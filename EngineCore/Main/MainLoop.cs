@@ -21,56 +21,57 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using log4net;
+using Engine8.EngineCore.Systems;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Systems.Display
+namespace Engine8.EngineCore.Main
 {
 
     /// <summary>
-    /// Top-level manager for the display components including the
-    /// main window, the Direct3D manager, etc.
+    /// Main loop that drives the systems.
     /// </summary>
-    class DisplayManager
+    public class MainLoop
     {
 
         /// <summary>
-        /// Class-level logger.
+        /// Flag indicating that the loop is to exit.
         /// </summary>
-        private static readonly ILog LOG = LogManager.GetLogger(typeof(DisplayManager));
+        private bool IsDone { get; set; }
 
-        public DisplayManager()
+        /// <summary>
+        /// SystemManager governed by this main loop.
+        /// </summary>
+        private readonly SystemManager SystemManager;
+
+        /// <summary>
+        /// Creates a main loop to govern the given SystemManager.
+        /// </summary>
+        /// <param name="systemManager">SystemManager to be governed.</param>
+        public MainLoop(SystemManager systemManager)
         {
-            
+            SystemManager = systemManager;
         }
 
         /// <summary>
-        /// Starts the display with the given resolution.
+        /// Called to execute the main loop.
         /// </summary>
-        /// <param name="width">Display width in pixels.</param>
-        /// <param name="height">Display height in pixels.</param>
-        /// <param name="fullscreen">Whether to run in fullscreen mode.</param>
-        public void StartDisplay(int width, int height, bool fullscreen)
+        public void Execute()
         {
-            // Create the main window
-            CreateMainWindow(width, height, fullscreen);
-        }
+            /* Reset the termination flag prior to entering the loop. */
+            IsDone = false;
 
-        /// <summary>
-        /// Stops the display.
-        /// </summary>
-        public void StopDisplay()
-        {
+            /* Loop... */
+            while (!IsDone)
+            {
 
-        }
-
-        private void CreateMainWindow(int width, int height, bool fullscreen)
-        {
-            // Create and display main window
-            LOG.Debug("Creating main window");
-            // TODO
-            LOG.Debug("Main window created");
+                /* Yield to the OS to avoid 100% CPU usage when not needed. */
+                
+            }
         }
 
     }
-
 }

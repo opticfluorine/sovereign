@@ -21,9 +21,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Engine8.EngineCore.Systems;
 using log4net;
 
-namespace Engine8.EngineCore.Systems.Display
+namespace Engine8.ClientCore.Systems.Display
 {
 
     /// <summary>
