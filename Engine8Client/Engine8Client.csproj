@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{DFD41CDD-7C12-476F-BD03-E9AEDDD1EC91}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Engine8Client</RootNamespace>
+    <RootNamespace>Engine8.Engine8Client</RootNamespace>
     <AssemblyName>Engine8Client</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -53,6 +53,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main\EngineCoreMain.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\Systems.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\Engine.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
