@@ -22,10 +22,11 @@
  */
 
 using Engine8.EngineCore.Logging;
+using Engine8.EngineCore.Main;
 
-namespace Engine8.EngineCore.Main
+namespace Engine8.Engine8Client.Main
 {
-    class EngineCoreMain
+    class ClientMain
     {
 
         /// <summary>
@@ -35,6 +36,10 @@ namespace Engine8.EngineCore.Main
         {
             /* Start up support services */
             SetupAuxilliaryServices();
+
+            /* Run the engine. */
+            CoreMain coreMain = new CoreMain();
+            coreMain.RunEngine();
         }
 
         /// <summary>

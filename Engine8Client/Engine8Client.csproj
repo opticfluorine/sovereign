@@ -32,7 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Engine8.EngineCore.Main.EngineCoreMain</StartupObject>
+    <StartupObject>Engine8.Engine8Client.Main.ClientMain</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -52,7 +52,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Main\EngineCoreMain.cs" />
+    <Compile Include="Main\ClientMain.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Data\Systems.xml">
