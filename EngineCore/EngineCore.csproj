@@ -38,7 +38,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="Data\Systems.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EngineUtil\EngineUtil.csproj">
@@ -47,18 +46,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration\CoreServicesProcessor.cs" />
-    <Compile Include="Configuration\EngineConfiguration.cs" />
-    <Compile Include="Main\CoreMain.cs" />
-    <Compile Include="Main\EngineBase.cs" />
-    <Compile Include="Main\IEngineBase.cs" />
-    <Compile Include="Main\MainInstaller.cs" />
-    <Compile Include="Main\MainLoop.cs" />
+    <Compile Include="Configuration\*.cs" />
+    <Compile Include="Main\*.cs" />
     <Compile Include="Logging\*.cs" />
     <Compile Include="Events\*.cs" />
-    <Compile Include="Systems\*.cs" />
-    <Compile Include="Systems\EventSystem\*.cs" />
-    <Compile Include="Timing\ISystemTimer.cs" />
+    <Compile Include="Systems\ISystem.cs" />
+    <Compile Include="Systems\SystemInstaller.cs" />
+    <Compile Include="Systems\SystemManager.cs" />
+    <Compile Include="Timing\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
@@ -83,6 +78,9 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

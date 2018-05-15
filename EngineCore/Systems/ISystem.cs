@@ -48,12 +48,6 @@ namespace Engine8.EngineCore.Systems
         /// <param name="systemTime">System time in microseconds.</param>
         void DoUpdate(ulong systemTime);
 
-        /// <summary>
-        /// Called from the main loop to perform rendering logic.
-        /// </summary>
-        /// <param name="timeSinceUpdate">Time (us) since the last state update.</param>
-        void DoRender(ulong timeSinceUpdate);
-
     }
 
 }

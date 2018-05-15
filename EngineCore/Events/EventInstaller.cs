@@ -21,32 +21,28 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Runtime.Serialization;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-namespace Engine8.EngineCore.Systems
+namespace Engine8.EngineCore.Events
 {
 
     /// <summary>
-    /// Exception thrown when an error occurs that blocks system initialization.
+    /// IoC installer for the event handling infrastructure.
     /// </summary>
-    public class SystemInitializationException : ApplicationException
+    public class EventInstaller : IWindsorInstaller
     {
-        public SystemInitializationException()
+
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
+            /* Event loop. */
+            container.Register(Classes.FromThisAssembly()
+                              .BasedOn<IEventLoop>()
+                              .WithService.DefaultInterfaces()
+                              .LifestyleSingleton());
         }
 
-        public SystemInitializationException(string message) : base(message)
-        {
-        }
-
-        public SystemInitializationException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        protected SystemInitializationException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 
 }

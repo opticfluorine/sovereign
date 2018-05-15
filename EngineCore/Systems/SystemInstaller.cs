@@ -1,7 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-
-<!--
- *
+﻿/*
  * Engine8 Dynamic World MMORPG Engine
  * Copyright (c) 2018 opticfluorine
  * 
@@ -22,23 +19,43 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
- *
--->
+ */
 
-<Systems>
-  
-  <!-- Display/rendering system. -->
-  <System>
-    <Name>Engine8.EngineCore.Systems.Display.DisplaySystem</Name>
-    <DoesUpdate>False</DoesUpdate>
-    <DoesRender>True</DoesRender>
-  </System>
+using Castle.Facilities.Startable;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-  <!-- Event routing system. -->
-  <System>
-    <Name>Engine8.EngineCore.Systems.Event.EventSystem</Name>
-    <DoesUpdate>True</DoesUpdate>
-    <DoesRender>False</DoesRender>
-  </System>
-  
-</Systems>
+namespace Engine8.EngineCore.Systems
+{
+
+    /// <summary>
+    /// IoC installer for all systems across all present assemblies.
+    /// </summary>
+    public class SystemInstaller : IWindsorInstaller
+    {
+
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            /* Install all available systems. */
+            container.Register(Classes.FromAssemblyInThisApplication()
+                .BasedOn<ISystem>()
+                .WithService.DefaultInterfaces()
+                .LifestyleSingleton()
+            );
+
+            /* Register the SystemManager facility. */
+            container.Register(Component.For<SystemManager>()
+                .LifestyleSingleton()
+                .Start()
+            );
+        }
+
+    }
+
+}

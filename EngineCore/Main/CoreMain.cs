@@ -21,6 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.Facilities.Startable;
+using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using Castle.Windsor;
 using Castle.Windsor.Installer;
 
@@ -49,8 +51,17 @@ namespace Engine8.EngineCore.Main
         private IWindsorContainer InitializeIoC()
         {
             /* Create the container. */
-            var iocContainer = new WindsorContainer()
-                .Install(FromAssembly.InThisApplication());
+            var iocContainer = new WindsorContainer();
+
+            /* Add additional resolvers. */
+            iocContainer.Kernel.Resolver.AddSubResolver(
+                new CollectionResolver(iocContainer.Kernel, true));
+
+            /* Add facilities. */
+            iocContainer.AddFacility<StartableFacility>(f => f.DeferredStart());
+
+            /* Install components. */
+            iocContainer.Install(FromAssembly.InThisApplication());
 
             return iocContainer;
         }
