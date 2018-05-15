@@ -21,24 +21,33 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Engine8.EngineCore.Logging;
-using Engine8.EngineCore.Main;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+using Castle.Facilities.Logging;
+using Castle.Services.Logging.Log4netIntegration;
 
-namespace Engine8.Engine8Client.Main
+namespace Engine8.EngineCore.Logging
 {
 
-    public class ClientMain
+    /// <summary>
+    /// IoC installer for logging facilities.
+    /// </summary>
+    public class LoggingInstaller : IWindsorInstaller
     {
 
         /// <summary>
-        /// Main entry point.
+        /// Path to the log4net configuration file.
         /// </summary>
-        static void Main()
+        private const string CONFIG_FILE = "Data/Logging.xml";
+
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            /* Run the engine. */
-            CoreMain coreMain = new CoreMain();
-            coreMain.RunEngine();
+            /* Configure log4net. */
+            container.AddFacility<LoggingFacility>(f => f.LogUsing<Log4netFactory>()
+                .WithConfig(CONFIG_FILE));
         }
+
     }
 
 }

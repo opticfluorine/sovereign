@@ -21,24 +21,28 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Engine8.EngineCore.Logging;
-using Engine8.EngineCore.Main;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-namespace Engine8.Engine8Client.Main
+namespace Engine8.EngineCore.Main
 {
 
-    public class ClientMain
+    /// <summary>
+    /// IoC installer for main components.
+    /// </summary>
+    public class MainInstaller : IWindsorInstaller
     {
 
-        /// <summary>
-        /// Main entry point.
-        /// </summary>
-        static void Main()
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            /* Run the engine. */
-            CoreMain coreMain = new CoreMain();
-            coreMain.RunEngine();
+            /* EngineBase singleton. */
+            container.Register(Classes.FromAssemblyInThisApplication()
+                               .BasedOn<IEngineBase>()
+                               .WithService.DefaultInterfaces()
+                               .LifestyleSingleton());
         }
+
     }
 
 }

@@ -1,4 +1,7 @@
-﻿/*
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+ *
  * Engine8 Dynamic World MMORPG Engine
  * Copyright (c) 2018 opticfluorine
  * 
@@ -19,26 +22,20 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
- */
+ *
+-->
 
-using Engine8.EngineCore.Logging;
-using Engine8.EngineCore.Main;
+<log4net>
 
-namespace Engine8.Engine8Client.Main
-{
+  <appender name="Console" type="log4net.Appender.ConsoleAppender">
+    <layout type="log4net.Layout.PatternLayout">
+      <conversionPattern value="%-4timestamp [%thread] %-5level %logger %ndc - %message%newline" />
+    </layout>
+  </appender>
 
-    public class ClientMain
-    {
-
-        /// <summary>
-        /// Main entry point.
-        /// </summary>
-        static void Main()
-        {
-            /* Run the engine. */
-            CoreMain coreMain = new CoreMain();
-            coreMain.RunEngine();
-        }
-    }
-
-}
+  <root>
+    <level value="DEBUG" />
+    <appender-ref ref="Console" />
+  </root>
+  
+</log4net>

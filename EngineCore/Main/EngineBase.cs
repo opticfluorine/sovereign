@@ -21,24 +21,23 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Engine8.EngineCore.Logging;
-using Engine8.EngineCore.Main;
+using Castle.Core.Logging;
 
-namespace Engine8.Engine8Client.Main
+namespace Engine8.EngineCore.Main
 {
 
-    public class ClientMain
+    /// <summary>
+    /// Runs the engine.
+    /// </summary>
+    public class EngineBase : IEngineBase
     {
-
-        /// <summary>
-        /// Main entry point.
-        /// </summary>
-        static void Main()
+        public void Run()
         {
-            /* Run the engine. */
-            CoreMain coreMain = new CoreMain();
-            coreMain.RunEngine();
+            Logger.Info("EngineBase.Run() is invoked.");
         }
+
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
     }
 
 }
