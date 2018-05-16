@@ -22,6 +22,8 @@
  */
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;
 using Castle.Core;
 using Castle.Core.Logging;
 
@@ -39,25 +41,48 @@ namespace Engine8.EngineCore.Systems
         /// <summary>
         /// Systems to be managed.
         /// </summary>
-        private readonly ICollection<ISystem> systemCollection;
+        private readonly IList<ISystem> systemList;
+
+        /// <summary>
+        /// Running tasks.
+        /// </summary>
+        private readonly IList<Task> tasks = new List<Task>();
 
         /// <summary>
         /// Creates a new SystemManager with the given update step.
         /// </summary>
-        /// <param name="systemCollection">Systems to be managed.</param>
-        public SystemManager(ICollection<ISystem> systemCollection)
+        /// <param name="systemList">Systems to be managed.</param>
+        public SystemManager(IList<ISystem> systemList)
         {
-            this.systemCollection = systemCollection;
+            this.systemList = systemList;
         }
 
         public void Start()
         {
             Logger.Info("Starting SystemManager.");
+
+            var taskQuery = from system in systemList
+                            select RunSingleSystem(system);
         }
 
         public void Stop()
         {
             Logger.Info("Stopping SystemManager.");
+        }
+
+        /// <summary>
+        /// Runs a single system in a separate thread.
+        /// </summary>
+        /// <param name="system">System to run.</param>
+        private Task RunSingleSystem(ISystem system)
+        {
+            var task = Task.Run(() =>
+           {
+               system.Initialize();
+               system.Run();
+               system.Cleanup();
+           });
+            return task;
         }
 
     }

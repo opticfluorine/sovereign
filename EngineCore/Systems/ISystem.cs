@@ -31,22 +31,19 @@ namespace Engine8.EngineCore.Systems
     {
 
         /// <summary>
-        /// Called to initialize the system.
+        /// Initializes the system. Called from the system thread.
         /// </summary>
-        /// <param name="manager">System manager that owns the system.</param>
-        void InitializeSystem(SystemManager manager);
+        void Initialize();
 
         /// <summary>
-        /// Called to clean up the system.
+        /// Runs the system. Called from the system thread.
         /// </summary>
-        void CleanupSystem();
+        void Run();
 
         /// <summary>
-        /// Called from the main loop to update the system.
-        /// An update is a non-rendering step.
+        /// Cleans up the system. Called from the system thread.
         /// </summary>
-        /// <param name="systemTime">System time in microseconds.</param>
-        void DoUpdate(ulong systemTime);
+        void Cleanup();
 
     }
 
