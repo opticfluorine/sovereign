@@ -22,10 +22,10 @@
  */
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
 using Castle.Core;
 using Castle.Core.Logging;
+using System.Threading;
 
 namespace Engine8.EngineCore.Systems
 {
@@ -46,7 +46,7 @@ namespace Engine8.EngineCore.Systems
         /// <summary>
         /// Running tasks.
         /// </summary>
-        private readonly IList<Task> tasks = new List<Task>();
+        private readonly List<Thread> threads = new List<Thread>();
 
         /// <summary>
         /// Creates a new SystemManager with the given update step.
@@ -61,8 +61,10 @@ namespace Engine8.EngineCore.Systems
         {
             Logger.Info("Starting SystemManager.");
 
-            var taskQuery = from system in systemList
+            /* Run all of the discovered systems. */
+            var threadQuery = from system in systemList
                             select RunSingleSystem(system);
+            threads.AddRange(threadQuery);
         }
 
         public void Stop()
@@ -74,15 +76,16 @@ namespace Engine8.EngineCore.Systems
         /// Runs a single system in a separate thread.
         /// </summary>
         /// <param name="system">System to run.</param>
-        private Task RunSingleSystem(ISystem system)
+        private Thread RunSingleSystem(ISystem system)
         {
-            var task = Task.Run(() =>
+            var thread = new Thread(new ThreadStart(() =>
            {
                system.Initialize();
                system.Run();
                system.Cleanup();
-           });
-            return task;
+           }));
+            thread.Start();
+            return thread;
         }
 
     }
