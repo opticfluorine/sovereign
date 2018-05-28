@@ -22,6 +22,7 @@
  */
 
 using Engine8.EngineCore.Events;
+using System.Collections.Generic;
 
 namespace Engine8.EngineCore.Systems
 {
@@ -36,6 +37,11 @@ namespace Engine8.EngineCore.Systems
         /// Event communicator for the given service.
         /// </summary>
         EventCommunicator EventCommunicator { get; set; }
+
+        /// <summary>
+        /// The set of event IDs that this system is listening for.
+        /// </summary>
+        ISet<int> EventIdsOfInterest { get; }
 
         /// <summary>
         /// Initializes the system. Called from the system thread.

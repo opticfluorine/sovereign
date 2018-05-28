@@ -49,7 +49,16 @@
     <Compile Include="Configuration\*.cs" />
     <Compile Include="Main\*.cs" />
     <Compile Include="Logging\*.cs" />
-    <Compile Include="Events\*.cs" />
+    <Compile Include="Events\Event.cs" />
+    <Compile Include="Events\EventFactory.cs" />
+    <Compile Include="Events\EventIds.cs" />
+    <Compile Include="Events\EventInstaller.cs" />
+    <Compile Include="Events\IEventDetails.cs" />
+    <Compile Include="Events\IEventLoop.cs" />
+    <Compile Include="Events\IEventProvider.cs" />
+    <Compile Include="Events\IEventSource.cs" />
+    <Compile Include="Events\MainEventLoop.cs" />
+    <Compile Include="Events\EventCommunicator.cs" />
     <Compile Include="Systems\ISystem.cs" />
     <Compile Include="Systems\SystemInstaller.cs" />
     <Compile Include="Systems\SystemManager.cs" />

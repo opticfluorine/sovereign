@@ -27,7 +27,7 @@ namespace Engine8.EngineCore.Events
     /// <summary>
     /// Interface for event loops, which are implemented as top-level dispatchers.
     /// </summary>
-    public interface IEventLoop : IEventDispatcher
+    public interface IEventLoop
     {
 
         /// <summary>
@@ -35,20 +35,6 @@ namespace Engine8.EngineCore.Events
         /// </summary>
         /// <returns>The number of events dispatched.</returns>
         int PumpEventLoop();
-
-        /// <summary>
-        /// Registers an event listener.
-        /// If the event listener is already registered, this does nothing.
-        /// </summary>
-        /// <param name="listener">Event listener.</param>
-        void RegisterListener(IEventListener listener);
-
-        /// <summary>
-        /// Deregisters an event listener.
-        /// If the event listener is not already registered, this does nothing.
-        /// </summary>
-        /// <param name="listener">Event listener.</param>
-        void DeregisterListener(IEventListener listener);
 
         /// <summary>
         /// Whether the event loop has terminated.

@@ -38,21 +38,19 @@ namespace Engine8.EngineCore.Systems.EventSystem
         /// <summary>
         /// Default size of the future event queue.
         /// </summary>
-        private const int QUEUE_SIZE = 512;
+        private const int QUEUE_SIZE = 4096;
 
         public bool Terminated { get; private set; } = false;
 
         /// <summary>
-        /// Registered event listeners.
+        /// The collection of systems known to the event loop.
         /// </summary>
-        private readonly ISet<IEventListener> RegisteredListeners 
-            = new HashSet<IEventListener>();
+        private readonly ICollection<ISystem> systems;
 
         /// <summary>
-        /// Map from event IDs to interested listeners.
+        /// Event communicators listening to each event ID.
         /// </summary>
-        private readonly IDictionary<int, ISet<IEventListener>> TypeListenerMap
-            = new Dictionary<int, ISet<IEventListener>>();
+        private readonly IDictionary<int, IList<EventCommunicator>> communicatorsByEventId;
 
         /// <summary>
         /// Priority queue of future events ordered by dispatch time.
@@ -70,32 +68,9 @@ namespace Engine8.EngineCore.Systems.EventSystem
         /// </summary>
         private bool exiting = false;
 
-        public void DispatchEvent(Event ev)
+        public MainEventLoop(ICollection<ISystem> systems)
         {
-            /* Sanity check. */
-            if (ev == null)
-            {
-                throw new ArgumentNullException(nameof(ev));
-            }
-
-            /*
-             * Even if the event is immediate, enqueue it to be sent
-             * the next time the event loop is pumped to avoid stack issues.
-             */
-            EnqueueFutureEvent(ev);
-        }
-
-        public void DispatchEvents(IEnumerable<Event> evs)
-        {
-            /* Sanity check. */
-            if (evs == null)
-                throw new ArgumentNullException(nameof(evs));
-
-            /* Dispatch all events. */
-            foreach (Event ev in evs)
-            {
-                DispatchEvent(ev);
-            }
+            this.systems = systems;
         }
 
         public int PumpEventLoop()
@@ -105,7 +80,7 @@ namespace Engine8.EngineCore.Systems.EventSystem
             for (dispatchCount = 0; EventQueue.Count > 0  &&
                 EventQueue.Peek().EventTime <= LastUpdateTime; ++dispatchCount)
             {
-                ImmediatelyDispatchEvent(EventQueue.Pop());
+                
             }
             return dispatchCount;
         }
@@ -122,81 +97,6 @@ namespace Engine8.EngineCore.Systems.EventSystem
         {
             LastUpdateTime = currentTime;
             return PumpEventLoop();
-        }
-
-        public void RegisterListener(IEventListener listener)
-        {
-            /* Sanity check. */
-            if (listener == null)
-            {
-                throw new ArgumentNullException(nameof(listener));
-            }
-            if (RegisteredListeners.Contains(listener)) return;
-
-            /* Register the listener and add it to the type maps. */
-            RegisteredListeners.Add(listener);
-            foreach (int id in listener.EventIdsListening)
-            {
-                AddListenerToTypeSet(listener, id);
-            }
-        }
-
-        public void DeregisterListener(IEventListener listener)
-        {
-            /* Sanity check. */
-            if (listener == null)
-                throw new ArgumentNullException(nameof(listener));
-            if (!RegisteredListeners.Contains(listener)) return;
-
-            /* Deregister the listener. */
-            foreach (int id in listener.EventIdsListening)
-            {
-                TypeListenerMap[id].Remove(listener);
-            }
-            RegisteredListeners.Remove(listener);
-        }
-
-        /// <summary>
-        /// Enqueues an event to be dispatched in the future.
-        /// </summary>
-        /// <param name="ev">Event to be dispatched.</param>
-        private void EnqueueFutureEvent(Event ev)
-        {
-            /* Push the event onto the heap. */
-            EventQueue.Push(ev);
-        }
-
-        /// <summary>
-        /// Immediately dispatches the given event.
-        /// </summary>
-        /// <param name="ev">Event to be dispatched.</param>
-        private void ImmediatelyDispatchEvent(Event ev)
-        {
-            /* Check if there are any interested listeners. */
-            if (!TypeListenerMap.ContainsKey(ev.EventId)) return;
-
-            /* Dispatch the event to all interested listeners. */
-            foreach (IEventListener listener in TypeListenerMap[ev.EventId])
-            {
-                listener.Notify(ev, this);
-            }
-        }
-
-        /// <summary>
-        /// Adds a listener to the type set for the given event ID.
-        /// </summary>
-        /// <param name="listener">Listener to be added.</param>
-        /// <param name="id">Event ID.</param>
-        private void AddListenerToTypeSet(IEventListener listener, int id)
-        {
-            /* Create the type set if this is the first listener. */
-            if (!TypeListenerMap.ContainsKey(id))
-            {
-                TypeListenerMap[id] = new HashSet<IEventListener>();
-            }
-
-            /* Register the listener. */
-            TypeListenerMap[id].Add(listener);
         }
 
         /// <summary>
