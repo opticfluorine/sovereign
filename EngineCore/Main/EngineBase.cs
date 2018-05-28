@@ -22,6 +22,8 @@
  */
 
 using Castle.Core.Logging;
+using Engine8.EngineCore.Events;
+using System.Threading;
 
 namespace Engine8.EngineCore.Main
 {
@@ -31,12 +33,68 @@ namespace Engine8.EngineCore.Main
     /// </summary>
     public class EngineBase : IEngineBase
     {
-        public void Run()
-        {
-            Logger.Info("EngineBase.Run() is invoked.");
-        }
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+        /// <summary>
+        /// Event loop.
+        /// </summary>
+        private readonly IEventLoop eventLoop;
+
+        public EngineBase(IEventLoop eventLoop)
+        {
+            this.eventLoop = eventLoop;
+        }
+
+        public void Run()
+        {
+            /* Start the engine. */
+            Logger.Info("EngineBase is starting.");
+            Startup();
+            Logger.Info("EngineBase is started.");
+
+            /* Run the engine. */
+            RunEngine();
+
+            /* Stop the engine. */
+            Logger.Info("EngineBase is stopping.");
+            Shutdown();
+            Logger.Info("EngineBase is stopped.");
+        }
+
+        /// <summary>
+        /// Starts the engine.
+        /// </summary>
+        private void Startup()
+        {
+
+        }
+
+        /// <summary>
+        /// Runs the engine.
+        /// </summary>
+        private void RunEngine()
+        {
+            /* Enter the main loop. */
+            while (!eventLoop.Terminated)
+            {
+                /* Drive the event loop. */
+                eventLoop.PumpEventLoop();
+
+                /* TODO: Add hooks for rendering and other main thread services here. */
+
+                /* Yield to avoid consuming 100% CPU. */
+                Thread.Sleep(0);
+            }
+        }
+
+        /// <summary>
+        /// Stops the engine.
+        /// </summary>
+        private void Shutdown()
+        {
+
+        }
 
     }
 

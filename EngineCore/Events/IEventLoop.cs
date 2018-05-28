@@ -50,6 +50,11 @@ namespace Engine8.EngineCore.Events
         /// <param name="listener">Event listener.</param>
         void DeregisterListener(IEventListener listener);
 
+        /// <summary>
+        /// Whether the event loop has terminated.
+        /// </summary>
+        bool Terminated { get; }
+
     }
 
 }

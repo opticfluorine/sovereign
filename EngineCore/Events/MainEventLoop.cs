@@ -40,6 +40,8 @@ namespace Engine8.EngineCore.Systems.EventSystem
         /// </summary>
         private const int QUEUE_SIZE = 512;
 
+        public bool Terminated { get; private set; } = false;
+
         /// <summary>
         /// Registered event listeners.
         /// </summary>
@@ -62,6 +64,11 @@ namespace Engine8.EngineCore.Systems.EventSystem
         /// The system time of the last update step (microseconds).
         /// </summary>
         private ulong LastUpdateTime;
+
+        /// <summary>
+        /// Whether exit is signaled.
+        /// </summary>
+        private bool exiting = false;
 
         public void DispatchEvent(Event ev)
         {

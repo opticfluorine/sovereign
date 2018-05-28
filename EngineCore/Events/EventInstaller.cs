@@ -41,6 +41,12 @@ namespace Engine8.EngineCore.Events
                               .BasedOn<IEventLoop>()
                               .WithService.DefaultInterfaces()
                               .LifestyleSingleton());
+
+            /* Event communicators */
+            container.Register(Classes.From(typeof(EventCommunicator))
+                              .Pick()
+                              .WithServiceBase()
+                              .LifestyleTransient());
         }
 
     }

@@ -21,6 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Engine8.EngineCore.Events;
+
 namespace Engine8.EngineCore.Systems
 {
 
@@ -29,6 +31,11 @@ namespace Engine8.EngineCore.Systems
     /// </summary>
     public interface ISystem
     {
+
+        /// <summary>
+        /// Event communicator for the given service.
+        /// </summary>
+        EventCommunicator EventCommunicator { get; set; }
 
         /// <summary>
         /// Initializes the system. Called from the system thread.
