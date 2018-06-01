@@ -23,6 +23,7 @@
 
 using Castle.Core.Logging;
 using Engine8.EngineCore.Events;
+using Engine8.EngineCore.Timing;
 using System.Threading;
 
 namespace Engine8.EngineCore.Main
@@ -41,9 +42,15 @@ namespace Engine8.EngineCore.Main
         /// </summary>
         private readonly IEventLoop eventLoop;
 
-        public EngineBase(IEventLoop eventLoop)
+        /// <summary>
+        /// System timer.
+        /// </summary>
+        private readonly ISystemTimer systemTimer;
+
+        public EngineBase(IEventLoop eventLoop, ISystemTimer systemTimer)
         {
             this.eventLoop = eventLoop;
+            this.systemTimer = systemTimer;
         }
 
         public void Run()
@@ -78,6 +85,8 @@ namespace Engine8.EngineCore.Main
             /* Enter the main loop. */
             while (!eventLoop.Terminated)
             {
+                /* TODO: Handle the system timer here. */
+
                 /* Drive the event loop. */
                 eventLoop.PumpEventLoop();
 

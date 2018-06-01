@@ -67,7 +67,7 @@ namespace Engine8.EngineCore.Events
         /// Sends an event to the system thread.
         /// </summary>
         /// <param name="ev">Event to be sent.</param>
-        void SendEventToSystem(Event ev)
+        public void SendEventToSystem(Event ev)
         {
             incomingEvents.Add(ev);
         }
@@ -77,7 +77,7 @@ namespace Engine8.EngineCore.Events
         /// This method does not block.
         /// </summary>
         /// <returns>Next event being sent to the event loop, or null if none is available.</returns>
-        Event GetOutgoingEvent()
+        public Event GetOutgoingEvent()
         {
             Event ev;
             bool hasEvent = outgoingEvents.TryDequeue(out ev);

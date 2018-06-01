@@ -21,40 +21,36 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.Facilities.Startable;
 using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Engine8.EngineUtil.IoC;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Systems
+namespace Engine8.EngineUtil.IoC
 {
 
     /// <summary>
-    /// IoC installer for all systems across all present assemblies.
+    /// Utility class for matching engine assemblies in Castle.Windsor installers.
     /// </summary>
-    public class SystemInstaller : IWindsorInstaller
+    public static class EngineClasses
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+        /// <summary>
+        /// Selects all available assemblies belonging to the engine.
+        /// </summary>
+        /// <returns>Descriptor covering the assemblies belonging to the engine.</returns>
+        public static FromAssemblyDescriptor EngineAssemblies()
         {
-            /* Install all available systems. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<ISystem>()
-                .WithService.DefaultInterfaces()
-                .LifestyleSingleton()
-            );
+            var thisAssembly = Assembly.GetExecutingAssembly();
+            var dir = Path.GetDirectoryName(thisAssembly.Location);
+            var prefix = thisAssembly.FullName.Substring(0, thisAssembly.FullName.IndexOf('.'));
 
-            /* Register the SystemManager facility. */
-            container.Register(Component.For<SystemManager>()
-                .LifestyleSingleton()
-                .Start()
-            );
+            return Classes.FromAssemblyInDirectory(
+                    new AssemblyFilter(dir)
+                    .FilterByName( name => name.FullName.StartsWith(prefix) )
+                );
         }
 
     }

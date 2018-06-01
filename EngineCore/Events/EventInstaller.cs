@@ -24,6 +24,7 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
+using Engine8.EngineUtil.IoC;
 
 namespace Engine8.EngineCore.Events
 {
@@ -37,7 +38,7 @@ namespace Engine8.EngineCore.Events
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
             /* Event loop. */
-            container.Register(Classes.FromThisAssembly()
+            container.Register(EngineClasses.EngineAssemblies()
                               .BasedOn<IEventLoop>()
                               .WithService.DefaultInterfaces()
                               .LifestyleSingleton());

@@ -31,10 +31,16 @@ namespace Engine8.EngineCore.Events
     {
 
         /// <summary>
+        /// Advances the event loop time to the given system time value.
+        /// This value should be a multiple of the tick interval.
+        /// </summary>
+        /// <param name="systemTime">System time of the current tick.</param>
+        void UpdateSystemTime(ulong systemTime);
+
+        /// <summary>
         /// Pumps the event loop.
         /// </summary>
-        /// <returns>The number of events dispatched.</returns>
-        int PumpEventLoop();
+        void PumpEventLoop();
 
         /// <summary>
         /// Whether the event loop has terminated.

@@ -7,7 +7,7 @@
     <ProjectGuid>{1298F7E5-4A7B-469E-98BB-F9AC7889EC2C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Engine8.EngineCore</RootNamespace>
-    <AssemblyName>EngineCore</AssemblyName>
+    <AssemblyName>Engine8.EngineCore</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -38,12 +38,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\EngineUtil\EngineUtil.csproj">
-      <Project>{6440b9bb-8545-4d8f-9f89-b8a876cc9977}</Project>
-      <Name>EngineUtil</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\*.cs" />
@@ -90,6 +84,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EngineUtil\EngineUtil.csproj">
+      <Project>{6440b9bb-8545-4d8f-9f89-b8a876cc9977}</Project>
+      <Name>EngineUtil</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

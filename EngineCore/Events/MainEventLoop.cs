@@ -21,8 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using Engine8.EngineCore.Events;
 using Engine8.EngineUtil.Collections;
 
@@ -48,14 +48,20 @@ namespace Engine8.EngineCore.Systems.EventSystem
         private readonly ICollection<ISystem> systems;
 
         /// <summary>
+        /// The collection of event communicators to listen on.
+        /// </summary>
+        private readonly ICollection<EventCommunicator> eventCommunicators;
+
+        /// <summary>
         /// Event communicators listening to each event ID.
         /// </summary>
-        private readonly IDictionary<int, IList<EventCommunicator>> communicatorsByEventId;
+        private readonly IDictionary<int, List<EventCommunicator>> communicatorsByEventId
+            = new Dictionary<int, List<EventCommunicator>>();
 
         /// <summary>
         /// Priority queue of future events ordered by dispatch time.
         /// </summary>
-        private readonly IHeap<Event> EventQueue 
+        private readonly IHeap<Event> FutureEventQueue 
             = new BinaryHeap<Event>(QUEUE_SIZE, new EventTimeComparer());
 
         /// <summary>
@@ -63,40 +69,123 @@ namespace Engine8.EngineCore.Systems.EventSystem
         /// </summary>
         private ulong LastUpdateTime;
 
-        /// <summary>
-        /// Whether exit is signaled.
-        /// </summary>
-        private bool exiting = false;
-
-        public MainEventLoop(ICollection<ISystem> systems)
+        public MainEventLoop(ICollection<ISystem> systems, 
+            ICollection<EventCommunicator> eventCommunicators)
         {
+            /* Set dependencies. */
             this.systems = systems;
+            this.eventCommunicators = eventCommunicators;
+
+            /* Build data structures. */
+            BuildCommunicatorTables();
         }
 
-        public int PumpEventLoop()
+        public void PumpEventLoop()
         {
-            /* Check for events that need to be dispatched. */
-            int dispatchCount;
-            for (dispatchCount = 0; EventQueue.Count > 0  &&
-                EventQueue.Peek().EventTime <= LastUpdateTime; ++dispatchCount)
-            {
-                
-            }
-            return dispatchCount;
+            /* Retrieve pending events from the communicators. */
+            RetrievePendingEvents();
         }
 
         /// <summary>
-        /// Pumps the event loop and updates the system time.
-        /// 
-        /// This should only be called from the event system; if the event queue
-        /// needs to be pumped without advancing the clock, call PumpEventLoop().
+        /// Updates the system time to the next tick if needed.
         /// </summary>
-        /// <param name="currentTime">Current system time.</param>
-        /// <returns>Number of events dispatched.</returns>
-        public int PumpEventLoop(ulong currentTime)
+        public void UpdateSystemTime(ulong systemTime)
         {
-            LastUpdateTime = currentTime;
-            return PumpEventLoop();
+            /* Advance the system time. */
+            LastUpdateTime = systemTime;
+
+            /* Dispatch events enqueued for dispatch by this time. */
+            DispatchEnqueuedEvents();
+        }
+
+        /// <summary>
+        /// Builds the communicator tables.
+        /// </summary>
+        private void BuildCommunicatorTables()
+        {
+            /* Enumerate all event IDs that will be listened for. */
+            var eventIds = from id in systems
+                           .SelectMany(system => system.EventIdsOfInterest)
+                           .Distinct()
+                           select id;
+
+            /* Find the communicators associated with each event ID. */
+            foreach (var eventId in eventIds)
+            {
+                var comms = from system in systems
+                            .Where(s => s.EventIdsOfInterest.Contains(eventId))
+                            select system.EventCommunicator;
+                var list = new List<EventCommunicator>();
+                list.AddRange(comms);
+                communicatorsByEventId.Add(eventId, list);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves pending events from the communicators.
+        /// </summary>
+        private void RetrievePendingEvents()
+        {
+            foreach (var comm in eventCommunicators)
+            {
+                Event nextEvent;
+                do
+                {
+                    nextEvent = comm.GetOutgoingEvent();
+                    if (nextEvent != null)
+                    {
+                        EnqueueEvent(nextEvent);
+                    }
+                }
+                while (nextEvent != null);
+            }
+        }
+
+        /// <summary>
+        /// Enqueues an event.
+        /// </summary>
+        /// <param name="ev">Event to enqueue.</param>
+        private void EnqueueEvent(Event ev)
+        {
+            /* Is the event to be dispatched immediately? */
+            if (ev.EventTime <= LastUpdateTime)
+            {
+                /* Dispatch immediately. */
+                DispatchImmediateEvent(ev);
+            }
+            else
+            {
+                /* Enqueue for later dispatch. */
+                FutureEventQueue.Add(ev);
+            }
+        }
+
+        /// <summary>
+        /// Immediately dispatches the given event.
+        /// </summary>
+        /// <param name="ev">Event to be immediately dispatched.</param>
+        private void DispatchImmediateEvent(Event ev)
+        {
+            var eventId = ev.EventId;
+            foreach (var comm in communicatorsByEventId[eventId])
+            {
+                comm.SendEventToSystem(ev);
+            }
+        }
+
+        /// <summary>
+        /// Dispatches all enqueued events that are scheduled for delivery
+        /// no later than the present system time.
+        /// </summary>
+        /// <returns>Number of dispatched events.</returns>
+        private void DispatchEnqueuedEvents()
+        {
+            while (FutureEventQueue.Count > 0 &&
+                FutureEventQueue.Peek().EventTime <= LastUpdateTime)
+            {
+                var nextEvent = FutureEventQueue.Pop();
+                DispatchImmediateEvent(nextEvent);
+            }
         }
 
         /// <summary>

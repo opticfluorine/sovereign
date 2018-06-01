@@ -24,6 +24,7 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
+using Engine8.EngineUtil.IoC;
 
 namespace Engine8.EngineCore.Main
 {
@@ -37,7 +38,7 @@ namespace Engine8.EngineCore.Main
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
             /* EngineBase singleton. */
-            container.Register(Classes.FromAssemblyInThisApplication()
+            container.Register(EngineClasses.EngineAssemblies()
                                .BasedOn<IEngineBase>()
                                .WithService.DefaultInterfaces()
                                .LifestyleSingleton());

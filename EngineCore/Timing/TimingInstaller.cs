@@ -21,40 +21,28 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.Facilities.Startable;
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 using Engine8.EngineUtil.IoC;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Systems
+namespace Engine8.EngineCore.Timing
 {
 
     /// <summary>
-    /// IoC installer for all systems across all present assemblies.
+    /// IoC installer for timing facilities.
     /// </summary>
-    public class SystemInstaller : IWindsorInstaller
+    public class TimingInstaller : IWindsorInstaller
     {
 
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            /* Install all available systems. */
+            /* ISystemTimer. */
             container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<ISystem>()
-                .WithService.DefaultInterfaces()
+                .BasedOn<ISystemTimer>()
+                .WithServiceDefaultInterfaces()
                 .LifestyleSingleton()
-            );
-
-            /* Register the SystemManager facility. */
-            container.Register(Component.For<SystemManager>()
-                .LifestyleSingleton()
-                .Start()
-            );
+                );
         }
 
     }
