@@ -21,41 +21,42 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Engine8.EngineUtil.IoC;
+using Castle.Core.Logging;
+using Engine8.EngineCore.Timing;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Timing
+namespace Engine8.EngineCore.Events
 {
 
     /// <summary>
-    /// IoC installer for timing facilities.
+    /// 
     /// </summary>
-    public class TimingInstaller : IWindsorInstaller
+    public class EventTimedAction : ITimedAction
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+        // Engine state advances every 10 ms.
+        public ulong Interval { get; } = 10000;
+
+        /// <summary>
+        /// Event loop.
+        /// </summary>
+        private readonly IEventLoop eventLoop;
+
+        public EventTimedAction(IEventLoop eventLoop)
         {
-            /* ISystemTimer. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<ISystemTimer>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton()
-                );
+            this.eventLoop = eventLoop;
+        }
 
-            /* ITimedAction. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<ITimedAction>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton()
-                .AllowMultipleMatches()
-                );
-
-            /* TimeManager. */
-            container.Register(Component.For<TimeManager>()
-                .LifestyleSingleton()
-                );
+        public void Invoke(ulong triggerTime)
+        {
+            Logger.DebugFormat("Begin event tick {0}.", triggerTime / Interval);
+            eventLoop.UpdateSystemTime(triggerTime);
         }
 
     }

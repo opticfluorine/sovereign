@@ -21,42 +21,35 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Engine8.EngineUtil.IoC;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Engine8.EngineCore.Timing
 {
 
     /// <summary>
-    /// IoC installer for timing facilities.
+    /// Describes an action that is executed in the main thread with
+    /// a given interval.
     /// </summary>
-    public class TimingInstaller : IWindsorInstaller
+    public interface ITimedAction
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            /* ISystemTimer. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<ISystemTimer>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton()
-                );
+        /// <summary>
+        /// Interval in microseconds between successive actions.
+        /// </summary>
+        ulong Interval { get; }
 
-            /* ITimedAction. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<ITimedAction>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton()
-                .AllowMultipleMatches()
-                );
-
-            /* TimeManager. */
-            container.Register(Component.For<TimeManager>()
-                .LifestyleSingleton()
-                );
-        }
+        /// <summary>
+        /// Invokes the action.
+        /// </summary>
+        /// <param name="triggerTime">
+        /// System time at which the action was triggered.
+        /// This is a multiple of the Interval.
+        /// </param>
+        void Invoke(ulong triggerTime);
 
     }
 

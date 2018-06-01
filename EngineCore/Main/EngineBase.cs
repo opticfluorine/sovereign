@@ -43,14 +43,14 @@ namespace Engine8.EngineCore.Main
         private readonly IEventLoop eventLoop;
 
         /// <summary>
-        /// System timer.
+        /// Time manager.
         /// </summary>
-        private readonly ISystemTimer systemTimer;
+        private readonly TimeManager timeManager;
 
-        public EngineBase(IEventLoop eventLoop, ISystemTimer systemTimer)
+        public EngineBase(IEventLoop eventLoop, TimeManager timeManager)
         {
             this.eventLoop = eventLoop;
-            this.systemTimer = systemTimer;
+            this.timeManager = timeManager;
         }
 
         public void Run()
@@ -85,12 +85,11 @@ namespace Engine8.EngineCore.Main
             /* Enter the main loop. */
             while (!eventLoop.Terminated)
             {
-                /* TODO: Handle the system timer here. */
+                /* Process any timed actions on the main thread. */
+                timeManager.AdvanceTime();
 
                 /* Drive the event loop. */
                 eventLoop.PumpEventLoop();
-
-                /* TODO: Add hooks for rendering and other main thread services here. */
 
                 /* Yield to avoid consuming 100% CPU. */
                 Thread.Sleep(0);
