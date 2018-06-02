@@ -25,6 +25,7 @@ using Castle.Facilities.Startable;
 using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using Castle.Windsor;
 using Castle.Windsor.Installer;
+using Engine8.EngineUtil.IoC;
 
 namespace Engine8.EngineCore.Main
 {
@@ -61,7 +62,8 @@ namespace Engine8.EngineCore.Main
             iocContainer.AddFacility<StartableFacility>(f => f.DeferredStart());
 
             /* Install components. */
-            iocContainer.Install(FromAssembly.InThisApplication());
+            iocContainer.Install(FromAssembly.InDirectory(
+                EngineClasses.EngineAssemblyFilter()));
 
             return iocContainer;
         }

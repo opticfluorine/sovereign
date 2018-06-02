@@ -47,10 +47,21 @@ namespace Engine8.EngineUtil.IoC
             var dir = Path.GetDirectoryName(thisAssembly.Location);
             var prefix = thisAssembly.FullName.Substring(0, thisAssembly.FullName.IndexOf('.'));
 
-            return Classes.FromAssemblyInDirectory(
-                    new AssemblyFilter(dir)
-                    .FilterByName( name => name.FullName.StartsWith(prefix) )
-                );
+            return Classes.FromAssemblyInDirectory(EngineAssemblyFilter());
+        }
+
+        /// <summary>
+        /// Creates an AssemblyFilter that matches all available assemblies
+        /// belonging to the engine.
+        /// </summary>
+        /// <returns>AssemblyFilter matching engine assemblies.</returns>
+        public static AssemblyFilter EngineAssemblyFilter()
+        {
+            var thisAssembly = Assembly.GetExecutingAssembly();
+            var dir = Path.GetDirectoryName(thisAssembly.Location);
+            var prefix = thisAssembly.FullName.Substring(0, thisAssembly.FullName.IndexOf('.'));
+
+            return new AssemblyFilter(dir).FilterByName(name => name.FullName.StartsWith(prefix));
         }
 
     }
