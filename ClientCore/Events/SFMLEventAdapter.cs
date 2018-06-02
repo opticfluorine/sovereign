@@ -21,39 +21,25 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Engine8.EngineUtil.IoC;
+using Engine8.EngineCore.Events;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Events
+namespace Engine8.ClientCore.Events
 {
 
     /// <summary>
-    /// IoC installer for the event handling infrastructure.
+    /// Converts SFML events into engine events.
     /// </summary>
-    public class EventInstaller : IWindsorInstaller
+    public class SFMLEventAdapter : IEventAdapter
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+        public Event PollEvent()
         {
-            /* Event loop. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventLoop>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
-
-            /* Event communicators. */
-            container.Register(Classes.From(typeof(EventCommunicator))
-                .Pick()
-                .WithServiceBase()
-                .LifestyleTransient());
-
-            /* Event adapters. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventAdapter>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
+            return null;
         }
 
     }

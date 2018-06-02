@@ -53,6 +53,11 @@ namespace Engine8.EngineCore.Systems.EventSystem
         private readonly ICollection<EventCommunicator> eventCommunicators;
 
         /// <summary>
+        /// The collection of event adapters.
+        /// </summary>
+        private readonly ICollection<IEventAdapter> eventAdapters;
+
+        /// <summary>
         /// Event communicators listening to each event ID.
         /// </summary>
         private readonly IDictionary<int, List<EventCommunicator>> communicatorsByEventId
@@ -70,11 +75,13 @@ namespace Engine8.EngineCore.Systems.EventSystem
         private ulong LastUpdateTime;
 
         public MainEventLoop(ICollection<ISystem> systems, 
-            ICollection<EventCommunicator> eventCommunicators)
+            ICollection<EventCommunicator> eventCommunicators,
+            ICollection<IEventAdapter> eventAdapters)
         {
             /* Set dependencies. */
             this.systems = systems;
             this.eventCommunicators = eventCommunicators;
+            this.eventAdapters = eventAdapters;
 
             /* Build data structures. */
             BuildCommunicatorTables();
@@ -84,6 +91,9 @@ namespace Engine8.EngineCore.Systems.EventSystem
         {
             /* Retrieve pending events from the communicators. */
             RetrievePendingEvents();
+
+            /* Retrieve events from the event adapters. */
+            RetrieveAdaptedEvents();
         }
 
         /// <summary>
@@ -138,6 +148,26 @@ namespace Engine8.EngineCore.Systems.EventSystem
                     }
                 }
                 while (nextEvent != null);
+            }
+        }
+        
+        /// <summary>
+        /// Retrieves and enqueues all available events from the IEventAdapters.
+        /// </summary>
+        private void RetrieveAdaptedEvents()
+        {
+            foreach (IEventAdapter eventAdapter in eventAdapters)
+            {
+                Event ev;
+                do
+                {
+                    ev = eventAdapter.PollEvent();
+                    if (ev != null)
+                    {
+                        EnqueueEvent(ev);
+                    }
+                }
+                while (ev != null);
             }
         }
 

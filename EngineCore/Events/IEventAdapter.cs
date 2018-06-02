@@ -21,40 +21,30 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Engine8.EngineUtil.IoC;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Engine8.EngineCore.Events
 {
 
     /// <summary>
-    /// IoC installer for the event handling infrastructure.
+    /// Describes an adapter that connects an external event source to
+    /// the event loop on the main thread.
     /// </summary>
-    public class EventInstaller : IWindsorInstaller
+    public interface IEventAdapter
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            /* Event loop. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventLoop>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
-
-            /* Event communicators. */
-            container.Register(Classes.From(typeof(EventCommunicator))
-                .Pick()
-                .WithServiceBase()
-                .LifestyleTransient());
-
-            /* Event adapters. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventAdapter>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
-        }
+        /// <summary>
+        /// Non-blocking method that polls for the next available event.
+        /// If no event is immediately available, null is returned.
+        /// </summary>
+        /// <returns>
+        /// Next available event, or null if no event is immediately available.
+        /// </returns>
+        Event PollEvent();
 
     }
 
