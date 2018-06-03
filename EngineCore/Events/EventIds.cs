@@ -27,7 +27,7 @@ namespace Engine8.EngineCore.Events
     /// <summary>
     /// Enumerates the event ID numbers.
     /// </summary>
-    public static class EventIds
+    public enum EventId
     {
 
         #region Core
@@ -35,24 +35,32 @@ namespace Engine8.EngineCore.Events
         /// <summary>
         /// Unknown event type.
         /// </summary>
-        public static readonly int Unknown = 0;
-
-        /// <summary>
-        /// First ID number assigned to core services.
-        /// </summary>
-        public static readonly int CoreStart = 1;
-
-        /// <summary>
-        /// Prefix used on core ID member names.  Used for reflection.
-        /// </summary>
-        public static readonly string CorePrefix = "Core_";
+        Unknown = 0,
 
         /// <summary>
         /// Quit event ID.
         /// </summary>
-        public static readonly int Core_Quit = CoreStart + 0;
+        Core_Quit = 1,
 
         #endregion Core
+
+        #region Client
+
+        #region Client_Input
+
+        /// <summary>
+        /// Event sent when a key is pressed.
+        /// </summary>
+        Client_Input_KeyDown = 10000,
+
+        /// <summary>
+        /// Event sent when a key is released.
+        /// </summary>
+        Client_Input_KeyUp = 10001,
+
+        #endregion
+
+        #endregion Client
 
     }
 

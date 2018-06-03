@@ -60,8 +60,8 @@ namespace Engine8.EngineCore.Systems.EventSystem
         /// <summary>
         /// Event communicators listening to each event ID.
         /// </summary>
-        private readonly IDictionary<int, List<EventCommunicator>> communicatorsByEventId
-            = new Dictionary<int, List<EventCommunicator>>();
+        private readonly IDictionary<EventId, List<EventCommunicator>> communicatorsByEventId
+            = new Dictionary<EventId, List<EventCommunicator>>();
 
         /// <summary>
         /// Priority queue of future events ordered by dispatch time.
@@ -201,7 +201,7 @@ namespace Engine8.EngineCore.Systems.EventSystem
             var eventId = ev.EventId;
 
             /* Handle Core_Quit events specially. */
-            if (eventId == EventIds.Core_Quit)
+            if (eventId == EventId.Core_Quit)
             {
                 Terminated = true;
             }

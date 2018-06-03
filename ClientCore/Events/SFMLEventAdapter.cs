@@ -196,7 +196,7 @@ namespace Engine8.ClientCore.Events
         private void Window_Closed(object sender, EventArgs e)
         {
             /* Map to a Core_Quit event. */
-            var ev = new Event(EventIds.Core_Quit);
+            var ev = new Event(EventId.Core_Quit);
             eventQueue.Enqueue(ev);
         }
 

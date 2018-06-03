@@ -40,7 +40,7 @@ namespace Engine8.EngineCore.Events
         /// <summary>
         /// Unique identifier for the event type.
         /// </summary>
-        public int EventId { get; private set; }
+        public EventId EventId { get; private set; }
 
         /// <summary>
         /// Time at which the event becomes valid, in microseconds.
@@ -52,7 +52,7 @@ namespace Engine8.EngineCore.Events
         /// </summary>
         public IEventDetails EventDetails { get; private set; }
 
-        public Event(int eventId, ulong eventTime = TIME_IMMEDIATE)
+        public Event(EventId eventId, ulong eventTime = TIME_IMMEDIATE)
             : this(eventId, null, eventTime)
         {
         }
@@ -65,7 +65,7 @@ namespace Engine8.EngineCore.Events
         /// <param name="eventTime">
         /// System time (us) when this event should be dispatched.
         /// </param>
-        public Event(int eventId, IEventDetails details, 
+        public Event(EventId eventId, IEventDetails details, 
             ulong eventTime = TIME_IMMEDIATE)
         {
             EventId = eventId;

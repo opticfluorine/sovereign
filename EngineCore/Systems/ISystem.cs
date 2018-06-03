@@ -41,7 +41,7 @@ namespace Engine8.EngineCore.Systems
         /// <summary>
         /// The set of event IDs that this system is listening for.
         /// </summary>
-        ISet<int> EventIdsOfInterest { get; }
+        ISet<EventId> EventIdsOfInterest { get; }
 
         /// <summary>
         /// Initializes the system. Called from the system thread.
