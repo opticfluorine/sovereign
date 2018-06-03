@@ -24,6 +24,7 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
+using Engine8.EngineCore.Systems;
 using Engine8.EngineUtil.IoC;
 
 namespace Engine8.EngineCore.Events
@@ -44,10 +45,8 @@ namespace Engine8.EngineCore.Events
                 .LifestyleSingleton());
 
             /* Event communicators. */
-            container.Register(Classes.From(typeof(EventCommunicator))
-                .Pick()
-                .WithServiceBase()
-                .LifestyleTransient());
+            container.Register(Component.For<EventCommunicator>()
+                .LifestylePerThread());
 
             /* Event adapters. */
             container.Register(EngineClasses.EngineAssemblies()

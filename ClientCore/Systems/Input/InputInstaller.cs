@@ -21,45 +21,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.Core.Logging;
-using Engine8.ClientCore.Rendering.Display;
-using Engine8.EngineCore.Timing;
-using SFML.Graphics;
-using SFML.System;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-namespace Engine8.ClientCore.Rendering
+namespace Engine8.ClientCore.Systems.Input
 {
 
     /// <summary>
-    /// Timed action that attempts to execute the renderer on the main thread at 60 FPS.
+    /// IoC installer for classes related to the InputSystem.
     /// </summary>
-    public class RenderingTimedAction : ITimedAction
+    public class InputInstaller : IWindsorInstaller
     {
 
-        public ILogger Logger { private get; set; } = NullLogger.Instance;
-
-        /// <summary>
-        /// Main display.
-        /// </summary>
-        private readonly MainDisplay mainDisplay;
-
-        // Target 60 FPS.
-        public ulong Interval { get; } = 16667;
-
-        public RenderingTimedAction(MainDisplay mainDisplay)
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            this.mainDisplay = mainDisplay;
+            /* KeyboardEventHandler. */
+            container.Register(Component.For<KeyboardEventHandler>()
+                .LifestyleSingleton());
         }
 
-        public void Invoke(ulong triggerTime)
-        {
-            
-        }
     }
 
 }

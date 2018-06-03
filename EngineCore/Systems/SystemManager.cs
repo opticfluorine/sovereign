@@ -83,7 +83,10 @@ namespace Engine8.EngineCore.Systems
                system.Initialize();
                system.Run();
                system.Cleanup();
-           }));
+           }))
+            {
+                Name = system.GetType().Name,
+            };
             thread.Start();
             return thread;
         }

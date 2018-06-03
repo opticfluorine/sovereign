@@ -21,45 +21,23 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.Core.Logging;
-using Engine8.ClientCore.Rendering.Display;
-using Engine8.EngineCore.Timing;
-using SFML.Graphics;
-using SFML.System;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Engine8.EngineCore.Events;
+using static SFML.Window.Keyboard;
 
-namespace Engine8.ClientCore.Rendering
+namespace Engine8.ClientCore.Events
 {
 
     /// <summary>
-    /// Timed action that attempts to execute the renderer on the main thread at 60 FPS.
+    /// Event details associated with a keyboard event.
     /// </summary>
-    public class RenderingTimedAction : ITimedAction
+    public class KeyEventDetails : IEventDetails
     {
 
-        public ILogger Logger { private get; set; } = NullLogger.Instance;
-
         /// <summary>
-        /// Main display.
+        /// Key whose state changed.
         /// </summary>
-        private readonly MainDisplay mainDisplay;
+        public Key Key { get; set; }
 
-        // Target 60 FPS.
-        public ulong Interval { get; } = 16667;
-
-        public RenderingTimedAction(MainDisplay mainDisplay)
-        {
-            this.mainDisplay = mainDisplay;
-        }
-
-        public void Invoke(ulong triggerTime)
-        {
-            
-        }
     }
 
 }

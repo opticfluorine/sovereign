@@ -155,12 +155,18 @@ namespace Engine8.ClientCore.Events
 
         private void Window_KeyReleased(object sender, SFML.Window.KeyEventArgs e)
         {
-            
+            /* Convert to a Client_Input_KeyUp event. */
+            var details = new KeyEventDetails() { Key = e.Code };
+            var ev = new Event(EventId.Client_Input_KeyUp, details);
+            eventQueue.Enqueue(ev);
         }
 
         private void Window_KeyPressed(object sender, SFML.Window.KeyEventArgs e)
         {
-            
+            /* Convert to a Client_Input_KeyDown event. */
+            var details = new KeyEventDetails() { Key = e.Code };
+            var ev = new Event(EventId.Client_Input_KeyDown, details);
+            eventQueue.Enqueue(ev);
         }
 
         private void Window_JoystickMoved(object sender, SFML.Window.JoystickMoveEventArgs e)

@@ -22,44 +22,50 @@
  */
 
 using Castle.Core.Logging;
-using Engine8.ClientCore.Rendering.Display;
-using Engine8.EngineCore.Timing;
-using SFML.Graphics;
-using SFML.System;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Engine8.ClientCore.Events;
+using Engine8.EngineCore.Events;
 
-namespace Engine8.ClientCore.Rendering
+namespace Engine8.ClientCore.Systems.Input
 {
 
     /// <summary>
-    /// Timed action that attempts to execute the renderer on the main thread at 60 FPS.
+    /// Processes keyboard events.
     /// </summary>
-    public class RenderingTimedAction : ITimedAction
+    public class KeyboardEventHandler
     {
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-        /// <summary>
-        /// Main display.
-        /// </summary>
-        private readonly MainDisplay mainDisplay;
-
-        // Target 60 FPS.
-        public ulong Interval { get; } = 16667;
-
-        public RenderingTimedAction(MainDisplay mainDisplay)
+        public void HandleEvent(Event ev)
         {
-            this.mainDisplay = mainDisplay;
+            switch (ev.EventId)
+            {
+                case EventId.Client_Input_KeyDown:
+                    HandleKeyDownEvent(ev);
+                    break;
+
+                case EventId.Client_Input_KeyUp:
+                    HandleKeyUpEvent(ev);
+                    break;
+
+                /* Ignore unhandled events. */
+                default:
+                    break;
+            }
         }
 
-        public void Invoke(ulong triggerTime)
+        private void HandleKeyDownEvent(Event ev)
         {
-            
+            var details = (KeyEventDetails)ev.EventDetails;
+            Logger.DebugFormat("Key '{0}' down.", details.Key);
         }
+
+        private void HandleKeyUpEvent(Event ev)
+        {
+            var details = (KeyEventDetails)ev.EventDetails;
+            Logger.DebugFormat("Key '{0}' up.", details.Key);
+        }
+
     }
 
 }

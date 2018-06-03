@@ -55,7 +55,6 @@ namespace Engine8.EngineCore.Events
 
         public void Invoke(ulong triggerTime)
         {
-            Logger.DebugFormat("Begin event tick {0}.", triggerTime / Interval);
             eventLoop.UpdateSystemTime(triggerTime);
         }
 
