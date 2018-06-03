@@ -158,6 +158,8 @@ namespace Engine8.EngineCore.Systems.EventSystem
         {
             foreach (IEventAdapter eventAdapter in eventAdapters)
             {
+                eventAdapter.PrepareEvents();
+
                 Event ev;
                 do
                 {
@@ -197,10 +199,21 @@ namespace Engine8.EngineCore.Systems.EventSystem
         private void DispatchImmediateEvent(Event ev)
         {
             var eventId = ev.EventId;
-            foreach (var comm in communicatorsByEventId[eventId])
+
+            /* Handle Core_Quit events specially. */
+            if (eventId == EventIds.Core_Quit)
             {
-                comm.SendEventToSystem(ev);
+                Terminated = true;
             }
+
+            /* Dispatch to all interested communicators, if any.. */
+            if (communicatorsByEventId.ContainsKey(eventId))
+            {
+                foreach (var comm in communicatorsByEventId[eventId])
+                {
+                    comm.SendEventToSystem(ev);
+                }
+            }   
         }
 
         /// <summary>

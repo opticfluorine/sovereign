@@ -22,6 +22,7 @@
  */
 
 using Castle.Core;
+using Engine8.ClientCore.Rendering.Display;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,14 +38,26 @@ namespace Engine8.ClientCore.Rendering
     public class RenderingManager : IStartable
     {
 
+        /// <summary>
+        /// Main display.
+        /// </summary>
+        private readonly MainDisplay mainDisplay;
+
+        public RenderingManager(MainDisplay mainDisplay)
+        {
+            this.mainDisplay = mainDisplay;
+        }
+
         public void Start()
         {
-            
+            /* Display the main window. */
+            mainDisplay.Show();
         }
 
         public void Stop()
         {
-            
+            /* Close the main window. */
+            mainDisplay.Close();
         }
 
     }

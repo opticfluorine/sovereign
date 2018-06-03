@@ -50,24 +50,26 @@ namespace Engine8.EngineCore.Events
         /// <summary>
         /// Details associated with the event.
         /// </summary>
-        public IList<IEventDetails> EventDetails { get; private set; }
+        public IEventDetails EventDetails { get; private set; }
+
+        public Event(int eventId, ulong eventTime = TIME_IMMEDIATE)
+            : this(eventId, null, eventTime)
+        {
+        }
 
         /// <summary>
         /// Creates a new Event object.
-        ///
-        /// You should not generally create new events directly.
-        /// Use the EventFactory class instead.
         /// </summary>
         /// <param name="eventId">Event type ID.</param>
         /// <param name="details">Associated event details.</param>
         /// <param name="eventTime">
         /// System time (us) when this event should be dispatched.
         /// </param>
-        public Event(int eventId, IList<IEventDetails> details, 
+        public Event(int eventId, IEventDetails details, 
             ulong eventTime = TIME_IMMEDIATE)
         {
             EventId = eventId;
-            EventDetails = new List<IEventDetails>(details);
+            EventDetails = details;
             EventTime = eventTime;
         }
 

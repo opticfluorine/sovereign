@@ -21,44 +21,30 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Events
+namespace Engine8.ClientCore.Rendering.Display
 {
 
     /// <summary>
-    /// Interface implemented by event provider classes.  These classes are
-    /// dynamically located and loaded at construction of an EventFactory.
+    /// IoC installer for display-related classes.
     /// </summary>
-    public interface IEventProvider
+    public class DisplayInstaller : IWindsorInstaller
     {
 
-        /// <summary>
-        /// Map from event ID to a list of IEventDetails classes that must be
-        /// instantiated for each event.
-        /// </summary>
-        IDictionary<int, IList<Type>> IdToRequiredDetailsMap { get; }
-
-        /// <summary>
-        /// Gets a default list of event details for the given event ID.
-        ///
-        /// Implementers must return a valid list for each ID included in the
-        /// IDToRequiredDetailsMap.
-        /// </summary>
-        /// <param name="id">Event ID.</param>
-        /// <returns>List of default event details.</returns>
-        IList<IEventDetails> GetDefaultDetails(int id);
-
-        /// <summary>
-        /// Validates the given event.
-        ///
-        /// Implementers must validate each event type included in the
-        /// IdToRequiredDetailsMap.
-        /// </summary>
-        /// <param name="ev">Event to be validated.</param>
-        /// <returns>true if the event is valid, false otherwise.</returns>
-        bool IsEventValid(Event ev);
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            /* MainDisplay. */
+            container.Register(Component.For<MainDisplay>()
+                .LifestyleSingleton());
+        }
 
     }
 

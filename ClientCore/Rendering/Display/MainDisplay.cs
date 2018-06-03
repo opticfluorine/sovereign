@@ -21,23 +21,68 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using SFML.Graphics;
+using SFML.System;
+using SFML.Window;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Events
+namespace Engine8.ClientCore.Rendering.Display
 {
 
     /// <summary>
-    /// Interface implemented by components that produce large
-    /// batches of events, e.g. adapters between event loops.
+    /// Manages the main display window.
     /// </summary>
-    public interface IEventSource
+    public class MainDisplay
     {
 
         /// <summary>
-        /// Gets the events waiting for dispatch.
+        /// Default window width.
         /// </summary>
-        /// <returns>Events waiting for dispatch.</returns>
-        IEnumerable<Event> GetEvents();
+        private const uint WIDTH = 1366;
+
+        /// <summary>
+        /// Default window height.
+        /// </summary>
+        private const uint HEIGHT = 768;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private static readonly Styles STYLES = Styles.Close;
+
+        /// <summary>
+        /// Window title.
+        /// </summary>
+        private const string TITLE = "Engine8";
+
+        /// <summary>
+        /// Main render window.
+        /// </summary>
+        public RenderWindow RenderWindow { get; private set; }
+
+        public MainDisplay()
+        {
+            /* Create and configure the main window. */
+            var mode = new VideoMode(WIDTH, HEIGHT);
+            RenderWindow = new RenderWindow(mode, TITLE, STYLES);
+        }
+
+        /// <summary>
+        /// Shows the main window.
+        /// </summary>
+        public void Show()
+        {
+            RenderWindow.Display();
+        }
+
+        public void Close()
+        {
+            RenderWindow.Close();
+        }
 
     }
 

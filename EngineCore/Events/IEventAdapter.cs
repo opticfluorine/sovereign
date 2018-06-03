@@ -38,6 +38,11 @@ namespace Engine8.EngineCore.Events
     {
 
         /// <summary>
+        /// Called immediately before the event loop will poll for events.
+        /// </summary>
+        void PrepareEvents();
+
+        /// <summary>
         /// Non-blocking method that polls for the next available event.
         /// If no event is immediately available, null is returned.
         /// </summary>
