@@ -63,6 +63,13 @@ namespace Engine8.EngineCore.Systems
         /// </summary>
         public void Execute()
         {
+            /* Ensure that at least one system is being managed. */
+            if (systems.Count == 0)
+            {
+                Log.Info("No systems to manage, this SystemExecutor will terminate.");
+                return;
+            }
+
             InitializeSystems();
             ExecuteSystems();
             CleanupSystems();
@@ -100,6 +107,8 @@ namespace Engine8.EngineCore.Systems
         /// </summary>
         private void CleanupSystems()
         {
+            Log.Info("SystemExecutor is shutting down.");
+
             foreach (var system in systems)
             {
                 system.Cleanup();
@@ -114,12 +123,12 @@ namespace Engine8.EngineCore.Systems
         {
             var sb = new StringBuilder();
 
-            sb.Append("SystemExecutor is starting with the following systems:\n\n");
+            sb.Append("SystemExecutor is starting with the following systems:");
             foreach (var system in systems)
             {
-                sb.Append(system.GetType().Name)
+                sb.Append("\n - ").Append(system.GetType().Name)
                     .Append(" (Workload = ").Append(system.WorkloadEstimate)
-                    .Append(")\n");
+                    .Append(")");
             }
 
             return sb.ToString();

@@ -60,7 +60,7 @@ namespace Engine8.EngineCore.Systems
             container.Register(Component.For<SystemExecutor>()
                 .LifestyleTransient());
             container.Register(Component.For<ISystemExecutorFactory>()
-                .LifestyleSingleton()
+                .LifestyleTransient()
                 .AsFactory());
 
         }

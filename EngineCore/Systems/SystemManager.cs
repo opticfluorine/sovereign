@@ -125,7 +125,7 @@ namespace Engine8.EngineCore.Systems
         private void PartitionSystems()
         {
             /* Iterate over the systems in order of decreasing workload. */
-            var rankedSystems = systemList.OrderByDescending(system => system.EventIdsOfInterest);
+            var rankedSystems = systemList.OrderByDescending(system => system.WorkloadEstimate);
             var count = 0;
             foreach (var system in rankedSystems)
             {
