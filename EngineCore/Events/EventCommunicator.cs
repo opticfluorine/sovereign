@@ -36,8 +36,8 @@ namespace Engine8.EngineCore.Events
         /// <summary>
         /// Events being sent from the event loop to the system thread.
         /// </summary>
-        private readonly BlockingCollection<Event> incomingEvents
-            = new BlockingCollection<Event>(new ConcurrentQueue<Event>());
+        private readonly ConcurrentQueue<Event> incomingEvents
+            = new ConcurrentQueue<Event>();
 
         /// <summary>
         /// Events being sent from the system thread to the event loop.
@@ -54,13 +54,15 @@ namespace Engine8.EngineCore.Events
         }
 
         /// <summary>
-        /// Gets the next event being sent to the system thread.
-        /// This method blocks until an event is available.
+        /// Tries to get the next event being sent to the system thread.
+        /// If no event is available, this returns false and the value of
+        /// ev is undefined.
         /// </summary>
-        /// <returns>Next event being sent to the system thread.</returns>
-        public Event GetIncomingEvent()
+        /// <param name="ev">Reference to hold the next event.</param>
+        /// <returns>true if an event was retrieved, false if not.</returns>
+        public bool GetIncomingEvent(out Event ev)
         {
-            return incomingEvents.Take();
+            return incomingEvents.TryDequeue(out ev);
         }
 
         /// <summary>
@@ -69,7 +71,7 @@ namespace Engine8.EngineCore.Events
         /// <param name="ev">Event to be sent.</param>
         public void SendEventToSystem(Event ev)
         {
-            incomingEvents.Add(ev);
+            incomingEvents.Enqueue(ev);
         }
 
         /// <summary>

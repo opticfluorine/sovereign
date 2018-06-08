@@ -34,13 +34,38 @@ namespace Engine8.EngineCore.Events
 
         /// <summary>
         /// Unknown event type.
+        /// 
+        /// Associated details: None
         /// </summary>
         Unknown = 0,
 
         /// <summary>
         /// Quit event ID.
+        /// 
+        /// Associated details: None
         /// </summary>
         Core_Quit = 1,
+
+        /// <summary>
+        /// Attempted one-time relative movement of an entity.
+        /// 
+        /// Associated details: MoveOnceEventDetails
+        /// </summary>
+        Core_Move_Once = 100,
+
+        /// <summary>
+        /// Sets the velocity of an entity.
+        /// 
+        /// Associated details: SetMovementEventDetails
+        /// </summary>
+        Core_Set_Velocity = 101,
+
+        /// <summary>
+        /// Ends the continous movement, if any, of an entity.
+        /// 
+        /// Associate details: EntityDetails
+        /// </summary>
+        Core_End_Movement = 102,
 
         #endregion Core
 
@@ -50,11 +75,15 @@ namespace Engine8.EngineCore.Events
 
         /// <summary>
         /// Event sent when a key is pressed.
+        /// 
+        /// Associated details: KeyEventDetails
         /// </summary>
         Client_Input_KeyDown = 10000,
 
         /// <summary>
         /// Event sent when a key is released.
+        /// 
+        /// Associated details: KeyEventDetails
         /// </summary>
         Client_Input_KeyUp = 10001,
 

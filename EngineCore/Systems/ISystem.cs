@@ -44,19 +44,26 @@ namespace Engine8.EngineCore.Systems
         ISet<EventId> EventIdsOfInterest { get; }
 
         /// <summary>
+        /// Estimated scale of the workload performed by this system.
+        /// Larger values indicate greater expected workloads.
+        /// This value is used to balance the system threads.
+        /// </summary>
+        int WorkloadEstimate { get; }
+
+        /// <summary>
         /// Initializes the system. Called from the system thread.
         /// </summary>
         void Initialize();
 
         /// <summary>
-        /// Runs the system. Called from the system thread.
-        /// </summary>
-        void Run();
-
-        /// <summary>
         /// Cleans up the system. Called from the system thread.
         /// </summary>
         void Cleanup();
+
+        /// <summary>
+        /// Executes the system once.
+        /// </summary>
+        void ExecuteOnce();
 
     }
 

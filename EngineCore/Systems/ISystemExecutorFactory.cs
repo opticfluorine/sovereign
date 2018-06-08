@@ -21,39 +21,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Engine8.EngineCore.Systems;
-using Engine8.EngineUtil.IoC;
-
-namespace Engine8.EngineCore.Events
+namespace Engine8.EngineCore.Systems
 {
 
     /// <summary>
-    /// IoC installer for the event handling infrastructure.
+    /// Abstract type factory for SystemExecutor.
     /// </summary>
-    public class EventInstaller : IWindsorInstaller
+    public interface ISystemExecutorFactory
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            /* Event loop. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventLoop>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
+        /// <summary>
+        /// Creates a new SystemExecutor.
+        /// </summary>
+        /// <returns>New SystemExecutor.</returns>
+        SystemExecutor Create();
 
-            /* Event communicators. */
-            container.Register(Component.For<EventCommunicator>()
-                .LifestyleTransient());
-
-            /* Event adapters. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventAdapter>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
-        }
+        /// <summary>
+        /// Releases a SystemExecutor built by this factory.
+        /// </summary>
+        /// <param name="systemExecutor">SystemExecutor to release.</param>
+        void Release(SystemExecutor systemExecutor);
 
     }
 

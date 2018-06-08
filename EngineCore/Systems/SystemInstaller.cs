@@ -22,6 +22,7 @@
  */
 
 using Castle.Facilities.Startable;
+using Castle.Facilities.TypedFactory;
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
@@ -43,18 +44,25 @@ namespace Engine8.EngineCore.Systems
 
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            /* Install all available systems. */
+            /* ISystem. */
             container.Register(EngineClasses.EngineAssemblies()
                 .BasedOn<ISystem>()
                 .WithService.DefaultInterfaces()
                 .LifestyleSingleton()
             );
 
-            /* Register the SystemManager facility. */
+            /* SystemManager. */
             container.Register(Component.For<SystemManager>()
                 .LifestyleSingleton()
-                .Start()
-            );
+                .Start());
+
+            /* SystemExecutor. */
+            container.Register(Component.For<SystemExecutor>()
+                .LifestyleTransient());
+            container.Register(Component.For<ISystemExecutorFactory>()
+                .LifestyleSingleton()
+                .AsFactory());
+
         }
 
     }

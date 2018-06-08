@@ -21,39 +21,33 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Engine8.EngineCore.Systems;
-using Engine8.EngineUtil.IoC;
+using Engine8.EngineCore.Events;
 
-namespace Engine8.EngineCore.Events
+namespace Engine8.EngineCore.Systems.Movement.Events
 {
 
     /// <summary>
-    /// IoC installer for the event handling infrastructure.
+    /// Sets the velocity of an entity. The entity will move under this
+    /// velocity until the velocity is changed, movement is ended, or the
+    /// entity cannot proceed to move.
     /// </summary>
-    public class EventInstaller : IWindsorInstaller
+    public class SetVelocityEventDetails : IEventDetails
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            /* Event loop. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventLoop>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
+        /// <summary>
+        /// Entity identifier.
+        /// </summary>
+        public ulong EntityId { get; set; }
 
-            /* Event communicators. */
-            container.Register(Component.For<EventCommunicator>()
-                .LifestyleTransient());
+        /// <summary>
+        /// Rate of movement along X in points per second.
+        /// </summary>
+        public float RateX { get; set; }
 
-            /* Event adapters. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventAdapter>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
-        }
+        /// <summary>
+        /// Rate of movement along Y in points per second.
+        /// </summary>
+        public float RateY { get; set; }
 
     }
 

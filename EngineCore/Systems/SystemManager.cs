@@ -26,6 +26,7 @@ using System.Linq;
 using Castle.Core;
 using Castle.Core.Logging;
 using System.Threading;
+using System.Text;
 
 namespace Engine8.EngineCore.Systems
 {
@@ -36,6 +37,11 @@ namespace Engine8.EngineCore.Systems
     public class SystemManager : IStartable
     {
 
+        /// <summary>
+        /// Number of system executor threads.
+        /// </summary>
+        private const int EXECUTOR_COUNT = 2;
+
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         /// <summary>
@@ -44,51 +50,116 @@ namespace Engine8.EngineCore.Systems
         private readonly IList<ISystem> systemList;
 
         /// <summary>
-        /// Running tasks.
+        /// System executor factory.
         /// </summary>
-        private readonly List<Thread> threads = new List<Thread>();
+        private readonly ISystemExecutorFactory systemExecutorFactory;
+
+        /// <summary>
+        /// Executors.
+        /// </summary>
+        private readonly IList<SystemExecutor> executors = new List<SystemExecutor>();
+
+        /// <summary>
+        /// Executor threads.
+        /// </summary>
+        private readonly IList<Thread> threads = new List<Thread>();
 
         /// <summary>
         /// Creates a new SystemManager with the given update step.
         /// </summary>
         /// <param name="systemList">Systems to be managed.</param>
-        public SystemManager(IList<ISystem> systemList)
+        /// <param name="systemExecutorFactory">System executor factory.</param>
+        public SystemManager(IList<ISystem> systemList, 
+            ISystemExecutorFactory systemExecutorFactory)
         {
             this.systemList = systemList;
+            this.systemExecutorFactory = systemExecutorFactory;
         }
 
         public void Start()
         {
             Logger.Info("Starting SystemManager.");
 
-            /* Run all of the discovered systems. */
-            var threadQuery = from system in systemList
-                            select RunSingleSystem(system);
-            threads.AddRange(threadQuery);
+            /* Create executors. */
+            CreateExecutors();
+
+            /* Partition systems across the executors. */
+            PartitionSystems();
+
+            /* Run the executors. */
+            RunExecutors();
         }
 
         public void Stop()
         {
             Logger.Info("Stopping SystemManager.");
+
+            /* Join on the executor threads. */
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
+
+            /* Release the executor resources. */
+            foreach (var executor in executors)
+            {
+                systemExecutorFactory.Release(executor);
+            }
         }
 
         /// <summary>
-        /// Runs a single system in a separate thread.
+        /// Creates the SystemExecutors.
         /// </summary>
-        /// <param name="system">System to run.</param>
-        private Thread RunSingleSystem(ISystem system)
+        private void CreateExecutors()
         {
-            var thread = new Thread(new ThreadStart(() =>
-           {
-               system.Initialize();
-               system.Run();
-               system.Cleanup();
-           }))
+            for (int i = 0; i < EXECUTOR_COUNT; ++i)
             {
-                Name = system.GetType().Name,
-            };
-            thread.Start();
-            return thread;
+                var executor = systemExecutorFactory.Create();
+                executors.Add(executor);
+            }
+        }
+
+        /// <summary>
+        /// Partitions the systems across the SystemExecutors.
+        /// </summary>
+        private void PartitionSystems()
+        {
+            /* Iterate over the systems in order of decreasing workload. */
+            var rankedSystems = systemList.OrderByDescending(system => system.EventIdsOfInterest);
+            var count = 0;
+            foreach (var system in rankedSystems)
+            {
+                /* Cycle through the executors round-robin style. */
+                var executor = executors[count % EXECUTOR_COUNT];
+                executor.AddSystem(system);
+
+                count++;
+            }
+        }
+
+        /// <summary>
+        /// Runs the SystemExecutors in their own threads.
+        /// </summary>
+        private void RunExecutors()
+        {
+            int count = 0;
+            var sb = new StringBuilder();
+            foreach (var executor in executors)
+            {
+                /* Generate a name for the executor. */
+                sb.Clear();
+                sb.Append("Executor ").Append(count);
+
+                /* Start the executor thread. */
+                var executorThread = new Thread(executor.Execute)
+                {
+                    Name = sb.ToString()
+                };
+                executorThread.Start();
+                threads.Add(executorThread);
+
+                count++;
+            }
         }
 
     }

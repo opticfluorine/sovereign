@@ -21,39 +21,42 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Engine8.EngineCore.Systems;
-using Engine8.EngineUtil.IoC;
+using Engine8.EngineCore.Events;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Events
+namespace Engine8.EngineCore.Systems.Movement.Events
 {
 
     /// <summary>
-    /// IoC installer for the event handling infrastructure.
+    /// Event details associated with the Core_Movement event, which
+    /// describes an attempt to move an entity relative to its current
+    /// position.
+    /// 
+    /// If the entity is able to move to the new position (i.e. the entity
+    /// is not fixed and is not somehow forbidden from the new position),
+    /// the movement is successful. Otherwise no movement occurs.
     /// </summary>
-    public class EventInstaller : IWindsorInstaller
+    public class MoveOnceEventDetails : IEventDetails
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            /* Event loop. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventLoop>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
+        /// <summary>
+        /// Identifier of the entity that is moving.
+        /// </summary>
+        public ulong EntityId { get; set; }
 
-            /* Event communicators. */
-            container.Register(Component.For<EventCommunicator>()
-                .LifestyleTransient());
+        /// <summary>
+        /// Distance to move along the x axis.
+        /// </summary>
+        public float DistanceX { get; set; }
 
-            /* Event adapters. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventAdapter>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
-        }
+        /// <summary>
+        /// Distance to move along the y axis.
+        /// </summary>
+        public float DistanceY { get; set; }
 
     }
 

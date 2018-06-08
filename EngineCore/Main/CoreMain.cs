@@ -22,6 +22,7 @@
  */
 
 using Castle.Facilities.Startable;
+using Castle.Facilities.TypedFactory;
 using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using Castle.Windsor;
 using Castle.Windsor.Installer;
@@ -60,6 +61,7 @@ namespace Engine8.EngineCore.Main
 
             /* Add facilities. */
             iocContainer.AddFacility<StartableFacility>(f => f.DeferredStart());
+            iocContainer.AddFacility<TypedFactoryFacility>();
 
             /* Install components. */
             iocContainer.Install(FromAssembly.InDirectory(

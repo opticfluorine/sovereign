@@ -21,37 +21,39 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Engine8.EngineCore.Events;
-using Engine8.EngineCore.Systems;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Castle.Core.Logging;
+using Engine8.EngineCore.Events;
 
-namespace Engine8.ClientCore.Systems.Input
+namespace Engine8.EngineCore.Systems.Movement
 {
 
     /// <summary>
-    /// System responsible for handling user input.
+    /// System responsible for coordinating the movement of entities.
     /// </summary>
-    public class InputSystem : ISystem
+    public class MovementSystem : ISystem
     {
+
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         public EventCommunicator EventCommunicator { get; set; }
 
-        public ISet<EventId> EventIdsOfInterest { get; }
-           = new HashSet<EventId>() {
-               EventId.Client_Input_KeyUp,
-               EventId.Client_Input_KeyDown,
-           };
-
-        public int WorkloadEstimate { get; } = 50;
-
-        /// <summary>
-        /// Keyboard event handler.
-        /// </summary>
-        private readonly KeyboardEventHandler keyboardEventHandler;
-
-        public InputSystem(KeyboardEventHandler keyboardEventHandler)
+        public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>()
         {
-            this.keyboardEventHandler = keyboardEventHandler;
+            EventId.Core_Move_Once,
+            EventId.Core_Set_Velocity,
+            EventId.Core_End_Movement,
+        };
+
+        public int WorkloadEstimate { get; } = 80;
+
+        public void Cleanup()
+        {
+            
         }
 
         public void Initialize()
@@ -59,27 +61,32 @@ namespace Engine8.ClientCore.Systems.Input
             
         }
 
-        public void Cleanup()
-        {
-            
-        }
-
         public void ExecuteOnce()
         {
-            /* Poll for events. */
+            /* Poll for movement-related events. */
             Event ev;
             while (EventCommunicator.GetIncomingEvent(out ev))
             {
                 switch (ev.EventId)
                 {
-                    /* Route keyboard events appropriately. */
-                    case EventId.Client_Input_KeyUp:
-                    case EventId.Client_Input_KeyDown:
-                        keyboardEventHandler.HandleEvent(ev);
+                    /* Handle direct movements. */
+                    case EventId.Core_Move_Once:
+                        /* TODO: Implement */
                         break;
 
-                    /* Ignore other events. */
+                    /* Handle velocity changes. */
+                    case EventId.Core_Set_Velocity:
+                        /* TODO: Implement */
+                        break;
+
+                    /* Stop movement. */
+                    case EventId.Core_End_Movement:
+                        /* TODO: Implement */
+                        break;
+
+                    /* Ignore unhandled events. */
                     default:
+                        Logger.WarnFormat("Unhandled event with ID = {0}.", ev.EventId);
                         break;
                 }
             }
