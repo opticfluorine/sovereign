@@ -24,6 +24,7 @@
 using Castle.Core.Logging;
 using Engine8.ClientCore.Events;
 using Engine8.EngineCore.Events;
+using static SFML.Window.Keyboard;
 
 namespace Engine8.ClientCore.Systems.Input
 {
@@ -35,6 +36,23 @@ namespace Engine8.ClientCore.Systems.Input
     {
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+        /// <summary>
+        /// Keyboard state.
+        /// </summary>
+        private readonly KeyboardState keyboardState;
+
+        /// <summary>
+        /// Player input movement mapper.
+        /// </summary>
+        private readonly PlayerInputMovementMapper playerInputMovementMapper;
+
+        public KeyboardEventHandler(KeyboardState keyboardState, 
+            PlayerInputMovementMapper playerInputMovementMapper)
+        {
+            this.keyboardState = keyboardState;
+            this.playerInputMovementMapper = playerInputMovementMapper;
+        }
 
         public void HandleEvent(Event ev)
         {
@@ -54,16 +72,71 @@ namespace Engine8.ClientCore.Systems.Input
             }
         }
 
+        /// <summary>
+        /// Handles key down events.
+        /// </summary>
+        /// <param name="ev">Key down event.</param>
         private void HandleKeyDownEvent(Event ev)
         {
             var details = (KeyEventDetails)ev.EventDetails;
-            Logger.DebugFormat("Key '{0}' down.", details.Key);
+
+            /* Update the keyboard state. */
+            keyboardState.KeyDown(details.Key);
+
+            /* Perform additional processing. */
+            switch (details.Key)
+            {
+                /* Direction keys. */
+                case Key.Up:
+                case Key.Down:
+                case Key.Left:
+                case Key.Right:
+                    HandleDirectionKeyEvent(ev);
+                    break;
+
+                /* Ignore keys that don't do anything for now. */
+                default:
+                    break;
+            }
         }
 
+        /// <summary>
+        /// Handles key up events.
+        /// </summary>
+        /// <param name="ev">Key up event.</param>
         private void HandleKeyUpEvent(Event ev)
         {
             var details = (KeyEventDetails)ev.EventDetails;
-            Logger.DebugFormat("Key '{0}' up.", details.Key);
+
+            /* Update the keyboard state. */
+            keyboardState.KeyUp(details.Key);
+
+            /* Perform additional processing. */
+            switch (details.Key)
+            {
+                /* Direction keys. */
+                case Key.Up:
+                case Key.Down:
+                case Key.Left:
+                case Key.Right:
+                    HandleDirectionKeyEvent(ev);
+                    break;
+
+                /* Ignore keys that don't do anything for now. */
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Handles direction key events.
+        /// </summary>
+        /// <param name="ev">Direction key event.</param>
+        private void HandleDirectionKeyEvent(Event ev)
+        {
+            playerInputMovementMapper.UpdateMovement(keyboardState.KeysDown[(int)Key.Up],
+                keyboardState.KeysDown[(int)Key.Down], keyboardState.KeysDown[(int)Key.Left],
+                keyboardState.KeysDown[(int)Key.Right]);
         }
 
     }

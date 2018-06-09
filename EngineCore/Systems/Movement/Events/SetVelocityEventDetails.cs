@@ -40,12 +40,12 @@ namespace Engine8.EngineCore.Systems.Movement.Events
         public ulong EntityId { get; set; }
 
         /// <summary>
-        /// Rate of movement along X in points per second.
+        /// Relative rate of movement along X as a ratio of the entity's base speed.
         /// </summary>
         public float RateX { get; set; }
 
         /// <summary>
-        /// Rate of movement along Y in points per second.
+        /// Relative rate of movement along Y as a ratio of the entity's base speed.
         /// </summary>
         public float RateY { get; set; }
 

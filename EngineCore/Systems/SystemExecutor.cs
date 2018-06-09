@@ -42,6 +42,9 @@ namespace Engine8.EngineCore.Systems
         /// </summary>
         private readonly IList<ISystem> systems = new List<ISystem>();
 
+        /// <summary>
+        /// Event loop.
+        /// </summary>
         private readonly IEventLoop eventLoop;
 
         public SystemExecutor(IEventLoop eventLoop)

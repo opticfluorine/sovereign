@@ -39,6 +39,10 @@ namespace Engine8.ClientCore.Systems.Input
             /* KeyboardEventHandler. */
             container.Register(Component.For<KeyboardEventHandler>()
                 .LifestyleSingleton());
+
+            /* KeyboardState. */
+            container.Register(Component.For<KeyboardState>()
+                .LifestyleSingleton());
         }
 
     }
