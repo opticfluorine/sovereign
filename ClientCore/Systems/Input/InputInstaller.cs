@@ -47,6 +47,10 @@ namespace Engine8.ClientCore.Systems.Input
             /* PlayerInputMovementMapper */
             container.Register(Component.For<PlayerInputMovementMapper>()
                 .LifestyleSingleton());
+
+            /* InputController. */
+            container.Register(Component.For<InputController>()
+                .LifestyleSingleton());
         }
 
     }
