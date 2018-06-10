@@ -43,6 +43,10 @@ namespace Engine8.ClientCore.Systems.Input
             /* KeyboardState. */
             container.Register(Component.For<KeyboardState>()
                 .LifestyleSingleton());
+
+            /* PlayerInputMovementMapper */
+            container.Register(Component.For<PlayerInputMovementMapper>()
+                .LifestyleSingleton());
         }
 
     }

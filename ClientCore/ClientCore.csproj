@@ -76,6 +76,7 @@
     <Compile Include="Rendering\RenderingInstaller.cs" />
     <Compile Include="Rendering\RenderingManager.cs" />
     <Compile Include="Rendering\RenderingTimedAction.cs" />
+    <Compile Include="Systems\Input\InputController.cs" />
     <Compile Include="Systems\Input\InputInstaller.cs" />
     <Compile Include="Systems\Input\InputSystem.cs" />
     <Compile Include="Systems\Input\KeyboardEventHandler.cs" />

@@ -34,52 +34,53 @@ namespace Engine8.ClientCore.Systems.Input
 {
 
     /// <summary>
-    /// Maps player input to movement events.
+    /// Exposes an API for reacting to user input.
     /// </summary>
-    public class PlayerInputMovementMapper
+    public class InputController
     {
 
         /// <summary>
-        /// Event communicator.
+        /// Event sender back to the event loop.
         /// </summary>
         private EventSender eventSender;
-
-        /// <summary>
-        /// Input controller.
-        /// </summary>
-        private InputController inputController;
-
-        public PlayerInputMovementMapper(EventSender eventSender, InputController inputController)
+        
+        public InputController(EventSender eventSender)
         {
             this.eventSender = eventSender;
-            this.inputController = inputController;
         }
 
         /// <summary>
-        /// Updates player movement based on player input.
+        /// Sets the movement of the player.
         /// </summary>
-        /// <param name="up">Input state for upward movement.</param>
-        /// <param name="down">Input state for downward movement.</param>
-        /// <param name="left">Input state for leftward movement.</param>
-        /// <param name="right">Input state for rightward movement.</param>
-        public void UpdateMovement(bool up, bool down, bool left, bool right)
+        /// <param name="dx">
+        /// Relative velocity along x as a multiple of the player base speed.
+        /// </param>
+        /// <param name="dy">
+        /// Relative velocity along y as a multiple of the player base speed.
+        /// </param>
+        public void SetPlayerMovement(float dx, float dy)
         {
-            /* Check whether movement has started or stopped. */
-            Event ev;
-            if (up || down || left || right)
+            var details = new SetVelocityEventDetails()
             {
-                /* Compute direction of the movement. */
-                float dx = (right ? 1.0f : 0.0f) - (left ? 1.0f : 0.0f);
-                float dy = (down ? 1.0f : 0.0f) - (up ? 1.0f : 0.0f);
+                EntityId = 0,
+                RateX = dx,
+                RateY = dy,
+            };
+            var ev = new Event(EventId.Core_Set_Velocity, details);
+            eventSender.SendEvent(ev);
+        }
 
-                /* Set the player movement. */
-                inputController.SetPlayerMovement(dx, dy);
-            }
-            else
+        /// <summary>
+        /// Stops all player movement.
+        /// </summary>
+        public void StopPlayerMovement()
+        {
+            var details = new EntityEventDetails()
             {
-                /* Stop the player movement. */
-                inputController.StopPlayerMovement();
-            }
+                EntityId = 0,
+            };
+            var ev = new Event(EventId.Core_End_Movement, details);
+            eventSender.SendEvent(ev);
         }
 
     }
