@@ -48,9 +48,9 @@ namespace Engine8.EngineCore.Systems.EventSystem
         private readonly ICollection<ISystem> systems;
 
         /// <summary>
-        /// The collection of event communicators to listen on.
+        /// The collection of event senders to listen on.
         /// </summary>
-        private readonly ICollection<EventCommunicator> eventCommunicators;
+        private readonly ICollection<EventSender> eventSenders;
 
         /// <summary>
         /// The collection of event adapters.
@@ -75,12 +75,12 @@ namespace Engine8.EngineCore.Systems.EventSystem
         private ulong LastUpdateTime;
 
         public MainEventLoop(ICollection<ISystem> systems, 
-            ICollection<EventCommunicator> eventCommunicators,
+            ICollection<EventSender> eventSenders,
             ICollection<IEventAdapter> eventAdapters)
         {
             /* Set dependencies. */
             this.systems = systems;
-            this.eventCommunicators = eventCommunicators;
+            this.eventSenders = eventSenders;
             this.eventAdapters = eventAdapters;
 
             /* Build data structures. */
@@ -136,7 +136,7 @@ namespace Engine8.EngineCore.Systems.EventSystem
         /// </summary>
         private void RetrievePendingEvents()
         {
-            foreach (var comm in eventCommunicators)
+            foreach (var comm in eventSenders)
             {
                 Event nextEvent;
                 do

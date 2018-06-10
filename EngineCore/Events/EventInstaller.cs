@@ -48,6 +48,10 @@ namespace Engine8.EngineCore.Events
             container.Register(Component.For<EventCommunicator>()
                 .LifestyleTransient());
 
+            /* Event senders. */
+            container.Register(Component.For<EventSender>()
+                .LifestylePerThread());
+
             /* Event adapters. */
             container.Register(EngineClasses.EngineAssemblies()
                 .BasedOn<IEventAdapter>()

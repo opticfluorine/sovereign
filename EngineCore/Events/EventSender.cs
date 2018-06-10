@@ -27,37 +27,36 @@ namespace Engine8.EngineCore.Events
 {
 
     /// <summary>
-    /// Provides interthread communication from the event loop to the system
-    /// threads.
+    /// Sends events from one or more systems to the event loop.
     /// </summary>
-    public class EventCommunicator
+    public class EventSender
     {
 
         /// <summary>
-        /// Events being sent from the event loop to the system thread.
+        /// Events being sent from the system thread to the event loop.
         /// </summary>
-        private readonly ConcurrentQueue<Event> incomingEvents
+        private readonly ConcurrentQueue<Event> outgoingEvents
             = new ConcurrentQueue<Event>();
 
         /// <summary>
-        /// Tries to get the next event being sent to the system thread.
-        /// If no event is available, this returns false and the value of
-        /// ev is undefined.
+        /// Sends an event to the event loop.
         /// </summary>
-        /// <param name="ev">Reference to hold the next event.</param>
-        /// <returns>true if an event was retrieved, false if not.</returns>
-        public bool GetIncomingEvent(out Event ev)
+        /// <param name="ev">Event to be sent.</param>
+        public void SendEvent(Event ev)
         {
-            return incomingEvents.TryDequeue(out ev);
+            outgoingEvents.Enqueue(ev);
         }
 
         /// <summary>
-        /// Sends an event to the system thread.
+        /// Gets the next event being sent to the event loop.
+        /// This method does not block.
         /// </summary>
-        /// <param name="ev">Event to be sent.</param>
-        public void SendEventToSystem(Event ev)
+        /// <returns>Next event being sent to the event loop, or null if none is available.</returns>
+        public Event GetOutgoingEvent()
         {
-            incomingEvents.Enqueue(ev);
+            Event ev;
+            bool hasEvent = outgoingEvents.TryDequeue(out ev);
+            return hasEvent ? ev : null;
         }
 
     }

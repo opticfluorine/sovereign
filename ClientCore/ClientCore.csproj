@@ -79,6 +79,8 @@
     <Compile Include="Systems\Input\InputInstaller.cs" />
     <Compile Include="Systems\Input\InputSystem.cs" />
     <Compile Include="Systems\Input\KeyboardEventHandler.cs" />
+    <Compile Include="Systems\Input\PlayerInputMovementMapper.cs" />
+    <Compile Include="Systems\Input\KeyboardState.cs" />
     <Compile Include="Timing\SFMLSystemTimer.cs" />
   </ItemGroup>
   <ItemGroup>

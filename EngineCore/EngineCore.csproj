@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Configuration\*.cs" />
     <Compile Include="Events\Details\EntityEventDetails.cs" />
+    <Compile Include="Events\EventSender.cs" />
     <Compile Include="Events\EventTimedAction.cs" />
     <Compile Include="Events\IEventAdapter.cs" />
     <Compile Include="Main\*.cs" />
