@@ -28,6 +28,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Engine8.EngineCore.Events;
+using Engine8.EngineCore.Events.Details;
+using Engine8.EngineCore.Systems.Movement.Events;
 
 namespace Engine8.EngineCore.Systems.Movement
 {
@@ -50,6 +52,13 @@ namespace Engine8.EngineCore.Systems.Movement
         };
 
         public int WorkloadEstimate { get; } = 80;
+
+        private readonly VelocityManager velocityManager;
+
+        public MovementSystem(VelocityManager velocityManager)
+        {
+            this.velocityManager = velocityManager;
+        }
 
         public void Cleanup()
         {
@@ -76,7 +85,7 @@ namespace Engine8.EngineCore.Systems.Movement
 
                     /* Handle velocity changes. */
                     case EventId.Core_Set_Velocity:
-                        /* TODO: Implement */
+                        OnSetVelocity(ev);
                         break;
 
                     /* Stop movement. */
@@ -90,6 +99,76 @@ namespace Engine8.EngineCore.Systems.Movement
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Handler for Core_Set_Velocity events.
+        /// </summary>
+        /// <param name="ev">Core_Set_Velocity event.</param>
+        private void OnSetVelocity(Event ev)
+        {
+            /* Get details. */
+            SetVelocityEventDetails details;
+            try
+            {
+                details = (SetVelocityEventDetails)ev.EventDetails;
+            }
+            catch (InvalidCastException e)
+            {
+                /* Log error and discard event. */
+                Logger.Warn("Bad Core_Set_Velocity event.", e);
+                return;
+            }
+
+            /* Handle event. */
+            velocityManager.SetVelocity(details.EntityId, details.RateX, details.RateY);
+        }
+
+        /// <summary>
+        /// Handler for Core_End_Movement events.
+        /// </summary>
+        /// <param name="ev">Core_End_Movement event.</param>
+        private void OnEndMovement(Event ev)
+        {
+            /* Extract details. */
+            EntityEventDetails details;
+            try
+            {
+                details = (EntityEventDetails)ev.EventDetails;
+            }
+            catch (InvalidCastException e)
+            {
+                /* Log error and discard event. */
+                Logger.Warn("Bad Core_End_Movement event.", e);
+                return;
+            }
+
+            /* Handle event. */
+            velocityManager.StopMovement(details.EntityId);
+        }
+
+        /// <summary>
+        /// Handler for Core_Move_Once events.
+        /// </summary>
+        /// <param name="ev">Core_Move_Once event.</param>
+        private void OnMoveOnce(Event ev)
+        {
+            /* Extract details. */
+            MoveOnceEventDetails details;
+            try
+            {
+                details = (MoveOnceEventDetails)ev.EventDetails;
+            }
+            catch (InvalidCastException e)
+            {
+                /* Log error and discard event. */
+                Logger.Warn("Bad Core_Move_Once event.", e);
+                return;
+            }
+
+            /* Handle event. */
+            velocityManager.MoveOnce(details.EntityId, details.MovementPhase,
+                details.DistanceX, details.DistanceY);
         }
 
     }

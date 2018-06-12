@@ -81,6 +81,7 @@ namespace Engine8.ClientCore.Systems.Input
             var details = (KeyEventDetails)ev.EventDetails;
 
             /* Update the keyboard state. */
+            var oldState = keyboardState.KeysDown[(int)details.Key];
             keyboardState.KeyDown(details.Key);
 
             /* Perform additional processing. */
@@ -91,7 +92,7 @@ namespace Engine8.ClientCore.Systems.Input
                 case Key.Down:
                 case Key.Left:
                 case Key.Right:
-                    HandleDirectionKeyEvent(ev);
+                    HandleDirectionKeyEvent(ev, oldState, true);
                     break;
 
                 /* Ignore keys that don't do anything for now. */
@@ -109,6 +110,7 @@ namespace Engine8.ClientCore.Systems.Input
             var details = (KeyEventDetails)ev.EventDetails;
 
             /* Update the keyboard state. */
+            var oldState = keyboardState.KeysDown[(int)details.Key];
             keyboardState.KeyUp(details.Key);
 
             /* Perform additional processing. */
@@ -119,7 +121,7 @@ namespace Engine8.ClientCore.Systems.Input
                 case Key.Down:
                 case Key.Left:
                 case Key.Right:
-                    HandleDirectionKeyEvent(ev);
+                    HandleDirectionKeyEvent(ev, oldState, false);
                     break;
 
                 /* Ignore keys that don't do anything for now. */
@@ -132,11 +134,17 @@ namespace Engine8.ClientCore.Systems.Input
         /// Handles direction key events.
         /// </summary>
         /// <param name="ev">Direction key event.</param>
-        private void HandleDirectionKeyEvent(Event ev)
+        /// <param name="oldState">Old state of the key.</param>
+        /// <param name="newState">New state of the key.</param>
+        private void HandleDirectionKeyEvent(Event ev, bool oldState, bool newState)
         {
-            playerInputMovementMapper.UpdateMovement(keyboardState.KeysDown[(int)Key.Up],
-                keyboardState.KeysDown[(int)Key.Down], keyboardState.KeysDown[(int)Key.Left],
-                keyboardState.KeysDown[(int)Key.Right]);
+            /* Only update movement if the state has changed. */
+            if (oldState != newState)
+            {
+                playerInputMovementMapper.UpdateMovement(keyboardState.KeysDown[(int)Key.Up],
+                    keyboardState.KeysDown[(int)Key.Down], keyboardState.KeysDown[(int)Key.Left],
+                    keyboardState.KeysDown[(int)Key.Right]);
+            }
         }
 
     }

@@ -71,9 +71,17 @@ namespace Engine8.ClientCore.Systems.Input
                 /* Compute direction of the movement. */
                 float dx = (right ? 1.0f : 0.0f) - (left ? 1.0f : 0.0f);
                 float dy = (down ? 1.0f : 0.0f) - (up ? 1.0f : 0.0f);
+                float norm = (float)Math.Sqrt(dx * dx + dy * dy);
 
                 /* Set the player movement. */
-                inputController.SetPlayerMovement(dx, dy);
+                if (dx == 0.0 && dy == 0.0)
+                {
+                    inputController.StopPlayerMovement();
+                }
+                else
+                {
+                    inputController.SetPlayerMovement(dx / norm, dy / norm);
+                }
             }
             else
             {

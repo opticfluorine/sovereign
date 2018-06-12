@@ -21,47 +21,30 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Engine8.EngineCore.Events;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Systems.Movement.Events
+namespace Engine8.EngineCore.Systems.Movement
 {
 
     /// <summary>
-    /// Event details associated with the Core_Movement event, which
-    /// describes an attempt to move an entity relative to its current
-    /// position.
-    /// 
-    /// If the entity is able to move to the new position (i.e. the entity
-    /// is not fixed and is not somehow forbidden from the new position),
-    /// the movement is successful. Otherwise no movement occurs.
+    /// IoC installer for classes related to the MovementSystem.
     /// </summary>
-    public class MoveOnceEventDetails : IEventDetails
+    public class MovementInstaller : IWindsorInstaller
     {
 
-        /// <summary>
-        /// Identifier of the entity that is moving.
-        /// </summary>
-        public ulong EntityId { get; set; }
-
-        /// <summary>
-        /// Unique movement phase used to filter expired events.
-        /// </summary>
-        public uint MovementPhase { get; set; }
-
-        /// <summary>
-        /// Distance to move along the x axis.
-        /// </summary>
-        public float DistanceX { get; set; }
-
-        /// <summary>
-        /// Distance to move along the y axis.
-        /// </summary>
-        public float DistanceY { get; set; }
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            /* VelocityManager. */
+            container.Register(Component.For<VelocityManager>()
+                .LifestyleSingleton());
+        }
 
     }
 

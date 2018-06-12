@@ -76,7 +76,9 @@
     <Compile Include="Systems\ISystemExecutorFactory.cs" />
     <Compile Include="Systems\Movement\Events\MoveOnceEventDetails.cs" />
     <Compile Include="Systems\Movement\Events\SetVelocityEventDetails.cs" />
+    <Compile Include="Systems\Movement\MovementInstaller.cs" />
     <Compile Include="Systems\Movement\MovementSystem.cs" />
+    <Compile Include="Systems\Movement\VelocityManager.cs" />
     <Compile Include="Systems\SystemExecutor.cs" />
     <Compile Include="Systems\SystemInstaller.cs" />
     <Compile Include="Systems\SystemManager.cs" />

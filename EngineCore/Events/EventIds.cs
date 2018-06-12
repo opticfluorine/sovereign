@@ -48,6 +48,7 @@ namespace Engine8.EngineCore.Events
 
         /// <summary>
         /// Attempted one-time relative movement of an entity.
+        /// This is a private event of the MovementSystem.
         /// 
         /// Associated details: MoveOnceEventDetails
         /// </summary>
