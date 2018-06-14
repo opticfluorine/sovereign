@@ -73,8 +73,7 @@ namespace Engine8.EngineCore.Systems.Movement
         public void ExecuteOnce()
         {
             /* Poll for movement-related events. */
-            Event ev;
-            while (EventCommunicator.GetIncomingEvent(out ev))
+            while (EventCommunicator.GetIncomingEvent(out Event ev))
             {
                 switch (ev.EventId)
                 {
@@ -121,7 +120,8 @@ namespace Engine8.EngineCore.Systems.Movement
             }
 
             /* Handle event. */
-            velocityManager.SetVelocity(details.EntityId, details.RateX, details.RateY);
+            velocityManager.SetVelocity(details.EntityId, details.RateX, details.RateY,
+                ev.EventTime);
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace Engine8.EngineCore.Systems.Movement
 
             /* Handle event. */
             velocityManager.MoveOnce(details.EntityId, details.MovementPhase,
-                details.DistanceX, details.DistanceY);
+                ev.EventTime);
         }
 
     }

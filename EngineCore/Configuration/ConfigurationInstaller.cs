@@ -21,47 +21,32 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.Core.Logging;
-using Engine8.EngineCore.Configuration;
-using Engine8.EngineCore.Timing;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+using Engine8.EngineUtil.IoC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Events
+namespace Engine8.EngineCore.Configuration
 {
 
     /// <summary>
-    /// 
+    /// IoC installer for engine configuration.
     /// </summary>
-    public class EventTimedAction : ITimedAction
+    public class ConfigurationInstaller : IWindsorInstaller
     {
 
-        public ILogger Logger { private get; set; } = NullLogger.Instance;
-
-        public ulong Interval => engineConfiguration.EventTickInterval;
-
-        /// <summary>
-        /// Event loop.
-        /// </summary>
-        private readonly IEventLoop eventLoop;
-
-        /// <summary>
-        /// Engine configuration.
-        /// </summary>
-        private readonly IEngineConfiguration engineConfiguration;
-
-        public EventTimedAction(IEventLoop eventLoop, IEngineConfiguration engineConfiguration)
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            this.eventLoop = eventLoop;
-            this.engineConfiguration = engineConfiguration;
-        }
-
-        public void Invoke(ulong triggerTime)
-        {
-            eventLoop.UpdateSystemTime(triggerTime);
+            /* IEngineConfiguration. */
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IEngineConfiguration>()
+                .WithServiceDefaultInterfaces()
+                .LifestyleSingleton());
         }
 
     }

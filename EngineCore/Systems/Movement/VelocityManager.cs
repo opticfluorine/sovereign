@@ -21,6 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.Core.Logging;
+using Engine8.EngineCore.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +38,8 @@ namespace Engine8.EngineCore.Systems.Movement
     public class VelocityManager
     {
 
+        public ILogger Log { private get; set; } = NullLogger.Instance;
+
         /// <summary>
         /// Internal state of an entity's velocity.
         /// </summary>
@@ -45,17 +49,17 @@ namespace Engine8.EngineCore.Systems.Movement
             /// Unique identifier for each phase of motion.
             /// Used to filter out cancelled events.
             /// </summary>
-            uint MovementPhase;
+            public uint MovementPhase;
 
             /// <summary>
             /// Distance to move along x during each tick.
             /// </summary>
-            float StepX;
+            public float StepX;
 
             /// <summary>
             /// Distance to move along y during each tick.
             /// </summary>
-            float StepY;
+            public float StepY;
         }
 
         /// <summary>
@@ -70,14 +74,42 @@ namespace Engine8.EngineCore.Systems.Movement
         private uint PhaseCounter = 0;
 
         /// <summary>
+        /// Engine configuration.
+        /// </summary>
+        private readonly IEngineConfiguration engineConfiguration;
+
+        /// <summary>
+        /// Movement controller.
+        /// </summary>
+        private readonly InternalMovementController internalMovementController;
+
+        public VelocityManager(IEngineConfiguration engineConfiguration,
+            InternalMovementController internalMovementController)
+        {
+            this.engineConfiguration = engineConfiguration;
+            this.internalMovementController = internalMovementController;
+        }
+
+        /// <summary>
         /// Sets the velocity of the given entity.
         /// </summary>
         /// <param name="entity">Entity ID.</param>
         /// <param name="dx">Relative velocity along x as a multiple of the entity base speed.</param>
         /// <param name="dy">Relative velocity along y as a multiple of the entity base speed.</param>
-        public void SetVelocity(ulong entity, float dx, float dy)
+        /// <param name="currentTime">Current system time, in us.</param>
+        public void SetVelocity(ulong entity, float dx, float dy, ulong currentTime)
         {
+            /* Declare a new velocity state. */
+            var state = new VelocityState
+            {
+                MovementPhase = PhaseCounter++,
+                StepX = dx,
+                StepY = dy,
+            };
+            activeVelocities[entity] = state;
 
+            /* Schedule the first movement. */
+            ScheduleNextMovement(entity, currentTime, state);
         }
 
         /// <summary>
@@ -94,11 +126,43 @@ namespace Engine8.EngineCore.Systems.Movement
         /// </summary>
         /// <param name="entity">Entity ID.</param>
         /// <param name="phase">Unique movement phase.</param>
-        /// <param name="distanceX">Distance to move along x.</param>
-        /// <param name="distanceY">Distance to move along y.</param>
-        public void MoveOnce(ulong entity, uint phase, float distanceX, float distanceY)
+        /// <param name="currentTime">Current system time, in us.</param>
+        public void MoveOnce(ulong entity, uint phase, ulong currentTime)
         {
+            /* Ensure that the movement has not been cancelled. */
+            if (!activeVelocities.ContainsKey(entity)) return;
+            var velocityState = activeVelocities[entity];
+            if (velocityState.MovementPhase != phase) return;
 
+            /* Move the entity. */
+            ExecuteMovement(entity, velocityState);
+
+            /* Schedule the next movement. */
+            ScheduleNextMovement(entity, currentTime, velocityState);
+        }
+
+        /// <summary>
+        /// Schedules the next movement for the given entity.
+        /// </summary>
+        /// <param name="entity">Entity ID.</param>
+        /// <param name="currentTime">Current system time, in us.</param>
+        /// <param name="velocityState">Velocity state.</param>
+        private void ScheduleNextMovement(ulong entity, ulong currentTime, 
+            VelocityState velocityState)
+        {
+            var nextTime = currentTime + engineConfiguration.EventTickInterval;
+            internalMovementController.ScheduleMovement(entity, velocityState.MovementPhase,
+                nextTime);
+        }
+
+        /// <summary>
+        /// Executes a scheduled movement for the given entity.
+        /// </summary>
+        /// <param name="entity">Entity ID.</param>
+        /// <param name="velocityState">Velocity state.</param>
+        private void ExecuteMovement(ulong entity, VelocityState velocityState)
+        {
+            // TODO: Implement
         }
 
     }

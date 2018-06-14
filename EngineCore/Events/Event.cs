@@ -45,7 +45,7 @@ namespace Engine8.EngineCore.Events
         /// <summary>
         /// Time at which the event becomes valid, in microseconds.
         /// </summary>
-        public ulong EventTime { get; private set; }
+        public ulong EventTime { get; set; }
 
         /// <summary>
         /// Details associated with the event.

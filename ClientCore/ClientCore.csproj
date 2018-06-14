@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\ClientEngineConfiguration.cs" />
     <Compile Include="Events\KeyEventDetails.cs" />
     <Compile Include="Events\SFMLEventAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

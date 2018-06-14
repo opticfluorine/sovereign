@@ -44,6 +44,14 @@ namespace Engine8.EngineCore.Systems.Movement
             /* VelocityManager. */
             container.Register(Component.For<VelocityManager>()
                 .LifestyleSingleton());
+
+            /* MovementController. */
+            container.Register(Component.For<MovementController>()
+                .LifestyleTransient());
+
+            /* InternalMovementController. */
+            container.Register(Component.For<InternalMovementController>()
+                .LifestyleTransient());
         }
 
     }

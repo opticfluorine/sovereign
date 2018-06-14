@@ -21,48 +21,19 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.Core.Logging;
-using Engine8.EngineCore.Configuration;
-using Engine8.EngineCore.Timing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Engine8.EngineCore.Events
+namespace Engine8.EngineCore.Configuration
 {
 
     /// <summary>
-    /// 
+    /// Engine configuration.
     /// </summary>
-    public class EventTimedAction : ITimedAction
+    public interface IEngineConfiguration
     {
 
-        public ILogger Logger { private get; set; } = NullLogger.Instance;
-
-        public ulong Interval => engineConfiguration.EventTickInterval;
-
         /// <summary>
-        /// Event loop.
+        /// Interval between event ticks in us.
         /// </summary>
-        private readonly IEventLoop eventLoop;
-
-        /// <summary>
-        /// Engine configuration.
-        /// </summary>
-        private readonly IEngineConfiguration engineConfiguration;
-
-        public EventTimedAction(IEventLoop eventLoop, IEngineConfiguration engineConfiguration)
-        {
-            this.eventLoop = eventLoop;
-            this.engineConfiguration = engineConfiguration;
-        }
-
-        public void Invoke(ulong triggerTime)
-        {
-            eventLoop.UpdateSystemTime(triggerTime);
-        }
+        ulong EventTickInterval { get; }
 
     }
 

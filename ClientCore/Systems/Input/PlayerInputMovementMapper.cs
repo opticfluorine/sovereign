@@ -42,7 +42,7 @@ namespace Engine8.ClientCore.Systems.Input
         /// <summary>
         /// Event communicator.
         /// </summary>
-        private EventSender eventSender;
+        private readonly EventSender eventSender;
 
         /// <summary>
         /// Input controller.
@@ -65,7 +65,6 @@ namespace Engine8.ClientCore.Systems.Input
         public void UpdateMovement(bool up, bool down, bool left, bool right)
         {
             /* Check whether movement has started or stopped. */
-            Event ev;
             if (up || down || left || right)
             {
                 /* Compute direction of the movement. */

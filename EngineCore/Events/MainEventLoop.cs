@@ -206,6 +206,9 @@ namespace Engine8.EngineCore.Systems.EventSystem
                 Terminated = true;
             }
 
+            /* Set the event time to the current tick time. */
+            ev.EventTime = LastUpdateTime;
+
             /* Dispatch to all interested communicators, if any.. */
             if (communicatorsByEventId.ContainsKey(eventId))
             {

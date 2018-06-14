@@ -53,16 +53,6 @@ namespace Engine8.EngineCore.Systems.Movement.Events
         /// </summary>
         public uint MovementPhase { get; set; }
 
-        /// <summary>
-        /// Distance to move along the x axis.
-        /// </summary>
-        public float DistanceX { get; set; }
-
-        /// <summary>
-        /// Distance to move along the y axis.
-        /// </summary>
-        public float DistanceY { get; set; }
-
     }
 
 }

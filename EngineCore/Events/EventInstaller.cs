@@ -50,7 +50,7 @@ namespace Engine8.EngineCore.Events
 
             /* Event senders. */
             container.Register(Component.For<EventSender>()
-                .LifestylePerThread());
+                .LifestyleTransient());
 
             /* Event adapters. */
             container.Register(EngineClasses.EngineAssemblies()
