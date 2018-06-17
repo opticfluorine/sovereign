@@ -36,7 +36,7 @@ namespace Engine8.EngineCore.Components
     /// Base class of component collections.
     /// </summary>
     /// <typeparam name="T">Component value type.</typeparam>
-    public class BaseComponentCollection<T> : IComponentUpdater
+    public class BaseComponentCollection<T>
     {
 
         /// <summary>
@@ -141,6 +141,9 @@ namespace Engine8.EngineCore.Components
             return maybe;
         }
 
+        /// <summary>
+        /// Applies pending component updates.
+        /// </summary>
         public void ApplyComponentUpdates()
         {
 

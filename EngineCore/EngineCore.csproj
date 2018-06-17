@@ -65,7 +65,7 @@
     <Compile Include="Components\ComponentInstaller.cs" />
     <Compile Include="Components\ComponentManager.cs" />
     <Compile Include="Components\ComponentOperation.cs" />
-    <Compile Include="Components\IComponentUpdater.cs" />
+    <Compile Include="Components\ComponentUpdater.cs" />
     <Compile Include="Configuration\ConfigurationInstaller.cs" />
     <Compile Include="Configuration\IEngineConfiguration.cs" />
     <Compile Include="Events\Details\EntityEventDetails.cs" />

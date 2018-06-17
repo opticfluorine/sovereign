@@ -28,7 +28,7 @@ namespace Engine8.EngineCore.Components
     /// Interface to be implemented by classes that perform
     /// direct updates to components once per tick.
     /// </summary>
-    public interface IComponentUpdater
+    public abstract class ComponentUpdater
     {
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Engine8.EngineCore.Components
         /// 
         /// This method should only be called from the main thread.
         /// </summary>
-        void ApplyComponentUpdates();
+        public abstract void ApplyComponentUpdates();
 
     }
 

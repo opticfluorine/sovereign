@@ -39,9 +39,9 @@ namespace Engine8.EngineCore.Components
         /// <summary>
         /// All known component updaters.
         /// </summary>
-        private readonly IList<IComponentUpdater> componentUpdaters;
+        private readonly IList<ComponentUpdater> componentUpdaters;
 
-        public ComponentManager(IList<IComponentUpdater> componentUpdaters)
+        public ComponentManager(IList<ComponentUpdater> componentUpdaters)
         {
             this.componentUpdaters = componentUpdaters;
         }

@@ -25,8 +25,8 @@ namespace Engine8.EngineCore.Components
 
             /* Component updaters. */
             container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IComponentUpdater>()
-                .WithServiceFromInterface(typeof(IComponentUpdater))
+                .BasedOn(typeof(BaseComponentCollection<>))
+                .WithServiceBase()
                 .LifestyleSingleton()
                 .AllowMultipleMatches());
         }

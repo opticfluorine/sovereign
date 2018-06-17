@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Engine8.EngineCore.Components;
 using Engine8.EngineCore.Events;
 using Engine8.EngineUtil.Collections;
 
@@ -58,6 +59,11 @@ namespace Engine8.EngineCore.Systems.EventSystem
         private readonly ICollection<IEventAdapter> eventAdapters;
 
         /// <summary>
+        /// Component manager.
+        /// </summary>
+        private readonly ComponentManager componentManager;
+
+        /// <summary>
         /// Event communicators listening to each event ID.
         /// </summary>
         private readonly IDictionary<EventId, List<EventCommunicator>> communicatorsByEventId
@@ -76,12 +82,14 @@ namespace Engine8.EngineCore.Systems.EventSystem
 
         public MainEventLoop(ICollection<ISystem> systems, 
             ICollection<EventSender> eventSenders,
-            ICollection<IEventAdapter> eventAdapters)
+            ICollection<IEventAdapter> eventAdapters,
+            ComponentManager componentManager)
         {
             /* Set dependencies. */
             this.systems = systems;
             this.eventSenders = eventSenders;
             this.eventAdapters = eventAdapters;
+            this.componentManager = componentManager;
 
             /* Build data structures. */
             BuildCommunicatorTables();
@@ -101,6 +109,9 @@ namespace Engine8.EngineCore.Systems.EventSystem
         /// </summary>
         public void UpdateSystemTime(ulong systemTime)
         {
+            /* Merge the component updates. */
+            componentManager.UpdateAllComponents();
+
             /* Advance the system time. */
             LastUpdateTime = systemTime;
 
