@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -30,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>
@@ -58,6 +60,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\BaseComponentCollection.cs" />
+    <Compile Include="Components\ComponentId.cs" />
+    <Compile Include="Components\ComponentInstaller.cs" />
+    <Compile Include="Components\ComponentManager.cs" />
+    <Compile Include="Components\ComponentOperation.cs" />
+    <Compile Include="Components\IComponentUpdater.cs" />
     <Compile Include="Configuration\ConfigurationInstaller.cs" />
     <Compile Include="Configuration\IEngineConfiguration.cs" />
     <Compile Include="Events\Details\EntityEventDetails.cs" />

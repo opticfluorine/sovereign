@@ -21,42 +21,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System.Collections.Concurrent;
-
-namespace Engine8.EngineCore.Events
+namespace Engine8.EngineCore.Components
 {
 
     /// <summary>
-    /// Sends events from one or more systems to the event loop.
+    /// Interface to be implemented by classes that perform
+    /// direct updates to components once per tick.
     /// </summary>
-    public class EventSender
+    public interface IComponentUpdater
     {
 
         /// <summary>
-        /// Events being sent from the system thread to the event loop.
+        /// Applies all pending updates to the components.
+        /// 
+        /// This method should only be called from the main thread.
         /// </summary>
-        private readonly ConcurrentQueue<Event> outgoingEvents
-            = new ConcurrentQueue<Event>();
-
-        /// <summary>
-        /// Sends an event to the event loop.
-        /// </summary>
-        /// <param name="ev">Event to be sent.</param>
-        public void SendEvent(Event ev)
-        {
-            outgoingEvents.Enqueue(ev);
-        }
-
-        /// <summary>
-        /// Gets the next event being sent to the event loop.
-        /// This method does not block.
-        /// </summary>
-        /// <returns>Next event being sent to the event loop, or null if none is available.</returns>
-        public Event GetOutgoingEvent()
-        {
-            var hasEvent = outgoingEvents.TryDequeue(out Event ev);
-            return hasEvent ? ev : null;
-        }
+        void ApplyComponentUpdates();
 
     }
 

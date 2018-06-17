@@ -21,41 +21,42 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System.Collections.Concurrent;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Events
+namespace Engine8.EngineCore.Components
 {
 
     /// <summary>
-    /// Sends events from one or more systems to the event loop.
+    /// Manages updates to all components.
     /// </summary>
-    public class EventSender
+    public class ComponentManager
     {
 
         /// <summary>
-        /// Events being sent from the system thread to the event loop.
+        /// All known component updaters.
         /// </summary>
-        private readonly ConcurrentQueue<Event> outgoingEvents
-            = new ConcurrentQueue<Event>();
+        private readonly IList<IComponentUpdater> componentUpdaters;
 
-        /// <summary>
-        /// Sends an event to the event loop.
-        /// </summary>
-        /// <param name="ev">Event to be sent.</param>
-        public void SendEvent(Event ev)
+        public ComponentManager(IList<IComponentUpdater> componentUpdaters)
         {
-            outgoingEvents.Enqueue(ev);
+            this.componentUpdaters = componentUpdaters;
         }
 
         /// <summary>
-        /// Gets the next event being sent to the event loop.
-        /// This method does not block.
+        /// Applies all pending changes to all components.
+        /// 
+        /// This method should only be called from the main thread.
         /// </summary>
-        /// <returns>Next event being sent to the event loop, or null if none is available.</returns>
-        public Event GetOutgoingEvent()
+        public void UpdateAllComponents()
         {
-            var hasEvent = outgoingEvents.TryDequeue(out Event ev);
-            return hasEvent ? ev : null;
+            foreach (var updater in componentUpdaters)
+            {
+                updater.ApplyComponentUpdates();
+            }
         }
 
     }
