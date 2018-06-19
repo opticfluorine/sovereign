@@ -65,6 +65,7 @@
     <Compile Include="Components\ComponentInstaller.cs" />
     <Compile Include="Components\ComponentManager.cs" />
     <Compile Include="Components\ComponentOperation.cs" />
+    <Compile Include="Components\ComponentOperators.cs" />
     <Compile Include="Components\ComponentUpdater.cs" />
     <Compile Include="Configuration\ConfigurationInstaller.cs" />
     <Compile Include="Configuration\IEngineConfiguration.cs" />
@@ -83,6 +84,10 @@
     <Compile Include="Events\EventCommunicator.cs" />
     <Compile Include="Systems\ISystem.cs" />
     <Compile Include="Systems\ISystemExecutorFactory.cs" />
+    <Compile Include="Systems\Movement\Components\PositionXComponentCollection.cs" />
+    <Compile Include="Systems\Movement\Components\PositionYComponentCollection.cs" />
+    <Compile Include="Systems\Movement\Components\VelocityYComponentCollection.cs" />
+    <Compile Include="Systems\Movement\Components\VelocityXComponentCollection.cs" />
     <Compile Include="Systems\Movement\Events\MoveOnceEventDetails.cs" />
     <Compile Include="Systems\Movement\Events\SetVelocityEventDetails.cs" />
     <Compile Include="Systems\Movement\InternalMovementController.cs" />
