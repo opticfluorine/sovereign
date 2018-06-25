@@ -69,12 +69,15 @@
     <Compile Include="Components\ComponentUpdater.cs" />
     <Compile Include="Configuration\ConfigurationInstaller.cs" />
     <Compile Include="Configuration\IEngineConfiguration.cs" />
+    <Compile Include="Entities\EntityAssigner.cs" />
+    <Compile Include="Entities\EntityInstaller.cs" />
+    <Compile Include="Entities\EntityManager.cs" />
     <Compile Include="Events\Details\EntityEventDetails.cs" />
     <Compile Include="Events\EventSender.cs" />
     <Compile Include="Events\EventTimedAction.cs" />
     <Compile Include="Events\IEventAdapter.cs" />
     <Compile Include="Main\*.cs" />
-    <Compile Include="Logging\*.cs" />
+    <Compile Include="Logging\LoggingInstaller.cs" />
     <Compile Include="Events\Event.cs" />
     <Compile Include="Events\EventIds.cs" />
     <Compile Include="Events\EventInstaller.cs" />
