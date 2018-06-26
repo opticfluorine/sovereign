@@ -27,6 +27,7 @@ namespace Engine8.EngineCore.Components
             container.Register(EngineClasses.EngineAssemblies()
                 .BasedOn(typeof(BaseComponentCollection<>))
                 .WithServiceBase()
+                .WithServiceSelf()
                 .LifestyleSingleton()
                 .AllowMultipleMatches());
         }
