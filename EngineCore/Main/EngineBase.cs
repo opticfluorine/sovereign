@@ -24,6 +24,7 @@
 using Castle.Core.Logging;
 using Engine8.EngineCore.Events;
 using Engine8.EngineCore.Timing;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Engine8.EngineCore.Main
@@ -47,10 +48,19 @@ namespace Engine8.EngineCore.Main
         /// </summary>
         private readonly TimeManager timeManager;
 
-        public EngineBase(IEventLoop eventLoop, TimeManager timeManager)
+        private readonly IList<IMainLoopAction> mainLoopActions;
+
+        /// <summary>
+        /// Main loop cycle count.
+        /// </summary>
+        private ulong cycleCount = 0;
+
+        public EngineBase(IEventLoop eventLoop, TimeManager timeManager,
+            IList<IMainLoopAction> mainLoopActions)
         {
             this.eventLoop = eventLoop;
             this.timeManager = timeManager;
+            this.mainLoopActions = mainLoopActions;
         }
 
         public void Run()
@@ -91,6 +101,9 @@ namespace Engine8.EngineCore.Main
                 /* Drive the event loop. */
                 eventLoop.PumpEventLoop();
 
+                /* Perform any main loop actions that are ready. */
+                PerformMainLoopActions();
+
                 /* Yield to avoid consuming 100% CPU. */
                 Thread.Sleep(0);
             }
@@ -102,6 +115,20 @@ namespace Engine8.EngineCore.Main
         private void Shutdown()
         {
 
+        }
+
+        /// <summary>
+        /// Performs any main loop actions that are ready for execution.
+        /// </summary>
+        private void PerformMainLoopActions()
+        {
+            cycleCount++;
+            foreach (IMainLoopAction action in mainLoopActions) {
+                if (cycleCount % action.CycleInterval == 0)
+                {
+                    action.Execute();
+                }
+            }
         }
 
     }

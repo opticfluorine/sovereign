@@ -23,6 +23,7 @@
 
 using Castle.Core.Logging;
 using Engine8.ClientCore.Rendering.Display;
+using Engine8.EngineCore.Main;
 using Engine8.EngineCore.Timing;
 using SFML.Graphics;
 using SFML.System;
@@ -36,9 +37,10 @@ namespace Engine8.ClientCore.Rendering
 {
 
     /// <summary>
-    /// Timed action that attempts to execute the renderer on the main thread at 60 FPS.
+    /// Main loop action that attempts to execute the renderer on the main thread
+    /// as fast as possible.
     /// </summary>
-    public class RenderingTimedAction : ITimedAction
+    public class RenderingMainLoopAction : IMainLoopAction
     {
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -48,18 +50,19 @@ namespace Engine8.ClientCore.Rendering
         /// </summary>
         private readonly MainDisplay mainDisplay;
 
-        // Target 60 FPS.
-        public ulong Interval { get; } = 16667;
+        // Rendering is expensive, so pump the loop multiple times between frames.
+        public ulong CycleInterval => 4;
 
-        public RenderingTimedAction(MainDisplay mainDisplay)
+        public RenderingMainLoopAction(MainDisplay mainDisplay)
         {
             this.mainDisplay = mainDisplay;
         }
 
-        public void Invoke(ulong triggerTime)
+        public void Execute()
         {
             
         }
+
     }
 
 }

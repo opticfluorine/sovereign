@@ -76,7 +76,11 @@
     <Compile Include="Events\EventSender.cs" />
     <Compile Include="Events\EventTimedAction.cs" />
     <Compile Include="Events\IEventAdapter.cs" />
-    <Compile Include="Main\*.cs" />
+    <Compile Include="Main\CoreMain.cs" />
+    <Compile Include="Main\EngineBase.cs" />
+    <Compile Include="Main\IEngineBase.cs" />
+    <Compile Include="Main\IMainLoopAction.cs" />
+    <Compile Include="Main\MainInstaller.cs" />
     <Compile Include="Logging\LoggingInstaller.cs" />
     <Compile Include="Events\Event.cs" />
     <Compile Include="Events\EventIds.cs" />

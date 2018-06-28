@@ -40,8 +40,15 @@ namespace Engine8.EngineCore.Main
             /* EngineBase singleton. */
             container.Register(EngineClasses.EngineAssemblies()
                                .BasedOn<IEngineBase>()
-                               .WithService.DefaultInterfaces()
+                               .WithServiceDefaultInterfaces()
                                .LifestyleSingleton());
+
+            /* Main loop actions. */
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IMainLoopAction>()
+                .WithServiceDefaultInterfaces()
+                .LifestyleSingleton()
+                .AllowMultipleMatches());
         }
 
     }
