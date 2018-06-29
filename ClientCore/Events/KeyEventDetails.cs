@@ -22,7 +22,7 @@
  */
 
 using Engine8.EngineCore.Events;
-using static SFML.Window.Keyboard;
+using SDL2;
 
 namespace Engine8.ClientCore.Events
 {
@@ -36,7 +36,7 @@ namespace Engine8.ClientCore.Events
         /// <summary>
         /// Key whose state changed.
         /// </summary>
-        public Key Key { get; set; }
+        public SDL.SDL_Keycode Key { get; set; }
 
     }
 

@@ -171,16 +171,10 @@ namespace Engine8.EngineCore.Systems.EventSystem
             {
                 eventAdapter.PrepareEvents();
 
-                Event ev;
-                do
+                while (eventAdapter.PollEvent(out Event ev))
                 {
-                    ev = eventAdapter.PollEvent();
-                    if (ev != null)
-                    {
-                        EnqueueEvent(ev);
-                    }
+                    EnqueueEvent(ev);
                 }
-                while (ev != null);
             }
         }
 

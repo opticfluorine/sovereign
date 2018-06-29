@@ -21,9 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using SFML.Graphics;
-using SFML.System;
-using SFML.Window;
+using SDL2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,17 +40,12 @@ namespace Engine8.ClientCore.Rendering.Display
         /// <summary>
         /// Default window width.
         /// </summary>
-        private const uint WIDTH = 1366;
+        private const int DEFAULT_WIDTH = 800;
 
         /// <summary>
         /// Default window height.
         /// </summary>
-        private const uint HEIGHT = 768;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private static readonly Styles STYLES = Styles.Close;
+        private const int DEFAULT_HEIGHT = 600;
 
         /// <summary>
         /// Window title.
@@ -60,15 +53,13 @@ namespace Engine8.ClientCore.Rendering.Display
         private const string TITLE = "Engine8";
 
         /// <summary>
-        /// Main render window.
+        /// Main window handle.
         /// </summary>
-        public RenderWindow RenderWindow { get; private set; }
+        private IntPtr windowHandle;
 
         public MainDisplay()
         {
-            /* Create and configure the main window. */
-            var mode = new VideoMode(WIDTH, HEIGHT);
-            RenderWindow = new RenderWindow(mode, TITLE, STYLES);
+
         }
 
         /// <summary>
@@ -76,12 +67,19 @@ namespace Engine8.ClientCore.Rendering.Display
         /// </summary>
         public void Show()
         {
-            RenderWindow.Display();
+            /* Create the main window. */
+            windowHandle = SDL.SDL_CreateWindow(TITLE, 
+                SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
+                DEFAULT_WIDTH, DEFAULT_HEIGHT, 
+                SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
         }
 
+        /// <summary>
+        /// Closes the main window.
+        /// </summary>
         public void Close()
         {
-            RenderWindow.Close();
+            SDL.SDL_DestroyWindow(windowHandle);
         }
 
     }

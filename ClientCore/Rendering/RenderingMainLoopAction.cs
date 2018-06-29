@@ -25,8 +25,6 @@ using Castle.Core.Logging;
 using Engine8.ClientCore.Rendering.Display;
 using Engine8.EngineCore.Main;
 using Engine8.EngineCore.Timing;
-using SFML.Graphics;
-using SFML.System;
 using System;
 using System.Collections.Generic;
 using System.Linq;

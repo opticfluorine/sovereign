@@ -41,7 +41,7 @@ namespace Engine8.ClientCore.Timing
         public void TestGetTime()
         {
             /* Create a system timer. */
-            ISystemTimer systemTimer = new SFMLSystemTimer();
+            ISystemTimer systemTimer = new SDLSystemTimer();
 
             /* Sample the system time in microseconds. */
             ulong t0 = systemTimer.GetTime();

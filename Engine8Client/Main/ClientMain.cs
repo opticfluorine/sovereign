@@ -23,6 +23,7 @@
 
 using Engine8.EngineCore.Logging;
 using Engine8.EngineCore.Main;
+using SDL2;
 
 namespace Engine8.Engine8Client.Main
 {
@@ -35,9 +36,20 @@ namespace Engine8.Engine8Client.Main
         /// </summary>
         static void Main()
         {
+            /* Initialize SDL. */
+            int err = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
+            if (err < 0)
+            {
+                /* Fatal error. */
+                return;
+            }
+
             /* Run the engine. */
             CoreMain coreMain = new CoreMain();
             coreMain.RunEngine();
+
+            /* Shut down SDL. */
+            SDL.SDL_Quit();
         }
     }
 

@@ -21,12 +21,12 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using SDL2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static SFML.Window.Keyboard;
 
 namespace Engine8.ClientCore.Systems.Input
 {
@@ -37,30 +37,38 @@ namespace Engine8.ClientCore.Systems.Input
     public class KeyboardState
     {
 
-        public bool[] KeysDown { get; private set; } = new bool[128];
+        /// <summary>
+        /// Keys that are currently pressed.
+        /// </summary>
+        private IDictionary<SDL.SDL_Keycode, bool> keysDown { get; } 
+            = new Dictionary<SDL.SDL_Keycode, bool>();
+
+        /// <summary>
+        /// Indicates whether the given key is currently pressed.
+        /// </summary>
+        /// <param name="key">Key.</param>
+        /// <returns>true if pressed, false otherwise.</returns>
+        public bool this[SDL.SDL_Keycode key]
+        {
+            get => keysDown.ContainsKey(key) ? keysDown[key] : false;
+        }
 
         /// <summary>
         /// Registers that a key has been pressed.
         /// </summary>
         /// <param name="key">Key that was pressed.</param>
-        public void KeyDown(Key key)
+        public void KeyDown(SDL.SDL_Keycode key)
         {
-            if (key != Key.Unknown)
-            {
-                KeysDown[(int)key] = true;
-            }
+            keysDown[key] = true;
         }
 
         /// <summary>
         /// Registers that a key has been released.
         /// </summary>
         /// <param name="key">Key that was released.</param>
-        public void KeyUp(Key key)
+        public void KeyUp(SDL.SDL_Keycode key)
         {
-            if (key != Key.Unknown)
-            {
-                KeysDown[(int)key] = false;
-            }
+            keysDown[key] = false;
         }
 
     }

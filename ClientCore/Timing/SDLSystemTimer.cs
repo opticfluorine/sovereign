@@ -22,8 +22,8 @@
  */
 
 using Engine8.EngineCore.Timing;
+using SDL2;
 using System;
-using SFML.System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,13 +35,24 @@ namespace Engine8.ClientCore.Timing
     /// <summary>
     /// SFML-backed implementation of ISystemTimer.
     /// </summary>
-    public class SFMLSystemTimer : ISystemTimer
+    public class SDLSystemTimer : ISystemTimer
     {
 
         /// <summary>
-        /// SFML clock instance.
+        /// High resolution counter frequency in counts per second.
         /// </summary>
-        private readonly Clock clock = new Clock();
+        private ulong performanceFrequency;
+
+        /// <summary>
+        /// Initial value of the counter.
+        /// </summary>
+        private ulong baseCount;
+
+        public SDLSystemTimer()
+        {
+            performanceFrequency = SDL.SDL_GetPerformanceFrequency();
+            baseCount = SDL.SDL_GetPerformanceCounter();
+        }
 
         /// <summary>
         /// Gets the current system time in microseconds.
@@ -49,7 +60,8 @@ namespace Engine8.ClientCore.Timing
         /// <returns>Current system time in us.</returns>
         public ulong GetTime()
         {
-            return (ulong) clock.ElapsedTime.AsMicroseconds();
+            return 1000000 * (SDL.SDL_GetPerformanceCounter() - baseCount) 
+                / performanceFrequency;
         }
 
     }

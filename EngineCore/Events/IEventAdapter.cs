@@ -44,12 +44,16 @@ namespace Engine8.EngineCore.Events
 
         /// <summary>
         /// Non-blocking method that polls for the next available event.
-        /// If no event is immediately available, null is returned.
         /// </summary>
+        /// 
+        /// <param name="ev">Event.</param>
+        /// 
+        /// If no event was available, ev is undefined.
+        /// 
         /// <returns>
-        /// Next available event, or null if no event is immediately available.
+        /// true if an event was available, false otherwise.
         /// </returns>
-        Event PollEvent();
+        bool PollEvent(out Event ev);
 
     }
 
