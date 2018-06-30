@@ -81,6 +81,10 @@
       <Project>{df493f51-f329-4b51-9715-272e303983f3}</Project>
       <Name>ClientCore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\D3D11Renderer\D3D11Renderer.csproj">
+      <Project>{7dbbaaae-6ebd-4f8a-a225-aee0112d6a5b}</Project>
+      <Name>D3D11Renderer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EngineCore\EngineCore.csproj">
       <Project>{1298f7e5-4a7b-469e-98bb-f9ac7889ec2c}</Project>
       <Name>EngineCore</Name>

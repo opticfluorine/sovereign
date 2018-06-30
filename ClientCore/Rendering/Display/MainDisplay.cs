@@ -57,6 +57,19 @@ namespace Engine8.ClientCore.Rendering.Display
         /// </summary>
         private IntPtr windowHandle;
 
+        /// <summary>
+        /// The HWND associated with the created window.
+        /// </summary>
+        public IntPtr WindowHwnd
+        {
+            get
+            {
+                SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
+                SDL.SDL_GetWindowWMInfo(windowHandle, ref info);
+                return info.info.win.window;
+            }
+        }
+
         public MainDisplay()
         {
 

@@ -21,38 +21,32 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.Facilities.Startable;
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Engine8.EngineUtil.IoC;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Forms;
 
-namespace Engine8.ClientCore.Rendering
+namespace Engine8.ClientCore.Logging
 {
 
     /// <summary>
-    /// 
+    /// Utility class that provides methods for reporting errors and
+    /// fatal errors to the user.
     /// </summary>
-    public class RenderingInstaller : IWindsorInstaller
+    public class ErrorHandler
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            /* RenderingManager. */
-            container.Register(Component.For<RenderingManager>()
-                .LifestyleSingleton()
-                .Start());
+        private static readonly string CAPTION = "Error";
 
-            /* IRenderer. */
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IRenderer>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
+        public static void Error(string message)
+        {
+            MessageBox.Show(null, message, CAPTION,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
+
+        public static void Fatal(string message)
+        {
+            Error(message);
+            Environment.Exit(1);
         }
 
     }
