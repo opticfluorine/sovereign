@@ -74,6 +74,7 @@
     <Compile Include="Rendering\Display\DisplayInstaller.cs" />
     <Compile Include="Rendering\Display\MainDisplay.cs" />
     <Compile Include="Rendering\IRenderer.cs" />
+    <Compile Include="Rendering\RendererInitializationException.cs" />
     <Compile Include="Rendering\RenderingInstaller.cs" />
     <Compile Include="Rendering\RenderingManager.cs" />
     <Compile Include="Rendering\RenderingMainLoopAction.cs" />

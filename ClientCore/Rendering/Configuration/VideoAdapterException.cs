@@ -11,7 +11,7 @@ namespace Engine8.ClientCore.Rendering.Configuration
     /// Exception thrown when there is an issue with a video adapter.
     /// </summary>
     [System.Serializable]
-    public class VideoAdapterException : Exception
+    public class VideoAdapterException : ApplicationException
     {
         public VideoAdapterException() { }
         public VideoAdapterException(string message) : base(message) { }
