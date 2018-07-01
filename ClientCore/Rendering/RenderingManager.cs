@@ -92,7 +92,7 @@ namespace Engine8.ClientCore.Rendering
                 SelectConfiguration();
 
                 /* Create the main window. */
-                mainDisplay.Show(selectedDisplayMode);
+                mainDisplay.Show(selectedDisplayMode, false);
 
                 /* Initialize the renderer. */
                 renderer.Initialize(mainDisplay, selectedAdapter);

@@ -73,11 +73,15 @@ namespace Engine8.ClientCore.Rendering.Configuration
             }
         }
 
-        private String CreateLogMessageForAdapter(IVideoAdapter selectedAdapter)
+        private string CreateLogMessageForAdapter(IVideoAdapter selectedAdapter)
         {
             var sb = new StringBuilder();
             const int conversionFactor = 1024 * 1024;
             sb.Append("Selected video adapter:\n")
+
+                .Append("  Name                 = ")
+                .Append(selectedAdapter.AdapterName)
+                .Append("\n")
 
                 .Append("  Dedicated GPU memory = ")
                 .Append(selectedAdapter.DedicatedGraphicsMemory / conversionFactor)

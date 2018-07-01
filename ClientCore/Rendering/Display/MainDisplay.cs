@@ -66,6 +66,11 @@ namespace Engine8.ClientCore.Rendering.Display
         /// </summary>
         public IDisplayMode DisplayMode { get; private set; }
 
+        /// <summary>
+        /// Whether the display is set to fullscreen mode.
+        /// </summary>
+        public bool IsFullscreen { get; private set; }
+
         public MainDisplay()
         {
 
@@ -74,15 +79,19 @@ namespace Engine8.ClientCore.Rendering.Display
         /// <summary>
         /// Shows the main window.
         /// </summary>
-        /// <param name="displayMode">DIsplay mode to use.</param>
-        public void Show(IDisplayMode displayMode)
+        /// <param name="displayMode">Display mode to use.</param>
+        /// <param name="fullscreen">Whether to use fullscreen mode.</param>
+        public void Show(IDisplayMode displayMode, bool fullscreen)
         {
+            /* Configure fullscreen. */
+            IsFullscreen = fullscreen;
+
             /* Create the main window. */
             DisplayMode = displayMode;
             windowHandle = SDL.SDL_CreateWindow(TITLE, 
                 SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
                 displayMode.Width, displayMode.Height, 
-                SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
+                GetWindowFlags());
         }
 
         /// <summary>
@@ -91,6 +100,16 @@ namespace Engine8.ClientCore.Rendering.Display
         public void Close()
         {
             SDL.SDL_DestroyWindow(windowHandle);
+        }
+
+        private SDL.SDL_WindowFlags GetWindowFlags()
+        {
+            var flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL;
+            if (IsFullscreen)
+            {
+                flags |= SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN;
+            }
+            return flags;
         }
 
     }

@@ -28,6 +28,11 @@ namespace Engine8.ClientCore.Rendering.Configuration
         /// </summary>
         long SharedSystemMemory { get; }
 
+        /// <summary>
+        /// Short name of the adapter.
+        /// </summary>
+        string AdapterName { get; }
+
     }
 
 }

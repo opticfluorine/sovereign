@@ -53,18 +53,16 @@ namespace Engine8.D3D11Renderer.Rendering
 
             /* Get information needed to create the device. */
             var nativeAdapter = videoAdapter.InternalAdapter;
-            var swapChainDesc = GetSwapChainDescription();
+            var nativeMode = ((D3D11DisplayMode)mainDisplay.DisplayMode).InternalModeDescription;
+            var swapChainDesc = GetSwapChainDescription(nativeMode);
 
             /* Create the device and swap chain. */
             Device.CreateWithSwapChain(
                 nativeAdapter,
-                DeviceCreationFlags.Debug | DeviceCreationFlags.SingleThreaded
-                | DeviceCreationFlags.Debuggable, 
-                swapChainDesc, 
-                out device, 
+                GetDeviceFlags(),
+                swapChainDesc,
+                out device,
                 out swapChain);
-
-            
         }
 
         public void Dispose()
@@ -76,24 +74,24 @@ namespace Engine8.D3D11Renderer.Rendering
             device = null;
         }
 
+        /// <summary>
+        /// Gets the device flags.
+        /// </summary>
+        /// <returns>Device flags.</returns>
         private DeviceCreationFlags GetDeviceFlags()
         {
-            var flags = DeviceCreationFlags.SingleThreaded | DeviceCreationFlags.Debug |
-                    DeviceCreationFlags.Debuggable;
+            var flags = DeviceCreationFlags.SingleThreaded | DeviceCreationFlags.Debug;
             return flags;
         }
 
-
-        private SharpDX.DXGI.SwapChainDescription GetSwapChainDescription()
+        /// <summary>
+        /// Gets the swap chain description.
+        /// </summary>
+        /// <param name="modeDescription">DXGI mode description.</param>
+        /// <returns>Swap chain description.</returns>
+        private SharpDX.DXGI.SwapChainDescription GetSwapChainDescription(
+            SharpDX.DXGI.ModeDescription modeDescription)
         {
-            /* Create the back buffer mode description. */
-            var modeDesc = new SharpDX.DXGI.ModeDescription
-            {
-                Width = 0,
-                Height = 0,
-                
-            };
-
             /* Create the multisampling description. */
             var sampleDesc = new SharpDX.DXGI.SampleDescription
             {
@@ -106,8 +104,8 @@ namespace Engine8.D3D11Renderer.Rendering
             {
                 BufferCount = 2,
                 SwapEffect = SharpDX.DXGI.SwapEffect.Discard,
-                ModeDescription = modeDesc,
-                IsWindowed = true,
+                ModeDescription = modeDescription,
+                IsWindowed = !mainDisplay.IsFullscreen,
                 OutputHandle = mainDisplay.WindowHwnd,
                 Usage = SharpDX.DXGI.Usage.RenderTargetOutput,
                 SampleDescription = sampleDesc,

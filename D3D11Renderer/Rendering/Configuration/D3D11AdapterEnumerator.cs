@@ -46,6 +46,7 @@ namespace Engine8.D3D11Renderer.Rendering.Configuration
                 DedicatedGraphicsMemory = adapter.Description.DedicatedVideoMemory,
                 DedicatedSystemMemory = adapter.Description.DedicatedSystemMemory,
                 SharedSystemMemory = adapter.Description.SharedSystemMemory,
+                AdapterName = adapter.Description.Description,
                 InternalAdapter = adapter,
             };
             return converted;

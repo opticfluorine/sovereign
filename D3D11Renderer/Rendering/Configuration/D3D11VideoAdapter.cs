@@ -20,6 +20,8 @@ namespace Engine8.D3D11Renderer.Rendering.Configuration
 
         public long SharedSystemMemory { get; internal set; }
 
+        public string AdapterName { get; internal set; }
+
         /// <summary>
         /// Internal DXGI video adapter described by this IVideoAdapter.
         /// </summary>
