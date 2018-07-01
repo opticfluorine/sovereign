@@ -43,12 +43,6 @@ namespace Engine8.ClientCore.Logging
                 MessageBoxIcon.Error);
         }
 
-        public static void Fatal(string message)
-        {
-            Error(message);
-            Environment.Exit(1);
-        }
-
     }
 
 }

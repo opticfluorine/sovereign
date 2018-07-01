@@ -22,7 +22,11 @@
  */
 
 using Castle.Core;
+using Castle.Core.Logging;
+using Engine8.ClientCore.Logging;
+using Engine8.ClientCore.Rendering.Configuration;
 using Engine8.ClientCore.Rendering.Display;
+using Engine8.EngineCore.Main;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,26 +42,93 @@ namespace Engine8.ClientCore.Rendering
     public class RenderingManager : IStartable
     {
 
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
         /// <summary>
         /// Main display.
         /// </summary>
         private readonly MainDisplay mainDisplay;
 
-        public RenderingManager(MainDisplay mainDisplay)
+        /// <summary>
+        /// Video adapter selector.
+        /// </summary>
+        private readonly AdapterSelector adapterSelector;
+
+        /// <summary>
+        /// Display mode selector.
+        /// </summary>
+        private readonly DisplayModeSelector displayModeSelector;
+
+        /// <summary>
+        /// Renderer.
+        /// </summary>
+        private readonly IRenderer renderer;
+
+        /// <summary>
+        /// Selected video adapter.
+        /// </summary>
+        private IVideoAdapter selectedAdapter;
+
+        /// <summary>
+        /// Selected display mode.
+        /// </summary>
+        private IDisplayMode selectedDisplayMode;
+
+        public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
+            DisplayModeSelector displayModeSelector, IRenderer renderer)
         {
             this.mainDisplay = mainDisplay;
+            this.adapterSelector = adapterSelector;
+            this.displayModeSelector = displayModeSelector;
+            this.renderer = renderer;
         }
 
         public void Start()
         {
-            /* Display the main window. */
-            mainDisplay.Show();
+            /* Any exceptions in this section are fatal. */
+            try
+            {
+                /* Configure the renderer. */
+                SelectConfiguration();
+
+                /* Create the main window. */
+                mainDisplay.Show(selectedDisplayMode);
+
+                /* Initialize the renderer. */
+                renderer.Initialize(mainDisplay, selectedAdapter);
+            }
+            catch (Exception e)
+            {
+                /* Fatal error - rendering could not be started. */
+                Logger.Fatal("Failed to start rendering.", e);
+                ErrorHandler.Error(e.Message);
+                throw new FatalErrorException("Failed to start rendering.", e);
+            }
         }
 
         public void Stop()
         {
+            /* Stop the renderer. */
+            try
+            {
+                renderer.Cleanup();
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Error while cleaning up the renderer.", e);
+            }
+
             /* Close the main window. */
             mainDisplay.Close();
+        }
+
+        /// <summary>
+        /// Selects the renderer configuration.
+        /// </summary>
+        private void SelectConfiguration()
+        {
+            selectedAdapter = adapterSelector.SelectAdapter();
+            selectedDisplayMode = displayModeSelector.SelectDisplayMode(selectedAdapter);
         }
 
     }

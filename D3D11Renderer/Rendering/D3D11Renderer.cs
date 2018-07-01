@@ -14,12 +14,19 @@ namespace Engine8.D3D11Renderer.Rendering
     {
 
         /// <summary>
+        /// Main display.
+        /// </summary>
+        private MainDisplay mainDisplay;
+
+        /// <summary>
         /// Device and swapchain that will be used for rendering.
         /// </summary>
         private D3D11Device device;
 
         public void Initialize(MainDisplay mainDisplay, IVideoAdapter videoAdapter)
         {
+            this.mainDisplay = mainDisplay;
+
             /* Attempt to create the rendering device. */
             try
             {
@@ -32,6 +39,12 @@ namespace Engine8.D3D11Renderer.Rendering
         }
 
         public void Cleanup()
+        {
+            device.Dispose();
+            device = null;
+        }
+
+        private void CreateDevice()
         {
 
         }

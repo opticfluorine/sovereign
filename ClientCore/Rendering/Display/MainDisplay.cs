@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Engine8.ClientCore.Rendering.Configuration;
 using SDL2;
 using System;
 using System.Collections.Generic;
@@ -36,16 +37,6 @@ namespace Engine8.ClientCore.Rendering.Display
     /// </summary>
     public class MainDisplay
     {
-
-        /// <summary>
-        /// Default window width.
-        /// </summary>
-        private const int DEFAULT_WIDTH = 800;
-
-        /// <summary>
-        /// Default window height.
-        /// </summary>
-        private const int DEFAULT_HEIGHT = 600;
 
         /// <summary>
         /// Window title.
@@ -70,6 +61,11 @@ namespace Engine8.ClientCore.Rendering.Display
             }
         }
 
+        /// <summary>
+        /// Display mode in use. Only valid after calling Show().
+        /// </summary>
+        public IDisplayMode DisplayMode { get; private set; }
+
         public MainDisplay()
         {
 
@@ -78,12 +74,14 @@ namespace Engine8.ClientCore.Rendering.Display
         /// <summary>
         /// Shows the main window.
         /// </summary>
-        public void Show()
+        /// <param name="displayMode">DIsplay mode to use.</param>
+        public void Show(IDisplayMode displayMode)
         {
             /* Create the main window. */
+            DisplayMode = displayMode;
             windowHandle = SDL.SDL_CreateWindow(TITLE, 
                 SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
-                DEFAULT_WIDTH, DEFAULT_HEIGHT, 
+                displayMode.Width, displayMode.Height, 
                 SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
         }
 

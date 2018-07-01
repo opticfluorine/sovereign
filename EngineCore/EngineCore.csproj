@@ -78,6 +78,7 @@
     <Compile Include="Events\IEventAdapter.cs" />
     <Compile Include="Main\CoreMain.cs" />
     <Compile Include="Main\EngineBase.cs" />
+    <Compile Include="Main\FatalErrorException.cs" />
     <Compile Include="Main\IEngineBase.cs" />
     <Compile Include="Main\IMainLoopAction.cs" />
     <Compile Include="Main\MainInstaller.cs" />

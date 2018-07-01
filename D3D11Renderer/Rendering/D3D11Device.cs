@@ -14,7 +14,7 @@ namespace Engine8.D3D11Renderer.Rendering
     /// <summary>
     /// Responsible for managing a Direct3D 11 device for rendering.
     /// </summary>
-    public class D3D11Device
+    public class D3D11Device : IDisposable
     {
 
         /// <summary>
@@ -65,6 +65,15 @@ namespace Engine8.D3D11Renderer.Rendering
                 out swapChain);
 
             
+        }
+
+        public void Dispose()
+        {
+            swapChain.Dispose();
+            swapChain = null;
+
+            device.Dispose();
+            device = null;
         }
 
         private DeviceCreationFlags GetDeviceFlags()

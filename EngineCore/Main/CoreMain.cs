@@ -21,12 +21,15 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.Core.Logging;
 using Castle.Facilities.Startable;
 using Castle.Facilities.TypedFactory;
 using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using Castle.Windsor;
 using Castle.Windsor.Installer;
 using Engine8.EngineUtil.IoC;
+using System;
+using System.Text;
 
 namespace Engine8.EngineCore.Main
 {
@@ -40,11 +43,22 @@ namespace Engine8.EngineCore.Main
         public void RunEngine()
         {
             /* Start up the IoC container */
-            var iocContainer = InitializeIoC();
-
-            /* Resolve the EngineBase and launch the engine. */
-            var engineBase = iocContainer.Resolve<IEngineBase>();
-            engineBase.Run();
+            IWindsorContainer iocContainer = null;
+            try
+            {
+                iocContainer = InitializeIoC();
+                var engineBase = iocContainer.Resolve<IEngineBase>();
+                engineBase.Run();
+            }
+            catch (FatalErrorException)
+            {
+                /* Handled fatal error - halt the engine. */
+            }
+            catch (Exception e)
+            {
+                /* Unhandled exception - this usually indicates a fatal error. */
+                LogEarlyError("Unhandled exception while running engine.", e, iocContainer);
+            }
 
             /* Shut down the IoC container */
             ShutdownIoC(iocContainer);
@@ -70,9 +84,36 @@ namespace Engine8.EngineCore.Main
             return iocContainer;
         }
 
-        private void ShutdownIoC(IWindsorContainer IocContainer)
+        private void ShutdownIoC(IWindsorContainer iocContainer)
         {
-            IocContainer.Dispose();
+            if (iocContainer != null)
+            {
+                iocContainer.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Attempts to log an unhandled exception that escaped the IoC scope.
+        /// </summary>
+        /// <param name="message">Message to log.</param>
+        /// <param name="e">Exception to log.</param>
+        /// <param name="iocContainer">IoC container.</param>
+        private void LogEarlyError(string message, Exception e, IWindsorContainer iocContainer)
+        {
+            /* Attempt to resolve a logger. */
+            try
+            {
+                var logger = iocContainer.Resolve<ILogger>();
+                logger.Fatal(message, e);
+            }
+            catch
+            {
+                /* Logger not available - fall back on stderr. */
+                var sb = new StringBuilder();
+                sb.Append("FATAL: ").Append(message).Append("\n")
+                  .Append(e.GetType().Name).Append(": ").Append(e.Message);
+                Console.Error.WriteLine(sb.ToString());
+            }
         }
 
     }

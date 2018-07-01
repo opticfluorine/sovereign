@@ -28,6 +28,16 @@ namespace Engine8.ClientCore.Rendering.Configuration
             /* AdapterSelector. */
             container.Register(Component.For<AdapterSelector>()
                 .LifestyleSingleton());
+
+            /* IDisplayModeEnumerator. */
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IDisplayModeEnumerator>()
+                .WithServiceDefaultInterfaces()
+                .LifestyleSingleton());
+
+            /* DisplayModeSelector. */
+            container.Register(Component.For<DisplayModeSelector>()
+                .LifestyleSingleton());
         }
 
     }

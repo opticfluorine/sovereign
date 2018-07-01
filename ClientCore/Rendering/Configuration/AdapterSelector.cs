@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Castle.Core.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,8 @@ namespace Engine8.ClientCore.Rendering.Configuration
     /// </summary>
     public class AdapterSelector
     {
+
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         /// <summary>
         /// Scaling factor for dedicated GPU memory.
@@ -55,17 +58,40 @@ namespace Engine8.ClientCore.Rendering.Configuration
             var adapters = adapterEnumerator.EnumerateVideoAdapters();
             try
             {
-                return adapters.OrderByDescending(
+                var selected = adapters.OrderByDescending(
                         adapter => adapter.DedicatedGraphicsMemory * DedicatedGpuFactor
                                 + adapter.DedicatedSystemMemory * DedicatedCpuFactor
                                 + adapter.SharedSystemMemory * SharedFactor
                     ).First();
+                Logger.Info(() => CreateLogMessageForAdapter(selected));
+                return selected;
             }
             catch (InvalidOperationException e)
             {
                 /* No suitable adapters found. */
                 throw new VideoAdapterException("No suitable video adapter found.", e);
             }
+        }
+
+        private String CreateLogMessageForAdapter(IVideoAdapter selectedAdapter)
+        {
+            var sb = new StringBuilder();
+            const int conversionFactor = 1024 * 1024;
+            sb.Append("Selected video adapter:\n")
+
+                .Append("  Dedicated GPU memory = ")
+                .Append(selectedAdapter.DedicatedGraphicsMemory / conversionFactor)
+                .Append(" MB\n")
+
+                .Append("  Dedicated CPU memory = ")
+                .Append(selectedAdapter.DedicatedSystemMemory / conversionFactor)
+                .Append(" MB\n")
+
+                .Append("  Shared CPU memory    = ")
+                .Append(selectedAdapter.SharedSystemMemory / conversionFactor)
+                .Append(" MB");
+
+            return sb.ToString();
         }
 
     }

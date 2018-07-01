@@ -67,7 +67,11 @@
     <Compile Include="Events\SDLEventAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rendering\Configuration\AdapterSelector.cs" />
+    <Compile Include="Rendering\Configuration\DisplayFormat.cs" />
+    <Compile Include="Rendering\Configuration\DisplayModeSelector.cs" />
     <Compile Include="Rendering\Configuration\IAdapterEnumerator.cs" />
+    <Compile Include="Rendering\Configuration\IDisplayMode.cs" />
+    <Compile Include="Rendering\Configuration\IDisplayModeEnumerator.cs" />
     <Compile Include="Rendering\Configuration\IVideoAdapter.cs" />
     <Compile Include="Rendering\Configuration\RenderingConfigurationInstaller.cs" />
     <Compile Include="Rendering\Configuration\VideoAdapterException.cs" />

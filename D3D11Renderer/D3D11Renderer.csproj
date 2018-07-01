@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rendering\Configuration\D3D11AdapterEnumerator.cs" />
+    <Compile Include="Rendering\Configuration\D3D11DisplayMode.cs" />
+    <Compile Include="Rendering\Configuration\D3D11DisplayModeEnumerator.cs" />
     <Compile Include="Rendering\Configuration\D3D11VideoAdapter.cs" />
     <Compile Include="Rendering\D3D11Device.cs" />
     <Compile Include="Rendering\D3D11Renderer.cs" />
