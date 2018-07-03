@@ -82,8 +82,14 @@
     <Compile Include="Rendering\RenderingInstaller.cs" />
     <Compile Include="Rendering\RenderingManager.cs" />
     <Compile Include="Rendering\RenderingMainLoopAction.cs" />
+    <Compile Include="Rendering\Sprites\SpriteInstaller.cs" />
     <Compile Include="Rendering\Sprites\SpriteSheet.cs" />
+    <Compile Include="Rendering\Sprites\SpriteSheetFactory.cs" />
+    <Compile Include="Rendering\Sprites\SurfaceLoader.cs" />
     <Compile Include="Rendering\Sprites\TextureAtlas.cs" />
+    <Compile Include="Rendering\Surface.cs" />
+    <Compile Include="Rendering\SurfaceException.cs" />
+    <Compile Include="Resources\ClientResourcePathBuilder.cs" />
     <Compile Include="SDL2-CS\LPUtf8StrMarshaler.cs" />
     <Compile Include="SDL2-CS\SDL2.cs" />
     <Compile Include="SDL2-CS\SDL2_image.cs" />

@@ -90,6 +90,9 @@
     <Compile Include="Events\IEventLoop.cs" />
     <Compile Include="Events\MainEventLoop.cs" />
     <Compile Include="Events\EventCommunicator.cs" />
+    <Compile Include="Resources\IResourcePathBuilder.cs" />
+    <Compile Include="Resources\ResourcesInstaller.cs" />
+    <Compile Include="Resources\ResourceType.cs" />
     <Compile Include="Systems\ISystem.cs" />
     <Compile Include="Systems\ISystemExecutorFactory.cs" />
     <Compile Include="Systems\Movement\Components\PositionXComponentCollection.cs" />
