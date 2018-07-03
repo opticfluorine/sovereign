@@ -75,6 +75,14 @@ namespace Engine8.D3D11Renderer.Rendering
         }
 
         /// <summary>
+        /// Presents the next frame.
+        /// </summary>
+        public void Present()
+        {
+            SwapChain.Present(0, SharpDX.DXGI.PresentFlags.None);
+        }
+
+        /// <summary>
         /// Gets the device flags.
         /// </summary>
         /// <returns>Device flags.</returns>

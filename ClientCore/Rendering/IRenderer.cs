@@ -30,6 +30,11 @@ namespace Engine8.ClientCore.Rendering
         /// </summary>
         void Cleanup();
 
+        /// <summary>
+        /// Renders the next frame.
+        /// </summary>
+        void Render();
+
     }
 
 }

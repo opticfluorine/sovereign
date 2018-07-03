@@ -56,6 +56,9 @@
     <Compile Include="Rendering\Configuration\D3D11VideoAdapter.cs" />
     <Compile Include="Rendering\D3D11Device.cs" />
     <Compile Include="Rendering\D3D11Renderer.cs" />
+    <Compile Include="Rendering\IRenderStage.cs" />
+    <Compile Include="Rendering\UI\D3D11UIRenderStage.cs" />
+    <Compile Include="Rendering\World\D3D11WorldRenderStage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

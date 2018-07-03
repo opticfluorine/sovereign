@@ -44,21 +44,21 @@ namespace Engine8.ClientCore.Rendering
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         /// <summary>
-        /// Main display.
+        /// Rendering manager.
         /// </summary>
-        private readonly MainDisplay mainDisplay;
+        private readonly RenderingManager renderingManager;
 
         // Rendering is expensive, so pump the loop multiple times between frames.
         public ulong CycleInterval => 4;
 
-        public RenderingMainLoopAction(MainDisplay mainDisplay)
+        public RenderingMainLoopAction(RenderingManager renderingManager)
         {
-            this.mainDisplay = mainDisplay;
+            this.renderingManager = renderingManager;
         }
 
         public void Execute()
         {
-            
+            renderingManager.Render();
         }
 
     }

@@ -123,6 +123,14 @@ namespace Engine8.ClientCore.Rendering
         }
 
         /// <summary>
+        /// Renders the next frame.
+        /// </summary>
+        public void Render()
+        {
+            renderer.Render();
+        }
+
+        /// <summary>
         /// Selects the renderer configuration.
         /// </summary>
         private void SelectConfiguration()
