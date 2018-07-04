@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Engine8.ClientCore.Logging;
 using Engine8.EngineCore.Logging;
 using Engine8.EngineCore.Main;
 using SDL2;
@@ -41,6 +42,15 @@ namespace Engine8.Engine8Client.Main
             if (err < 0)
             {
                 /* Fatal error. */
+                ErrorHandler.Error(SDL.SDL_GetError());
+                return;
+            }
+
+            err = SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG);
+            if (err < 0)
+            {
+                /* Fatal error. */
+                ErrorHandler.Error(SDL.SDL_GetError());
                 return;
             }
 
@@ -49,6 +59,7 @@ namespace Engine8.Engine8Client.Main
             coreMain.RunEngine();
 
             /* Shut down SDL. */
+            SDL_image.IMG_Quit();
             SDL.SDL_Quit();
         }
     }

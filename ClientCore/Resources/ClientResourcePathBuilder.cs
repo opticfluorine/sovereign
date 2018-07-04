@@ -13,7 +13,7 @@ namespace Engine8.ClientCore.Resources
         /// <summary>
         /// Top-level resource directory.
         /// </summary>
-        private const string ResourceRoot = ".";
+        private const string ResourceRoot = "Data";
 
         public string BuildPathToResource(ResourceType resourceType, string resourceFilename)
         {

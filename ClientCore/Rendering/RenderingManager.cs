@@ -65,27 +65,33 @@ namespace Engine8.ClientCore.Rendering
         private readonly IRenderer renderer;
 
         /// <summary>
+        /// Rendering resource manager.
+        /// </summary>
+        private readonly RenderingResourceManager resourceManager;
+
+        /// <summary>
         /// Selected video adapter.
         /// </summary>
         private IVideoAdapter selectedAdapter;
-
+        
         /// <summary>
         /// Selected display mode.
         /// </summary>
         private IDisplayMode selectedDisplayMode;
 
         public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
-            DisplayModeSelector displayModeSelector, IRenderer renderer)
+            DisplayModeSelector displayModeSelector, IRenderer renderer, RenderingResourceManager resourceManager)
         {
             this.mainDisplay = mainDisplay;
             this.adapterSelector = adapterSelector;
             this.displayModeSelector = displayModeSelector;
             this.renderer = renderer;
+            this.resourceManager = resourceManager;
         }
 
         public void Start()
         {
-            /* Any exceptions in this section are fatal. */
+            /* Start the renderer. Any exceptions in this section are fatal. */
             try
             {
                 /* Configure the renderer. */
@@ -104,10 +110,16 @@ namespace Engine8.ClientCore.Rendering
                 ErrorHandler.Error(e.Message);
                 throw new FatalErrorException("Failed to start rendering.", e);
             }
+
+            /* Load resources used by the renderer. */
+            LoadResources();
         }
 
         public void Stop()
         {
+            /* Release resources used by the renderer. */
+            CleanupResources();
+
             /* Stop the renderer. */
             try
             {
@@ -137,6 +149,22 @@ namespace Engine8.ClientCore.Rendering
         {
             selectedAdapter = adapterSelector.SelectAdapter();
             selectedDisplayMode = displayModeSelector.SelectDisplayMode(selectedAdapter);
+        }
+
+        /// <summary>
+        /// Loads resources used by rendering.
+        /// </summary>
+        private void LoadResources()
+        {
+            resourceManager.InitializeResources();
+        }
+
+        /// <summary>
+        /// Cleans up resources used by rendering.
+        /// </summary>
+        private void CleanupResources()
+        {
+            resourceManager.CleanupResources();
         }
 
     }

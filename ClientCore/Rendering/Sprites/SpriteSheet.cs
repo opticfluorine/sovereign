@@ -11,7 +11,7 @@ namespace Engine8.ClientCore.Rendering.Sprites
     /// <summary>
     /// A set of sprites loaded from a single file.
     /// </summary>
-    public class SpriteSheet
+    public class SpriteSheet : IDisposable
     {
 
         /// <summary>
@@ -27,13 +27,18 @@ namespace Engine8.ClientCore.Rendering.Sprites
         /// <summary>
         /// SDL_Surface holding the spriteset.
         /// </summary>
-        public SDL.SDL_Surface Surface { get; private set; }
+        public Surface Surface { get; private set; }
 
-        public SpriteSheet(SDL.SDL_Surface surface, int spriteWidth, int spriteHeight)
+        public SpriteSheet(Surface surface, int spriteWidth, int spriteHeight)
         {
             Surface = surface;
             SpriteWidth = spriteWidth;
             SpriteHeight = spriteHeight;
+        }
+
+        public void Dispose()
+        {
+            Surface.Dispose();
         }
 
     }

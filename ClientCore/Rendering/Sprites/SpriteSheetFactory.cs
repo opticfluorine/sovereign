@@ -23,6 +23,16 @@ namespace Engine8.ClientCore.Rendering.Sprites
             this.surfaceLoader = surfaceLoader;
         }
 
+        /// <summary>
+        /// Loads the spritesheet described by the given definition.
+        /// </summary>
+        /// <param name="definition">Spritesheet definition.</param>
+        /// <returns>Spritesheet.</returns>
+        public SpriteSheet LoadSpriteSheet(SpriteSheetDefinition definition)
+        {
+            return null;
+        }
+
     }
 
 }

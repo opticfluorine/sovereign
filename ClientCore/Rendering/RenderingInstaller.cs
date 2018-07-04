@@ -53,6 +53,10 @@ namespace Engine8.ClientCore.Rendering
                 .BasedOn<IRenderer>()
                 .WithServiceDefaultInterfaces()
                 .LifestyleSingleton());
+
+            /* RenderingResourceManager. */
+            container.Register(Component.For<RenderingResourceManager>()
+                .LifestyleSingleton());
         }
 
     }

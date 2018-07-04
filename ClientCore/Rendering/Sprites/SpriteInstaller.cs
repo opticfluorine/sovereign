@@ -1,11 +1,6 @@
 ﻿using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine8.ClientCore.Rendering.Sprites
 {
@@ -24,6 +19,14 @@ namespace Engine8.ClientCore.Rendering.Sprites
 
             /* SpriteSheetFactory. */
             container.Register(Component.For<SpriteSheetFactory>()
+                .LifestyleSingleton());
+
+            /* SpriteSheetManager. */
+            container.Register(Component.For<SpriteSheetManager>()
+                .LifestyleSingleton());
+
+            /* SpriteSheetDefinitionLoader. */
+            container.Register(Component.For<SpriteSheetDefinitionLoader>()
                 .LifestyleSingleton());
         }
 
