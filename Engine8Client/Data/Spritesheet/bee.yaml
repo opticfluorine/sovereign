@@ -1,0 +1,21 @@
+﻿# Spritesheet definition for bee.png
+#
+# bee.png is part of the Liberated Pixel Cup base assets, retrieved from
+#   https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles
+# on July 4, 2018.
+#
+
+---
+
+# Spritesheet definition
+Filename: bee.png
+SheetId: 5
+SpriteWidth: 32
+SpriteHeight: 32
+
+# Rights metadata
+Author: |
+  Lanea Zimmerman (AKA Sharm), Stephen Challener (AKA Redshrike),
+  Charles Sanchez (AKA CharlesGabriel), Manuel Riecke (AKA MrBeast),
+  Daniel Armstrong (AKA HughSpectrum)
+License: CC-BY-SA 3.0

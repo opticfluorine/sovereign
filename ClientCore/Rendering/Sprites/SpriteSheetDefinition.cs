@@ -19,7 +19,12 @@ namespace Engine8.ClientCore.Rendering.Sprites
         /// <summary>
         /// Name of the spritesheet image file.
         /// </summary>
-        public string SpriteSheetFilename { get; set; }
+        public string Filename { get; set; }
+
+        /// <summary>
+        /// ID number of the spritesheet.
+        /// </summary>
+        public int SheetId { get; set; }
 
         /// <summary>
         /// Sprite width.
@@ -30,6 +35,16 @@ namespace Engine8.ClientCore.Rendering.Sprites
         /// Sprite height.
         /// </summary>
         public int SpriteHeight { get; set; }
+
+        /// <summary>
+        /// Author of the spritesheet.
+        /// </summary>
+        public string Author { get; set; }
+
+        /// <summary>
+        /// License rights of the spritesheet.f
+        /// </summary>
+        public string License { get; set; }
 
     }
 
