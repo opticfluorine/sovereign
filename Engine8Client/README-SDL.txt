@@ -1,3 +1,6 @@
+The following notice applies to the included SDL2 library.
+
+=======================
 
 Please distribute this file with the SDL runtime environment:
 

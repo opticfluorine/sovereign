@@ -91,6 +91,7 @@
     <Compile Include="Rendering\Sprites\SpriteSheetDefinition.cs" />
     <Compile Include="Rendering\Sprites\SpriteSheetDefinitionException.cs" />
     <Compile Include="Rendering\Sprites\SpriteSheetDefinitionLoader.cs" />
+    <Compile Include="Rendering\Sprites\SpriteSheetDefinitionValidator.cs" />
     <Compile Include="Rendering\Sprites\SpriteSheetFactory.cs" />
     <Compile Include="Rendering\Sprites\SpriteSheetManager.cs" />
     <Compile Include="Rendering\Sprites\SurfaceLoader.cs" />

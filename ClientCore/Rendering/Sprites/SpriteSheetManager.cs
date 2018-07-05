@@ -41,16 +41,23 @@ namespace Engine8.ClientCore.Rendering.Sprites
         private SpriteSheetDefinitionLoader definitionLoader;
 
         /// <summary>
+        /// Spritesheet definition validator.
+        /// </summary>
+        private SpriteSheetDefinitionValidator definitionValidator;
+
+        /// <summary>
         /// Resource path builder.
         /// </summary>
         private IResourcePathBuilder resourcePathBuilder;
 
         public SpriteSheetManager(SpriteSheetFactory spriteSheetFactory,
             SpriteSheetDefinitionLoader definitionLoader,
+            SpriteSheetDefinitionValidator definitionValidator,
             IResourcePathBuilder resourcePathBuilder)
         {
             this.spriteSheetFactory = spriteSheetFactory;
             this.definitionLoader = definitionLoader;
+            this.definitionValidator = definitionValidator;
             this.resourcePathBuilder = resourcePathBuilder;
         }
 
@@ -62,12 +69,19 @@ namespace Engine8.ClientCore.Rendering.Sprites
             /* Load the spritesheets. */
             try
             {
+                Logger.Info("Loading spritesheets.");
+
                 SpriteSheets.AddRange(LoadSpriteSheets());
+
+                Logger.InfoFormat("Successfully loaded {0} spritesheets.", SpriteSheets.Count());
             }
             catch (Exception e)
             {
                 /* Fatal error - failed to load the spritesheets. */
-                var message = "Failed to load spritesheets.";
+                var sb = new StringBuilder();
+                sb.Append("Failed to load spritesheets.\n\n").Append(e.Message);
+                var message = sb.ToString();
+
                 Logger.Fatal(message, e);
                 ErrorHandler.Error(message);
                 throw new FatalErrorException(message, e);
@@ -100,21 +114,29 @@ namespace Engine8.ClientCore.Rendering.Sprites
         /// <summary>
         /// Loads the spritesheet definitions.
         /// </summary>
-        /// <returns>Spritesheet definitions.</returns>
-        private IEnumerable<SpriteSheetDefinition> LoadDefinitions()
+        /// <returns>Spritesheet definitions ordered by sheet ID.</returns>
+        private IList<SpriteSheetDefinition> LoadDefinitions()
         {
-            return from filename in FindDefinitionFiles()
-                   select definitionLoader.LoadDefinition(filename);
+            var defs = from filename in FindDefinitionFiles()
+                       select definitionLoader.LoadDefinition(filename);
+            return defs.OrderBy(def => def.SheetId).ToList();
         }
 
         /// <summary>
         /// Loads the spritesheets.
         /// </summary>
         /// <returns>Spritesheets.</returns>
+        /// <exception cref="SpriteSheetDefinitionException">
+        /// Thrown if the sprite sheets cannot be loaded.
+        /// </exception>
         private IEnumerable<SpriteSheet> LoadSpriteSheets()
         {
-            return from definition in LoadDefinitions()
-                   select spriteSheetFactory.LoadSpriteSheet(definition);
+            /* Validate definitions immediately. */
+            var defs = LoadDefinitions();
+            definitionValidator.Validate(defs);
+
+            /* Load the spritesheets. */
+            return defs.Select(def => spriteSheetFactory.LoadSpriteSheet(def));
         }
 
     }

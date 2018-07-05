@@ -15,25 +15,19 @@ namespace Engine8.ClientCore.Rendering.Sprites
     {
 
         /// <summary>
-        /// Width of a single sprite in this sheet.
+        /// Spritesheet definition.
         /// </summary>
-        public int SpriteWidth { get; private set; }
-
-        /// <summary>
-        /// Height of a single sprite in this sheet.
-        /// </summary>
-        public int SpriteHeight { get; private set; }
+        public SpriteSheetDefinition Definition { get; private set; }
 
         /// <summary>
         /// SDL_Surface holding the spriteset.
         /// </summary>
         public Surface Surface { get; private set; }
 
-        public SpriteSheet(Surface surface, int spriteWidth, int spriteHeight)
+        public SpriteSheet(Surface surface, SpriteSheetDefinition definition)
         {
             Surface = surface;
-            SpriteWidth = spriteWidth;
-            SpriteHeight = spriteHeight;
+            Definition = definition;
         }
 
         public void Dispose()

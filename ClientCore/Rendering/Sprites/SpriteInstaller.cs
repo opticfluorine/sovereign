@@ -28,6 +28,10 @@ namespace Engine8.ClientCore.Rendering.Sprites
             /* SpriteSheetDefinitionLoader. */
             container.Register(Component.For<SpriteSheetDefinitionLoader>()
                 .LifestyleSingleton());
+
+            /* SpriteSheetDefinitionValidator. */
+            container.Register(Component.For<SpriteSheetDefinitionValidator>()
+                .LifestyleSingleton());
         }
 
     }

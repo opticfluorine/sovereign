@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Castle.Core.Logging;
+using Engine8.EngineCore.Resources;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,14 +16,23 @@ namespace Engine8.ClientCore.Rendering.Sprites
     public class SpriteSheetFactory
     {
 
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
         /// <summary>
         /// Surface loader.
         /// </summary>
         private readonly SurfaceLoader surfaceLoader;
 
-        public SpriteSheetFactory(SurfaceLoader surfaceLoader)
+        /// <summary>
+        /// Resource path builder.
+        /// </summary>
+        private readonly IResourcePathBuilder resourcePathBuilder;
+
+        public SpriteSheetFactory(SurfaceLoader surfaceLoader, 
+            IResourcePathBuilder resourcePathBuilder)
         {
             this.surfaceLoader = surfaceLoader;
+            this.resourcePathBuilder = resourcePathBuilder;
         }
 
         /// <summary>
@@ -28,9 +40,32 @@ namespace Engine8.ClientCore.Rendering.Sprites
         /// </summary>
         /// <param name="definition">Spritesheet definition.</param>
         /// <returns>Spritesheet.</returns>
+        /// <exception cref="SurfaceException">Thrown if the spritesheet file cannot be loaded.</exception>
         public SpriteSheet LoadSpriteSheet(SpriteSheetDefinition definition)
         {
-            return null;
+            Logger.DebugFormat("Loading spritesheet {0}: {1}", definition.SheetId,
+                definition.Filename);
+
+            /* Attempt to load the spritesheet surface. */
+            var surface = LoadSurfaceForSpritesheet(definition);
+
+            /* Bundle the spritesheet. */
+            return new SpriteSheet(surface, definition);
+        }
+
+        /// <summary>
+        /// Loads the spritesheet image file into a Surface.
+        /// </summary>
+        /// <param name="definition">Spritesheet definition.</param>
+        /// <returns>Spritesheet surface.</returns>
+        /// <exception cref="SurfaceException">
+        /// Thrown if the surface cannot be loaded.
+        /// </exception>
+        private Surface LoadSurfaceForSpritesheet(SpriteSheetDefinition definition)
+        {
+            var filepath = resourcePathBuilder.BuildPathToResource(ResourceType.Spritesheet,
+                definition.Filename);
+            return surfaceLoader.LoadSurface(filepath);
         }
 
     }
