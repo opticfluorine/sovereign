@@ -32,6 +32,10 @@ namespace Engine8.ClientCore.Rendering.Sprites
             /* SpriteSheetDefinitionValidator. */
             container.Register(Component.For<SpriteSheetDefinitionValidator>()
                 .LifestyleSingleton());
+
+            /* TextureAtlasManager. */
+            container.Register(Component.For<TextureAtlasManager>()
+                .LifestyleSingleton());
         }
 
     }

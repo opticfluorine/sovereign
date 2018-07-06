@@ -96,6 +96,8 @@
     <Compile Include="Rendering\Sprites\SpriteSheetManager.cs" />
     <Compile Include="Rendering\Sprites\SurfaceLoader.cs" />
     <Compile Include="Rendering\Sprites\TextureAtlas.cs" />
+    <Compile Include="Rendering\Sprites\TextureAtlasException.cs" />
+    <Compile Include="Rendering\Sprites\TextureAtlasManager.cs" />
     <Compile Include="Rendering\Surface.cs" />
     <Compile Include="Rendering\SurfaceException.cs" />
     <Compile Include="Resources\ClientResourcePathBuilder.cs" />

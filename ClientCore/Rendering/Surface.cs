@@ -2,6 +2,7 @@
 using SDL2;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Engine8.ClientCore.Rendering
 {
@@ -15,9 +16,26 @@ namespace Engine8.ClientCore.Rendering
     {
 
         /// <summary>
-        /// Pointer to the underlying SDL_Surface.
+        /// Provides access to the pointer to the underlying SDL_Surface.
         /// </summary>
-        public IntPtr SurfacePointer { get; private set; }
+        public IntPtr SurfacePointer
+        {
+            get => surfacePointer;
+
+            private set
+            {
+                surfacePointer = value;
+                if (IsValid)
+                {
+                    properties = new SurfaceProperties(value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private IntPtr surfacePointer = IntPtr.Zero;
 
         /// <summary>
         /// Whether the surface has been disposed.
@@ -28,6 +46,26 @@ namespace Engine8.ClientCore.Rendering
         /// Whether the surface is backed by a valid pointer.
         /// </summary>
         public bool IsValid { get => SurfacePointer != IntPtr.Zero; }
+
+        /// <summary>
+        /// Read-only property that provides access to underlying surface properties.
+        /// </summary>
+        public SurfaceProperties Properties
+        {
+            get
+            {
+                if (!IsValid)
+                {
+                    throw new InvalidOperationException("Surface is not valid.");
+                }
+                return properties;
+            }
+        }
+
+        /// <summary>
+        /// Underlying surface properties.
+        /// </summary>
+        private SurfaceProperties properties = null;
 
         /// <summary>
         /// Map from DisplayFormat to SDL pixel formats.
@@ -94,6 +132,66 @@ namespace Engine8.ClientCore.Rendering
         }
 
         /// <summary>
+        /// Blits the entire surface onto a destination surface.
+        /// </summary>
+        /// <param name="dest">Destination surface.</param>
+        /// <param name="destX">Top left x coordinate of destination.</param>
+        /// <param name="destY">Top left y coordinate of destination.</param>
+        public void Blit(Surface dest, int destX, int destY)
+        {
+            /* Ensure the source is valid. */
+            if (!IsValid)
+                throw new InvalidOperationException("Source surface is not valid.");
+
+            /* Blit the entire surface. */
+            Blit(dest, destX, destY, 0, 0, Properties.Width, Properties.Height);
+        }
+
+        /// <summary>
+        /// Blits a portion of this surface onto a destination surface.s
+        /// </summary>
+        /// <param name="dest">Destination surface.</param>
+        /// <param name="destX">Top left x coordinate of destination.</param>
+        /// <param name="destY">Top left y coordinate of destination.</param>
+        /// <param name="srcX">Top left x coordinate of source.</param>
+        /// <param name="srcY">Top left y coordinate of source.</param>
+        /// <param name="width">Width of source region.</param>
+        /// <param name="height">Height of source region.</param>
+        public void Blit(Surface dest, int destX, int destY, int srcX, 
+            int srcY, int width, int height)
+        {
+            /* Ensure the source and destination are valid. */
+            if (!IsValid)
+                throw new InvalidOperationException("Source surface is not valid.");
+            if (!dest.IsValid)
+                throw new InvalidOperationException("Destination surface is not valid.");
+
+            /* Prepare blit structures. */
+            var srcRect = new SDL.SDL_Rect()
+            {
+                x = srcX,
+                y = srcY,
+                w = width,
+                h = height,
+            };
+            var dstRect = new SDL.SDL_Rect()
+            {
+                x = destX,
+                y = destY,
+                w = width,
+                h = height,
+            };
+
+            /* Blit. */
+            int res = SDL.SDL_BlitSurface(SurfacePointer, ref srcRect,
+                dest.SurfacePointer, ref dstRect);
+            if (res < 0)
+            {
+                throw new SurfaceException(SDL.SDL_GetError());
+            }
+        }
+
+        /// <summary>
         /// Disposes of the surface by freeing the underlying memory.
         /// </summary>
         public void Dispose()
@@ -104,6 +202,44 @@ namespace Engine8.ClientCore.Rendering
                 SurfacePointer = IntPtr.Zero;
             }
             IsDisposed = true;
+        }
+
+        /// <summary>
+        /// Proxy class that provides access to underlying surface data.
+        /// </summary>
+        public class SurfaceProperties
+        {
+
+            /// <summary>
+            /// Underlying surface.
+            /// </summary>
+            private readonly SDL.SDL_Surface surface;
+
+            /// <summary>
+            /// Surface width.
+            /// </summary>
+            public int Width => surface.w;
+
+            /// <summary>
+            /// Surface height.
+            /// </summary>
+            public int Height => surface.h;
+
+            /// <summary>
+            /// Pitch of the surface.
+            /// </summary>
+            public int Pitch => surface.pitch;
+
+            /// <summary>
+            /// Pointer to pixel data.
+            /// </summary>
+            public IntPtr Data => surface.pixels;
+
+            internal SurfaceProperties(IntPtr surfacePtr)
+            {
+                surface = Marshal.PtrToStructure<SDL.SDL_Surface>(surfacePtr);
+            }
+
         }
 
     }
