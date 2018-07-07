@@ -30,6 +30,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Castle.Core.4.2.0\lib\net45\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Windsor, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Castle.Windsor.4.1.0\lib\net45\Castle.Windsor.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpDX.4.1.0\lib\net45\SharpDX.dll</HintPath>
     </Reference>
@@ -40,7 +46,10 @@
       <HintPath>..\packages\SharpDX.DXGI.4.1.0\lib\net45\SharpDX.DXGI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -53,10 +62,15 @@
     <Compile Include="Rendering\Configuration\D3D11AdapterEnumerator.cs" />
     <Compile Include="Rendering\Configuration\D3D11DisplayMode.cs" />
     <Compile Include="Rendering\Configuration\D3D11DisplayModeEnumerator.cs" />
+    <Compile Include="Rendering\Configuration\D3D11RendererConstants.cs" />
     <Compile Include="Rendering\Configuration\D3D11VideoAdapter.cs" />
     <Compile Include="Rendering\D3D11Device.cs" />
     <Compile Include="Rendering\D3D11Renderer.cs" />
+    <Compile Include="Rendering\D3D11RenderingInstaller.cs" />
     <Compile Include="Rendering\IRenderStage.cs" />
+    <Compile Include="Rendering\Resources\D3D11ResourceInstaller.cs" />
+    <Compile Include="Rendering\Resources\D3D11ResourceManager.cs" />
+    <Compile Include="Rendering\Resources\Textures\D3D11Texture.cs" />
     <Compile Include="Rendering\UI\D3D11UIRenderStage.cs" />
     <Compile Include="Rendering\World\D3D11WorldRenderStage.cs" />
   </ItemGroup>

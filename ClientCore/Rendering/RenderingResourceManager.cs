@@ -17,18 +17,18 @@ namespace Engine8.ClientCore.Rendering
         /// <summary>
         /// Spritesheet manager.
         /// </summary>
-        private SpriteSheetManager spriteSheetManager;
+        public SpriteSheetManager SpriteSheetManager { get; private set; }
 
         /// <summary>
         /// Texture atlas manager.
         /// </summary>
-        private TextureAtlasManager textureAtlasManager;
+        public TextureAtlasManager TextureAtlasManager { get; private set; }
 
         public RenderingResourceManager(SpriteSheetManager spriteSheetManager,
             TextureAtlasManager textureAtlasManager)
         {
-            this.spriteSheetManager = spriteSheetManager;
-            this.textureAtlasManager = textureAtlasManager;
+            SpriteSheetManager = spriteSheetManager;
+            TextureAtlasManager = textureAtlasManager;
         }
 
         /// <summary>
@@ -36,8 +36,8 @@ namespace Engine8.ClientCore.Rendering
         /// </summary>
         public void InitializeResources()
         {
-            spriteSheetManager.InitializeSpriteSheets();
-            textureAtlasManager.InitializeTextureAtlas();
+            SpriteSheetManager.InitializeSpriteSheets();
+            TextureAtlasManager.InitializeTextureAtlas();
         }
 
         /// <summary>
@@ -45,8 +45,8 @@ namespace Engine8.ClientCore.Rendering
         /// </summary>
         public void CleanupResources()
         {
-            textureAtlasManager.ReleaseTextureAtlas();
-            spriteSheetManager.ReleaseSpriteSheets();
+            TextureAtlasManager.ReleaseTextureAtlas();
+            SpriteSheetManager.ReleaseSpriteSheets();
         }
 
     }

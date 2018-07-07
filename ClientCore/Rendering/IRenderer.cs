@@ -1,5 +1,6 @@
 ﻿using Engine8.ClientCore.Rendering.Configuration;
 using Engine8.ClientCore.Rendering.Display;
+using Engine8.ClientCore.Rendering.Sprites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,12 +19,11 @@ namespace Engine8.ClientCore.Rendering
         /// <summary>
         /// Initializes the renderer.
         /// </summary>
-        /// <param name="mainDisplay">Main display to be backed by this renderer.</param>
         /// <param name="videoAdapter">Video adapter to use.</param>
         /// <exception cref="RendererInitializationException">
         /// Thrown if an error occurs while initializing the renderer.
         /// </exception>
-        void Initialize(MainDisplay mainDisplay, IVideoAdapter videoAdapter);
+        void Initialize(IVideoAdapter videoAdapter);
 
         /// <summary>
         /// Shuts down and cleans up the renderer.

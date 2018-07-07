@@ -16,11 +16,6 @@ namespace Engine8.D3D11Renderer.Rendering.Configuration
     {
 
         /// <summary>
-        /// Display format to be used.
-        /// </summary>
-        private const Format DefaultFormat = Format.R8G8B8A8_UNorm;
-
-        /// <summary>
         /// Engine display format corresponding to the display format to be used.
         /// </summary>
         private const DisplayFormat DefaultDisplayFormat = DisplayFormat.R8G8B8A8_UNorm;
@@ -40,7 +35,7 @@ namespace Engine8.D3D11Renderer.Rendering.Configuration
         private IEnumerable<ModeDescription> GetNativeModes(Adapter adapter)
         {
             return adapter.Outputs.SelectMany(
-                output => output.GetDisplayModeList(DefaultFormat, 0))
+                output => output.GetDisplayModeList(D3D11RendererConstants.DisplayFormat, 0))
                 .Distinct();
         }
 

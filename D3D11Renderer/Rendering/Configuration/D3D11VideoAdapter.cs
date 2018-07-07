@@ -27,6 +27,13 @@ namespace Engine8.D3D11Renderer.Rendering.Configuration
         /// </summary>
         internal Adapter InternalAdapter { get; set; }
 
+        public override String ToString()
+        {
+            var sb = new StringBuilder();
+            sb.Append(nameof(D3D11VideoAdapter)).Append(" / ").Append(AdapterName);
+            return sb.ToString();
+        }
+
     }
 
 }

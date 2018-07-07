@@ -91,28 +91,14 @@ namespace Engine8.ClientCore.Rendering
 
         public void Start()
         {
-            /* Start the renderer. Any exceptions in this section are fatal. */
-            try
-            {
-                /* Configure the renderer. */
-                SelectConfiguration();
-
-                /* Create the main window. */
-                mainDisplay.Show(selectedDisplayMode, false);
-
-                /* Initialize the renderer. */
-                renderer.Initialize(mainDisplay, selectedAdapter);
-            }
-            catch (Exception e)
-            {
-                /* Fatal error - rendering could not be started. */
-                Logger.Fatal("Failed to start rendering.", e);
-                ErrorHandler.Error(e.Message);
-                throw new FatalErrorException("Failed to start rendering.", e);
-            }
+            /* Create the main display. */
+            CreateMainDisplay();
 
             /* Load resources used by the renderer. */
             LoadResources();
+
+            /* Initialize the renderer. */
+            InitializeRenderer();
         }
 
         public void Stop()
@@ -140,6 +126,48 @@ namespace Engine8.ClientCore.Rendering
         public void Render()
         {
             renderer.Render();
+        }
+
+        /// <summary>
+        /// Creates the main display.
+        /// </summary>
+        private void CreateMainDisplay()
+        {
+            try
+            {
+                /* Configure the display. */
+                SelectConfiguration();
+
+                /* Create the main window. */
+                mainDisplay.Show(selectedDisplayMode, false);
+            }
+            catch (Exception e)
+            {
+                /* Fatal error - can't create the main display. */
+                var msg = "Failed to create the main display.";
+                Logger.Fatal(msg, e);
+                ErrorHandler.Error(e.Message);
+                throw new FatalErrorException(msg, e);
+            }
+        }
+
+        /// <summary>
+        /// Initializes the renderer.
+        /// </summary>
+        private void InitializeRenderer()
+        {
+            try
+            {
+                renderer.Initialize(selectedAdapter);
+            }
+            catch (Exception e)
+            {
+                /* Fatal error - can't initialize the renderer. */
+                var msg = "Failed to initialize the renderer.";
+                Logger.Fatal(msg, e);
+                ErrorHandler.Error(e.Message);
+                throw new FatalErrorException(msg, e);
+            }
         }
 
         /// <summary>

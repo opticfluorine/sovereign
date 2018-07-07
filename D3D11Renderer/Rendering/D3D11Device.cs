@@ -14,7 +14,7 @@ namespace Engine8.D3D11Renderer.Rendering
     /// <summary>
     /// Responsible for managing a Direct3D 11 device for rendering.
     /// </summary>
-    public class D3D11Device : IDisposable
+    public class D3D11Device 
     {
 
         /// <summary>
@@ -40,17 +40,19 @@ namespace Engine8.D3D11Renderer.Rendering
         /// <summary>
         /// Main display backed by this renderer.
         /// </summary>
-        private MainDisplay mainDisplay;
+        private readonly MainDisplay mainDisplay;
+
+        public D3D11Device(MainDisplay mainDisplay)
+        {
+            this.mainDisplay = mainDisplay;
+        }
 
         /// <summary>
         /// Creates the Direct3D 11 device.
         /// </summary>
-        /// <param name="mainDisplay">Main display that will be managed by this renderer.</param>
         /// <param name="videoAdapter">Video adapter to use.</param>
-        public D3D11Device(MainDisplay mainDisplay, D3D11VideoAdapter videoAdapter)
+        public void CreateDevice(D3D11VideoAdapter videoAdapter)
         {
-            this.mainDisplay = mainDisplay;
-
             /* Get information needed to create the device. */
             var nativeAdapter = videoAdapter.InternalAdapter;
             var nativeMode = ((D3D11DisplayMode)mainDisplay.DisplayMode).InternalModeDescription;
@@ -65,7 +67,10 @@ namespace Engine8.D3D11Renderer.Rendering
                 out swapChain);
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Cleans up the device and swapchain.
+        /// </summary>
+        public void Cleanup()
         {
             swapChain.Dispose();
             swapChain = null;

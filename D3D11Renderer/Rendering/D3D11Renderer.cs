@@ -2,6 +2,7 @@
 using Engine8.ClientCore.Rendering.Configuration;
 using Engine8.ClientCore.Rendering.Display;
 using Engine8.D3D11Renderer.Rendering.Configuration;
+using Engine8.D3D11Renderer.Rendering.Resources;
 using System;
 
 namespace Engine8.D3D11Renderer.Rendering
@@ -16,33 +17,53 @@ namespace Engine8.D3D11Renderer.Rendering
         /// <summary>
         /// Main display.
         /// </summary>
-        private MainDisplay mainDisplay;
+        private readonly MainDisplay mainDisplay;
 
         /// <summary>
         /// Device and swapchain that will be used for rendering.
         /// </summary>
-        private D3D11Device device;
+        private readonly D3D11Device device;
+
+        /// <summary>
+        /// D3D11 resource manager.
+        /// </summary>
+        private readonly D3D11ResourceManager resourceManager;
+
+        public D3D11Renderer(MainDisplay mainDisplay, D3D11ResourceManager resourceManager,
+            D3D11Device device)
+        {
+            this.mainDisplay = mainDisplay;
+            this.resourceManager = resourceManager;
+            this.device = device;
+        }
 
         /// <summary>
         /// Initializes the Direct3D 11-based renderer.
         /// </summary>
-        /// <param name="mainDisplay">Main display.</param>
         /// <param name="videoAdapter">Selected video adapter.</param>
         /// <exception cref="RendererInitializationException">
         /// Thrown if an error occurs during initialization.
         /// </exception>
-        public void Initialize(MainDisplay mainDisplay, IVideoAdapter videoAdapter)
+        public void Initialize(IVideoAdapter videoAdapter)
         {
-            this.mainDisplay = mainDisplay;
+            try
+            {
+                /* Attempt to create the rendering device. */
+                device.CreateDevice((D3D11VideoAdapter)videoAdapter);
 
-            /* Attempt to create the rendering device. */
-            CreateDevice((D3D11VideoAdapter)videoAdapter);
+                /* Install main resources. */
+                resourceManager.InitializeBaseResources();
+            }
+            catch (Exception e)
+            {
+                throw new RendererInitializationException("Could not initialize the renderer.", e);
+            }
         }
 
         public void Cleanup()
         {
-            device.Dispose();
-            device = null;
+            resourceManager.Cleanup();
+            device.Cleanup();
         }
 
         public void Render()
@@ -51,24 +72,6 @@ namespace Engine8.D3D11Renderer.Rendering
 
             /* Present the next frame. */
             device.Present();
-        }
-
-        /// <summary>
-        /// Creates the Direct3D 11 device.
-        /// </summary>
-        /// <exception cref="RendererInitializationException">
-        /// Thrown if an error occurs.
-        /// </exception>
-        private void CreateDevice(D3D11VideoAdapter videoAdapter)
-        {
-            try
-            {
-                device = new D3D11Device(mainDisplay, videoAdapter);
-            }
-            catch (Exception e)
-            {
-                throw new RendererInitializationException("Failed to create the Direct3D 11 device.", e);
-            }
         }
 
     }
