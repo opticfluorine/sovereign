@@ -192,6 +192,28 @@ namespace Engine8.ClientCore.Rendering
         }
 
         /// <summary>
+        /// Saves the surface to a PNG file.
+        /// </summary>
+        /// <param name="filename">Filename to save to.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the surface is not valid.
+        /// </exception>
+        /// <exception cref="SurfaceException">
+        /// Thrown if the image cannot be saved.
+        /// </exception>
+        public void SavePng(string filename)
+        {
+            /* Ensure the surface is valid. */
+            if (!IsValid)
+                throw new InvalidOperationException("Surface is not valid.");
+
+            /* Save the surface to a file. */
+            int status = SDL_image.IMG_SavePNG(surfacePointer, filename);
+            if (status < 0)
+                throw new SurfaceException(SDL.SDL_GetError());
+        }
+
+        /// <summary>
         /// Disposes of the surface by freeing the underlying memory.
         /// </summary>
         public void Dispose()

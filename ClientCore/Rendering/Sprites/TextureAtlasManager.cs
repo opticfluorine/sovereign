@@ -1,4 +1,7 @@
-﻿using Engine8.ClientCore.Rendering.Display;
+﻿using Castle.Core.Logging;
+using Engine8.ClientCore.Logging;
+using Engine8.ClientCore.Rendering.Display;
+using Engine8.EngineCore.Main;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +17,8 @@ namespace Engine8.ClientCore.Rendering.Sprites
     public class TextureAtlasManager
     {
 
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
         /// <summary>
         /// Texture atlas.
         /// </summary>
@@ -24,18 +29,45 @@ namespace Engine8.ClientCore.Rendering.Sprites
         /// </summary>
         private readonly MainDisplay mainDisplay;
 
-        public TextureAtlasManager(MainDisplay mainDisplay)
+        /// <summary>
+        /// Spritesheet manager.
+        /// </summary>
+        private readonly SpriteSheetManager spriteSheetManager;
+
+        public TextureAtlasManager(MainDisplay mainDisplay, SpriteSheetManager spriteSheetManager)
         {
             this.mainDisplay = mainDisplay;
+            this.spriteSheetManager = spriteSheetManager;
         }
 
         /// <summary>
         /// Initializes the texture atlas.
         /// </summary>
-        /// <param name="spriteSheets"></param>
-        public void InitializeTextureAtlas(IList<SpriteSheet> spriteSheets)
+        public void InitializeTextureAtlas()
         {
+            Logger.Info("Creating the texture atlas.");
 
+            try
+            {
+                TextureAtlas = new TextureAtlas(spriteSheetManager.SpriteSheets,
+                    mainDisplay.DisplayMode.DisplayFormat);
+            }
+            catch (Exception e)
+            {
+                /* Report error. */
+                var baseMessage = "Failed to create the texture atlas.";
+                Logger.Fatal(baseMessage, e);
+
+                var sb = new StringBuilder();
+                sb.Append(baseMessage).Append("\n\n").Append(e.Message);
+                ErrorHandler.Error(sb.ToString());
+
+                throw new FatalErrorException(baseMessage, e);
+            }
+
+            var w = TextureAtlas.AtlasSurface.Properties.Width;
+            var h = TextureAtlas.AtlasSurface.Properties.Height;
+            Logger.InfoFormat("Texture atlas created ({0} x {1}).", w, h);
         }
 
         /// <summary>
@@ -43,7 +75,7 @@ namespace Engine8.ClientCore.Rendering.Sprites
         /// </summary>
         public void ReleaseTextureAtlas()
         {
-
+            TextureAtlas.Dispose();
         }
 
     }

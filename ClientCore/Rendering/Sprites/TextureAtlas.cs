@@ -1,4 +1,5 @@
-﻿using Engine8.ClientCore.Rendering.Configuration;
+﻿using Castle.Core.Logging;
+using Engine8.ClientCore.Rendering.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace Engine8.ClientCore.Rendering.Sprites
     /// </summary>
     public class TextureAtlas : IDisposable
     {
+
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         /// <summary>
         /// Maximum width of the texture atlas.
@@ -98,7 +101,6 @@ namespace Engine8.ClientCore.Rendering.Sprites
                 if (newBaseX > MaxWidth)
                 {
                     /* Advance to next row. */
-                    maximumRowWidth = Math.Max(maximumRowWidth, baseX);
                     baseX = 0;
                     baseY += currentRowHeight;
                     newBaseX = nextWidth;
@@ -120,6 +122,7 @@ namespace Engine8.ClientCore.Rendering.Sprites
 
                 /* Advance to the next position. */
                 baseX = newBaseX;
+                maximumRowWidth = Math.Max(maximumRowWidth, baseX);
                 currentRowHeight = Math.Max(currentRowHeight, nextHeight);
             }
 
