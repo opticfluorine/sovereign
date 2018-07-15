@@ -34,7 +34,7 @@ namespace Engine8.D3D11Renderer.Rendering.Resources.Textures
 
         public void Dispose()
         {
-
+            Texture.Dispose();
         }
 
         private Texture2D CreateTexture(D3D11Device device, Surface surface)

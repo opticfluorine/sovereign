@@ -20,6 +20,13 @@ namespace Engine8.D3D11Renderer.Rendering
             /* D3D11Device. */
             container.Register(Component.For<D3D11Device>()
                 .LifestyleSingleton());
+
+            /* IRenderStage. */
+            container.Register(Classes.FromThisAssembly()
+                .BasedOn<IRenderStage>()
+                .WithServiceDefaultInterfaces()
+                .LifestyleSingleton()
+                .AllowMultipleMatches());
         }
     }
 }

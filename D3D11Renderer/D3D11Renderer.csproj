@@ -73,6 +73,8 @@
     <Compile Include="Rendering\Resources\Textures\D3D11Texture.cs" />
     <Compile Include="Rendering\UI\D3D11UIRenderStage.cs" />
     <Compile Include="Rendering\World\D3D11WorldRenderStage.cs" />
+    <Compile Include="Rendering\World\SingleLayerTileRenderStep.cs" />
+    <Compile Include="Rendering\World\WorldRenderStageInstaller.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -90,6 +92,9 @@
       <Project>{6440b9bb-8545-4d8f-9f89-b8a876cc9977}</Project>
       <Name>EngineUtil</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\Shader\WorldShader.hlsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

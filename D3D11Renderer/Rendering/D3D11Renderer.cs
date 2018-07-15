@@ -4,6 +4,8 @@ using Engine8.ClientCore.Rendering.Display;
 using Engine8.D3D11Renderer.Rendering.Configuration;
 using Engine8.D3D11Renderer.Rendering.Resources;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine8.D3D11Renderer.Rendering
 {
@@ -29,12 +31,18 @@ namespace Engine8.D3D11Renderer.Rendering
         /// </summary>
         private readonly D3D11ResourceManager resourceManager;
 
+        /// <summary>
+        /// Render stages.
+        /// </summary>
+        private readonly List<IRenderStage> renderStages = new List<IRenderStage>();
+
         public D3D11Renderer(MainDisplay mainDisplay, D3D11ResourceManager resourceManager,
-            D3D11Device device)
+            D3D11Device device, IList<IRenderStage> renderStages)
         {
             this.mainDisplay = mainDisplay;
             this.resourceManager = resourceManager;
             this.device = device;
+            SortRenderStages(renderStages);
         }
 
         /// <summary>
@@ -53,6 +61,12 @@ namespace Engine8.D3D11Renderer.Rendering
 
                 /* Install main resources. */
                 resourceManager.InitializeBaseResources();
+
+                /* Initialize render stages. */
+                foreach (var stage in renderStages)
+                {
+                    stage.Initialize();
+                }
             }
             catch (Exception e)
             {
@@ -62,16 +76,38 @@ namespace Engine8.D3D11Renderer.Rendering
 
         public void Cleanup()
         {
+            /* Release render stages. */
+            foreach (var stage in renderStages)
+            {
+                stage.Cleanup();
+            }
+
+            /* Release resources. */
             resourceManager.Cleanup();
+
+            /* Release device. */
             device.Cleanup();
         }
 
         public void Render()
         {
             /* Perform rendering. */
+            foreach (var stage in renderStages)
+            {
+                stage.Render();
+            }
 
             /* Present the next frame. */
             device.Present();
+        }
+
+        /// <summary>
+        /// Sorts the render stages into the order in which they are executed.
+        /// </summary>
+        /// <param name="stages">Render stages.</param>
+        private void SortRenderStages(IList<IRenderStage> stages)
+        {
+            renderStages.AddRange(stages.OrderBy(stage => stage.Priority));
         }
 
     }
