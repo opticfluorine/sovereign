@@ -118,19 +118,19 @@ namespace Engine8.EngineUtil.Collections
             public OctreeNode[] ChildNodes { get; private set; } = new OctreeNode[8];
 
             /// <summary>
-            /// X partition.
+            /// Minimum extents of the node.
             /// </summary>
-            public float XPartition { get; private set; }
+            public Vector3<float> MinExtents { get; private set; }
 
             /// <summary>
-            /// Y partition.
+            /// Maximum extents of the node.
             /// </summary>
-            public float YPartition { get; private set; }
+            public Vector3<float> MaxExtents { get; private set; }
 
             /// <summary>
-            /// Z partition.
+            /// Partitions between octants.
             /// </summary>
-            public float ZPartition { get; private set; }
+            public Vector3<float> Partitions { get; private set; }
 
             /// <summary>
             /// Whether this node or any child has been modified since the last call
@@ -213,9 +213,9 @@ namespace Engine8.EngineUtil.Collections
             /// <returns>Index of the octant that contains the point.</returns>
             private Octant GetOctantForPoint(Vector3<float> point)
             {
-                var isTop = point.z > ZPartition;
-                var isNorth = point.y > YPartition;
-                var isEast = point.x > XPartition;
+                var isTop = point.z > Partitions.z;
+                var isNorth = point.y > Partitions.y;
+                var isEast = point.x > Partitions.x;
 
                 return (isTop ? Octant.Top : 0)
                     | (isNorth ? Octant.North : 0)
@@ -266,9 +266,14 @@ namespace Engine8.EngineUtil.Collections
                 IsModified = true;
 
                 /* Bisect the axes to get the new partitions. */
-                XPartition = (minExtents.x + maxExtents.x) / 2.0f;
-                YPartition = (minExtents.y + maxExtents.y) / 2.0f;
-                ZPartition = (minExtents.z + maxExtents.z) / 2.0f;
+                MinExtents = minExtents;
+                MaxExtents = maxExtents;
+                Partitions = new Vector3<float>()
+                {
+                    x = (MinExtents.x + MaxExtents.x) * 0.5f,
+                    y = (MinExtents.y + MaxExtents.y) * 0.5f,
+                    z = (MinExtents.z + MaxExtents.z) * 0.5f
+                };
 
                 /* Determine whether this node is a leaf. */
                 Objects.UnionWith(objects);
@@ -287,17 +292,14 @@ namespace Engine8.EngineUtil.Collections
                 var octantSets = PartitionObjects(objects);
 
                 /* Create the child nodes. */
-                CreateChildNodes(octantSets, minExtents, maxExtents);
+                CreateChildNodes(octantSets);
             }
 
             /// <summary>
             /// Creates the child nodes.
             /// </summary>
             /// <param name="octantSets">Partitioned object sets.</param>
-            /// <param name="minExtents">Minimum extents of the current node.</param>
-            /// <param name="maxExtents">Maximum extents of the current node.</param>
-            private void CreateChildNodes(ISet<T>[] octantSets, Vector3<float> minExtents,
-                Vector3<float> maxExtents)
+            private void CreateChildNodes(ISet<T>[] octantSets)
             {
                 /* Iterate over the octants. */
                 for (int i = 0; i < 8; ++i)
@@ -310,15 +312,15 @@ namespace Engine8.EngineUtil.Collections
                     var octant = (Octant)i;
                     var newMinExtents = new Vector3<float>()
                     {
-                        x = octant.HasFlag(Octant.East) ? XPartition : minExtents.x,
-                        y = octant.HasFlag(Octant.North) ? YPartition : minExtents.y,
-                        z = octant.HasFlag(Octant.Top) ? ZPartition : minExtents.z
+                        x = octant.HasFlag(Octant.East) ? Partitions.x : MinExtents.x,
+                        y = octant.HasFlag(Octant.North) ? Partitions.y : MinExtents.y,
+                        z = octant.HasFlag(Octant.Top) ? Partitions.z : MinExtents.z
                     };
                     var newMaxExtents = new Vector3<float>()
                     {
-                        x = octant.HasFlag(Octant.East) ? maxExtents.x : XPartition,
-                        y = octant.HasFlag(Octant.North) ? maxExtents.y : YPartition,
-                        z = octant.HasFlag(Octant.Top) ? maxExtents.z : ZPartition
+                        x = octant.HasFlag(Octant.East) ? MaxExtents.x : Partitions.x,
+                        y = octant.HasFlag(Octant.North) ? MaxExtents.y : Partitions.y,
+                        z = octant.HasFlag(Octant.Top) ? MaxExtents.z : Partitions.z 
                     };
 
                     /* Create the child node. */
