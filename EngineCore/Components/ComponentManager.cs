@@ -39,11 +39,15 @@ namespace Engine8.EngineCore.Components
         /// <summary>
         /// All known component updaters.
         /// </summary>
-        private readonly IList<IComponentUpdater> componentUpdaters;
+        private readonly IList<IComponentUpdater> componentUpdaters = new List<IComponentUpdater>();
 
-        public ComponentManager(IList<IComponentUpdater> componentUpdaters)
+        /// <summary>
+        /// Registers a component updater with the manager.
+        /// </summary>
+        /// <param name="updater">Component updater to be registered.</param>
+        public void RegisterComponentUpdater(IComponentUpdater updater)
         {
-            this.componentUpdaters = componentUpdaters;
+            componentUpdaters.Add(updater);
         }
 
         /// <summary>

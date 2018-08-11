@@ -64,6 +64,11 @@ namespace Engine8.EngineCore.Components
         public ILogger Log { private get; set; } = NullLogger.Instance;
 
         /// <summary>
+        /// Component manager. Supplied by the IoC container.
+        /// </summary>
+        public ComponentManager ComponentManager { private get; set; }
+
+        /// <summary>
         /// Underlying component array.
         /// </summary>
         private readonly List<T> components;
@@ -162,6 +167,9 @@ namespace Engine8.EngineCore.Components
             {
                 pendingModifications[operation] = new StructBuffer<PendingModify>(OperationBufferSize);
             }
+
+            /* Register with the component manager. */
+            ComponentManager.RegisterComponentUpdater(this);
         }
 
         /// <summary>
