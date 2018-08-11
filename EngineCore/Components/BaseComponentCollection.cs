@@ -53,7 +53,7 @@ namespace Engine8.EngineCore.Components
     /// is currently enqueued for addition.
     /// 
     /// <typeparam name="T">Component value type.</typeparam>
-    public class BaseComponentCollection<T> : IComponentUpdater
+    public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSource<T>
     {
 
         /// <summary>
@@ -123,25 +123,12 @@ namespace Engine8.EngineCore.Components
         private readonly ISet<ulong> pendingRemoveEvents = new HashSet<ulong>();
 
         /// <summary>
-        /// Delegate type used to communicate component add and update events.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        /// <param name="componentValue">New component value.</param>
-        public delegate void ComponentEventHandler(ulong entityId, T componentValue);
-
-        /// <summary>
-        /// Delegate type used to communicate component remove events.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        public delegate void ComponentRemovedEventHandler(ulong entityId);
-
-        /// <summary>
         /// Event triggered when a component is added to the collection.
         /// </summary>
         ///
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        public event ComponentEventHandler OnComponentAdded;
+        public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentAdded;
 
         /// <summary>
         /// Event triggered when a component is removed from the collection.
@@ -149,7 +136,7 @@ namespace Engine8.EngineCore.Components
         ///
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        public event ComponentRemovedEventHandler OnComponentRemoved;
+        public event ComponentEventDelegates<T>.ComponentRemovedEventHandler OnComponentRemoved;
 
         /// <summary>
         /// Event triggered when an existing component is updated.
@@ -157,7 +144,7 @@ namespace Engine8.EngineCore.Components
         /// 
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        public event ComponentEventHandler OnComponentModified;
+        public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentModified;
 
         /// <summary>
         /// Creates a base component collection.
