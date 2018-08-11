@@ -28,6 +28,7 @@ namespace Engine8.EngineCore.Components
                 .BasedOn(typeof(BaseComponentCollection<>))
                 .WithServiceBase()
                 .WithServiceSelf()
+                .WithServices(typeof(IComponentUpdater))
                 .LifestyleSingleton()
                 .AllowMultipleMatches());
         }

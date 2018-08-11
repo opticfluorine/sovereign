@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Engine8.EngineUtil.Collections;
 
 namespace Engine8.EngineCore.Components
 {
@@ -52,8 +53,13 @@ namespace Engine8.EngineCore.Components
     /// is currently enqueued for addition.
     /// 
     /// <typeparam name="T">Component value type.</typeparam>
-    public class BaseComponentCollection<T>
+    public class BaseComponentCollection<T> : IComponentUpdater
     {
+
+        /// <summary>
+        /// Internal operation buffer size.
+        /// </summary>
+        private const int OperationBufferSize = 1024;
 
         public ILogger Log { private get; set; } = NullLogger.Instance;
 
@@ -87,20 +93,47 @@ namespace Engine8.EngineCore.Components
         /// <summary>
         /// Pending component additions.
         /// </summary>
-        private readonly ConcurrentQueue<PendingAdd> pendingAdds 
-            = new ConcurrentQueue<PendingAdd>();
+        private readonly StructBuffer<PendingAdd> pendingAdds = new StructBuffer<PendingAdd>(OperationBufferSize);
 
         /// <summary>
         /// Pending component modifications binned by operation.
         /// </summary>
-        private readonly IDictionary<ComponentOperation, ConcurrentQueue<PendingModify>> 
-            pendingModifications = new Dictionary<ComponentOperation, ConcurrentQueue<PendingModify>>();
+        private readonly IDictionary<ComponentOperation, StructBuffer<PendingModify>> 
+            pendingModifications = new Dictionary<ComponentOperation, StructBuffer<PendingModify>>();
 
         /// <summary>
         /// Pending component removals.
         /// </summary>
-        private readonly ConcurrentQueue<PendingRemove> pendingRemoves 
-            = new ConcurrentQueue<PendingRemove>();
+        private readonly StructBuffer<PendingRemove> pendingRemoves 
+            = new StructBuffer<PendingRemove>(OperationBufferSize);
+
+        /// <summary>
+        /// Add events that are pending invocation.
+        /// </summary>
+        private readonly ISet<ulong> pendingAddEvents = new HashSet<ulong>();
+
+        /// <summary>
+        /// Modify events that are pending invocation.
+        /// </summary>
+        private readonly ISet<ulong> pendingModifyEvents = new HashSet<ulong>();
+
+        /// <summary>
+        /// Remove events that are pending invocation.
+        /// </summary>
+        private readonly ISet<ulong> pendingRemoveEvents = new HashSet<ulong>();
+
+        /// <summary>
+        /// Delegate type used to communicate component add and update events.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        /// <param name="componentValue">New component value.</param>
+        public delegate void ComponentEventHandler(ulong entityId, T componentValue);
+
+        /// <summary>
+        /// Delegate type used to communicate component remove events.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        public delegate void ComponentRemovedEventHandler(ulong entityId);
 
         /// <summary>
         /// Event triggered when a component is added to the collection.
@@ -108,7 +141,7 @@ namespace Engine8.EngineCore.Components
         ///
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        public event EventHandler OnComponentAdded;
+        public event ComponentEventHandler OnComponentAdded;
 
         /// <summary>
         /// Event triggered when a component is removed from the collection.
@@ -116,7 +149,7 @@ namespace Engine8.EngineCore.Components
         ///
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        public event EventHandler OnComponentRemoved;
+        public event ComponentRemovedEventHandler OnComponentRemoved;
 
         /// <summary>
         /// Event triggered when an existing component is updated.
@@ -124,7 +157,7 @@ namespace Engine8.EngineCore.Components
         /// 
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        public event EventHandler OnComponentModified;
+        public event ComponentEventHandler OnComponentModified;
 
         /// <summary>
         /// Creates a base component collection.
@@ -140,7 +173,7 @@ namespace Engine8.EngineCore.Components
             /* Key up the allowed operators. */
             foreach (var operation in operators.Keys)
             {
-                pendingModifications[operation] = new ConcurrentQueue<PendingModify>();
+                pendingModifications[operation] = new StructBuffer<PendingModify>(OperationBufferSize);
             }
         }
 
@@ -189,7 +222,7 @@ namespace Engine8.EngineCore.Components
                     EntityId = entityId,
                     InitialValue = initialValue,
                 };
-                pendingAdds.Enqueue(pendingAdd);
+                pendingAdds.Add(ref pendingAdd);
             }
         }
 
@@ -226,7 +259,7 @@ namespace Engine8.EngineCore.Components
                 ComponentOperation = operation,
                 Adjustment = adjustment,
             };
-            pendingModifications[operation].Enqueue(pendingModify);
+            pendingModifications[operation].Add(ref pendingModify);
         }
 
         /// <summary>
@@ -244,7 +277,7 @@ namespace Engine8.EngineCore.Components
             {
                 EntityId = entityId,
             };
-            pendingRemoves.Enqueue(pendingRemove);
+            pendingRemoves.Add(ref pendingRemove);
         }
 
         /// <summary>
@@ -278,9 +311,23 @@ namespace Engine8.EngineCore.Components
         /// </summary>
         public void ApplyComponentUpdates()
         {
+            /* Apply all pending operations. */
             ApplyAdds();
             ApplyModifications();
             ApplyRemoves();
+
+            /* Dispatch events as needed. */
+            FireComponentEvents();
+        }
+
+        /// <summary>
+        /// Fires all pending component events.
+        /// </summary>
+        private void FireComponentEvents()
+        {
+            FireAddEvents();
+            FireModificationEvents();
+            FireRemoveEvents();
         }
 
         /// <summary>
@@ -289,10 +336,14 @@ namespace Engine8.EngineCore.Components
         private void ApplyAdds()
         {
             /* Iterate over new components. */
-            while (pendingAdds.TryDequeue(out PendingAdd pendingAdd))
+            foreach (var pendingAdd in pendingAdds)
             {
                 ApplyAddComponent(pendingAdd.EntityId, pendingAdd.InitialValue);
+                pendingAddEvents.Add(pendingAdd.EntityId);
             }
+
+            /* Reset the buffer. */
+            pendingAdds.Clear();
         }
 
         /// <summary>
@@ -306,12 +357,15 @@ namespace Engine8.EngineCore.Components
                 /* Transform and update all components. */
                 var op = operators[operation];
                 var queue = pendingModifications[operation];
-                while (queue.TryDequeue(out PendingModify pendingUpdate))
+                foreach (var pendingModify in queue)
                 {
-                    var transformed = op(components[pendingUpdate.ComponentIndex],
-                        pendingUpdate.Adjustment);
-                    components[pendingUpdate.ComponentIndex] = transformed;
+                    var transformed = op(components[pendingModify.ComponentIndex],
+                        pendingModify.Adjustment);
+                    components[pendingModify.ComponentIndex] = transformed;
                 }
+
+                /* Reset the buffer. */
+                queue.Clear();
             }
         }
 
@@ -320,10 +374,73 @@ namespace Engine8.EngineCore.Components
         /// </summary>
         private void ApplyRemoves()
         {
-            while (pendingRemoves.TryDequeue(out PendingRemove pendingRemove))
+            /* Apply operations. */
+            foreach (var pendingRemove in pendingRemoves)
             {
                 ApplyRemoveComponent(pendingRemove.EntityId);
             }
+
+            /* Clear the buffer. */
+            pendingRemoves.Clear();
+        }
+
+        /// <summary>
+        /// Fires events for component additions.
+        /// </summary>
+        private void FireAddEvents()
+        {
+            /* Iterate over entities that have been added. */
+            if (OnComponentAdded != null)
+            {
+                foreach (var entityId in pendingAddEvents)
+                {
+                    /* Notify all listeners. */
+                    var value = this[entityId];
+                    OnComponentAdded?.Invoke(entityId, value);
+                }
+            }
+
+            /* Reset the pending events. */
+            pendingAddEvents.Clear();
+        }
+
+        /// <summary>
+        /// Fires events for component modifications.
+        /// </summary>
+        private void FireModificationEvents()
+        {
+            /* Iterate over entities that have been modified. */
+            if (OnComponentModified != null)
+            {
+                foreach (var entityId in pendingModifyEvents)
+                {
+                    /* Notify all listeners. */
+                    var value = this[entityId];
+                    OnComponentModified.Invoke(entityId, value);
+                }
+            }
+
+            /* Reset the pending events. */
+            pendingModifyEvents.Clear();
+        }
+
+        /// <summary>
+        /// Fires events for component removals.
+        /// </summary>
+        private void FireRemoveEvents()
+        {
+            /* Iterate over entities that have been removed. */
+            if (OnComponentRemoved != null)
+            {
+                foreach (var entityId in pendingRemoveEvents)
+                {
+                    /* Notify all listeners. */
+                    OnComponentRemoved.Invoke(entityId);
+                }
+            }
+
+            /* Reset the pending events. */
+            pendingRemoveEvents.Clear();
         }
 
         /// <summary>
