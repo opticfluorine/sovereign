@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -12,7 +13,9 @@ namespace Engine8.EngineCore.Components.Indexers
     /// <summary>
     /// Manages a position-based index into a ComponentCollection.
     /// </summary>
-    public class PositionIndexer : IDisposable
+    ///
+    /// Extend this class for each ComponentCollection that requires position indexing.
+    public class BasePositionComponentIndexer : IDisposable
     {
 
         /// <summary>
@@ -28,8 +31,10 @@ namespace Engine8.EngineCore.Components.Indexers
         /// <summary>
         /// Creates an indexer for the given component collection.
         /// </summary>
+        /// <param name="componennCollection">Component collection.</param>
         /// <param name="componentEventSource">Component event source.</param>
-        protected PositionIndexer(IComponentEventSource<Vector<float>> componentEventSource)
+        protected BasePositionComponentIndexer(BaseComponentCollection<Vector<float>> componennCollection, 
+            IComponentEventSource<Vector<float>> componentEventSource)
         {
             this.componentEventSource = componentEventSource;
 
@@ -39,6 +44,7 @@ namespace Engine8.EngineCore.Components.Indexers
             componentEventSource.OnComponentRemoved += OnComponentRemoved;
 
             /* Create the initial index. */
+            octree = new Octree<ulong>(componennCollection.GetAllComponents());
         }
 
         public void Dispose()
@@ -47,6 +53,35 @@ namespace Engine8.EngineCore.Components.Indexers
             componentEventSource.OnComponentAdded -= OnComponentAdded;
             componentEventSource.OnComponentModified -= OnComponentModified;
             componentEventSource.OnComponentRemoved -= OnComponentRemoved;
+        }
+
+        /// <summary>
+        /// Finds all entities with position components in the box with minPosition at
+        /// the bottom-left corner and maxPosition at the top-right corner.
+        /// </summary>
+        /// <param name="minPosition">Bottom-left corner of the search space.</param>
+        /// <param name="maxPosition">Top-right corner of the search space.</param>
+        /// <returns>All entities with position components in the given range.</returns>
+        public IEnumerable<ulong> GetEntitiesInRange(Vector<float> minPosition, Vector<float> maxPosition)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Finds all entities in the given range and bins them by the z component of their position.
+        /// </summary>
+        /// <param name="minPosition">Bottom-left corner of the search space.</param>
+        /// <param name="maxPosition">Top-right corner of the search space.</param>
+        /// <param name="binSize">Interval on which bins are created.</param>
+        ///
+        /// The bin boundaries are a sequence 0, binSize, 2 * binSize, ..., n * binSize. Each bin has
+        /// inclusive lower bound and exclusive upper bound.
+        /// 
+        /// <returns>Dictionary mapping the floor of each bin to the entities in the bin.</returns>
+        public IDictionary<float, IEnumerable<ulong>> GetEntitiesInRangeZBinned(Vector<float> minPosition,
+            Vector<float> maxPosition, float binSize = 1.0f)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

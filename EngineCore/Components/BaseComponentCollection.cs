@@ -294,6 +294,26 @@ namespace Engine8.EngineCore.Components
         }
 
         /// <summary>
+        /// Creates a dictionary mapping entity IDs to all known components.
+        /// </summary>
+        ///
+        /// This method should be used sparingly - it requires allocation and creation of
+        /// an entire dictionary. It is intended to be used in the initial creation of
+        /// a ComponentIndexer. Consider using GetComponentForEntity() in combination
+        /// with an appropriate ComponentIndexer instead.
+        /// 
+        /// <returns>Dictionary mapping entity IDs to all known components.</returns>
+        public IDictionary<ulong, T> GetAllComponents()
+        {
+            var dict = new Dictionary<ulong, T>();
+            foreach (var entityId in entityToComponentMap.Keys)
+            {
+                dict[entityId] = components[entityToComponentMap[entityId]];
+            }
+            return dict;
+        }
+
+        /// <summary>
         /// Applies pending component updates.
         /// </summary>
         public void ApplyComponentUpdates()

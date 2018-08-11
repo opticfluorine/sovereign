@@ -12,7 +12,7 @@ namespace Engine8.EngineCore.Systems.Movement.Components
     /// <summary>
     /// Manages the velocities of all mobile entities.
     /// </summary>
-    public class VelocityComponentCollection : BaseComponentCollection<Vector<float>>
+    public sealed class VelocityComponentCollection : BaseComponentCollection<Vector<float>>
     {
 
         /// <summary>
