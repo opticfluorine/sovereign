@@ -87,10 +87,9 @@ namespace Engine8.EngineCore.Components.Indexers
         /// <summary>
         /// Called when a component is added.
         /// </summary>
-        /// <param name="sender">Object that sent the event.</param>
-        /// <param name="eventArgs">Event arguments.</param>
-        private void OnComponentAdded(Object sender,
-            ComponentAddModifyEventArgs<Vector<float>> eventArgs)
+        /// <param name="entityId">Entity ID.</param>
+        /// <param name="position">Initial position.</param>
+        private void OnComponentAdded(ulong entityId, Vector<float> position)
         {
 
         }
@@ -98,10 +97,9 @@ namespace Engine8.EngineCore.Components.Indexers
         /// <summary>
         /// Called when a component is modified.
         /// </summary>
-        /// <param name="sender">Object that sent the event.</param>
-        /// <param name="eventArgs">Event arguments.</param>
-        private void OnComponentModified(Object sender,
-            ComponentAddModifyEventArgs<Vector<float>> eventArgs)
+        /// <param name="entityId">Entity ID.</param>
+        /// <param name="position">New position.</param>
+        private void OnComponentModified(ulong entityId, Vector<float> position)
         {
 
         }
@@ -109,10 +107,8 @@ namespace Engine8.EngineCore.Components.Indexers
         /// <summary>
         /// Called when a component is removed.
         /// </summary>
-        /// <param name="sender">Object that sent the event.</param>
-        /// <param name="eventArgs">Event arguments.</param>
-        private void OnComponentRemoved(Object sender,
-            ComponentRemoveEventArgs eventArgs)
+        /// <param name="entityId">Entity ID.</param>
+        private void OnComponentRemoved(ulong entityId)
         {
 
         }

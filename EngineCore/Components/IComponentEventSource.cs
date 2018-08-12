@@ -20,7 +20,7 @@ namespace Engine8.EngineCore.Components
         ///
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        event EventHandler<ComponentAddModifyEventArgs<T>> OnComponentAdded;
+        event ComponentEventDelegates<T>.ComponentEventHandler OnComponentAdded;
 
         /// <summary>
         /// Event triggered when a component is removed from the collection.
@@ -28,7 +28,7 @@ namespace Engine8.EngineCore.Components
         ///
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        event EventHandler<ComponentRemoveEventArgs> OnComponentRemoved;
+        event ComponentEventDelegates<T>.ComponentRemovedEventHandler OnComponentRemoved;
 
         /// <summary>
         /// Event triggered when an existing component is updated.
@@ -36,7 +36,7 @@ namespace Engine8.EngineCore.Components
         /// 
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        event EventHandler<ComponentAddModifyEventArgs<T>> OnComponentModified;
+        event ComponentEventDelegates<T>.ComponentEventHandler OnComponentModified;
 
     }
 

@@ -61,14 +61,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\BaseComponentCollection.cs" />
-    <Compile Include="Components\ComponentAddModifyEventArgs.cs" />
     <Compile Include="Components\ComponentEventDelegates.cs" />
     <Compile Include="Components\ComponentId.cs" />
     <Compile Include="Components\ComponentInstaller.cs" />
     <Compile Include="Components\ComponentManager.cs" />
     <Compile Include="Components\ComponentOperation.cs" />
     <Compile Include="Components\ComponentOperators.cs" />
-    <Compile Include="Components\ComponentRemoveEventArgs.cs" />
     <Compile Include="Components\IComponentEventSource.cs" />
     <Compile Include="Components\IComponentUpdater.cs" />
     <Compile Include="Components\Indexers\BasePositionComponentIndexer.cs" />
