@@ -61,27 +61,11 @@ namespace Engine8.EngineCore.Components.Indexers
         /// </summary>
         /// <param name="minPosition">Bottom-left corner of the search space.</param>
         /// <param name="maxPosition">Top-right corner of the search space.</param>
-        /// <returns>All entities with position components in the given range.</returns>
-        public IEnumerable<ulong> GetEntitiesInRange(Vector<float> minPosition, Vector<float> maxPosition)
+        /// <param name="buffer">Buffer to which the results will be appended.</param>
+        public void GetEntitiesInRange(Vector<float> minPosition, Vector<float> maxPosition,
+            IList<Tuple<Vector<float>, ulong>> buffer)
         {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Finds all entities in the given range and bins them by the z component of their position.
-        /// </summary>
-        /// <param name="minPosition">Bottom-left corner of the search space.</param>
-        /// <param name="maxPosition">Top-right corner of the search space.</param>
-        /// <param name="binSize">Interval on which bins are created.</param>
-        ///
-        /// The bin boundaries are a sequence 0, binSize, 2 * binSize, ..., n * binSize. Each bin has
-        /// inclusive lower bound and exclusive upper bound.
-        /// 
-        /// <returns>Dictionary mapping the floor of each bin to the entities in the bin.</returns>
-        public IDictionary<float, IEnumerable<ulong>> GetEntitiesInRangeZBinned(Vector<float> minPosition,
-            Vector<float> maxPosition, float binSize = 1.0f)
-        {
-            throw new NotImplementedException();
+            octree.GetElementsInRange(minPosition, maxPosition, buffer);
         }
 
         /// <summary>
@@ -91,7 +75,7 @@ namespace Engine8.EngineCore.Components.Indexers
         /// <param name="position">Initial position.</param>
         private void OnComponentAdded(ulong entityId, Vector<float> position)
         {
-
+            octree.Add(position, entityId);
         }
 
         /// <summary>
@@ -101,7 +85,7 @@ namespace Engine8.EngineCore.Components.Indexers
         /// <param name="position">New position.</param>
         private void OnComponentModified(ulong entityId, Vector<float> position)
         {
-
+            octree.UpdatePosition(entityId, position);
         }
 
         /// <summary>
@@ -110,7 +94,7 @@ namespace Engine8.EngineCore.Components.Indexers
         /// <param name="entityId">Entity ID.</param>
         private void OnComponentRemoved(ulong entityId)
         {
-
+            octree.Remove(entityId);
         }
 
     }
