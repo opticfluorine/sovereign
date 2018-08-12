@@ -5,7 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using Engine8.EngineUtil.Collections;
+using Engine8.EngineUtil.Collections.Octree;
 
 namespace Engine8.EngineCore.Components.Indexers
 {

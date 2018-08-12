@@ -5,7 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
-namespace Engine8.EngineUtil.Collections
+namespace Engine8.EngineUtil.Collections.Octree
 {
 
     /// <summary>
