@@ -133,7 +133,7 @@ namespace Engine8.EngineCore.Components
         ///
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentAdded;
+        public event EventHandler<ComponentAddModifyEventArgs<T>> OnComponentAdded;
 
         /// <summary>
         /// Event triggered when a component is removed from the collection.
@@ -141,7 +141,7 @@ namespace Engine8.EngineCore.Components
         ///
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        public event ComponentEventDelegates<T>.ComponentRemovedEventHandler OnComponentRemoved;
+        public event EventHandler<ComponentRemoveEventArgs> OnComponentRemoved;
 
         /// <summary>
         /// Event triggered when an existing component is updated.
@@ -149,7 +149,7 @@ namespace Engine8.EngineCore.Components
         /// 
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
-        public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentModified;
+        public event EventHandler<ComponentAddModifyEventArgs<T>> OnComponentModified;
 
         /// <summary>
         /// Creates a base component collection.
@@ -411,7 +411,7 @@ namespace Engine8.EngineCore.Components
                 {
                     /* Notify all listeners. */
                     var value = this[entityId];
-                    OnComponentAdded?.Invoke(entityId, value);
+                    OnComponentAdded.Invoke(this, new ComponentAddModifyEventArgs<T>(entityId, value));
                 }
             }
 
@@ -431,7 +431,7 @@ namespace Engine8.EngineCore.Components
                 {
                     /* Notify all listeners. */
                     var value = this[entityId];
-                    OnComponentModified.Invoke(entityId, value);
+                    OnComponentModified.Invoke(this, new ComponentAddModifyEventArgs<T>(entityId, value));
                 }
             }
 
@@ -450,7 +450,7 @@ namespace Engine8.EngineCore.Components
                 foreach (var entityId in pendingRemoveEvents)
                 {
                     /* Notify all listeners. */
-                    OnComponentRemoved.Invoke(entityId);
+                    OnComponentRemoved.Invoke(this, new ComponentRemoveEventArgs(entityId));
                 }
             }
 
