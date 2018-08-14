@@ -33,7 +33,7 @@ namespace Engine8.EngineCore.Components
             VectorOperators = new Dictionary<ComponentOperation, Func<Vector<float>, Vector<float>, Vector<float>>>()
             {
                 {ComponentOperation.Set, (a, b) => b},
-                {ComponentOperation.Add, (a, b) => a + b},
+                {ComponentOperation.Add, Vector.Add},
             };
 
     }

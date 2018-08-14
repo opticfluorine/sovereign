@@ -44,7 +44,8 @@ namespace Engine8.EngineCore.Components.Indexers
             componentEventSource.OnComponentRemoved += OnComponentRemoved;
 
             /* Create the initial index. */
-            octree = new Octree<ulong>(componennCollection.GetAllComponents());
+            octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin, 
+                componennCollection.GetAllComponents());
         }
 
         public void Dispose()
