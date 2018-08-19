@@ -40,6 +40,11 @@ namespace Engine8.EngineUtil.Collections.Octree
         public readonly float MinimumNodeSize;
 
         /// <summary>
+        /// The number of elements known to the octree.
+        /// </summary>
+        public int Count => rootNode.elementPositions.Count;
+
+        /// <summary>
         /// Root node of the octree.
         /// </summary>
         private OctreeNode<T> rootNode;
@@ -130,13 +135,25 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// 
         /// <param name="lockHandle">Active lock handle.</param>
         /// <param name="element">Element to be removed.</param>
-        /// 
-        /// <exception cref="KeyNotFoundException">
-        /// Thrown if the element is not in the octree.
-        /// </exception>
         public void Remove(OctreeLock lockHandle, T element)
         {
-            throw new NotImplementedException();
+            /* Scan down from the root node. */
+            var currentNode = rootNode;
+            while (currentNode != null)
+            {
+                /* Remove item from the current node. */
+                currentNode.elementPositions.Remove(element);
+
+                /* Descend if needed. */
+                OctreeNode<T> nextNode = null;
+                foreach (var childNode in currentNode.childNodes)
+                {
+                    if (childNode == null) continue;
+                    if (childNode.elementPositions.ContainsKey(element))
+                        nextNode = childNode;
+                }
+                currentNode = nextNode;
+            }
         }
 
         /// <summary>

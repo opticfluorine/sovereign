@@ -15,6 +15,14 @@ namespace Engine8.EngineCore.Components
     {
 
         /// <summary>
+        /// Event triggered when component updates are started.
+        /// </summary>
+        /// 
+        /// This is intended for use with data view objects that are updated
+        /// on the main thread once component updates for a given tick are complete.
+        event EventHandler OnStartUpdates;
+
+        /// <summary>
         /// Event triggered when a component is added to the collection.
         /// </summary>
         ///
@@ -37,6 +45,14 @@ namespace Engine8.EngineCore.Components
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
         event ComponentEventDelegates<T>.ComponentEventHandler OnComponentModified;
+
+        /// <summary>
+        /// Event triggered when component updates are complete.
+        /// </summary>
+        /// 
+        /// This is intended for use with data view objects that are updated
+        /// on the main thread once component updates for a given tick are complete.
+        event EventHandler OnEndUpdates;
 
     }
 

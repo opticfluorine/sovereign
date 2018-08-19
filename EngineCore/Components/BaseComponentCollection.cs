@@ -128,6 +128,14 @@ namespace Engine8.EngineCore.Components
         private readonly ISet<ulong> pendingRemoveEvents = new HashSet<ulong>();
 
         /// <summary>
+        /// Event triggered when the component collection begins firing component events.
+        /// </summary>
+        /// 
+        /// This is intended for use with data view objects that are updated
+        /// on the main thread once component updates for a given tick are complete.
+        public event EventHandler OnStartUpdates;
+
+        /// <summary>
         /// Event triggered when a component is added to the collection.
         /// </summary>
         ///
@@ -150,6 +158,14 @@ namespace Engine8.EngineCore.Components
         /// This is intended for use with data view objects that are updated
         /// on the main thread once component updates for a given tick are complete.
         public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentModified;
+
+        /// <summary>
+        /// Event triggered when the component collection has finished firing component events.
+        /// </summary>
+        /// 
+        /// This is intended for use with data view objects that are updated
+        /// on the main thread once component updates for a given tick are complete.
+        public event EventHandler OnEndUpdates;
 
         /// <summary>
         /// Creates a base component collection.
@@ -340,9 +356,16 @@ namespace Engine8.EngineCore.Components
         /// </summary>
         private void FireComponentEvents()
         {
+            /* Announce that events are being fired. */
+            OnStartUpdates?.Invoke(this, null);
+
+            /* Fire events. */
             FireAddEvents();
             FireModificationEvents();
             FireRemoveEvents();
+
+            /* Announce that events are done being fired. */
+            OnEndUpdates?.Invoke(this, null);
         }
 
         /// <summary>
