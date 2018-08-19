@@ -12,7 +12,7 @@ namespace Engine8.EngineCore.Systems.Movement.Components
     /// <summary>
     /// Manages the positions of all positionable entities.
     /// </summary>
-    public sealed class PositionComponentCollection : BaseComponentCollection<Vector<float>>
+    public sealed class PositionComponentCollection : BaseComponentCollection<Vector3>
     {
 
         /// <summary>

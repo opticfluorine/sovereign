@@ -29,11 +29,11 @@ namespace Engine8.EngineCore.Components
         /// <summary>
         /// Standard operators for vector-valued components.
         /// </summary>
-        public static readonly IDictionary<ComponentOperation, Func<Vector<float>, Vector<float>, Vector<float>>>
-            VectorOperators = new Dictionary<ComponentOperation, Func<Vector<float>, Vector<float>, Vector<float>>>()
+        public static readonly IDictionary<ComponentOperation, Func<Vector3, Vector3, Vector3>>
+            VectorOperators = new Dictionary<ComponentOperation, Func<Vector3, Vector3, Vector3>>()
             {
                 {ComponentOperation.Set, (a, b) => b},
-                {ComponentOperation.Add, Vector.Add},
+                {ComponentOperation.Add, Vector3.Add},
             };
 
     }

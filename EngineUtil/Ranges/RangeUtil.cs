@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Engine8.EngineUtil.Numerics;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
@@ -19,11 +20,11 @@ namespace Engine8.EngineUtil.Ranges
         /// <param name="rangeMax">Upper bound (exclusive) of range.</param>
         /// <param name="point">Point to check.</param>
         /// <returns>true if the point is interior, false otherwise.</returns>
-        public static bool IsPointInRange(Vector<float> rangeMin, Vector<float> rangeMax,
-            Vector<float> point)
+        public static bool IsPointInRange(Vector3 rangeMin, Vector3 rangeMax,
+            Vector3 point)
         {
-            return Vector.LessThanOrEqualAll(rangeMin, point) 
-                && Vector.LessThanAll(point, rangeMax);
+            return rangeMin.LessThanOrEqualAll(point)
+                && point.LessThanAll(rangeMax);
         }
 
         /// <summary>
@@ -34,11 +35,11 @@ namespace Engine8.EngineUtil.Ranges
         /// <param name="secondRangeMin">Lower bound (inclusive) of second range.</param>
         /// <param name="secondRangeMax">Upper bound (exclusive) of second range.</param>
         /// <returns>true if the ranges intersect, false otherwise.</returns>
-        public static bool RangesIntersect(Vector<float> firstRangeMin, Vector<float> firstRangeMax,
-            Vector<float> secondRangeMin, Vector<float> secondRangeMax)
+        public static bool RangesIntersect(Vector3 firstRangeMin, Vector3 firstRangeMax,
+            Vector3 secondRangeMin, Vector3 secondRangeMax)
         {
-            return Vector.GreaterThanAll(firstRangeMax, secondRangeMin)
-                && Vector.GreaterThanAll(secondRangeMax, firstRangeMin);
+            return firstRangeMax.GreaterThanAll(secondRangeMin)
+                && secondRangeMax.GreaterThanAll(firstRangeMin);
         }
 
         /// <summary>
@@ -49,11 +50,11 @@ namespace Engine8.EngineUtil.Ranges
         /// <param name="outerRangeMin">Lower bound (inclusive) of the outer range.</param>
         /// <param name="outerRangeMax">Upper bound (exclusive) of the outer range.</param>
         /// <returns></returns>
-        public static bool IsRangeInterior(Vector<float> innerRangeMin, Vector<float> innerRangeMax,
-            Vector<float> outerRangeMin, Vector<float> outerRangeMax)
+        public static bool IsRangeInterior(Vector3 innerRangeMin, Vector3 innerRangeMax,
+            Vector3 outerRangeMin, Vector3 outerRangeMax)
         {
-            return Vector.LessThanOrEqualAll(outerRangeMin, innerRangeMin)
-                && Vector.LessThanAll(innerRangeMax, outerRangeMax);
+            return outerRangeMin.LessThanOrEqualAll(innerRangeMin)
+                && innerRangeMax.LessThanAll(outerRangeMax);
         }
 
     }

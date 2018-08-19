@@ -21,7 +21,7 @@ namespace Engine8.EngineCore.Components.Indexers
         /// <summary>
         /// Component collection.
         /// </summary>
-        protected readonly IComponentEventSource<Vector<float>> componentEventSource;
+        protected readonly IComponentEventSource<Vector3> componentEventSource;
 
         /// <summary>
         /// Octree providing partitioning to the set of tracked entity IDs.
@@ -38,8 +38,8 @@ namespace Engine8.EngineCore.Components.Indexers
         /// </summary>
         /// <param name="componennCollection">Component collection.</param>
         /// <param name="componentEventSource">Component event source.</param>
-        protected BasePositionComponentIndexer(BaseComponentCollection<Vector<float>> componennCollection, 
-            IComponentEventSource<Vector<float>> componentEventSource)
+        protected BasePositionComponentIndexer(BaseComponentCollection<Vector3> componennCollection, 
+            IComponentEventSource<Vector3> componentEventSource)
         {
             this.componentEventSource = componentEventSource;
 
@@ -77,8 +77,8 @@ namespace Engine8.EngineCore.Components.Indexers
         /// <param name="minPosition">Bottom-left corner of the search space.</param>
         /// <param name="maxPosition">Top-right corner of the search space.</param>
         /// <param name="buffer">Buffer to which the results will be appended.</param>
-        public void GetEntitiesInRange(IndexerLock indexerLock, Vector<float> minPosition, 
-            Vector<float> maxPosition, IList<Tuple<Vector<float>, ulong>> buffer)
+        public void GetEntitiesInRange(IndexerLock indexerLock, Vector3 minPosition, 
+            Vector3 maxPosition, IList<Tuple<Vector3, ulong>> buffer)
         {
             octree.GetElementsInRange(indexerLock.octreeLock, minPosition, maxPosition, buffer);
         }
@@ -120,7 +120,7 @@ namespace Engine8.EngineCore.Components.Indexers
         /// </summary>
         /// <param name="entityId">Entity ID.</param>
         /// <param name="position">Initial position.</param>
-        private void OnComponentAdded(ulong entityId, Vector<float> position)
+        private void OnComponentAdded(ulong entityId, Vector3 position)
         {
             octree.Add(updateLock.octreeLock, position, entityId);
         }
@@ -130,7 +130,7 @@ namespace Engine8.EngineCore.Components.Indexers
         /// </summary>
         /// <param name="entityId">Entity ID.</param>
         /// <param name="position">New position.</param>
-        private void OnComponentModified(ulong entityId, Vector<float> position)
+        private void OnComponentModified(ulong entityId, Vector3 position)
         {
             octree.UpdatePosition(updateLock.octreeLock, entityId, position);
         }

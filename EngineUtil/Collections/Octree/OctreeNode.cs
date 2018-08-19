@@ -40,22 +40,22 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// <summary>
         /// Elements contained within the bounds of this node and their positions.
         /// </summary>
-        public IDictionary<T, Vector<float>> elementPositions = new Dictionary<T, Vector<float>>();
+        public IDictionary<T, Vector3> elementPositions = new Dictionary<T, Vector3>();
 
         /// <summary>
         /// Minimum position (inclusive) of the node's box.
         /// </summary>
-        public readonly Vector<float> minPosition;
+        public readonly Vector3 minPosition;
 
         /// <summary>
         /// Maximum position (exclusive) of the node's box.
         /// </summary>
-        public readonly Vector<float> maxPosition;
+        public readonly Vector3 maxPosition;
 
         /// <summary>
         /// Partitions between the octants, defined by the planes (xy), (xz), and (yz).
         /// </summary>
-        public readonly Vector<float> partitions;
+        public readonly Vector3 partitions;
 
         /// <summary>
         /// Number of elements at or below this node.
@@ -66,17 +66,20 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// Creates a new node of the given octree.
         /// </summary>
         /// <param name="octree">Octree.</param>
+        /// <param name="parentNode">Parent node.</param>
         /// <param name="minPosition">Minimum position (inclusive) of the node's box.</param>
         /// <param name="maxPosition">Maximum position (exclusive) of the node's box.</param>
-        public OctreeNode(Octree<T> octree, Vector<float> minPosition, Vector<float> maxPosition)
+        public OctreeNode(Octree<T> octree, OctreeNode<T> parentNode,
+            Vector3 minPosition, Vector3 maxPosition)
         {
             /* Set fields. */
             this.octree = octree;
+            this.parentNode = parentNode;
             this.minPosition = minPosition;
             this.maxPosition = maxPosition;
 
             /* Compute node partitions. */
-            partitions = Vector.Multiply(0.5f, Vector.Add(minPosition, maxPosition));
+            partitions = 0.5f * (minPosition + maxPosition);
         }
 
         /// <summary>
@@ -84,13 +87,14 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// direction of the given exterior position.
         /// </summary>
         /// <param name="childNode"></param>
-        public OctreeNode(OctreeNode<T> childNode, Vector<float> position)
+        public OctreeNode(OctreeNode<T> childNode, Vector3 position)
         {
             /* Determine the direction in which the tree should grow. */
             var childOctant = childNode.GetParentNodeDetails(position, out minPosition, out maxPosition);
 
             /* Arrange the node. */
             childNodes[(int)childOctant] = childNode;
+            childNode.parentNode = this;
 
             /* Copy properties of child node. */
             octree = childNode.octree;
@@ -109,11 +113,11 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// </summary>
         /// <param name="position">Position.</param>
         /// <returns>Octant containing the position.</returns>
-        public OctreeOctant GetOctantForPosition(Vector<float> position)
+        public OctreeOctant GetOctantForPosition(Vector3 position)
         {
-            return (position[0] >= partitions[0] ? OctreeOctant.East : 0)
-                | (position[1] >= partitions[1] ? OctreeOctant.North : 0)
-                | (position[2] >= partitions[2] ? OctreeOctant.Top : 0);
+            return (position.X >= partitions.X ? OctreeOctant.East : 0)
+                | (position.Y >= partitions.Y ? OctreeOctant.North : 0)
+                | (position.Z >= partitions.Z ? OctreeOctant.Top : 0);
         }
 
         /// <summary>
@@ -122,7 +126,7 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// </summary>
         /// <param name="position">Position.</param>
         /// <returns>Child node.</returns>
-        public OctreeNode<T> GetChildNodeForPosition(Vector<float> position)
+        public OctreeNode<T> GetChildNodeForPosition(Vector3 position)
         {
             var octant = GetOctantForPosition(position);
             
@@ -130,7 +134,7 @@ namespace Engine8.EngineUtil.Collections.Octree
             if (childNodes[(int)octant] == null)
             {
                 GetBoundsOfOctant(octant, out var minPosition, out var maxPosition);
-                childNodes[(int)octant] = new OctreeNode<T>(octree, minPosition, maxPosition);
+                childNodes[(int)octant] = new OctreeNode<T>(octree, this, minPosition, maxPosition);
             }
 
             return childNodes[(int)octant];
@@ -140,22 +144,22 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// Gets the bounds of the given octant in this node.
         /// </summary>
         /// <param name="octant">Octant.</param>
-        /// <param name="minPosition">Minimum position (inclusive).</param>
-        /// <param name="maxPosition">Maximum position (exclusive).</param>
+        /// <param name="octantMinPosition">Minimum position (inclusive).</param>
+        /// <param name="octantMaxPosition">Maximum position (exclusive).</param>
         public void GetBoundsOfOctant(OctreeOctant octant,
-            out Vector<float> minPosition, out Vector<float> maxPosition)
+            out Vector3 octantMinPosition, out Vector3 octantMaxPosition)
         {
             /* Compute minimum position. */
-            var minX = octant.HasFlag(OctreeOctant.East) ? partitions[0] : minPosition[0];
-            var minY = octant.HasFlag(OctreeOctant.North) ? partitions[1] : minPosition[1];
-            var minZ = octant.HasFlag(OctreeOctant.Top) ? partitions[2] : minPosition[2];
-            minPosition = new Vector<float>(new float[] { minX, minY, minZ });
+            var minX = octant.HasFlag(OctreeOctant.East) ? partitions.X : minPosition.X;
+            var minY = octant.HasFlag(OctreeOctant.North) ? partitions.Y : minPosition.Y;
+            var minZ = octant.HasFlag(OctreeOctant.Top) ? partitions.Z : minPosition.Z;
+            octantMinPosition = new Vector3(minX, minY, minZ);
 
             /* Compute maximum position. */
-            var maxX = octant.HasFlag(OctreeOctant.East) ? maxPosition[0] : partitions[0];
-            var maxY = octant.HasFlag(OctreeOctant.North) ? maxPosition[1] : partitions[1];
-            var maxZ = octant.HasFlag(OctreeOctant.Top) ? maxPosition[2] : partitions[2];
-            maxPosition = new Vector<float>(new float[] { maxX, maxY, maxZ });
+            var maxX = octant.HasFlag(OctreeOctant.East) ? maxPosition.X : partitions.X;
+            var maxY = octant.HasFlag(OctreeOctant.North) ? maxPosition.Y : partitions.Y;
+            var maxZ = octant.HasFlag(OctreeOctant.Top) ? maxPosition.Z : partitions.Z;
+            octantMaxPosition = new Vector3(maxX, maxY, maxZ);
         }
 
         /// <summary>
@@ -163,7 +167,7 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// </summary>
         /// <param name="position">Position.</param>
         /// <returns>true if the position is interior, false otherwise.</returns>
-        public bool IsPositionInterior(Vector<float> position)
+        public bool IsPositionInterior(Vector3 position)
         {
             return RangeUtil.IsPointInRange(minPosition, maxPosition, position);
         }
@@ -174,7 +178,7 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// <param name="minRange">Lower bound (inclusive) of the given range.</param>
         /// <param name="maxRange">Upper bound (exclusive) of the given range.</param>
         /// <returns>true if the range intersects, false otherwise.</returns>
-        public bool IntersectsRange(Vector<float> minRange, Vector<float> maxRange)
+        public bool IntersectsRange(Vector3 minRange, Vector3 maxRange)
         {
             return RangeUtil.RangesIntersect(minPosition, maxPosition, minRange, maxRange);
         }
@@ -186,7 +190,7 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// <param name="minRange">Lower bound (inclusive) of range.</param>
         /// <param name="maxRange">Upper bound (exclusive) of range.</param>
         /// <returns>true if the node is interior, false otherwise.</returns>
-        public bool IsNodeInteriorToRange(Vector<float> minRange, Vector<float> maxRange)
+        public bool IsNodeInteriorToRange(Vector3 minRange, Vector3 maxRange)
         {
             return RangeUtil.IsRangeInterior(minPosition, maxPosition, minRange, maxRange);
         }
@@ -206,64 +210,28 @@ namespace Engine8.EngineUtil.Collections.Octree
         }
 
         /// <summary>
-        /// Determines the octant in the parent node that this node should be
-        /// assigned to in order to grow the tree toward the given exterior point.
+        /// Adds the given element to the node, rebalancing if necessary.
         /// </summary>
-        /// <param name="position">Exterior position.</param>
-        /// <param name="parentMinPosition">Minimum position of the parent node.</param>
-        /// <param name="parentMaxPosition">Maximum position of the parent node.</param>
-        /// <returns>Octant containing the current node.</returns>
-        private OctreeOctant GetParentNodeDetails(Vector<float> position, out Vector<float> parentMinPosition,
-            out Vector<float> parentMaxPosition)
+        /// 
+        /// This method assumes that the node is a leaf node.
+        /// 
+        /// <param name="element">Element to be added.</param>
+        /// <param name="position">Position of the element.</param>
+        public void AddElement(T element, Vector3 position)
         {
-            /* Generate the corners and distances. */
-            var corners = new Vector<float>[8];
-            var distancesSquared = new float[8];
-            for (int i = 0; i < 8; ++i)
-            {
-                /* Generate corner. */
-                var octant = (OctreeOctant)i;
-                corners[i] = new Vector<float>(new float[] {
-                    octant.HasFlag(OctreeOctant.East) ? minPosition[0] : maxPosition[0],
-                    octant.HasFlag(OctreeOctant.North) ? minPosition[1] : maxPosition[1],
-                    octant.HasFlag(OctreeOctant.Top) ? minPosition[2] : maxPosition[2]
-                });
+            /* Add the element to the node. */
+            elementPositions[element] = position;
 
-                /* Compute distance squared. */
-                var delta = corners[i] - position;
-                distancesSquared[i] = Vector.Dot(delta, delta);
+            /* Propagate upward to the root node. */
+            var currentNode = parentNode;
+            while (currentNode != null)
+            {
+                currentNode.elementPositions[element] = position;
+                currentNode = currentNode.parentNode;
             }
 
-            /* Select the octant that minimizes the distance. */
-            var minDistanceSquared = Single.MaxValue;
-            var minIndex = 0;
-            for (int i = 0; i < 8; ++i)
-            {
-                var distanceSquared = distancesSquared[i];
-                if (distanceSquared < minDistanceSquared)
-                {
-                    minDistanceSquared = distanceSquared;
-                    minIndex = i;
-                }
-            }
-
-            /* Compute the bounds of the parent node. */
-            var childOctant = (OctreeOctant)minIndex;
-            var parentHalfWidth = maxPosition[0] - minPosition[0];
-            parentMinPosition = new Vector<float>(new float[]
-            {
-                childOctant.HasFlag(OctreeOctant.East) ? minPosition[0] - parentHalfWidth : minPosition[0],
-                childOctant.HasFlag(OctreeOctant.North) ? minPosition[1] - parentHalfWidth : minPosition[1],
-                childOctant.HasFlag(OctreeOctant.Top) ? minPosition[2] - parentHalfWidth : minPosition[2]
-            });
-            parentMaxPosition = new Vector<float>(new float[]
-            {
-                childOctant.HasFlag(OctreeOctant.East) ? maxPosition[0] : maxPosition[0] + parentHalfWidth,
-                childOctant.HasFlag(OctreeOctant.North) ? maxPosition[1] : maxPosition[1] + parentHalfWidth,
-                childOctant.HasFlag(OctreeOctant.Top) ? maxPosition[2] : maxPosition[2] + parentHalfWidth
-            });
-
-            return childOctant;
+            /* Rebalance the leaf node. */
+            RebalanceLeafNode();
         }
 
         /// <summary>
@@ -302,12 +270,71 @@ namespace Engine8.EngineUtil.Collections.Octree
         }
 
         /// <summary>
+        /// Determines the octant in the parent node that this node should be
+        /// assigned to in order to grow the tree toward the given exterior point.
+        /// </summary>
+        /// <param name="position">Exterior position.</param>
+        /// <param name="parentMinPosition">Minimum position of the parent node.</param>
+        /// <param name="parentMaxPosition">Maximum position of the parent node.</param>
+        /// <returns>Octant containing the current node.</returns>
+        private OctreeOctant GetParentNodeDetails(Vector3 position, out Vector3 parentMinPosition,
+            out Vector3 parentMaxPosition)
+        {
+            /* Generate the corners and distances. */
+            var corners = new Vector3[8];
+            var distancesSquared = new float[8];
+            for (int i = 0; i < 8; ++i)
+            {
+                /* Generate corner. */
+                var octant = (OctreeOctant)i;
+                corners[i] = new Vector3(
+                    octant.HasFlag(OctreeOctant.East) ? minPosition.X : maxPosition.X,
+                    octant.HasFlag(OctreeOctant.North) ? minPosition.Y : maxPosition.Y,
+                    octant.HasFlag(OctreeOctant.Top) ? minPosition.Z : maxPosition.Z
+                );
+
+                /* Compute distance squared. */
+                var delta = corners[i] - position;
+                distancesSquared[i] = Vector3.Dot(delta, delta);
+            }
+
+            /* Select the octant that minimizes the distance. */
+            var minDistanceSquared = Single.MaxValue;
+            var minIndex = 0;
+            for (int i = 0; i < 8; ++i)
+            {
+                var distanceSquared = distancesSquared[i];
+                if (distanceSquared < minDistanceSquared)
+                {
+                    minDistanceSquared = distanceSquared;
+                    minIndex = i;
+                }
+            }
+
+            /* Compute the bounds of the parent node. */
+            var childOctant = (OctreeOctant)minIndex;
+            var parentHalfWidth = maxPosition.X - minPosition.X;
+            parentMinPosition = new Vector3(
+                childOctant.HasFlag(OctreeOctant.East) ? minPosition.X - parentHalfWidth : minPosition.X,
+                childOctant.HasFlag(OctreeOctant.North) ? minPosition.Y - parentHalfWidth : minPosition.Y,
+                childOctant.HasFlag(OctreeOctant.Top) ? minPosition.Z - parentHalfWidth : minPosition.Z
+            );
+            parentMaxPosition = new Vector3(
+                childOctant.HasFlag(OctreeOctant.East) ? maxPosition.X : maxPosition.X + parentHalfWidth,
+                childOctant.HasFlag(OctreeOctant.North) ? maxPosition.Y : maxPosition.Y + parentHalfWidth,
+                childOctant.HasFlag(OctreeOctant.Top) ? maxPosition.Z : maxPosition.Z + parentHalfWidth
+            );
+
+            return childOctant;
+        }
+
+        /// <summary>
         /// Determines whether the node can be further subdivided.
         /// </summary>
         /// <returns></returns>
         private bool CanNodeBeSubdivided()
         {
-            var nodeLength = maxPosition[0] - minPosition[0];
+            var nodeLength = maxPosition.X - minPosition.X;
             return !(Math.Abs(nodeLength - octree.MinimumNodeSize) < Threshold);
         }
 
@@ -341,7 +368,7 @@ namespace Engine8.EngineUtil.Collections.Octree
                 if (childNodes[(int)octant] == null)
                 {
                     GetBoundsOfOctant(octant, out var newMinPos, out var newMaxPos);
-                    childNodes[(int)octant] = new OctreeNode<T>(octree, newMinPos, newMaxPos);
+                    childNodes[(int)octant] = new OctreeNode<T>(octree, this, newMinPos, newMaxPos);
                 }
 
                 /* Distribute the element. */

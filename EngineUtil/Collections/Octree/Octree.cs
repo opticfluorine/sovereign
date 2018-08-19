@@ -32,7 +32,7 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// <summary>
         /// Default origin vector.
         /// </summary>
-        public static readonly Vector<float> DefaultOrigin = new Vector<float>(0.0f);
+        public static readonly Vector3 DefaultOrigin = Vector3.Zero;
 
         /// <summary>
         /// Minimum length of a node.
@@ -60,7 +60,7 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// <param name="origin">Center point of the initial tree.</param>
         /// <param name="initialLevels">Number of levels to initially generate in the tree.</param>
         /// <param name="minimumNodeSize">Minimum length of a node.</param>
-        public Octree(Vector<float> origin,
+        public Octree(Vector3 origin,
             int initialLevels = DefaultInitialLevels, 
             float minimumNodeSize = DefaultMinimumNodeSize)
         {
@@ -68,11 +68,11 @@ namespace Engine8.EngineUtil.Collections.Octree
 
             /* Create the initial node. */
             var halfRootNodeLength = 0.5f * (float)Math.Pow(minimumNodeSize, initialLevels);
-            var span = new Vector<float>(halfRootNodeLength);
-            var minPosition = Vector.Subtract(origin, span);
-            var maxPosition = Vector.Add(origin, span);
+            var span = new Vector3(halfRootNodeLength);
+            var minPosition = origin - span;
+            var maxPosition = origin + span;
              
-            rootNode = new OctreeNode<T>(this, minPosition, maxPosition);
+            rootNode = new OctreeNode<T>(this, null, minPosition, maxPosition);
         }
 
         /// <summary>
@@ -82,8 +82,8 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// <param name="initialData">Initial elements to be added to the octree.</param>
         /// <param name="initialLevels">Number of levels to initially generate in the tree.</param>
         /// <param name="minimumNodeSize">Minimum length of a node.</param>
-        public Octree(Vector<float> origin,
-            IDictionary<T, Vector<float>> initialData,
+        public Octree(Vector3 origin,
+            IDictionary<T, Vector3> initialData,
             int initialLevels = DefaultInitialLevels,
             float minimumNodeSize = DefaultMinimumNodeSize) : this(origin, initialLevels, minimumNodeSize)
         {
@@ -108,9 +108,13 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// <param name="lockHandle">Active lock handle.</param>
         /// <param name="position">Initial position of the element.</param>
         /// <param name="element">Element to be added.</param>
-        public void Add(OctreeLock lockHandle, Vector<float> position, T element)
+        public void Add(OctreeLock lockHandle, Vector3 position, T element)
         {
-            throw new NotImplementedException();
+            /* Find or create the leaf node that will contain the element. */
+            var leafNode = FindLeafNodeForPosition(position);
+
+            /* Add the element to the leaf node. */
+            leafNode.AddElement(element, position);
         }
 
         /// <summary>
@@ -124,7 +128,7 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// <exception cref="KeyNotFoundException">
         /// Thrown if the element is not in the octree.
         /// </exception>
-        public void UpdatePosition(OctreeLock lockHandle, T element, Vector<float> position)
+        public void UpdatePosition(OctreeLock lockHandle, T element, Vector3 position)
         {
             throw new NotImplementedException();
         }
@@ -163,8 +167,8 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// <param name="minPosition">Minimum position (inclusive).</param>
         /// <param name="maxPosition">Maximum position (exclusive).</param>
         /// <param name="buffer">Buffer to hold the results.</param>
-        public void GetElementsInRange(OctreeLock lockHandle, Vector<float> minPosition,
-            Vector<float> maxPosition, IList<Tuple<Vector<float>, T>> buffer)
+        public void GetElementsInRange(OctreeLock lockHandle, Vector3 minPosition,
+            Vector3 maxPosition, IList<Tuple<Vector3, T>> buffer)
         {
             /* Depth-first search of overlapping nodes. */
             var nodesToSearch = new Stack<OctreeNode<T>>();
@@ -183,7 +187,7 @@ namespace Engine8.EngineUtil.Collections.Octree
                     {
                         var element = elementAndPosition.Key;
                         var position = elementAndPosition.Value;
-                        buffer.Add(new Tuple<Vector<float>, T>(position, element));
+                        buffer.Add(new Tuple<Vector3, T>(position, element));
                     }
                     continue;
                 }
@@ -205,7 +209,7 @@ namespace Engine8.EngineUtil.Collections.Octree
                     if (RangeUtil.IsPointInRange(minPosition, maxPosition, position))
                     {
                         var element = elementAndPosition.Key;
-                        buffer.Add(new Tuple<Vector<float>, T>(position, element));
+                        buffer.Add(new Tuple<Vector3, T>(position, element));
                     }
                 }
             }
@@ -239,7 +243,7 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// </summary>
         /// <param name="position">Position for which the leaf node is to be found.</param>
         /// <returns>Leaf node.</returns>
-        private OctreeNode<T> FindLeafNodeForPosition(Vector<float> position)
+        private OctreeNode<T> FindLeafNodeForPosition(Vector3 position)
         {
             /* Expand the tree if needed. */
             while (!rootNode.IsPositionInterior(position))
@@ -255,7 +259,7 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// </summary>
         /// <param name="position">Position.</param>
         /// <returns>Leaf node.</returns>
-        private OctreeNode<T> DescendToLeafNode(Vector<float> position)
+        private OctreeNode<T> DescendToLeafNode(Vector3 position)
         {
             /* Drill down to the leaf node. */
             var currentNode = rootNode;
