@@ -113,10 +113,8 @@ namespace Engine8.ClientCore.Rendering
         public static Surface CreateSurface(int width, int height, DisplayFormat format)
         {
             /* Look up the format. */
-            int bpp;
-            uint amask, rmask, gmask, bmask;
-            if (SDL.SDL_PixelFormatEnumToMasks(formatMap[format], out bpp, out rmask, out gmask,
-                out bmask, out amask) == SDL.SDL_bool.SDL_FALSE)
+            if (SDL.SDL_PixelFormatEnumToMasks(formatMap[format], out int bpp, out uint rmask, out uint gmask,
+                out uint bmask, out uint amask) == SDL.SDL_bool.SDL_FALSE)
             {
                 throw new SurfaceException(SDL.SDL_GetError());
             }
