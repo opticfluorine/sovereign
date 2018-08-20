@@ -1,10 +1,7 @@
 ﻿using Engine8.EngineUtil.Ranges;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
 using System.Threading;
 
 namespace Engine8.EngineUtil.Collections.Octree
@@ -130,7 +127,20 @@ namespace Engine8.EngineUtil.Collections.Octree
         /// </exception>
         public void UpdatePosition(OctreeLock lockHandle, T element, Vector3 position)
         {
-            throw new NotImplementedException();
+            /* Locate the leaf node containing the element. */
+            var initialNode = FindNodeForElement(element);
+            if (initialNode == null)
+                throw new KeyNotFoundException(element.ToString());
+
+            /* Clear any links that are invalidated. */
+            var currentNode = initialNode;
+            while (currentNode != null && !currentNode.IsPositionInterior(position))
+            {
+                currentNode = currentNode.parentNode;
+            }
+
+            /* Old links are cleared, now add the element. */
+            Add(lockHandle, position, element);
         }
 
         /// <summary>
@@ -251,6 +261,38 @@ namespace Engine8.EngineUtil.Collections.Octree
 
             /* Find/create the leaf node. */
             return DescendToLeafNode(position);
+        }
+
+        /// <summary>
+        /// Finds the leaf node that contains the given element.
+        /// </summary>
+        /// <param name="element">Element.</param>
+        /// <returns>Leaf node containing the element, or null if the element is not found.</returns>
+        private OctreeNode<T> FindNodeForElement(T element)
+        {
+            /* Bail if the element is not present. */
+            if (!rootNode.elementPositions.ContainsKey(element)) return null;
+
+            /* Descend to the leaf node. */
+            var currentNode = rootNode;
+            while (!currentNode.IsLeafNode())
+            {
+                /* Descend into the node containing the element. */
+                OctreeNode<T> nextNode = null;
+                foreach (var childNode in currentNode.childNodes)
+                {
+                    if (childNode != null && childNode.elementPositions.ContainsKey(element))
+                    {
+                        nextNode = childNode;
+                        break;
+                    }
+                }
+
+                /* Octree is corrupted if element present at root but not at intermediate node. */
+                currentNode = nextNode ?? throw new InvalidOperationException("Octree is corrupted.");
+            }
+
+            return currentNode;
         }
 
         /// <summary>
