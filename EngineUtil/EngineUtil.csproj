@@ -26,8 +26,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Castle.Core" Version="4.3.1" />
     <PackageReference Include="Castle.Windsor" Version="4.1.0" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+    <PackageReference Include="YamlDotNet" Version="5.0.1" />
   </ItemGroup>
 
 </Project>
