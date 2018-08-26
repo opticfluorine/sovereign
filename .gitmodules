@@ -1,0 +1,3 @@
+[submodule "WorldGen/Contrib/FastNoise_CSharp"]
+	path = WorldGen/Contrib/FastNoise_CSharp
+	url = https://github.com/Auburns/FastNoise_CSharp.git
