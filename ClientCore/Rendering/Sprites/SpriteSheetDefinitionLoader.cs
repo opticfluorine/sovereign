@@ -31,18 +31,19 @@ namespace Engine8.ClientCore.Rendering.Sprites
         public SpriteSheetDefinition LoadDefinition(string filename)
         {
             /* Deserialize the definition file. */
-            using (var reader = new StreamReader(filename)) {
-                try
+            try
+            {
+                using (var reader = new StreamReader(filename))
                 {
                     return deserializer.Deserialize<SpriteSheetDefinition>(reader);
                 }
-                catch (Exception e)
-                {
-                    var sb = new StringBuilder();
-                    sb.Append("Failed to load spritesheet definition file '")
-                        .Append(filename).Append("'.");
-                    throw new SpriteSheetDefinitionException(sb.ToString(), e);
-                }
+            }
+            catch (Exception e)
+            {
+                var sb = new StringBuilder();
+                sb.Append("Failed to load spritesheet definition file '")
+                    .Append(filename).Append("'.");
+                throw new SpriteSheetDefinitionException(sb.ToString(), e);
             }
         }
 
