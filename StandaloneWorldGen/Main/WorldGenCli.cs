@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Castle.Core.Logging;
+using Engine8.WorldGen.Configuration;
+using Engine8.WorldLib.Material;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,6 +14,23 @@ namespace Engine8.StandaloneWorldGen.Main
     public class WorldGenCli
     {
 
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+        /// <summary>
+        /// Material definitions loader.
+        /// </summary>
+        private readonly MaterialDefinitionsLoader materialDefinitionsLoader;
+
+        /// <summary>
+        /// WorldGen configuration loader.
+        /// </summary>
+        private readonly WorldGenConfigurationLoader worldGenConfigurationLoader;
+
+        /// <summary>
+        /// Path to the material definitions file.
+        /// </summary>
+        private string materialDefinitionsFilePath;
+
         /// <summary>
         /// Path to the configuration file.
         /// </summary>
@@ -21,6 +41,13 @@ namespace Engine8.StandaloneWorldGen.Main
         /// </summary>
         private string outputFilePath;
 
+        public WorldGenCli(MaterialDefinitionsLoader materialDefinitionsLoader,
+            WorldGenConfigurationLoader worldGenConfigurationLoader)
+        {
+            this.materialDefinitionsLoader = materialDefinitionsLoader;
+            this.worldGenConfigurationLoader = worldGenConfigurationLoader;
+        }
+
         /// <summary>
         /// Runs the application.
         /// </summary>
@@ -28,6 +55,30 @@ namespace Engine8.StandaloneWorldGen.Main
         {
             /* Parse command-line arguments. */
             ParseArguments(args);
+
+            /* Load material definitions. */
+            MaterialDefinitions materialDefinitions;
+            try
+            {
+                materialDefinitions = materialDefinitionsLoader.LoadDefinitions(materialDefinitionsFilePath);
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal("Failed to load material definitions.", e);
+                Environment.Exit(1);
+            }
+
+            /* Load WorldGen configuration. */
+            WorldGenConfiguration worldGenConfiguration;
+            try
+            {
+                worldGenConfiguration = worldGenConfigurationLoader.LoadConfiguration(configFilePath);
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal("Failed to load WorldGen configuration.", e);
+                Environment.Exit(1);
+            }
         }
 
         /// <summary>
@@ -37,12 +88,13 @@ namespace Engine8.StandaloneWorldGen.Main
         private void ParseArguments(string[] args)
         {
             /* Check that arguments are specified correctly. */
-            if (args.Length != 2)
+            if (args.Length != 3)
                 PrintHelpInfo();
 
             /* Parse arguments. */
-            configFilePath = args[0];
-            outputFilePath = args[1];
+            materialDefinitionsFilePath = args[0];
+            configFilePath = args[1];
+            outputFilePath = args[2];
         }
 
         /// <summary>
@@ -52,7 +104,7 @@ namespace Engine8.StandaloneWorldGen.Main
         {
             Console.Write("usage: ");
             Console.Write(AppDomain.CurrentDomain.FriendlyName);
-            Console.WriteLine(" configFilePath outputFilePath");
+            Console.WriteLine(" materialDefinitionsFilePath configFilePath outputFilePath");
 
             Environment.Exit(1);
         }
