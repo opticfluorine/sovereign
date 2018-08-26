@@ -22,11 +22,7 @@
  */
 
 using Castle.Core.Logging;
-using Castle.Facilities.Startable;
-using Castle.Facilities.TypedFactory;
-using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using Castle.Windsor;
-using Castle.Windsor.Installer;
 using Engine8.EngineUtil.IoC;
 using System;
 using System.Text;
@@ -46,7 +42,7 @@ namespace Engine8.EngineCore.Main
             IWindsorContainer iocContainer = null;
             try
             {
-                iocContainer = InitializeIoC();
+                iocContainer = IoCUtil.InitializeIoC();
                 var engineBase = iocContainer.Resolve<IEngineBase>();
                 engineBase.Run();
             }
@@ -62,26 +58,6 @@ namespace Engine8.EngineCore.Main
 
             /* Shut down the IoC container */
             ShutdownIoC(iocContainer);
-        }
-
-        private IWindsorContainer InitializeIoC()
-        {
-            /* Create the container. */
-            var iocContainer = new WindsorContainer();
-
-            /* Add additional resolvers. */
-            iocContainer.Kernel.Resolver.AddSubResolver(
-                new CollectionResolver(iocContainer.Kernel, true));
-
-            /* Add facilities. */
-            iocContainer.AddFacility<StartableFacility>(f => f.DeferredStart());
-            iocContainer.AddFacility<TypedFactoryFacility>();
-
-            /* Install components. */
-            iocContainer.Install(FromAssembly.InDirectory(
-                EngineClasses.EngineAssemblyFilter()));
-
-            return iocContainer;
         }
 
         private void ShutdownIoC(IWindsorContainer iocContainer)
