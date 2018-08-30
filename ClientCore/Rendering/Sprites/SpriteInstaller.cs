@@ -2,7 +2,7 @@
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 
-namespace Engine8.ClientCore.Rendering.Sprites
+namespace Sovereign.ClientCore.Rendering.Sprites
 {
 
     /// <summary>

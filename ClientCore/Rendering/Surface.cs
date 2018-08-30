@@ -1,10 +1,10 @@
-﻿using Engine8.ClientCore.Rendering.Configuration;
+﻿using Sovereign.ClientCore.Rendering.Configuration;
 using SDL2;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace Engine8.ClientCore.Rendering
+namespace Sovereign.ClientCore.Rendering
 {
 
     /// <summary>

@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Engine8.EngineUtil</RootNamespace>
-    <AssemblyName>Engine8.EngineUtil</AssemblyName>
+    <RootNamespace>Sovereign.EngineUtil</RootNamespace>
+    <AssemblyName>Sovereign.EngineUtil</AssemblyName>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Engine8.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Indexers;
 
-namespace Engine8.EngineCore.Systems.Movement.Components.Indexers
+namespace Sovereign.EngineCore.Systems.Movement.Components.Indexers
 {
 
     /// <summary>

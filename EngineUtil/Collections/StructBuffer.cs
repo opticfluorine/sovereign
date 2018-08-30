@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Engine8.EngineUtil.Collections
+namespace Sovereign.EngineUtil.Collections
 {
 
     /// <summary>

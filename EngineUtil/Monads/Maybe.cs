@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Engine8.EngineUtil.Monads
+namespace Sovereign.EngineUtil.Monads
 {
 
     /// <summary>

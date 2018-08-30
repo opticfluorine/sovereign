@@ -2,7 +2,7 @@
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 
-namespace Engine8.EngineCore.Entities
+namespace Sovereign.EngineCore.Entities
 {
 
     /// <summary>

@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Engine8.EngineUtil.IoC
+namespace Sovereign.EngineUtil.IoC
 {
 
     /// <summary>

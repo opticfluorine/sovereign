@@ -1,5 +1,5 @@
-﻿using Engine8.ClientCore.Rendering;
-using Engine8.D3D11Renderer.Rendering.Configuration;
+﻿using Sovereign.ClientCore.Rendering;
+using Sovereign.D3D11Renderer.Rendering.Configuration;
 using SharpDX.Direct3D11;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.D3D11Renderer.Rendering.Resources.Textures
+namespace Sovereign.D3D11Renderer.Rendering.Resources.Textures
 {
 
     /// <summary>

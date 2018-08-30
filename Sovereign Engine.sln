@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestEngineUtil", "TestEngin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientCore", "ClientCore\ClientCore.csproj", "{DF493F51-F329-4B51-9715-272E303983F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine8Client", "Engine8Client\Engine8Client.csproj", "{DFD41CDD-7C12-476F-BD03-E9AEDDD1EC91}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SovereignClient", "SovereignClient\SovereignClient.csproj", "{DFD41CDD-7C12-476F-BD03-E9AEDDD1EC91}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{DF89049A-7B30-48E2-8C92-485985286625}"
 EndProject
@@ -23,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClientCore", "TestClien
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{33554031-434D-48E2-9279-D48C9A503EF7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine8Server", "Engine8Server\Engine8Server.csproj", "{ED6E075E-EF6B-4604-8F30-B95417B2BFC2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SovereignServer", "SovereignServer\SovereignServer.csproj", "{ED6E075E-EF6B-4604-8F30-B95417B2BFC2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3D11Renderer", "D3D11Renderer\D3D11Renderer.csproj", "{7DBBAAAE-6EBD-4F8A-A225-AEE0112D6A5B}"
 EndProject

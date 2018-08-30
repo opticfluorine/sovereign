@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Engine8.ClientCore.Rendering
+namespace Sovereign.ClientCore.Rendering
 {
 
     /// <summary>

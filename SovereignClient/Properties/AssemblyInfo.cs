@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Engine8 Client")]
+[assembly: AssemblyTitle("Sovereign Client")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Engine8")]
+[assembly: AssemblyProduct("Sovereign")]
 [assembly: AssemblyCopyright("Copyright (c) 2018 opticfluorine")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -1,11 +1,11 @@
-﻿using Engine8.EngineCore.Configuration;
+﻿using Sovereign.EngineCore.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.ClientCore.Configuration
+namespace Sovereign.ClientCore.Configuration
 {
 
     /// <summary>

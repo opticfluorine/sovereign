@@ -1,11 +1,11 @@
 ﻿using Castle.Core.Logging;
-using Engine8.WorldGen.Configuration;
-using Engine8.WorldLib.Material;
+using Sovereign.WorldGen.Configuration;
+using Sovereign.WorldLib.Material;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Engine8.StandaloneWorldGen.Main
+namespace Sovereign.StandaloneWorldGen.Main
 {
 
     /// <summary>

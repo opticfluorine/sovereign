@@ -1,9 +1,9 @@
-﻿using Engine8.WorldLib.World.Domain;
+﻿using Sovereign.WorldLib.World.Domain;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Engine8.WorldLib.World
+namespace Sovereign.WorldLib.World
 {
 
     /// <summary>

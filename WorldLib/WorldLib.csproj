@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Engine8.WorldLib</RootNamespace>
-    <AssemblyName>Engine8.WorldLib</AssemblyName>
+    <RootNamespace>Sovereign.WorldLib</RootNamespace>
+    <AssemblyName>Sovereign.WorldLib</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Engine8.WorldGen.Configuration
+namespace Sovereign.WorldGen.Configuration
 {
 
     /// <summary>

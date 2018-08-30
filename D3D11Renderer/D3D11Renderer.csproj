@@ -7,8 +7,8 @@
     <ProjectGuid>{7DBBAAAE-6EBD-4F8A-A225-AEE0112D6A5B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Engine8.D3D11Renderer</RootNamespace>
-    <AssemblyName>Engine8.D3D11Renderer</AssemblyName>
+    <RootNamespace>Sovereign.D3D11Renderer</RootNamespace>
+    <AssemblyName>Sovereign.D3D11Renderer</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

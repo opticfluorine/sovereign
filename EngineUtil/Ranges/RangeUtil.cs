@@ -1,10 +1,10 @@
-﻿using Engine8.EngineUtil.Numerics;
+﻿using Sovereign.EngineUtil.Numerics;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
-namespace Engine8.EngineUtil.Ranges
+namespace Sovereign.EngineUtil.Ranges
 {
 
     /// <summary>

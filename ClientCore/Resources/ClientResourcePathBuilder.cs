@@ -1,7 +1,7 @@
-﻿using Engine8.EngineCore.Resources;
+﻿using Sovereign.EngineCore.Resources;
 using System.IO;
 
-namespace Engine8.ClientCore.Resources
+namespace Sovereign.ClientCore.Resources
 {
 
     /// <summary>

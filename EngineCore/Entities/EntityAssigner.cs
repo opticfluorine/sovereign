@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Entities
+namespace Sovereign.EngineCore.Entities
 {
 
     /// <summary>

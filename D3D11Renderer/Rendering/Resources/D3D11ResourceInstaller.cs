@@ -2,7 +2,7 @@
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 
-namespace Engine8.D3D11Renderer.Rendering.Resources
+namespace Sovereign.D3D11Renderer.Rendering.Resources
 {
 
     /// <summary>

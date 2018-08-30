@@ -1,5 +1,5 @@
 ﻿
-namespace Engine8.EngineCore.Resources
+namespace Sovereign.EngineCore.Resources
 {
 
     /// <summary>

@@ -1,5 +1,5 @@
 ﻿/*
- * Engine8 Dynamic World MMORPG Engine
+ * Sovereign Dynamic World MMORPG Engine
  * Copyright (c) 2018 opticfluorine
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a 
@@ -21,12 +21,12 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Engine8.ClientCore.Logging;
-using Engine8.EngineCore.Logging;
-using Engine8.EngineCore.Main;
+using Sovereign.ClientCore.Logging;
+using Sovereign.EngineCore.Logging;
+using Sovereign.EngineCore.Main;
 using SDL2;
 
-namespace Engine8.Engine8Client.Main
+namespace Sovereign.SovereignClient.Main
 {
 
     public class ClientMain

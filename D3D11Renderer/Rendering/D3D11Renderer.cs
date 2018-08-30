@@ -1,13 +1,13 @@
-﻿using Engine8.ClientCore.Rendering;
-using Engine8.ClientCore.Rendering.Configuration;
-using Engine8.ClientCore.Rendering.Display;
-using Engine8.D3D11Renderer.Rendering.Configuration;
-using Engine8.D3D11Renderer.Rendering.Resources;
+﻿using Sovereign.ClientCore.Rendering;
+using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.ClientCore.Rendering.Display;
+using Sovereign.D3D11Renderer.Rendering.Configuration;
+using Sovereign.D3D11Renderer.Rendering.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine8.D3D11Renderer.Rendering
+namespace Sovereign.D3D11Renderer.Rendering
 {
 
     /// <summary>

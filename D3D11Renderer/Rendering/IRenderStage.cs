@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.D3D11Renderer.Rendering
+namespace Sovereign.D3D11Renderer.Rendering
 {
 
     /// <summary>

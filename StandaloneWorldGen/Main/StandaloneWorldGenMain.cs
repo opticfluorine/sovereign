@@ -1,9 +1,9 @@
-﻿using Engine8.EngineUtil.IoC;
+﻿using Sovereign.EngineUtil.IoC;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Engine8.StandaloneWorldGen.Main
+namespace Sovereign.StandaloneWorldGen.Main
 {
 
     /// <summary>

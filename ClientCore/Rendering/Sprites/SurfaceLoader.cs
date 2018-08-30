@@ -1,5 +1,5 @@
 ﻿using Castle.Core.Logging;
-using Engine8.ClientCore.Rendering.Display;
+using Sovereign.ClientCore.Rendering.Display;
 using SDL2;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.ClientCore.Rendering.Sprites
+namespace Sovereign.ClientCore.Rendering.Sprites
 {
 
     /// <summary>

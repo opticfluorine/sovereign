@@ -1,13 +1,13 @@
-﻿using Engine8.ClientCore.Rendering.Configuration;
-using Engine8.ClientCore.Rendering.Display;
-using Engine8.ClientCore.Rendering.Sprites;
+﻿using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.ClientCore.Rendering.Display;
+using Sovereign.ClientCore.Rendering.Sprites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.ClientCore.Rendering
+namespace Sovereign.ClientCore.Rendering
 {
 
     /// <summary>

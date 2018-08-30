@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Main
+namespace Sovereign.EngineCore.Main
 {
 
     /// <summary>

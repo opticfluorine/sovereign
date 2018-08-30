@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Engine8.StandaloneWorldGen.Logging
+namespace Sovereign.StandaloneWorldGen.Logging
 {
 
     /// <summary>

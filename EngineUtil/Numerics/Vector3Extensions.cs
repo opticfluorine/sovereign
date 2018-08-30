@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
-namespace Engine8.EngineUtil.Numerics
+namespace Sovereign.EngineUtil.Numerics
 {
 
     /// <summary>

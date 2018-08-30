@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Engine8.ClientCore.Rendering.Sprites
+namespace Sovereign.ClientCore.Rendering.Sprites
 {
 
     /// <summary>

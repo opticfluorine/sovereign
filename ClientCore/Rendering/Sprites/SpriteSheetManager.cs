@@ -1,7 +1,7 @@
 ﻿using Castle.Core.Logging;
-using Engine8.ClientCore.Logging;
-using Engine8.EngineCore.Main;
-using Engine8.EngineCore.Resources;
+using Sovereign.ClientCore.Logging;
+using Sovereign.EngineCore.Main;
+using Sovereign.EngineCore.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.ClientCore.Rendering.Sprites
+namespace Sovereign.ClientCore.Rendering.Sprites
 {
 
     /// <summary>

@@ -3,9 +3,9 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <StartupObject>Engine8.StandaloneWorldGen.Main.StandaloneWorldGenMain</StartupObject>
-    <RootNamespace>Engine8.StandaloneWorldGen</RootNamespace>
-    <AssemblyName>Engine8.StandaloneWorldGen</AssemblyName>
+    <StartupObject>Sovereign.StandaloneWorldGen.Main.StandaloneWorldGenMain</StartupObject>
+    <RootNamespace>Sovereign.StandaloneWorldGen</RootNamespace>
+    <AssemblyName>Sovereign.StandaloneWorldGen</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

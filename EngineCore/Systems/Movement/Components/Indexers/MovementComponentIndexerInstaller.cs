@@ -7,7 +7,7 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 
-namespace Engine8.EngineCore.Systems.Movement.Components.Indexers
+namespace Sovereign.EngineCore.Systems.Movement.Components.Indexers
 {
     
     /// <summary>

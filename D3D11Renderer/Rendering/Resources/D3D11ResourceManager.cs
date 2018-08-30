@@ -1,14 +1,14 @@
 ﻿using Castle.Core.Logging;
-using Engine8.ClientCore.Rendering;
-using Engine8.ClientCore.Rendering.Sprites;
-using Engine8.D3D11Renderer.Rendering.Resources.Textures;
+using Sovereign.ClientCore.Rendering;
+using Sovereign.ClientCore.Rendering.Sprites;
+using Sovereign.D3D11Renderer.Rendering.Resources.Textures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.D3D11Renderer.Rendering.Resources
+namespace Sovereign.D3D11Renderer.Rendering.Resources
 {
 
     /// <summary>

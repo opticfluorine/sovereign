@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Engine8.WorldLib.Material
+namespace Sovereign.WorldLib.Material
 {
 
     /// <summary>

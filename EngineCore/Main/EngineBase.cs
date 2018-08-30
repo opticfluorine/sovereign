@@ -1,5 +1,5 @@
 ﻿/*
- * Engine8 Dynamic World MMORPG Engine
+ * Sovereign Dynamic World MMORPG Engine
  * Copyright (c) 2018 opticfluorine
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a 
@@ -22,12 +22,12 @@
  */
 
 using Castle.Core.Logging;
-using Engine8.EngineCore.Events;
-using Engine8.EngineCore.Timing;
+using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Timing;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Engine8.EngineCore.Main
+namespace Sovereign.EngineCore.Main
 {
 
     /// <summary>

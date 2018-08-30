@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{DFD41CDD-7C12-476F-BD03-E9AEDDD1EC91}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Engine8.Engine8Client</RootNamespace>
-    <AssemblyName>Engine8.Client</AssemblyName>
+    <RootNamespace>Sovereign.Client</RootNamespace>
+    <AssemblyName>Sovereign.Client</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -51,7 +51,7 @@
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Engine8.Engine8Client.Main.ClientMain</StartupObject>
+    <StartupObject>Sovereign.SovereignClient.Main.ClientMain</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>

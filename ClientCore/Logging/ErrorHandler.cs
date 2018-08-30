@@ -1,5 +1,5 @@
 ﻿/*
- * Engine8 Dynamic World MMORPG Engine
+ * Sovereign Dynamic World MMORPG Engine
  * Copyright (c) 2018 opticfluorine
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a 
@@ -24,7 +24,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace Engine8.ClientCore.Logging
+namespace Sovereign.ClientCore.Logging
 {
 
     /// <summary>

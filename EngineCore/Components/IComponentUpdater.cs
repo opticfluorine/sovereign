@@ -1,4 +1,4 @@
-﻿namespace Engine8.EngineCore.Components
+﻿namespace Sovereign.EngineCore.Components
 {
 
     /// <summary>

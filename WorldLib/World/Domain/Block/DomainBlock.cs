@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Engine8.WorldLib.World.Domain.Block
+namespace Sovereign.WorldLib.World.Domain.Block
 {
 
     /// <summary>

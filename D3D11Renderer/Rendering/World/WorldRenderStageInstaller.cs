@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.D3D11Renderer.Rendering.World
+namespace Sovereign.D3D11Renderer.Rendering.World
 {
 
     public class WorldRenderStageInstaller : IWindsorInstaller

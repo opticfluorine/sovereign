@@ -1,9 +1,9 @@
 ﻿using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using Engine8.EngineUtil.IoC;
+using Sovereign.EngineUtil.IoC;
 
-namespace Engine8.EngineCore.Resources
+namespace Sovereign.EngineCore.Resources
 {
 
     /// <summary>

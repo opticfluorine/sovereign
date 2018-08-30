@@ -1,14 +1,14 @@
 ﻿using Castle.Core.Logging;
-using Engine8.ClientCore.Logging;
-using Engine8.ClientCore.Rendering.Display;
-using Engine8.EngineCore.Main;
+using Sovereign.ClientCore.Logging;
+using Sovereign.ClientCore.Rendering.Display;
+using Sovereign.EngineCore.Main;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.ClientCore.Rendering.Sprites
+namespace Sovereign.ClientCore.Rendering.Sprites
 {
 
     /// <summary>

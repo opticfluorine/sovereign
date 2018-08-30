@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Engine8.WorldGen</RootNamespace>
-    <AssemblyName>Engine8.WorldGen</AssemblyName>
+    <RootNamespace>Sovereign.WorldGen</RootNamespace>
+    <AssemblyName>Sovereign.WorldGen</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using Engine8.EngineCore.Components;
+using Sovereign.EngineCore.Components;
 
-namespace Engine8.EngineCore.Systems.Movement.Components
+namespace Sovereign.EngineCore.Systems.Movement.Components
 {
 
     /// <summary>

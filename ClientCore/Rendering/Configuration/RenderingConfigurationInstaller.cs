@@ -1,14 +1,14 @@
 ﻿using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using Engine8.EngineUtil.IoC;
+using Sovereign.EngineUtil.IoC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.ClientCore.Rendering.Configuration
+namespace Sovereign.ClientCore.Rendering.Configuration
 {
 
     /// <summary>

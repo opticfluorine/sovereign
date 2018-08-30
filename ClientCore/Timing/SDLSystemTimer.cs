@@ -1,5 +1,5 @@
 ﻿/*
- * Engine8 Dynamic World MMORPG Engine
+ * Sovereign Dynamic World MMORPG Engine
  * Copyright (c) 2018 opticfluorine
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a 
@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Engine8.EngineCore.Timing;
+using Sovereign.EngineCore.Timing;
 using SDL2;
 using System;
 using System.Collections.Generic;
@@ -29,7 +29,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.ClientCore.Timing
+namespace Sovereign.ClientCore.Timing
 {
 
     /// <summary>

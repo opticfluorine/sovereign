@@ -5,7 +5,7 @@ using System.Text;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Engine8.WorldGen.Configuration
+namespace Sovereign.WorldGen.Configuration
 {
 
     /// <summary>

@@ -1,8 +1,8 @@
-﻿using Engine8.ClientCore.Rendering.Configuration;
+﻿using Sovereign.ClientCore.Rendering.Configuration;
 using SharpDX.DXGI;
 using System.Collections.Generic;
 
-namespace Engine8.D3D11Renderer.Rendering.Configuration
+namespace Sovereign.D3D11Renderer.Rendering.Configuration
 {
 
     /// <summary>

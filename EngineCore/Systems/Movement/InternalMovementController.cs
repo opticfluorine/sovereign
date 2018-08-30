@@ -1,12 +1,12 @@
-﻿using Engine8.EngineCore.Events;
-using Engine8.EngineCore.Systems.Movement.Events;
+﻿using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems.Movement.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.EngineCore.Systems.Movement
+namespace Sovereign.EngineCore.Systems.Movement
 {
 
     /// <summary>

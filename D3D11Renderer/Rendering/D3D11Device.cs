@@ -1,4 +1,4 @@
-﻿using Engine8.D3D11Renderer.Rendering.Configuration;
+﻿using Sovereign.D3D11Renderer.Rendering.Configuration;
 using SharpDX.Direct3D11;
 using SharpDX;
 using System;
@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Engine8.ClientCore.Rendering.Display;
+using Sovereign.ClientCore.Rendering.Display;
 
-namespace Engine8.D3D11Renderer.Rendering
+namespace Sovereign.D3D11Renderer.Rendering
 {
 
     /// <summary>

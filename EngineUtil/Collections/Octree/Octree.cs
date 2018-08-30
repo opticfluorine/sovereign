@@ -1,10 +1,10 @@
-﻿using Engine8.EngineUtil.Ranges;
+﻿using Sovereign.EngineUtil.Ranges;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading;
 
-namespace Engine8.EngineUtil.Collections.Octree
+namespace Sovereign.EngineUtil.Collections.Octree
 {
 
     /// <summary>

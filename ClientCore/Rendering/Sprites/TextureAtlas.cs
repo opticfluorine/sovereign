@@ -1,10 +1,10 @@
 ﻿using Castle.Core.Logging;
-using Engine8.ClientCore.Rendering.Configuration;
+using Sovereign.ClientCore.Rendering.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine8.ClientCore.Rendering.Sprites
+namespace Sovereign.ClientCore.Rendering.Sprites
 {
 
     /// <summary>

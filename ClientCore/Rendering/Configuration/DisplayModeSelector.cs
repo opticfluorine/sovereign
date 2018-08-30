@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine8.ClientCore.Rendering.Configuration
+namespace Sovereign.ClientCore.Rendering.Configuration
 {
 
     /// <summary>
