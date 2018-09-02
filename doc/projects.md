@@ -1,5 +1,5 @@
-Engine8 Projects
-================
+Sovereign Engine Projects
+=========================
 
 This section describes the various projects that comprise the engine.
 
@@ -15,17 +15,17 @@ ClientCore is the main class library for the client-specific code.
 D3D11Renderer is an implementation of the rendering interfaces defined in
 ClientCore that uses Direct3D 11.
 
-### Engine8Client
+### SovereignClient
 
-Engine8Client is an executable wrapper around ClientCore that configures the
+SovereignClient is an executable wrapper around ClientCore that configures the
 engine to run as a client.
 
 Server Projects
 ---------------
 
-### Engine8Server
+### SovereignServer
 
-Engine8Server is an executable wrapper around EngineCore that configures the
+SovereignServer is an executable wrapper around EngineCore that configures the
 engine to run as a server.
 
 ### WorldGen
