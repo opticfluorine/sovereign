@@ -32,7 +32,8 @@ material modifier. The material ID defines the specific type of material
 (e.g. grass, sand, water). The material modifier indicates which particular
 appearance of the material the block will take.
 
-Each material specifies two tile sprites, the top face and the side face.
-The top face is the horizontal surface in the xy plane, and the side face is 
-the vertical surface in the xz plane.
+Each material specifies three tile sprites: the top face, the side face,
+and an alternate top face to be shown if a face is obscured. The top face
+is the horizontal surface in the xy plane, and the side face is the vertical
+surface in the xz plane.
 

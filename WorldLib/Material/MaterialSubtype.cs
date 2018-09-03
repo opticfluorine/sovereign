@@ -19,12 +19,17 @@ namespace Sovereign.WorldLib.Material
         /// <summary>
         /// The ID of the tile sprite used for the top face.
         /// </summary>
-        public uint TopFaceTileSpriteId { get; set; }
+        public int TopFaceTileSpriteId { get; set; }
+
+        /// <summary>
+        /// The ID of the tile sprite used for the top face if a face is obscured.
+        /// </summary>
+        public int ObscuredTopFaceTileSpriteId { get; set; }
 
         /// <summary>
         /// The ID of the tile sprite used for the side face.
         /// </summary>
-        public uint SideFaceTileSpriteId { get; set; }
+        public int SideFaceTileSpriteId { get; set; }
 
     }
 

@@ -10,3 +10,4 @@ Materials:
       - MaterialModifier: 0
         TopFaceTileSpriteId: 0
         SideFaceTileSpriteId: 0
+        AlternateTopFaceTileSpriteId: 0
