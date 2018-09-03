@@ -26,6 +26,7 @@ using Castle.Core.Logging;
 using Sovereign.ClientCore.Logging;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
+using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using System;
 using System.Collections.Generic;
@@ -68,6 +69,11 @@ namespace Sovereign.ClientCore.Rendering
         /// Rendering resource manager.
         /// </summary>
         private readonly RenderingResourceManager resourceManager;
+
+        /// <summary>
+        /// Error handler.
+        /// </summary>
+        public IErrorHandler ErrorHandler { private get; set; } = NullErrorHandler.Instance;
 
         /// <summary>
         /// Selected video adapter.

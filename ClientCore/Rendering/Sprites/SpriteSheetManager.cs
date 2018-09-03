@@ -1,5 +1,6 @@
 ﻿using Castle.Core.Logging;
 using Sovereign.ClientCore.Logging;
+using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
 using System;
@@ -19,6 +20,8 @@ namespace Sovereign.ClientCore.Rendering.Sprites
     {
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+        public IErrorHandler ErrorHandler { private get; set; } = NullErrorHandler.Instance;
 
         /// <summary>
         /// Suffix attached to spritesheet definition filenames.

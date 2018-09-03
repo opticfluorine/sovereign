@@ -26,6 +26,7 @@ using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 using Castle.Facilities.Logging;
 using Castle.Services.Logging.Log4netIntegration;
+using Sovereign.EngineUtil.IoC;
 
 namespace Sovereign.EngineCore.Logging
 {
@@ -46,6 +47,13 @@ namespace Sovereign.EngineCore.Logging
             /* Configure log4net. */
             container.AddFacility<LoggingFacility>(f => f.LogUsing<Log4netFactory>()
                 .WithConfig(CONFIG_FILE));
+
+            /* IErrorHandler. */
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IErrorHandler>()
+                .WithServiceDefaultInterfaces()
+                .Unless(handlerType => handlerType.Equals(typeof(NullErrorHandler)))
+                .LifestyleSingleton());
         }
 
     }

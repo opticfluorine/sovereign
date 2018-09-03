@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Logging;
 using System;
 using System.Windows.Forms;
 
@@ -31,12 +32,12 @@ namespace Sovereign.ClientCore.Logging
     /// Utility class that provides methods for reporting errors and
     /// fatal errors to the user.
     /// </summary>
-    public class ErrorHandler
+    public class ErrorHandler : IErrorHandler
     {
 
         private static readonly string CAPTION = "Error";
 
-        public static void Error(string message)
+        public void Error(string message)
         {
             MessageBox.Show(null, message, CAPTION,
                 MessageBoxButtons.OK,

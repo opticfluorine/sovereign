@@ -1,6 +1,7 @@
 ﻿using Castle.Core.Logging;
 using Sovereign.ClientCore.Logging;
 using Sovereign.ClientCore.Rendering.Display;
+using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,8 @@ namespace Sovereign.ClientCore.Rendering.Sprites
     {
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+        public IErrorHandler ErrorHandler { private get; set; } = NullErrorHandler.Instance;
 
         /// <summary>
         /// Texture atlas.

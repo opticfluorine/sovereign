@@ -42,7 +42,7 @@ namespace Sovereign.SovereignClient.Main
             if (err < 0)
             {
                 /* Fatal error. */
-                ErrorHandler.Error(SDL.SDL_GetError());
+                new ErrorHandler().Error(SDL.SDL_GetError());
                 return;
             }
 
@@ -50,7 +50,7 @@ namespace Sovereign.SovereignClient.Main
             if (err < 0)
             {
                 /* Fatal error. */
-                ErrorHandler.Error(SDL.SDL_GetError());
+                new ErrorHandler().Error(SDL.SDL_GetError());
                 return;
             }
 
