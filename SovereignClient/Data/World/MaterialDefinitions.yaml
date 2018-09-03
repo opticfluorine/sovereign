@@ -1,0 +1,12 @@
+﻿# Default material definitions file
+#
+
+---
+
+Materials:
+  - MaterialId: 0
+    MaterialName: Water
+    MaterialSubtypes:
+      - MaterialModifier: 0
+        TopFaceTileSpriteId: 0
+        SideFaceTileSpriteId: 0

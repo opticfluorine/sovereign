@@ -14,7 +14,7 @@ namespace Sovereign.WorldLib.Material
         /// <summary>
         /// Materials.
         /// </summary>
-        public IList<Material> Materials;
+        public IList<Material> Materials { get; set; }
 
     }
 
