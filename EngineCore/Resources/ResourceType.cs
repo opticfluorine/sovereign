@@ -18,6 +18,11 @@ namespace Sovereign.EngineCore.Resources
         /// </summary>
         Spritesheet,
 
+        /// <summary>
+        /// World definition files.
+        /// </summary>
+        World,
+
     }
 
 }

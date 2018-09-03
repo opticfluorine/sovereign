@@ -24,6 +24,7 @@
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Timing;
+using Sovereign.EngineCore.World;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -48,6 +49,11 @@ namespace Sovereign.EngineCore.Main
         /// </summary>
         private readonly TimeManager timeManager;
 
+        /// <summary>
+        /// World manager.
+        /// </summary>
+        private readonly WorldManager worldManager;
+
         private readonly IList<IMainLoopAction> mainLoopActions;
 
         /// <summary>
@@ -56,10 +62,11 @@ namespace Sovereign.EngineCore.Main
         private ulong cycleCount = 0;
 
         public EngineBase(IEventLoop eventLoop, TimeManager timeManager,
-            IList<IMainLoopAction> mainLoopActions)
+            WorldManager worldManager, IList<IMainLoopAction> mainLoopActions)
         {
             this.eventLoop = eventLoop;
             this.timeManager = timeManager;
+            this.worldManager = worldManager;
             this.mainLoopActions = mainLoopActions;
         }
 
