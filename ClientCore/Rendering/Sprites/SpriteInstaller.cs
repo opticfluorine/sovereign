@@ -36,6 +36,18 @@ namespace Sovereign.ClientCore.Rendering.Sprites
             /* TextureAtlasManager. */
             container.Register(Component.For<TextureAtlasManager>()
                 .LifestyleSingleton());
+
+            /* SpriteManager. */
+            container.Register(Component.For<SpriteManager>()
+                .LifestyleSingleton());
+
+            /* SpriteDefinitionsLoader. */
+            container.Register(Component.For<SpriteDefinitionsLoader>()
+                .LifestyleSingleton());
+
+            /* SpriteDefinitionsValidator. */
+            container.Register(Component.For<SpriteDefinitionsValidator>()
+                .LifestyleSingleton());
         }
 
     }

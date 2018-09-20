@@ -14,7 +14,7 @@ namespace Sovereign.WorldLib.Material
         /// <summary>
         /// Material ID. Unique.
         /// </summary>
-        public uint MaterialId { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Name of the material.

@@ -1,4 +1,5 @@
 ﻿using Castle.Core.Logging;
+using Sovereign.EngineUtil.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,51 @@ namespace Sovereign.WorldLib.Material
         }
 
         /// <summary>
+        /// Checks that IDs are not duplicated and run from 0 to n - 1.
+        /// </summary>
+        /// <param name="definitions">Definitions.</param>
+        /// <param name="sb">StringBuilder for error reporting.</param>
+        /// <returns>true if valid, false otherwise.</returns>
+        private bool ValidateIds(MaterialDefinitions definitions,
+            StringBuilder sb)
+        {
+            var spriteCount = definitions.Materials.Count;
+            var validator = new ConsecutiveRangeValidation();
+            validator.IsRangeConsecutive(definitions.Materials.Select(material => material.Id),
+                0, spriteCount, out var duplicateIds, out var outOfRangeIds);
+
+            var hasDuplicates = duplicateIds.Count > 0;
+            var hasOutOfRanges = outOfRangeIds.Count > 0;
+            var valid = hasDuplicates || hasOutOfRanges;
+
+            if (!valid)
+            {
+                if (hasDuplicates)
+                {
+                    sb.Append("The following material IDs are duplicated:\n\n");
+                    foreach (var id in duplicateIds)
+                    {
+                        sb.Append("Material ").Append(id).Append("\n");
+                    }
+                }
+
+                if (hasDuplicates && hasOutOfRanges) sb.Append("\n");
+
+                if (hasOutOfRanges)
+                {
+                    sb.Append("Material IDs must run consecutively from 0.\n")
+                        .Append("The following IDs are out of range:\n\n");
+                    foreach (var id in outOfRangeIds)
+                    {
+                        sb.Append("Material ").Append(id).Append("\n");
+                    }
+                }
+            }
+
+            return valid;
+        }
+
+        /// <summary>
         /// Checks that Material IDs are not duplicated in the definitions.
         /// </summary>
         /// <param name="materialDefinitions">Material definitions.</param>
@@ -43,7 +89,7 @@ namespace Sovereign.WorldLib.Material
         {
             /* Check whether any IDs are duplicated. */
             var uniqueIdCount = materialDefinitions.Materials
-                .Select(material => material.MaterialId)
+                .Select(material => material.Id)
                 .Distinct().Count();
             var satisfied = uniqueIdCount == materialDefinitions.Materials.Count;
 
@@ -111,7 +157,7 @@ namespace Sovereign.WorldLib.Material
         {
             /* Identify the duplicated IDs. */
             var duplicateIds = materialDefinitions.Materials
-                .GroupBy(material => material.MaterialId)
+                .GroupBy(material => material.Id)
                 .Where(group => group.Count() > 1)
                 .Select(group => group.Key)
                 .OrderBy(materialId => materialId);
@@ -145,7 +191,7 @@ namespace Sovereign.WorldLib.Material
             /* Produce error message. */
             var sb = new StringBuilder();
             sb.Append("Material modifiers must be unique within a single Material.\n")
-                .Append("For Material ").Append(material.MaterialId)
+                .Append("For Material ").Append(material.Id)
                 .Append(" (\"").Append(material.MaterialName).Append("\"), the following "
                 + "modifiers are duplicated:");
             foreach (var duplicateModifier in duplicateModifiers)

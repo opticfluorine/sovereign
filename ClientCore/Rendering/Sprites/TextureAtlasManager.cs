@@ -52,7 +52,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites
 
             try
             {
-                TextureAtlas = new TextureAtlas(spriteSheetManager.SpriteSheets,
+                TextureAtlas = new TextureAtlas(spriteSheetManager.SpriteSheets.Values,
                     mainDisplay.DisplayMode.DisplayFormat);
             }
             catch (Exception e)

@@ -14,6 +14,11 @@ namespace Sovereign.EngineCore.Resources
     {
 
         /// <summary>
+        /// Sprite definitions and other related data.
+        /// </summary>
+        Sprite,
+
+        /// <summary>
         /// Spritesheet files.
         /// </summary>
         Spritesheet,

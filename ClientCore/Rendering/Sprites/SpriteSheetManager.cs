@@ -29,9 +29,10 @@ namespace Sovereign.ClientCore.Rendering.Sprites
         private const string DefinitionSuffix = ".yaml";
 
         /// <summary>
-        /// A list of all loaded spritesheets.
+        /// Map from spritesheet names to spritesheets.
         /// </summary>
-        public List<SpriteSheet> SpriteSheets { get; private set; } = new List<SpriteSheet>();
+        public IDictionary<string, SpriteSheet> SpriteSheets { get; private set; } 
+            = new Dictionary<string, SpriteSheet>();
 
         /// <summary>
         /// Spritesheet factory.
@@ -74,7 +75,10 @@ namespace Sovereign.ClientCore.Rendering.Sprites
             {
                 Logger.Info("Loading spritesheets.");
 
-                SpriteSheets.AddRange(LoadSpriteSheets());
+                foreach (var spriteSheet in LoadSpriteSheets())
+                {
+                    SpriteSheets[spriteSheet.Definition.Filename] = spriteSheet;
+                }
 
                 Logger.InfoFormat("Successfully loaded {0} spritesheets.", SpriteSheets.Count());
             }
@@ -96,7 +100,10 @@ namespace Sovereign.ClientCore.Rendering.Sprites
         /// </summary>
         public void ReleaseSpriteSheets()
         {
-            SpriteSheets.ForEach(spriteSheet => spriteSheet.Dispose());
+            foreach (var spriteSheet in SpriteSheets.Values)
+            {
+                spriteSheet.Dispose();
+            }
             SpriteSheets.Clear();
         }
 

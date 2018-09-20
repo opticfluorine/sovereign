@@ -7,7 +7,7 @@ for each tile sprite being rendered.
 Tile Sprites
 ------------
 
-A tile sprite is a set of sprites together with a selection rule that
+A tile sprite is a set of animated sprites together with a selection rule that
 determines the list of sprites to be drawn depending on the neighboring 
 tile sprites. For example, a grass tile sprite might consist of an all-grass
 sprite together with semi-transparent border/corner grass sprites to be
@@ -19,4 +19,12 @@ in the four cardinal directions in the plane of the tile. Tile contexts take
 precedence in order from most specific to least specific. Each tile context
 is associated with a list of zero or more sprites in the order in which they
 are to be drawn.
+
+Animated Sprites
+----------------
+
+Animated sprites are lists of one or more animated sprite frames. Animated
+sprites are rendered frame-by-frame to create animated effects. Each animated
+sprite frame consists of a sprite reference and a frame length (in 
+milliseconds).
 
