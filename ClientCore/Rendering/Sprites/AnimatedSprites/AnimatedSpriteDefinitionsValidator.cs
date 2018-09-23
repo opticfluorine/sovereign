@@ -58,7 +58,8 @@ namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites
         {
             var sb = new StringBuilder();
             var valid = ValidateIds(definitions, sb)
-                && ValidateNonzeroAnimationTimestep(definitions, sb);
+                && ValidateNonzeroAnimationTimestep(definitions, sb)
+                && ValidateSpriteIds(definitions, sb);
             if (!valid)
             {
                 throw new AnimatedSpriteDefinitionsException(sb.ToString().Trim());
@@ -156,7 +157,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites
                 sb.Append("The following animated sprites reference unknown sprites:\n\n");
                 foreach (var sprite in badSprites)
                 {
-
+                    sb.Append("Animated Sprite ").Append(sprite.Id).Append("\n");
                 }
             }
 
