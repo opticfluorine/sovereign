@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Sovereign.ClientCore.Rendering.Sprites.TileSprites.TileSpriteDefinitions;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
 {
@@ -51,7 +52,8 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
             /* Validate. */
             var valid = ValidateIds(tileSpriteDefinitions, sb)
                 && ValidateNoEmptyTileContexts(tileSpriteDefinitions, sb)
-                && ValidateTileContextIdRanges(tileSpriteDefinitions, sb);
+                && ValidateTileContextIdRanges(tileSpriteDefinitions, sb)
+                && ValidateDefaultContextPresent(tileSpriteDefinitions, sb);
             if (!valid)
             {
                 throw new TileSpriteDefinitionsException(sb.ToString().Trim());
@@ -164,6 +166,35 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         }
 
         /// <summary>
+        /// Checks that every tile sprite has at least a default tile context.
+        /// </summary>
+        /// <param name="definitions">Definitions to validate.</param>
+        /// <param name="sb">StringBuilder for error reporting.</param>
+        /// <returns>true if valid, false otherwise.</returns>
+        private bool ValidateDefaultContextPresent(TileSpriteDefinitions definitions,
+            StringBuilder sb)
+        {
+            var badSprites = definitions.TileSprites
+                .Where(sprite => sprite.TileContexts != null)
+                .Where(sprite => !sprite.TileContexts
+                    .Select(IsDefaultContext)
+                    .Aggregate((a, b) => a || b));
+            var valid = badSprites.Count() == 0;
+
+            if (!valid)
+            {
+                sb.Append("All tile sprites must have a default tile context.\n"
+                    + "The following tile sprites do not have a default tile context:\n\n");
+                foreach (var sprite in badSprites)
+                {
+                    sb.Append("Tile Sprite ").Append(sprite.Id).Append("\n");
+                }
+            }
+
+            return valid;
+        }
+
+        /// <summary>
         /// Determines if the given tile context has any neighbor IDs that are
         /// out of range.
         /// </summary>
@@ -175,6 +206,20 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
                 || context.EastTileSpriteId < -1
                 || context.SouthTileSpriteId < -1
                 || context.WestTileSpriteId < -1;
+        }
+
+        /// <summary>
+        /// Determines if the given tile context is a default context that
+        /// matches all neighboring tiles.
+        /// </summary>
+        /// <param name="context">Tile context.</param>
+        /// <returns>true if default, false otherwise.</returns>
+        private bool IsDefaultContext(TileContext context)
+        {
+            return context.NorthTileSpriteId == TileSprite.Wildcard
+                && context.EastTileSpriteId == TileSprite.Wildcard
+                && context.SouthTileSpriteId == TileSprite.Wildcard
+                && context.WestTileSpriteId == TileSprite.Wildcard;
         }
 
     }

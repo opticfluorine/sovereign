@@ -30,8 +30,17 @@ using System.Threading.Tasks;
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
 {
 
+    /// <summary>
+    /// Describes a tile sprite that changes its appearance based on
+    /// its context (surrounding tile sprites).
+    /// </summary>
     public sealed class TileSprite
     {
+
+        /// <summary>
+        /// Indicates a wildcard neighboring tile sprite.
+        /// </summary>
+        public const int Wildcard = -1;
 
         /// <summary>
         /// Tile sprite ID.
@@ -42,6 +51,45 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// Tile contexts.
         /// </summary>
         public IList<TileContext> TileContexts { get; set; }
+
+        /// <summary>
+        /// Cache of previously resolved tile contexts.
+        /// </summary>
+        private IDictionary<Tuple<int, int, int, int>, TileContext> lookupCache
+            = new Dictionary<Tuple<int, int, int, int>, TileContext>();
+
+        /// <summary>
+        /// Finds the tile context that matches the given bordering tiles.
+        /// </summary>
+        /// 
+        /// This method should only be called from the rendering thread.
+        /// 
+        /// <param name="idNorth">ID of the north tile sprite.</param>
+        /// <param name="idEast">ID of the east tile sprite.</param>
+        /// <param name="idSouth">ID of the south tile sprite.</param>
+        /// <param name="idWest">ID of the west tile sprite.</param>
+        /// <returns>Matching tile context.</returns>
+        public TileContext GetMatchingContext(int idNorth, int idEast, int idSouth, int idWest)
+        {
+            /* Check if the context is already in the cache. */
+            var ids = new Tuple<int, int, int, int>(idNorth, idEast, idSouth, idWest);
+            if (lookupCache.ContainsKey(ids))
+                return lookupCache[ids];
+
+            /* Context not found in cache - resolve. */
+            
+            return null;
+        }
+
+        /// <summary>
+        /// Resolves the tile context for the given neighboring IDs.
+        /// </summary>
+        /// <param name="ids">4-tuple of neighboring IDs (north, east, south, west).</param>
+        /// <returns>Resolved tile context.</returns>
+        private TileContext ResolveContext(Tuple<int, int, int, int> ids)
+        {
+
+        }
 
     }
 

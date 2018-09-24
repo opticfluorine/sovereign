@@ -21,11 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
 {
@@ -39,7 +35,27 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// <summary>
         /// Tile sprites.
         /// </summary>
-        public IList<TileSprite> TileSprites { get; set; }
+        public IList<TileSpriteRecord> TileSprites { get; set; }
+
+        /// <summary>
+        /// Serializable record of a tile sprite.
+        /// </summary>
+        public sealed class TileSpriteRecord
+        {
+
+            /// <summary>
+            /// Tile sprite ID.
+            /// </summary>
+            public int Id { get; set; }
+
+            /// <summary>
+            /// Tile contexts.
+            /// </summary>
+            public IList<TileContext> TileContexts { get; set; }
+
+        }
+
+
 
     }
 

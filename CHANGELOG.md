@@ -4,6 +4,30 @@
 
 ### September
 
+#### 23 September 2018
+
+* Start implementing tile context resolution for tile sprites. This allows
+  tile sprites to be mapped to the corresponding animated sprites based on
+  the neighboring tile sprites.
+** The initial implementation lazily resolves the tile context for a given 
+   tile sprite and set of neighboring tile sprites using an O(n) search of
+   the tile contexts for the center tile, then caches the resolved context
+   for O(1) lookup when the same combination of tiles appears again.
+** For the time being the sprite resolution code is not thread-safe, as it
+   should only need to be called from the rendering thread. Resolving tile
+   sprites from another thread could cause a race condition on the context
+   cache. That being said, the worst behavior that will happen is that a
+   cache check will be missed and both threads will perform an O(n) search.
+
+* Tile sprites are required to have a default tile context (a tile context
+  where all neighboring tile IDs are set to wildcards). The tile sprite
+  definitions validator throws an exception if any tile sprites lack a
+  default tile context.
+
+* Refactor tile sprite definitions to use a separate serializable record
+  class instead of loading the internal representation directly, similar
+  to what is implemented for animated sprites.
+
 #### 22 September 2018
 
 * Add sprite ID validation to animated sprites.

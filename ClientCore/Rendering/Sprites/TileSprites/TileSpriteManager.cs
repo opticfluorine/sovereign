@@ -27,9 +27,6 @@ using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
 {
@@ -50,6 +47,11 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         public const string TileSpriteDefinitionsFilename = "TileSpriteDefinitions.yaml";
 
         /// <summary>
+        /// List of tile sprites.
+        /// </summary>
+        public IList<TileSprite> TileSprites { get; private set; } = new List<TileSprite>();
+
+        /// <summary>
         /// Resource path builder.
         /// </summary>
         private readonly IResourcePathBuilder pathBuilder;
@@ -59,7 +61,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// </summary>
         private readonly TileSpriteDefinitionsLoader loader;
 
-        public TileSpriteManager(IResourcePathBuilder pathBuilder, 
+        public TileSpriteManager(IResourcePathBuilder pathBuilder,
             TileSpriteDefinitionsLoader loader)
         {
             this.pathBuilder = pathBuilder;
@@ -71,12 +73,24 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// </summary>
         public void InitializeTileSprites()
         {
+            var definitions = LoadDefinitions();
+        }
+
+        /// <summary>
+        /// Loads the tile sprite definitions.
+        /// </summary>
+        /// <returns>Tile sprite definitions.</returns>
+        /// <exception cref="FatalErrorException">
+        /// Thrown if the tile sprite definitions cannot be loaded.
+        /// </exception>
+        private TileSpriteDefinitions LoadDefinitions()
+        {
             /* Try to load the tile sprite definitions. */
             TileSpriteDefinitions definitions;
             try
             {
                 definitions = loader.LoadDefinitions(pathBuilder
-                    .BuildPathToResource(ResourceType.Sprite, 
+                    .BuildPathToResource(ResourceType.Sprite,
                     TileSpriteDefinitionsFilename));
             }
             catch (Exception e)
@@ -89,6 +103,17 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
 
                 throw new FatalErrorException();
             }
+
+            return definitions;
+        }
+
+        /// <summary>
+        /// Unpacks the tile sprite definitions to populate the list of tile sprites.
+        /// </summary>
+        /// <param name="definitions">Tile sprite definitions.</param>
+        private void UnpackDefinitions(TileSpriteDefinitions definitions)
+        {
+
         }
 
     }
