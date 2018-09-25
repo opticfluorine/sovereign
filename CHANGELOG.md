@@ -4,6 +4,11 @@
 
 ### September
 
+#### 24 September 2018
+
+* Clean up project directory structures, moving all code into a top-level
+  src directory.
+
 #### 23 September 2018
 
 * Start implementing tile context resolution for tile sprites. This allows
