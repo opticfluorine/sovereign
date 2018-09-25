@@ -6,6 +6,12 @@
 
 #### 24 September 2018
 
+* Require that tile sprites do not contain duplicate tile contexts.
+
+* Continue implementing tile context resolution. Sort tile contexts by
+  priority when unpacking from the deserialized record. This sort is
+  deterministic.
+
 * Clean up project directory structures, moving all code into a top-level
   src directory.
 

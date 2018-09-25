@@ -22,11 +22,8 @@
  */
 
 using Sovereign.EngineUtil.Validation;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using static Sovereign.ClientCore.Rendering.Sprites.TileSprites.TileSpriteDefinitions;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
@@ -195,6 +192,53 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         }
 
         /// <summary>
+        /// Checks that there are no duplicate tile contexts within the same tile sprite.
+        /// </summary>
+        /// <param name="definitions">Definitions to validate.</param>
+        /// <param name="sb">StringBuilder for error reporting.</param>
+        /// <returns>true if valid, false otherwise.</returns>
+        private bool ValidateNoDuplicateContexts(TileSpriteDefinitions definitions,
+            StringBuilder sb)
+        {
+            var badTiles = definitions.TileSprites
+                .Where(HasDuplicateContexts);
+            var valid = badTiles.Count() == 0;
+
+            if (!valid)
+            {
+                sb.Append("Tile sprites may not contain duplicate tile contexts.\n"
+                    + "The following tile sprites contain duplicate tile contexts:\n\n");
+                foreach (var tile in badTiles)
+                {
+                    sb.Append("Tile Sprite ").Append(tile.Id).Append("\n");
+                }
+            }
+
+            return valid;
+        }
+
+        /// <summary>
+        /// Checks whether the given tile sprite contains duplicate tile contexts.
+        /// </summary>
+        /// <param name="tile">Tile sprite record to check.</param>
+        /// <returns>true if duplicates are found, false otherwise.</returns>
+        private bool HasDuplicateContexts(TileSpriteRecord tile)
+        {
+            var contexts = tile.TileContexts;
+            for (int i = 0; i < contexts.Count - 1; ++i)
+            {
+                for (int j = i; j < contexts.Count; ++j)
+                {
+                    if (contexts[i].NorthTileSpriteId == contexts[j].NorthTileSpriteId
+                        && contexts[i].EastTileSpriteId == contexts[j].EastTileSpriteId
+                        && contexts[i].SouthTileSpriteId == contexts[j].SouthTileSpriteId
+                        && contexts[i].WestTileSpriteId == contexts[j].WestTileSpriteId) return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Determines if the given tile context has any neighbor IDs that are
         /// out of range.
         /// </summary>
@@ -202,10 +246,10 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// <returns>true if out of range, false otherwise.</returns>
         private bool TileContextHasOutOfRangeIds(TileContext context)
         {
-            return context.NorthTileSpriteId < -1
-                || context.EastTileSpriteId < -1
-                || context.SouthTileSpriteId < -1
-                || context.WestTileSpriteId < -1;
+            return context.NorthTileSpriteId < TileSprite.Wildcard
+                || context.EastTileSpriteId < TileSprite.Wildcard
+                || context.SouthTileSpriteId < TileSprite.Wildcard
+                || context.WestTileSpriteId < TileSprite.Wildcard;
         }
 
         /// <summary>

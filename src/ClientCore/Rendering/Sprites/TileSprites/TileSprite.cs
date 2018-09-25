@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Sovereign.ClientCore.Rendering.Sprites.TileSprites.TileSpriteDefinitions;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
 {
@@ -45,18 +46,24 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// <summary>
         /// Tile sprite ID.
         /// </summary>
-        public int Id { get; set; }
+        public int Id { get; private set; }
 
         /// <summary>
-        /// Tile contexts.
+        /// Tile contexts sorted in priority order.
         /// </summary>
-        public IList<TileContext> TileContexts { get; set; }
+        public IList<TileContext> TileContexts { get; private set; }
 
         /// <summary>
         /// Cache of previously resolved tile contexts.
         /// </summary>
         private IDictionary<Tuple<int, int, int, int>, TileContext> lookupCache
             = new Dictionary<Tuple<int, int, int, int>, TileContext>();
+
+        public TileSprite(TileSpriteRecord definition)
+        {
+            Id = definition.Id;
+            TileContexts = SortContexts(definition.TileContexts);
+        }
 
         /// <summary>
         /// Finds the tile context that matches the given bordering tiles.
@@ -69,6 +76,10 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// <param name="idSouth">ID of the south tile sprite.</param>
         /// <param name="idWest">ID of the west tile sprite.</param>
         /// <returns>Matching tile context.</returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown if no matching tile context is found. This should not typically occur as
+        /// there should always be a default context that matches all ID patterns.
+        /// </exception>
         public TileContext GetMatchingContext(int idNorth, int idEast, int idSouth, int idWest)
         {
             /* Check if the context is already in the cache. */
@@ -77,8 +88,9 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
                 return lookupCache[ids];
 
             /* Context not found in cache - resolve. */
-            
-            return null;
+            var context = ResolveContext(ids);
+            lookupCache[ids] = context;
+            return context;
         }
 
         /// <summary>
@@ -86,9 +98,36 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// </summary>
         /// <param name="ids">4-tuple of neighboring IDs (north, east, south, west).</param>
         /// <returns>Resolved tile context.</returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown if no matching tile context is found. This should not typically occur as
+        /// there should always be a default context that matches all ID patterns.
+        /// </exception>
         private TileContext ResolveContext(Tuple<int, int, int, int> ids)
         {
+            /* Since the contexts are sorted in priority order, iterate until match. */
+            foreach (var context in TileContexts)
+            {
+                if (context.IsMatch(ids.Item1, ids.Item2, ids.Item3, ids.Item4))
+                    return context;
+            }
 
+            /* We should at least match the default context, so throw an exception. */
+            throw new KeyNotFoundException("No matching context found.");
+        }
+
+        /// <summary>
+        /// Sorts the tile contexts by priority.
+        /// </summary>
+        /// <param name="contexts">Tile contexts to be sorted.</param>
+        /// <returns>Sorted list of tile contexts.</returns>
+        private IList<TileContext> SortContexts(IEnumerable<TileContext> contexts)
+        {
+            return contexts.OrderBy(context => context.GetWildcardCount())
+                .ThenByDescending(context => context.NorthTileSpriteId)
+                .ThenByDescending(context => context.EastTileSpriteId)
+                .ThenByDescending(context => context.SouthTileSpriteId)
+                .ThenByDescending(context => context.WestTileSpriteId)
+                .ToList();
         }
 
     }

@@ -27,6 +27,7 @@ using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
 {
@@ -74,6 +75,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         public void InitializeTileSprites()
         {
             var definitions = LoadDefinitions();
+            UnpackDefinitions(definitions);
         }
 
         /// <summary>
@@ -113,7 +115,10 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// <param name="definitions">Tile sprite definitions.</param>
         private void UnpackDefinitions(TileSpriteDefinitions definitions)
         {
-
+            foreach (var definition in definitions.TileSprites.OrderBy(tile => tile.Id))
+            {
+                TileSprites.Add(new TileSprite(definition));
+            }
         }
 
     }

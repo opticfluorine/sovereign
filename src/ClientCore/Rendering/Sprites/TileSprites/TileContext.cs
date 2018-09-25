@@ -62,6 +62,34 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// </summary>
         public List<int> SpriteIds { get; set; }
 
+        /// <summary>
+        /// Determines whether the context matches the given neighboring tile IDs.
+        /// </summary>
+        /// <param name="northId">North neighbor tile ID.</param>
+        /// <param name="eastId">East neighbor tile ID.</param>
+        /// <param name="southId">South neighbor tile ID.</param>
+        /// <param name="westId">West neighbor tile ID.</param>
+        /// <returns></returns>
+        public bool IsMatch(int northId, int eastId, int southId, int westId)
+        {
+            return (NorthTileSpriteId == TileSprite.Wildcard || NorthTileSpriteId == northId)
+                && (EastTileSpriteId == TileSprite.Wildcard || EastTileSpriteId == eastId)
+                && (SouthTileSpriteId == TileSprite.Wildcard || SouthTileSpriteId == southId)
+                && (WestTileSpriteId == TileSprite.Wildcard || WestTileSpriteId == westId);
+        }
+
+        /// <summary>
+        /// Gets the number of wildcards in the context.
+        /// </summary>
+        /// <returns>Number of wildcards in the context.</returns>
+        public int GetWildcardCount()
+        {
+            return (NorthTileSpriteId == TileSprite.Wildcard ? 1 : 0)
+                + (EastTileSpriteId == TileSprite.Wildcard ? 1 : 0)
+                + (SouthTileSpriteId == TileSprite.Wildcard ? 1 : 0)
+                + (WestTileSpriteId == TileSprite.Wildcard ? 1 : 0);
+        }
+
     }
 
 }
