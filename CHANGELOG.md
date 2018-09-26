@@ -4,6 +4,19 @@
 
 ### September
 
+#### 25 September 2018
+
+* Begin work on the rendering graph. The rendering graph provides a layer
+  of abstraction between the game model and the renderer. Frames are then
+  rendered in a three-step process:
+    1. The game state is encoded into a rendering graph. For example, tile
+       sprites might be transformed through the sprite pipeline down to the
+       level of the texture atlas. Instructions for additional processing
+       such as lighting effects are also sequenced in the graph.
+    2. The updated rendering graph is passed to the renderer.
+    3. The renderer iterates through the rendering graph and executes the
+       appropriate draw commands to render the next frame.
+
 #### 24 September 2018
 
 * Require that tile sprites do not contain duplicate tile contexts.
