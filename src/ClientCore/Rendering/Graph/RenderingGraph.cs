@@ -21,11 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
+using Sovereign.ClientCore.Rendering.Graph.Actions;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.ClientCore.Rendering.Graph
 {
@@ -33,8 +30,80 @@ namespace Sovereign.ClientCore.Rendering.Graph
     /// <summary>
     /// Describes the rendering options to be performed while generating the next frame.
     /// </summary>
+    /// 
+    /// The rendering graph is a tree that is traversed in depth-first order. The children
+    /// of each node, if any, are visited in order of priority. Rendering actions local to
+    /// the node are executed after all children have been traversed. The order in which
+    /// local rendering actions are performed is undefined.
     public sealed class RenderingGraph
     {
+
+        /// <summary>
+        /// Unique priority of this node. Lower priority nodes are visited earlier.
+        /// </summary>
+        public int Priority { get; private set; }
+
+        /// <summary>
+        /// Child nodes in priority order.
+        /// </summary>
+        public ISet<RenderingGraph> ChildNodes { get; private set; }
+            = new SortedSet<RenderingGraph>(
+                Comparer<RenderingGraph>.Create(
+                    (a, b) => Comparer<int>.Default.Compare(a.Priority, b.Priority)));
+
+        /// <summary>
+        /// Rendering actions local to this node.
+        /// </summary>
+        public ISet<IRenderingAction> RenderingActions { get; private set; }
+            = new HashSet<IRenderingAction>();
+
+        public RenderingGraph(int priority)
+        {
+            Priority = priority;
+        }
+
+        /// <summary>
+        /// Adds a child node to the current node.
+        /// Does nothing if the child node was already added.
+        /// </summary>
+        /// <param name="childNode">Child node to add.</param>
+        public void AddChildNode(RenderingGraph childNode)
+        {
+            ChildNodes.Add(childNode);
+        }
+
+        /// <summary>
+        /// Removes a child node from the current node.
+        /// Does nothing if the child node is not present.
+        /// </summary>
+        /// <param name="childNode">Child node to remove.</param>
+        public void RemoveChildNode(RenderingGraph childNode)
+        {
+            ChildNodes.Remove(childNode);
+        }
+
+        /// <summary>
+        /// Adds a rendering action to the current node.
+        /// Does nothing if the rendering action was already added.
+        /// </summary>
+        /// <param name="renderingAction">Rendering action to add.</param>
+        public void AddRenderingAction(IRenderingAction renderingAction)
+        {
+            RenderingActions.Add(renderingAction);
+        }
+
+        /// <summary>
+        /// Removes a rendering action from the current node.
+        /// Does nothing if the rendering action was already removed.
+        /// </summary>
+        /// <param name="renderingAction">Rendering action to remove.</param>
+        public void RemoveRenderingAction(IRenderingAction renderingAction)
+        {
+            RenderingActions.Remove(renderingAction);
+        }
+
+        public override int GetHashCode() => Priority;
+
     }
 
 }

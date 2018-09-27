@@ -4,6 +4,13 @@
 
 ### September
 
+#### 26 September 2018
+
+* Continue work on the rendering graph. Describe the rendering graph as
+  a tree to be executed in depth-first order, with nodes at the smae level
+  sorted in order of priority. Refer to the documentation comments for the
+  RenderingGraph class for further information.
+
 #### 25 September 2018
 
 * Begin work on the rendering graph. The rendering graph provides a layer

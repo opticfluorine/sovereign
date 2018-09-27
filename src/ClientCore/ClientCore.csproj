@@ -81,6 +81,11 @@
     <Compile Include="Rendering\Configuration\VideoAdapterException.cs" />
     <Compile Include="Rendering\Display\DisplayInstaller.cs" />
     <Compile Include="Rendering\Display\MainDisplay.cs" />
+    <Compile Include="Rendering\Graph\Actions\DrawSpritesRenderingAction.cs" />
+    <Compile Include="Rendering\Graph\Actions\IRenderingAction.cs" />
+    <Compile Include="Rendering\Graph\IRenderingGraphUpdater.cs" />
+    <Compile Include="Rendering\Graph\RenderingGraph.cs" />
+    <Compile Include="Rendering\Graph\RenderingGraphInstaller.cs" />
     <Compile Include="Rendering\Graph\RenderingGraphManager.cs" />
     <Compile Include="Rendering\IRenderer.cs" />
     <Compile Include="Rendering\RendererInitializationException.cs" />
