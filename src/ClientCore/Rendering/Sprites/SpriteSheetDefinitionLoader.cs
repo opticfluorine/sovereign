@@ -39,7 +39,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites
         /// <summary>
         /// YAML deserializer for the spritesheet definition file.
         /// </summary>
-        private readonly Deserializer deserializer = new DeserializerBuilder()
+        private readonly IDeserializer deserializer = new DeserializerBuilder()
             .WithNamingConvention(new PascalCaseNamingConvention())
             .Build();
 

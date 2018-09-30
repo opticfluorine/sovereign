@@ -40,7 +40,7 @@ namespace Sovereign.WorldGen.Configuration
         /// <summary>
         /// YAML deserializer.
         /// </summary>
-        private readonly Deserializer deserializer = new DeserializerBuilder()
+        private readonly IDeserializer deserializer = new DeserializerBuilder()
             .WithNamingConvention(new PascalCaseNamingConvention())
             .Build();
 

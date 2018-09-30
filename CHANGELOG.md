@@ -4,6 +4,10 @@
 
 ### September
 
+#### 30 September 2018
+
+* Migrate to YamlDotNet 5.1.0.
+
 #### 26 September 2018
 
 * Continue work on the rendering graph. Describe the rendering graph as
