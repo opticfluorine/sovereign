@@ -3,3 +3,19 @@
 
 TileSprites:
   - Id: 0
+    TileContexts:
+    - NorthTileSpriteId: -1
+      EastTileSpriteId:  -1
+      SouthTileSpriteId: -1
+      WestTileSpriteId:  -1
+      SpriteIds:
+      - 0
+
+  - Id: 1
+    TileContexts:
+    - NorthTileSpriteId: -1
+      EastTileSpriteId:  -1
+      SouthTileSpriteId: -1
+      WestTileSpriteId:  -1
+      SpriteIds:
+      - 1

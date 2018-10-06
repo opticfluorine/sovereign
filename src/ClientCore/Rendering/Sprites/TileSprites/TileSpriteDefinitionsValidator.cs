@@ -73,7 +73,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
 
             var hasDuplicates = duplicateIds.Count > 0;
             var hasOutOfRanges = outOfRangeIds.Count > 0;
-            var valid = hasDuplicates || hasOutOfRanges;
+            var valid = !(hasDuplicates || hasOutOfRanges);
 
             if (!valid)
             {

@@ -2,6 +2,14 @@
 
 ## 2018
 
+### October
+
+#### 06 October 2018
+
+* Create default sprite definitions.
+* Fix issues with sprite definition validation.
+* Fix issues with tile sprite definition validation.
+
 ### September
 
 #### 30 September 2018
