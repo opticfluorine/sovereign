@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites.AnimatedSpriteDefinitions;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites
 {
@@ -46,10 +47,12 @@ namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites
         /// </summary>
         public IList<Sprite> Sprites { get; private set; }
 
-        public AnimatedSprite(ulong frameTime, IList<Sprite> sprites)
+        public AnimatedSprite(AnimatedSpriteDefinition definition, SpriteManager spriteManager)
         {
-            FrameTime = frameTime;
-            Sprites = sprites;
+            FrameTime = definition.AnimationTimestep;
+            Sprites = definition.SpriteIds
+                .Select(id => spriteManager.Sprites[id])
+                .ToList();
         }
 
     }

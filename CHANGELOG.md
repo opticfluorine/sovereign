@@ -4,6 +4,10 @@
 
 ### October
 
+#### 20 October 2018
+
+* Load animated sprite definitions.
+
 #### 06 October 2018
 
 * Create default sprite definitions.
