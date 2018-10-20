@@ -41,6 +41,43 @@ The client should be able to manage a local bound copy of the server for
 single-player or multiplayer gameplay.
 
 
+### Client Authentication
+
+The client should be able to authenticate with the server with a persistent
+account for each player.
+
+
+### Non-Player Characters
+
+Non-player characters should be able to exist within the game world. NPCs
+should be able to be either persistent or non-persistent.
+
+
+### Items and Inventory System
+
+Items should be able to exist within the game world or in character inventories.
+
+
+### Combat
+
+An action combat system should be implemented.
+
+
+### Skills
+
+Characters should be able to develop skills.
+
+
+### Dynamic Magic System
+
+A dynamic magic system with procedurally generated spells should be implemented.
+
+
+### Server Scripting
+
+A scripting engine should be integrated with the server.
+
+
 ### Resource Editor
 
 A resource editor should allow for the management of the various resource
