@@ -98,8 +98,9 @@ namespace Sovereign.ClientCore.Rendering.Sprites
             }
             catch (Exception e)
             {
-                Logger.Fatal("Failed to load sprite definitions.", e);
-                ErrorHandler.Error(e.Message);
+                Logger.Fatal("Failed to load the sprite definitions.", e);
+                ErrorHandler.Error("Failed to load the sprite definitions.\n"
+                    + "Refer to the error log for details.");
                 throw new FatalErrorException();
             }
         }

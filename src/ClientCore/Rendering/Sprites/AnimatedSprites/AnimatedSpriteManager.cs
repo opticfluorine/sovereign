@@ -107,8 +107,9 @@ namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites
             catch (Exception e)
             {
                 /* Log and throw a fatal error. */
-                Logger.Fatal("Failed to load animated sprite definitions.", e);
-                ErrorHandler.Error(e.Message);
+                Logger.Fatal("Failed to load the animated sprite definitions.", e);
+                ErrorHandler.Error("Failed to load the animated sprite definitions.\n"
+                    + "Refer to the error log for details.");
 
                 throw new FatalErrorException();
             }

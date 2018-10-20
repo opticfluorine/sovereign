@@ -6,6 +6,7 @@
 
 #### 20 October 2018
 
+* Clean up error messages for all sprite definition managers.
 * Load animated sprite definitions.
 
 #### 06 October 2018

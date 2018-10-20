@@ -98,10 +98,11 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
             catch (Exception e)
             {
                 /* Log and throw a fatal error. */
-                var msg = "Failed to load tile sprite definitions.";
+                var msg = "Failed to load the tile sprite definitions.";
                 Logger.Fatal(msg, e);
 
-                ErrorHandler.Error(e.Message);
+                ErrorHandler.Error("Failed to load the tile sprite definitions.\n"
+                    + "Refer to the error log for details.");
 
                 throw new FatalErrorException();
             }
