@@ -8,7 +8,7 @@ TileSprites:
       EastTileSpriteId:  -1
       SouthTileSpriteId: -1
       WestTileSpriteId:  -1
-      SpriteIds:
+      AnimatedSpriteIds:
       - 0
 
   - Id: 1
@@ -17,5 +17,5 @@ TileSprites:
       EastTileSpriteId:  -1
       SouthTileSpriteId: -1
       WestTileSpriteId:  -1
-      SpriteIds:
+      AnimatedSpriteIds:
       - 1

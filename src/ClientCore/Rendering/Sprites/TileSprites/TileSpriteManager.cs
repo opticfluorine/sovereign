@@ -22,6 +22,7 @@
  */
 
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
@@ -62,11 +63,17 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// </summary>
         private readonly TileSpriteDefinitionsLoader loader;
 
+        /// <summary>
+        /// Animated sprite manager.
+        /// </summary>
+        private readonly AnimatedSpriteManager animatedSpriteManager;
+
         public TileSpriteManager(IResourcePathBuilder pathBuilder,
-            TileSpriteDefinitionsLoader loader)
+            TileSpriteDefinitionsLoader loader, AnimatedSpriteManager animatedSpriteManager)
         {
             this.pathBuilder = pathBuilder;
             this.loader = loader;
+            this.animatedSpriteManager = animatedSpriteManager;
         }
 
         /// <summary>
@@ -118,7 +125,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         {
             foreach (var definition in definitions.TileSprites.OrderBy(tile => tile.Id))
             {
-                TileSprites.Add(new TileSprite(definition));
+                TileSprites.Add(new TileSprite(definition, animatedSpriteManager));
             }
         }
 

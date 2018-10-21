@@ -6,6 +6,11 @@
 
 #### 20 October 2018
 
+* Automatically populate mappings from tile sprites down through sprites
+  at startup. Still need to populate the mapping from materials to tile sprites
+  and from sprites to texture atlas coordinates.
+* When tile sprite definitions are validated, check that the animated sprites
+  referenced in each tile context are defined in the animated sprite definitions.
 * Clean up error messages for all sprite definition managers.
 * Load animated sprite definitions.
 

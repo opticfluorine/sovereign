@@ -1,0 +1,15 @@
+﻿# Default animated sprite definitions.
+#
+
+AnimatedSprites:
+  # Grass, center
+  - Id: 0
+    AnimationTimestep: 1
+    SpriteIds:
+    - 0
+
+  # Water, center
+  - Id: 1
+    AnimationTimestep: 1
+    SpriteIds:
+    - 1

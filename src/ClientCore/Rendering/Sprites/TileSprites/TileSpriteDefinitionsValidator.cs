@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.EngineUtil.Validation;
 using System.Linq;
 using System.Text;
@@ -34,6 +35,13 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
     /// </summary>
     public sealed class TileSpriteDefinitionsValidator
     {
+
+        private readonly AnimatedSpriteManager animatedSpriteManager;
+
+        public TileSpriteDefinitionsValidator(AnimatedSpriteManager animatedSpriteManager)
+        {
+            this.animatedSpriteManager = animatedSpriteManager;
+        }
 
         /// <summary>
         /// Validates the given definitions.
@@ -50,7 +58,9 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
             var valid = ValidateIds(tileSpriteDefinitions, sb)
                 && ValidateNoEmptyTileContexts(tileSpriteDefinitions, sb)
                 && ValidateTileContextIdRanges(tileSpriteDefinitions, sb)
-                && ValidateDefaultContextPresent(tileSpriteDefinitions, sb);
+                && ValidateDefaultContextPresent(tileSpriteDefinitions, sb)
+                && ValidateNoDuplicateContexts(tileSpriteDefinitions, sb)
+                && ValidateAnimatedSpritesExist(tileSpriteDefinitions, sb);
             if (!valid)
             {
                 throw new TileSpriteDefinitionsException(sb.ToString().Trim());
@@ -211,6 +221,36 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
                 foreach (var tile in badTiles)
                 {
                     sb.Append("Tile Sprite ").Append(tile.Id).Append("\n");
+                }
+            }
+
+            return valid;
+        }
+
+        /// <summary>
+        /// Checks that all animated sprite references are valid.
+        /// </summary>
+        /// <param name="definitions">Definitions to validate.</param>
+        /// <param name="sb">StringBuilder for error reporting.</param>
+        /// <returns>true if valid, false otherwise.</returns>
+        private bool ValidateAnimatedSpritesExist(TileSpriteDefinitions definitions,
+            StringBuilder sb)
+        {
+            var badIds = definitions.TileSprites
+                .Where(sprite => sprite.TileContexts
+                    .Where(context => context.AnimatedSpriteIds
+                        .Where(id => id >= animatedSpriteManager.AnimatedSprites.Count)
+                        .Count() > 0)
+                    .Count() > 0)
+                .Select(sprite => sprite.Id);
+            var valid = badIds.Count() == 0;
+
+            if (!valid)
+            {
+                sb.Append("The following tile sprites contained references to unknown Animated Sprites:\n\n");
+                foreach (var id in badIds)
+                {
+                    sb.Append("Tile Sprite ").Append(id).Append("\n");
                 }
             }
 

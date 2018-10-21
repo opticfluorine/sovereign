@@ -58,9 +58,9 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         public int WestTileSpriteId { get; set; }
 
         /// <summary>
-        /// List of sprite IDs to be drawn in order if the context matches.
+        /// List of animated sprite IDs to be drawn in order if the context matches.
         /// </summary>
-        public List<int> SpriteIds { get; set; }
+        public List<int> AnimatedSpriteIds { get; set; }
 
         /// <summary>
         /// Determines whether the context matches the given neighboring tile IDs.
