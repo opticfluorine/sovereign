@@ -6,6 +6,7 @@
 
 #### 21 October 2018
 
+* Improve logging while loading resources.
 * Automatically populate mapping from materials to tile sprites at startup. 
 
 #### 20 October 2018

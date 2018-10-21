@@ -78,6 +78,8 @@ namespace Sovereign.ClientCore.Rendering.Sprites
         {
             var definitions = LoadDefinitions();
             Sprites = UnpackSprites(definitions);
+
+            Logger.Info("Loaded " + Sprites.Count + " sprites.");
         }
 
         /// <summary>

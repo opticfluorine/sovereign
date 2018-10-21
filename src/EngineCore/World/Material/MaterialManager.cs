@@ -82,6 +82,8 @@ namespace Sovereign.EngineCore.World.Materials
         {
             var definitions = LoadMaterialDefinitions();
             UnpackMaterialDefinitions(definitions);
+
+            logger.Info("Loaded " + Materials.Count + " materials.");
         }
 
         /// <summary>

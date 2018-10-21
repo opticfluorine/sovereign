@@ -87,6 +87,8 @@ namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites
         {
             var definitions = LoadDefinitions();
             UnpackDefinitions(definitions);
+
+            Logger.Info("Loaded " + AnimatedSprites.Count + " animated sprites.");
         }
 
         /// <summary>

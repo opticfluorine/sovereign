@@ -83,6 +83,8 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         {
             var definitions = LoadDefinitions();
             UnpackDefinitions(definitions);
+
+            Logger.Info("Loaded " + TileSprites.Count + " tile sprites.");
         }
 
         /// <summary>
