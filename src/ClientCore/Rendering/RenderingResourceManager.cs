@@ -21,9 +21,11 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
+using Sovereign.EngineCore.World.Materials;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,42 +41,35 @@ namespace Sovereign.ClientCore.Rendering
     public class RenderingResourceManager
     {
 
-        /// <summary>
-        /// Spritesheet manager.
-        /// </summary>
-        public SpriteSheetManager SpriteSheetManager { get; private set; }
+        private readonly SpriteSheetManager spriteSheetManager;
 
-        /// <summary>
-        /// Texture atlas manager.
-        /// </summary>
-        public TextureAtlasManager TextureAtlasManager { get; private set; }
+        private readonly TextureAtlasManager textureAtlasManager;
 
-        /// <summary>
-        /// Tile sprite manager.
-        /// </summary>
-        public TileSpriteManager TileSpriteManager { get; private set; }
+        private readonly TileSpriteManager tileSpriteManager;
 
-        /// <summary>
-        /// Animated sprite manager.
-        /// </summary>
-        public AnimatedSpriteManager AnimatedSpriteManager { get; private set; }
+        private readonly AnimatedSpriteManager animatedSpriteManager;
 
-        /// <summary>
-        /// Sprite manager.
-        /// </summary>
-        public SpriteManager SpriteManager { get; private set; }
+        private readonly SpriteManager spriteManager;
+
+        private readonly MaterialManager materialManager;
+
+        private readonly RenderingMaterialManager renderingMaterialManager;
 
         public RenderingResourceManager(SpriteSheetManager spriteSheetManager,
             TextureAtlasManager textureAtlasManager,
             TileSpriteManager tileSpriteManager,
             AnimatedSpriteManager animatedSpriteManager,
-            SpriteManager spriteManager)
+            SpriteManager spriteManager,
+            MaterialManager materialManager,
+            RenderingMaterialManager renderingMaterialManager)
         {
-            SpriteSheetManager = spriteSheetManager;
-            TextureAtlasManager = textureAtlasManager;
-            TileSpriteManager = tileSpriteManager;
-            AnimatedSpriteManager = animatedSpriteManager;
-            SpriteManager = spriteManager;
+            this.spriteSheetManager = spriteSheetManager;
+            this.textureAtlasManager = textureAtlasManager;
+            this.tileSpriteManager = tileSpriteManager;
+            this.animatedSpriteManager = animatedSpriteManager;
+            this.spriteManager = spriteManager;
+            this.materialManager = materialManager;
+            this.renderingMaterialManager = renderingMaterialManager;
         }
 
         /// <summary>
@@ -83,13 +78,17 @@ namespace Sovereign.ClientCore.Rendering
         public void InitializeResources()
         {
             /* Initialize spritesheets. */
-            SpriteSheetManager.InitializeSpriteSheets();
-            TextureAtlasManager.InitializeTextureAtlas();
+            spriteSheetManager.InitializeSpriteSheets();
+            textureAtlasManager.InitializeTextureAtlas();
 
             /* Initialize sprite abstractions. */
-            SpriteManager.InitializeSprites();
-            AnimatedSpriteManager.InitializeAnimatedSprites();
-            TileSpriteManager.InitializeTileSprites();
+            spriteManager.InitializeSprites();
+            animatedSpriteManager.InitializeAnimatedSprites();
+            tileSpriteManager.InitializeTileSprites();
+
+            /* Initialize materials. */
+            materialManager.InitializeMaterials();
+            renderingMaterialManager.InitializeRenderingMaterials();
         }
 
         /// <summary>
@@ -97,8 +96,8 @@ namespace Sovereign.ClientCore.Rendering
         /// </summary>
         public void CleanupResources()
         {
-            TextureAtlasManager.ReleaseTextureAtlas();
-            SpriteSheetManager.ReleaseSpriteSheets();
+            textureAtlasManager.ReleaseTextureAtlas();
+            spriteSheetManager.ReleaseSpriteSheets();
         }
 
     }

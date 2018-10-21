@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.World.Material;
+using Sovereign.EngineCore.World.Materials;
 using System;
 using System.Collections.Generic;
 using System.Linq;

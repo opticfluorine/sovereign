@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sovereign.WorldLib.Material
+namespace Sovereign.WorldLib.Materials
 {
 
     /// <summary>

@@ -25,29 +25,34 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.WorldLib.Material
+namespace Sovereign.WorldLib.Materials
 {
 
     /// <summary>
-    /// Describes a material.
+    /// Describes a subtype of a material.
     /// </summary>
-    public class Material
+    public class MaterialSubtype
     {
 
         /// <summary>
-        /// Material ID. Unique.
+        /// The material modifier value. Unique within a material.
         /// </summary>
-        public int Id { get; set; }
+        public int MaterialModifier { get; set; }
 
         /// <summary>
-        /// Name of the material.
+        /// The ID of the tile sprite used for the top face.
         /// </summary>
-        public string MaterialName { get; set; }
+        public int TopFaceTileSpriteId { get; set; }
 
         /// <summary>
-        /// Associated material subtypes.
+        /// The ID of the tile sprite used for the top face if a face is obscured.
         /// </summary>
-        public IList<MaterialSubtype> MaterialSubtypes { get; set; }
+        public int ObscuredTopFaceTileSpriteId { get; set; }
+
+        /// <summary>
+        /// The ID of the tile sprite used for the side face.
+        /// </summary>
+        public int SideFaceTileSpriteId { get; set; }
 
     }
 

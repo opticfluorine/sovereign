@@ -23,7 +23,7 @@
 
 using Castle.Core.Logging;
 using Sovereign.WorldGen.Configuration;
-using Sovereign.WorldLib.Material;
+using Sovereign.WorldLib.Materials;
 using System;
 using System.Collections.Generic;
 using System.Text;

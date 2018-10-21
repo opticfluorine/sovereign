@@ -4,6 +4,10 @@
 
 ### October
 
+#### 21 October 2018
+
+* Automatically populate mapping from materials to tile sprites at startup. 
+
 #### 20 October 2018
 
 * Automatically populate mappings from tile sprites down through sprites

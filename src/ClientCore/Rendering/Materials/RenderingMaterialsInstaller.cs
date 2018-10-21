@@ -24,27 +24,23 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.World.Materials
+namespace Sovereign.ClientCore.Rendering.Materials
 {
 
     /// <summary>
-    /// IoC installer for materials support classes.
+    /// IoC installer for the rendering side of materials.
     /// </summary>
-    public class EngineMaterialInstaller : IWindsorInstaller
+    public sealed class RenderingMaterialsInstaller : IWindsorInstaller
     {
-
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            /* MaterialManager. */
-            container.Register(Component.For<MaterialManager>()
+            container.Register(Component.For<RenderingMaterialManager>()
                 .LifestyleSingleton());
-        }
 
+            container.Register(Component.For<RenderingMaterialValidator>()
+                .LifestyleTransient());
+        }
     }
+
 }

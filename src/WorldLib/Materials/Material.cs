@@ -25,19 +25,29 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.WorldLib.Material
+namespace Sovereign.WorldLib.Materials
 {
 
     /// <summary>
-    /// Contains the definitions of the materials.
+    /// Describes a material.
     /// </summary>
-    public class MaterialDefinitions
+    public sealed class Material
     {
 
         /// <summary>
-        /// Materials.
+        /// Material ID. Unique.
         /// </summary>
-        public IList<Material> Materials { get; set; }
+        public int Id { get; set; }
+
+        /// <summary>
+        /// Name of the material.
+        /// </summary>
+        public string MaterialName { get; set; }
+
+        /// <summary>
+        /// Associated material subtypes.
+        /// </summary>
+        public IList<MaterialSubtype> MaterialSubtypes { get; set; }
 
     }
 

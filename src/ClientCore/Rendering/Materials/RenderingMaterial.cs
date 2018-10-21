@@ -21,31 +21,38 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
+using Sovereign.WorldLib.Materials;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Sovereign.WorldLib.Material
+namespace Sovereign.ClientCore.Rendering.Materials
 {
 
     /// <summary>
-    /// IoC installer for materials.
+    /// Client-side material for rendering.
     /// </summary>
-    public class MaterialInstaller : IWindsorInstaller
+    public sealed class RenderingMaterial
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            /* MaterialDefinitionsValidator. */
-            container.Register(Component.For<MaterialDefinitionsValidator>()
-                .LifestyleTransient());
+        public TileSprite TopFaceTileSprite { get; private set; }
 
-            /* MaterialDefinitionsLoader. */
-            container.Register(Component.For<MaterialDefinitionsLoader>()
-                .LifestyleTransient());
+        public TileSprite SideFaceTileSprite { get; private set; }
+
+        public TileSprite ObscuredTopFaceTileSprite { get; private set; }
+
+        public RenderingMaterial(MaterialSubtype materialSubtype, 
+            TileSpriteManager tileSpriteManager)
+        {
+            TopFaceTileSprite = tileSpriteManager
+                .TileSprites[materialSubtype.TopFaceTileSpriteId];
+            SideFaceTileSprite = tileSpriteManager
+                .TileSprites[materialSubtype.SideFaceTileSpriteId];
+            ObscuredTopFaceTileSprite = tileSpriteManager
+                .TileSprites[materialSubtype.ObscuredTopFaceTileSpriteId];
         }
 
     }

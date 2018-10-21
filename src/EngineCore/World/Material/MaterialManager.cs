@@ -25,14 +25,14 @@ using Castle.Core.Logging;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
-using Sovereign.WorldLib.Material;
+using Sovereign.WorldLib.Materials;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.World.Material
+namespace Sovereign.EngineCore.World.Materials
 {
 
     /// <summary>
@@ -63,7 +63,7 @@ namespace Sovereign.EngineCore.World.Material
         /// <summary>
         /// Material definitions.
         /// </summary>
-        public MaterialDefinitions MaterialDefinitions { get; private set; }
+        public IList<Material> Materials { get; private set; }
 
         public MaterialManager(MaterialDefinitionsLoader loader, IResourcePathBuilder pathBuilder,
             ILogger logger, IErrorHandler errorHandler)
@@ -73,9 +73,15 @@ namespace Sovereign.EngineCore.World.Material
             this.pathBuilder = pathBuilder;
             this.logger = logger;
             this.errorHandler = errorHandler;
+        }
 
-            /* Load the material definitions. */
-            MaterialDefinitions = LoadMaterialDefinitions();
+        /// <summary>
+        /// Initializes the materials.
+        /// </summary>
+        public void InitializeMaterials()
+        {
+            var definitions = LoadMaterialDefinitions();
+            UnpackMaterialDefinitions(definitions);
         }
 
         /// <summary>
@@ -105,6 +111,17 @@ namespace Sovereign.EngineCore.World.Material
                 /* Signal the fatal error. */
                 throw new FatalErrorException();
             }
+        }
+
+        /// <summary>
+        /// Unpacks the material definitions.
+        /// </summary>
+        /// <param name="materialDefinitions"></param>
+        private void UnpackMaterialDefinitions(MaterialDefinitions materialDefinitions)
+        {
+            Materials = materialDefinitions.Materials
+                .OrderBy(material => material.Id)
+                .ToList();
         }
 
     }

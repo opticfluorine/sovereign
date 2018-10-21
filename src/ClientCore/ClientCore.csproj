@@ -88,6 +88,11 @@
     <Compile Include="Rendering\Graph\RenderingGraphInstaller.cs" />
     <Compile Include="Rendering\Graph\RenderingGraphManager.cs" />
     <Compile Include="Rendering\IRenderer.cs" />
+    <Compile Include="Rendering\Materials\RenderingMaterial.cs" />
+    <Compile Include="Rendering\Materials\RenderingMaterialException.cs" />
+    <Compile Include="Rendering\Materials\RenderingMaterialManager.cs" />
+    <Compile Include="Rendering\Materials\RenderingMaterialsInstaller.cs" />
+    <Compile Include="Rendering\Materials\RenderingMaterialValidator.cs" />
     <Compile Include="Rendering\RendererInitializationException.cs" />
     <Compile Include="Rendering\RenderingInstaller.cs" />
     <Compile Include="Rendering\RenderingManager.cs" />
@@ -150,6 +155,10 @@
     <ProjectReference Include="..\EngineUtil\EngineUtil.csproj">
       <Project>{6440b9bb-8545-4d8f-9f89-b8a876cc9977}</Project>
       <Name>EngineUtil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WorldLib\WorldLib.csproj">
+      <Project>{DF1A3BA3-4DF6-4410-B335-60E792D6216B}</Project>
+      <Name>WorldLib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

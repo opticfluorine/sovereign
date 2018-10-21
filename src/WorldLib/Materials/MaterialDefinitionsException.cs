@@ -21,30 +21,30 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.World.Materials
+namespace Sovereign.WorldLib.Materials
 {
 
     /// <summary>
-    /// IoC installer for materials support classes.
+    /// Exception type thrown when an error occurs with material definitions.
     /// </summary>
-    public class EngineMaterialInstaller : IWindsorInstaller
+    public sealed class MaterialDefinitionsException : ApplicationException
     {
-
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+        public MaterialDefinitionsException()
         {
-            /* MaterialManager. */
-            container.Register(Component.For<MaterialManager>()
-                .LifestyleSingleton());
         }
 
+        public MaterialDefinitionsException(string message) : base(message)
+        {
+        }
+
+        public MaterialDefinitionsException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
+
 }

@@ -28,7 +28,7 @@ using System.Text;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Sovereign.WorldLib.Material
+namespace Sovereign.WorldLib.Materials
 {
 
     /// <summary>

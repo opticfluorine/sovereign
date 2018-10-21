@@ -23,28 +23,29 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Sovereign.WorldLib.Material
+namespace Sovereign.ClientCore.Rendering.Materials
 {
 
     /// <summary>
-    /// Exception type thrown when an error occurs with material definitions.
+    /// Exception type thrown if there is an issue with rendering materials.
     /// </summary>
-    public sealed class MaterialDefinitionsException : ApplicationException
+    public sealed class RenderingMaterialException : ApplicationException
     {
-        public MaterialDefinitionsException()
+        public RenderingMaterialException()
         {
         }
 
-        public MaterialDefinitionsException(string message) : base(message)
+        public RenderingMaterialException(string message) : base(message)
         {
         }
 
-        public MaterialDefinitionsException(string message, Exception innerException) : base(message, innerException)
+        public RenderingMaterialException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
-
 }
