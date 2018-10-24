@@ -27,7 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sovereign.ClientCore.Rendering.Sprites
+namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
 {
 
     /// <summary>

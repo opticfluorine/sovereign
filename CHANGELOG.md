@@ -4,6 +4,10 @@
 
 ### October
 
+#### 23 October 2018
+
+* Continue work on texture atlas mappings.
+
 #### 21 October 2018
 
 * Improve logging while loading resources.

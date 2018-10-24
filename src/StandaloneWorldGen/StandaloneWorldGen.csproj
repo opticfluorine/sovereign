@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <PackageReference Include="Castle.Core-log4net" Version="4.3.1" />
-    <PackageReference Include="Castle.LoggingFacility" Version="4.1.0" />
+    <PackageReference Include="Castle.LoggingFacility" Version="4.1.1" />
   </ItemGroup>
 
   <ItemGroup>

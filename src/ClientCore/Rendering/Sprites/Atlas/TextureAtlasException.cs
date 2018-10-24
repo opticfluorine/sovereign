@@ -24,7 +24,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Sovereign.ClientCore.Rendering.Sprites
+namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
 {
 
     /// <summary>

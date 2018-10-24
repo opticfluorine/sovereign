@@ -24,51 +24,28 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Sovereign.ClientCore.Rendering.Sprites
+namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
 {
 
     /// <summary>
-    /// IoC installer for sprite-related services.
+    /// IoC installer for texture atlas-related classes.
     /// </summary>
-    public class SpriteInstaller : IWindsorInstaller
+    public sealed class AtlasInstaller : IWindsorInstaller
     {
-
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            /* SurfaceLoader. */
-            container.Register(Component.For<SurfaceLoader>()
+            container.Register(Component.For<TextureAtlasManager>()
                 .LifestyleSingleton());
 
-            /* SpriteSheetFactory. */
-            container.Register(Component.For<SpriteSheetFactory>()
-                .LifestyleSingleton());
-
-            /* SpriteSheetManager. */
-            container.Register(Component.For<SpriteSheetManager>()
-                .LifestyleSingleton());
-
-            /* SpriteSheetDefinitionLoader. */
-            container.Register(Component.For<SpriteSheetDefinitionLoader>()
-                .LifestyleSingleton());
-
-            /* SpriteSheetDefinitionValidator. */
-            container.Register(Component.For<SpriteSheetDefinitionValidator>()
-                .LifestyleSingleton());
-
-            /* SpriteManager. */
-            container.Register(Component.For<SpriteManager>()
-                .LifestyleSingleton());
-
-            /* SpriteDefinitionsLoader. */
-            container.Register(Component.For<SpriteDefinitionsLoader>()
-                .LifestyleSingleton());
-
-            /* SpriteDefinitionsValidator. */
-            container.Register(Component.For<SpriteDefinitionsValidator>()
+            container.Register(Component.For<AtlasMap>()
                 .LifestyleSingleton());
         }
-
     }
 
 }

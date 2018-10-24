@@ -24,6 +24,7 @@
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Sprites;
+using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.D3D11Renderer.Rendering.Resources.Textures;
 using System;
 using System.Collections.Generic;

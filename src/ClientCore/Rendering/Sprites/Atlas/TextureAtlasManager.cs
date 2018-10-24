@@ -22,17 +22,13 @@
  */
 
 using Castle.Core.Logging;
-using Sovereign.ClientCore.Logging;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.ClientCore.Rendering.Sprites
+namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
 {
 
     /// <summary>
