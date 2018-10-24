@@ -6,8 +6,8 @@
 
 #### 23 October 2018
 
+* Automatically populate mapping from sprites to texture atlas at startup.
 * Remove SheetId field from spritesheet definitions.
-* Continue work on texture atlas mappings.
 
 #### 21 October 2018
 

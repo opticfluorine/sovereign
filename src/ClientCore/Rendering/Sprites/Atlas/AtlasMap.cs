@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.Core.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +36,77 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
     /// </summary>
     public sealed class AtlasMap
     {
+
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+        private readonly TextureAtlasManager atlasManager;
+
+        private readonly SpriteManager spriteManager;
+
+        private readonly SpriteSheetManager spriteSheetManager;
+
+        /// <summary>
+        /// Maps each sprite ID to its texture atlas coordinates.
+        /// </summary>
+        public IList<AtlasMapElement> MapElements { get; private set; }
+
+        public AtlasMap(TextureAtlasManager atlasManager, SpriteManager spriteManager,
+            SpriteSheetManager spriteSheetManager)
+        {
+            this.atlasManager = atlasManager;
+            this.spriteManager = spriteManager;
+            this.spriteSheetManager = spriteSheetManager;
+        }
+
+        /// <summary>
+        /// Initializes the atlas map.
+        /// </summary>
+        /// 
+        /// This must be called after the texture atlas and sprite manager are
+        /// initialized.
+        public void InitializeAtlasMap()
+        {
+            MapElements = new List<AtlasMapElement>(spriteManager.Sprites.Count);
+
+            /* Iterate in order of sprite ID. */
+            foreach (var sprite in spriteManager.Sprites)
+            {
+                AddSprite(sprite);
+            }
+
+            Logger.Info("Mapped " + MapElements.Count + " sprites to the texture atlas.");
+        }
+
+        /// <summary>
+        /// Adds the given sprite to the map.
+        /// </summary>
+        /// <param name="sprite">Sprite to be added.</param>
+        private void AddSprite(Sprite sprite)
+        {
+            /* Retrieve spritesheet. */
+            var sheet = spriteSheetManager.SpriteSheets[sprite.SpritesheetName];
+            var tileWidth = sheet.Definition.SpriteWidth;
+            var tileHeight = sheet.Definition.SpriteHeight;
+
+            /* Locate spritesheet in atlas. */
+            var (stlx, stly) = atlasManager.TextureAtlas.SpriteSheetMap[sprite.SpritesheetName];
+
+            /* Compute sprite coordinates in atlas. */
+            var tlx = stlx + sprite.Column * tileWidth;
+            var tly = stly + sprite.Row * tileHeight;
+            var brx = tlx + tileWidth;
+            var bry = tly + tileHeight;
+
+            /* Add record to map. */
+            MapElements.Add(new AtlasMapElement()
+            {
+                TopLeftX = tlx,
+                TopLeftY = tly,
+                BottomRightX = brx,
+                BottomRightY = bry
+            });
+        }
+
     }
 
 }

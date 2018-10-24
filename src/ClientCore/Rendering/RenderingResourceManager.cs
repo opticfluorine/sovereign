@@ -52,6 +52,8 @@ namespace Sovereign.ClientCore.Rendering
 
         private readonly SpriteManager spriteManager;
 
+        private readonly AtlasMap atlasMap;
+
         private readonly MaterialManager materialManager;
 
         private readonly RenderingMaterialManager renderingMaterialManager;
@@ -61,6 +63,7 @@ namespace Sovereign.ClientCore.Rendering
             TileSpriteManager tileSpriteManager,
             AnimatedSpriteManager animatedSpriteManager,
             SpriteManager spriteManager,
+            AtlasMap atlasMap,
             MaterialManager materialManager,
             RenderingMaterialManager renderingMaterialManager)
         {
@@ -69,6 +72,7 @@ namespace Sovereign.ClientCore.Rendering
             this.tileSpriteManager = tileSpriteManager;
             this.animatedSpriteManager = animatedSpriteManager;
             this.spriteManager = spriteManager;
+            this.atlasMap = atlasMap;
             this.materialManager = materialManager;
             this.renderingMaterialManager = renderingMaterialManager;
         }
@@ -86,6 +90,7 @@ namespace Sovereign.ClientCore.Rendering
             spriteManager.InitializeSprites();
             animatedSpriteManager.InitializeAnimatedSprites();
             tileSpriteManager.InitializeTileSprites();
+            atlasMap.InitializeAtlasMap();
 
             /* Initialize materials. */
             materialManager.InitializeMaterials();

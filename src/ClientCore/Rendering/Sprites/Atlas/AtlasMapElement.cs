@@ -31,10 +31,17 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
 {
 
     /// <summary>
-    /// 
+    /// Encodes an entry in the texture atlas.
     /// </summary>
-    public sealed class AtlasMapElement
+    public struct AtlasMapElement
     {
+        public int TopLeftX;
+
+        public int TopLeftY;
+
+        public int BottomRightX;
+
+        public int BottomRightY;
     }
 
 }
