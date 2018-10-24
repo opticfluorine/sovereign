@@ -54,6 +54,12 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         public Surface AtlasSurface { get; private set; }
 
         /// <summary>
+        /// Maps spritesheet names to top-left coordinate in the atlas.
+        /// </summary>
+        public IDictionary<string, Tuple<int, int>> SpriteSheetMap
+            = new Dictionary<string, Tuple<int, int>>();
+
+        /// <summary>
         /// Creates and packs a texture atlas from the given collection
         /// of spritesheets.
         /// </summary>
@@ -196,6 +202,10 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
                 var srcSurface = planElement.SpriteSheet.Surface;
                 srcSurface.Blit(AtlasSurface, planElement.TopLeftX,
                     planElement.TopLeftY);
+
+                /* Add the spritesheet to the map. */
+                SpriteSheetMap[planElement.SpriteSheet.Definition.Filename]
+                    = new Tuple<int, int>(planElement.TopLeftX, planElement.TopLeftY);
             }
         }
 

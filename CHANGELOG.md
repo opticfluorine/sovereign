@@ -6,6 +6,7 @@
 
 #### 23 October 2018
 
+* Remove SheetId field from spritesheet definitions.
 * Continue work on texture atlas mappings.
 
 #### 21 October 2018

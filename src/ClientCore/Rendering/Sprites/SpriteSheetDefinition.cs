@@ -45,11 +45,6 @@ namespace Sovereign.ClientCore.Rendering.Sprites
         public string Filename { get; set; }
 
         /// <summary>
-        /// ID number of the spritesheet.
-        /// </summary>
-        public int SheetId { get; set; }
-
-        /// <summary>
         /// Sprite width.
         /// </summary>
         public int SpriteWidth { get; set; }

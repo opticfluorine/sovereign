@@ -147,12 +147,12 @@ namespace Sovereign.ClientCore.Rendering.Sprites
         /// <summary>
         /// Loads the spritesheet definitions.
         /// </summary>
-        /// <returns>Spritesheet definitions ordered by sheet ID.</returns>
+        /// <returns>Spritesheet definitions ordered by filename.</returns>
         private IList<SpriteSheetDefinition> LoadDefinitions()
         {
             var defs = from filename in FindDefinitionFiles()
                        select definitionLoader.LoadDefinition(filename);
-            return defs.OrderBy(def => def.SheetId).ToList();
+            return defs.OrderBy(def => def.Filename).ToList();
         }
 
         /// <summary>
