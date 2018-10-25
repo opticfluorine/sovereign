@@ -4,6 +4,11 @@
 
 ### October
 
+#### 24 October 2018
+
+* Add Drawable component for indicating whether an entity can be drawn to
+  the screen.
+
 #### 23 October 2018
 
 * Automatically populate mapping from sprites to texture atlas at startup.

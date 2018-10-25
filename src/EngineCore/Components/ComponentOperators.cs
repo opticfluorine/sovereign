@@ -59,6 +59,15 @@ namespace Sovereign.EngineCore.Components
                 {ComponentOperation.Add, Vector3.Add},
             };
 
+        /// <summary>
+        /// Standard operators for boolean-valued components.
+        /// </summary>
+        public static readonly IDictionary<ComponentOperation, Func<bool, bool, bool>>
+            BoolOperators = new Dictionary<ComponentOperation, Func<bool, bool, bool>>()
+            {
+                {ComponentOperation.Set, (a, b) => b},
+            };
+
     }
 
 }
