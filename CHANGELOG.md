@@ -6,6 +6,7 @@
 
 #### 26 October 2018
 
+* Add Material component for indicating the material of a block entity.
 * Add new position component indexer that filters out non-Drawable entities.
 
 #### 24 October 2018

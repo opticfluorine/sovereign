@@ -115,8 +115,9 @@
     <Compile Include="Systems\SystemInstaller.cs" />
     <Compile Include="Systems\SystemManager.cs" />
     <Compile Include="Timing\*.cs" />
-    <Compile Include="World\Material\EngineMaterialInstaller.cs" />
-    <Compile Include="World\Material\MaterialManager.cs" />
+    <Compile Include="World\Materials\Components\MaterialComponentCollection.cs" />
+    <Compile Include="World\Materials\EngineMaterialInstaller.cs" />
+    <Compile Include="World\Materials\MaterialManager.cs" />
     <Compile Include="World\WorldInstaller.cs" />
     <Compile Include="World\WorldManager.cs" />
   </ItemGroup>
