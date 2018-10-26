@@ -21,30 +21,31 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Components;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sovereign.ClientCore.Rendering.Components
+namespace Sovereign.ClientCore.Rendering.Components.Indexers
 {
 
     /// <summary>
-    /// Describes a component that indicates whether an entity can be drawn.
+    /// IoC installer for rendering component indexers and support classes.
     /// </summary>
-    /// 
-    /// This component is of type bool, but the value has no meaning; the existence of
-    /// any Drawable component for an entity indicates that the entity is drawable.
-    public sealed class DrawableComponentCollection : BaseComponentCollection<bool>
+    public sealed class RenderingComponentIndexerInstaller : IWindsorInstaller
     {
-
-        private const int BaseSize = 65536;
-
-        public DrawableComponentCollection() : base(BaseSize, ComponentOperators.BoolOperators)
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-        }
+            container.Register(Component.For<DrawablePositionEventSource>()
+                .LifestyleTransient());
 
+            container.Register(Component.For<DrawablePositionComponentIndexer>()
+                .LifestyleSingleton());
+        }
     }
+
 }

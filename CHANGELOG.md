@@ -4,6 +4,10 @@
 
 ### October
 
+#### 26 October 2018
+
+* Add new position component indexer that filters out non-Drawable entities.
+
 #### 24 October 2018
 
 * Add Drawable component for indicating whether an entity can be drawn to

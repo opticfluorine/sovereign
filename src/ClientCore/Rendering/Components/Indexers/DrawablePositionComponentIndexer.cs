@@ -21,28 +21,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.Movement.Components;
 
-namespace Sovereign.ClientCore.Rendering.Components
+namespace Sovereign.ClientCore.Rendering.Components.Indexers
 {
 
     /// <summary>
-    /// Describes a component that indicates whether an entity can be drawn.
+    /// Position index for drawable entities.
     /// </summary>
-    /// 
-    /// This component is of type bool, but the value has no meaning; the existence of
-    /// any Drawable component for an entity indicates that the entity is drawable.
-    public sealed class DrawableComponentCollection : BaseComponentCollection<bool>
+    public sealed class DrawablePositionComponentIndexer
+        : BasePositionComponentIndexer
     {
 
-        private const int BaseSize = 65536;
-
-        public DrawableComponentCollection() : base(BaseSize, ComponentOperators.BoolOperators)
+        public DrawablePositionComponentIndexer(PositionComponentCollection positionCollection,
+            DrawablePositionEventSource eventSource)
+            : base(positionCollection, eventSource)
         {
         }
 
