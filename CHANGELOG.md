@@ -4,6 +4,15 @@
 
 ### October
 
+#### 31 October 2018
+
+* Start defining the interface between the two components of the rendering
+  architecture. Scenes implement, at minimum, a method (still need to define
+  the signature) called from the low-level renderer to populate the buffers.
+  The low-level renderer is then responsible for interpreting how to use these
+  buffers. The key here is that the buffers are populated with a single method
+  call across the interface.
+
 #### 30 October 2018
 
 * Remove existing rendering graph code. There wasn't much there and I don't

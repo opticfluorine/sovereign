@@ -18,7 +18,7 @@ supported is Direct3D 11.
 ## Rendering Coordinator
 
 The behavior of the rendering coordinator is dependent on the state of the client.
-This allows transitions between different game states, e.g. startup splash screens,
+This allows transitions between different scenes, e.g. startup splash screens,
 the main menu, and the in-game mode.
 
 ### Main Menu
