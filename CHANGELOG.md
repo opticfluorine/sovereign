@@ -4,6 +4,13 @@
 
 ### October
 
+#### 30 October 2018
+
+* Remove existing rendering graph code. There wasn't much there and I don't
+  think what I had there fits well with the planned rendering architecture
+  now that I've taken a step back and thought about it.
+* Start some rough high-level documentation of the renderer.
+
 #### 26 October 2018
 
 * Add Material component for indicating the material of a block entity.
