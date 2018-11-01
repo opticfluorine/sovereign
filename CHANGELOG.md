@@ -6,6 +6,9 @@
 
 #### 31 October 2018
 
+* Start working on some code for managing Direct3D resource buffers.
+* Start reworking the Direct3D 11 renderer to use the new scene-based
+  architecture.
 * Start defining the interface between the two components of the rendering
   architecture. Scenes implement, at minimum, a method (still need to define
   the signature) called from the low-level renderer to populate the buffers.

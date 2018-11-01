@@ -30,27 +30,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sovereign.D3D11Renderer.Rendering
+namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 {
 
     /// <summary>
-    /// IoC installer for the D3D11 renderer.
+    /// IoC installer for game scene rendering components.
     /// </summary>
-    public class D3D11RenderingInstaller : IWindsorInstaller
+    public sealed class GameSceneInstaller : IWindsorInstaller
     {
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            container.Register(Component.For<D3D11Device>()
-                .LifestyleSingleton());
-
-            container.Register(Classes.FromThisAssembly()
-                .BasedOn<IRenderStage>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton()
-                .AllowMultipleMatches());
-
-            container.Register(Component.For<D3D11SceneConsumer>()
+            container.Register(Component.For<GameSceneConsumer>()
                 .LifestyleSingleton());
         }
     }
+
 }

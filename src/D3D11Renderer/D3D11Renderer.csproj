@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
@@ -67,10 +69,14 @@
     <Compile Include="Rendering\D3D11Device.cs" />
     <Compile Include="Rendering\D3D11Renderer.cs" />
     <Compile Include="Rendering\D3D11RenderingInstaller.cs" />
+    <Compile Include="Rendering\D3D11SceneConsumer.cs" />
     <Compile Include="Rendering\IRenderStage.cs" />
+    <Compile Include="Rendering\Resources\Buffers\D3D11UpdateBuffer.cs" />
     <Compile Include="Rendering\Resources\D3D11ResourceInstaller.cs" />
     <Compile Include="Rendering\Resources\D3D11ResourceManager.cs" />
     <Compile Include="Rendering\Resources\Textures\D3D11Texture.cs" />
+    <Compile Include="Rendering\Scenes\Game\GameSceneConsumer.cs" />
+    <Compile Include="Rendering\Scenes\Game\GameSceneInstaller.cs" />
     <Compile Include="Rendering\UI\D3D11UIRenderStage.cs" />
     <Compile Include="Rendering\World\D3D11WorldRenderStage.cs" />
     <Compile Include="Rendering\World\SingleLayerTileRenderStep.cs" />
@@ -96,5 +102,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

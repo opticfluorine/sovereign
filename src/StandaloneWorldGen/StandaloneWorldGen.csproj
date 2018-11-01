@@ -6,6 +6,7 @@
     <StartupObject>Sovereign.StandaloneWorldGen.Main.StandaloneWorldGenMain</StartupObject>
     <RootNamespace>Sovereign.StandaloneWorldGen</RootNamespace>
     <AssemblyName>Sovereign.StandaloneWorldGen</AssemblyName>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

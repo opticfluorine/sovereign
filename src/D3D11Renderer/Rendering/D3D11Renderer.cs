@@ -24,6 +24,7 @@
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
+using Sovereign.ClientCore.Rendering.Scenes;
 using Sovereign.D3D11Renderer.Rendering.Configuration;
 using Sovereign.D3D11Renderer.Rendering.Resources;
 using System;
@@ -55,17 +56,23 @@ namespace Sovereign.D3D11Renderer.Rendering
         private readonly D3D11ResourceManager resourceManager;
 
         /// <summary>
-        /// Render stages.
+        /// Scene consumer.
         /// </summary>
-        private readonly List<IRenderStage> renderStages = new List<IRenderStage>();
+        private readonly D3D11SceneConsumer sceneConsumer;
+
+        /// <summary>
+        /// Scene manager.
+        /// </summary>
+        private readonly SceneManager sceneManager;
 
         public D3D11Renderer(MainDisplay mainDisplay, D3D11ResourceManager resourceManager,
-            D3D11Device device, IList<IRenderStage> renderStages)
+            D3D11Device device, D3D11SceneConsumer sceneConsumer, SceneManager sceneManager)
         {
             this.mainDisplay = mainDisplay;
             this.resourceManager = resourceManager;
             this.device = device;
-            SortRenderStages(renderStages);
+            this.sceneConsumer = sceneConsumer;
+            this.sceneManager = sceneManager;
         }
 
         /// <summary>
@@ -84,12 +91,6 @@ namespace Sovereign.D3D11Renderer.Rendering
 
                 /* Install main resources. */
                 resourceManager.InitializeBaseResources();
-
-                /* Initialize render stages. */
-                foreach (var stage in renderStages)
-                {
-                    stage.Initialize();
-                }
             }
             catch (Exception e)
             {
@@ -99,12 +100,6 @@ namespace Sovereign.D3D11Renderer.Rendering
 
         public void Cleanup()
         {
-            /* Release render stages. */
-            foreach (var stage in renderStages)
-            {
-                stage.Cleanup();
-            }
-
             /* Release resources. */
             resourceManager.Cleanup();
 
@@ -114,11 +109,9 @@ namespace Sovereign.D3D11Renderer.Rendering
 
         public void Render()
         {
-            /* Perform rendering. */
-            foreach (var stage in renderStages)
-            {
-                stage.Render();
-            }
+            /* Hand the current scene off to the top-level consumer. */
+            var scene = sceneManager.ActiveScene;
+            sceneConsumer.RenderScene(scene);
 
             /* Present the next frame. */
             device.Present();

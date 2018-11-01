@@ -21,36 +21,27 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sovereign.D3D11Renderer.Rendering
+namespace Sovereign.ClientCore.Rendering.Scenes
 {
 
     /// <summary>
-    /// IoC installer for the D3D11 renderer.
+    /// Interface for classes that consume a rendering scene.
     /// </summary>
-    public class D3D11RenderingInstaller : IWindsorInstaller
+    public interface ISceneConsumer
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<D3D11Device>()
-                .LifestyleSingleton());
 
-            container.Register(Classes.FromThisAssembly()
-                .BasedOn<IRenderStage>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton()
-                .AllowMultipleMatches());
+        /// <summary>
+        /// Consumes the scene.
+        /// </summary>
+        /// <param name="scene">Scene to consume.</param>
+        void ConsumeScene(IScene scene);
 
-            container.Register(Component.For<D3D11SceneConsumer>()
-                .LifestyleSingleton());
-        }
     }
+
 }
