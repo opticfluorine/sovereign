@@ -85,12 +85,6 @@
     <Compile Include="Rendering\Configuration\VideoAdapterException.cs" />
     <Compile Include="Rendering\Display\DisplayInstaller.cs" />
     <Compile Include="Rendering\Display\MainDisplay.cs" />
-    <Compile Include="Rendering\Graph\Actions\DrawSpritesRenderingAction.cs" />
-    <Compile Include="Rendering\Graph\Actions\IRenderingAction.cs" />
-    <Compile Include="Rendering\Graph\IRenderingGraphUpdater.cs" />
-    <Compile Include="Rendering\Graph\RenderingGraph.cs" />
-    <Compile Include="Rendering\Graph\RenderingGraphInstaller.cs" />
-    <Compile Include="Rendering\Graph\RenderingGraphManager.cs" />
     <Compile Include="Rendering\IRenderer.cs" />
     <Compile Include="Rendering\Materials\RenderingMaterial.cs" />
     <Compile Include="Rendering\Materials\RenderingMaterialException.cs" />
@@ -102,6 +96,8 @@
     <Compile Include="Rendering\RenderingManager.cs" />
     <Compile Include="Rendering\RenderingMainLoopAction.cs" />
     <Compile Include="Rendering\RenderingResourceManager.cs" />
+    <Compile Include="Rendering\Scenes\IScene.cs" />
+    <Compile Include="Rendering\Scenes\SceneType.cs" />
     <Compile Include="Rendering\Sprites\AnimatedSprites\AnimatedSprite.cs" />
     <Compile Include="Rendering\Sprites\AnimatedSprites\AnimatedSpriteDefinitions.cs" />
     <Compile Include="Rendering\Sprites\AnimatedSprites\AnimatedSpriteDefinitionsException.cs" />
