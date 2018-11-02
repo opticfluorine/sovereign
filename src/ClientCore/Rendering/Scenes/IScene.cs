@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,9 +45,21 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         /// <summary>
         /// Populates the buffers used by the renderer.
         /// </summary>
+        ///
+        /// The low-level renderer will call this method on the active scene when it is
+        /// time to update the buffers. To update the buffers, simply update the supplied
+        /// arrays. These local buffers will be copied to the GPU buffers after this method
+        /// returns.
         /// 
-        /// TODO: Method signature.
-        void PopulateBuffers();
+        /// The maximum number of elements in each buffer is defined by the low-level renderer
+        /// and may be determined from the length of the arrays.
+        ///
+        /// <param name="vertexBuffer">Vertex buffer for update.</param>
+        /// <param name="texCoordBuffer">Texture coordinate buffer for update.</param>
+        /// <param name="drawLengths">Number of vertices to use for each sequential draw.</param>
+        /// <param name="drawCount">Number of draws to perform.</param>
+        void PopulateBuffers(Vector3[] vertexBuffer, Vector3[] texCoordBuffer, 
+            int[] drawLengths, out int drawCount);
 
     }
 

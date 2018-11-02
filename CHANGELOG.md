@@ -2,6 +2,14 @@
 
 ## 2018
 
+### November
+
+#### 02 November 2018
+
+* Update the `IScene.PopulateBuffers` signature based on the resource buffer
+  code.
+* Rework the resource buffer code.
+
 ### October
 
 #### 31 October 2018
