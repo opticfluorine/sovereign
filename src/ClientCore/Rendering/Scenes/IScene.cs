@@ -58,7 +58,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         /// <param name="texCoordBuffer">Texture coordinate buffer for update.</param>
         /// <param name="drawLengths">Number of vertices to use for each sequential draw.</param>
         /// <param name="drawCount">Number of draws to perform.</param>
-        void PopulateBuffers(Vector3[] vertexBuffer, Vector3[] texCoordBuffer, 
+        void PopulateBuffers(Vector3[] vertexBuffer, Vector2[] texCoordBuffer, 
             int[] drawLengths, out int drawCount);
 
     }

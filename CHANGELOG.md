@@ -4,6 +4,10 @@
 
 ### November
 
+#### 03 Novemeber 2018
+
+* Fix texture coordinates in the `IScene.PopulateBuffers` signature.
+
 #### 02 November 2018
 
 * Update the `IScene.PopulateBuffers` signature based on the resource buffer
