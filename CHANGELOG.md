@@ -4,6 +4,10 @@
 
 ### November
 
+#### 04 November 2018
+
+* Populate vertex buffers during game rendering.
+
 #### 03 Novemeber 2018
 
 * Fix texture coordinates in the `IScene.PopulateBuffers` signature.

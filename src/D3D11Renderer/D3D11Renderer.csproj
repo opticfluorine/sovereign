@@ -50,6 +50,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
@@ -75,6 +76,7 @@
     <Compile Include="Rendering\Resources\D3D11ResourceInstaller.cs" />
     <Compile Include="Rendering\Resources\D3D11ResourceManager.cs" />
     <Compile Include="Rendering\Resources\Textures\D3D11Texture.cs" />
+    <Compile Include="Rendering\Scenes\Game\GameResourceManager.cs" />
     <Compile Include="Rendering\Scenes\Game\GameSceneConsumer.cs" />
     <Compile Include="Rendering\Scenes\Game\GameSceneInstaller.cs" />
     <Compile Include="Rendering\UI\D3D11UIRenderStage.cs" />

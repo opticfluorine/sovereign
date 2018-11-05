@@ -37,9 +37,24 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
     public sealed class GameSceneConsumer : ISceneConsumer
     {
 
+        private readonly GameResourceManager gameResourceManager;
+
+        public GameSceneConsumer(GameResourceManager gameResourceManager)
+        {
+            this.gameResourceManager = gameResourceManager;
+        }
+
         public void ConsumeScene(IScene scene)
         {
-            throw new NotImplementedException();
+            /* Handle general processing. */
+            scene.PopulateBuffers(gameResourceManager.VertexBuffer.Buffer,
+                gameResourceManager.TexCoordBuffer.Buffer,
+                gameResourceManager.DrawBuffer, 
+                out var drawCount);
+            gameResourceManager.DrawCount = drawCount;
+
+            /* Post updates to the buffers. */
+            gameResourceManager.UpdateBuffers();
         }
 
     }
