@@ -4,6 +4,12 @@
 
 ### November
 
+#### 05 November 2018
+
+* Split WorldShader.hlsl into separate vertex and pixel shader files.
+* Load compiled shaders at startup.
+* Compile HLSL shaders at build time.
+
 #### 04 November 2018
 
 * Populate vertex buffers during game rendering.
