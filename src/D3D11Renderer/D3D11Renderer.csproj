@@ -78,7 +78,9 @@
     <Compile Include="Rendering\Resources\Textures\D3D11Texture.cs" />
     <Compile Include="Rendering\Scenes\Game\GameResourceManager.cs" />
     <Compile Include="Rendering\Scenes\Game\GameSceneConsumer.cs" />
+    <Compile Include="Rendering\Scenes\Game\GameSceneInputAssembler.cs" />
     <Compile Include="Rendering\Scenes\Game\GameSceneInstaller.cs" />
+    <Compile Include="Rendering\Scenes\Game\GameSceneRenderer.cs" />
     <Compile Include="Rendering\UI\D3D11UIRenderStage.cs" />
     <Compile Include="Rendering\World\D3D11WorldRenderStage.cs" />
     <Compile Include="Rendering\World\SingleLayerTileRenderStep.cs" />

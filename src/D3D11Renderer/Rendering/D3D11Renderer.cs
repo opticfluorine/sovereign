@@ -27,6 +27,7 @@ using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Scenes;
 using Sovereign.D3D11Renderer.Rendering.Configuration;
 using Sovereign.D3D11Renderer.Rendering.Resources;
+using Sovereign.D3D11Renderer.Rendering.Scenes.Game;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,14 +66,18 @@ namespace Sovereign.D3D11Renderer.Rendering
         /// </summary>
         private readonly SceneManager sceneManager;
 
+        private readonly GameSceneRenderer gameSceneRenderer;
+
         public D3D11Renderer(MainDisplay mainDisplay, D3D11ResourceManager resourceManager,
-            D3D11Device device, D3D11SceneConsumer sceneConsumer, SceneManager sceneManager)
+            D3D11Device device, D3D11SceneConsumer sceneConsumer, SceneManager sceneManager,
+            GameSceneRenderer gameSceneRenderer)
         {
             this.mainDisplay = mainDisplay;
             this.resourceManager = resourceManager;
             this.device = device;
             this.sceneConsumer = sceneConsumer;
             this.sceneManager = sceneManager;
+            this.gameSceneRenderer = gameSceneRenderer;
         }
 
         /// <summary>
@@ -91,6 +96,9 @@ namespace Sovereign.D3D11Renderer.Rendering
 
                 /* Install main resources. */
                 resourceManager.InitializeBaseResources();
+
+                /* Initialize all scenes. */
+                gameSceneRenderer.Initialize();
             }
             catch (Exception e)
             {
@@ -100,6 +108,9 @@ namespace Sovereign.D3D11Renderer.Rendering
 
         public void Cleanup()
         {
+            /* Clean up all scenes. */
+            gameSceneRenderer.Dispose();
+
             /* Release resources. */
             resourceManager.Cleanup();
 
@@ -111,19 +122,10 @@ namespace Sovereign.D3D11Renderer.Rendering
         {
             /* Hand the current scene off to the top-level consumer. */
             var scene = sceneManager.ActiveScene;
-            sceneConsumer.RenderScene(scene);
+            sceneConsumer.ConsumeScene(scene);
 
             /* Present the next frame. */
             device.Present();
-        }
-
-        /// <summary>
-        /// Sorts the render stages into the order in which they are executed.
-        /// </summary>
-        /// <param name="stages">Render stages.</param>
-        private void SortRenderStages(IList<IRenderStage> stages)
-        {
-            renderStages.AddRange(stages.OrderBy(stage => stage.Priority));
         }
 
     }

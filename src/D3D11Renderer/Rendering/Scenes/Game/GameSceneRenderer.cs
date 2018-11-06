@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.ClientCore.Rendering.Scenes;
+using SharpDX.Direct3D11;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,36 +32,59 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 {
 
     /// <summary>
-    /// Consumer that renders the in-game scene.
+    /// Responsible for rendering the game scene.
     /// </summary>
-    public sealed class GameSceneConsumer : ISceneConsumer
+    public sealed class GameSceneRenderer : IDisposable
     {
+
+        private readonly D3D11Device device;
 
         private readonly GameResourceManager gameResourceManager;
 
-        private readonly GameSceneRenderer gameSceneRenderer;
+        private readonly GameSceneInputAssembler inputAssembler;
 
-        public GameSceneConsumer(GameResourceManager gameResourceManager,
-            GameSceneRenderer gameSceneRenderer)
+        public GameSceneRenderer(D3D11Device device, GameResourceManager gameResourceManager,
+            GameSceneInputAssembler inputAssembler)
         {
+            this.device = device;
             this.gameResourceManager = gameResourceManager;
-            this.gameSceneRenderer = gameSceneRenderer;
+            this.inputAssembler = inputAssembler;
         }
 
-        public void ConsumeScene(IScene scene)
+        /// <summary>
+        /// Initializes the game scene renderer.
+        /// </summary>
+        public void Initialize()
         {
-            /* Handle general processing. */
-            scene.PopulateBuffers(gameResourceManager.VertexBuffer.Buffer,
-                gameResourceManager.TexCoordBuffer.Buffer,
-                gameResourceManager.DrawBuffer, 
-                out var drawCount);
-            gameResourceManager.DrawCount = drawCount;
+            inputAssembler.Initialize();
+        }
 
-            /* Post updates to the buffers. */
-            gameResourceManager.UpdateBuffers();
+        public void Dispose()
+        {
+            inputAssembler.Dispose();
+        }
 
-            /* Render. */
-            gameSceneRenderer.Render();
+        /// <summary>
+        /// Renders the game scene.
+        /// </summary>
+        public void Render()
+        {
+
+        }
+
+        /// <summary>
+        /// Configures the Direct3D 11 rendering pipeline.
+        /// </summary>
+        private void ConfigurePipeline()
+        {
+            var context = device.Device.ImmediateContext;
+
+            
+        }
+
+        private void ConfigureInputAssembler(DeviceContext context)
+        {
+            
         }
 
     }
