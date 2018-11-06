@@ -66,9 +66,12 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 
         private readonly D3D11Device device;
 
-        public GameResourceManager(D3D11Device device)
+        private readonly GameSceneShaders shaders;
+
+        public GameResourceManager(D3D11Device device, GameSceneShaders shaders)
         {
             this.device = device;
+            this.shaders = shaders;
             DrawBuffer = new int[MaximumBufferElements];
         }
 
@@ -77,6 +80,10 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// </summary>
         public void Initialize()
         {
+            /* Load shader bytecode. */
+            shaders.Initialize();
+
+            /* Create buffers. */
             VertexBuffer = new D3D11UpdateBuffer<Vector3>(device, BindFlags.VertexBuffer, 
                 MaximumBufferElements);
             TexCoordBuffer = new D3D11UpdateBuffer<Vector2>(device, BindFlags.ShaderResource,

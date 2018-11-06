@@ -56,6 +56,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// </summary>
         public void Initialize()
         {
+            gameResourceManager.Initialize();
             inputAssembler.Initialize();
         }
 

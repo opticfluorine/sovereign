@@ -39,14 +39,17 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 
         private readonly D3D11Device device;
 
+        private readonly GameSceneShaders shaders;
+
         /// <summary>
         /// Vertex buffer input layout.
         /// </summary>
         private InputLayout inputLayout;
 
-        public GameSceneInputAssembler(D3D11Device device)
+        public GameSceneInputAssembler(D3D11Device device, GameSceneShaders shaders)
         {
             this.device = device;
+            this.shaders = shaders;
         }
 
         /// <summary>
@@ -102,7 +105,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
                     SemanticIndex = 0
                 },
             };
-            return new InputLayout(device.Device, null, layouts);
+            return new InputLayout(device.Device, shaders.WorldVertexShader, layouts);
         }
 
     }
