@@ -1,5 +1,3 @@
-extensions: designer.cs generated.cs
-extensions: .cs .cpp .h .hlsl
 /*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
@@ -22,3 +20,42 @@ extensions: .cs .cpp .h .hlsl
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
  */
+
+/* Shader constants. */
+cbuffer ShaderConstants {
+	float3 g_worldScale;       // x, y, z scaling factors
+	float3 g_cameraPos;        // x, y, z position of camera
+	float g_layerZ;            // z position of current layer
+};
+
+/* Vertex shader input. */
+struct VsInput {
+	float3 vPosition : POSITION;
+	float2 vTexCoord : TEXCOORD;
+};
+
+/* Vertex shader output. */
+struct VsOutput {
+	float4 vPosition : SV_POSITION;
+	float2 vTexCoord : TEXCOORD;
+};
+
+/* Single-layer world vertex shader. */
+VsOutput main(VsInput input) {
+	VsOutput output;
+
+	/* x is offset by the camera, then scaled. */
+	output.vPosition.x = g_worldScale.x * (input.vPosition.x - g_cameraPos.x);
+
+	/* y is offset by the camera and by z, then scaled. */
+	output.vPosition.y = g_worldScale.y * (input.vPosition.y - g_cameraPos.y)
+		- g_worldScale.z * (g_layerZ - g_cameraPos.z);
+
+    output.vPosition.z = 0.0;
+    output.vPosition.w = 0.0;
+
+	/* Texture coordinates are passed through. */
+	output.vTexCoord = input.vTexCoord;
+
+	return output;
+}

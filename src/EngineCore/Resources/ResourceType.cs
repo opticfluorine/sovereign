@@ -37,6 +37,11 @@ namespace Sovereign.EngineCore.Resources
     {
 
         /// <summary>
+        /// Compiled shader object files.
+        /// </summary>
+        Shader,
+
+        /// <summary>
         /// Sprite definitions and other related data.
         /// </summary>
         Sprite,

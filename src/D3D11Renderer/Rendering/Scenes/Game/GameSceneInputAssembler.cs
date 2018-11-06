@@ -78,15 +78,31 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         {
             var layouts = new InputElement[]
             {
+                /* Vertex buffer */
                 new InputElement
                 {
                     AlignedByteOffset = InputElement.AppendAligned,
                     Classification = InputClassification.PerVertexData,
                     Format = SharpDX.DXGI.Format.R32G32B32_Float,
-                    
-                }
+                    InstanceDataStepRate = 0,
+                    Slot = 0,
+                    SemanticName = "POSITION",
+                    SemanticIndex = 0
+                },
+
+                /* Texture coordinate buffer */
+                new InputElement
+                {
+                    AlignedByteOffset = InputElement.AppendAligned,
+                    Classification = InputClassification.PerVertexData,
+                    Format = SharpDX.DXGI.Format.R32G32_Float,
+                    InstanceDataStepRate = 0,
+                    Slot = 1,
+                    SemanticName = "TEXCOORD",
+                    SemanticIndex = 0
+                },
             };
-            return new InputLayout(device.Device, null, null);
+            return new InputLayout(device.Device, null, layouts);
         }
 
     }

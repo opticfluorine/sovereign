@@ -1,5 +1,3 @@
-extensions: designer.cs generated.cs
-extensions: .cs .cpp .h .hlsl
 /*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
@@ -22,3 +20,29 @@ extensions: .cs .cpp .h .hlsl
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
  */
+
+/* Texture atlas. */
+Texture2D g_textureAtlas;
+
+/* Texture atlas sampler. */
+SamplerState g_textureAtlasSampler;
+
+/* Pixel shader input. */
+struct PsInput {
+	float4 pos : SV_POSITION; /* only x and y are used */
+	float2 texCoord : TEXCOORD;
+};
+
+struct PsOutput {
+    float4 color : SV_TARGET0;
+};
+
+/* Single-layer world pixel shader. */
+PsOutput main(PsInput input) {
+	PsOutput output;
+
+	/* Sample the texture atlas directly. */
+	output.color = g_textureAtlas.Sample(g_textureAtlasSampler, input.texCoord);
+
+	return output;
+};

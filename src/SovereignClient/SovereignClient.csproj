@@ -75,6 +75,12 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Content Include="Data\Shader\WorldPixelShader.cso">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Shader\WorldVertexShader.cso">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Data\Spritesheet\snake.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -147,6 +153,10 @@
     <ProjectReference Include="..\EngineUtil\EngineUtil.csproj">
       <Project>{6440b9bb-8545-4d8f-9f89-b8a876cc9977}</Project>
       <Name>EngineUtil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Shaders\Shaders.vcxproj">
+      <Project>{10b84ace-b05c-4636-b484-e9edf42210df}</Project>
+      <Name>Shaders</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

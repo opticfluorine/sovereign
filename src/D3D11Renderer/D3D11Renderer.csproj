@@ -11,6 +11,8 @@
     <AssemblyName>Sovereign.D3D11Renderer</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -99,9 +101,6 @@
       <Project>{6440b9bb-8545-4d8f-9f89-b8a876cc9977}</Project>
       <Name>EngineUtil</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Data\Shader\WorldShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
