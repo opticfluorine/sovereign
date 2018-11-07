@@ -96,6 +96,7 @@
     <Compile Include="Rendering\RenderingManager.cs" />
     <Compile Include="Rendering\RenderingMainLoopAction.cs" />
     <Compile Include="Rendering\RenderingResourceManager.cs" />
+    <Compile Include="Rendering\Resources\Buffers\Pos3Tex2Vertex.cs" />
     <Compile Include="Rendering\Scenes\IScene.cs" />
     <Compile Include="Rendering\Scenes\ISceneConsumer.cs" />
     <Compile Include="Rendering\Scenes\SceneInstaller.cs" />
@@ -170,8 +171,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Rendering\Resources\Buffers\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

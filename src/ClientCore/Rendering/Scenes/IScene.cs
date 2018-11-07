@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,10 +56,9 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         /// and may be determined from the length of the arrays.
         ///
         /// <param name="vertexBuffer">Vertex buffer for update.</param>
-        /// <param name="texCoordBuffer">Texture coordinate buffer for update.</param>
         /// <param name="drawLengths">Number of vertices to use for each sequential draw.</param>
         /// <param name="drawCount">Number of draws to perform.</param>
-        void PopulateBuffers(Vector3[] vertexBuffer, Vector2[] texCoordBuffer, 
+        void PopulateBuffers(Pos3Tex2Vertex[] vertexBuffer, 
             int[] drawLengths, out int drawCount);
 
     }

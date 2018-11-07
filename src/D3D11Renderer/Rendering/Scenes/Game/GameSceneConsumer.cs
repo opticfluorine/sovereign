@@ -52,7 +52,6 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         {
             /* Handle general processing. */
             scene.PopulateBuffers(gameResourceManager.VertexBuffer.Buffer,
-                gameResourceManager.TexCoordBuffer.Buffer,
                 gameResourceManager.DrawBuffer, 
                 out var drawCount);
             gameResourceManager.DrawCount = drawCount;

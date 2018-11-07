@@ -4,6 +4,10 @@
 
 ### November
 
+#### 06 November 2018
+
+* Fix vertex shaders.
+
 #### 05 November 2018
 
 * Split WorldShader.hlsl into separate vertex and pixel shader files.

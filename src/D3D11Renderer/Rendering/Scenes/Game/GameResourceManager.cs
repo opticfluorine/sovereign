@@ -22,13 +22,8 @@
  */
 
 using SharpDX.Direct3D11;
+using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.D3D11Renderer.Rendering.Resources.Buffers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 {
@@ -47,12 +42,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// <summary>
         /// Updateable vertex buffer.
         /// </summary>
-        public D3D11UpdateBuffer<Vector3> VertexBuffer { get; private set; }
-
-        /// <summary>
-        /// Updateable texture coordinate buffer.
-        /// </summary>
-        public D3D11UpdateBuffer<Vector2> TexCoordBuffer { get; private set; }
+        public D3D11UpdateBuffer<Pos3Tex2Vertex> VertexBuffer { get; private set; }
 
         /// <summary>
         /// Number of elements to use in each draw.
@@ -84,9 +74,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
             shaders.Initialize();
 
             /* Create buffers. */
-            VertexBuffer = new D3D11UpdateBuffer<Vector3>(device, BindFlags.VertexBuffer, 
-                MaximumBufferElements);
-            TexCoordBuffer = new D3D11UpdateBuffer<Vector2>(device, BindFlags.ShaderResource,
+            VertexBuffer = new D3D11UpdateBuffer<Pos3Tex2Vertex>(device, BindFlags.VertexBuffer,
                 MaximumBufferElements);
         }
 
@@ -95,9 +83,6 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// </summary>
         public void Cleanup()
         {
-            TexCoordBuffer.Dispose();
-            TexCoordBuffer = null;
-
             VertexBuffer.Dispose();
             VertexBuffer = null;
         }
@@ -108,7 +93,6 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         public void UpdateBuffers()
         {
             VertexBuffer.Update();
-            TexCoordBuffer.Update();
         }
 
     }
