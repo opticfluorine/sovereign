@@ -105,16 +105,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
                     SemanticIndex = 0
                 },
             };
-
-            try
-            {
-                return new InputLayout(device.Device, shaders.WorldVertexShader, layouts);
-            }
-            catch (Exception e)
-            {
-                device.Device.QueryInterface<InfoQueue>();
-                throw e;
-            }
+            return new InputLayout(device.Device, shaders.WorldVertexShader, layouts);
         }
 
     }
