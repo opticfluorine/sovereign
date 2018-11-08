@@ -21,15 +21,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.D3D11Renderer.Rendering.Configuration;
 using SharpDX.Direct3D11;
-using SharpDX;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Sovereign.ClientCore.Rendering.Display;
+using Sovereign.D3D11Renderer.Rendering.Configuration;
 
 namespace Sovereign.D3D11Renderer.Rendering
 {
@@ -37,7 +31,7 @@ namespace Sovereign.D3D11Renderer.Rendering
     /// <summary>
     /// Responsible for managing a Direct3D 11 device for rendering.
     /// </summary>
-    public class D3D11Device 
+    public class D3D11Device
     {
 
         /// <summary>
@@ -64,6 +58,11 @@ namespace Sovereign.D3D11Renderer.Rendering
         /// Main display backed by this renderer.
         /// </summary>
         private readonly MainDisplay mainDisplay;
+
+        /// <summary>
+        /// Debug info queue.
+        /// </summary>
+        private InfoQueue infoQueue;
 
         public D3D11Device(MainDisplay mainDisplay)
         {

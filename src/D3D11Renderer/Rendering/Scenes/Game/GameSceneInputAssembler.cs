@@ -81,10 +81,10 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         {
             var layouts = new InputElement[]
             {
-                /* Vertex buffer */
+                /* Position */
                 new InputElement
                 {
-                    AlignedByteOffset = InputElement.AppendAligned,
+                    AlignedByteOffset = 0,
                     Classification = InputClassification.PerVertexData,
                     Format = SharpDX.DXGI.Format.R32G32B32_Float,
                     InstanceDataStepRate = 0,
@@ -93,19 +93,28 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
                     SemanticIndex = 0
                 },
 
-                /* Texture coordinate buffer */
+                /* Texture coordinate */
                 new InputElement
                 {
-                    AlignedByteOffset = InputElement.AppendAligned,
+                    AlignedByteOffset = 12,
                     Classification = InputClassification.PerVertexData,
                     Format = SharpDX.DXGI.Format.R32G32_Float,
                     InstanceDataStepRate = 0,
-                    Slot = 1,
+                    Slot = 0,
                     SemanticName = "TEXCOORD",
                     SemanticIndex = 0
                 },
             };
-            return new InputLayout(device.Device, shaders.WorldVertexShader, layouts);
+
+            try
+            {
+                return new InputLayout(device.Device, shaders.WorldVertexShader, layouts);
+            }
+            catch (Exception e)
+            {
+                device.Device.QueryInterface<InfoQueue>();
+                throw e;
+            }
         }
 
     }
