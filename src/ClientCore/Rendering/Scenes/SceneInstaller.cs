@@ -24,6 +24,7 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
+using Sovereign.EngineUtil.IoC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,13 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         {
             container.Register(Component.For<SceneManager>()
                 .LifestyleSingleton());
+
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IScene>()
+                .WithServiceBase()
+                .WithServiceSelf()
+                .LifestyleSingleton()
+                .AllowMultipleMatches());
         }
     }
 }

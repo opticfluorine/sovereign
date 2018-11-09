@@ -103,6 +103,7 @@
     <Compile Include="Rendering\Scenes\SceneInstaller.cs" />
     <Compile Include="Rendering\Scenes\SceneManager.cs" />
     <Compile Include="Rendering\Scenes\SceneType.cs" />
+    <Compile Include="Rendering\Scenes\Game\GameScene.cs" />
     <Compile Include="Rendering\Sprites\AnimatedSprites\AnimatedSprite.cs" />
     <Compile Include="Rendering\Sprites\AnimatedSprites\AnimatedSpriteDefinitions.cs" />
     <Compile Include="Rendering\Sprites\AnimatedSprites\AnimatedSpriteDefinitionsException.cs" />

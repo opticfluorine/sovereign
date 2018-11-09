@@ -4,6 +4,15 @@
 
 ### November
 
+#### 08 November 2018
+
+* `SceneManager` starts with `GameScene` as the active scene by default.
+  This will change in the future when other scenes are added.
+
+#### 07 November 2018
+
+* Create D3D11 `InputLayout` for game rendering.
+
 #### 06 November 2018
 
 * Fix vertex shaders.

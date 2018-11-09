@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
@@ -21,32 +21,24 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.ClientCore.Rendering.Scenes.Game;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sovereign.ClientCore.Rendering.Resources.Buffers;
 
-namespace Sovereign.ClientCore.Rendering.Scenes
+namespace Sovereign.ClientCore.Rendering.Scenes.Game
 {
 
     /// <summary>
-    /// Manages the renderable scenes.
+    /// In-game scene.
     /// </summary>
-    public sealed class SceneManager
+    public sealed class GameScene : IScene
     {
 
-        /// <summary>
-        /// Current active scene.
-        /// </summary>
-        public IScene ActiveScene { get; set; }
+        public SceneType SceneType => SceneType.Game;
 
-        public SceneManager(GameScene gameScene)
+        public void PopulateBuffers(Pos3Tex2Vertex[] vertexBuffer, int[] drawLengths, out int drawCount)
         {
-            ActiveScene = gameScene;
+            /* TODO */
+            drawCount = 0;
         }
-
     }
 
 }

@@ -59,11 +59,6 @@ namespace Sovereign.D3D11Renderer.Rendering
         /// </summary>
         private readonly MainDisplay mainDisplay;
 
-        /// <summary>
-        /// Debug info queue.
-        /// </summary>
-        private InfoQueue infoQueue;
-
         public D3D11Device(MainDisplay mainDisplay)
         {
             this.mainDisplay = mainDisplay;
