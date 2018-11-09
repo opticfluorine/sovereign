@@ -21,9 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using SharpDX.Direct3D11;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,30 +32,48 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 {
 
     /// <summary>
-    /// IoC installer for game scene rendering components.
+    /// Manages the vertex shader stage for the game scene.
     /// </summary>
-    public sealed class GameSceneInstaller : IWindsorInstaller
+    public sealed class GameSceneVertexShader : IDisposable
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+
+        private readonly D3D11Device device;
+
+        private readonly GameSceneShaders gameSceneShaders;
+
+        /// <summary>
+        /// D3D11 vertex shader object.
+        /// </summary>
+        private VertexShader vertexShader;
+
+        public GameSceneVertexShader(D3D11Device device, GameSceneShaders gameSceneShaders)
         {
-            container.Register(Component.For<GameSceneConsumer>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<GameResourceManager>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<GameSceneRenderer>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<GameSceneInputAssembler>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<GameSceneShaders>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<GameSceneVertexShader>()
-                .LifestyleSingleton());
+            this.device = device;
+            this.gameSceneShaders = gameSceneShaders;
         }
+
+        /// <summary>
+        /// Initializes the vertex shader.
+        /// </summary>
+        public void Initialize()
+        {
+            vertexShader = new VertexShader(device.Device, gameSceneShaders.WorldVertexShader);
+        }
+
+        public void Dispose()
+        {
+            vertexShader?.Dispose();
+        }
+
+        /// <summary>
+        /// Configures the vertex shader stage for the given context.
+        /// </summary>
+        /// <param name="context">Device context.</param>
+        public void Configure(DeviceContext context)
+        {
+            context.VertexShader.SetShader(vertexShader, null, 0);
+        }
+
     }
 
 }

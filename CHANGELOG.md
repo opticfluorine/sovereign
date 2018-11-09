@@ -4,6 +4,10 @@
 
 ### November
 
+#### 09 November 2018
+
+* Start configuring the vertex shader for game rendering.
+
 #### 08 November 2018
 
 * `SceneManager` starts with `GameScene` as the active scene by default.

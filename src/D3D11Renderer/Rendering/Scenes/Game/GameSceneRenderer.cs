@@ -43,12 +43,15 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 
         private readonly GameSceneInputAssembler inputAssembler;
 
+        private readonly GameSceneVertexShader vertexShader;
+
         public GameSceneRenderer(D3D11Device device, GameResourceManager gameResourceManager,
-            GameSceneInputAssembler inputAssembler)
+            GameSceneInputAssembler inputAssembler, GameSceneVertexShader vertexShader)
         {
             this.device = device;
             this.gameResourceManager = gameResourceManager;
             this.inputAssembler = inputAssembler;
+            this.vertexShader = vertexShader;
         }
 
         /// <summary>
@@ -58,11 +61,14 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         {
             gameResourceManager.Initialize();
             inputAssembler.Initialize();
+            vertexShader.Initialize();
         }
 
         public void Dispose()
         {
+            vertexShader.Dispose();
             inputAssembler.Dispose();
+            gameResourceManager.Cleanup();
         }
 
         /// <summary>
@@ -70,7 +76,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// </summary>
         public void Render()
         {
-
+            ConfigurePipeline();
         }
 
         /// <summary>
@@ -80,12 +86,8 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         {
             var context = device.Device.ImmediateContext;
 
-            
-        }
-
-        private void ConfigureInputAssembler(DeviceContext context)
-        {
-            
+            inputAssembler.Configure(context);
+            vertexShader.Configure(context);
         }
 
     }
