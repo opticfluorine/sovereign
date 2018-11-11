@@ -22,10 +22,10 @@
  */
 
 /* Texture atlas. */
-Texture2D g_textureAtlas;
+Texture2D g_textureAtlas : register(t0);
 
 /* Texture atlas sampler. */
-SamplerState g_textureAtlasSampler;
+SamplerState g_textureAtlasSampler : register(s0);
 
 /* Pixel shader input. */
 struct PsInput {

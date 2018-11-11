@@ -28,8 +28,8 @@ namespace Sovereign.D3D11Renderer.Rendering.Resources.Buffers
         /// <summary>
         /// GPU-side buffer.
         /// </summary>
-        private Buffer gpuBuffer;
-
+        public Buffer GpuBuffer { get; set; }
+        
         /// <summary>
         /// Number of T objects in the buffer.
         /// </summary>
@@ -39,6 +39,11 @@ namespace Sovereign.D3D11Renderer.Rendering.Resources.Buffers
         /// Local buffer for update.
         /// </summary>
         public T[] Buffer { get; private set; }
+
+        /// <summary>
+        /// Size of each element in bytes.
+        /// </summary>
+        public int ElementSize { get; private set; }
 
         /// <summary>
         /// GC handle for the local buffer.
@@ -65,6 +70,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Resources.Buffers
         {
             this.device = device;
             Length = sizeInT;
+            ElementSize = Marshal.SizeOf<T>();
             CreateBuffers(bindFlags);
             AllocateLocalMemory();
         }
@@ -77,11 +83,11 @@ namespace Sovereign.D3D11Renderer.Rendering.Resources.Buffers
             var context = device.Device.ImmediateContext;
 
             /* Start by writing the local buffer to the buffer. */
-            context.MapSubresource(gpuBuffer, MapMode.WriteDiscard, MapFlags.None, out var stream);
+            context.MapSubresource(GpuBuffer, MapMode.WriteDiscard, MapFlags.None, out var stream);
             stream.Write(bufferPtr, 0, bufferLenBytes);
 
             /* Commit the staging buffer. */
-            context.UnmapSubresource(gpuBuffer, 0);
+            context.UnmapSubresource(GpuBuffer, 0);
         }
 
         public void Dispose()
@@ -95,7 +101,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Resources.Buffers
         /// <param name="bindFlags">D3D11 bind flags.</param>
         private void CreateBuffers(BindFlags bindFlags)
         {
-            gpuBuffer = CreateSingleBuffer(
+            GpuBuffer = CreateSingleBuffer(
                 bindFlags,
                 CpuAccessFlags.Write,
                 ResourceUsage.Dynamic);
@@ -109,7 +115,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Resources.Buffers
             Buffer = new T[Length];
             bufferHandle = GCHandle.Alloc(Buffer, GCHandleType.Pinned);
             bufferPtr = bufferHandle.AddrOfPinnedObject();
-            bufferLenBytes = Length * Marshal.SizeOf<T>();
+            bufferLenBytes = Length * ElementSize;
         }
 
         /// <summary>
@@ -127,7 +133,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Resources.Buffers
                 BindFlags = bindFlags,
                 CpuAccessFlags = cpuAccessFlags,
                 OptionFlags = ResourceOptionFlags.None,
-                SizeInBytes = Length * Marshal.SizeOf<T>(),
+                SizeInBytes = Length * ElementSize,
                 StructureByteStride = 0,
                 Usage = resourceUsage
             };

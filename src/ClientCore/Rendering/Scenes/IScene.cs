@@ -22,6 +22,7 @@
  */
 
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
+using Sovereign.ClientCore.Rendering.Scenes.Game;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,6 +61,12 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         /// <param name="drawCount">Number of draws to perform.</param>
         void PopulateBuffers(Pos3Tex2Vertex[] vertexBuffer, 
             int[] drawLengths, out int drawCount);
+
+        /// <summary>
+        /// Populates the game scene vertex constants buffer, if applicable.
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer.</param>
+        void PopulateGameSceneVertexConstantBuffer(GameSceneVertexConstants[] constantBuffer);
 
     }
 

@@ -98,6 +98,7 @@
     <Compile Include="Rendering\RenderingMainLoopAction.cs" />
     <Compile Include="Rendering\RenderingResourceManager.cs" />
     <Compile Include="Rendering\Resources\Buffers\Pos3Tex2Vertex.cs" />
+    <Compile Include="Rendering\Scenes\Game\GameSceneVertexConstants.cs" />
     <Compile Include="Rendering\Scenes\IScene.cs" />
     <Compile Include="Rendering\Scenes\ISceneConsumer.cs" />
     <Compile Include="Rendering\Scenes\SceneInstaller.cs" />

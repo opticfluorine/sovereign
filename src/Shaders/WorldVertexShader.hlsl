@@ -22,10 +22,10 @@
  */
 
 /* Shader constants. */
-cbuffer ShaderConstants {
+cbuffer ShaderConstants : register(b0)
+{
 	float3 g_worldScale;       // x, y, z scaling factors
 	float3 g_cameraPos;        // x, y, z position of camera
-	float g_layerZ;            // z position of current layer
 };
 
 /* Vertex shader input. */
@@ -49,7 +49,7 @@ VsOutput main(VsInput input) {
 
 	/* y is offset by the camera and by z, then scaled. */
 	output.vPosition.y = g_worldScale.y * (input.vPosition.y - g_cameraPos.y)
-		- g_worldScale.z * (g_layerZ - g_cameraPos.z);
+		- g_worldScale.z * (input.vPosition.z - g_cameraPos.z);
 
     output.vPosition.z = 0.0;
     output.vPosition.w = 0.0;

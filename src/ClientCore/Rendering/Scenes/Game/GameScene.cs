@@ -39,6 +39,12 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
             /* TODO */
             drawCount = 0;
         }
+
+        public void PopulateGameSceneVertexConstantBuffer(GameSceneVertexConstants[] constantBuffer)
+        {
+            /* TODO */
+        }
+
     }
 
 }

@@ -4,6 +4,10 @@
 
 ### November
 
+#### 10 November 2018
+
+* More work on the vertex shader and the input assembly stage.
+
 #### 09 November 2018
 
 * Start configuring the vertex shader for game rendering.

@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using System;
 using System.Collections.Generic;
@@ -41,15 +42,24 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 
         private readonly GameSceneShaders shaders;
 
+        private readonly GameResourceManager gameResourceManager;
+
         /// <summary>
         /// Vertex buffer input layout.
         /// </summary>
         private InputLayout inputLayout;
 
-        public GameSceneInputAssembler(D3D11Device device, GameSceneShaders shaders)
+        /// <summary>
+        /// Vertex buffer binding.
+        /// </summary>
+        private VertexBufferBinding bufferBinding;
+
+        public GameSceneInputAssembler(D3D11Device device, GameSceneShaders shaders,
+            GameResourceManager gameResourceManager)
         {
             this.device = device;
             this.shaders = shaders;
+            this.gameResourceManager = gameResourceManager;
         }
 
         /// <summary>
@@ -58,6 +68,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         public void Initialize()
         {
             inputLayout = CreateInputLayout();
+            bufferBinding = CreateBufferBinding();
         }
 
         public void Dispose()
@@ -72,6 +83,8 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         public void Configure(DeviceContext context)
         {
             context.InputAssembler.InputLayout = inputLayout;
+            context.InputAssembler.SetVertexBuffers(0, bufferBinding);
+            context.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
         }
 
         /// <summary>
@@ -106,6 +119,16 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
                 },
             };
             return new InputLayout(device.Device, shaders.WorldVertexShader, layouts);
+        }
+
+        /// <summary>
+        /// Creates the vertex buffer binding.
+        /// </summary>
+        /// <returns>Vertex buffer binding.</returns>
+        private VertexBufferBinding CreateBufferBinding()
+        {
+            var buffer = gameResourceManager.VertexBuffer;
+            return new VertexBufferBinding(buffer.GpuBuffer, buffer.ElementSize, 0);
         }
 
     }

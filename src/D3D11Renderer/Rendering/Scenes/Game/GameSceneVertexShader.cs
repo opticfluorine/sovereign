@@ -41,15 +41,19 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 
         private readonly GameSceneShaders gameSceneShaders;
 
+        private readonly GameResourceManager resourceManager;
+
         /// <summary>
         /// D3D11 vertex shader object.
         /// </summary>
         private VertexShader vertexShader;
 
-        public GameSceneVertexShader(D3D11Device device, GameSceneShaders gameSceneShaders)
+        public GameSceneVertexShader(D3D11Device device, GameSceneShaders gameSceneShaders,
+            GameResourceManager resourceManager)
         {
             this.device = device;
             this.gameSceneShaders = gameSceneShaders;
+            this.resourceManager = resourceManager;
         }
 
         /// <summary>
@@ -57,7 +61,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// </summary>
         public void Initialize()
         {
-            vertexShader = new VertexShader(device.Device, gameSceneShaders.WorldVertexShader);
+            vertexShader = CreateShader();
         }
 
         public void Dispose()
@@ -72,6 +76,16 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         public void Configure(DeviceContext context)
         {
             context.VertexShader.SetShader(vertexShader, null, 0);
+            context.VertexShader.SetConstantBuffer(0, resourceManager.VertexConstantBuffer.GpuBuffer);
+        }
+
+        /// <summary>
+        /// Creates the D3D11 vertex shader object.
+        /// </summary>
+        /// <returns>Vertex shader object.</returns>
+        private VertexShader CreateShader()
+        {
+            return new VertexShader(device.Device, gameSceneShaders.WorldVertexShader);
         }
 
     }

@@ -56,6 +56,9 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
                 out var drawCount);
             gameResourceManager.DrawCount = drawCount;
 
+            scene.PopulateGameSceneVertexConstantBuffer(
+                gameResourceManager.VertexConstantBuffer.Buffer);
+
             /* Post updates to the buffers. */
             gameResourceManager.UpdateBuffers();
 
