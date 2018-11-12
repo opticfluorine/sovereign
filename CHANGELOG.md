@@ -4,6 +4,12 @@
 
 ### November
 
+#### 11 November 2018
+
+* Refactor some of the game scene rendering code into a world renderer.
+  This gives clean layer-by-layer rendering of the game world and will
+  allow for lighting and other effects to be easily added in the future.
+
 #### 10 November 2018
 
 * More work on the vertex shader and the input assembly stage.

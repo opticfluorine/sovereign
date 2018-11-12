@@ -28,13 +28,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
+namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
 {
 
     /// <summary>
     /// Manages the vertex shader stage for the game scene.
     /// </summary>
-    public sealed class GameSceneVertexShader : IDisposable
+    public sealed class WorldVertexShader : IDisposable
     {
 
         private readonly D3D11Device device;
@@ -48,7 +48,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// </summary>
         private VertexShader vertexShader;
 
-        public GameSceneVertexShader(D3D11Device device, GameSceneShaders gameSceneShaders,
+        public WorldVertexShader(D3D11Device device, GameSceneShaders gameSceneShaders,
             GameResourceManager resourceManager)
         {
             this.device = device;
@@ -73,10 +73,20 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// Configures the vertex shader stage for the given context.
         /// </summary>
         /// <param name="context">Device context.</param>
-        public void Configure(DeviceContext context)
+        public void Bind(DeviceContext context)
         {
             context.VertexShader.SetShader(vertexShader, null, 0);
             context.VertexShader.SetConstantBuffer(0, resourceManager.VertexConstantBuffer.GpuBuffer);
+        }
+
+        /// <summary>
+        /// Unbinds the resources from the vertex shader.
+        /// </summary>
+        /// <param name="context">Device context.</param>
+        public void Unbind(DeviceContext context)
+        {
+            context.VertexShader.SetConstantBuffer(0, null);
+            context.VertexShader.SetShader(null, null, 0);
         }
 
         /// <summary>

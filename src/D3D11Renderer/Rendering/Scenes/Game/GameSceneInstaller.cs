@@ -49,14 +49,9 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
             container.Register(Component.For<GameSceneRenderer>()
                 .LifestyleSingleton());
 
-            container.Register(Component.For<GameSceneInputAssembler>()
-                .LifestyleSingleton());
-
             container.Register(Component.For<GameSceneShaders>()
                 .LifestyleSingleton());
 
-            container.Register(Component.For<GameSceneVertexShader>()
-                .LifestyleSingleton());
         }
     }
 

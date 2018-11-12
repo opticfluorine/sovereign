@@ -21,15 +21,37 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sovereign.D3D11Renderer.Rendering.World
+namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
 {
-    public class SingleLayerTileRenderStep
+
+    /// <summary>
+    /// IoC installer for world-related components of the game scene renderer.
+    /// </summary>
+    public sealed class GameSceneWorldInstaller : IWindsorInstaller
     {
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(Component.For<WorldInputAssembler>()
+                .LifestyleSingleton());
+
+            container.Register(Component.For<WorldVertexShader>()
+                .LifestyleSingleton());
+
+            container.Register(Component.For<WorldPixelShader>()
+                .LifestyleSingleton());
+
+            container.Register(Component.For<WorldRenderer>()
+                .LifestyleSingleton());
+        }
     }
+
 }

@@ -22,6 +22,7 @@
  */
 
 using SharpDX.Direct3D11;
+using Sovereign.D3D11Renderer.Rendering.Scenes.Game.World;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,20 +39,15 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
     {
 
         private readonly D3D11Device device;
-
         private readonly GameResourceManager gameResourceManager;
-
-        private readonly GameSceneInputAssembler inputAssembler;
-
-        private readonly GameSceneVertexShader vertexShader;
+        private readonly WorldRenderer worldRenderer;
 
         public GameSceneRenderer(D3D11Device device, GameResourceManager gameResourceManager,
-            GameSceneInputAssembler inputAssembler, GameSceneVertexShader vertexShader)
+            WorldRenderer worldRenderer)
         {
             this.device = device;
             this.gameResourceManager = gameResourceManager;
-            this.inputAssembler = inputAssembler;
-            this.vertexShader = vertexShader;
+            this.worldRenderer = worldRenderer;
         }
 
         /// <summary>
@@ -60,14 +56,11 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         public void Initialize()
         {
             gameResourceManager.Initialize();
-            inputAssembler.Initialize();
-            vertexShader.Initialize();
+            worldRenderer.Initialize();
         }
 
         public void Dispose()
         {
-            vertexShader.Dispose();
-            inputAssembler.Dispose();
             gameResourceManager.Cleanup();
         }
 
@@ -76,18 +69,30 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// </summary>
         public void Render()
         {
-            ConfigurePipeline();
+            var context = device.Device.ImmediateContext;
+
+            /* Iterate over layers to be drawn. */
+            var offset = 0;
+            for (int i = 0; i < gameResourceManager.DrawCount; ++i)
+            {
+                var length = gameResourceManager.DrawBuffer[i];
+                RenderLayer(context, offset, length);
+                offset += length;
+            }
         }
 
         /// <summary>
-        /// Configures the Direct3D 11 rendering pipeline.
+        /// Renders a single layer.
         /// </summary>
-        private void ConfigurePipeline()
+        /// <param name="context">Device context.</param>
+        /// <param name="offset">Vertex buffer offset for layer.</param>
+        /// <param name="length">Number of vertices in layer.</param>
+        private void RenderLayer(DeviceContext context, int offset, int length)
         {
-            var context = device.Device.ImmediateContext;
-
-            inputAssembler.Configure(context);
-            vertexShader.Configure(context);
+            /* Draw the world. */
+            worldRenderer.RenderLayer(context, offset, length);
+            
+            /* TODO: Lighting and other effects. */
         }
 
     }

@@ -29,13 +29,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
+namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
 {
 
     /// <summary>
-    /// Manages the input assembler stage for the game scene.
+    /// Manages the input assembler stage for world rendering.
     /// </summary>
-    public sealed class GameSceneInputAssembler : IDisposable
+    public sealed class WorldInputAssembler : IDisposable
     {
 
         private readonly D3D11Device device;
@@ -54,7 +54,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// </summary>
         private VertexBufferBinding bufferBinding;
 
-        public GameSceneInputAssembler(D3D11Device device, GameSceneShaders shaders,
+        public WorldInputAssembler(D3D11Device device, GameSceneShaders shaders,
             GameResourceManager gameResourceManager)
         {
             this.device = device;
@@ -80,11 +80,21 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// Configures the input assembler stage.
         /// </summary>
         /// <param name="context">Device context.</param>
-        public void Configure(DeviceContext context)
+        public void Bind(DeviceContext context)
         {
             context.InputAssembler.InputLayout = inputLayout;
             context.InputAssembler.SetVertexBuffers(0, bufferBinding);
             context.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+        }
+
+        /// <summary>
+        /// Unbinds the game scene input assembler from the device context.
+        /// </summary>
+        /// <param name="context">Device context.</param>
+        public void Unbind(DeviceContext context)
+        {
+            context.InputAssembler.SetVertexBuffers(0, null);
+            context.InputAssembler.InputLayout = null;
         }
 
         /// <summary>
