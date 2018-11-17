@@ -42,24 +42,23 @@ namespace Sovereign.ClientCore.Rendering.Configuration
 
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            /* IAdapterEnumerator. */
             container.Register(EngineClasses.EngineAssemblies()
                 .BasedOn<IAdapterEnumerator>()
                 .WithServiceDefaultInterfaces()
                 .LifestyleSingleton());
 
-            /* AdapterSelector. */
             container.Register(Component.For<AdapterSelector>()
                 .LifestyleSingleton());
 
-            /* IDisplayModeEnumerator. */
             container.Register(EngineClasses.EngineAssemblies()
                 .BasedOn<IDisplayModeEnumerator>()
                 .WithServiceDefaultInterfaces()
                 .LifestyleSingleton());
 
-            /* DisplayModeSelector. */
             container.Register(Component.For<DisplayModeSelector>()
+                .LifestyleSingleton());
+
+            container.Register(Component.For<DisplayViewport>()
                 .LifestyleSingleton());
         }
 

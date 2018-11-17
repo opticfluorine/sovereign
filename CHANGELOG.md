@@ -4,6 +4,12 @@
 
 ### November
 
+#### 17 November 2018
+
+* Set up rasterizer and output-merger stages for world rendering.
+* Update D3D11Device to automatically roll the output target when the 
+  swapchain buffers are flipped.
+
 #### 11 November 2018
 
 * Refactor some of the game scene rendering code into a world renderer.

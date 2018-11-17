@@ -70,6 +70,16 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         public void Render()
         {
             var context = device.Device.ImmediateContext;
+            RenderWorld(context);
+        }
+
+        /// <summary>
+        /// Renders the game world.
+        /// </summary>
+        private void RenderWorld(DeviceContext context)
+        {
+            /* Bind pipeline. */
+            worldRenderer.BindPipeline(context);
 
             /* Iterate over layers to be drawn. */
             var offset = 0;
@@ -79,6 +89,9 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
                 RenderLayer(context, offset, length);
                 offset += length;
             }
+
+            /* Unbind pipeline. */
+            worldRenderer.UnbindPipeline(context);
         }
 
         /// <summary>

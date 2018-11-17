@@ -22,6 +22,7 @@
  */
 
 using SharpDX.Direct3D11;
+using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.D3D11Renderer.Rendering.Configuration;
 
@@ -40,9 +41,14 @@ namespace Sovereign.D3D11Renderer.Rendering
         public Device Device => device;
 
         /// <summary>
-        /// Swap chain connected to the device.
+        /// Render target view pointing to the back buffer.
         /// </summary>
-        public SharpDX.DXGI.SwapChain SwapChain => swapChain;
+        public RenderTargetView BackBufferView { get; private set; }
+
+        /// <summary>
+        /// Display mode associated with the device.
+        /// </summary>
+        public IDisplayMode DisplayMode => mainDisplay.DisplayMode;
 
         /// <summary>
         /// Internal storage for the device.
@@ -82,6 +88,9 @@ namespace Sovereign.D3D11Renderer.Rendering
                 swapChainDesc,
                 out device,
                 out swapChain);
+
+            /* Initialize the back buffer view. */
+            UpdateBackBufferView();
         }
 
         /// <summary>
@@ -101,7 +110,8 @@ namespace Sovereign.D3D11Renderer.Rendering
         /// </summary>
         public void Present()
         {
-            SwapChain.Present(0, SharpDX.DXGI.PresentFlags.None);
+            swapChain.Present(0, SharpDX.DXGI.PresentFlags.None);
+            UpdateBackBufferView();
         }
 
         /// <summary>
@@ -143,6 +153,16 @@ namespace Sovereign.D3D11Renderer.Rendering
             };
 
             return description;
+        }
+
+        /// <summary>
+        /// Updates the back buffer view.
+        /// </summary>
+        private void UpdateBackBufferView()
+        {
+            BackBufferView?.Dispose();
+            BackBufferView = new RenderTargetView(device,
+                swapChain.GetBackBuffer<Buffer>(0));
         }
 
     }

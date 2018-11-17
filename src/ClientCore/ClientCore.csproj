@@ -78,6 +78,7 @@
     <Compile Include="Rendering\Configuration\AdapterSelector.cs" />
     <Compile Include="Rendering\Configuration\DisplayFormat.cs" />
     <Compile Include="Rendering\Configuration\DisplayModeSelector.cs" />
+    <Compile Include="Rendering\Configuration\DisplayViewport.cs" />
     <Compile Include="Rendering\Configuration\IAdapterEnumerator.cs" />
     <Compile Include="Rendering\Configuration\IDisplayMode.cs" />
     <Compile Include="Rendering\Configuration\IDisplayModeEnumerator.cs" />

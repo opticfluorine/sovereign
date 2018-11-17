@@ -38,14 +38,18 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
     {
         private readonly WorldInputAssembler inputAssembler;
         private readonly WorldVertexShader vertexShader;
+        private readonly WorldRasterizer rasterizer;
         private readonly WorldPixelShader pixelShader;
+        private readonly WorldOutputMerger outputMerger;
 
         public WorldRenderer(WorldInputAssembler inputAssembler, WorldVertexShader vertexShader,
-            WorldPixelShader pixelShader)
+            WorldRasterizer rasterizer, WorldPixelShader pixelShader, WorldOutputMerger outputMerger)
         {
             this.inputAssembler = inputAssembler;
             this.vertexShader = vertexShader;
+            this.rasterizer = rasterizer;
             this.pixelShader = pixelShader;
+            this.outputMerger = outputMerger;
         }
 
         /// <summary>
@@ -55,7 +59,9 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         {
             inputAssembler.Initialize();
             vertexShader.Initialize();
+            rasterizer.Initialize();
             pixelShader.Initialize();
+            outputMerger.Initialize();
         }
 
         /// <summary>
@@ -75,22 +81,26 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         /// Binds all resources to the pipeline.
         /// </summary>
         /// <param name="context">Device context.</param>
-        private void BindPipeline(DeviceContext context)
+        public void BindPipeline(DeviceContext context)
         {
             inputAssembler.Bind(context);
             vertexShader.Bind(context);
+            rasterizer.Bind(context);
             pixelShader.Bind(context);
+            outputMerger.Bind(context);
         }
 
         /// <summary>
         /// Unbinds all resources from the pipeline.
         /// </summary>
         /// <param name="context">Device context.</param>
-        private void UnbindPipeline(DeviceContext context)
+        public void UnbindPipeline(DeviceContext context)
         {
             pixelShader.Unbind(context);
+            rasterizer.Unbind(context);
             vertexShader.Unbind(context);
             inputAssembler.Unbind(context);
+            outputMerger.Unbind(context);
         }
 
         /// <summary>
