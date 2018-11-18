@@ -120,7 +120,10 @@ namespace Sovereign.D3D11Renderer.Rendering
         /// <returns>Device flags.</returns>
         private DeviceCreationFlags GetDeviceFlags()
         {
-            var flags = DeviceCreationFlags.SingleThreaded | DeviceCreationFlags.Debug;
+            var flags = DeviceCreationFlags.SingleThreaded;
+#if DEBUG
+            flags |= DeviceCreationFlags.Debug;
+#endif
             return flags;
         }
 
@@ -162,7 +165,7 @@ namespace Sovereign.D3D11Renderer.Rendering
         {
             BackBufferView?.Dispose();
             BackBufferView = new RenderTargetView(device,
-                swapChain.GetBackBuffer<Buffer>(0));
+                swapChain.GetBackBuffer<Resource>(0));
         }
 
     }

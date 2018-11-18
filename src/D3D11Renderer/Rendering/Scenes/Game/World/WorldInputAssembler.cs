@@ -93,8 +93,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         /// <param name="context">Device context.</param>
         public void Unbind(DeviceContext context)
         {
-            context.InputAssembler.SetVertexBuffers(0, null);
-            context.InputAssembler.InputLayout = null;
+            context.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding[] { });
         }
 
         /// <summary>

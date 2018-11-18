@@ -119,14 +119,18 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         {
             var atlasTexture = mainResourceManager.AtlasTexture.Texture;
 
+            var desc = new ShaderResourceViewDescription()
+            {
+                Dimension = ShaderResourceViewDimension.Texture2D,
+                Format = atlasTexture.Description.Format
+            };
+            desc.Texture2D.MipLevels = -1;
+            desc.Texture2D.MostDetailedMip = 0;
+
             return new ShaderResourceView[]
             {
                 new ShaderResourceView(device.Device,
-                    atlasTexture,
-                    new ShaderResourceViewDescription() {
-                        Dimension = ShaderResourceViewDimension.Texture2D,
-                        Format = atlasTexture.Description.Format
-                    }),
+                    atlasTexture, desc)
             };
         }
 
