@@ -34,39 +34,37 @@ namespace Sovereign.EngineCore.Events
 
         /// <summary>
         /// Unknown event type.
-        /// 
-        /// Associated details: None
         /// </summary>
+        /// Associated details: None
         Unknown = 0,
 
         /// <summary>
         /// Quit event ID.
-        /// 
-        /// Associated details: None
         /// </summary>
+        /// Associated details: None
         Core_Quit = 1,
+
+        #region Movement
 
         /// <summary>
         /// Attempted one-time relative movement of an entity.
-        /// This is a private event of the MovementSystem.
-        /// 
-        /// Associated details: MoveOnceEventDetails
         /// </summary>
+        /// Associated details: MoveOnceEventDetails
         Core_Move_Once = 100,
 
         /// <summary>
         /// Sets the velocity of an entity.
-        /// 
-        /// Associated details: SetMovementEventDetails
         /// </summary>
+        /// Associated details: SetMovementEventDetails
         Core_Set_Velocity = 101,
 
         /// <summary>
         /// Ends the continous movement, if any, of an entity.
-        /// 
-        /// Associate details: EntityDetails
         /// </summary>
+        /// Associated details: EntityEventDetails
         Core_End_Movement = 102,
+
+        #endregion Movement
 
         #endregion Core
 
@@ -76,19 +74,33 @@ namespace Sovereign.EngineCore.Events
 
         /// <summary>
         /// Event sent when a key is pressed.
-        /// 
-        /// Associated details: KeyEventDetails
         /// </summary>
-        Client_Input_KeyDown = 10000,
+        /// Associated details: KeyEventDetails
+        Client_Input_KeyDown = 100000,
 
         /// <summary>
         /// Event sent when a key is released.
-        /// 
-        /// Associated details: KeyEventDetails
         /// </summary>
-        Client_Input_KeyUp = 10001,
+        /// Associated details: KeyEventDetails
+        Client_Input_KeyUp = 100001,
 
-        #endregion
+        #endregion Client_Input
+
+        #region Client_Camera
+
+        /// <summary>
+        /// Event sent when the camera is attached to another entity.
+        /// </summary>
+        /// Associated details: EntityEventDetails
+        Client_Camera_Attach = 100100,
+
+        /// <summary>
+        /// Event sent when the camera is detached from another entity.
+        /// </summary>
+        /// Associated details: None
+        Client_Camera_Detach = 100101,
+
+        #endregion Client_Camera
 
         #endregion Client
 

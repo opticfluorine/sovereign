@@ -21,20 +21,20 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace Sovereign.EngineCore.Events.Details
+namespace Sovereign.EngineCore.Entities
 {
 
     /// <summary>
-    /// Reusable IEventDetails for events that have no details other
-    /// than the ID of the affected entity.
+    /// Provides methods for creating new entities.
     /// </summary>
-    public class EntityEventDetails : IEventDetails
+    public interface IEntityFactory
     {
 
         /// <summary>
-        /// ID of the affected entity.
+        /// Gets an entity builder.
         /// </summary>
-        public ulong EntityId { get; set; }
+        /// <returns>Entity builder.</returns>
+        IEntityBuilder GetBuilder();
 
     }
 

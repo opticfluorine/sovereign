@@ -67,6 +67,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\ClientEngineConfiguration.cs" />
+    <Compile Include="Entities\ClientEntityBuilder.cs" />
+    <Compile Include="Entities\ClientEntityFactory.cs" />
     <Compile Include="Logging\ErrorHandler.cs" />
     <Compile Include="Events\KeyEventDetails.cs" />
     <Compile Include="Events\SDLEventAdapter.cs" />
@@ -150,6 +152,10 @@
     <Compile Include="SDL2-CS\SDL2_image.cs" />
     <Compile Include="SDL2-CS\SDL2_mixer.cs" />
     <Compile Include="SDL2-CS\SDL2_ttf.cs" />
+    <Compile Include="Systems\Camera\CameraEventHandler.cs" />
+    <Compile Include="Systems\Camera\CameraInstaller.cs" />
+    <Compile Include="Systems\Camera\CameraManager.cs" />
+    <Compile Include="Systems\Camera\CameraSystem.cs" />
     <Compile Include="Systems\Input\InputController.cs" />
     <Compile Include="Systems\Input\InputInstaller.cs" />
     <Compile Include="Systems\Input\InputSystem.cs" />

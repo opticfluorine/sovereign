@@ -21,47 +21,50 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Sovereign.ClientCore.Systems.Input
+namespace Sovereign.ClientCore.Systems.Camera
 {
 
     /// <summary>
-    /// System responsible for handling user input.
+    /// System responsible for managing the camera.
     /// </summary>
-    public class InputSystem : ISystem
+    public sealed class CameraSystem : ISystem
     {
+        private readonly CameraManager cameraManager;
+        private readonly CameraEventHandler eventHandler;
+
+        public int WorkloadEstimate => 20;
+
+        public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>
+        {
+            EventId.Client_Camera_Attach,
+            EventId.Client_Camera_Detach
+        };
+
+        public CameraSystem(CameraManager cameraManager, CameraEventHandler eventHandler)
+        {
+            this.cameraManager = cameraManager;
+            this.eventHandler = eventHandler;
+        }
 
         public EventCommunicator EventCommunicator { get; set; }
 
-        public ISet<EventId> EventIdsOfInterest { get; }
-           = new HashSet<EventId>() {
-               EventId.Client_Input_KeyUp,
-               EventId.Client_Input_KeyDown,
-           };
-
-        public int WorkloadEstimate { get; } = 50;
-
-        /// <summary>
-        /// Keyboard event handler.
-        /// </summary>
-        private readonly KeyboardEventHandler keyboardEventHandler;
-
-        public InputSystem(KeyboardEventHandler keyboardEventHandler)
-        {
-            this.keyboardEventHandler = keyboardEventHandler;
-        }
-
         public void Initialize()
         {
-            
+            cameraManager.Initialize();
         }
+ 
 
         public void Cleanup()
         {
-            
         }
 
         public void ExecuteOnce()
@@ -69,21 +72,13 @@ namespace Sovereign.ClientCore.Systems.Input
             /* Poll for events. */
             while (EventCommunicator.GetIncomingEvent(out var ev))
             {
-                switch (ev.EventId)
-                {
-                    /* Route keyboard events appropriately. */
-                    case EventId.Client_Input_KeyUp:
-                    case EventId.Client_Input_KeyDown:
-                        keyboardEventHandler.HandleEvent(ev);
-                        break;
-
-                    /* Ignore other events. */
-                    default:
-                        break;
-                }
+                eventHandler.HandleEvent(ev);
             }
+
+            /* Update the camera. */
+            cameraManager.UpdateCamera();
         }
 
-    }
+   }
 
 }

@@ -21,20 +21,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System.Numerics;
+
 namespace Sovereign.EngineCore.Events.Details
 {
 
     /// <summary>
-    /// Reusable IEventDetails for events that have no details other
-    /// than the ID of the affected entity.
+    /// Reusable IEventDetails for events with no information other than
+    /// a three-dimensional vector.
     /// </summary>
-    public class EntityEventDetails : IEventDetails
+    public sealed class VectorEventDetails : IEventDetails
     {
 
         /// <summary>
-        /// ID of the affected entity.
+        /// Position.
         /// </summary>
-        public ulong EntityId { get; set; }
+        public Vector3 Vector { get; set; }
 
     }
 

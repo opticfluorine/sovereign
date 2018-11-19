@@ -4,6 +4,13 @@
 
 ### November
 
+#### 18 November 2018
+
+* Add `Camera` system to the client to provide a basic tracking
+  camera for rendering.
+* Add `IEntityFactory` and `IEntityBuilder` to provide a simplified
+  interface for creating new entities with various components.
+
 #### 17 November 2018
 
 * Set up rasterizer and output-merger stages for world rendering.

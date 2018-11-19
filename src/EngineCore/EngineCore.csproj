@@ -73,9 +73,14 @@
     <Compile Include="Configuration\ConfigurationInstaller.cs" />
     <Compile Include="Configuration\IEngineConfiguration.cs" />
     <Compile Include="Entities\EntityAssigner.cs" />
+    <Compile Include="Entities\AbstractEntityBuilder.cs" />
+    <Compile Include="Entities\IEntityFactory.cs" />
     <Compile Include="Entities\EntityInstaller.cs" />
     <Compile Include="Entities\EntityManager.cs" />
+    <Compile Include="Entities\IEntityBuilder.cs" />
     <Compile Include="Events\Details\EntityEventDetails.cs" />
+    <Compile Include="Events\Details\EntityVectorEventDetails.cs" />
+    <Compile Include="Events\Details\VectorEventDetails.cs" />
     <Compile Include="Events\EventSender.cs" />
     <Compile Include="Events\EventTimedAction.cs" />
     <Compile Include="Events\IEventAdapter.cs" />

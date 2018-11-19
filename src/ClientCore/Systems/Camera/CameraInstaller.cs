@@ -21,21 +21,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace Sovereign.EngineCore.Events.Details
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+
+namespace Sovereign.ClientCore.Systems.Camera
 {
 
     /// <summary>
-    /// Reusable IEventDetails for events that have no details other
-    /// than the ID of the affected entity.
+    /// IoC installer for the camera system.
     /// </summary>
-    public class EntityEventDetails : IEventDetails
+    public sealed class CameraInstaller : IWindsorInstaller
     {
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(Component.For<CameraManager>()
+                .LifestyleSingleton());
 
-        /// <summary>
-        /// ID of the affected entity.
-        /// </summary>
-        public ulong EntityId { get; set; }
-
+            container.Register(Component.For<CameraEventHandler>()
+                .LifestyleSingleton());
+        }
     }
 
 }
