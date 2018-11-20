@@ -27,6 +27,7 @@ using Sovereign.EngineCore.Systems.Movement.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -73,14 +74,22 @@ namespace Sovereign.ClientCore.Systems.Camera
         /// </summary>
         internal void UpdateCamera()
         {
-            if (!IsTracking) return;
-
-            var targetPos = positions.GetComponentForEntity(CameraEntityId);
-            var targetVel = velocities.GetComponentForEntity(CameraEntityId);
-            if (targetPos.HasValue)
-                positions.ModifyComponent(CameraEntityId, ComponentOperation.Set, targetPos.Value);
-            if (targetVel.HasValue)
-                velocities.ModifyComponent(CameraEntityId, ComponentOperation.Set, targetVel.Value);
+            if (!IsTracking)
+            {
+                /* Zero the velocity so the camera doesn't drift from interpolation. */
+                velocities.ModifyComponent(CameraEntityId, ComponentOperation.Set, Vector3.Zero);
+            }
+            else
+            {
+                /* Match position and velocity with the target entity. */
+                var targetPos = positions.GetComponentForEntity(CameraEntityId);
+                var targetVel = velocities.GetComponentForEntity(CameraEntityId);
+                if (targetPos.HasValue)
+                    positions.ModifyComponent(CameraEntityId, ComponentOperation.Set, targetPos.Value);
+                if (targetVel.HasValue)
+                    velocities.ModifyComponent(CameraEntityId, ComponentOperation.Set, targetVel.Value);
+            }
+            
         }
 
         /// <summary>

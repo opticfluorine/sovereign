@@ -68,6 +68,7 @@ namespace Sovereign.ClientCore.Systems.Camera
         private void HandleAttachEvent(EntityEventDetails details)
         {
             manager.SetCameraState(true, details.EntityId);
+            manager.UpdateCamera();
         }
 
         /// <summary>
@@ -76,6 +77,7 @@ namespace Sovereign.ClientCore.Systems.Camera
         private void HandleDetachEvent()
         {
             manager.SetCameraState(false, 0);
+            manager.UpdateCamera();
         }
 
     }

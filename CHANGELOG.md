@@ -6,6 +6,14 @@
 
 #### 19 November 2018
 
+* Fix issue in `BaseComponentCollection` where attempting to modify the
+  value of a component that is not associated to an entity throws an
+  exception. The new behavior is to silently do nothing. This is needed
+  since a new component is not associated to an entity until the beginning
+  of the next tick.
+* Ensure that the camera velocity is reset to zero when not tracking an
+  entity. This ensures that the camera position does not appear to drift
+  between ticks due to interpolation by the renderer.
 * Fix issue where objects could not be added to `StructBuffer`s. 
 * Fix issue where component collections could not be instantiated.
 * Update the `Camera` system to only update its position once per tick.

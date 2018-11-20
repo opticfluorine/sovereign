@@ -244,20 +244,18 @@ namespace Sovereign.EngineCore.Components
         /// 
         /// Note that the component must already exist and be associated with the given
         /// entity; it is not sufficient to first make the corresponding call to
-        /// AddComponent.
+        /// AddComponent. If the component is not associated, this method has no effect.
         /// 
         /// <param name="entityId">Entity ID.</param>
         /// <param name="operation">Operation to perform on the component.</param>
         /// <param name="adjustment">Adjustment value.</param>
-        /// <exception cref="KeyNotFoundException">
-        /// Thrown if no component is currently associated with the given entity.
-        /// </exception>
         /// <exception cref="NotSupportedException">
         /// Thrown if the requested operation is not supported for this component.
         /// </exception>
         public void ModifyComponent(ulong entityId, ComponentOperation operation, T adjustment)
         {
             /* Ensure that the entity has an associated component. */
+            if (!HasComponentForEntity(entityId)) return;
             var componentIndex = entityToComponentMap[entityId];
 
             /* Ensure that the operation is supported by this component. */
