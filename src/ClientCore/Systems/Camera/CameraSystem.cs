@@ -46,7 +46,8 @@ namespace Sovereign.ClientCore.Systems.Camera
         public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>
         {
             EventId.Client_Camera_Attach,
-            EventId.Client_Camera_Detach
+            EventId.Client_Camera_Detach,
+            EventId.Core_Tick
         };
 
         public CameraSystem(CameraManager cameraManager, CameraEventHandler eventHandler)
@@ -74,9 +75,6 @@ namespace Sovereign.ClientCore.Systems.Camera
             {
                 eventHandler.HandleEvent(ev);
             }
-
-            /* Update the camera. */
-            cameraManager.UpdateCamera();
         }
 
    }

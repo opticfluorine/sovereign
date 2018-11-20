@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sovereign.EngineCore.Components;
@@ -115,8 +116,20 @@ namespace Sovereign.EngineCore.Systems.EventSystem
             /* Advance the system time. */
             LastUpdateTime = systemTime;
 
+            /* Emit the Core_Tick event. */
+            EmitTickEvent();
+
             /* Dispatch events enqueued for dispatch by this time. */
             DispatchEnqueuedEvents();
+        }
+
+        /// <summary>
+        /// Emits the tick event at the beginning of a tick.
+        /// </summary>
+        private void EmitTickEvent()
+        {
+            var ev = new Event(EventId.Core_Tick);
+            EnqueueEvent(ev);
         }
 
         /// <summary>

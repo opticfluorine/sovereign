@@ -54,6 +54,10 @@ namespace Sovereign.ClientCore.Systems.Camera
                 case EventId.Client_Camera_Detach:
                     HandleDetachEvent();
                     break;
+
+                case EventId.Core_Tick:
+                    manager.UpdateCamera();
+                    break;
             }
         }
 

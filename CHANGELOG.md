@@ -4,6 +4,12 @@
 
 ### November
 
+#### 19 November 2018
+
+* Update the `Camera` system to only update its position once per tick.
+  The motion of the camera should be smoothed through interpolation by
+  the renderer.
+
 #### 18 November 2018
 
 * Add `Camera` system to the client to provide a basic tracking

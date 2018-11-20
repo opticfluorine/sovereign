@@ -44,6 +44,12 @@ namespace Sovereign.EngineCore.Events
         /// Associated details: None
         Core_Quit = 1,
 
+        /// <summary>
+        /// Event sent at the beginning of a new tick.
+        /// </summary>
+        /// Associated details: None
+        Core_Tick = 2,
+
         #region Movement
 
         /// <summary>
