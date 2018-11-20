@@ -66,7 +66,7 @@ namespace Sovereign.EngineCore.Components
         /// <summary>
         /// Component manager. Supplied by the IoC container.
         /// </summary>
-        public ComponentManager ComponentManager { private get; set; }
+        protected readonly ComponentManager componentManager;
 
         /// <summary>
         /// Underlying component array.
@@ -170,9 +170,10 @@ namespace Sovereign.EngineCore.Components
         /// <summary>
         /// Creates a base component collection.
         /// </summary>
+        /// <param name="componentManager">Component manager.</param>
         /// <param name="initialSize">Initial size of the component buffer.</param>
         /// <param name="operators">Dict of component operators for use in updates.</param>
-        protected BaseComponentCollection(int initialSize,
+        protected BaseComponentCollection(ComponentManager componentManager, int initialSize,
             IDictionary<ComponentOperation, Func<T, T, T>> operators)
         {
             this.operators = operators;
@@ -185,7 +186,7 @@ namespace Sovereign.EngineCore.Components
             }
 
             /* Register with the component manager. */
-            ComponentManager.RegisterComponentUpdater(this);
+            componentManager.RegisterComponentUpdater(this);
         }
 
         /// <summary>

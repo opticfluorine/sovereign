@@ -22,11 +22,6 @@
  */
 
 using Sovereign.EngineCore.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.EngineCore.World.Materials.Components
 {
@@ -42,7 +37,8 @@ namespace Sovereign.EngineCore.World.Materials.Components
         /// </summary>
         public const int InitialSize = 65536;
 
-        public MaterialComponentCollection() : base(InitialSize, ComponentOperators.IntOperators)
+        public MaterialComponentCollection(ComponentManager componentManager) 
+            : base(componentManager, InitialSize, ComponentOperators.IntOperators)
         {
         }
 

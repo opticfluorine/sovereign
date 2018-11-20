@@ -22,11 +22,6 @@
  */
 
 using Sovereign.EngineCore.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.ClientCore.Rendering.Components
 {
@@ -42,7 +37,8 @@ namespace Sovereign.ClientCore.Rendering.Components
 
         private const int BaseSize = 65536;
 
-        public DrawableComponentCollection() : base(BaseSize, ComponentOperators.BoolOperators)
+        public DrawableComponentCollection(ComponentManager componentManager)
+            : base(componentManager, BaseSize, ComponentOperators.BoolOperators)
         {
         }
 

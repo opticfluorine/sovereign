@@ -6,6 +6,7 @@
 
 #### 19 November 2018
 
+* Fix issue where component collections could not be instantiated.
 * Update the `Camera` system to only update its position once per tick.
   The motion of the camera should be smoothed through interpolation by
   the renderer.
