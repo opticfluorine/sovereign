@@ -4,6 +4,12 @@
 
 ### November
 
+#### 20 November 2018
+
+* Manage camera position and velocity directly in `CameraManager` rather
+  than in a dedicated camera entity. If the position and velocity were
+  tracked by an entity, the camera would lag the target entity by one tick.
+
 #### 19 November 2018
 
 * Fix issue in `BaseComponentCollection` where attempting to modify the

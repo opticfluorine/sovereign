@@ -34,16 +34,23 @@ using System.Threading.Tasks;
 namespace Sovereign.ClientCore.Systems.Camera
 {
 
+    /// <summary>
+    /// Responsible for managing the camera.
+    /// </summary>
     public sealed class CameraManager
     {
-        private readonly IEntityFactory entityFactory;
         private readonly PositionComponentCollection positions;
         private readonly VelocityComponentCollection velocities;
 
         /// <summary>
-        /// Entity ID of the camera.
+        /// Camera position.
         /// </summary>
-        public ulong CameraEntityId { get; private set; }
+        public Vector3 Position { get; private set; }
+
+        /// <summary>
+        /// Camera velocity.
+        /// </summary>
+        public Vector3 Velocity { get; private set; }
 
         /// <summary>
         /// Entity ID of the entity tracked by the camera.
@@ -55,18 +62,15 @@ namespace Sovereign.ClientCore.Systems.Camera
         /// </summary>
         public bool IsTracking { get; private set; }
 
-        public CameraManager(IEntityFactory entityFactory, 
-            PositionComponentCollection positions,
+        public CameraManager(PositionComponentCollection positions,
             VelocityComponentCollection velocities)
         {
-            this.entityFactory = entityFactory;
             this.positions = positions;
             this.velocities = velocities;
         }
 
         public void Initialize()
         {
-            CreateCameraEntity();
         }
 
         /// <summary>
@@ -77,17 +81,17 @@ namespace Sovereign.ClientCore.Systems.Camera
             if (!IsTracking)
             {
                 /* Zero the velocity so the camera doesn't drift from interpolation. */
-                velocities.ModifyComponent(CameraEntityId, ComponentOperation.Set, Vector3.Zero);
+                Velocity = Vector3.Zero;
             }
             else
             {
                 /* Match position and velocity with the target entity. */
-                var targetPos = positions.GetComponentForEntity(CameraEntityId);
-                var targetVel = velocities.GetComponentForEntity(CameraEntityId);
+                var targetPos = positions.GetComponentForEntity(TrackingEntityId);
+                var targetVel = velocities.GetComponentForEntity(TrackingEntityId);
                 if (targetPos.HasValue)
-                    positions.ModifyComponent(CameraEntityId, ComponentOperation.Set, targetPos.Value);
+                    Position = targetPos.Value;
                 if (targetVel.HasValue)
-                    velocities.ModifyComponent(CameraEntityId, ComponentOperation.Set, targetVel.Value);
+                    Velocity = targetVel.Value;
             }
             
         }
@@ -101,16 +105,6 @@ namespace Sovereign.ClientCore.Systems.Camera
         {
             IsTracking = attached;
             TrackingEntityId = entityId;
-        }
-
-        /// <summary>
-        /// Creates the camera entity.
-        /// </summary>
-        private void CreateCameraEntity()
-        {
-            CameraEntityId = entityFactory.GetBuilder()
-                .Positionable()
-                .Build();
         }
 
     }
