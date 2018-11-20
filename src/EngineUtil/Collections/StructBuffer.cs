@@ -45,14 +45,19 @@ namespace Sovereign.EngineUtil.Collections
     {
 
         /// <summary>
+        /// Initial capacity.
+        /// </summary>
+        private readonly int initialCapacity;
+
+        /// <summary>
         /// Backing list.
         /// </summary>
-        private List<T> list;
+        private T[] list;
 
         /// <summary>
         /// Buffer capacity.
         /// </summary>
-        public int Capacity => list.Capacity;
+        public int Capacity => list.Length;
 
         /// <summary>
         /// Number of active objects in the buffer.
@@ -65,7 +70,8 @@ namespace Sovereign.EngineUtil.Collections
         /// <param name="capacity">Capacity.</param>
         public StructBuffer(int capacity)
         {
-            list = new List<T>(capacity);
+            initialCapacity = capacity;
+            list = new T[capacity];
         }
 
         /// <summary>
@@ -77,6 +83,7 @@ namespace Sovereign.EngineUtil.Collections
             Monitor.Enter(list);
             try
             {
+                if (Count == Capacity) ResizeList();
                 list[Count++] = item;
             }
             finally
@@ -108,6 +115,16 @@ namespace Sovereign.EngineUtil.Collections
         IEnumerator IEnumerable.GetEnumerator()
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Increases the size of the backing list.
+        /// </summary>
+        private void ResizeList()
+        {
+            var newList = new T[Capacity + initialCapacity];
+            Array.Copy(list, newList, Capacity);
+            list = newList;
         }
 
         /// <summary>
