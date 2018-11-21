@@ -11,9 +11,9 @@ Position | Grid units; 1.0 = one block width
 Velocity | Grid units per second
 System time | Microseconds (us)
 
-## Derived Unnits
+## Derived Units
 
-Type | Definition
---- | ---
-Game tick | 10 milliseconds (ms); defined in IEngineConfiguration classes
+Type | Definition | Definition Location
+--- | --- | ---
+Game tick | 10 milliseconds (ms) | `IEngineConfiguration` implementations
 
