@@ -4,6 +4,10 @@
 
 ### November
 
+#### 21 November 2018
+
+* Document the unit conventions used by the engine in docs/units.md.
+
 #### 20 November 2018
 
 * Manage camera position and velocity directly in `CameraManager` rather
