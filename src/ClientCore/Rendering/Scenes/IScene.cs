@@ -45,6 +45,16 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         SceneType SceneType { get; }
 
         /// <summary>
+        /// Called when the renderer starts rendering this scene.
+        /// </summary>
+        void BeginScene();
+
+        /// <summary>
+        /// Called when the renderer finishes rendering this scene.
+        /// </summary>
+        void EndScene();
+
+        /// <summary>
         /// Populates the buffers used by the renderer.
         /// </summary>
         ///

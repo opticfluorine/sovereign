@@ -16,4 +16,5 @@ System time | Microseconds (us)
 Type | Definition | Definition Location
 --- | --- | ---
 Game tick | 10 milliseconds (ms) | `IEngineConfiguration` implementations
+Time since tick | Seconds since start of the current tick | N/A
 

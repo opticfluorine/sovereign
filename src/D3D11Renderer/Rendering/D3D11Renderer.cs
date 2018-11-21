@@ -122,7 +122,9 @@ namespace Sovereign.D3D11Renderer.Rendering
         {
             /* Hand the current scene off to the top-level consumer. */
             var scene = sceneManager.ActiveScene;
+            scene.BeginScene();
             sceneConsumer.ConsumeScene(scene);
+            scene.EndScene();
 
             /* Present the next frame. */
             device.Present();

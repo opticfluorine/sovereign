@@ -21,7 +21,12 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
+using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Timing;
+using Sovereign.EngineUtil.Numerics;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game
 {
@@ -31,8 +36,44 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
     /// </summary>
     public sealed class GameScene : IScene
     {
+        private readonly ISystemTimer systemTimer;
+        private readonly IEngineConfiguration engineConfiguration;
+        private readonly GameSceneCamera camera;
+        private readonly DisplayViewport viewport;
+        private readonly MainDisplay mainDisplay;
+
+        /// <summary>
+        /// Time since the current tick started, in seconds.
+        /// </summary>
+        /// Evaluated at the start of rendering.
+        private float timeSinceTick;
+
+        /// <summary>
+        /// Game scene scaling constants.
+        /// </summary>
+        private GameSceneScale scale;
 
         public SceneType SceneType => SceneType.Game;
+
+        public GameScene(ISystemTimer systemTimer, IEngineConfiguration engineConfiguration,
+            GameSceneCamera camera, DisplayViewport viewport, MainDisplay mainDisplay)
+        {
+            this.systemTimer = systemTimer;
+            this.engineConfiguration = engineConfiguration;
+            this.camera = camera;
+            this.viewport = viewport;
+            this.mainDisplay = mainDisplay;
+        }
+
+        public void BeginScene()
+        {
+            ComputeTimeSinceTick();
+        }
+
+        public void EndScene()
+        {
+
+        }
 
         public void PopulateBuffers(Pos3Tex2Vertex[] vertexBuffer, int[] drawLengths, out int drawCount)
         {
@@ -42,7 +83,21 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
 
         public void PopulateGameSceneVertexConstantBuffer(GameSceneVertexConstants[] constantBuffer)
         {
-            /* TODO */
+            if (scale == null)
+                scale = new GameSceneScale(viewport, mainDisplay.DisplayMode);
+
+            scale.Apply(ref constantBuffer[0]);
+            camera.Aim(ref constantBuffer[0], timeSinceTick);
+        }
+
+        /// <summary>
+        /// Updates timeSinceTick.
+        /// </summary>
+        private void ComputeTimeSinceTick()
+        {
+            var systemTime = systemTimer.GetTime();
+            timeSinceTick = (systemTime % engineConfiguration.EventTickInterval)
+                * UnitConversions.UsToS;
         }
 
     }

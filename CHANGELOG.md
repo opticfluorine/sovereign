@@ -6,6 +6,8 @@
 
 #### 21 November 2018
 
+* Populate game scene vertex shader constants buffer using camera data
+  and appropriate scaling factors based on the screen resolution.
 * Document the unit conventions used by the engine in docs/units.md.
 
 #### 20 November 2018

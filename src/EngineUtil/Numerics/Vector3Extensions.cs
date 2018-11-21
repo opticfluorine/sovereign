@@ -83,5 +83,18 @@ namespace Sovereign.EngineUtil.Numerics
             return left.X > right.X && left.Y > right.Y && left.Z > right.Z;
         }
 
+        /// <summary>
+        /// Interpolates a vector between two system ticks.
+        /// </summary>
+        /// <param name="position">This vector.</param>
+        /// <param name="velocity">Time rate of change per second of the vector.</param>
+        /// <param name="t">Time to extend over in seconds.</param>
+        /// <returns></returns>
+        public static Vector3 InterpolateByTime(this Vector3 position, 
+            Vector3 velocity, float t)
+        {
+            return position + (t * velocity);
+        }
+
     }
 }
