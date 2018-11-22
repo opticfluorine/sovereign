@@ -36,15 +36,26 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
         /// <summary>
         /// Scaling constants.
         /// </summary>
-        public Vector3 Scale { get; private set; }
+        private readonly Vector3 scale;
+
+        /// <summary>
+        /// Display dimensions.
+        /// </summary>
+        private readonly Vector2 displayDimensions;
 
         public GameSceneScale(DisplayViewport viewport, IDisplayMode mode)
         {
-            Scale = new Vector3()
+            scale = new Vector3()
             {
                 X = (float)mode.Width / viewport.Width,
                 Y = (float)mode.Height / viewport.Height,
                 Z = (float)mode.Height / viewport.Height
+            };
+
+            displayDimensions = new Vector2()
+            {
+                X = mode.Width,
+                Y = mode.Height
             };
         }
 
@@ -54,9 +65,12 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
         /// <param name="vertexConstants">Vertex shader constants.</param>
         public void Apply(ref GameSceneVertexConstants vertexConstants)
         {
-            vertexConstants.WorldScaleX = Scale.X;
-            vertexConstants.WorldScaleY = Scale.Y;
-            vertexConstants.WorldScaleZ = Scale.Z;
+            vertexConstants.WorldScaleX = scale.X;
+            vertexConstants.WorldScaleY = scale.Y;
+            vertexConstants.WorldScaleZ = scale.Z;
+
+            vertexConstants.DisplayWidth = displayDimensions.X;
+            vertexConstants.DisplayHeight = displayDimensions.Y;
         }
 
     }

@@ -21,12 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game
 {
@@ -69,14 +64,14 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
         [FieldOffset(5 * sizeof(float))] public float CameraZ;
 
         /// <summary>
-        /// Unused field. Reserved for future use.
+        /// Width of the display in pixels.
         /// </summary>
-        [FieldOffset(6 * sizeof(float))] public float Unused0;
+        [FieldOffset(6 * sizeof(float))] public float DisplayWidth;
 
         /// <summary>
-        /// Unused field. Reserved for future use.
+        /// Height of the display in pixels.
         /// </summary>
-        [FieldOffset(7 * sizeof(float))] public float Unused1;
+        [FieldOffset(7 * sizeof(float))] public float DisplayHeight;
 
     }
 

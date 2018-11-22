@@ -6,6 +6,8 @@
 
 #### 21 November 2018
 
+* Update world vertex shader to ensure that the camera focus is in
+  the center of the screen.
 * Populate game scene vertex shader constants buffer using camera data
   and appropriate scaling factors based on the screen resolution.
 * Document the unit conventions used by the engine in docs/units.md.

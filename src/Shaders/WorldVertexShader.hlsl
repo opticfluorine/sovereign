@@ -26,6 +26,7 @@ cbuffer ShaderConstants : register(b0)
 {
 	float3 g_worldScale;       // x, y, z scaling factors
 	float3 g_cameraPos;        // x, y, z position of camera
+    float2 g_displaySize;      // width, height of display mode
 };
 
 /* Vertex shader input. */
@@ -45,11 +46,13 @@ VsOutput main(VsInput input) {
 	VsOutput output;
 
 	/* x is offset by the camera, then scaled. */
-	output.vPosition.x = g_worldScale.x * (input.vPosition.x - g_cameraPos.x);
+	output.vPosition.x = (g_worldScale.x * (input.vPosition.x - g_cameraPos.x))
+        + (g_displaySize.x / 2.0);
 
 	/* y is offset by the camera and by z, then scaled. */
-	output.vPosition.y = g_worldScale.y * (input.vPosition.y - g_cameraPos.y)
-		- g_worldScale.z * (input.vPosition.z - g_cameraPos.z);
+    output.vPosition.y = (g_worldScale.y * (input.vPosition.y - g_cameraPos.y)
+        - g_worldScale.z * (input.vPosition.z - g_cameraPos.z))
+        + (g_displaySize.y / 2.0);
 
     output.vPosition.z = 0.0;
     output.vPosition.w = 0.0;
