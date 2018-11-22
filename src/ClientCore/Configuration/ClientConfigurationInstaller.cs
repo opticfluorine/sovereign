@@ -21,27 +21,27 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+using Sovereign.EngineUtil.IoC;
 
 namespace Sovereign.ClientCore.Configuration
 {
 
     /// <summary>
-    /// Client-side engine configuration.
+    /// IoC installer for client configuration.
     /// </summary>
-    public class ClientEngineConfiguration : IEngineConfiguration, IClientConfiguration
+    public sealed class ClientConfigurationInstaller : IWindsorInstaller
     {
-
-        /* Events advance every 10 ms. */
-        public ulong EventTickInterval => 10000;
-
-        public int TileWidth => 32;
-
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IClientConfiguration>()
+                .WithServiceDefaultInterfaces()
+                .LifestyleSingleton());
+        }
     }
 
 }

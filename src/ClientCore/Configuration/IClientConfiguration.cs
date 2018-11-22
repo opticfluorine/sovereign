@@ -21,7 +21,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,15 +31,15 @@ namespace Sovereign.ClientCore.Configuration
 {
 
     /// <summary>
-    /// Client-side engine configuration.
+    /// Main configuration interface for client constants.
     /// </summary>
-    public class ClientEngineConfiguration : IEngineConfiguration, IClientConfiguration
+    public interface IClientConfiguration
     {
 
-        /* Events advance every 10 ms. */
-        public ulong EventTickInterval => 10000;
-
-        public int TileWidth => 32;
+        /// <summary>
+        /// Width of a tile in pixels.
+        /// </summary>
+        int TileWidth { get; }
 
     }
 
