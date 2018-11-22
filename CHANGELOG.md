@@ -4,6 +4,10 @@
 
 ### November
 
+#### 22 November 2018
+
+* Clear the back buffer prior to rendering.
+
 #### 21 November 2018
 
 * Update world vertex shader to ensure that the camera focus is in

@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using SharpDX.Mathematics.Interop;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
@@ -40,6 +41,17 @@ namespace Sovereign.D3D11Renderer.Rendering
     /// </summary>
     public class D3D11Renderer : IRenderer
     {
+
+        /// <summary>
+        /// Color to clear the screen before rendering.
+        /// </summary>
+        public readonly RawColor4 ClearColor = new RawColor4()
+        {
+            R = 0.0f,
+            G = 0.0f,
+            B = 0.0f,
+            A = 0.0f
+        };
 
         /// <summary>
         /// Main display.
@@ -120,6 +132,9 @@ namespace Sovereign.D3D11Renderer.Rendering
 
         public void Render()
         {
+            /* Prepare for rendering. */
+            ClearScreen();
+
             /* Hand the current scene off to the top-level consumer. */
             var scene = sceneManager.ActiveScene;
             scene.BeginScene();
@@ -128,6 +143,15 @@ namespace Sovereign.D3D11Renderer.Rendering
 
             /* Present the next frame. */
             device.Present();
+        }
+        
+        /// <summary>
+        /// Clears the screen.
+        /// </summary>
+        private void ClearScreen()
+        {
+            var context = device.Device.ImmediateContext;
+            context.ClearRenderTargetView(device.BackBufferView, ClearColor);
         }
 
     }
