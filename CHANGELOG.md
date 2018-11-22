@@ -6,6 +6,7 @@
 
 #### 22 November 2018
 
+* Give a better definition of the block structure in docs/world_structure.md.
 * Clear the back buffer prior to rendering.
 
 #### 21 November 2018
