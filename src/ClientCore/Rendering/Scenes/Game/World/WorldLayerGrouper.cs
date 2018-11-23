@@ -21,11 +21,15 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.Core.Logging;
+using Sovereign.ClientCore.Rendering.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.World.Materials;
 using Sovereign.EngineCore.World.Materials.Components;
 using Sovereign.EngineUtil.Collections;
-using System;
+using Sovereign.WorldLib.Materials;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
 {
@@ -36,7 +40,13 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
     public sealed class WorldLayerGrouper
     {
 
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
         private readonly MaterialComponentCollection materials;
+        private readonly MaterialModifierComponentCollection materialModifiers;
+        private readonly AnimatedSpriteComponentCollection animatedSprites;
+        private readonly AboveBlockComponentCollection aboveBlocks;
+        private readonly MaterialManager materialManager;
 
         /// <summary>
         /// Reusable pool of world layers.
@@ -50,9 +60,17 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         public SortedDictionary<int, WorldLayer> Layers { get; private set; }
             = new SortedDictionary<int, WorldLayer>();
 
-        public WorldLayerGrouper(MaterialComponentCollection materials)
+        public WorldLayerGrouper(MaterialComponentCollection materials,
+            MaterialModifierComponentCollection materialModifiers,
+            AnimatedSpriteComponentCollection animatedSprites,
+            AboveBlockComponentCollection aboveBlocks,
+            MaterialManager materialManager)
         {
             this.materials = materials;
+            this.materialModifiers = materialModifiers;
+            this.animatedSprites = animatedSprites;
+            this.aboveBlocks = aboveBlocks;
+            this.materialManager = materialManager;
         }
 
         /// <summary>
@@ -87,21 +105,94 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="drawable">Drawable to process.</param>
         private void AddAnimatedSprite(PositionedEntity drawable)
         {
-            throw new NotImplementedException();
+            var zFloor = (int)drawable.Position.Z;
+            var layer = SelectLayer(zFloor);
+            var sprite = animatedSprites.GetComponentForEntity(drawable.EntityId);
+            if (sprite.HasValue)
+                layer.AnimatedSprites.Add(new Pos3Id()
+                {
+                    Position = drawable.Position,
+                    Id = sprite.Value
+                });
         }
 
         /// <summary>
         /// Adds a material block to the rendering sequence.
         /// </summary>
         /// <param name="drawable">Drawable to process.</param>
-        /// <param name="value">Value to process.</param>
-        private void AddMaterial(PositionedEntity drawable, int value)
+        /// <param name="materialId">Material ID.</param>
+        private void AddMaterial(PositionedEntity drawable, int materialId)
         {
             /* The current z contains the top face, the lower z contains the front face */
             var zFloorTop = (int)drawable.Position.Z;
             var zFloorFront = zFloorTop - 1;
             var layerTop = SelectLayer(zFloorTop);
             var layerFront = SelectLayer(zFloorFront);
+
+            MaterialSubtype materialSubtype;
+            try
+            {
+                materialSubtype = GetMaterialSubtype(drawable.EntityId, materialId);
+            }
+            catch
+            {
+                Logger.ErrorFormat("Invalid material/modifier combination for entity ID {0}",
+                    drawable.EntityId);
+                return;
+            }
+
+            AddMaterialTopFace(drawable, materialSubtype, layerTop);
+            AddMaterialFrontFace(drawable, materialSubtype, layerFront);
+        }
+
+        /// <summary>
+        /// Adds the front face of a material block to its rendering layer.
+        /// </summary>
+        /// <param name="drawable">Material block information.</param>
+        /// <param name="materialSubtype">Material subtype.</param>
+        /// <param name="layerFront">Rendering layer.</param>
+        private void AddMaterialFrontFace(PositionedEntity drawable, MaterialSubtype materialSubtype,
+            WorldLayer layerFront)
+        {
+            layerFront.FrontFaceTileSprites.Add(new Pos3Id()
+            {
+                Position = drawable.Position,
+                Id = materialSubtype.SideFaceTileSpriteId
+            });
+        }
+
+        /// <summary>
+        /// Adds the top face of a material block to its rendering layer.
+        /// </summary>
+        /// <param name="drawable">Material block information.</param>
+        /// <param name="materialSubtype">Material subtype.</param>
+        /// <param name="layerTop">Rendering layer.</param>
+        private void AddMaterialTopFace(PositionedEntity drawable, MaterialSubtype materialSubtype,
+            WorldLayer layerTop)
+        {
+            var topFaceId = IsTopFaceObscured(drawable.EntityId) ?
+                materialSubtype.ObscuredTopFaceTileSpriteId
+                : materialSubtype.TopFaceTileSpriteId;
+            layerTop.TopFaceTileSprites.Add(new Pos3Id()
+            {
+                Position = new Vector3()
+                {
+                    X = drawable.Position.X,
+                    Y = drawable.Position.Y,
+                    Z = drawable.Position.Z - 1.0f
+                },
+                Id = topFaceId
+            });
+        }
+
+        /// <summary>
+        /// Determines whether the top face of a block is obscured by another block.
+        /// </summary>
+        /// <param name="entityId">Entity ID of the block.</param>
+        /// <returns>true if the top face is obscured, false otherwise.</returns>
+        private bool IsTopFaceObscured(ulong entityId)
+        {
+            return aboveBlocks.HasComponentForEntity(entityId);
         }
 
         /// <summary>
@@ -119,6 +210,20 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
                 Layers[zFloor] = layer;
             }
             return layer;
+        }
+
+        /// <summary>
+        /// Looks up the material subtype for the given entity.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        /// <param name="materialId">Material ID.</param>
+        /// <returns>Material subtype.</returns>
+        private MaterialSubtype GetMaterialSubtype(ulong entityId, int materialId)
+        {
+            var modifier = materialModifiers
+                .GetComponentForEntity(entityId)
+                .OrElseDefault(0);
+            return materialManager.Materials[materialId].MaterialSubtypes[modifier];
         }
 
         /// <summary>

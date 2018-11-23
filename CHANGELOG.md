@@ -4,6 +4,11 @@
 
 ### November
 
+#### 23 November 2018
+
+* Fix Octree unit tests that were broken by a recent refactoring.
+* Continue implementing the high-level world renderer.
+
 #### 22 November 2018
 
 * Start implementing the high-level world renderer.

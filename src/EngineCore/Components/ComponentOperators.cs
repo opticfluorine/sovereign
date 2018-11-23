@@ -50,6 +50,18 @@ namespace Sovereign.EngineCore.Components
             };
 
         /// <summary>
+        /// Standard operators for ulong-valued components.
+        /// </summary>
+        public static readonly IDictionary<ComponentOperation, Func<ulong, ulong, ulong>>
+            UlongOperators = new Dictionary<ComponentOperation, Func<ulong, ulong, ulong>>()
+            {
+                {ComponentOperation.Set, (a, b) => b},
+                {ComponentOperation.Add, (a, b) => a + b},
+                {ComponentOperation.Multiply, (a, b) => a * b},
+                {ComponentOperation.Divide, (a, b) => a / b},
+            };
+
+        /// <summary>
         /// Standard operators for float-valued components.
         /// </summary>
         public static readonly IDictionary<ComponentOperation, Func<float, float, float>>

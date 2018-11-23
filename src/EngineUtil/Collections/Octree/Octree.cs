@@ -204,7 +204,6 @@ namespace Sovereign.EngineUtil.Collections.Octree
         /// <typeparam name="R">Buffer record type.</typeparam>
         public void GetElementsInRange<R>(OctreeLock lockHandle, Vector3 minPosition,
             Vector3 maxPosition, IList<R> buffer, Func<Vector3,T,R> recordProducer)
-            where R : struct
         {
             /* Depth-first search of overlapping nodes. */
             var nodesToSearch = new Stack<OctreeNode<T>>();

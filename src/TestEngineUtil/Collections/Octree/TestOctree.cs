@@ -89,7 +89,8 @@ namespace TestEngineUtil.Collections.Octree
             var matchList = new List<Tuple<Vector3, ulong>>();
             using (var octreeLock = octree.AcquireLock())
             {
-                octree.GetElementsInRange(octreeLock, minRange, maxRange, matchList);
+                octree.GetElementsInRange(octreeLock, minRange, maxRange, matchList,
+                    (pos, id) => new Tuple<Vector3, ulong>(pos, id));
             }
 
             /* Assert that nothing matched. */
@@ -116,7 +117,8 @@ namespace TestEngineUtil.Collections.Octree
             var matchList = new List<Tuple<Vector3, ulong>>();
             using (var octreeLock = octree.AcquireLock())
             {
-                octree.GetElementsInRange(octreeLock, minRange, maxRange, matchList);
+                octree.GetElementsInRange(octreeLock, minRange, maxRange, matchList,
+                    (pos, id) => new Tuple<Vector3, ulong>(pos, id));
             }
 
             /* Assert that the correct element matched. */
@@ -155,7 +157,8 @@ namespace TestEngineUtil.Collections.Octree
             var matchList = new List<Tuple<Vector3, ulong>>();
             using (var octreeLock = octree.AcquireLock())
             {
-                octree.GetElementsInRange(octreeLock, origin, midpoint, matchList);
+                octree.GetElementsInRange(octreeLock, origin, midpoint, matchList,
+                    (pos, id) => new Tuple<Vector3, ulong>(pos, id));
             }
             Assert.Single(matchList);
         }
@@ -185,7 +188,8 @@ namespace TestEngineUtil.Collections.Octree
             var matchList = new List<Tuple<Vector3, ulong>>();
             using (var octreeLock = octree.AcquireLock())
             {
-                octree.GetElementsInRange(octreeLock, minRange, maxRange, matchList);
+                octree.GetElementsInRange(octreeLock, minRange, maxRange, matchList,
+                    (pos, id) => new Tuple<Vector3, ulong>(pos, id));
             }
 
             var firstTuple = new Tuple<Vector3, ulong>(data[0], 0);
@@ -221,7 +225,8 @@ namespace TestEngineUtil.Collections.Octree
             var matchList = new List<Tuple<Vector3, ulong>>();
             using (var octreeLock = octree.AcquireLock())
             {
-                octree.GetElementsInRange(octreeLock, minRange, maxRange, matchList);
+                octree.GetElementsInRange(octreeLock, minRange, maxRange, matchList,
+                    (pos, id) => new Tuple<Vector3, ulong>(pos, id));
             }
             Assert.Single(matchList);
             Assert.Contains(remainingTuple, matchList);

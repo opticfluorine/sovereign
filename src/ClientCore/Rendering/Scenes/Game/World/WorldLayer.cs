@@ -50,7 +50,13 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <summary>
         /// Tile sprites forming the floor of this layer.
         /// </summary>
-        public IList<Pos3Id> TileSprites { get; private set; }
+        public IList<Pos3Id> TopFaceTileSprites { get; private set; }
+            = new List<Pos3Id>(InitialTileSpriteCount);
+
+        /// <summary>
+        /// Front face tile sprites of blocks in the next higher layer.
+        /// </summary>
+        public IList<Pos3Id> FrontFaceTileSprites { get; private set; }
             = new List<Pos3Id>(InitialTileSpriteCount);
 
         /// <summary>
@@ -64,7 +70,8 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// </summary>
         public void Reset()
         {
-            TileSprites.Clear();
+            TopFaceTileSprites.Clear();
+            FrontFaceTileSprites.Clear();
             AnimatedSprites.Clear();
         }
 

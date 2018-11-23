@@ -122,6 +122,8 @@
     <Compile Include="Systems\SystemManager.cs" />
     <Compile Include="Timing\*.cs" />
     <Compile Include="World\Materials\Components\MaterialComponentCollection.cs" />
+    <Compile Include="World\Materials\Components\AboveBlockComponentCollection.cs" />
+    <Compile Include="World\Materials\Components\MaterialModifierComponentCollection.cs" />
     <Compile Include="World\Materials\EngineMaterialInstaller.cs" />
     <Compile Include="World\Materials\MaterialManager.cs" />
     <Compile Include="World\WorldInstaller.cs" />

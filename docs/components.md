@@ -23,5 +23,6 @@ Client components are only available in the client.
 
 Component | Component Collection Class | Description
 --- | --- | ---
+`AnimatedSprite` | `AnimatedSpriteComponentCollection` | For non-block drawable entities (see `Drawable` component), denotes the animated sprite ID to use for rendering.
 `Drawable` | `DrawableComponentCollection` | The existence of this component indicates that the entity should be considered for rendering.
 
