@@ -43,14 +43,20 @@ namespace Sovereign.EngineCore.Entities
         protected readonly PositionComponentCollection positions;
         protected readonly VelocityComponentCollection velocities;
         protected readonly MaterialComponentCollection materials;
+        protected readonly MaterialModifierComponentCollection materialModifiers;
+        protected readonly AboveBlockComponentCollection aboveBlocks;
 
         public AbstractEntityBuilder(ulong entityId, PositionComponentCollection positions,
-            VelocityComponentCollection velocities, MaterialComponentCollection materials)
+            VelocityComponentCollection velocities, MaterialComponentCollection materials,
+            MaterialModifierComponentCollection materialModifiers,
+            AboveBlockComponentCollection aboveBlocks)
         {
             this.entityId = entityId;
             this.positions = positions;
             this.velocities = velocities;
             this.materials = materials;
+            this.materialModifiers = materialModifiers;
+            this.aboveBlocks = aboveBlocks;
         }
 
         public ulong Build() => entityId;
@@ -78,7 +84,21 @@ namespace Sovereign.EngineCore.Entities
             return this;
         }
 
+        public IEntityBuilder MaterialModifier(int materialModifier)
+        {
+            materialModifiers.AddComponent(entityId, materialModifier);
+            return this;
+        }
+
+        public IEntityBuilder AboveBlock(ulong otherEntityId)
+        {
+            aboveBlocks.AddComponent(entityId, otherEntityId);
+            return this;
+        }
+
         abstract public IEntityBuilder Drawable();
+
+        abstract public IEntityBuilder AnimatedSprite(int animatedSpriteId);
 
     }
 

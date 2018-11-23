@@ -21,12 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.EngineCore.Entities
 {
@@ -42,7 +37,9 @@ namespace Sovereign.EngineCore.Entities
         /// </summary>
         /// <returns>Entity ID.</returns>
         ulong Build();
-        
+
+        #region Positioning
+
         /// <summary>
         /// Makes the new entity positionable with the given position and velocity.
         /// </summary>
@@ -66,6 +63,10 @@ namespace Sovereign.EngineCore.Entities
         /// <returns>Builder.</returns>
         IEntityBuilder Positionable();
 
+        #endregion Positioning
+
+        #region Rendering
+
         /// <summary>
         /// Makes the new entity drawable.
         /// </summary>
@@ -73,11 +74,40 @@ namespace Sovereign.EngineCore.Entities
         IEntityBuilder Drawable();
 
         /// <summary>
+        /// Uses the given animated sprite when rendering the new entity.
+        /// </summary>
+        /// <param name="animatedSpriteId">Animated sprite ID.</param>
+        /// <returns>Builder.</returns>
+        IEntityBuilder AnimatedSprite(int animatedSpriteId);
+
+        #endregion Rendering
+
+        #region Blocks
+
+        /// <summary>
         /// Makes the new entity a block of the given material.
         /// </summary>
         /// <param name="materialId">Material ID.</param>
         /// <returns>Builder.</returns>
         IEntityBuilder Material(int materialId);
+
+        /// <summary>
+        /// Assigns the given material modifier to the new entity.
+        /// </summary>
+        /// <param name="materialModifier">Material modifier.</param>
+        /// <returns>Builder.</returns>
+        IEntityBuilder MaterialModifier(int materialModifier);
+
+        /// <summary>
+        /// Records the entity ID of the block above this block.
+        /// Note that this does not move either block, only records the
+        /// topological relationship.
+        /// </summary>
+        /// <param name="aboveBlock"></param>
+        /// <returns></returns>
+        IEntityBuilder AboveBlock(ulong aboveBlock);
+
+        #endregion Blocks
 
     }
 

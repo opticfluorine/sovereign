@@ -12,20 +12,32 @@ namespace Sovereign.ClientCore.Entities
     public sealed class ClientEntityBuilder : AbstractEntityBuilder
     {
         private readonly DrawableComponentCollection drawables;
+        private readonly AnimatedSpriteComponentCollection animatedSprites;
 
         public ClientEntityBuilder(ulong entityId,
             PositionComponentCollection positions,
             VelocityComponentCollection velocities,
             DrawableComponentCollection drawables,
-            MaterialComponentCollection materials)
-            : base(entityId, positions, velocities, materials)
+            MaterialComponentCollection materials,
+            MaterialModifierComponentCollection materialModifiers,
+            AboveBlockComponentCollection aboveBlocks,
+            AnimatedSpriteComponentCollection animatedSprites)
+            : base(entityId, positions, velocities, materials, materialModifiers,
+                  aboveBlocks)
         {
             this.drawables = drawables;
+            this.animatedSprites = animatedSprites;
         }
 
         public override IEntityBuilder Drawable()
         {
             drawables.AddComponent(entityId, true);
+            return this;
+        }
+
+        public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
+        {
+            animatedSprites.AddComponent(entityId, animatedSpriteId);
             return this;
         }
 

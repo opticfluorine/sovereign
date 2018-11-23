@@ -6,6 +6,7 @@
 
 #### 23 November 2018
 
+* Update `IEntityBuilder` with the new component types.
 * Fix Octree unit tests that were broken by a recent refactoring.
 * Continue implementing the high-level world renderer.
 
