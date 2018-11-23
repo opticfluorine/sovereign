@@ -6,6 +6,7 @@
 
 #### 22 November 2018
 
+* Start implementing the high-level world renderer.
 * Define the tile width in `ClientEngineConfiguration`. An `IClientConfiguration`
   interface is added to provide access to client-specific configuration constants.
 * Give a better definition of the block structure in docs/world_structure.md.

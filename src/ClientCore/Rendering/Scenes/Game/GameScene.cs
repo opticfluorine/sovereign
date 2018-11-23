@@ -24,6 +24,7 @@
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
+using Sovereign.ClientCore.Rendering.Scenes.Game.World;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
@@ -41,6 +42,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
         private readonly GameSceneCamera camera;
         private readonly DisplayViewport viewport;
         private readonly MainDisplay mainDisplay;
+        private readonly WorldVertexSequencer worldVertexSequencer;
 
         /// <summary>
         /// Time since the current tick started, in seconds.
@@ -56,13 +58,15 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
         public SceneType SceneType => SceneType.Game;
 
         public GameScene(ISystemTimer systemTimer, IEngineConfiguration engineConfiguration,
-            GameSceneCamera camera, DisplayViewport viewport, MainDisplay mainDisplay)
+            GameSceneCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
+            WorldVertexSequencer worldVertexSequencer)
         {
             this.systemTimer = systemTimer;
             this.engineConfiguration = engineConfiguration;
             this.camera = camera;
             this.viewport = viewport;
             this.mainDisplay = mainDisplay;
+            this.worldVertexSequencer = worldVertexSequencer;
         }
 
         public void BeginScene()
@@ -77,8 +81,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
 
         public void PopulateBuffers(Pos3Tex2Vertex[] vertexBuffer, int[] drawLengths, out int drawCount)
         {
-            /* TODO */
-            drawCount = 0;
+            worldVertexSequencer.SequenceVertices(vertexBuffer, drawLengths, out drawCount);
         }
 
         public void PopulateGameSceneVertexConstantBuffer(GameSceneVertexConstants[] constantBuffer)

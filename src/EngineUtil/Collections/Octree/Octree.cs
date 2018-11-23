@@ -200,8 +200,11 @@ namespace Sovereign.EngineUtil.Collections.Octree
         /// <param name="minPosition">Minimum position (inclusive).</param>
         /// <param name="maxPosition">Maximum position (exclusive).</param>
         /// <param name="buffer">Buffer to hold the results.</param>
-        public void GetElementsInRange(OctreeLock lockHandle, Vector3 minPosition,
-            Vector3 maxPosition, IList<Tuple<Vector3, T>> buffer)
+        /// <param name="recordProducer">Lambda to produce buffer records.</param>
+        /// <typeparam name="R">Buffer record type.</typeparam>
+        public void GetElementsInRange<R>(OctreeLock lockHandle, Vector3 minPosition,
+            Vector3 maxPosition, IList<R> buffer, Func<Vector3,T,R> recordProducer)
+            where R : struct
         {
             /* Depth-first search of overlapping nodes. */
             var nodesToSearch = new Stack<OctreeNode<T>>();
@@ -220,7 +223,7 @@ namespace Sovereign.EngineUtil.Collections.Octree
                     {
                         var element = elementAndPosition.Key;
                         var position = elementAndPosition.Value;
-                        buffer.Add(new Tuple<Vector3, T>(position, element));
+                        buffer.Add(recordProducer(position, element));
                     }
                     continue;
                 }
@@ -242,7 +245,7 @@ namespace Sovereign.EngineUtil.Collections.Octree
                     if (RangeUtil.IsPointInRange(minPosition, maxPosition, position))
                     {
                         var element = elementAndPosition.Key;
-                        buffer.Add(new Tuple<Vector3, T>(position, element));
+                        buffer.Add(recordProducer(position, element));
                     }
                 }
             }

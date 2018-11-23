@@ -70,6 +70,7 @@
     <Compile Include="Components\IComponentEventSource.cs" />
     <Compile Include="Components\IComponentUpdater.cs" />
     <Compile Include="Components\Indexers\BasePositionComponentIndexer.cs" />
+    <Compile Include="Components\Indexers\PositionedEntity.cs" />
     <Compile Include="Configuration\ConfigurationInstaller.cs" />
     <Compile Include="Configuration\IEngineConfiguration.cs" />
     <Compile Include="Entities\EntityAssigner.cs" />

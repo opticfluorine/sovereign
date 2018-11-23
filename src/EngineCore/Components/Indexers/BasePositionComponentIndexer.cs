@@ -101,9 +101,14 @@ namespace Sovereign.EngineCore.Components.Indexers
         /// <param name="maxPosition">Top-right corner of the search space.</param>
         /// <param name="buffer">Buffer to which the results will be appended.</param>
         public void GetEntitiesInRange(IndexerLock indexerLock, Vector3 minPosition, 
-            Vector3 maxPosition, IList<Tuple<Vector3, ulong>> buffer)
+            Vector3 maxPosition, IList<PositionedEntity> buffer)
         {
-            octree.GetElementsInRange(indexerLock.octreeLock, minPosition, maxPosition, buffer);
+            octree.GetElementsInRange(indexerLock.octreeLock, minPosition, maxPosition, buffer,
+                (position, id) => new PositionedEntity()
+                {
+                    Position = position,
+                    EntityId = id
+                });
         }
 
         /// <summary>
