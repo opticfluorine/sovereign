@@ -21,27 +21,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Events;
+using System.Collections.Generic;
 
-namespace Sovereign.EngineCore.World.Materials.Components
+namespace Sovereign.EngineCore.Systems.Block.Events
 {
 
     /// <summary>
-    /// The MaterialModifier component specifies the material modifier of a
-    /// material block entity.
+    /// Event details for removing a batch of blocks at once.
     /// </summary>
-    public sealed class MaterialModifierComponentCollection : BaseComponentCollection<int>
+    public sealed class BlockRemoveBatchEventDetails : IEventDetails
     {
 
         /// <summary>
-        /// Initial number of components.
+        /// List of block entity IDs to remove.
         /// </summary>
-        public const int InitialCount = 65536;
-
-        public MaterialModifierComponentCollection(ComponentManager componentManager)
-            : base(componentManager, InitialCount, ComponentOperators.IntOperators)
-        {
-        }
+        public IList<ulong> EntityIds { get; set; }
 
     }
 

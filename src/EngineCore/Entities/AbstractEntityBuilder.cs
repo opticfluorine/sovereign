@@ -21,14 +21,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
-using Sovereign.EngineCore.World.Materials.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.EngineCore.Entities
 {

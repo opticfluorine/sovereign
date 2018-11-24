@@ -1,7 +1,7 @@
 ﻿using Sovereign.ClientCore.Rendering.Components;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
-using Sovereign.EngineCore.World.Materials.Components;
 
 namespace Sovereign.ClientCore.Entities
 {

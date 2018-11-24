@@ -23,8 +23,8 @@
 
 using Sovereign.ClientCore.Rendering.Components;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
-using Sovereign.EngineCore.World.Materials.Components;
 
 namespace Sovereign.ClientCore.Entities
 {
@@ -39,19 +39,28 @@ namespace Sovereign.ClientCore.Entities
         private readonly VelocityComponentCollection velocities;
         private readonly DrawableComponentCollection drawables;
         private readonly MaterialComponentCollection materials;
+        private readonly MaterialModifierComponentCollection materialModifiers;
+        private readonly AboveBlockComponentCollection aboveBlocks;
+        private readonly AnimatedSpriteComponentCollection animatedSprites;
         private EntityAssigner assigner;
 
         public ClientEntityFactory(EntityManager entityManager,
             PositionComponentCollection positions,
             VelocityComponentCollection velocities,
             DrawableComponentCollection drawables,
-            MaterialComponentCollection materials)
+            MaterialComponentCollection materials,
+            MaterialModifierComponentCollection materialModifiers,
+            AboveBlockComponentCollection aboveBlocks,
+            AnimatedSpriteComponentCollection animatedSprites)
         {
             this.entityManager = entityManager;
             this.positions = positions;
             this.velocities = velocities;
             this.drawables = drawables;
             this.materials = materials;
+            this.materialModifiers = materialModifiers;
+            this.aboveBlocks = aboveBlocks;
+            this.animatedSprites = animatedSprites;
         }
 
         public IEntityBuilder GetBuilder()
@@ -60,7 +69,8 @@ namespace Sovereign.ClientCore.Entities
                 assigner = entityManager.GetNewAssigner();
 
             return new ClientEntityBuilder(assigner.GetNextId(),
-                positions, velocities, drawables, materials);
+                positions, velocities, drawables, materials,
+                materialModifiers, aboveBlocks, animatedSprites);
         }
     }
 

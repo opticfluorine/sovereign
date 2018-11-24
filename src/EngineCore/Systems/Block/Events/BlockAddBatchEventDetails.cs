@@ -21,27 +21,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Events;
+using System.Collections.Generic;
 
-namespace Sovereign.EngineCore.World.Materials.Components
+namespace Sovereign.EngineCore.Systems.Block.Events
 {
 
     /// <summary>
-    /// The AboveBlock component tracks the entity ID of the block, if any, directly
-    /// above a block.
+    /// Event details for adding a batch of blocks at once.
     /// </summary>
-    public sealed class AboveBlockComponentCollection : BaseComponentCollection<ulong>
+    public sealed class BlockAddBatchEventDetails : IEventDetails
     {
 
         /// <summary>
-        /// Initial size of component collection.
+        /// Blocks to be added.
         /// </summary>
-        public const int InitialSize = 65536;
-
-        public AboveBlockComponentCollection(ComponentManager manager)
-            : base(manager, InitialSize, ComponentOperators.UlongOperators)
-        {
-        }
+        public IList<BlockRecord> BlockRecords { get; set; }
 
     }
 

@@ -4,6 +4,12 @@
 
 ### November
 
+#### 24 November 2018
+
+* Move `MaterialComponentCollection`, `MaterialModifierComponentCollection`,
+  and `AboveBlockComponentCollection` into a new `BlockSystem` for managing
+  block entities.
+
 #### 23 November 2018
 
 * Use an octree-based indexer to identify the drawable entities within

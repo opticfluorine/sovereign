@@ -104,6 +104,11 @@
     <Compile Include="Resources\IResourcePathBuilder.cs" />
     <Compile Include="Resources\ResourcesInstaller.cs" />
     <Compile Include="Resources\ResourceType.cs" />
+    <Compile Include="Systems\Block\BlockSystem.cs" />
+    <Compile Include="Systems\Block\Events\BlockAddBatchEventDetails.cs" />
+    <Compile Include="Systems\Block\Events\BlockAddEventDetails.cs" />
+    <Compile Include="Systems\Block\Events\BlockRecord.cs" />
+    <Compile Include="Systems\Block\Events\BlockRemoveBatchEventDetails.cs" />
     <Compile Include="Systems\ISystem.cs" />
     <Compile Include="Systems\ISystemExecutorFactory.cs" />
     <Compile Include="Systems\Movement\Components\Indexers\MovementComponentIndexerInstaller.cs" />
@@ -121,9 +126,9 @@
     <Compile Include="Systems\SystemInstaller.cs" />
     <Compile Include="Systems\SystemManager.cs" />
     <Compile Include="Timing\*.cs" />
-    <Compile Include="World\Materials\Components\MaterialComponentCollection.cs" />
-    <Compile Include="World\Materials\Components\AboveBlockComponentCollection.cs" />
-    <Compile Include="World\Materials\Components\MaterialModifierComponentCollection.cs" />
+    <Compile Include="Systems\Block\Components\MaterialComponentCollection.cs" />
+    <Compile Include="Systems\Block\Components\AboveBlockComponentCollection.cs" />
+    <Compile Include="Systems\Block\Components\MaterialModifierComponentCollection.cs" />
     <Compile Include="World\Materials\EngineMaterialInstaller.cs" />
     <Compile Include="World\Materials\MaterialManager.cs" />
     <Compile Include="World\WorldInstaller.cs" />

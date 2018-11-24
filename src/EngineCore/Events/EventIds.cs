@@ -72,6 +72,34 @@ namespace Sovereign.EngineCore.Events
 
         #endregion Movement
 
+        #region Blocks
+
+        /// <summary>
+        /// Adds a single block.
+        /// </summary>
+        /// Associated details: BlockAddEventDetails
+        Core_Block_Add = 200,
+
+        /// <summary>
+        /// Adds a batch of blocks at once.
+        /// </summary>
+        /// Associated details: BlockAddBatchEventDetails
+        Core_Block_AddBatch = 201,
+
+        /// <summary>
+        /// Removes a single block.
+        /// </summary>
+        /// Associated details: EntityEventDetails
+        Core_Block_Remove = 202,
+
+        /// <summary>
+        /// Removes a batch of blocks at once.
+        /// </summary>
+        /// Associated details: BlockRemoveBatchEventDetails
+        Core_Block_RemoveBatch = 203,
+
+        #endregion Blocks
+
         #endregion Core
 
         #region Client

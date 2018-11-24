@@ -23,24 +23,26 @@
 
 using Sovereign.EngineCore.Components;
 
-namespace Sovereign.EngineCore.World.Materials.Components
+namespace Sovereign.EngineCore.Systems.Block.Components
 {
 
     /// <summary>
-    /// The Material component specifies the material index for a block entity.
+    /// The MaterialModifier component specifies the material modifier of a
+    /// material block entity.
     /// </summary>
-    public sealed class MaterialComponentCollection : BaseComponentCollection<int>
+    public sealed class MaterialModifierComponentCollection : BaseComponentCollection<int>
     {
 
         /// <summary>
-        /// Initial size of component collection.
+        /// Initial number of components.
         /// </summary>
-        public const int InitialSize = 65536;
+        public const int InitialCount = 65536;
 
-        public MaterialComponentCollection(ComponentManager componentManager) 
-            : base(componentManager, InitialSize, ComponentOperators.IntOperators)
+        public MaterialModifierComponentCollection(ComponentManager componentManager)
+            : base(componentManager, InitialCount, ComponentOperators.IntOperators)
         {
         }
 
     }
+
 }
