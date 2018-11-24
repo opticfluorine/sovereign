@@ -42,14 +42,24 @@ namespace Sovereign.EngineCore.Systems.Block
             this.entityManager = entityManager;
         }
 
+        /// <summary>
+        /// Adds a new block entity.
+        /// </summary>
+        /// <param name="blockRecord">Block to be added.</param>
         public void AddBlock(BlockRecord blockRecord)
         {
+            // TODO: Set the AboveBlock component.
+
             entityFactory.GetBuilder()
                 .Positionable(blockRecord.Position)
                 .Material(blockRecord.Material)
                 .MaterialModifier(blockRecord.MaterialModifier);
         }
 
+        /// <summary>
+        /// Removes a block entity.
+        /// </summary>
+        /// <param name="entityId">Entity ID of the block to be removed.</param>
         public void RemoveBlock(ulong entityId)
         {
             entityManager.RemoveEntity(entityId);
