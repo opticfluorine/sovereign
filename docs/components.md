@@ -7,7 +7,7 @@ outlines the available component types and their roles.
 
 ## Core Components
 
-Core components are available in all Soverign Engine components.
+Core components are available in both the client and server.
 
 Component | Component Collection Class | Description
 --- | --- | ---
