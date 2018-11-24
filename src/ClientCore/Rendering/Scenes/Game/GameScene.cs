@@ -81,7 +81,8 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
 
         public void PopulateBuffers(Pos3Tex2Vertex[] vertexBuffer, int[] drawLengths, out int drawCount)
         {
-            worldVertexSequencer.SequenceVertices(vertexBuffer, drawLengths, out drawCount);
+            worldVertexSequencer.SequenceVertices(vertexBuffer, drawLengths, out drawCount,
+                timeSinceTick);
         }
 
         public void PopulateGameSceneVertexConstantBuffer(GameSceneVertexConstants[] constantBuffer)

@@ -60,10 +60,11 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="vertexBuffer">Vertex buffer.</param>
         /// <param name="drawLengths">Draw lengths for each layer.</param>
         /// <param name="drawCount">Number of layers to draw one at a time.</param>
+        /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
         public void SequenceVertices(Pos3Tex2Vertex[] vertexBuffer, int[] drawLengths,
-            out int drawCount)
+            out int drawCount, float timeSinceTick)
         {
-            RetrieveEntities();
+            RetrieveEntities(timeSinceTick);
             GroupLayers(out drawCount);
             PrepareLayers(vertexBuffer, drawLengths);
         }
@@ -71,10 +72,11 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <summary>
         /// Retrieves the drawable entities in range.
         /// </summary>
-        private void RetrieveEntities()
+        /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
+        private void RetrieveEntities(float timeSinceTick)
         {
             drawables.Clear();
-            entityRetriever.RetrieveEntities(drawables);
+            entityRetriever.RetrieveEntities(drawables, timeSinceTick);
         }
 
         /// <summary>

@@ -6,6 +6,10 @@
 
 #### 23 November 2018
 
+* Use an octree-based indexer to identify the drawable entities within
+  range of the camera. Since the range of the renderer is somewhat
+  arbitrary (each unit of y gives access to another unit of z, and vice
+  versa), added a pair of tunable rendering cutoffs to `IClientConfiguration`.
 * Update `IEntityBuilder` with the new component types.
 * Fix Octree unit tests that were broken by a recent refactoring.
 * Continue implementing the high-level world renderer.

@@ -41,6 +41,16 @@ namespace Sovereign.ClientCore.Configuration
         /// </summary>
         int TileWidth { get; }
 
+        /// <summary>
+        /// Extra tiles to search for renderable entities along the x axis.
+        /// </summary>
+        float RenderSearchSpacerX { get; }
+
+        /// <summary>
+        /// Extra tiles to search for renderable entities along the y axis.
+        /// </summary>
+        float RenderSearchSpacerY { get; }
+
     }
 
 }

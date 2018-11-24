@@ -22,11 +22,6 @@
  */
 
 using Sovereign.EngineCore.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.ClientCore.Configuration
 {
@@ -41,6 +36,10 @@ namespace Sovereign.ClientCore.Configuration
         public ulong EventTickInterval => 10000;
 
         public int TileWidth => 32;
+
+        public float RenderSearchSpacerX => 4.0f;
+
+        public float RenderSearchSpacerY => 8.0f;
 
     }
 
