@@ -35,7 +35,7 @@ namespace Sovereign.EngineCore.Events
         /// <summary>
         /// Time used to indicate that the event should be dispatched immediately.
         /// </summary>
-        public const int TIME_IMMEDIATE = 0;
+        public const ulong Immediate = 0;
 
         /// <summary>
         /// Unique identifier for the event type.
@@ -52,7 +52,7 @@ namespace Sovereign.EngineCore.Events
         /// </summary>
         public IEventDetails EventDetails { get; private set; }
 
-        public Event(EventId eventId, ulong eventTime = TIME_IMMEDIATE)
+        public Event(EventId eventId, ulong eventTime = Immediate)
             : this(eventId, null, eventTime)
         {
         }
@@ -66,7 +66,7 @@ namespace Sovereign.EngineCore.Events
         /// System time (us) when this event should be dispatched.
         /// </param>
         public Event(EventId eventId, IEventDetails details, 
-            ulong eventTime = TIME_IMMEDIATE)
+            ulong eventTime = Immediate)
         {
             EventId = eventId;
             EventDetails = details;

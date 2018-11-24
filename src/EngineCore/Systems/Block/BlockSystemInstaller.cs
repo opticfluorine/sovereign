@@ -21,52 +21,29 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
-using System.Collections.Generic;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
 namespace Sovereign.EngineCore.Systems.Block
 {
 
     /// <summary>
-    /// System responsible for managing the block entities.
+    /// IoC installer for the block system.
     /// </summary>
-    public sealed class BlockSystem : ISystem
+    public sealed class BlockSystemInstaller : IWindsorInstaller
     {
-        private readonly BlockEventHandler eventHandler;
-
-        public EventCommunicator EventCommunicator { get; set; }
-
-        public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            EventId.Core_Block_Add,
-            EventId.Core_Block_AddBatch,
-            EventId.Core_Block_Remove,
-            EventId.Core_Block_RemoveBatch,
-        };
+            container.Register(Component.For<BlockEventHandler>()
+                .LifestyleSingleton());
 
-        public int WorkloadEstimate => 50;
+            container.Register(Component.For<BlockController>()
+                .LifestyleSingleton());
 
-        public BlockSystem(BlockEventHandler eventHandler)
-        {
-            this.eventHandler = eventHandler;
+            container.Register(Component.For<BlockManager>()
+                .LifestyleSingleton());
         }
-
-        public void Initialize()
-        {
-        }
-
-        public void Cleanup()
-        {
-        }
-
-        public void ExecuteOnce()
-        {
-            while (EventCommunicator.GetIncomingEvent(out var ev))
-            {
-                eventHandler.HandleEvent(ev);
-            }
-        }
-
     }
 
 }

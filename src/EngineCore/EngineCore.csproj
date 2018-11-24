@@ -68,6 +68,7 @@
     <Compile Include="Components\ComponentOperation.cs" />
     <Compile Include="Components\ComponentOperators.cs" />
     <Compile Include="Components\IComponentEventSource.cs" />
+    <Compile Include="Components\IComponentRemover.cs" />
     <Compile Include="Components\IComponentUpdater.cs" />
     <Compile Include="Components\Indexers\BasePositionComponentIndexer.cs" />
     <Compile Include="Components\Indexers\PositionedEntity.cs" />
@@ -104,7 +105,11 @@
     <Compile Include="Resources\IResourcePathBuilder.cs" />
     <Compile Include="Resources\ResourcesInstaller.cs" />
     <Compile Include="Resources\ResourceType.cs" />
+    <Compile Include="Systems\Block\BlockController.cs" />
+    <Compile Include="Systems\Block\BlockEventHandler.cs" />
+    <Compile Include="Systems\Block\BlockManager.cs" />
     <Compile Include="Systems\Block\BlockSystem.cs" />
+    <Compile Include="Systems\Block\BlockSystemInstaller.cs" />
     <Compile Include="Systems\Block\Events\BlockAddBatchEventDetails.cs" />
     <Compile Include="Systems\Block\Events\BlockAddEventDetails.cs" />
     <Compile Include="Systems\Block\Events\BlockRecord.cs" />

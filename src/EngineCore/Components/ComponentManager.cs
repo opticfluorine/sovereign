@@ -42,6 +42,11 @@ namespace Sovereign.EngineCore.Components
         private readonly IList<IComponentUpdater> componentUpdaters = new List<IComponentUpdater>();
 
         /// <summary>
+        /// All known component removers.
+        /// </summary>
+        private readonly IList<IComponentRemover> componentRemovers = new List<IComponentRemover>();
+
+        /// <summary>
         /// Registers a component updater with the manager.
         /// </summary>
         /// <param name="updater">Component updater to be registered.</param>
@@ -61,6 +66,27 @@ namespace Sovereign.EngineCore.Components
             {
                 updater.ApplyComponentUpdates();
             }
+        }
+
+        /// <summary>
+        /// Removes all components for the given entity.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        public void RemoveAllComponentsForEntity(ulong entityId)
+        {
+            foreach (var remover in componentRemovers)
+            {
+                remover.RemoveComponent(entityId);
+            }
+        }
+
+        /// <summary>
+        /// Register a component remover.
+        /// </summary>
+        /// <param name="componentRemover">Component remover.</param>
+        public void RegisterComponentRemover(IComponentRemover componentRemover)
+        {
+            componentRemovers.Add(componentRemover);
         }
 
     }

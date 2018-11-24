@@ -6,6 +6,7 @@
 
 #### 24 November 2018
 
+* Update `EntityManager` to support removing entities.
 * Move `MaterialComponentCollection`, `MaterialModifierComponentCollection`,
   and `AboveBlockComponentCollection` into a new `BlockSystem` for managing
   block entities.

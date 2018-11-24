@@ -21,52 +21,39 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
-using System.Collections.Generic;
+using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Block.Events;
 
 namespace Sovereign.EngineCore.Systems.Block
 {
 
     /// <summary>
-    /// System responsible for managing the block entities.
+    /// Responsible for managing the creation and destruction of block entities.
     /// </summary>
-    public sealed class BlockSystem : ISystem
+    public sealed class BlockManager
     {
-        private readonly BlockEventHandler eventHandler;
+        private readonly IEntityFactory entityFactory;
+        private readonly EntityManager entityManager;
 
-        public EventCommunicator EventCommunicator { get; set; }
-
-        public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
+        public BlockManager(IEntityFactory entityFactory,
+            EntityManager entityManager)
         {
-            EventId.Core_Block_Add,
-            EventId.Core_Block_AddBatch,
-            EventId.Core_Block_Remove,
-            EventId.Core_Block_RemoveBatch,
-        };
-
-        public int WorkloadEstimate => 50;
-
-        public BlockSystem(BlockEventHandler eventHandler)
-        {
-            this.eventHandler = eventHandler;
+            this.entityFactory = entityFactory;
+            this.entityManager = entityManager;
         }
 
-        public void Initialize()
+        public void AddBlock(BlockRecord blockRecord)
         {
+            entityFactory.GetBuilder()
+                .Positionable(blockRecord.Position)
+                .Material(blockRecord.Material)
+                .MaterialModifier(blockRecord.MaterialModifier);
         }
 
-        public void Cleanup()
+        public void RemoveBlock(ulong entityId)
         {
+            entityManager.RemoveEntity(entityId);
         }
-
-        public void ExecuteOnce()
-        {
-            while (EventCommunicator.GetIncomingEvent(out var ev))
-            {
-                eventHandler.HandleEvent(ev);
-            }
-        }
-
     }
 
 }

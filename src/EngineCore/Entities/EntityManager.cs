@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,7 @@ namespace Sovereign.EngineCore.Entities
     /// The methods exposed by this class are thread-safe.
     public class EntityManager
     {
+        private readonly ComponentManager componentManager;
 
         /// <summary>
         /// First block reserved for use by automatic assignment.
@@ -53,6 +55,11 @@ namespace Sovereign.EngineCore.Entities
         /// Next block identifier.
         /// </summary>
         private int nextBlock = (int)FirstReservedBlock;
+
+        public EntityManager(ComponentManager componentManager)
+        {
+            this.componentManager = componentManager;
+        }
 
         /// <summary>
         /// Gets a new EntityAssigner.
@@ -81,6 +88,15 @@ namespace Sovereign.EngineCore.Entities
         public EntityAssigner GetNewAssigner(uint block)
         {
             return new EntityAssigner(block);
+        }
+
+        /// <summary>
+        /// Removes the given entity.
+        /// </summary>
+        /// <param name="entityId">Entity ID to be removed.</param>
+        public void RemoveEntity(ulong entityId)
+        {
+            componentManager.RemoveAllComponentsForEntity(entityId);
         }
 
     }

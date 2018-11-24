@@ -22,14 +22,11 @@
  */
 
 using Castle.Core.Logging;
+using Sovereign.EngineUtil.Collections;
 using Sovereign.EngineUtil.Monads;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.EngineCore.Components
 {
@@ -53,7 +50,7 @@ namespace Sovereign.EngineCore.Components
     /// is currently enqueued for addition.
     /// 
     /// <typeparam name="T">Component value type.</typeparam>
-    public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSource<T>
+    public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSource<T>, IComponentRemover
     {
 
         /// <summary>
@@ -103,13 +100,13 @@ namespace Sovereign.EngineCore.Components
         /// <summary>
         /// Pending component modifications binned by operation.
         /// </summary>
-        private readonly IDictionary<ComponentOperation, StructBuffer<PendingModify>> 
+        private readonly IDictionary<ComponentOperation, StructBuffer<PendingModify>>
             pendingModifications = new Dictionary<ComponentOperation, StructBuffer<PendingModify>>();
 
         /// <summary>
         /// Pending component removals.
         /// </summary>
-        private readonly StructBuffer<PendingRemove> pendingRemoves 
+        private readonly StructBuffer<PendingRemove> pendingRemoves
             = new StructBuffer<PendingRemove>(OperationBufferSize);
 
         /// <summary>
@@ -187,6 +184,7 @@ namespace Sovereign.EngineCore.Components
 
             /* Register with the component manager. */
             componentManager.RegisterComponentUpdater(this);
+            componentManager.RegisterComponentRemover(this);
         }
 
         /// <summary>
@@ -272,11 +270,6 @@ namespace Sovereign.EngineCore.Components
             pendingModifications[operation].Add(ref pendingModify);
         }
 
-        /// <summary>
-        /// Enqueues the removal of the component associated with the given entity ID.
-        /// If no entity is associated with the given entity, no action is performed.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
         public void RemoveComponent(ulong entityId)
         {
             /* Ensure that a component is associated. */

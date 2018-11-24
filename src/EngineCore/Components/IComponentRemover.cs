@@ -21,51 +21,21 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
-using System.Collections.Generic;
-
-namespace Sovereign.EngineCore.Systems.Block
+namespace Sovereign.EngineCore.Components
 {
 
     /// <summary>
-    /// System responsible for managing the block entities.
+    /// Interface for removing components.
     /// </summary>
-    public sealed class BlockSystem : ISystem
+    public interface IComponentRemover
     {
-        private readonly BlockEventHandler eventHandler;
 
-        public EventCommunicator EventCommunicator { get; set; }
-
-        public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
-        {
-            EventId.Core_Block_Add,
-            EventId.Core_Block_AddBatch,
-            EventId.Core_Block_Remove,
-            EventId.Core_Block_RemoveBatch,
-        };
-
-        public int WorkloadEstimate => 50;
-
-        public BlockSystem(BlockEventHandler eventHandler)
-        {
-            this.eventHandler = eventHandler;
-        }
-
-        public void Initialize()
-        {
-        }
-
-        public void Cleanup()
-        {
-        }
-
-        public void ExecuteOnce()
-        {
-            while (EventCommunicator.GetIncomingEvent(out var ev))
-            {
-                eventHandler.HandleEvent(ev);
-            }
-        }
+        /// <summary>
+        /// Enqueues the removal of the component associated with the given entity ID.
+        /// If no entity is associated with the given entity, no action is performed.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        void RemoveComponent(ulong entityId);
 
     }
 

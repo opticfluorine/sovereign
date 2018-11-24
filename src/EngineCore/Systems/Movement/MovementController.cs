@@ -56,7 +56,7 @@ namespace Sovereign.EngineCore.Systems.Movement
         /// <param name="rateY"></param>
         /// <param name="eventTime"></param>
         public void SetMovement(ulong entity, float rateX, float rateY,
-            ulong eventTime=Event.TIME_IMMEDIATE)
+            ulong eventTime=Event.Immediate)
         {
             var details = new SetVelocityEventDetails()
             {
