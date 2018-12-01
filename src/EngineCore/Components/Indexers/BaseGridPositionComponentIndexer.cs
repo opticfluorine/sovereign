@@ -32,7 +32,7 @@ namespace Sovereign.EngineCore.Components.Indexers
     /// Base class for component indexers that allow lookup by exact integer
     /// grid coordinates.
     /// </summary>
-    public class BaseIntegerPositionComponentIndexer : BaseComponentIndexer<Vector3>
+    public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     {
 
         private readonly IDictionary<GridPosition, ISet<ulong>> entitiesByPosition
@@ -41,7 +41,7 @@ namespace Sovereign.EngineCore.Components.Indexers
         private readonly IDictionary<ulong, GridPosition> knownPositions
             = new Dictionary<ulong, GridPosition>();
 
-        protected BaseIntegerPositionComponentIndexer(BaseComponentCollection<Vector3> components,
+        protected BaseGridPositionIndexer(BaseComponentCollection<Vector3> components,
             IComponentEventSource<Vector3> eventSource)
             : base(components, eventSource)
         {
@@ -58,18 +58,18 @@ namespace Sovereign.EngineCore.Components.Indexers
                 ? entities : null;
         }
 
-        protected override void OnComponentAdded(ulong entityId, Vector3 componentValue)
+        protected override void ComponentAddedCallback(ulong entityId, Vector3 componentValue)
         {
             AddEntity(entityId, componentValue);
         }
 
-        protected override void OnComponentModified(ulong entityId, Vector3 componentValue)
+        protected override void ComponentModifiedCallback(ulong entityId, Vector3 componentValue)
         {
             RemoveEntity(entityId);
             AddEntity(entityId, componentValue);
         }
 
-        protected override void OnComponentRemoved(ulong entityId)
+        protected override void ComponentRemovedCallback(ulong entityId)
         {
             RemoveEntity(entityId);
         }

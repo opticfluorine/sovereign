@@ -70,8 +70,9 @@
     <Compile Include="Components\IComponentEventSource.cs" />
     <Compile Include="Components\IComponentRemover.cs" />
     <Compile Include="Components\IComponentUpdater.cs" />
+    <Compile Include="Components\Indexers\BaseComponentEventFilter.cs" />
     <Compile Include="Components\Indexers\BaseComponentIndexer.cs" />
-    <Compile Include="Components\Indexers\BaseIntegerPositionComponentIndexer.cs" />
+    <Compile Include="Components\Indexers\BaseGridPositionComponentIndexer.cs" />
     <Compile Include="Components\Indexers\BasePositionComponentIndexer.cs" />
     <Compile Include="Components\Indexers\GridPosition.cs" />
     <Compile Include="Components\Indexers\PositionedEntity.cs" />
@@ -113,6 +114,9 @@
     <Compile Include="Systems\Block\BlockManager.cs" />
     <Compile Include="Systems\Block\BlockSystem.cs" />
     <Compile Include="Systems\Block\BlockSystemInstaller.cs" />
+    <Compile Include="Systems\Block\Components\Indexers\BlockComponentIndexerInstaller.cs" />
+    <Compile Include="Systems\Block\Components\Indexers\BlockGridPositionIndexer.cs" />
+    <Compile Include="Systems\Block\Components\Indexers\BlockPositionEventFilter.cs" />
     <Compile Include="Systems\Block\Events\BlockAddBatchEventDetails.cs" />
     <Compile Include="Systems\Block\Events\BlockAddEventDetails.cs" />
     <Compile Include="Systems\Block\Events\BlockRecord.cs" />

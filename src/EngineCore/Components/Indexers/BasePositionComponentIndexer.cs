@@ -102,27 +102,27 @@ namespace Sovereign.EngineCore.Components.Indexers
             return acquired;
         }
 
-        protected override void OnStartUpdates(object sender, EventArgs args)
+        protected override void StartUpdatesCallback(object sender, EventArgs args)
         {
             updateLock = AcquireLock();
         }
 
-        protected override void OnComponentAdded(ulong entityId, Vector3 position)
+        protected override void ComponentAddedCallback(ulong entityId, Vector3 position)
         {
             octree.Add(updateLock.octreeLock, position, entityId);
         }
 
-        protected override void OnComponentModified(ulong entityId, Vector3 position)
+        protected override void ComponentModifiedCallback(ulong entityId, Vector3 position)
         {
             octree.UpdatePosition(updateLock.octreeLock, entityId, position);
         }
 
-        protected override void OnComponentRemoved(ulong entityId)
+        protected override void ComponentRemovedCallback(ulong entityId)
         {
             octree.Remove(updateLock.octreeLock, entityId);
         }
 
-        protected override void OnEndUpdates(object source, EventArgs args)
+        protected override void EndUpdatesCallback(object source, EventArgs args)
         {
             /* Release the update lock. */
             updateLock.Dispose();

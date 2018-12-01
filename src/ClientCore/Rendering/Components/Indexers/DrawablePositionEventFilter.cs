@@ -21,31 +21,34 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.Movement.Components;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Numerics;
 
 namespace Sovereign.ClientCore.Rendering.Components.Indexers
 {
 
     /// <summary>
-    /// IoC installer for rendering component indexers and support classes.
+    /// Event source that filters position events to exclude non-drawable entities.
     /// </summary>
-    public sealed class RenderingComponentIndexerInstaller : IWindsorInstaller
+    public sealed class DrawablePositionEventFilter : BaseComponentEventFilter<Vector3>
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<DrawablePositionEventFilter>()
-                .LifestyleTransient());
+        private readonly DrawableComponentCollection drawableCollection;
 
-            container.Register(Component.For<DrawablePositionComponentIndexer>()
-                .LifestyleSingleton());
+        public DrawablePositionEventFilter(PositionComponentCollection positionCollection,
+            DrawableComponentCollection drawableCollection)
+            : base(positionCollection, positionCollection)
+        {
+            this.drawableCollection = drawableCollection;
         }
+
+        protected override bool ShouldAccept(ulong entityId)
+        {
+            return drawableCollection.HasComponentForEntity(entityId);
+        }
+
     }
 
 }

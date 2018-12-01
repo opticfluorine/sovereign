@@ -21,30 +21,30 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.Movement.Components;
+using System.Numerics;
 
-namespace Sovereign.ClientCore.Rendering.Components.Indexers
+namespace Sovereign.EngineCore.Systems.Block.Components.Indexers
 {
 
     /// <summary>
-    /// IoC installer for rendering component indexers and support classes.
+    /// Component event filter that only accepts position updates for block entities.
     /// </summary>
-    public sealed class RenderingComponentIndexerInstaller : IWindsorInstaller
+    public sealed class BlockPositionEventFilter : BaseComponentEventFilter<Vector3>
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<DrawablePositionEventFilter>()
-                .LifestyleTransient());
+        private readonly MaterialComponentCollection materials;
 
-            container.Register(Component.For<DrawablePositionComponentIndexer>()
-                .LifestyleSingleton());
+        public BlockPositionEventFilter(PositionComponentCollection positions,
+            MaterialComponentCollection materials)
+            : base(positions, positions)
+        {
+            this.materials = materials;
+        }
+
+        protected override bool ShouldAccept(ulong entityId)
+        {
+            return materials.HasComponentForEntity(entityId);
         }
     }
 

@@ -21,31 +21,24 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.Movement.Components;
 
-namespace Sovereign.ClientCore.Rendering.Components.Indexers
+namespace Sovereign.EngineCore.Systems.Block.Components.Indexers
 {
 
     /// <summary>
-    /// IoC installer for rendering component indexers and support classes.
+    /// GridPosition indexer for block entities.
     /// </summary>
-    public sealed class RenderingComponentIndexerInstaller : IWindsorInstaller
+    public sealed class BlockGridPositionIndexer : BaseGridPositionIndexer
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<DrawablePositionEventFilter>()
-                .LifestyleTransient());
 
-            container.Register(Component.For<DrawablePositionComponentIndexer>()
-                .LifestyleSingleton());
+        public BlockGridPositionIndexer(PositionComponentCollection positions,
+            BlockPositionEventFilter eventFilter)
+            : base(positions, eventFilter)
+        {
         }
+
     }
 
 }

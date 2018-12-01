@@ -41,11 +41,11 @@ namespace Sovereign.EngineCore.Components.Indexers
             this.components = components;
             this.eventSource = eventSource;
 
-            eventSource.OnStartUpdates += OnStartUpdates;
-            eventSource.OnComponentAdded += OnComponentAdded;
-            eventSource.OnComponentModified += OnComponentModified;
-            eventSource.OnComponentRemoved += OnComponentRemoved;
-            eventSource.OnEndUpdates += OnEndUpdates;
+            eventSource.OnStartUpdates += StartUpdatesCallback;
+            eventSource.OnComponentAdded += ComponentAddedCallback;
+            eventSource.OnComponentModified += ComponentModifiedCallback;
+            eventSource.OnComponentRemoved += ComponentRemovedCallback;
+            eventSource.OnEndUpdates += EndUpdatesCallback;
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Sovereign.EngineCore.Components.Indexers
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event arguments.</param>
-        protected virtual void OnStartUpdates(object sender, EventArgs e)
+        protected virtual void StartUpdatesCallback(object sender, EventArgs e)
         {
         }
 
@@ -64,7 +64,7 @@ namespace Sovereign.EngineCore.Components.Indexers
         /// </summary>
         /// <param name="entityId">Entity ID.</param>
         /// <param name="componentValue">New component value.</param>
-        protected virtual void OnComponentAdded(ulong entityId, T componentValue)
+        protected virtual void ComponentAddedCallback(ulong entityId, T componentValue)
         {
         }
 
@@ -74,7 +74,7 @@ namespace Sovereign.EngineCore.Components.Indexers
         /// </summary>
         /// <param name="entityId">Entity ID.</param>
         /// <param name="componentValue">New component value.</param>
-        protected virtual void OnComponentModified(ulong entityId, T componentValue)
+        protected virtual void ComponentModifiedCallback(ulong entityId, T componentValue)
         {
         }
 
@@ -83,7 +83,7 @@ namespace Sovereign.EngineCore.Components.Indexers
         /// Defaults to no action.
         /// </summary>
         /// <param name="entityId">Entity ID.</param>
-        protected virtual void OnComponentRemoved(ulong entityId)
+        protected virtual void ComponentRemovedCallback(ulong entityId)
         {
         }
 
@@ -93,17 +93,17 @@ namespace Sovereign.EngineCore.Components.Indexers
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event arguments.</param>
-        protected virtual void OnEndUpdates(object sender, EventArgs e)
+        protected virtual void EndUpdatesCallback(object sender, EventArgs e)
         {
         }
 
         public void Dispose()
         {
-            eventSource.OnEndUpdates -= OnEndUpdates;
-            eventSource.OnComponentRemoved -= OnComponentRemoved;
-            eventSource.OnComponentModified -= OnComponentModified;
-            eventSource.OnComponentAdded -= OnComponentAdded;
-            eventSource.OnStartUpdates -= OnStartUpdates;
+            eventSource.OnEndUpdates -= EndUpdatesCallback;
+            eventSource.OnComponentRemoved -= ComponentRemovedCallback;
+            eventSource.OnComponentModified -= ComponentModifiedCallback;
+            eventSource.OnComponentAdded -= ComponentAddedCallback;
+            eventSource.OnStartUpdates -= StartUpdatesCallback;
         }
 
     }

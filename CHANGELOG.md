@@ -2,6 +2,15 @@
 
 ## 2018
 
+### December
+
+#### 01 December 2018
+
+* Add a `BlockGridPositionIndexer` to allow fast lookup of block entities
+  by their grid position.
+* Refactor component event filters into a `BaseComponentEventFilter` class
+  and derived classes.
+
 ### November
 
 #### 30 November 2018

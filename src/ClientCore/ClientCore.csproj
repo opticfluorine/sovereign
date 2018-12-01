@@ -78,7 +78,7 @@
     <Compile Include="Rendering\Components\AnimatedSpriteComponentCollection.cs" />
     <Compile Include="Rendering\Components\DrawableComponentCollection.cs" />
     <Compile Include="Rendering\Components\Indexers\DrawablePositionComponentIndexer.cs" />
-    <Compile Include="Rendering\Components\Indexers\DrawablePositionEventSource.cs" />
+    <Compile Include="Rendering\Components\Indexers\DrawablePositionEventFilter.cs" />
     <Compile Include="Rendering\Components\Indexers\RenderingComponentIndexerInstaller.cs" />
     <Compile Include="Rendering\Configuration\AdapterSelector.cs" />
     <Compile Include="Rendering\Configuration\DisplayFormat.cs" />

@@ -35,7 +35,7 @@ namespace Sovereign.ClientCore.Rendering.Components.Indexers
     {
 
         public DrawablePositionComponentIndexer(PositionComponentCollection positionCollection,
-            DrawablePositionEventSource eventSource)
+            DrawablePositionEventFilter eventSource)
             : base(positionCollection, eventSource)
         {
         }
