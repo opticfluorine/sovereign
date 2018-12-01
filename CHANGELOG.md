@@ -4,6 +4,13 @@
 
 ### November
 
+#### 30 November 2018
+
+* Implement a `BaseIntegerPositionComponentIndexer` class to index
+  positions on a grid (e.g. for block positions).
+* Refactor component indexers into a `BaseComponentIndexer` class and
+  derived classes thereof.
+
 #### 24 November 2018
 
 * Update `EntityManager` to support removing entities.

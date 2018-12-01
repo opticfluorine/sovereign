@@ -21,14 +21,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineUtil.Collections.Octree;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using Sovereign.EngineUtil.Collections.Octree;
 
 namespace Sovereign.EngineCore.Components.Indexers
 {
@@ -38,13 +34,8 @@ namespace Sovereign.EngineCore.Components.Indexers
     /// </summary>
     ///
     /// Extend this class for each ComponentCollection that requires position indexing.
-    public class BasePositionComponentIndexer : IDisposable
+    public class BasePositionComponentIndexer : BaseComponentIndexer<Vector3>
     {
-
-        /// <summary>
-        /// Component collection.
-        /// </summary>
-        protected readonly IComponentEventSource<Vector3> componentEventSource;
 
         /// <summary>
         /// Octree providing partitioning to the set of tracked entity IDs.
@@ -59,37 +50,15 @@ namespace Sovereign.EngineCore.Components.Indexers
         /// <summary>
         /// Creates an indexer for the given component collection.
         /// </summary>
-        /// <param name="componennCollection">Component collection.</param>
+        /// <param name="components">Component collection.</param>
         /// <param name="componentEventSource">Component event source.</param>
-        protected BasePositionComponentIndexer(BaseComponentCollection<Vector3> componennCollection, 
+        protected BasePositionComponentIndexer(BaseComponentCollection<Vector3> components,
             IComponentEventSource<Vector3> componentEventSource)
+            : base(components, componentEventSource)
         {
-            this.componentEventSource = componentEventSource;
-
-            /* Register component callbacks. */
-            componentEventSource.OnStartUpdates += OnStartUpdates;
-            componentEventSource.OnComponentAdded += OnComponentAdded;
-            componentEventSource.OnComponentModified += OnComponentModified;
-            componentEventSource.OnComponentRemoved += OnComponentRemoved;
-            componentEventSource.OnEndUpdates += OnEndUpdates;
-
             /* Create the initial index. */
-            octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin, 
-                componennCollection.GetAllComponents());
-        }
-
-        public void Dispose()
-        {
-            /* Deregister callbacks. */
-            componentEventSource.OnStartUpdates -= OnStartUpdates;
-            componentEventSource.OnComponentAdded -= OnComponentAdded;
-            componentEventSource.OnComponentModified -= OnComponentModified;
-            componentEventSource.OnComponentRemoved -= OnComponentRemoved;
-            componentEventSource.OnEndUpdates -= OnEndUpdates;
-
-            /* Release the update lock if needed. */
-            if (updateLock != null)
-                updateLock.Dispose();
+            octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin,
+                components.GetAllComponents());
         }
 
         /// <summary>
@@ -100,7 +69,7 @@ namespace Sovereign.EngineCore.Components.Indexers
         /// <param name="minPosition">Bottom-left corner of the search space.</param>
         /// <param name="maxPosition">Top-right corner of the search space.</param>
         /// <param name="buffer">Buffer to which the results will be appended.</param>
-        public void GetEntitiesInRange(IndexerLock indexerLock, Vector3 minPosition, 
+        public void GetEntitiesInRange(IndexerLock indexerLock, Vector3 minPosition,
             Vector3 maxPosition, IList<PositionedEntity> buffer)
         {
             octree.GetElementsInRange(indexerLock.octreeLock, minPosition, maxPosition, buffer,
@@ -133,51 +102,27 @@ namespace Sovereign.EngineCore.Components.Indexers
             return acquired;
         }
 
-        /// <summary>
-        /// Called when the component collection begins updating values.
-        /// </summary>
-        /// <param name="sender">Unused.</param>
-        /// <param name="args">Unused.</param>
-        private void OnStartUpdates(object sender, EventArgs args)
+        protected override void OnStartUpdates(object sender, EventArgs args)
         {
             updateLock = AcquireLock();
         }
 
-        /// <summary>
-        /// Called when a component is added.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        /// <param name="position">Initial position.</param>
-        private void OnComponentAdded(ulong entityId, Vector3 position)
+        protected override void OnComponentAdded(ulong entityId, Vector3 position)
         {
             octree.Add(updateLock.octreeLock, position, entityId);
         }
 
-        /// <summary>
-        /// Called when a component is modified.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        /// <param name="position">New position.</param>
-        private void OnComponentModified(ulong entityId, Vector3 position)
+        protected override void OnComponentModified(ulong entityId, Vector3 position)
         {
             octree.UpdatePosition(updateLock.octreeLock, entityId, position);
         }
 
-        /// <summary>
-        /// Called when a component is removed.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        private void OnComponentRemoved(ulong entityId)
+        protected override void OnComponentRemoved(ulong entityId)
         {
             octree.Remove(updateLock.octreeLock, entityId);
         }
 
-        /// <summary>
-        /// Called when the component collection has finished updates.
-        /// </summary>
-        /// <param name="source">Unused.</param>
-        /// <param name="args">Unused.</param>
-        private void OnEndUpdates(object source, EventArgs args)
+        protected override void OnEndUpdates(object source, EventArgs args)
         {
             /* Release the update lock. */
             updateLock.Dispose();

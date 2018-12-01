@@ -70,7 +70,10 @@
     <Compile Include="Components\IComponentEventSource.cs" />
     <Compile Include="Components\IComponentRemover.cs" />
     <Compile Include="Components\IComponentUpdater.cs" />
+    <Compile Include="Components\Indexers\BaseComponentIndexer.cs" />
+    <Compile Include="Components\Indexers\BaseIntegerPositionComponentIndexer.cs" />
     <Compile Include="Components\Indexers\BasePositionComponentIndexer.cs" />
+    <Compile Include="Components\Indexers\GridPosition.cs" />
     <Compile Include="Components\Indexers\PositionedEntity.cs" />
     <Compile Include="Configuration\ConfigurationInstaller.cs" />
     <Compile Include="Configuration\IEngineConfiguration.cs" />
