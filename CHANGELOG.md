@@ -6,6 +6,8 @@
 
 #### 01 December 2018
 
+* Automatically set the `AboveBlock` components as needed when adding or
+  removing blocks.
 * Limit block system "add block" events to grid positions since voxel
   blocks should be aligned to grid positions.
 * Add a `BlockGridPositionIndexer` to allow fast lookup of block entities
