@@ -23,6 +23,7 @@
 
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Events;
+using System.Numerics;
 
 namespace Sovereign.EngineCore.Systems.Block
 {
@@ -51,7 +52,7 @@ namespace Sovereign.EngineCore.Systems.Block
             // TODO: Set the AboveBlock component.
 
             entityFactory.GetBuilder()
-                .Positionable(blockRecord.Position)
+                .Positionable((Vector3)blockRecord.Position)
                 .Material(blockRecord.Material)
                 .MaterialModifier(blockRecord.MaterialModifier);
         }

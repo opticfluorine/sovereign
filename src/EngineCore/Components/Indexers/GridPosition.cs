@@ -66,6 +66,11 @@ namespace Sovereign.EngineCore.Components.Indexers
             Z = (int)position.Z;
         }
 
+        public static explicit operator Vector3(GridPosition gridPosition)
+        {
+            return new Vector3(gridPosition.X, gridPosition.Y, gridPosition.Z);
+        }
+
     }
 
 }

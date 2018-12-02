@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System.Numerics;
+using Sovereign.EngineCore.Components.Indexers;
 
 namespace Sovereign.EngineCore.Systems.Block.Events
 {
@@ -35,7 +35,7 @@ namespace Sovereign.EngineCore.Systems.Block.Events
         /// <summary>
         /// Block position.
         /// </summary>
-        public Vector3 Position;
+        public GridPosition Position;
 
         /// <summary>
         /// Material ID.
