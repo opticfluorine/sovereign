@@ -1,6 +1,7 @@
 pipeline {
   agent any
   stages {
+
     stage('Build') {
       steps {
         dir('src') {
@@ -8,5 +9,16 @@ pipeline {
         }
       }
     }
+
+    stage('Package') {
+      steps {
+        dir('src/SovereignClientSetup') {
+          
+          powershell './BuildInstaller.ps1'
+
+        }
+      }
+    }
+
   }
 }
