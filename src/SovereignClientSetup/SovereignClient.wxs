@@ -7,6 +7,13 @@
 
     <Media Id="1"
            Cabinet="SovereignClient.cab" EmbedCab="yes" />
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+
+    <UIRef Id="WixUI_Mondo"/>
+    <UIRef Id="WixUI_ErrorProgressText"/>
+
+    <WixVariable Id="WixUILicenseRtf" Value="license.rtf" />
     
 		<Feature Id="ProductFeature" Title="Sovereign Engine Client" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
