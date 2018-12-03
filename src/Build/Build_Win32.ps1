@@ -6,4 +6,5 @@
 # msbuild must be on the PATH.
 
 # Build all projects.
+nuget restore
 msbuild 'Sovereign Engine.sln' /restore
