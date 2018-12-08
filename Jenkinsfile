@@ -1,6 +1,11 @@
 pipeline {
   agent any
   stages {
+    stage('Checkout') {
+      steps{
+        checkout poll: true, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'GitLFSPull'], [$class: 'CleanCheckout']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'fc79acce-aa7d-4b2f-a6ec-a22c1f67ccb7', url: 'ssh://git@gitlab.com/opticfluorine/engine8.git']]]
+      }
+    }
 
     stage('Build') {
       steps {
