@@ -13,14 +13,14 @@ pipeline {
                 [$class: 'CloneOption',
                         depth: 0,
                         noTags: false,
-                        reference: '/other/optional/local/reference/clone',
+                        reference: '/other/option',
                         shallow: false,
                         timeout: 120]
             ],
             submoduleCfg: [],
             userRemoteConfigs: [
-                [credentialsId: 'foobar',
-                url: 'https://github.com/foo/bar.git']
+                [credentialsId: 'git',
+                url: 'ssh://git@gitlab.com/opticfluorine/engine8.git']
             ]
         ])
       }
