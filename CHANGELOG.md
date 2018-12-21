@@ -4,6 +4,10 @@
 
 ### December
 
+#### 21 December 2018
+
+* Fix startup issue where `IClientConfiguration` could not be resolved.
+
 #### 01 December 2018
 
 * Automatically set the `AboveBlock` components as needed when adding or

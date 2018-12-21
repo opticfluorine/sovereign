@@ -21,20 +21,23 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Configuration;
-
 namespace Sovereign.ClientCore.Configuration
 {
 
     /// <summary>
-    /// Client-side engine configuration.
+    /// Client configuration.
     /// </summary>
-    public class ClientEngineConfiguration : IEngineConfiguration
+    /// <remarks>
+    /// In the future, the values of IClientConfiguration will be loaded at
+    /// runtime from a file.
+    /// </remarks>
+    public sealed class ClientConfiguration : IClientConfiguration
     {
+        public int TileWidth => 32;
 
-        /* Events advance every 10 ms. */
-        public ulong EventTickInterval => 10000;
+        public float RenderSearchSpacerX => 4.0f;
 
+        public float RenderSearchSpacerY => 8.0f;
     }
 
 }

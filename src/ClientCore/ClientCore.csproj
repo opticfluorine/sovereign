@@ -66,6 +66,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\ClientConfiguration.cs" />
     <Compile Include="Configuration\ClientConfigurationInstaller.cs" />
     <Compile Include="Configuration\ClientEngineConfiguration.cs" />
     <Compile Include="Configuration\IClientConfiguration.cs" />
