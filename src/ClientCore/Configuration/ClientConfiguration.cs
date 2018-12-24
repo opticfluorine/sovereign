@@ -38,6 +38,8 @@ namespace Sovereign.ClientCore.Configuration
         public float RenderSearchSpacerX => 4.0f;
 
         public float RenderSearchSpacerY => 8.0f;
+
+        public int MaxFramerate => 60;
     }
 
 }

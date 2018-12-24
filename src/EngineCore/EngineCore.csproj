@@ -141,6 +141,7 @@
     <Compile Include="Systems\Block\Components\MaterialComponentCollection.cs" />
     <Compile Include="Systems\Block\Components\AboveBlockComponentCollection.cs" />
     <Compile Include="Systems\Block\Components\MaterialModifierComponentCollection.cs" />
+    <Compile Include="Util\Units.cs" />
     <Compile Include="World\Materials\EngineMaterialInstaller.cs" />
     <Compile Include="World\Materials\MaterialManager.cs" />
     <Compile Include="World\WorldInstaller.cs" />

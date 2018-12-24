@@ -21,40 +21,37 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sovereign.ClientCore.Configuration
+namespace Sovereign.EngineCore.Util
 {
 
     /// <summary>
-    /// Main configuration interface for client constants.
+    /// Constants for unit conversions.
     /// </summary>
-    public interface IClientConfiguration
+    public static class Units
     {
 
         /// <summary>
-        /// Width of a tile in pixels.
+        /// Unit conversion constants related to system time.
         /// </summary>
-        int TileWidth { get; }
+        public static class SystemTime
+        {
 
-        /// <summary>
-        /// Extra tiles to search for renderable entities along the x axis.
-        /// </summary>
-        float RenderSearchSpacerX { get; }
+            /// <summary>
+            /// One second in system time.
+            /// </summary>
+            public const ulong Second = 1000000;
 
-        /// <summary>
-        /// Extra tiles to search for renderable entities along the y axis.
-        /// </summary>
-        float RenderSearchSpacerY { get; }
+            /// <summary>
+            /// One ms in system time.
+            /// </summary>
+            public const ulong Millisecond = 1000;
 
-        /// <summary>
-        /// Maximum framerate (in frames per second).
-        /// </summary>
-        int MaxFramerate { get; }
+            /// <summary>
+            /// One us in system time.
+            /// </summary>
+            public const ulong Microsecond = 1;
+
+        }
 
     }
 

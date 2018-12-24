@@ -4,6 +4,10 @@
 
 ### December
 
+#### 24 December 2018
+
+* Add support for limiting the framerate.
+
 #### 21 December 2018
 
 * Fix startup issue where `IClientConfiguration` could not be resolved.

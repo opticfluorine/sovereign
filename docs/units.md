@@ -10,6 +10,7 @@ Type | Definition
 Position | Grid units; 1.0 = one block width
 Velocity | Grid units per second
 System time | Microseconds (us)
+Framerate | Frames per second (FPS)
 
 ## Derived Units
 

@@ -22,9 +22,11 @@
  */
 
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Timing;
+using Sovereign.EngineCore.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,22 +45,41 @@ namespace Sovereign.ClientCore.Rendering
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-        /// <summary>
-        /// Rendering manager.
-        /// </summary>
         private readonly RenderingManager renderingManager;
+        private readonly ISystemTimer systemTimer;
 
         // Rendering is expensive, so pump the loop multiple times between frames.
         public ulong CycleInterval => 4;
 
-        public RenderingMainLoopAction(RenderingManager renderingManager)
+        /// <summary>
+        /// Minimum system time delta between frames.
+        /// </summary>
+        private readonly ulong minimumTimeDelta;
+
+        /// <summary>
+        /// System time of the last frame.
+        /// </summary>
+        private ulong lastFrameTime = 0;
+
+        public RenderingMainLoopAction(RenderingManager renderingManager,
+            ISystemTimer systemTimer, IClientConfiguration clientConfiguration)
         {
             this.renderingManager = renderingManager;
+            this.systemTimer = systemTimer;
+
+            minimumTimeDelta = Units.SystemTime.Second / (ulong)clientConfiguration.MaxFramerate;
         }
 
         public void Execute()
         {
-            renderingManager.Render();
+            /* Ensure that the frame rate is capped appropriately. */
+            var currentTime = systemTimer.GetTime();
+            var delta = currentTime - lastFrameTime;
+            if (delta >= minimumTimeDelta)
+            {
+                renderingManager.Render();
+                lastFrameTime = currentTime;
+            }
         }
 
     }
