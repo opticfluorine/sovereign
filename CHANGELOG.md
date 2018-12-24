@@ -6,6 +6,7 @@
 
 #### 24 December 2018
 
+* Add `Thread.Sleep()` call to `SystemExecutor` to help with high CPU usage.
 * Add support for limiting the framerate.
 
 #### 21 December 2018

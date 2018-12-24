@@ -25,6 +25,7 @@ using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace Sovereign.EngineCore.Systems
 {
@@ -102,6 +103,9 @@ namespace Sovereign.EngineCore.Systems
                 {
                     system.ExecuteOnce();
                 }
+
+                /* Yield if needed to avoid high CPU usage. */
+                Thread.Sleep(0);
             }
         }
 
