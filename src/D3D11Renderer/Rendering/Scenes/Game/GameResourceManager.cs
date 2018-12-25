@@ -46,6 +46,11 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         public D3D11UpdateBuffer<Pos3Tex2Vertex> VertexBuffer { get; private set; }
 
         /// <summary>
+        /// Index buffer into the vertex buffer.
+        /// </summary>
+        public D3D11UpdateBuffer<int> IndexBuffer { get; private set; }
+
+        /// <summary>
         /// Constant buffer for the vertex shader.
         /// </summary>
         public D3D11UpdateBuffer<GameSceneVertexConstants> VertexConstantBuffer { get; private set; }

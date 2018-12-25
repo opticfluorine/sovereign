@@ -6,6 +6,7 @@
 
 #### 24 December 2018
 
+* Wire an index buffer into the high-level renderer.
 * Add `Thread.Sleep()` call to `SystemExecutor` to help with high CPU usage.
 * Add support for limiting the framerate.
 

@@ -58,15 +58,17 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// Produces the vertex buffer for world rendering.
         /// </summary>
         /// <param name="vertexBuffer">Vertex buffer.</param>
+        /// <param name="indexBuffer">Index buffer.</param>
         /// <param name="drawLengths">Draw lengths for each layer.</param>
         /// <param name="drawCount">Number of layers to draw one at a time.</param>
         /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
-        public void SequenceVertices(Pos3Tex2Vertex[] vertexBuffer, int[] drawLengths,
+        public void SequenceVertices(Pos3Tex2Vertex[] vertexBuffer, 
+            int[] indexBuffer, int[] drawLengths,
             out int drawCount, float timeSinceTick)
         {
             RetrieveEntities(timeSinceTick);
             GroupLayers(out drawCount);
-            PrepareLayers(vertexBuffer, drawLengths);
+            PrepareLayers(vertexBuffer, indexBuffer, drawLengths);
         }
 
         /// <summary>
@@ -93,14 +95,17 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// Prepares the layers and populates the vertex buffer.
         /// </summary>
         /// <param name="vertexBuffer">Vertex buffer.</param>
+        /// <param name="indexBuffer">Index buffer.</param>
         /// <param name="drawLengths">Draw lengths for each layer.</param>
-        private void PrepareLayers(Pos3Tex2Vertex[] vertexBuffer, int[] drawLengths)
+        private void PrepareLayers(Pos3Tex2Vertex[] vertexBuffer, int[] indexBuffer, 
+            int[] drawLengths)
         {
             var bufferOffset = 0;
             var layerIndex = 0;
             foreach (var layer in grouper.Layers.Values)
             {
-                var verticesAdded = AddLayerToVertexBuffer(layer, vertexBuffer, bufferOffset);
+                var verticesAdded = AddLayerToVertexBuffer(layer, vertexBuffer, 
+                    indexBuffer, bufferOffset);
                 drawLengths[layerIndex] = verticesAdded;
 
                 bufferOffset += verticesAdded;
@@ -113,12 +118,13 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// </summary>
         /// <param name="layer">Layer to be added.</param>
         /// <param name="vertexBuffer">Vertex buffer.</param>
+        /// <param name="indexBuffer">Index buffer.</param>
         /// <param name="bufferOffset">Offset into the vertex buffer.</param>
         /// <returns>Number of vertices added to the vertex buffer.</returns>
         private int AddLayerToVertexBuffer(WorldLayer layer, Pos3Tex2Vertex[] vertexBuffer,
-            int bufferOffset)
+            int[] indexBuffer, int bufferOffset)
         {
-            return layerVertexSequencer.AddLayer(layer, vertexBuffer, bufferOffset);
+            return layerVertexSequencer.AddLayer(layer, vertexBuffer, indexBuffer, bufferOffset);
         }
 
     }
