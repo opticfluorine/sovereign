@@ -22,6 +22,7 @@
  */
 
 using SharpDX.Direct3D11;
+using SharpDX.Mathematics.Interop;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.ClientCore.Rendering.Scenes.Game;
 using Sovereign.D3D11Renderer.Rendering.Resources.Buffers;
@@ -53,7 +54,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// <summary>
         /// Constant buffer for the vertex shader.
         /// </summary>
-        public D3D11UpdateBuffer<GameSceneVertexConstants> VertexConstantBuffer { get; private set; }
+        public D3D11UpdateBuffer<RawMatrix> VertexConstantBuffer { get; private set; }
 
         /// <summary>
         /// Number of elements to use in each draw.
@@ -91,7 +92,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
             IndexBuffer = new D3D11UpdateBuffer<uint>(device, BindFlags.IndexBuffer,
                 MaximumBufferElements);
 
-            VertexConstantBuffer = new D3D11UpdateBuffer<GameSceneVertexConstants>(device,
+            VertexConstantBuffer = new D3D11UpdateBuffer<RawMatrix>(device,
                 BindFlags.ConstantBuffer, 1);
         }
 
@@ -100,6 +101,12 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// </summary>
         public void Cleanup()
         {
+            VertexConstantBuffer?.Dispose();
+            VertexConstantBuffer = null;
+
+            IndexBuffer?.Dispose();
+            IndexBuffer = null;
+
             VertexBuffer?.Dispose();
             VertexBuffer = null;
         }
@@ -110,6 +117,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         public void UpdateBuffers()
         {
             VertexBuffer.Update();
+            IndexBuffer.Update();
             VertexConstantBuffer.Update();
         }
 

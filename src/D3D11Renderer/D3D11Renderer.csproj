@@ -90,6 +90,7 @@
     <Compile Include="Rendering\Scenes\Game\GameSceneShaders.cs" />
     <Compile Include="Rendering\Scenes\Game\World\WorldRasterizer.cs" />
     <Compile Include="Rendering\Scenes\Game\World\WorldRenderer.cs" />
+    <Compile Include="Rendering\Scenes\Game\World\WorldVertexConstantsUpdater.cs" />
     <Compile Include="Rendering\Scenes\Game\World\WorldVertexShader.cs" />
     <Compile Include="Rendering\UI\D3D11UIRenderStage.cs" />
   </ItemGroup>

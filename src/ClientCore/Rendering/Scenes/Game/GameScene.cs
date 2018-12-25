@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System.Numerics;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
@@ -49,11 +50,6 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
         /// </summary>
         /// Evaluated at the start of rendering.
         private float timeSinceTick;
-
-        /// <summary>
-        /// Game scene scaling constants.
-        /// </summary>
-        private GameSceneScale scale;
 
         public SceneType SceneType => SceneType.Game;
 
@@ -86,13 +82,12 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
                 out drawCount, timeSinceTick);
         }
 
-        public void PopulateGameSceneVertexConstantBuffer(GameSceneVertexConstants[] constantBuffer)
+        public void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles, 
+            out Vector3 cameraPos)
         {
-            if (scale == null)
-                scale = new GameSceneScale(viewport, mainDisplay.DisplayMode);
-
-            scale.Apply(ref constantBuffer[0]);
-            camera.Aim(ref constantBuffer[0], timeSinceTick);
+            widthInTiles = viewport.WidthInTiles;
+            heightInTiles = viewport.HeightInTiles;
+            cameraPos = camera.Aim(timeSinceTick);
         }
 
         /// <summary>

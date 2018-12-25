@@ -24,9 +24,7 @@
 /* Shader constants. */
 cbuffer ShaderConstants : register(b0)
 {
-	float3 g_worldScale;       // x, y, z scaling factors
-	float3 g_cameraPos;        // x, y, z position of camera
-    float2 g_displaySize;      // width, height of display mode
+    float4x4 g_transform;
 };
 
 /* Vertex shader input. */
@@ -45,17 +43,9 @@ struct VsOutput {
 VsOutput main(VsInput input) {
 	VsOutput output;
 
-	/* x is offset by the camera, then scaled. */
-	output.vPosition.x = (g_worldScale.x * (input.vPosition.x - g_cameraPos.x))
-        + (g_displaySize.x * 0.5);
-
-	/* y is offset by the camera and by z, then scaled. */
-    output.vPosition.y = (g_worldScale.y * (input.vPosition.y - g_cameraPos.y)
-        - g_worldScale.z * (input.vPosition.z - g_cameraPos.z))
-        + (g_displaySize.y * 0.5);
-
-    output.vPosition.z = 0.0;
-    output.vPosition.w = 0.0;
+    /* Add the w coordinate and transform to device coordinates. */
+    float4 original = { input.vPosition, 1.0f };
+    output.vPosition = mul(g_transform, original);
 
 	/* Texture coordinates are passed through. */
 	output.vTexCoord = input.vTexCoord;

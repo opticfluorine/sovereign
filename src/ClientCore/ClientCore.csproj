@@ -106,8 +106,6 @@
     <Compile Include="Rendering\RenderingResourceManager.cs" />
     <Compile Include="Rendering\Resources\Buffers\Pos3Tex2Vertex.cs" />
     <Compile Include="Rendering\Scenes\Game\GameSceneCamera.cs" />
-    <Compile Include="Rendering\Scenes\Game\GameSceneScale.cs" />
-    <Compile Include="Rendering\Scenes\Game\GameSceneVertexConstants.cs" />
     <Compile Include="Rendering\Scenes\Game\GeneralGameSceneInstaller.cs" />
     <Compile Include="Rendering\Scenes\Game\World\GeneralGameSceneWorldInstaller.cs" />
     <Compile Include="Rendering\Scenes\Game\World\Pos3Id.cs" />

@@ -22,11 +22,7 @@
  */
 
 using Sovereign.ClientCore.Rendering.Scenes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sovereign.D3D11Renderer.Rendering.Scenes.Game.World;
 
 namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 {
@@ -38,14 +34,16 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
     {
 
         private readonly GameResourceManager gameResourceManager;
-
         private readonly GameSceneRenderer gameSceneRenderer;
+        private readonly WorldVertexConstantsUpdater worldVertexConstantsUpdater;
 
         public GameSceneConsumer(GameResourceManager gameResourceManager,
-            GameSceneRenderer gameSceneRenderer)
+            GameSceneRenderer gameSceneRenderer,
+            WorldVertexConstantsUpdater worldVertexConstantsUpdater)
         {
             this.gameResourceManager = gameResourceManager;
             this.gameSceneRenderer = gameSceneRenderer;
+            this.worldVertexConstantsUpdater = worldVertexConstantsUpdater;
         }
 
         public void ConsumeScene(IScene scene)
@@ -53,12 +51,10 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
             /* Handle general processing. */
             scene.PopulateBuffers(gameResourceManager.VertexBuffer.Buffer,
                 gameResourceManager.IndexBuffer.Buffer,
-                gameResourceManager.DrawBuffer, 
+                gameResourceManager.DrawBuffer,
                 out var drawCount);
             gameResourceManager.DrawCount = drawCount;
-
-            scene.PopulateGameSceneVertexConstantBuffer(
-                gameResourceManager.VertexConstantBuffer.Buffer);
+            worldVertexConstantsUpdater.Update(scene);
 
             /* Post updates to the buffers. */
             gameResourceManager.UpdateBuffers();

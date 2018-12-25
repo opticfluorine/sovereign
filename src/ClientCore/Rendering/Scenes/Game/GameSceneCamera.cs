@@ -24,6 +24,7 @@
 
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.EngineUtil.Numerics;
+using System.Numerics;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game
 {
@@ -45,18 +46,13 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
         /// Updates the vertex shader constant buffer to contain the
         /// correct camera coordinates.
         /// </summary>
-        /// <param name="vertexConstants">Vertex shader constants.</param>
         /// <param name="timeSinceTick">Time elapsed from the start of the current tick.</param>
-        public void Aim(ref GameSceneVertexConstants vertexConstants, float timeSinceTick)
+        public Vector3 Aim(float timeSinceTick)
         {
             var pos = cameraManager.Position;
             var vel = cameraManager.Velocity;
 
-            var adjPos = pos.InterpolateByTime(vel, timeSinceTick);
-
-            vertexConstants.CameraX = adjPos.X;
-            vertexConstants.CameraY = adjPos.Y;
-            vertexConstants.CameraZ = adjPos.Z;
+            return pos.InterpolateByTime(vel, timeSinceTick);
         }
 
     }

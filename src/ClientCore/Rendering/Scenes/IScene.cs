@@ -74,10 +74,13 @@ namespace Sovereign.ClientCore.Rendering.Scenes
             int[] drawLengths, out int drawCount);
 
         /// <summary>
-        /// Populates the game scene vertex constants buffer, if applicable.
+        /// Populates the world rendering vertex constants buffer, if applicable.
         /// </summary>
-        /// <param name="constantBuffer">Constant buffer.</param>
-        void PopulateGameSceneVertexConstantBuffer(GameSceneVertexConstants[] constantBuffer);
+        /// <param name="widthInTiles">Width of the display in tiles.</param>
+        /// <param name="heightInTiles">Height of the display in tiles.</param>
+        /// <param name="cameraPos">Camera position.</param>
+        void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles,
+            out Vector3 cameraPos);
 
     }
 

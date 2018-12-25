@@ -4,6 +4,14 @@
 
 ### December
 
+#### 25 December 2018
+
+* Merry Christmas!
+* Fix the vertex shader to output normalized device coordinates. This is done
+  by using a world-view transformation matrix that centers the camera and
+  applies the proper 3/4 perspective.
+* Ensure that index buffer is copied to the GPU once per frame.
+
 #### 24 December 2018
 
 * Use indexed rendering instead of directly rendering the vertices.

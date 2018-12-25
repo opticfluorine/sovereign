@@ -58,6 +58,8 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
             container.Register(Component.For<WorldRenderer>()
                 .LifestyleSingleton());
 
+            container.Register(Component.For<WorldVertexConstantsUpdater>()
+                .LifestyleSingleton());
         }
     }
 
