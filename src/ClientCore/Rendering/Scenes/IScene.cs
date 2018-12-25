@@ -70,7 +70,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         /// <param name="indexBuffer">Index buffer for update.</param>
         /// <param name="drawLengths">Number of vertices to use for each sequential draw.</param>
         /// <param name="drawCount">Number of draws to perform.</param>
-        void PopulateBuffers(Pos3Tex2Vertex[] vertexBuffer, int[] indexBuffer,
+        void PopulateBuffers(Pos3Tex2Vertex[] vertexBuffer, uint[] indexBuffer,
             int[] drawLengths, out int drawCount);
 
         /// <summary>

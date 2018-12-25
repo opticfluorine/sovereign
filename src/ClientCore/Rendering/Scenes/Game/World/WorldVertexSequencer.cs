@@ -62,8 +62,8 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="drawLengths">Draw lengths for each layer.</param>
         /// <param name="drawCount">Number of layers to draw one at a time.</param>
         /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
-        public void SequenceVertices(Pos3Tex2Vertex[] vertexBuffer, 
-            int[] indexBuffer, int[] drawLengths,
+        public void SequenceVertices(Pos3Tex2Vertex[] vertexBuffer,
+            uint[] indexBuffer, int[] drawLengths,
             out int drawCount, float timeSinceTick)
         {
             RetrieveEntities(timeSinceTick);
@@ -97,18 +97,22 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="vertexBuffer">Vertex buffer.</param>
         /// <param name="indexBuffer">Index buffer.</param>
         /// <param name="drawLengths">Draw lengths for each layer.</param>
-        private void PrepareLayers(Pos3Tex2Vertex[] vertexBuffer, int[] indexBuffer, 
+        private void PrepareLayers(Pos3Tex2Vertex[] vertexBuffer, uint[] indexBuffer,
             int[] drawLengths)
         {
             var bufferOffset = 0;
+            var indexBufferOffset = 0;
             var layerIndex = 0;
             foreach (var layer in grouper.Layers.Values)
             {
-                var verticesAdded = AddLayerToVertexBuffer(layer, vertexBuffer, 
-                    indexBuffer, bufferOffset);
-                drawLengths[layerIndex] = verticesAdded;
+                AddLayerToVertexBuffer(layer, vertexBuffer,
+                    indexBuffer, bufferOffset, indexBufferOffset,
+                    out var verticesAdded,
+                    out var indicesAdded);
+                drawLengths[layerIndex] = indicesAdded;
 
                 bufferOffset += verticesAdded;
+                indexBufferOffset += indicesAdded;
                 layerIndex++;
             }
         }
@@ -120,11 +124,16 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="vertexBuffer">Vertex buffer.</param>
         /// <param name="indexBuffer">Index buffer.</param>
         /// <param name="bufferOffset">Offset into the vertex buffer.</param>
-        /// <returns>Number of vertices added to the vertex buffer.</returns>
-        private int AddLayerToVertexBuffer(WorldLayer layer, Pos3Tex2Vertex[] vertexBuffer,
-            int[] indexBuffer, int bufferOffset)
+        /// <param name="indexBufferOffset">Offset into the index buffer.</param>
+        /// <param name="verticesAdded">Number of vertices added to the buffer.</param>
+        /// <param name="indicesAdded">Number of indices added to the buffer.</param>
+        private void AddLayerToVertexBuffer(WorldLayer layer, Pos3Tex2Vertex[] vertexBuffer,
+            uint[] indexBuffer, int bufferOffset, int indexBufferOffset,
+            out int verticesAdded, out int indicesAdded)
         {
-            return layerVertexSequencer.AddLayer(layer, vertexBuffer, indexBuffer, bufferOffset);
+            layerVertexSequencer.AddLayer(layer, vertexBuffer, indexBuffer,
+                bufferOffset, indexBufferOffset,
+                out verticesAdded, out indicesAdded);
         }
 
     }

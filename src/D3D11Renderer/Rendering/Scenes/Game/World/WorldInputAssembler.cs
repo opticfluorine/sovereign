@@ -84,6 +84,8 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         {
             context.InputAssembler.InputLayout = inputLayout;
             context.InputAssembler.SetVertexBuffers(0, bufferBinding);
+            context.InputAssembler.SetIndexBuffer(gameResourceManager.IndexBuffer.GpuBuffer,
+                SharpDX.DXGI.Format.R32_UInt, 0);
             context.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
         }
 

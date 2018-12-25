@@ -40,9 +40,12 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="vertexBuffer">Vertex buffer to populate.</param>
         /// <param name="indexBuffer">Index buffer to populate.</param>
         /// <param name="bufferOffset">Offset into the vertex buffer.</param>
-        /// <returns>Number of vertices added to the vertex buffer.</returns>
-        public int AddLayer(WorldLayer layer, Pos3Tex2Vertex[] vertexBuffer, 
-            int[] indexBuffer, int bufferOffset)
+        /// <param name="indexBufferOffset">Offset into the index buffer.</param>
+        /// <param name="verticesAdded">Number of vertices added to the buffer.</param>
+        /// <param name="indicesAdded">Number of indices added to the buffer.</param>
+        public void AddLayer(WorldLayer layer, Pos3Tex2Vertex[] vertexBuffer, 
+            uint[] indexBuffer, int bufferOffset, int indexBufferOffset,
+            out int verticesAdded, out int indicesAdded)
         {
             throw new NotImplementedException();
         }

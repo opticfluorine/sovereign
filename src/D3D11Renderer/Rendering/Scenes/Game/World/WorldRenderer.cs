@@ -107,11 +107,11 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         /// Draws a single layer of the world.
         /// </summary>
         /// <param name="context">Device context.</param>
-        /// <param name="vertexOffset">First vertex in the buffer to use.</param>
-        /// <param name="vertexCount">Number of vertices in the buffer to draw.</param>
-        private void DrawLayer(DeviceContext context, int vertexOffset, int vertexCount)
+        /// <param name="indexOffset">First index to use in the index buffer.</param>
+        /// <param name="indexCount">Number of indices to use from the index buffer.</param>
+        private void DrawLayer(DeviceContext context, int indexOffset, int indexCount)
         {
-            context.Draw(vertexCount, vertexOffset);
+            context.DrawIndexed(indexCount, indexOffset, 0);
         }
 
     }

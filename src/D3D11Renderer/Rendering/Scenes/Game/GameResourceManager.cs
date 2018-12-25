@@ -48,7 +48,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// <summary>
         /// Index buffer into the vertex buffer.
         /// </summary>
-        public D3D11UpdateBuffer<int> IndexBuffer { get; private set; }
+        public D3D11UpdateBuffer<uint> IndexBuffer { get; private set; }
 
         /// <summary>
         /// Constant buffer for the vertex shader.
@@ -86,6 +86,9 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 
             /* Create buffers. */
             VertexBuffer = new D3D11UpdateBuffer<Pos3Tex2Vertex>(device, BindFlags.VertexBuffer,
+                MaximumBufferElements);
+
+            IndexBuffer = new D3D11UpdateBuffer<uint>(device, BindFlags.IndexBuffer,
                 MaximumBufferElements);
 
             VertexConstantBuffer = new D3D11UpdateBuffer<GameSceneVertexConstants>(device,

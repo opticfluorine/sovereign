@@ -98,8 +98,8 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// Renders a single layer.
         /// </summary>
         /// <param name="context">Device context.</param>
-        /// <param name="offset">Vertex buffer offset for layer.</param>
-        /// <param name="length">Number of vertices in layer.</param>
+        /// <param name="offset">Index buffer offset for layer.</param>
+        /// <param name="length">Number of indices in layer.</param>
         private void RenderLayer(DeviceContext context, int offset, int length)
         {
             /* Draw the world. */
