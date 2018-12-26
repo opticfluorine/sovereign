@@ -21,34 +21,36 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using Sovereign.ClientCore.Rendering.Resources.Buffers;
+using System.Collections.Generic;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
 {
 
     /// <summary>
-    /// IoC installer for the high-level world rendering classes.
+    /// Responsible for sequencing animated sprites into the buffers.
     /// </summary>
-    public sealed class GeneralGameSceneWorldInstaller : IWindsorInstaller
+    public sealed class WorldSpriteSequencer
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+
+        /// <summary>
+        /// Sequences animated sprites into the buffers.
+        /// </summary>
+        /// <param name="animatedSprites">Animated sprites to sequence.</param>
+        /// <param name="vertexBuffer">Vertex buffer.</param>
+        /// <param name="indexBuffer">Index buffer.</param>
+        /// <param name="bufferOffset">Offset into the vertex buffer.</param>
+        /// <param name="indexBufferOffset">Offset into the index buffer.</param>
+        /// <param name="verticesAdded">Number of vertices sequenced by this call.</param>
+        /// <param name="indicesAdded">Number of indices sequenced by this call.</param>
+        public void SequenceAnimatedSprites(IList<Pos3Id> animatedSprites,
+            Pos3Tex2Vertex[] vertexBuffer, uint[] indexBuffer,
+            int bufferOffset, int indexBufferOffset,
+            out int verticesAdded, out int indicesAdded)
         {
-            container.Register(Component.For<WorldVertexSequencer>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<WorldLayerGrouper>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<WorldLayerVertexSequencer>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<WorldEntityRetriever>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<WorldSpriteSequencer>()
-                .LifestyleSingleton());
+            verticesAdded = indicesAdded = 0;
         }
+
     }
+
 }

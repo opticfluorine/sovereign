@@ -22,6 +22,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
@@ -32,6 +33,18 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
     /// </summary>
     public sealed class WorldLayerVertexSequencer
     {
+
+        private readonly WorldSpriteSequencer spriteSequencer;
+
+        /// <summary>
+        /// Animated sprites to be sequenced.
+        /// </summary>
+        private readonly List<Pos3Id> animatedSprites = new List<Pos3Id>();
+
+        public WorldLayerVertexSequencer(WorldSpriteSequencer spriteSequencer)
+        {
+            this.spriteSequencer = spriteSequencer;
+        }
 
         /// <summary>
         /// Adds a single layer to the vertex buffer.
@@ -46,6 +59,34 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         public void AddLayer(WorldLayer layer, Pos3Tex2Vertex[] vertexBuffer, 
             uint[] indexBuffer, int bufferOffset, int indexBufferOffset,
             out int verticesAdded, out int indicesAdded)
+        {
+            animatedSprites.Clear();
+
+            AddTileSprites(layer.TopFaceTileSprites);
+            AddTileSprites(layer.FrontFaceTileSprites);
+            AddAnimatedSprites(layer.AnimatedSprites);
+
+            spriteSequencer.SequenceAnimatedSprites(animatedSprites,
+                vertexBuffer, indexBuffer,
+                bufferOffset, indexBufferOffset,
+                out verticesAdded, out indicesAdded);
+        }
+
+        /// <summary>
+        /// Converts the given tile sprites to animated sprites and adds them to
+        /// the list of sprites to be sequenced.
+        /// </summary>
+        /// <param name="tileSprites">Tile sprites to add.</param>
+        private void AddTileSprites(IList<Pos3Id> tileSprites)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Adds the given animated sprites to the list of sprites to be sequenced.
+        /// </summary>
+        /// <param name="animatedSprites">Animated sprites to add.</param>
+        private void AddAnimatedSprites(IList<Pos3Id> animatedSprites)
         {
             throw new NotImplementedException();
         }

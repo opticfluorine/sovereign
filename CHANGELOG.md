@@ -7,6 +7,7 @@
 #### 25 December 2018
 
 * Merry Christmas!
+* Start implementing `WorldLayerVertexSequencer`.
 * Fix the vertex shader to output normalized device coordinates. This is done
   by using a world-view transformation matrix that centers the camera and
   applies the proper 3/4 perspective.
