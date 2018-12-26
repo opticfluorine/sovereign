@@ -4,6 +4,11 @@
 
 ### December
 
+#### 26 December 2018
+
+* Interpolate positions based on velocities in the vertex shader.
+* Add velocity to the world rendering vertex data.
+
 #### 25 December 2018
 
 * Merry Christmas!

@@ -117,10 +117,22 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
                     SemanticIndex = 0
                 },
 
-                /* Texture coordinate */
+                /* Velocity */
                 new InputElement
                 {
                     AlignedByteOffset = 12,
+                    Classification = InputClassification.PerVertexData,
+                    Format = SharpDX.DXGI.Format.R32G32B32_Float,
+                    InstanceDataStepRate = 0,
+                    Slot = 0,
+                    SemanticName = "POSITION",
+                    SemanticIndex = 1
+                },
+
+                /* Texture coordinate */
+                new InputElement
+                {
+                    AlignedByteOffset = 24,
                     Classification = InputClassification.PerVertexData,
                     Format = SharpDX.DXGI.Format.R32G32_Float,
                     InstanceDataStepRate = 0,

@@ -26,6 +26,7 @@ using SharpDX.Mathematics.Interop;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.ClientCore.Rendering.Scenes.Game;
 using Sovereign.D3D11Renderer.Rendering.Resources.Buffers;
+using Sovereign.D3D11Renderer.Rendering.Scenes.Game.World;
 
 namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 {
@@ -44,7 +45,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// <summary>
         /// Updateable vertex buffer.
         /// </summary>
-        public D3D11UpdateBuffer<Pos3Tex2Vertex> VertexBuffer { get; private set; }
+        public D3D11UpdateBuffer<WorldVertex> VertexBuffer { get; private set; }
 
         /// <summary>
         /// Index buffer into the vertex buffer.
@@ -54,7 +55,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// <summary>
         /// Constant buffer for the vertex shader.
         /// </summary>
-        public D3D11UpdateBuffer<RawMatrix> VertexConstantBuffer { get; private set; }
+        public D3D11UpdateBuffer<WorldVertexShaderConstants> VertexConstantBuffer { get; private set; }
 
         /// <summary>
         /// Number of elements to use in each draw.
@@ -86,13 +87,13 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
             shaders.Initialize();
 
             /* Create buffers. */
-            VertexBuffer = new D3D11UpdateBuffer<Pos3Tex2Vertex>(device, BindFlags.VertexBuffer,
+            VertexBuffer = new D3D11UpdateBuffer<WorldVertex>(device, BindFlags.VertexBuffer,
                 MaximumBufferElements);
 
             IndexBuffer = new D3D11UpdateBuffer<uint>(device, BindFlags.IndexBuffer,
                 MaximumBufferElements);
 
-            VertexConstantBuffer = new D3D11UpdateBuffer<RawMatrix>(device,
+            VertexConstantBuffer = new D3D11UpdateBuffer<WorldVertexShaderConstants>(device,
                 BindFlags.ConstantBuffer, 1);
         }
 

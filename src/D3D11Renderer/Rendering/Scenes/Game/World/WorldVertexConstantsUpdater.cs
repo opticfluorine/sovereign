@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using SharpDX.Mathematics.Interop;
 using Sovereign.ClientCore.Rendering.Scenes;
 
 namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
@@ -47,32 +48,37 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
             /* Retrieve the needed constants. */
             scene.PopulateWorldVertexConstants(out var widthInTiles,
                 out var heightInTiles,
-                out var cameraPos);
+                out var cameraPos,
+                out var timeSinceTick);
             var invHalfWidth = 2.0f / widthInTiles;
             var invHalfHeight = 2.0f / heightInTiles;
 
-            /* Compute the world-view transform matrix. */
+            /* Update constant buffer. */
             var buf = gameResourceManager.VertexConstantBuffer.Buffer;
+            buf[0].TimeSinceTick = timeSinceTick;
 
-            buf[0].M11 = invHalfWidth;
-            buf[0].M12 = 0.0f;
-            buf[0].M13 = 0.0f;
-            buf[0].M14 = -invHalfWidth * cameraPos.X;
+            /* Calculate world-view transform matrix. */
+            ref var mat = ref buf[0].WorldViewTransform;
 
-            buf[0].M21 = 0.0f;
-            buf[0].M22 = invHalfHeight;
-            buf[0].M23 = -invHalfHeight;
-            buf[0].M24 = invHalfHeight * (cameraPos.Z - cameraPos.Y);
+            mat.M11 = invHalfWidth;
+            mat.M12 = 0.0f;
+            mat.M13 = 0.0f;
+            mat.M14 = -invHalfWidth * cameraPos.X;
 
-            buf[0].M31 = 0.0f;
-            buf[0].M32 = 0.0f;
-            buf[0].M33 = 0.0f;
-            buf[0].M34 = 1.0f;
+            mat.M21 = 0.0f;
+            mat.M22 = invHalfHeight;
+            mat.M23 = -invHalfHeight;
+            mat.M24 = invHalfHeight * (cameraPos.Z - cameraPos.Y);
 
-            buf[0].M41 = 0.0f;
-            buf[0].M42 = 0.0f;
-            buf[0].M43 = 0.0f;
-            buf[0].M44 = 1.0f;
+            mat.M31 = 0.0f;
+            mat.M32 = 0.0f;
+            mat.M33 = 0.0f;
+            mat.M34 = 1.0f;
+
+            mat.M41 = 0.0f;
+            mat.M42 = 0.0f;
+            mat.M43 = 0.0f;
+            mat.M44 = 1.0f;
         }
 
     }

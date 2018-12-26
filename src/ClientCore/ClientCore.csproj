@@ -104,7 +104,7 @@
     <Compile Include="Rendering\RenderingManager.cs" />
     <Compile Include="Rendering\RenderingMainLoopAction.cs" />
     <Compile Include="Rendering\RenderingResourceManager.cs" />
-    <Compile Include="Rendering\Resources\Buffers\Pos3Tex2Vertex.cs" />
+    <Compile Include="Rendering\Resources\Buffers\WorldVertex.cs" />
     <Compile Include="Rendering\Scenes\Game\GameSceneCamera.cs" />
     <Compile Include="Rendering\Scenes\Game\GeneralGameSceneInstaller.cs" />
     <Compile Include="Rendering\Scenes\Game\World\GeneralGameSceneWorldInstaller.cs" />

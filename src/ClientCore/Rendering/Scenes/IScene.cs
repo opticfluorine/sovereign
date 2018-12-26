@@ -70,7 +70,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         /// <param name="indexBuffer">Index buffer for update.</param>
         /// <param name="drawLengths">Number of vertices to use for each sequential draw.</param>
         /// <param name="drawCount">Number of draws to perform.</param>
-        void PopulateBuffers(Pos3Tex2Vertex[] vertexBuffer, uint[] indexBuffer,
+        void PopulateBuffers(WorldVertex[] vertexBuffer, uint[] indexBuffer,
             int[] drawLengths, out int drawCount);
 
         /// <summary>
@@ -79,8 +79,9 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         /// <param name="widthInTiles">Width of the display in tiles.</param>
         /// <param name="heightInTiles">Height of the display in tiles.</param>
         /// <param name="cameraPos">Camera position.</param>
+        /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
         void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles,
-            out Vector3 cameraPos);
+            out Vector3 cameraPos, out float timeSinceTick);
 
     }
 

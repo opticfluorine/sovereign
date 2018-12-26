@@ -75,7 +75,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
 
         }
 
-        public void PopulateBuffers(Pos3Tex2Vertex[] vertexBuffer, uint[] indexBuffer,
+        public void PopulateBuffers(WorldVertex[] vertexBuffer, uint[] indexBuffer,
             int[] drawLengths, out int drawCount)
         {
             worldVertexSequencer.SequenceVertices(vertexBuffer, indexBuffer, drawLengths,
@@ -83,11 +83,12 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
         }
 
         public void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles, 
-            out Vector3 cameraPos)
+            out Vector3 cameraPos, out float timeSinceTick)
         {
             widthInTiles = viewport.WidthInTiles;
             heightInTiles = viewport.HeightInTiles;
-            cameraPos = camera.Aim(timeSinceTick);
+            cameraPos = camera.Aim(this.timeSinceTick);
+            timeSinceTick = this.timeSinceTick;
         }
 
         /// <summary>

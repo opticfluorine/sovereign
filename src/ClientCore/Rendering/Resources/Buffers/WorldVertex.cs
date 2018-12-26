@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
@@ -21,40 +21,27 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-/* Shader constants. */
-cbuffer ShaderConstants : register(b0)
+using System.Runtime.InteropServices;
+
+namespace Sovereign.ClientCore.Rendering.Resources.Buffers
 {
-    float4x4 g_transform;
-    float g_timeSinceTick;
-    float3 g_reserved;
-};
 
-/* Vertex shader input. */
-struct VsInput {
-	float3 vPosition : POSITION0;
-    float3 vVelocity : POSITION1;
-	float2 vTexCoord : TEXCOORD;
-};
+    /// <summary>
+    /// Vertex type for world rendering.
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct WorldVertex
+    {
+        [FieldOffset(0)] public float PosX;
+        [FieldOffset(sizeof(float))] public float PosY;
+        [FieldOffset(2 * sizeof(float))] public float PosZ;
 
-/* Vertex shader output. */
-struct VsOutput {
-	float4 vPosition : SV_POSITION;
-	float2 vTexCoord : TEXCOORD;
-};
+        [FieldOffset(3 * sizeof(float))] public float VelX;
+        [FieldOffset(4 * sizeof(float))] public float VelY;
+        [FieldOffset(5 * sizeof(float))] public float VelZ;
 
-/* Single-layer world vertex shader. */
-VsOutput main(VsInput input) {
-	VsOutput output;
+        [FieldOffset(6 * sizeof(float))] public float TexX;
+        [FieldOffset(7 * sizeof(float))] public float TexY;
+    }
 
-    /* Interpolate the position given the velocity. */
-    float3 interpolated = input.vPosition + mul(g_timeSinceTick, input.vVelocity);
-
-    /* Add the w coordinate and transform to device coordinates. */
-    float4 original = { interpolated, 1.0f };
-    output.vPosition = mul(g_transform, original);
-
-	/* Texture coordinates are passed through. */
-	output.vTexCoord = input.vTexCoord;
-
-	return output;
 }

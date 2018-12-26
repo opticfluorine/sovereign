@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
@@ -21,40 +21,44 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-/* Shader constants. */
-cbuffer ShaderConstants : register(b0)
+using SharpDX.Mathematics.Interop;
+using System.Runtime.InteropServices;
+
+namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
 {
-    float4x4 g_transform;
-    float g_timeSinceTick;
-    float3 g_reserved;
-};
 
-/* Vertex shader input. */
-struct VsInput {
-	float3 vPosition : POSITION0;
-    float3 vVelocity : POSITION1;
-	float2 vTexCoord : TEXCOORD;
-};
+    /// <summary>
+    /// Vertex shader constants for world rendering.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public struct WorldVertexShaderConstants
+    {
 
-/* Vertex shader output. */
-struct VsOutput {
-	float4 vPosition : SV_POSITION;
-	float2 vTexCoord : TEXCOORD;
-};
+        /// <summary>
+        /// World/view transformation matrix.
+        /// </summary>
+        public RawMatrix WorldViewTransform;
 
-/* Single-layer world vertex shader. */
-VsOutput main(VsInput input) {
-	VsOutput output;
+        /// <summary>
+        /// Time since the last tick, in seconds.
+        /// </summary>
+        public float TimeSinceTick;
 
-    /* Interpolate the position given the velocity. */
-    float3 interpolated = input.vPosition + mul(g_timeSinceTick, input.vVelocity);
+        /// <summary>
+        /// Reserved for future use.
+        /// </summary>
+        public float Reserved1;
 
-    /* Add the w coordinate and transform to device coordinates. */
-    float4 original = { interpolated, 1.0f };
-    output.vPosition = mul(g_transform, original);
+        /// <summary>
+        /// Reserved for future use.
+        /// </summary>
+        public float Reserved2;
 
-	/* Texture coordinates are passed through. */
-	output.vTexCoord = input.vTexCoord;
+        /// <summary>
+        /// Reserved for future use.
+        /// </summary>
+        public float Reserved3;
 
-	return output;
+    }
+
 }

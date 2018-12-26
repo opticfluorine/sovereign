@@ -56,7 +56,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="indexBufferOffset">Offset into the index buffer.</param>
         /// <param name="verticesAdded">Number of vertices added to the buffer.</param>
         /// <param name="indicesAdded">Number of indices added to the buffer.</param>
-        public void AddLayer(WorldLayer layer, Pos3Tex2Vertex[] vertexBuffer, 
+        public void AddLayer(WorldLayer layer, WorldVertex[] vertexBuffer, 
             uint[] indexBuffer, int bufferOffset, int indexBufferOffset,
             out int verticesAdded, out int indicesAdded)
         {

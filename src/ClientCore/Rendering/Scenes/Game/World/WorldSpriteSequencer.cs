@@ -44,7 +44,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="verticesAdded">Number of vertices sequenced by this call.</param>
         /// <param name="indicesAdded">Number of indices sequenced by this call.</param>
         public void SequenceAnimatedSprites(IList<Pos3Id> animatedSprites,
-            Pos3Tex2Vertex[] vertexBuffer, uint[] indexBuffer,
+            WorldVertex[] vertexBuffer, uint[] indexBuffer,
             int bufferOffset, int indexBufferOffset,
             out int verticesAdded, out int indicesAdded)
         {
