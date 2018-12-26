@@ -95,6 +95,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         /// <param name="context">Device context.</param>
         public void Unbind(DeviceContext context)
         {
+            context.InputAssembler.SetIndexBuffer(null, SharpDX.DXGI.Format.Unknown, 0);
             context.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding[] { });
         }
 
