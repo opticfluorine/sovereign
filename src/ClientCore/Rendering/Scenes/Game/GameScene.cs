@@ -46,6 +46,11 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
         private readonly WorldVertexSequencer worldVertexSequencer;
 
         /// <summary>
+        /// System time of the current frame, in microseconds.
+        /// </summary>
+        private ulong systemTime;
+
+        /// <summary>
         /// Time since the current tick started, in seconds.
         /// </summary>
         /// Evaluated at the start of rendering.
@@ -67,7 +72,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
 
         public void BeginScene()
         {
-            ComputeTimeSinceTick();
+            ComputeTimes();
         }
 
         public void EndScene()
@@ -79,7 +84,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
             int[] drawLengths, out int drawCount)
         {
             worldVertexSequencer.SequenceVertices(vertexBuffer, indexBuffer, drawLengths,
-                out drawCount, timeSinceTick);
+                out drawCount, timeSinceTick, systemTime);
         }
 
         public void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles, 
@@ -92,11 +97,11 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
         }
 
         /// <summary>
-        /// Updates timeSinceTick.
+        /// Updates systemTime and timeSinceTick.
         /// </summary>
-        private void ComputeTimeSinceTick()
+        private void ComputeTimes()
         {
-            var systemTime = systemTimer.GetTime();
+            systemTime = systemTimer.GetTime();
             timeSinceTick = (systemTime % engineConfiguration.EventTickInterval)
                 * UnitConversions.UsToS;
         }

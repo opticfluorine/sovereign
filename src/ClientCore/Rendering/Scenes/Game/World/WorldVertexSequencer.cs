@@ -62,13 +62,14 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="drawLengths">Draw lengths for each layer.</param>
         /// <param name="drawCount">Number of layers to draw one at a time.</param>
         /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
+        /// <param name="systemTime">System time of the current frame.</param>
         public void SequenceVertices(WorldVertex[] vertexBuffer,
             uint[] indexBuffer, int[] drawLengths,
-            out int drawCount, float timeSinceTick)
+            out int drawCount, float timeSinceTick, ulong systemTime)
         {
             RetrieveEntities(timeSinceTick);
             GroupLayers(out drawCount);
-            PrepareLayers(vertexBuffer, indexBuffer, drawLengths);
+            PrepareLayers(vertexBuffer, indexBuffer, drawLengths, systemTime);
         }
 
         /// <summary>
@@ -97,8 +98,9 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="vertexBuffer">Vertex buffer.</param>
         /// <param name="indexBuffer">Index buffer.</param>
         /// <param name="drawLengths">Draw lengths for each layer.</param>
+        /// <param name="systemTime">System time of the current frame.</param>
         private void PrepareLayers(WorldVertex[] vertexBuffer, uint[] indexBuffer,
-            int[] drawLengths)
+            int[] drawLengths, ulong systemTime)
         {
             var bufferOffset = 0;
             var indexBufferOffset = 0;
@@ -106,7 +108,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             foreach (var layer in grouper.Layers.Values)
             {
                 AddLayerToVertexBuffer(layer, vertexBuffer,
-                    indexBuffer, bufferOffset, indexBufferOffset,
+                    indexBuffer, bufferOffset, indexBufferOffset, systemTime,
                     out var verticesAdded,
                     out var indicesAdded);
                 drawLengths[layerIndex] = indicesAdded;
@@ -125,14 +127,15 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="indexBuffer">Index buffer.</param>
         /// <param name="bufferOffset">Offset into the vertex buffer.</param>
         /// <param name="indexBufferOffset">Offset into the index buffer.</param>
+        /// <param name="systemTime">System time of the current frame.</param>
         /// <param name="verticesAdded">Number of vertices added to the buffer.</param>
         /// <param name="indicesAdded">Number of indices added to the buffer.</param>
         private void AddLayerToVertexBuffer(WorldLayer layer, WorldVertex[] vertexBuffer,
-            uint[] indexBuffer, int bufferOffset, int indexBufferOffset,
+            uint[] indexBuffer, int bufferOffset, int indexBufferOffset, ulong systemTime,
             out int verticesAdded, out int indicesAdded)
         {
             layerVertexSequencer.AddLayer(layer, vertexBuffer, indexBuffer,
-                bufferOffset, indexBufferOffset,
+                bufferOffset, indexBufferOffset, systemTime,
                 out verticesAdded, out indicesAdded);
         }
 

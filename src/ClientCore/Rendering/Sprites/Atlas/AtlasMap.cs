@@ -103,7 +103,9 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
                 TopLeftX = tlx,
                 TopLeftY = tly,
                 BottomRightX = brx,
-                BottomRightY = bry
+                BottomRightY = bry,
+                Width = tileWidth,
+                Height = tileHeight
             });
         }
 

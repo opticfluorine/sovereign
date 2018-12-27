@@ -6,6 +6,11 @@
 
 #### 26 December 2018
 
+* Implement `WorldSpriteSequencer` to actually populate the vertex and index
+  buffers given a list of animated sprites. For now the transformation from
+  animated sprite to texture coordinates is done on the CPU; it would be
+  interesting in the future to offload this task to the vertex shader using
+  a tbuffer.
 * Interpolate positions based on velocities in the vertex shader.
 * Add velocity to the world rendering vertex data.
 

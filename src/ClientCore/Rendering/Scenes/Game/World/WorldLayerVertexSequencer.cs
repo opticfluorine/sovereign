@@ -54,10 +54,11 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="indexBuffer">Index buffer to populate.</param>
         /// <param name="bufferOffset">Offset into the vertex buffer.</param>
         /// <param name="indexBufferOffset">Offset into the index buffer.</param>
+        /// <param name="systemTime">System time of the current frame.</param>
         /// <param name="verticesAdded">Number of vertices added to the buffer.</param>
         /// <param name="indicesAdded">Number of indices added to the buffer.</param>
         public void AddLayer(WorldLayer layer, WorldVertex[] vertexBuffer, 
-            uint[] indexBuffer, int bufferOffset, int indexBufferOffset,
+            uint[] indexBuffer, int bufferOffset, int indexBufferOffset, ulong systemTime,
             out int verticesAdded, out int indicesAdded)
         {
             animatedSprites.Clear();
@@ -68,7 +69,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
 
             spriteSequencer.SequenceAnimatedSprites(animatedSprites,
                 vertexBuffer, indexBuffer,
-                bufferOffset, indexBufferOffset,
+                bufferOffset, indexBufferOffset, systemTime,
                 out verticesAdded, out indicesAdded);
         }
 

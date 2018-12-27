@@ -21,11 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites.AnimatedSpriteDefinitions;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites
@@ -53,6 +50,17 @@ namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites
             Sprites = definition.SpriteIds
                 .Select(id => spriteManager.Sprites[id])
                 .ToList();
+        }
+
+        /// <summary>
+        /// Gets the sprite for the given system time.
+        /// </summary>
+        /// <param name="systemTime">System time.</param>
+        /// <returns>Sprite for the given system time.</returns>
+        public Sprite GetSpriteForTime(ulong systemTime)
+        {
+            var spriteFrame = (int)(systemTime / FrameTime) % Sprites.Count;
+            return Sprites[spriteFrame];
         }
 
     }

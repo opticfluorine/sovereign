@@ -21,12 +21,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
 {
 
@@ -42,6 +36,10 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         public int BottomRightX;
 
         public int BottomRightY;
+
+        public int Width;
+
+        public int Height;
     }
 
 }
