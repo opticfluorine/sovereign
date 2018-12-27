@@ -27,15 +27,21 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
 {
 
     /// <summary>
-    /// Pairs a position with an ID (e.g. tile sprite ID, animated sprite ID, etc.).
+    /// Pairs a position and velocity with an ID (e.g. tile sprite ID, 
+    /// animated sprite ID, etc.).
     /// </summary>
-    public struct Pos3Id
+    public struct PosVelId
     {
 
         /// <summary>
         /// Position.
         /// </summary>
         public Vector3 Position;
+
+        /// <summary>
+        /// Velocity.
+        /// </summary>
+        public Vector3 Velocity;
 
         /// <summary>
         /// ID.

@@ -39,7 +39,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <summary>
         /// Animated sprites to be sequenced.
         /// </summary>
-        private readonly List<Pos3Id> animatedSprites = new List<Pos3Id>();
+        private readonly List<PosVelId> animatedSprites = new List<PosVelId>();
 
         public WorldLayerVertexSequencer(WorldSpriteSequencer spriteSequencer)
         {
@@ -78,7 +78,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// the list of sprites to be sequenced.
         /// </summary>
         /// <param name="tileSprites">Tile sprites to add.</param>
-        private void AddTileSprites(IList<Pos3Id> tileSprites)
+        private void AddTileSprites(IList<PosVelId> tileSprites)
         {
             throw new NotImplementedException();
         }
@@ -87,7 +87,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// Adds the given animated sprites to the list of sprites to be sequenced.
         /// </summary>
         /// <param name="animatedSprites">Animated sprites to add.</param>
-        private void AddAnimatedSprites(IList<Pos3Id> animatedSprites)
+        private void AddAnimatedSprites(IList<PosVelId> animatedSprites)
         {
             throw new NotImplementedException();
         }

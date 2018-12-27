@@ -50,20 +50,20 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <summary>
         /// Tile sprites forming the floor of this layer.
         /// </summary>
-        public IList<Pos3Id> TopFaceTileSprites { get; private set; }
-            = new List<Pos3Id>(InitialTileSpriteCount);
+        public IList<PosVelId> TopFaceTileSprites { get; private set; }
+            = new List<PosVelId>(InitialTileSpriteCount);
 
         /// <summary>
         /// Front face tile sprites of blocks in the next higher layer.
         /// </summary>
-        public IList<Pos3Id> FrontFaceTileSprites { get; private set; }
-            = new List<Pos3Id>(InitialTileSpriteCount);
+        public IList<PosVelId> FrontFaceTileSprites { get; private set; }
+            = new List<PosVelId>(InitialTileSpriteCount);
 
         /// <summary>
         /// Animated sprites to additionally be drawn in this layer.
         /// </summary>
-        public IList<Pos3Id> AnimatedSprites { get; private set; }
-            = new List<Pos3Id>(InitialAnimatedSpriteCount);
+        public IList<PosVelId> AnimatedSprites { get; private set; }
+            = new List<PosVelId>(InitialAnimatedSpriteCount);
 
         /// <summary>
         /// Resets the layer.

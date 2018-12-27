@@ -25,6 +25,7 @@ using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Systems.Block.Components;
+using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.World.Materials;
 using Sovereign.EngineUtil.Collections;
 using Sovereign.WorldLib.Materials;
@@ -46,6 +47,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         private readonly MaterialModifierComponentCollection materialModifiers;
         private readonly AnimatedSpriteComponentCollection animatedSprites;
         private readonly AboveBlockComponentCollection aboveBlocks;
+        private readonly VelocityComponentCollection velocities;
         private readonly MaterialManager materialManager;
 
         /// <summary>
@@ -64,12 +66,14 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             MaterialModifierComponentCollection materialModifiers,
             AnimatedSpriteComponentCollection animatedSprites,
             AboveBlockComponentCollection aboveBlocks,
+            VelocityComponentCollection velocities,
             MaterialManager materialManager)
         {
             this.materials = materials;
             this.materialModifiers = materialModifiers;
             this.animatedSprites = animatedSprites;
             this.aboveBlocks = aboveBlocks;
+            this.velocities = velocities;
             this.materialManager = materialManager;
         }
 
@@ -92,26 +96,33 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="drawable">Drawable to process.</param>
         private void ProcessDrawable(PositionedEntity drawable)
         {
+            /* Get the entity velocity, defaulting to zero if not set. */
+            var velocity = velocities.GetComponentForEntity(drawable.EntityId)
+                .OrElseDefault(Vector3.Zero);
+
+            /* Route the drawable to the correct rendering list. */
             var material = materials.GetComponentForEntity(drawable.EntityId);
             if (material.HasValue)
-                AddMaterial(drawable, material.Value);
+                AddMaterial(drawable, material.Value, velocity);
             else
-                AddAnimatedSprite(drawable);
+                AddAnimatedSprite(drawable, velocity);
         }
 
         /// <summary>
         /// Adds a non-material animated sprite to the rendering sequence.
         /// </summary>
         /// <param name="drawable">Drawable to process.</param>
-        private void AddAnimatedSprite(PositionedEntity drawable)
+        /// <param name="velocity">Velocity of the entity.</param>
+        private void AddAnimatedSprite(PositionedEntity drawable, Vector3 velocity)
         {
             var zFloor = (int)drawable.Position.Z;
             var layer = SelectLayer(zFloor);
             var sprite = animatedSprites.GetComponentForEntity(drawable.EntityId);
             if (sprite.HasValue)
-                layer.AnimatedSprites.Add(new Pos3Id()
+                layer.AnimatedSprites.Add(new PosVelId()
                 {
                     Position = drawable.Position,
+                    Velocity = velocity,
                     Id = sprite.Value
                 });
         }
@@ -121,7 +132,8 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// </summary>
         /// <param name="drawable">Drawable to process.</param>
         /// <param name="materialId">Material ID.</param>
-        private void AddMaterial(PositionedEntity drawable, int materialId)
+        /// <param name="velocity">Velocity of the entity.</param>
+        private void AddMaterial(PositionedEntity drawable, int materialId, Vector3 velocity)
         {
             /* The current z contains the top face, the lower z contains the front face */
             var zFloorTop = (int)drawable.Position.Z;
@@ -141,8 +153,8 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
                 return;
             }
 
-            AddMaterialTopFace(drawable, materialSubtype, layerTop);
-            AddMaterialFrontFace(drawable, materialSubtype, layerFront);
+            AddMaterialTopFace(drawable, materialSubtype, velocity, layerTop);
+            AddMaterialFrontFace(drawable, materialSubtype, velocity, layerFront);
         }
 
         /// <summary>
@@ -150,14 +162,16 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// </summary>
         /// <param name="drawable">Material block information.</param>
         /// <param name="materialSubtype">Material subtype.</param>
+        /// <param name="velocity">Velocity of the entity.</param>
         /// <param name="layerFront">Rendering layer.</param>
         private void AddMaterialFrontFace(PositionedEntity drawable, MaterialSubtype materialSubtype,
-            WorldLayer layerFront)
+            Vector3 velocity, WorldLayer layerFront)
         {
-            layerFront.FrontFaceTileSprites.Add(new Pos3Id()
+            layerFront.FrontFaceTileSprites.Add(new PosVelId()
             {
                 Position = drawable.Position,
-                Id = materialSubtype.SideFaceTileSpriteId
+                Velocity = velocity,
+                Id = materialSubtype.SideFaceTileSpriteId,
             });
         }
 
@@ -166,14 +180,15 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// </summary>
         /// <param name="drawable">Material block information.</param>
         /// <param name="materialSubtype">Material subtype.</param>
+        /// <param name="velocity">Velocity of the entity.</param>
         /// <param name="layerTop">Rendering layer.</param>
         private void AddMaterialTopFace(PositionedEntity drawable, MaterialSubtype materialSubtype,
-            WorldLayer layerTop)
+            Vector3 velocity, WorldLayer layerTop)
         {
             var topFaceId = IsTopFaceObscured(drawable.EntityId) ?
                 materialSubtype.ObscuredTopFaceTileSpriteId
                 : materialSubtype.TopFaceTileSpriteId;
-            layerTop.TopFaceTileSprites.Add(new Pos3Id()
+            layerTop.TopFaceTileSprites.Add(new PosVelId()
             {
                 Position = new Vector3()
                 {
@@ -181,6 +196,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
                     Y = drawable.Position.Y,
                     Z = drawable.Position.Z - 1.0f
                 },
+                Velocity = velocity,
                 Id = topFaceId
             });
         }

@@ -6,6 +6,7 @@
 
 #### 26 December 2018
 
+* Route entity velocities to the vertices in `WorldSpriteSequencer`.
 * Implement `WorldSpriteSequencer` to actually populate the vertex and index
   buffers given a list of animated sprites. For now the transformation from
   animated sprite to texture coordinates is done on the CPU; it would be

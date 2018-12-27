@@ -64,7 +64,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="systemTime">System time of this frame.</param>
         /// <param name="verticesAdded">Number of vertices sequenced by this call.</param>
         /// <param name="indicesAdded">Number of indices sequenced by this call.</param>
-        public void SequenceAnimatedSprites(IList<Pos3Id> animatedSprites,
+        public void SequenceAnimatedSprites(IList<PosVelId> animatedSprites,
             WorldVertex[] vertexBuffer, uint[] indexBuffer,
             int bufferOffset, int indexBufferOffset, ulong systemTime,
             out int verticesAdded, out int indicesAdded)
@@ -83,11 +83,12 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             foreach (var positionedAnimatedSprite in animatedSprites)
             {
                 var pos = positionedAnimatedSprite.Position;
+                var vel = positionedAnimatedSprite.Velocity;
                 var animId = positionedAnimatedSprite.Id;
                 var animatedSprite = animatedSpriteManager.AnimatedSprites[animId];
                 var sprite = animatedSprite.GetSpriteForTime(systemTime);
 
-                AddVerticesForSprite(sprite, pos, vertexBuffer, vertexPos);
+                AddVerticesForSprite(sprite, pos, vel, vertexBuffer, vertexPos);
                 AddIndicesForSprite(indexBuffer, indexPos, (uint)vertexPos);
 
                 vertexPos += VerticesPerSprite;
@@ -108,7 +109,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="vertexBuffer"></param>
         /// <param name="vertexPos"></param>
         private void AddVerticesForSprite(Sprite sprite, Vector3 position,
-            WorldVertex[] vertexBuffer, int vertexPos)
+            Vector3 velocity, WorldVertex[] vertexBuffer, int vertexPos)
         {
             /* Retrieve sprite information. */
             var spriteInfo = atlasMap.MapElements[sprite.Id];
@@ -118,9 +119,9 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             vertex.PosX = position.X;
             vertex.PosY = position.Y;
             vertex.PosZ = position.Z;
-            vertex.VelX = 0.0f; // TODO
-            vertex.VelY = 0.0f; // TODO
-            vertex.VelZ = 0.0f; // TODO
+            vertex.VelX = velocity.X;
+            vertex.VelY = velocity.Y;
+            vertex.VelZ = velocity.Z;
             vertex.TexX = spriteInfo.TopLeftX;
             vertex.TexY = spriteInfo.TopLeftY;
 
@@ -129,9 +130,9 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             vertex.PosX = position.X + spriteInfo.Width;
             vertex.PosY = position.Y;
             vertex.PosZ = position.Z;
-            vertex.VelX = 0.0f; // TODO
-            vertex.VelY = 0.0f; // TODO
-            vertex.VelZ = 0.0f; // TODO
+            vertex.VelX = velocity.X;
+            vertex.VelY = velocity.Y;
+            vertex.VelZ = velocity.Z;
             vertex.TexX = spriteInfo.BottomRightX;
             vertex.TexY = spriteInfo.TopLeftY;
 
@@ -140,9 +141,9 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             vertex.PosX = position.X + spriteInfo.Width;
             vertex.PosY = position.Y - spriteInfo.Height;
             vertex.PosZ = position.Z;
-            vertex.VelX = 0.0f; // TODO
-            vertex.VelY = 0.0f; // TODO
-            vertex.VelZ = 0.0f; // TODO
+            vertex.VelX = velocity.X;
+            vertex.VelY = velocity.Y;
+            vertex.VelZ = velocity.Z;
             vertex.TexX = spriteInfo.BottomRightX;
             vertex.TexY = spriteInfo.BottomRightY;
 
@@ -151,9 +152,9 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             vertex.PosX = position.X;
             vertex.PosY = position.Y - spriteInfo.Height;
             vertex.PosZ = position.Z;
-            vertex.VelX = 0.0f; // TODO
-            vertex.VelY = 0.0f; // TODO
-            vertex.VelZ = 0.0f; // TODO
+            vertex.VelX = velocity.X;
+            vertex.VelY = velocity.Y;
+            vertex.VelZ = velocity.Z;
             vertex.TexX = spriteInfo.TopLeftX;
             vertex.TexY = spriteInfo.BottomRightY;
         }
