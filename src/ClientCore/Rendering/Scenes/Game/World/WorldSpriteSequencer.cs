@@ -64,7 +64,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="systemTime">System time of this frame.</param>
         /// <param name="verticesAdded">Number of vertices sequenced by this call.</param>
         /// <param name="indicesAdded">Number of indices sequenced by this call.</param>
-        public void SequenceAnimatedSprites(IList<PosVelId> animatedSprites,
+        unsafe public void SequenceAnimatedSprites(IList<PosVelId> animatedSprites,
             WorldVertex[] vertexBuffer, uint[] indexBuffer,
             int bufferOffset, int indexBufferOffset, ulong systemTime,
             out int verticesAdded, out int indicesAdded)
@@ -80,19 +80,27 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
                 return;
             }
 
-            foreach (var positionedAnimatedSprite in animatedSprites)
+            /* Update buffers directly. */
+            fixed (WorldVertex* vertexBase = vertexBuffer)
             {
-                var pos = positionedAnimatedSprite.Position;
-                var vel = positionedAnimatedSprite.Velocity;
-                var animId = positionedAnimatedSprite.Id;
-                var animatedSprite = animatedSpriteManager.AnimatedSprites[animId];
-                var sprite = animatedSprite.GetSpriteForTime(systemTime);
+                fixed (uint* indexBase = indexBuffer)
+                {
+                    foreach (var positionedAnimatedSprite in animatedSprites)
+                    {
+                        var pos = positionedAnimatedSprite.Position;
+                        var vel = positionedAnimatedSprite.Velocity;
+                        var animId = positionedAnimatedSprite.Id;
+                        var animatedSprite = animatedSpriteManager.AnimatedSprites[animId];
+                        var sprite = animatedSprite.GetSpriteForTime(systemTime);
 
-                AddVerticesForSprite(sprite, pos, vel, vertexBuffer, vertexPos);
-                AddIndicesForSprite(indexBuffer, indexPos, (uint)vertexPos);
+                        AddVerticesForSprite(sprite, pos, vel, vertexBase, vertexPos);
+                        AddIndicesForSprite(indexBase, indexPos, (uint)vertexPos);
 
-                vertexPos += VerticesPerSprite;
-                indexPos += IndicesPerSprite;
+                        vertexPos += VerticesPerSprite;
+                        indexPos += IndicesPerSprite;
+                    }
+
+                }
             }
 
             verticesAdded = vertexPos - bufferOffset;
@@ -105,77 +113,81 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <remarks>
         /// Vertices are generated clockwise from top-left.
         /// </remarks>
-        /// <param name="sprite"></param>
-        /// <param name="vertexBuffer"></param>
-        /// <param name="vertexPos"></param>
-        private void AddVerticesForSprite(Sprite sprite, Vector3 position,
-            Vector3 velocity, WorldVertex[] vertexBuffer, int vertexPos)
+        /// <param name="sprite">Sprite to sequence.</param>
+        /// <param name="position">Position of entity.</param>
+        /// <param name="velocity">Velocity of entity.</param>
+        /// <param name="vertexBase">Pointer to beginning of vertex buffer.</param>
+        /// <param name="vertexPos">Position of the first vertex to add.</param>
+        unsafe private void AddVerticesForSprite(Sprite sprite, Vector3 position,
+            Vector3 velocity, WorldVertex* vertexBase, int vertexPos)
         {
             /* Retrieve sprite information. */
             var spriteInfo = atlasMap.MapElements[sprite.Id];
 
             /* Top left. */
-            ref var vertex = ref vertexBuffer[vertexPos];
-            vertex.PosX = position.X;
-            vertex.PosY = position.Y;
-            vertex.PosZ = position.Z;
-            vertex.VelX = velocity.X;
-            vertex.VelY = velocity.Y;
-            vertex.VelZ = velocity.Z;
-            vertex.TexX = spriteInfo.TopLeftX;
-            vertex.TexY = spriteInfo.TopLeftY;
+            WorldVertex* vertex = vertexBase + vertexPos * sizeof(WorldVertex);
+            vertex->PosX = position.X;
+            vertex->PosY = position.Y;
+            vertex->PosZ = position.Z;
+            vertex->VelX = velocity.X;
+            vertex->VelY = velocity.Y;
+            vertex->VelZ = velocity.Z;
+            vertex->TexX = spriteInfo.TopLeftX;
+            vertex->TexY = spriteInfo.TopLeftY;
 
             /* Top right. */
-            vertex = vertexBuffer[vertexPos + 1];
-            vertex.PosX = position.X + spriteInfo.Width;
-            vertex.PosY = position.Y;
-            vertex.PosZ = position.Z;
-            vertex.VelX = velocity.X;
-            vertex.VelY = velocity.Y;
-            vertex.VelZ = velocity.Z;
-            vertex.TexX = spriteInfo.BottomRightX;
-            vertex.TexY = spriteInfo.TopLeftY;
+            vertex += sizeof(WorldVertex);
+            vertex->PosX = position.X + spriteInfo.Width;
+            vertex->PosY = position.Y;
+            vertex->PosZ = position.Z;
+            vertex->VelX = velocity.X;
+            vertex->VelY = velocity.Y;
+            vertex->VelZ = velocity.Z;
+            vertex->TexX = spriteInfo.BottomRightX;
+            vertex->TexY = spriteInfo.TopLeftY;
 
             /* Bottom right. */
-            vertex = vertexBuffer[vertexPos + 2];
-            vertex.PosX = position.X + spriteInfo.Width;
-            vertex.PosY = position.Y - spriteInfo.Height;
-            vertex.PosZ = position.Z;
-            vertex.VelX = velocity.X;
-            vertex.VelY = velocity.Y;
-            vertex.VelZ = velocity.Z;
-            vertex.TexX = spriteInfo.BottomRightX;
-            vertex.TexY = spriteInfo.BottomRightY;
+            vertex += sizeof(WorldVertex);
+            vertex->PosX = position.X + spriteInfo.Width;
+            vertex->PosY = position.Y - spriteInfo.Height;
+            vertex->PosZ = position.Z;
+            vertex->VelX = velocity.X;
+            vertex->VelY = velocity.Y;
+            vertex->VelZ = velocity.Z;
+            vertex->TexX = spriteInfo.BottomRightX;
+            vertex->TexY = spriteInfo.BottomRightY;
 
             /* Bottom left. */
-            vertex = vertexBuffer[vertexPos + 3];
-            vertex.PosX = position.X;
-            vertex.PosY = position.Y - spriteInfo.Height;
-            vertex.PosZ = position.Z;
-            vertex.VelX = velocity.X;
-            vertex.VelY = velocity.Y;
-            vertex.VelZ = velocity.Z;
-            vertex.TexX = spriteInfo.TopLeftX;
-            vertex.TexY = spriteInfo.BottomRightY;
+            vertex += sizeof(WorldVertex);
+            vertex->PosX = position.X;
+            vertex->PosY = position.Y - spriteInfo.Height;
+            vertex->PosZ = position.Z;
+            vertex->VelX = velocity.X;
+            vertex->VelY = velocity.Y;
+            vertex->VelZ = velocity.Z;
+            vertex->TexX = spriteInfo.TopLeftX;
+            vertex->TexY = spriteInfo.BottomRightY;
         }
 
         /// <summary>
         /// Adds the six indices for the two triangles that compose a sprite.
         /// </summary>
-        /// <param name="indexBuffer">Index buffer to populate.</param>
+        /// <param name="indexBase">Pointer to index buffer to populate.</param>
         /// <param name="indexPos">Position for the first index.</param>
         /// <param name="vertexPos">Position of the first vertex.</param>
-        private void AddIndicesForSprite(uint[] indexBuffer, int indexPos, uint vertexPos)
+        unsafe private void AddIndicesForSprite(uint* indexBase, int indexPos, uint vertexPos)
         {
+            uint* index = indexBase + indexPos * sizeof(uint);
+
             /* Upper left triangle. */
-            indexBuffer[indexPos] = vertexPos;
-            indexBuffer[indexPos + 1] = vertexPos + 1;
-            indexBuffer[indexPos + 2] = vertexPos + 3;
+            *index = vertexPos;
+            *(index + sizeof(uint)) = vertexPos + 1;
+            *(index + 2 * sizeof(uint)) = vertexPos + 3;
 
             /* Lower right triangle. */
-            indexBuffer[indexPos + 3] = vertexPos + 1;
-            indexBuffer[indexPos + 4] = vertexPos + 2;
-            indexBuffer[indexPos + 5] = vertexPos + 3;
+            *(index + 3 * sizeof(uint)) = vertexPos + 1;
+            *(index + 4 * sizeof(uint)) = vertexPos + 2;
+            *(index + 5 * sizeof(uint)) = vertexPos + 3;
         }
 
         /// <summary>

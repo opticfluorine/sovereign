@@ -4,6 +4,11 @@
 
 ### December
 
+#### 27 December 2018
+
+* Use unsafe pointer arithmetic for updating vertex and index buffers.
+  The array bounds are checked once per layer at the outset.
+
 #### 26 December 2018
 
 * Route entity velocities to the vertices in `WorldSpriteSequencer`.
