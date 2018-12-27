@@ -31,8 +31,8 @@ cbuffer ShaderConstants : register(b0)
 
 /* Vertex shader input. */
 struct VsInput {
-	float3 vPosition : POSITION0;
-    float3 vVelocity : POSITION1;
+	float3 vPosition : POSITION;
+    float3 vVelocity : VELOCITY;
 	float2 vTexCoord : TEXCOORD;
 };
 

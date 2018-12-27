@@ -126,8 +126,8 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
                     Format = SharpDX.DXGI.Format.R32G32B32_Float,
                     InstanceDataStepRate = 0,
                     Slot = 0,
-                    SemanticName = "POSITION",
-                    SemanticIndex = 1
+                    SemanticName = "VELOCITY",
+                    SemanticIndex = 0
                 },
 
                 /* Texture coordinate */
