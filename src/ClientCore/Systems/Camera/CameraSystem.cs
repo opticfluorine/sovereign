@@ -52,11 +52,12 @@ namespace Sovereign.ClientCore.Systems.Camera
         };
 
         public CameraSystem(CameraManager cameraManager, CameraEventHandler eventHandler,
-            IEventLoop eventLoop)
+            IEventLoop eventLoop, EventCommunicator eventCommunicator)
         {
             this.cameraManager = cameraManager;
             this.eventHandler = eventHandler;
             this.eventLoop = eventLoop;
+            EventCommunicator = eventCommunicator;
 
             eventLoop.RegisterSystem(this);
         }
@@ -66,7 +67,7 @@ namespace Sovereign.ClientCore.Systems.Camera
             eventLoop.UnregisterSystem(this);
         }
 
-        public EventCommunicator EventCommunicator { get; set; }
+        public EventCommunicator EventCommunicator { get; private set; }
 
         public void Initialize()
         {

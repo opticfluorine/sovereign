@@ -39,7 +39,7 @@ namespace Sovereign.EngineCore.Systems.TestContent
         private readonly BlockSource blockSource;
         private readonly IEventLoop eventLoop;
 
-        public EventCommunicator EventCommunicator { get; set; }
+        public EventCommunicator EventCommunicator { get; private set; }
 
         public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
         {
@@ -48,10 +48,12 @@ namespace Sovereign.EngineCore.Systems.TestContent
 
         public int WorkloadEstimate => 0;
 
-        public TestContentSystem(BlockSource blockSource, IEventLoop eventLoop)
+        public TestContentSystem(BlockSource blockSource, IEventLoop eventLoop,
+            EventCommunicator eventCommunicator)
         {
             this.blockSource = blockSource;
             this.eventLoop = eventLoop;
+            EventCommunicator = eventCommunicator;
 
             eventLoop.RegisterSystem(this);
         }

@@ -36,7 +36,7 @@ namespace Sovereign.EngineCore.Systems
         /// <summary>
         /// Event communicator for the given service.
         /// </summary>
-        EventCommunicator EventCommunicator { get; set; }
+        EventCommunicator EventCommunicator { get; }
 
         /// <summary>
         /// The set of event IDs that this system is listening for.

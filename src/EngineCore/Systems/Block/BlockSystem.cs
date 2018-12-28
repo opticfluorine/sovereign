@@ -39,7 +39,7 @@ namespace Sovereign.EngineCore.Systems.Block
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-        public EventCommunicator EventCommunicator { get; set; }
+        public EventCommunicator EventCommunicator { get; private set; }
 
         public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
         {
@@ -51,10 +51,12 @@ namespace Sovereign.EngineCore.Systems.Block
 
         public int WorkloadEstimate => 50;
 
-        public BlockSystem(BlockEventHandler eventHandler, IEventLoop eventLoop)
+        public BlockSystem(BlockEventHandler eventHandler, IEventLoop eventLoop,
+            EventCommunicator eventCommunicator)
         {
             this.eventHandler = eventHandler;
             this.eventLoop = eventLoop;
+            EventCommunicator = eventCommunicator;
 
             eventLoop.RegisterSystem(this);
         }

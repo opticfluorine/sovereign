@@ -35,7 +35,7 @@ namespace Sovereign.ClientCore.Systems.Input
     public class InputSystem : ISystem, IDisposable
     {
 
-        public EventCommunicator EventCommunicator { get; set; }
+        public EventCommunicator EventCommunicator { get; private set; }
 
         public ISet<EventId> EventIdsOfInterest { get; }
            = new HashSet<EventId>() {
@@ -49,10 +49,11 @@ namespace Sovereign.ClientCore.Systems.Input
         private readonly IEventLoop eventLoop;
 
         public InputSystem(KeyboardEventHandler keyboardEventHandler,
-            IEventLoop eventLoop)
+            IEventLoop eventLoop, EventCommunicator eventCommunicator)
         {
             this.keyboardEventHandler = keyboardEventHandler;
             this.eventLoop = eventLoop;
+            EventCommunicator = eventCommunicator;
 
             eventLoop.RegisterSystem(this);
         }

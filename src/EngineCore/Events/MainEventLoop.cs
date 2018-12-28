@@ -84,12 +84,8 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         public MainEventLoop(ComponentManager componentManager,
             ICollection<IEventAdapter> eventAdapters)
         {
-            /* Set dependencies. */
             this.componentManager = componentManager;
             this.eventAdapters = eventAdapters;
-
-            /* Build data structures. */
-            BuildCommunicatorTables();
         }
 
         public void PumpEventLoop()
@@ -140,6 +136,7 @@ namespace Sovereign.EngineCore.Systems.EventSystem
             lock (systems)
             {
                 systems.Add(system);
+                UpdateCommunicatorTables(system);
             }
         }
 
@@ -163,23 +160,19 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// <summary>
         /// Builds the communicator tables.
         /// </summary>
-        private void BuildCommunicatorTables()
+        /// <param name="system">System.</param>
+        private void UpdateCommunicatorTables(ISystem system)
         {
-            /* Enumerate all event IDs that will be listened for. */
-            var eventIds = from id in systems
-                           .SelectMany(system => system.EventIdsOfInterest)
-                           .Distinct()
+            var eventIds = from id in system.EventIdsOfInterest.Distinct()
                            select id;
 
-            /* Find the communicators associated with each event ID. */
             foreach (var eventId in eventIds)
             {
-                var comms = from system in systems
-                            .Where(s => s.EventIdsOfInterest.Contains(eventId))
-                            select system.EventCommunicator;
-                var list = new List<EventCommunicator>();
-                list.AddRange(comms);
-                communicatorsByEventId.Add(eventId, list);
+                if (!communicatorsByEventId.ContainsKey(eventId))
+                {
+                    communicatorsByEventId[eventId] = new List<EventCommunicator>();
+                }
+                communicatorsByEventId[eventId].Add(system.EventCommunicator);
             }
         }
 
@@ -256,7 +249,7 @@ namespace Sovereign.EngineCore.Systems.EventSystem
                 {
                     comm.SendEventToSystem(ev);
                 }
-            }   
+            }
         }
 
         /// <summary>

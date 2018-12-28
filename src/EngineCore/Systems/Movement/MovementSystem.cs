@@ -42,7 +42,7 @@ namespace Sovereign.EngineCore.Systems.Movement
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-        public EventCommunicator EventCommunicator { get; set; }
+        public EventCommunicator EventCommunicator { get; private set; }
 
         public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>()
         {
@@ -56,10 +56,12 @@ namespace Sovereign.EngineCore.Systems.Movement
         private readonly VelocityManager velocityManager;
         private readonly IEventLoop eventLoop;
 
-        public MovementSystem(VelocityManager velocityManager, IEventLoop eventLoop)
+        public MovementSystem(VelocityManager velocityManager, IEventLoop eventLoop,
+            EventCommunicator eventCommunicator)
         {
             this.velocityManager = velocityManager;
             this.eventLoop = eventLoop;
+            EventCommunicator = eventCommunicator;
 
             eventLoop.RegisterSystem(this);
         }

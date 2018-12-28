@@ -6,6 +6,8 @@
 
 #### 28 December 2018
 
+* Fix issue where the event loop was dropping all events because the
+  communicator map was not being populated.
 * Refactor some of the event code to partially avoid the use of
   dependency-injected `ICollection<T>` objects, specifically in the case of
   `ISystem` and `IEventSender` dependencies. These dependencies were reversed,
