@@ -49,6 +49,9 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
 
             container.Register(Component.For<WorldSpriteSequencer>()
                 .LifestyleSingleton());
+
+            container.Register(Component.For<WorldTileSpriteSequencer>()
+                .LifestyleSingleton());
         }
     }
 }

@@ -6,6 +6,8 @@
 
 #### 27 December 2018
 
+* Implement `WorldTileSpriteSequencer` for mapping tile sprites to
+  animated sprites during world rendering.
 * Use unsafe pointer arithmetic for updating vertex and index buffers.
   The array bounds are checked once per layer at the outset.
 

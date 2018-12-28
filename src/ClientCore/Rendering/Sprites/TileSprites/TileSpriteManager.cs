@@ -127,7 +127,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         {
             foreach (var definition in definitions.TileSprites.OrderBy(tile => tile.Id))
             {
-                TileSprites.Add(new TileSprite(definition, animatedSpriteManager));
+                TileSprites.Add(new TileSprite(definition));
             }
         }
 

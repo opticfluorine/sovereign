@@ -114,6 +114,7 @@
     <Compile Include="Rendering\Scenes\Game\World\WorldLayerGrouper.cs" />
     <Compile Include="Rendering\Scenes\Game\World\WorldLayerVertexSequencer.cs" />
     <Compile Include="Rendering\Scenes\Game\World\WorldSpriteSequencer.cs" />
+    <Compile Include="Rendering\Scenes\Game\World\WorldTileSpriteSequencer.cs" />
     <Compile Include="Rendering\Scenes\Game\World\WorldVertexSequencer.cs" />
     <Compile Include="Rendering\Scenes\IScene.cs" />
     <Compile Include="Rendering\Scenes\ISceneConsumer.cs" />

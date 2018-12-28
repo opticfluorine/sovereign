@@ -21,12 +21,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Sovereign.ClientCore.Rendering.Sprites.TileSprites.TileSpriteDefinitions;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
@@ -52,18 +49,18 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// <summary>
         /// Tile contexts sorted in priority order.
         /// </summary>
-        private IList<MappedContext> mappedContexts;
+        private IList<TileContext> tileContexts;
 
         /// <summary>
         /// Cache of previously resolved tile contexts.
         /// </summary>
-        private IDictionary<Tuple<int, int, int, int>, MappedContext> lookupCache
-            = new Dictionary<Tuple<int, int, int, int>, MappedContext>();
+        private IDictionary<Tuple<int, int, int, int>, TileContext> lookupCache
+            = new Dictionary<Tuple<int, int, int, int>, TileContext>();
 
-        public TileSprite(TileSpriteRecord definition, AnimatedSpriteManager animatedSpriteManager)
+        public TileSprite(TileSpriteRecord definition)
         {
             Id = definition.Id;
-            mappedContexts = SortContexts(definition.TileContexts, animatedSpriteManager);
+            tileContexts = SortContexts(definition.TileContexts);
         }
 
         /// <summary>
@@ -82,18 +79,18 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// Thrown if no matching tile context is found. This should not typically occur as
         /// there should always be a default context that matches all ID patterns.
         /// </exception>
-        public IList<AnimatedSprite> GetMatchingAnimatedSprites(int idNorth, int idEast, 
+        public IList<int> GetMatchingAnimatedSpriteIds(int idNorth, int idEast,
             int idSouth, int idWest)
         {
             /* Check if the context is already in the cache. */
             var ids = new Tuple<int, int, int, int>(idNorth, idEast, idSouth, idWest);
             if (lookupCache.ContainsKey(ids))
-                return lookupCache[ids].AnimatedSprites;
+                return lookupCache[ids].AnimatedSpriteIds;
 
             /* Context not found in cache - resolve. */
             var context = ResolveContext(ids);
             lookupCache[ids] = context;
-            return context.AnimatedSprites;
+            return context.AnimatedSpriteIds;
         }
 
         /// <summary>
@@ -105,12 +102,12 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// Thrown if no matching tile context is found. This should not typically occur as
         /// there should always be a default context that matches all ID patterns.
         /// </exception>
-        private MappedContext ResolveContext(Tuple<int, int, int, int> ids)
+        private TileContext ResolveContext(Tuple<int, int, int, int> ids)
         {
             /* Since the contexts are sorted in priority order, iterate until match. */
-            foreach (var context in mappedContexts)
+            foreach (var context in tileContexts)
             {
-                if (context.TileContext.IsMatch(ids.Item1, ids.Item2, ids.Item3, ids.Item4))
+                if (context.IsMatch(ids.Item1, ids.Item2, ids.Item3, ids.Item4))
                     return context;
             }
 
@@ -122,38 +119,15 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// Sorts the tile contexts by priority.
         /// </summary>
         /// <param name="contexts">Tile contexts to be sorted.</param>
-        /// <param name="animatedSpriteManager">Animated sprite manager.</param>
         /// <returns>Sorted list of tile contexts.</returns>
-        private IList<MappedContext> SortContexts(IEnumerable<TileContext> contexts,
-            AnimatedSpriteManager animatedSpriteManager)
+        private IList<TileContext> SortContexts(IEnumerable<TileContext> contexts)
         {
             return contexts.OrderBy(context => context.GetWildcardCount())
                 .ThenByDescending(context => context.NorthTileSpriteId)
                 .ThenByDescending(context => context.EastTileSpriteId)
                 .ThenByDescending(context => context.SouthTileSpriteId)
                 .ThenByDescending(context => context.WestTileSpriteId)
-                .Select(context => new MappedContext(context, animatedSpriteManager))
                 .ToList();
-        }
-
-        /// <summary>
-        /// Inner context class that maps the context to the animated sprites.
-        /// </summary>
-        private sealed class MappedContext
-        {
-
-            public TileContext TileContext { get; private set; }
-
-            public IList<AnimatedSprite> AnimatedSprites { get; private set; }
-
-            public MappedContext(TileContext context, AnimatedSpriteManager animatedSpriteManager)
-            {
-                TileContext = context;
-                AnimatedSprites = context.AnimatedSpriteIds
-                    .Select(id => animatedSpriteManager.AnimatedSprites[id])
-                    .ToList();
-            }
-
         }
 
     }

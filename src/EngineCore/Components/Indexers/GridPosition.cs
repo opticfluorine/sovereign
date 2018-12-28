@@ -32,6 +32,12 @@ namespace Sovereign.EngineCore.Components.Indexers
     public struct GridPosition
     {
 
+        public static readonly GridPosition OneX = new GridPosition(1, 0, 0);
+
+        public static readonly GridPosition OneY = new GridPosition(0, 1, 0);
+
+        public static readonly GridPosition OneZ = new GridPosition(0, 0, 1);
+
         /// <summary>
         /// X position.
         /// </summary>
@@ -74,6 +80,26 @@ namespace Sovereign.EngineCore.Components.Indexers
         public static explicit operator GridPosition(Vector3 position)
         {
             return new GridPosition(position);
+        }
+
+        public static GridPosition operator +(GridPosition left, GridPosition right)
+        {
+            return new GridPosition()
+            {
+                X = left.X + right.X,
+                Y = left.Y + right.Y,
+                Z = left.Z + right.Z
+            };
+        }
+
+        public static GridPosition operator -(GridPosition left, GridPosition right)
+        {
+            return new GridPosition()
+            {
+                X = left.X - right.X,
+                Y = left.Y - right.Y,
+                Z = left.Z - right.Z
+            };
         }
 
     }

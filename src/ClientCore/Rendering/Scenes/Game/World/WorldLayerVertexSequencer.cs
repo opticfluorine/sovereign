@@ -21,9 +21,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
+using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
+using System.Collections.Generic;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
 {
@@ -34,16 +34,21 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
     public sealed class WorldLayerVertexSequencer
     {
 
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
         private readonly WorldSpriteSequencer spriteSequencer;
+        private readonly WorldTileSpriteSequencer tileSpriteSequencer;
 
         /// <summary>
         /// Animated sprites to be sequenced.
         /// </summary>
-        private readonly List<PosVelId> animatedSprites = new List<PosVelId>();
+        private readonly List<PosVelId> sequencedSprites = new List<PosVelId>();
 
-        public WorldLayerVertexSequencer(WorldSpriteSequencer spriteSequencer)
+        public WorldLayerVertexSequencer(WorldSpriteSequencer spriteSequencer,
+            WorldTileSpriteSequencer tileSpriteSequencer)
         {
             this.spriteSequencer = spriteSequencer;
+            this.tileSpriteSequencer = tileSpriteSequencer;
         }
 
         /// <summary>
@@ -57,39 +62,33 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="systemTime">System time of the current frame.</param>
         /// <param name="verticesAdded">Number of vertices added to the buffer.</param>
         /// <param name="indicesAdded">Number of indices added to the buffer.</param>
-        public void AddLayer(WorldLayer layer, WorldVertex[] vertexBuffer, 
+        public void AddLayer(WorldLayer layer, WorldVertex[] vertexBuffer,
             uint[] indexBuffer, int bufferOffset, int indexBufferOffset, ulong systemTime,
             out int verticesAdded, out int indicesAdded)
         {
-            animatedSprites.Clear();
+            /* Sequence the tile sprites into the buffers. */
+            sequencedSprites.Clear();
+            tileSpriteSequencer.SequenceTileSprites(sequencedSprites, layer.TopFaceTileSprites, true);
+            tileSpriteSequencer.SequenceTileSprites(sequencedSprites, layer.FrontFaceTileSprites, false);
 
-            AddTileSprites(layer.TopFaceTileSprites);
-            AddTileSprites(layer.FrontFaceTileSprites);
-            AddAnimatedSprites(layer.AnimatedSprites);
+            var totalVerticesAdded = 0;
+            var totalIndicesAdded = 0;
 
-            spriteSequencer.SequenceAnimatedSprites(animatedSprites,
+            spriteSequencer.SequenceAnimatedSprites(sequencedSprites,
                 vertexBuffer, indexBuffer,
                 bufferOffset, indexBufferOffset, systemTime,
-                out verticesAdded, out indicesAdded);
-        }
+                out var lastVerticesAdded, out var lastIndicesAdded);
+            totalVerticesAdded += lastVerticesAdded;
+            totalIndicesAdded += lastIndicesAdded;
 
-        /// <summary>
-        /// Converts the given tile sprites to animated sprites and adds them to
-        /// the list of sprites to be sequenced.
-        /// </summary>
-        /// <param name="tileSprites">Tile sprites to add.</param>
-        private void AddTileSprites(IList<PosVelId> tileSprites)
-        {
-            throw new NotImplementedException();
-        }
+            /* Sequence the remaining animated sprites into the buffers. */
+            spriteSequencer.SequenceAnimatedSprites(layer.AnimatedSprites,
+                vertexBuffer, indexBuffer,
+                bufferOffset + totalVerticesAdded, indexBufferOffset + totalIndicesAdded,
+                systemTime, out lastVerticesAdded, out lastIndicesAdded);
 
-        /// <summary>
-        /// Adds the given animated sprites to the list of sprites to be sequenced.
-        /// </summary>
-        /// <param name="animatedSprites">Animated sprites to add.</param>
-        private void AddAnimatedSprites(IList<PosVelId> animatedSprites)
-        {
-            throw new NotImplementedException();
+            verticesAdded = totalVerticesAdded + lastVerticesAdded;
+            indicesAdded = totalIndicesAdded + lastIndicesAdded;
         }
 
     }
