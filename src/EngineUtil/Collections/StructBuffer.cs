@@ -80,15 +80,10 @@ namespace Sovereign.EngineUtil.Collections
         /// <param name="item">Adds the item to the buffer.</param>
         public void Add(ref T item)
         {
-            Monitor.Enter(list);
-            try
+            lock (list)
             {
                 if (Count == Capacity) ResizeList();
                 list[Count++] = item;
-            }
-            finally
-            {
-                Monitor.Exit(list);
             }
         }
 
@@ -97,9 +92,10 @@ namespace Sovereign.EngineUtil.Collections
         /// </summary>
         public void Clear()
         {
-            Monitor.Enter(list);
-            Count = 0;
-            Monitor.Exit(list);
+            lock (list)
+            {
+                Count = 0;
+            }
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -147,7 +143,7 @@ namespace Sovereign.EngineUtil.Collections
 
             public T1 Current { get; private set; }
 
-            object IEnumerator.Current => (object)Current;
+            object IEnumerator.Current => Current;
 
             public StructBufferEnumerator(StructBuffer<T1> structBuffer)
             {
