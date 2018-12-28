@@ -4,6 +4,19 @@
 
 ### December
 
+#### 28 December 2018
+
+* Refactor some of the event code to partially avoid the use of
+  dependency-injected `ICollection<T>` objects, specifically in the case of
+  `ISystem` and `IEventSender` dependencies. These dependencies were reversed,
+  with the implementations now depending on `IEventLoop` and registering with
+  the event loop in the constructor. This fixes an issue when using multiple
+  `IEventSender` objects and avoids cyclic dependencies. Note that injected
+  `ICollection<T>` objects are still used for `IEventAdapter` objects, as the
+  event loop is the owner of the event adapters.
+* Add `TestContentSystem` to supply some sample data for testing the engine.
+  This system will be removed in the future once data is persistent.
+
 #### 27 December 2018
 
 * Implement `WorldTileSpriteSequencer` for mapping tile sprites to

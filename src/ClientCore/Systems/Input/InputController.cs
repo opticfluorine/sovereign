@@ -42,9 +42,9 @@ namespace Sovereign.ClientCore.Systems.Input
         /// <summary>
         /// Event sender back to the event loop.
         /// </summary>
-        private EventSender eventSender;
+        private IEventSender eventSender;
         
-        public InputController(EventSender eventSender)
+        public InputController(IEventSender eventSender)
         {
             this.eventSender = eventSender;
         }

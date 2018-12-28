@@ -41,9 +41,9 @@ namespace Sovereign.EngineCore.Systems.Movement
         /// <summary>
         /// Event sender used for communication with the event loop.
         /// </summary>
-        private readonly EventSender eventSender;
+        private readonly IEventSender eventSender;
 
-        public MovementController(EventSender eventSender)
+        public MovementController(IEventSender eventSender)
         {
             this.eventSender = eventSender;
         }

@@ -23,6 +23,7 @@
 
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
+using System;
 using System.Collections.Generic;
 
 namespace Sovereign.ClientCore.Systems.Input
@@ -31,7 +32,7 @@ namespace Sovereign.ClientCore.Systems.Input
     /// <summary>
     /// System responsible for handling user input.
     /// </summary>
-    public class InputSystem : ISystem
+    public class InputSystem : ISystem, IDisposable
     {
 
         public EventCommunicator EventCommunicator { get; set; }
@@ -44,14 +45,21 @@ namespace Sovereign.ClientCore.Systems.Input
 
         public int WorkloadEstimate { get; } = 50;
 
-        /// <summary>
-        /// Keyboard event handler.
-        /// </summary>
         private readonly KeyboardEventHandler keyboardEventHandler;
+        private readonly IEventLoop eventLoop;
 
-        public InputSystem(KeyboardEventHandler keyboardEventHandler)
+        public InputSystem(KeyboardEventHandler keyboardEventHandler,
+            IEventLoop eventLoop)
         {
             this.keyboardEventHandler = keyboardEventHandler;
+            this.eventLoop = eventLoop;
+
+            eventLoop.RegisterSystem(this);
+        }
+
+        public void Dispose()
+        {
+            eventLoop.UnregisterSystem(this);
         }
 
         public void Initialize()

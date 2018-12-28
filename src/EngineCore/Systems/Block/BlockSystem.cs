@@ -21,7 +21,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
+using System;
 using System.Collections.Generic;
 
 namespace Sovereign.EngineCore.Systems.Block
@@ -30,9 +32,12 @@ namespace Sovereign.EngineCore.Systems.Block
     /// <summary>
     /// System responsible for managing the block entities.
     /// </summary>
-    public sealed class BlockSystem : ISystem
+    public sealed class BlockSystem : ISystem, IDisposable
     {
         private readonly BlockEventHandler eventHandler;
+        private readonly IEventLoop eventLoop;
+
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         public EventCommunicator EventCommunicator { get; set; }
 
@@ -46,9 +51,17 @@ namespace Sovereign.EngineCore.Systems.Block
 
         public int WorkloadEstimate => 50;
 
-        public BlockSystem(BlockEventHandler eventHandler)
+        public BlockSystem(BlockEventHandler eventHandler, IEventLoop eventLoop)
         {
             this.eventHandler = eventHandler;
+            this.eventLoop = eventLoop;
+
+            eventLoop.RegisterSystem(this);
+        }
+
+        public void Dispose()
+        {
+            eventLoop.UnregisterSystem(this);
         }
 
         public void Initialize()
@@ -63,6 +76,7 @@ namespace Sovereign.EngineCore.Systems.Block
         {
             while (EventCommunicator.GetIncomingEvent(out var ev))
             {
+                Logger.DebugFormat("Received event with type {0}.", ev.EventId);
                 eventHandler.HandleEvent(ev);
             }
         }

@@ -90,6 +90,7 @@
     <Compile Include="Events\EventSender.cs" />
     <Compile Include="Events\EventTimedAction.cs" />
     <Compile Include="Events\IEventAdapter.cs" />
+    <Compile Include="Events\IEventSender.cs" />
     <Compile Include="Logging\IErrorHandler.cs" />
     <Compile Include="Logging\NullErrorHandler.cs" />
     <Compile Include="Main\CoreMain.cs" />
@@ -137,6 +138,9 @@
     <Compile Include="Systems\SystemExecutor.cs" />
     <Compile Include="Systems\SystemInstaller.cs" />
     <Compile Include="Systems\SystemManager.cs" />
+    <Compile Include="Systems\TestContent\BlockSource.cs" />
+    <Compile Include="Systems\TestContent\TestContentInstaller.cs" />
+    <Compile Include="Systems\TestContent\TestContentSystem.cs" />
     <Compile Include="Timing\*.cs" />
     <Compile Include="Systems\Block\Components\MaterialComponentCollection.cs" />
     <Compile Include="Systems\Block\Components\AboveBlockComponentCollection.cs" />

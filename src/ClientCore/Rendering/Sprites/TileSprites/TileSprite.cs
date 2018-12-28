@@ -49,7 +49,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         /// <summary>
         /// Tile contexts sorted in priority order.
         /// </summary>
-        private IList<TileContext> tileContexts;
+        private readonly IList<TileContext> tileContexts;
 
         /// <summary>
         /// Cache of previously resolved tile contexts.

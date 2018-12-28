@@ -26,6 +26,7 @@ using Castle.Windsor;
 using Sovereign.EngineUtil.IoC;
 using System;
 using System.Text;
+using System.Threading;
 
 namespace Sovereign.EngineCore.Main
 {
@@ -38,6 +39,9 @@ namespace Sovereign.EngineCore.Main
 
         public void RunEngine()
         {
+            /* Name the thread. */
+            Thread.CurrentThread.Name = "Main";
+
             /* Start up the IoC container */
             IWindsorContainer iocContainer = null;
             try

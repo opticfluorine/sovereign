@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems.Block.Events;
@@ -36,6 +37,8 @@ namespace Sovereign.EngineCore.Systems.Block
     /// </summary>
     public class BlockController
     {
+
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         /// <summary>
         /// Default size of add and remove batch buffers.
@@ -60,9 +63,11 @@ namespace Sovereign.EngineCore.Systems.Block
         /// <param name="eventSender">Event sender for the calling thread.</param>
         /// <param name="blockRecord">Block to add.</param>
         /// <param name="eventTime">System time to dispatch event, in microseconds.</param>
-        public void AddBlock(EventSender eventSender, BlockRecord blockRecord,
+        public void AddBlock(IEventSender eventSender, BlockRecord blockRecord,
             ulong eventTime = Event.Immediate)
         {
+            Logger.DebugFormat("Requesting to add block {0}.", blockRecord.ToString());
+
             var details = new BlockAddEventDetails()
             {
                 BlockRecord = blockRecord
@@ -77,7 +82,7 @@ namespace Sovereign.EngineCore.Systems.Block
         /// <param name="eventSender">Event sender for the calling thread.</param>
         /// <param name="recordProvider">Function that populates the list of blocks to create.</param>
         /// <param name="eventTime">System time to dispatch event, in microseconds.</param>
-        public void AddBlocks(EventSender eventSender, Action<IList<BlockRecord>> recordProvider,
+        public void AddBlocks(IEventSender eventSender, Action<IList<BlockRecord>> recordProvider,
             ulong eventTime = Event.Immediate)
         {
             /* Populate the add records. */
@@ -85,6 +90,7 @@ namespace Sovereign.EngineCore.Systems.Block
             recordProvider(recordList);
 
             /* Send the event. */
+            Logger.DebugFormat("Requesting to add {0} blocks.", recordList.Count);
             var details = new BlockAddBatchEventDetails()
             {
                 BlockRecords = recordList
@@ -99,9 +105,10 @@ namespace Sovereign.EngineCore.Systems.Block
         /// <param name="eventSender">Event sender for the calling thread.</param>
         /// <param name="blockEntityId">Entity ID of the block to remove.</param>
         /// <param name="eventTime">System time to dispatch event, in microseconds.</param>
-        public void RemoveBlock(EventSender eventSender, ulong blockEntityId,
+        public void RemoveBlock(IEventSender eventSender, ulong blockEntityId,
             ulong eventTime = Event.Immediate)
         {
+            Logger.DebugFormat("Requesting to remove block {0}.", blockEntityId);
             var details = new EntityEventDetails() { EntityId = blockEntityId };
             var ev = new Event(EventId.Core_Block_Remove, details, eventTime);
             eventSender.SendEvent(ev);
@@ -113,7 +120,7 @@ namespace Sovereign.EngineCore.Systems.Block
         /// <param name="eventSender">Event sender for the calling thread.</param>
         /// <param name="blockEntityIdProvider">Function that populates the list of entity IDs to remove.</param>
         /// <param name="eventTime">System time to dispatch event, in microseconds.</param>
-        public void RemoveBlocks(EventSender eventSender, Action<IList<ulong>> blockEntityIdProvider,
+        public void RemoveBlocks(IEventSender eventSender, Action<IList<ulong>> blockEntityIdProvider,
             ulong eventTime = Event.Immediate)
         {
             /* Populate the buffer. */
@@ -121,6 +128,7 @@ namespace Sovereign.EngineCore.Systems.Block
             blockEntityIdProvider(removeList);
 
             /* Send the event. */
+            Logger.DebugFormat("Requesting to remove {0} blocks.", removeList.Count);
             var details = new BlockRemoveBatchEventDetails() { EntityIds = removeList };
             var ev = new Event(EventId.Core_Block_RemoveBatch, details, eventTime);
             eventSender.SendEvent(ev);

@@ -21,46 +21,23 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Concurrent;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-namespace Sovereign.EngineCore.Events
+namespace Sovereign.EngineCore.Systems.TestContent
 {
 
     /// <summary>
-    /// Sends events from one or more systems to the event loop.
+    /// IoC installer for the TestContent system.
     /// </summary>
-    public class EventSender : IEventSender, IDisposable
+    public sealed class TestContentInstaller : IWindsorInstaller
     {
-        private readonly IEventLoop eventLoop;
-
-        /// <summary>
-        /// Events being sent from the system thread to the event loop.
-        /// </summary>
-        private readonly ConcurrentQueue<Event> outgoingEvents
-            = new ConcurrentQueue<Event>();
-
-        public EventSender(IEventLoop eventLoop)
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            this.eventLoop = eventLoop;
-            eventLoop.RegisterEventSender(this);
+            container.Register(Component.For<BlockSource>()
+                .LifestyleSingleton());
         }
-
-        public void Dispose()
-        {
-            eventLoop.UnregisterEventSender(this);
-        }
-
-        public void SendEvent(Event ev)
-        {
-            outgoingEvents.Enqueue(ev);
-        }
-
-        public bool TryGetOutgoingEvent(out Event ev)
-        {
-            return outgoingEvents.TryDequeue(out ev);
-        }
-
     }
 
 }

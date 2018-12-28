@@ -21,54 +21,57 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Systems.Movement.Events;
-using System;
+using Sovereign.EngineCore.Systems.Block;
+using Sovereign.EngineCore.Systems.Block.Events;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.Systems.Movement
+namespace Sovereign.EngineCore.Systems.TestContent
 {
 
     /// <summary>
-    /// Defines a private API for use within the MovementSystem to
-    /// control the movement of entities.
+    /// Responsible for generating blocks for initial testing.
     /// </summary>
-    public class InternalMovementController
+    public sealed class BlockSource
     {
-
-        /// <summary>
-        /// Event sender used for communication with the event loop.
-        /// </summary>
+        private readonly BlockController blockController;
         private readonly IEventSender eventSender;
 
-        public InternalMovementController(IEventSender eventSender)
+        public BlockSource(BlockController blockController, IEventSender eventSender)
         {
+            this.blockController = blockController;
             this.eventSender = eventSender;
         }
 
         /// <summary>
-        /// Schedules a movement of an entity to occur at the given time.
-        /// 
-        /// This method is intended to be used within the MovementSystem only.
+        /// Generates blocks for initial testing.
         /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        /// <param name="movementPhase">Unique movement phase identifier.</param>
-        /// <param name="movementTime">System time of the movement, in us.</param>
-        internal void ScheduleMovement(ulong entityId, uint movementPhase,
-            ulong movementTime)
+        public void GenerateBlocks()
         {
-            var details = new MoveOnceEventDetails()
-            {
-                EntityId = entityId,
-                MovementPhase = movementPhase,
-            };
-            var ev = new Event(EventId.Core_Move_Once, details, movementTime);
+            blockController.AddBlocks(eventSender, CreateBlockRecords);
+        }
 
-            eventSender.SendEvent(ev);
+        /// <summary>
+        /// Callback method to create block records.
+        /// </summary>
+        /// <param name="records">List to populate with block records.</param>
+        private void CreateBlockRecords(IList<BlockRecord> records)
+        {
+            for (int x = -50; x <= 50; ++x)
+            {
+                for (int y = -50; y <= 50; ++y)
+                {
+                    records.Add(new BlockRecord()
+                    {
+                        Position = new GridPosition(x, y, 0),
+                        Material = 0,
+                        MaterialModifier = 0
+                    });
+                }
+            }
         }
 
     }
+
 }

@@ -21,44 +21,59 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Events;
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 
-namespace Sovereign.EngineCore.Events
+namespace Sovereign.EngineCore.Systems.TestContent
 {
 
     /// <summary>
-    /// Sends events from one or more systems to the event loop.
+    /// System responsible for supplying content for early testing.
     /// </summary>
-    public class EventSender : IEventSender, IDisposable
+    /// <remarks>
+    /// This will be removed in the future.
+    /// </remarks>
+    public sealed class TestContentSystem : ISystem, IDisposable
     {
+        private readonly BlockSource blockSource;
         private readonly IEventLoop eventLoop;
 
-        /// <summary>
-        /// Events being sent from the system thread to the event loop.
-        /// </summary>
-        private readonly ConcurrentQueue<Event> outgoingEvents
-            = new ConcurrentQueue<Event>();
+        public EventCommunicator EventCommunicator { get; set; }
 
-        public EventSender(IEventLoop eventLoop)
+        public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
         {
+            /* no events */
+        };
+
+        public int WorkloadEstimate => 0;
+
+        public TestContentSystem(BlockSource blockSource, IEventLoop eventLoop)
+        {
+            this.blockSource = blockSource;
             this.eventLoop = eventLoop;
-            eventLoop.RegisterEventSender(this);
+
+            eventLoop.RegisterSystem(this);
+        }
+
+        public void Initialize()
+        {
+            blockSource.GenerateBlocks();
+        }
+
+        public void Cleanup()
+        {
+
+        }
+
+        public void ExecuteOnce()
+        {
+            /* No action. */
         }
 
         public void Dispose()
         {
-            eventLoop.UnregisterEventSender(this);
-        }
-
-        public void SendEvent(Event ev)
-        {
-            outgoingEvents.Enqueue(ev);
-        }
-
-        public bool TryGetOutgoingEvent(out Event ev)
-        {
-            return outgoingEvents.TryDequeue(out ev);
+            eventLoop.UnregisterSystem(this);
         }
 
     }

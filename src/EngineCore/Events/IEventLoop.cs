@@ -21,6 +21,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Systems;
+using System.Collections.Concurrent;
+
 namespace Sovereign.EngineCore.Events
 {
 
@@ -46,6 +49,30 @@ namespace Sovereign.EngineCore.Events
         /// Whether the event loop has terminated.
         /// </summary>
         bool Terminated { get; }
+
+        /// <summary>
+        /// Register an event sender.
+        /// </summary>
+        /// <param name="eventSender">Event sender to register.</param>
+        void RegisterEventSender(IEventSender eventSender);
+
+        /// <summary>
+        /// Unregisters an event sender.
+        /// </summary>
+        /// <param name="eventSender">Event sender to unregister.</param>
+        void UnregisterEventSender(IEventSender eventSender);
+
+        /// <summary>
+        /// Registers a system.
+        /// </summary>
+        /// <param name="system">System to register.</param>
+        void RegisterSystem(ISystem system);
+
+        /// <summary>
+        /// Unregisters a system.
+        /// </summary>
+        /// <param name="system">System to unregister.</param>
+        void UnregisterSystem(ISystem system);
 
     }
 

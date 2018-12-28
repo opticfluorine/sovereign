@@ -37,7 +37,7 @@ namespace Sovereign.EngineCore.Systems.Movement
     /// <summary>
     /// System responsible for coordinating the movement of entities.
     /// </summary>
-    public class MovementSystem : ISystem
+    public class MovementSystem : ISystem, IDisposable
     {
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -54,10 +54,19 @@ namespace Sovereign.EngineCore.Systems.Movement
         public int WorkloadEstimate { get; } = 80;
 
         private readonly VelocityManager velocityManager;
+        private readonly IEventLoop eventLoop;
 
-        public MovementSystem(VelocityManager velocityManager)
+        public MovementSystem(VelocityManager velocityManager, IEventLoop eventLoop)
         {
             this.velocityManager = velocityManager;
+            this.eventLoop = eventLoop;
+
+            eventLoop.RegisterSystem(this);
+        }
+
+        public void Dispose()
+        {
+            eventLoop.UnregisterSystem(this);
         }
 
         public void Cleanup()

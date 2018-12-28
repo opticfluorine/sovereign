@@ -21,45 +21,28 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Concurrent;
-
 namespace Sovereign.EngineCore.Events
 {
 
     /// <summary>
-    /// Sends events from one or more systems to the event loop.
+    /// Interface for event senders.
     /// </summary>
-    public class EventSender : IEventSender, IDisposable
+    public interface IEventSender
     {
-        private readonly IEventLoop eventLoop;
 
         /// <summary>
-        /// Events being sent from the system thread to the event loop.
+        /// Sends an event to the event loop.
         /// </summary>
-        private readonly ConcurrentQueue<Event> outgoingEvents
-            = new ConcurrentQueue<Event>();
+        /// <param name="ev">Event to be sent.</param>
+        void SendEvent(Event ev);
 
-        public EventSender(IEventLoop eventLoop)
-        {
-            this.eventLoop = eventLoop;
-            eventLoop.RegisterEventSender(this);
-        }
-
-        public void Dispose()
-        {
-            eventLoop.UnregisterEventSender(this);
-        }
-
-        public void SendEvent(Event ev)
-        {
-            outgoingEvents.Enqueue(ev);
-        }
-
-        public bool TryGetOutgoingEvent(out Event ev)
-        {
-            return outgoingEvents.TryDequeue(out ev);
-        }
+        /// <summary>
+        /// Gets the next event being sent to the event loop.
+        /// This method does not block.
+        /// </summary>
+        /// <param name="ev">Next event being sent to the event loop, or null if none is available.</param>
+        /// <returns>true if an event was available, false otherwise.</returns>
+        bool TryGetOutgoingEvent(out Event ev);
 
     }
 

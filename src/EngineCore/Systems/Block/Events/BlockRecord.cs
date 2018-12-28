@@ -22,6 +22,7 @@
  */
 
 using Sovereign.EngineCore.Components.Indexers;
+using System.Text;
 
 namespace Sovereign.EngineCore.Systems.Block.Events
 {
@@ -46,6 +47,18 @@ namespace Sovereign.EngineCore.Systems.Block.Events
         /// Material modifier.
         /// </summary>
         public int MaterialModifier;
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.Append("(")
+                .Append(Position.X).Append(", ")
+                .Append(Position.Y).Append(", ")
+                .Append(Position.Z).Append(", ")
+                .Append(Material).Append(", ")
+                .Append(MaterialModifier).Append(")");
+            return sb.ToString();
+        }
 
     }
 

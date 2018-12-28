@@ -49,7 +49,9 @@ namespace Sovereign.EngineCore.Events
                 .LifestyleTransient());
 
             /* Event senders. */
-            container.Register(Component.For<EventSender>()
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IEventSender>()
+                .WithServiceDefaultInterfaces()
                 .LifestyleTransient());
 
             /* Event adapters. */

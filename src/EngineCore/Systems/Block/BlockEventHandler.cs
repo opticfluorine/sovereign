@@ -55,19 +55,27 @@ namespace Sovereign.EngineCore.Systems.Block
             switch (ev.EventId)
             {
                 case EventId.Core_Block_Add:
-                    HandleAdd((BlockAddEventDetails)ev.EventDetails);
+                    var addDetails = (BlockAddEventDetails)ev.EventDetails;
+                    Logger.DebugFormat("Adding block {0}.", addDetails.BlockRecord);
+                    HandleAdd(addDetails);
                     break;
 
                 case EventId.Core_Block_AddBatch:
-                    HandleAddBatch((BlockAddBatchEventDetails)ev.EventDetails);
+                    var addBatchDetails = (BlockAddBatchEventDetails)ev.EventDetails;
+                    Logger.DebugFormat("Adding {0} blocks.", addBatchDetails.BlockRecords.Count);
+                    HandleAddBatch(addBatchDetails);
                     break;
 
                 case EventId.Core_Block_Remove:
-                    HandleRemove((EntityEventDetails)ev.EventDetails);
+                    var removeDetails = (EntityEventDetails)ev.EventDetails;
+                    Logger.DebugFormat("Removing block {0}.", removeDetails.EntityId);
+                    HandleRemove(removeDetails);
                     break;
 
                 case EventId.Core_Block_RemoveBatch:
-                    HandleRemoveBatch((BlockRemoveBatchEventDetails)ev.EventDetails);
+                    var removeBatchDetails = (BlockRemoveBatchEventDetails)ev.EventDetails;
+                    Logger.DebugFormat("Removing {0} blocks.", removeBatchDetails.EntityIds.Count);
+                    HandleRemoveBatch(removeBatchDetails);
                     break;
 
                 default:

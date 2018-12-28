@@ -42,14 +42,14 @@ namespace Sovereign.ClientCore.Systems.Input
         /// <summary>
         /// Event communicator.
         /// </summary>
-        private readonly EventSender eventSender;
+        private readonly IEventSender eventSender;
 
         /// <summary>
         /// Input controller.
         /// </summary>
         private InputController inputController;
 
-        public PlayerInputMovementMapper(EventSender eventSender, InputController inputController)
+        public PlayerInputMovementMapper(IEventSender eventSender, InputController inputController)
         {
             this.eventSender = eventSender;
             this.inputController = inputController;

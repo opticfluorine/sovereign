@@ -36,10 +36,11 @@ namespace Sovereign.ClientCore.Systems.Camera
     /// <summary>
     /// System responsible for managing the camera.
     /// </summary>
-    public sealed class CameraSystem : ISystem
+    public sealed class CameraSystem : ISystem, IDisposable
     {
         private readonly CameraManager cameraManager;
         private readonly CameraEventHandler eventHandler;
+        private readonly IEventLoop eventLoop;
 
         public int WorkloadEstimate => 20;
 
@@ -50,10 +51,19 @@ namespace Sovereign.ClientCore.Systems.Camera
             EventId.Core_Tick
         };
 
-        public CameraSystem(CameraManager cameraManager, CameraEventHandler eventHandler)
+        public CameraSystem(CameraManager cameraManager, CameraEventHandler eventHandler,
+            IEventLoop eventLoop)
         {
             this.cameraManager = cameraManager;
             this.eventHandler = eventHandler;
+            this.eventLoop = eventLoop;
+
+            eventLoop.RegisterSystem(this);
+        }
+
+        public void Dispose()
+        {
+            eventLoop.UnregisterSystem(this);
         }
 
         public EventCommunicator EventCommunicator { get; set; }

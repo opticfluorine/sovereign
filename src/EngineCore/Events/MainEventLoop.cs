@@ -47,12 +47,12 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// <summary>
         /// The collection of systems known to the event loop.
         /// </summary>
-        private readonly ICollection<ISystem> systems;
+        private readonly ISet<ISystem> systems = new HashSet<ISystem>();
 
         /// <summary>
         /// The collection of event senders to listen on.
         /// </summary>
-        private readonly ICollection<EventSender> eventSenders;
+        private readonly ISet<IEventSender> eventSenders = new HashSet<IEventSender>();
 
         /// <summary>
         /// The collection of event adapters.
@@ -81,16 +81,12 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// </summary>
         private ulong LastUpdateTime;
 
-        public MainEventLoop(ICollection<ISystem> systems, 
-            ICollection<EventSender> eventSenders,
-            ICollection<IEventAdapter> eventAdapters,
-            ComponentManager componentManager)
+        public MainEventLoop(ComponentManager componentManager,
+            ICollection<IEventAdapter> eventAdapters)
         {
             /* Set dependencies. */
-            this.systems = systems;
-            this.eventSenders = eventSenders;
-            this.eventAdapters = eventAdapters;
             this.componentManager = componentManager;
+            this.eventAdapters = eventAdapters;
 
             /* Build data structures. */
             BuildCommunicatorTables();
@@ -121,6 +117,38 @@ namespace Sovereign.EngineCore.Systems.EventSystem
 
             /* Dispatch events enqueued for dispatch by this time. */
             DispatchEnqueuedEvents();
+        }
+
+        public void RegisterEventSender(IEventSender eventSender)
+        {
+            lock (eventSenders)
+            {
+                eventSenders.Add(eventSender);
+            }
+        }
+
+        public void UnregisterEventSender(IEventSender eventSender)
+        {
+            lock (eventSenders)
+            {
+                eventSenders.Remove(eventSender);
+            }
+        }
+
+        public void RegisterSystem(ISystem system)
+        {
+            lock (systems)
+            {
+                systems.Add(system);
+            }
+        }
+
+        public void UnregisterSystem(ISystem system)
+        {
+            lock (systems)
+            {
+                systems.Remove(system);
+            }
         }
 
         /// <summary>
@@ -160,18 +188,12 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// </summary>
         private void RetrievePendingEvents()
         {
-            foreach (var comm in eventSenders)
+            foreach (var eventSender in eventSenders)
             {
-                Event nextEvent;
-                do
+                while (eventSender.TryGetOutgoingEvent(out var ev))
                 {
-                    nextEvent = comm.GetOutgoingEvent();
-                    if (nextEvent != null)
-                    {
-                        EnqueueEvent(nextEvent);
-                    }
+                    EnqueueEvent(ev);
                 }
-                while (nextEvent != null);
             }
         }
         
