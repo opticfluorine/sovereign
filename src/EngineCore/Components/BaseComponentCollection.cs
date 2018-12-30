@@ -61,11 +61,6 @@ namespace Sovereign.EngineCore.Components
         public ILogger Log { private get; set; } = NullLogger.Instance;
 
         /// <summary>
-        /// Component manager. Supplied by the IoC container.
-        /// </summary>
-        protected readonly ComponentManager componentManager;
-
-        /// <summary>
         /// Underlying component array.
         /// </summary>
         private readonly List<T> components;

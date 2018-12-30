@@ -148,6 +148,7 @@ namespace Sovereign.EngineUtil.Collections
             public StructBufferEnumerator(StructBuffer<T1> structBuffer)
             {
                 this.structBuffer = structBuffer;
+                currentIndex = -1;
             }
 
             public void Dispose()
@@ -167,6 +168,11 @@ namespace Sovereign.EngineUtil.Collections
             {
                 currentIndex = 0;
             }
+        }
+
+        public override string ToString()
+        {
+            return "Count = " + Count;
         }
 
     }

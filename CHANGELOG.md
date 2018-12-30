@@ -6,6 +6,8 @@
 
 #### 30 December 2018
 
+* Fix issue in `StructBuffer` where the iterator always skipped the
+  first element.
 * Fix issue in `EntityAssigner` that was causing entity ID collisions.
 * Throttle `SystemExecutor` with a `Thread.Sleep(1)` call (instead of 0)
   to reduce CPU usage. This can be changed back later if the penalty to
