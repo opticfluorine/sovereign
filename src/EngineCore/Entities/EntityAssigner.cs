@@ -42,7 +42,7 @@ namespace Sovereign.EngineCore.Entities
         /// <summary>
         /// Entity block assigned to this assigner.
         /// </summary>
-        public uint Block { get; private set; }
+        public ulong Block { get; private set; }
         
         /// <summary>
         /// Block ID shifted to the upper dword
@@ -58,7 +58,7 @@ namespace Sovereign.EngineCore.Entities
         /// Creates an assigner for the given block.
         /// </summary>
         /// <param name="block">Block.</param>
-        public EntityAssigner(uint block)
+        public EntityAssigner(ulong block)
         {
             Block = block;
             shiftBlock = block << 32;

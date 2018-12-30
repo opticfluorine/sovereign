@@ -22,6 +22,7 @@
  */
 
 using System.Numerics;
+using System.Text;
 
 namespace Sovereign.EngineCore.Components.Indexers
 {
@@ -100,6 +101,16 @@ namespace Sovereign.EngineCore.Components.Indexers
                 Y = left.Y - right.Y,
                 Z = left.Z - right.Z
             };
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.Append("(")
+                .Append(X).Append(", ")
+                .Append(Y).Append(", ")
+                .Append(Z).Append(")");
+            return sb.ToString();
         }
 
     }

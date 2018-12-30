@@ -4,6 +4,15 @@
 
 ### December
 
+#### 30 December 2018
+
+* Fix issue in `EntityAssigner` that was causing entity ID collisions.
+* Throttle `SystemExecutor` with a `Thread.Sleep(1)` call (instead of 0)
+  to reduce CPU usage. This can be changed back later if the penalty to
+  system latency is too high. Attempting the same change on the main
+  thread dropped FPS to 45 in a debug build, so the `Thread.Sleep(0)`
+  call in `EngineBase` was left alone. 
+
 #### 28 December 2018
 
 * Fix issue with thread synchronization in `StructBuffer`.

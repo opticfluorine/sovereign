@@ -105,7 +105,7 @@ namespace Sovereign.EngineCore.Systems
                 }
 
                 /* Yield if needed to avoid high CPU usage. */
-                Thread.Sleep(0);
+                Thread.Sleep(1);
             }
         }
 
