@@ -44,7 +44,8 @@ namespace Sovereign.EngineCore.Systems.Block.Components.Indexers
 
         protected override bool ShouldAccept(ulong entityId)
         {
-            return materials.HasComponentForEntity(entityId);
+            return materials.HasComponentForEntity(entityId)
+                || materials.HasPendingComponentForEntity(entityId);
         }
     }
 

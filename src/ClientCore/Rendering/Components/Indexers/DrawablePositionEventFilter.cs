@@ -46,7 +46,8 @@ namespace Sovereign.ClientCore.Rendering.Components.Indexers
 
         protected override bool ShouldAccept(ulong entityId)
         {
-            return drawableCollection.HasComponentForEntity(entityId);
+            return drawableCollection.HasComponentForEntity(entityId)
+                || drawableCollection.HasPendingComponentForEntity(entityId);
         }
 
     }

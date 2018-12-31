@@ -27,6 +27,8 @@ using Sovereign.EngineUtil.Monads;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 
 namespace Sovereign.EngineCore.Components
 {
@@ -91,6 +93,11 @@ namespace Sovereign.EngineCore.Components
         /// Pending component additions.
         /// </summary>
         private readonly StructBuffer<PendingAdd> pendingAdds = new StructBuffer<PendingAdd>(OperationBufferSize);
+
+        /// <summary>
+        /// Entity IDs of pending adds.
+        /// </summary>
+        private readonly ISet<ulong> pendingAddEntityIds = new HashSet<ulong>();
 
         /// <summary>
         /// Pending component modifications binned by operation.
@@ -228,6 +235,7 @@ namespace Sovereign.EngineCore.Components
                     InitialValue = initialValue,
                 };
                 pendingAdds.Add(ref pendingAdd);
+                pendingAddEntityIds.Add(entityId);
             }
         }
 
@@ -286,6 +294,17 @@ namespace Sovereign.EngineCore.Components
         public bool HasComponentForEntity(ulong entityId)
         {
             return entityToComponentMap.ContainsKey(entityId);
+        }
+
+        /// <summary>
+        /// Determines whether a component will be associated with the given entity
+        /// following the next commit of pending adds.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        /// <returns>true if there is a pending add, false otherwise.</returns>
+        public bool HasPendingComponentForEntity(ulong entityId)
+        {
+            return pendingAddEntityIds.Contains(entityId);
         }
 
         /// <summary>
@@ -368,6 +387,7 @@ namespace Sovereign.EngineCore.Components
             }
 
             /* Reset the buffer. */
+            pendingAddEntityIds.Clear();
             pendingAdds.Clear();
         }
 
@@ -543,6 +563,7 @@ namespace Sovereign.EngineCore.Components
         /// <summary>
         /// Describes a pending component modification.
         /// </summary>
+        [DebuggerDisplay("{ComponentIndex} => {ComponentOperation} {Adjustment}")]
         private struct PendingModify
         {
             /// <summary>
@@ -564,6 +585,7 @@ namespace Sovereign.EngineCore.Components
         /// <summary>
         /// Describes a pending component creation.
         /// </summary>
+        [DebuggerDisplay("{EntityId} => {InitialValue}")]
         private struct PendingAdd
         {
             /// <summary>
@@ -580,6 +602,7 @@ namespace Sovereign.EngineCore.Components
         /// <summary>
         /// Describes a pending component removal.
         /// </summary>
+        [DebuggerDisplay("{EntityId}")]
         private struct PendingRemove
         {
             /// <summary>

@@ -6,6 +6,13 @@
 
 #### 30 December 2018
 
+* Fix issue in `BaseComponentCollection` and the various
+  `*EventFilter` classes where newly created entities are not properly
+  indexed due to the filters not checking for pending component
+  additions. Note that this also reveals a possible race condition
+  where an entity is improperly indexed if 
+  `ComponentManager.UpdateAllComponents()` is called before an
+  `EntityBuilder` on another thread finishes building its entity.
 * Fix issue in `StructBuffer` where the iterator always skipped the
   first element.
 * Fix issue in `EntityAssigner` that was causing entity ID collisions.
