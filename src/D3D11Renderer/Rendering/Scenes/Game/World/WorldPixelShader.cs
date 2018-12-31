@@ -53,6 +53,11 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         /// </summary>
         private ShaderResourceView[] resourceViews;
 
+        /// <summary>
+        /// Pixel shader sampler state.
+        /// </summary>
+        private SamplerState samplerState;
+
         public WorldPixelShader(D3D11Device device, GameSceneShaders shaders,
             D3D11ResourceManager mainResourceManager)
         {
@@ -68,6 +73,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         {
             pixelShader = CreateShader();
             resourceViews = CreateResourceViews();
+            samplerState = CreateSamplerState();
         }
 
         public void Dispose()
@@ -90,15 +96,16 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         {
             context.PixelShader.SetShader(pixelShader, null, 0);
             context.PixelShader.SetShaderResources(0, resourceViews);
+            context.PixelShader.SetSampler(0, samplerState);
         }
 
         public void Unbind(DeviceContext context)
         {
+            context.PixelShader.SetSampler(0, null);
             for (int i = 0; i < resourceViews.Length; ++i)
             {
                 context.PixelShader.SetShaderResource(i, null);
             }
-
             context.PixelShader.SetShader(null, null, 0);
         }
 
@@ -132,6 +139,19 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
                 new ShaderResourceView(device.Device,
                     atlasTexture, desc)
             };
+        }
+
+        public SamplerState CreateSamplerState()
+        {
+            var desc = new SamplerStateDescription()
+            {
+                Filter = Filter.MinMagMipPoint,
+                AddressU = TextureAddressMode.Clamp,
+                AddressV = TextureAddressMode.Clamp,
+                AddressW = TextureAddressMode.Clamp,
+                ComparisonFunction = Comparison.Never
+            };
+            return new SamplerState(device.Device, desc);
         }
 
     }

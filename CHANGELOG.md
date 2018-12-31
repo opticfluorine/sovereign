@@ -4,6 +4,10 @@
 
 ### December
 
+#### 31 December 2018
+
+* Add a `SamplerState` to `WorldPixelShader`.
+
 #### 30 December 2018
 
 * First time to display a screen that's not entirely black! Of course,
