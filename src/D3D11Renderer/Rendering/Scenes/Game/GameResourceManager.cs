@@ -38,9 +38,19 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
     {
 
         /// <summary>
-        /// Maximum number of elements in a main resource buffer.
+        /// Maximum number of draws.
         /// </summary>
-        public const int MaximumBufferElements = 65536;
+        public const int MaximumDraws = 1024;
+
+        /// <summary>
+        /// Maximum number of vertices in the vertex buffer.
+        /// </summary>
+        public const int MaximumVertices = 16384;
+
+        /// <summary>
+        /// Maximum number of indices in the index buffer.
+        /// </summary>
+        public const int MaximumIndices = 24576;
 
         /// <summary>
         /// Updateable vertex buffer.
@@ -75,7 +85,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         {
             this.device = device;
             this.shaders = shaders;
-            DrawBuffer = new int[MaximumBufferElements];
+            DrawBuffer = new int[MaximumDraws];
         }
 
         /// <summary>
@@ -88,10 +98,10 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
 
             /* Create buffers. */
             VertexBuffer = new D3D11UpdateBuffer<WorldVertex>(device, BindFlags.VertexBuffer,
-                MaximumBufferElements);
+                MaximumVertices);
 
             IndexBuffer = new D3D11UpdateBuffer<uint>(device, BindFlags.IndexBuffer,
-                MaximumBufferElements);
+                MaximumIndices);
 
             VertexConstantBuffer = new D3D11UpdateBuffer<WorldVertexShaderConstants>(device,
                 BindFlags.ConstantBuffer, 1);

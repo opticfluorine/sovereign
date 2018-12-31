@@ -27,19 +27,37 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
     /// <summary>
     /// Encodes an entry in the texture atlas.
     /// </summary>
-    public struct AtlasMapElement
+    public class AtlasMapElement
     {
-        public int TopLeftX;
+        /// <summary>
+        /// Width as a multiple of the tile width.
+        /// </summary>
+        public float WidthInTiles;
 
-        public int TopLeftY;
+        /// <summary>
+        /// Height as a multiple of the tile width.
+        /// </summary>
+        public float HeightInTiles;
 
-        public int BottomRightX;
+        /// <summary>
+        /// Normalized texel coordinate of the left edge.
+        /// </summary>
+        public float NormalizedLeftX;
 
-        public int BottomRightY;
+        /// <summary>
+        /// Normalized texel coordinate of the right edge.
+        /// </summary>
+        public float NormalizedRightX;
 
-        public int Width;
+        /// <summary>
+        /// Normalized texel coordinate of the top edge.
+        /// </summary>
+        public float NormalizedTopY;
 
-        public int Height;
+        /// <summary>
+        /// Normalized texel coordinate of the bottom edge.
+        /// </summary>
+        public float NormalizedBottomY;
     }
 
 }

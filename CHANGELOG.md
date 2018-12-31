@@ -6,6 +6,8 @@
 
 #### 31 December 2018
 
+* Decrease vertex and index buffer sizes.
+* Normalize texture atlas coordinates.
 * Add a `SamplerState` to `WorldPixelShader`.
 
 #### 30 December 2018

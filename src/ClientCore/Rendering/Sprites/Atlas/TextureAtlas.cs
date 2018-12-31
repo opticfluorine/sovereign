@@ -54,6 +54,16 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         public Surface AtlasSurface { get; private set; }
 
         /// <summary>
+        /// Width of the atlas surface in pixels.
+        /// </summary>
+        public int Width { get; private set; }
+
+        /// <summary>
+        /// Height of the atlas surface in pixels.
+        /// </summary>
+        public int Height { get; private set; }
+
+        /// <summary>
         /// Maps spritesheet names to top-left coordinate in the atlas.
         /// </summary>
         public IDictionary<string, Tuple<int, int>> SpriteSheetMap
@@ -76,6 +86,8 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
             /* Compute the packing plan. */
             var plan = PlanPacking(orderedSheets, out int atlasWidth, 
                 out int atlasHeight);
+            Width = atlasWidth;
+            Height = atlasHeight;
 
             /* Create the atlas. */
             CreateAtlas(plan, atlasWidth, atlasHeight, format);

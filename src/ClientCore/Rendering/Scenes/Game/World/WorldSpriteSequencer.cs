@@ -132,41 +132,41 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             vertex->VelX = velocity.X;
             vertex->VelY = velocity.Y;
             vertex->VelZ = velocity.Z;
-            vertex->TexX = spriteInfo.TopLeftX;
-            vertex->TexY = spriteInfo.TopLeftY;
+            vertex->TexX = spriteInfo.NormalizedLeftX;
+            vertex->TexY = spriteInfo.NormalizedTopY;
 
             /* Top right. */
             vertex++;
-            vertex->PosX = position.X + spriteInfo.Width;
+            vertex->PosX = position.X + spriteInfo.WidthInTiles;
             vertex->PosY = position.Y;
             vertex->PosZ = position.Z;
             vertex->VelX = velocity.X;
             vertex->VelY = velocity.Y;
             vertex->VelZ = velocity.Z;
-            vertex->TexX = spriteInfo.BottomRightX;
-            vertex->TexY = spriteInfo.TopLeftY;
+            vertex->TexX = spriteInfo.NormalizedRightX;
+            vertex->TexY = spriteInfo.NormalizedTopY;
 
             /* Bottom right. */
             vertex++;
-            vertex->PosX = position.X + spriteInfo.Width;
-            vertex->PosY = position.Y - spriteInfo.Height;
+            vertex->PosX = position.X + spriteInfo.WidthInTiles;
+            vertex->PosY = position.Y - spriteInfo.HeightInTiles;
             vertex->PosZ = position.Z;
             vertex->VelX = velocity.X;
             vertex->VelY = velocity.Y;
             vertex->VelZ = velocity.Z;
-            vertex->TexX = spriteInfo.BottomRightX;
-            vertex->TexY = spriteInfo.BottomRightY;
+            vertex->TexX = spriteInfo.NormalizedRightX;
+            vertex->TexY = spriteInfo.NormalizedBottomY;
 
             /* Bottom left. */
             vertex++;
             vertex->PosX = position.X;
-            vertex->PosY = position.Y - spriteInfo.Height;
+            vertex->PosY = position.Y - spriteInfo.HeightInTiles;
             vertex->PosZ = position.Z;
             vertex->VelX = velocity.X;
             vertex->VelY = velocity.Y;
             vertex->VelZ = velocity.Z;
-            vertex->TexX = spriteInfo.TopLeftX;
-            vertex->TexY = spriteInfo.BottomRightY;
+            vertex->TexX = spriteInfo.NormalizedLeftX;
+            vertex->TexY = spriteInfo.NormalizedBottomY;
         }
 
         /// <summary>

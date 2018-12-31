@@ -22,6 +22,7 @@
  */
 
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,10 +41,9 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         private readonly TextureAtlasManager atlasManager;
-
         private readonly SpriteManager spriteManager;
-
         private readonly SpriteSheetManager spriteSheetManager;
+        private readonly IClientConfiguration clientConfiguration;
 
         /// <summary>
         /// Maps each sprite ID to its texture atlas coordinates.
@@ -51,11 +51,13 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         public IList<AtlasMapElement> MapElements { get; private set; }
 
         public AtlasMap(TextureAtlasManager atlasManager, SpriteManager spriteManager,
-            SpriteSheetManager spriteSheetManager)
+            SpriteSheetManager spriteSheetManager, 
+            IClientConfiguration clientConfiguration)
         {
             this.atlasManager = atlasManager;
             this.spriteManager = spriteManager;
             this.spriteSheetManager = spriteSheetManager;
+            this.clientConfiguration = clientConfiguration;
         }
 
         /// <summary>
@@ -85,27 +87,29 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         {
             /* Retrieve spritesheet. */
             var sheet = spriteSheetManager.SpriteSheets[sprite.SpritesheetName];
-            var tileWidth = sheet.Definition.SpriteWidth;
-            var tileHeight = sheet.Definition.SpriteHeight;
+            var spriteWidth = sheet.Definition.SpriteWidth;
+            var spriteHeight = sheet.Definition.SpriteHeight;
 
             /* Locate spritesheet in atlas. */
             var (stlx, stly) = atlasManager.TextureAtlas.SpriteSheetMap[sprite.SpritesheetName];
+            var atlasWidth = atlasManager.TextureAtlas.Width;
+            var atlasHeight = atlasManager.TextureAtlas.Height;
 
             /* Compute sprite coordinates in atlas. */
-            var tlx = stlx + sprite.Column * tileWidth;
-            var tly = stly + sprite.Row * tileHeight;
-            var brx = tlx + tileWidth;
-            var bry = tly + tileHeight;
+            var tlx = (float)(stlx + sprite.Column * spriteWidth);
+            var tly = (float)(stly + sprite.Row * spriteHeight);
+            var brx = tlx + spriteWidth;
+            var bry = tly + spriteHeight;
 
             /* Add record to map. */
             MapElements.Add(new AtlasMapElement()
             {
-                TopLeftX = tlx,
-                TopLeftY = tly,
-                BottomRightX = brx,
-                BottomRightY = bry,
-                Width = tileWidth,
-                Height = tileHeight
+                NormalizedLeftX = tlx / atlasWidth,
+                NormalizedTopY = tly / atlasHeight,
+                NormalizedRightX = brx / atlasWidth,
+                NormalizedBottomY = bry / atlasHeight,
+                WidthInTiles = spriteWidth,
+                HeightInTiles = spriteHeight
             });
         }
 
