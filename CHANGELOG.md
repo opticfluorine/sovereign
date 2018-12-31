@@ -6,6 +6,10 @@
 
 #### 30 December 2018
 
+* First time to display a screen that's not entirely black! Of course,
+  it's just half-black and half blood-red, which is not the desired
+  result, so back to debugging...
+* Fix buffer overrun issues in `WorldSpriteSequencer`.
 * Increase GPU buffer sizes significantly to accomodate larger scenes.
 * Fix `NullReferenceException` in `WorldTileSpriteSequencer` when
   sequencing the edge of the world.

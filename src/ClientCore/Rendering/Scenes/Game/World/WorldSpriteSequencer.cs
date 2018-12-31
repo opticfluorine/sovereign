@@ -125,7 +125,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             var spriteInfo = atlasMap.MapElements[sprite.Id];
 
             /* Top left. */
-            WorldVertex* vertex = vertexBase + vertexPos * sizeof(WorldVertex);
+            WorldVertex* vertex = vertexBase + vertexPos; 
             vertex->PosX = position.X;
             vertex->PosY = position.Y;
             vertex->PosZ = position.Z;
@@ -136,7 +136,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             vertex->TexY = spriteInfo.TopLeftY;
 
             /* Top right. */
-            vertex += sizeof(WorldVertex);
+            vertex++;
             vertex->PosX = position.X + spriteInfo.Width;
             vertex->PosY = position.Y;
             vertex->PosZ = position.Z;
@@ -147,7 +147,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             vertex->TexY = spriteInfo.TopLeftY;
 
             /* Bottom right. */
-            vertex += sizeof(WorldVertex);
+            vertex++;
             vertex->PosX = position.X + spriteInfo.Width;
             vertex->PosY = position.Y - spriteInfo.Height;
             vertex->PosZ = position.Z;
@@ -158,7 +158,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             vertex->TexY = spriteInfo.BottomRightY;
 
             /* Bottom left. */
-            vertex += sizeof(WorldVertex);
+            vertex++;
             vertex->PosX = position.X;
             vertex->PosY = position.Y - spriteInfo.Height;
             vertex->PosZ = position.Z;
@@ -177,17 +177,17 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="vertexPos">Position of the first vertex.</param>
         unsafe private void AddIndicesForSprite(uint* indexBase, int indexPos, uint vertexPos)
         {
-            uint* index = indexBase + indexPos * sizeof(uint);
+            uint* index = indexBase + indexPos;
 
             /* Upper left triangle. */
             *index = vertexPos;
-            *(index + sizeof(uint)) = vertexPos + 1;
-            *(index + 2 * sizeof(uint)) = vertexPos + 3;
+            *(index + 1) = vertexPos + 1;
+            *(index + 2) = vertexPos + 3;
 
             /* Lower right triangle. */
-            *(index + 3 * sizeof(uint)) = vertexPos + 1;
-            *(index + 4 * sizeof(uint)) = vertexPos + 2;
-            *(index + 5 * sizeof(uint)) = vertexPos + 3;
+            *(index + 3) = vertexPos + 1;
+            *(index + 4) = vertexPos + 2;
+            *(index + 5) = vertexPos + 3;
         }
 
         /// <summary>
