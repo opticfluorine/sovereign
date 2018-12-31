@@ -6,6 +6,10 @@
 
 #### 30 December 2018
 
+* Fix `NullReferenceException` in `WorldTileSpriteSequencer` when
+  sequencing the edge of the world.
+* Forcibly terminate worker threads if they fail to respond to engine
+  shutdown within a short timeout.
 * Fix issues in `OctreeNode` that caused infinite loops when
   attempting to rebalance a tree.
 * Update `BlockManager` to designate block entities as `Drawable`

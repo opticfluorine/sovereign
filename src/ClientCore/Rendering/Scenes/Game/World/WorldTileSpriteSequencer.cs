@@ -116,7 +116,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         {
             /* Get the block, or return a wildcard if not found. */
             var blockIds = blockGridPositions.GetEntitiesAtPosition(position);
-            if (blockIds.Count == 0) return TileSprite.Wildcard;
+            if (blockIds == null || blockIds.Count == 0) return TileSprite.Wildcard;
             var blockId = blockIds.First();
 
             /* Get the material information, or return wildcard if not found. */

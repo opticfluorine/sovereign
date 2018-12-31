@@ -97,7 +97,8 @@ namespace Sovereign.EngineCore.Systems
             /* Join on the executor threads. */
             foreach (var thread in threads)
             {
-                thread.Join();
+                if (!thread.Join(500))
+                    thread.Abort();
             }
 
             /* Release the executor resources. */
