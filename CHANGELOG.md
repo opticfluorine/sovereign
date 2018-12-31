@@ -6,6 +6,10 @@
 
 #### 30 December 2018
 
+* Add `IncrementalGuard` synchronization primitive to resolve the
+  possible race condition in `ComponentManager`. Adding an entity with
+  an `IEntityBuilder` is now atomic with respect to the per-tick
+  component updates.
 * Fix issue in `BaseComponentCollection` and the various
   `*EventFilter` classes where newly created entities are not properly
   indexed due to the filters not checking for pending component

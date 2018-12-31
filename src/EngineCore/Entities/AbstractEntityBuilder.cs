@@ -21,8 +21,11 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
+using Sovereign.EngineUtil.Threading;
+using System;
 using System.Numerics;
 
 namespace Sovereign.EngineCore.Entities
@@ -31,30 +34,48 @@ namespace Sovereign.EngineCore.Entities
     /// <summary>
     /// Base builder class for new entities.
     /// </summary>
-    public abstract class AbstractEntityBuilder : IEntityBuilder
+    public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     {
 
         protected readonly ulong entityId;
+        protected readonly ComponentManager componentManager;
         protected readonly PositionComponentCollection positions;
         protected readonly VelocityComponentCollection velocities;
         protected readonly MaterialComponentCollection materials;
         protected readonly MaterialModifierComponentCollection materialModifiers;
         protected readonly AboveBlockComponentCollection aboveBlocks;
 
-        public AbstractEntityBuilder(ulong entityId, PositionComponentCollection positions,
+        private IncrementalGuard.IncrementalGuardWeakLock weakLock;
+
+        public AbstractEntityBuilder(ulong entityId, 
+            ComponentManager componentManager, PositionComponentCollection positions,
             VelocityComponentCollection velocities, MaterialComponentCollection materials,
             MaterialModifierComponentCollection materialModifiers,
             AboveBlockComponentCollection aboveBlocks)
         {
             this.entityId = entityId;
+            this.componentManager = componentManager;
             this.positions = positions;
             this.velocities = velocities;
             this.materials = materials;
             this.materialModifiers = materialModifiers;
             this.aboveBlocks = aboveBlocks;
+
+            weakLock = componentManager.ComponentGuard.AcquireWeakLock();
         }
 
-        public ulong Build() => entityId;
+        public void Dispose()
+        {
+            weakLock?.Dispose();
+        }
+
+        public ulong Build()
+        {
+            weakLock.Dispose();
+            weakLock = null;
+
+            return entityId;
+        }
 
         public IEntityBuilder Positionable(Vector3 position, Vector3 velocity)
         {

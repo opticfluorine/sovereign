@@ -21,11 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
+using Sovereign.EngineUtil.Threading;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.EngineCore.Components
 {
@@ -35,6 +32,11 @@ namespace Sovereign.EngineCore.Components
     /// </summary>
     public class ComponentManager
     {
+
+        /// <summary>
+        /// Incremental guard used to synchronize component updates.
+        /// </summary>
+        public IncrementalGuard ComponentGuard { get; } = new IncrementalGuard();
 
         /// <summary>
         /// All known component updaters.
@@ -62,9 +64,12 @@ namespace Sovereign.EngineCore.Components
         /// </summary>
         public void UpdateAllComponents()
         {
-            foreach (var updater in componentUpdaters)
+            using (var strongLock = ComponentGuard.AcquireStrongLock())
             {
-                updater.ApplyComponentUpdates();
+                foreach (var updater in componentUpdaters)
+                {
+                    updater.ApplyComponentUpdates();
+                }
             }
         }
 

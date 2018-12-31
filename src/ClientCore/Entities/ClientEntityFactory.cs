@@ -22,6 +22,7 @@
  */
 
 using Sovereign.ClientCore.Rendering.Components;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
@@ -35,6 +36,7 @@ namespace Sovereign.ClientCore.Entities
     public sealed class ClientEntityFactory : IEntityFactory
     {
         private readonly EntityManager entityManager;
+        private readonly ComponentManager componentManager;
         private readonly PositionComponentCollection positions;
         private readonly VelocityComponentCollection velocities;
         private readonly DrawableComponentCollection drawables;
@@ -45,6 +47,7 @@ namespace Sovereign.ClientCore.Entities
         private EntityAssigner assigner;
 
         public ClientEntityFactory(EntityManager entityManager,
+            ComponentManager componentManager,
             PositionComponentCollection positions,
             VelocityComponentCollection velocities,
             DrawableComponentCollection drawables,
@@ -54,6 +57,7 @@ namespace Sovereign.ClientCore.Entities
             AnimatedSpriteComponentCollection animatedSprites)
         {
             this.entityManager = entityManager;
+            this.componentManager = componentManager;
             this.positions = positions;
             this.velocities = velocities;
             this.drawables = drawables;
@@ -69,7 +73,7 @@ namespace Sovereign.ClientCore.Entities
                 assigner = entityManager.GetNewAssigner();
 
             return new ClientEntityBuilder(assigner.GetNextId(),
-                positions, velocities, drawables, materials,
+                componentManager, positions, velocities, drawables, materials,
                 materialModifiers, aboveBlocks, animatedSprites);
         }
     }
