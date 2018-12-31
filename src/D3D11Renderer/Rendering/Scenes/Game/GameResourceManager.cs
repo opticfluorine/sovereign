@@ -40,7 +40,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game
         /// <summary>
         /// Maximum number of elements in a main resource buffer.
         /// </summary>
-        public const int MaximumBufferElements = 4096;
+        public const int MaximumBufferElements = 65536;
 
         /// <summary>
         /// Updateable vertex buffer.

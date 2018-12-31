@@ -6,6 +6,7 @@
 
 #### 30 December 2018
 
+* Increase GPU buffer sizes significantly to accomodate larger scenes.
 * Fix `NullReferenceException` in `WorldTileSpriteSequencer` when
   sequencing the edge of the world.
 * Forcibly terminate worker threads if they fail to respond to engine
