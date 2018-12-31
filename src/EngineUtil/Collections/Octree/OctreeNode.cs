@@ -24,6 +24,7 @@
 using Sovereign.EngineUtil.Ranges;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -37,6 +38,7 @@ namespace Sovereign.EngineUtil.Collections.Octree
     /// <typeparam name="T">Element type.</typeparam>
     ///
     /// This class is intended for use as an internal data structure by Octree.
+    [DebuggerDisplay("{minPosition} - {maxPosition}, Count = {elementPositions.Count}")]
     sealed class OctreeNode<T>
     {
 
@@ -276,16 +278,16 @@ namespace Sovereign.EngineUtil.Collections.Octree
                 if (currentNode.elementPositions.Count < 2) continue;
 
                 /* If the node cannot be reduced further in size, stop. */
-                if (!CanNodeBeSubdivided()) continue;
+                if (!currentNode.CanNodeBeSubdivided()) continue;
 
                 /* If the node cannot be rebalanced further, stop. */
                 if (!currentNode.CanLeafNodeBeRebalanced()) continue;
 
                 /* Distribute the elements into the child nodes. */
-                DistributeElementsToChildren();
+                currentNode.DistributeElementsToChildren();
 
                 /* Mark child nodes to revisit. */
-                foreach (var nextNode in childNodes)
+                foreach (var nextNode in currentNode.childNodes)
                 {
                     if (nextNode != null) nodesToVisit.Push(nextNode);
                 }

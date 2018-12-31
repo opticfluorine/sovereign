@@ -6,6 +6,8 @@
 
 #### 30 December 2018
 
+* Fix issues in `OctreeNode` that caused infinite loops when
+  attempting to rebalance a tree.
 * Update `BlockManager` to designate block entities as `Drawable`
   by default.
 * Add `IncrementalGuard` synchronization primitive to resolve the
