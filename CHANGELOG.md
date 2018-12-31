@@ -6,6 +6,8 @@
 
 #### 30 December 2018
 
+* Update `BlockManager` to designate block entities as `Drawable`
+  by default.
 * Add `IncrementalGuard` synchronization primitive to resolve the
   possible race condition in `ComponentManager`. Adding an entity with
   an `IEntityBuilder` is now atomic with respect to the per-tick

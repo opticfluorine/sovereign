@@ -96,7 +96,8 @@ namespace Sovereign.EngineCore.Systems.Block
             var builder = entityFactory.GetBuilder()
                 .Positionable((Vector3)blockRecord.Position)
                 .Material(blockRecord.Material)
-                .MaterialModifier(blockRecord.MaterialModifier);
+                .MaterialModifier(blockRecord.MaterialModifier)
+                .Drawable();
 
             if (hasAboveBlock) builder.AboveBlock(aboveBlock);
 
