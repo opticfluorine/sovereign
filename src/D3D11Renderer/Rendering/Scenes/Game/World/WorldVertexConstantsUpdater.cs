@@ -61,24 +61,24 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
             ref var mat = ref buf[0].WorldViewTransform;
 
             mat.M11 = invHalfWidth;
-            mat.M12 = 0.0f;
-            mat.M13 = 0.0f;
-            mat.M14 = -invHalfWidth * cameraPos.X;
-
             mat.M21 = 0.0f;
-            mat.M22 = invHalfHeight;
-            mat.M23 = -invHalfHeight;
-            mat.M24 = invHalfHeight * (cameraPos.Z - cameraPos.Y);
-
             mat.M31 = 0.0f;
-            mat.M32 = 0.0f;
-            mat.M33 = 0.0f;
-            mat.M34 = 0.0f;
+            mat.M41 = -invHalfWidth * cameraPos.X;
 
-            mat.M41 = 0.0f;
-            mat.M42 = 0.0f;
+            mat.M12 = 0.0f;
+            mat.M22 = invHalfHeight;
+            mat.M32 = -invHalfHeight;
+            mat.M42 = invHalfHeight * (cameraPos.Z - cameraPos.Y);
+
+            mat.M13 = 0.0f;
+            mat.M23 = 0.0f;
+            mat.M33 = 0.0f;
             mat.M43 = 0.0f;
-            mat.M44 = 0.0f;
+
+            mat.M14 = 0.0f;
+            mat.M24 = 0.0f;
+            mat.M34 = 0.0f;
+            mat.M44 = 1.0f;
         }
 
     }

@@ -35,6 +35,7 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
 
         private readonly D3D11Device device;
         private readonly DisplayViewport displayViewport;
+        private RasterizerState rasterizerState;
 
         public WorldRasterizer(D3D11Device device, DisplayViewport displayViewport)
         {
@@ -47,7 +48,20 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         /// </summary>
         public void Initialize()
         {
-            /* Nothing to be done. */
+            var desc = new RasterizerStateDescription()
+            {
+                CullMode = CullMode.None,
+                DepthBias = 0,
+                DepthBiasClamp = 0.0f,
+                FillMode = FillMode.Solid,
+                IsAntialiasedLineEnabled = false,
+                IsDepthClipEnabled = false,
+                IsFrontCounterClockwise = false,
+                IsMultisampleEnabled = false,
+                IsScissorEnabled = false,
+                SlopeScaledDepthBias = 0.0f
+            };
+            rasterizerState = new RasterizerState(device.Device, desc);
         }
 
         /// <summary>
@@ -56,10 +70,9 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         /// <param name="context">Device context.</param>
         public void Bind(DeviceContext context)
         {
+            context.Rasterizer.State = rasterizerState;
             context.Rasterizer.SetViewport(0.0f, 0.0f, 
                 device.DisplayMode.Width, device.DisplayMode.Height);
-            context.Rasterizer.SetScissorRectangle(0, 0, 
-                displayViewport.Width, displayViewport.Height);
         }
 
         /// <summary>
@@ -68,7 +81,6 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
         /// <param name="context">Device context.</param>
         public void Unbind(DeviceContext context)
         {
-            /* Nothing to be done. */
         }
 
     }
