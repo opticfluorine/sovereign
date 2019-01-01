@@ -108,8 +108,8 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
                 NormalizedTopY = tly / atlasHeight,
                 NormalizedRightX = brx / atlasWidth,
                 NormalizedBottomY = bry / atlasHeight,
-                WidthInTiles = spriteWidth,
-                HeightInTiles = spriteHeight
+                WidthInTiles = spriteWidth / clientConfiguration.TileWidth,
+                HeightInTiles = spriteHeight / clientConfiguration.TileWidth
             });
         }
 

@@ -73,12 +73,12 @@ namespace Sovereign.D3D11Renderer.Rendering.Scenes.Game.World
             mat.M31 = 0.0f;
             mat.M32 = 0.0f;
             mat.M33 = 0.0f;
-            mat.M34 = -1.0f;
+            mat.M34 = 0.0f;
 
             mat.M41 = 0.0f;
             mat.M42 = 0.0f;
             mat.M43 = 0.0f;
-            mat.M44 = 1.0f;
+            mat.M44 = 0.0f;
         }
 
     }
