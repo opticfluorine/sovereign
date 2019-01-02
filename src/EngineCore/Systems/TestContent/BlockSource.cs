@@ -58,6 +58,7 @@ namespace Sovereign.EngineCore.Systems.TestContent
         /// <param name="records">List to populate with block records.</param>
         private void CreateBlockRecords(IList<BlockRecord> records)
         {
+            var mat = 0;
             for (int x = -50; x <= 50; ++x)
             {
                 for (int y = -50; y <= 50; ++y)
@@ -65,9 +66,10 @@ namespace Sovereign.EngineCore.Systems.TestContent
                     records.Add(new BlockRecord()
                     {
                         Position = new GridPosition(x, y, 0),
-                        Material = 0,
+                        Material = mat % 2,
                         MaterialModifier = 0
                     });
+                    mat++;
                 }
             }
         }

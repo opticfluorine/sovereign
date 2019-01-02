@@ -2,14 +2,14 @@
 #
 
 Sprites:
-  # Grass, center
+    # Water, center
   - Id: 0
-    SpritesheetName: lpc_atlas_2.png
-    Row: 3
-    Column: 22
-
-  # Water, center
-  - Id: 1
     SpritesheetName: lpc_atlas_2.png
     Row: 12
     Column: 10
+    
+    # Grass, center
+  - Id: 1
+    SpritesheetName: lpc_atlas_2.png
+    Row: 3
+    Column: 22

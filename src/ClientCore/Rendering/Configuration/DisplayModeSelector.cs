@@ -42,12 +42,12 @@ namespace Sovereign.ClientCore.Rendering.Configuration
         /// <summary>
         /// Default width.
         /// </summary>
-        private const int DefaultWidth = 1440;
+        private const int DefaultWidth = 1366;
 
         /// <summary>
         /// Default height.
         /// </summary>
-        private const int DefaultHeight = 900;
+        private const int DefaultHeight = 768;
 
         /// <summary>
         /// Display mode enumerator.

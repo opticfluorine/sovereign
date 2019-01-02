@@ -1,5 +1,19 @@
 # Sovereign Engine Changelog
 
+## 2019
+
+### January
+
+#### 01 January 2019
+
+* The renderer draws a checkerboard for the first time. The colors in the texture
+  are completely wrong however, so this needs to be investigated.
+* Change base resolution in `DisplayViewport`, the original values were too large
+  and the resulting tiles were far too small.
+* Update aspect ratio in `DisplayModeSelector` to 16:9. The engine is still locked
+  to this aspect ratio; writing an issue to make this adjustable in the future.
+* Update `BlockSource` to produce a checkerboard pattern for testing the renderer.
+
 ## 2018
 
 ### December

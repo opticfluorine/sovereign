@@ -26,12 +26,12 @@ namespace Sovereign.ClientCore.Rendering.Configuration
         /// <summary>
         /// Width of the display viewport in pixels.
         /// </summary>
-        public int Width => 1280;
+        public int Width => 800;
 
         /// <summary>
         /// Height of the display viewport in pixels.
         /// </summary>
-        public int Height => 720;
+        public int Height => 450;
 
         /// <summary>
         /// Width of the display viewport as a multiple of the tile width.

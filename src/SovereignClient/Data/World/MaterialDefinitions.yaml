@@ -11,3 +11,10 @@ Materials:
         TopFaceTileSpriteId: 0
         SideFaceTileSpriteId: 0
         ObscuredTopFaceTileSpriteId: 0
+  - Id: 1
+    MaterialName: Grass
+    MaterialSubtypes:
+      - MaterialModifier: 0
+        TopFaceTileSpriteId: 1
+        SideFaceTileSpriteId: 1
+        ObscuredTopFaceTileSpriteId: 1
