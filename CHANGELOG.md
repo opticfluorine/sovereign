@@ -6,6 +6,9 @@
 
 #### 01 January 2019
 
+* Add a `GetHashCode()` method to `GridPosition`. This improved the performance of
+  the `WorldTileSpriteSequencer` by approximately 6.5x by improving the performance
+  of lookups from the `BlockGridPositionIndexer`.
 * The renderer draws a checkerboard for the first time. The colors in the texture
   are completely wrong however, so this needs to be investigated.
 * Change base resolution in `DisplayViewport`, the original values were too large

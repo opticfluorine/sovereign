@@ -6,6 +6,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+nsight_profiler.cfg
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

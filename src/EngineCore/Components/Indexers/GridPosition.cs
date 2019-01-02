@@ -113,6 +113,15 @@ namespace Sovereign.EngineCore.Components.Indexers
             return sb.ToString();
         }
 
+        public override int GetHashCode()
+        {
+            int hash = 17;
+            hash = hash * 31 + X.GetHashCode();
+            hash = hash * 31 + Y.GetHashCode();
+            hash = hash * 31 + Z.GetHashCode();
+            return hash;
+        }
+
     }
 
 }
