@@ -6,6 +6,9 @@
 
 #### 01 January 2019
 
+* Fix byte ordering issue in `Surface` that was storing texture atlas pixels in
+  ABGR order instead of RGBA, leading to weird overly red graphics. Colors are now
+  correct.
 * Add a `GetHashCode()` method to `GridPosition`. This improved the performance of
   the `WorldTileSpriteSequencer` by approximately 6.5x by improving the performance
   of lookups from the `BlockGridPositionIndexer`.

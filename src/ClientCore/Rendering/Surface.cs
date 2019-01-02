@@ -96,7 +96,7 @@ namespace Sovereign.ClientCore.Rendering
         private static readonly IDictionary<DisplayFormat, uint> formatMap
             = new Dictionary<DisplayFormat, uint>()
             {
-                {DisplayFormat.R8G8B8A8_UNorm, SDL.SDL_PIXELFORMAT_RGBA8888},
+                {DisplayFormat.R8G8B8A8_UNorm, SDL.SDL_PIXELFORMAT_ABGR8888},
             };
 
         /// <summary>
