@@ -4,6 +4,12 @@
 
 ### January
 
+#### 02 January 2019
+
+* Change checkerboard to something less awful to look at, and use sprites that have
+  some variation in their color across their surface - this showed that the texture
+  atlas is being sampled correctly.
+
 #### 01 January 2019
 
 * Fix byte ordering issue in `Surface` that was storing texture atlas pixels in

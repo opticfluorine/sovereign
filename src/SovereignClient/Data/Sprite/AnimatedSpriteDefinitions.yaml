@@ -2,14 +2,26 @@
 #
 
 AnimatedSprites:
-  # Grass, center
+  # Water, center
   - Id: 0
     AnimationTimestep: 1
     SpriteIds:
     - 0
 
-  # Water, center
+  # Grass, center
   - Id: 1
     AnimationTimestep: 1
     SpriteIds:
     - 1
+
+  # Light dirt, center
+  - Id: 2
+    AnimationTimestep: 1
+    SpriteIds:
+    - 2
+
+  # Dark dirt, center
+  - Id: 3
+    AnimationTimestep: 1
+    SpriteIds:
+    - 3

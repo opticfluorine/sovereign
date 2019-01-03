@@ -18,3 +18,17 @@ Materials:
         TopFaceTileSpriteId: 1
         SideFaceTileSpriteId: 1
         ObscuredTopFaceTileSpriteId: 1
+  - Id: 2
+    MaterialName: Light Dirt
+    MaterialSubtypes:
+      - MaterialModifier: 0
+        TopFaceTileSpriteId: 2
+        SideFaceTileSpriteId: 2
+        ObscuredTopFaceTileSpriteId: 2
+  - Id: 3
+    MaterialName: Dark Dirt
+    MaterialSubtypes:
+      - MaterialModifier: 0
+        TopFaceTileSpriteId: 3
+        SideFaceTileSpriteId: 3
+        ObscuredTopFaceTileSpriteId: 3

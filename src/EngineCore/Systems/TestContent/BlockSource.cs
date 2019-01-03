@@ -66,7 +66,7 @@ namespace Sovereign.EngineCore.Systems.TestContent
                     records.Add(new BlockRecord()
                     {
                         Position = new GridPosition(x, y, 0),
-                        Material = mat % 2,
+                        Material = 2 + (mat % 2),
                         MaterialModifier = 0
                     });
                     mat++;

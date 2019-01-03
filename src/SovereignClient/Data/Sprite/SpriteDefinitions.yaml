@@ -13,3 +13,15 @@ Sprites:
     SpritesheetName: lpc_atlas_2.png
     Row: 3
     Column: 22
+
+    # Light dirt, center
+  - Id: 2
+    SpritesheetName: lpc_atlas_2.png
+    Row: 3
+    Column: 16
+
+    # Dark dirt, center
+  - Id: 3
+    SpritesheetName: lpc_atlas_2.png
+    Row: 3
+    Column: 19
