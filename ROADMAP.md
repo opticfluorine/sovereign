@@ -3,6 +3,9 @@
 This file is an incomplete list of future features planned.
 Planned features are grouped by release, with earliest releases listed first.
 
+All features shall be implemented following the accessibility guidelines
+outlined in docs/accessibility.md.
+
 ## Initial Release
 
 ### Basic World Rendering

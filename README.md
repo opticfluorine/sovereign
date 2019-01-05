@@ -8,7 +8,8 @@ and player-created/player-driven worlds.
 
 The engine is currently in a very early stage of development and is a
 work in progress. I'm developing this as a hobby in my limited personal time,
-so progress can be somewhat slow (but typically steady).
+so progress can be somewhat slow (but typically steady). The engine is not
+feature complete and should be considered as being in a pre-alpha state.
 
 Sovereign Engine is made available under the MIT license.
 
