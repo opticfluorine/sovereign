@@ -23,6 +23,7 @@
 
 using Castle.Core;
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Logging;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
@@ -45,30 +46,12 @@ namespace Sovereign.ClientCore.Rendering
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-        /// <summary>
-        /// Main display.
-        /// </summary>
         private readonly MainDisplay mainDisplay;
-
-        /// <summary>
-        /// Video adapter selector.
-        /// </summary>
         private readonly AdapterSelector adapterSelector;
-
-        /// <summary>
-        /// Display mode selector.
-        /// </summary>
         private readonly DisplayModeSelector displayModeSelector;
-
-        /// <summary>
-        /// Renderer.
-        /// </summary>
         private readonly IRenderer renderer;
-
-        /// <summary>
-        /// Rendering resource manager.
-        /// </summary>
         private readonly RenderingResourceManager resourceManager;
+        private readonly IClientConfiguration clientConfiguration;
 
         /// <summary>
         /// Error handler.
@@ -86,13 +69,15 @@ namespace Sovereign.ClientCore.Rendering
         private IDisplayMode selectedDisplayMode;
 
         public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
-            DisplayModeSelector displayModeSelector, IRenderer renderer, RenderingResourceManager resourceManager)
+            DisplayModeSelector displayModeSelector, IRenderer renderer, 
+            RenderingResourceManager resourceManager, IClientConfiguration clientConfiguration)
         {
             this.mainDisplay = mainDisplay;
             this.adapterSelector = adapterSelector;
             this.displayModeSelector = displayModeSelector;
             this.renderer = renderer;
             this.resourceManager = resourceManager;
+            this.clientConfiguration = clientConfiguration;
         }
 
         public void Start()
@@ -145,7 +130,7 @@ namespace Sovereign.ClientCore.Rendering
                 SelectConfiguration();
 
                 /* Create the main window. */
-                mainDisplay.Show(selectedDisplayMode, false);
+                mainDisplay.Show(selectedDisplayMode, clientConfiguration.Fullscreen);
             }
             catch (Exception e)
             {

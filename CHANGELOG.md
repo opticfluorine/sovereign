@@ -4,6 +4,10 @@
 
 ### January
 
+#### 06 January 2019
+
+* Add configuration option for running in fullscreen mode.
+
 #### 02 January 2019
 
 * Change checkerboard to something less awful to look at, and use sprites that have

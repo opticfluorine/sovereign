@@ -56,6 +56,11 @@ namespace Sovereign.ClientCore.Configuration
         /// </summary>
         int MaxFramerate { get; }
 
+        /// <summary>
+        /// Whether to run in fullscreen mode.
+        /// </summary>
+        bool Fullscreen { get; }
+
     }
 
 }
