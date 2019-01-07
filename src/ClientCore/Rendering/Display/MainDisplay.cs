@@ -107,7 +107,7 @@ namespace Sovereign.ClientCore.Rendering.Display
             var flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL;
             if (IsFullscreen)
             {
-                flags |= SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN;
+                flags |= SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP;
             }
             return flags;
         }
