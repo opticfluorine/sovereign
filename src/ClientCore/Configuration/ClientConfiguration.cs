@@ -41,7 +41,7 @@ namespace Sovereign.ClientCore.Configuration
 
         public int MaxFramerate => 60;
 
-        public bool Fullscreen => true;
+        public bool Fullscreen => false;
     }
 
 }
