@@ -88,15 +88,9 @@ namespace Sovereign.EngineCore.Entities
         /// Makes the new entity a block of the given material.
         /// </summary>
         /// <param name="materialId">Material ID.</param>
-        /// <returns>Builder.</returns>
-        IEntityBuilder Material(int materialId);
-
-        /// <summary>
-        /// Assigns the given material modifier to the new entity.
-        /// </summary>
         /// <param name="materialModifier">Material modifier.</param>
         /// <returns>Builder.</returns>
-        IEntityBuilder MaterialModifier(int materialModifier);
+        IEntityBuilder Material(int materialId, int materialModifier);
 
         /// <summary>
         /// Records the entity ID of the block above this block.

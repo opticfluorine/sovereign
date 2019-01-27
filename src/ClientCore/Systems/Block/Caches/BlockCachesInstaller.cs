@@ -1,6 +1,4 @@
-extensions: designer.cs generated.cs
-extensions: .cs .cpp .h .hlsl
-/*
+﻿/*
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
@@ -22,3 +20,28 @@ extensions: .cs .cpp .h .hlsl
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
  */
+
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+using Sovereign.EngineUtil.IoC;
+
+namespace Sovereign.ClientCore.Systems.Block.Caches
+{
+
+    /// <summary>
+    /// IoC installer for block system caches.
+    /// </summary>
+    public sealed class BlockCachesInstaller : IWindsorInstaller
+    {
+
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IBlockAnimatedSpriteCache>()
+                .WithServiceDefaultInterfaces()
+                .LifestyleSingleton());
+        }
+
+    }
+}

@@ -1,6 +1,4 @@
-extensions: designer.cs generated.cs
-extensions: .cs .cpp .h .hlsl
-/*
+﻿/*
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
@@ -22,3 +20,33 @@ extensions: .cs .cpp .h .hlsl
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
  */
+
+using System.Collections.Generic;
+
+namespace Sovereign.ClientCore.Systems.Block.Caches
+{
+
+    /// <summary>
+    /// Interface to the block system's animated sprite cache.
+    /// </summary>
+    public interface IBlockAnimatedSpriteCache
+    {
+
+        /// <summary>
+        /// Gets the front face animated sprite IDs for the given block.
+        /// </summary>
+        /// <param name="blockId">Block entity ID.</param>
+        /// <returns>Front face animated sprite IDs.</returns>
+        IList<int> GetFrontFaceAnimatedSpriteIds(ulong blockId);
+
+        /// <summary>
+        /// Gets the top face animated sprite IDs for the given block.
+        /// </summary>
+        /// <param name="blockId">Block entity ID.</param>
+        /// <returns>Top face animated sprite IDs.</returns>
+        IList<int> GetTopFaceAnimatedSpriteIds(ulong blockId);
+
+    }
+
+}
+

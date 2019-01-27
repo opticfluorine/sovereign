@@ -72,7 +72,7 @@
     <Compile Include="Components\IComponentUpdater.cs" />
     <Compile Include="Components\Indexers\BaseComponentEventFilter.cs" />
     <Compile Include="Components\Indexers\BaseComponentIndexer.cs" />
-    <Compile Include="Components\Indexers\BaseGridPositionComponentIndexer.cs" />
+    <Compile Include="Components\Indexers\BaseGridPositionIndexer.cs" />
     <Compile Include="Components\Indexers\BasePositionComponentIndexer.cs" />
     <Compile Include="Components\Indexers\GridPosition.cs" />
     <Compile Include="Components\Indexers\PositionedEntity.cs" />

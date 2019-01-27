@@ -22,13 +22,11 @@
  */
 
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.ClientCore.Systems.Block.Caches;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.World.Materials;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
 {
@@ -49,13 +47,15 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         private readonly MaterialManager materialManager;
         private readonly AboveBlockComponentCollection aboveBlocks;
         private readonly TileSpriteManager tileSpriteManager;
+        private readonly IBlockAnimatedSpriteCache spriteCache;
 
         public WorldTileSpriteSequencer(MaterialComponentCollection materials,
             MaterialModifierComponentCollection materialModifiers,
             BlockGridPositionIndexer blockGridPositions,
             MaterialManager materialManager,
             AboveBlockComponentCollection aboveBlocks,
-            TileSpriteManager tileSpriteManager)
+            TileSpriteManager tileSpriteManager,
+            IBlockAnimatedSpriteCache spriteCache)
         {
             this.materials = materials;
             this.materialModifiers = materialModifiers;
@@ -63,6 +63,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
             this.materialManager = materialManager;
             this.aboveBlocks = aboveBlocks;
             this.tileSpriteManager = tileSpriteManager;
+            this.spriteCache = spriteCache;
         }
 
         /// <summary>
@@ -71,79 +72,27 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// <param name="animatedSprites">Animated sprites to render.</param>
         /// <param name="tileSprites">Tile sprites to transform.</param>
         /// <param name="isTopFace">Whether the tile sprites are top faces of blocks.</param>
-        public void SequenceTileSprites(IList<PosVelId> animatedSprites, 
+        public void SequenceTileSprites(IList<PosVelId> animatedSprites,
             IList<PosVelId> tileSprites, bool isTopFace)
         {
             foreach (var tileSpriteInfo in tileSprites)
             {
-                /* Obtain grid coordinates for self and neighbors. */
-                var center = (GridPosition)tileSpriteInfo.Position;
-                var north = center + GridPosition.OneY;
-                var south = center - GridPosition.OneY;
-                var east = center + GridPosition.OneX;
-                var west = center - GridPosition.OneX;
+                /* Resolve animated sprite information from the cache. */
+                var cachedSprites = isTopFace
+                    ? spriteCache.GetTopFaceAnimatedSpriteIds(tileSpriteInfo.EntityId)
+                    : spriteCache.GetFrontFaceAnimatedSpriteIds(tileSpriteInfo.EntityId);
 
-                /* Get tile sprites (or wildcards) for neighbors. */
-                var centerId = tileSpriteInfo.Id;
-                var northId = GetTileSpriteIdAtPosition(north, isTopFace);
-                var southId = GetTileSpriteIdAtPosition(south, isTopFace);
-                var eastId = GetTileSpriteIdAtPosition(east, isTopFace);
-                var westId = GetTileSpriteIdAtPosition(west, isTopFace);
-
-                /* Resolve the tile sprite. */
-                var tileSprite = tileSpriteManager.TileSprites[centerId];
-                var resolvedSprites = tileSprite.GetMatchingAnimatedSpriteIds(northId, eastId,
-                    southId, westId);
-                foreach (var sprite in resolvedSprites)
+                /* Sequence the sprite information. */
+                foreach (var spriteId in cachedSprites)
                 {
-                    /* Sequence sprite. */
                     animatedSprites.Add(new PosVelId()
                     {
-                        Id = sprite,
                         Position = tileSpriteInfo.Position,
-                        Velocity = tileSpriteInfo.Velocity
+                        Velocity = tileSpriteInfo.Velocity,
+                        Id = spriteId,
+                        EntityId = tileSpriteInfo.EntityId
                     });
                 }
-            }
-        }
-
-        /// <summary>
-        /// Gets the tile sprite ID at the given position.
-        /// </summary>
-        /// <param name="position"></param>
-        /// <returns></returns>
-        private int GetTileSpriteIdAtPosition(GridPosition position, bool isTopFace)
-        {
-            /* Get the block, or return a wildcard if not found. */
-            var blockIds = blockGridPositions.GetEntitiesAtPosition(position);
-            if (blockIds == null || blockIds.Count == 0) return TileSprite.Wildcard;
-            var blockId = blockIds.First();
-
-            /* Get the material information, or return wildcard if not found. */
-            var materialId = materials.GetComponentForEntity(blockId);
-            var modifier = materialModifiers.GetComponentForEntity(blockId);
-            if (!materialId.HasValue || !modifier.HasValue) return TileSprite.Wildcard;
-
-            /* Retrieve the tile sprite information. */
-            try
-            {
-                var material = materialManager.Materials[materialId.Value];
-                var subtype = material.MaterialSubtypes[modifier.Value];
-
-                if (isTopFace)
-                {
-                    var obscured = aboveBlocks.HasComponentForEntity(blockId);
-                    return obscured ? subtype.ObscuredTopFaceTileSpriteId
-                        : subtype.TopFaceTileSpriteId;
-                }
-                else
-                {
-                    return subtype.SideFaceTileSpriteId;
-                }
-            }
-            catch
-            {
-                return TileSprite.Wildcard;
             }
         }
 
