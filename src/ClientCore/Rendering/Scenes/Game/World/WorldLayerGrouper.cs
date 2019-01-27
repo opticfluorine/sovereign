@@ -123,7 +123,8 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
                 {
                     Position = drawable.Position,
                     Velocity = velocity,
-                    Id = sprite.Value
+                    Id = sprite.Value,
+                    EntityId = drawable.EntityId
                 });
         }
 
@@ -172,6 +173,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
                 Position = drawable.Position,
                 Velocity = velocity,
                 Id = materialSubtype.SideFaceTileSpriteId,
+                EntityId = drawable.EntityId
             });
         }
 
@@ -197,7 +199,8 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
                     Z = drawable.Position.Z - 1.0f
                 },
                 Velocity = velocity,
-                Id = topFaceId
+                Id = topFaceId,
+                EntityId = drawable.EntityId
             });
         }
 

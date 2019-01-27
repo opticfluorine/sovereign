@@ -94,14 +94,9 @@ namespace Sovereign.EngineCore.Entities
             return Positionable(Vector3.Zero, Vector3.Zero);
         }
 
-        public IEntityBuilder Material(int materialId)
+        public IEntityBuilder Material(int materialId, int materialModifier)
         {
             materials.AddComponent(entityId, materialId);
-            return this;
-        }
-
-        public IEntityBuilder MaterialModifier(int materialModifier)
-        {
             materialModifiers.AddComponent(entityId, materialModifier);
             return this;
         }

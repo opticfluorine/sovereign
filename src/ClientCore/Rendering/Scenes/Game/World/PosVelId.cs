@@ -48,5 +48,10 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World
         /// </summary>
         public int Id;
 
+        /// <summary>
+        /// Associated entity ID.
+        /// </summary>
+        public ulong EntityId;
+
     }
 }

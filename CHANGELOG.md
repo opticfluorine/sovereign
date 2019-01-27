@@ -4,6 +4,17 @@
 
 ### January
 
+#### 26 January 2019
+
+* Implement issue 4 - move tile sprite resolution outside of the main
+  rendering loop into an `IBlockAnimatedSpriteCache` implementation.  This
+  cache only updates modified blocks and their neighbors once per tick.
+* Combine `IEntityBuilder.Material(int)` and 
+  `IEntityBuilder.MaterialModifier(int)` into a single method 
+  `IEntityBuilder.Material(int, int)`. Since a block isn't valid unless it has
+  both a material and a material modifier, it doesn't make sense to allow the
+  two components to be set separately.
+
 #### 06 January 2019
 
 * Add configuration option for running in fullscreen mode.

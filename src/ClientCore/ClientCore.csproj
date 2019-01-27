@@ -166,6 +166,9 @@
     <Compile Include="SDL2-CS\SDL2_image.cs" />
     <Compile Include="SDL2-CS\SDL2_mixer.cs" />
     <Compile Include="SDL2-CS\SDL2_ttf.cs" />
+    <Compile Include="Systems\Block\Caches\BlockAnimatedSpriteCache.cs" />
+    <Compile Include="Systems\Block\Caches\BlockCachesInstaller.cs" />
+    <Compile Include="Systems\Block\Caches\IBlockAnimatedSpriteCache.cs" />
     <Compile Include="Systems\Camera\CameraEventHandler.cs" />
     <Compile Include="Systems\Camera\CameraInstaller.cs" />
     <Compile Include="Systems\Camera\CameraManager.cs" />
