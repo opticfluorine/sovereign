@@ -101,7 +101,7 @@
       <Name>ClientCore</Name>
     </ProjectReference>
     <ProjectReference Include="..\EngineCore\EngineCore.csproj">
-      <Project>{1298f7e5-4a7b-469e-98bb-f9ac7889ec2c}</Project>
+      <Project>{d3d0b582-3b04-465a-b641-6a3919d9b1c5}</Project>
       <Name>EngineCore</Name>
     </ProjectReference>
     <ProjectReference Include="..\EngineUtil\EngineUtil.csproj">

@@ -4,6 +4,11 @@
 
 ### January
 
+#### 27 January 2019
+
+* Implement required interfaces in `ServerCore`.
+* Convert `EngineCore` to a .NET Standard 2.0 class library.
+
 #### 26 January 2019
 
 * Implement issue 4 - move tile sprite resolution outside of the main

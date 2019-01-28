@@ -27,6 +27,8 @@
 
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="4.3.1" />
+    <PackageReference Include="Castle.Core-log4net" Version="4.3.1" />
+    <PackageReference Include="Castle.LoggingFacility" Version="4.1.1" />
     <PackageReference Include="Castle.Windsor" Version="4.1.1" />
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
