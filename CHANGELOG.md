@@ -4,6 +4,11 @@
 
 ### April
 
+#### 28 April 2019
+
+* Move `TestContentSystem` from `EngineCore` to `ClientCore`.
+  With `PersistenceSystem` implemented, it is no longer required by the server.
+
 #### 27 April 2019
 
 * Wire up synchronization and successfully write to the database.

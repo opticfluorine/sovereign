@@ -22,10 +22,11 @@
  */
 
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems;
 using System;
 using System.Collections.Generic;
 
-namespace Sovereign.EngineCore.Systems.TestContent
+namespace Sovereign.ClientCore.Systems.TestContent
 {
 
     /// <summary>

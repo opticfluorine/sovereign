@@ -188,6 +188,9 @@
     <Compile Include="Systems\Input\KeyboardEventHandler.cs" />
     <Compile Include="Systems\Input\PlayerInputMovementMapper.cs" />
     <Compile Include="Systems\Input\KeyboardState.cs" />
+    <Compile Include="Systems\TestContent\BlockSource.cs" />
+    <Compile Include="Systems\TestContent\TestContentInstaller.cs" />
+    <Compile Include="Systems\TestContent\TestContentSystem.cs" />
     <Compile Include="Timing\SDLSystemTimer.cs" />
   </ItemGroup>
   <ItemGroup>

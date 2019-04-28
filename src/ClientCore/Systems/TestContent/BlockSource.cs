@@ -27,7 +27,7 @@ using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Block.Events;
 using System.Collections.Generic;
 
-namespace Sovereign.EngineCore.Systems.TestContent
+namespace Sovereign.ClientCore.Systems.TestContent
 {
 
     /// <summary>
