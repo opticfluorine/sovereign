@@ -38,7 +38,8 @@ namespace Sovereign.EngineCore.Systems.Block.Components
         public const int InitialSize = 65536;
 
         public MaterialComponentCollection(ComponentManager componentManager) 
-            : base(componentManager, InitialSize, ComponentOperators.IntOperators)
+            : base(componentManager, InitialSize, ComponentOperators.IntOperators,
+                  ComponentType.Material)
         {
         }
 

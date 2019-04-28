@@ -37,6 +37,11 @@ namespace Sovereign.EngineCore.Resources
     {
 
         /// <summary>
+        /// Configuration files.
+        /// </summary>
+        Configuration,
+
+        /// <summary>
         /// Compiled shader object files.
         /// </summary>
         Shader,

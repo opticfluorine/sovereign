@@ -72,6 +72,9 @@ namespace Sovereign.EngineCore.Main
 
         public void Run()
         {
+            /* Output diagnostic info. */
+            LogDiagnostics();
+
             /* Start the engine. */
             Logger.Info("EngineBase is starting.");
             Startup();
@@ -136,6 +139,16 @@ namespace Sovereign.EngineCore.Main
                     action.Execute();
                 }
             }
+        }
+
+        /// <summary>
+        /// Logs startup diagnostic information.
+        /// </summary>
+        private void LogDiagnostics()
+        {
+            ThreadPool.GetMaxThreads(out int workerThreads, out int completionPortThreads);
+            Logger.DebugFormat("Maximum worker threads = {0}.", workerThreads);
+            Logger.DebugFormat("Maximum I/O completion threads = {0}.", completionPortThreads);
         }
 
     }

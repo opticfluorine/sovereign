@@ -1,0 +1,82 @@
+﻿# ----------------------
+# Database Configuration
+# ----------------------
+Database:
+
+    # ------------
+    # DatabaseType
+    # ------------
+    # Specifies the type of database to use.
+    # Valid options are 'sqlite', 'postgres'
+    DatabaseType: sqlite
+
+    # ----
+    # Host
+    # ----
+    # For postgres, specifies the database host.
+    # For sqlite, specifies the data source file.
+    Host: Data/sovereign.db
+
+    # ----
+    # Port
+    # ----
+    # For postgres, specifies the database port. Defaults to 5432.
+    # Not used for sqlite.
+    Port: 5432
+
+    # --------
+    # Database
+    # --------
+    # For postgres, specifies the database name. Defaults to 'sovereign'.
+    # Not used for sqlite.
+    Database: sovereign
+
+    # --------
+    # Username
+    # --------
+    # For postgres, specifies the database username. Defaults to
+    # 'sovereign'.
+    # Not used for sqlite.
+    Username: sovereign
+
+    # --------
+    # Password
+    # --------
+    # For postgres, specifies the database password. Defaults to no
+    # password.
+    # Not used for sqlite.
+    # Password: sovereign
+
+    # -------
+    # Pooling
+    # -------
+    # Whether or not to use database connection pooling.
+    # Allowed values: true, false.
+    Pooling: true
+
+    # -----------
+    # PoolSizeMin
+    # -----------
+    # Minimum size of the database connection pool.
+    PoolSizeMin: 1
+
+    # -----------
+    # PoolSizeMax
+    # -----------
+    # Maximum size of the database connection pool.
+    PoolSizeMax: 100
+
+    # -------------------
+    # SyncIntervalSeconds
+    # -------------------
+    # Maximum number of seconds between database synchronizations.
+    SyncIntervalSeconds: 60
+
+
+World:
+
+    # ---------
+    # ChunkSize
+    # ---------
+    # Size, in blocks, of the length of a discrete chunk of the world.
+    ChunkSize: 32

@@ -39,7 +39,8 @@ namespace Sovereign.ClientCore.Rendering.Components
         public const int InitialSize = 65536;
 
         public AnimatedSpriteComponentCollection(ComponentManager manager)
-            : base(manager, InitialSize, ComponentOperators.IntOperators)
+            : base(manager, InitialSize, ComponentOperators.IntOperators,
+                  ComponentType.AnimatedSprite)
         {
         }
 

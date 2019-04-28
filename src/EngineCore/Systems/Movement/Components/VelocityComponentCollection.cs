@@ -44,7 +44,8 @@ namespace Sovereign.EngineCore.Systems.Movement.Components
         private const int BaseSize = 65536;
 
         public VelocityComponentCollection(ComponentManager componentManager) 
-            : base(componentManager, BaseSize, ComponentOperators.VectorOperators) { }
+            : base(componentManager, BaseSize, ComponentOperators.VectorOperators,
+                  ComponentType.Velocity) { }
 
     }
 

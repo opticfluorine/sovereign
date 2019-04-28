@@ -45,7 +45,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Persistence\Persistence.csproj" />
     <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Data\Configuration\ServerConfiguration.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Logs\README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

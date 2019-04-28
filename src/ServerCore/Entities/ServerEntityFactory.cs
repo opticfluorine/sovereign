@@ -67,8 +67,13 @@ namespace Sovereign.ServerCore.Entities
             if (entityAssigner == null)
                 entityAssigner = entityManager.GetNewAssigner();
 
+            return GetBuilder(entityAssigner.GetNextId());
+        }
+
+        public IEntityBuilder GetBuilder(ulong entityId)
+        {
             return new ServerEntityBuilder(
-                entityAssigner.GetNextId(),
+                entityId,
                 componentManager,
                 positions,
                 velocities,
