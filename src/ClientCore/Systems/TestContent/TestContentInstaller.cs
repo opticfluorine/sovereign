@@ -25,7 +25,7 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 
-namespace Sovereign.EngineCore.Systems.TestContent
+namespace Sovereign.ClientCore.Systems.TestContent
 {
 
     /// <summary>
