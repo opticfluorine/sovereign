@@ -13,6 +13,7 @@ System | System Class | Description
 --- | --- | ---
 `Block` | `BlockSystem` | Responsible for managing the lifecycle of block entities.
 `Movement` | `MovementSystem` | Responsible for controlling the movement of positionable entities.
+`TestContent` | `TestContentSystem` | Generates content for development and testing.
 
 ## Client Systems
 
@@ -22,4 +23,12 @@ System | System Class | Description
 --- | --- | ---
 `Camera` | `CameraSystem` | Responsible for managing the camera used for rendering.
 `Input` | `InputSystem` | Responsible for responding to user input (keyboard, mouse, gamepad, etc).
+
+## Server Systems
+
+Server systems are only present in the server.
+
+System | System Class | Description
+--- | --- | ---
+`Persistence` | `PersistenceSystem` | Responsible for managing the database.
 

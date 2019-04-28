@@ -3,13 +3,24 @@
 
   <appender name="Console" type="log4net.Appender.ConsoleAppender">
     <layout type="log4net.Layout.PatternLayout">
-      <conversionPattern value="%-4timestamp [%thread] %-5level %logger %ndc - %message%newline" />
+      <conversionPattern value="%-4.4timestamp [%-10thread] %-5level %-28logger{1} - %message%newline" />
+    </layout>
+  </appender>
+
+  <appender name="Logfile" type="log4net.Appender.RollingFileAppender">
+    <file value="Logs/Server.log" />
+    <appendToFile value="false" />
+    <rollingStyle value="Date" />
+    <datePattern value="yyyyMMdd" />
+    <layout type="log4net.Layout.PatternLayout">
+      <conversionPattern value="%d{ISO8601} [%-10thread] %-5level %-28logger{1} - %message%newline" />
     </layout>
   </appender>
 
   <root>
     <level value="DEBUG" />
     <appender-ref ref="Console" />
+    <appender-ref ref="Logfile" />
   </root>
   
 </log4net>

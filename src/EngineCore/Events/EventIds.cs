@@ -138,6 +138,33 @@ namespace Sovereign.EngineCore.Events
 
         #endregion Client
 
+        #region Server
+
+        #region Server_Persistence
+
+        /// <summary>
+        /// Event sent to retrieve a specific entity from the database.
+        /// </summary>
+        /// Associated details: EntityEventDetails
+        Server_Persistence_RetrieveEntity = 200000,
+
+        /// <summary>
+        /// Event sent to retrieve all entities positioned within a range
+        /// from the database.
+        /// </summary>
+        /// Associated details: VectorPairEventDetails
+        Server_Persistence_RetrieveEntitiesInRange = 200001,
+
+        /// <summary>
+        /// Event sent to synchronize the server with the database.
+        /// </summary>
+        /// Associated details: None
+        Server_Persistence_Synchronize = 200099,
+
+        #endregion Server_Persistence
+
+        #endregion Server
+
     }
 
 }

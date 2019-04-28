@@ -39,7 +39,8 @@ namespace Sovereign.EngineCore.Systems.Block.Components
         public const int InitialCount = 65536;
 
         public MaterialModifierComponentCollection(ComponentManager componentManager)
-            : base(componentManager, InitialCount, ComponentOperators.IntOperators)
+            : base(componentManager, InitialCount, ComponentOperators.IntOperators,
+                  ComponentType.MaterialModifier)
         {
         }
 

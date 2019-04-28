@@ -37,18 +37,19 @@ namespace Sovereign.EngineCore.Main
 
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            /* EngineBase singleton. */
             container.Register(EngineClasses.EngineAssemblies()
                                .BasedOn<IEngineBase>()
                                .WithServiceDefaultInterfaces()
                                .LifestyleSingleton());
 
-            /* Main loop actions. */
             container.Register(EngineClasses.EngineAssemblies()
                 .BasedOn<IMainLoopAction>()
                 .WithServiceDefaultInterfaces()
                 .LifestyleSingleton()
                 .AllowMultipleMatches());
+
+            container.Register(Component.For<FatalErrorHandler>()
+                .LifestyleSingleton());
         }
 
     }

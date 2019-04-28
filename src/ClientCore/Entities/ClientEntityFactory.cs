@@ -72,10 +72,17 @@ namespace Sovereign.ClientCore.Entities
             if (assigner == null)
                 assigner = entityManager.GetNewAssigner();
 
-            return new ClientEntityBuilder(assigner.GetNextId(),
+            return GetBuilder(assigner.GetNextId());
+        }
+
+        public IEntityBuilder GetBuilder(ulong entityId)
+        {
+
+            return new ClientEntityBuilder(entityId,
                 componentManager, positions, velocities, drawables, materials,
                 materialModifiers, aboveBlocks, animatedSprites);
         }
+
     }
 
 }

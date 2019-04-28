@@ -38,7 +38,8 @@ namespace Sovereign.ClientCore.Rendering.Components
         private const int BaseSize = 65536;
 
         public DrawableComponentCollection(ComponentManager componentManager)
-            : base(componentManager, BaseSize, ComponentOperators.BoolOperators)
+            : base(componentManager, BaseSize, ComponentOperators.BoolOperators,
+                  ComponentType.Drawable)
         {
         }
 

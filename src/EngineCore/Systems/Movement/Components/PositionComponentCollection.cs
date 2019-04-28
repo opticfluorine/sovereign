@@ -44,7 +44,8 @@ namespace Sovereign.EngineCore.Systems.Movement.Components
         private const int BaseSize = 65536;
 
         public PositionComponentCollection(ComponentManager componentManager) 
-            : base(componentManager, BaseSize, ComponentOperators.VectorOperators)
+            : base(componentManager, BaseSize, ComponentOperators.VectorOperators,
+                  ComponentType.Position)
         {
         }
 

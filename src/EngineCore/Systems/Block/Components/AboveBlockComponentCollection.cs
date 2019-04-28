@@ -39,7 +39,8 @@ namespace Sovereign.EngineCore.Systems.Block.Components
         public const int InitialSize = 65536;
 
         public AboveBlockComponentCollection(ComponentManager manager)
-            : base(manager, InitialSize, ComponentOperators.UlongOperators)
+            : base(manager, InitialSize, ComponentOperators.UlongOperators,
+                  ComponentType.AboveBlock)
         {
         }
 

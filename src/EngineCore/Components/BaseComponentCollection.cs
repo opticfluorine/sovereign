@@ -63,6 +63,11 @@ namespace Sovereign.EngineCore.Components
         public ILogger Log { private get; set; } = NullLogger.Instance;
 
         /// <summary>
+        /// Component type.
+        /// </summary>
+        public ComponentType ComponentType { get; private set; }
+
+        /// <summary>
         /// Underlying component array.
         /// </summary>
         private readonly List<T> components;
@@ -173,10 +178,13 @@ namespace Sovereign.EngineCore.Components
         /// <param name="initialSize">Initial size of the component buffer.</param>
         /// <param name="operators">Dict of component operators for use in updates.</param>
         protected BaseComponentCollection(ComponentManager componentManager, int initialSize,
-            IDictionary<ComponentOperation, Func<T, T, T>> operators)
+            IDictionary<ComponentOperation, Func<T, T, T>> operators,
+            ComponentType componentType)
         {
             this.operators = operators;
             components = new List<T>(initialSize);
+
+            ComponentType = componentType;
 
             /* Key up the allowed operators. */
             foreach (var operation in operators.Keys)

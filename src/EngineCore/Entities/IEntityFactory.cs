@@ -36,6 +36,13 @@ namespace Sovereign.EngineCore.Entities
         /// <returns>Entity builder.</returns>
         IEntityBuilder GetBuilder();
 
+        /// <summary>
+        /// Gets an entity builder for the given entity ID.
+        /// </summary>
+        /// <param name="entityId">Entity ID for the new entity.</param>
+        /// <returns>Entity builder.</returns>
+        IEntityBuilder GetBuilder(ulong entityId);
+
     }
 
 }

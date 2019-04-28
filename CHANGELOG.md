@@ -2,6 +2,95 @@
 
 ## 2019
 
+### April
+
+#### 27 April 2019
+
+* Wire up synchronization and successfully write to the database.
+* Add prototype `IRemoveComponentQuery` implementations for SQLite.
+* Add prototype `IModifyComponentQuery` implementations for SQLite.
+* Add prototype `IAddComponentQuery` implementations for SQLite.
+* Add `IAddEntityQuery` and its SQLite implementation for adding entity
+  IDs to the database.
+* Fix cases where `IDisposable` objects in the persistence system were
+  not being properly disposed.
+* Denormalize `Material` and `MaterialModifier` tables in the database
+  to simplify component updates. While the data schema does not logically
+  permit Material and MaterialModifier to be specified independently, the
+  component code treats them independently and so the database should reflect
+  this. This highlights an interesting design decision - the component code
+  collectively forms a sort of in-memory database, and this database defines
+  the true schema of the data. The relational database schema merely reflect
+  the underlying schema rather than defining it.
+* Create state trackers and wire them up to the persistence system.
+
+#### 26 April 2019
+
+* Add `BaseStateTracker` for translating component updates into queued
+  database actions.
+
+#### 21 April 2019
+
+* Add `ComponentType` enum and tag each `ComponentCollection` with its
+  `ComponentType`. This will be used in database synchronization.
+
+#### 20 April 2019
+
+* Add unit tests for `SqliteNextPersistedIdQuery`.
+* Clean up `SqliteNextPersistedIdQuery`.
+
+#### 19 April 2019
+
+* Add unit tests for `SqliteMigrationQuery`.
+* Fix `SqliteMigrationQuery`.
+
+#### 17 April 2019
+
+* Update `docs/systems.md`.
+* Update `docs/projects.md`.
+* Add unit tests for `SqliteRetrieveRangeQuery`.
+* Migrate `Shaders` project to VS 2019.
+
+#### 16 April 2019
+
+* Fix minor issue with `SqliteRetrieveEntityQuery`.
+* Add unit tests for `SqliteRetrieveEntityQuery`.
+* Add test fixture for SQLite implementations of persistence interfaces.
+* Create full database setup scripts.
+
+#### 15 April 2019
+
+* Implement `Server_Persistence_RetrieveEntitiesInRange` event.
+* Add query for retrieving entities in a given position range.
+
+#### 14 April 2019
+
+* Add support for retrieving a single entity from the database.
+* Renormalize the database to better reflect component schema constraints.
+
+#### 06 April 2019
+
+* Trigger a persistence synchronization with a regular interval (60 seconds
+  by default, can be configured).
+* Set up event handlers for persistence system.
+
+### February
+
+#### 10 February 2019
+
+* Check the migration level of the database at startup.
+* Open and close SQLite database correctly.
+* Properly handle Ctrl+C on the server.
+
+#### 09 February 2019
+
+* Wire up persistence initialization.
+* Set up database schema.
+
+#### 03 February 2019
+
+* Add `EntityMapper` for mapping entity IDs to and from the database.
+
 ### January
 
 #### 27 January 2019

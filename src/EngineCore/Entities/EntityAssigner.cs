@@ -40,6 +40,21 @@ namespace Sovereign.EngineCore.Entities
     {
 
         /// <summary>
+        /// First block ID (upper 32 bits) for persisted entity IDs.
+        /// </summary>
+        public const ulong PersistedBlock = 0x7FFF0000;
+
+        /// <summary>
+        /// First volatile entity ID.
+        /// </summary>
+        public const ulong FirstVolatileId = 0;
+
+        /// <summary>
+        /// First persisted entity ID.
+        /// </summary>
+        public const ulong FirstPersistedId = PersistedBlock << 32;
+
+        /// <summary>
         /// Entity block assigned to this assigner.
         /// </summary>
         public ulong Block { get; private set; }
