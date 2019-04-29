@@ -6,6 +6,8 @@
 
 #### 28 April 2019
 
+* Start adding `WorldLoaderSystem` for managing the loading and unloading of
+  world data as needed.
 * Move `TestContentSystem` from `EngineCore` to `ClientCore`.
   With `PersistenceSystem` implemented, it is no longer required by the server.
 

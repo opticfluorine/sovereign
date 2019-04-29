@@ -163,6 +163,22 @@ namespace Sovereign.EngineCore.Events
 
         #endregion Server_Persistence
 
+        #region Server_WorldLoader
+
+        /// <summary>
+        /// Event sent to load a world segment.
+        /// </summary>
+        /// Associated details:
+        Server_WorldLoader_LoadSegment = 200100,
+
+        /// <summary>
+        /// Event sent to unload a world segment.
+        /// </summary>
+        /// Associated details:
+        Server_WorldLoader_UnloadSegment = 200101,
+
+        #endregion Server_WorldLoader
+
         #endregion Server
 
     }
