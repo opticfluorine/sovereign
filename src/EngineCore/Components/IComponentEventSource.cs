@@ -70,6 +70,11 @@ namespace Sovereign.EngineCore.Components
         event ComponentEventDelegates<T>.ComponentEventHandler OnComponentModified;
 
         /// <summary>
+        /// Event triggered when an existing component is unloaded from memory.
+        /// </summary>
+        event ComponentEventDelegates<T>.ComponentUnloadedEventHandler OnComponentUnloaded;
+
+        /// <summary>
         /// Event triggered when component updates are complete.
         /// </summary>
         /// 

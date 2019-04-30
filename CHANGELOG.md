@@ -4,6 +4,11 @@
 
 ### April
 
+#### 29 April 2019
+
+* Add a new `Unload` operation to components. This removes the entity from
+  memory but not from persistence.
+
 #### 28 April 2019
 
 * Start adding `WorldLoaderSystem` for managing the loading and unloading of

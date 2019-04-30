@@ -122,6 +122,11 @@ namespace Sovereign.EngineCore.Components.Indexers
             octree.Remove(updateLock.octreeLock, entityId);
         }
 
+        protected override void ComponentUnloadedCallback(ulong entityId)
+        {
+            octree.Remove(updateLock.octreeLock, entityId);
+        }
+
         protected override void EndUpdatesCallback(object source, EventArgs args)
         {
             /* Release the update lock. */

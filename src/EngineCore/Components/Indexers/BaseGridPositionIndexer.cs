@@ -74,6 +74,11 @@ namespace Sovereign.EngineCore.Components.Indexers
             RemoveEntity(entityId);
         }
 
+        protected override void ComponentUnloadedCallback(ulong entityId)
+        {
+            RemoveEntity(entityId);
+        }
+
         /// <summary>
         /// Adds the given entity to the index.
         /// </summary>

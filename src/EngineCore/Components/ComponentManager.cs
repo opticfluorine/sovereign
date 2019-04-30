@@ -86,6 +86,16 @@ namespace Sovereign.EngineCore.Components
         }
 
         /// <summary>
+        /// Unloads all components for the given entity, but does not
+        /// formally delete them.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        public void UnloadAllComponentsForEntity(ulong entityId)
+        {
+
+        }
+
+        /// <summary>
         /// Register a component remover.
         /// </summary>
         /// <param name="componentRemover">Component remover.</param>

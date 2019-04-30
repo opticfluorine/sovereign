@@ -50,6 +50,12 @@ namespace Sovereign.EngineCore.Components
         /// <param name="entityId">Entity ID.</param>
         public delegate void ComponentRemovedEventHandler(ulong entityId);
 
+        /// <summary>
+        /// Delegate type used to communicate component unload events.
+        /// </summary>
+        /// <param name="entityId"></param>
+        public delegate void ComponentUnloadedEventHandler(ulong entityId);
+
     }
 
 }

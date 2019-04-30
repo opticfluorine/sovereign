@@ -99,6 +99,15 @@ namespace Sovereign.EngineCore.Entities
             componentManager.RemoveAllComponentsForEntity(entityId);
         }
 
+        /// <summary>
+        /// Unloads the given entity, but does not formally delete it.
+        /// </summary>
+        /// <param name="entityId">Entity ID to be unloaded.</param>
+        public void UnloadEntity(ulong entityId)
+        {
+            componentManager.UnloadAllComponentsForEntity(entityId);
+        }
+
     }
 
 }

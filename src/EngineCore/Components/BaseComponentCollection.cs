@@ -117,6 +117,12 @@ namespace Sovereign.EngineCore.Components
             = new StructBuffer<PendingRemove>(OperationBufferSize);
 
         /// <summary>
+        /// Pending component unloads.
+        /// </summary>
+        private readonly StructBuffer<PendingUnload> pendingUnloads
+            = new StructBuffer<PendingUnload>(OperationBufferSize);
+
+        /// <summary>
         /// Add events that are pending invocation.
         /// </summary>
         private readonly ISet<ulong> pendingAddEvents = new HashSet<ulong>();
@@ -132,43 +138,20 @@ namespace Sovereign.EngineCore.Components
         private readonly ISet<ulong> pendingRemoveEvents = new HashSet<ulong>();
 
         /// <summary>
-        /// Event triggered when the component collection begins firing component events.
+        /// Unload events that are pending invocation.
         /// </summary>
-        /// 
-        /// This is intended for use with data view objects that are updated
-        /// on the main thread once component updates for a given tick are complete.
+        private readonly ISet<ulong> pendingUnloadEvents = new HashSet<ulong>();
+
         public event EventHandler OnStartUpdates;
 
-        /// <summary>
-        /// Event triggered when a component is added to the collection.
-        /// </summary>
-        ///
-        /// This is intended for use with data view objects that are updated
-        /// on the main thread once component updates for a given tick are complete.
         public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentAdded;
 
-        /// <summary>
-        /// Event triggered when a component is removed from the collection.
-        /// </summary>
-        ///
-        /// This is intended for use with data view objects that are updated
-        /// on the main thread once component updates for a given tick are complete.
         public event ComponentEventDelegates<T>.ComponentRemovedEventHandler OnComponentRemoved;
 
-        /// <summary>
-        /// Event triggered when an existing component is updated.
-        /// </summary>
-        /// 
-        /// This is intended for use with data view objects that are updated
-        /// on the main thread once component updates for a given tick are complete.
         public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentModified;
 
-        /// <summary>
-        /// Event triggered when the component collection has finished firing component events.
-        /// </summary>
-        /// 
-        /// This is intended for use with data view objects that are updated
-        /// on the main thread once component updates for a given tick are complete.
+        public event ComponentEventDelegates<T>.ComponentUnloadedEventHandler OnComponentUnloaded;
+
         public event EventHandler OnEndUpdates;
 
         /// <summary>
@@ -294,6 +277,19 @@ namespace Sovereign.EngineCore.Components
             pendingRemoves.Add(ref pendingRemove);
         }
 
+        public void UnloadComponent(ulong entityId)
+        {
+            /* Ensure that a component is associated. */
+            if (!HasComponentForEntity(entityId)) return;
+
+            /* Enqueue the unload. */
+            var pendingUnload = new PendingUnload()
+            {
+                EntityId = entityId
+            };
+            pendingUnloads.Add(ref pendingUnload);
+        }
+
         /// <summary>
         /// Determines whether a component is associated with the given entity.
         /// </summary>
@@ -360,6 +356,7 @@ namespace Sovereign.EngineCore.Components
             ApplyAdds();
             ApplyModifications();
             ApplyRemoves();
+            ApplyUnloads();
 
             /* Dispatch events as needed. */
             FireComponentEvents();
@@ -377,6 +374,7 @@ namespace Sovereign.EngineCore.Components
             FireAddEvents();
             FireModificationEvents();
             FireRemoveEvents();
+            FireUnloadEvents();
 
             /* Announce that events are done being fired. */
             OnEndUpdates?.Invoke(this, null);
@@ -430,11 +428,26 @@ namespace Sovereign.EngineCore.Components
             /* Apply operations. */
             foreach (var pendingRemove in pendingRemoves)
             {
-                ApplyRemoveComponent(pendingRemove.EntityId);
+                ApplyRemoveOrUnloadComponent(pendingRemove.EntityId);
             }
 
             /* Clear the buffer. */
             pendingRemoves.Clear();
+        }
+
+        /// <summary>
+        /// Applies all pending component unloads.
+        /// </summary>
+        private void ApplyUnloads()
+        {
+            /* Apply operations. */
+            foreach (var pendingUnload in pendingUnloads)
+            {
+                ApplyRemoveOrUnloadComponent(pendingUnload.EntityId);
+            }
+
+            /* Clear the buffer. */
+            pendingUnloads.Clear();
         }
 
         /// <summary>
@@ -497,6 +510,25 @@ namespace Sovereign.EngineCore.Components
         }
 
         /// <summary>
+        /// Fires events for component unloads.
+        /// </summary>
+        private void FireUnloadEvents()
+        {
+            /* Iterate over entities that have been unloaded. */
+            if (OnComponentUnloaded != null)
+            {
+                foreach (var entityId in pendingUnloadEvents)
+                {
+                    /* Notify all listeners. */
+                    OnComponentUnloaded.Invoke(entityId);
+                }
+            }
+
+            /* Reset the pending events. */
+            pendingUnloadEvents.Clear();
+        }
+
+        /// <summary>
         /// Immediately adds a component for the given entity.
         /// 
         /// This method should only be used from the main thread.
@@ -513,13 +545,13 @@ namespace Sovereign.EngineCore.Components
         }
 
         /// <summary>
-        /// Immediately removes the component associated with the given entity.
+        /// Immediately removes or unloads the component associated with the given entity.
         /// If no component is associated, this method has no effect.
         /// 
         /// This method should only be used from the main thread.
         /// </summary>
         /// <param name="entityId">Entity ID.</param>
-        private void ApplyRemoveComponent(ulong entityId)
+        private void ApplyRemoveOrUnloadComponent(ulong entityId)
         {
             /* Ensure that a component is associated to the entity. */
             if (!entityToComponentMap.ContainsKey(entityId)) return;
@@ -612,6 +644,15 @@ namespace Sovereign.EngineCore.Components
         /// </summary>
         [DebuggerDisplay("{EntityId}")]
         private struct PendingRemove
+        {
+            /// <summary>
+            /// ID of the associated entity.
+            /// </summary>
+            public ulong EntityId;
+        }
+
+        [DebuggerDisplay("{EntityId}")]
+        private struct PendingUnload
         {
             /// <summary>
             /// ID of the associated entity.
