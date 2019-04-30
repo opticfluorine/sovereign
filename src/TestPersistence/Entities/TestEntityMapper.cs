@@ -122,6 +122,33 @@ namespace TestPersistence.Entities
         }
 
         /// <summary>
+        /// Tests unloading an entity ID from the mapper.
+        /// </summary>
+        [Fact]
+        public void TestUnloadId()
+        {
+            /* Generate a mapping. */
+            var mapper = GetMapper();
+            ulong entityId = 1;
+            var firstPersisted = mapper.GetPersistedId(entityId, out bool needToCreate);
+
+            /* Confirm that the reverse mapping exists. */
+            var firstReversed = mapper.GetVolatileId(firstPersisted);
+            Assert.Equal(entityId, firstReversed);
+
+            /* Unload the entity. */
+            mapper.UnloadId(entityId);
+
+            /* Confirm that the reverse mapping is eliminated. */
+            var secondReversed = mapper.GetVolatileId(firstPersisted);
+            Assert.NotEqual(entityId, secondReversed);
+
+            /* Confirm that the forward mapping is eliminated. */
+            var secondPersisted = mapper.GetPersistedId(entityId, out bool needToCreate2);
+            Assert.NotEqual(firstPersisted, secondPersisted);
+        }
+
+        /// <summary>
         /// Gets an EntityMapper object to test.
         /// </summary>
         /// <returns>EntityMapper object.</returns>

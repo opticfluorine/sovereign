@@ -40,6 +40,7 @@ namespace Sovereign.EngineCore.Entities
     public class EntityManager
     {
         private readonly ComponentManager componentManager;
+        private readonly EntityNotifier entityNotifier;
 
         /// <summary>
         /// First block reserved for use by automatic assignment.
@@ -56,9 +57,11 @@ namespace Sovereign.EngineCore.Entities
         /// </summary>
         private int nextBlock = (int)FirstReservedBlock;
 
-        public EntityManager(ComponentManager componentManager)
+        public EntityManager(ComponentManager componentManager,
+            EntityNotifier entityNotifier)
         {
             this.componentManager = componentManager;
+            this.entityNotifier = entityNotifier;
         }
 
         /// <summary>
@@ -97,6 +100,7 @@ namespace Sovereign.EngineCore.Entities
         public void RemoveEntity(ulong entityId)
         {
             componentManager.RemoveAllComponentsForEntity(entityId);
+            entityNotifier.EnqueueRemove(entityId);
         }
 
         /// <summary>
@@ -106,6 +110,7 @@ namespace Sovereign.EngineCore.Entities
         public void UnloadEntity(ulong entityId)
         {
             componentManager.UnloadAllComponentsForEntity(entityId);
+            entityNotifier.EnqueueUnload(entityId);
         }
 
     }

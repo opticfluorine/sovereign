@@ -111,6 +111,35 @@ namespace Sovereign.Persistence.Entities
                 return persistedEntityId;
         }
 
+        /// <summary>
+        /// Unloads the given entity from the mapper.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        public void UnloadId(ulong entityId)
+        {
+            if (!initialized) throw new InvalidOperationException("Not initialized");
+
+            /* Remove all mappings in both directions. */
+            if (persistedToVolatile.ContainsKey(entityId))
+            {
+                var volatileId = persistedToVolatile[entityId];
+                persistedToVolatile.Remove(entityId);
+                if (volatileToPersisted.ContainsKey(volatileId))
+                {
+                    volatileToPersisted.Remove(volatileId);
+                }
+            }
+            if (volatileToPersisted.ContainsKey(entityId))
+            {
+                var persistedId = volatileToPersisted[entityId];
+                volatileToPersisted.Remove(entityId);
+                if (persistedToVolatile.ContainsKey(persistedId))
+                {
+                    persistedToVolatile.Remove(persistedId);
+                }
+            }
+        }
+
         private ulong GetNewPersistedId(ulong volatileEntityId)
         {
             var persistedEntityId = NextPersistedId++;

@@ -6,6 +6,7 @@
 
 #### 29 April 2019
 
+* Update `Persistence` to properly handle removed and unloaded entity IDs.
 * Add a new `Unload` operation to components. This removes the entity from
   memory but not from persistence.
 

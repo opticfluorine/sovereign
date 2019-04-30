@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,34 +21,44 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
+using Microsoft.Data.Sqlite;
+using Sovereign.Persistence.Database.Queries;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Text;
 
-namespace Sovereign.EngineCore.Entities
+namespace Sovereign.Persistence.Database.Sqlite.Queries
 {
 
     /// <summary>
-    /// IoC installer for the entity infrastructure.
+    /// SQLite query to remove an entity ID from the database.
     /// </summary>
-    public sealed class EntityInstaller : IWindsorInstaller
+    public sealed class SqliteRemoveEntityQuery : IRemoveEntityQuery
     {
+        private SqliteConnection connection;
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+        /// <summary>
+        /// Query string.
+        /// </summary>
+        private const string sql = @"DELETE FROM Entity WHERE id = @Id";
+
+        public SqliteRemoveEntityQuery(IDbConnection connection)
         {
-            container.Register(Component.For<EntityManager>()
-                .LifestyleSingleton());
+            this.connection = (SqliteConnection)connection;
+        }
 
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEntityFactory>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleTransient());
+        public void RemoveEntityId(ulong entityId, IDbTransaction transaction)
+        {
+            using (var cmd = new SqliteCommand(sql, connection, (SqliteTransaction)transaction))
+            {
+                var param = new SqliteParameter("Id", entityId);
+                param.SqliteType = SqliteType.Integer;
+                cmd.Parameters.Add(param);
 
-            container.Register(Component.For<EntityNotifier>()
-                .LifestyleSingleton());
+                cmd.ExecuteNonQuery();
+            }
         }
 
     }
-
 }

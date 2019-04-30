@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,33 +21,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Text;
 
-namespace Sovereign.EngineCore.Entities
+namespace Sovereign.Persistence.Database.Queries
 {
 
     /// <summary>
-    /// IoC installer for the entity infrastructure.
+    /// Query to remove an entity ID from the database.
     /// </summary>
-    public sealed class EntityInstaller : IWindsorInstaller
+    public interface IRemoveEntityQuery
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<EntityManager>()
-                .LifestyleSingleton());
-
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEntityFactory>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleTransient());
-
-            container.Register(Component.For<EntityNotifier>()
-                .LifestyleSingleton());
-        }
+        /// <summary>
+        /// Removes the given entity ID from the database.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        /// <param name="transaction">Database transaction.</param>
+        void RemoveEntityId(ulong entityId, IDbTransaction transaction);
 
     }
 

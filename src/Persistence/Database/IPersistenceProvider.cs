@@ -66,6 +66,11 @@ namespace Sovereign.Persistence.Database
         IAddEntityQuery AddEntityQuery { get; }
 
         /// <summary>
+        /// IRemoveEntityQuery for this persistence provider.
+        /// </summary>
+        IRemoveEntityQuery RemoveEntityQuery { get; }
+
+        /// <summary>
         /// IAddComponentQuery for the Position component.
         /// </summary>
         IAddComponentQuery<Vector3> AddPositionQuery { get; }

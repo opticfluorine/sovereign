@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,33 +21,30 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Sovereign.EngineCore.Entities
 {
 
     /// <summary>
-    /// IoC installer for the entity infrastructure.
+    /// Defines delegate types for entity-related events.
     /// </summary>
-    public sealed class EntityInstaller : IWindsorInstaller
+    public static class EntityEventDelegates
     {
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<EntityManager>()
-                .LifestyleSingleton());
+        /// <summary>
+        /// Delegate for entity removal events.
+        /// </summary>
+        /// <param name="entityId">Entity ID that is removed.</param>
+        public delegate void RemoveEntityEvent(ulong entityId);
 
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEntityFactory>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleTransient());
-
-            container.Register(Component.For<EntityNotifier>()
-                .LifestyleSingleton());
-        }
+        /// <summary>
+        /// Delegate for entity unload events.
+        /// </summary>
+        /// <param name="entityId">Entity ID that is unloaded.</param>
+        public delegate void UnloadEntityEvent(ulong entityId);
 
     }
 
