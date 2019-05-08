@@ -159,6 +159,10 @@
       <Project>{10b84ace-b05c-4636-b484-e9edf42210df}</Project>
       <Name>Shaders</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WorldManagement\WorldManagement.csproj">
+      <Project>{4cd78f23-a60d-416d-ad48-dd54a7ed7b89}</Project>
+      <Name>WorldManagement</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main\ClientMain.cs" />

@@ -47,7 +47,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Persistence\Persistence.csproj" />
     <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
-    <ProjectReference Include="..\WorldLoader\WorldLoader.csproj" />
+    <ProjectReference Include="..\WorldManagement\WorldManagement.csproj" />
   </ItemGroup>
 
   <ItemGroup>

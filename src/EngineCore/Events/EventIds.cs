@@ -100,6 +100,22 @@ namespace Sovereign.EngineCore.Events
 
         #endregion Blocks
 
+        #region WorldManagement
+
+        /// <summary>
+        /// Event sent to load a world segment.
+        /// </summary>
+        /// Associated details: WorldSegmentEventDetails
+        Core_WorldManagement_LoadSegment = 300,
+
+        /// <summary>
+        /// Unloads a world segment from memory.
+        /// </summary>
+        /// Associated details: WorldSegmentEventDetails
+        Core_WorldManagement_UnloadSegment = 301,
+
+        #endregion WorldManagement
+
         #endregion Core
 
         #region Client
@@ -162,22 +178,6 @@ namespace Sovereign.EngineCore.Events
         Server_Persistence_Synchronize = 200099,
 
         #endregion Server_Persistence
-
-        #region Server_WorldLoader
-
-        /// <summary>
-        /// Event sent to load a world segment.
-        /// </summary>
-        /// Associated details:
-        Server_WorldLoader_LoadSegment = 200100,
-
-        /// <summary>
-        /// Event sent to unload a world segment.
-        /// </summary>
-        /// Associated details:
-        Server_WorldLoader_UnloadSegment = 200101,
-
-        #endregion Server_WorldLoader
 
         #endregion Server
 

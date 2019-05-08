@@ -21,48 +21,25 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Components.Indexers;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.WorldLoader.Systems.WorldLoader
+namespace Sovereign.EngineCore.Events.Details
 {
-    public sealed class WorldLoaderSystem : ISystem
+
+    /// <summary>
+    /// Details for events related to a specific world segment.
+    /// </summary>
+    public sealed class WorldSegmentEventDetails : IEventDetails
     {
-        public EventCommunicator EventCommunicator { get; set; }
 
-        public ISet<EventId> EventIdsOfInterest => eventIdsOfInterest;
-        private ISet<EventId> eventIdsOfInterest = new HashSet<EventId>()
-        {
-            EventId.Server_WorldLoader_LoadSegment,
-            EventId.Server_WorldLoader_UnloadSegment
-        };
-        private readonly IEventLoop eventLoop;
+        /// <summary>
+        /// World segment index.
+        /// </summary>
+        public GridPosition SegmentIndex;
 
-        public int WorkloadEstimate => 100;
-
-        public WorldLoaderSystem(IEventLoop eventLoop)
-        {
-            this.eventLoop = eventLoop;
-
-            eventLoop.RegisterSystem(this);
-        }
-
-        public void Cleanup()
-        {
-
-        }
-
-        public void ExecuteOnce()
-        {
-
-        }
-
-        public void Initialize()
-        {
-
-        }
     }
+
 }

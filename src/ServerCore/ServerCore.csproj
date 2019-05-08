@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EngineCore\EngineCore.csproj" />
     <ProjectReference Include="..\EngineUtil\EngineUtil.csproj" />
+    <ProjectReference Include="..\WorldManagement\WorldManagement.csproj" />
   </ItemGroup>
 
 </Project>

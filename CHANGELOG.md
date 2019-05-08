@@ -2,6 +2,14 @@
 
 ## 2019
 
+### May
+
+#### 07 May 2019
+
+* Consolidate `WorldLoaderSystem` and `WorldManagementSystem` into the latter.
+  Handle client/server specific functionality by implementing interfaces in
+  `ClientCore` and `ServerCore` respectively.
+
 ### April
 
 #### 29 April 2019
