@@ -22,7 +22,10 @@
  */
 
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Events;
+using Sovereign.ServerCore.Systems.Persistence;
 using Sovereign.WorldManagement.Systems.WorldManagement;
+using Sovereign.WorldManagement.WorldSegments;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -35,10 +38,31 @@ namespace Sovereign.ServerCore.Systems.WorldManagement
     /// </summary>
     public class ServerWorldSegmentLoader : IWorldSegmentLoader
     {
+        private readonly PersistenceController persistenceController;
+        private readonly WorldSegmentRegistry worldSegmentRegistry;
+        private readonly WorldSegmentResolver worldSegmentResolver;
+        private readonly IEventSender eventSender;
+
+        public ServerWorldSegmentLoader(PersistenceController persistenceController,
+            WorldSegmentRegistry worldSegmentRegistry,
+            WorldSegmentResolver worldSegmentResolver,
+            IEventSender eventSender)
+        {
+            this.persistenceController = persistenceController;
+            this.worldSegmentRegistry = worldSegmentRegistry;
+            this.worldSegmentResolver = worldSegmentResolver;
+            this.eventSender = eventSender;
+        }
 
         public void LoadSegment(GridPosition segmentIndex)
         {
-            throw new NotImplementedException();
+            /* Skip loading if already loaded. */
+            if (worldSegmentRegistry.IsLoaded(segmentIndex)) return;
+
+            /* Load. */
+            (var minPos, var maxPos) = worldSegmentResolver.GetRangeForWorldSegment(segmentIndex);
+            persistenceController.RetrieveEntitiesInRange(eventSender, minPos, maxPos);
+            worldSegmentRegistry.OnSegmentLoaded(segmentIndex);
         }
 
     }

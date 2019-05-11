@@ -6,6 +6,7 @@
 
 #### 11 May 2019
 
+* Implement `ServerWorldSegmentLoader` to load world segments from the database.
 * Implement `WorldSegmentUnloader` to unload world segments.
 
 #### 07 May 2019
