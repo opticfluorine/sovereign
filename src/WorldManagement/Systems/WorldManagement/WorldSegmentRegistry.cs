@@ -21,10 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
+using Sovereign.EngineCore.Components.Indexers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -33,28 +30,30 @@ namespace Sovereign.WorldManagement.Systems.WorldManagement
 {
 
     /// <summary>
-    /// IoC installer for WorldManagementSystem support classes.
+    /// Responsible for tracking which world segments are currently loaded.
     /// </summary>
-    public sealed class WorldManagementInstaller : IWindsorInstaller
+    public sealed class WorldSegmentRegistry
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+        /// <summary>
+        /// Set of currently loaded world segment indices.
+        /// </summary>
+        private readonly ISet<GridPosition> loadedSegments = new HashSet<GridPosition>();
+
+        public bool IsLoaded(GridPosition segmentIndex)
         {
-            container.Register(Component.For<WorldManagementEventHandler>()
-                .LifestyleSingleton());
-
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IWorldSegmentLoader>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
-
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IWorldSegmentUnloader>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<WorldSegmentRegistry>()
-                .LifestyleSingleton());
+            return loadedSegments.Contains(segmentIndex);
         }
+
+        public void OnSegmentLoaded(GridPosition segmentIndex)
+        {
+            loadedSegments.Add(segmentIndex);
+        }
+
+        public void OnSegmentUnloaded(GridPosition segmentIndex)
+        {
+            loadedSegments.Remove(segmentIndex);
+        }
+
     }
 
 }

@@ -21,40 +21,21 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.WorldManagement.Systems.WorldManagement
+namespace Sovereign.WorldManagement.Configuration
 {
 
     /// <summary>
-    /// IoC installer for WorldManagementSystem support classes.
+    /// Hardcoded configuration for WorldManagementSystem.
     /// </summary>
-    public sealed class WorldManagementInstaller : IWindsorInstaller
+    public sealed class WorldManagementConfiguration : IWorldManagementConfiguration
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<WorldManagementEventHandler>()
-                .LifestyleSingleton());
 
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IWorldSegmentLoader>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
+        public uint SegmentLength => 32;
 
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IWorldSegmentUnloader>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<WorldSegmentRegistry>()
-                .LifestyleSingleton());
-        }
     }
 
 }

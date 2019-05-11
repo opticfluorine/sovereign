@@ -23,8 +23,11 @@
 
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Movement.Components.Indexers;
+using Sovereign.WorldManagement.WorldSegments;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace Sovereign.WorldManagement.Systems.WorldManagement
@@ -36,15 +39,45 @@ namespace Sovereign.WorldManagement.Systems.WorldManagement
     public sealed class WorldSegmentUnloader : IWorldSegmentUnloader
     {
         private readonly EntityManager entityManager;
+        private readonly PositionComponentIndexer positionComponentIndexer;
+        private readonly WorldSegmentResolver worldSegmentResolver;
+        private readonly WorldSegmentRegistry worldSegmentRegistry;
 
-        public WorldSegmentUnloader(EntityManager entityManager)
+        /// <summary>
+        /// Reusable buffer for entity lookup.
+        /// </summary>
+        private readonly IList<PositionedEntity> entityBuffer = new List<PositionedEntity>();
+
+        public WorldSegmentUnloader(EntityManager entityManager,
+            PositionComponentIndexer positionComponentIndexer,
+            WorldSegmentResolver worldSegmentResolver,
+            WorldSegmentRegistry worldSegmentRegistry)
         {
             this.entityManager = entityManager;
+            this.positionComponentIndexer = positionComponentIndexer;
+            this.worldSegmentResolver = worldSegmentResolver;
+            this.worldSegmentRegistry = worldSegmentRegistry;
         }
 
         public void UnloadSegment(GridPosition segmentIndex)
         {
+            /* Get the position range to be unloaded. */
+            (var minPos, var maxPos) = worldSegmentResolver
+                .GetRangeForWorldSegment(segmentIndex);
 
+            /* Get the entities in the range. */
+            entityBuffer.Clear();
+            using (var indexLock = positionComponentIndexer.AcquireLock())
+            {
+                positionComponentIndexer.GetEntitiesInRange(indexLock, minPos, maxPos, entityBuffer);
+            }
+
+            /* Unload the entities. */
+            foreach (var entity in entityBuffer)
+            {
+                entityManager.UnloadEntity(entity.EntityId);
+            }
+            worldSegmentRegistry.OnSegmentUnloaded(segmentIndex);
         }
 
     }

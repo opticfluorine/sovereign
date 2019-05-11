@@ -24,35 +24,21 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.WorldManagement.Systems.WorldManagement
+namespace Sovereign.WorldManagement.WorldSegments
 {
 
     /// <summary>
-    /// IoC installer for WorldManagementSystem support classes.
+    /// IoC installer for world segment support classes.
     /// </summary>
-    public sealed class WorldManagementInstaller : IWindsorInstaller
+    public sealed class WorldSegmentsInstaller : IWindsorInstaller
     {
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            container.Register(Component.For<WorldManagementEventHandler>()
-                .LifestyleSingleton());
-
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IWorldSegmentLoader>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
-
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IWorldSegmentUnloader>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<WorldSegmentRegistry>()
+            container.Register(Component.For<WorldSegmentResolver>()
                 .LifestyleSingleton());
         }
     }

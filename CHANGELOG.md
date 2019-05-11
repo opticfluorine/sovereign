@@ -4,6 +4,10 @@
 
 ### May
 
+#### 11 May 2019
+
+* Implement `WorldSegmentUnloader` to unload world segments.
+
 #### 07 May 2019
 
 * Consolidate `WorldLoaderSystem` and `WorldManagementSystem` into the latter.

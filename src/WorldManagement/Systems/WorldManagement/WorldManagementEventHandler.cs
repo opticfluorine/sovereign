@@ -37,12 +37,15 @@ namespace Sovereign.WorldManagement.Systems.WorldManagement
     /// </summary>
     public sealed class WorldManagementEventHandler
     {
+        private readonly IWorldSegmentLoader loader;
         private readonly IWorldSegmentUnloader unloader;
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-        public WorldManagementEventHandler(IWorldSegmentUnloader unloader)
+        public WorldManagementEventHandler(IWorldSegmentLoader loader, 
+            IWorldSegmentUnloader unloader)
         {
+            this.loader = loader;
             this.unloader = unloader;
         }
 
@@ -80,7 +83,7 @@ namespace Sovereign.WorldManagement.Systems.WorldManagement
         /// <param name="segmentIndex">Segment index.</param>
         private void OnLoadSegment(GridPosition segmentIndex)
         {
-            throw new NotImplementedException();
+            loader.LoadSegment(segmentIndex);
         }
 
         /// <summary>
