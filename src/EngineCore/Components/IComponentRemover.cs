@@ -37,6 +37,13 @@ namespace Sovereign.EngineCore.Components
         /// <param name="entityId">Entity ID.</param>
         void RemoveComponent(ulong entityId);
 
+        /// <summary>
+        /// Enqueues the unloading of the component associated with the given entity ID.
+        /// If no entity is associated with the given entity, no action is performed.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        void UnloadComponent(ulong entityId);
+
     }
 
 }

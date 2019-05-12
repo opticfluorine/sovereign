@@ -56,6 +56,8 @@ namespace Sovereign.Persistence.Database.Sqlite
 
         public IAddEntityQuery AddEntityQuery { get; private set; }
 
+        public IRemoveEntityQuery RemoveEntityQuery { get; private set; }
+
         private const string positionTableName = "Position";
         public IAddComponentQuery<Vector3> AddPositionQuery { get; private set; }
         public IModifyComponentQuery<Vector3> ModifyPositionQuery { get; private set; }
@@ -89,6 +91,7 @@ namespace Sovereign.Persistence.Database.Sqlite
             RetrieveRangeQuery = new SqliteRetrieveRangeQuery(Connection);
 
             AddEntityQuery = new SqliteAddEntityQuery(Connection);
+            RemoveEntityQuery = new SqliteRemoveEntityQuery(Connection);
 
             /* Position component. */
             AddPositionQuery = new Vector3SqliteAddComponentQuery(positionTableName,

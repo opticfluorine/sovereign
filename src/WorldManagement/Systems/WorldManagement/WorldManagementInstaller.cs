@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,41 +21,40 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+using Sovereign.EngineUtil.IoC;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.Components
+namespace Sovereign.WorldManagement.Systems.WorldManagement
 {
 
     /// <summary>
-    /// Defines delegate types for component add/remove/modify events.
+    /// IoC installer for WorldManagementSystem support classes.
     /// </summary>
-    /// <typeparam name="T">Value type.</typeparam>
-    public static class ComponentEventDelegates<T>
+    public sealed class WorldManagementInstaller : IWindsorInstaller
     {
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(Component.For<WorldManagementEventHandler>()
+                .LifestyleSingleton());
 
-        /// <summary>
-        /// Delegate type used to communicate component add and update events.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        /// <param name="componentValue">New component value.</param>
-        public delegate void ComponentEventHandler(ulong entityId, T componentValue);
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IWorldSegmentLoader>()
+                .WithServiceDefaultInterfaces()
+                .LifestyleSingleton());
 
-        /// <summary>
-        /// Delegate type used to communicate component remove events.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        public delegate void ComponentRemovedEventHandler(ulong entityId);
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IWorldSegmentUnloader>()
+                .WithServiceDefaultInterfaces()
+                .LifestyleSingleton());
 
-        /// <summary>
-        /// Delegate type used to communicate component unload events.
-        /// </summary>
-        /// <param name="entityId"></param>
-        public delegate void ComponentUnloadedEventHandler(ulong entityId);
-
+            container.Register(Component.For<WorldSegmentRegistry>()
+                .LifestyleSingleton());
+        }
     }
 
 }

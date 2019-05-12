@@ -11,22 +11,19 @@ object may transition from one domain to another. Note that this does not
 preclude the existence of "portals" or other scripted gateways which move
 objects from one domain to another.
 
-Domains
--------
-
-Each domain exists in its own three-dimensional coordinate system where the
+The world exists in a three-dimensional coordinate system where the
 x coordinate runs west to east, the y coordinate runs south to north, and
 the z coordinate runs bottom to top (in depth). The domain is comprised of
 a three-dimensional grid of blocks - cubes of unit length - each of which
 is assigned (at a minimum) a material identifier and a material modifier.
-As each domain block is tracked within the engine as an independent entity,
+As each block is tracked within the engine as an independent entity,
 additional information can be associated with a block by linking the
 corresponding component.
 
 Materials
 ---------
 
-A material defines the base type of a domain block. The material of a block
+A material defines the base type of a block. The material of a block
 is specified by a pair of unsigned 32-bit integers, the material ID and the 
 material modifier. The material ID defines the specific type of material
 (e.g. grass, sand, water). The material modifier indicates which particular

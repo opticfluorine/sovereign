@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,41 +21,44 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Microsoft.Data.Sqlite;
+using Sovereign.Persistence.Database.Queries;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.Components
+namespace Sovereign.Persistence.Database.Sqlite.Queries
 {
 
     /// <summary>
-    /// Defines delegate types for component add/remove/modify events.
+    /// SQLite query to remove an entity ID from the database.
     /// </summary>
-    /// <typeparam name="T">Value type.</typeparam>
-    public static class ComponentEventDelegates<T>
+    public sealed class SqliteRemoveEntityQuery : IRemoveEntityQuery
     {
+        private SqliteConnection connection;
 
         /// <summary>
-        /// Delegate type used to communicate component add and update events.
+        /// Query string.
         /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        /// <param name="componentValue">New component value.</param>
-        public delegate void ComponentEventHandler(ulong entityId, T componentValue);
+        private const string sql = @"DELETE FROM Entity WHERE id = @Id";
 
-        /// <summary>
-        /// Delegate type used to communicate component remove events.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        public delegate void ComponentRemovedEventHandler(ulong entityId);
+        public SqliteRemoveEntityQuery(IDbConnection connection)
+        {
+            this.connection = (SqliteConnection)connection;
+        }
 
-        /// <summary>
-        /// Delegate type used to communicate component unload events.
-        /// </summary>
-        /// <param name="entityId"></param>
-        public delegate void ComponentUnloadedEventHandler(ulong entityId);
+        public void RemoveEntityId(ulong entityId, IDbTransaction transaction)
+        {
+            using (var cmd = new SqliteCommand(sql, connection, (SqliteTransaction)transaction))
+            {
+                var param = new SqliteParameter("Id", entityId);
+                param.SqliteType = SqliteType.Integer;
+                cmd.Parameters.Add(param);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
 
     }
-
 }

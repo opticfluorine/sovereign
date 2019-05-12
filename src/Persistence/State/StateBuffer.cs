@@ -54,6 +54,12 @@ namespace Sovereign.Persistence.State
             = new StructBuffer<ulong>(BufferSize);
 
         /// <summary>
+        /// Removed entity IDs.
+        /// </summary>
+        private readonly StructBuffer<ulong> removedEntities
+            = new StructBuffer<ulong>(BufferSize);
+
+        /// <summary>
         /// Position state updates.
         /// </summary>
         private readonly StructBuffer<StateUpdate<Vector3>> positionUpdates
@@ -90,6 +96,15 @@ namespace Sovereign.Persistence.State
         }
 
         /// <summary>
+        /// Queues an entity for database removal.
+        /// </summary>
+        /// <param name="entityId">Persisted entity ID.</param>
+        public void RemoveEntity(ulong entityId)
+        {
+            removedEntities.Add(ref entityId);
+        }
+
+        /// <summary>
         /// Queues a position update.
         /// </summary>
         /// <param name="update">State update.</param>
@@ -122,6 +137,7 @@ namespace Sovereign.Persistence.State
         public void Reset()
         {
             newEntities.Clear();
+            removedEntities.Clear();
             positionUpdates.Clear();
             materialUpdates.Clear();
             materialModifierUpdates.Clear();
@@ -146,7 +162,7 @@ namespace Sovereign.Persistence.State
             {
                 using (var transaction = persistenceProvider.Connection.BeginTransaction())
                 {
-                    SynchronizeEntities(persistenceProvider, transaction);
+                    SynchronizeAddedEntities(persistenceProvider, transaction);
 
                     /* Position. */
                     SynchronizeComponent(positionUpdates,
@@ -169,6 +185,8 @@ namespace Sovereign.Persistence.State
                         persistenceProvider.RemoveMaterialModifierQuery,
                         transaction);
 
+                    SynchronizeRemovedEntities(persistenceProvider, transaction);
+
                     transaction.Commit();
                 }
             }
@@ -184,13 +202,28 @@ namespace Sovereign.Persistence.State
         /// </summary>
         /// <param name="persistenceProvider">Persistence provider.</param>
         /// <param name="transaction">Transaction.</param>
-        private void SynchronizeEntities(IPersistenceProvider persistenceProvider,
+        private void SynchronizeAddedEntities(IPersistenceProvider persistenceProvider,
             IDbTransaction transaction)
         {
             var query = persistenceProvider.AddEntityQuery;
             foreach (var entityId in newEntities)
             {
                 query.AddEntity(entityId, transaction);
+            }
+        }
+
+        /// <summary>
+        /// Removes entities from the database.
+        /// </summary>
+        /// <param name="persistenceProvider">Persistence provider.</param>
+        /// <param name="transaction">Transaction.</param>
+        private void SynchronizeRemovedEntities(IPersistenceProvider persistenceProvider,
+            IDbTransaction transaction)
+        {
+            var query = persistenceProvider.RemoveEntityQuery;
+            foreach (var entityId in removedEntities)
+            {
+                query.RemoveEntityId(entityId, transaction);
             }
         }
 

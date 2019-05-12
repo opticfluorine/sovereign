@@ -45,6 +45,7 @@ namespace Sovereign.EngineCore.Components.Indexers
             eventSource.OnComponentAdded += ComponentAddedCallback;
             eventSource.OnComponentModified += ComponentModifiedCallback;
             eventSource.OnComponentRemoved += ComponentRemovedCallback;
+            eventSource.OnComponentUnloaded += ComponentUnloadedCallback;
             eventSource.OnEndUpdates += EndUpdatesCallback;
         }
 
@@ -88,6 +89,15 @@ namespace Sovereign.EngineCore.Components.Indexers
         }
 
         /// <summary>
+        /// Called when the event source signals that a component is unloaded.
+        /// Defaults to no action.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        protected virtual void ComponentUnloadedCallback(ulong entityId)
+        {
+        }
+
+        /// <summary>
         /// Called when the event source signals that updates are complete.
         /// Defaults to no action.
         /// </summary>
@@ -100,6 +110,7 @@ namespace Sovereign.EngineCore.Components.Indexers
         public void Dispose()
         {
             eventSource.OnEndUpdates -= EndUpdatesCallback;
+            eventSource.OnComponentUnloaded -= ComponentUnloadedCallback;
             eventSource.OnComponentRemoved -= ComponentRemovedCallback;
             eventSource.OnComponentModified -= ComponentModifiedCallback;
             eventSource.OnComponentAdded -= ComponentAddedCallback;

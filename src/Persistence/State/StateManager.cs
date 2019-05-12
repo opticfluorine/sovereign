@@ -23,8 +23,10 @@
 
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Main;
 using Sovereign.Persistence.Database;
+using Sovereign.Persistence.Entities;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -36,10 +38,12 @@ namespace Sovereign.Persistence.State
     /// <summary>
     /// Manages changes to state of all persisted entities.
     /// </summary>
-    public sealed class StateManager
+    public sealed class StateManager : IDisposable
     {
         private readonly ComponentManager componentManager;
         private readonly PersistenceProviderManager persistenceProviderManager;
+        private readonly EntityNotifier entityNotifier;
+        private readonly EntityMapper entityMapper;
 
         /// <summary>
         /// Front state buffer, currently accepting data.
@@ -53,13 +57,25 @@ namespace Sovereign.Persistence.State
 
         public StateManager(ComponentManager componentManager,
             PersistenceProviderManager persistenceProviderManager,
-            ILogger logger, FatalErrorHandler fatalErrorHandler)
+            ILogger logger, FatalErrorHandler fatalErrorHandler,
+            EntityNotifier entityNotifier, EntityMapper entityMapper)
         {
             FrontBuffer = new StateBuffer(logger, fatalErrorHandler);
             backBuffer = new StateBuffer(logger, fatalErrorHandler);
 
             this.componentManager = componentManager;
             this.persistenceProviderManager = persistenceProviderManager;
+            this.entityNotifier = entityNotifier;
+            this.entityMapper = entityMapper;
+
+            entityNotifier.OnRemoveEntity += OnRemoveEntity;
+            entityNotifier.OnUnloadEntity += OnUnloadEntity;
+        }
+
+        public void Dispose()
+        {
+            entityNotifier.OnUnloadEntity -= OnUnloadEntity;
+            entityNotifier.OnRemoveEntity -= OnRemoveEntity;
         }
 
         /// <summary>
@@ -91,6 +107,29 @@ namespace Sovereign.Persistence.State
                 /* Clear front buffer so that it can be reused. */
                 FrontBuffer.Reset();
             }
+        }
+
+        /// <summary>
+        /// Called when an entity is removed.
+        /// </summary>
+        /// <param name="entityId">Removed entity ID.</param>
+        private void OnRemoveEntity(ulong entityId)
+        {
+            var persistedId = entityMapper.GetPersistedId(entityId, out bool needToCreate);
+            if (!needToCreate)
+            {
+                FrontBuffer.RemoveEntity(persistedId);
+            }
+            entityMapper.UnloadId(entityId);
+        }
+
+        /// <summary>
+        /// Called when an entity is unloaded.
+        /// </summary>
+        /// <param name="entityId">Unloaded entity ID.</param>
+        private void OnUnloadEntity(ulong entityId)
+        {
+            entityMapper.UnloadId(entityId);
         }
 
     }

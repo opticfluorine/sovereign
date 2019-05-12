@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,40 +21,38 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Components.Indexers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.Components
+namespace Sovereign.WorldManagement.Systems.WorldManagement
 {
 
     /// <summary>
-    /// Defines delegate types for component add/remove/modify events.
+    /// Responsible for tracking which world segments are currently loaded.
     /// </summary>
-    /// <typeparam name="T">Value type.</typeparam>
-    public static class ComponentEventDelegates<T>
+    public sealed class WorldSegmentRegistry
     {
-
         /// <summary>
-        /// Delegate type used to communicate component add and update events.
+        /// Set of currently loaded world segment indices.
         /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        /// <param name="componentValue">New component value.</param>
-        public delegate void ComponentEventHandler(ulong entityId, T componentValue);
+        private readonly ISet<GridPosition> loadedSegments = new HashSet<GridPosition>();
 
-        /// <summary>
-        /// Delegate type used to communicate component remove events.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        public delegate void ComponentRemovedEventHandler(ulong entityId);
+        public bool IsLoaded(GridPosition segmentIndex)
+        {
+            return loadedSegments.Contains(segmentIndex);
+        }
 
-        /// <summary>
-        /// Delegate type used to communicate component unload events.
-        /// </summary>
-        /// <param name="entityId"></param>
-        public delegate void ComponentUnloadedEventHandler(ulong entityId);
+        public void OnSegmentLoaded(GridPosition segmentIndex)
+        {
+            loadedSegments.Add(segmentIndex);
+        }
+
+        public void OnSegmentUnloaded(GridPosition segmentIndex)
+        {
+            loadedSegments.Remove(segmentIndex);
+        }
 
     }
 

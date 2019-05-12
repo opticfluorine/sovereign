@@ -44,6 +44,9 @@ namespace Sovereign.EngineCore.Entities
                 .BasedOn<IEntityFactory>()
                 .WithServiceDefaultInterfaces()
                 .LifestyleTransient());
+
+            container.Register(Component.For<EntityNotifier>()
+                .LifestyleSingleton());
         }
 
     }

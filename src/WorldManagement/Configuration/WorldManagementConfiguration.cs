@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -23,38 +23,18 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.Components
+namespace Sovereign.WorldManagement.Configuration
 {
 
     /// <summary>
-    /// Defines delegate types for component add/remove/modify events.
+    /// Hardcoded configuration for WorldManagementSystem.
     /// </summary>
-    /// <typeparam name="T">Value type.</typeparam>
-    public static class ComponentEventDelegates<T>
+    public sealed class WorldManagementConfiguration : IWorldManagementConfiguration
     {
 
-        /// <summary>
-        /// Delegate type used to communicate component add and update events.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        /// <param name="componentValue">New component value.</param>
-        public delegate void ComponentEventHandler(ulong entityId, T componentValue);
-
-        /// <summary>
-        /// Delegate type used to communicate component remove events.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        public delegate void ComponentRemovedEventHandler(ulong entityId);
-
-        /// <summary>
-        /// Delegate type used to communicate component unload events.
-        /// </summary>
-        /// <param name="entityId"></param>
-        public delegate void ComponentUnloadedEventHandler(ulong entityId);
+        public uint SegmentLength => 32;
 
     }
 

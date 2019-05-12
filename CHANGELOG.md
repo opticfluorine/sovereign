@@ -2,10 +2,39 @@
 
 ## 2019
 
+### May
+
+#### 12 May 2019
+
+* Implement `ClientWorldSegmentLoader` to create test sets of blocks. This was
+  previously done by `TestContentSystem`'s `BlockSource` class which has now
+  been removed. `TestContentSystem` now uses `WorldManagementController` to
+  load the nine center world segments, producing equivalent results.
+
+#### 11 May 2019
+
+* Add `WorldManagementController` to `EngineCore`.
+* Implement `ServerWorldSegmentLoader` to load world segments from the database.
+* Implement `WorldSegmentUnloader` to unload world segments.
+
+#### 07 May 2019
+
+* Consolidate `WorldLoaderSystem` and `WorldManagementSystem` into the latter.
+  Handle client/server specific functionality by implementing interfaces in
+  `ClientCore` and `ServerCore` respectively.
+
 ### April
+
+#### 29 April 2019
+
+* Update `Persistence` to properly handle removed and unloaded entity IDs.
+* Add a new `Unload` operation to components. This removes the entity from
+  memory but not from persistence.
 
 #### 28 April 2019
 
+* Start adding `WorldLoaderSystem` for managing the loading and unloading of
+  world data as needed.
 * Move `TestContentSystem` from `EngineCore` to `ClientCore`.
   With `PersistenceSystem` implemented, it is no longer required by the server.
 

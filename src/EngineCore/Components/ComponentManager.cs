@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineUtil.Threading;
 using System.Collections.Generic;
 
@@ -32,6 +33,7 @@ namespace Sovereign.EngineCore.Components
     /// </summary>
     public class ComponentManager
     {
+        private readonly EntityNotifier entityNotifier;
 
         /// <summary>
         /// Incremental guard used to synchronize component updates.
@@ -47,6 +49,11 @@ namespace Sovereign.EngineCore.Components
         /// All known component removers.
         /// </summary>
         private readonly IList<IComponentRemover> componentRemovers = new List<IComponentRemover>();
+
+        public ComponentManager(EntityNotifier entityNotifier)
+        {
+            this.entityNotifier = entityNotifier;
+        }
 
         /// <summary>
         /// Registers a component updater with the manager.
@@ -66,10 +73,14 @@ namespace Sovereign.EngineCore.Components
         {
             using (var strongLock = ComponentGuard.AcquireStrongLock())
             {
+                /* Update components. */
                 foreach (var updater in componentUpdaters)
                 {
                     updater.ApplyComponentUpdates();
                 }
+
+                /* Trigger pending entity events. */
+                entityNotifier.Dispatch();
             }
         }
 
@@ -83,6 +94,16 @@ namespace Sovereign.EngineCore.Components
             {
                 remover.RemoveComponent(entityId);
             }
+        }
+
+        /// <summary>
+        /// Unloads all components for the given entity, but does not
+        /// formally delete them.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        public void UnloadAllComponentsForEntity(ulong entityId)
+        {
+
         }
 
         /// <summary>

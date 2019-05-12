@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -23,55 +23,48 @@
 
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Systems.Block;
-using Sovereign.EngineCore.Systems.Block.Events;
+using Sovereign.EngineCore.Events.Details;
+using System;
 using System.Collections.Generic;
+using System.Text;
 
-namespace Sovereign.ClientCore.Systems.TestContent
+namespace Sovereign.EngineCore.Systems.WorldManagement
 {
 
     /// <summary>
-    /// Responsible for generating blocks for initial testing.
+    /// Event controller for the world management system.
     /// </summary>
-    public sealed class BlockSource
+    public sealed class WorldManagementController
     {
-        private readonly BlockController blockController;
-        private readonly IEventSender eventSender;
-
-        public BlockSource(BlockController blockController, IEventSender eventSender)
-        {
-            this.blockController = blockController;
-            this.eventSender = eventSender;
-        }
 
         /// <summary>
-        /// Generates blocks for initial testing.
+        /// Loads the given world segment if it is not already loaded.
         /// </summary>
-        public void GenerateBlocks()
+        /// <param name="eventSender">Event sender.</param>
+        /// <param name="segmentIndex">World segment index.</param>
+        public void LoadSegment(IEventSender eventSender, GridPosition segmentIndex)
         {
-            blockController.AddBlocks(eventSender, CreateBlockRecords);
-        }
-
-        /// <summary>
-        /// Callback method to create block records.
-        /// </summary>
-        /// <param name="records">List to populate with block records.</param>
-        private void CreateBlockRecords(IList<BlockRecord> records)
-        {
-            var mat = 0;
-            for (int x = -50; x <= 50; ++x)
+            var details = new WorldSegmentEventDetails()
             {
-                for (int y = -50; y <= 50; ++y)
-                {
-                    records.Add(new BlockRecord()
-                    {
-                        Position = new GridPosition(x, y, 0),
-                        Material = 2 + (mat % 2),
-                        MaterialModifier = 0
-                    });
-                    mat++;
-                }
-            }
+                SegmentIndex = segmentIndex
+            };
+            var ev = new Event(EventId.Core_WorldManagement_LoadSegment, details);
+            eventSender.SendEvent(ev);
+        }
+
+        /// <summary>
+        /// Unloads the given world segment if it is already loaded.
+        /// </summary>
+        /// <param name="eventSender">Event sender.</param>
+        /// <param name="segmentIndex">World segment index.</param>
+        public void UnloadSegment(IEventSender eventSender, GridPosition segmentIndex)
+        {
+            var details = new WorldSegmentEventDetails()
+            {
+                SegmentIndex = segmentIndex
+            };
+            var ev = new Event(EventId.Core_WorldManagement_UnloadSegment, details);
+            eventSender.SendEvent(ev);
         }
 
     }

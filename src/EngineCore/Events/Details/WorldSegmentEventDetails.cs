@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,23 +21,25 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using Sovereign.EngineCore.Components.Indexers;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Sovereign.ClientCore.Systems.TestContent
+namespace Sovereign.EngineCore.Events.Details
 {
 
     /// <summary>
-    /// IoC installer for the TestContent system.
+    /// Details for events related to a specific world segment.
     /// </summary>
-    public sealed class TestContentInstaller : IWindsorInstaller
+    public sealed class WorldSegmentEventDetails : IEventDetails
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<BlockSource>()
-                .LifestyleSingleton());
-        }
+
+        /// <summary>
+        /// World segment index.
+        /// </summary>
+        public GridPosition SegmentIndex;
+
     }
 
 }

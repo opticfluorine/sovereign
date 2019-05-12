@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,62 +21,41 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
-using Sovereign.EngineCore.Systems.WorldManagement;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
-namespace Sovereign.ClientCore.Systems.TestContent
+namespace Sovereign.WorldManagement.Systems.WorldManagement
 {
 
     /// <summary>
-    /// System responsible for supplying content for early testing.
+    /// System responsible for managing the world state lifecycle.
     /// </summary>
-    /// <remarks>
-    /// This will be removed in the future.
-    /// </remarks>
-    public sealed class TestContentSystem : ISystem, IDisposable
+    public sealed class WorldManagementSystem : ISystem
     {
-        private readonly IEventLoop eventLoop;
-
         public EventCommunicator EventCommunicator { get; private set; }
 
-        private readonly IEventSender eventSender;
-        private readonly WorldManagementController worldManagementController;
+        private readonly IEventLoop eventLoop;
+        private readonly WorldManagementEventHandler eventHandler;
 
-        public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
+        public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>()
         {
-            /* no events */
+            EventId.Core_WorldManagement_LoadSegment,
+            EventId.Core_WorldManagement_UnloadSegment
         };
 
-        public int WorkloadEstimate => 0;
+        public int WorkloadEstimate => 80;
 
-        public TestContentSystem(IEventLoop eventLoop,
-            EventCommunicator eventCommunicator,
-            IEventSender eventSender,
-            WorldManagementController worldManagementController)
+        public WorldManagementSystem(EventCommunicator eventCommunicator,
+            IEventLoop eventLoop, WorldManagementEventHandler eventHandler)
         {
-            this.eventLoop = eventLoop;
             EventCommunicator = eventCommunicator;
-            this.eventSender = eventSender;
-            this.worldManagementController = worldManagementController;
+            this.eventLoop = eventLoop;
+            this.eventHandler = eventHandler;
 
             eventLoop.RegisterSystem(this);
-        }
-
-        public void Initialize()
-        {
-            /* Load some test world segments. */
-            for (int i = -1; i < 2; ++i)
-            {
-                for (int j = -1; j < 2; ++j)
-                {
-                    worldManagementController.LoadSegment(eventSender,
-                        new GridPosition(i, j, 0));
-                }
-            }
         }
 
         public void Cleanup()
@@ -86,14 +65,15 @@ namespace Sovereign.ClientCore.Systems.TestContent
 
         public void ExecuteOnce()
         {
-            /* No action. */
+            while (EventCommunicator.GetIncomingEvent(out var ev))
+            {
+                eventHandler.HandleEvent(ev);
+            }
         }
 
-        public void Dispose()
+        public void Initialize()
         {
-            eventLoop.UnregisterSystem(this);
+
         }
-
     }
-
 }

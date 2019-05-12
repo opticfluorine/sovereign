@@ -39,6 +39,7 @@ namespace Sovereign.EngineCore.Components.Indexers
         public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentAdded;
         public event ComponentEventDelegates<T>.ComponentRemovedEventHandler OnComponentRemoved;
         public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentModified;
+        public event ComponentEventDelegates<T>.ComponentUnloadedEventHandler OnComponentUnloaded;
         public event EventHandler OnEndUpdates;
 
         public BaseComponentEventFilter(BaseComponentCollection<T> components,
@@ -72,6 +73,11 @@ namespace Sovereign.EngineCore.Components.Indexers
         protected override void ComponentRemovedCallback(ulong entityId)
         {
             if (ShouldAccept(entityId)) OnComponentRemoved(entityId);
+        }
+
+        protected override void ComponentUnloadedCallback(ulong entityId)
+        {
+            if (ShouldAccept(entityId)) OnComponentUnloaded(entityId);
         }
 
     }
