@@ -21,8 +21,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Systems.WorldManagement;
 using System;
 using System.Collections.Generic;
 
@@ -37,10 +39,12 @@ namespace Sovereign.ClientCore.Systems.TestContent
     /// </remarks>
     public sealed class TestContentSystem : ISystem, IDisposable
     {
-        private readonly BlockSource blockSource;
         private readonly IEventLoop eventLoop;
 
         public EventCommunicator EventCommunicator { get; private set; }
+
+        private readonly IEventSender eventSender;
+        private readonly WorldManagementController worldManagementController;
 
         public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
         {
@@ -49,19 +53,30 @@ namespace Sovereign.ClientCore.Systems.TestContent
 
         public int WorkloadEstimate => 0;
 
-        public TestContentSystem(BlockSource blockSource, IEventLoop eventLoop,
-            EventCommunicator eventCommunicator)
+        public TestContentSystem(IEventLoop eventLoop,
+            EventCommunicator eventCommunicator,
+            IEventSender eventSender,
+            WorldManagementController worldManagementController)
         {
-            this.blockSource = blockSource;
             this.eventLoop = eventLoop;
             EventCommunicator = eventCommunicator;
+            this.eventSender = eventSender;
+            this.worldManagementController = worldManagementController;
 
             eventLoop.RegisterSystem(this);
         }
 
         public void Initialize()
         {
-            blockSource.GenerateBlocks();
+            /* Load some test world segments. */
+            for (int i = -1; i < 2; ++i)
+            {
+                for (int j = -1; j < 2; ++j)
+                {
+                    worldManagementController.LoadSegment(eventSender,
+                        new GridPosition(i, j, 0));
+                }
+            }
         }
 
         public void Cleanup()

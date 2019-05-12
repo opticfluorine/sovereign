@@ -4,6 +4,13 @@
 
 ### May
 
+#### 12 May 2019
+
+* Implement `ClientWorldSegmentLoader` to create test sets of blocks. This was
+  previously done by `TestContentSystem`'s `BlockSource` class which has now
+  been removed. `TestContentSystem` now uses `WorldManagementController` to
+  load the nine center world segments, producing equivalent results.
+
 #### 11 May 2019
 
 * Add `WorldManagementController` to `EngineCore`.
