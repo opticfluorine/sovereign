@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,17 +35,20 @@ namespace Sovereign.EngineCore.Events.Details
     /// <summary>
     /// Reusable event details for events with an entity ID and a Vector3.
     /// </summary>
+    [ProtoContract]
     public sealed class EntityVectorEventDetails : IEventDetails
     {
 
         /// <summary>
         /// Entity ID.
         /// </summary>
+        [ProtoMember(1, IsRequired = true)]
         public ulong EntityId { get; set; }
 
         /// <summary>
         /// Position.
         /// </summary>
+        [ProtoMember(2, IsRequired = true)]
         public Vector3 Vector { get; set; }
 
     }

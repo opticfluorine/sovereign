@@ -23,8 +23,11 @@
 
 using Castle.Core.Logging;
 using Castle.Windsor;
+using ProtoBuf.Meta;
+using Sovereign.EngineCore.Util;
 using Sovereign.EngineUtil.IoC;
 using System;
+using System.Numerics;
 using System.Text;
 using System.Threading;
 
@@ -41,6 +44,10 @@ namespace Sovereign.EngineCore.Main
         {
             /* Name the thread. */
             Thread.CurrentThread.Name = "Main";
+
+            /* Configure Protobuf. */
+            RuntimeTypeModel.Default[typeof(Vector3)]
+                .SetSurrogate(typeof(Vector3Surrogate));
 
             /* Start up the IoC container */
             IWindsorContainer iocContainer = null;

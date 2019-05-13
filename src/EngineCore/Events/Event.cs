@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using ProtoBuf;
 using System.Collections.Generic;
 
 namespace Sovereign.EngineCore.Events
@@ -29,6 +30,7 @@ namespace Sovereign.EngineCore.Events
     /// <summary>
     /// Interface implemented by event classes.
     /// </summary>
+    [ProtoContract]
     public class Event
     {
 
@@ -40,17 +42,41 @@ namespace Sovereign.EngineCore.Events
         /// <summary>
         /// Unique identifier for the event type.
         /// </summary>
+        [ProtoMember(1, IsRequired = true)]
         public EventId EventId { get; private set; }
 
         /// <summary>
         /// Time at which the event becomes valid, in microseconds.
         /// </summary>
+        /// <remarks>
+        /// This field is not sent over the network as timed events will not
+        /// be relayed until their trigger time is reached.
+        /// </remarks>
         public ulong EventTime { get; set; }
+
+        /// <summary>
+        /// Flag indicating that the event originated locally
+        /// (i.e. not from a remote client or server).
+        /// </summary>
+        /// <remarks>
+        /// This field is not sent over the network as the value of the
+        /// locality flag depends on the execution context.
+        /// </remarks>
+        public bool Local { get; set; }
 
         /// <summary>
         /// Details associated with the event.
         /// </summary>
+        [ProtoMember(2, IsRequired = false)]
         public IEventDetails EventDetails { get; private set; }
+
+        /// <summary>
+        /// Default constructor, needed for Protobuf compatibility.
+        /// </summary>
+        public Event()
+        {
+
+        }
 
         public Event(EventId eventId, ulong eventTime = Immediate)
             : this(eventId, null, eventTime)
@@ -65,12 +91,34 @@ namespace Sovereign.EngineCore.Events
         /// <param name="eventTime">
         /// System time (us) when this event should be dispatched.
         /// </param>
+        /// <remarks>
+        /// This constructor always produces a local event. Nonlocal
+        /// (remote) events should be created with the copy constructor.
+        /// </remarks>
         public Event(EventId eventId, IEventDetails details, 
             ulong eventTime = Immediate)
         {
             EventId = eventId;
             EventDetails = details;
             EventTime = eventTime;
+            Local = true;
+        }
+
+        /// <summary>
+        /// Shallow copy constructor that updates the locality flag.
+        /// </summary>
+        /// <param name="other">Event to be copied.</param>
+        /// <param name="local">New value for Local.</param>
+        /// <remarks>
+        /// This constructor performs a shallow copy only; the EventDetails
+        /// object, if any, is not copied.
+        /// </remarks>
+        public Event(Event other, bool local = false)
+        {
+            EventId = other.EventId;
+            EventDetails = other.EventDetails;
+            EventTime = other.EventTime;
+            Local = local;
         }
 
     }

@@ -21,12 +21,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using ProtoBuf;
+
 namespace Sovereign.EngineCore.Events
 {
 
     /// <summary>
     /// Interface implemented by event detail classes.
     /// </summary>
+    /// <remarks>
+    /// Ensure that derived types are linked with a ProtoInclude here.
+    /// </remarks>
+    [ProtoContract]
+    [ProtoInclude(1, "SetVelocityEventDetails")]
+    [ProtoInclude(2, "MoveOnceEventDetails")]
+    [ProtoInclude(3, "EntityEventDetails")]
+    [ProtoInclude(4, "EntityVectorEventDetails")]
     public interface IEventDetails
     {
     }

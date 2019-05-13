@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -22,40 +22,39 @@
  */
 
 using ProtoBuf;
-using Sovereign.EngineCore.Events;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.Systems.Movement.Events
+namespace Sovereign.EngineCore.Util
 {
 
     /// <summary>
-    /// Event details associated with the Core_Movement event, which
-    /// describes an attempt to move an entity relative to its current
-    /// position.
-    /// 
-    /// If the entity is able to move to the new position (i.e. the entity
-    /// is not fixed and is not somehow forbidden from the new position),
-    /// the movement is successful. Otherwise no movement occurs.
+    /// Serialization surrogate for Vector3 structs.
     /// </summary>
     [ProtoContract]
-    public class MoveOnceEventDetails : IEventDetails
+    public struct Vector3Surrogate
     {
 
-        /// <summary>
-        /// Identifier of the entity that is moving.
-        /// </summary>
-        [ProtoMember(1, IsRequired = true)]
-        public ulong EntityId { get; set; }
+        [ProtoMember(1, IsRequired = true)] public float X;
+        [ProtoMember(2, IsRequired = true)] public float Y;
+        [ProtoMember(3, IsRequired = true)] public float Z;
 
-        /// <summary>
-        /// Unique movement phase used to filter expired events.
-        /// </summary>
-        [ProtoMember(2, IsRequired = true)]
-        public uint MovementPhase { get; set; }
+        public static implicit operator Vector3(Vector3Surrogate surrogate)
+        {
+            return new Vector3(surrogate.X, surrogate.Y, surrogate.Z);
+        }
+
+        public static implicit operator Vector3Surrogate(Vector3 vector)
+        {
+            return new Vector3Surrogate()
+            {
+                X = vector.X,
+                Y = vector.Y,
+                Z = vector.Z
+            };
+        }
 
     }
 

@@ -6,6 +6,8 @@
 
 #### 12 May 2019
 
+* Add `NetworkCore` project with a `NetworkSystem` and `NetworkingService` that
+  will be responsible for managing client/server networking.
 * Implement `ClientWorldSegmentLoader` to create test sets of blocks. This was
   previously done by `TestContentSystem`'s `BlockSource` class which has now
   been removed. `TestContentSystem` now uses `WorldManagementController` to

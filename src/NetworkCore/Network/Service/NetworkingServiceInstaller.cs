@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,42 +21,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using ProtoBuf;
-using Sovereign.EngineCore.Events;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.Systems.Movement.Events
+namespace Sovereign.NetworkCore.Network.Service
 {
 
     /// <summary>
-    /// Event details associated with the Core_Movement event, which
-    /// describes an attempt to move an entity relative to its current
-    /// position.
-    /// 
-    /// If the entity is able to move to the new position (i.e. the entity
-    /// is not fixed and is not somehow forbidden from the new position),
-    /// the movement is successful. Otherwise no movement occurs.
+    /// IoC installer for the networking service.
     /// </summary>
-    [ProtoContract]
-    public class MoveOnceEventDetails : IEventDetails
+    public sealed class NetworkingServiceInstaller : IWindsorInstaller
     {
-
-        /// <summary>
-        /// Identifier of the entity that is moving.
-        /// </summary>
-        [ProtoMember(1, IsRequired = true)]
-        public ulong EntityId { get; set; }
-
-        /// <summary>
-        /// Unique movement phase used to filter expired events.
-        /// </summary>
-        [ProtoMember(2, IsRequired = true)]
-        public uint MovementPhase { get; set; }
-
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(Component.For<NetworkingService>()
+                .LifestyleSingleton());
+        }
     }
 
 }

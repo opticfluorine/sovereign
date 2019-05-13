@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using ProtoBuf;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.EngineCore.Systems.Movement.Events
@@ -31,22 +32,26 @@ namespace Sovereign.EngineCore.Systems.Movement.Events
     /// velocity until the velocity is changed, movement is ended, or the
     /// entity cannot proceed to move.
     /// </summary>
+    [ProtoContract]
     public class SetVelocityEventDetails : IEventDetails
     {
 
         /// <summary>
         /// Entity identifier.
         /// </summary>
+        [ProtoMember(1, IsRequired = true)]
         public ulong EntityId { get; set; }
 
         /// <summary>
         /// Relative rate of movement along X as a ratio of the entity's base speed.
         /// </summary>
+        [ProtoMember(2, IsRequired = true)]
         public float RateX { get; set; }
 
         /// <summary>
         /// Relative rate of movement along Y as a ratio of the entity's base speed.
         /// </summary>
+        [ProtoMember(3, IsRequired = true)]
         public float RateY { get; set; }
 
     }

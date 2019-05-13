@@ -21,6 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using ProtoBuf;
+
 namespace Sovereign.EngineCore.Events.Details
 {
 
@@ -28,12 +30,14 @@ namespace Sovereign.EngineCore.Events.Details
     /// Reusable IEventDetails for events that have no details other
     /// than the ID of the affected entity.
     /// </summary>
+    [ProtoContract]
     public class EntityEventDetails : IEventDetails
     {
 
         /// <summary>
         /// ID of the affected entity.
         /// </summary>
+        [ProtoMember(1, IsRequired = true)]
         public ulong EntityId { get; set; }
 
     }
