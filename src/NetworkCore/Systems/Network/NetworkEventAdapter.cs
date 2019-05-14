@@ -22,7 +22,6 @@
  */
 
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Systems;
 using Sovereign.NetworkCore.Network.Service;
 using System;
 using System.Collections.Generic;
@@ -32,61 +31,27 @@ namespace Sovereign.NetworkCore.Systems.Network
 {
 
     /// <summary>
-    /// System that connects the event loop to the networking service.
+    /// Event adapter that injects events received and processed from the network.
     /// </summary>
-    public sealed class NetworkSystem : ISystem
+    public sealed class NetworkEventAdapter : IEventAdapter
     {
         private readonly NetworkingService networkingService;
-        private readonly IEventSender eventSender;
 
-        public EventCommunicator EventCommunicator { get; private set; }
-
-        /// <summary>
-        /// Event IDs that are candidates to be replicated onto the network.
-        /// </summary>
-        public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>()
-        {
-            EventId.Core_Set_Velocity,
-            EventId.Core_Move_Once,
-            EventId.Core_End_Movement
-        };
-
-        public int WorkloadEstimate => 50;
-
-        public NetworkSystem(NetworkingService networkingService,
-            IEventSender eventSender,
-            EventCommunicator eventCommunicator,
-            IEventLoop eventLoop)
+        public NetworkEventAdapter(NetworkingService networkingService)
         {
             this.networkingService = networkingService;
-            this.eventSender = eventSender;
-            EventCommunicator = eventCommunicator;
-
-            eventLoop.RegisterSystem(this);
         }
 
-        public void Cleanup()
+        public bool PollEvent(out Event ev)
         {
-            networkingService.Stop();
+            return networkingService.ReceivedEvents.TryDequeue(out ev);
         }
 
-        public void ExecuteOnce()
+        public void PrepareEvents()
         {
-            /* Process outgoing local events. */
-            while (EventCommunicator.GetIncomingEvent(out var ev))
-            {
-                /* Discard nonlocal events. */
-                if (!ev.Local) continue;
-
-                /* Enqueue to send. */
-                networkingService.EventsToSend.Enqueue(ev);
-            }
+            /* no action */
         }
 
-        public void Initialize()
-        {
-            networkingService.Start();
-        }
     }
 
 }

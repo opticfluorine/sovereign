@@ -4,6 +4,10 @@
 
 ### May
 
+#### 13 May 2019
+
+* Add `NetworkEventAdapter` to transfer received events into the event loop.
+
 #### 12 May 2019
 
 * Add `NetworkCore` project with a `NetworkSystem` and `NetworkingService` that
