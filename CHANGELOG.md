@@ -4,6 +4,11 @@
 
 ### May
 
+#### 19 May 2019
+
+* Add high-level documentation of networking.
+* Add `BaseComponentReducer<T>` for producing events from component updates.
+
 #### 13 May 2019
 
 * Add `NetworkEventAdapter` to transfer received events into the event loop.
