@@ -42,7 +42,7 @@ namespace Sovereign.EngineCore.Components.Indexers
         /// <summary>
         /// Entity IDs that need an update.
         /// </summary>
-        private ISet<ulong> entityIds = new HashSet<ulong>();
+        private readonly ISet<ulong> entityIds = new HashSet<ulong>();
 
         public BaseComponentReducer(BaseComponentCollection<T> components,
             IComponentEventSource<T> eventSource,

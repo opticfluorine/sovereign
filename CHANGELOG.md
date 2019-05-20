@@ -6,6 +6,11 @@
 
 #### 19 May 2019
 
+* Wire up the inbound and outbound network pipelines. Output a summary to the
+  log at startup (debug level only).
+* Add interfaces for the inbound and outbound network pipelines. These perform
+  event filtering, security, and data transforms at the network boundary as
+  needed.
 * Add high-level documentation of networking.
 * Add `BaseComponentReducer<T>` for producing events from component updates.
 

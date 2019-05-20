@@ -23,6 +23,7 @@
 
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.NetworkCore.Network.Pipeline;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -38,6 +39,9 @@ namespace Sovereign.NetworkCore.Network.Service
     /// </summary>
     public sealed class NetworkingService
     {
+        private readonly InboundNetworkPipeline inboundPipeline;
+        private readonly OutboundNetworkPipeline outboundPipeline;
+
         /// <summary>
         /// Thread that the service is running on.
         /// </summary>
@@ -61,6 +65,13 @@ namespace Sovereign.NetworkCore.Network.Service
         /// </summary>
         public ConcurrentQueue<Event> EventsToSend { get; }
             = new ConcurrentQueue<Event>();
+
+        public NetworkingService(InboundNetworkPipeline inboundPipeline,
+            OutboundNetworkPipeline outboundPipeline)
+        {
+            this.inboundPipeline = inboundPipeline;
+            this.outboundPipeline = outboundPipeline;
+        }
 
         /// <summary>
         /// Starts the networking service.
@@ -87,6 +98,7 @@ namespace Sovereign.NetworkCore.Network.Service
         private void Run()
         {
             Logger.Info("Networking service is started.");
+            OutputStartupDiagnostics();
 
             while (!stopRequested)
             {
@@ -94,6 +106,12 @@ namespace Sovereign.NetworkCore.Network.Service
             }
 
             Logger.Info("Networking service is stopped.");
+        }
+
+        private void OutputStartupDiagnostics()
+        {
+            inboundPipeline.OutputStartupDiagnostics();
+            outboundPipeline.OutputStartupDiagnostics();
         }
 
     }

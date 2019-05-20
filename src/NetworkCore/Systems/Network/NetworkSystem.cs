@@ -37,7 +37,6 @@ namespace Sovereign.NetworkCore.Systems.Network
     public sealed class NetworkSystem : ISystem
     {
         private readonly NetworkingService networkingService;
-        private readonly IEventSender eventSender;
 
         public EventCommunicator EventCommunicator { get; private set; }
 
@@ -54,12 +53,10 @@ namespace Sovereign.NetworkCore.Systems.Network
         public int WorkloadEstimate => 50;
 
         public NetworkSystem(NetworkingService networkingService,
-            IEventSender eventSender,
             EventCommunicator eventCommunicator,
             IEventLoop eventLoop)
         {
             this.networkingService = networkingService;
-            this.eventSender = eventSender;
             EventCommunicator = eventCommunicator;
 
             eventLoop.RegisterSystem(this);
