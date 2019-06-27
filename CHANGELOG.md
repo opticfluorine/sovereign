@@ -2,6 +2,12 @@
 
 ## 2019
 
+### June
+
+#### 26 June 2019
+
+* After taking a month away, continue working on networking design.
+
 ### May
 
 #### 19 May 2019

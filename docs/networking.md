@@ -5,7 +5,9 @@ mechanism used by both the client and server. The engine communicates over the
 network by serializing and sending the minimum set of events necessary to
 reconstruct the current game state at the remote endpoint.
 
-## Game State
+## Event-Based Networking Architecture
+
+### Game State
 
 The game state at any given time is defined by the current server tick and
 the set of all entities and components at that tick. Both the client and the
@@ -35,7 +37,7 @@ defining events is sufficient to reconstruct the global game state, and so the
 secondary defining events and the nondefining events are not sent over the
 network.
 
-## Client-Server Relationship
+### Client-Server Relationship
 
 Sovereign Engine uses a client-server model where many clients connect to a
 single server over the network. The server is fully authoritative; that is,
@@ -61,7 +63,7 @@ server will not send any acknowledgment or rejection packets in response to
 speculative events; the server event sequence is the authoritative definition 
 of the global game state.
 
-## Designing Primary Defining Events
+### Designing Primary Defining Events
 
 Primary defining events must create the server-defined authoritative global
 game state when processed by the client, regardless of whether the client has
@@ -87,4 +89,34 @@ will lag to player inputs by a minimum of the tick length, though this overhead
 becomes negligible for high-ping clients. The lagging effects should average 
 out over several ticks as the server sends authoritative updates, but if not, 
 more advanced compensation methods will be required.
+
+## Packets
+
+### Packet Reliability
+
+Sovereign Engine sends packets between clients and servers using UDP. UDP is
+a stateless protocol that offers no reliability or ordering guarantees. Any
+ordering or reliability needed by Sovereign must be supported at the
+application layer.
+
+Packets sent between the client and server may be categorized based on their
+need for ordering and/or reliability. The table below categorizes some common
+types of communication used by Sovereign Engine.
+
+Function | Direction | Ordering Required | Reliability Required
+--- | --- | --- | ---
+Chat | Bidirectional | Yes | Yes
+Keep-Alive | Bidirectional | No | No
+Login | Bidirectional | Yes | Yes
+Player Input | Client -> Server | Yes | No
+Send Entity Updates | Server -> Client | No | No
+Send World Data | Server -> Client | No | Yes
+
+For functions where ordering is required, the ordering of packets is only
+important within the set of packets related to that function. For example,
+if a chat packet and a world data packet were both being sent, the order in
+which the two packets are delivered is not important. However, if two chat
+packets were being sent, then the order is important. The engine therefore
+groups packets by function into separate channels in order to avoid
+unnecessary performance hits.
 
