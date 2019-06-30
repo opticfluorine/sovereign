@@ -21,38 +21,24 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Network.Service;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.NetworkCore.Systems.Network
+namespace Sovereign.EngineCore.Events
 {
 
     /// <summary>
-    /// Event adapter that injects events received and processed from the network.
+    /// Manages the collection of event adapters.
     /// </summary>
-    public sealed class NetworkEventAdapter : IEventAdapter
+    public sealed class EventAdapterManager
     {
-        private readonly NetworkingService networkingService;
 
-        public NetworkEventAdapter(NetworkingService networkingService,
-            EventAdapterManager adapterManager)
+        public readonly IList<IEventAdapter> EventAdapters = new List<IEventAdapter>();
+
+        public void RegisterEventAdapter(IEventAdapter eventAdapter)
         {
-            this.networkingService = networkingService;
-
-            adapterManager.RegisterEventAdapter(this);
-        }
-
-        public bool PollEvent(out Event ev)
-        {
-            return networkingService.ReceivedEvents.TryDequeue(out ev);
-        }
-
-        public void PrepareEvents()
-        {
-            /* no action */
+            EventAdapters.Add(eventAdapter);
         }
 
     }

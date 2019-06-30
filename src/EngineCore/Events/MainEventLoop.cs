@@ -55,9 +55,9 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         private readonly ISet<IEventSender> eventSenders = new HashSet<IEventSender>();
 
         /// <summary>
-        /// The collection of event adapters.
+        /// Event adapter manager.
         /// </summary>
-        private readonly ICollection<IEventAdapter> eventAdapters;
+        private readonly EventAdapterManager eventAdapterManager;
 
         /// <summary>
         /// Component manager.
@@ -82,10 +82,10 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         private ulong LastUpdateTime;
 
         public MainEventLoop(ComponentManager componentManager,
-            ICollection<IEventAdapter> eventAdapters)
+            EventAdapterManager eventAdapterManager)
         {
             this.componentManager = componentManager;
-            this.eventAdapters = eventAdapters;
+            this.eventAdapterManager = eventAdapterManager;
         }
 
         public void PumpEventLoop()
@@ -195,7 +195,7 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// </summary>
         private void RetrieveAdaptedEvents()
         {
-            foreach (IEventAdapter eventAdapter in eventAdapters)
+            foreach (IEventAdapter eventAdapter in eventAdapterManager.EventAdapters)
             {
                 eventAdapter.PrepareEvents();
 

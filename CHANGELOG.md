@@ -4,6 +4,18 @@
 
 ### June
 
+#### 30 June 2019
+
+* Add network configuration to server.
+* Open server port at startup.
+* Refactor code around `IEventAdapter` to avoid unnecessary cyclic
+  dependencies. This eliminates dependencies on collections of adapters
+  and instead registers adapters with the `EventAdapterManager` from their
+  constructors. This has the side effect of requiring each event adapter to
+  be depended on by another class; the three existing adapters have been
+  linked to relevant classes. It's still not a great solution, but it's a step
+  forward from collection dependence.
+
 #### 26 June 2019
 
 * After taking a month away, continue working on networking design.

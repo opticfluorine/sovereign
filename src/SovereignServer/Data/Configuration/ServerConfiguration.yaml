@@ -73,6 +73,27 @@ Database:
     SyncIntervalSeconds: 60
 
 
+Network:
+
+    # --------------------
+    # NetworkInterfaceIPv4
+    # --------------------
+    # IPv4 interface to bind.
+    NetworkInterfaceIPv4: 0.0.0.0
+
+    # --------------------
+    # NetworkInterfaceIPv6
+    # --------------------
+    # IPv6 interface to bind.
+    NetworkInterfaceIPv6: ::0
+
+    # ----
+    # Port
+    # ----
+    # Server port.
+    Port: 12820
+
+
 World:
 
     # ---------

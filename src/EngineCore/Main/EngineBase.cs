@@ -62,7 +62,8 @@ namespace Sovereign.EngineCore.Main
         private ulong cycleCount = 0;
 
         public EngineBase(IEventLoop eventLoop, TimeManager timeManager,
-            WorldManager worldManager, IList<IMainLoopAction> mainLoopActions)
+            WorldManager worldManager, IList<IMainLoopAction> mainLoopActions,
+            ConsoleEventAdapter eventAdapter)
         {
             this.eventLoop = eventLoop;
             this.timeManager = timeManager;

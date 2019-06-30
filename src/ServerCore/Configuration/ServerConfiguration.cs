@@ -36,6 +36,11 @@ namespace Sovereign.ServerCore.Configuration
         public DatabaseRecord Database { get; set; }
 
         /// <summary>
+        /// Server-side network configuration settings.
+        /// </summary>
+        public NetworkRecord Network { get; set; }
+
+        /// <summary>
         /// World configuration settings.
         /// </summary>
         public WorldRecord World { get; set; }
@@ -96,6 +101,29 @@ namespace Sovereign.ServerCore.Configuration
             /// in seconds.
             /// </summary>
             public int SyncIntervalSeconds { get; set; } = 60;
+
+        }
+
+        /// <summary>
+        /// Full description of the server-side network configuration.
+        /// </summary>
+        public sealed class NetworkRecord
+        {
+
+            /// <summary>
+            /// IPv4 network interface to bind.
+            /// </summary>
+            public string NetworkInterfaceIPv4 { get; set; } = "0.0.0.0";
+
+            /// <summary>
+            /// IPv6 network interface to bind.
+            /// </summary>
+            public string NetworkInterfaceIPv6 { get; set; } = "::0";
+
+            /// <summary>
+            /// Server port.
+            /// </summary>
+            public ushort Port { get; set; } = 12820;
 
         }
 

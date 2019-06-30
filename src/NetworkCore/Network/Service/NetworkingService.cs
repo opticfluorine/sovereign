@@ -23,6 +23,8 @@
 
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Main;
+using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline;
 using System;
 using System.Collections.Concurrent;
@@ -41,6 +43,9 @@ namespace Sovereign.NetworkCore.Network.Service
     {
         private readonly InboundNetworkPipeline inboundPipeline;
         private readonly OutboundNetworkPipeline outboundPipeline;
+        private readonly NetLogger netLogger;
+        private readonly INetworkManager networkManager;
+        private readonly FatalErrorHandler fatalErrorHandler;
 
         /// <summary>
         /// Thread that the service is running on.
@@ -57,7 +62,7 @@ namespace Sovereign.NetworkCore.Network.Service
         /// <summary>
         /// Queue of processed events received and accepted from the network.
         /// </summary>
-        public ConcurrentQueue<Event> ReceivedEvents { get; } 
+        public ConcurrentQueue<Event> ReceivedEvents { get; }
             = new ConcurrentQueue<Event>();
 
         /// <summary>
@@ -67,10 +72,16 @@ namespace Sovereign.NetworkCore.Network.Service
             = new ConcurrentQueue<Event>();
 
         public NetworkingService(InboundNetworkPipeline inboundPipeline,
-            OutboundNetworkPipeline outboundPipeline)
+            OutboundNetworkPipeline outboundPipeline,
+            NetLogger netLogger,
+            INetworkManager networkManager,
+            FatalErrorHandler fatalErrorHandler)
         {
             this.inboundPipeline = inboundPipeline;
             this.outboundPipeline = outboundPipeline;
+            this.netLogger = netLogger;
+            this.networkManager = networkManager;
+            this.fatalErrorHandler = fatalErrorHandler;
         }
 
         /// <summary>
@@ -100,9 +111,41 @@ namespace Sovereign.NetworkCore.Network.Service
             Logger.Info("Networking service is started.");
             OutputStartupDiagnostics();
 
+            /* Start the network manager. */
+            try
+            {
+                networkManager.Initialize();
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal("Failed to start the network manager.", e);
+                fatalErrorHandler.FatalError();
+                return;
+            }
+
+            /* Loop until shutdown. */
             while (!stopRequested)
             {
-                Thread.Sleep(1);
+                try
+                {
+                    // TODO
+                    Thread.Sleep(1);
+                }
+                catch (Exception e)
+                {
+                    /* Unhandled exception escaped the network thread. */
+                    Logger.Error("Error in networking service.", e);
+                }
+            }
+
+            /* Clean up networking resources. */
+            try
+            {
+                networkManager.Dispose();
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal("Error stopping network manager.", e);
             }
 
             Logger.Info("Networking service is stopped.");

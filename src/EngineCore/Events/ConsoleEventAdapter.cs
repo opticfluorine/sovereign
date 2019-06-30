@@ -40,9 +40,11 @@ namespace Sovereign.EngineCore.Events
         /// </summary>
         private bool StopRequested = false;
 
-        public ConsoleEventAdapter()
+        public ConsoleEventAdapter(EventAdapterManager adapterManager)
         {
             Console.CancelKeyPress += Console_CancelKeyPress;
+
+            adapterManager.RegisterEventAdapter(this);
         }
 
         public void PrepareEvents()

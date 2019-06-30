@@ -54,7 +54,8 @@ namespace Sovereign.NetworkCore.Systems.Network
 
         public NetworkSystem(NetworkingService networkingService,
             EventCommunicator eventCommunicator,
-            IEventLoop eventLoop)
+            IEventLoop eventLoop,
+            NetworkEventAdapter eventAdapter)
         {
             this.networkingService = networkingService;
             EventCommunicator = eventCommunicator;

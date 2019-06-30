@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Sovereign.ClientCore.Events;
 
 namespace Sovereign.ClientCore.Rendering.Display
 {
@@ -71,7 +72,14 @@ namespace Sovereign.ClientCore.Rendering.Display
         /// </summary>
         public bool IsFullscreen { get; private set; }
 
-        public MainDisplay()
+        /// <summary>
+        /// Creates the display.
+        /// </summary>
+        /// <param name="eventAdapter">
+        /// SDL event adapter. It is anchored here for IoC resolution since
+        /// the SDL library is managed outside of the object graph.
+        /// </param>
+        public MainDisplay(SDLEventAdapter eventAdapter)
         {
 
         }

@@ -49,7 +49,7 @@ namespace Sovereign.EngineCore.Main
                 .AllowMultipleMatches());
 
             container.Register(Component.For<FatalErrorHandler>()
-                .LifestyleSingleton());
+                .LifestyleTransient());
         }
 
     }

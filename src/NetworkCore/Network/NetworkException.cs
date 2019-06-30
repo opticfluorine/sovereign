@@ -21,40 +21,30 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Network.Service;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
-namespace Sovereign.NetworkCore.Systems.Network
+namespace Sovereign.NetworkCore.Network
 {
 
     /// <summary>
-    /// Event adapter that injects events received and processed from the network.
+    /// Exception type thrown when network errors occur.
     /// </summary>
-    public sealed class NetworkEventAdapter : IEventAdapter
+    public sealed class NetworkException : Exception
     {
-        private readonly NetworkingService networkingService;
-
-        public NetworkEventAdapter(NetworkingService networkingService,
-            EventAdapterManager adapterManager)
+        public NetworkException()
         {
-            this.networkingService = networkingService;
-
-            adapterManager.RegisterEventAdapter(this);
         }
 
-        public bool PollEvent(out Event ev)
+        public NetworkException(string message) : base(message)
         {
-            return networkingService.ReceivedEvents.TryDequeue(out ev);
         }
 
-        public void PrepareEvents()
+        public NetworkException(string message, Exception innerException) : base(message, innerException)
         {
-            /* no action */
         }
-
     }
 
 }

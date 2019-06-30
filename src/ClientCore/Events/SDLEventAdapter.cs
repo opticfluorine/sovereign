@@ -39,6 +39,11 @@ namespace Sovereign.ClientCore.Events
     public class SDLEventAdapter : IEventAdapter
     {
 
+        public SDLEventAdapter(EventAdapterManager adapterManager)
+        {
+            adapterManager.RegisterEventAdapter(this);
+        }
+
         public void PrepareEvents()
         {
             /* No preparation is needed with SDL. */

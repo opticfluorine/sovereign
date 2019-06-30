@@ -21,38 +21,48 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Network.Service;
+using Castle.Core.Logging;
+using LiteNetLib;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.NetworkCore.Systems.Network
+namespace Sovereign.NetworkCore.Network.Infrastructure
 {
 
     /// <summary>
-    /// Event adapter that injects events received and processed from the network.
+    /// Class for logging debug info from LiteNetLib.
     /// </summary>
-    public sealed class NetworkEventAdapter : IEventAdapter
+    public sealed class NetLogger : INetLogger
     {
-        private readonly NetworkingService networkingService;
 
-        public NetworkEventAdapter(NetworkingService networkingService,
-            EventAdapterManager adapterManager)
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+        public NetLogger()
         {
-            this.networkingService = networkingService;
-
-            adapterManager.RegisterEventAdapter(this);
+            NetDebug.Logger = this;
         }
 
-        public bool PollEvent(out Event ev)
+        public void WriteNet(NetLogLevel level, string str, params object[] args)
         {
-            return networkingService.ReceivedEvents.TryDequeue(out ev);
-        }
+            switch (level)
+            {
+                case NetLogLevel.Error:
+                    Logger.ErrorFormat(str, args);
+                    break;
 
-        public void PrepareEvents()
-        {
-            /* no action */
+                case NetLogLevel.Warning:
+                    Logger.WarnFormat(str, args);
+                    break;
+
+                case NetLogLevel.Info:
+                    Logger.InfoFormat(str, args);
+                    break;
+
+                case NetLogLevel.Trace:
+                    Logger.DebugFormat(str, args);
+                    break;
+            }
         }
 
     }

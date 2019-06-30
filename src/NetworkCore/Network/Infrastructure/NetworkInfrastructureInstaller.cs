@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -24,43 +24,25 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using Sovereign.EngineCore.Systems;
 using Sovereign.EngineUtil.IoC;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Sovereign.EngineCore.Events
+namespace Sovereign.NetworkCore.Network.Infrastructure
 {
-
-    /// <summary>
-    /// IoC installer for the event handling infrastructure.
-    /// </summary>
-    public class EventInstaller : IWindsorInstaller
+    public sealed class NetworkInfrastructureInstaller : IWindsorInstaller
     {
-
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
             container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventLoop>()
+                .BasedOn<INetworkManager>()
                 .WithServiceDefaultInterfaces()
                 .LifestyleSingleton());
 
-            container.Register(Component.For<EventCommunicator>()
-                .LifestyleTransient());
-
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventSender>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleTransient());
-
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IEventAdapter>()
-                .WithServiceDefaultInterfaces()
-                .WithServiceSelf()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<EventAdapterManager>()
+            container.Register(Component.For<NetLogger>()
                 .LifestyleSingleton());
         }
-
     }
 
 }

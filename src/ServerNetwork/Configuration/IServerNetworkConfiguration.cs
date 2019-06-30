@@ -21,39 +21,33 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Network.Service;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.NetworkCore.Systems.Network
+namespace Sovereign.ServerNetwork.Configuration
 {
 
     /// <summary>
-    /// Event adapter that injects events received and processed from the network.
+    /// Interface for server-side network configuration.
     /// </summary>
-    public sealed class NetworkEventAdapter : IEventAdapter
+    public interface IServerNetworkConfiguration
     {
-        private readonly NetworkingService networkingService;
 
-        public NetworkEventAdapter(NetworkingService networkingService,
-            EventAdapterManager adapterManager)
-        {
-            this.networkingService = networkingService;
+        /// <summary>
+        /// Server IPv4 network interface.
+        /// </summary>
+        string NetworkInterfaceIPv4 { get; }
 
-            adapterManager.RegisterEventAdapter(this);
-        }
+        /// <summary>
+        /// Server IPv6 network interface.
+        /// </summary>
+        string NetworkInterfaceIPv6 { get; }
 
-        public bool PollEvent(out Event ev)
-        {
-            return networkingService.ReceivedEvents.TryDequeue(out ev);
-        }
-
-        public void PrepareEvents()
-        {
-            /* no action */
-        }
+        /// <summary>
+        /// Server port.
+        /// </summary>
+        ushort Port { get; }
 
     }
 
