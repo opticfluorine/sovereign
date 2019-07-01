@@ -59,6 +59,9 @@ namespace Sovereign.EngineCore.Events
 
             container.Register(Component.For<EventAdapterManager>()
                 .LifestyleSingleton());
+
+            container.Register(Component.For<EventDescriptions>()
+                .LifestyleSingleton());
         }
 
     }

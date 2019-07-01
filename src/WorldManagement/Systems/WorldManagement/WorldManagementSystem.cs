@@ -22,6 +22,7 @@
  */
 
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 using System;
 using System.Collections.Generic;
@@ -49,12 +50,19 @@ namespace Sovereign.WorldManagement.Systems.WorldManagement
         public int WorkloadEstimate => 80;
 
         public WorldManagementSystem(EventCommunicator eventCommunicator,
-            IEventLoop eventLoop, WorldManagementEventHandler eventHandler)
+            IEventLoop eventLoop, WorldManagementEventHandler eventHandler,
+            EventDescriptions eventDescriptions)
         {
+            /* Dependency injection. */
             EventCommunicator = eventCommunicator;
             this.eventLoop = eventLoop;
             this.eventHandler = eventHandler;
 
+            /* Register events. */
+            eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Core_WorldManagement_LoadSegment);
+            eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Core_WorldManagement_UnloadSegment);
+
+            /* Register system. */
             eventLoop.RegisterSystem(this);
         }
 

@@ -57,12 +57,19 @@ namespace Sovereign.EngineCore.Systems.Movement
         private readonly IEventLoop eventLoop;
 
         public MovementSystem(VelocityManager velocityManager, IEventLoop eventLoop,
-            EventCommunicator eventCommunicator)
+            EventCommunicator eventCommunicator, EventDescriptions eventDescriptions)
         {
+            /* Dependency injection. */
             this.velocityManager = velocityManager;
             this.eventLoop = eventLoop;
             EventCommunicator = eventCommunicator;
 
+            /* Register events. */
+            eventDescriptions.RegisterEvent<MoveOnceEventDetails>(EventId.Core_Move_Once);
+            eventDescriptions.RegisterEvent<SetVelocityEventDetails>(EventId.Core_Set_Velocity);
+            eventDescriptions.RegisterEvent<EntityEventDetails>(EventId.Core_End_Movement);
+
+            /* Register system. */
             eventLoop.RegisterSystem(this);
         }
 

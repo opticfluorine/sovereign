@@ -6,6 +6,9 @@
 
 #### 30 June 2019
 
+* Add `EventDescriptions` for mapping entity IDs to their corresponding
+  `IEventDetails` types. Events are dynamically registered in the constructors
+  of the responsible systems.
 * Add network configuration to server.
 * Open server port at startup.
 * Refactor code around `IEventAdapter` to avoid unnecessary cyclic

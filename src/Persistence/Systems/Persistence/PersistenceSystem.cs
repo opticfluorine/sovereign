@@ -23,6 +23,7 @@
 
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Systems;
 using Sovereign.Persistence.Database;
@@ -71,8 +72,10 @@ namespace Sovereign.Persistence.Systems.Persistence
             IEventLoop eventLoop,
             EntityMapper entityMapper,
             TrackerManager trackerManager,
-            ILogger logger)
+            ILogger logger,
+            EventDescriptions eventDescriptions)
         {
+            /* Dependency injection. */
             this.providerManager = providerManager;
             this.databaseValidator = databaseValidator;
             this.eventHandler = eventHandler;
@@ -83,6 +86,12 @@ namespace Sovereign.Persistence.Systems.Persistence
             EventCommunicator = eventCommunicator;
             Logger = logger;
 
+            /* Register events. */
+            eventDescriptions.RegisterEvent<EntityEventDetails>(EventId.Server_Persistence_RetrieveEntity);
+            eventDescriptions.RegisterEvent<VectorPairEventDetails>(EventId.Server_Persistence_RetrieveEntitiesInRange);
+            eventDescriptions.RegisterNullEvent(EventId.Server_Persistence_Synchronize);
+
+            /* Register system. */
             eventLoop.RegisterSystem(this);
 
             /* Initialize provider and connect to database. */

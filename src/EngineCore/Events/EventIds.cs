@@ -61,7 +61,7 @@ namespace Sovereign.EngineCore.Events
         /// <summary>
         /// Sets the velocity of an entity.
         /// </summary>
-        /// Associated details: SetMovementEventDetails
+        /// Associated details: SetVelocityEventDetails
         Core_Set_Velocity = 101,
 
         /// <summary>

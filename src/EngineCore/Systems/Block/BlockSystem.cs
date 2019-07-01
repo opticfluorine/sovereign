@@ -23,6 +23,8 @@
 
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Systems.Block.Events;
 using System;
 using System.Collections.Generic;
 
@@ -52,12 +54,20 @@ namespace Sovereign.EngineCore.Systems.Block
         public int WorkloadEstimate => 50;
 
         public BlockSystem(BlockEventHandler eventHandler, IEventLoop eventLoop,
-            EventCommunicator eventCommunicator)
+            EventCommunicator eventCommunicator, EventDescriptions eventDescriptions)
         {
+            /* Dependency injection. */
             this.eventHandler = eventHandler;
             this.eventLoop = eventLoop;
             EventCommunicator = eventCommunicator;
 
+            /* Register events. */
+            eventDescriptions.RegisterEvent<BlockAddEventDetails>(EventId.Core_Block_Add);
+            eventDescriptions.RegisterEvent<BlockAddBatchEventDetails>(EventId.Core_Block_AddBatch);
+            eventDescriptions.RegisterEvent<EntityEventDetails>(EventId.Core_Block_Remove);
+            eventDescriptions.RegisterEvent<BlockRemoveBatchEventDetails>(EventId.Core_Block_RemoveBatch);
+
+            /* Register system. */
             eventLoop.RegisterSystem(this);
         }
 

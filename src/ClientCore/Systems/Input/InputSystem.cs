@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.ClientCore.Events;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using System;
@@ -49,12 +50,19 @@ namespace Sovereign.ClientCore.Systems.Input
         private readonly IEventLoop eventLoop;
 
         public InputSystem(KeyboardEventHandler keyboardEventHandler,
-            IEventLoop eventLoop, EventCommunicator eventCommunicator)
+            IEventLoop eventLoop, EventCommunicator eventCommunicator,
+            EventDescriptions eventDescriptions)
         {
+            /* Dependency injection. */
             this.keyboardEventHandler = keyboardEventHandler;
             this.eventLoop = eventLoop;
             EventCommunicator = eventCommunicator;
 
+            /* Register events. */
+            eventDescriptions.RegisterEvent<KeyEventDetails>(EventId.Client_Input_KeyUp);
+            eventDescriptions.RegisterEvent<KeyEventDetails>(EventId.Client_Input_KeyDown);
+
+            /* Register system. */
             eventLoop.RegisterSystem(this);
         }
 
