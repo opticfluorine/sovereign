@@ -2,6 +2,13 @@
 
 ## 2019
 
+### July
+
+#### 01 July 2019
+
+* When debug logging is enabled, output the full mapping between `EventId` and
+  `IEventDetails` at startup.
+
 ### June
 
 #### 30 June 2019

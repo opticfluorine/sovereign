@@ -21,8 +21,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.Core.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Sovereign.EngineCore.Events
@@ -33,6 +35,8 @@ namespace Sovereign.EngineCore.Events
     /// </summary>
     public sealed class EventDescriptions
     {
+
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         /// <summary>
         /// Map from event ID to detail type.
@@ -77,6 +81,21 @@ namespace Sovereign.EngineCore.Events
         public void RegisterNullEvent(EventId eventId)
         {
             RegisterEvent(eventId, null);
+        }
+
+        /// <summary>
+        /// Logs debug info about the current mapping.
+        /// </summary>
+        public void LogDebugInfo()
+        {
+            Logger.Debug("Current event detail mapping:");
+            var orderedKeys = detailTypes.Keys
+                .OrderBy(id => id.ToString(), StringComparer.CurrentCulture);
+            foreach (var key in orderedKeys)
+            {
+                var type = detailTypes[key];
+                Logger.DebugFormat("{0} => {1}", key.ToString(), type != null ? type.Name : "null");
+            }
         }
 
         private void RegisterEvent(EventId eventId, Type detailType)

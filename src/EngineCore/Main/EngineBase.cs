@@ -55,6 +55,7 @@ namespace Sovereign.EngineCore.Main
         private readonly WorldManager worldManager;
 
         private readonly IList<IMainLoopAction> mainLoopActions;
+        private readonly EventDescriptions eventDescriptions;
 
         /// <summary>
         /// Main loop cycle count.
@@ -63,12 +64,13 @@ namespace Sovereign.EngineCore.Main
 
         public EngineBase(IEventLoop eventLoop, TimeManager timeManager,
             WorldManager worldManager, IList<IMainLoopAction> mainLoopActions,
-            ConsoleEventAdapter eventAdapter)
+            ConsoleEventAdapter eventAdapter, EventDescriptions eventDescriptions)
         {
             this.eventLoop = eventLoop;
             this.timeManager = timeManager;
             this.worldManager = worldManager;
             this.mainLoopActions = mainLoopActions;
+            this.eventDescriptions = eventDescriptions;
         }
 
         public void Run()
@@ -150,6 +152,8 @@ namespace Sovereign.EngineCore.Main
             ThreadPool.GetMaxThreads(out int workerThreads, out int completionPortThreads);
             Logger.DebugFormat("Maximum worker threads = {0}.", workerThreads);
             Logger.DebugFormat("Maximum I/O completion threads = {0}.", completionPortThreads);
+
+            eventDescriptions.LogDebugInfo();
         }
 
     }
