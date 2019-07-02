@@ -6,6 +6,7 @@
 
 #### 01 July 2019
 
+* Add support for deserializing packets.
 * When debug logging is enabled, output the full mapping between `EventId` and
   `IEventDetails` at startup.
 

@@ -91,17 +91,13 @@ namespace Sovereign.EngineCore.Events
         /// <param name="eventTime">
         /// System time (us) when this event should be dispatched.
         /// </param>
-        /// <remarks>
-        /// This constructor always produces a local event. Nonlocal
-        /// (remote) events should be created with the copy constructor.
-        /// </remarks>
         public Event(EventId eventId, IEventDetails details, 
-            ulong eventTime = Immediate)
+            ulong eventTime = Immediate, bool local = true)
         {
             EventId = eventId;
             EventDetails = details;
             EventTime = eventTime;
-            Local = true;
+            Local = local;
         }
 
         /// <summary>

@@ -33,20 +33,17 @@ namespace Sovereign.NetworkCore.Network
     /// <summary>
     /// Network packet type.
     /// </summary>
-    [ProtoContract]
     public sealed class NetworkPacket
     {
 
         /// <summary>
         /// HMAC for this packet.
         /// </summary>
-        [ProtoMember(0, IsRequired = true)]
         public byte[] HMAC { get; set; }
 
         /// <summary>
         /// Serialized payload for this packet.
         /// </summary>
-        [ProtoMember(1, IsRequired = true)]
         public byte[] SerializedPayload { get; set; }
 
     }
