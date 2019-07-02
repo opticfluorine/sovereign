@@ -4,6 +4,10 @@
 
 ### July
 
+#### 02 July 2019
+
+* Add support for serializing packets.
+
 #### 01 July 2019
 
 * Add support for deserializing packets.

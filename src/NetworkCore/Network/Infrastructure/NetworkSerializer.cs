@@ -42,7 +42,7 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
 
         public const int HMAC_SIZE_BYTES = 8;
 
-        public const int MAX_PAYLOAD_SIZE = 1500 - HMAC_SIZE_BYTES;
+        public const int MAX_PAYLOAD_SIZE = 1200;
 
         private readonly EventDescriptions eventDescriptions;
 
@@ -69,8 +69,19 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
         /// Thrown if a received nonce is reused, indicating a possible attempted
         /// replay attack.
         /// </exception>
+        /// <exception cref="PacketSizeException">
+        /// Thrown if the received packet is too large.
+        /// </exception>
         public Event DeserializeEvent(NetworkConnection connection, byte[] packetData)
         {
+            /* Validate packet size. */
+            if (packetData.Length > MAX_PAYLOAD_SIZE + HMAC_SIZE_BYTES)
+            {
+                // Packet too large.
+                throw new PacketSizeException("Packet of length " + packetData.Length
+                    + " is too large.");
+            }
+
             /* Unpack the raw data. */
             int payloadSize = packetData.Length - HMAC_SIZE_BYTES;
             if (payloadSize < 1)
@@ -89,6 +100,143 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
 
             /* Deserialize the payload. */
             return DeserializePayload(payloadSpan, connection);
+        }
+
+        /// <summary>
+        /// Serializes an event to be sent over the network.
+        /// </summary>
+        /// <param name="connection">Network connection.</param>
+        /// <param name="ev">Event to serialize.</param>
+        /// <returns>Serialized event.</returns>
+        /// <exception cref="PacketSizeException">
+        /// Thrown if the serialized packet exceeds the maximum size.
+        /// </exception>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown if the event type is not registered with EventDescriptions.
+        /// </exception>
+        /// <exception cref="MalformedEventException">
+        /// Thrown if the event to be serialized is malformed.
+        /// </exception>
+        public byte[] SerializeEvent(NetworkConnection connection, Event ev) 
+        {
+            // Determine how to serialize the event.
+            Type detailType;
+            detailType = eventDescriptions.GetDetailType(ev.EventId);
+
+            // Verify the existence of the details.
+            if ((detailType != null && ev.EventDetails == null) ||
+                (detailType == null && ev.EventDetails != null))
+            {
+                throw new MalformedEventException("Unexpected event details.");
+            }
+
+            // If present, serialize the event details.
+            byte[] innerPayload = SerializeDetails(detailType, ev.EventDetails);
+
+            // Serialize the outer payload.
+            byte[] outerPayload = SerializePayload(innerPayload, ev, connection);
+
+            // Assemble the packet.
+            var packet = new byte[outerPayload.Length + HMAC_SIZE_BYTES];
+            AssemblePacket(packet, outerPayload, connection);
+            return packet;
+        }
+
+        /// <summary>
+        /// Assembles a packet, including the HMAC digest.
+        /// </summary>
+        /// <param name="packet">Buffer to hold the packet.</param>
+        /// <param name="outerPayload">Serialized payload.</param>
+        /// <param name="connection">Connection.</param>
+        private void AssemblePacket(byte[] packet, byte[] outerPayload, NetworkConnection connection)
+        {
+            // Compute the HMAC digest for the packet.
+            var srcPayloadSpan = new Span<byte>(outerPayload);
+            var hmac = ComputeHMAC(srcPayloadSpan, connection);
+            Array.Copy(hmac, 0, packet, 0, hmac.Length);
+
+            // Fill the rest of the packet.
+            Array.Copy(outerPayload, 0, packet, hmac.Length, outerPayload.Length);
+        }
+
+        /// <summary>
+        /// Serializes the packet payload.
+        /// </summary>
+        /// <param name="innerPayload">Inner (details) payload.</param>
+        /// <param name="ev">Event being serialized.</param>
+        /// <param name="connection">Connection.</param>
+        /// <returns>Serialized packet.</returns>
+        /// <exception cref="PacketSizeException">
+        /// Thrown if the serialized packet exceeds the maximum packet size.
+        /// </exception>
+        private byte[] SerializePayload(byte[] innerPayload, Event ev, NetworkConnection connection)
+        {
+            // Assemble the payload.
+            var payload = new NetworkPayload();
+            payload.EventId = ev.EventId;
+            payload.Nonce = connection.GetOutboundNonce();
+            payload.SerializedDetails = innerPayload;
+
+            // Serialize the payload.
+            byte[] outerPayload;
+            try
+            {
+                using (var stream = new MemoryStream())
+                {
+                    Serializer.Serialize<NetworkPayload>(stream, payload);
+                    outerPayload = stream.ToArray();
+                }
+            }
+            catch (Exception e)
+            {
+                throw new MalformedEventException("Failed to serialize payload.", e);
+            }
+            
+            // Verify payload size.
+            if (outerPayload.Length > MAX_PAYLOAD_SIZE)
+            {
+                throw new PacketSizeException("Serialized packet size too large.");
+            }
+
+            return outerPayload;
+        }
+
+        /// <summary>
+        /// Serializes the event details.
+        /// </summary>
+        /// <param name="detailType">Event details type.</param>
+        /// <param name="eventDetails">Event details to serialize.</param>
+        /// <returns>Serialized event details, or a zero-length array if there are no details.</returns>
+        /// <exception cref="MalformedEventException">
+        /// Thrown if the event details type is incorrect.
+        /// </exception>
+        private byte[] SerializeDetails(Type detailType, IEventDetails eventDetails)
+        {
+            // Handle null details.
+            if (detailType == null)
+            {
+                return new byte[0];
+            }
+
+            // Verify details type.
+            if (eventDetails.GetType() != detailType)
+            {
+                throw new MalformedEventException("Event details type is incorrect.");
+            }
+
+            // Serialize.
+            using (var stream = new MemoryStream())
+            {
+                try
+                {
+                    Serializer.NonGeneric.Serialize(stream, eventDetails);
+                }
+                catch (Exception e)
+                {
+                    throw new MalformedEventException("Failed to serialize event details.", e);
+                }
+                return stream.ToArray();
+            }
         }
 
         /// <summary>
@@ -254,6 +402,24 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
     }
 
     /// <summary>
+    /// Exception type thrown when an event is malformed.
+    /// </summary>
+    public sealed class MalformedEventException : Exception
+    {
+        public MalformedEventException()
+        {
+        }
+
+        public MalformedEventException(string message) : base(message)
+        {
+        }
+
+        public MalformedEventException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }
+
+    /// <summary>
     /// Exception type thrown when an HMAC does not match the payload.
     /// </summary>
     public sealed class BadHMACException : Exception
@@ -286,6 +452,21 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
         }
 
         public BadNonceException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }
+
+    public sealed class PacketSizeException : Exception
+    {
+        public PacketSizeException()
+        {
+        }
+
+        public PacketSizeException(string message) : base(message)
+        {
+        }
+
+        public PacketSizeException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
