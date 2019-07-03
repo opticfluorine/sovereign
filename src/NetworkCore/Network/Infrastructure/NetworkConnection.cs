@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using LiteNetLib;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -63,8 +64,9 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
         /// <summary>
         /// Creates a new connection.
         /// </summary>
+        /// <param name="peer">Connected peer.</param>
         /// <param name="key">HMAC key. The passed array is erased by the constructor.</param>
-        public NetworkConnection(byte[] key)
+        public NetworkConnection(NetPeer peer, byte[] key)
         {
             /* Allocate and pin the key memory. */
             _Key = new byte[key.Length];
