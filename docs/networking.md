@@ -90,6 +90,7 @@ becomes negligible for high-ping clients. The lagging effects should average
 out over several ticks as the server sends authoritative updates, but if not, 
 more advanced compensation methods will be required.
 
+
 ## Packets
 
 ### Packet Reliability
@@ -119,4 +120,22 @@ which the two packets are delivered is not important. However, if two chat
 packets were being sent, then the order is important. The engine therefore
 groups packets by function into separate channels in order to avoid
 unnecessary performance hits.
+
+
+## Connections
+
+### Authentication
+
+> :information_source: Authentication support is targeted for Milestone 2.
+
+The first stage of establishing a connection is to authenticate. This is done
+out-of-band via a REST API exposed by the server. This REST API should be 
+placed behind a TLS termination proxy (e.g. nginx configured for this role) 
+to provide proper security.
+
+The authentication method is currently undefined, though OAuth 2.0 support is
+planned.
+
+Once authentication is complete, a shared secret is established between the
+server and client. This secret is used as the HMAC key for message validation.
 

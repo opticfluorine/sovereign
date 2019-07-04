@@ -6,19 +6,25 @@ Planned features are grouped by release, with earliest releases listed first.
 All features shall be implemented following the accessibility guidelines
 outlined in docs/accessibility.md.
 
-## Initial Release
+
+## Milestone 1
 
 ### Basic World Rendering
+
+> :white_check_mark: Complete.
 
 The client should be able to perform basic rendering of the game world as
 described in docs/world_structure.md.
 
-
 ### Client-Server Model
+
+> :arrow_forward: In progress.
 
 The client should defer to the server as the authority on the world state.
 
 #### Client-Server Communication
+
+> :arrow_forward: In progress.
 
 The client and server should be able to communicate over the network. This
 will be done by extending the existing event system to repeat certain events
@@ -28,12 +34,35 @@ The initial release will not support client authentication.
 
 #### Server Backend
 
+> :white_check_mark: Complete.
+
 The server should be able to use SQLite as the default backend database.
 
 
 ### Player Character Movement
 
 The player should be able to control a character using the keyboard.
+
+
+## Milestone 2
+
+### Client Authentication
+
+The client should be able to authenticate with the server with a persistent
+account for each player.
+
+### Non-Player Characters
+
+Non-player characters should be able to exist within the game world. NPCs
+should be able to be either persistent or non-persistent.
+
+### Items and Inventory System
+
+Items should be able to exist within the game world or in character inventories.
+
+### PostgreSQL Backend Support
+
+The server should be able to optionally use a PostgreSQL database.
 
 
 ## Future Features Not Assigned to a Release
@@ -43,43 +72,21 @@ The player should be able to control a character using the keyboard.
 The client should be able to manage a local bound copy of the server for 
 single-player or multiplayer gameplay.
 
-
-### Client Authentication
-
-The client should be able to authenticate with the server with a persistent
-account for each player.
-
-
-### Non-Player Characters
-
-Non-player characters should be able to exist within the game world. NPCs
-should be able to be either persistent or non-persistent.
-
-
-### Items and Inventory System
-
-Items should be able to exist within the game world or in character inventories.
-
-
 ### Combat
 
 An action combat system should be implemented.
-
 
 ### Skills
 
 Characters should be able to develop skills.
 
-
 ### Dynamic Magic System
 
 A dynamic magic system with procedurally generated spells should be implemented.
 
-
 ### Server Scripting
 
 A scripting engine should be integrated with the server.
-
 
 ### Resource Editor
 
@@ -94,8 +101,4 @@ the Client. Some issues that will need to be addressed include:
 * How is consistency between the game resources and the world database 
   maintained?
 
-
-### PostgreSQL Backend Support
-
-The server should be able to optionally use a PostgreSQL database.
 

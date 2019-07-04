@@ -4,6 +4,11 @@
 
 ### July
 
+#### 04 July 2019
+
+* Update network documentation to cover the HMAC key.
+* Update roadmap.
+
 #### 02 July 2019
 
 * Add support for serializing packets.

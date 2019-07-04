@@ -183,7 +183,7 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
             {
                 using (var stream = new MemoryStream())
                 {
-                    Serializer.Serialize<NetworkPayload>(stream, payload);
+                    Serializer.Serialize(stream, payload);
                     outerPayload = stream.ToArray();
                 }
             }
