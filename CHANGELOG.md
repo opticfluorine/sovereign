@@ -4,6 +4,12 @@
 
 ### July
 
+#### 05 July 2019
+
+* Implement `ServerNetworkManager`. It should be possible to connect to the
+  server now, or at least it will be once the client-side networking is
+  implemented.
+
 #### 04 July 2019
 
 * Update network documentation to cover the HMAC key.

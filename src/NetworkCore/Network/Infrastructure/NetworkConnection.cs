@@ -37,9 +37,16 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
     {
 
         /// <summary>
+        /// Unique ID number for this connection.
+        /// </summary>
+        public int Id { get => peer.Id; }
+
+        /// <summary>
         /// Key used for HMAC.
         /// </summary>
         internal byte[] Key { get => _Key; }
+
+        private readonly NetPeer peer;
 
         /// <summary>
         /// Backing array for the HMAC key.
@@ -68,6 +75,9 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
         /// <param name="key">HMAC key. The passed array is erased by the constructor.</param>
         public NetworkConnection(NetPeer peer, byte[] key)
         {
+            /* Set up. */
+            this.peer = peer;
+
             /* Allocate and pin the key memory. */
             _Key = new byte[key.Length];
             keyHandle = GCHandle.Alloc(_Key, GCHandleType.Pinned);
@@ -99,6 +109,17 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
         public uint GetOutboundNonce()
         {
             return nextOutboundNonce++;
+        }
+
+        /// <summary>
+        /// Disconnects the connection if it is currently connected.
+        /// </summary>
+        internal void Disconnect()
+        {
+            if (peer.ConnectionState == ConnectionState.Connected)
+            {
+                peer.Disconnect();
+            }
         }
 
         public void Dispose()

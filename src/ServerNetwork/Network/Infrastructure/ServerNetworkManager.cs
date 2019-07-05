@@ -41,6 +41,8 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
     public sealed class ServerNetworkManager : INetworkManager
     {
         private readonly IServerNetworkConfiguration config;
+        private readonly NetworkConnectionManager connectionManager;
+        private readonly NetworkSerializer serializer;
 
         /// <summary>
         /// Backing LiteNetLib NetManager.
@@ -54,26 +56,22 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-        public event OnConnectionRequest OnConnectionRequest;
-        public event OnConnected OnConnected;
-        public event OnDisconnected OnDisconnected;
-        public event OnNetworkError OnNetworkError;
         public event OnNetworkReceive OnNetworkReceive;
-        public event OnNetworkReceiveUnconnected OnNetworkReceiveUnconnected;
 
-        public ServerNetworkManager(IServerNetworkConfiguration config)
+        public ServerNetworkManager(IServerNetworkConfiguration config,
+            NetworkConnectionManager connectionManager,
+            NetworkSerializer serializer)
         {
             /* Dependency injection. */
             this.config = config;
+            this.connectionManager = connectionManager;
+            this.serializer = serializer;
 
             /* Connect the network event plumbing. */
             netListener = new EventBasedNetListener();
             netListener.NetworkErrorEvent += NetListener_NetworkErrorEvent;
             netListener.ConnectionRequestEvent += NetListener_ConnectionRequestEvent;
             netListener.NetworkReceiveEvent += NetListener_NetworkReceiveEvent;
-            netListener.NetworkReceiveUnconnectedEvent += NetListener_NetworkReceiveUnconnectedEvent;
-            netListener.NetworkLatencyUpdateEvent += NetListener_NetworkLatencyUpdateEvent;
-            netListener.PeerConnectedEvent += NetListener_PeerConnectedEvent;
             netListener.PeerDisconnectedEvent += NetListener_PeerDisconnectedEvent;
 
             /* Create the network manager, but defer startup. */
@@ -119,33 +117,7 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
         /// <param name="disconnectInfo">Info.</param>
         private void NetListener_PeerDisconnectedEvent(NetPeer peer, DisconnectInfo disconnectInfo)
         {
-        }
-
-        /// <summary>
-        /// Callback invoked when a peer has connected.
-        /// </summary>
-        /// <param name="peer">Connected peer.</param>
-        private void NetListener_PeerConnectedEvent(NetPeer peer)
-        {
-        }
-
-        /// <summary>
-        /// Called when the network latency to a peer is updated.
-        /// </summary>
-        /// <param name="peer">Remote peer.</param>
-        /// <param name="latency">New latency value.</param>
-        private void NetListener_NetworkLatencyUpdateEvent(NetPeer peer, int latency)
-        {
-        }
-
-        /// <summary>
-        /// Called when a packet is received from an unconnected remote endpoint. 
-        /// </summary>
-        /// <param name="remoteEndPoint">Remote endpoint.</param>
-        /// <param name="reader">Packet reader.</param>
-        /// <param name="messageType">Message type.</param>
-        private void NetListener_NetworkReceiveUnconnectedEvent(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
-        {
+            CloseConnection(peer);
         }
 
         /// <summary>
@@ -156,6 +128,29 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
         /// <param name="deliveryMethod">Delivery method.</param>
         private void NetListener_NetworkReceiveEvent(NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod)
         {
+            try
+            {
+                var conn = connectionManager.GetConnection(peer.Id);
+                var ev = serializer.DeserializeEvent(conn, reader.GetRemainingBytes());
+
+                OnNetworkReceive(ev, conn);
+            }
+            catch (Exception e)
+            {
+                // Log error.
+                var sb = new StringBuilder();
+                sb.Append("Error receiving from ")
+                    .Append(peer.EndPoint.ToString())
+                    .Append(".");
+                Logger.Error(sb.ToString(), e);
+
+                // Terminate connection.
+                CloseConnection(peer);
+            }
+            finally
+            {
+                reader.Recycle();
+            }
         }
 
         /// <summary>
@@ -164,6 +159,31 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
         /// <param name="request">Connection request.</param>
         private void NetListener_ConnectionRequestEvent(ConnectionRequest request)
         {
+            var sb = new StringBuilder();
+            sb.Append("New connection request from ")
+                .Append(request.RemoteEndPoint.ToString())
+                .Append(".");
+            Logger.Info(sb.ToString());
+
+            // TODO: Verify that the connection request is valid, and select
+            //       the correct HMAC key.
+            var key = new byte[64];
+            Array.Clear(key, 0, key.Length);
+
+            // If we got this far, accept the connection.
+            try
+            {
+                var peer = request.Accept();
+                connectionManager.CreateConnection(peer, key);
+            }
+            catch (Exception e)
+            {
+                sb.Clear();
+                sb.Append("Error accepting connection request from ")
+                    .Append(request.RemoteEndPoint.ToString())
+                    .Append(".");
+                Logger.Error(sb.ToString(), e);
+            }
         }
 
         /// <summary>
@@ -173,6 +193,30 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
         /// <param name="socketError">Error.</param>
         private void NetListener_NetworkErrorEvent(IPEndPoint endPoint, SocketError socketError)
         {
+            Logger.ErrorFormat("Network error from {0}: {1}.",
+                endPoint.ToString(), socketError.ToString());
+        }
+
+        /// <summary>
+        /// Closes a connection as gracefully as possible.
+        /// </summary>
+        /// <param name="peer">Connected peer.</param>
+        private void CloseConnection(NetPeer peer)
+        {
+            try
+            {
+                connectionManager.RemoveConnection(peer.Id);
+
+                Logger.InfoFormat("Connection closed from {0}.",
+                    peer.EndPoint.ToString());
+            }
+            catch (Exception e)
+            {
+                var sb = new StringBuilder();
+                sb.Append("Error removing closed connection from ")
+                    .Append(peer.EndPoint.ToString()).Append(".");
+                Logger.Error(sb.ToString(), e);
+            }
         }
 
     }

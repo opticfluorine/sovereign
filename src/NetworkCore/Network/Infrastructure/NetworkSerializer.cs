@@ -40,7 +40,7 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
     public sealed class NetworkSerializer
     {
 
-        public const int HMAC_SIZE_BYTES = 8;
+        public const int HMAC_SIZE_BYTES = 256 / 8;
 
         public const int MAX_PAYLOAD_SIZE = 1200;
 

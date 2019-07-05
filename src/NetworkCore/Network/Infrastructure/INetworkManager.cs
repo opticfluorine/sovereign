@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Events;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -29,71 +30,21 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
 {
 
     /// <summary>
-    /// Delegate type for new connection requests.
-    /// </summary>
-    public delegate void OnConnectionRequest();
-
-    /// <summary>
-    /// Delegate type for new connections.
-    /// </summary>
-    public delegate void OnConnected();
-
-    /// <summary>
-    /// Delegate type for disconnections.
-    /// </summary>
-    public delegate void OnDisconnected();
-
-   /// <summary>
-    /// Delegate type for network errors.
-    /// </summary>
-    public delegate void OnNetworkError();
-
-    /// <summary>
     /// Delegate type for received packets.
     /// </summary>
-    public delegate void OnNetworkReceive();
-
-    /// <summary>
-    /// Delegate type for received packets not associated with a connection.
-    /// </summary>
-    public delegate void OnNetworkReceiveUnconnected();
+    /// <param name="ev">Received event.</param>
+    /// <param name="connection">Associated connection.</param>
+    public delegate void OnNetworkReceive(Event ev, NetworkConnection connection);
 
     /// <summary>
     /// Interface for managing the network for a client or server.
     /// </summary>
     public interface INetworkManager : IDisposable
     {
-
-        /// <summary>
-        /// Event invoked when a new connection request is received.
-        /// </summary>
-        event OnConnectionRequest OnConnectionRequest;
-
-        /// <summary>
-        /// Event invoked when a connection is established.
-        /// </summary>
-        event OnConnected OnConnected;
-
-        /// <summary>
-        /// Event invoked when a connection is closed.
-        /// </summary>
-        event OnDisconnected OnDisconnected;
-
-        /// <summary>
-        /// Event invoked when a network error occurs.
-        /// </summary>
-        event OnNetworkError OnNetworkError;
-
         /// <summary>
         /// Event invoked when a packet is received.
         /// </summary>
         event OnNetworkReceive OnNetworkReceive;
-
-        /// <summary>
-        /// Event invoked when a packet is received without an associated
-        /// connection.
-        /// </summary>
-        event OnNetworkReceiveUnconnected OnNetworkReceiveUnconnected;
 
         /// <summary>
         /// Initializes the network manager.

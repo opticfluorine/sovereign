@@ -42,6 +42,12 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
 
             container.Register(Component.For<NetLogger>()
                 .LifestyleSingleton());
+
+            container.Register(Component.For<NetworkSerializer>()
+                .LifestyleSingleton());
+
+            container.Register(Component.For<NetworkConnectionManager>()
+                .LifestyleSingleton());
         }
     }
 

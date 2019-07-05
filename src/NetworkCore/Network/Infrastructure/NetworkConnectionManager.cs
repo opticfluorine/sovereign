@@ -80,9 +80,29 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
             return conn;
         }
 
+        /// <summary>
+        /// Removes the given connection, closing it if needed and disposing the
+        /// associated resources.
+        /// </summary>
+        /// <param name="connection">Connection to remove.</param>
         public void RemoveConnection(NetworkConnection connection)
         {
-            // TODO
+            connections.Remove(connection.Id);
+            connection.Disconnect();
+            connection.Dispose();
+        }
+
+        /// <summary>
+        /// Convenience method that removes the connection with the given ID.
+        /// </summary>
+        /// <param name="id">Connection ID.</param>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown if no connection is known with the given ID.
+        /// </exception>
+        public void RemoveConnection(int id)
+        {
+            var conn = GetConnection(id);
+            RemoveConnection(conn);
         }
 
     }
