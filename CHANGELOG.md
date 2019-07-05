@@ -6,6 +6,7 @@
 
 #### 05 July 2019
 
+* Implement `ClientNetworkManager`. Still need to test everything.
 * Implement `ServerNetworkManager`. It should be possible to connect to the
   server now, or at least it will be once the client-side networking is
   implemented.

@@ -143,6 +143,10 @@
       <Project>{df493f51-f329-4b51-9715-272e303983f3}</Project>
       <Name>ClientCore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ClientNetwork\ClientNetwork.csproj">
+      <Project>{8f38e967-2362-42fc-937a-442579bfd909}</Project>
+      <Name>ClientNetwork</Name>
+    </ProjectReference>
     <ProjectReference Include="..\D3D11Renderer\D3D11Renderer.csproj">
       <Project>{7dbbaaae-6ebd-4f8a-a225-aee0112d6a5b}</Project>
       <Name>D3D11Renderer</Name>

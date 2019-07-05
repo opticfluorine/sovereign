@@ -38,6 +38,7 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
             container.Register(EngineClasses.EngineAssemblies()
                 .BasedOn<INetworkManager>()
                 .WithServiceDefaultInterfaces()
+                .WithServiceSelf()
                 .LifestyleSingleton());
 
             container.Register(Component.For<NetLogger>()

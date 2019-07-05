@@ -21,41 +21,45 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
+using Sovereign.ClientCore.Network;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Sovereign.NetworkCore.Network.Infrastructure
+namespace Sovereign.ClientNetwork.Network.Infrastructure
 {
 
     /// <summary>
-    /// Delegate type for received packets.
+    /// Network client implementation.
     /// </summary>
-    /// <param name="ev">Received event.</param>
-    /// <param name="connection">Associated connection.</param>
-    public delegate void OnNetworkReceive(Event ev, NetworkConnection connection);
-
-    /// <summary>
-    /// Interface for managing the network for a client or server.
-    /// </summary>
-    public interface INetworkManager : IDisposable
+    public sealed class NetworkClient : INetworkClient
     {
-        /// <summary>
-        /// Event invoked when a packet is received.
-        /// </summary>
-        event OnNetworkReceive OnNetworkReceive;
+        private readonly ClientNetworkManager clientNetworkManager;
 
-        /// <summary>
-        /// Initializes the network manager.
-        /// </summary>
-        void Initialize();
+        public NetworkClient(ClientNetworkManager clientNetworkManager)
+        {
+            this.clientNetworkManager = clientNetworkManager;
+        }
 
-        /// <summary>
-        /// Polls the network.
-        /// </summary>
-        void Poll();
+        public NetworkClientState ClientState => clientNetworkManager.ClientState;
 
+        public string ErrorMessage => clientNetworkManager.ErrorMessage;
+
+        public void BeginConnection(string host, ushort port)
+        {
+            clientNetworkManager.BeginConnection(host, port);
+        }
+
+        public void EndConnection()
+        {
+            clientNetworkManager.EndConnection();
+        }
+
+        public void ResetError()
+        {
+            clientNetworkManager.ResetError();
+        }
     }
-
 }

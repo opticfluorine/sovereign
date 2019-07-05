@@ -21,41 +21,30 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+using Sovereign.EngineUtil.IoC;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Sovereign.NetworkCore.Network.Infrastructure
+namespace Sovereign.ClientCore.Network
 {
 
     /// <summary>
-    /// Delegate type for received packets.
+    /// IoC installer for ClientCore network code.
     /// </summary>
-    /// <param name="ev">Received event.</param>
-    /// <param name="connection">Associated connection.</param>
-    public delegate void OnNetworkReceive(Event ev, NetworkConnection connection);
-
-    /// <summary>
-    /// Interface for managing the network for a client or server.
-    /// </summary>
-    public interface INetworkManager : IDisposable
+    public sealed class ClientNetworkInstaller : IWindsorInstaller
     {
-        /// <summary>
-        /// Event invoked when a packet is received.
-        /// </summary>
-        event OnNetworkReceive OnNetworkReceive;
-
-        /// <summary>
-        /// Initializes the network manager.
-        /// </summary>
-        void Initialize();
-
-        /// <summary>
-        /// Polls the network.
-        /// </summary>
-        void Poll();
-
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            EngineClasses.EngineAssemblies()
+                .BasedOn<INetworkClient>()
+                .WithServiceDefaultInterfaces()
+                .LifestyleSingleton();
+        }
     }
-
 }

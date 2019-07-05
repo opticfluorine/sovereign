@@ -21,41 +21,39 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Sovereign.NetworkCore.Network.Infrastructure
+namespace Sovereign.ClientCore.Network
 {
 
     /// <summary>
-    /// Delegate type for received packets.
+    /// Enumeration of possible network client states.
     /// </summary>
-    /// <param name="ev">Received event.</param>
-    /// <param name="connection">Associated connection.</param>
-    public delegate void OnNetworkReceive(Event ev, NetworkConnection connection);
-
-    /// <summary>
-    /// Interface for managing the network for a client or server.
-    /// </summary>
-    public interface INetworkManager : IDisposable
+    public enum NetworkClientState
     {
         /// <summary>
-        /// Event invoked when a packet is received.
+        /// Network client is disconnected.
         /// </summary>
-        event OnNetworkReceive OnNetworkReceive;
+        Disconnected,
 
         /// <summary>
-        /// Initializes the network manager.
+        /// Network client is currently establishing a connection.
         /// </summary>
-        void Initialize();
+        Connecting,
 
         /// <summary>
-        /// Polls the network.
+        /// Network client is connected.
         /// </summary>
-        void Poll();
+        Connected,
 
+        /// <summary>
+        /// Network error occurred.
+        /// </summary>
+        Failed
     }
 
 }

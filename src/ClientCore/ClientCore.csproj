@@ -84,6 +84,9 @@
     <Compile Include="Logging\ErrorHandler.cs" />
     <Compile Include="Events\KeyEventDetails.cs" />
     <Compile Include="Events\SDLEventAdapter.cs" />
+    <Compile Include="Network\ClientNetworkInstaller.cs" />
+    <Compile Include="Network\INetworkClient.cs" />
+    <Compile Include="Network\NetworkClientState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rendering\Components\AnimatedSpriteComponentCollection.cs" />
     <Compile Include="Rendering\Components\DrawableComponentCollection.cs" />

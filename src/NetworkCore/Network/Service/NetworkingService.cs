@@ -128,7 +128,7 @@ namespace Sovereign.NetworkCore.Network.Service
             {
                 try
                 {
-                    // TODO
+                    networkManager.Poll();
                     Thread.Sleep(1);
                 }
                 catch (Exception e)

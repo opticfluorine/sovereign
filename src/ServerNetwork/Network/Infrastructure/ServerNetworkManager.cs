@@ -110,6 +110,11 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
             netManager.Stop();
         }
 
+        public void Poll()
+        {
+            netManager.PollEvents();
+        }
+
         /// <summary>
         /// Callback invoked when a peer has disconnected.
         /// </summary>

@@ -21,40 +21,57 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Sovereign.NetworkCore.Network.Infrastructure
+namespace Sovereign.ClientCore.Network
 {
 
     /// <summary>
-    /// Delegate type for received packets.
+    /// Interface for controlling the network client.
     /// </summary>
-    /// <param name="ev">Received event.</param>
-    /// <param name="connection">Associated connection.</param>
-    public delegate void OnNetworkReceive(Event ev, NetworkConnection connection);
-
-    /// <summary>
-    /// Interface for managing the network for a client or server.
-    /// </summary>
-    public interface INetworkManager : IDisposable
+    public interface INetworkClient
     {
-        /// <summary>
-        /// Event invoked when a packet is received.
-        /// </summary>
-        event OnNetworkReceive OnNetworkReceive;
 
         /// <summary>
-        /// Initializes the network manager.
+        /// Begins a connection to a remote server.
         /// </summary>
-        void Initialize();
+        /// <param name="host">Server host.</param>
+        /// <param name="port">Server port.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if ClientState is not Disconnected.
+        /// </exception>
+        void BeginConnection(string host, ushort port);
 
         /// <summary>
-        /// Polls the network.
+        /// Ends the current connection.
         /// </summary>
-        void Poll();
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if ClientState is not Connecting or Connected.
+        /// </exception>
+        void EndConnection();
+
+        /// <summary>
+        /// Current status of the connection.
+        /// </summary>
+        /// <returns>Status.</returns>
+        NetworkClientState ClientState { get; }
+
+        /// <summary>
+        /// Error message. Valid only if ClientState is Failed.
+        /// </summary>
+        string ErrorMessage { get; }
+
+        /// <summary>
+        /// Resets the error state, transitioning from Failed to Disconnected.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if ClientState is not Failed.
+        /// </exception>
+        void ResetError();
 
     }
 
