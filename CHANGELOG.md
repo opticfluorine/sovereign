@@ -4,6 +4,12 @@
 
 ### July
 
+#### 07 July 2019
+
+* Add an embedded HTTP server for exposing REST APIs. This will be used for
+  out-of-band communications including authentication and block data transfer.
+* Wire up network pipelines.
+
 #### 05 July 2019
 
 * Implement `ClientNetworkManager`. Still need to test everything.

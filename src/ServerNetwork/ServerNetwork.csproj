@@ -11,4 +11,12 @@
     <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Network\Authentication\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Watson" Version="2.1.2" />
+  </ItemGroup>
+
 </Project>

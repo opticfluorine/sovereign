@@ -25,6 +25,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Sovereign.EngineCore.Events;
+using Sovereign.NetworkCore.Network.Infrastructure;
+using Sovereign.NetworkCore.Network.Service;
 
 namespace Sovereign.NetworkCore.Network.Pipeline
 {
@@ -34,13 +36,20 @@ namespace Sovereign.NetworkCore.Network.Pipeline
     /// </summary>
     public sealed class FinalInboundPipelineStage : IInboundPipelineStage
     {
+        private readonly ReceivedEventQueue queue;
+
         public int Priority => int.MaxValue;
 
         public IInboundPipelineStage NextStage { get; set; }
 
-        public void ProcessEvent(Event ev)
+        public FinalInboundPipelineStage(ReceivedEventQueue queue)
         {
-            /* TODO */
+            this.queue = queue;
+        }
+
+        public void ProcessEvent(Event ev, NetworkConnection connection)
+        {
+            queue.ReceivedEvents.Enqueue(ev);
         }
     }
 

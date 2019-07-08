@@ -49,6 +49,16 @@ namespace Sovereign.ServerNetwork.Configuration
         /// </summary>
         ushort Port { get; }
 
+        /// <summary>
+        /// REST server hostname.
+        /// </summary>
+        string RestHostname { get; }
+
+        /// <summary>
+        /// REST server port.
+        /// </summary>
+        ushort RestPort { get; }
+
     }
 
 }

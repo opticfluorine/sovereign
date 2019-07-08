@@ -24,25 +24,34 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Network.Infrastructure;
+using WatsonWebserver;
 
-namespace Sovereign.NetworkCore.Network.Pipeline
+namespace Sovereign.ServerNetwork.Network.Rest
 {
 
     /// <summary>
-    /// Final stage of the outbound network pipeline.
+    /// Exposes a REST service.
     /// </summary>
-    public sealed class FinalOutboundPipelineStage : IOutboundPipelineStage
+    public interface IRestService
     {
-        public int Priority => int.MaxValue;
 
-        public IOutboundPipelineStage NextStage { get; set; }
+        /// <summary>
+        /// Path at which the service is exposed.
+        /// </summary>
+        string Path { get; }
 
-        public void ProcessEvent(Event ev, NetworkConnection connection)
-        {
-            /* TODO */
-        }
+        /// <summary>
+        /// HTTP request type.
+        /// </summary>
+        HttpMethod RequestType { get; }
+
+        /// <summary>
+        /// Called when a request is received.
+        /// </summary>
+        /// <param name="req">HTTP request.</param>
+        /// <returns>HTTP response.</returns>
+        HttpResponse OnRequest(HttpRequest req);
+
     }
 
 }

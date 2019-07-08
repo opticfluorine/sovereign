@@ -125,6 +125,16 @@ namespace Sovereign.ServerCore.Configuration
             /// </summary>
             public ushort Port { get; set; } = 12820;
 
+            /// <summary>
+            /// REST server hostname.
+            /// </summary>
+            public string RestHostname { get; set; } = "127.0.0.1";
+
+            /// <summary>
+            /// REST server port.
+            /// </summary>
+            public ushort RestPort { get; set; } = 8080;
+
         }
 
         /// <summary>

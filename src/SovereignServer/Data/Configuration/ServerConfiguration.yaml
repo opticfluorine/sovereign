@@ -93,6 +93,18 @@ Network:
     # Server port.
     Port: 12820
 
+    # ------------
+    # RestHostname
+    # ------------
+    # Hostname to use for the local REST server.
+    RestHostname: 127.0.0.1
+
+    # --------
+    # RestPort
+    # --------
+    # Port to use for the local REST server.
+    RestPort: 8080
+
 
 World:
 

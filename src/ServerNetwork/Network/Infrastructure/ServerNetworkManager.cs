@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Sovereign.ServerNetwork.Network.Rest;
 
 namespace Sovereign.ServerNetwork.Network.Infrastructure
 {
@@ -43,6 +44,7 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
         private readonly IServerNetworkConfiguration config;
         private readonly NetworkConnectionManager connectionManager;
         private readonly NetworkSerializer serializer;
+        private readonly RestServer restServer;
 
         /// <summary>
         /// Backing LiteNetLib NetManager.
@@ -60,12 +62,14 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
 
         public ServerNetworkManager(IServerNetworkConfiguration config,
             NetworkConnectionManager connectionManager,
-            NetworkSerializer serializer)
+            NetworkSerializer serializer,
+            RestServer restServer)
         {
             /* Dependency injection. */
             this.config = config;
             this.connectionManager = connectionManager;
             this.serializer = serializer;
+            this.restServer = restServer;
 
             /* Connect the network event plumbing. */
             netListener = new EventBasedNetListener();
@@ -101,10 +105,16 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
             }
 
             Logger.Info("Server started.");
+
+            // Start the REST server.
+            restServer.Initialize();
         }
 
         public void Dispose()
         {
+            // Stop the REST server.
+            restServer.Dispose();
+
             /* Clean up the network manager. */
             Logger.Info("Stopping server.");
             netManager.Stop();

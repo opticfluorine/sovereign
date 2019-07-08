@@ -21,28 +21,27 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Events;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Network.Infrastructure;
 
-namespace Sovereign.NetworkCore.Network.Pipeline
+namespace Sovereign.NetworkCore.Network.Service
 {
 
     /// <summary>
-    /// Final stage of the outbound network pipeline.
+    /// Manages the queue of events received from the network.
     /// </summary>
-    public sealed class FinalOutboundPipelineStage : IOutboundPipelineStage
+    public sealed class ReceivedEventQueue
     {
-        public int Priority => int.MaxValue;
 
-        public IOutboundPipelineStage NextStage { get; set; }
+        /// <summary>
+        /// Queue of processed events received and accepted from the network.
+        /// </summary>
+        public ConcurrentQueue<Event> ReceivedEvents { get; }
+            = new ConcurrentQueue<Event>();
 
-        public void ProcessEvent(Event ev, NetworkConnection connection)
-        {
-            /* TODO */
-        }
     }
 
 }

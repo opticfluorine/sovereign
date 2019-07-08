@@ -40,6 +40,9 @@ namespace Sovereign.NetworkCore.Network.Service
         {
             container.Register(Component.For<NetworkingService>()
                 .LifestyleSingleton());
+
+            container.Register(Component.For<ReceivedEventQueue>()
+                .LifestyleSingleton());
         }
     }
 

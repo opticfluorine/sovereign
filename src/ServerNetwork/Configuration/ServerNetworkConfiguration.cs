@@ -19,6 +19,10 @@ namespace Sovereign.ServerNetwork.Configuration
 
         public ushort Port => serverConfiguration.Network.Port;
 
+        public string RestHostname => serverConfiguration.Network.RestHostname;
+
+        public ushort RestPort => serverConfiguration.Network.RestPort;
+
         public ServerNetworkConfiguration(IServerConfigurationManager configurationManager)
         {
             serverConfiguration = configurationManager.ServerConfiguration;

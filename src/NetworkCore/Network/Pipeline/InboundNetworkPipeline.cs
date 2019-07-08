@@ -23,6 +23,7 @@
 
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.NetworkCore.Network.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,9 +63,10 @@ namespace Sovereign.NetworkCore.Network.Pipeline
         /// Processes an inbound event.
         /// </summary>
         /// <param name="ev">Event.</param>
-        public void ProcessEvent(Event ev)
+        /// <param name="connection">Associated connection.</param>
+        public void ProcessEvent(Event ev, NetworkConnection connection)
         {
-            firstStage.ProcessEvent(ev);
+            firstStage.ProcessEvent(ev, connection);
         }
 
         /// <summary>

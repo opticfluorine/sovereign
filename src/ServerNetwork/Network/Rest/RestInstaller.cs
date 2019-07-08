@@ -21,27 +21,32 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+using Sovereign.EngineUtil.IoC;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Network.Infrastructure;
 
-namespace Sovereign.NetworkCore.Network.Pipeline
+namespace Sovereign.ServerNetwork.Network.Rest
 {
 
     /// <summary>
-    /// Final stage of the outbound network pipeline.
+    /// IoC installer for REST services.
     /// </summary>
-    public sealed class FinalOutboundPipelineStage : IOutboundPipelineStage
+    public sealed class RestInstaller : IWindsorInstaller
     {
-        public int Priority => int.MaxValue;
-
-        public IOutboundPipelineStage NextStage { get; set; }
-
-        public void ProcessEvent(Event ev, NetworkConnection connection)
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            /* TODO */
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IRestService>()
+                .WithServiceAllInterfaces()
+                .LifestyleSingleton()
+                .AllowMultipleMatches());
+
+            container.Register(Component.For<RestServer>()
+                .LifestyleSingleton());
         }
     }
 

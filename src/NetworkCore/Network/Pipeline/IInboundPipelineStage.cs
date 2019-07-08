@@ -22,6 +22,7 @@
  */
 
 using Sovereign.EngineCore.Events;
+using Sovereign.NetworkCore.Network.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -57,7 +58,8 @@ namespace Sovereign.NetworkCore.Network.Pipeline
         /// Processes an inbound event.
         /// </summary>
         /// <param name="ev">Inbound event.</param>
-        void ProcessEvent(Event ev);
+        /// <param name="connection">Associated connection.</param>
+        void ProcessEvent(Event ev, NetworkConnection connection);
 
     }
 

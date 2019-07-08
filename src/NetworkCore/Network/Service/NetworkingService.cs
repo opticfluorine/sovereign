@@ -60,12 +60,6 @@ namespace Sovereign.NetworkCore.Network.Service
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         /// <summary>
-        /// Queue of processed events received and accepted from the network.
-        /// </summary>
-        public ConcurrentQueue<Event> ReceivedEvents { get; }
-            = new ConcurrentQueue<Event>();
-
-        /// <summary>
         /// Queue of outgoing events to be processed and sent.
         /// </summary>
         public ConcurrentQueue<Event> EventsToSend { get; }
@@ -77,11 +71,15 @@ namespace Sovereign.NetworkCore.Network.Service
             INetworkManager networkManager,
             FatalErrorHandler fatalErrorHandler)
         {
+            // Dependency injection.
             this.inboundPipeline = inboundPipeline;
             this.outboundPipeline = outboundPipeline;
             this.netLogger = netLogger;
             this.networkManager = networkManager;
             this.fatalErrorHandler = fatalErrorHandler;
+
+            // Wire up pipelines.
+            networkManager.OnNetworkReceive += NetworkManager_OnNetworkReceive;
         }
 
         /// <summary>
@@ -106,6 +104,9 @@ namespace Sovereign.NetworkCore.Network.Service
             serviceThread.Join();
         }
 
+        /// <summary>
+        /// Runs the networking service.
+        /// </summary>
         private void Run()
         {
             Logger.Info("Networking service is started.");
@@ -151,10 +152,23 @@ namespace Sovereign.NetworkCore.Network.Service
             Logger.Info("Networking service is stopped.");
         }
 
+        /// <summary>
+        /// Outputs startup diagnonstic messages.
+        /// </summary>
         private void OutputStartupDiagnostics()
         {
             inboundPipeline.OutputStartupDiagnostics();
             outboundPipeline.OutputStartupDiagnostics();
+        }
+
+        /// <summary>
+        /// Called when an event is received from the network.
+        /// </summary>
+        /// <param name="ev">Received event.</param>
+        /// <param name="connection">Associated connection.</param>
+        private void NetworkManager_OnNetworkReceive(Event ev, NetworkConnection connection)
+        {
+            inboundPipeline.ProcessEvent(ev, connection);
         }
 
     }

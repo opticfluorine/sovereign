@@ -35,19 +35,19 @@ namespace Sovereign.NetworkCore.Systems.Network
     /// </summary>
     public sealed class NetworkEventAdapter : IEventAdapter
     {
-        private readonly NetworkingService networkingService;
+        private readonly ReceivedEventQueue eventQueue;
 
-        public NetworkEventAdapter(NetworkingService networkingService,
+        public NetworkEventAdapter(ReceivedEventQueue eventQueue,
             EventAdapterManager adapterManager)
         {
-            this.networkingService = networkingService;
+            this.eventQueue = eventQueue;
 
             adapterManager.RegisterEventAdapter(this);
         }
 
         public bool PollEvent(out Event ev)
         {
-            return networkingService.ReceivedEvents.TryDequeue(out ev);
+            return eventQueue.ReceivedEvents.TryDequeue(out ev);
         }
 
         public void PrepareEvents()
