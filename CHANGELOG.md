@@ -2,6 +2,12 @@
 
 ## 2019
 
+### August
+
+#### 18 August 2019
+
+* Add account queries to `Persistence`.
+
 ### July
 
 #### 07 July 2019

@@ -31,6 +31,32 @@ CREATE TABLE MigrationLog
 	name        VARCHAR(255) NOT NULL
 );
 
+-------------------
+-- Account Table --
+-------------------
+
+CREATE TABLE Account
+(
+    id              BLOB PRIMARY KEY NOT NULL,
+	username        VARCHAR(255) NOT NULL
+);
+
+CREATE UNIQUE INDEX Account_Username_Index ON Account (username);
+
+
+----------------------------
+-- Account Authentication --
+----------------------------
+
+CREATE TABLE Account_Authentication
+(
+    id             BLOB PRIMARY KEY NOT NULL,
+	password_salt  BLOB NOT NULL,
+	password_hash  BLOB NOT NULL,
+	FOREIGN KEY (id) REFERENCES Account(id)
+);
+
+
 ------------------
 -- Entity Table --
 ------------------

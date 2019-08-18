@@ -48,6 +48,10 @@ namespace Sovereign.Persistence.Database.Sqlite
 
         public INextPersistedIdQuery NextPersistedIdQuery { get; private set; }
 
+        public IRetrieveAccountQuery RetrieveAccountQuery { get; private set; }
+
+        public IRetrieveAccountWithAuthQuery RetrieveAccountWithAuthQuery { get; private set; }
+
         public IRetrieveEntityQuery RetrieveEntityQuery { get; private set; }
 
         public IRetrieveRangeQuery RetrieveRangeQuery { get; private set; }
@@ -87,6 +91,10 @@ namespace Sovereign.Persistence.Database.Sqlite
             Connect();
             MigrationQuery = new SqliteMigrationQuery(Connection);
             NextPersistedIdQuery = new SqliteNextPersistedIdQuery(Connection);
+
+            RetrieveAccountQuery = new SqliteRetrieveAccountQuery(Connection);
+            RetrieveAccountWithAuthQuery = new SqliteRetrieveAccountWithAuthQuery(Connection);
+
             RetrieveEntityQuery = new SqliteRetrieveEntityQuery(Connection);
             RetrieveRangeQuery = new SqliteRetrieveRangeQuery(Connection);
 

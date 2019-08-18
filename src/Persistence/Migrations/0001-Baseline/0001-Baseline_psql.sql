@@ -31,6 +31,33 @@ CREATE TABLE MigrationLog
 	name        VARCHAR(255) NOT NULL
 );
 
+
+-------------
+-- Account --
+-------------
+
+CREATE TABLE Account
+(
+    id          BYTEA PRIMARY KEY NOT NULL,
+	username    VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE UNIQUE INDEX Account_Username_Index ON Account (username);
+
+
+----------------------------
+-- Account Authentication --
+----------------------------
+
+CREATE TABLE Account_Authentication
+(
+	id             BYTEA PRIMARY KEY NOT NULL,
+	password_salt  BYTEA NOT NULL,
+	password_hash  BYTEA NOT NULL,
+	FOREIGN KEY (id) REFERENCES Account(id) ON DELETE CASCADE
+);
+
+
 ------------------
 -- Entity Table --
 ------------------

@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AssemblyName>Sovereign.ServerNetwork</AssemblyName>
-    <RootNamespace>Sovereign.ServerNetwork</RootNamespace>
+    <AssemblyName>Sovereign.Accounts</AssemblyName>
+    <RootNamespace>Sovereign.Accounts</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NetworkCore\NetworkCore.csproj" />
+    <ProjectReference Include="..\Persistence\Persistence.csproj" />
     <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Watson" Version="2.1.2" />
+    <Folder Include="Accounts\" />
   </ItemGroup>
 
 </Project>

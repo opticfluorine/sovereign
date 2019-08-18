@@ -144,6 +144,47 @@ namespace TestPersistence.Database.Sqlite
         }
 
         /// <summary>
+        /// Adds an account with the given username.
+        /// </summary>
+        /// <param name="username"></param>
+        public void AddAccount(Guid id, string username)
+        {
+            /* Add username info. */
+            const string sql = @"INSERT INTO Account (id, username) VALUES (@Id, @Username)";
+            var cmd = new SqliteCommand(sql, Connection);
+
+            var pId = new SqliteParameter("Id", id.ToByteArray());
+            pId.SqliteType = SqliteType.Blob;
+            cmd.Parameters.Add(pId);
+
+            var pUsername = new SqliteParameter("Username", username);
+            pUsername.SqliteType = SqliteType.Text;
+            cmd.Parameters.Add(pUsername);
+
+            cmd.ExecuteNonQuery();
+
+            /* Add authentication details. */
+            var salt = new byte[64];
+            var hash = new byte[128];
+            Array.Clear(salt, 0, salt.Length);
+            Array.Clear(hash, 0, hash.Length);
+
+            const string sql2 = @"INSERT INTO Account_Authentication (id, password_salt, password_hash) VALUES (@Id, @Salt, @Hash)";
+            var cmd2 = new SqliteCommand(sql2, Connection);
+            cmd2.Parameters.Add(pId);
+
+            var pSalt = new SqliteParameter("Salt", salt);
+            pSalt.SqliteType = SqliteType.Blob;
+            cmd2.Parameters.Add(pSalt);
+
+            var pHash = new SqliteParameter("Hash", hash);
+            pHash.SqliteType = SqliteType.Blob;
+            cmd2.Parameters.Add(pHash);
+
+            cmd2.ExecuteNonQuery();
+        }
+
+        /// <summary>
         /// Creates an in-memory database.
         /// </summary>
         /// <returns>In-memory database.</returns>

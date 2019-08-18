@@ -51,6 +51,16 @@ namespace Sovereign.Persistence.Database
         INextPersistedIdQuery NextPersistedIdQuery { get; }
 
         /// <summary>
+        /// IRetrieveAccountQuery for this persistence provider.
+        /// </summary>
+        IRetrieveAccountQuery RetrieveAccountQuery { get; }
+
+        /// <summary>
+        /// IRetrieveAccountWithAuthQUery for this persistence provider.
+        /// </summary>
+        IRetrieveAccountWithAuthQuery RetrieveAccountWithAuthQuery { get; }
+
+        /// <summary>
         /// IRetrieveEntityQuery for this persistence provider.
         /// </summary>
         IRetrieveEntityQuery RetrieveEntityQuery { get; }
