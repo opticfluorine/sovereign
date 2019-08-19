@@ -6,6 +6,7 @@
 
 #### 18 August 2019
 
+* Start adding authentication code.
 * Add account retrieval services to `Persistence`.
 * Add account queries to `Persistence`.
 

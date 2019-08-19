@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Persistence\Persistence.csproj" />
-    <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
+    <PackageReference Include="Sodium.Core" Version="1.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Accounts\" />
+    <ProjectReference Include="..\Persistence\Persistence.csproj" />
+    <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
   </ItemGroup>
 
 </Project>
