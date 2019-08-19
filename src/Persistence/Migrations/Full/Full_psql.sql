@@ -35,6 +35,8 @@ CREATE TABLE MigrationLog
 -------------
 -- Account --
 -------------
+-- NOTE: Any changes to the Account schema must be documented in the
+-- "Account Privacy" section of docs/accounts.md.
 
 CREATE TABLE Account
 (
@@ -48,12 +50,16 @@ CREATE UNIQUE INDEX Account_Username_Index ON Account (username);
 ----------------------------
 -- Account Authentication --
 ----------------------------
+-- NOTE: Any changes to the Account_Authentication schema must be documented
+-- in the "Account Privacy" section of docs/accounts.md.
 
 CREATE TABLE Account_Authentication
 (
 	id             BYTEA PRIMARY KEY NOT NULL,
 	password_salt  BYTEA NOT NULL,
 	password_hash  BYTEA NOT NULL,
+	opslimit       BIGINT NOT NULL,
+	memlimit       BIGINT NOT NULL,
 	FOREIGN KEY (id) REFERENCES Account(id) ON DELETE CASCADE
 );
 
@@ -110,6 +116,25 @@ CREATE INDEX Position_Xyz_Index ON Position (x, y, z);
 
 
 -- Create views.
+
+--------------------------------------
+-- Account With Authentication View --
+--------------------------------------
+
+CREATE VIEW AccountWithAuthentication AS
+	SELECT Account.id AS id,
+		   Account.username AS username,
+		   Account_Authentication.salt AS salt,
+		   Account_Authentication.hash AS hash,
+		   Account_Authentication.opslimit AS opslimit,
+		   Account_Authentication.memlimit AS memlimit
+	FROM Account
+	INNER JOIN Account_Authentication ON Account.id = Account_Authentication.id;
+
+
+---------------------------------
+-- Entity With Components View --
+---------------------------------
 
 CREATE VIEW EntityWithComponents AS
     SELECT Entity.id AS id,

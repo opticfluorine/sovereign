@@ -52,7 +52,9 @@ namespace TestPersistence.Database.Sqlite.Queries
             if (insert)
             {
                 var id = Guid.NewGuid();
-                fixture.AddAccount(id, username);
+                var salt = new byte[16];
+                var hash = new byte[16];
+                fixture.AddAccount(id, username, salt, hash);
             }
 
             /* Query the account. */

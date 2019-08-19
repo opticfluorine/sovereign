@@ -146,8 +146,11 @@ namespace TestPersistence.Database.Sqlite
         /// <summary>
         /// Adds an account with the given username.
         /// </summary>
-        /// <param name="username"></param>
-        public void AddAccount(Guid id, string username)
+        /// <param name="id">Account ID.</param>
+        /// <param name="username">Username.</param>
+        /// <param name="salt">Password salt.</param>
+        /// <param name="hash">Password hash.</param>
+        public void AddAccount(Guid id, string username, byte[] salt, byte[] hash)
         {
             /* Add username info. */
             const string sql = @"INSERT INTO Account (id, username) VALUES (@Id, @Username)";
@@ -164,12 +167,9 @@ namespace TestPersistence.Database.Sqlite
             cmd.ExecuteNonQuery();
 
             /* Add authentication details. */
-            var salt = new byte[64];
-            var hash = new byte[128];
-            Array.Clear(salt, 0, salt.Length);
-            Array.Clear(hash, 0, hash.Length);
-
-            const string sql2 = @"INSERT INTO Account_Authentication (id, password_salt, password_hash) VALUES (@Id, @Salt, @Hash)";
+            const string sql2 = @"INSERT INTO Account_Authentication 
+                                    (id, password_salt, password_hash, opslimit, memlimit) 
+                                    VALUES (@Id, @Salt, @Hash, 0, 0)";
             var cmd2 = new SqliteCommand(sql2, Connection);
             cmd2.Parameters.Add(pId);
 

@@ -43,7 +43,7 @@ namespace Sovereign.Persistence.Database.Sqlite.Queries
         /// SQL query.
         /// </summary>
         private const string Query =
-            @"SELECT * FROM Account
+            @"SELECT id FROM Account
               WHERE username = @Username";
 
         public SqliteRetrieveAccountQuery(IDbConnection dbConnection)

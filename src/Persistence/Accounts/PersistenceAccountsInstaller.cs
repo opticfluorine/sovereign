@@ -21,48 +21,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Microsoft.Data.Sqlite;
-using Sovereign.Persistence.Database.Queries;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.Persistence.Database.Sqlite.Queries
+namespace Sovereign.Persistence.Accounts
 {
 
     /// <summary>
-    /// IRetrieveAccountWithAuthQuery for the SQLite persistence provider.
+    /// IoC installer for Persistence.Accounts.
     /// </summary>
-    public sealed class SqliteRetrieveAccountWithAuthQuery : IRetrieveAccountWithAuthQuery
+    public sealed class PersistenceAccountsInstaller : IWindsorInstaller
     {
-
-        private readonly SqliteConnection dbConnection;
-
-        /// <summary>
-        /// SQL query.
-        /// </summary>
-        private const string Query =
-            @"SELECT id, salt, hash
-                FROM AccountWithAuthentication
-                WHERE username = @Username";
-
-        public SqliteRetrieveAccountWithAuthQuery(IDbConnection dbConnection)
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            this.dbConnection = (SqliteConnection)dbConnection;
+            container.Register(Component.For<PersistenceAccountServices>()
+                .LifestyleSingleton());
         }
-
-        public QueryReader RetrieveAccountWithAuth(string username)
-        {
-            var cmd = new SqliteCommand(Query, dbConnection);
-
-            var param = new SqliteParameter("Username", username);
-            param.SqliteType = SqliteType.Text;
-            cmd.Parameters.Add(param);
-
-            return new QueryReader(cmd);
-        }
-
     }
+
 }

@@ -31,6 +31,10 @@ namespace Sovereign.Persistence.Accounts
     /// <summary>
     /// Data class for a user account.
     /// </summary>
+    /// <remarks>
+    /// Any changes to the persisted user account schema must be documented in
+    /// the "Account Privacy" section of docs/accounts.md.
+    /// </remarks>
     public sealed class Account
     {
 
@@ -45,21 +49,68 @@ namespace Sovereign.Persistence.Accounts
         public string Username { get; private set; }
 
         /// <summary>
+        /// Whether authentication details are present in this record.
+        /// </summary>
+        public bool AuthDetailsPresent { get; private set; }
+
+        /// <summary>
         /// Password salt.
         /// </summary>
         public byte[] Salt { get; private set; }
 
         /// <summary>
+        /// Password hash.
+        /// </summary>
+        public byte[] Hash { get; private set; }
+
+        /// <summary>
+        /// Argon2 operations limit for password hashing.
+        /// </summary>
+        public ulong Opslimit { get; private set; }
+
+        /// <summary>
+        /// Argon2 memory limit for password hashing.
+        /// </summary>
+        public ulong Memlimit { get; private set; }
+
+        /// <summary>
         /// Creates an account record with the given fields.
         /// </summary>
+        /// <param name="id">Account ID.</param>
+        /// <param name="username">Username.</param>
+        internal Account(Guid id, string username)
+        {
+            Id = id;
+            Username = username;
+
+            AuthDetailsPresent = false;
+        }
+
+        /// <summary>
+        /// Creates an account record with the given fields.
+        /// </summary>
+        /// <param name="id">Account ID.</param>
         /// <param name="username">Username.</param>
         /// <param name="salt">Password salt.</param>
-        internal Account(string username, byte[] salt)
+        /// <param name="hash">Password hash.</param>
+        /// <param name="opslimit">Argon2 opslimit.</param>
+        /// <param name="memlimit">Argon2 memlimit.</param>
+        internal Account(Guid id, string username, byte[] salt, byte[] hash,
+            ulong opslimit, ulong memlimit)
         {
+            Id = id;
             Username = username;
 
             Salt = new byte[salt.Length];
             Array.Copy(salt, Salt, salt.Length);
+
+            Hash = new byte[hash.Length];
+            Array.Copy(hash, Hash, hash.Length);
+
+            Opslimit = opslimit;
+            Memlimit = memlimit;
+
+            AuthDetailsPresent = true;
         }
 
     }

@@ -126,15 +126,10 @@ unnecessary performance hits.
 
 ### Authentication
 
-> :information_source: Authentication support is targeted for Milestone 2.
-
 The first stage of establishing a connection is to authenticate. This is done
 out-of-band via a REST API exposed by the server. This REST API should be 
 placed behind a TLS termination proxy (e.g. nginx configured for this role) 
 to provide proper security.
-
-The authentication method is currently undefined, though OAuth 2.0 support is
-planned.
 
 Once authentication is complete, a shared secret is established between the
 server and client. This secret is used as the HMAC key for message validation.
