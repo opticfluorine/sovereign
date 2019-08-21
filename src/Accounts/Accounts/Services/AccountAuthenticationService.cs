@@ -21,6 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.Core.Logging;
+using Sovereign.Accounts.Accounts.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -33,6 +35,20 @@ namespace Sovereign.Accounts.Accounts.Services
     /// </summary>
     public sealed class AccountAuthenticationService
     {
+        private readonly AccountAuthenticator authenticator;
+        private readonly AuthenticationAttemptLimiter limiter;
+        private readonly AccountLoginTracker loginTracker;
+
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+        public AccountAuthenticationService(AccountAuthenticator authenticator,
+            AuthenticationAttemptLimiter limiter,
+            AccountLoginTracker loginTracker)
+        {
+            this.authenticator = authenticator;
+            this.limiter = limiter;
+            this.loginTracker = loginTracker;
+        }
 
         /// <summary>
         /// Attempts to authenticate the account with the given username and password.
@@ -42,8 +58,52 @@ namespace Sovereign.Accounts.Accounts.Services
         /// <returns>Authentication result.</returns>
         public AuthenticationResult Authenticate(string username, string password)
         {
-            // TODO
-            return AuthenticationResult.Successful;
+            try
+            {
+                // Reject if too many authentication attempts have been made recently.
+                if (limiter.IsAccountLoginDisabled(username))
+                {
+                    // Too many login attempts.
+                    Logger.InfoFormat("Rejected login for {0}: too many failed attempts.", username);
+                    return AuthenticationResult.TooManyAttempts;
+                }
+
+                // Verify the username and password combination.
+                var authValid = authenticator.Authenticate(username, password, out var id);
+                if (!authValid)
+                {
+                    // Bad password, log and reject.
+                    limiter.RegisterFailedAttempt(username);
+                    Logger.InfoFormat("Rejected login for {0}: authentication failure.", username);
+                    return AuthenticationResult.Failed;
+                }
+
+                // Verify that the account is not already logged in.
+                if (loginTracker.IsLoggedIn(id))
+                {
+                    // Already logged in, log and reject.
+                    Logger.InfoFormat("Rejected login for {0}: already logged in.", username);
+                    return AuthenticationResult.AlreadyLoggedIn;
+                }
+
+                // Login successful.
+                loginTracker.Login(id);
+                return AuthenticationResult.Successful;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Error while handling login request for " + username + "; rejecting.", e);
+                return AuthenticationResult.Failed;
+            }
+        }
+
+        /// <summary>
+        /// Logs out the given account.
+        /// </summary>
+        /// <param name="id">Account ID.</param>
+        public void Logout(Guid id)
+        {
+            loginTracker.Logout(id);
         }
 
     }

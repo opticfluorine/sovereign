@@ -25,37 +25,28 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.Accounts.Accounts.Services
+namespace Sovereign.Accounts.Configuration
 {
 
     /// <summary>
-    /// Enumerated result of an authentication.
+    /// Configuration interface for account services.
     /// </summary>
-    public enum AuthenticationResult
+    public interface IAccountsConfiguration
     {
 
         /// <summary>
-        /// The authentication was successful.
+        /// Maximum number of failed login attempts before access to
+        /// an account is temporarily disabled.
         /// </summary>
-        Successful,
+        int MaxFailedLoginAttempts { get; }
 
         /// <summary>
-        /// The authentication failed.
+        /// Length of the login denial period, in seconds. The failed login 
+        /// attempt count is reset after this amount of time has elapsed
+        /// since the last failed login attempt.
         /// </summary>
-        Failed,
+        int LoginDenialPeriodSeconds { get; }
 
-        /// <summary>
-        /// The authentication was successful, but the account is already
-        /// logged in.
-        /// </summary>
-        AlreadyLoggedIn,
-
-        /// <summary>
-        /// Too many failed attempts have been made to log into the account,
-        /// and login attempts are temporarily disabled for this account.
-        /// </summary>
-        TooManyAttempts,
-
-    };
+    }
 
 }

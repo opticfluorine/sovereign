@@ -4,6 +4,14 @@
 
 ### August
 
+#### 20 August 2019
+
+* Add account services to be consumed by the REST API and network code that
+  cares about authentication.
+* Add `AccountsSystem` which currently drives a periodic purge of the list
+  of accounts which are currently locked out due to too many failed
+  login attempts.
+
 #### 18 August 2019
 
 * Start adding authentication code.

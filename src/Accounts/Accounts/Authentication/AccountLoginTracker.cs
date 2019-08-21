@@ -25,37 +25,49 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.Accounts.Accounts.Services
+namespace Sovereign.Accounts.Accounts.Authentication
 {
 
     /// <summary>
-    /// Enumerated result of an authentication.
+    /// Responsible for tracking which accounts are currently logged in.
     /// </summary>
-    public enum AuthenticationResult
+    public sealed class AccountLoginTracker
     {
 
         /// <summary>
-        /// The authentication was successful.
+        /// Set of all currently logged in account IDs.
         /// </summary>
-        Successful,
+        private readonly ISet<Guid> LoggedInAccountIds
+            = new HashSet<Guid>();
 
         /// <summary>
-        /// The authentication failed.
+        /// Signals that the given account has logged in.
         /// </summary>
-        Failed,
+        /// <param name="accountId">Account ID.</param>
+        public void Login(Guid accountId)
+        {
+            LoggedInAccountIds.Add(accountId);
+        }
 
         /// <summary>
-        /// The authentication was successful, but the account is already
-        /// logged in.
+        /// Signals that the given account has logged out.
         /// </summary>
-        AlreadyLoggedIn,
+        /// <param name="accountId">Account ID.</param>
+        public void Logout(Guid accountId)
+        {
+            LoggedInAccountIds.Remove(accountId);
+        }
 
         /// <summary>
-        /// Too many failed attempts have been made to log into the account,
-        /// and login attempts are temporarily disabled for this account.
+        /// Checks whether the given account ID is already logged in.
         /// </summary>
-        TooManyAttempts,
+        /// <param name="accountId">Account ID.</param>
+        /// <returns>true if logged in, false otherwise.</returns>
+        public bool IsLoggedIn(Guid accountId)
+        {
+            return LoggedInAccountIds.Contains(accountId);
+        }
 
-    };
+    }
 
 }

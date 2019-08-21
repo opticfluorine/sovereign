@@ -21,41 +21,30 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.ServerCore.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.Accounts.Accounts.Services
+namespace Sovereign.Accounts.Configuration
 {
 
     /// <summary>
-    /// Enumerated result of an authentication.
+    /// Accounts configuration view.
     /// </summary>
-    public enum AuthenticationResult
+    public sealed class AccountsConfiguration : IAccountsConfiguration
     {
+        private readonly ServerConfiguration configuration;
 
-        /// <summary>
-        /// The authentication was successful.
-        /// </summary>
-        Successful,
+        public int MaxFailedLoginAttempts => configuration.Accounts.MaxFailedLoginAttempts;
 
-        /// <summary>
-        /// The authentication failed.
-        /// </summary>
-        Failed,
+        public int LoginDenialPeriodSeconds => configuration.Accounts.LoginDenialPeriodSeconds;
 
-        /// <summary>
-        /// The authentication was successful, but the account is already
-        /// logged in.
-        /// </summary>
-        AlreadyLoggedIn,
+        public AccountsConfiguration(ServerConfiguration configuration)
+        {
+            this.configuration = configuration;
+        }
 
-        /// <summary>
-        /// Too many failed attempts have been made to log into the account,
-        /// and login attempts are temporarily disabled for this account.
-        /// </summary>
-        TooManyAttempts,
-
-    };
+    }
 
 }

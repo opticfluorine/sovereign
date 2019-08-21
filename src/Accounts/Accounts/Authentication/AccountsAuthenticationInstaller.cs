@@ -40,6 +40,12 @@ namespace Sovereign.Accounts.Accounts.Authentication
         {
             container.Register(Component.For<AccountAuthenticator>()
                 .LifestyleSingleton());
+
+            container.Register(Component.For<AccountLoginTracker>()
+                .LifestyleSingleton());
+
+            container.Register(Component.For<AuthenticationAttemptLimiter>()
+                .LifestyleSingleton());
         }
     }
 }

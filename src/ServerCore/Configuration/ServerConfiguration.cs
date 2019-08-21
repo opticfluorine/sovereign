@@ -31,6 +31,11 @@ namespace Sovereign.ServerCore.Configuration
     {
 
         /// <summary>
+        /// Accounts configuration settings.
+        /// </summary>
+        public AccountsRecord Accounts { get; set; }
+
+        /// <summary>
         /// Database configuration settings.
         /// </summary>
         public DatabaseRecord Database { get; set; }
@@ -44,6 +49,27 @@ namespace Sovereign.ServerCore.Configuration
         /// World configuration settings.
         /// </summary>
         public WorldRecord World { get; set; }
+
+        /// <summary>
+        /// Full description of the accounts configuration.
+        /// </summary>
+        public sealed class AccountsRecord
+        {
+
+            /// <summary>
+            /// Maximum number of failed login attempts before access to
+            /// an account is temporarily disabled.
+            /// </summary>
+            public int MaxFailedLoginAttempts { get; set; }
+
+            /// <summary>
+            /// Length of the login denial period, in seconds. The failed
+            /// login attempt count is reset after this amount of time has
+            /// elapsed since the last failed login attempt.
+            /// </summary>
+            public int LoginDenialPeriodSeconds { get; set; }
+
+        }
 
         /// <summary>
         /// Full description of the database configuration.

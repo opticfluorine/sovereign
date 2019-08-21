@@ -52,8 +52,9 @@ namespace Sovereign.Accounts.Accounts.Authentication
         /// </summary>
         /// <param name="username">Username.</param>
         /// <param name="password">Password.</param>
+        /// <param name="id">Account ID; only valid if the method returns true.</param>
         /// <returns>true if authentication succeeded, false otherwise.</returns>
-        public bool Authenticate(string username, string password)
+        public bool Authenticate(string username, string password, out Guid id)
         {
             try
             {
@@ -63,16 +64,19 @@ namespace Sovereign.Accounts.Accounts.Authentication
                 {
                     // Account does not exist.
                     Logger.Debug("Username \"" + username + "\" not known; rejecting.");
+                    id = Guid.Empty;
                     return false;
                 }
 
                 // Check trial hash and return.
+                id = account.Value.Id;
                 return CheckAccount(account.Value, password);
             }
             catch (Exception e)
             {
                 Logger.Error("Error while authenticating account with username \""
                     + username + "\"; rejecting.", e);
+                id = Guid.Empty;
                 return false;
             }
         }

@@ -21,41 +21,29 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+using Sovereign.EngineUtil.IoC;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.Accounts.Accounts.Services
+namespace Sovereign.Accounts.Configuration
 {
 
     /// <summary>
-    /// Enumerated result of an authentication.
+    /// IoC installer for accounts configuration.
     /// </summary>
-    public enum AuthenticationResult
+    public sealed class AccounsConfigurationInstaller : IWindsorInstaller
     {
-
-        /// <summary>
-        /// The authentication was successful.
-        /// </summary>
-        Successful,
-
-        /// <summary>
-        /// The authentication failed.
-        /// </summary>
-        Failed,
-
-        /// <summary>
-        /// The authentication was successful, but the account is already
-        /// logged in.
-        /// </summary>
-        AlreadyLoggedIn,
-
-        /// <summary>
-        /// Too many failed attempts have been made to log into the account,
-        /// and login attempts are temporarily disabled for this account.
-        /// </summary>
-        TooManyAttempts,
-
-    };
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(EngineClasses.EngineAssemblies()
+                .BasedOn<IAccountsConfiguration>()
+                .WithServiceDefaultInterfaces()
+                .LifestyleSingleton());
+        }
+    }
 
 }

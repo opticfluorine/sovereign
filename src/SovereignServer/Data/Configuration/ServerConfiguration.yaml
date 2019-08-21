@@ -1,4 +1,25 @@
 ﻿# ----------------------
+# Accounts Configuration
+# ----------------------
+Accounts:
+
+    # ----------------------
+    # MaxFailedLoginAttempts
+    # ----------------------
+    # Maximum number of failed login attempts before access to an account
+    # is temporarily disabled.
+    MaxFailedLoginAttempts: 10
+
+    # ------------------------
+    # LoginDenialPeriodSeconds
+    # ------------------------
+    # Length of the login denial period, in seconds. The failed login attempt
+    # count is reset after this amount of time has elapsed since the last
+    # failed login attempt.
+    LoginDenialPeriodSeconds: 1800
+
+
+# ----------------------
 # Database Configuration
 # ----------------------
 Database:
