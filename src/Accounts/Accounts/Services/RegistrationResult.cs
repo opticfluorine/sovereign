@@ -21,9 +21,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -32,14 +29,31 @@ namespace Sovereign.Accounts.Accounts.Services
 {
 
     /// <summary>
-    /// IoC installer for account services.
+    /// Enumeration of possible results for account registration.
     /// </summary>
-    public sealed class AccountsServicesInstaller : IWindsorInstaller
+    public enum RegistrationResult
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            Component.For<AccountServices>()
-                .LifestyleSingleton();
-        }
+
+        /// <summary>
+        /// Registration completed successfully.
+        /// </summary>
+        Successful,
+
+        /// <summary>
+        /// Provided username and/or password was invalid.
+        /// </summary>
+        InvalidInput,
+
+        /// <summary>
+        /// Provided username is already in use.
+        /// </summary>
+        UsernameTaken,
+
+        /// <summary>
+        /// An unknown error occurred.
+        /// </summary>
+        UnknownFailure
+
     }
+
 }

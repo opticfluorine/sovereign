@@ -2,6 +2,12 @@
 
 ## 2019
 
+### September
+
+#### 01 September 2019
+
+* Add registration support to the account services.
+
 ### August
 
 #### 20 August 2019

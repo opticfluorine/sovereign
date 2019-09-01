@@ -60,14 +60,19 @@ namespace Sovereign.ServerCore.Configuration
             /// Maximum number of failed login attempts before access to
             /// an account is temporarily disabled.
             /// </summary>
-            public int MaxFailedLoginAttempts { get; set; }
+            public int MaxFailedLoginAttempts { get; set; } = 10;
 
             /// <summary>
             /// Length of the login denial period, in seconds. The failed
             /// login attempt count is reset after this amount of time has
             /// elapsed since the last failed login attempt.
             /// </summary>
-            public int LoginDenialPeriodSeconds { get; set; }
+            public int LoginDenialPeriodSeconds { get; set; } = 1800;
+
+            /// <summary>
+            /// Minimum length of all new passwords.
+            /// </summary>
+            public int MinimumPasswordLength { get; set; } = 8;
 
         }
 

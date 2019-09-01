@@ -23,6 +23,7 @@
 
 using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
+using Sovereign.Accounts.Accounts.Registration;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -31,23 +32,29 @@ namespace Sovereign.Accounts.Accounts.Services
 {
 
     /// <summary>
-    /// Provides authentication service for accounts.
+    /// Provides account-related services.
     /// </summary>
-    public sealed class AccountAuthenticationService
+    public sealed class AccountServices
     {
         private readonly AccountAuthenticator authenticator;
         private readonly AuthenticationAttemptLimiter limiter;
         private readonly AccountLoginTracker loginTracker;
+        private readonly RegistrationValidator registrationValidator;
+        private readonly RegistrationController registrationController;
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-        public AccountAuthenticationService(AccountAuthenticator authenticator,
+        public AccountServices(AccountAuthenticator authenticator,
             AuthenticationAttemptLimiter limiter,
-            AccountLoginTracker loginTracker)
+            AccountLoginTracker loginTracker,
+            RegistrationValidator registrationValidator,
+            RegistrationController registrationController)
         {
             this.authenticator = authenticator;
             this.limiter = limiter;
             this.loginTracker = loginTracker;
+            this.registrationValidator = registrationValidator;
+            this.registrationController = registrationController;
         }
 
         /// <summary>
@@ -104,6 +111,41 @@ namespace Sovereign.Accounts.Accounts.Services
         public void Logout(Guid id)
         {
             loginTracker.Logout(id);
+        }
+
+        /// <summary>
+        /// Registers a new account.
+        /// </summary>
+        /// <param name="username">Username.</param>
+        /// <param name="password">Password.</param>
+        /// <returns>Registration result.</returns>
+        public RegistrationResult Register(string username, string password)
+        {
+            try
+            {
+                // Validate user input.
+                if (!registrationValidator.ValidateRegistrationInput(username, password))
+                {
+                    return RegistrationResult.InvalidInput;
+                }
+
+                // Attempt registration.
+                if (registrationController.Register(username, password))
+                {
+                    // Interpret failure as username being taken. It could also
+                    // be caused by other database failures, but in practice
+                    // violating the unique constraint is likely to be at
+                    // fault.
+                    return RegistrationResult.UsernameTaken;
+                }
+
+                return RegistrationResult.Successful;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Error handling registration request.", e);
+                return RegistrationResult.UnknownFailure;
+            }
         }
 
     }

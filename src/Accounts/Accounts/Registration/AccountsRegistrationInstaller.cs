@@ -28,18 +28,22 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.Accounts.Accounts.Services
+namespace Sovereign.Accounts.Accounts.Registration
 {
 
     /// <summary>
-    /// IoC installer for account services.
+    /// IoC installer for Accounts.Registration.
     /// </summary>
-    public sealed class AccountsServicesInstaller : IWindsorInstaller
+    public sealed class AccountsRegistrationInstaller : IWindsorInstaller
     {
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            Component.For<AccountServices>()
-                .LifestyleSingleton();
+            container.Register(Component.For<RegistrationController>()
+                .LifestyleSingleton());
+
+            container.Register(Component.For<RegistrationValidator>()
+                .LifestyleSingleton());
         }
     }
+
 }

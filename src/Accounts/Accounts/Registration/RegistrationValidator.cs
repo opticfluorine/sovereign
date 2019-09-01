@@ -21,25 +21,44 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using Sovereign.Accounts.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.Accounts.Accounts.Services
+namespace Sovereign.Accounts.Accounts.Registration
 {
 
     /// <summary>
-    /// IoC installer for account services.
+    /// Responsible for validating registration-related user input.
     /// </summary>
-    public sealed class AccountsServicesInstaller : IWindsorInstaller
+    public sealed class RegistrationValidator
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+        private readonly IAccountsConfiguration configuration;
+
+        public RegistrationValidator(IAccountsConfiguration configuration)
         {
-            Component.For<AccountServices>()
-                .LifestyleSingleton();
+            this.configuration = configuration;
         }
+
+        /// <summary>
+        /// Validates registration input.
+        /// </summary>
+        /// <param name="username">Username.</param>
+        /// <param name="password">Password.</param>
+        /// <returns>true if input is valid, false otherwise.</returns>
+        public bool ValidateRegistrationInput(string username, string password)
+        {
+            // Username must not be blank.
+            if (username.Length < 1) return false;
+
+            // Password must be at least the minimum length.
+            if (password.Length < configuration.MinimumPasswordLength) return false;
+
+            // All tests passed.
+            return true;
+        }
+
     }
+
 }

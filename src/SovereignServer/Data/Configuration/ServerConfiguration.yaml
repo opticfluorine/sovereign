@@ -18,6 +18,12 @@ Accounts:
     # failed login attempt.
     LoginDenialPeriodSeconds: 1800
 
+    # ---------------------
+    # MinimumPasswordLength
+    # ---------------------
+    # Minimum length of all new passwords.
+    MinimumPasswordLength: 8
+
 
 # ----------------------
 # Database Configuration

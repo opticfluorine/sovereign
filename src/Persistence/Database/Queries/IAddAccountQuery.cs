@@ -21,25 +21,32 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.Accounts.Accounts.Services
+namespace Sovereign.Persistence.Database.Queries
 {
 
     /// <summary>
-    /// IoC installer for account services.
+    /// Query for adding a new account.
     /// </summary>
-    public sealed class AccountsServicesInstaller : IWindsorInstaller
+    public interface IAddAccountQuery
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            Component.For<AccountServices>()
-                .LifestyleSingleton();
-        }
+
+        /// <summary>
+        /// Adds a new account to the database.
+        /// </summary>
+        /// <param name="id">Account ID.</param>
+        /// <param name="username">Username.</param>
+        /// <param name="passwordSalt">Password salt.</param>
+        /// <param name="passwordHash">Password hash.</param>
+        /// <param name="opslimit">Password hashing opslimit value.</param>
+        /// <param name="memlimit">Password hashing memlimit value.</param>
+        /// <returns>true if successful, false otherwise.</returns>
+        bool AddAccount(Guid id, string username, byte[] passwordSalt, byte[] passwordHash,
+            ulong opslimit, ulong memlimit);
+
     }
+
 }

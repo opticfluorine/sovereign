@@ -40,6 +40,8 @@ namespace Sovereign.Accounts.Configuration
 
         public int LoginDenialPeriodSeconds => configuration.Accounts.LoginDenialPeriodSeconds;
 
+        public int MinimumPasswordLength => configuration.Accounts.MinimumPasswordLength;
+
         public AccountsConfiguration(ServerConfiguration configuration)
         {
             this.configuration = configuration;

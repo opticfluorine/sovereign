@@ -21,36 +21,53 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.Persistence.Database.Sqlite.Queries;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Xunit;
 
-namespace Sovereign.Accounts.Configuration
+namespace TestPersistence.Database.Sqlite.Queries
 {
 
     /// <summary>
-    /// Configuration interface for account services.
+    /// Unit tests for SqliteAddAccountQuery.
     /// </summary>
-    public interface IAccountsConfiguration
+    [Collection("Sqlite")]
+    public sealed class TestSqliteAddAccountQuery
     {
+        private readonly SqliteTestFixture fixture;
+
+        public TestSqliteAddAccountQuery(SqliteTestFixture fixture)
+        {
+            this.fixture = fixture;
+        }
 
         /// <summary>
-        /// Maximum number of failed login attempts before access to
-        /// an account is temporarily disabled.
+        /// Tests adding accounts.
         /// </summary>
-        int MaxFailedLoginAttempts { get; }
+        [Fact]
+        public void TestAddAccount()
+        {
+            // Add an account.
+            // This should be accepted.
+            Guid id = Guid.NewGuid();
+            string username = "TestUser";
+            byte[] salt = new byte[16];
+            byte[] hash = new byte[16];
+            ulong opslimit = 0;
+            ulong memlimit = 0;
 
-        /// <summary>
-        /// Length of the login denial period, in seconds. The failed login 
-        /// attempt count is reset after this amount of time has elapsed
-        /// since the last failed login attempt.
-        /// </summary>
-        int LoginDenialPeriodSeconds { get; }
+            var query = new SqliteAddAccountQuery(fixture.Connection);
+            var result = query.AddAccount(id, username, salt, hash, opslimit, memlimit);
+            Assert.True(result);
 
-        /// <summary>
-        /// Minimum length of all new passwords.
-        /// </summary>
-        int MinimumPasswordLength { get; }
+            // Now switch the ID and try to reuse the same username.
+            // This should be rejected.
+            Guid id2 = Guid.NewGuid();
+            var result2 = query.AddAccount(id2, username, salt, hash, opslimit, memlimit);
+            Assert.False(result2);
+        }
 
     }
 
