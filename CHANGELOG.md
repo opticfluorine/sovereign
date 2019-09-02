@@ -4,6 +4,10 @@
 
 ### September
 
+#### 02 September 2019
+
+* Add REST service for account registration.
+
 #### 01 September 2019
 
 * Add registration support to the account services.

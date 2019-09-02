@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Accounts\Accounts.csproj" />
     <ProjectReference Include="..\NetworkCore\NetworkCore.csproj" />
     <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
   </ItemGroup>

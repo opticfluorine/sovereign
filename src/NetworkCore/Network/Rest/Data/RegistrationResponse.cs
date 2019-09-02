@@ -21,25 +21,20 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sovereign.Accounts.Accounts.Services
+namespace Sovereign.NetworkCore.Network.Rest.Data
 {
 
     /// <summary>
-    /// IoC installer for account services.
+    /// Registration response data record.
     /// </summary>
-    public sealed class AccountsServicesInstaller : IWindsorInstaller
+    public class RegistrationResponse
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<AccountServices>()
-                .LifestyleSingleton());
-        }
+
+        /// <summary>
+        /// Human-readable description of the registration result.
+        /// </summary>
+        public string Result { get; set; }
+        
     }
+
 }

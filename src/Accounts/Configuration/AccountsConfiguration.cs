@@ -42,9 +42,9 @@ namespace Sovereign.Accounts.Configuration
 
         public int MinimumPasswordLength => configuration.Accounts.MinimumPasswordLength;
 
-        public AccountsConfiguration(ServerConfiguration configuration)
+        public AccountsConfiguration(IServerConfigurationManager configurationManager)
         {
-            this.configuration = configuration;
+            configuration = configurationManager.ServerConfiguration;
         }
 
     }

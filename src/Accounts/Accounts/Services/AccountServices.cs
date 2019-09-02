@@ -130,7 +130,7 @@ namespace Sovereign.Accounts.Accounts.Services
                 }
 
                 // Attempt registration.
-                if (registrationController.Register(username, password))
+                if (!registrationController.Register(username, password))
                 {
                     // Interpret failure as username being taken. It could also
                     // be caused by other database failures, but in practice
