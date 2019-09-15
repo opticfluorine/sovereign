@@ -21,34 +21,25 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sovereign.Accounts.Accounts.Authentication
+namespace Sovereign.NetworkCore.Network.Rest.Data
 {
 
     /// <summary>
-    /// IoC installer for account authentication classes.
+    /// Login request data record.
     /// </summary>
-    public sealed class AccountsAuthenticationInstaller : IWindsorInstaller
+    public class LoginRequest
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<AccountAuthenticator>()
-                .LifestyleSingleton());
+        
+        /// <summary>
+        /// Username.
+        /// </summary>
+        public string Username { get; set; }
 
-            container.Register(Component.For<AccountLoginTracker>()
-                .LifestyleSingleton());
+        /// <summary>
+        /// Password.
+        /// </summary>
+        public string Password { get; set; }
 
-            container.Register(Component.For<AuthenticationAttemptLimiter>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<SharedSecretManager>()
-                .LifestyleSingleton());
-        }
     }
+
 }

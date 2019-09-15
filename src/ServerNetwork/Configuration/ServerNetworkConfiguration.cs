@@ -17,6 +17,8 @@ namespace Sovereign.ServerNetwork.Configuration
 
         public string NetworkInterfaceIPv6 => serverConfiguration.Network.NetworkInterfaceIPv6;
 
+        public string Host => serverConfiguration.Network.Host;
+
         public ushort Port => serverConfiguration.Network.Port;
 
         public string RestHostname => serverConfiguration.Network.RestHostname;

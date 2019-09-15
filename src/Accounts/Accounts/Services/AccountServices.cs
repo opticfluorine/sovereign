@@ -25,8 +25,6 @@ using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Registration;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Sovereign.Accounts.Accounts.Services
 {
@@ -41,6 +39,7 @@ namespace Sovereign.Accounts.Accounts.Services
         private readonly AccountLoginTracker loginTracker;
         private readonly RegistrationValidator registrationValidator;
         private readonly RegistrationController registrationController;
+        private readonly SharedSecretManager sharedSecretManager;
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -48,13 +47,15 @@ namespace Sovereign.Accounts.Accounts.Services
             AuthenticationAttemptLimiter limiter,
             AccountLoginTracker loginTracker,
             RegistrationValidator registrationValidator,
-            RegistrationController registrationController)
+            RegistrationController registrationController,
+            SharedSecretManager sharedSecretManager)
         {
             this.authenticator = authenticator;
             this.limiter = limiter;
             this.loginTracker = loginTracker;
             this.registrationValidator = registrationValidator;
             this.registrationController = registrationController;
+            this.sharedSecretManager = sharedSecretManager;
         }
 
         /// <summary>
@@ -62,9 +63,14 @@ namespace Sovereign.Accounts.Accounts.Services
         /// </summary>
         /// <param name="username">Account username.</param>
         /// <param name="password">Password attempt.</param>
+        /// <param name="guid">Account ID.</param>
         /// <returns>Authentication result.</returns>
-        public AuthenticationResult Authenticate(string username, string password)
+        public AuthenticationResult Authenticate(string username, string password,
+            out Guid guid, out string secret)
         {
+            guid = Guid.Empty;
+            secret = null;
+
             try
             {
                 // Reject if too many authentication attempts have been made recently.
@@ -95,6 +101,11 @@ namespace Sovereign.Accounts.Accounts.Services
 
                 // Login successful.
                 loginTracker.Login(id);
+                secret = sharedSecretManager.AddSecret(id);
+                guid = id;
+
+                Logger.InfoFormat("Login successful for {0}.", username);
+
                 return AuthenticationResult.Successful;
             }
             catch (Exception e)
@@ -138,6 +149,8 @@ namespace Sovereign.Accounts.Accounts.Services
                     // fault.
                     return RegistrationResult.UsernameTaken;
                 }
+
+                Logger.InfoFormat("New account registered for {0}.", username);
 
                 return RegistrationResult.Successful;
             }

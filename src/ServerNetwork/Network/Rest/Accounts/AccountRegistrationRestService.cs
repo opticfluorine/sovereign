@@ -56,7 +56,7 @@ namespace Sovereign.ServerNetwork.Network.Rest.Accounts
             = new Dictionary<RegistrationResult, string>()
             {
                 {RegistrationResult.Successful, "Successful."},
-                {RegistrationResult.InvalidInput, "The password did not meet minimum requirements."},
+                {RegistrationResult.InvalidInput, "The username and/or password did not meet minimum requirements."},
                 {RegistrationResult.UsernameTaken, "The username is already in use."},
                 {RegistrationResult.UnknownFailure, "An unknown error occurred."}
             };

@@ -42,6 +42,8 @@ namespace Sovereign.Accounts.Configuration
 
         public int MinimumPasswordLength => configuration.Accounts.MinimumPasswordLength;
 
+        public int HandoffPeriodSeconds => configuration.Accounts.HandoffPeriodSeconds;
+
         public AccountsConfiguration(IServerConfigurationManager configurationManager)
         {
             configuration = configurationManager.ServerConfiguration;

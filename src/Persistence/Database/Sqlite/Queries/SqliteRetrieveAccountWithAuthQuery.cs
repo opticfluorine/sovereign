@@ -44,7 +44,7 @@ namespace Sovereign.Persistence.Database.Sqlite.Queries
         /// SQL query.
         /// </summary>
         private const string Query =
-            @"SELECT id, salt, hash
+            @"SELECT id, salt, hash, opslimit, memlimit
                 FROM AccountWithAuthentication
                 WHERE username = @Username";
 

@@ -124,8 +124,8 @@ CREATE INDEX Position_Xyz_Index ON Position (x, y, z);
 CREATE VIEW AccountWithAuthentication AS
 	SELECT Account.id AS id,
 		   Account.username AS username,
-		   Account_Authentication.salt AS salt,
-		   Account_Authentication.hash AS hash,
+		   Account_Authentication.password_salt AS salt,
+		   Account_Authentication.password_hash AS hash,
 		   Account_Authentication.opslimit AS opslimit,
 		   Account_Authentication.memlimit AS memlimit
 	FROM Account

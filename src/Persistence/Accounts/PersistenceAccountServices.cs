@@ -40,10 +40,10 @@ namespace Sovereign.Persistence.Accounts
         private readonly PersistenceProviderManager providerManager;
 
         private const int FIELD_ID = 0;
-        private const int FIELD_SALT = 2;
-        private const int FIELD_HASH = 3;
-        private const int FIELD_OPSLIMIT = 4;
-        private const int FIELD_MEMLIMIT = 5;
+        private const int FIELD_SALT = 1;
+        private const int FIELD_HASH = 2;
+        private const int FIELD_OPSLIMIT = 3;
+        private const int FIELD_MEMLIMIT = 4;
 
         public PersistenceAccountServices(PersistenceProviderManager providerManager)
         {
@@ -92,10 +92,10 @@ namespace Sovereign.Persistence.Accounts
                     var id = new Guid((byte[])reader.Reader.GetValue(FIELD_ID));
                     var salt = (byte[])reader.Reader.GetValue(FIELD_SALT);
                     var hash = (byte[])reader.Reader.GetValue(FIELD_HASH);
-                    var opslimit = (ulong)reader.Reader.GetValue(FIELD_OPSLIMIT);
-                    var memlimit = (ulong)reader.Reader.GetValue(FIELD_MEMLIMIT);
+                    var opslimit = (long)reader.Reader.GetValue(FIELD_OPSLIMIT);
+                    var memlimit = (long)reader.Reader.GetValue(FIELD_MEMLIMIT);
                     return new Maybe<Account>(new Account(id, username, salt, hash,
-                        opslimit, memlimit));
+                        (ulong)opslimit, (ulong)memlimit));
                 }
                 else
                 {

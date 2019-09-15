@@ -52,6 +52,13 @@ namespace Sovereign.Accounts.Configuration
         /// </summary>
         int MinimumPasswordLength { get; }
 
+        /// <summary>
+        /// Length of the connection handoff period following a successful
+        /// login. The connection may only be established during the handoff,
+        /// beyond which the handoff will be invalidated.
+        /// </summary>
+        int HandoffPeriodSeconds { get; }
+
     }
 
 }

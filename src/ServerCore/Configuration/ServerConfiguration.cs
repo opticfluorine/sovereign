@@ -23,13 +23,11 @@
 
 namespace Sovereign.ServerCore.Configuration
 {
-
     /// <summary>
     /// Full description of the server runtime configuration.
     /// </summary>
     public sealed class ServerConfiguration
     {
-
         /// <summary>
         /// Accounts configuration settings.
         /// </summary>
@@ -55,7 +53,6 @@ namespace Sovereign.ServerCore.Configuration
         /// </summary>
         public sealed class AccountsRecord
         {
-
             /// <summary>
             /// Maximum number of failed login attempts before access to
             /// an account is temporarily disabled.
@@ -74,6 +71,13 @@ namespace Sovereign.ServerCore.Configuration
             /// </summary>
             public int MinimumPasswordLength { get; set; } = 8;
 
+            /// <summary>
+            /// Length of the connection handoff period following a successful
+            /// login. The connection may only be established during the handoff,
+            /// beyond which the handoff will be invalidated.
+            /// </summary>
+            public int HandoffPeriodSeconds { get; set; } = 30;
+
         }
 
         /// <summary>
@@ -81,7 +85,6 @@ namespace Sovereign.ServerCore.Configuration
         /// </summary>
         public sealed class DatabaseRecord
         {
-
             /// <summary>
             /// Database type.
             /// </summary>
@@ -132,7 +135,6 @@ namespace Sovereign.ServerCore.Configuration
             /// in seconds.
             /// </summary>
             public int SyncIntervalSeconds { get; set; } = 60;
-
         }
 
         /// <summary>
@@ -140,7 +142,6 @@ namespace Sovereign.ServerCore.Configuration
         /// </summary>
         public sealed class NetworkRecord
         {
-
             /// <summary>
             /// IPv4 network interface to bind.
             /// </summary>
@@ -150,6 +151,11 @@ namespace Sovereign.ServerCore.Configuration
             /// IPv6 network interface to bind.
             /// </summary>
             public string NetworkInterfaceIPv6 { get; set; } = "::0";
+
+            /// <summary>
+            /// Server hostname to use for connection handoff.
+            /// </summary>
+            public string Host { get; set; } = "localhost";
 
             /// <summary>
             /// Server port.
@@ -165,7 +171,6 @@ namespace Sovereign.ServerCore.Configuration
             /// REST server port.
             /// </summary>
             public ushort RestPort { get; set; } = 8080;
-
         }
 
         /// <summary>
@@ -173,14 +178,10 @@ namespace Sovereign.ServerCore.Configuration
         /// </summary>
         public sealed class WorldRecord
         {
-
             /// <summary>
             /// Length, in blocks, of each discrete chunk of the world.
             /// </summary>
             public int ChunkSize { get; set; } = 32;
-
         }
-
     }
-
 }

@@ -24,6 +24,14 @@ Accounts:
     # Minimum length of all new passwords.
     MinimumPasswordLength: 8
 
+    # --------------------
+    # HandoffPeriodSeconds
+    # --------------------
+    # Length of the connection handoff period following a successful login.
+    # The connection may only be established during the handoff period, beyond
+    # which the handoff will be invalidated.
+    HandoffPeriodSeconds: 30
+
 
 # ----------------------
 # Database Configuration
@@ -100,6 +108,9 @@ Database:
     SyncIntervalSeconds: 60
 
 
+# ---------------------
+# Network Configuration
+# ---------------------
 Network:
 
     # --------------------
@@ -113,6 +124,12 @@ Network:
     # --------------------
     # IPv6 interface to bind.
     NetworkInterfaceIPv6: ::0
+
+    # ----
+    # Host
+    # ----
+    # Server hostname to use for connection handoff.
+    Host: localhost
 
     # ----
     # Port
@@ -133,6 +150,9 @@ Network:
     RestPort: 8080
 
 
+# -------------------
+# World Configuration
+# -------------------
 World:
 
     # ---------

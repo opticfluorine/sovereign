@@ -45,6 +45,11 @@ namespace Sovereign.ServerNetwork.Configuration
         string NetworkInterfaceIPv6 { get; }
 
         /// <summary>
+        /// Server hostname to use for connection handoff.
+        /// </summary>
+        string Host { get; }
+
+        /// <summary>
         /// Server port.
         /// </summary>
         ushort Port { get; }

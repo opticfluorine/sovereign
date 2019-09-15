@@ -52,6 +52,7 @@ namespace Sovereign.Accounts.Systems.Accounts
             EventId.Core_Tick
         };
         private readonly AuthenticationAttemptLimiter attemptLimiter;
+        private readonly SharedSecretManager sharedSecretManager;
 
         public EventCommunicator EventCommunicator { get; private set; }
 
@@ -61,9 +62,11 @@ namespace Sovereign.Accounts.Systems.Accounts
 
         public AccountsSystem(IEventLoop eventLoop,
             EventCommunicator eventCommunicator,
-            AuthenticationAttemptLimiter attemptLimiter)
+            AuthenticationAttemptLimiter attemptLimiter,
+            SharedSecretManager sharedSecretManager)
         {
             this.attemptLimiter = attemptLimiter;
+            this.sharedSecretManager = sharedSecretManager;
 
             EventCommunicator = eventCommunicator;
             eventLoop.RegisterSystem(this);
@@ -81,6 +84,7 @@ namespace Sovereign.Accounts.Systems.Accounts
                 if (ticksSincePurge > TICKS_BETWEEN_PURGES)
                 {
                     attemptLimiter.PurgeExpiredRecords();
+                    sharedSecretManager.PurgeOldSecrets();
                     ticksSincePurge = 0;
                 }
             }

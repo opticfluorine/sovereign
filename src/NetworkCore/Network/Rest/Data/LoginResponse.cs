@@ -21,34 +21,40 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sovereign.Accounts.Accounts.Authentication
+namespace Sovereign.NetworkCore.Network.Rest.Data
 {
 
     /// <summary>
-    /// IoC installer for account authentication classes.
+    /// Login response data record.
     /// </summary>
-    public sealed class AccountsAuthenticationInstaller : IWindsorInstaller
+    public class LoginResponse
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<AccountAuthenticator>()
-                .LifestyleSingleton());
 
-            container.Register(Component.For<AccountLoginTracker>()
-                .LifestyleSingleton());
+        /// <summary>
+        /// Human-readable string describing the result of the login attempt.
+        /// </summary>
+        public string Result;
 
-            container.Register(Component.For<AuthenticationAttemptLimiter>()
-                .LifestyleSingleton());
+        /// <summary>
+        /// User ID. Used for connection handoff.
+        /// </summary>
+        public string UserId;
 
-            container.Register(Component.For<SharedSecretManager>()
-                .LifestyleSingleton());
-        }
+        /// <summary>
+        /// Shared secret between the client and server.
+        /// </summary>
+        public string SharedSecret;
+
+        /// <summary>
+        /// Hostname of the server to connect to.
+        /// </summary>
+        public string ServerHost;
+
+        /// <summary>
+        /// Port of the server to connect to.
+        /// </summary>
+        public ushort ServerPort;
+
     }
+
 }
