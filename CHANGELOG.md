@@ -2,6 +2,10 @@
 
 ## 2019
 
+### October
+
+* Add `TODO.org` for tracking sub-issue-level development tasks.
+
 ### September
 
 #### 15 September 2019

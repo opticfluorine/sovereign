@@ -1,0 +1,38 @@
+* Sovereign Engine To-Do Items
+
+** Milestone 1
+
+*** Networking (Issue #8)
+
+**** TODO Accept new event bus connections if login was successful.
+The client will pass a shared login token (not the shared secret) when it
+attempts connection to the server. Requirements:
+
+***** TODO Requirement: Event Bus Connection Login Token Match
+The server shall reject a new event bus connection if the login token is not 
+found in the list of valid login tokens.
+
+***** TODO Requirement: Event Bus Connection Login Token Timeout
+The server shall reject a new event bus connection if the login token matches 
+a token in the list of valid login tokens that is older than
+ServerConfiguration.Accounts.HandoffPeriodSeconds.
+
+***** TODO Requirement: Event Bus Connection IP Check
+The server shall reject a new event bus connection if the connection does not
+originate from the same IP address as the successful login attempt that
+resulted in the generation of the login token.
+
+***** TODO Requirement: Accept New Event Bus Connection
+The server shall accept a new event bus connection if the login token matches
+a token in the list of valid login tokens and the connection attempt does
+not violate any of the above requirements.
+
+***** TODO Requirement: Event Bus Connection Login Token Purge
+The server shall remove the login token from the list of valid login tokens
+upon the successful establishment of a new event bus connection.
+
+**** TODO Automatically connect client to server on startup.
+Client login user interface is out of scope for this issue, so for debugging
+purposes just automatically attempt login and connection when the client
+starts.
+
