@@ -40,6 +40,7 @@ namespace Sovereign.Accounts.Accounts.Services
         private readonly RegistrationValidator registrationValidator;
         private readonly RegistrationController registrationController;
         private readonly SharedSecretManager sharedSecretManager;
+        private readonly LoginHandoffTracker loginHandoffTracker;
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -48,7 +49,8 @@ namespace Sovereign.Accounts.Accounts.Services
             AccountLoginTracker loginTracker,
             RegistrationValidator registrationValidator,
             RegistrationController registrationController,
-            SharedSecretManager sharedSecretManager)
+            SharedSecretManager sharedSecretManager,
+            LoginHandoffTracker loginHandoffTracker)
         {
             this.authenticator = authenticator;
             this.limiter = limiter;
@@ -56,6 +58,7 @@ namespace Sovereign.Accounts.Accounts.Services
             this.registrationValidator = registrationValidator;
             this.registrationController = registrationController;
             this.sharedSecretManager = sharedSecretManager;
+            this.loginHandoffTracker = loginHandoffTracker;
         }
 
         /// <summary>
@@ -101,6 +104,7 @@ namespace Sovereign.Accounts.Accounts.Services
 
                 // Login successful.
                 loginTracker.Login(id);
+                loginHandoffTracker.AddPendingHandoff(id);
                 secret = sharedSecretManager.AddSecret(id);
                 guid = id;
 

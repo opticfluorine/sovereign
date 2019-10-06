@@ -4,6 +4,12 @@
 
 ### October
 
+#### 06 October 2019
+
+* Add support for login handoffs.
+
+#### 05 October 2019
+
 * Add `TODO.org` for tracking sub-issue-level development tasks.
 
 ### September

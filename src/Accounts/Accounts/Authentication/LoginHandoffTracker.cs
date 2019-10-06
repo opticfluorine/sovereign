@@ -21,9 +21,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -32,26 +29,41 @@ namespace Sovereign.Accounts.Accounts.Authentication
 {
 
     /// <summary>
-    /// IoC installer for account authentication classes.
+    /// Tracks connection handoffs after successful login.
     /// </summary>
-    public sealed class AccountsAuthenticationInstaller : IWindsorInstaller
+    public sealed class LoginHandoffTracker
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+
+        /// <summary>
+        /// Account IDs with pending handoffs.
+        /// </summary>
+        private readonly ISet<Guid> pendingHandoffAccountIds
+            = new HashSet<Guid>();
+
+        /// <summary>
+        /// Adds an account to the pending handoff list.
+        /// </summary>
+        /// <param name="accountId">Account ID.</param>
+        /// <remarks>
+        /// If the account is already in the pending handoff list, this
+        /// method has no effect.
+        /// </remarks>
+        public void AddPendingHandoff(Guid accountId)
         {
-            container.Register(Component.For<AccountAuthenticator>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<AccountLoginTracker>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<AuthenticationAttemptLimiter>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<SharedSecretManager>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<LoginHandoffTracker>()
-                .LifestyleSingleton());
+            pendingHandoffAccountIds.Add(accountId);
         }
+
+        /// <summary>
+        /// Removes an account from the pending handoff list if it is
+        /// present.
+        /// </summary>
+        /// <param name="accountId">Account ID.</param>
+        /// <returns>true if the account was in the list; false otherwise.</returns>
+        public bool TakePendingHandoff(Guid accountId)
+        {
+            return pendingHandoffAccountIds.Remove(accountId);
+        }
+
     }
+
 }

@@ -36,3 +36,6 @@ Client login user interface is out of scope for this issue, so for debugging
 purposes just automatically attempt login and connection when the client
 starts.
 
+**** TODO Add additional logging to registration and login events.
+Not all cases are logged correctly right now. Fix this.
+
