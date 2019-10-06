@@ -31,11 +31,11 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Sovereign.ServerNetwork.Network.Connections;
 using Sovereign.ServerNetwork.Network.Rest;
 
 namespace Sovereign.ServerNetwork.Network.Infrastructure
 {
-
     /// <summary>
     /// Server-side network manager.
     /// </summary>
@@ -45,6 +45,7 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
         private readonly NetworkConnectionManager connectionManager;
         private readonly NetworkSerializer serializer;
         private readonly RestServer restServer;
+        private readonly NewConnectionProcessor newConnectionProcessor;
 
         /// <summary>
         /// Backing LiteNetLib NetManager.
@@ -63,13 +64,15 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
         public ServerNetworkManager(IServerNetworkConfiguration config,
             NetworkConnectionManager connectionManager,
             NetworkSerializer serializer,
-            RestServer restServer)
+            RestServer restServer,
+            NewConnectionProcessor newConnectionProcessor)
         {
             /* Dependency injection. */
             this.config = config;
             this.connectionManager = connectionManager;
             this.serializer = serializer;
             this.restServer = restServer;
+            this.newConnectionProcessor = newConnectionProcessor;
 
             /* Connect the network event plumbing. */
             netListener = new EventBasedNetListener();
@@ -141,7 +144,8 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
         /// <param name="peer">Remote peer.</param>
         /// <param name="reader">Packet reader.</param>
         /// <param name="deliveryMethod">Delivery method.</param>
-        private void NetListener_NetworkReceiveEvent(NetPeer peer, NetPacketReader reader, DeliveryMethod deliveryMethod)
+        private void NetListener_NetworkReceiveEvent(NetPeer peer, NetPacketReader reader,
+            DeliveryMethod deliveryMethod)
         {
             try
             {
@@ -174,26 +178,28 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
         /// <param name="request">Connection request.</param>
         private void NetListener_ConnectionRequestEvent(ConnectionRequest request)
         {
-            var sb = new StringBuilder();
-            sb.Append("New connection request from ")
-                .Append(request.RemoteEndPoint.ToString())
-                .Append(".");
-            Logger.Info(sb.ToString());
-
-            // TODO: Verify that the connection request is valid, and select
-            //       the correct HMAC key.
-            var key = new byte[64];
-            Array.Clear(key, 0, key.Length);
-
-            // If we got this far, accept the connection.
             try
             {
-                var peer = request.Accept();
-                connectionManager.CreateConnection(peer, key);
+                var sb = new StringBuilder();
+                sb.Append("New connection request from ")
+                    .Append(request.RemoteEndPoint.ToString())
+                    .Append(".");
+                Logger.Info(sb.ToString());
+
+                // First round of validation.
+                var shouldAccept = request.Type == ConnectionRequestType.Incoming;
+                if (!shouldAccept)
+                {
+                    request.Reject();
+                    return;
+                }
+
+                // Hand off to detailed request processing.
+                newConnectionProcessor.ProcessConnectionRequest(request);
             }
             catch (Exception e)
             {
-                sb.Clear();
+                var sb = new StringBuilder();
                 sb.Append("Error accepting connection request from ")
                     .Append(request.RemoteEndPoint.ToString())
                     .Append(".");
@@ -233,6 +239,5 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure
                 Logger.Error(sb.ToString(), e);
             }
         }
-
     }
 }

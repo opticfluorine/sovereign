@@ -97,7 +97,8 @@ namespace Sovereign.ServerNetwork.Network.Authentication
 
                 // Attempt login.
                 var result = accountServices.Authenticate(requestData.Username,
-                    requestData.Password, out var guid, out var secret);
+                    requestData.Password, req.SourceIp,
+                    out var guid, out var secret);
                 if (result != AuthenticationResult.Successful)
                 {
                     // Report error.

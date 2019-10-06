@@ -66,9 +66,11 @@ namespace Sovereign.Accounts.Accounts.Services
         /// </summary>
         /// <param name="username">Account username.</param>
         /// <param name="password">Password attempt.</param>
+        /// <param name="ipAddress">IP address from which the login attempt was made.</param>
         /// <param name="guid">Account ID.</param>
+        /// <param name="secret">Shared secret.</param>
         /// <returns>Authentication result.</returns>
-        public AuthenticationResult Authenticate(string username, string password,
+        public AuthenticationResult Authenticate(string username, string password, string ipAddress,
             out Guid guid, out string secret)
         {
             guid = Guid.Empty;
@@ -104,7 +106,7 @@ namespace Sovereign.Accounts.Accounts.Services
 
                 // Login successful.
                 loginTracker.Login(id);
-                loginHandoffTracker.AddPendingHandoff(id);
+                loginHandoffTracker.AddPendingHandoff(id, ipAddress);
                 secret = sharedSecretManager.AddSecret(id);
                 guid = id;
 

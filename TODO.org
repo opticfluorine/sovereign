@@ -4,30 +4,36 @@
 
 *** Networking (Issue #8)
 
-**** TODO Accept new event bus connections if login was successful.
+**** DONE Accept new event bus connections if login was successful.
+     CLOSED: [2019-10-06 Sun 19:53]
 The client will pass a shared login token (not the shared secret) when it
 attempts connection to the server. Requirements:
 
-***** TODO Requirement: Event Bus Connection Login Token Match
+***** DONE Requirement: Event Bus Connection Login Token Match
+      CLOSED: [2019-10-06 Sun 19:53]
 The server shall reject a new event bus connection if the login token is not 
 found in the list of valid login tokens.
 
-***** TODO Requirement: Event Bus Connection Login Token Timeout
+***** DONE Requirement: Event Bus Connection Login Token Timeout
+      CLOSED: [2019-10-06 Sun 19:53]
 The server shall reject a new event bus connection if the login token matches 
 a token in the list of valid login tokens that is older than
 ServerConfiguration.Accounts.HandoffPeriodSeconds.
 
-***** TODO Requirement: Event Bus Connection IP Check
+***** DONE Requirement: Event Bus Connection IP Check
+      CLOSED: [2019-10-06 Sun 19:53]
 The server shall reject a new event bus connection if the connection does not
 originate from the same IP address as the successful login attempt that
 resulted in the generation of the login token.
 
-***** TODO Requirement: Accept New Event Bus Connection
+***** DONE Requirement: Accept New Event Bus Connection
+      CLOSED: [2019-10-06 Sun 19:53]
 The server shall accept a new event bus connection if the login token matches
 a token in the list of valid login tokens and the connection attempt does
 not violate any of the above requirements.
 
-***** TODO Requirement: Event Bus Connection Login Token Purge
+***** DONE Requirement: Event Bus Connection Login Token Purge
+      CLOSED: [2019-10-06 Sun 19:53]
 The server shall remove the login token from the list of valid login tokens
 upon the successful establishment of a new event bus connection.
 

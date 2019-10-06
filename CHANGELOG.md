@@ -6,6 +6,9 @@
 
 #### 06 October 2019
 
+* Add `NewConnectionProcessor` class for processing handoffs from successful
+  login to new event bus connections. This is currently untested; it will
+  undergo integration testing once default login is added to the client.
 * Add support for login handoffs.
 
 #### 05 October 2019
