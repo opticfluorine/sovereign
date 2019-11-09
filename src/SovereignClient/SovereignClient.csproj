@@ -159,6 +159,10 @@
       <Project>{6440b9bb-8545-4d8f-9f89-b8a876cc9977}</Project>
       <Name>EngineUtil</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Performance\Performance.csproj">
+      <Project>{013fee44-5812-4851-b375-3c61228bb23c}</Project>
+      <Name>Performance</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Shaders\Shaders.vcxproj">
       <Project>{10b84ace-b05c-4636-b484-e9edf42210df}</Project>
       <Name>Shaders</Name>

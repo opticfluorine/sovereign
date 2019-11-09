@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,43 +21,18 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace Sovereign.EngineCore.Util
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+
+namespace Sovereign.Performance.Performance
 {
-
-    /// <summary>
-    /// Constants for unit conversions.
-    /// </summary>
-    public static class Units
+    public sealed class PerformanceMonitorInstaller : IWindsorInstaller
     {
-
-        /// <summary>
-        /// Unit conversion constants related to system time.
-        /// </summary>
-        public static class SystemTime
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-
-            /// <summary>
-            /// One minute in system time.
-            /// </summary>
-            public const ulong Minute = 60 * Second;
-
-            /// <summary>
-            /// One second in system time.
-            /// </summary>
-            public const ulong Second = 1000 * Millisecond;
-
-            /// <summary>
-            /// One ms in system time.
-            /// </summary>
-            public const ulong Millisecond = 1000 * Microsecond;
-
-            /// <summary>
-            /// One us in system time.
-            /// </summary>
-            public const ulong Microsecond = 1;
-
+            container.Register(Component.For<EventLatencyPerformanceMonitor>()
+                .LifestyleSingleton());
         }
-
     }
-
 }

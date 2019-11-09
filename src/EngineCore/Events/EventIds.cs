@@ -116,6 +116,16 @@ namespace Sovereign.EngineCore.Events
 
         #endregion WorldManagement
 
+        #region Performance
+
+        /// <summary>
+        /// Sent to perform a local event loop latency test.
+        /// </summary>
+        /// Associated details: TimeEventDetails
+        Core_Performance_EventLatencyTest = 400,
+
+        #endregion Performance
+
         #endregion Core
 
         #region Client

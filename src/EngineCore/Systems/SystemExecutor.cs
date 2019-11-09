@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using System.Collections.Generic;
@@ -101,11 +102,15 @@ namespace Sovereign.EngineCore.Systems
             {
                 foreach (var system in systems)
                 {
-                    system.ExecuteOnce();
+                    try
+                    {
+                        system.ExecuteOnce();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("Unhandled exception in system.", e);
+                    }
                 }
-
-                /* Yield if needed to avoid high CPU usage. */
-                Thread.Sleep(1);
             }
         }
 

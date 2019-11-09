@@ -2,6 +2,19 @@
 
 ## 2019
 
+### November
+
+#### 09 November 2019
+
+* Add `PerformanceSystem` for monitoring engine performance at runtime.
+* Add local event latency monitor to `PerformanceSystem`. This performance
+  monitor tracks the average latency of sending an event across the local event
+  bus to another thread. The value is logged once per minute to the debug log.
+* Remove `Thread.Sleep(1)` call in `SystemExecutor`. The local event latency
+  monitor revealed that the resulting context switches had a large impact on
+  event latency. On my laptop, event latency averages around 35 us without the
+  call, but around 9 ms with - over 250 times slower.
+
 ### October
 
 #### 06 October 2019

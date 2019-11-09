@@ -14,6 +14,7 @@ System | System Class | Description
 `Block` | `BlockSystem` | Responsible for managing the lifecycle of block entities.
 `Movement` | `MovementSystem` | Responsible for controlling the movement of positionable entities.
 `Network` | `NetworkSystem` | Responsible for replicating local events onto the network.
+`Performance` | `PerformanceSystem` | Responsible for monitoring engine performance.
 `WorldManagement` | `WorldManagementSystem` | Responsible for managing the in-memory lifecycle of all entities.
 
 ## Client Systems

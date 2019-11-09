@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.EngineCore.Systems.EventSystem
@@ -73,13 +74,13 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// <summary>
         /// Priority queue of future events ordered by dispatch time.
         /// </summary>
-        private readonly IHeap<Event> FutureEventQueue 
+        private readonly IHeap<Event> futureEventQueue 
             = new BinaryHeap<Event>(QUEUE_SIZE, new EventTimeComparer());
 
         /// <summary>
         /// The system time of the last update step (microseconds).
         /// </summary>
-        private ulong LastUpdateTime;
+        private ulong lastUpdateTime;
 
         public MainEventLoop(ComponentManager componentManager,
             EventAdapterManager eventAdapterManager)
@@ -106,7 +107,7 @@ namespace Sovereign.EngineCore.Systems.EventSystem
             componentManager.UpdateAllComponents();
 
             /* Advance the system time. */
-            LastUpdateTime = systemTime;
+            lastUpdateTime = systemTime;
 
             /* Emit the Core_Tick event. */
             EmitTickEvent();
@@ -153,8 +154,14 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// </summary>
         private void EmitTickEvent()
         {
+            // Emit tick.
             var ev = new Event(EventId.Core_Tick);
             EnqueueEvent(ev);
+
+            // Emit per-tick performance events.
+            var latencyEv = new Event(EventId.Core_Performance_EventLatencyTest, 
+                new TimeEventDetails() { SystemTime = lastUpdateTime });
+            EnqueueEvent(latencyEv);
         }
 
         /// <summary>
@@ -213,7 +220,7 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         private void EnqueueEvent(Event ev)
         {
             /* Is the event to be dispatched immediately? */
-            if (ev.EventTime <= LastUpdateTime)
+            if (ev.EventTime <= lastUpdateTime)
             {
                 /* Dispatch immediately. */
                 DispatchImmediateEvent(ev);
@@ -221,7 +228,7 @@ namespace Sovereign.EngineCore.Systems.EventSystem
             else
             {
                 /* Enqueue for later dispatch. */
-                FutureEventQueue.Add(ev);
+                futureEventQueue.Add(ev);
             }
         }
 
@@ -240,7 +247,7 @@ namespace Sovereign.EngineCore.Systems.EventSystem
             }
 
             /* Set the event time to the current tick time. */
-            ev.EventTime = LastUpdateTime;
+            ev.EventTime = lastUpdateTime;
 
             /* Dispatch to all interested communicators, if any.. */
             if (communicatorsByEventId.ContainsKey(eventId))
@@ -259,10 +266,10 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// <returns>Number of dispatched events.</returns>
         private void DispatchEnqueuedEvents()
         {
-            while (FutureEventQueue.Count > 0 &&
-                FutureEventQueue.Peek().EventTime <= LastUpdateTime)
+            while (futureEventQueue.Count > 0 &&
+                futureEventQueue.Peek().EventTime <= lastUpdateTime)
             {
-                var nextEvent = FutureEventQueue.Pop();
+                var nextEvent = futureEventQueue.Pop();
                 DispatchImmediateEvent(nextEvent);
             }
         }
