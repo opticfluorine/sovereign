@@ -24,16 +24,13 @@
 using Castle.Core;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Configuration;
-using Sovereign.ClientCore.Logging;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sovereign.ClientCore.Events;
+using Sovereign.ClientCore.Rendering.Gui;
 
 namespace Sovereign.ClientCore.Rendering
 {
@@ -43,7 +40,6 @@ namespace Sovereign.ClientCore.Rendering
     /// </summary>
     public class RenderingManager : IStartable
     {
-
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         private readonly MainDisplay mainDisplay;
@@ -52,6 +48,8 @@ namespace Sovereign.ClientCore.Rendering
         private readonly IRenderer renderer;
         private readonly RenderingResourceManager resourceManager;
         private readonly IClientConfiguration clientConfiguration;
+        private readonly SDLEventAdapter sdlEventAdapter;
+        private readonly CommonGuiManager guiManager;
 
         /// <summary>
         /// Error handler.
@@ -70,7 +68,8 @@ namespace Sovereign.ClientCore.Rendering
 
         public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
             DisplayModeSelector displayModeSelector, IRenderer renderer, 
-            RenderingResourceManager resourceManager, IClientConfiguration clientConfiguration)
+            RenderingResourceManager resourceManager, IClientConfiguration clientConfiguration,
+            SDLEventAdapter sdlEventAdapter, CommonGuiManager guiManager)
         {
             this.mainDisplay = mainDisplay;
             this.adapterSelector = adapterSelector;
@@ -78,6 +77,8 @@ namespace Sovereign.ClientCore.Rendering
             this.renderer = renderer;
             this.resourceManager = resourceManager;
             this.clientConfiguration = clientConfiguration;
+            this.sdlEventAdapter = sdlEventAdapter;
+            this.guiManager = guiManager;
         }
 
         public void Start()
@@ -90,6 +91,9 @@ namespace Sovereign.ClientCore.Rendering
 
             /* Initialize the renderer. */
             InitializeRenderer();
+
+            /* Initialize the GUI. */
+            InitializeGUI();
         }
 
         public void Stop()
@@ -106,6 +110,9 @@ namespace Sovereign.ClientCore.Rendering
             {
                 Logger.Error("Error while cleaning up the renderer.", e);
             }
+
+            /* Clean up GUI resources. */
+            guiManager.Dispose();
 
             /* Close the main window. */
             mainDisplay.Close();
@@ -155,6 +162,25 @@ namespace Sovereign.ClientCore.Rendering
             {
                 /* Fatal error - can't initialize the renderer. */
                 var msg = "Failed to initialize the renderer.";
+                Logger.Fatal(msg, e);
+                ErrorHandler.Error(e.Message);
+                throw new FatalErrorException(msg, e);
+            }
+        }
+
+        /// <summary>
+        /// Initializes the GUI.
+        /// </summary>
+        private void InitializeGUI()
+        {
+            try
+            {
+                guiManager.Initialize();
+            }
+            catch (Exception e)
+            {
+                /* Fatal error - can't initialize the GUI. */
+                var msg = "Failed to initialize the GUI.";
                 Logger.Fatal(msg, e);
                 ErrorHandler.Error(e.Message);
                 throw new FatalErrorException(msg, e);

@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Sovereign.ClientCore.Rendering.Gui;
 
 namespace Sovereign.ClientCore.Events
 {
@@ -38,9 +39,12 @@ namespace Sovereign.ClientCore.Events
     /// </summary>
     public class SDLEventAdapter : IEventAdapter
     {
+        private readonly CommonGuiManager guiManager;
 
-        public SDLEventAdapter(EventAdapterManager adapterManager)
+        public SDLEventAdapter(EventAdapterManager adapterManager, CommonGuiManager guiManager)
         {
+            this.guiManager = guiManager;
+
             adapterManager.RegisterEventAdapter(this);
         }
 
@@ -56,8 +60,16 @@ namespace Sovereign.ClientCore.Events
              * or no events remain.
              */
             ev = null;
-            while (ev == null && SDL.SDL_PollEvent(out SDL.SDL_Event sdlEv) == 1)
+            while (ev == null && SDL.SDL_PollEvent(out var sdlEv) == 1)
             {
+                /*
+                 * Occasionally the GUI system will entirely consume keyboard
+                 * and mouse events. When this occurs, we do not convert the
+                 * SDL event to the corresponding internal event.
+                 */
+                guiManager.ProcessEvent(ref sdlEv, out var shouldDispatch);
+                if (!shouldDispatch) continue;
+
                 switch (sdlEv.type)
                 {
                     case SDL.SDL_EventType.SDL_QUIT:

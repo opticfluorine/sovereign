@@ -4,6 +4,16 @@
 
 ### November
 
+#### 24 November 2019
+
+* Refactor code around `SDLEventAdapter` to tie in ImGui. At this point ImGui
+  should be integrated with SDL2. The next step to to integrate ImGui with the
+  D3D11 renderer.
+
+#### 17 November 2019
+
+* Begin integrating ImGui into the client.
+
 #### 09 November 2019
 
 * Add `PerformanceSystem` for monitoring engine performance at runtime.

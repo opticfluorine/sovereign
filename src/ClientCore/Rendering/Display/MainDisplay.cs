@@ -47,7 +47,7 @@ namespace Sovereign.ClientCore.Rendering.Display
         /// <summary>
         /// Main window handle.
         /// </summary>
-        private IntPtr windowHandle;
+        public IntPtr WindowHandle { get; private set; }
 
         /// <summary>
         /// The HWND associated with the created window.
@@ -57,7 +57,7 @@ namespace Sovereign.ClientCore.Rendering.Display
             get
             {
                 SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
-                SDL.SDL_GetWindowWMInfo(windowHandle, ref info);
+                SDL.SDL_GetWindowWMInfo(WindowHandle, ref info);
                 return info.info.win.window;
             }
         }
@@ -73,16 +73,11 @@ namespace Sovereign.ClientCore.Rendering.Display
         public bool IsFullscreen { get; private set; }
 
         /// <summary>
-        /// Creates the display.
+        /// Whether the window currently has input focus.
         /// </summary>
-        /// <param name="eventAdapter">
-        /// SDL event adapter. It is anchored here for IoC resolution since
-        /// the SDL library is managed outside of the object graph.
-        /// </param>
-        public MainDisplay(SDLEventAdapter eventAdapter)
-        {
-
-        }
+        public bool IsInputFocus =>
+            (SDL.SDL_GetWindowFlags(WindowHandle)
+             & (uint)SDL.SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS) != 0;
 
         /// <summary>
         /// Shows the main window.
@@ -96,7 +91,7 @@ namespace Sovereign.ClientCore.Rendering.Display
 
             /* Create the main window. */
             DisplayMode = displayMode;
-            windowHandle = SDL.SDL_CreateWindow(TITLE, 
+            WindowHandle = SDL.SDL_CreateWindow(TITLE, 
                 SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
                 displayMode.Width, displayMode.Height, 
                 GetWindowFlags());
@@ -107,7 +102,7 @@ namespace Sovereign.ClientCore.Rendering.Display
         /// </summary>
         public void Close()
         {
-            SDL.SDL_DestroyWindow(windowHandle);
+            SDL.SDL_DestroyWindow(WindowHandle);
         }
 
         private SDL.SDL_WindowFlags GetWindowFlags()
