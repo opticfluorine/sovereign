@@ -48,7 +48,7 @@ stage is invoked, where the required ImGui calls are made and the buffers are
 generated. Second the buffers are passed to the renderer, and the appropriate
 graphics API calls are made to perform the GUI rendering.
 
-****** TODO Merge ImGui texture atlas into global texture atlas.
+****** DONE Merge ImGui texture atlas into global texture atlas.
 Eventually we will want to render sprites from the global texture atlas within
 ImGui controls (e.g. for an inventory window). Merging the ImGui texture atlas
 into the global texture atlas will eliminate the need for extra texture

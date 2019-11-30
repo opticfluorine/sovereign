@@ -86,14 +86,14 @@ namespace Sovereign.ClientCore.Rendering
             /* Create the main display. */
             CreateMainDisplay();
 
+            /* Initialize the GUI. */
+            InitializeGUI();
+
             /* Load resources used by the renderer. */
             LoadResources();
 
             /* Initialize the renderer. */
             InitializeRenderer();
-
-            /* Initialize the GUI. */
-            InitializeGUI();
         }
 
         public void Stop()

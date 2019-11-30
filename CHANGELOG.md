@@ -4,6 +4,11 @@
 
 ### November
 
+#### 29 November 2019
+
+* Merge the ImGui font atlas into the main `TextureAtlas`. This will allow for
+  rendering both text and sprites without re-binding a texture on the GPU.
+
 #### 24 November 2019
 
 * Refactor code around `SDLEventAdapter` to tie in ImGui. At this point ImGui

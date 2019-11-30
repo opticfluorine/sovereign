@@ -116,6 +116,7 @@
     <Compile Include="Rendering\Display\MainDisplay.cs" />
     <Compile Include="Rendering\GUI\CommonGuiInstaller.cs" />
     <Compile Include="Rendering\GUI\CommonGuiManager.cs" />
+    <Compile Include="Rendering\GUI\GuiFontAtlas.cs" />
     <Compile Include="Rendering\IRenderer.cs" />
     <Compile Include="Rendering\Materials\RenderingMaterial.cs" />
     <Compile Include="Rendering\Materials\RenderingMaterialException.cs" />

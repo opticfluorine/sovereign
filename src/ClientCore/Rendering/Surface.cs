@@ -153,6 +153,36 @@ namespace Sovereign.ClientCore.Rendering
         }
 
         /// <summary>
+        /// Creates a new surface from a copy of the given raw pixel data.
+        /// </summary>
+        /// <param name="pixelData">Pointer to pixel data.</param>
+        /// <param name="width">Width of the surface in pixels.</param>
+        /// <param name="height">Height of the surface in pixels.</param>
+        /// <param name="format">Format of the pixel data and of the surface.</param>
+        /// <returns>New surface containing a copy of the pixel data in the source format.</returns>
+        public static Surface CreateSurfaceFrom(IntPtr pixelData, int width, int height, DisplayFormat format)
+        {
+            /* Look up the format. */
+            if (SDL.SDL_PixelFormatEnumToMasks(formatMap[format], out int bpp, out uint rmask, out uint gmask,
+                    out uint bmask, out uint amask) == SDL.SDL_bool.SDL_FALSE)
+            {
+                throw new SurfaceException(SDL.SDL_GetError());
+            }
+
+            /* Create the surface. */
+            var pitch = (bpp / 8) * width;
+            var sdlSurface = SDL.SDL_CreateRGBSurfaceFrom(pixelData, width, height, bpp,
+                pitch, rmask, gmask, bmask, amask);
+            var surface = new Surface(sdlSurface);
+            if (!surface.IsValid)
+            {
+                throw new SurfaceException(SDL.SDL_GetError());
+            }
+
+            return surface;
+        }
+
+        /// <summary>
         /// Blits the entire surface onto a destination surface.
         /// </summary>
         /// <param name="dest">Destination surface.</param>

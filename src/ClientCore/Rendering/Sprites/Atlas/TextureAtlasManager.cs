@@ -27,6 +27,7 @@ using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using System;
 using System.Text;
+using Sovereign.ClientCore.Rendering.GUI;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
 {
@@ -56,10 +57,14 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         /// </summary>
         private readonly SpriteSheetManager spriteSheetManager;
 
-        public TextureAtlasManager(MainDisplay mainDisplay, SpriteSheetManager spriteSheetManager)
+        private readonly GuiFontAtlas fontAtlas;
+
+        public TextureAtlasManager(MainDisplay mainDisplay, SpriteSheetManager spriteSheetManager,
+            GuiFontAtlas fontAtlas)
         {
             this.mainDisplay = mainDisplay;
             this.spriteSheetManager = spriteSheetManager;
+            this.fontAtlas = fontAtlas;
         }
 
         /// <summary>
@@ -72,7 +77,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
             try
             {
                 TextureAtlas = new TextureAtlas(spriteSheetManager.SpriteSheets.Values,
-                    mainDisplay.DisplayMode.DisplayFormat);
+                    fontAtlas, mainDisplay.DisplayMode.DisplayFormat);
             }
             catch (Exception e)
             {

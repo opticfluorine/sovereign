@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
@@ -21,26 +21,36 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.ClientCore.Rendering.GUI;
+/*
+ * Based on the vertex shader included in the D3D11 example for the Dear ImGui
+ * library by Omar Cornut. (imgui_impl_dx11.cpp)
+ * https://github.com/ocornut/imgui/blob/ca63349eb4d3d97adf9214eb02ee066d85029a17/examples/imgui_impl_dx11.cpp
+ */
 
-namespace Sovereign.ClientCore.Rendering.Gui
+cbuffer ShaderConstants : register(b0)
 {
+	float4x4 ProjectionMatrix;
+};
 
-    /// <summary>
-    /// IoC installer for platform-independent GUI support.
-    /// </summary>
-    public class CommonGuiInstaller : IWindsorInstaller
-    {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<CommonGuiManager>()
-                .LifestyleSingleton());
+struct VsInput
+{
+	float2 pos : POSITION;
+	float4 col : COLOR0;
+	float2 uv  : TEXCOORD0;
+};
 
-            container.Register(Component.For<GuiFontAtlas>()
-                .LifestyleSingleton());
-        }
-    }
+struct VsOutput
+{
+	float4 pos : SV_POSITION;
+	float4 col : COLOR0;
+	float2 uv  : TEXCOORD0;
+};
+
+VsOutput main(VsInput input)
+{
+	VsOutput output;
+	output.pos = mul(ProjectionMatrix, float4(input.pos.xy, 0.f, 1.f));
+	output.col = input.col;
+	output.uv = input.uv;
+	return output;
 }
