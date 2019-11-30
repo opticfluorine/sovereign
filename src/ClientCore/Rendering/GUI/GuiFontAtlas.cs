@@ -44,6 +44,16 @@ namespace Sovereign.ClientCore.Rendering.GUI
         private Surface fontAtlasSurface;
 
         /// <summary>
+        /// Width.
+        /// </summary>
+        private int width;
+
+        /// <summary>
+        /// Height.
+        /// </summary>
+        private int height;
+
+        /// <summary>
         /// Gets a pointer to the SDL surface containing the font atlas.
         /// </summary>
         public Surface FontAtlasSurface
@@ -62,12 +72,34 @@ namespace Sovereign.ClientCore.Rendering.GUI
         /// <summary>
         /// Width of the font atlas, in pixels.
         /// </summary>
-        public int Width { get; private set; }
+        public int Width
+        {
+            get
+            {
+                if (fontAtlasSurface == null)
+                {
+                    InitializeSurface();
+                }
+
+                return width;
+            }
+        }
 
         /// <summary>
         /// Height of the font atlas, in pixels.
         /// </summary>
-        public int Height { get; private set; }
+        public int Height
+        {
+            get
+            {
+                if (fontAtlasSurface == null)
+                {
+                    InitializeSurface();
+                }
+
+                return height;
+            }
+        }
 
         public void Dispose()
         {
@@ -82,8 +114,8 @@ namespace Sovereign.ClientCore.Rendering.GUI
             // Retrieve raw data from ImGui.
             ImGui.GetIO().Fonts.GetTexDataAsRGBA32(out IntPtr outPixels, 
                 out var outWidth, out var outHeight);
-            Width = outWidth;
-            Height = outHeight;
+            width = outWidth;
+            height = outHeight;
 
             // Create an SDL_Surface to hold the atlas.
             fontAtlasSurface = Surface.CreateSurfaceFrom(outPixels, outWidth, outHeight, 

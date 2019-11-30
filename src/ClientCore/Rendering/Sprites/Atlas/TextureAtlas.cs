@@ -212,7 +212,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
             }
 
             /* Advance to the next position. */
-            maximumRowWidth = Math.Max(maximumRowWidth, baseX);
+            maximumRowWidth = Math.Max(maximumRowWidth, newBaseX);
             currentRowHeight = Math.Max(currentRowHeight, height);
         }
 
