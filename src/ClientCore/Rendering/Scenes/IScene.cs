@@ -22,13 +22,8 @@
  */
 
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
-using Sovereign.ClientCore.Rendering.Scenes.Game;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+using ImGuiNET;
 
 namespace Sovereign.ClientCore.Rendering.Scenes
 {
@@ -43,6 +38,11 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         /// Type of scene. This determines how the renderer processes the scene.
         /// </summary>
         SceneType SceneType { get; }
+
+        /// <summary>
+        /// Flag indicating whether the GUI should be rendered in this scene.
+        /// </summary>
+        bool RenderGui { get; }
 
         /// <summary>
         /// Called when the renderer starts rendering this scene.
@@ -82,6 +82,16 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
         void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles,
             out Vector3 cameraPos, out float timeSinceTick);
+
+        /// <summary>
+        /// Populates the various buffers used for GUI rendering.
+        /// </summary>
+        /// <param name="vertexBuffer">Vertex buffer to be populated.</param>
+        /// <param name="indexBuffer">Index buffer to be populated.</param>
+        /// <remarks>
+        /// This method will only be called if RenderGui is true.
+        /// </remarks>
+        void PopulateGuiBuffers(ImDrawVert[] vertexBuffer, ushort[] indexBuffer);
 
     }
 
