@@ -42,12 +42,17 @@ namespace Sovereign.ClientCore.Rendering.Configuration
         /// <summary>
         /// Default width.
         /// </summary>
-        private const int DefaultWidth = 1366;
+        private const int DefaultWidth = 1280;
 
         /// <summary>
         /// Default height.
         /// </summary>
-        private const int DefaultHeight = 768;
+        private const int DefaultHeight = 720;
+
+        /// <summary>
+        /// Comparison tolerance for aspect ratio.
+        /// </summary>
+        private const double AspectRatioTolerance = 1E-1;
 
         /// <summary>
         /// Display mode enumerator.
@@ -88,11 +93,20 @@ namespace Sovereign.ClientCore.Rendering.Configuration
             }
             else
             {
-                /* Preferred mode not found, use the highest resolution mode. */
+                /* Preferred mode not found, use the highest resolution mode that matches the aspect ratio. */
+                var aspectRatio = (double)DefaultWidth / DefaultHeight;
                 var resSortedModes = from mode in availableModes
+                                     where Math.Abs((double)mode.Width / mode.Height - aspectRatio) < AspectRatioTolerance
                                      orderby mode.Width * mode.Height descending
                                      select mode;
-                selectedMode = resSortedModes.First();
+                try
+                {
+                    selectedMode = resSortedModes.First();
+                }
+                catch
+                {
+                    throw new VideoAdapterException("No display modes found for selected video adapter.");
+                }
             }
 
             /* Log the decision and return. */

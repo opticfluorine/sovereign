@@ -6,6 +6,8 @@
 
 #### 22 March 2020
 
+* When selecting the initial screen resolution, only consider display modes
+  with the same aspect ratio as the default screen resolution.
 * Update video adapter selection logic to only select devices with one or
   more display outputs. This adds support for certain devices with multiple
   GPUs where one GPU serves as the "primary" GPU and the driver makes its
