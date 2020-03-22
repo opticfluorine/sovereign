@@ -84,13 +84,17 @@ namespace Sovereign.EngineCore.Systems.Block
         {
         }
 
-        public void ExecuteOnce()
+        public int ExecuteOnce()
         {
+            var eventsProcessed = 0;
             while (EventCommunicator.GetIncomingEvent(out var ev))
             {
                 Logger.DebugFormat("Received event with type {0}.", ev.EventId);
                 eventHandler.HandleEvent(ev);
+                eventsProcessed++;
             }
+
+            return eventsProcessed;
         }
 
     }

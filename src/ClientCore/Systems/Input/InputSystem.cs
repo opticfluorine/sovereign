@@ -81,9 +81,10 @@ namespace Sovereign.ClientCore.Systems.Input
             
         }
 
-        public void ExecuteOnce()
+        public int ExecuteOnce()
         {
             /* Poll for events. */
+            var eventsProcessed = 0;
             while (EventCommunicator.GetIncomingEvent(out var ev))
             {
                 switch (ev.EventId)
@@ -98,7 +99,11 @@ namespace Sovereign.ClientCore.Systems.Input
                     default:
                         break;
                 }
+
+                eventsProcessed++;
             }
+
+            return eventsProcessed;
         }
 
     }

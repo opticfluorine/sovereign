@@ -63,7 +63,8 @@ namespace Sovereign.EngineCore.Systems
         /// <summary>
         /// Executes the system once.
         /// </summary>
-        void ExecuteOnce();
+        /// <returns>Number of events processed by the system during this call.</returns>
+        int ExecuteOnce();
 
     }
 

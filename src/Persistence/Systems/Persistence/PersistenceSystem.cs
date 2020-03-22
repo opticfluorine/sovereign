@@ -112,12 +112,16 @@ namespace Sovereign.Persistence.Systems.Persistence
             Logger.Info("Persistence system started.");
         }
 
-        public void ExecuteOnce()
+        public int ExecuteOnce()
         {
+            var eventsProcessed = 0;
             while (EventCommunicator.GetIncomingEvent(out var ev))
             {
                 eventHandler.HandleEvent(ev);
+                eventsProcessed++;
             }
+
+            return eventsProcessed;
         }
 
         public void Cleanup()

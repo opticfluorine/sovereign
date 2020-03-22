@@ -71,12 +71,16 @@ namespace Sovereign.WorldManagement.Systems.WorldManagement
 
         }
 
-        public void ExecuteOnce()
+        public int ExecuteOnce()
         {
+            var eventsProcessed = 0;
             while (EventCommunicator.GetIncomingEvent(out var ev))
             {
                 eventHandler.HandleEvent(ev);
+                eventsProcessed++;
             }
+
+            return eventsProcessed;
         }
 
         public void Initialize()

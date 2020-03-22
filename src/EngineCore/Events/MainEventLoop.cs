@@ -89,13 +89,15 @@ namespace Sovereign.EngineCore.Systems.EventSystem
             this.eventAdapterManager = eventAdapterManager;
         }
 
-        public void PumpEventLoop()
+        public int PumpEventLoop()
         {
             /* Retrieve pending events from the communicators. */
-            RetrievePendingEvents();
+            var eventsProcessed = RetrievePendingEvents();
 
             /* Retrieve events from the event adapters. */
-            RetrieveAdaptedEvents();
+            eventsProcessed += RetrieveAdaptedEvents();
+
+            return eventsProcessed;
         }
 
         /// <summary>
@@ -186,22 +188,33 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// <summary>
         /// Retrieves pending events from the communicators.
         /// </summary>
-        private void RetrievePendingEvents()
+        /// <returns>
+        /// Number of events processed.
+        /// </returns>
+        private int RetrievePendingEvents()
         {
+            var eventsProcessed = 0;
             foreach (var eventSender in eventSenders)
             {
                 while (eventSender.TryGetOutgoingEvent(out var ev))
                 {
                     EnqueueEvent(ev);
+                    eventsProcessed++;
                 }
             }
+
+            return eventsProcessed;
         }
         
         /// <summary>
         /// Retrieves and enqueues all available events from the IEventAdapters.
         /// </summary>
-        private void RetrieveAdaptedEvents()
+        /// <returns>
+        /// Number of events processed.
+        /// </returns>
+        private int RetrieveAdaptedEvents()
         {
+            var eventsProcessed = 0;
             foreach (IEventAdapter eventAdapter in eventAdapterManager.EventAdapters)
             {
                 eventAdapter.PrepareEvents();
@@ -209,8 +222,11 @@ namespace Sovereign.EngineCore.Systems.EventSystem
                 while (eventAdapter.PollEvent(out Event ev))
                 {
                     EnqueueEvent(ev);
+                    eventsProcessed++;
                 }
             }
+
+            return eventsProcessed;
         }
 
         /// <summary>

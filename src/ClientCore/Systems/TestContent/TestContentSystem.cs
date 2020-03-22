@@ -84,9 +84,10 @@ namespace Sovereign.ClientCore.Systems.TestContent
 
         }
 
-        public void ExecuteOnce()
+        public int ExecuteOnce()
         {
             /* No action. */
+            return 0;
         }
 
         public void Dispose()

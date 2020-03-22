@@ -88,9 +88,10 @@ namespace Sovereign.EngineCore.Systems.Movement
             
         }
 
-        public void ExecuteOnce()
+        public int ExecuteOnce()
         {
             /* Poll for movement-related events. */
+            var eventsProcessed = 0;
             while (EventCommunicator.GetIncomingEvent(out Event ev))
             {
                 switch (ev.EventId)
@@ -115,7 +116,11 @@ namespace Sovereign.EngineCore.Systems.Movement
                         Logger.WarnFormat("Unhandled event with ID = {0}.", ev.EventId);
                         break;
                 }
+
+                eventsProcessed++;
             }
+
+            return eventsProcessed;
         }
 
         /// <summary>

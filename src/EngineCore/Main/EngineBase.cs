@@ -58,6 +58,14 @@ namespace Sovereign.EngineCore.Main
         private readonly EventDescriptions eventDescriptions;
 
         /// <summary>
+        /// If the main loop processes less than this many events in a single pass,
+        /// the main thread will sleep instead of yielding its timeslice. This reduces
+        /// CPU utilization during light workloads in exchange for a temporary increase
+        /// in main loop latency.
+        /// </summary>
+        private const int ThreadSleepEventLimit = 8;
+
+        /// <summary>
         /// Main loop cycle count.
         /// </summary>
         private ulong cycleCount = 0;
@@ -112,13 +120,13 @@ namespace Sovereign.EngineCore.Main
                 timeManager.AdvanceTime();
 
                 /* Drive the event loop. */
-                eventLoop.PumpEventLoop();
+                var eventsProcessed = eventLoop.PumpEventLoop();
 
                 /* Perform any main loop actions that are ready. */
                 PerformMainLoopActions();
 
                 /* Yield to avoid consuming 100% CPU. */
-                Thread.Sleep(0);
+                Thread.Sleep(eventsProcessed < ThreadSleepEventLimit ? 1 : 0);
             }
         }
 

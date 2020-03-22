@@ -89,8 +89,9 @@ namespace Sovereign.Performance.Systems.Performance
         {
         }
 
-        public void ExecuteOnce()
+        public int ExecuteOnce()
         {
+            var eventsProcessed = 0;
             while (EventCommunicator.GetIncomingEvent(out var ev))
             {
                 switch (ev.EventId)
@@ -103,7 +104,10 @@ namespace Sovereign.Performance.Systems.Performance
                         eventLatency.OnPerformanceEvent(ev.EventDetails);
                         break;
                 }
+                eventsProcessed++;
             }
+
+            return eventsProcessed;
         }
 
         /// <summary>

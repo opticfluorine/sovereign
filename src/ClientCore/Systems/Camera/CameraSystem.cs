@@ -87,13 +87,17 @@ namespace Sovereign.ClientCore.Systems.Camera
         {
         }
 
-        public void ExecuteOnce()
+        public int ExecuteOnce()
         {
             /* Poll for events. */
+            var eventsProcessed = 0;
             while (EventCommunicator.GetIncomingEvent(out var ev))
             {
                 eventHandler.HandleEvent(ev);
+                eventsProcessed++;
             }
+
+            return eventsProcessed;
         }
 
    }

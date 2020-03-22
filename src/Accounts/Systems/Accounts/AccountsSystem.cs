@@ -76,8 +76,9 @@ namespace Sovereign.Accounts.Systems.Accounts
         {
         }
 
-        public void ExecuteOnce()
+        public int ExecuteOnce()
         {
+            var eventsProcessed = 0;
             while (EventCommunicator.GetIncomingEvent(out var ev))
             {
                 ticksSincePurge++;
@@ -87,7 +88,11 @@ namespace Sovereign.Accounts.Systems.Accounts
                     sharedSecretManager.PurgeOldSecrets();
                     ticksSincePurge = 0;
                 }
+
+                eventsProcessed++;
             }
+
+            return eventsProcessed;
         }
 
         public void Initialize()

@@ -49,6 +49,13 @@ namespace Sovereign.EngineCore.Systems
         /// </summary>
         private readonly IEventLoop eventLoop;
 
+        /// <summary>
+        /// An executor thread will sleep if it processes less than this number
+        /// of events in a single pass. This reduces system load under light
+        /// conditions in exchange for a temporary increase in event latency.
+        /// </summary>
+        private const int ThreadYieldEventLimit = 10;
+
         public SystemExecutor(IEventLoop eventLoop)
         {
             this.eventLoop = eventLoop;
@@ -100,16 +107,29 @@ namespace Sovereign.EngineCore.Systems
         {
             while (!eventLoop.Terminated)
             {
+                // Keep track of events processed for later load balancing.
+                var eventsProcessed = 0;
+
+                // Execute all systems.
                 foreach (var system in systems)
                 {
                     try
                     {
-                        system.ExecuteOnce();
+                        eventsProcessed += system.ExecuteOnce();
                     }
                     catch (Exception e)
                     {
                         Log.Error("Unhandled exception in system.", e);
                     }
+                }
+
+                // Check if this thread's workload is light.
+                if (eventsProcessed < ThreadYieldEventLimit)
+                {
+                    // This thread's current workload is light, so yield the thread
+                    // to the OS. This reduces our utilization in exchange for a
+                    // temporary increase in event latency on this thread.
+                    Thread.Sleep(1);
                 }
             }
         }

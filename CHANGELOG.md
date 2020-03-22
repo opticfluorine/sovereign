@@ -6,6 +6,9 @@
 
 #### 22 March 2020
 
+* Add throttling to all threads to reduce CPU utilization under light
+  workloads. The throttling is automatically disabled when the number of
+  events processed per loop exceeds a threshold.
 * When selecting the initial screen resolution, only consider display modes
   with the same aspect ratio as the default screen resolution.
 * Update video adapter selection logic to only select devices with one or

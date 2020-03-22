@@ -68,9 +68,10 @@ namespace Sovereign.NetworkCore.Systems.Network
             networkingService.Stop();
         }
 
-        public void ExecuteOnce()
+        public int ExecuteOnce()
         {
             /* Process outgoing local events. */
+            var eventsProcessed = 0;
             while (EventCommunicator.GetIncomingEvent(out var ev))
             {
                 /* Discard nonlocal events. */
@@ -78,7 +79,10 @@ namespace Sovereign.NetworkCore.Systems.Network
 
                 /* Enqueue to send. */
                 networkingService.EventsToSend.Enqueue(ev);
+                eventsProcessed++;
             }
+
+            return eventsProcessed;
         }
 
         public void Initialize()

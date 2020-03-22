@@ -43,7 +43,10 @@ namespace Sovereign.EngineCore.Events
         /// <summary>
         /// Pumps the event loop.
         /// </summary>
-        void PumpEventLoop();
+        /// <returns>
+        /// Number of events processed by this call.
+        /// </returns>
+        int PumpEventLoop();
 
         /// <summary>
         /// Whether the event loop has terminated.
