@@ -81,7 +81,8 @@ namespace Sovereign.ClientCore.Rendering.Configuration
             var adapters = adapterEnumerator.EnumerateVideoAdapters();
             try
             {
-                var selected = adapters.OrderByDescending(
+                var selected = adapters.Where(adapter => adapter.OutputCount > 0)
+                    .OrderByDescending(
                         adapter => adapter.DedicatedGraphicsMemory * DedicatedGpuFactor
                                 + adapter.DedicatedSystemMemory * DedicatedCpuFactor
                                 + adapter.SharedSystemMemory * SharedFactor

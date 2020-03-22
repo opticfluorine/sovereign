@@ -22,6 +22,7 @@
  */
 
 using System.Numerics;
+using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
@@ -57,6 +58,8 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
         private float timeSinceTick;
 
         public SceneType SceneType => SceneType.Game;
+
+        public bool RenderGui => true;
 
         public GameScene(ISystemTimer systemTimer, IEngineConfiguration engineConfiguration,
             GameSceneCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
@@ -94,6 +97,11 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game
             heightInTiles = viewport.HeightInTiles;
             cameraPos = camera.Aim(this.timeSinceTick);
             timeSinceTick = this.timeSinceTick;
+        }
+
+        public void PopulateGuiBuffers(ImDrawVert[] vertexBuffer, ushort[] indexBuffer)
+        {
+            // TODO
         }
 
         /// <summary>

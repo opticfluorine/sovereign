@@ -69,8 +69,9 @@ namespace Sovereign.D3D11Renderer.Rendering.Configuration
                 DedicatedGraphicsMemory = adapter.Description.DedicatedVideoMemory,
                 DedicatedSystemMemory = adapter.Description.DedicatedSystemMemory,
                 SharedSystemMemory = adapter.Description.SharedSystemMemory,
+                OutputCount = adapter.Outputs.Length,
                 AdapterName = adapter.Description.Description,
-                InternalAdapter = adapter,
+                InternalAdapter = adapter
             };
             return converted;
         }

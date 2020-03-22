@@ -1,5 +1,18 @@
 # Sovereign Engine Changelog
 
+## 2020
+
+### March
+
+#### 22 March 2020
+
+* Update video adapter selection logic to only select devices with one or
+  more display outputs. This adds support for certain devices with multiple
+  GPUs where one GPU serves as the "primary" GPU and the driver makes its
+  own selection of the actual device to use (for example, certain laptops
+  with Radeon integrated graphics). It also handles the edge case where
+  the most powerful GPU is a compute-only card.
+
 ## 2019
 
 ### November

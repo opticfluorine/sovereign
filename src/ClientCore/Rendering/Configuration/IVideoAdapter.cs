@@ -52,6 +52,12 @@ namespace Sovereign.ClientCore.Rendering.Configuration
         long SharedSystemMemory { get; }
 
         /// <summary>
+        /// The number of outputs supported by this device.
+        /// Used to filter devices that cannot be used directly.
+        /// </summary>
+        int OutputCount { get; }
+
+        /// <summary>
         /// Short name of the adapter.
         /// </summary>
         string AdapterName { get; }
