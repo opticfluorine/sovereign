@@ -2,6 +2,11 @@
 
 ## 2020
 
+### 03 May 2020
+
+* Update the roadmap with more features. Reorder some of the milestone features
+  to reflect current development.
+
 ### March
 
 #### 22 March 2020

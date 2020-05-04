@@ -63,7 +63,10 @@ namespace Sovereign.EngineCore.Main
         /// CPU utilization during light workloads in exchange for a temporary increase
         /// in main loop latency.
         /// </summary>
-        private const int ThreadSleepEventLimit = 8;
+        /// <remarks>
+        /// This can be set to zero to disable.
+        /// </remarks>
+        private const int ThreadSleepEventLimit = 0;
 
         /// <summary>
         /// Main loop cycle count.
