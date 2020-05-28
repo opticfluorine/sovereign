@@ -2,7 +2,16 @@
 
 ## 2020
 
-### 03 May 2020
+### May
+
+#### 28 May 2020
+
+* Change license from MIT license to AGPL 3. The change to a more restrictive
+  open source license was done to ensure that the use of the Sovereign Engine
+  supports its goals of creating an open set of development tools for 2D
+  MMORPGs.
+
+#### 03 May 2020
 
 * Update the roadmap with more features. Reorder some of the milestone features
   to reflect current development.
