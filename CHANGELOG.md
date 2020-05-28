@@ -1,11 +1,181 @@
 # Sovereign Engine Changelog
 
-## 2019
+## 2020
 
 ### May
 
+#### 28 May 2020
+
+* Change license from MIT license to AGPL 3. The change to a more restrictive
+  open source license was done to ensure that the use of the Sovereign Engine
+  supports its goals of creating an open set of development tools for 2D
+  MMORPGs.
+
+#### 03 May 2020
+
+* Update the roadmap with more features. Reorder some of the milestone features
+  to reflect current development.
+
+### March
+
+#### 22 March 2020
+
+* Add throttling to all threads to reduce CPU utilization under light
+  workloads. The throttling is automatically disabled when the number of
+  events processed per loop exceeds a threshold.
+* When selecting the initial screen resolution, only consider display modes
+  with the same aspect ratio as the default screen resolution.
+* Update video adapter selection logic to only select devices with one or
+  more display outputs. This adds support for certain devices with multiple
+  GPUs where one GPU serves as the "primary" GPU and the driver makes its
+  own selection of the actual device to use (for example, certain laptops
+  with Radeon integrated graphics). It also handles the edge case where
+  the most powerful GPU is a compute-only card.
+
+## 2019
+
+### November
+
+#### 29 November 2019
+
+* Merge the ImGui font atlas into the main `TextureAtlas`. This will allow for
+  rendering both text and sprites without re-binding a texture on the GPU.
+
+#### 24 November 2019
+
+* Refactor code around `SDLEventAdapter` to tie in ImGui. At this point ImGui
+  should be integrated with SDL2. The next step to to integrate ImGui with the
+  D3D11 renderer.
+
+#### 17 November 2019
+
+* Begin integrating ImGui into the client.
+
+#### 09 November 2019
+
+* Add `PerformanceSystem` for monitoring engine performance at runtime.
+* Add local event latency monitor to `PerformanceSystem`. This performance
+  monitor tracks the average latency of sending an event across the local event
+  bus to another thread. The value is logged once per minute to the debug log.
+* Remove `Thread.Sleep(1)` call in `SystemExecutor`. The local event latency
+  monitor revealed that the resulting context switches had a large impact on
+  event latency. On my laptop, event latency averages around 35 us without the
+  call, but around 9 ms with - over 250 times slower.
+
+### October
+
+#### 06 October 2019
+
+* Add `NewConnectionProcessor` class for processing handoffs from successful
+  login to new event bus connections. This is currently untested; it will
+  undergo integration testing once default login is added to the client.
+* Add support for login handoffs.
+
+#### 05 October 2019
+
+* Add `TODO.org` for tracking sub-issue-level development tasks.
+
+### September
+
+#### 15 September 2019
+
+* Add REST service for account login.
+
+#### 02 September 2019
+
+* Add REST service for account registration.
+
+#### 01 September 2019
+
+* Add registration support to the account services.
+
+### August
+
+#### 20 August 2019
+
+* Add account services to be consumed by the REST API and network code that
+  cares about authentication.
+* Add `AccountsSystem` which currently drives a periodic purge of the list
+  of accounts which are currently locked out due to too many failed
+  login attempts.
+
+#### 18 August 2019
+
+* Start adding authentication code.
+* Add account retrieval services to `Persistence`.
+* Add account queries to `Persistence`.
+
+### July
+
+#### 07 July 2019
+
+* Add an embedded HTTP server for exposing REST APIs. This will be used for
+  out-of-band communications including authentication and block data transfer.
+* Wire up network pipelines.
+
+#### 05 July 2019
+
+* Implement `ClientNetworkManager`. Still need to test everything.
+* Implement `ServerNetworkManager`. It should be possible to connect to the
+  server now, or at least it will be once the client-side networking is
+  implemented.
+
+#### 04 July 2019
+
+* Update network documentation to cover the HMAC key.
+* Update roadmap.
+
+#### 02 July 2019
+
+* Add support for serializing packets.
+
+#### 01 July 2019
+
+* Add support for deserializing packets.
+* When debug logging is enabled, output the full mapping between `EventId` and
+  `IEventDetails` at startup.
+
+### June
+
+#### 30 June 2019
+
+* Add `EventDescriptions` for mapping entity IDs to their corresponding
+  `IEventDetails` types. Events are dynamically registered in the constructors
+  of the responsible systems.
+* Add network configuration to server.
+* Open server port at startup.
+* Refactor code around `IEventAdapter` to avoid unnecessary cyclic
+  dependencies. This eliminates dependencies on collections of adapters
+  and instead registers adapters with the `EventAdapterManager` from their
+  constructors. This has the side effect of requiring each event adapter to
+  be depended on by another class; the three existing adapters have been
+  linked to relevant classes. It's still not a great solution, but it's a step
+  forward from collection dependence.
+
+#### 26 June 2019
+
+* After taking a month away, continue working on networking design.
+
+### May
+
+#### 19 May 2019
+
+* Wire up the inbound and outbound network pipelines. Output a summary to the
+  log at startup (debug level only).
+* Add interfaces for the inbound and outbound network pipelines. These perform
+  event filtering, security, and data transforms at the network boundary as
+  needed.
+* Add high-level documentation of networking.
+* Add `BaseComponentReducer<T>` for producing events from component updates.
+
+#### 13 May 2019
+
+* Add `NetworkEventAdapter` to transfer received events into the event loop.
+
 #### 12 May 2019
 
+* Add `NetworkCore` project with a `NetworkSystem` and `NetworkingService` that
+  will be responsible for managing client/server networking.
 * Implement `ClientWorldSegmentLoader` to create test sets of blocks. This was
   previously done by `TestContentSystem`'s `BlockSource` class which has now
   been removed. `TestContentSystem` now uses `WorldManagementController` to

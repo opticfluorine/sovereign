@@ -21,5 +21,11 @@
     <FxCompile Include="WorldPixelShader.hlsl">
       <Filter>Source Files</Filter>
     </FxCompile>
+    <FxCompile Include="GuiVertexShader.hlsl">
+      <Filter>Source Files</Filter>
+    </FxCompile>
+    <FxCompile Include="GuiPixelShader.hlsl">
+      <Filter>Source Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

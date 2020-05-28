@@ -1,39 +1,31 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2020 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using Castle.Core;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Configuration;
-using Sovereign.ClientCore.Logging;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sovereign.ClientCore.Events;
+using Sovereign.ClientCore.Rendering.Gui;
 
 namespace Sovereign.ClientCore.Rendering
 {
@@ -43,7 +35,6 @@ namespace Sovereign.ClientCore.Rendering
     /// </summary>
     public class RenderingManager : IStartable
     {
-
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         private readonly MainDisplay mainDisplay;
@@ -52,6 +43,8 @@ namespace Sovereign.ClientCore.Rendering
         private readonly IRenderer renderer;
         private readonly RenderingResourceManager resourceManager;
         private readonly IClientConfiguration clientConfiguration;
+        private readonly SDLEventAdapter sdlEventAdapter;
+        private readonly CommonGuiManager guiManager;
 
         /// <summary>
         /// Error handler.
@@ -70,7 +63,8 @@ namespace Sovereign.ClientCore.Rendering
 
         public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
             DisplayModeSelector displayModeSelector, IRenderer renderer, 
-            RenderingResourceManager resourceManager, IClientConfiguration clientConfiguration)
+            RenderingResourceManager resourceManager, IClientConfiguration clientConfiguration,
+            SDLEventAdapter sdlEventAdapter, CommonGuiManager guiManager)
         {
             this.mainDisplay = mainDisplay;
             this.adapterSelector = adapterSelector;
@@ -78,12 +72,17 @@ namespace Sovereign.ClientCore.Rendering
             this.renderer = renderer;
             this.resourceManager = resourceManager;
             this.clientConfiguration = clientConfiguration;
+            this.sdlEventAdapter = sdlEventAdapter;
+            this.guiManager = guiManager;
         }
 
         public void Start()
         {
             /* Create the main display. */
             CreateMainDisplay();
+
+            /* Initialize the GUI. */
+            InitializeGUI();
 
             /* Load resources used by the renderer. */
             LoadResources();
@@ -106,6 +105,9 @@ namespace Sovereign.ClientCore.Rendering
             {
                 Logger.Error("Error while cleaning up the renderer.", e);
             }
+
+            /* Clean up GUI resources. */
+            guiManager.Dispose();
 
             /* Close the main window. */
             mainDisplay.Close();
@@ -155,6 +157,25 @@ namespace Sovereign.ClientCore.Rendering
             {
                 /* Fatal error - can't initialize the renderer. */
                 var msg = "Failed to initialize the renderer.";
+                Logger.Fatal(msg, e);
+                ErrorHandler.Error(e.Message);
+                throw new FatalErrorException(msg, e);
+            }
+        }
+
+        /// <summary>
+        /// Initializes the GUI.
+        /// </summary>
+        private void InitializeGUI()
+        {
+            try
+            {
+                guiManager.Initialize();
+            }
+            catch (Exception e)
+            {
+                /* Fatal error - can't initialize the GUI. */
+                var msg = "Failed to initialize the GUI.";
                 Logger.Fatal(msg, e);
                 ErrorHandler.Error(e.Message);
                 throw new FatalErrorException(msg, e);

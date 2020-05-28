@@ -1,24 +1,19 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2020 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using System;
@@ -26,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.EngineCore.Systems.EventSystem
@@ -55,9 +51,9 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         private readonly ISet<IEventSender> eventSenders = new HashSet<IEventSender>();
 
         /// <summary>
-        /// The collection of event adapters.
+        /// Event adapter manager.
         /// </summary>
-        private readonly ICollection<IEventAdapter> eventAdapters;
+        private readonly EventAdapterManager eventAdapterManager;
 
         /// <summary>
         /// Component manager.
@@ -73,28 +69,30 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// <summary>
         /// Priority queue of future events ordered by dispatch time.
         /// </summary>
-        private readonly IHeap<Event> FutureEventQueue 
+        private readonly IHeap<Event> futureEventQueue 
             = new BinaryHeap<Event>(QUEUE_SIZE, new EventTimeComparer());
 
         /// <summary>
         /// The system time of the last update step (microseconds).
         /// </summary>
-        private ulong LastUpdateTime;
+        private ulong lastUpdateTime;
 
         public MainEventLoop(ComponentManager componentManager,
-            ICollection<IEventAdapter> eventAdapters)
+            EventAdapterManager eventAdapterManager)
         {
             this.componentManager = componentManager;
-            this.eventAdapters = eventAdapters;
+            this.eventAdapterManager = eventAdapterManager;
         }
 
-        public void PumpEventLoop()
+        public int PumpEventLoop()
         {
             /* Retrieve pending events from the communicators. */
-            RetrievePendingEvents();
+            var eventsProcessed = RetrievePendingEvents();
 
             /* Retrieve events from the event adapters. */
-            RetrieveAdaptedEvents();
+            eventsProcessed += RetrieveAdaptedEvents();
+
+            return eventsProcessed;
         }
 
         /// <summary>
@@ -106,7 +104,7 @@ namespace Sovereign.EngineCore.Systems.EventSystem
             componentManager.UpdateAllComponents();
 
             /* Advance the system time. */
-            LastUpdateTime = systemTime;
+            lastUpdateTime = systemTime;
 
             /* Emit the Core_Tick event. */
             EmitTickEvent();
@@ -153,8 +151,14 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// </summary>
         private void EmitTickEvent()
         {
+            // Emit tick.
             var ev = new Event(EventId.Core_Tick);
             EnqueueEvent(ev);
+
+            // Emit per-tick performance events.
+            var latencyEv = new Event(EventId.Core_Performance_EventLatencyTest, 
+                new TimeEventDetails() { SystemTime = lastUpdateTime });
+            EnqueueEvent(latencyEv);
         }
 
         /// <summary>
@@ -179,31 +183,45 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// <summary>
         /// Retrieves pending events from the communicators.
         /// </summary>
-        private void RetrievePendingEvents()
+        /// <returns>
+        /// Number of events processed.
+        /// </returns>
+        private int RetrievePendingEvents()
         {
+            var eventsProcessed = 0;
             foreach (var eventSender in eventSenders)
             {
                 while (eventSender.TryGetOutgoingEvent(out var ev))
                 {
                     EnqueueEvent(ev);
+                    eventsProcessed++;
                 }
             }
+
+            return eventsProcessed;
         }
         
         /// <summary>
         /// Retrieves and enqueues all available events from the IEventAdapters.
         /// </summary>
-        private void RetrieveAdaptedEvents()
+        /// <returns>
+        /// Number of events processed.
+        /// </returns>
+        private int RetrieveAdaptedEvents()
         {
-            foreach (IEventAdapter eventAdapter in eventAdapters)
+            var eventsProcessed = 0;
+            foreach (IEventAdapter eventAdapter in eventAdapterManager.EventAdapters)
             {
                 eventAdapter.PrepareEvents();
 
                 while (eventAdapter.PollEvent(out Event ev))
                 {
                     EnqueueEvent(ev);
+                    eventsProcessed++;
                 }
             }
+
+            return eventsProcessed;
         }
 
         /// <summary>
@@ -213,7 +231,7 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         private void EnqueueEvent(Event ev)
         {
             /* Is the event to be dispatched immediately? */
-            if (ev.EventTime <= LastUpdateTime)
+            if (ev.EventTime <= lastUpdateTime)
             {
                 /* Dispatch immediately. */
                 DispatchImmediateEvent(ev);
@@ -221,7 +239,7 @@ namespace Sovereign.EngineCore.Systems.EventSystem
             else
             {
                 /* Enqueue for later dispatch. */
-                FutureEventQueue.Add(ev);
+                futureEventQueue.Add(ev);
             }
         }
 
@@ -240,7 +258,7 @@ namespace Sovereign.EngineCore.Systems.EventSystem
             }
 
             /* Set the event time to the current tick time. */
-            ev.EventTime = LastUpdateTime;
+            ev.EventTime = lastUpdateTime;
 
             /* Dispatch to all interested communicators, if any.. */
             if (communicatorsByEventId.ContainsKey(eventId))
@@ -259,10 +277,10 @@ namespace Sovereign.EngineCore.Systems.EventSystem
         /// <returns>Number of dispatched events.</returns>
         private void DispatchEnqueuedEvents()
         {
-            while (FutureEventQueue.Count > 0 &&
-                FutureEventQueue.Peek().EventTime <= LastUpdateTime)
+            while (futureEventQueue.Count > 0 &&
+                futureEventQueue.Peek().EventTime <= lastUpdateTime)
             {
-                var nextEvent = FutureEventQueue.Pop();
+                var nextEvent = futureEventQueue.Pop();
                 DispatchImmediateEvent(nextEvent);
             }
         }

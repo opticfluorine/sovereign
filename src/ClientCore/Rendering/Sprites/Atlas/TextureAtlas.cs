@@ -1,43 +1,34 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2020 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sovereign.ClientCore.Rendering.GUI;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
 {
-
     /// <summary>
     /// Responsible for collecting spritesheets into a single texture atlas.
     /// </summary>
     public class TextureAtlas : IDisposable
     {
-
-        public ILogger Logger { private get; set; } = NullLogger.Instance;
-
         /// <summary>
         /// Maximum width of the texture atlas.
         /// </summary>
@@ -70,21 +61,28 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
             = new Dictionary<string, Tuple<int, int>>();
 
         /// <summary>
+        /// Top-left point of the font atlas within the texture atlas.
+        /// </summary>
+        public Tuple<int, int> FontAtlasPosition { get; private set; }
+
+        /// <summary>
         /// Creates and packs a texture atlas from the given collection
         /// of spritesheets.
         /// </summary>
         /// <param name="spriteSheets">Spritesheets to pack.</param>
+        /// <param name="fontAtlas">Font atlas.</param>
         /// <param name="format">Pixel format for the atlas.</param>
         /// <exception cref="TextureAtlasException">
         /// Thrown if the texture atlas cannot be created.
         /// </exception>
-        public TextureAtlas(IEnumerable<SpriteSheet> spriteSheets, DisplayFormat format)
+        public TextureAtlas(IEnumerable<SpriteSheet> spriteSheets, GuiFontAtlas fontAtlas,
+            DisplayFormat format)
         {
             /* Order spritesheets for packing. */
             var orderedSheets = OrderSheetsForPacking(spriteSheets);
 
             /* Compute the packing plan. */
-            var plan = PlanPacking(orderedSheets, out int atlasWidth, 
+            var plan = PlanPacking(orderedSheets, fontAtlas, out int atlasWidth,
                 out int atlasHeight);
             Width = atlasWidth;
             Height = atlasHeight;
@@ -114,6 +112,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         /// Plans the packing of the spritesheets.
         /// </summary>
         /// <param name="spriteSheets">Spritesheets in packing order.</param>
+        /// <param name="fontAtlas">Font atlas.</param>
         /// <param name="atlasWidth">Width of the texture atlas.</param>
         /// <param name="atlasHeight">Height of the texture atlas.</param>
         /// <returns>Planned positioning of the spritesheets.</returns>
@@ -121,51 +120,56 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         /// Thrown if no suitable packing is found.
         /// </exception>
         private IList<PlanElement> PlanPacking(IOrderedEnumerable<SpriteSheet> spriteSheets,
-            out int atlasWidth, out int atlasHeight)
+            GuiFontAtlas fontAtlas, out int atlasWidth, out int atlasHeight)
         {
             /* Allocate the plan. */
             var plan = new List<PlanElement>(spriteSheets.Count());
 
             /* Iterate through the spritesheets. */
-            int baseX = 0;
-            int baseY = 0;
-            int maximumRowWidth = 0;
-            int currentRowHeight = 0;
+            var baseX = 0;
+            var baseY = 0;
+            var maximumRowWidth = 0;
+            var currentRowHeight = 0;
+            int nextWidth;
+            int nextHeight;
+            int newBaseX;
             foreach (var spriteSheet in spriteSheets)
             {
                 /* Get information for next sheet. */
-                int nextWidth = spriteSheet.Surface.Properties.Width;
-                int nextHeight = spriteSheet.Surface.Properties.Height;
+                nextWidth = spriteSheet.Surface.Properties.Width;
+                nextHeight = spriteSheet.Surface.Properties.Height;
 
-                /* Check if the sheet can be fit in the current row. */
-                int newBaseX = baseX + nextWidth;
-                if (newBaseX > MaxWidth)
-                {
-                    /* Advance to next row. */
-                    baseX = 0;
-                    baseY += currentRowHeight;
-                    newBaseX = nextWidth;
-                    if (baseY > MaxHeight)
-                    {
-                        /* Cannot fit spritesheets. */
-                        throw new TextureAtlasException("Cannot pack spritesheets into texture atlas.");
-                    }
-                    currentRowHeight = 0;
-                }
+                /* Place the next sheet. */
+                AdvancePosition(nextWidth, nextHeight, ref baseX, ref baseY,
+                    ref maximumRowWidth, ref currentRowHeight, out newBaseX);
 
                 /* Add the sheet. */
                 plan.Add(new PlanElement()
                 {
-                    SpriteSheet = spriteSheet,
+                    PlanElementType = PlanElementType.Spritesheet,
+                    Surface = spriteSheet.Surface,
+                    Name = spriteSheet.Definition.Filename,
                     TopLeftX = baseX,
-                    TopLeftY = baseY,
+                    TopLeftY = baseY
                 });
 
                 /* Advance to the next position. */
                 baseX = newBaseX;
-                maximumRowWidth = Math.Max(maximumRowWidth, baseX);
-                currentRowHeight = Math.Max(currentRowHeight, nextHeight);
             }
+
+            /* Add the font atlas to the plan. */
+            nextWidth = fontAtlas.Width;
+            nextHeight = fontAtlas.Height;
+            AdvancePosition(nextWidth, nextHeight, ref baseX, ref baseY,
+                ref maximumRowWidth, ref currentRowHeight, out newBaseX);
+            plan.Add(new PlanElement()
+            {
+                PlanElementType = PlanElementType.FontAtlas,
+                Surface = fontAtlas.FontAtlasSurface,
+                Name = "",
+                TopLeftX = baseX,
+                TopLeftY = baseY
+            });
 
             /* Output the plan. */
             atlasWidth = maximumRowWidth;
@@ -174,11 +178,46 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         }
 
         /// <summary>
+        /// Advances to the next position in the atlas plan.
+        /// </summary>
+        /// <param name="width">Width of the next surface to be added.</param>
+        /// <param name="height">Height of the next surface to be added.</param>
+        /// <param name="baseX">X position at which the next surface should be placed.</param>
+        /// <param name="baseY">Y position at which the next surface should be placed.</param>
+        /// <param name="maximumRowWidth">Maximum width of all rows.</param>
+        /// <param name="currentRowHeight">Height of the current row.</param>
+        /// <param name="newBaseX">Next value of baseX.</param>
+        private void AdvancePosition(int width, int height, ref int baseX, ref int baseY,
+            ref int maximumRowWidth, ref int currentRowHeight, out int newBaseX)
+        {
+            /* Check if the sheet can be fit in the current row. */
+            newBaseX = baseX + width;
+            if (newBaseX > MaxWidth)
+            {
+                /* Advance to next row. */
+                baseX = 0;
+                baseY += currentRowHeight;
+                newBaseX = width;
+                if (baseY > MaxHeight)
+                {
+                    /* Cannot fit spritesheets. */
+                    throw new TextureAtlasException("Cannot pack spritesheets into texture atlas.");
+                }
+                currentRowHeight = 0;
+            }
+
+            /* Advance to the next position. */
+            maximumRowWidth = Math.Max(maximumRowWidth, newBaseX);
+            currentRowHeight = Math.Max(currentRowHeight, height);
+        }
+
+        /// <summary>
         /// Creates the texture atlas according to the given plan.
         /// </summary>
         /// <param name="plan">Packing plan.</param>
         /// <param name="atlasWidth">Atlas width.</param>
         /// <param name="atlasHeight">Atlas height.</param>
+        /// <param name="format">Display format.</param>
         private void CreateAtlas(IList<PlanElement> plan, int atlasWidth, int atlasHeight,
             DisplayFormat format)
         {
@@ -195,7 +234,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         /// <param name="atlasWidth">Atlas width.</param>
         /// <param name="atlasHeight">Atlas height.</param>
         /// <param name="format">Format.</param>
-        private void CreateAtlasSurface(int atlasWidth, int atlasHeight, 
+        private void CreateAtlasSurface(int atlasWidth, int atlasHeight,
             DisplayFormat format)
         {
             AtlasSurface = Surface.CreateSurface(atlasWidth, atlasHeight, format);
@@ -211,14 +250,38 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
             foreach (var planElement in plan)
             {
                 /* Execute the plan step. */
-                var srcSurface = planElement.SpriteSheet.Surface;
+                var srcSurface = planElement.Surface;
                 srcSurface.Blit(AtlasSurface, planElement.TopLeftX,
                     planElement.TopLeftY);
 
-                /* Add the spritesheet to the map. */
-                SpriteSheetMap[planElement.SpriteSheet.Definition.Filename]
-                    = new Tuple<int, int>(planElement.TopLeftX, planElement.TopLeftY);
+                /* Perform any type-specific processing. */
+                if (planElement.PlanElementType == PlanElementType.Spritesheet)
+                {
+                    SpriteSheetMap[planElement.Name]
+                        = new Tuple<int, int>(planElement.TopLeftX, planElement.TopLeftY);
+                }
+                else if (planElement.PlanElementType == PlanElementType.FontAtlas)
+                {
+                    FontAtlasPosition = new Tuple<int, int>(
+                        planElement.TopLeftX, planElement.TopLeftY);
+                }
             }
+        }
+
+        /// <summary>
+        /// Enumeration of plan element types.
+        /// </summary>
+        private enum PlanElementType
+        {
+            /// <summary>
+            /// Plan element is a spritesheet.
+            /// </summary>
+            Spritesheet,
+
+            /// <summary>
+            /// Plan element is the font atlas.
+            /// </summary>
+            FontAtlas
         }
 
         /// <summary>
@@ -226,11 +289,20 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
         /// </summary>
         private struct PlanElement
         {
+            /// <summary>
+            /// Surface to be placed.
+            /// </summary>
+            public Surface Surface;
 
             /// <summary>
-            /// Spritesheet to be placed.
+            /// Type of this plan element.
             /// </summary>
-            public SpriteSheet SpriteSheet;
+            public PlanElementType PlanElementType;
+
+            /// <summary>
+            /// Surface name. Only used if PlanElementType is Spritesheet.
+            /// </summary>
+            public string Name;
 
             /// <summary>
             /// Planned x coordinate of the top left corner of the spritesheet.
@@ -241,9 +313,6 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas
             /// Planned y coordinate of the top left corner of the spritesheet.
             /// </summary>
             public int TopLeftY;
-
         }
-
     }
-
 }

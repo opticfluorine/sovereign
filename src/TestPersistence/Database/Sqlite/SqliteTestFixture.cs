@@ -1,24 +1,19 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2019 opticfluorine
+ * Copyright (c) 2020 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using Microsoft.Data.Sqlite;
@@ -141,6 +136,47 @@ namespace TestPersistence.Database.Sqlite
             cmd.Parameters.Add(pId);
 
             cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Adds an account with the given username.
+        /// </summary>
+        /// <param name="id">Account ID.</param>
+        /// <param name="username">Username.</param>
+        /// <param name="salt">Password salt.</param>
+        /// <param name="hash">Password hash.</param>
+        public void AddAccount(Guid id, string username, byte[] salt, byte[] hash)
+        {
+            /* Add username info. */
+            const string sql = @"INSERT INTO Account (id, username) VALUES (@Id, @Username)";
+            var cmd = new SqliteCommand(sql, Connection);
+
+            var pId = new SqliteParameter("Id", id.ToByteArray());
+            pId.SqliteType = SqliteType.Blob;
+            cmd.Parameters.Add(pId);
+
+            var pUsername = new SqliteParameter("Username", username);
+            pUsername.SqliteType = SqliteType.Text;
+            cmd.Parameters.Add(pUsername);
+
+            cmd.ExecuteNonQuery();
+
+            /* Add authentication details. */
+            const string sql2 = @"INSERT INTO Account_Authentication 
+                                    (id, password_salt, password_hash, opslimit, memlimit) 
+                                    VALUES (@Id, @Salt, @Hash, 0, 0)";
+            var cmd2 = new SqliteCommand(sql2, Connection);
+            cmd2.Parameters.Add(pId);
+
+            var pSalt = new SqliteParameter("Salt", salt);
+            pSalt.SqliteType = SqliteType.Blob;
+            cmd2.Parameters.Add(pSalt);
+
+            var pHash = new SqliteParameter("Hash", hash);
+            pHash.SqliteType = SqliteType.Blob;
+            cmd2.Parameters.Add(pHash);
+
+            cmd2.ExecuteNonQuery();
         }
 
         /// <summary>

@@ -51,15 +51,24 @@
     <Reference Include="Castle.Windsor, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <HintPath>..\packages\Castle.Windsor.4.1.1\lib\net45\Castle.Windsor.dll</HintPath>
     </Reference>
+    <Reference Include="ImGui.NET, Version=1.72.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ImGui.NET.1.72.0\lib\netstandard2.0\ImGui.NET.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+    </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.4.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Web" />
@@ -84,6 +93,9 @@
     <Compile Include="Logging\ErrorHandler.cs" />
     <Compile Include="Events\KeyEventDetails.cs" />
     <Compile Include="Events\SDLEventAdapter.cs" />
+    <Compile Include="Network\ClientNetworkInstaller.cs" />
+    <Compile Include="Network\INetworkClient.cs" />
+    <Compile Include="Network\NetworkClientState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rendering\Components\AnimatedSpriteComponentCollection.cs" />
     <Compile Include="Rendering\Components\DrawableComponentCollection.cs" />
@@ -102,6 +114,9 @@
     <Compile Include="Rendering\Configuration\VideoAdapterException.cs" />
     <Compile Include="Rendering\Display\DisplayInstaller.cs" />
     <Compile Include="Rendering\Display\MainDisplay.cs" />
+    <Compile Include="Rendering\GUI\CommonGuiInstaller.cs" />
+    <Compile Include="Rendering\GUI\CommonGuiManager.cs" />
+    <Compile Include="Rendering\GUI\GuiFontAtlas.cs" />
     <Compile Include="Rendering\IRenderer.cs" />
     <Compile Include="Rendering\Materials\RenderingMaterial.cs" />
     <Compile Include="Rendering\Materials\RenderingMaterialException.cs" />
@@ -201,6 +216,10 @@
       <Project>{6440b9bb-8545-4d8f-9f89-b8a876cc9977}</Project>
       <Name>EngineUtil</Name>
     </ProjectReference>
+    <ProjectReference Include="..\NetworkCore\NetworkCore.csproj">
+      <Project>{ace0b021-39ab-4696-8fd2-fe585118718c}</Project>
+      <Name>NetworkCore</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WorldLib\WorldLib.csproj">
       <Project>{DF1A3BA3-4DF6-4410-B335-60E792D6216B}</Project>
       <Name>WorldLib</Name>
@@ -211,8 +230,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\ImGui.NET.1.72.0\build\net40\ImGui.NET.targets" Condition="Exists('..\packages\ImGui.NET.1.72.0\build\net40\ImGui.NET.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\ImGui.NET.1.72.0\build\net40\ImGui.NET.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ImGui.NET.1.72.0\build\net40\ImGui.NET.targets'))" />
+  </Target>
 </Project>

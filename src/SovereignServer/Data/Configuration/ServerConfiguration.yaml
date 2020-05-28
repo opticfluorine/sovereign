@@ -1,4 +1,39 @@
 ﻿# ----------------------
+# Accounts Configuration
+# ----------------------
+Accounts:
+
+    # ----------------------
+    # MaxFailedLoginAttempts
+    # ----------------------
+    # Maximum number of failed login attempts before access to an account
+    # is temporarily disabled.
+    MaxFailedLoginAttempts: 10
+
+    # ------------------------
+    # LoginDenialPeriodSeconds
+    # ------------------------
+    # Length of the login denial period, in seconds. The failed login attempt
+    # count is reset after this amount of time has elapsed since the last
+    # failed login attempt.
+    LoginDenialPeriodSeconds: 1800
+
+    # ---------------------
+    # MinimumPasswordLength
+    # ---------------------
+    # Minimum length of all new passwords.
+    MinimumPasswordLength: 8
+
+    # --------------------
+    # HandoffPeriodSeconds
+    # --------------------
+    # Length of the connection handoff period following a successful login.
+    # The connection may only be established during the handoff period, beyond
+    # which the handoff will be invalidated.
+    HandoffPeriodSeconds: 30
+
+
+# ----------------------
 # Database Configuration
 # ----------------------
 Database:
@@ -73,6 +108,51 @@ Database:
     SyncIntervalSeconds: 60
 
 
+# ---------------------
+# Network Configuration
+# ---------------------
+Network:
+
+    # --------------------
+    # NetworkInterfaceIPv4
+    # --------------------
+    # IPv4 interface to bind.
+    NetworkInterfaceIPv4: 0.0.0.0
+
+    # --------------------
+    # NetworkInterfaceIPv6
+    # --------------------
+    # IPv6 interface to bind.
+    NetworkInterfaceIPv6: ::0
+
+    # ----
+    # Host
+    # ----
+    # Server hostname to use for connection handoff.
+    Host: localhost
+
+    # ----
+    # Port
+    # ----
+    # Server port.
+    Port: 12820
+
+    # ------------
+    # RestHostname
+    # ------------
+    # Hostname to use for the local REST server.
+    RestHostname: 127.0.0.1
+
+    # --------
+    # RestPort
+    # --------
+    # Port to use for the local REST server.
+    RestPort: 8080
+
+
+# -------------------
+# World Configuration
+# -------------------
 World:
 
     # ---------

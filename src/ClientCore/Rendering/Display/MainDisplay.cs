@@ -1,24 +1,19 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2020 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using Sovereign.ClientCore.Rendering.Configuration;
@@ -28,6 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Sovereign.ClientCore.Events;
 
 namespace Sovereign.ClientCore.Rendering.Display
 {
@@ -46,7 +42,7 @@ namespace Sovereign.ClientCore.Rendering.Display
         /// <summary>
         /// Main window handle.
         /// </summary>
-        private IntPtr windowHandle;
+        public IntPtr WindowHandle { get; private set; }
 
         /// <summary>
         /// The HWND associated with the created window.
@@ -56,7 +52,7 @@ namespace Sovereign.ClientCore.Rendering.Display
             get
             {
                 SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
-                SDL.SDL_GetWindowWMInfo(windowHandle, ref info);
+                SDL.SDL_GetWindowWMInfo(WindowHandle, ref info);
                 return info.info.win.window;
             }
         }
@@ -71,10 +67,12 @@ namespace Sovereign.ClientCore.Rendering.Display
         /// </summary>
         public bool IsFullscreen { get; private set; }
 
-        public MainDisplay()
-        {
-
-        }
+        /// <summary>
+        /// Whether the window currently has input focus.
+        /// </summary>
+        public bool IsInputFocus =>
+            (SDL.SDL_GetWindowFlags(WindowHandle)
+             & (uint)SDL.SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS) != 0;
 
         /// <summary>
         /// Shows the main window.
@@ -88,7 +86,7 @@ namespace Sovereign.ClientCore.Rendering.Display
 
             /* Create the main window. */
             DisplayMode = displayMode;
-            windowHandle = SDL.SDL_CreateWindow(TITLE, 
+            WindowHandle = SDL.SDL_CreateWindow(TITLE, 
                 SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
                 displayMode.Width, displayMode.Height, 
                 GetWindowFlags());
@@ -99,7 +97,7 @@ namespace Sovereign.ClientCore.Rendering.Display
         /// </summary>
         public void Close()
         {
-            SDL.SDL_DestroyWindow(windowHandle);
+            SDL.SDL_DestroyWindow(WindowHandle);
         }
 
         private SDL.SDL_WindowFlags GetWindowFlags()

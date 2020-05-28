@@ -1,34 +1,24 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2020 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
-using Sovereign.ClientCore.Rendering.Scenes.Game;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+using ImGuiNET;
 
 namespace Sovereign.ClientCore.Rendering.Scenes
 {
@@ -43,6 +33,11 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         /// Type of scene. This determines how the renderer processes the scene.
         /// </summary>
         SceneType SceneType { get; }
+
+        /// <summary>
+        /// Flag indicating whether the GUI should be rendered in this scene.
+        /// </summary>
+        bool RenderGui { get; }
 
         /// <summary>
         /// Called when the renderer starts rendering this scene.
@@ -82,6 +77,16 @@ namespace Sovereign.ClientCore.Rendering.Scenes
         /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
         void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles,
             out Vector3 cameraPos, out float timeSinceTick);
+
+        /// <summary>
+        /// Populates the various buffers used for GUI rendering.
+        /// </summary>
+        /// <param name="vertexBuffer">Vertex buffer to be populated.</param>
+        /// <param name="indexBuffer">Index buffer to be populated.</param>
+        /// <remarks>
+        /// This method will only be called if RenderGui is true.
+        /// </remarks>
+        void PopulateGuiBuffers(ImDrawVert[] vertexBuffer, ushort[] indexBuffer);
 
     }
 

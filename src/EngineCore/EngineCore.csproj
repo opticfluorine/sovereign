@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="protobuf-net" Version="2.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\EngineUtil\EngineUtil.csproj" />
     <ProjectReference Include="..\WorldLib\WorldLib.csproj" />
   </ItemGroup>
