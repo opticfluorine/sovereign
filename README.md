@@ -11,7 +11,8 @@ work in progress. I'm developing this as a hobby in my limited personal time,
 so progress can be somewhat slow (but typically steady). The engine is not
 feature complete and should be considered as being in a pre-alpha state.
 
-Sovereign Engine is made available under the MIT license.
+Sovereign Engine is made available under the GNU Affero General Public License,
+version 3. See the LICENSE file for more information.
 
 
 ## Third Party Assets
