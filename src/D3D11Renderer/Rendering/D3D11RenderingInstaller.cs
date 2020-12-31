@@ -27,6 +27,7 @@ using Castle.Windsor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,7 +44,7 @@ namespace Sovereign.D3D11Renderer.Rendering
             container.Register(Component.For<D3D11Device>()
                 .LifestyleSingleton());
 
-            container.Register(Classes.FromThisAssembly()
+            container.Register(Classes.FromAssembly(Assembly.GetCallingAssembly())
                 .BasedOn<IRenderStage>()
                 .WithServiceDefaultInterfaces()
                 .LifestyleSingleton()

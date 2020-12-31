@@ -23,7 +23,7 @@
 
 using Sovereign.EngineCore.Logging;
 using System;
-using System.Windows.Forms;
+using Castle.Core.Logging;
 
 namespace Sovereign.ClientCore.Logging
 {
@@ -34,14 +34,13 @@ namespace Sovereign.ClientCore.Logging
     /// </summary>
     public class ErrorHandler : IErrorHandler
     {
-
-        private static readonly string CAPTION = "Error";
+        
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         public void Error(string message)
         {
-            MessageBox.Show(null, message, CAPTION,
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            // TODO Show error via ImGui if renderer is started, otherwise by other method
+            Logger.Error(message);
         }
 
     }
