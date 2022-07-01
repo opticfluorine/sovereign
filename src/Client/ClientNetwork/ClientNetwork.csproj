@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>Sovereign.ClientNetwork</AssemblyName>
+    <RootNamespace>Sovereign.ClientNetwork</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClientCore\ClientCore.csproj" />
+    <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj" />
+  </ItemGroup>
+
+</Project>

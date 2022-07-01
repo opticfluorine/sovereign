@@ -1,15 +1,66 @@
 # Sovereign Engine Changelog
 
-## 2020
+## 2022
+
+### June
+
+#### 30 June 2022
+
+ * Veldrid renderer is functional using the Vulkan backend.
+   This still needs to be tested under Win32, but going to
+   defer this for now.
+
+#### 13 June 2022
+
+* Completed the initial implementation of the Veldrid renderer port.
+  This needs to be tested, which means the client needs to run under
+  .NET 6.0 - so, time to do lots of testing of old commits that were
+  never tested.
+
+#### 08 June 2022
+
+ * Port `D3D11UpdateBuffer` to `VeldridUpdateBuffer`.
+
+#### 04 June 2022
+
+ * Continue porting `D3D11Renderer` to `VeldridRenderer`. 
+ * Add `VeldridTexture` class for wrapping a 2D Veldrid texture created from a `Surface`. 
+ * Add `VeldridResourceManager` for managing GPU resources.
+ * Update `Surface` to expose additional details through its `Properties` field.
 
 ### May
 
-#### 28 May 2020
+#### 30 May 2022
 
-* Change license from MIT license to AGPL 3. The change to a more restrictive
-  open source license was done to ensure that the use of the Sovereign Engine
-  supports its goals of creating an open set of development tools for 2D
-  MMORPGs.
+ * Start implementing the Veldrid renderer. For the MVP this will only
+   support OpenGL rendering (even on Windows).
+
+#### 29 May 2022
+
+ * Routine upgrades of dependencies to go with the migration to .NET 6.
+   Various minor code changes to fix deprecations, etc.
+ * Note that a lot of the dependency upgrades (essentially all) have not been
+   tested while the renderer rewrite is in progress. We'll accept some technical
+   debt here for a while.
+
+#### 28 May 2022
+
+ * Refactor the project structures into Common, Client, and Server source trees.
+   Previously the projects were organized in the VS solution file, but this change
+   provides similar organization independent of the IDE. This makes it easier to
+   develop on Linux using VS Code, for example.
+
+#### 22 May 2022
+
+ * Well, life has been busy, work has been busy, and it's been two years since
+   I've done any serious work on this project. Let's get started.
+ * Previously had started a migration to .NET 5. Since then, .NET 5 went EOL,
+   so migrate again to .NET 6.
+ * Set up a development container for use with VS Code.
+
+## 2020
+
+### May
 
 #### 03 May 2020
 
