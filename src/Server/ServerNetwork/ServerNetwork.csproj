@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>Sovereign.ServerNetwork</AssemblyName>
+    <RootNamespace>Sovereign.ServerNetwork</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Accounts\Accounts.csproj" />
+    <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
+    <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Watson" Version="4.2.2.13" />
+  </ItemGroup>
+
+</Project>

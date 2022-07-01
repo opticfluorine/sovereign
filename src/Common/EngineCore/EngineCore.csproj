@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>Sovereign.EngineCore</AssemblyName>
+    <RootNamespace>Sovereign.EngineCore</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EngineUtil\EngineUtil.csproj" />
+    <ProjectReference Include="..\WorldLib\WorldLib.csproj" />
+  </ItemGroup>
+
+</Project>

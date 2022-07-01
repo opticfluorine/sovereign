@@ -15,6 +15,13 @@ communication with the underlying graphics API. The renderer is intended to
 be interchangeable to provide portability. The only renderer currently
 supported is Direct3D 11.
 
+With the deprecation of the SharpDX library, the Direct3D 11 renderewr is being
+replaced by a cross-platform renderer backed by the Veldrid library. Veldrid is
+able to render using Direct3D, OpenGL, OpenGL ES, and Vulkan backends. This will
+provide ongoing rendering support for Windows clients while also enabling
+native Linux clients (and potentially Mac OS X clients via the Metal backend,
+though official Mac OS X support is not planned).
+
 ## Rendering Coordinator
 
 The behavior of the rendering coordinator is dependent on the state of the client.

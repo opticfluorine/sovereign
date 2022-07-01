@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>Sovereign.ServerCore</AssemblyName>
+    <RootNamespace>Sovereign.ServerCore</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\EngineCore\EngineCore.csproj" />
+    <ProjectReference Include="..\..\Common\EngineUtil\EngineUtil.csproj" />
+    <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj" />
+    <ProjectReference Include="..\..\Common\WorldManagement\WorldManagement.csproj" />
+  </ItemGroup>
+
+</Project>
