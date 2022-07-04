@@ -10,16 +10,10 @@ Client Projects
 
 `ClientCore` is the main class library for the client-specific code.
 
-### D3D11Renderer
+### VeldridRenderer
 
-`D3D11Renderer` is an implementation of the rendering interfaces defined in
-ClientCore that uses Direct3D 11.
-
-### Shaders
-
-`Shaders` contains the HLSL shaders used by `D3D11Renderer`. Building this
-project produces the compiled shader bytecode and copies it to the
-`SovereignClient` project.
+`VeldridRenderer` is an implementation of the rendering interfaces defined in
+ClientCore that uses the Veldrid backend for cross-platform rendering.
 
 ### SovereignClient
 
