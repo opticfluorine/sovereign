@@ -1,8 +1,6 @@
-World Structure
-===============
+# World Structure
 
-Game World
-----------
+## Game World
 
 The game world is a collection of one or more "domains", where a domain is a
 disconnected three-dimensional segment of the world. By "disconnected", we
@@ -20,8 +18,7 @@ As each block is tracked within the engine as an independent entity,
 additional information can be associated with a block by linking the
 corresponding component.
 
-Materials
----------
+## Materials
 
 A material defines the base type of a block. The material of a block
 is specified by a pair of unsigned 32-bit integers, the material ID and the 
@@ -34,8 +31,7 @@ and an alternate top face to be shown if a face is obscured. The top face
 is the horizontal surface in the xy plane, and the side face is the vertical
 surface in the xz plane.
 
-Blocks
-------
+## Blocks
 
 Each domain is constructed of a collection of blocks as described above.
 A block is a unit cube (in position units) with side lengths equal to the
@@ -46,4 +42,3 @@ of the unit length block whose base is centered on the bottom plane of
 the entity.
 
 ![Block structure](img/BlockStructure.png)
-

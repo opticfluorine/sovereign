@@ -21,33 +21,21 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.WorldLib.Materials
+namespace Sovereign.EngineCore.World.Materials;
+
+/// <summary>
+/// Contains the definitions of the materials.
+/// </summary>
+public class MaterialDefinitions
 {
 
     /// <summary>
-    /// IoC installer for materials.
+    /// Materials.
     /// </summary>
-    public class MaterialInstaller : IWindsorInstaller
-    {
-
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            /* MaterialDefinitionsValidator. */
-            container.Register(Component.For<MaterialDefinitionsValidator>()
-                .LifestyleTransient());
-
-            /* MaterialDefinitionsLoader. */
-            container.Register(Component.For<MaterialDefinitionsLoader>()
-                .LifestyleTransient());
-        }
-
-    }
+    public IList<Material> Materials { get; set; }
 
 }

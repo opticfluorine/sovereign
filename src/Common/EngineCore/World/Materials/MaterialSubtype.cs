@@ -21,36 +21,32 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.Facilities.Logging;
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Services.Logging.Log4netIntegration;
-using Castle.Windsor;
-using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Sovereign.EngineCore.World.Materials;
 
-namespace Sovereign.StandaloneWorldGen.Logging
+/// <summary>
+/// Describes a subtype of a material.
+/// </summary>
+public class MaterialSubtype
 {
 
     /// <summary>
-    /// IoC installer for logging in the StandaloneWorldGen utility.
+    /// The material modifier value. Unique within a material.
     /// </summary>
-    public class StandaloneWorldGenLoggingInstaller : IWindsorInstaller
-    {
+    public int MaterialModifier { get; set; }
 
-        /// <summary>
-        /// Name of the logging configuration file.
-        /// </summary>
-        private const string LogConfigFilepath = "Logging.xml";
+    /// <summary>
+    /// The ID of the tile sprite used for the top face.
+    /// </summary>
+    public int TopFaceTileSpriteId { get; set; }
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            /* Configure log4net. */
-            container.AddFacility<LoggingFacility>(f => f.LogUsing<Log4netFactory>()
-                .WithConfig(LogConfigFilepath));
-        }
+    /// <summary>
+    /// The ID of the tile sprite used for the top face if a face is obscured.
+    /// </summary>
+    public int ObscuredTopFaceTileSpriteId { get; set; }
 
-    }
+    /// <summary>
+    /// The ID of the tile sprite used for the side face.
+    /// </summary>
+    public int SideFaceTileSpriteId { get; set; }
 
 }

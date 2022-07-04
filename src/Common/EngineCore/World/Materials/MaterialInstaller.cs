@@ -21,29 +21,38 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Sovereign.WorldGen.Configuration
+namespace Sovereign.EngineCore.World.Materials
 {
 
     /// <summary>
-    /// Validates WorldGenConfiguration objects.
+    /// IoC installer for materials support classes.
     /// </summary>
-    public class WorldGenConfigurationValidator
+    public class MaterialInstaller : IWindsorInstaller
     {
 
-        /// <summary>
-        /// Determines whether a WorldGen configuration is valid.
-        /// </summary>
-        /// <param name="worldGenConfiguration">WorldGen configuration.</param>
-        /// <returns>true if the configuration is valid, false otherwise.</returns>
-        public bool IsValid(WorldGenConfiguration worldGenConfiguration)
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            return true;
+            /* MaterialManager. */
+            container.Register(Component.For<MaterialManager>()
+                .LifestyleSingleton());
+
+            /* MaterialDefinitionsValidator. */
+            container.Register(Component.For<MaterialDefinitionsValidator>()
+                .LifestyleTransient());
+
+            /* MaterialDefinitionsLoader. */
+            container.Register(Component.For<MaterialDefinitionsLoader>()
+                .LifestyleTransient());
         }
 
     }
-
 }

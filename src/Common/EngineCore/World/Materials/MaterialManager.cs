@@ -25,12 +25,9 @@ using Castle.Core.Logging;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
-using Sovereign.WorldLib.Materials;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.EngineCore.World.Materials
 {

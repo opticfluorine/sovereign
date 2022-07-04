@@ -22,12 +22,7 @@
  */
 
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
-using Sovereign.WorldLib.Materials;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sovereign.EngineCore.World.Materials;
 
 namespace Sovereign.ClientCore.Rendering.Materials
 {
