@@ -28,11 +28,14 @@ using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.World.Materials;
+using Sovereign.EngineUtil.Collections;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace Sovereign.ClientCore.Systems.Block.Caches
 {
@@ -57,6 +60,12 @@ namespace Sovereign.ClientCore.Systems.Block.Caches
         private readonly AboveBlockComponentCollection aboveBlocks;
         private readonly TileSpriteManager tileSpriteManager;
 
+        /// <summary>
+        /// Block set pool.
+        /// </summary>
+        private readonly ObjectPool<HashSet<ulong>> blockSetPool
+            = new ObjectPool<HashSet<ulong>>(4);
+
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         /// <summary>
@@ -67,30 +76,30 @@ namespace Sovereign.ClientCore.Systems.Block.Caches
         /// <summary>
         /// Block entity IDs that have been added or modified since the last cache update.
         /// </summary>
-        private readonly ISet<ulong> changedBlocks = new HashSet<ulong>();
+        private HashSet<ulong> changedBlocks;
 
         /// <summary>
         /// Block entity IDs that have been removed since the last cache update.
         /// </summary>
-        private readonly ISet<ulong> removedBlocks = new HashSet<ulong>();
+        private HashSet<ulong> removedBlocks;
 
         /// <summary>
         /// Top face animated sprite cache.
         /// </summary>
         private readonly IDictionary<ulong, IList<int>> topFaceCache
-            = new Dictionary<ulong, IList<int>>();
+            = new ConcurrentDictionary<ulong, IList<int>>();
 
         /// <summary>
         /// Front face animated sprite cache.
         /// </summary>
         private readonly IDictionary<ulong, IList<int>> frontFaceCache
-            = new Dictionary<ulong, IList<int>>();
+            = new ConcurrentDictionary<ulong, IList<int>>();
 
         /// <summary>
         /// Internal cache of known current block positions.
         /// </summary>
         private readonly IDictionary<ulong, GridPosition> knownPositions
-            = new Dictionary<ulong, GridPosition>();
+            = new ConcurrentDictionary<ulong, GridPosition>();
 
         /// <summary>
         /// Read-only empty list to return when no sprites are cached.
@@ -131,33 +140,42 @@ namespace Sovereign.ClientCore.Systems.Block.Caches
 
         public IList<int> GetFrontFaceAnimatedSpriteIds(ulong blockId)
         {
-            return frontFaceCache.ContainsKey(blockId)
-                ? frontFaceCache[blockId]
-                : emptyList;
+            return frontFaceCache.TryGetValue(blockId, out var spriteIds) ? spriteIds : emptyList;
         }
 
         public IList<int> GetTopFaceAnimatedSpriteIds(ulong blockId)
         {
-            return topFaceCache.ContainsKey(blockId)
-                ? topFaceCache[blockId]
-                : emptyList;
+            return topFaceCache.TryGetValue(blockId, out var spriteIds) ? spriteIds : emptyList;
         }
 
         /// <summary>
         /// Updates the animated sprite cache.
         /// </summary>
-        private void UpdateCache()
+        private void UpdateCache(HashSet<ulong> changedSet, HashSet<ulong> removedSet)
         {
-            HandleChangedBlocks();
-            HandleRemovedBlocks();
+            try
+            {
+                // Update the cache with the changes.
+                HandleChangedBlocks(changedSet);
+                HandleRemovedBlocks(removedSet);
+
+                // Return the sets to the pool so that they can be reused later.
+                blockSetPool.ReturnObject(changedSet);
+                blockSetPool.ReturnObject(removedSet);
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Error updating sprite cache.", e);
+            }
         }
 
         /// <summary>
         /// Updates the cache for any blocks that have changed.
         /// </summary>
-        private void HandleChangedBlocks()
+        /// <param name="changedSet">Set of changed blocks.</param>
+        private void HandleChangedBlocks(ISet<ulong> changedSet)
         {
-            foreach (var blockId in changedBlocks)
+            foreach (var blockId in changedSet)
             {
                 UpdatePositionForBlock(blockId);
 
@@ -174,9 +192,10 @@ namespace Sovereign.ClientCore.Systems.Block.Caches
         /// <summary>
         /// Updates the cahce for any blocks that have been removed.
         /// </summary>
-        private void HandleRemovedBlocks()
+        /// <param name="removedSet">Set of removed blocks.</param>
+        private void HandleRemovedBlocks(ISet<ulong> removedSet)
         {
-            foreach (var blockId in removedBlocks)
+            foreach (var blockId in removedSet)
             {
                 RemoveEntity(blockId);
 
@@ -236,6 +255,11 @@ namespace Sovereign.ClientCore.Systems.Block.Caches
             /* Resolve to the tile sprite level. */
             var blockId = blockIds.First();
             var centerId = GetTileSpriteIdForBlock(blockId, isTopFace);
+            if (centerId == -1)
+            {
+                // Block isn't ready yet, return at a later pass.
+                return;
+            }
 
             /* Resolve neighbors to the tile sprite level. */
             var north = gridPosition + GridPosition.OneY;
@@ -357,6 +381,15 @@ namespace Sovereign.ClientCore.Systems.Block.Caches
         /// <param name="e">Not used.</param>
         private void OnStartUpdates(object sender, EventArgs e)
         {
+            if (updateCount == 0)
+            {
+                // First update pass for this tick, start new collections.
+                changedBlocks = blockSetPool.TakeObject();
+                removedBlocks = blockSetPool.TakeObject();
+                changedBlocks.Clear();
+                removedBlocks.Clear();
+            }
+
             updateCount++;
         }
 
@@ -370,13 +403,18 @@ namespace Sovereign.ClientCore.Systems.Block.Caches
             /* Check whether both materials and modifiers have updated. */
             if (updateCount >= UpdatedCollectionCount)
             {
-                /* Update the cache. */
-                UpdateCache();
+                /* Update the cache asynchronously. */
+                if (changedBlocks.Count > 0 || removedBlocks.Count > 0)
+                {
+                    var changedSet = changedBlocks;
+                    var removedSet = removedBlocks;
+                    Task.Factory.StartNew(() => UpdateCache(changedSet, removedSet));
+                }
 
-                /* Reset state. */
+                /* Reset state for the next tick. */
+                changedBlocks = null;
+                removedBlocks = null;
                 updateCount = 0;
-                changedBlocks.Clear();
-                removedBlocks.Clear();
             }
         }
 

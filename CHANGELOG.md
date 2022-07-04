@@ -2,6 +2,16 @@
 
 ## 2022
 
+### July
+
+#### 03 July 2022
+
+ * Fix various performance issues with component processing and tile
+   sprite cacheing.
+ * Process updates to the tile sprite cache in a background thread so that
+   the main thread is not blocked by large cache updates following world
+   segment load.
+
 ### June
 
 #### 30 June 2022

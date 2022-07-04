@@ -84,8 +84,8 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites
         {
             /* Check if the context is already in the cache. */
             var ids = new Tuple<int, int, int, int>(idNorth, idEast, idSouth, idWest);
-            if (lookupCache.ContainsKey(ids))
-                return lookupCache[ids].AnimatedSpriteIds;
+            if (lookupCache.TryGetValue(ids, out var cachedValues))
+                return cachedValues.AnimatedSpriteIds;
 
             /* Context not found in cache - resolve. */
             var context = ResolveContext(ids);
