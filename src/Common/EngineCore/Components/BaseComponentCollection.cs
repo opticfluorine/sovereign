@@ -322,8 +322,8 @@ namespace Sovereign.EngineCore.Components
         public Maybe<T> GetComponentForEntity(ulong entityId)
         {
             var maybe = new Maybe<T>();
-            if (HasComponentForEntity(entityId))
-                maybe.Value = components[entityToComponentMap[entityId]];
+            if (entityToComponentMap.TryGetValue(entityId, out var componentId))
+                maybe.Value = components[componentId];
             return maybe;
         }
 
