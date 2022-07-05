@@ -66,6 +66,12 @@ namespace Sovereign.ClientCore.Systems.Block.Caches
         private readonly ObjectPool<HashSet<ulong>> blockSetPool
             = new ObjectPool<HashSet<ulong>>(4);
 
+        /// <summary>
+        /// Sprite ID list pool.
+        /// </summary>
+        private readonly ObjectPool<List<int>> spriteListPool
+            = new ObjectPool<List<int>>(1024);
+
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         /// <summary>
@@ -277,28 +283,8 @@ namespace Sovereign.ClientCore.Systems.Block.Caches
                 southId, westId);
 
             /* Retrieve and populate cache. */
-            var cacheList = GetCacheList(blockId, isTopFace);
-            cacheList.Clear();
-            foreach (var animatedSpriteId in resolvedSprites)
-            {
-                cacheList.Add(animatedSpriteId);
-            }
-        }
-
-        /// <summary>
-        /// Gets the cache list for the given block face.
-        /// </summary>
-        /// <param name="blockId">Block entity ID.</param>
-        /// <param name="isTopFace">Top face if true; front face otherwise.</param>
-        /// <returns>Cache list.</returns>
-        private IList<int> GetCacheList(ulong blockId, bool isTopFace)
-        {
             var dict = isTopFace ? topFaceCache : frontFaceCache;
-            if (!dict.ContainsKey(blockId))
-            {
-                dict[blockId] = new List<int>();
-            }
-            return dict[blockId];
+            dict[blockId] = resolvedSprites;
         }
 
         /// <summary>
