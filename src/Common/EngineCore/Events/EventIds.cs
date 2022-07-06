@@ -182,6 +182,18 @@ namespace Sovereign.EngineCore.Events
         Server_Persistence_RetrieveEntitiesInRange = 200001,
 
         /// <summary>
+        /// Event sent to load a world segment from the database.
+        /// </summary>
+        /// Associated details: WorldSegmentEventDetails
+        Server_Persistence_RetrieveWorldSegment = 200002,
+
+        /// <summary>
+        /// Signals that the entities of a world segment have been loaded.
+        /// </summary>
+        /// Asssociated details: WorldSegmentEventDetails
+        Server_Persistence_WorldSegmentLoaded = 200003,
+
+        /// <summary>
         /// Event sent to synchronize the server with the database.
         /// </summary>
         /// Associated details: None

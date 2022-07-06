@@ -65,6 +65,11 @@ namespace Sovereign.EngineCore.Events
         public bool Local { get; set; }
 
         /// <summary>
+        /// If true, the vent will be sent at the start of the first fully eligible tick.
+        /// </summary>
+        public bool SyncToTick { get; set; }
+
+        /// <summary>
         /// Details associated with the event.
         /// </summary>
         [ProtoMember(2, IsRequired = false)]

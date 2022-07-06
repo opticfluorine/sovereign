@@ -4,6 +4,18 @@
 
 ### July
 
+#### 05 July 2022
+
+ * Fix `PersistenceController` which wasn't filling out any event details.
+ * Add support to `PersistenceSystem` for loading entire world segments based on
+   segment index. A load completion event is sent when this succeeds.
+ * Allow events to be "synced to tick" based on a flag in `Event`. When this
+   flag is sent, the event loop will wait for dispatch until the beginning of
+   the first full tick where the event is eligible to be sent (i.e. the start
+   of the first tick after the scheduled event time). This allows a completion
+   event to be deferred until the main loop has a chance to process any changes
+   to the entities and components.
+
 #### 03 July 2022
 
  * Fix various performance issues with component processing and tile
