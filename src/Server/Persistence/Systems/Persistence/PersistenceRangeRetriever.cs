@@ -92,7 +92,7 @@ namespace Sovereign.Persistence.Systems.Persistence
                 // Sync the event to the next tick to ensure that the loaded entities
                 // and components have been fully processed.
                 var details = new WorldSegmentEventDetails() { SegmentIndex = segmentIndex };
-                var ev = new Event(EventId.Server_Persistence_WorldSegmentLoaded, details);
+                var ev = new Event(EventId.Core_WorldManagement_WorldSegmentLoaded, details);
                 ev.SyncToTick = true;
                 eventSender.SendEvent(ev);
             });

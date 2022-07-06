@@ -1,6 +1,6 @@
-﻿/*
+/*
  * Sovereign Engine
- * Copyright (c) 2019 opticfluorine
+ * Copyright (c) 2022 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,39 +21,21 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
+using Sovereign.EngineCore.Components.Indexers;
 
 namespace Sovereign.WorldManagement.Systems.WorldManagement;
 
 /// <summary>
-/// IoC installer for WorldManagementSystem support classes.
+/// Interface for postprocessing a newly loaded world segment.
 /// </summary>
-public sealed class WorldManagementInstaller : IWindsorInstaller
+public interface IWorldSegmentLoadedHandler
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
-    {
-        container.Register(Component.For<WorldManagementEventHandler>()
-            .LifestyleSingleton());
 
-        container.Register(EngineClasses.EngineAssemblies()
-            .BasedOn<IWorldSegmentLoader>()
-            .WithServiceDefaultInterfaces()
-            .LifestyleSingleton());
+    /// <summary>
+    /// Called by the WorldManagement system to do any postprocessing for a
+    /// newly loaded world segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    void OnWorldSegmentLoaded(GridPosition segmentIndex);
 
-        container.Register(EngineClasses.EngineAssemblies()
-            .BasedOn<IWorldSegmentUnloader>()
-            .WithServiceDefaultInterfaces()
-            .LifestyleSingleton());
-
-        container.Register(Component.For<WorldSegmentRegistry>()
-            .LifestyleSingleton());
-
-        container.Register(EngineClasses.EngineAssemblies()
-            .BasedOn<IWorldSegmentLoadedHandler>()
-            .WithServiceDefaultInterfaces()
-            .LifestyleSingleton());
-    }
 }

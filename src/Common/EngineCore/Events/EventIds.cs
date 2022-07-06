@@ -114,6 +114,12 @@ namespace Sovereign.EngineCore.Events
         /// Associated details: WorldSegmentEventDetails
         Core_WorldManagement_UnloadSegment = 301,
 
+        /// <summary>
+        /// Signals that the entities of a world segment have been loaded.
+        /// </summary>
+        /// Asssociated details: WorldSegmentEventDetails
+        Core_WorldManagement_WorldSegmentLoaded = 302,
+
         #endregion WorldManagement
 
         #region Performance
@@ -186,12 +192,6 @@ namespace Sovereign.EngineCore.Events
         /// </summary>
         /// Associated details: WorldSegmentEventDetails
         Server_Persistence_RetrieveWorldSegment = 200002,
-
-        /// <summary>
-        /// Signals that the entities of a world segment have been loaded.
-        /// </summary>
-        /// Asssociated details: WorldSegmentEventDetails
-        Server_Persistence_WorldSegmentLoaded = 200003,
 
         /// <summary>
         /// Event sent to synchronize the server with the database.
