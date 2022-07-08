@@ -56,6 +56,16 @@ public sealed class WorldSegmentBlockDataManager
     }
 
     /// <summary>
+    /// Gets summary block data for the given world segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <returns>Summary block data, or null if no summary block data is available.</returns>
+    public WorldSegmentBlockData GetWorldSegmentBlockData(GridPosition segmentIndex)
+    {
+        return segmentBlockData.TryGetValue(segmentIndex, out var data) ? data : null;
+    }
+
+    /// <summary>
     /// Asynchronously adds a world segment to the data set.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
@@ -72,6 +82,7 @@ public sealed class WorldSegmentBlockDataManager
     {
         try
         {
+            Logger.DebugFormat("Adding summary block data for world segment {0}.", segmentIndex);
             segmentBlockData[segmentIndex] = generator.Create(segmentIndex);
         }
         catch (Exception e)
