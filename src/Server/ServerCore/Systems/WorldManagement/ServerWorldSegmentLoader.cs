@@ -26,44 +26,38 @@ using Sovereign.EngineCore.Events;
 using Sovereign.ServerCore.Systems.Persistence;
 using Sovereign.WorldManagement.Systems.WorldManagement;
 using Sovereign.WorldManagement.WorldSegments;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Sovereign.ServerCore.Systems.WorldManagement
+namespace Sovereign.ServerCore.Systems.WorldManagement;
+
+/// <summary>
+/// Server-side world segment loader.
+/// </summary>
+public class ServerWorldSegmentLoader : IWorldSegmentLoader
 {
+    private readonly PersistenceController persistenceController;
+    private readonly WorldSegmentRegistry worldSegmentRegistry;
+    private readonly WorldSegmentResolver worldSegmentResolver;
+    private readonly IEventSender eventSender;
 
-    /// <summary>
-    /// Server-side world segment loader.
-    /// </summary>
-    public class ServerWorldSegmentLoader : IWorldSegmentLoader
+    public ServerWorldSegmentLoader(PersistenceController persistenceController,
+        WorldSegmentRegistry worldSegmentRegistry,
+        WorldSegmentResolver worldSegmentResolver,
+        IEventSender eventSender)
     {
-        private readonly PersistenceController persistenceController;
-        private readonly WorldSegmentRegistry worldSegmentRegistry;
-        private readonly WorldSegmentResolver worldSegmentResolver;
-        private readonly IEventSender eventSender;
-
-        public ServerWorldSegmentLoader(PersistenceController persistenceController,
-            WorldSegmentRegistry worldSegmentRegistry,
-            WorldSegmentResolver worldSegmentResolver,
-            IEventSender eventSender)
-        {
-            this.persistenceController = persistenceController;
-            this.worldSegmentRegistry = worldSegmentRegistry;
-            this.worldSegmentResolver = worldSegmentResolver;
-            this.eventSender = eventSender;
-        }
-
-        public void LoadSegment(GridPosition segmentIndex)
-        {
-            /* Skip loading if already loaded. */
-            if (worldSegmentRegistry.IsLoaded(segmentIndex)) return;
-
-            /* Load. */
-            (var minPos, var maxPos) = worldSegmentResolver.GetRangeForWorldSegment(segmentIndex);
-            persistenceController.RetrieveEntitiesInRange(eventSender, minPos, maxPos);
-            worldSegmentRegistry.OnSegmentLoaded(segmentIndex);
-        }
-
+        this.persistenceController = persistenceController;
+        this.worldSegmentRegistry = worldSegmentRegistry;
+        this.worldSegmentResolver = worldSegmentResolver;
+        this.eventSender = eventSender;
     }
+
+    public void LoadSegment(GridPosition segmentIndex)
+    {
+        /* Skip loading if already loaded. */
+        if (worldSegmentRegistry.IsLoaded(segmentIndex)) return;
+
+        /* Load. */
+        persistenceController.RetrieveWorldSegment(eventSender, segmentIndex);
+        worldSegmentRegistry.OnSegmentLoaded(segmentIndex);
+    }
+
 }

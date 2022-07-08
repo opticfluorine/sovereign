@@ -22,19 +22,25 @@
  */
 
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.WorldManagement.Systems.WorldManagement;
+using Sovereign.EngineCore.Systems.WorldManagement;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
 /// <summary>
-/// Handles server-side postprocessing of newly loaded world segments.
+/// Responsible for creating and updating summary world segment block data structures.
 /// </summary>
-public class ServerWorldSegmentLoadedHandler : IWorldSegmentLoadedHandler
+public sealed class WorldSegmentBlockDataGenerator
 {
 
-    public void OnWorldSegmentLoaded(GridPosition segmentIndex)
+    /// <summary>
+    /// Creates summary block data for the given world segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <returns>Summary block data.</returns>
+    public WorldSegmentBlockData Create(GridPosition segmentIndex)
     {
-        // 
+        // TODO
+        return null;
     }
 
 }

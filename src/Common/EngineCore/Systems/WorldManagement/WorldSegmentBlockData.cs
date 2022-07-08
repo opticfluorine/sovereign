@@ -21,20 +21,12 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.WorldManagement.Systems.WorldManagement;
-
-namespace Sovereign.ServerCore.Systems.WorldManagement;
+namespace Sovereign.EngineCore.Systems.WorldManagement;
 
 /// <summary>
-/// Handles server-side postprocessing of newly loaded world segments.
+/// Encodes block data for a world segment for sending from server to client.
 /// </summary>
-public class ServerWorldSegmentLoadedHandler : IWorldSegmentLoadedHandler
+public sealed class WorldSegmentBlockData
 {
-
-    public void OnWorldSegmentLoaded(GridPosition segmentIndex)
-    {
-        // 
-    }
-
+    // TODO
 }

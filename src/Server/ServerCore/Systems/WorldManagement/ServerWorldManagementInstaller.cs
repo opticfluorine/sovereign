@@ -21,20 +21,19 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.WorldManagement.Systems.WorldManagement;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
-/// <summary>
-/// Handles server-side postprocessing of newly loaded world segments.
-/// </summary>
-public class ServerWorldSegmentLoadedHandler : IWorldSegmentLoadedHandler
+public sealed class ServerWorldManagementInstaller : IWindsorInstaller
 {
-
-    public void OnWorldSegmentLoaded(GridPosition segmentIndex)
+    public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        // 
+        container.Register(Component.For<WorldSegmentBlockDataManager>()
+            .LifestyleSingleton());
+        container.Register(Component.For<WorldSegmentBlockDataGenerator>()
+            .LifestyleSingleton());
     }
-
 }
