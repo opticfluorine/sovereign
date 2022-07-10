@@ -39,13 +39,13 @@ public sealed class BlockMaterialData
     /// Material ID.
     /// </summary>
     [Key(0)]
-    int MaterialId;
+    public int MaterialId;
 
     /// <summary>
     /// Material modifier ID.
     /// </summary>
     [Key(1)]
-    int ModifierId;
+    public int ModifierId;
 
 }
 

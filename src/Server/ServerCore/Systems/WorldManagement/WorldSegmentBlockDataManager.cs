@@ -43,10 +43,13 @@ public sealed class WorldSegmentBlockDataManager
     private readonly WorldSegmentBlockDataGenerator generator;
 
     /// <summary>
-    /// Summary block data for loaded world segments.
+    /// Summary block data for loaded world segments via their producer tasks.
+    /// A producer task is created when segment load is completed.
+    /// Updates are made via continuations of the tasks.
+    /// This allows the REST endpoint to await any segment data.
     /// </summary>
-    private readonly ConcurrentDictionary<GridPosition, WorldSegmentBlockData> segmentBlockData
-        = new ConcurrentDictionary<GridPosition, WorldSegmentBlockData>();
+    private readonly ConcurrentDictionary<GridPosition, Task<WorldSegmentBlockData>> dataProducers
+        = new ConcurrentDictionary<GridPosition, Task<WorldSegmentBlockData>>();
 
     public WorldSegmentBlockDataManager(BlockPositionEventFilter eventFilter,
         WorldSegmentBlockDataGenerator generator)
@@ -60,9 +63,9 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
     /// <returns>Summary block data, or null if no summary block data is available.</returns>
-    public WorldSegmentBlockData GetWorldSegmentBlockData(GridPosition segmentIndex)
+    public Task<WorldSegmentBlockData> GetWorldSegmentBlockData(GridPosition segmentIndex)
     {
-        return segmentBlockData.TryGetValue(segmentIndex, out var data) ? data : null;
+        return dataProducers.TryGetValue(segmentIndex, out var data) ? data : null;
     }
 
     /// <summary>
@@ -71,23 +74,24 @@ public sealed class WorldSegmentBlockDataManager
     /// <param name="segmentIndex">World segment index.</param>
     public void AddWorldSegment(GridPosition segmentIndex)
     {
-        Task.Factory.StartNew(() => DoAddWorldSegment(segmentIndex));
+        dataProducers[segmentIndex] = Task.Factory.StartNew(() => DoAddWorldSegment(segmentIndex));
     }
 
     /// <summary>
     /// Blocking call that adds a world segment to the data set.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
-    private void DoAddWorldSegment(GridPosition segmentIndex)
+    private WorldSegmentBlockData DoAddWorldSegment(GridPosition segmentIndex)
     {
         try
         {
             Logger.DebugFormat("Adding summary block data for world segment {0}.", segmentIndex);
-            segmentBlockData[segmentIndex] = generator.Create(segmentIndex);
+            return generator.Create(segmentIndex);
         }
         catch (Exception e)
         {
             Logger.ErrorFormat(e, "Error adding summary block data for world segment {0}.", segmentIndex);
+            return null;
         }
     }
 
