@@ -183,7 +183,7 @@ public sealed class WorldSegmentBlockDataManager
     {
         try
         {
-            // TODO Return lists to object pool for future reuse.
+            generator.Free(data);
         }
         catch (Exception e)
         {

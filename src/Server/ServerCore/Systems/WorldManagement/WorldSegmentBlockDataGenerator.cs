@@ -43,4 +43,15 @@ public sealed class WorldSegmentBlockDataGenerator
         return null;
     }
 
+    /// <summary>
+    /// Cleans up a block data object produced by this generator, returning any
+    /// pooled objects to their respective object pools. The object should be
+    /// considered invalid following this call.
+    /// </summary>
+    /// <param name="data">Data to be freed.</param>
+    public void Free(WorldSegmentBlockData data)
+    {
+
+    }
+
 }
