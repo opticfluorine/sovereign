@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
@@ -51,6 +52,13 @@ public sealed class WorldSegmentBlockDataManager
     private readonly ConcurrentDictionary<GridPosition, Task<WorldSegmentBlockData>> dataProducers
         = new ConcurrentDictionary<GridPosition, Task<WorldSegmentBlockData>>();
 
+    /// <summary>
+    /// Deletion tasks. The presence of a deletion task in this map indicates
+    /// that the deletion has been scheduled but is not yet complete.
+    /// </summary>
+    private readonly ConcurrentDictionary<GridPosition, Task> deletionTasks
+        = new ConcurrentDictionary<GridPosition, Task>();
+
     public WorldSegmentBlockDataManager(BlockPositionEventFilter eventFilter,
         WorldSegmentBlockDataGenerator generator)
     {
@@ -74,7 +82,66 @@ public sealed class WorldSegmentBlockDataManager
     /// <param name="segmentIndex">World segment index.</param>
     public void AddWorldSegment(GridPosition segmentIndex)
     {
-        dataProducers[segmentIndex] = Task.Factory.StartNew(() => DoAddWorldSegment(segmentIndex));
+        if (deletionTasks.TryGetValue(segmentIndex, out var deletionTask))
+        {
+            // Segment was rapidly unloaded and reloaded.
+            // Schedule the reload for after the unload is complete.
+            dataProducers[segmentIndex] = deletionTask.ContinueWith((task) => DoAddWorldSegment(segmentIndex));
+        }
+        else
+        {
+            // Segment has not yet been loaded or has been fully unloaded.
+            // Start a new processing chain from scratch for this segment.
+            dataProducers[segmentIndex] = Task.Factory.StartNew(() => DoAddWorldSegment(segmentIndex));
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously updates a world segment in the data set.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    public void UpdateWorldSegment(GridPosition segmentIndex)
+    {
+        if (deletionTasks.ContainsKey(segmentIndex))
+        {
+            // Segment already being deleted, do not update.
+            Logger.WarnFormat("Tried to update world segment data for {0} during deletion.", segmentIndex);
+            return;
+        }
+
+        if (dataProducers.TryGetValue(segmentIndex, out var currentTask))
+        {
+            dataProducers[segmentIndex] = currentTask.ContinueWith(
+                (task) => DoUpdateWorldSegment(segmentIndex, task.Result));
+        }
+        else
+        {
+            Logger.ErrorFormat("Tried to update world segment data for {0} before it was added.", segmentIndex);
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously removes a world segment from the data set.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    public void RemoveWorldSegment(GridPosition segmentIndex)
+    {
+        // If the world segment is already being removed, don't attempt to remove it again.
+        if (deletionTasks.ContainsKey(segmentIndex))
+        {
+            return;
+        }
+
+        // Immediately remove the segment from the data set, then schedule it for disposal.
+        if (dataProducers.TryRemove(segmentIndex, out var currentTask))
+        {
+            deletionTasks[segmentIndex] = currentTask.ContinueWith(
+                (task) => DoRemoveWorldSegment(segmentIndex, currentTask.Result));
+        }
+        else
+        {
+            Logger.ErrorFormat("Tried to remove world segemnt data for {0} before it was added.", segmentIndex);
+        }
     }
 
     /// <summary>
@@ -92,6 +159,40 @@ public sealed class WorldSegmentBlockDataManager
         {
             Logger.ErrorFormat(e, "Error adding summary block data for world segment {0}.", segmentIndex);
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Blockign call that updates a world segment in the data set.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <param name="data">Existing world segment data.</param>
+    /// <returns>Updated world segment data.</returns>
+    private WorldSegmentBlockData DoUpdateWorldSegment(GridPosition segmentIndex, WorldSegmentBlockData data)
+    {
+        // TODO
+        return data;
+    }
+
+    /// <summary>
+    /// Blockign call that removes a world segment from the data set.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <param name="data">Existing world segment data.</param>
+    private void DoRemoveWorldSegment(GridPosition segmentIndex, WorldSegmentBlockData data)
+    {
+        try
+        {
+            // TODO Return lists to object pool for future reuse.
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorFormat(e, "Error removing summary block data for world segment {0}.", segmentIndex);
+        }
+        finally
+        {
+            // Clear deletion task.
+            deletionTasks.TryRemove(segmentIndex, out var unused);
         }
     }
 
