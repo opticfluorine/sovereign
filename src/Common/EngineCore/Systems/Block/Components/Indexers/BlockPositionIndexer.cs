@@ -1,6 +1,6 @@
-﻿/*
+/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2022 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,30 +21,21 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.Movement.Components;
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+namespace Sovereign.EngineCore.Systems.Block.Components.Indexers;
 
-namespace Sovereign.EngineCore.Systems.Block.Components.Indexers
+/// <summary>
+/// Indexes block positions in an octree to enable range retrieval of multiple blocks.
+/// </summary>
+public sealed class BlockPositionIndexer : BasePositionComponentIndexer
 {
 
-    /// <summary>
-    /// IoC installer for block component indexers.
-    /// </summary>
-    public sealed class BlockComponentIndexerInstaller : IWindsorInstaller
+    public BlockPositionIndexer(PositionComponentCollection positions, BlockPositionEventFilter filter)
+        : base(positions, filter)
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<BlockGridPositionIndexer>()
-                .LifestyleSingleton());
 
-            container.Register(Component.For<BlockPositionEventFilter>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<BlockPositionIndexer>()
-                .LifestyleSingleton());
-        }
     }
 
 }

@@ -89,7 +89,7 @@ public sealed class WorldSegmentBlockDataLine
     /// is occupied by a block of the default material for this depth plane.
     /// </summary>
     [Key(1)]
-    public IList<LinePositionedBlockData> BlockData;
+    public List<LinePositionedBlockData> BlockData;
 
 }
 
@@ -112,7 +112,7 @@ public sealed class WorldSegmentBlockDataPlane
     /// on that line are occupied with blocks of the default material.
     /// </summary>
     [Key(1)]
-    public IList<WorldSegmentBlockDataLine> Lines;
+    public List<WorldSegmentBlockDataLine> Lines;
 
 }
 
@@ -136,6 +136,6 @@ public sealed class WorldSegmentBlockData
     /// default block for that plane.
     /// </summary>
     [Key(1)]
-    public IList<WorldSegmentBlockDataPlane> DataPlanes;
+    public List<WorldSegmentBlockDataPlane> DataPlanes;
 
 }
