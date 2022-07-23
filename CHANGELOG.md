@@ -4,6 +4,13 @@
 
 ### July
 
+#### 23 July 2022
+
+ * Reserve material ID 0 as a special material corresponding to the absence of
+   a block (or "air"). This enables an optimization trick in world block data
+   transfer from server to client by leveraging block sparsity (especially above the surface
+   layer) to reduce encoded block data size.
+
 #### 05 July 2022
 
  * Fix `PersistenceController` which wasn't filling out any event details.

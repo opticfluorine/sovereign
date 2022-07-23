@@ -23,6 +23,7 @@
 
 using Castle.Core.Logging;
 using Sovereign.EngineUtil.Validation;
+using System;
 using System.Linq;
 using System.Text;
 
@@ -118,7 +119,7 @@ public sealed class MaterialDefinitionsValidator
         {
             var error = GetMaterialIdUniquenessErrorMessage(materialDefinitions);
             errorStringBuilder.Append(error).Append("\n\n");
-            Logger.Error(() => GetMaterialIdUniquenessErrorMessage(materialDefinitions));
+            Logger.Error(error);
         }
 
         return satisfied;
@@ -139,6 +140,30 @@ public sealed class MaterialDefinitionsValidator
         {
             satisfied = satisfied && CheckSingleMaterialModiferUniqueness(material, errorStringBuilder);
         }
+        return satisfied;
+    }
+
+    /// <summary>
+    /// Checks for invalid or reserved material IDs.
+    /// </summary>
+    /// <param name="definitions">Material definitions.</param>
+    /// <param name="errBuilder">Error string builder.</param>
+    /// <returns>true if all IDs are valid, false otherwise.</returns>
+    private bool CheckMaterialIdValidity(MaterialDefinitions definitions, StringBuilder errBuilder)
+    {
+        var satisfied = true;
+        foreach (var material in definitions.Materials)
+        {
+            satisfied = satisfied && material.Id > 0;
+        }
+
+        if (!satisfied)
+        {
+            var error = GetMaterialIdErrorMessage(definitions);
+            errBuilder.Append(error).Append("\n\n");
+            Logger.Error(error);
+        }
+
         return satisfied;
     }
 
@@ -217,6 +242,28 @@ public sealed class MaterialDefinitionsValidator
         foreach (var duplicateModifier in duplicateModifiers)
         {
             sb.Append("\nMaterial Modifier ").Append(duplicateModifier);
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Gets the error message for an invalid material ID.
+    /// </summary>
+    /// <param name="definitions">Definitions.</param>
+    /// <returns>Error message.</returns>
+    private string GetMaterialIdErrorMessage(MaterialDefinitions definitions)
+    {
+        /* Identify any invalid IDs. */
+        var badIds = definitions.Materials
+            .Where((material) => material.Id < 1)
+            .Select((material, idx) => material.Id);
+
+        var sb = new StringBuilder();
+        sb.Append("Material IDs must be greater than zero. Bad material IDs found:");
+        foreach (var id in badIds)
+        {
+            sb.Append("\nMaterial ").Append(id);
         }
 
         return sb.ToString();

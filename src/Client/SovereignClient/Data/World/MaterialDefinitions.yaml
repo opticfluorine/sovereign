@@ -4,13 +4,6 @@
 ---
 
 Materials:
-  - Id: 0
-    MaterialName: Water
-    MaterialSubtypes:
-      - MaterialModifier: 0
-        TopFaceTileSpriteId: 0
-        SideFaceTileSpriteId: 0
-        ObscuredTopFaceTileSpriteId: 0
   - Id: 1
     MaterialName: Grass
     MaterialSubtypes:
@@ -32,3 +25,10 @@ Materials:
         TopFaceTileSpriteId: 3
         SideFaceTileSpriteId: 3
         ObscuredTopFaceTileSpriteId: 3
+  - Id: 4
+    MaterialName: Water
+    MaterialSubtypes:
+      - MaterialModifier: 0
+        TopFaceTileSpriteId: 0
+        SideFaceTileSpriteId: 0
+        ObscuredTopFaceTileSpriteId: 0
