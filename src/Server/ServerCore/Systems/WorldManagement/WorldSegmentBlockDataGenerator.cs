@@ -65,33 +65,6 @@ public sealed class WorldSegmentBlockDataGenerator
         public int MaterialModifier;
     }
 
-    /// <summary>
-    /// Object pool for block buffers.
-    /// </summary>
-    private readonly ObjectPool<List<PositionedEntity>> blockListPool = new ObjectPool<List<PositionedEntity>>();
-
-    /// <summary>
-    /// Object pool for nested lists breaking down a segment into depth planes.
-    /// </summary>
-    private readonly ObjectPool<List<List<BlockData>>> planeListPool = new ObjectPool<List<List<BlockData>>>();
-
-    /// <summary>
-    /// Object pool for world segment block data objects.
-    /// </summary>
-    private readonly ObjectPool<WorldSegmentBlockData> dataPool = new ObjectPool<WorldSegmentBlockData>();
-
-    /// <summary>
-    /// Object pool for converted data planes.
-    /// </summary>
-    private readonly ObjectPool<List<WorldSegmentBlockDataPlane>> convertedPlaneListPool
-        = new ObjectPool<List<WorldSegmentBlockDataPlane>>();
-
-    /// <summary>
-    /// Object pool for converted data lines.
-    /// </summary>
-    private readonly ObjectPool<List<WorldSegmentBlockDataLine>> convertedLineListPool
-        = new ObjectPool<List<WorldSegmentBlockDataLine>>();
-
     public WorldSegmentBlockDataGenerator(WorldSegmentResolver resolver, BlockPositionIndexer indexer,
         MaterialComponentCollection materials, MaterialModifierComponentCollection modifiers,
         IWorldManagementConfiguration config)
@@ -112,18 +85,17 @@ public sealed class WorldSegmentBlockDataGenerator
     {
         // Retrieve the latest data for the requested world segment.
         var range = resolver.GetRangeForWorldSegment(segmentIndex);
-        var blocks = blockListPool.TakeObject();
+        var blocks = new List<PositionedEntity>();
         using (var lockHandle = indexer.AcquireLock())
         {
             indexer.GetEntitiesInRange(lockHandle, range.Item1, range.Item2, blocks);
         }
 
         // Retrieve material data, group into depth planes.
-        var depthPlanes = planeListPool.TakeObject();
-        if (depthPlanes.Count < config.SegmentLength)
+        var depthPlanes = new List<BlockData>[config.SegmentLength];
+        for (int i = 0; i < config.SegmentLength; ++i)
         {
-            // This appears to be a new list, allocate depth planes.
-            InitializeDepthPlanes(depthPlanes);
+            depthPlanes[i] = new List<BlockData>();
         }
         GroupByDepth(blocks, depthPlanes, segmentIndex);
 
@@ -131,42 +103,18 @@ public sealed class WorldSegmentBlockDataGenerator
         WorldSegmentBlockData data = GetEmptyBlockData();
 
         // Process each depth plane separately.
-
-        // Clean up.
-        foreach (var plane in depthPlanes) plane.Clear();
-        blocks.Clear();
-        planeListPool.ReturnObject(depthPlanes);
-        blockListPool.ReturnObject(blocks);
+        for (int i = 0; i < config.SegmentLength; ++i)
+        {
+            if (TryConvertDepthPlane(depthPlanes[i], ref data.DefaultMaterialsPerPlane[i],
+                out var converted))
+            {
+                // At least one non-default block in plane.
+                data.DataPlanes.Add(converted);
+            }
+        }
 
         // TODO
         return null;
-    }
-
-
-    /// <summary>
-    /// Cleans up a block data object produced by this generator, returning any
-    /// pooled objects to their respective object pools. The object should be
-    /// considered invalid following this call.
-    /// </summary>
-    /// <param name="data">Data to be freed.</param>
-    public void Free(WorldSegmentBlockData data)
-    {
-        // TODO Clean up internal structures.
-
-        dataPool.ReturnObject(data);
-    }
-
-    /// <summary>
-    /// Initializes a new list of depth planes.
-    /// </summary>
-    /// <param name="depthPlanes">Depth planes list to initialize.</param>
-    private void InitializeDepthPlanes(List<List<BlockData>> depthPlanes)
-    {
-        depthPlanes.Clear();
-        for (int i = 0; i < config.SegmentLength; ++i)
-        {
-            depthPlanes.Add(new List<BlockData>());
-        }
     }
 
     /// <summary>
@@ -175,36 +123,11 @@ public sealed class WorldSegmentBlockDataGenerator
     /// <returns>Empty block data object.</returns>
     private WorldSegmentBlockData GetEmptyBlockData()
     {
-        var data = dataPool.TakeObject();
-
-        if (data.DefaultMaterialsPerPlane == null)
-        {
-            // Take this as indication that the structure hasn't been initialized yet.
-            data.DefaultMaterialsPerPlane = new BlockMaterialData[config.SegmentLength];
-            data.DataPlanes = new List<WorldSegmentBlockDataPlane>();
-        }
+        var data = new WorldSegmentBlockData();
+        data.DefaultMaterialsPerPlane = new BlockMaterialData[config.SegmentLength];
+        data.DataPlanes = new List<WorldSegmentBlockDataPlane>();
 
         return data;
-    }
-
-    /// <summary>
-    /// Cleans up a block data object, returning objects to the pools as needed.
-    /// The data object itself is also returned to its pool; the reference should be
-    /// considered invalid after this method returns.
-    /// </summary>
-    /// <param name="data">Block data object to clean up.</param>
-    private void CleanupBlockData(WorldSegmentBlockData data)
-    {
-        foreach (var plane in data.DataPlanes)
-        {
-            foreach (var line in plane.Lines)
-            {
-            }
-            plane.Lines.Clear();
-            convertedLineListPool.ReturnObject(plane.Lines);
-        }
-        data.DataPlanes.Clear();
-        dataPool.ReturnObject(data);
     }
 
     /// <summary>
@@ -213,9 +136,41 @@ public sealed class WorldSegmentBlockDataGenerator
     /// <param name="blocks">Blocks in the world segment.</param>
     /// <param name="depthPlanes">Depth planes to populate, indexed by z offset from segment origin.</param>
     /// <param name="segmentIndex">World segment index.</param>
-    private void GroupByDepth(List<PositionedEntity> blocks, List<List<BlockData>> depthPlanes, GridPosition segmentIndex)
+    private void GroupByDepth(List<PositionedEntity> blocks, List<BlockData>[] depthPlanes, GridPosition segmentIndex)
     {
+        var baseDepth = (int)resolver.GetRangeForWorldSegment(segmentIndex).Item1.Z;
+        foreach (var block in blocks)
+        {
+            var offset = (int)block.Position.Z - baseDepth;
+            var material = materials[block.EntityId];
+            var modifier = modifiers[block.EntityId];
 
+            var blockData = new BlockData
+            {
+                Material = material,
+                MaterialModifier = modifier,
+                Position = new GridPosition(block.Position)
+            };
+
+            depthPlanes[offset].Add(blockData);
+        }
     }
+
+    /// <summary>
+    /// Converts a depth plane. The default block is always updated. If any non-default blocks
+    /// are present in the plane, a converted data plane is passed back.
+    /// </summary>
+    /// <param name="blocks">Input block data for this depth plane.</param>
+    /// <param name="defaultMaterial">Default material for the plane.</param>
+    /// <param name="converted">Converted plane. Undefined if the method returns false.</param>
+    /// <returns>true if any non-default blocks were converted; false otherwise.</returns>
+    private bool TryConvertDepthPlane(List<BlockData> blocks, ref BlockMaterialData defaultMaterial,
+        out WorldSegmentBlockDataPlane converted)
+    {
+        converted = new WorldSegmentBlockDataPlane();
+
+        return false;
+    }
+
 
 }
