@@ -117,6 +117,11 @@ public sealed class WorldSegmentBlockDataGenerator
         return null;
     }
 
+    public void Free(WorldSegmentBlockData data)
+    {
+        // TODO
+    }
+
     /// <summary>
     /// Gets an empty block data object for use.
     /// </summary>

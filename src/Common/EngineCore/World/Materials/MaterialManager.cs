@@ -118,7 +118,26 @@ namespace Sovereign.EngineCore.World.Materials
         /// <param name="materialDefinitions"></param>
         private void UnpackMaterialDefinitions(MaterialDefinitions materialDefinitions)
         {
+            /* Create a reserved material 0 for "air". */
+            var airMat = new Material
+            {
+                Id = 0,
+                MaterialName = "Air",
+                MaterialSubtypes = new[]
+                {
+                    new MaterialSubtype
+                    {
+                        MaterialModifier = 0,
+                        ObscuredTopFaceTileSpriteId = 0,
+                        SideFaceTileSpriteId = 0,
+                        TopFaceTileSpriteId = 0
+                    }
+                }
+            };
+
+            /* Combine the loaded materials with the special type, then order and stash as a list. */
             Materials = materialDefinitions.Materials
+                .Append(airMat)
                 .OrderBy(material => material.Id)
                 .ToList();
         }

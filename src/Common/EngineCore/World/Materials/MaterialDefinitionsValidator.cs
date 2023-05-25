@@ -47,15 +47,15 @@ public sealed class MaterialDefinitionsValidator
     {
         var sb = new StringBuilder();
 
-        var valid = CheckMaterialIdUniqueness(materialDefinitions, sb)
-            && CheckMaterialModifierUniqueness(materialDefinitions, sb);
+        var valid = CheckMaterialModifierUniqueness(materialDefinitions, sb)
+            && ValidateIds(materialDefinitions, sb);
 
         errorMessages = sb.ToString().Trim();
         return valid;
     }
 
     /// <summary>
-    /// Checks that IDs are not duplicated and run from 0 to n - 1.
+    /// Checks that IDs are not duplicated and run from 1 to n.
     /// </summary>
     /// <param name="definitions">Definitions.</param>
     /// <param name="sb">StringBuilder for error reporting.</param>
@@ -66,11 +66,11 @@ public sealed class MaterialDefinitionsValidator
         var spriteCount = definitions.Materials.Count;
         var validator = new ConsecutiveRangeValidation();
         validator.IsRangeConsecutive(definitions.Materials.Select(material => material.Id),
-            0, spriteCount, out var duplicateIds, out var outOfRangeIds);
+            1, spriteCount + 1, out var duplicateIds, out var outOfRangeIds);
 
         var hasDuplicates = duplicateIds.Count > 0;
         var hasOutOfRanges = outOfRangeIds.Count > 0;
-        var valid = hasDuplicates || hasOutOfRanges;
+        var valid = !(hasDuplicates || hasOutOfRanges);
 
         if (!valid)
         {
@@ -87,7 +87,7 @@ public sealed class MaterialDefinitionsValidator
 
             if (hasOutOfRanges)
             {
-                sb.Append("Material IDs must run consecutively from 0.\n")
+                sb.Append("Material IDs must run consecutively from 1.\n")
                     .Append("The following IDs are out of range:\n\n");
                 foreach (var id in outOfRangeIds)
                 {
@@ -97,32 +97,6 @@ public sealed class MaterialDefinitionsValidator
         }
 
         return valid;
-    }
-
-    /// <summary>
-    /// Checks that Material IDs are not duplicated in the definitions.
-    /// </summary>
-    /// <param name="materialDefinitions">Material definitions.</param>
-    /// <param name="errorStringBuilder">String builder for error messages.</param>
-    /// <returns>true if there are no duplicates, false otherwise.</returns>
-    private bool CheckMaterialIdUniqueness(MaterialDefinitions materialDefinitions,
-        StringBuilder errorStringBuilder)
-    {
-        /* Check whether any IDs are duplicated. */
-        var uniqueIdCount = materialDefinitions.Materials
-            .Select(material => material.Id)
-            .Distinct().Count();
-        var satisfied = uniqueIdCount == materialDefinitions.Materials.Count;
-
-        /* Output an error message if there are any violations. */
-        if (!satisfied)
-        {
-            var error = GetMaterialIdUniquenessErrorMessage(materialDefinitions);
-            errorStringBuilder.Append(error).Append("\n\n");
-            Logger.Error(error);
-        }
-
-        return satisfied;
     }
 
     /// <summary>
@@ -140,30 +114,6 @@ public sealed class MaterialDefinitionsValidator
         {
             satisfied = satisfied && CheckSingleMaterialModiferUniqueness(material, errorStringBuilder);
         }
-        return satisfied;
-    }
-
-    /// <summary>
-    /// Checks for invalid or reserved material IDs.
-    /// </summary>
-    /// <param name="definitions">Material definitions.</param>
-    /// <param name="errBuilder">Error string builder.</param>
-    /// <returns>true if all IDs are valid, false otherwise.</returns>
-    private bool CheckMaterialIdValidity(MaterialDefinitions definitions, StringBuilder errBuilder)
-    {
-        var satisfied = true;
-        foreach (var material in definitions.Materials)
-        {
-            satisfied = satisfied && material.Id > 0;
-        }
-
-        if (!satisfied)
-        {
-            var error = GetMaterialIdErrorMessage(definitions);
-            errBuilder.Append(error).Append("\n\n");
-            Logger.Error(error);
-        }
-
         return satisfied;
     }
 

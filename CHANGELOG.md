@@ -1,5 +1,17 @@
 # Sovereign Engine Changelog
 
+## 2023
+
+### May
+
+#### 25 May 2023
+
+ * Trying again to get back into working on this project!
+ * Get Veldrid renderer up and running on Windows.
+ * Fix various issues with the material ID 0 change from last July. This introduced an off-by-one
+   error in the materials list, and there was some weird stuff going on with material definition
+   validation at startup.
+
 ## 2022
 
 ### July
