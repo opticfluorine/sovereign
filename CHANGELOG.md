@@ -4,6 +4,11 @@
 
 ### May
 
+#### 26 May 2023
+
+ * For Windows, copy SDL binaries to build directory automatically. In the future, probably want
+   to only do this for Windows and multi-target builds.
+
 #### 25 May 2023
 
  * Trying again to get back into working on this project!
