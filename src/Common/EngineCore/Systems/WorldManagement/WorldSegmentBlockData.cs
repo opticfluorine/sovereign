@@ -47,6 +47,17 @@ public sealed class BlockMaterialData
     [Key(1)]
     public int ModifierId;
 
+    public override bool Equals(object obj)
+    {
+        return obj is BlockMaterialData data &&
+               MaterialId == data.MaterialId &&
+               ModifierId == data.ModifierId;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(MaterialId, ModifierId);
+    }
 }
 
 /// <summary>

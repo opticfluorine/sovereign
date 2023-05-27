@@ -27,7 +27,7 @@ using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.Systems.WorldManagement;
-using Sovereign.EngineUtil.Collections;
+using Sovereign.EngineCore.World.Materials;
 using Sovereign.WorldManagement.Configuration;
 using Sovereign.WorldManagement.WorldSegments;
 
@@ -47,7 +47,7 @@ public sealed class WorldSegmentBlockDataGenerator
     /// <summary>
     /// Internal block data type.
     /// </summary>
-    private struct BlockData
+    private class BlockData
     {
         /// <summary>
         /// Block position.
@@ -55,14 +55,80 @@ public sealed class WorldSegmentBlockDataGenerator
         public GridPosition Position;
 
         /// <summary>
-        /// Material ID.
+        /// Block type.
         /// </summary>
-        public int Material;
+        public BlockMaterialData BlockType;
+    }
+
+    /// <summary>
+    /// Internal struct used for grouping blocks into depth planes.
+    /// </summary>
+    private class DepthPlane
+    {
+        /// <summary>
+        /// Blocks in the depth plane.
+        /// </summary>
+        public List<BlockData> Blocks = new List<BlockData>();
 
         /// <summary>
-        /// Material modifier ID.
+        /// Default block type for this depth plane.
         /// </summary>
-        public int MaterialModifier;
+        public BlockMaterialData DefaultBlockType { get; private set; }
+            = new BlockMaterialData() { MaterialId = Material.Air, ModifierId = 0 };
+
+        /// <summary>
+        /// Z offset of this depth plane.
+        /// </summary>
+        public int OffsetZ { get; private set; }
+
+        /// <summary>
+        /// Running count of material types in this depth plane.
+        /// </summary>
+        private Dictionary<BlockMaterialData, int> MaterialCounts
+            = new Dictionary<BlockMaterialData, int>();
+
+        /// <summary>
+        /// Cached count of most frequent material type.
+        /// </summary>
+        private int LeadingMaterialCount = 0;
+
+        /// <summary>
+        /// Creates an empty depth plane.
+        /// </summary>
+        /// <param name="offsetZ">Z offset of this depth plane.</param>
+        public DepthPlane(int offsetZ)
+        {
+            OffsetZ = offsetZ;
+        }
+
+        /// <summary>
+        /// Adds a block to the depth plane.
+        /// </summary>
+        /// <param name="block">Block.</param>
+        public void Add(BlockData block)
+        {
+            Blocks.Add(block);
+
+            // Update material counts.
+            int count;
+            if (MaterialCounts.TryGetValue(block.BlockType, out count))
+            {
+                count++;
+            }
+            else
+            {
+                count = 1;
+            }
+            MaterialCounts[block.BlockType] = count;
+
+            // Update default block if needed.
+            if (count > LeadingMaterialCount)
+            {
+                LeadingMaterialCount = count;
+                DefaultBlockType = block.BlockType;
+            }
+        }
+
     }
 
     public WorldSegmentBlockDataGenerator(WorldSegmentResolver resolver, BlockPositionIndexer indexer,
@@ -92,12 +158,13 @@ public sealed class WorldSegmentBlockDataGenerator
         }
 
         // Retrieve material data, group into depth planes.
-        var depthPlanes = new List<BlockData>[config.SegmentLength];
+        var basePoint = resolver.GetRangeForWorldSegment(segmentIndex).Item1;
+        var depthPlanes = new DepthPlane[config.SegmentLength];
         for (int i = 0; i < config.SegmentLength; ++i)
         {
-            depthPlanes[i] = new List<BlockData>();
+            depthPlanes[i] = new DepthPlane(i);
         }
-        GroupByDepth(blocks, depthPlanes, segmentIndex);
+        GroupByDepth(blocks, depthPlanes, (int)basePoint.Z);
 
         // Initialize a new block summary data object.
         WorldSegmentBlockData data = GetEmptyBlockData();
@@ -105,7 +172,8 @@ public sealed class WorldSegmentBlockDataGenerator
         // Process each depth plane separately.
         for (int i = 0; i < config.SegmentLength; ++i)
         {
-            if (TryConvertDepthPlane(depthPlanes[i], ref data.DefaultMaterialsPerPlane[i],
+            if (TryConvertDepthPlane(depthPlanes[i], 
+                (int)basePoint.X, (int)basePoint.Y, (int)basePoint.Z,
                 out var converted))
             {
                 // At least one non-default block in plane.
@@ -113,13 +181,7 @@ public sealed class WorldSegmentBlockDataGenerator
             }
         }
 
-        // TODO
-        return null;
-    }
-
-    public void Free(WorldSegmentBlockData data)
-    {
-        // TODO
+        return data;
     }
 
     /// <summary>
@@ -137,23 +199,22 @@ public sealed class WorldSegmentBlockDataGenerator
 
     /// <summary>
     /// Groups a list of block entities into depth planes while also retrieving material data.
+    /// This method also identifies the most frequent material appearing in each plane.
     /// </summary>
     /// <param name="blocks">Blocks in the world segment.</param>
     /// <param name="depthPlanes">Depth planes to populate, indexed by z offset from segment origin.</param>
-    /// <param name="segmentIndex">World segment index.</param>
-    private void GroupByDepth(List<PositionedEntity> blocks, List<BlockData>[] depthPlanes, GridPosition segmentIndex)
+    /// <param name="baseZ">Z coordinate of segment base point.</param>
+    private void GroupByDepth(List<PositionedEntity> blocks, DepthPlane[] depthPlanes, int baseZ)
     {
-        var baseDepth = (int)resolver.GetRangeForWorldSegment(segmentIndex).Item1.Z;
         foreach (var block in blocks)
         {
-            var offset = (int)block.Position.Z - baseDepth;
+            var offset = (int)block.Position.Z - baseZ;
             var material = materials[block.EntityId];
             var modifier = modifiers[block.EntityId];
 
             var blockData = new BlockData
             {
-                Material = material,
-                MaterialModifier = modifier,
+                BlockType = new BlockMaterialData() { MaterialId = material, ModifierId = modifier },
                 Position = new GridPosition(block.Position)
             };
 
@@ -162,20 +223,117 @@ public sealed class WorldSegmentBlockDataGenerator
     }
 
     /// <summary>
-    /// Converts a depth plane. The default block is always updated. If any non-default blocks
-    /// are present in the plane, a converted data plane is passed back.
+    /// Converts a depth plane. If any non-default blocks are present in the
+    /// depth plane, a data plane is passed back.
     /// </summary>
-    /// <param name="blocks">Input block data for this depth plane.</param>
-    /// <param name="defaultMaterial">Default material for the plane.</param>
-    /// <param name="converted">Converted plane. Undefined if the method returns false.</param>
+    /// <param name="depthPlane">Depth plane to convert.</param>
+    /// <param name="baseX">Base X position of the data block.</param>
+    /// <param name="baseY">Base Y position of the data block.</param>
+    /// <param name="baseZ">Base Z position of the data block.</param>
+    /// <param name="converted">Converted plane, only if method returns true.</param>
     /// <returns>true if any non-default blocks were converted; false otherwise.</returns>
-    private bool TryConvertDepthPlane(List<BlockData> blocks, ref BlockMaterialData defaultMaterial,
+    private bool TryConvertDepthPlane(DepthPlane depthPlane, 
+        int baseX, int baseY, int baseZ,
         out WorldSegmentBlockDataPlane converted)
     {
-        converted = new WorldSegmentBlockDataPlane();
+        // Allocate all possible data lines.
+        var lines = new WorldSegmentBlockDataLine[config.SegmentLength];
+        for (int i = 0; i < lines.Length; ++i)
+        {
+            lines[i].OffsetY = (byte)i;
+            lines[i].BlockData = new List<LinePositionedBlockData>();
+        }
 
-        return false;
+        // Filter to exclude default blocks.
+        var keptBlocks = new List<BlockData>();
+        foreach (var block in depthPlane.Blocks)
+        {
+            if (block.BlockType != depthPlane.DefaultBlockType)
+            {
+                keptBlocks.Add(block);
+            }
+        }
+
+        // As a special case, if the default block is not air, the air blocks
+        // must be created and added to the kept set.
+        if (depthPlane.DefaultBlockType.MaterialId != Material.Air)
+        {
+            AddAirBlocks(keptBlocks, depthPlane, baseX, baseY, baseZ);
+        }
+
+        // Group blocks into data lines.
+        foreach (var block in keptBlocks)
+        {
+            // Convert block.
+            var positionedBlock = new LinePositionedBlockData()
+            {
+                OffsetX = (byte)(block.Position.X - baseX),
+                MaterialData = block.BlockType
+            };
+
+            var offsetY = block.Position.Y - baseY;
+            lines[offsetY].BlockData.Add(positionedBlock);
+        }
+
+        // Retain only the non-empty data lines in the converted plane.
+        converted = new WorldSegmentBlockDataPlane();
+        converted.OffsetZ = (byte)depthPlane.OffsetZ;
+        var hasLines = false;
+        foreach (var line in lines)
+        {
+            if (line.BlockData.Count > 0)
+            {
+                converted.Lines.Add(line);
+                hasLines = true;
+            }
+        }
+
+        return hasLines;
     }
 
+    /// <summary>
+    /// Generates explicit air blocks in the depth plane wherever no block is present.
+    /// </summary>
+    /// <param name="keptBlocks">Running list of non-default blocks in plane.</param>
+    /// <param name="depthPlane">Depth plane.</param>
+    /// <param name="baseX">Base X coordinate.</param>
+    /// <param name="baseY">Base Y coordinate.</param>
+    /// <param name="baseZ">Base Z coordinate.</param>
+    private void AddAirBlocks(List<BlockData> keptBlocks, DepthPlane depthPlane, 
+        int baseX, int baseY, int baseZ)
+    {
+        // Determine where air blocks need to be added.
+        var filledPoints = new bool[config.SegmentLength, config.SegmentLength];
+        foreach (var block in depthPlane.Blocks)
+        {
+            int offsetX = block.Position.X - baseX;
+            int offsetY = block.Position.Y - baseY;
+            filledPoints[offsetX, offsetY] = true;
+        }
+
+        // Now add all of the air blocks.
+        var airType = new BlockMaterialData { MaterialId = Material.Air, ModifierId = 0 };
+        for (int i = 0; i < config.SegmentLength; ++i)
+        {
+            for (int j = 0; j < config.SegmentLength; ++j)
+            {
+                if (!filledPoints[i, j])
+                {
+                    var block = new BlockData()
+                    {
+                        BlockType = airType,
+                        Position = new GridPosition()
+                        {
+                            X = baseX + i,
+                            Y = baseY + j,
+                            Z = baseZ + depthPlane.OffsetZ
+                        }
+                    };
+                    keptBlocks.Add(block);
+                }
+            }
+        }
+    }
 
 }
+

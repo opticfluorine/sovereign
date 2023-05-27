@@ -4,6 +4,12 @@
 
 ### May
 
+#### 27 May 2023
+
+ * Finish initial implementation of world block segment conversion (from blocks to structured form).
+   This has not yet been tested. Still to be done is conversion back from structured form to blocks
+   in the client, and implementation of a transfer interface between server and client.
+
 #### 25 May 2023
 
  * Trying again to get back into working on this project!

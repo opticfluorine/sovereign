@@ -175,25 +175,14 @@ public sealed class WorldSegmentBlockDataManager
     }
 
     /// <summary>
-    /// Blockign call that removes a world segment from the data set.
+    /// Blocking call that removes a world segment from the data set.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
     /// <param name="data">Existing world segment data.</param>
     private void DoRemoveWorldSegment(GridPosition segmentIndex, WorldSegmentBlockData data)
     {
-        try
-        {
-            generator.Free(data);
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorFormat(e, "Error removing summary block data for world segment {0}.", segmentIndex);
-        }
-        finally
-        {
-            // Clear deletion task.
-            deletionTasks.TryRemove(segmentIndex, out var unused);
-        }
+        // Clear deletion task.
+        deletionTasks.TryRemove(segmentIndex, out var unused);
     }
 
 }

@@ -34,6 +34,11 @@ public sealed class Material
 {
 
     /// <summary>
+    /// Reserved ID value for the "air" block.
+    /// </summary>
+    public const int Air = 0;
+
+    /// <summary>
     /// Material ID. Unique.
     /// ID 0 is special and indicates a vacant block (no material/air).
     /// </summary>
