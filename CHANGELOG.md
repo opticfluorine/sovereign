@@ -10,6 +10,11 @@
    This has not yet been tested. Still to be done is conversion back from structured form to blocks
    in the client, and implementation of a transfer interface between server and client.
 
+#### 26 May 2023
+
+ * For Windows, copy SDL binaries to build directory automatically. In the future, probably want
+   to only do this for Windows and multi-target builds.
+
 #### 25 May 2023
 
  * Trying again to get back into working on this project!
