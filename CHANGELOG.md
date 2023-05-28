@@ -9,6 +9,12 @@
  * Finish initial implementation of world block segment conversion (from blocks to structured form).
    This has not yet been tested. Still to be done is conversion back from structured form to blocks
    in the client, and implementation of a transfer interface between server and client.
+ * For updating world block segment data in the server, just regenerate the segment instead of
+   trying to do an incremental update. There will be a performance penalty since constructing a
+   segment is an expensive operation, however these can proceed in the background so shouldn't be
+   a huge issue except under very large workloads. We can circle back and optimize this with an
+   incremental update if it turns out to be a problem, otherwise chalk this one up to avoiding
+   a premature optimization.
 
 #### 26 May 2023
 

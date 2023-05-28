@@ -111,12 +111,11 @@ public sealed class WorldSegmentBlockDataManager
 
         if (dataProducers.TryGetValue(segmentIndex, out var currentTask))
         {
+            // Just redo the creation instead of trying to do an incremental update.
+            // We can come back here and optimize later if this causes too big of a
+            // performance hit.
             dataProducers[segmentIndex] = currentTask.ContinueWith(
-                (task) => DoUpdateWorldSegment(segmentIndex, task.Result));
-        }
-        else
-        {
-            Logger.ErrorFormat("Tried to update world segment data for {0} before it was added.", segmentIndex);
+                (task) => DoAddWorldSegment(segmentIndex));
         }
     }
 
@@ -160,18 +159,6 @@ public sealed class WorldSegmentBlockDataManager
             Logger.ErrorFormat(e, "Error adding summary block data for world segment {0}.", segmentIndex);
             return null;
         }
-    }
-
-    /// <summary>
-    /// Blockign call that updates a world segment in the data set.
-    /// </summary>
-    /// <param name="segmentIndex">World segment index.</param>
-    /// <param name="data">Existing world segment data.</param>
-    /// <returns>Updated world segment data.</returns>
-    private WorldSegmentBlockData DoUpdateWorldSegment(GridPosition segmentIndex, WorldSegmentBlockData data)
-    {
-        // TODO
-        return data;
     }
 
     /// <summary>
