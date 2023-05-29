@@ -47,9 +47,9 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
 
         public string ErrorMessage => clientNetworkManager.ErrorMessage;
 
-        public void BeginConnection(string host, ushort port)
+        public void BeginConnection(ClientConnectionParameters connectionParameters)
         {
-            clientNetworkManager.BeginConnection(host, port);
+            clientNetworkManager.BeginConnection(connectionParameters);
         }
 
         public void EndConnection()

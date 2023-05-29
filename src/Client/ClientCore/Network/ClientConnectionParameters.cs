@@ -21,56 +21,48 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.ClientCore.Network;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sovereign.ClientNetwork.Network.Rest
+namespace Sovereign.ClientCore.Network
 {
 
     /// <summary>
-    /// Provides a common interface for interacting with the REST server from the client.
+    /// Describes a set of connection parameters for a server.
     /// </summary>
-    public sealed class RestClient
+    public sealed class ClientConnectionParameters
     {
 
         /// <summary>
-        /// HTTP client instance.
+        /// Server hostname.
         /// </summary>
-        private readonly HttpClient httpClient = new HttpClient();
+        public string Host { get; private set; }
 
         /// <summary>
-        /// Base URI for the REST server.
+        /// Server port.
         /// </summary>
-        private Uri baseUri;
+        public ushort Port { get; private set; }
 
         /// <summary>
-        /// Selects the REST server to use for all future requests.
+        /// REST server hostname. Typically the same as Host.
         /// </summary>
-        /// <param name="connectionParameters">Updated connection parameters to use.</param>
-        public void SelectServer(ClientConnectionParameters connectionParameters)
+        public string RestHost { get; private set; }
+
+        /// <summary>
+        /// REST server port.
+        /// </summary>
+        public ushort RestPort { get; private set; }
+
+        /// <summary>
+        /// Whether the REST server is using a TLS-encrypted connection.
+        /// </summary>
+        public bool RestTls { get; private set; }
+
+        public ClientConnectionParameters(string host, ushort port, string restHost, ushort restPort, bool restTls)
         {
-            var builder = new UriBuilder();
-            builder.Scheme = connectionParameters.RestTls ? "https" : "http";
-            builder.Host = connectionParameters.RestHost;
-            builder.Port = connectionParameters.RestPort;
-            baseUri = builder.Uri;
+            Host = host;
+            Port = port;
+            RestHost = restHost;
+            RestPort = restPort;
+            RestTls = restTls;
         }
-
-        /// <summary>
-        /// Asynchronously makes a GET request to the REST server.
-        /// </summary>
-        /// <param name="url">Relative URL of the REST endpoint.</param>
-        public Task<HttpResponseMessage> Get(string url)
-        {
-            var uri = new Uri(baseUri, url);
-            return httpClient.GetAsync(uri);
-        }
-
-    } 
+    }
 
 }

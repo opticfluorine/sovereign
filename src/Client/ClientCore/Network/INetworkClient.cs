@@ -22,10 +22,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.ClientCore.Network
 {
@@ -39,12 +35,11 @@ namespace Sovereign.ClientCore.Network
         /// <summary>
         /// Begins a connection to a remote server.
         /// </summary>
-        /// <param name="host">Server host.</param>
-        /// <param name="port">Server port.</param>
+        /// <param name="connectionParameters">Client connection parameters.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if ClientState is not Disconnected.
         /// </exception>
-        void BeginConnection(string host, ushort port);
+        void BeginConnection(ClientConnectionParameters connectionParameters);
 
         /// <summary>
         /// Ends the current connection.

@@ -21,47 +21,21 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace Sovereign.ClientNetwork.Network
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+
+namespace Sovereign.ClientNetwork.Network.Rest
 {
 
     /// <summary>
-    /// Describes a set of connection parameters for a server.
+    /// IoC installer for the REST client.
     /// </summary>
-    public sealed class ClientConnectionParameters
+    public sealed class RestClientInstaller : IWindsorInstaller
     {
-
-        /// <summary>
-        /// Server hostname.
-        /// </summary>
-        public string Host { get; private set; }
-
-        /// <summary>
-        /// Server port.
-        /// </summary>
-        public ushort Port { get; private set; }
-
-        /// <summary>
-        /// REST server hostname. Typically the same as Host.
-        /// </summary>
-        public string RestHost { get; private set; }
-
-        /// <summary>
-        /// REST server port.
-        /// </summary>
-        public ushort RestPort { get; private set; }
-
-        /// <summary>
-        /// Whether the REST server is using a TLS-encrypted connection.
-        /// </summary>
-        public bool RestTls { get; private set; }
-
-        public ClientConnectionParameters(string host, ushort port, string restHost, ushort restPort, bool restTls)
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            Host = host;
-            Port = port;
-            RestHost = restHost;
-            RestPort = restPort;
-            RestTls = restTls;
+            container.Register(Component.For<RestClient>().LifestyleSingleton());
         }
     }
 
