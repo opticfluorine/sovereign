@@ -25,25 +25,17 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sovereign.WorldGen.Configuration
+namespace Sovereign.EngineCore.World.Materials;
+
+/// <summary>
+/// Contains the definitions of the materials.
+/// </summary>
+public class MaterialDefinitions
 {
 
     /// <summary>
-    /// Validates WorldGenConfiguration objects.
+    /// Materials.
     /// </summary>
-    public class WorldGenConfigurationValidator
-    {
-
-        /// <summary>
-        /// Determines whether a WorldGen configuration is valid.
-        /// </summary>
-        /// <param name="worldGenConfiguration">WorldGen configuration.</param>
-        /// <returns>true if the configuration is valid, false otherwise.</returns>
-        public bool IsValid(WorldGenConfiguration worldGenConfiguration)
-        {
-            return true;
-        }
-
-    }
+    public IList<Material> Materials { get; set; }
 
 }

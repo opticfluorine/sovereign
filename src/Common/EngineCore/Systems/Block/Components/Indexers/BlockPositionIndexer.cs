@@ -1,6 +1,6 @@
-﻿/*
+/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2022 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,35 +21,20 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineUtil.IoC;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.Movement.Components;
 
-namespace Sovereign.StandaloneWorldGen.Main
+namespace Sovereign.EngineCore.Systems.Block.Components.Indexers;
+
+/// <summary>
+/// Indexes block positions in an octree to enable range retrieval of multiple blocks.
+/// </summary>
+public sealed class BlockPositionIndexer : BasePositionComponentIndexer
 {
 
-    /// <summary>
-    /// Main class for the standalone world generator utility.
-    /// </summary>
-    class StandaloneWorldGenMain
+    public BlockPositionIndexer(PositionComponentCollection positions, BlockPositionEventFilter filter)
+        : base(positions, filter)
     {
-
-        static void Main(string[] args)
-        {
-            /* Start up the IoC container. */
-            try
-            {
-                var iocContainer = IoCUtil.InitializeIoC();
-                var cli = iocContainer.Resolve<WorldGenCli>();
-                cli.Run(args);
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine(e.ToString());
-                Environment.Exit(1);
-            }
-        }
 
     }
 

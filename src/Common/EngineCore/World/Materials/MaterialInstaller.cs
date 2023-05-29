@@ -21,22 +21,38 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Sovereign.WorldGen.Configuration
+namespace Sovereign.EngineCore.World.Materials
 {
 
     /// <summary>
-    /// Allowed domain types.
+    /// IoC installer for materials support classes.
     /// </summary>
-    public enum DomainType
+    public class MaterialInstaller : IWindsorInstaller
     {
-        /// <summary>
-        /// Generates a domain with multiple continents.
-        /// </summary>
-        Continents,
-    }
 
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            /* MaterialManager. */
+            container.Register(Component.For<MaterialManager>()
+                .LifestyleSingleton());
+
+            /* MaterialDefinitionsValidator. */
+            container.Register(Component.For<MaterialDefinitionsValidator>()
+                .LifestyleTransient());
+
+            /* MaterialDefinitionsLoader. */
+            container.Register(Component.For<MaterialDefinitionsLoader>()
+                .LifestyleTransient());
+        }
+
+    }
 }

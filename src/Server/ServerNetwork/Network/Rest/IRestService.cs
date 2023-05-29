@@ -39,6 +39,11 @@ namespace Sovereign.ServerNetwork.Network.Rest
         string Path { get; }
 
         /// <summary>
+        /// Type of path used by this service.
+        /// </summary>
+        RestPathType PathType { get; }
+
+        /// <summary>
         /// HTTP request type.
         /// </summary>
         HttpMethod RequestType { get; }

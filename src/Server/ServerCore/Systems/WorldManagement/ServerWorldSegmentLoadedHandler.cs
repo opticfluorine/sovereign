@@ -1,6 +1,6 @@
-﻿/*
+/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2022 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,34 +21,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using MessagePack;
-using Sovereign.WorldLib.World.Domain.Block;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.WorldManagement.Systems.WorldManagement;
 
-namespace Sovereign.WorldLib.World.Domain
+namespace Sovereign.ServerCore.Systems.WorldManagement;
+
+/// <summary>
+/// Handles server-side postprocessing of newly loaded world segments.
+/// </summary>
+public class ServerWorldSegmentLoadedHandler : IWorldSegmentLoadedHandler
 {
+    private readonly WorldSegmentBlockDataManager blockDataManager;
 
-    /// <summary>
-    /// Describes a single world domain.
-    /// </summary>
-    [MessagePackObject]
-    public class WorldDomain
+    public ServerWorldSegmentLoadedHandler(WorldSegmentBlockDataManager blockDataManager)
     {
+        this.blockDataManager = blockDataManager;
+    }
 
-        /// <summary>
-        /// Domain ID. Unique within a World.
-        /// </summary>
-        [Key(0)]
-        public uint DomainId { get; set; }
-
-        /// <summary>
-        /// Domain blocks within this domain.
-        /// </summary>
-        [Key(1)]
-        public IList<DomainBlock> DomainBlocks { get; set; }
-
+    public void OnWorldSegmentLoaded(GridPosition segmentIndex)
+    {
+        blockDataManager.AddWorldSegment(segmentIndex);
     }
 
 }

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EngineUtil\EngineUtil.csproj" />
-    <ProjectReference Include="..\WorldLib\WorldLib.csproj" />
   </ItemGroup>
 
 </Project>

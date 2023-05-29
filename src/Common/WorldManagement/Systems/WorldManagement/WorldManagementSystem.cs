@@ -61,6 +61,7 @@ namespace Sovereign.WorldManagement.Systems.WorldManagement
             /* Register events. */
             eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Core_WorldManagement_LoadSegment);
             eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Core_WorldManagement_UnloadSegment);
+            eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Core_WorldManagement_WorldSegmentLoaded);
 
             /* Register system. */
             eventLoop.RegisterSystem(this);

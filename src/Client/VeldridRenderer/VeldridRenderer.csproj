@@ -12,8 +12,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Veldrid" Version="4.8.0" />
-      <PackageReference Include="Veldrid.OpenGLBindings" Version="4.8.0" />
+      <PackageReference Include="Veldrid" Version="4.9.0" />
+      <PackageReference Include="Veldrid.OpenGLBindings" Version="4.9.0" />
     </ItemGroup>
 
 

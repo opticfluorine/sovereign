@@ -66,6 +66,8 @@ namespace Sovereign.ServerNetwork.Network.Rest.Accounts
 
         public string Path => "/register/";
 
+        public RestPathType PathType => RestPathType.Static;
+
         public HttpMethod RequestType => HttpMethod.POST;
 
         public AccountRegistrationRestService(AccountServices accountServices)

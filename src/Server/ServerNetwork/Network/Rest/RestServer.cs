@@ -26,6 +26,7 @@ using Sovereign.EngineCore.Main;
 using Sovereign.ServerNetwork.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Threading.Tasks;
 using WatsonWebserver;
 
@@ -46,8 +47,8 @@ namespace Sovereign.ServerNetwork.Network.Rest
         /// <summary>
         /// Response headers for the default request handler.
         /// </summary>
-        private readonly Dictionary<string, string> badResponseHeaders
-            = new Dictionary<string, string>()
+        private readonly NameValueCollection badResponseHeaders
+            = new NameValueCollection()
             {
                 { "Cache-Control", "public" }
             };
@@ -80,8 +81,22 @@ namespace Sovereign.ServerNetwork.Network.Rest
                 // Add routes for each service.
                 foreach (var service in restServices)
                 {
-                    restServer.Routes.Static.Add(service.RequestType,
-                        service.Path, service.OnRequest);
+                    switch (service.PathType)
+                    {
+                        case RestPathType.Static:
+                            restServer.Routes.Static.Add(service.RequestType,
+                                service.Path, service.OnRequest);
+                            break;
+
+                        case RestPathType.Parameter:
+                            restServer.Routes.Parameter.Add(service.RequestType,
+                                service.Path, service.OnRequest);
+                            break;
+
+                        default:
+                            Logger.Error("Unrecognized path type in REST service. The service will not be available.");
+                            break;
+                    }
                 }
 
                 Logger.InfoFormat("Started REST server on {0}:{1}.",

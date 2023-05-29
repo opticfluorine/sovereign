@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2023 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,34 +21,24 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sovereign.WorldLib.Materials
+namespace Sovereign.ServerNetwork.Network.Rest
 {
 
     /// <summary>
-    /// Describes a material.
+    /// Enum of path routing types for the REST APIs.
     /// </summary>
-    public sealed class Material
+    public enum RestPathType
     {
+        /// <summary>
+        /// Static routing to an endpoint with no paramters.
+        /// </summary>
+        Static,
 
         /// <summary>
-        /// Material ID. Unique.
+        /// Parameter routing to an endpoint; named parameters are in {curly braces}.
         /// </summary>
-        public int Id { get; set; }
-
-        /// <summary>
-        /// Name of the material.
-        /// </summary>
-        public string MaterialName { get; set; }
-
-        /// <summary>
-        /// Associated material subtypes.
-        /// </summary>
-        public IList<MaterialSubtype> MaterialSubtypes { get; set; }
-
+        Parameter
     }
 
 }
+

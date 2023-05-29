@@ -1,8 +1,66 @@
 # Sovereign Engine Changelog
 
+## 2023
+
+### May
+
+#### 28 May 2023
+
+ * Add a REST service to the server for serving world block segment data (untested). In the future
+   this will need to be updated to validate that the requesting user is within a valid range of
+   the requested block to prevent information leakage. Currently the transfer uses LZ4 compression
+   via the MessagePack library, will need to later evaluate the tradeoff between performance and
+   size reduction.
+ * Generate block segment data as soon as the segment is loaded from the database. Still need to
+   wire up the update handler.
+
+#### 27 May 2023
+
+ * Finish initial implementation of world block segment conversion (from blocks to structured form).
+   This has not yet been tested. Still to be done is conversion back from structured form to blocks
+   in the client, and implementation of a transfer interface between server and client.
+ * For updating world block segment data in the server, just regenerate the segment instead of
+   trying to do an incremental update. There will be a performance penalty since constructing a
+   segment is an expensive operation, however these can proceed in the background so shouldn't be
+   a huge issue except under very large workloads. We can circle back and optimize this with an
+   incremental update if it turns out to be a problem, otherwise chalk this one up to avoiding
+   a premature optimization.
+
+#### 26 May 2023
+
+ * For Windows, copy SDL binaries to build directory automatically. In the future, probably want
+   to only do this for Windows and multi-target builds.
+
+#### 25 May 2023
+
+ * Trying again to get back into working on this project!
+ * Get Veldrid renderer up and running on Windows.
+ * Fix various issues with the material ID 0 change from last July. This introduced an off-by-one
+   error in the materials list, and there was some weird stuff going on with material definition
+   validation at startup.
+
 ## 2022
 
 ### July
+
+#### 23 July 2022
+
+ * Reserve material ID 0 as a special material corresponding to the absence of
+   a block (or "air"). This enables an optimization trick in world block data
+   transfer from server to client by leveraging block sparsity (especially above the surface
+   layer) to reduce encoded block data size.
+
+#### 05 July 2022
+
+ * Fix `PersistenceController` which wasn't filling out any event details.
+ * Add support to `PersistenceSystem` for loading entire world segments based on
+   segment index. A load completion event is sent when this succeeds.
+ * Allow events to be "synced to tick" based on a flag in `Event`. When this
+   flag is sent, the event loop will wait for dispatch until the beginning of
+   the first full tick where the event is eligible to be sent (i.e. the start
+   of the first tick after the scheduled event time). This allows a completion
+   event to be deferred until the main loop has a chance to process any changes
+   to the entities and components.
 
 #### 03 July 2022
 

@@ -1,6 +1,6 @@
-﻿/*
+/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2022 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,36 +21,19 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.Facilities.Logging;
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Services.Logging.Log4netIntegration;
 using Castle.Windsor;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Sovereign.StandaloneWorldGen.Logging
+namespace Sovereign.ServerCore.Systems.WorldManagement;
+
+public sealed class ServerWorldManagementInstaller : IWindsorInstaller
 {
-
-    /// <summary>
-    /// IoC installer for logging in the StandaloneWorldGen utility.
-    /// </summary>
-    public class StandaloneWorldGenLoggingInstaller : IWindsorInstaller
+    public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-
-        /// <summary>
-        /// Name of the logging configuration file.
-        /// </summary>
-        private const string LogConfigFilepath = "Logging.xml";
-
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            /* Configure log4net. */
-            container.AddFacility<LoggingFacility>(f => f.LogUsing<Log4netFactory>()
-                .WithConfig(LogConfigFilepath));
-        }
-
+        container.Register(Component.For<WorldSegmentBlockDataManager>()
+            .LifestyleSingleton());
+        container.Register(Component.For<WorldSegmentBlockDataGenerator>()
+            .LifestyleSingleton());
     }
-
 }

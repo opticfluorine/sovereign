@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using System;
@@ -28,108 +29,121 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
-namespace Sovereign.Persistence.Systems.Persistence
+namespace Sovereign.Persistence.Systems.Persistence;
+
+/// <summary>
+/// Event handler for the persistence system.
+/// </summary>
+public sealed class PersistenceEventHandler
 {
+    private readonly PersistenceScheduler scheduler;
+    private readonly PersistenceSynchronizer synchronizer;
+    private readonly PersistenceEntityRetriever entityRetriever;
+    private readonly PersistenceRangeRetriever rangeRetriever;
 
-    /// <summary>
-    /// Event handler for the persistence system.
-    /// </summary>
-    public sealed class PersistenceEventHandler
+    public PersistenceEventHandler(PersistenceScheduler scheduler,
+        PersistenceSynchronizer synchronizer,
+        PersistenceEntityRetriever entityRetriever,
+        PersistenceRangeRetriever rangeRetriever)
     {
-        private readonly PersistenceScheduler scheduler;
-        private readonly PersistenceSynchronizer synchronizer;
-        private readonly PersistenceEntityRetriever entityRetriever;
-        private readonly PersistenceRangeRetriever rangeRetriever;
+        this.scheduler = scheduler;
+        this.synchronizer = synchronizer;
+        this.entityRetriever = entityRetriever;
+        this.rangeRetriever = rangeRetriever;
+    }
 
-        public PersistenceEventHandler(PersistenceScheduler scheduler,
-            PersistenceSynchronizer synchronizer,
-            PersistenceEntityRetriever entityRetriever,
-            PersistenceRangeRetriever rangeRetriever)
+    public void HandleEvent(Event ev)
+    {
+        switch (ev.EventId)
         {
-            this.scheduler = scheduler;
-            this.synchronizer = synchronizer;
-            this.entityRetriever = entityRetriever;
-            this.rangeRetriever = rangeRetriever;
-        }
+            case EventId.Core_Quit:
+                OnCoreQuit();
+                break;
 
-        public void HandleEvent(Event ev)
-        {
-            switch (ev.EventId)
-            {
-                case EventId.Core_Quit:
-                    OnCoreQuit();
-                    break;
+            case EventId.Server_Persistence_RetrieveEntity:
+                {
+                    var details = (EntityEventDetails)ev.EventDetails;
+                    OnRetrieveEntity(details.EntityId);
+                }
+                break;
 
-                case EventId.Server_Persistence_RetrieveEntity:
-                    {
-                        var details = (EntityEventDetails)ev.EventDetails;
-                        OnRetrieveEntity(details.EntityId);
-                    }
-                    break;
+            case EventId.Server_Persistence_RetrieveEntitiesInRange:
+                {
+                    var details = (VectorPairEventDetails)ev.EventDetails;
+                    OnRetrieveEntitiesInRange(details.First, details.Second);
+                }
+                break;
 
-                case EventId.Server_Persistence_RetrieveEntitiesInRange:
-                    {
-                        var details = (VectorPairEventDetails)ev.EventDetails;
-                        OnRetrieveEntitiesInRange(details.First, details.Second);
-                    }
-                    break;
+            case EventId.Server_Persistence_RetrieveWorldSegment:
+                {
+                    var details = (WorldSegmentEventDetails)ev.EventDetails;
+                    OnRetrieveWorldSegment(details.SegmentIndex);
+                }
+                break;
 
-                case EventId.Server_Persistence_Synchronize:
-                    OnSynchronize();
-                    break;
+            case EventId.Server_Persistence_Synchronize:
+                OnSynchronize();
+                break;
 
-                default:
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Called to handle a Core_Quit event.
-        /// </summary>
-        private void OnCoreQuit()
-        {
-            /* Synchronize the database before exit. */
-            PerformSynchronization();
-        }
-
-        /// <summary>
-        /// Called to handle a Server_Persistence_RetrieveEntity event.
-        /// </summary>
-        /// <param name="entityId">Entity ID to retrieve.</param>
-        private void OnRetrieveEntity(ulong entityId)
-        {
-            entityRetriever.RetrieveEntity(entityId);
-        }
-
-        /// <summary>
-        /// Called to handle a Server_Persistence_RetrieveEntitiesInRange event.
-        /// </summary>
-        /// <param name="minPos">Minimum position in the range.</param>
-        /// <param name="maxPos">Maximum position in the range.</param>
-        private void OnRetrieveEntitiesInRange(Vector3 minPos, Vector3 maxPos)
-        {
-            rangeRetriever.RetrieveRange(minPos, maxPos);
-        }
-
-        /// <summary>
-        /// Called to handle a Server_Persistence_Synchronize event.
-        /// </summary>
-        private void OnSynchronize()
-        {
-            /* Synchronize. */
-            PerformSynchronization();
-
-            /* Schedule the next synchronization. */
-            scheduler.ScheduleSynchronize();
-        }
-
-        /// <summary>
-        /// Performs the database synchronization.
-        /// </summary>
-        private void PerformSynchronization()
-        {
-            synchronizer.Synchronize();
+            default:
+                break;
         }
     }
 
+    /// <summary>
+    /// Called to handle a Core_Quit event.
+    /// </summary>
+    private void OnCoreQuit()
+    {
+        /* Synchronize the database before exit. */
+        PerformSynchronization();
+    }
+
+    /// <summary>
+    /// Called to handle a Server_Persistence_RetrieveEntity event.
+    /// </summary>
+    /// <param name="entityId">Entity ID to retrieve.</param>
+    private void OnRetrieveEntity(ulong entityId)
+    {
+        entityRetriever.RetrieveEntity(entityId);
+    }
+
+    /// <summary>
+    /// Called to handle a Server_Persistence_RetrieveEntitiesInRange event.
+    /// </summary>
+    /// <param name="minPos">Minimum position in the range.</param>
+    /// <param name="maxPos">Maximum position in the range.</param>
+    private void OnRetrieveEntitiesInRange(Vector3 minPos, Vector3 maxPos)
+    {
+        rangeRetriever.RetrieveRange(minPos, maxPos);
+    }
+
+    /// <summary>
+    /// Called to handle a Server_Persistence_RetrieveWorldSegment event.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    private void OnRetrieveWorldSegment(GridPosition segmentIndex)
+    {
+
+    }
+
+    /// <summary>
+    /// Called to handle a Server_Persistence_Synchronize event.
+    /// </summary>
+    private void OnSynchronize()
+    {
+        /* Synchronize. */
+        PerformSynchronization();
+
+        /* Schedule the next synchronization. */
+        scheduler.ScheduleSynchronize();
+    }
+
+    /// <summary>
+    /// Performs the database synchronization.
+    /// </summary>
+    private void PerformSynchronization()
+    {
+        synchronizer.Synchronize();
+    }
 }

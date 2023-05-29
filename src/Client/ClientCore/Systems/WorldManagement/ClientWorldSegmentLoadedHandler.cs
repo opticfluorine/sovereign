@@ -1,6 +1,6 @@
-﻿/*
+/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2022 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,30 +21,18 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Text;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.WorldManagement.Systems.WorldManagement;
 
-namespace Sovereign.WorldGen.Configuration
+namespace Sovereign.ClientCore.Systems.WorldManagement;
+
+/// <summary>
+/// Handles client postprocessing of newly loaded world segments.
+/// </summary>
+public class ClientWorldSegmentLoadedHandler : IWorldSegmentLoadedHandler
 {
-
-    /// <summary>
-    /// Exception type thrown for errors related to WorldGen configuration.
-    /// </summary>
-    public sealed class WorldGenConfigurationException : ApplicationException
+    public void OnWorldSegmentLoaded(GridPosition segmentIndex)
     {
-        public WorldGenConfigurationException()
-        {
-        }
-
-        public WorldGenConfigurationException(string message) : base(message)
-        {
-        }
-
-        public WorldGenConfigurationException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+        // no-op
     }
-
 }

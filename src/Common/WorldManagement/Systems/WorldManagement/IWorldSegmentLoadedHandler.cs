@@ -1,6 +1,6 @@
-﻿/*
+/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2022 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,28 +21,21 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using MessagePack;
-using Sovereign.WorldLib.World.Domain;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Sovereign.EngineCore.Components.Indexers;
 
-namespace Sovereign.WorldLib.World
+namespace Sovereign.WorldManagement.Systems.WorldManagement;
+
+/// <summary>
+/// Interface for postprocessing a newly loaded world segment.
+/// </summary>
+public interface IWorldSegmentLoadedHandler
 {
 
     /// <summary>
-    /// Describes a game world.
+    /// Called by the WorldManagement system to do any postprocessing for a
+    /// newly loaded world segment.
     /// </summary>
-    [MessagePackObject]
-    public class World
-    {
-
-        /// <summary>
-        /// The list of world domains that comprise the game world.
-        /// </summary>
-        [Key(0)]
-        public IList<WorldDomain> WorldDomains { get; set; }
-
-    }
+    /// <param name="segmentIndex">World segment index.</param>
+    void OnWorldSegmentLoaded(GridPosition segmentIndex);
 
 }

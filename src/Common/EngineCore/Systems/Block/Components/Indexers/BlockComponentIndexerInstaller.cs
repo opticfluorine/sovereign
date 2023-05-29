@@ -41,6 +41,9 @@ namespace Sovereign.EngineCore.Systems.Block.Components.Indexers
 
             container.Register(Component.For<BlockPositionEventFilter>()
                 .LifestyleSingleton());
+
+            container.Register(Component.For<BlockPositionIndexer>()
+                .LifestyleSingleton());
         }
     }
 

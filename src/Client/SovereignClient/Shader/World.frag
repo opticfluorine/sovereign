@@ -27,9 +27,10 @@ layout(location = 0) in vec2 texCoord;
 
 layout(location = 0) out vec4 color;
 
-layout(set = 0, binding = 1) uniform sampler2D g_textureAtlas;
+layout(set = 0, binding = 1) uniform texture2D g_textureAtlas;
+layout(set = 0, binding = 2) uniform sampler g_textureAtlasSampler;
 
 void main()
 {
-    color = texture(g_textureAtlas, texCoord);
+    color = texture(sampler2D(g_textureAtlas, g_textureAtlasSampler), texCoord);
 }

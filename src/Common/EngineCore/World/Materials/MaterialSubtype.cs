@@ -21,33 +21,32 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Sovereign.EngineCore.World.Materials;
 
-namespace Sovereign.WorldLib.Materials
+/// <summary>
+/// Describes a subtype of a material.
+/// </summary>
+public class MaterialSubtype
 {
 
     /// <summary>
-    /// IoC installer for materials.
+    /// The material modifier value. Unique within a material.
     /// </summary>
-    public class MaterialInstaller : IWindsorInstaller
-    {
+    public int MaterialModifier { get; set; }
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            /* MaterialDefinitionsValidator. */
-            container.Register(Component.For<MaterialDefinitionsValidator>()
-                .LifestyleTransient());
+    /// <summary>
+    /// The ID of the tile sprite used for the top face.
+    /// </summary>
+    public int TopFaceTileSpriteId { get; set; }
 
-            /* MaterialDefinitionsLoader. */
-            container.Register(Component.For<MaterialDefinitionsLoader>()
-                .LifestyleTransient());
-        }
+    /// <summary>
+    /// The ID of the tile sprite used for the top face if a face is obscured.
+    /// </summary>
+    public int ObscuredTopFaceTileSpriteId { get; set; }
 
-    }
+    /// <summary>
+    /// The ID of the tile sprite used for the side face.
+    /// </summary>
+    public int SideFaceTileSpriteId { get; set; }
 
 }

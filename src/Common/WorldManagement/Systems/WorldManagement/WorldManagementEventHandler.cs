@@ -39,14 +39,17 @@ namespace Sovereign.WorldManagement.Systems.WorldManagement
     {
         private readonly IWorldSegmentLoader loader;
         private readonly IWorldSegmentUnloader unloader;
+        private readonly IWorldSegmentLoadedHandler loadedHandler;
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         public WorldManagementEventHandler(IWorldSegmentLoader loader,
-            IWorldSegmentUnloader unloader)
+            IWorldSegmentUnloader unloader,
+            IWorldSegmentLoadedHandler loadedHandler)
         {
             this.loader = loader;
             this.unloader = unloader;
+            this.loadedHandler = loadedHandler;
         }
 
         /// <summary>
@@ -68,6 +71,13 @@ namespace Sovereign.WorldManagement.Systems.WorldManagement
                     {
                         var details = (WorldSegmentEventDetails)ev.EventDetails;
                         OnUnloadSegment(details.SegmentIndex);
+                    }
+                    break;
+
+                case EventId.Core_WorldManagement_WorldSegmentLoaded:
+                    {
+                        var details = (WorldSegmentEventDetails)ev.EventDetails;
+                        OnWorldSegmentLoaded(details.SegmentIndex);
                     }
                     break;
 
@@ -93,6 +103,15 @@ namespace Sovereign.WorldManagement.Systems.WorldManagement
         private void OnUnloadSegment(GridPosition segmentIndex)
         {
             unloader.UnloadSegment(segmentIndex);
+        }
+
+        /// <summary>
+        /// Handles a segment loaded event.
+        /// </summary>
+        /// <param name="segmentIndex">Segment index.</param>
+        private void OnWorldSegmentLoaded(GridPosition segmentIndex)
+        {
+            loadedHandler.OnWorldSegmentLoaded(segmentIndex);
         }
 
     }
