@@ -31,10 +31,16 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public class ServerWorldSegmentLoadedHandler : IWorldSegmentLoadedHandler
 {
+    private readonly WorldSegmentBlockDataManager blockDataManager;
+
+    public ServerWorldSegmentLoadedHandler(WorldSegmentBlockDataManager blockDataManager)
+    {
+        this.blockDataManager = blockDataManager;
+    }
 
     public void OnWorldSegmentLoaded(GridPosition segmentIndex)
     {
-        // 
+        blockDataManager.AddWorldSegment(segmentIndex);
     }
 
 }

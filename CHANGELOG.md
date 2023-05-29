@@ -11,6 +11,8 @@
    the requested block to prevent information leakage. Currently the transfer uses LZ4 compression
    via the MessagePack library, will need to later evaluate the tradeoff between performance and
    size reduction.
+ * Generate block segment data as soon as the segment is loaded from the database. Still need to
+   wire up the update handler.
 
 #### 27 May 2023
 
