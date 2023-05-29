@@ -4,6 +4,14 @@
 
 ### May
 
+#### 28 May 2023
+
+ * Add a REST service to the server for serving world block segment data (untested). In the future
+   this will need to be updated to validate that the requesting user is within a valid range of
+   the requested block to prevent information leakage. Currently the transfer uses LZ4 compression
+   via the MessagePack library, will need to later evaluate the tradeoff between performance and
+   size reduction.
+
 #### 27 May 2023
 
  * Finish initial implementation of world block segment conversion (from blocks to structured form).

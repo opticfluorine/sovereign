@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2019 opticfluorine
+ * Copyright (c) 2023 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,40 +21,24 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System.Threading.Tasks;
-using WatsonWebserver;
-
 namespace Sovereign.ServerNetwork.Network.Rest
 {
 
     /// <summary>
-    /// Exposes a REST service.
+    /// Enum of path routing types for the REST APIs.
     /// </summary>
-    public interface IRestService
+    public enum RestPathType
     {
+        /// <summary>
+        /// Static routing to an endpoint with no paramters.
+        /// </summary>
+        Static,
 
         /// <summary>
-        /// Path at which the service is exposed.
+        /// Parameter routing to an endpoint; named parameters are in {curly braces}.
         /// </summary>
-        string Path { get; }
-
-        /// <summary>
-        /// Type of path used by this service.
-        /// </summary>
-        RestPathType PathType { get; }
-
-        /// <summary>
-        /// HTTP request type.
-        /// </summary>
-        HttpMethod RequestType { get; }
-
-        /// <summary>
-        /// Called when a request is received.
-        /// </summary>
-        /// <param name="ctx">HTTP context.</param>
-        /// <returns>Task for asynchronously sending response.</returns>
-        Task OnRequest(HttpContext ctx);
-
+        Parameter
     }
 
 }
+

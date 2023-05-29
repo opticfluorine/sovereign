@@ -74,6 +74,8 @@ namespace Sovereign.ServerNetwork.Network.Authentication
 
         public string Path => "/login/";
 
+        public RestPathType PathType => RestPathType.Static;
+
         public HttpMethod RequestType => HttpMethod.POST;
 
         public AuthenticationRestService(AccountServices accountServices,
