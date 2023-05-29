@@ -24,6 +24,7 @@
 using Castle.Core.Logging;
 using LiteNetLib;
 using Sovereign.ClientCore.Network;
+using Sovereign.ClientNetwork.Network.Rest;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using System;
 using System.Collections.Concurrent;
@@ -80,10 +81,16 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
     {
         private readonly NetworkConnectionManager connectionManager;
         private readonly NetworkSerializer networkSerializer;
+        private readonly RestClient restClient;
         private readonly EventBasedNetListener netListener;
         private readonly NetManager netManager;
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+        /// <summary>
+        /// Current connection parameters.
+        /// </summary>
+        public ClientConnectionParameters ConnectionParameters { get; private set; }
 
         /// <summary>
         /// Command queue.
@@ -110,10 +117,11 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
         internal string ErrorMessage { get; private set; }
 
         public ClientNetworkManager(NetworkConnectionManager connectionManager,
-            NetworkSerializer networkSerializer)
+            NetworkSerializer networkSerializer, RestClient restClient)
         {
             this.connectionManager = connectionManager;
             this.networkSerializer = networkSerializer;
+            this.restClient = restClient;
 
             netListener = new EventBasedNetListener();
             netManager = new NetManager(netListener);
@@ -145,22 +153,28 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
         /// <summary>
         /// Asynchronously begins a connection to a server.
         /// </summary>
-        /// <param name="host">Server host.</param>
-        /// <param name="port">Server port.</param>
+        /// <param name="connectionParameters">Client connection parameters to use.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if the client is not currently disconnected.
         /// </exception>
-        internal void BeginConnection(string host, ushort port)
+        internal void BeginConnection(ClientConnectionParameters connectionParameters)
         {
             if (ClientState != NetworkClientState.Disconnected)
             {
                 throw new InvalidOperationException("Client is not disconnected.");
             }
 
+            ConnectionParameters = connectionParameters;
+
+            // Reconfigure the REST client for the latest connection.
+            restClient.SelectServer(ConnectionParameters);
+
+            // TODO Authentication with server via REST API prior to establishing main connection
+
             var cmd = new ClientNetworkCommand();
             cmd.CommandType = ClientNetworkCommandType.BeginConnection;
-            cmd.Host = host;
-            cmd.Port = port;
+            cmd.Host = ConnectionParameters.Host;
+            cmd.Port = ConnectionParameters.Port;
 
             commandQueue.Enqueue(cmd);
         }
