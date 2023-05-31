@@ -4,6 +4,17 @@
 
 ### May
 
+#### 30 May 2023
+
+ * Move the REST client from `ClientNetwork` to `ClientCore` - it will be needed in core, and
+   doesn't really fit in `ClientNetwork` since it doesn't implement common network-related interfaces.
+
+#### 29 May 2023
+
+ * Implement a simple REST client for interacting with the REST server.
+ * Update client-side connection parameters to include REST server host and port in addition to the
+   host and port for the UDP server.
+
 #### 28 May 2023
 
  * Add a REST service to the server for serving world block segment data (untested). In the future
