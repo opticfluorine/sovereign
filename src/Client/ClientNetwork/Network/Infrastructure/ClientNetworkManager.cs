@@ -24,7 +24,7 @@
 using Castle.Core.Logging;
 using LiteNetLib;
 using Sovereign.ClientCore.Network;
-using Sovereign.ClientNetwork.Network.Rest;
+using Sovereign.ClientCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using System;
 using System.Collections.Concurrent;
