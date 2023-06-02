@@ -32,6 +32,7 @@ using Sovereign.Accounts.Accounts.Services;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.ServerNetwork.Configuration;
 using WatsonWebserver;
+using Sovereign.EngineCore.Network.Rest;
 
 namespace Sovereign.ServerNetwork.Network.Authentication
 {
@@ -72,7 +73,7 @@ namespace Sovereign.ServerNetwork.Network.Authentication
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-        public string Path => "/login/";
+        public string Path => RestEndpoints.Authentication;
 
         public RestPathType PathType => RestPathType.Static;
 

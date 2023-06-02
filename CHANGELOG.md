@@ -2,6 +2,13 @@
 
 ## 2023
 
+### June
+
+#### 02 June 2023
+
+ * Move REST endpoint definitions to constants in a common class so that they can be
+   reused easily from the client code.
+
 ### May
 
 #### 30 May 2023

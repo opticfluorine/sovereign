@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Newtonsoft.Json;
 using Sovereign.Accounts.Accounts.Services;
+using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using WatsonWebserver;
 
@@ -64,7 +65,7 @@ namespace Sovereign.ServerNetwork.Network.Rest.Accounts
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-        public string Path => "/register/";
+        public string Path => RestEndpoints.AccountRegistration;
 
         public RestPathType PathType => RestPathType.Static;
 

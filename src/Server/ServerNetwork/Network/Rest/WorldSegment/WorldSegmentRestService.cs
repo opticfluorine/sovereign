@@ -23,9 +23,8 @@
 
 using MessagePack;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Systems.WorldManagement;
+using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Systems.WorldManagement;
-using System;
 using System.Threading.Tasks;
 using WatsonWebserver;
 
@@ -40,7 +39,7 @@ namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment
     {
         private readonly WorldSegmentBlockDataManager blockDataManager;
 
-        public string Path => "/world/{x}/{y}/{z}";
+        public string Path => RestEndpoints.WorldSegment + "/{x}/{y}/{z}";
 
         public RestPathType PathType => RestPathType.Parameter;
 
