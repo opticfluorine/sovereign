@@ -23,6 +23,7 @@
 
 using MessagePack;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Systems.WorldManagement;
 using System.Threading.Tasks;
@@ -67,8 +68,7 @@ namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment
                 {
                     // Get the latest version of the block data and encode it for transfer.
                     var blockData = await dataTask;
-                    var options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
-                    var encodedData = MessagePackSerializer.Serialize(blockData, options);
+                    var encodedData = MessagePackSerializer.Serialize(blockData, MessageConfig.CompressedUntrustedMessagePackOptions);
 
                     ctx.Response.ContentType = "application/octet-stream";
                     ctx.Response.ContentLength = encodedData.Length;

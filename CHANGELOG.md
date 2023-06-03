@@ -4,6 +4,10 @@
 
 ### June
 
+#### 03 June 2023
+
+ * Parse world segment data and load blocks through the client.
+
 #### 02 June 2023
 
  * Begin implementation of the client-side world segment loader.

@@ -45,7 +45,13 @@ namespace Sovereign.ClientCore.Network.Rest
         private Uri baseUri;
 
         /// <summary>
-        /// Selects the REST server to use for all future requests.
+        /// Flag indicating whether the REST client should be considered "connected".
+        /// </summary>
+        public bool Connected { get; private set; }
+
+        /// <summary>
+        /// Selects the REST server to use for all future requests. This additionally sets
+        /// the REST client state to "connected".
         /// </summary>
         /// <param name="connectionParameters">Updated connection parameters to use.</param>
         public void SelectServer(ClientConnectionParameters connectionParameters)
@@ -55,14 +61,30 @@ namespace Sovereign.ClientCore.Network.Rest
             builder.Host = connectionParameters.RestHost;
             builder.Port = connectionParameters.RestPort;
             baseUri = builder.Uri;
+
+            Connected = true;
+        }
+
+        /// <summary>
+        /// Sets the REST client to the disconnected state to prevent accidental requests
+        /// to the server after the session has ended.
+        /// </summary>
+        public void Disconnect()
+        {
+            Connected = false;
         }
 
         /// <summary>
         /// Asynchronously makes a GET request to the REST server.
         /// </summary>
         /// <param name="url">Relative URL of the REST endpoint.</param>
+        /// <exception cref="InvalidOperationException">Thrown if the REST client is not in the connected state.</exception>
         public Task<HttpResponseMessage> Get(string url)
         {
+            if (!Connected)
+            {
+                throw new InvalidOperationException("REST client is not connected.");
+            }
             var uri = new Uri(baseUri, url);
             return httpClient.GetAsync(uri);
         }
