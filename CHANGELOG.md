@@ -6,6 +6,7 @@
 
 #### 02 June 2023
 
+ * Begin implementation of the client-side world segment loader.
  * Fix issue where default blocks weren't updated in segment data generation.
  * Move REST endpoint definitions to constants in a common class so that they can be
    reused easily from the client code.
