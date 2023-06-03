@@ -172,7 +172,11 @@ public sealed class WorldSegmentBlockDataGenerator
         // Process each depth plane separately.
         for (int i = 0; i < config.SegmentLength; ++i)
         {
-            if (TryConvertDepthPlane(depthPlanes[i], 
+            // Update defaults.
+            data.DefaultMaterialsPerPlane[i] = depthPlanes[i].DefaultBlockType;
+
+            // Add the layer if it contains non-default blocks.
+            if (TryConvertDepthPlane(depthPlanes[i],
                 (int)basePoint.X, (int)basePoint.Y, (int)basePoint.Z,
                 out var converted))
             {
