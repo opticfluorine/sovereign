@@ -25,13 +25,13 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 
-namespace Sovereign.ClientCore.Systems.Network
+namespace Sovereign.ClientCore.Systems.ClientNetwork
 {
 
     /// <summary>
     /// IoC installer for the client network system.
     /// </summary>
-    public sealed class ClientNetworkInstaller : IWindsorInstaller
+    public sealed class ClientNetworkSystemInstaller : IWindsorInstaller
     {
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
@@ -39,6 +39,7 @@ namespace Sovereign.ClientCore.Systems.Network
                                Component.For<ClientNetworkController>()
                                                   .LifestyleSingleton()
                                                              );
+            container.Register(Component.For<ClientNetworkEventHandler>().LifestyleSingleton());
         }
     }
 }

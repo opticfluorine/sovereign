@@ -4,6 +4,11 @@
 
 ### June
 
+#### 04 June 2023
+
+ * Gracefully handle connection loss in the client by transitioning to the
+   disconnected state when a connection loss is detected.
+
 #### 03 June 2023
 
  * Parse world segment data and load blocks through the client.

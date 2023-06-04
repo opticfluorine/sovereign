@@ -24,6 +24,7 @@
 using Castle.Core.Logging;
 using MessagePack;
 using Sovereign.ClientCore.Network.Rest;
+using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
@@ -55,25 +56,27 @@ namespace Sovereign.ClientCore.Systems.WorldManagement
         private readonly IWorldManagementConfiguration config;
         private readonly BlockController blockController;
         private readonly RestClient restClient;
+        private readonly ClientNetworkController networkController;
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
         /// <summary>
         /// Maximum retry count.
         /// </summary>
-        public const int MaxRetries = 3;
+        public const int MaxRetries = 5;
 
         /// <summary>
         /// Delay between consecutive retries, in milliseconds.
         /// </summary>
-        public const int RetryDelayMs = 1000;
+        public const int RetryDelayMs = 2000;
 
         public ClientWorldSegmentLoader(IEventSender eventSender,
             WorldSegmentResolver worldSegmentResolver,
             WorldSegmentRegistry worldSegmentRegistry,
             IWorldManagementConfiguration config,
             BlockController blockController,
-            RestClient restClient)
+            RestClient restClient,
+            ClientNetworkController networkController)
         {
             this.eventSender = eventSender;
             this.worldSegmentResolver = worldSegmentResolver;
@@ -81,6 +84,7 @@ namespace Sovereign.ClientCore.Systems.WorldManagement
             this.config = config;
             this.blockController = blockController;
             this.restClient = restClient;
+            this.networkController = networkController;
         }
 
         public void LoadSegment(GridPosition segmentIndex)
@@ -145,7 +149,7 @@ namespace Sovereign.ClientCore.Systems.WorldManagement
 
             /* If we get here, all the retries failed and we hit the limit. */
             Logger.ErrorFormat("Failed to retrieve segment data for {0} after {1} tries; connection assumed lost.", segmentIndex, MaxRetries);
-            // TODO: Send an event indicating presumed connection failure.
+            networkController.DeclareConnectionLost(eventSender);
         }
 
         /// <summary>

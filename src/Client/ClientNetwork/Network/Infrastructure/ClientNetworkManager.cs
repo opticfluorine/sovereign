@@ -193,6 +193,10 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
                 throw new InvalidOperationException("Client is not connecting or connected.");
             }
 
+            // Stop the REST client.
+            restClient.Disconnect();
+
+            // Stop the event connection.
             var cmd = new ClientNetworkCommand();
             cmd.CommandType = ClientNetworkCommandType.EndConnection;
 

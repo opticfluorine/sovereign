@@ -69,6 +69,7 @@ namespace Sovereign.ClientCore.Network.Rest
         /// Sets the REST client to the disconnected state to prevent accidental requests
         /// to the server after the session has ended.
         /// </summary>
+        /// If the REST client is not in the connected state, this method does nothing.
         public void Disconnect()
         {
             Connected = false;
@@ -92,3 +93,4 @@ namespace Sovereign.ClientCore.Network.Rest
     } 
 
 }
+

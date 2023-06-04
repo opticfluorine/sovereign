@@ -25,11 +25,6 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 using Sovereign.EngineUtil.IoC;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sovereign.ClientCore.Network
 {
@@ -41,10 +36,11 @@ namespace Sovereign.ClientCore.Network
     {
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            EngineClasses.EngineAssemblies()
+            container.Register(
+                EngineClasses.EngineAssemblies()
                 .BasedOn<INetworkClient>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton();
+                .WithServiceAllInterfaces()
+                .LifestyleSingleton());
         }
     }
 }

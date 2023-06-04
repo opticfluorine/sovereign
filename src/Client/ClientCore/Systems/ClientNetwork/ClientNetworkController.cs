@@ -23,7 +23,7 @@
 
 using Sovereign.EngineCore.Events;
 
-namespace Sovereign.ClientCore.Systems.Network
+namespace Sovereign.ClientCore.Systems.ClientNetwork
 {
 
     /// <summary>
