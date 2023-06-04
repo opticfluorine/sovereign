@@ -168,6 +168,16 @@ namespace Sovereign.EngineCore.Events
 
         #endregion Client_Camera
 
+        #region Client_Network
+
+        /// <summary>
+        /// Event sent when the client believes the connection to the server has been lost.
+        /// </summary>
+        /// Associated details: None
+        Client_Network_ConnectionLost = 100200,
+
+        #endregion Client_Network
+
         #endregion Client
 
         #region Server
