@@ -20,6 +20,8 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+    - name: Setup glslc
+      run: sudo apt-get install -y mesa-utils
     - name: Restore dependencies
       run: dotnet restore
       working-directory: src
