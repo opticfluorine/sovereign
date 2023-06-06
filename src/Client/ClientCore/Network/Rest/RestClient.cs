@@ -23,6 +23,7 @@
 
 using System;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace Sovereign.ClientCore.Network.Rest
@@ -79,6 +80,7 @@ namespace Sovereign.ClientCore.Network.Rest
         /// Asynchronously makes a GET request to the REST server.
         /// </summary>
         /// <param name="url">Relative URL of the REST endpoint.</param>
+        /// <returns>Task awaiting the response.</returns>
         /// <exception cref="InvalidOperationException">Thrown if the REST client is not in the connected state.</exception>
         public Task<HttpResponseMessage> Get(string url)
         {
@@ -88,6 +90,23 @@ namespace Sovereign.ClientCore.Network.Rest
             }
             var uri = new Uri(baseUri, url);
             return httpClient.GetAsync(uri);
+        }
+
+        /// <summary>
+        /// Asynchronously makes a POST request to the REST server with a JSON payload.
+        /// </summary>
+        /// <param name="url">Relative URL of the REST endpoint.</param>
+        /// <param name="content">Request content.</param>
+        /// <returns>Task awaiting the response.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the REST client is not in the connected state.</exception>
+        public Task<HttpResponseMessage> PostJson<T>(string url, T content)
+        {
+            if (!Connected)
+            {
+                throw new InvalidOperationException("REST client is not connected.");
+            }
+            var uri = new Uri(baseUri, url);
+            return httpClient.PostAsync(uri, JsonContent.Create<T>(content));
         }
 
     } 
