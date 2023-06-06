@@ -21,16 +21,15 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.DynamicProxy.Generators;
+using Castle.Core.Logging;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace Sovereign.ClientNetwork.Network
@@ -43,22 +42,98 @@ namespace Sovereign.ClientNetwork.Network
     {
         private readonly RestClient restClient;
 
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
         public AuthenticationClient(RestClient restClient)
         {
             this.restClient = restClient;
         }
 
-        public async Maybe<string> LoginAsync(string username, string password)
+        /// <summary>
+        /// Attempts to login to the server with the given username and password.
+        /// </summary>
+        /// <param name="username">Username.</param>
+        /// <param name="password">Plaintext password.</param>
+        /// <returns></returns>
+        public async Task<Maybe<LoginResponse>> LoginAsync(string username, string password)
         {
-            // Prepare request.
-            var request = new LoginRequest()
+            try
             {
-                Username = username,
-                Password = password
-            };
+                // Prepare request.
+                Logger.InfoFormat("Attempting login as {0}.", username);
+                var request = new LoginRequest()
+                {
+                    Username = username,
+                    Password = password
+                };
 
-            // Send request, handle response.
-            var response = await restClient.PostJson(RestEndpoints.Authentication, request);
+                // Send request, handle response.
+                var response = await restClient.PostJson(RestEndpoints.Authentication, request);
+                var result = new Maybe<LoginResponse>();
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.Created:
+                        // Successful login.
+                        Logger.Info("Login successful.");
+                        result = await ProcessSuccessfulLogin(response);
+                        break;
+
+                    case HttpStatusCode.TooManyRequests:
+                        // Failed: Too many login attempts, try again later.
+                        Logger.Error("Login failed: too many attempts, try again later.");
+                        break;
+
+                    case HttpStatusCode.Conflict:
+                        // Failed: Account is already logged in.
+                        Logger.Error("Login failed: account is already logged in.");
+                        break;
+
+                    case HttpStatusCode.Forbidden:
+                        // Failed: Invalid username or password.
+                        Logger.Error("Login failed: invalid username or password.");
+                        break;
+
+                    case HttpStatusCode.BadRequest:
+                        // Failed: Invalid request.
+                        Logger.Error("Login failed: invalid request.");
+                        break;
+
+                    case HttpStatusCode.InternalServerError:
+                        // Failed: Server error.
+                        Logger.Error("Login failed: server error.");
+                        break;
+
+                    default:
+                        // Failed: Unknown error.
+                        Logger.Error("Login failed: unknown error.");
+                        break;
+                }
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Unhandled exception during login.", e);
+                return new Maybe<LoginResponse>();
+            }
+        }
+
+        /// <summary>
+        /// Processes the response for a successful login.
+        /// </summary>
+        /// <param name="response">Response from REST server.</param>
+        /// <returns>Login response, or an empty Maybe if an error occurs.</returns>
+        private async Task<Maybe<LoginResponse>> ProcessSuccessfulLogin(HttpResponseMessage response)
+        {
+            try
+            {
+                return new Maybe<LoginResponse>(await response.Content.ReadFromJsonAsync<LoginResponse>());
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Error while processing successful login.", e);
+                return new Maybe<LoginResponse>();
+            }
         }
 
     }

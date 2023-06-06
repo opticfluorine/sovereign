@@ -4,6 +4,15 @@
 
 ### June
 
+#### 06 June 2023
+
+ * Add `AuthenticationClient` for authenticating with the server.
+
+#### 05 June 2023
+
+ * Set up a basic CI/CD pipeline (build only for right now) to perform automatic build
+   check on the main branch as well as any Dependabot PRs.
+
 #### 04 June 2023
 
  * Gracefully handle connection loss in the client by transitioning to the
