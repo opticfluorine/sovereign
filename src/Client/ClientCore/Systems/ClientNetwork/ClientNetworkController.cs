@@ -21,7 +21,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.ClientCore.Events;
+using Sovereign.ClientCore.Network;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 
 namespace Sovereign.ClientCore.Systems.ClientNetwork
 {
@@ -39,6 +42,43 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork
         public void DeclareConnectionLost(IEventSender eventSender)
         {
             var ev = new Event(EventId.Client_Network_ConnectionLost);
+            eventSender.SendEvent(ev);
+        }
+
+        /// <summary>
+        /// Sends an event commanding the system to begin a connection to the server.
+        /// </summary>
+        /// <param name="eventSender">Event sender.</param>
+        /// <param name="connectionParameters">Connection parameters.</param>
+        /// <param name="loginParameters">Login parameters.</param>
+        public void BeginConnection(IEventSender eventSender, ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
+        {
+            var ev = new Event(EventId.Client_Network_BeginConnection,
+                new BeginConnectionEventDetails(connectionParameters, loginParameters));
+            eventSender.SendEvent(ev);
+        }
+
+        /// <summary>
+        /// Sends an event announcing that a login attempt failed.
+        /// </summary>
+        /// <param name="eventSender">Event sender.</param>
+        /// <param name="reason">Login failure reason.</param>
+        public void LoginFailed(IEventSender eventSender, string reason)
+        {
+            var ev = new Event(EventId.Client_Network_LoginFailed,
+                               new ErrorEventDetails(reason));
+            eventSender.SendEvent(ev);
+        }
+
+        /// <summary>
+        /// Sends an event announcing that a connection attempt failed after successful authentication.
+        /// </summary>
+        /// <param name="eventSender">Event sender.</param>
+        /// <param name="reason">Connection failure reason.</param>
+        public void ConnectionAttemptFailed(IEventSender eventSender, string reason)
+        {
+            var ev = new Event(EventId.Client_Network_ConnectionAttemptFailed,
+                new ErrorEventDetails(reason));
             eventSender.SendEvent(ev);
         }
 

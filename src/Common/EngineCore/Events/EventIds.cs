@@ -176,6 +176,25 @@ namespace Sovereign.EngineCore.Events
         /// Associated details: None
         Client_Network_ConnectionLost = 100200,
 
+        /// <summary>
+        /// Event sent to command ClientNetworkSystem to begin connecting to the server.
+        /// This causes an asynchronous authentication attempt to be made with the REST server.
+        /// </summary>
+        /// Associated details: BeginConnectionEventDetails
+        Client_Network_BeginConnection = 100201,
+
+        /// <summary>
+        /// Event sent when the client has failed to authenticate with the REST server.
+        /// </summary>
+        /// Associated details: ErrorEventDetails
+        Client_Network_LoginFailed = 100202,
+
+        /// <summary>
+        /// Event sent when the client has failed to establish an event server connection.
+        /// </summary>
+        /// Associated details: ErrorEventDetails
+        Client_Network_ConnectionAttemptFailed = 100203,
+
         #endregion Client_Network
 
         #endregion Client

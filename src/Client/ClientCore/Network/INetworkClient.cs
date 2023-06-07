@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.NetworkCore.Network.Rest.Data;
 using System;
 
 namespace Sovereign.ClientCore.Network
@@ -33,13 +34,23 @@ namespace Sovereign.ClientCore.Network
     {
 
         /// <summary>
-        /// Begins a connection to a remote server.
+        /// Begins a connection to a remote server by making an authentication attempt with the REST server.
         /// </summary>
         /// <param name="connectionParameters">Client connection parameters.</param>
+        /// <param name="loginParameters">Login parameters.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if ClientState is not Disconnected.
         /// </exception>
-        void BeginConnection(ClientConnectionParameters connectionParameters);
+        void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters);
+
+        /// <summary>
+        /// Continues a connection to a remote server following successful authentication.
+        /// </summary>
+        /// <param name="loginResponse">Successful login response.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if ClientState is not Connecting.
+        /// </exception>
+        void ContinueConnection(LoginResponse loginResponse);
 
         /// <summary>
         /// Ends the current connection.

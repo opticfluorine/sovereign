@@ -21,7 +21,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.ClientCore.Events;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 using System;
 using System.Collections.Generic;
@@ -42,6 +44,7 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork
         public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>
         {
             EventId.Client_Network_ConnectionLost,
+            EventId.Client_Network_BeginConnection,
         };
 
         public int WorkloadEstimate => 20;
@@ -55,6 +58,9 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork
             EventCommunicator = eventCommunicator;
 
             eventDescriptions.RegisterNullEvent(EventId.Client_Network_ConnectionLost);
+            eventDescriptions.RegisterEvent<BeginConnectionEventDetails>(EventId.Client_Network_BeginConnection);
+            eventDescriptions.RegisterEvent<ErrorEventDetails>(EventId.Client_Network_ConnectionAttemptFailed);
+            eventDescriptions.RegisterEvent<ErrorEventDetails>(EventId.Client_Network_LoginFailed);
 
             eventLoop.RegisterSystem(this);
         }

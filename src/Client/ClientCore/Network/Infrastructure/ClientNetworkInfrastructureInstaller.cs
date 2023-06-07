@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2019 opticfluorine
+ * Copyright (c) 2023 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,45 +21,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.ClientCore.Network;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-namespace Sovereign.ClientNetwork.Network.Infrastructure
+namespace Sovereign.ClientCore.Network.Infrastructure
 {
 
     /// <summary>
-    /// Network client implementation.
+    /// IoC installer for the client network infrastructure.
     /// </summary>
-    public sealed class NetworkClient : INetworkClient
+    public sealed class ClientNetworkInfrastructureInstaller : IWindsorInstaller
     {
-        private readonly ClientNetworkManager clientNetworkManager;
-
-        public NetworkClient(ClientNetworkManager clientNetworkManager)
+        public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            this.clientNetworkManager = clientNetworkManager;
-        }
-
-        public NetworkClientState ClientState => clientNetworkManager.ClientState;
-
-        public string ErrorMessage => clientNetworkManager.ErrorMessage;
-
-        public void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
-        {
-            clientNetworkManager.BeginConnection(connectionParameters, loginParameters);
-        }
-
-        public void EndConnection()
-        {
-            clientNetworkManager.EndConnection();
-        }
-
-        public void ResetError()
-        {
-            clientNetworkManager.ResetError();
+            container.Register(Component.For<AuthenticationClient>().LifestyleSingleton());
         }
     }
+
 }

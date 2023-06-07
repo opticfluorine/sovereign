@@ -54,6 +54,9 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork
                     HandleConnectionLostEvent();
                     break;
 
+                case EventId.Client_Network_BeginConnection:
+                    break;
+
                 default:
                     Logger.WarnFormat("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
                     break;

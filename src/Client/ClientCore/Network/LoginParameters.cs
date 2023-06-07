@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2019 opticfluorine
+ * Copyright (c) 2023 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,45 +21,36 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.ClientCore.Network;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sovereign.ClientNetwork.Network.Infrastructure
+namespace Sovereign.ClientCore.Network
 {
 
     /// <summary>
-    /// Network client implementation.
+    /// Immutable record of login parameters.
     /// </summary>
-    public sealed class NetworkClient : INetworkClient
+    public sealed class LoginParameters
     {
-        private readonly ClientNetworkManager clientNetworkManager;
 
-        public NetworkClient(ClientNetworkManager clientNetworkManager)
+        /// <summary>
+        /// Username.
+        /// </summary>
+        public string Username { get; private set; }
+
+        /// <summary>
+        /// Password.
+        /// </summary>
+        public string Password { get; private set; }
+
+        /// <summary>
+        /// Creates a new set of login parameters.
+        /// </summary>
+        /// <param name="username">Username.</param>
+        /// <param name="password">Plaintext password.</param>
+        public LoginParameters(string username, string password)
         {
-            this.clientNetworkManager = clientNetworkManager;
+            Username = username;
+            Password = password;
         }
 
-        public NetworkClientState ClientState => clientNetworkManager.ClientState;
-
-        public string ErrorMessage => clientNetworkManager.ErrorMessage;
-
-        public void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
-        {
-            clientNetworkManager.BeginConnection(connectionParameters, loginParameters);
-        }
-
-        public void EndConnection()
-        {
-            clientNetworkManager.EndConnection();
-        }
-
-        public void ResetError()
-        {
-            clientNetworkManager.ResetError();
-        }
     }
+
 }

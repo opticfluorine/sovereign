@@ -21,14 +21,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.ClientCore.Network;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sovereign.NetworkCore.Network.Rest.Data;
 
-namespace Sovereign.ClientNetwork.Network.Infrastructure
+namespace Sovereign.ClientCore.Network.Infrastructure
 {
 
     /// <summary>
@@ -50,6 +45,11 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
         public void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
         {
             clientNetworkManager.BeginConnection(connectionParameters, loginParameters);
+        }
+
+        public void ContinueConnection(LoginResponse loginResponse)
+        {
+
         }
 
         public void EndConnection()

@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClientCore\ClientCore.csproj" />
-    <ProjectReference Include="..\ClientNetwork\ClientNetwork.csproj" />
     <ProjectReference Include="..\VeldridRenderer\VeldridRenderer.csproj" />
   </ItemGroup>
 
@@ -17,27 +16,21 @@
     <ItemGroup>
       <DataFiles Include="Data/**/*" />
     </ItemGroup>
-    <Copy 
-      SourceFiles="@(DataFiles)"
-      DestinationFolder="$(OutDir)Data/%(RecursiveDir)" />
+    <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)" />
   </Target>
 
   <Target Name="CopyContribAfterBuild" AfterTargets="Build">
     <ItemGroup>
       <SdlLibs Include="Contrib/SDL/*" />
     </ItemGroup>
-    <Copy
-      SourceFiles="@(SdlLibs)"
-      DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="@(SdlLibs)" DestinationFolder="$(OutDir)" />
   </Target>
 
   <Target Name="CopyDataAfterPublish" AfterTargets="Publish">
     <ItemGroup>
       <DataFiles Include="$(OutDir)Data/**/*" />
     </ItemGroup>
-    <Copy 
-      SourceFiles="@(DataFiles)"
-      DestinationFolder="$(PublishDir)Data/%(RecursiveDir)" />
+    <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(PublishDir)Data/%(RecursiveDir)" />
   </Target>
 
   <Target Name="CompileShaders" BeforeTargets="Build">
@@ -46,9 +39,7 @@
       <GlslFiles Include="Shader/*.vert;Shader/*.frag" />
     </ItemGroup>
     <MakeDir Directories="$(OutDir)Data/Shader" />
-    <Exec Command="glslc @(GlslFiles) -o $(OutDir)Data/Shader/%(Filename)%(Extension).spv"
-          Outputs="$(OutDir)Data/Shader/%(Filename)%(Extension).spv"
-          />
+    <Exec Command="glslc @(GlslFiles) -o $(OutDir)Data/Shader/%(Filename)%(Extension).spv" Outputs="$(OutDir)Data/Shader/%(Filename)%(Extension).spv" />
   </Target>
 
 </Project>

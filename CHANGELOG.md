@@ -4,6 +4,14 @@
 
 ### June
 
+#### 07 June 2023
+
+ * Refactor `ClientNetwork` library, merging it directly into `ClientCore`. Turns out that was
+   a bad boundary to divide the libraries along, it introduces all sorts of awkward couplings
+   and other issues.
+ * Start sequencing the connection process through the client network system. Add a variety of events
+   to control this process and report back with status.
+
 #### 06 June 2023
 
  * Add `AuthenticationClient` for authenticating with the server.

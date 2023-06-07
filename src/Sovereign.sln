@@ -1,63 +1,54 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33717.318
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{2D1834B6-48B7-48DC-8A50-175FDB361FD3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientCore", "Client\ClientCore\ClientCore.csproj", "{A84E9D9B-DE0D-4F59-A9A6-FAB500CD1812}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientCore", "Client\ClientCore\ClientCore.csproj", "{A84E9D9B-DE0D-4F59-A9A6-FAB500CD1812}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientNetwork", "Client\ClientNetwork\ClientNetwork.csproj", "{F37A4DF2-C254-406D-8870-49FE16AA582D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SovereignClient", "Client\SovereignClient\SovereignClient.csproj", "{31F840DD-E698-449F-81F0-CD0314FE6DF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SovereignClient", "Client\SovereignClient\SovereignClient.csproj", "{31F840DD-E698-449F-81F0-CD0314FE6DF7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VeldridRenderer", "Client\VeldridRenderer\VeldridRenderer.csproj", "{879996C6-7467-4FCA-9A57-71EF600D3BE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VeldridRenderer", "Client\VeldridRenderer\VeldridRenderer.csproj", "{879996C6-7467-4FCA-9A57-71EF600D3BE7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{A7AE4949-CD5D-4B09-BB44-C827278514C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineCore", "Common\EngineCore\EngineCore.csproj", "{CD07EA04-7ABF-49EB-B1EE-8A8D92BAC111}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EngineCore", "Common\EngineCore\EngineCore.csproj", "{CD07EA04-7ABF-49EB-B1EE-8A8D92BAC111}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineUtil", "Common\EngineUtil\EngineUtil.csproj", "{C5D2525F-982C-4F5C-B261-50AE523D3228}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EngineUtil", "Common\EngineUtil\EngineUtil.csproj", "{C5D2525F-982C-4F5C-B261-50AE523D3228}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkCore", "Common\NetworkCore\NetworkCore.csproj", "{82D87DD9-CFCA-4D7D-9093-6C7184F06FA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkCore", "Common\NetworkCore\NetworkCore.csproj", "{82D87DD9-CFCA-4D7D-9093-6C7184F06FA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Performance", "Common\Performance\Performance.csproj", "{EFB91BC9-EEFC-4742-A67C-9E292B583585}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Performance", "Common\Performance\Performance.csproj", "{EFB91BC9-EEFC-4742-A67C-9E292B583585}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestEngineUtil", "Common\TestEngineUtil\TestEngineUtil.csproj", "{152A6AD1-62FA-4715-9D7A-0CFAF917C4CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestEngineUtil", "Common\TestEngineUtil\TestEngineUtil.csproj", "{152A6AD1-62FA-4715-9D7A-0CFAF917C4CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldManagement", "Common\WorldManagement\WorldManagement.csproj", "{BBC6D942-A7A9-4C3F-B356-4338CA46384E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldManagement", "Common\WorldManagement\WorldManagement.csproj", "{BBC6D942-A7A9-4C3F-B356-4338CA46384E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{B39882EF-9429-46E2-AEE4-69EF9DD360C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Accounts", "Server\Accounts\Accounts.csproj", "{9EF97B05-CDB1-4143-8CD6-960CED679969}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Accounts", "Server\Accounts\Accounts.csproj", "{9EF97B05-CDB1-4143-8CD6-960CED679969}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persistence", "Server\Persistence\Persistence.csproj", "{E6A4D926-6A26-4F4F-AFE6-773E29C22B80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persistence", "Server\Persistence\Persistence.csproj", "{E6A4D926-6A26-4F4F-AFE6-773E29C22B80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerCore", "Server\ServerCore\ServerCore.csproj", "{D22F5D56-4B7D-4354-9A87-C65735A5C863}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerCore", "Server\ServerCore\ServerCore.csproj", "{D22F5D56-4B7D-4354-9A87-C65735A5C863}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerNetwork", "Server\ServerNetwork\ServerNetwork.csproj", "{E30AE410-77FD-4F5D-AC7E-2E6F00A9D0D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerNetwork", "Server\ServerNetwork\ServerNetwork.csproj", "{E30AE410-77FD-4F5D-AC7E-2E6F00A9D0D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SovereignServer", "Server\SovereignServer\SovereignServer.csproj", "{6D68E429-89BD-4C96-82FD-E8BA1C6AE550}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SovereignServer", "Server\SovereignServer\SovereignServer.csproj", "{6D68E429-89BD-4C96-82FD-E8BA1C6AE550}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPersistence", "Server\TestPersistence\TestPersistence.csproj", "{00080C95-35D3-42DD-95A6-43DB455BDD21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestPersistence", "Server\TestPersistence\TestPersistence.csproj", "{00080C95-35D3-42DD-95A6-43DB455BDD21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A84E9D9B-DE0D-4F59-A9A6-FAB500CD1812}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A84E9D9B-DE0D-4F59-A9A6-FAB500CD1812}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A84E9D9B-DE0D-4F59-A9A6-FAB500CD1812}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A84E9D9B-DE0D-4F59-A9A6-FAB500CD1812}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F37A4DF2-C254-406D-8870-49FE16AA582D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F37A4DF2-C254-406D-8870-49FE16AA582D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F37A4DF2-C254-406D-8870-49FE16AA582D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F37A4DF2-C254-406D-8870-49FE16AA582D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{31F840DD-E698-449F-81F0-CD0314FE6DF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{31F840DD-E698-449F-81F0-CD0314FE6DF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31F840DD-E698-449F-81F0-CD0314FE6DF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -115,9 +106,11 @@ Global
 		{00080C95-35D3-42DD-95A6-43DB455BDD21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00080C95-35D3-42DD-95A6-43DB455BDD21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A84E9D9B-DE0D-4F59-A9A6-FAB500CD1812} = {2D1834B6-48B7-48DC-8A50-175FDB361FD3}
-		{F37A4DF2-C254-406D-8870-49FE16AA582D} = {2D1834B6-48B7-48DC-8A50-175FDB361FD3}
 		{31F840DD-E698-449F-81F0-CD0314FE6DF7} = {2D1834B6-48B7-48DC-8A50-175FDB361FD3}
 		{879996C6-7467-4FCA-9A57-71EF600D3BE7} = {2D1834B6-48B7-48DC-8A50-175FDB361FD3}
 		{CD07EA04-7ABF-49EB-B1EE-8A8D92BAC111} = {A7AE4949-CD5D-4B09-BB44-C827278514C8}
@@ -132,5 +125,8 @@ Global
 		{E30AE410-77FD-4F5D-AC7E-2E6F00A9D0D1} = {B39882EF-9429-46E2-AEE4-69EF9DD360C6}
 		{6D68E429-89BD-4C96-82FD-E8BA1C6AE550} = {B39882EF-9429-46E2-AEE4-69EF9DD360C6}
 		{00080C95-35D3-42DD-95A6-43DB455BDD21} = {B39882EF-9429-46E2-AEE4-69EF9DD360C6}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {20D431D9-0FD8-469F-95BB-5899DC2CA35A}
 	EndGlobalSection
 EndGlobal

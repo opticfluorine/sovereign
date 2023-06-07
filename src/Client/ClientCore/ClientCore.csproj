@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Common\EngineCore\EngineCore.csproj" />
+    <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj" />
     <ProjectReference Include="..\..\Common\WorldManagement\WorldManagement.csproj" />
   </ItemGroup>
 

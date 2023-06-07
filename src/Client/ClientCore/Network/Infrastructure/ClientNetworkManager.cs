@@ -23,19 +23,18 @@
 
 using Castle.Core.Logging;
 using LiteNetLib;
-using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Network.Rest;
+using Sovereign.ClientCore.Systems.ClientNetwork;
+using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Infrastructure;
+using Sovereign.NetworkCore.Network.Rest.Data;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.ClientNetwork.Network.Infrastructure
+namespace Sovereign.ClientCore.Network.Infrastructure
 {
 
     internal enum ClientNetworkCommandType
@@ -83,6 +82,8 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
         private readonly NetworkSerializer networkSerializer;
         private readonly RestClient restClient;
         private readonly AuthenticationClient authClient;
+        private readonly EventSender eventSender;
+        private readonly ClientNetworkController clientNetworkController;
         private readonly EventBasedNetListener netListener;
         private readonly NetManager netManager;
 
@@ -119,12 +120,15 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
 
         public ClientNetworkManager(NetworkConnectionManager connectionManager,
             NetworkSerializer networkSerializer, RestClient restClient,
-            AuthenticationClient authClient)
+            AuthenticationClient authClient, EventSender eventSender,
+            ClientNetworkController clientNetworkController)
         {
             this.connectionManager = connectionManager;
             this.networkSerializer = networkSerializer;
             this.restClient = restClient;
             this.authClient = authClient;
+            this.eventSender = eventSender;
+            this.clientNetworkController = clientNetworkController;
 
             netListener = new EventBasedNetListener();
             netManager = new NetManager(netListener);
@@ -170,15 +174,31 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
 
             ConnectionParameters = connectionParameters;
 
-            // Reconfigure the REST client for the latest connection.
+            // Reconfigure the REST client for the latest connection, then attempt to login.
+            ClientState = NetworkClientState.Connecting;
             restClient.SelectServer(ConnectionParameters);
-
-            var cmd = new ClientNetworkCommand();
-            cmd.CommandType = ClientNetworkCommandType.BeginConnection;
-            cmd.Host = ConnectionParameters.Host;
-            cmd.Port = ConnectionParameters.Port;
-
-            commandQueue.Enqueue(cmd);
+            var task = authClient.LoginAsync(loginParameters).ContinueWith((task) =>
+            {
+                if (task.IsFaulted)
+                {
+                    // Special failure case.
+                    Logger.Error("Login failed with unhandled exception; connection stopped.", task.Exception);
+                    clientNetworkController.LoginFailed(eventSender, "Unhandled exception occurred during login.");
+                }
+                else
+                {
+                    if (task.Result.HasValue)
+                    {
+                        // Authentication succeeded, proceed with connection.
+                        ContinueConnection(task.Result.Value);
+                    }
+                    else
+                    {
+                        // Authentication failed.
+                        clientNetworkController.LoginFailed(eventSender, "Login failed.");
+                    }
+                }
+            });
         }
 
         /// <summary>
@@ -222,6 +242,20 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
         }
 
         /// <summary>
+        /// Continues connection to server following a successful login.
+        /// </summary>
+        /// <param name="loginResponse">Successful login response.</param>
+        private void ContinueConnection(LoginResponse loginResponse)
+        {
+            var cmd = new ClientNetworkCommand();
+            cmd.CommandType = ClientNetworkCommandType.BeginConnection;
+            cmd.Host = ConnectionParameters.Host;
+            cmd.Port = ConnectionParameters.Port;
+
+            commandQueue.Enqueue(cmd);
+        }
+
+        /// <summary>
         /// Handles any pending commands.
         /// </summary>
         private void HandleCommands()
@@ -252,15 +286,6 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
         /// <param name="port">Server port.</param>
         private void HandleBeginCommand(string host, ushort port)
         {
-            // Sanity check.
-            if (ClientState != NetworkClientState.Disconnected)
-            {
-                Logger.Error("Client is not ready.");
-                return;
-            }
-
-            // Connect.
-            ClientState = NetworkClientState.Connecting;
             try
             {
                 // Resolve host.
@@ -287,6 +312,7 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
                 ClientState = NetworkClientState.Failed;
 
                 Logger.Error("Failed to connect to server.", e);
+                clientNetworkController.ConnectionAttemptFailed(eventSender, ErrorMessage);
             }
         }
 

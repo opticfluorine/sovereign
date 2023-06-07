@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2019 opticfluorine
+ * Copyright (c) 2023 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -22,44 +22,34 @@
  */
 
 using Sovereign.ClientCore.Network;
+using Sovereign.EngineCore.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sovereign.ClientNetwork.Network.Infrastructure
+namespace Sovereign.ClientCore.Events
 {
 
     /// <summary>
-    /// Network client implementation.
+    /// Event details for a connection attempt.
     /// </summary>
-    public sealed class NetworkClient : INetworkClient
+    public sealed class BeginConnectionEventDetails : IEventDetails
     {
-        private readonly ClientNetworkManager clientNetworkManager;
+        /// <summary>
+        /// Connection parameters to be used for the connection.
+        /// </summary>
+        public ClientConnectionParameters ConnectionParameters { get; private set; }
 
-        public NetworkClient(ClientNetworkManager clientNetworkManager)
+        public LoginParameters LoginParameters { get; private set; }
+
+        public BeginConnectionEventDetails(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
         {
-            this.clientNetworkManager = clientNetworkManager;
-        }
-
-        public NetworkClientState ClientState => clientNetworkManager.ClientState;
-
-        public string ErrorMessage => clientNetworkManager.ErrorMessage;
-
-        public void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
-        {
-            clientNetworkManager.BeginConnection(connectionParameters, loginParameters);
-        }
-
-        public void EndConnection()
-        {
-            clientNetworkManager.EndConnection();
-        }
-
-        public void ResetError()
-        {
-            clientNetworkManager.ResetError();
+            ConnectionParameters = connectionParameters;
+            LoginParameters = loginParameters;
         }
     }
+
 }
+

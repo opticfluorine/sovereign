@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2019 opticfluorine
+ * Copyright (c) 2023 opticfluorine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"), 
@@ -21,45 +21,29 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.ClientCore.Network;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sovereign.ClientNetwork.Network.Infrastructure
+namespace Sovereign.EngineCore.Events.Details
 {
 
     /// <summary>
-    /// Network client implementation.
+    /// Event details for conveying an error message.
     /// </summary>
-    public sealed class NetworkClient : INetworkClient
+    public sealed class ErrorEventDetails : IEventDetails
     {
-        private readonly ClientNetworkManager clientNetworkManager;
 
-        public NetworkClient(ClientNetworkManager clientNetworkManager)
+        /// <summary>
+        /// Error message.
+        /// </summary>
+        public string Message { get; private set; }
+
+        /// <summary>
+        /// Creates a new error details object.
+        /// </summary>
+        /// <param name="message">Error message.</param>
+        public ErrorEventDetails(string message)
         {
-            this.clientNetworkManager = clientNetworkManager;
+            Message = message;
         }
 
-        public NetworkClientState ClientState => clientNetworkManager.ClientState;
-
-        public string ErrorMessage => clientNetworkManager.ErrorMessage;
-
-        public void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
-        {
-            clientNetworkManager.BeginConnection(connectionParameters, loginParameters);
-        }
-
-        public void EndConnection()
-        {
-            clientNetworkManager.EndConnection();
-        }
-
-        public void ResetError()
-        {
-            clientNetworkManager.ResetError();
-        }
     }
+
 }
