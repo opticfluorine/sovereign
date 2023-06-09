@@ -22,8 +22,10 @@
  */
 
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Network;
 using Sovereign.EngineCore.Events;
+using System;
 
 namespace Sovereign.ClientCore.Systems.ClientNetwork
 {
@@ -55,12 +57,22 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork
                     break;
 
                 case EventId.Client_Network_BeginConnection:
+                    HandleBeginConnection((BeginConnectionEventDetails)ev.EventDetails);
                     break;
 
                 default:
                     Logger.WarnFormat("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Handles a begin connection request.
+        /// </summary>
+        /// <param name="details">Connection details.</param>
+        private void HandleBeginConnection(BeginConnectionEventDetails details)
+        {
+            networkClient.BeginConnection(details.ConnectionParameters, details.LoginParameters);
         }
 
         /// <summary>
