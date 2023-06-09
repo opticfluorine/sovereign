@@ -82,6 +82,16 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork
             eventSender.SendEvent(ev);
         }
 
+        /// <summary>
+        /// Sends an event announcing that the connection to the event server has been established.
+        /// </summary>
+        /// <param name="eventSender">Event sender.</param>
+        public void Connected(IEventSender eventSender)
+        {
+            var ev = new Event(EventId.Client_Network_Connected);
+            eventSender.SendEvent(ev);
+        }
+
     }
 
 }

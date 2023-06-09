@@ -309,6 +309,7 @@ namespace Sovereign.ClientCore.Network.Infrastructure
                 var peer = netManager.Connect(new IPEndPoint(addr, port), "");
                 conn = connectionManager.CreateConnection(peer, hmacKey);
                 ClientState = NetworkClientState.Connected;
+                clientNetworkController.Connected(eventSender);
             }
             catch (Exception e)
             {

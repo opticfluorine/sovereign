@@ -4,6 +4,12 @@
 
 ### June
 
+#### 09 June 2023
+
+ * Publish event in the client when a connection is successful.
+ * Update `TestContentSystem` to wait for successful connection before trying to load
+   the test world segments.
+
 #### 08 June 2023
 
  * Continue client connection sequencing. Work in progress.

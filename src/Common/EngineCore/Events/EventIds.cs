@@ -195,6 +195,12 @@ namespace Sovereign.EngineCore.Events
         /// Associated details: ErrorEventDetails
         Client_Network_ConnectionAttemptFailed = 100203,
 
+        /// <summary>
+        /// Event sent when the client has successfully connected to the event server.
+        /// </summary>
+        /// Associated details: None
+        Client_Network_Connected = 100204,
+
         #endregion Client_Network
 
         #endregion Client

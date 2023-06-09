@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Castle.Core.Logging;
 using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.EngineCore.Components.Indexers;
@@ -43,6 +44,8 @@ namespace Sovereign.ClientCore.Systems.TestContent
     {
         private readonly IEventLoop eventLoop;
 
+        public ILogger Logger { private get; set; } = NullLogger.Instance;
+
         public EventCommunicator EventCommunicator { get; private set; }
 
         private readonly IEventSender eventSender;
@@ -51,7 +54,7 @@ namespace Sovereign.ClientCore.Systems.TestContent
 
         public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
         {
-            /* no events */
+            EventId.Client_Network_Connected,
         };
 
         public int WorkloadEstimate => 0;
@@ -73,20 +76,8 @@ namespace Sovereign.ClientCore.Systems.TestContent
 
         public void Initialize()
         {
-            /* Automatically connect to a local server with debug credentials. */
-            networkController.BeginConnection(eventSender,
-                new ClientConnectionParameters("localhost", 12820, "localhost", 8080, false),
-                new LoginParameters("debug", "debug"));
+            AutomateConnect();
 
-            /* Load some test world segments. */
-            for (int i = -1; i < 2; ++i)
-            {
-                for (int j = -1; j < 2; ++j)
-                {
-                    worldManagementController.LoadSegment(eventSender,
-                        new GridPosition(i, j, 0));
-                }
-            }
         }
 
         public void Cleanup()
@@ -96,13 +87,57 @@ namespace Sovereign.ClientCore.Systems.TestContent
 
         public int ExecuteOnce()
         {
-            /* No action. */
-            return 0;
+            /* Poll for events. */
+            var eventsProcessed = 0;
+            while (EventCommunicator.GetIncomingEvent(out var ev))
+            {
+                switch (ev.EventId)
+                {
+                    case EventId.Client_Network_Connected:
+                        LoadSegmentsNearOrigin();
+                        break;
+
+                    default:
+                        break;
+                }
+                eventsProcessed++;
+            }
+
+            return eventsProcessed;
         }
 
         public void Dispose()
         {
             eventLoop.UnregisterSystem(this);
+        }
+
+        /// <summary>
+        /// Automatically starts the connection process.
+        /// </summary>
+        private void AutomateConnect()
+        {
+            /* Automatically connect to a local server with debug credentials. */
+            Logger.Info("Automatically connecting to local server.");
+            networkController.BeginConnection(eventSender,
+                new ClientConnectionParameters("localhost", 12820, "localhost", 8080, false),
+                new LoginParameters("debug", "debug"));
+        }
+        
+        /// <summary>
+        /// Automatically loads some test world segments near the global origin.
+        /// </summary>
+        private void LoadSegmentsNearOrigin()
+        {
+            /* Load some test world segments. */
+            Logger.Info("Automatically loading test world segments.");
+            for (int i = -1; i < 2; ++i)
+            {
+                for (int j = -1; j < 2; ++j)
+                {
+                    worldManagementController.LoadSegment(eventSender,
+                        new GridPosition(i, j, 0));
+                }
+            }
         }
 
     }

@@ -57,6 +57,7 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork
             this.eventHandler = eventHandler;
             EventCommunicator = eventCommunicator;
 
+            eventDescriptions.RegisterNullEvent(EventId.Client_Network_Connected);
             eventDescriptions.RegisterNullEvent(EventId.Client_Network_ConnectionLost);
             eventDescriptions.RegisterEvent<BeginConnectionEventDetails>(EventId.Client_Network_BeginConnection);
             eventDescriptions.RegisterEvent<ErrorEventDetails>(EventId.Client_Network_ConnectionAttemptFailed);
