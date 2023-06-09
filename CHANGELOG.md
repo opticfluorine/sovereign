@@ -9,6 +9,8 @@
  * Publish event in the client when a connection is successful.
  * Update `TestContentSystem` to wait for successful connection before trying to load
    the test world segments.
+ * Fix issue where world segment data was not correctly setting air as the default
+   block type for sparse layers.
 
 #### 08 June 2023
 

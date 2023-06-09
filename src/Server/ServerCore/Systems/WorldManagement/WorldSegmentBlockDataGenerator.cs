@@ -90,15 +90,19 @@ public sealed class WorldSegmentBlockDataGenerator
         /// <summary>
         /// Cached count of most frequent material type.
         /// </summary>
-        private int LeadingMaterialCount = 0;
+        private int leadingMaterialCount = 0;
+
+        private int airBlockCount;
 
         /// <summary>
         /// Creates an empty depth plane.
         /// </summary>
+        /// <param name="sideLength">Length of a block side.</param>
         /// <param name="offsetZ">Z offset of this depth plane.</param>
-        public DepthPlane(int offsetZ)
+        public DepthPlane(uint sideLength, int offsetZ)
         {
             OffsetZ = offsetZ;
+            airBlockCount = (int)(sideLength * sideLength * sideLength);
         }
 
         /// <summary>
@@ -108,6 +112,7 @@ public sealed class WorldSegmentBlockDataGenerator
         public void Add(BlockData block)
         {
             Blocks.Add(block);
+            airBlockCount--;
 
             // Update material counts.
             int count;
@@ -122,10 +127,22 @@ public sealed class WorldSegmentBlockDataGenerator
             MaterialCounts[block.BlockType] = count;
 
             // Update default block if needed.
-            if (count > LeadingMaterialCount)
+            if (count > leadingMaterialCount)
             {
-                LeadingMaterialCount = count;
+                leadingMaterialCount = count;
                 DefaultBlockType = block.BlockType;
+            }
+        }
+
+        /// <summary>
+        /// Finishes the depth plane once all blocks have been added.
+        /// </summary>
+        public void Finish()
+        {
+            // Check for case where air is the most common block type.
+            if (airBlockCount > leadingMaterialCount)
+            {
+                DefaultBlockType = new BlockMaterialData { MaterialId = Material.Air, ModifierId = 0 };
             }
         }
 
@@ -162,7 +179,7 @@ public sealed class WorldSegmentBlockDataGenerator
         var depthPlanes = new DepthPlane[config.SegmentLength];
         for (int i = 0; i < config.SegmentLength; ++i)
         {
-            depthPlanes[i] = new DepthPlane(i);
+            depthPlanes[i] = new DepthPlane(config.SegmentLength, i);
         }
         GroupByDepth(blocks, depthPlanes, (int)basePoint.Z);
 
@@ -210,6 +227,7 @@ public sealed class WorldSegmentBlockDataGenerator
     /// <param name="baseZ">Z coordinate of segment base point.</param>
     private void GroupByDepth(List<PositionedEntity> blocks, DepthPlane[] depthPlanes, int baseZ)
     {
+        // Group blocks by depth.
         foreach (var block in blocks)
         {
             var offset = (int)block.Position.Z - baseZ;
@@ -223,6 +241,12 @@ public sealed class WorldSegmentBlockDataGenerator
             };
 
             depthPlanes[offset].Add(blockData);
+        }
+
+        // Finish all depth planes.
+        foreach (var plane in depthPlanes)
+        {
+            plane.Finish();
         }
     }
 
