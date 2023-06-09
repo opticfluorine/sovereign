@@ -21,6 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.ClientCore.Network;
+using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
@@ -45,6 +47,7 @@ namespace Sovereign.ClientCore.Systems.TestContent
 
         private readonly IEventSender eventSender;
         private readonly WorldManagementController worldManagementController;
+        private readonly ClientNetworkController networkController;
 
         public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
         {
@@ -56,18 +59,25 @@ namespace Sovereign.ClientCore.Systems.TestContent
         public TestContentSystem(IEventLoop eventLoop,
             EventCommunicator eventCommunicator,
             IEventSender eventSender,
-            WorldManagementController worldManagementController)
+            WorldManagementController worldManagementController,
+            ClientNetworkController networkController)
         {
             this.eventLoop = eventLoop;
             EventCommunicator = eventCommunicator;
             this.eventSender = eventSender;
             this.worldManagementController = worldManagementController;
+            this.networkController = networkController;
 
             eventLoop.RegisterSystem(this);
         }
 
         public void Initialize()
         {
+            /* Automatically connect to a local server with debug credentials. */
+            networkController.BeginConnection(eventSender,
+                new ClientConnectionParameters("localhost", 12820, "localhost", 8080, false),
+                new LoginParameters("debug", "debug"));
+
             /* Load some test world segments. */
             for (int i = -1; i < 2; ++i)
             {

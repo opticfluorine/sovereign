@@ -174,6 +174,11 @@ namespace Sovereign.ClientCore.Network.Infrastructure
 
             ConnectionParameters = connectionParameters;
 
+            Logger.InfoFormat("Connecting to {0}:{1} [REST: {2}:{3}] as {4}.",
+                ConnectionParameters.Host, ConnectionParameters.Port,
+                ConnectionParameters.RestHost, ConnectionParameters.RestPort,
+                loginParameters.Username);
+
             // Reconfigure the REST client for the latest connection, then attempt to login.
             ClientState = NetworkClientState.Connecting;
             restClient.SelectServer(ConnectionParameters);
