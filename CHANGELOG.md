@@ -11,6 +11,9 @@
    the test world segments.
  * Fix issue where world segment data was not correctly setting air as the default
    block type for sparse layers.
+ * Cache the compressed world segment data in the server instead of compressing on the
+   fly in the REST service. This avoids the overhead of compressing the data on every
+   request.
 
 #### 08 June 2023
 

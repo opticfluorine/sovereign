@@ -26,7 +26,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
+using MessagePack;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.Systems.WorldManagement;
 
@@ -49,8 +51,8 @@ public sealed class WorldSegmentBlockDataManager
     /// Updates are made via continuations of the tasks.
     /// This allows the REST endpoint to await any segment data.
     /// </summary>
-    private readonly ConcurrentDictionary<GridPosition, Task<WorldSegmentBlockData>> dataProducers
-        = new ConcurrentDictionary<GridPosition, Task<WorldSegmentBlockData>>();
+    private readonly ConcurrentDictionary<GridPosition, Task<byte[]>> dataProducers
+        = new ConcurrentDictionary<GridPosition, Task<byte[]>>();
 
     /// <summary>
     /// Deletion tasks. The presence of a deletion task in this map indicates
@@ -71,7 +73,7 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
     /// <returns>Summary block data, or null if no summary block data is available.</returns>
-    public Task<WorldSegmentBlockData> GetWorldSegmentBlockData(GridPosition segmentIndex)
+    public Task<byte[]> GetWorldSegmentBlockData(GridPosition segmentIndex)
     {
         return dataProducers.TryGetValue(segmentIndex, out var data) ? data : null;
     }
@@ -135,7 +137,7 @@ public sealed class WorldSegmentBlockDataManager
         if (dataProducers.TryRemove(segmentIndex, out var currentTask))
         {
             deletionTasks[segmentIndex] = currentTask.ContinueWith(
-                (task) => DoRemoveWorldSegment(segmentIndex, currentTask.Result));
+                (task) => DoRemoveWorldSegment(segmentIndex));
         }
         else
         {
@@ -147,12 +149,13 @@ public sealed class WorldSegmentBlockDataManager
     /// Blocking call that adds a world segment to the data set.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
-    private WorldSegmentBlockData DoAddWorldSegment(GridPosition segmentIndex)
+    private byte[] DoAddWorldSegment(GridPosition segmentIndex)
     {
         try
         {
             Logger.DebugFormat("Adding summary block data for world segment {0}.", segmentIndex);
-            return generator.Create(segmentIndex);
+            var blockData = generator.Create(segmentIndex);
+            return MessagePackSerializer.Serialize(blockData, MessageConfig.CompressedUntrustedMessagePackOptions);
         }
         catch (Exception e)
         {
@@ -165,8 +168,7 @@ public sealed class WorldSegmentBlockDataManager
     /// Blocking call that removes a world segment from the data set.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
-    /// <param name="data">Existing world segment data.</param>
-    private void DoRemoveWorldSegment(GridPosition segmentIndex, WorldSegmentBlockData data)
+    private void DoRemoveWorldSegment(GridPosition segmentIndex)
     {
         // Clear deletion task.
         deletionTasks.TryRemove(segmentIndex, out var unused);

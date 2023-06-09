@@ -68,11 +68,10 @@ namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment
                 {
                     // Get the latest version of the block data and encode it for transfer.
                     var blockData = await dataTask;
-                    var encodedData = MessagePackSerializer.Serialize(blockData, MessageConfig.CompressedUntrustedMessagePackOptions);
 
                     ctx.Response.ContentType = "application/octet-stream";
-                    ctx.Response.ContentLength = encodedData.Length;
-                    await ctx.Response.Send(encodedData);
+                    ctx.Response.ContentLength = blockData.Length;
+                    await ctx.Response.Send(blockData);
                 }
                 else
                 {
