@@ -24,6 +24,7 @@
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Network;
+using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.EngineCore.Events;
 using System;
 
@@ -36,12 +37,19 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork
     public sealed class ClientNetworkEventHandler
     {
         private readonly INetworkClient networkClient;
+        private readonly RegistrationClient registrationClient;
+        private readonly ClientNetworkController networkController;
+        private readonly IEventSender eventSender;
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-        public ClientNetworkEventHandler(INetworkClient networkClient)
+        public ClientNetworkEventHandler(INetworkClient networkClient, RegistrationClient registrationClient,
+            ClientNetworkController networkController, IEventSender eventSender)
         {
             this.networkClient = networkClient;
+            this.registrationClient = registrationClient;
+            this.networkController = networkController;
+            this.eventSender = eventSender;
         }
 
         /// <summary>
@@ -60,10 +68,41 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork
                     HandleBeginConnection((BeginConnectionEventDetails)ev.EventDetails);
                     break;
 
+                case EventId.Client_Network_RegisterAccount:
+                    HandleRegisterAccount((RegisterAccountEventDetails)ev.EventDetails);
+                    break;
+
                 default:
                     Logger.WarnFormat("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Handles a register account event.
+        /// </summary>
+        /// <param name="eventDetails">Registration details.</param>
+        private void HandleRegisterAccount(RegisterAccountEventDetails eventDetails)
+        {
+            registrationClient.RegisterAsync(eventDetails.ConnectionParameters, eventDetails.RegistrationRequest)
+                .ContinueWith((task) =>
+                {
+                    if (task.IsFaulted)
+                    {
+                        networkController.RegistrationFailed(eventSender, "Registration failed due to an internal error.");
+                        return;
+                    }
+
+                    var option = task.Result;
+                    if (option.HasFirst)
+                    {
+                        networkController.RegistrationSucceeded(eventSender);
+                    }
+                    else
+                    {
+                        networkController.RegistrationFailed(eventSender, option.Second);
+                    }
+                });
         }
 
         /// <summary>

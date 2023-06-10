@@ -4,6 +4,10 @@
 
 ### June
 
+#### 10 June 2023
+
+ * Finish wiring up the registration client to `ClientNetworkSystem`.
+
 #### 09 June 2023
 
  * Publish event in the client when a connection is successful.

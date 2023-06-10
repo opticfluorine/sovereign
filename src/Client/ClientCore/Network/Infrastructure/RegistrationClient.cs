@@ -43,6 +43,11 @@ namespace Sovereign.ClientCore.Network.Infrastructure
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
+        public RegistrationClient(RestClient restClient)
+        {
+            this.restClient = restClient;
+        }
+
         public async Task<Option<RegistrationResponse, string>> RegisterAsync(ClientConnectionParameters connectionParameters,
             RegistrationRequest request)
         {
