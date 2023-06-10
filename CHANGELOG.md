@@ -7,6 +7,10 @@
 #### 10 June 2023
 
  * Finish wiring up the registration client to `ClientNetworkSystem`.
+ * Update `TestContentSystem` to use the registration client to register a new user
+   before authenticating with the server. If the registration fails, it just assumes
+   the user already exists and tries to authenticate. This is a bit of a hack, but
+   it will work for testing.
 
 #### 09 June 2023
 

@@ -28,6 +28,7 @@ using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Systems.WorldManagement;
+using Sovereign.NetworkCore.Network.Rest.Data;
 using System;
 using System.Collections.Generic;
 
@@ -52,9 +53,27 @@ namespace Sovereign.ClientCore.Systems.TestContent
         private readonly WorldManagementController worldManagementController;
         private readonly ClientNetworkController networkController;
 
+        /// <summary>
+        /// Hardcoded connection parameters for debug. Remove once connection is configurable.
+        /// </summary>
+        private readonly ClientConnectionParameters connectionParameters =
+            new ClientConnectionParameters("localhost", 12820, "localhost", 8080, false);
+
+        /// <summary>
+        /// Hardcoded username for debug. Remove once connection is configurable.
+        /// </summary>
+        private const string username = "debug";
+
+        /// <summary>
+        /// Hardcoded password for debug. Remove once connection is configurable.
+        /// </summary>
+        private const string password = "debug";
+
         public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
         {
             EventId.Client_Network_Connected,
+            EventId.Client_Network_RegisterSuccess,
+            EventId.Client_Network_RegisterFailed,
         };
 
         public int WorkloadEstimate => 0;
@@ -76,8 +95,7 @@ namespace Sovereign.ClientCore.Systems.TestContent
 
         public void Initialize()
         {
-            AutomateConnect();
-
+            AutomateRegister();
         }
 
         public void Cleanup()
@@ -93,6 +111,11 @@ namespace Sovereign.ClientCore.Systems.TestContent
             {
                 switch (ev.EventId)
                 {
+                    case EventId.Client_Network_RegisterSuccess:
+                    case EventId.Client_Network_RegisterFailed:
+                        AutomateConnect();
+                        break;
+
                     case EventId.Client_Network_Connected:
                         LoadSegmentsNearOrigin();
                         break;
@@ -112,6 +135,21 @@ namespace Sovereign.ClientCore.Systems.TestContent
         }
 
         /// <summary>
+        /// Automatically attempts to register the debug account with the local server.
+        /// </summary>
+        private void AutomateRegister()
+        {
+            Logger.Info("Automatically registering debug account with local server.");
+            networkController.RegisterAccount(eventSender,
+                new RegistrationRequest()
+                {
+                    Username = username,
+                    Password = password
+                },
+                connectionParameters);
+        }
+
+        /// <summary>
         /// Automatically starts the connection process.
         /// </summary>
         private void AutomateConnect()
@@ -119,8 +157,8 @@ namespace Sovereign.ClientCore.Systems.TestContent
             /* Automatically connect to a local server with debug credentials. */
             Logger.Info("Automatically connecting to local server.");
             networkController.BeginConnection(eventSender,
-                new ClientConnectionParameters("localhost", 12820, "localhost", 8080, false),
-                new LoginParameters("debug", "debug"));
+                connectionParameters,
+                new LoginParameters(username, password));
         }
         
         /// <summary>
