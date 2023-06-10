@@ -201,6 +201,24 @@ namespace Sovereign.EngineCore.Events
         /// Associated details: None
         Client_Network_Connected = 100204,
 
+        /// <summary>
+        /// Event sent to command ClientNetworkSystem to register a new account.
+        /// </summary>
+        /// Associated details: RegisterAccountEventDetails
+        Client_Network_RegisterAccount = 100205,
+
+        /// <summary>
+        /// Event sent to announce a successful account registration.
+        /// </summary>
+        /// Associated details: None
+        Client_Network_RegisterSuccess = 100206,
+
+        /// <summary>
+        /// Event sent to announce a failed account registration.
+        /// </summary>
+        /// Associated details: ErrorEventDetails
+        Client_Network_RegisterFailed = 100207,
+
         #endregion Client_Network
 
         #endregion Client

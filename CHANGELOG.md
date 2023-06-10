@@ -14,6 +14,9 @@
  * Cache the compressed world segment data in the server instead of compressing on the
    fly in the REST service. This avoids the overhead of compressing the data on every
    request.
+ * Begin implementing a registration client and everything around it. This isn't quite done
+   yet, but it's a start. Shouldn't take much longer to finish up, mostly just needs to be
+   wired into `ClientSystem` with the new events.
 
 #### 08 June 2023
 

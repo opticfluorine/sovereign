@@ -21,23 +21,42 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using Sovereign.ClientCore.Network;
+using Sovereign.EngineCore.Events;
+using Sovereign.NetworkCore.Network.Rest.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Sovereign.ClientCore.Network.Infrastructure
+namespace Sovereign.ClientCore.Events
 {
 
     /// <summary>
-    /// IoC installer for the client network infrastructure.
+    /// Event details for a register account event.
     /// </summary>
-    public sealed class ClientNetworkInfrastructureInstaller : IWindsorInstaller
+    public sealed class RegisterAccountEventDetails : IEventDetails
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+
+        /// <summary>
+        /// Registration request.
+        /// </summary>
+        public RegistrationRequest RegistrationRequest { get; private set; }
+
+        /// <summary>
+        /// Connection parameters.
+        /// </summary>
+        public ClientConnectionParameters ConnectionParameters { get; private set; }
+
+        public RegisterAccountEventDetails(RegistrationRequest registrationRequest, 
+            ClientConnectionParameters connectionParameters)
         {
-            container.Register(Component.For<AuthenticationClient>().LifestyleSingleton());
-            container.Register(Component.For<RegistrationClient>().LifestyleSingleton());
+            RegistrationRequest = registrationRequest;
+            ConnectionParameters = connectionParameters;
         }
+
     }
 
 }
+

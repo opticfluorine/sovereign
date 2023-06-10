@@ -25,6 +25,7 @@ using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Network;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.NetworkCore.Network.Rest.Data;
 
 namespace Sovereign.ClientCore.Systems.ClientNetwork
 {
@@ -92,6 +93,43 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork
             eventSender.SendEvent(ev);
         }
 
+        /// <summary>
+        /// Sends an event commanding an account registration.
+        /// </summary>
+        /// <param name="eventSender">Event sender.</param>
+        /// <param name="request">Registration request.</param>
+        /// <param name="connectionParameters">Connection parameters.</param>
+        public void RegisterAccount(IEventSender eventSender, RegistrationRequest request, 
+            ClientConnectionParameters connectionParameters)
+        {
+            var ev = new Event(EventId.Client_Network_RegisterAccount,
+                new RegisterAccountEventDetails(request, connectionParameters));
+            eventSender.SendEvent(ev);
+        }
+
+        /// <summary>
+        /// Sends an event announcing a successful registration.
+        /// </summary>
+        /// <param name="eventSender">Event sender.</param>
+        public void RegistrationSucceeded(IEventSender eventSender)
+        {
+            var ev = new Event(EventId.Client_Network_RegisterSuccess);
+            eventSender.SendEvent(ev);
+        }
+
+        /// <summary>
+        /// Sends an event announcing a failed registration.
+        /// </summary>
+        /// <param name="eventSender">Event sender.</param>
+        /// <param name="error">Error message.</param>
+        public void RegistrationFailed(IEventSender eventSender, string error)
+        {
+            var ev = new Event(EventId.Client_Network_RegisterFailed,
+                new ErrorEventDetails(error));
+            eventSender.SendEvent(ev);
+        }
+
     }
 
 }
+
