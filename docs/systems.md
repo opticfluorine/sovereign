@@ -35,5 +35,5 @@ Server systems are only present in the server.
 System | System Class | Description
 --- | --- | ---
 `Accounts` | `AccountsSystem` | Responsible for managing the locked account list.
+`Debug` | `DebugSystem` | Responsible for providing a debug interface for test.
 `Persistence` | `PersistenceSystem` | Responsible for managing the database.
-

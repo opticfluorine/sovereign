@@ -45,6 +45,11 @@ namespace Sovereign.EngineCore.Network.Rest
         /// </summary>
         public const string WorldSegment = "/world";
 
+        /// <summary>
+        /// Relative path to REST endpoint for the debug service.
+        /// </summary>
+        public const string Debug = "/debug";
+
     }
 
 }

@@ -47,6 +47,11 @@ namespace Sovereign.ServerCore.Configuration
         /// World configuration settings.
         /// </summary>
         public WorldRecord World { get; set; }
+        
+        /// <summary>
+        /// Debug configuration settings.
+        /// </summary>
+        public DebugRecord Debug { get; set; }
 
         /// <summary>
         /// Full description of the accounts configuration.
@@ -182,6 +187,21 @@ namespace Sovereign.ServerCore.Configuration
             /// Length, in blocks, of each discrete chunk of the world.
             /// </summary>
             public int ChunkSize { get; set; } = 32;
+        }
+
+        /// <summary>
+        /// Full description of the debug configuration.
+        /// </summary>
+        public sealed class DebugRecord
+        {
+            /// <summary>
+            /// Whether to enable debug mode.
+            /// </summary>
+            /// <remarks>
+            /// Debug mode should only ever be enabled for development.
+            /// It must be disabled for production servers.
+            /// </remarks>
+            public bool EnableDebugMode { get; set; } = false;
         }
     }
 }

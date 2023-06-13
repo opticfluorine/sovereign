@@ -160,3 +160,16 @@ World:
     # ---------
     # Size, in blocks, of the length of a discrete chunk of the world.
     ChunkSize: 32
+    
+# -------------------
+# Debug Configuration
+# -------------------
+Debug:
+    
+    # ---------------
+    # EnableDebugMode
+    # ---------------
+    # Whether or not to enable debug mode.
+    # Debug mode should only be enabled for development purposes.
+    # It must be disabled for production use.
+    EnableDebugMode: false

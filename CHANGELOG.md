@@ -4,6 +4,12 @@
 
 ### June
 
+#### 13 June 2023
+
+ * Add skeleton for a `DebugRestService` to provide a debug REST interface to the
+   server for automating certain debug-related tasks. Currently this only contains
+   a stub for commanding the server to generate some test world data.
+
 #### 10 June 2023
 
  * Finish wiring up the registration client to `ClientNetworkSystem`.

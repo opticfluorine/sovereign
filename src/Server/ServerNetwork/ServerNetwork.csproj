@@ -16,4 +16,36 @@
     <PackageReference Include="Watson" Version="5.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="bin\Debug\net6.0\Sovereign.Accounts.dll" />
+    <Content Include="bin\Debug\net6.0\Sovereign.Accounts.pdb" />
+    <Content Include="bin\Debug\net6.0\Sovereign.EngineCore.dll" />
+    <Content Include="bin\Debug\net6.0\Sovereign.EngineCore.pdb" />
+    <Content Include="bin\Debug\net6.0\Sovereign.EngineUtil.dll" />
+    <Content Include="bin\Debug\net6.0\Sovereign.EngineUtil.pdb" />
+    <Content Include="bin\Debug\net6.0\Sovereign.NetworkCore.dll" />
+    <Content Include="bin\Debug\net6.0\Sovereign.NetworkCore.pdb" />
+    <Content Include="bin\Debug\net6.0\Sovereign.Persistence.dll" />
+    <Content Include="bin\Debug\net6.0\Sovereign.Persistence.pdb" />
+    <Content Include="bin\Debug\net6.0\Sovereign.ServerCore.dll" />
+    <Content Include="bin\Debug\net6.0\Sovereign.ServerCore.pdb" />
+    <Content Include="bin\Debug\net6.0\Sovereign.ServerNetwork.deps.json" />
+    <Content Include="bin\Debug\net6.0\Sovereign.ServerNetwork.dll" />
+    <Content Include="bin\Debug\net6.0\Sovereign.ServerNetwork.pdb" />
+    <Content Include="bin\Debug\net6.0\Sovereign.WorldManagement.dll" />
+    <Content Include="bin\Debug\net6.0\Sovereign.WorldManagement.pdb" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="bin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="bin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="bin\**" />
+  </ItemGroup>
+
 </Project>
