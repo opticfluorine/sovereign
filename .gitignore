@@ -12,7 +12,7 @@ nsight_profiler.cfg
 *.userprefs
 
 # Build results
-[Dd]ebug/
+debug/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
