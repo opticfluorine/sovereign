@@ -19,7 +19,14 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+using System.Collections.Generic;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems.Block;
+using Sovereign.EngineCore.Systems.Block.Events;
 using Sovereign.ServerCore.Events;
+using Sovereign.WorldManagement.Configuration;
+using Sovereign.WorldManagement.WorldSegments;
 
 namespace Sovereign.ServerCore.Systems.Debug;
 
@@ -28,6 +35,21 @@ namespace Sovereign.ServerCore.Systems.Debug;
 /// </summary>
 public sealed class DebugEventHandler
 {
+    private readonly WorldSegmentResolver worldSegmentResolver;
+    private readonly IWorldManagementConfiguration worldManagementConfig;
+    private readonly BlockController blockController;
+    private IEventSender eventSender;
+
+    public DebugEventHandler(WorldSegmentResolver worldSegmentResolver,
+        IWorldManagementConfiguration worldManagementConfig,
+        BlockController blockController,
+        IEventSender eventSender)
+    {
+        this.worldSegmentResolver = worldSegmentResolver;
+        this.worldManagementConfig = worldManagementConfig;
+        this.blockController = blockController;
+        this.eventSender = eventSender;
+    }
 
     /// <summary>
     /// Handles a debug command event.
@@ -51,6 +73,50 @@ public sealed class DebugEventHandler
     /// </summary>
     private void DoGenerateWorldData()
     {
-        // TODO
+        blockController.AddBlocks(eventSender, 
+            (blocks) => CreateSegmentedWorldData(blocks));
+    }
+
+    /// <summary>
+    /// Creates a series of world segments with test data.
+    /// </summary>
+    /// <param name="blocks">Array to hold new blocks.</param>
+    private void CreateSegmentedWorldData(IList<BlockRecord> blocks)
+    {
+        for (int i = -2; i < 3; ++i)
+        {
+            for (int j = -2; j < 3; ++j)
+            {
+                CreateBlocksForSegment(blocks, new GridPosition(i, j, 0));
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Creates the test blocks for a world segment.
+    /// </summary>
+    /// <param name="blocks">List to hold created blocks.</param>
+    /// <param name="segmentIndex">World segment index.</param>
+    private void CreateBlocksForSegment(IList<BlockRecord> blocks,
+        GridPosition segmentIndex)
+    {
+        var origin = (GridPosition)worldSegmentResolver
+            .GetRangeForWorldSegment(segmentIndex).Item1;
+        for (int i = 0; i < worldManagementConfig.SegmentLength; ++i)
+        {
+            for (int j = 0; j < worldManagementConfig.SegmentLength; ++j)
+            {
+                var pos = new GridPosition(
+                    origin.X + i,
+                    origin.Y + j,
+                    origin.Z);
+                blocks.Add(new BlockRecord()
+                {
+                    Position = pos,
+                    Material = 2 + ((i % 2 + j) % 2),
+                    MaterialModifier = 0
+                });
+            }
+        }
     }
 }

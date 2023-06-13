@@ -1,4 +1,4 @@
-# Sovereign EngiCHANGELOne Changelog
+# Sovereign Engine Changelog
 
 ## 2023
 
@@ -9,6 +9,10 @@
  * Add skeleton for a `DebugRestService` to provide a debug REST interface to the
    server for automating certain debug-related tasks. Currently this only contains
    a stub for commanding the server to generate some test world data.
+ * Add a debug command for generating test world data. It generates the same
+   single layer of checkerboard tiles that the client used to generate internally,
+   so once the client is integrated with the server, we should see the same
+   familiar pattern appear.
 
 #### 10 June 2023
 
