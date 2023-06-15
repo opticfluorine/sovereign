@@ -99,6 +99,8 @@ namespace Sovereign.ServerNetwork.Network.Rest
                     }
                 }
 
+                restServer.Start();
+
                 Logger.InfoFormat("Started REST server on {0}:{1}.",
                     networkConfiguration.RestHostname,
                     networkConfiguration.RestPort);
@@ -113,6 +115,10 @@ namespace Sovereign.ServerNetwork.Network.Rest
         public void Dispose()
         {
             Logger.Info("Stopping REST server.");
+            if (restServer.IsListening)
+            {
+                restServer.Stop();
+            }
             restServer.Dispose();
         }
 
