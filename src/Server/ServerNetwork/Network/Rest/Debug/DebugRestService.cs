@@ -53,10 +53,10 @@ public class DebugRestService : IRestService
     /// </summary>
     private bool Enabled => config.Debug.EnableDebugMode;
 
-    public DebugRestService(ServerConfiguration config, DebugController debugController,
+    public DebugRestService(IServerConfigurationManager configManager, DebugController debugController,
         IEventSender eventSender)
     {
-        this.config = config;
+        config = configManager.ServerConfiguration;
         this.debugController = debugController;
         this.eventSender = eventSender;
     }

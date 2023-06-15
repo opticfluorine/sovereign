@@ -4,6 +4,19 @@
 
 ### June
 
+#### 15 June 2023
+
+ * Fix minor IoC-related issue in `DebugRestService`.
+ * Fix issue in `Persistence` where the migration level check was not reading
+   in a row of data. This resulted in an exception being thrown at startup. It's
+   not clear to me why this was working before - earlier testing was done with
+   an older version on .NET and using Windows instead of Linux, so maybe that
+   played a role. Regardless, it's fixed now.
+ * Upgraded `Microsoft.Data.Sqlite` dependency to latest stable version.
+ * Noticed that event latency has degraded on Linux, is now hovering around 0.5ms
+   in the server. This should really be an order of magnitude smaller. Need to
+   investigate why this is happening now.
+
 #### 13 June 2023
 
  * Add skeleton for a `DebugRestService` to provide a debug REST interface to the

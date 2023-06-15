@@ -53,6 +53,9 @@ namespace Sovereign.Persistence.Database.Sqlite.Queries
             {
                 using (var reader = cmd.ExecuteReader())
                 {
+                    // This particular query should always produce one row, so the call to Read() should always 
+                    // return true. If not, just let the exception bubble up.
+                    reader.Read();
                     var latestLevel = reader.GetInt32(0);
                     return latestLevel == migrationLevel;
                 }
