@@ -31,6 +31,7 @@ using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Systems.Debug;
 using WatsonWebserver;
+using YamlDotNet.Serialization.NodeDeserializers;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Debug;
 
@@ -79,16 +80,29 @@ public class DebugRestService : IRestService
                 {
                     var data = ctx.Request.DataAsBytes;
                     var command = JsonSerializer.Deserialize<DebugCommand>(data);
+                    if (!command.IsValid)
+                    {
+                        throw new ArgumentException("Bad debug command.");
+                    }
+
                     debugController.SendDebugCommand(eventSender, command);
 
                     ctx.Response.StatusCode = 200;
                     await ctx.Response.Send();
                 }
-                catch (Exception e)
+                catch (JsonException)
                 {
-                    Logger.Warn("Bad debug service request.", e);
+                    Logger.WarnFormat("Bad debug service request from {0}.", ctx.Request.Source.IpAddress);
 
                     ctx.Response.StatusCode = 400;
+                    await ctx.Response.Send();
+                }
+                catch (Exception e)
+                {
+                    Logger.WarnFormat(e, "Unhandled exception in debug service for request from {0}.",
+                        ctx.Request.Source.IpAddress);
+
+                    ctx.Response.StatusCode = 500;
                     await ctx.Response.Send();
                 }
             }

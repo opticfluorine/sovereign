@@ -87,6 +87,7 @@ namespace Sovereign.EngineCore.Systems.Block
         {
             /* Populate the add records. */
             var recordList = batchAddPool.TakeObject();
+            recordList.Clear();
             recordProvider(recordList);
 
             /* Send the event. */

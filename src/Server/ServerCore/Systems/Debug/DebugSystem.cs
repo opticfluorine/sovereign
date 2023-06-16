@@ -19,6 +19,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
@@ -26,11 +27,12 @@ using Sovereign.ServerCore.Events;
 
 namespace Sovereign.ServerCore.Systems.Debug;
 
-public sealed class DebugSystem : ISystem
+public sealed class DebugSystem : ISystem, IDisposable
 {
     private readonly DebugEventHandler eventHandler;
-    
-    public EventCommunicator EventCommunicator { get; set; }
+    private readonly IEventLoop eventLoop;
+
+    public EventCommunicator EventCommunicator { get; private set; }
 
     public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
     {
@@ -39,9 +41,19 @@ public sealed class DebugSystem : ISystem
 
     public int WorkloadEstimate => 20;
     
-    public DebugSystem(DebugEventHandler eventHandler)
+    public DebugSystem(DebugEventHandler eventHandler, EventCommunicator eventCommunicator,
+        IEventLoop eventLoop, EventDescriptions eventDescriptions)
     {
+        // Dependency injection.
+        this.eventLoop = eventLoop;
         this.eventHandler = eventHandler;
+        EventCommunicator = eventCommunicator;
+        
+        // Register events.
+        eventDescriptions.RegisterEvent<DebugCommandEventDetails>(EventId.Server_Debug_Command);
+        
+        // Register system.
+        eventLoop.RegisterSystem(this);
     }
     
     public void Initialize()
@@ -63,5 +75,10 @@ public sealed class DebugSystem : ISystem
         }
 
         return eventsProcessed;
+    }
+
+    public void Dispose()
+    {
+        eventLoop.UnregisterSystem(this);
     }
 }

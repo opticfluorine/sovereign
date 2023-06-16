@@ -19,10 +19,17 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+using System.Text.Json.Serialization;
+
 namespace Sovereign.ServerCore.Systems.Debug;
 
 public enum DebugCommandType
 {
+    /// <summary>
+    /// Unknown command type.
+    /// </summary>
+    Unknown,
+    
     /// <summary>
     /// Debug command to generate test world data.
     /// </summary>
@@ -38,6 +45,11 @@ public sealed class DebugCommand
     /// <summary>
     /// Debug command type.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public DebugCommandType Type { get; set; }
-    
+
+    /// <summary>
+    /// Checks whether the record is valid.
+    /// </summary>
+    public bool IsValid => Type != DebugCommandType.Unknown;
 }

@@ -4,6 +4,10 @@
 
 ### June
 
+#### 16 June 2023
+
+ * Fix issues with debug REST service.
+
 #### 15 June 2023
 
  * Begin testing lots of previously untested changes.
