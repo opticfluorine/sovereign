@@ -18,6 +18,7 @@
    in the server. This should really be an order of magnitude smaller. Need to
    investigate why this is happening now.
  * Fix issue where REST server was not started.
+ * Cleanly handle REST server shutdown without crashing.
 
 #### 13 June 2023
 

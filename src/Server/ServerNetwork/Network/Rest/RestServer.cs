@@ -77,6 +77,7 @@ namespace Sovereign.ServerNetwork.Network.Rest
                 // Create REST server.
                 restServer = new Server(networkConfiguration.RestHostname,
                     networkConfiguration.RestPort, false, OnUnmappedRequest);
+                restServer.Start();
 
                 // Add routes for each service.
                 foreach (var service in restServices)
@@ -99,8 +100,6 @@ namespace Sovereign.ServerNetwork.Network.Rest
                     }
                 }
 
-                restServer.Start();
-
                 Logger.InfoFormat("Started REST server on {0}:{1}.",
                     networkConfiguration.RestHostname,
                     networkConfiguration.RestPort);
@@ -119,7 +118,6 @@ namespace Sovereign.ServerNetwork.Network.Rest
             {
                 restServer.Stop();
             }
-            restServer.Dispose();
         }
 
         /// <summary>
