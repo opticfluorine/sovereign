@@ -288,9 +288,9 @@ public class MainEventLoop : IEventLoop
         ev.EventTime = lastUpdateTime;
 
         /* Dispatch to all interested communicators, if any.. */
-        if (communicatorsByEventId.ContainsKey(eventId))
+        if (communicatorsByEventId.TryGetValue(eventId, out var communicators))
         {
-            foreach (var comm in communicatorsByEventId[eventId])
+            foreach (var comm in communicators)
             {
                 comm.SendEventToSystem(ev);
             }

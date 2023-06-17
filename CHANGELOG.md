@@ -13,6 +13,8 @@
    load. Disabling this behavior restores the latency to the expected value of
    roughly 40 - 50 us. We're seeing this currently because the server just isn't
    doing anything substantial yet.
+ * Fixed performance issue when dispatching events from the main thread where
+   a dictionary lookup was being performed redundantly.
 
 #### 16 June 2023
 
