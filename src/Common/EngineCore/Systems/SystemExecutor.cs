@@ -42,7 +42,7 @@ namespace Sovereign.EngineCore.Systems
         /// <summary>
         /// Systems managed by this executor.
         /// </summary>
-        private readonly IList<ISystem> systems = new List<ISystem>();
+        private readonly List<ISystem> systems = new();
 
         /// <summary>
         /// Event loop.

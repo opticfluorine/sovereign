@@ -15,6 +15,9 @@
    doing anything substantial yet.
  * Fixed performance issue when dispatching events from the main thread where
    a dictionary lookup was being performed redundantly.
+ * Fixed performance issue where the `SystemExecutor` was performing a huge
+   number of very small and short-lived allocations on the Small Object
+   Heap.
 
 #### 16 June 2023
 
