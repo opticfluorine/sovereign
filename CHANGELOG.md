@@ -4,6 +4,16 @@
 
 ### June
 
+#### 17 June 2023
+
+ * Investigated the performance issue with event latency. This turns out to be
+   intentional and I forgot about it - `SystemExecutor` is configured to put
+   the executor thread to sleep if only a small number of threads are processed,
+   yielding some performance back to the OS when the server is under very light
+   load. Disabling this behavior restores the latency to the expected value of
+   roughly 40 - 50 us. We're seeing this currently because the server just isn't
+   doing anything substantial yet.
+
 #### 16 June 2023
 
  * Fix issues with debug REST service.
