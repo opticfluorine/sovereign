@@ -34,7 +34,7 @@ namespace Sovereign.EngineCore.Events
     public sealed class EventAdapterManager
     {
 
-        public readonly IList<IEventAdapter> EventAdapters = new List<IEventAdapter>();
+        public readonly List<IEventAdapter> EventAdapters = new();
 
         public void RegisterEventAdapter(IEventAdapter eventAdapter)
         {

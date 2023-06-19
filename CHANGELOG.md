@@ -4,6 +4,10 @@
 
 ### June
 
+#### 18 June 2023
+
+ * Fix additional memory allocation issues found through dynamic analysis.
+
 #### 17 June 2023
 
  * Investigated the performance issue with event latency. This turns out to be

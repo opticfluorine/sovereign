@@ -21,15 +21,14 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Systems;
 using Sovereign.EngineUtil.Collections;
 
-namespace Sovereign.EngineCore.Systems.EventSystem;
+namespace Sovereign.EngineCore.Events;
 
 /// <summary>
 /// Main event loop provided by the event system.
@@ -47,12 +46,12 @@ public class MainEventLoop : IEventLoop
     /// <summary>
     /// The collection of systems known to the event loop.
     /// </summary>
-    private readonly ISet<ISystem> systems = new HashSet<ISystem>();
+    private readonly HashSet<ISystem> systems = new();
 
     /// <summary>
     /// The collection of event senders to listen on.
     /// </summary>
-    private readonly ISet<IEventSender> eventSenders = new HashSet<IEventSender>();
+    private readonly HashSet<IEventSender> eventSenders = new();
 
     /// <summary>
     /// Event adapter manager.
@@ -67,8 +66,7 @@ public class MainEventLoop : IEventLoop
     /// <summary>
     /// Event communicators listening to each event ID.
     /// </summary>
-    private readonly IDictionary<EventId, List<EventCommunicator>> communicatorsByEventId
-        = new Dictionary<EventId, List<EventCommunicator>>();
+    private readonly Dictionary<EventId, List<EventCommunicator>> communicatorsByEventId = new();
 
     /// <summary>
     /// Priority queue of future events ordered by dispatch time.
