@@ -106,7 +106,9 @@ namespace Sovereign.ClientCore.Network.Rest
                 throw new InvalidOperationException("REST client is not connected.");
             }
             var uri = new Uri(baseUri, url);
-            return httpClient.PostAsync(uri, JsonContent.Create<T>(content));
+            var jsonContent = JsonContent.Create<T>(content);
+            jsonContent.Headers.ContentLength = jsonContent.ReadAsStream().Length;
+            return httpClient.PostAsync(uri, jsonContent);
         }
 
     } 

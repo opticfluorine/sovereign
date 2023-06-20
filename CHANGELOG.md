@@ -9,6 +9,9 @@
  * Minor bugfixes to the client that were introduced by recent untested changes.
  * Begin testing the register/login/connect sequence at startup. Currently running
    into issues with account registration.
+ * Fix issue where `RestClient` did not play nicely with Watson Webserver. The
+   `HttpContent` subclasses do not automatically set the `Content-Length` header,
+   and so the server would not parse the request.
 
 #### 19 June 2023
 

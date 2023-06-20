@@ -57,7 +57,7 @@ namespace Sovereign.ClientCore.Systems.TestContent
         /// Hardcoded connection parameters for debug. Remove once connection is configurable.
         /// </summary>
         private readonly ClientConnectionParameters connectionParameters =
-            new ClientConnectionParameters("localhost", 12820, "localhost", 8080, false);
+            new ClientConnectionParameters("127.0.0.1", 12820, "127.0.0.1", 8080, false);
 
         /// <summary>
         /// Hardcoded username for debug. Remove once connection is configurable.

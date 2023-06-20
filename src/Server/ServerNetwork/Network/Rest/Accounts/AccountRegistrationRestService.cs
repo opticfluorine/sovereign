@@ -41,7 +41,7 @@ namespace Sovereign.ServerNetwork.Network.Rest.Accounts
     public sealed class AccountRegistrationRestService : IRestService
     {
         private readonly AccountServices accountServices;
-
+        
         private readonly IDictionary<RegistrationResult, int> resultToStatus
             = new Dictionary<RegistrationResult, int>()
             {
@@ -81,12 +81,12 @@ namespace Sovereign.ServerNetwork.Network.Rest.Accounts
             try
             {
                 // Parse input.
-                var requestBody = ctx.Request.Data.ToString();
-                var registrationRequest = JsonConvert
-                    .DeserializeObject<RegistrationRequest>(requestBody);
+                var registrationRequest = ctx.Request.DataAsJsonObject<RegistrationRequest>();
                 if (registrationRequest.Username == null ||
                     registrationRequest.Password == null)
                 {
+                    Logger.ErrorFormat("Received incomplete registration request from {0}.", 
+                        ctx.Request.Source.IpAddress);
                     await SendResponse(ctx, 400, "Incomplete request.");
                     return;
                 }
@@ -94,6 +94,9 @@ namespace Sovereign.ServerNetwork.Network.Rest.Accounts
                 // Handle registration.
                 var result = accountServices.Register(registrationRequest.Username,
                     registrationRequest.Password);
+
+                Logger.InfoFormat("Registration for user '{0}' from {1} returned status {2}.",
+                    registrationRequest.Username, ctx.Request.Source.IpAddress, result);
                 await SendResponse(ctx,
                     resultToStatus[result],
                     resultToString[result]);
@@ -102,6 +105,8 @@ namespace Sovereign.ServerNetwork.Network.Rest.Accounts
             {
                 try
                 {
+                    Logger.ErrorFormat("Received malformed registration request from {0}.",
+                        ctx.Request.Source.IpAddress);
                     await SendResponse(ctx, 400, "Malformed request.");
                 }
                 catch (Exception e)
