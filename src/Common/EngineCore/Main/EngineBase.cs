@@ -66,7 +66,7 @@ namespace Sovereign.EngineCore.Main
         /// <remarks>
         /// This can be set to zero to disable.
         /// </remarks>
-        private const int ThreadSleepEventLimit = 0;
+        private const int ThreadSleepEventLimit = 2;
 
         /// <summary>
         /// Main loop cycle count.

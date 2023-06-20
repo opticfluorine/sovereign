@@ -40,7 +40,7 @@ namespace Sovereign.EngineCore.Systems
         /// <summary>
         /// Number of system executor threads.
         /// </summary>
-        private const int EXECUTOR_COUNT = 2;
+        private const int EXECUTOR_COUNT = 1;
 
         public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -57,12 +57,12 @@ namespace Sovereign.EngineCore.Systems
         /// <summary>
         /// Executors.
         /// </summary>
-        private readonly IList<SystemExecutor> executors = new List<SystemExecutor>();
+        private readonly List<SystemExecutor> executors = new();
 
         /// <summary>
         /// Executor threads.
         /// </summary>
-        private readonly IList<Thread> threads = new List<Thread>();
+        private readonly List<Thread> threads = new();
 
         /// <summary>
         /// Creates a new SystemManager with the given update step.

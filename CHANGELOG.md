@@ -4,6 +4,14 @@
 
 ### June
 
+#### 19 June 2023
+
+ * Adjust some performance thresholds to avoid wasting cycles while the engine
+   is idling. This drives tradeoffs between power consumption and latency, but
+   the thresholds are low enough where both the client and server should be able
+   to quickly shift between low- and high-power states in response to changes in
+   system load.
+
 #### 18 June 2023
 
  * Fix additional memory allocation issues found through dynamic analysis.
