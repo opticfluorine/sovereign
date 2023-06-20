@@ -82,7 +82,7 @@ namespace Sovereign.ClientCore.Network.Infrastructure
         private readonly NetworkSerializer networkSerializer;
         private readonly RestClient restClient;
         private readonly AuthenticationClient authClient;
-        private readonly EventSender eventSender;
+        private readonly IEventSender eventSender;
         private readonly ClientNetworkController clientNetworkController;
         private readonly EventBasedNetListener netListener;
         private readonly NetManager netManager;
@@ -120,7 +120,7 @@ namespace Sovereign.ClientCore.Network.Infrastructure
 
         public ClientNetworkManager(NetworkConnectionManager connectionManager,
             NetworkSerializer networkSerializer, RestClient restClient,
-            AuthenticationClient authClient, EventSender eventSender,
+            AuthenticationClient authClient, IEventSender eventSender,
             ClientNetworkController clientNetworkController)
         {
             this.connectionManager = connectionManager;

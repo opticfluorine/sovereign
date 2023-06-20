@@ -4,6 +4,12 @@
 
 ### June
 
+#### 20 June 2023
+
+ * Minor bugfixes to the client that were introduced by recent untested changes.
+ * Begin testing the register/login/connect sequence at startup. Currently running
+   into issues with account registration.
+
 #### 19 June 2023
 
  * Adjust some performance thresholds to avoid wasting cycles while the engine
