@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Sovereign.EngineCore.Network
@@ -53,7 +54,11 @@ namespace Sovereign.EngineCore.Network
                 .Standard
                 .WithSecurity(MessagePackSecurity.UntrustedData);
 
+        /// <summary>
+        /// JSON serializer options.
+        /// </summary>
+        public static JsonSerializerOptions JsonOptions => new(JsonSerializerDefaults.Web);
+
     }
 
 }
-

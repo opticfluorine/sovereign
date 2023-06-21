@@ -12,6 +12,7 @@
  * Fix issue where `RestClient` did not play nicely with Watson Webserver. The
    `HttpContent` subclasses do not automatically set the `Content-Length` header,
    and so the server would not parse the request.
+ * Get registration and login to work between server and client!
 
 #### 19 June 2023
 

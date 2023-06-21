@@ -67,7 +67,7 @@ namespace Sovereign.ClientCore.Systems.TestContent
         /// <summary>
         /// Hardcoded password for debug. Remove once connection is configurable.
         /// </summary>
-        private const string password = "debug";
+        private const string password = "debug12345";
 
         public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
         {

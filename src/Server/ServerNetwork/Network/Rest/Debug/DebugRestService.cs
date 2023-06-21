@@ -54,6 +54,11 @@ public class DebugRestService : IRestService
     /// </summary>
     private bool Enabled => config.Debug.EnableDebugMode;
 
+    /// <summary>
+    /// Maximum request size, in bytes.
+    /// </summary>
+    private const int MaxRequestSize = 1024;
+
     public DebugRestService(IServerConfigurationManager configManager, DebugController debugController,
         IEventSender eventSender)
     {
@@ -76,36 +81,34 @@ public class DebugRestService : IRestService
             }
             else
             {
-                try
+                // Safety check.
+                if (ctx.Request.ContentLength > MaxRequestSize)
                 {
-                    var data = ctx.Request.DataAsBytes;
-                    var command = JsonSerializer.Deserialize<DebugCommand>(data);
-                    if (!command.IsValid)
-                    {
-                        throw new ArgumentException("Bad debug command.");
-                    }
-
-                    debugController.SendDebugCommand(eventSender, command);
-
-                    ctx.Response.StatusCode = 200;
+                    ctx.Response.StatusCode = 413;
                     await ctx.Response.Send();
+                    return;
                 }
-                catch (JsonException)
+                
+                // Process request.
+                var data = ctx.Request.DataAsBytes;
+                var command = JsonSerializer.Deserialize<DebugCommand>(data);
+                if (!command.IsValid)
                 {
-                    Logger.WarnFormat("Bad debug service request from {0}.", ctx.Request.Source.IpAddress);
-
-                    ctx.Response.StatusCode = 400;
-                    await ctx.Response.Send();
+                    throw new ArgumentException("Bad debug command.");
                 }
-                catch (Exception e)
-                {
-                    Logger.WarnFormat(e, "Unhandled exception in debug service for request from {0}.",
-                        ctx.Request.Source.IpAddress);
 
-                    ctx.Response.StatusCode = 500;
-                    await ctx.Response.Send();
-                }
+                debugController.SendDebugCommand(eventSender, command);
+
+                ctx.Response.StatusCode = 200;
+                await ctx.Response.Send();
             }
+        }
+        catch (JsonException)
+        {
+            Logger.WarnFormat("Bad debug service request from {0}.", ctx.Request.Source.IpAddress);
+
+            ctx.Response.StatusCode = 400;
+            await ctx.Response.Send();
         }
         catch (Exception e)
         {

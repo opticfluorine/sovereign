@@ -25,10 +25,12 @@ using Castle.Core.Logging;
 using Sovereign.ServerNetwork.Network.Rest;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Text;
-using Newtonsoft.Json;
+using System.Text.Json;
 using Sovereign.Accounts.Accounts.Services;
+using Sovereign.EngineCore.Network;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.ServerNetwork.Configuration;
 using WatsonWebserver;
@@ -44,6 +46,11 @@ namespace Sovereign.ServerNetwork.Network.Authentication
     {
         private readonly AccountServices accountServices;
         private readonly IServerNetworkConfiguration configuration;
+        
+        /// <summary>
+        /// Maximum request length, in bytes.
+        /// </summary>
+        private const int MaxRequestLength = 1024;
 
         /// <summary>
         /// Map from result to HTTP status code.
@@ -90,9 +97,17 @@ namespace Sovereign.ServerNetwork.Network.Authentication
         {
             try
             {
+                // Safety check.
+                if (ctx.Request.ContentLength > MaxRequestLength)
+                {
+                    await SendResponse(ctx, 413, "Request too large.");
+                    return;
+                }
+                
                 // Decode and validate input.
-                var requestJson = ctx.Request.Data.ToString();
-                var requestData = JsonConvert.DeserializeObject<LoginRequest>(requestJson);
+                var requestJson = ctx.Request.DataAsString;
+                var requestData = JsonSerializer.Deserialize<LoginRequest>(requestJson,
+                    MessageConfig.JsonOptions);
                 if (requestData.Username == null || requestData.Password == null)
                 {
                     await SendResponse(ctx, 400, "Incomplete input.");
@@ -119,7 +134,7 @@ namespace Sovereign.ServerNetwork.Network.Authentication
                     configuration.Host,
                     configuration.Port);
             }
-            catch (JsonReaderException)
+            catch (JsonException)
             {
                 try
                 {
@@ -149,6 +164,8 @@ namespace Sovereign.ServerNetwork.Network.Authentication
             string secret = null, string host = null,
             ushort port = 0)
         {
+            ctx.Response.StatusCode = status;
+            
             var responseData = new LoginResponse()
             {
                 Result = result,
@@ -157,7 +174,8 @@ namespace Sovereign.ServerNetwork.Network.Authentication
                 ServerHost = host,
                 ServerPort = port
             };
-            var responseJson = JsonConvert.SerializeObject(responseData);
+            var responseJson = JsonSerializer.Serialize(responseData);
+            
             await ctx.Response.Send(Encoding.UTF8.GetBytes(responseJson));
         }
 

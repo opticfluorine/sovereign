@@ -24,10 +24,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
-using Newtonsoft.Json;
 using Sovereign.Accounts.Accounts.Services;
+using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using WatsonWebserver;
@@ -50,6 +51,11 @@ namespace Sovereign.ServerNetwork.Network.Rest.Accounts
                 {RegistrationResult.UsernameTaken, 400},
                 {RegistrationResult.UnknownFailure, 500}
             };
+        
+        /// <summary>
+        /// Maximum request length, in bytes.
+        /// </summary>
+        private const int MaxRequestLength = 1024;
 
         /// <summary>
         /// Map from internal registration results to external messages.
@@ -80,8 +86,20 @@ namespace Sovereign.ServerNetwork.Network.Rest.Accounts
         {
             try
             {
+                // Safety check.
+                if (ctx.Request.ContentLength > MaxRequestLength)
+                {
+                    Logger.ErrorFormat("Received registration request from {0} that was too large.",
+                        ctx.Request.Source.IpAddress);
+                    await SendResponse(ctx, 413, "Request too large.");
+                    return;
+                }
+                
                 // Parse input.
-                var registrationRequest = ctx.Request.DataAsJsonObject<RegistrationRequest>();
+                var requestBody = ctx.Request.DataAsString;
+                var registrationRequest = JsonSerializer.Deserialize<RegistrationRequest>(requestBody,
+                    MessageConfig.JsonOptions);
+                
                 if (registrationRequest.Username == null ||
                     registrationRequest.Password == null)
                 {
@@ -101,7 +119,7 @@ namespace Sovereign.ServerNetwork.Network.Rest.Accounts
                     resultToStatus[result],
                     resultToString[result]);
             }
-            catch (JsonReaderException)
+            catch (JsonException)
             {
                 try
                 {
@@ -141,7 +159,7 @@ namespace Sovereign.ServerNetwork.Network.Rest.Accounts
             {
                 Result = result
             };
-            var responseJson = JsonConvert.SerializeObject(responseData);
+            var responseJson = JsonSerializer.Serialize(responseData);
             ctx.Response.StatusCode = status;
             ctx.Response.ContentType = "application/json";
             await ctx.Response.Send(Encoding.UTF8.GetBytes(responseJson));

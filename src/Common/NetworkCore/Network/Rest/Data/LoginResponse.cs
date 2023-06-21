@@ -33,27 +33,27 @@ namespace Sovereign.NetworkCore.Network.Rest.Data
         /// <summary>
         /// Human-readable string describing the result of the login attempt.
         /// </summary>
-        public string Result;
+        public string Result { get; set; }
 
         /// <summary>
         /// User ID. Used for connection handoff.
         /// </summary>
-        public string UserId;
+        public string UserId { get; set; }
 
         /// <summary>
         /// Shared secret between the client and server.
         /// </summary>
-        public string SharedSecret;
+        public string SharedSecret { get; set; }
 
         /// <summary>
         /// Hostname of the server to connect to.
         /// </summary>
-        public string ServerHost;
+        public string ServerHost { get; set; }
 
         /// <summary>
         /// Port of the server to connect to.
         /// </summary>
-        public ushort ServerPort;
+        public ushort ServerPort { get; set; }
 
     }
 

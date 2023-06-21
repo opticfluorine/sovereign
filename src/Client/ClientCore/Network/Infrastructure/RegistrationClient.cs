@@ -72,7 +72,7 @@ namespace Sovereign.ClientCore.Network.Infrastructure
                 // Send the registration request.
                 var httpResponse = await restClient.PostJson(RestEndpoints.AccountRegistration, request);
                 var response = await httpResponse.Content.ReadFromJsonAsync<RegistrationResponse>();
-                if (httpResponse.StatusCode == HttpStatusCode.OK)
+                if (httpResponse.StatusCode == HttpStatusCode.Created)
                 {
                     Logger.Info("Registration successful.");
                     result = new Option<RegistrationResponse, string>(response);
