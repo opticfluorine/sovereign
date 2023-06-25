@@ -4,179 +4,197 @@
 
 ### June
 
+#### 24 June 2023
+
+* Remove the old `OutboundNetworkPipeline` scaffolding - I have a new concept
+  for how this will work and it requires a slightly different architecture.
+  Previously, the pipeline took in an event and its connection, applied some
+  _minimal and reductive_ filters and transformations to the event, and then sent
+  it out. In effect, this passed two responsibilities to the rest of the server
+  at large: first, it left it to some other undefined system to map the event
+  to the correct connections, and second, it spread responsibility to the entire
+  server to produce "primary defining events" (see `docs/networking.md`) that
+  would enter the pipeline. The new design uses a two-stage model: first, a
+  _definitive upconverter_ that monitors the secondary defining events and
+  periodically produces primary defining events, and second, an
+  _additive pipeline_ that takes in both primary and secondary events, transforms
+  them as needed, and maps them to the correct connections (plural). This design
+  consolidates the responsibilities onto two systems only, leaving much more
+  freedom for the design of the remaining game systems.
+
 #### 20 June 2023
 
- * Minor bugfixes to the client that were introduced by recent untested changes.
- * Begin testing the register/login/connect sequence at startup. Currently running
-   into issues with account registration.
- * Fix issue where `RestClient` did not play nicely with Watson Webserver. The
-   `HttpContent` subclasses do not automatically set the `Content-Length` header,
-   and so the server would not parse the request.
- * Get registration and login to work between server and client!
+* Minor bugfixes to the client that were introduced by recent untested changes.
+* Begin testing the register/login/connect sequence at startup. Currently running
+  into issues with account registration.
+* Fix issue where `RestClient` did not play nicely with Watson Webserver. The
+  `HttpContent` subclasses do not automatically set the `Content-Length` header,
+  and so the server would not parse the request.
+* Get registration and login to work between server and client!
 
 #### 19 June 2023
 
- * Adjust some performance thresholds to avoid wasting cycles while the engine
-   is idling. This drives tradeoffs between power consumption and latency, but
-   the thresholds are low enough where both the client and server should be able
-   to quickly shift between low- and high-power states in response to changes in
-   system load.
+* Adjust some performance thresholds to avoid wasting cycles while the engine
+  is idling. This drives tradeoffs between power consumption and latency, but
+  the thresholds are low enough where both the client and server should be able
+  to quickly shift between low- and high-power states in response to changes in
+  system load.
 
 #### 18 June 2023
 
- * Fix additional memory allocation issues found through dynamic analysis.
+* Fix additional memory allocation issues found through dynamic analysis.
 
 #### 17 June 2023
 
- * Investigated the performance issue with event latency. This turns out to be
-   intentional and I forgot about it - `SystemExecutor` is configured to put
-   the executor thread to sleep if only a small number of threads are processed,
-   yielding some performance back to the OS when the server is under very light
-   load. Disabling this behavior restores the latency to the expected value of
-   roughly 40 - 50 us. We're seeing this currently because the server just isn't
-   doing anything substantial yet.
- * Fixed performance issue when dispatching events from the main thread where
-   a dictionary lookup was being performed redundantly.
- * Fixed performance issue where the `SystemExecutor` was performing a huge
-   number of very small and short-lived allocations on the Small Object
-   Heap.
+* Investigated the performance issue with event latency. This turns out to be
+  intentional and I forgot about it - `SystemExecutor` is configured to put
+  the executor thread to sleep if only a small number of threads are processed,
+  yielding some performance back to the OS when the server is under very light
+  load. Disabling this behavior restores the latency to the expected value of
+  roughly 40 - 50 us. We're seeing this currently because the server just isn't
+  doing anything substantial yet.
+* Fixed performance issue when dispatching events from the main thread where
+  a dictionary lookup was being performed redundantly.
+* Fixed performance issue where the `SystemExecutor` was performing a huge
+  number of very small and short-lived allocations on the Small Object
+  Heap.
 
 #### 16 June 2023
 
- * Fix issues with debug REST service.
+* Fix issues with debug REST service.
 
 #### 15 June 2023
 
- * Begin testing lots of previously untested changes.
- * Fix minor IoC-related issue in `DebugRestService`.
- * Fix issue in `Persistence` where the migration level check was not reading
-   in a row of data. This resulted in an exception being thrown at startup. It's
-   not clear to me why this was working before - earlier testing was done with
-   an older version on .NET and using Windows instead of Linux, so maybe that
-   played a role. Regardless, it's fixed now.
- * Upgraded `Microsoft.Data.Sqlite` dependency to latest stable version.
- * Noticed that event latency has degraded on Linux, is now hovering around 0.5ms
-   in the server. This should really be an order of magnitude smaller. Need to
-   investigate why this is happening now.
- * Fix issue where REST server was not started.
- * Cleanly handle REST server shutdown without crashing.
+* Begin testing lots of previously untested changes.
+* Fix minor IoC-related issue in `DebugRestService`.
+* Fix issue in `Persistence` where the migration level check was not reading
+  in a row of data. This resulted in an exception being thrown at startup. It's
+  not clear to me why this was working before - earlier testing was done with
+  an older version on .NET and using Windows instead of Linux, so maybe that
+  played a role. Regardless, it's fixed now.
+* Upgraded `Microsoft.Data.Sqlite` dependency to latest stable version.
+* Noticed that event latency has degraded on Linux, is now hovering around 0.5ms
+  in the server. This should really be an order of magnitude smaller. Need to
+  investigate why this is happening now.
+* Fix issue where REST server was not started.
+* Cleanly handle REST server shutdown without crashing.
 
 #### 13 June 2023
 
- * Add skeleton for a `DebugRestService` to provide a debug REST interface to the
-   server for automating certain debug-related tasks. Currently this only contains
-   a stub for commanding the server to generate some test world data.
- * Add a debug command for generating test world data. It generates the same
-   single layer of checkerboard tiles that the client used to generate internally,
-   so once the client is integrated with the server, we should see the same
-   familiar pattern appear.
+* Add skeleton for a `DebugRestService` to provide a debug REST interface to the
+  server for automating certain debug-related tasks. Currently this only contains
+  a stub for commanding the server to generate some test world data.
+* Add a debug command for generating test world data. It generates the same
+  single layer of checkerboard tiles that the client used to generate internally,
+  so once the client is integrated with the server, we should see the same
+  familiar pattern appear.
 
 #### 10 June 2023
 
- * Finish wiring up the registration client to `ClientNetworkSystem`.
- * Update `TestContentSystem` to use the registration client to register a new user
-   before authenticating with the server. If the registration fails, it just assumes
-   the user already exists and tries to authenticate. This is a bit of a hack, but
-   it will work for testing.
+* Finish wiring up the registration client to `ClientNetworkSystem`.
+* Update `TestContentSystem` to use the registration client to register a new user
+  before authenticating with the server. If the registration fails, it just assumes
+  the user already exists and tries to authenticate. This is a bit of a hack, but
+  it will work for testing.
 
 #### 09 June 2023
 
- * Publish event in the client when a connection is successful.
- * Update `TestContentSystem` to wait for successful connection before trying to load
-   the test world segments.
- * Fix issue where world segment data was not correctly setting air as the default
-   block type for sparse layers.
- * Cache the compressed world segment data in the server instead of compressing on the
-   fly in the REST service. This avoids the overhead of compressing the data on every
-   request.
- * Begin implementing a registration client and everything around it. This isn't quite done
-   yet, but it's a start. Shouldn't take much longer to finish up, mostly just needs to be
-   wired into `ClientSystem` with the new events.
+* Publish event in the client when a connection is successful.
+* Update `TestContentSystem` to wait for successful connection before trying to load
+  the test world segments.
+* Fix issue where world segment data was not correctly setting air as the default
+  block type for sparse layers.
+* Cache the compressed world segment data in the server instead of compressing on the
+  fly in the REST service. This avoids the overhead of compressing the data on every
+  request.
+* Begin implementing a registration client and everything around it. This isn't quite done
+  yet, but it's a start. Shouldn't take much longer to finish up, mostly just needs to be
+  wired into `ClientSystem` with the new events.
 
 #### 08 June 2023
 
- * Continue client connection sequencing. Work in progress.
+* Continue client connection sequencing. Work in progress.
 
 #### 07 June 2023
 
- * Refactor `ClientNetwork` library, merging it directly into `ClientCore`. Turns out that was
-   a bad boundary to divide the libraries along, it introduces all sorts of awkward couplings
-   and other issues.
- * Start sequencing the connection process through the client network system. Add a variety of events
-   to control this process and report back with status. Untested.
+* Refactor `ClientNetwork` library, merging it directly into `ClientCore`. Turns out that was
+  a bad boundary to divide the libraries along, it introduces all sorts of awkward couplings
+  and other issues.
+* Start sequencing the connection process through the client network system. Add a variety of events
+  to control this process and report back with status. Untested.
 
 #### 06 June 2023
 
- * Add `AuthenticationClient` for authenticating with the server.
+* Add `AuthenticationClient` for authenticating with the server.
 
 #### 05 June 2023
 
- * Set up a basic CI/CD pipeline (build only for right now) to perform automatic build
-   check on the main branch as well as any Dependabot PRs.
+* Set up a basic CI/CD pipeline (build only for right now) to perform automatic build
+  check on the main branch as well as any Dependabot PRs.
 
 #### 04 June 2023
 
- * Gracefully handle connection loss in the client by transitioning to the
-   disconnected state when a connection loss is detected.
+* Gracefully handle connection loss in the client by transitioning to the
+  disconnected state when a connection loss is detected.
 
 #### 03 June 2023
 
- * Parse world segment data and load blocks through the client.
+* Parse world segment data and load blocks through the client.
 
 #### 02 June 2023
 
- * Begin implementation of the client-side world segment loader.
- * Fix issue where default blocks weren't updated in segment data generation.
- * Move REST endpoint definitions to constants in a common class so that they can be
-   reused easily from the client code.
+* Begin implementation of the client-side world segment loader.
+* Fix issue where default blocks weren't updated in segment data generation.
+* Move REST endpoint definitions to constants in a common class so that they can be
+  reused easily from the client code.
 
 ### May
 
 #### 30 May 2023
 
- * Move the REST client from `ClientNetwork` to `ClientCore` - it will be needed in core, and
-   doesn't really fit in `ClientNetwork` since it doesn't implement common network-related interfaces.
+* Move the REST client from `ClientNetwork` to `ClientCore` - it will be needed in core, and
+  doesn't really fit in `ClientNetwork` since it doesn't implement common network-related interfaces.
 
 #### 29 May 2023
 
- * Implement a simple REST client for interacting with the REST server.
- * Update client-side connection parameters to include REST server host and port in addition to the
-   host and port for the UDP server.
+* Implement a simple REST client for interacting with the REST server.
+* Update client-side connection parameters to include REST server host and port in addition to the
+  host and port for the UDP server.
 
 #### 28 May 2023
 
- * Add a REST service to the server for serving world block segment data (untested). In the future
-   this will need to be updated to validate that the requesting user is within a valid range of
-   the requested block to prevent information leakage. Currently the transfer uses LZ4 compression
-   via the MessagePack library, will need to later evaluate the tradeoff between performance and
-   size reduction.
- * Generate block segment data as soon as the segment is loaded from the database. Still need to
-   wire up the update handler.
+* Add a REST service to the server for serving world block segment data (untested). In the future
+  this will need to be updated to validate that the requesting user is within a valid range of
+  the requested block to prevent information leakage. Currently the transfer uses LZ4 compression
+  via the MessagePack library, will need to later evaluate the tradeoff between performance and
+  size reduction.
+* Generate block segment data as soon as the segment is loaded from the database. Still need to
+  wire up the update handler.
 
 #### 27 May 2023
 
- * Finish initial implementation of world block segment conversion (from blocks to structured form).
-   This has not yet been tested. Still to be done is conversion back from structured form to blocks
-   in the client, and implementation of a transfer interface between server and client.
- * For updating world block segment data in the server, just regenerate the segment instead of
-   trying to do an incremental update. There will be a performance penalty since constructing a
-   segment is an expensive operation, however these can proceed in the background so shouldn't be
-   a huge issue except under very large workloads. We can circle back and optimize this with an
-   incremental update if it turns out to be a problem, otherwise chalk this one up to avoiding
-   a premature optimization.
+* Finish initial implementation of world block segment conversion (from blocks to structured form).
+  This has not yet been tested. Still to be done is conversion back from structured form to blocks
+  in the client, and implementation of a transfer interface between server and client.
+* For updating world block segment data in the server, just regenerate the segment instead of
+  trying to do an incremental update. There will be a performance penalty since constructing a
+  segment is an expensive operation, however these can proceed in the background so shouldn't be
+  a huge issue except under very large workloads. We can circle back and optimize this with an
+  incremental update if it turns out to be a problem, otherwise chalk this one up to avoiding
+  a premature optimization.
 
 #### 26 May 2023
 
- * For Windows, copy SDL binaries to build directory automatically. In the future, probably want
-   to only do this for Windows and multi-target builds.
+* For Windows, copy SDL binaries to build directory automatically. In the future, probably want
+  to only do this for Windows and multi-target builds.
 
 #### 25 May 2023
 
- * Trying again to get back into working on this project!
- * Get Veldrid renderer up and running on Windows.
- * Fix various issues with the material ID 0 change from last July. This introduced an off-by-one
-   error in the materials list, and there was some weird stuff going on with material definition
-   validation at startup.
+* Trying again to get back into working on this project!
+* Get Veldrid renderer up and running on Windows.
+* Fix various issues with the material ID 0 change from last July. This introduced an off-by-one
+  error in the materials list, and there was some weird stuff going on with material definition
+  validation at startup.
 
 ## 2022
 
@@ -184,38 +202,38 @@
 
 #### 23 July 2022
 
- * Reserve material ID 0 as a special material corresponding to the absence of
-   a block (or "air"). This enables an optimization trick in world block data
-   transfer from server to client by leveraging block sparsity (especially above the surface
-   layer) to reduce encoded block data size.
+* Reserve material ID 0 as a special material corresponding to the absence of
+  a block (or "air"). This enables an optimization trick in world block data
+  transfer from server to client by leveraging block sparsity (especially above the surface
+  layer) to reduce encoded block data size.
 
 #### 05 July 2022
 
- * Fix `PersistenceController` which wasn't filling out any event details.
- * Add support to `PersistenceSystem` for loading entire world segments based on
-   segment index. A load completion event is sent when this succeeds.
- * Allow events to be "synced to tick" based on a flag in `Event`. When this
-   flag is sent, the event loop will wait for dispatch until the beginning of
-   the first full tick where the event is eligible to be sent (i.e. the start
-   of the first tick after the scheduled event time). This allows a completion
-   event to be deferred until the main loop has a chance to process any changes
-   to the entities and components.
+* Fix `PersistenceController` which wasn't filling out any event details.
+* Add support to `PersistenceSystem` for loading entire world segments based on
+  segment index. A load completion event is sent when this succeeds.
+* Allow events to be "synced to tick" based on a flag in `Event`. When this
+  flag is sent, the event loop will wait for dispatch until the beginning of
+  the first full tick where the event is eligible to be sent (i.e. the start
+  of the first tick after the scheduled event time). This allows a completion
+  event to be deferred until the main loop has a chance to process any changes
+  to the entities and components.
 
 #### 03 July 2022
 
- * Fix various performance issues with component processing and tile
-   sprite cacheing.
- * Process updates to the tile sprite cache in a background thread so that
-   the main thread is not blocked by large cache updates following world
-   segment load.
+* Fix various performance issues with component processing and tile
+  sprite cacheing.
+* Process updates to the tile sprite cache in a background thread so that
+  the main thread is not blocked by large cache updates following world
+  segment load.
 
 ### June
 
 #### 30 June 2022
 
- * Veldrid renderer is functional using the Vulkan backend.
-   This still needs to be tested under Win32, but going to
-   defer this for now.
+* Veldrid renderer is functional using the Vulkan backend.
+  This still needs to be tested under Win32, but going to
+  defer this for now.
 
 #### 13 June 2022
 
@@ -226,44 +244,44 @@
 
 #### 08 June 2022
 
- * Port `D3D11UpdateBuffer` to `VeldridUpdateBuffer`.
+* Port `D3D11UpdateBuffer` to `VeldridUpdateBuffer`.
 
 #### 04 June 2022
 
- * Continue porting `D3D11Renderer` to `VeldridRenderer`. 
- * Add `VeldridTexture` class for wrapping a 2D Veldrid texture created from a `Surface`. 
- * Add `VeldridResourceManager` for managing GPU resources.
- * Update `Surface` to expose additional details through its `Properties` field.
+* Continue porting `D3D11Renderer` to `VeldridRenderer`.
+* Add `VeldridTexture` class for wrapping a 2D Veldrid texture created from a `Surface`.
+* Add `VeldridResourceManager` for managing GPU resources.
+* Update `Surface` to expose additional details through its `Properties` field.
 
 ### May
 
 #### 30 May 2022
 
- * Start implementing the Veldrid renderer. For the MVP this will only
-   support OpenGL rendering (even on Windows).
+* Start implementing the Veldrid renderer. For the MVP this will only
+  support OpenGL rendering (even on Windows).
 
 #### 29 May 2022
 
- * Routine upgrades of dependencies to go with the migration to .NET 6.
-   Various minor code changes to fix deprecations, etc.
- * Note that a lot of the dependency upgrades (essentially all) have not been
-   tested while the renderer rewrite is in progress. We'll accept some technical
-   debt here for a while.
+* Routine upgrades of dependencies to go with the migration to .NET 6.
+  Various minor code changes to fix deprecations, etc.
+* Note that a lot of the dependency upgrades (essentially all) have not been
+  tested while the renderer rewrite is in progress. We'll accept some technical
+  debt here for a while.
 
 #### 28 May 2022
 
- * Refactor the project structures into Common, Client, and Server source trees.
-   Previously the projects were organized in the VS solution file, but this change
-   provides similar organization independent of the IDE. This makes it easier to
-   develop on Linux using VS Code, for example.
+* Refactor the project structures into Common, Client, and Server source trees.
+  Previously the projects were organized in the VS solution file, but this change
+  provides similar organization independent of the IDE. This makes it easier to
+  develop on Linux using VS Code, for example.
 
 #### 22 May 2022
 
- * Well, life has been busy, work has been busy, and it's been two years since
-   I've done any serious work on this project. Let's get started.
- * Previously had started a migration to .NET 5. Since then, .NET 5 went EOL,
-   so migrate again to .NET 6.
- * Set up a development container for use with VS Code.
+* Well, life has been busy, work has been busy, and it's been two years since
+  I've done any serious work on this project. Let's get started.
+* Previously had started a migration to .NET 5. Since then, .NET 5 went EOL,
+  so migrate again to .NET 6.
+* Set up a development container for use with VS Code.
 
 ## 2020
 
@@ -563,10 +581,10 @@
 #### 26 January 2019
 
 * Implement issue 4 - move tile sprite resolution outside of the main
-  rendering loop into an `IBlockAnimatedSpriteCache` implementation.  This
+  rendering loop into an `IBlockAnimatedSpriteCache` implementation. This
   cache only updates modified blocks and their neighbors once per tick.
-* Combine `IEntityBuilder.Material(int)` and 
-  `IEntityBuilder.MaterialModifier(int)` into a single method 
+* Combine `IEntityBuilder.Material(int)` and
+  `IEntityBuilder.MaterialModifier(int)` into a single method
   `IEntityBuilder.Material(int, int)`. Since a block isn't valid unless it has
   both a material and a material modifier, it doesn't make sense to allow the
   two components to be set separately.
@@ -630,7 +648,7 @@
   `*EventFilter` classes where newly created entities are not properly
   indexed due to the filters not checking for pending component
   additions. Note that this also reveals a possible race condition
-  where an entity is improperly indexed if 
+  where an entity is improperly indexed if
   `ComponentManager.UpdateAllComponents()` is called before an
   `EntityBuilder` on another thread finishes building its entity.
 * Fix issue in `StructBuffer` where the iterator always skipped the
@@ -640,7 +658,7 @@
   to reduce CPU usage. This can be changed back later if the penalty to
   system latency is too high. Attempting the same change on the main
   thread dropped FPS to 45 in a debug build, so the `Thread.Sleep(0)`
-  call in `EngineBase` was left alone. 
+  call in `EngineBase` was left alone.
 
 #### 28 December 2018
 
@@ -765,7 +783,7 @@
 * Ensure that the camera velocity is reset to zero when not tracking an
   entity. This ensures that the camera position does not appear to drift
   between ticks due to interpolation by the renderer.
-* Fix issue where objects could not be added to `StructBuffer`s. 
+* Fix issue where objects could not be added to `StructBuffer`s.
 * Fix issue where component collections could not be instantiated.
 * Update the `Camera` system to only update its position once per tick.
   The motion of the camera should be smoothed through interpolation by
@@ -781,7 +799,7 @@
 #### 17 November 2018
 
 * Set up rasterizer and output-merger stages for world rendering.
-* Update D3D11Device to automatically roll the output target when the 
+* Update D3D11Device to automatically roll the output target when the
   swapchain buffers are flipped.
 
 #### 11 November 2018
@@ -870,7 +888,7 @@
 #### 21 October 2018
 
 * Improve logging while loading resources.
-* Automatically populate mapping from materials to tile sprites at startup. 
+* Automatically populate mapping from materials to tile sprites at startup.
 
 #### 20 October 2018
 
@@ -928,7 +946,7 @@
 * Start implementing tile context resolution for tile sprites. This allows
   tile sprites to be mapped to the corresponding animated sprites based on
   the neighboring tile sprites.
-    - The initial implementation lazily resolves the tile context for a given 
+    - The initial implementation lazily resolves the tile context for a given
       tile sprite and set of neighboring tile sprites using an O(n) search of
       the tile contexts for the center tile, then caches the resolved context
       for O(1) lookup when the same combination of tiles appears again.

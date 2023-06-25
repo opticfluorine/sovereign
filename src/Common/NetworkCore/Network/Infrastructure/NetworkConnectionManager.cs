@@ -38,8 +38,7 @@ namespace Sovereign.NetworkCore.Network.Infrastructure
         /// <summary>
         /// Map from connection ID to connection object.
         /// </summary>
-        private readonly IDictionary<int, NetworkConnection> connections
-            = new Dictionary<int, NetworkConnection>();
+        private readonly Dictionary<int, NetworkConnection> connections = new();
 
         /// <summary>
         /// Gets a connection by ID.

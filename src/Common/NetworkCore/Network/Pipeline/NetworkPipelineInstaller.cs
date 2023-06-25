@@ -25,38 +25,23 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 using Sovereign.EngineUtil.IoC;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Sovereign.NetworkCore.Network.Pipeline
+namespace Sovereign.NetworkCore.Network.Pipeline;
+
+/// <summary>
+///     IoC installer for the network pipelines.
+/// </summary>
+public sealed class NetworkPipelineInstaller : IWindsorInstaller
 {
-
-    /// <summary>
-    /// IoC installer for the network pipelines.
-    /// </summary>
-    public sealed class NetworkPipelineInstaller : IWindsorInstaller
+    public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IInboundPipelineStage>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton()
-                .AllowMultipleMatches());
+        container.Register(EngineClasses.EngineAssemblies()
+            .BasedOn<IInboundPipelineStage>()
+            .WithServiceDefaultInterfaces()
+            .LifestyleSingleton()
+            .AllowMultipleMatches());
 
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IOutboundPipelineStage>()
-                .WithServiceDefaultInterfaces()
-                .LifestyleSingleton()
-                .AllowMultipleMatches());
-
-            container.Register(Component.For<InboundNetworkPipeline>()
-                .LifestyleSingleton());
-
-            container.Register(Component.For<OutboundNetworkPipeline>()
-                .LifestyleSingleton());
-        }
+        container.Register(Component.For<InboundNetworkPipeline>()
+            .LifestyleSingleton());
     }
-
 }

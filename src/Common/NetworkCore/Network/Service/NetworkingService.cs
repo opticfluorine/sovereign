@@ -21,156 +21,148 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 
-namespace Sovereign.NetworkCore.Network.Service
+namespace Sovereign.NetworkCore.Network.Service;
+
+/// <summary>
+///     Responsible for managing network operations on one or more
+///     separate threads.
+/// </summary>
+public sealed class NetworkingService
 {
+    private readonly FatalErrorHandler fatalErrorHandler;
+    private readonly InboundNetworkPipeline inboundPipeline;
+    private readonly NetLogger netLogger;
+    private readonly INetworkManager networkManager;
+    private readonly OutboundNetworkPipeline outboundPipeline;
 
     /// <summary>
-    /// Responsible for managing network operations on one or more
-    /// separate threads.
+    ///     Thread that the service is running on.
     /// </summary>
-    public sealed class NetworkingService
+    private Thread serviceThread;
+
+    /// <summary>
+    ///     Flag indicating whether the service has been requested to stop.
+    /// </summary>
+    private bool stopRequested;
+
+    public NetworkingService(InboundNetworkPipeline inboundPipeline,
+        OutboundNetworkPipeline outboundPipeline,
+        NetLogger netLogger,
+        INetworkManager networkManager,
+        FatalErrorHandler fatalErrorHandler)
     {
-        private readonly InboundNetworkPipeline inboundPipeline;
-        private readonly OutboundNetworkPipeline outboundPipeline;
-        private readonly NetLogger netLogger;
-        private readonly INetworkManager networkManager;
-        private readonly FatalErrorHandler fatalErrorHandler;
+        // Dependency injection.
+        this.inboundPipeline = inboundPipeline;
+        this.outboundPipeline = outboundPipeline;
+        this.netLogger = netLogger;
+        this.networkManager = networkManager;
+        this.fatalErrorHandler = fatalErrorHandler;
 
-        /// <summary>
-        /// Thread that the service is running on.
-        /// </summary>
-        private Thread serviceThread;
-
-        /// <summary>
-        /// Flag indicating whether the service has been requested to stop.
-        /// </summary>
-        private bool stopRequested;
-
-        public ILogger Logger { private get; set; } = NullLogger.Instance;
-
-        /// <summary>
-        /// Queue of outgoing events to be processed and sent.
-        /// </summary>
-        public ConcurrentQueue<Event> EventsToSend { get; }
-            = new ConcurrentQueue<Event>();
-
-        public NetworkingService(InboundNetworkPipeline inboundPipeline,
-            OutboundNetworkPipeline outboundPipeline,
-            NetLogger netLogger,
-            INetworkManager networkManager,
-            FatalErrorHandler fatalErrorHandler)
-        {
-            // Dependency injection.
-            this.inboundPipeline = inboundPipeline;
-            this.outboundPipeline = outboundPipeline;
-            this.netLogger = netLogger;
-            this.networkManager = networkManager;
-            this.fatalErrorHandler = fatalErrorHandler;
-
-            // Wire up pipelines.
-            networkManager.OnNetworkReceive += NetworkManager_OnNetworkReceive;
-        }
-
-        /// <summary>
-        /// Starts the networking service.
-        /// </summary>
-        public void Start()
-        {
-            stopRequested = false;
-            serviceThread = new Thread(Run)
-            {
-                Name = "Networking"
-            };
-            serviceThread.Start();
-        }
-
-        /// <summary>
-        /// Stops the networking service.
-        /// </summary>
-        public void Stop()
-        {
-            stopRequested = true;
-            serviceThread.Join();
-        }
-
-        /// <summary>
-        /// Runs the networking service.
-        /// </summary>
-        private void Run()
-        {
-            Logger.Info("Networking service is started.");
-            OutputStartupDiagnostics();
-
-            /* Start the network manager. */
-            try
-            {
-                networkManager.Initialize();
-            }
-            catch (Exception e)
-            {
-                Logger.Fatal("Failed to start the network manager.", e);
-                fatalErrorHandler.FatalError();
-                return;
-            }
-
-            /* Loop until shutdown. */
-            while (!stopRequested)
-            {
-                try
-                {
-                    networkManager.Poll();
-                    Thread.Sleep(1);
-                }
-                catch (Exception e)
-                {
-                    /* Unhandled exception escaped the network thread. */
-                    Logger.Error("Error in networking service.", e);
-                }
-            }
-
-            /* Clean up networking resources. */
-            try
-            {
-                networkManager.Dispose();
-            }
-            catch (Exception e)
-            {
-                Logger.Fatal("Error stopping network manager.", e);
-            }
-
-            Logger.Info("Networking service is stopped.");
-        }
-
-        /// <summary>
-        /// Outputs startup diagnonstic messages.
-        /// </summary>
-        private void OutputStartupDiagnostics()
-        {
-            inboundPipeline.OutputStartupDiagnostics();
-            outboundPipeline.OutputStartupDiagnostics();
-        }
-
-        /// <summary>
-        /// Called when an event is received from the network.
-        /// </summary>
-        /// <param name="ev">Received event.</param>
-        /// <param name="connection">Associated connection.</param>
-        private void NetworkManager_OnNetworkReceive(Event ev, NetworkConnection connection)
-        {
-            inboundPipeline.ProcessEvent(ev, connection);
-        }
-
+        // Wire up pipelines.
+        networkManager.OnNetworkReceive += NetworkManager_OnNetworkReceive;
     }
 
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+    /// <summary>
+    ///     Queue of outgoing events to be processed and sent.
+    /// </summary>
+    public ConcurrentQueue<Event> EventsToSend { get; }
+        = new();
+
+    /// <summary>
+    ///     Starts the networking service.
+    /// </summary>
+    public void Start()
+    {
+        stopRequested = false;
+        serviceThread = new Thread(Run)
+        {
+            Name = "Networking"
+        };
+        serviceThread.Start();
+    }
+
+    /// <summary>
+    ///     Stops the networking service.
+    /// </summary>
+    public void Stop()
+    {
+        stopRequested = true;
+        serviceThread.Join();
+    }
+
+    /// <summary>
+    ///     Runs the networking service.
+    /// </summary>
+    private void Run()
+    {
+        Logger.Info("Networking service is started.");
+        OutputStartupDiagnostics();
+
+        /* Start the network manager. */
+        try
+        {
+            networkManager.Initialize();
+        }
+        catch (Exception e)
+        {
+            Logger.Fatal("Failed to start the network manager.", e);
+            fatalErrorHandler.FatalError();
+            return;
+        }
+
+        /* Loop until shutdown. */
+        while (!stopRequested)
+            try
+            {
+                networkManager.Poll();
+                Thread.Sleep(1);
+            }
+            catch (Exception e)
+            {
+                /* Unhandled exception escaped the network thread. */
+                Logger.Error("Error in networking service.", e);
+            }
+
+        /* Clean up networking resources. */
+        try
+        {
+            networkManager.Dispose();
+        }
+        catch (Exception e)
+        {
+            Logger.Fatal("Error stopping network manager.", e);
+        }
+
+        Logger.Info("Networking service is stopped.");
+    }
+
+    /// <summary>
+    ///     Outputs startup diagnonstic messages.
+    /// </summary>
+    private void OutputStartupDiagnostics()
+    {
+        inboundPipeline.OutputStartupDiagnostics();
+    }
+
+    /// <summary>
+    ///     Called when an event is received from the network.
+    /// </summary>
+    /// <param name="ev">Received event.</param>
+    /// <param name="connection">Associated connection.</param>
+    private void NetworkManager_OnNetworkReceive(Event ev, NetworkConnection connection)
+    {
+        inboundPipeline.ProcessEvent(ev, connection);
+    }
 }

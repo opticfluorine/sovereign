@@ -21,28 +21,23 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Network.Infrastructure;
 
-namespace Sovereign.NetworkCore.Network.Pipeline
+namespace Sovereign.NetworkCore.Network.Pipeline.Outbound;
+
+/// <summary>
+///     Network pipeline that processes outbound network events.
+/// </summary>
+public sealed class OutboundNetworkPipeline
 {
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
-    /// Final stage of the outbound network pipeline.
+    ///     Processes an outbound event.
     /// </summary>
-    public sealed class FinalOutboundPipelineStage : IOutboundPipelineStage
+    /// <param name="ev">Event.</param>
+    public void ProcessEvent(Event ev)
     {
-        public int Priority => int.MaxValue;
-
-        public IOutboundPipelineStage NextStage { get; set; }
-
-        public void ProcessEvent(Event ev, NetworkConnection connection)
-        {
-            /* TODO */
-        }
     }
-
 }
