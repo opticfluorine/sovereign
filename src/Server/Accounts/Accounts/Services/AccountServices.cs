@@ -21,152 +21,143 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Registration;
-using System;
 
-namespace Sovereign.Accounts.Accounts.Services
+namespace Sovereign.Accounts.Accounts.Services;
+
+/// <summary>
+///     Provides account-related services.
+/// </summary>
+public sealed class AccountServices
 {
+    private readonly AccountAuthenticator authenticator;
+    private readonly AuthenticationAttemptLimiter limiter;
+    private readonly LoginHandoffTracker loginHandoffTracker;
+    private readonly AccountLoginTracker loginTracker;
+    private readonly RegistrationController registrationController;
+    private readonly RegistrationValidator registrationValidator;
+    private readonly SharedSecretManager sharedSecretManager;
 
-    /// <summary>
-    /// Provides account-related services.
-    /// </summary>
-    public sealed class AccountServices
+    public AccountServices(AccountAuthenticator authenticator,
+        AuthenticationAttemptLimiter limiter,
+        AccountLoginTracker loginTracker,
+        RegistrationValidator registrationValidator,
+        RegistrationController registrationController,
+        SharedSecretManager sharedSecretManager,
+        LoginHandoffTracker loginHandoffTracker)
     {
-        private readonly AccountAuthenticator authenticator;
-        private readonly AuthenticationAttemptLimiter limiter;
-        private readonly AccountLoginTracker loginTracker;
-        private readonly RegistrationValidator registrationValidator;
-        private readonly RegistrationController registrationController;
-        private readonly SharedSecretManager sharedSecretManager;
-        private readonly LoginHandoffTracker loginHandoffTracker;
-
-        public ILogger Logger { private get; set; } = NullLogger.Instance;
-
-        public AccountServices(AccountAuthenticator authenticator,
-            AuthenticationAttemptLimiter limiter,
-            AccountLoginTracker loginTracker,
-            RegistrationValidator registrationValidator,
-            RegistrationController registrationController,
-            SharedSecretManager sharedSecretManager,
-            LoginHandoffTracker loginHandoffTracker)
-        {
-            this.authenticator = authenticator;
-            this.limiter = limiter;
-            this.loginTracker = loginTracker;
-            this.registrationValidator = registrationValidator;
-            this.registrationController = registrationController;
-            this.sharedSecretManager = sharedSecretManager;
-            this.loginHandoffTracker = loginHandoffTracker;
-        }
-
-        /// <summary>
-        /// Attempts to authenticate the account with the given username and password.
-        /// </summary>
-        /// <param name="username">Account username.</param>
-        /// <param name="password">Password attempt.</param>
-        /// <param name="ipAddress">IP address from which the login attempt was made.</param>
-        /// <param name="guid">Account ID.</param>
-        /// <param name="secret">Shared secret.</param>
-        /// <returns>Authentication result.</returns>
-        public AuthenticationResult Authenticate(string username, string password, string ipAddress,
-            out Guid guid, out string secret)
-        {
-            guid = Guid.Empty;
-            secret = null;
-
-            try
-            {
-                // Reject if too many authentication attempts have been made recently.
-                if (limiter.IsAccountLoginDisabled(username))
-                {
-                    // Too many login attempts.
-                    Logger.InfoFormat("Rejected login for {0}: too many failed attempts.", username);
-                    return AuthenticationResult.TooManyAttempts;
-                }
-
-                // Verify the username and password combination.
-                var authValid = authenticator.Authenticate(username, password, out var id);
-                if (!authValid)
-                {
-                    // Bad password, log and reject.
-                    limiter.RegisterFailedAttempt(username);
-                    Logger.InfoFormat("Rejected login for {0}: authentication failure.", username);
-                    return AuthenticationResult.Failed;
-                }
-
-                // Verify that the account is not already logged in.
-                if (loginTracker.IsLoggedIn(id))
-                {
-                    // Already logged in, log and reject.
-                    Logger.InfoFormat("Rejected login for {0}: already logged in.", username);
-                    return AuthenticationResult.AlreadyLoggedIn;
-                }
-
-                // Login successful.
-                loginTracker.Login(id);
-                loginHandoffTracker.AddPendingHandoff(id, ipAddress);
-                secret = sharedSecretManager.AddSecret(id);
-                guid = id;
-
-                Logger.InfoFormat("Login successful for {0}.", username);
-
-                return AuthenticationResult.Successful;
-            }
-            catch (Exception e)
-            {
-                Logger.Error("Error while handling login request for " + username + "; rejecting.", e);
-                return AuthenticationResult.Failed;
-            }
-        }
-
-        /// <summary>
-        /// Logs out the given account.
-        /// </summary>
-        /// <param name="id">Account ID.</param>
-        public void Logout(Guid id)
-        {
-            loginTracker.Logout(id);
-        }
-
-        /// <summary>
-        /// Registers a new account.
-        /// </summary>
-        /// <param name="username">Username.</param>
-        /// <param name="password">Password.</param>
-        /// <returns>Registration result.</returns>
-        public RegistrationResult Register(string username, string password)
-        {
-            try
-            {
-                // Validate user input.
-                if (!registrationValidator.ValidateRegistrationInput(username, password))
-                {
-                    return RegistrationResult.InvalidInput;
-                }
-
-                // Attempt registration.
-                if (!registrationController.Register(username, password))
-                {
-                    // Interpret failure as username being taken. It could also
-                    // be caused by other database failures, but in practice
-                    // violating the unique constraint is likely to be at
-                    // fault.
-                    return RegistrationResult.UsernameTaken;
-                }
-
-                Logger.InfoFormat("New account registered for {0}.", username);
-
-                return RegistrationResult.Successful;
-            }
-            catch (Exception e)
-            {
-                Logger.Error("Error handling registration request.", e);
-                return RegistrationResult.UnknownFailure;
-            }
-        }
-
+        this.authenticator = authenticator;
+        this.limiter = limiter;
+        this.loginTracker = loginTracker;
+        this.registrationValidator = registrationValidator;
+        this.registrationController = registrationController;
+        this.sharedSecretManager = sharedSecretManager;
+        this.loginHandoffTracker = loginHandoffTracker;
     }
 
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+    /// <summary>
+    ///     Attempts to authenticate the account with the given username and password.
+    /// </summary>
+    /// <param name="username">Account username.</param>
+    /// <param name="password">Password attempt.</param>
+    /// <param name="guid">Account ID.</param>
+    /// <param name="secret">Shared secret.</param>
+    /// <returns>Authentication result.</returns>
+    public AuthenticationResult Authenticate(string username, string password,
+        out Guid guid, out string secret)
+    {
+        guid = Guid.Empty;
+        secret = null;
+
+        try
+        {
+            // Reject if too many authentication attempts have been made recently.
+            if (limiter.IsAccountLoginDisabled(username))
+            {
+                // Too many login attempts.
+                Logger.InfoFormat("Rejected login for {0}: too many failed attempts.", username);
+                return AuthenticationResult.TooManyAttempts;
+            }
+
+            // Verify the username and password combination.
+            var authValid = authenticator.Authenticate(username, password, out var id);
+            if (!authValid)
+            {
+                // Bad password, log and reject.
+                limiter.RegisterFailedAttempt(username);
+                Logger.InfoFormat("Rejected login for {0}: authentication failure.", username);
+                return AuthenticationResult.Failed;
+            }
+
+            // Verify that the account is not already logged in.
+            if (loginTracker.IsLoggedIn(id))
+            {
+                // Already logged in, log and reject.
+                Logger.InfoFormat("Rejected login for {0}: already logged in.", username);
+                return AuthenticationResult.AlreadyLoggedIn;
+            }
+
+            // Login successful.
+            loginTracker.Login(id);
+            loginHandoffTracker.AddPendingHandoff(id);
+            secret = sharedSecretManager.AddSecret(id);
+            guid = id;
+
+            Logger.InfoFormat("Login successful for {0}.", username);
+
+            return AuthenticationResult.Successful;
+        }
+        catch (Exception e)
+        {
+            Logger.Error("Error while handling login request for " + username + "; rejecting.", e);
+            return AuthenticationResult.Failed;
+        }
+    }
+
+    /// <summary>
+    ///     Logs out the given account.
+    /// </summary>
+    /// <param name="id">Account ID.</param>
+    public void Logout(Guid id)
+    {
+        loginTracker.Logout(id);
+    }
+
+    /// <summary>
+    ///     Registers a new account.
+    /// </summary>
+    /// <param name="username">Username.</param>
+    /// <param name="password">Password.</param>
+    /// <returns>Registration result.</returns>
+    public RegistrationResult Register(string username, string password)
+    {
+        try
+        {
+            // Validate user input.
+            if (!registrationValidator.ValidateRegistrationInput(username, password))
+                return RegistrationResult.InvalidInput;
+
+            // Attempt registration.
+            if (!registrationController.Register(username, password))
+                // Interpret failure as username being taken. It could also
+                // be caused by other database failures, but in practice
+                // violating the unique constraint is likely to be at
+                // fault.
+                return RegistrationResult.UsernameTaken;
+
+            Logger.InfoFormat("New account registered for {0}.", username);
+
+            return RegistrationResult.Successful;
+        }
+        catch (Exception e)
+        {
+            Logger.Error("Error handling registration request.", e);
+            return RegistrationResult.UnknownFailure;
+        }
+    }
 }

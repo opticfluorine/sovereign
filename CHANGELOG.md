@@ -4,6 +4,20 @@
 
 ### June
 
+#### 25 June 2023
+
+* Update the event server connection protocol to only require the account UUID
+  from the login response - no longer require the IP address to match the one
+  seen during the login stage. This addresses an edge case where the login occurs
+  over IPv4 while the event server connection occurs over IPv6. Defense against
+  login hijacking attacks is still maintained as the shared secret is still
+  required for all subsequent messages - therefore the worst that can be done
+  with knowledge of the account UUID is a denial of service attack against a
+  specific user. This is a reasonable tradeoff given that the account UUID should
+  not normally be publicly known anyway, and because it would be difficult to
+  time the attack to occur during the login stage (and a brute force attack would
+  be easily detected and blocked).
+
 #### 24 June 2023
 
 * Remove the old `OutboundNetworkPipeline` scaffolding - I have a new concept
