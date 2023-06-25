@@ -26,105 +26,99 @@ using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.EngineCore.Events;
-using System;
 
-namespace Sovereign.ClientCore.Systems.ClientNetwork
+namespace Sovereign.ClientCore.Systems.ClientNetwork;
+
+/// <summary>
+///     Responsible for handling events related to the client network system.
+/// </summary>
+public sealed class ClientNetworkEventHandler
 {
+    private readonly IEventSender eventSender;
+    private readonly INetworkClient networkClient;
+    private readonly ClientNetworkController networkController;
+    private readonly RegistrationClient registrationClient;
+
+    public ClientNetworkEventHandler(INetworkClient networkClient, RegistrationClient registrationClient,
+        ClientNetworkController networkController, IEventSender eventSender)
+    {
+        this.networkClient = networkClient;
+        this.registrationClient = registrationClient;
+        this.networkController = networkController;
+        this.eventSender = eventSender;
+    }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
-    /// Responsible for handling events related to the client network system.
+    ///     Handles a client network related event.
     /// </summary>
-    public sealed class ClientNetworkEventHandler
+    /// <param name="ev">Event.</param>
+    public void HandleEvent(Event ev)
     {
-        private readonly INetworkClient networkClient;
-        private readonly RegistrationClient registrationClient;
-        private readonly ClientNetworkController networkController;
-        private readonly IEventSender eventSender;
-
-        public ILogger Logger { private get; set; } = NullLogger.Instance;
-
-        public ClientNetworkEventHandler(INetworkClient networkClient, RegistrationClient registrationClient,
-            ClientNetworkController networkController, IEventSender eventSender)
+        switch (ev.EventId)
         {
-            this.networkClient = networkClient;
-            this.registrationClient = registrationClient;
-            this.networkController = networkController;
-            this.eventSender = eventSender;
+            case EventId.Client_Network_ConnectionLost:
+                HandleConnectionLostEvent();
+                break;
+
+            case EventId.Client_Network_BeginConnection:
+                HandleBeginConnection((BeginConnectionEventDetails)ev.EventDetails);
+                break;
+
+            case EventId.Client_Network_RegisterAccount:
+                HandleRegisterAccount((RegisterAccountEventDetails)ev.EventDetails);
+                break;
+
+            default:
+                Logger.WarnFormat("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
+                break;
         }
+    }
 
-        /// <summary>
-        /// Handles a client network related event.
-        /// </summary>
-        /// <param name="ev">Event.</param>
-        public void HandleEvent(Event ev)
-        {
-            switch (ev.EventId)
+    /// <summary>
+    ///     Handles a register account event.
+    /// </summary>
+    /// <param name="eventDetails">Registration details.</param>
+    private void HandleRegisterAccount(RegisterAccountEventDetails eventDetails)
+    {
+        registrationClient.RegisterAsync(eventDetails.ConnectionParameters, eventDetails.RegistrationRequest)
+            .ContinueWith(task =>
             {
-                case EventId.Client_Network_ConnectionLost:
-                    HandleConnectionLostEvent();
-                    break;
-
-                case EventId.Client_Network_BeginConnection:
-                    HandleBeginConnection((BeginConnectionEventDetails)ev.EventDetails);
-                    break;
-
-                case EventId.Client_Network_RegisterAccount:
-                    HandleRegisterAccount((RegisterAccountEventDetails)ev.EventDetails);
-                    break;
-
-                default:
-                    Logger.WarnFormat("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Handles a register account event.
-        /// </summary>
-        /// <param name="eventDetails">Registration details.</param>
-        private void HandleRegisterAccount(RegisterAccountEventDetails eventDetails)
-        {
-            registrationClient.RegisterAsync(eventDetails.ConnectionParameters, eventDetails.RegistrationRequest)
-                .ContinueWith((task) =>
+                if (task.IsFaulted)
                 {
-                    if (task.IsFaulted)
-                    {
-                        networkController.RegistrationFailed(eventSender, "Registration failed due to an internal error.");
-                        return;
-                    }
+                    networkController.RegistrationFailed(eventSender, "Registration failed due to an internal error.");
+                    return;
+                }
 
-                    var option = task.Result;
-                    if (option.HasFirst)
-                    {
-                        networkController.RegistrationSucceeded(eventSender);
-                    }
-                    else
-                    {
-                        networkController.RegistrationFailed(eventSender, option.Second);
-                    }
-                });
-        }
+                var option = task.Result;
+                if (option.HasFirst)
+                    networkController.RegistrationSucceeded(eventSender);
+                else
+                    networkController.RegistrationFailed(eventSender, option.Second);
+            });
+    }
 
-        /// <summary>
-        /// Handles a begin connection request.
-        /// </summary>
-        /// <param name="details">Connection details.</param>
-        private void HandleBeginConnection(BeginConnectionEventDetails details)
+    /// <summary>
+    ///     Handles a begin connection request.
+    /// </summary>
+    /// <param name="details">Connection details.</param>
+    private void HandleBeginConnection(BeginConnectionEventDetails details)
+    {
+        networkClient.BeginConnection(details.ConnectionParameters, details.LoginParameters);
+    }
+
+    /// <summary>
+    ///     Handles a connection lost event.
+    /// </summary>
+    private void HandleConnectionLostEvent()
+    {
+        // Only pass this along if we're actually connected or connecting.
+        if (networkClient.ClientState == NetworkClientState.Connected
+            || networkClient.ClientState == NetworkClientState.Connecting)
         {
-            networkClient.BeginConnection(details.ConnectionParameters, details.LoginParameters);
-        }
-
-        /// <summary>
-        /// Handles a connection lost event.
-        /// </summary>
-        private void HandleConnectionLostEvent()
-        {
-            /* Log the error, then gracefully close out the connections as usual. */
             Logger.Error("Connection to server lost.");
             networkClient.EndConnection();
         }
-
     }
-
 }
-

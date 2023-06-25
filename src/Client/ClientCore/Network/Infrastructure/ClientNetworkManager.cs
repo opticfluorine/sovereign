@@ -28,6 +28,7 @@ using System.Net;
 using System.Net.Sockets;
 using Castle.Core.Logging;
 using LiteNetLib;
+using Sodium;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.EngineCore.Events;
@@ -95,6 +96,11 @@ public sealed class ClientNetworkManager : INetworkManager
     ///     Active connection.
     /// </summary>
     private NetworkConnection conn;
+
+    /// <summary>
+    ///     Latest login response.
+    /// </summary>
+    private LoginResponse loginResponse;
 
     public ClientNetworkManager(NetworkConnectionManager connectionManager,
         NetworkSerializer networkSerializer, RestClient restClient,
@@ -211,12 +217,15 @@ public sealed class ClientNetworkManager : INetworkManager
     /// </exception>
     internal void EndConnection()
     {
-        if (ClientState != NetworkClientState.Connecting ||
-            ClientState != NetworkClientState.Connected)
+        if (!(ClientState == NetworkClientState.Connecting ||
+              ClientState == NetworkClientState.Connected))
             throw new InvalidOperationException("Client is not connecting or connected.");
 
         // Stop the REST client.
         restClient.Disconnect();
+
+        // Clear the login information.
+        loginResponse = null;
 
         // Stop the event connection.
         var cmd = new ClientNetworkCommand();
@@ -244,6 +253,10 @@ public sealed class ClientNetworkManager : INetworkManager
     /// <param name="loginResponse">Successful login response.</param>
     private void ContinueConnection(LoginResponse loginResponse)
     {
+        // Store the login details.
+        this.loginResponse = loginResponse;
+
+        // Start up the connection to the event server.
         var cmd = new ClientNetworkCommand();
         cmd.CommandType = ClientNetworkCommandType.BeginConnection;
         cmd.Host = ConnectionParameters.Host;
@@ -288,12 +301,13 @@ public sealed class ClientNetworkManager : INetworkManager
             if (resolvedHost.AddressList.Count() == 0) throw new ArgumentException("Host could not be resolved.");
             var addr = resolvedHost.AddressList[0];
 
-            // TODO: Authentication.
-            var hmacKey = new byte[64];
-            Array.Clear(hmacKey, 0, hmacKey.Length);
+            // Grab HMAC key (shared secret) from the login response.
+            var hmacKey = Utilities.HexToBinary(loginResponse.SharedSecret);
 
             // Connect.
-            var peer = netManager.Connect(new IPEndPoint(addr, port), "");
+            var peer = netManager.Connect(new IPEndPoint(addr, port), loginResponse.UserId);
+
+            // Record the connection.
             conn = connectionManager.CreateConnection(peer, hmacKey);
             ClientState = NetworkClientState.Connected;
             clientNetworkController.Connected(eventSender);
@@ -314,13 +328,10 @@ public sealed class ClientNetworkManager : INetworkManager
     /// </summary>
     private void HandleEndCommand()
     {
-        // Sanity check.
+        // If already disconnected, silently fail.
         if (ClientState != NetworkClientState.Connecting ||
             ClientState != NetworkClientState.Connected)
-        {
-            Logger.Error("Client is not ready.");
             return;
-        }
 
         // Disconnect.
         try
@@ -399,13 +410,9 @@ public sealed class ClientNetworkManager : INetworkManager
     /// <param name="disconnectInfo">Disconnect info.</param>
     private void NetListener_PeerDisconnectedEvent(NetPeer peer, DisconnectInfo disconnectInfo)
     {
-        if (conn != null)
-        {
-            Logger.InfoFormat("Disconnected by remote peer. Reason: {0}", disconnectInfo.Reason.ToString());
-            connectionManager.RemoveConnection(conn);
-            conn = null;
-            ClientState = NetworkClientState.Failed;
-            ErrorMessage = disconnectInfo.Reason.ToString();
-        }
+        // Notify any systems that care that the connection has been lost.
+        // This will route back to here and gracefully clean up the connection.
+        Logger.InfoFormat("Connection lost: {0}", disconnectInfo.Reason);
+        clientNetworkController.DeclareConnectionLost(eventSender);
     }
 }

@@ -21,114 +21,101 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using LiteNetLib;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
+using LiteNetLib;
 
-namespace Sovereign.NetworkCore.Network.Infrastructure
+namespace Sovereign.NetworkCore.Network.Infrastructure;
+
+/// <summary>
+///     Encapsulates the connection to a single remote peer.
+/// </summary>
+public sealed class NetworkConnection : IDisposable
 {
+    /// <summary>
+    ///     Backing array for the HMAC key.
+    /// </summary>
+    private readonly byte[] _Key;
 
     /// <summary>
-    /// Encapsulates the connection to a single remote peer.
+    ///     GC handle used to pin the HMAC key.
     /// </summary>
-    public sealed class NetworkConnection : IDisposable
+    private readonly GCHandle keyHandle;
+
+    private readonly NetPeer peer;
+
+    /// <summary>
+    ///     Set of received nonces that are no longer valid for this connection.
+    /// </summary>
+    private readonly ISet<uint> receivedNonces = new HashSet<uint>();
+
+    /// <summary>
+    ///     Next available outbound nonce.
+    /// </summary>
+    private uint nextOutboundNonce;
+
+    /// <summary>
+    ///     Creates a new connection.
+    /// </summary>
+    /// <param name="peer">Connected peer.</param>
+    /// <param name="key">HMAC key.</param>
+    public NetworkConnection(NetPeer peer, byte[] key)
     {
+        /* Set up. */
+        this.peer = peer;
 
-        /// <summary>
-        /// Unique ID number for this connection.
-        /// </summary>
-        public int Id { get => peer.Id; }
+        /* Allocate and pin the key memory. */
+        _Key = new byte[key.Length];
+        keyHandle = GCHandle.Alloc(_Key, GCHandleType.Pinned);
 
-        /// <summary>
-        /// Key used for HMAC.
-        /// </summary>
-        internal byte[] Key { get => _Key; }
-
-        private readonly NetPeer peer;
-
-        /// <summary>
-        /// Backing array for the HMAC key.
-        /// </summary>
-        private readonly byte[] _Key;
-
-        /// <summary>
-        /// GC handle used to pin the HMAC key.
-        /// </summary>
-        private readonly GCHandle keyHandle;
-
-        /// <summary>
-        /// Set of received nonces that are no longer valid for this connection.
-        /// </summary>
-        private readonly ISet<uint> receivedNonces = new HashSet<uint>();
-
-        /// <summary>
-        /// Next available outbound nonce.
-        /// </summary>
-        private uint nextOutboundNonce = 0;
-
-        /// <summary>
-        /// Creates a new connection.
-        /// </summary>
-        /// <param name="peer">Connected peer.</param>
-        /// <param name="key">HMAC key. The passed array is erased by the constructor.</param>
-        public NetworkConnection(NetPeer peer, byte[] key)
-        {
-            /* Set up. */
-            this.peer = peer;
-
-            /* Allocate and pin the key memory. */
-            _Key = new byte[key.Length];
-            keyHandle = GCHandle.Alloc(_Key, GCHandleType.Pinned);
-
-            /* Copy the key and clear the original array. */
-            Array.Copy(key, Key, key.Length);
-            Array.Clear(key, 0, key.Length);
-        }
-
-        /// <summary>
-        /// Determines whether a received nonce is valid.
-        /// </summary>
-        /// <param name="receivedNonce">Received nonce.</param>
-        /// <returns>true if valid, false otherwise.</returns>
-        public bool IsReceivedNonceValid(uint receivedNonce)
-        {
-            var valid = !receivedNonces.Contains(receivedNonce);
-            if (valid)
-            {
-                receivedNonces.Add(receivedNonce);
-            }
-            return valid;
-        }
-
-        /// <summary>
-        /// Gets the next usable outbound nonce.
-        /// </summary>
-        /// <returns>Next usable outbound nonce.</returns>
-        public uint GetOutboundNonce()
-        {
-            return nextOutboundNonce++;
-        }
-
-        /// <summary>
-        /// Disconnects the connection if it is currently connected.
-        /// </summary>
-        internal void Disconnect()
-        {
-            if (peer.ConnectionState == ConnectionState.Connected)
-            {
-                peer.Disconnect();
-            }
-        }
-
-        public void Dispose()
-        {
-            /* Zero the key and release the pin. */
-            Array.Clear(_Key, 0, _Key.Length);
-            keyHandle.Free();
-        }
-
+        /* Copy the key. */
+        Array.Copy(key, Key, key.Length);
     }
 
+    /// <summary>
+    ///     Unique ID number for this connection.
+    /// </summary>
+    public int Id => peer.Id;
+
+    /// <summary>
+    ///     Key used for HMAC.
+    /// </summary>
+    internal byte[] Key => _Key;
+
+    public void Dispose()
+    {
+        /* Zero the key and release the pin. */
+        Array.Clear(_Key, 0, _Key.Length);
+        keyHandle.Free();
+    }
+
+    /// <summary>
+    ///     Determines whether a received nonce is valid.
+    /// </summary>
+    /// <param name="receivedNonce">Received nonce.</param>
+    /// <returns>true if valid, false otherwise.</returns>
+    public bool IsReceivedNonceValid(uint receivedNonce)
+    {
+        var valid = !receivedNonces.Contains(receivedNonce);
+        if (valid) receivedNonces.Add(receivedNonce);
+        return valid;
+    }
+
+    /// <summary>
+    ///     Gets the next usable outbound nonce.
+    /// </summary>
+    /// <returns>Next usable outbound nonce.</returns>
+    public uint GetOutboundNonce()
+    {
+        return nextOutboundNonce++;
+    }
+
+    /// <summary>
+    ///     Disconnects the connection if it is currently connected.
+    /// </summary>
+    internal void Disconnect()
+    {
+        if (peer.ConnectionState == ConnectionState.Connected) peer.Disconnect();
+    }
 }

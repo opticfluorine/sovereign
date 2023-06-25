@@ -24,141 +24,123 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
 using Sodium;
 using Sovereign.Accounts.Configuration;
 using Sovereign.EngineCore.Timing;
-using Sovereign.EngineCore.Util;
 using Sovereign.EngineUtil.Numerics;
+using Sovereign.NetworkCore.Network.Authentication;
 
-namespace Sovereign.Accounts.Accounts.Authentication
+namespace Sovereign.Accounts.Accounts.Authentication;
+
+internal sealed class PendingSecret
 {
+    public ulong GenerationTime { get; set; }
 
-    sealed class PendingSecret
+    public byte[] SharedSecret { get; set; }
+}
+
+/// <summary>
+///     Responsible for managing shared secrets during the
+///     connection handoff.
+/// </summary>
+public sealed class SharedSecretManager
+{
+    private readonly IAccountsConfiguration accountsConfiguration;
+
+    /// <summary>
+    ///     Pending secrets by user ID.
+    /// </summary>
+    private readonly IDictionary<Guid, PendingSecret> pendingSecrets
+        = new ConcurrentDictionary<Guid, PendingSecret>();
+
+    private readonly ISystemTimer timer;
+
+    public SharedSecretManager(ISystemTimer timer,
+        IAccountsConfiguration accountsConfiguration)
     {
-
-        public ulong GenerationTime { get; set; }
-
-        public byte[] SharedSecret { get; set; }
-
+        this.timer = timer;
+        this.accountsConfiguration = accountsConfiguration;
     }
 
     /// <summary>
-    /// Responsible for managing shared secrets during the
-    /// connection handoff.
+    ///     Adds a secret for the given user ID.
     /// </summary>
-    public sealed class SharedSecretManager
+    /// <param name="userId">User ID.</param>
+    /// <returns>Hexadecimal-encoded shared secret.</returns>
+    /// <remarks>
+    ///     If a shared secret is already pending for the given user ID,
+    ///     calling AddSecret will overwrite the existing secret.
+    /// </remarks>
+    public string AddSecret(Guid userId)
     {
-
-        /// <summary>
-        /// Length of the shared secret, in bytes.
-        /// </summary>
-        private const int SECRET_LENGTH = 16;
-
-        /// <summary>
-        /// Pending secrets by user ID.
-        /// </summary>
-        private readonly IDictionary<Guid, PendingSecret> pendingSecrets
-            = new ConcurrentDictionary<Guid, PendingSecret>();
-
-        private readonly ISystemTimer timer;
-        private readonly IAccountsConfiguration accountsConfiguration;
-
-        public SharedSecretManager(ISystemTimer timer,
-            IAccountsConfiguration accountsConfiguration)
+        var pendingSecret = new PendingSecret
         {
-            this.timer = timer;
-            this.accountsConfiguration = accountsConfiguration;
-        }
-
-        /// <summary>
-        /// Adds a secret for the given user ID.
-        /// </summary>
-        /// <param name="userId">User ID.</param>
-        /// <returns>Hexadecimal-encoded shared secret.</returns>
-        /// <remarks>
-        /// If a shared secret is already pending for the given user ID,
-        /// calling AddSecret will overwrite the existing secret.
-        /// </remarks>
-        public string AddSecret(Guid userId)
-        {
-            var pendingSecret = new PendingSecret()
-            {
-                GenerationTime = timer.GetTime(),
-                SharedSecret = CreateSecret()
-            };
-            pendingSecrets[userId] = pendingSecret;
-            return Utilities.BinaryToHex(pendingSecret.SharedSecret);
-        }
-
-        /// <summary>
-        /// Takes the secret for the given user ID if one is pending.
-        /// </summary>
-        /// <param name="userId">User ID.</param>
-        /// <param name="sharedSecret"></param>
-        /// <returns>true if a secret was pending, false otherwise.</returns>
-        public bool TakeSecret(Guid userId, out byte[] sharedSecret)
-        {
-            sharedSecret = null;
-            var hasSecret = pendingSecrets.ContainsKey(userId);
-            if (hasSecret)
-            {
-                var pendingSecret = pendingSecrets[userId];
-                pendingSecrets.Remove(userId);
-
-                // Ensure that the secret hasn't expired.
-                if (!HasSecretExpired(pendingSecret, timer.GetTime()))
-                {
-                    sharedSecret = pendingSecret.SharedSecret;
-                }
-                else
-                {
-                    // Secret expired, go ahead and remove it.
-                    pendingSecrets.Remove(userId);
-                }
-            }
-
-            return sharedSecret != null;
-        }
-
-        /// <summary>
-        /// Purges old expired pending secrets from memory.
-        /// </summary>
-        public void PurgeOldSecrets()
-        {
-            var now = timer.GetTime();
-            foreach (var userId in pendingSecrets.Keys)
-            {
-                var pendingSecret = pendingSecrets[userId];
-                if (HasSecretExpired(pendingSecret, now))
-                {
-                    // Secret has expired, remove.
-                    pendingSecrets.Remove(userId);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Generates a new shared secret.
-        /// </summary>
-        /// <returns>Shared secret.</returns>
-        private byte[] CreateSecret()
-        {
-            return SodiumCore.GetRandomBytes(SECRET_LENGTH);
-        }
-
-        /// <summary>
-        /// Checks whether the given pending secret has expired.
-        /// </summary>
-        /// <param name="pendingSecret">Pending secret.</param>
-        /// <param name="systemTime">Current system time.</param>
-        /// <returns>true if expired, false otherwise.</returns>
-        private bool HasSecretExpired(PendingSecret pendingSecret, ulong systemTime)
-        {
-            var delta = (systemTime - pendingSecret.GenerationTime) * UnitConversions.UsToS;
-            return delta > accountsConfiguration.HandoffPeriodSeconds;
-        }
-
+            GenerationTime = timer.GetTime(),
+            SharedSecret = CreateSecret()
+        };
+        pendingSecrets[userId] = pendingSecret;
+        return Utilities.BinaryToHex(pendingSecret.SharedSecret);
     }
 
+    /// <summary>
+    ///     Takes the secret for the given user ID if one is pending.
+    /// </summary>
+    /// <param name="userId">User ID.</param>
+    /// <param name="sharedSecret"></param>
+    /// <returns>true if a secret was pending, false otherwise.</returns>
+    public bool TakeSecret(Guid userId, out byte[] sharedSecret)
+    {
+        sharedSecret = null;
+        var hasSecret = pendingSecrets.ContainsKey(userId);
+        if (hasSecret)
+        {
+            var pendingSecret = pendingSecrets[userId];
+            pendingSecrets.Remove(userId);
+
+            // Ensure that the secret hasn't expired.
+            if (!HasSecretExpired(pendingSecret, timer.GetTime()))
+                sharedSecret = pendingSecret.SharedSecret;
+            else
+                // Secret expired, go ahead and remove it.
+                pendingSecrets.Remove(userId);
+        }
+
+        return sharedSecret != null;
+    }
+
+    /// <summary>
+    ///     Purges old expired pending secrets from memory.
+    /// </summary>
+    public void PurgeOldSecrets()
+    {
+        var now = timer.GetTime();
+        foreach (var userId in pendingSecrets.Keys)
+        {
+            var pendingSecret = pendingSecrets[userId];
+            if (HasSecretExpired(pendingSecret, now))
+                // Secret has expired, remove.
+                pendingSecrets.Remove(userId);
+        }
+    }
+
+    /// <summary>
+    ///     Generates a new shared secret.
+    /// </summary>
+    /// <returns>Shared secret.</returns>
+    private byte[] CreateSecret()
+    {
+        return SodiumCore.GetRandomBytes(AuthenticationConstants.SharedSecretLength);
+    }
+
+    /// <summary>
+    ///     Checks whether the given pending secret has expired.
+    /// </summary>
+    /// <param name="pendingSecret">Pending secret.</param>
+    /// <param name="systemTime">Current system time.</param>
+    /// <returns>true if expired, false otherwise.</returns>
+    private bool HasSecretExpired(PendingSecret pendingSecret, ulong systemTime)
+    {
+        var delta = (systemTime - pendingSecret.GenerationTime) * UnitConversions.UsToS;
+        return delta > accountsConfiguration.HandoffPeriodSeconds;
+    }
 }

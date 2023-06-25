@@ -25,93 +25,82 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Sovereign.NetworkCore.Network;
 
-namespace Sovereign.ClientCore.Network.Rest
+namespace Sovereign.ClientCore.Network.Rest;
+
+/// <summary>
+///     Provides a common interface for interacting with the REST server from the client.
+/// </summary>
+public sealed class RestClient
 {
+    /// <summary>
+    ///     HTTP client instance.
+    /// </summary>
+    private readonly HttpClient httpClient = new();
 
     /// <summary>
-    /// Provides a common interface for interacting with the REST server from the client.
+    ///     Base URI for the REST server.
     /// </summary>
-    public sealed class RestClient
+    private Uri baseUri;
+
+    /// <summary>
+    ///     Flag indicating whether the REST client should be considered "connected".
+    /// </summary>
+    public bool Connected { get; private set; }
+
+    /// <summary>
+    ///     Selects the REST server to use for all future requests. This additionally sets
+    ///     the REST client state to "connected".
+    /// </summary>
+    /// <param name="connectionParameters">Updated connection parameters to use.</param>
+    public void SelectServer(ClientConnectionParameters connectionParameters)
     {
+        var builder = new UriBuilder();
+        builder.Scheme = connectionParameters.RestTls ? "https" : "http";
+        builder.Host = connectionParameters.RestHost;
+        builder.Port = connectionParameters.RestPort;
+        baseUri = builder.Uri;
 
-        /// <summary>
-        /// HTTP client instance.
-        /// </summary>
-        private readonly HttpClient httpClient = new HttpClient();
+        Connected = true;
+    }
 
-        /// <summary>
-        /// Base URI for the REST server.
-        /// </summary>
-        private Uri baseUri;
+    /// <summary>
+    ///     Sets the REST client to the disconnected state to prevent accidental requests
+    ///     to the server after the session has ended.
+    /// </summary>
+    /// If the REST client is not in the connected state, this method does nothing.
+    public void Disconnect()
+    {
+        Connected = false;
+    }
 
-        /// <summary>
-        /// Flag indicating whether the REST client should be considered "connected".
-        /// </summary>
-        public bool Connected { get; private set; }
+    /// <summary>
+    ///     Asynchronously makes a GET request to the REST server.
+    /// </summary>
+    /// <param name="url">Relative URL of the REST endpoint.</param>
+    /// <returns>Task awaiting the response.</returns>
+    /// <exception cref="NetworkException">Thrown if the REST client is not in the connected state.</exception>
+    public Task<HttpResponseMessage> Get(string url)
+    {
+        if (!Connected) throw new NetworkException("REST client is not connected.");
+        var uri = new Uri(baseUri, url);
+        return httpClient.GetAsync(uri);
+    }
 
-        /// <summary>
-        /// Selects the REST server to use for all future requests. This additionally sets
-        /// the REST client state to "connected".
-        /// </summary>
-        /// <param name="connectionParameters">Updated connection parameters to use.</param>
-        public void SelectServer(ClientConnectionParameters connectionParameters)
-        {
-            var builder = new UriBuilder();
-            builder.Scheme = connectionParameters.RestTls ? "https" : "http";
-            builder.Host = connectionParameters.RestHost;
-            builder.Port = connectionParameters.RestPort;
-            baseUri = builder.Uri;
-
-            Connected = true;
-        }
-
-        /// <summary>
-        /// Sets the REST client to the disconnected state to prevent accidental requests
-        /// to the server after the session has ended.
-        /// </summary>
-        /// If the REST client is not in the connected state, this method does nothing.
-        public void Disconnect()
-        {
-            Connected = false;
-        }
-
-        /// <summary>
-        /// Asynchronously makes a GET request to the REST server.
-        /// </summary>
-        /// <param name="url">Relative URL of the REST endpoint.</param>
-        /// <returns>Task awaiting the response.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if the REST client is not in the connected state.</exception>
-        public Task<HttpResponseMessage> Get(string url)
-        {
-            if (!Connected)
-            {
-                throw new InvalidOperationException("REST client is not connected.");
-            }
-            var uri = new Uri(baseUri, url);
-            return httpClient.GetAsync(uri);
-        }
-
-        /// <summary>
-        /// Asynchronously makes a POST request to the REST server with a JSON payload.
-        /// </summary>
-        /// <param name="url">Relative URL of the REST endpoint.</param>
-        /// <param name="content">Request content.</param>
-        /// <returns>Task awaiting the response.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if the REST client is not in the connected state.</exception>
-        public Task<HttpResponseMessage> PostJson<T>(string url, T content)
-        {
-            if (!Connected)
-            {
-                throw new InvalidOperationException("REST client is not connected.");
-            }
-            var uri = new Uri(baseUri, url);
-            var jsonContent = JsonContent.Create<T>(content);
-            jsonContent.Headers.ContentLength = jsonContent.ReadAsStream().Length;
-            return httpClient.PostAsync(uri, jsonContent);
-        }
-
-    } 
-
+    /// <summary>
+    ///     Asynchronously makes a POST request to the REST server with a JSON payload.
+    /// </summary>
+    /// <param name="url">Relative URL of the REST endpoint.</param>
+    /// <param name="content">Request content.</param>
+    /// <returns>Task awaiting the response.</returns>
+    /// <exception cref="NetworkException">Thrown if the REST client is not in the connected state.</exception>
+    public Task<HttpResponseMessage> PostJson<T>(string url, T content)
+    {
+        if (!Connected) throw new NetworkException("REST client is not connected.");
+        var uri = new Uri(baseUri, url);
+        var jsonContent = JsonContent.Create(content);
+        jsonContent.Headers.ContentLength = jsonContent.ReadAsStream().Length;
+        return httpClient.PostAsync(uri, jsonContent);
+    }
 }
-

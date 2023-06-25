@@ -1,18 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>Sovereign.Accounts</AssemblyName>
-    <RootNamespace>Sovereign.Accounts</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <AssemblyName>Sovereign.Accounts</AssemblyName>
+        <RootNamespace>Sovereign.Accounts</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Sodium.Core" Version="1.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Persistence\Persistence.csproj" />
-    <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Persistence\Persistence.csproj"/>
+        <ProjectReference Include="..\ServerCore\ServerCore.csproj"/>
+    </ItemGroup>
 
 </Project>

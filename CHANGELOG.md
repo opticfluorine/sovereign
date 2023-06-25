@@ -22,6 +22,8 @@
   consolidates the responsibilities onto two systems only, leaving much more
   freedom for the design of the remaining game systems.
 * Add skeletons for basic outbound pipeline stages to client and server.
+* Process login response when connecting to the event server.
+* Clean up client-side disconnect handling.
 
 #### 20 June 2023
 
