@@ -31,6 +31,23 @@ namespace Sovereign.NetworkCore.Network.Pipeline.Outbound;
 /// </summary>
 public sealed class OutboundNetworkPipeline
 {
+    private readonly IConnectionMappingOutboundPipelineStage connectionMappingStage;
+    private readonly FinalOutboundPipelineStage finalStage;
+
+    private readonly IOutboundPipelineStage firstStage;
+
+    public OutboundNetworkPipeline(IConnectionMappingOutboundPipelineStage connectionMappingStage,
+        FinalOutboundPipelineStage finalStage)
+    {
+        // Dependency injection.
+        this.connectionMappingStage = connectionMappingStage;
+        this.finalStage = finalStage;
+
+        // Wire up the stages.
+        connectionMappingStage.NextStage = finalStage;
+        firstStage = connectionMappingStage;
+    }
+
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
@@ -39,5 +56,6 @@ public sealed class OutboundNetworkPipeline
     /// <param name="ev">Event.</param>
     public void ProcessEvent(Event ev)
     {
+        firstStage.Process(new OutboundEventInfo(ev));
     }
 }

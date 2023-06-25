@@ -21,74 +21,74 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System.Collections.Generic;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
+using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.NetworkCore.Network.Service;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Sovereign.NetworkCore.Systems.Network
+namespace Sovereign.NetworkCore.Systems.Network;
+
+/// <summary>
+///     System that connects the event loop to the networking service.
+/// </summary>
+public sealed class NetworkSystem : ISystem
 {
+    private readonly NetworkingService networkingService;
+    private readonly OutboundNetworkPipeline outboundPipeline;
 
-    /// <summary>
-    /// System that connects the event loop to the networking service.
-    /// </summary>
-    public sealed class NetworkSystem : ISystem
+    public NetworkSystem(NetworkingService networkingService,
+        EventCommunicator eventCommunicator,
+        IEventLoop eventLoop,
+        NetworkEventAdapter eventAdapter,
+        OutboundNetworkPipeline outboundPipeline)
     {
-        private readonly NetworkingService networkingService;
+        this.networkingService = networkingService;
+        EventCommunicator = eventCommunicator;
+        this.outboundPipeline = outboundPipeline;
 
-        public EventCommunicator EventCommunicator { get; private set; }
-
-        /// <summary>
-        /// Event IDs that are candidates to be replicated onto the network.
-        /// </summary>
-        public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>()
-        {
-            EventId.Core_Set_Velocity,
-            EventId.Core_Move_Once,
-            EventId.Core_End_Movement
-        };
-
-        public int WorkloadEstimate => 50;
-
-        public NetworkSystem(NetworkingService networkingService,
-            EventCommunicator eventCommunicator,
-            IEventLoop eventLoop,
-            NetworkEventAdapter eventAdapter)
-        {
-            this.networkingService = networkingService;
-            EventCommunicator = eventCommunicator;
-
-            eventLoop.RegisterSystem(this);
-        }
-
-        public void Cleanup()
-        {
-            networkingService.Stop();
-        }
-
-        public int ExecuteOnce()
-        {
-            /* Process outgoing local events. */
-            var eventsProcessed = 0;
-            while (EventCommunicator.GetIncomingEvent(out var ev))
-            {
-                /* Discard nonlocal events. */
-                if (!ev.Local) continue;
-
-                /* Enqueue to send. */
-                networkingService.EventsToSend.Enqueue(ev);
-                eventsProcessed++;
-            }
-
-            return eventsProcessed;
-        }
-
-        public void Initialize()
-        {
-            networkingService.Start();
-        }
+        eventLoop.RegisterSystem(this);
     }
 
+    public EventCommunicator EventCommunicator { get; }
+
+    /// <summary>
+    ///     Event IDs that are candidates to be replicated onto the network.
+    /// </summary>
+    public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
+    {
+        EventId.Core_Set_Velocity,
+        EventId.Core_Move_Once,
+        EventId.Core_End_Movement
+    };
+
+    public int WorkloadEstimate => 50;
+
+    public void Cleanup()
+    {
+        networkingService.Stop();
+    }
+
+    public int ExecuteOnce()
+    {
+        /* Process outgoing local events. */
+        var eventsProcessed = 0;
+        while (EventCommunicator.GetIncomingEvent(out var ev))
+        {
+            /* Discard nonlocal events. */
+            if (!ev.Local) continue;
+
+            /* Pass what's left to the outbound pipeline. */
+            outboundPipeline.ProcessEvent(ev);
+
+            eventsProcessed++;
+        }
+
+        return eventsProcessed;
+    }
+
+    public void Initialize()
+    {
+        networkingService.Start();
+    }
 }

@@ -22,13 +22,11 @@
  */
 
 using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.NetworkCore.Network.Infrastructure;
-using Sovereign.NetworkCore.Network.Pipeline;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 
@@ -74,12 +72,6 @@ public sealed class NetworkingService
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
-
-    /// <summary>
-    ///     Queue of outgoing events to be processed and sent.
-    /// </summary>
-    public ConcurrentQueue<Event> EventsToSend { get; }
-        = new();
 
     /// <summary>
     ///     Starts the networking service.

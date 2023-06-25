@@ -21,41 +21,42 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using Sovereign.EngineCore.Events;
+using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 
-namespace Sovereign.NetworkCore.Network.Infrastructure
+namespace Sovereign.NetworkCore.Network.Infrastructure;
+
+/// <summary>
+///     Delegate type for received packets.
+/// </summary>
+/// <param name="ev">Received event.</param>
+/// <param name="connection">Associated connection.</param>
+public delegate void OnNetworkReceive(Event ev, NetworkConnection connection);
+
+/// <summary>
+///     Interface for managing the network for a client or server.
+/// </summary>
+public interface INetworkManager : IDisposable
 {
+    /// <summary>
+    ///     Event invoked when a packet is received.
+    /// </summary>
+    event OnNetworkReceive OnNetworkReceive;
 
     /// <summary>
-    /// Delegate type for received packets.
+    ///     Initializes the network manager.
     /// </summary>
-    /// <param name="ev">Received event.</param>
-    /// <param name="connection">Associated connection.</param>
-    public delegate void OnNetworkReceive(Event ev, NetworkConnection connection);
+    void Initialize();
 
     /// <summary>
-    /// Interface for managing the network for a client or server.
+    ///     Polls the network.
     /// </summary>
-    public interface INetworkManager : IDisposable
-    {
-        /// <summary>
-        /// Event invoked when a packet is received.
-        /// </summary>
-        event OnNetworkReceive OnNetworkReceive;
+    void Poll();
 
-        /// <summary>
-        /// Initializes the network manager.
-        /// </summary>
-        void Initialize();
-
-        /// <summary>
-        /// Polls the network.
-        /// </summary>
-        void Poll();
-
-    }
-
+    /// <summary>
+    ///     Enqueues an event to be sent via the given connection.
+    /// </summary>
+    /// <param name="evInfo">Event info.</param>
+    void EnqueueEvent(OutboundEventInfo evInfo);
 }

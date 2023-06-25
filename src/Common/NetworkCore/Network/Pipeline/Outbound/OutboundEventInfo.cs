@@ -27,17 +27,12 @@ namespace Sovereign.NetworkCore.Network.Pipeline.Outbound;
 /// <summary>
 ///     Information (partial or complete) for an outbound event in the pipeline.
 /// </summary>
-public struct OutboundEventInfo<TEvent>
+public struct OutboundEventInfo
 {
-    /// <summary>
-    ///     Event ID. Required.
-    /// </summary>
-    public EventId EventId { get; }
-
     /// <summary>
     ///     Event. Required.
     /// </summary>
-    public TEvent Event { get; }
+    public Event Event { get; }
 
     /// <summary>
     ///     Connection to send event with. Optional, but must be specified by the end of the pipeline.
@@ -47,12 +42,10 @@ public struct OutboundEventInfo<TEvent>
     /// <summary>
     ///     Creates an outbound event info.
     /// </summary>
-    /// <param name="eventId">Event ID.</param>
     /// <param name="ev">Event.</param>
     /// <param name="connection">Connection.</param>
-    public OutboundEventInfo(EventId eventId, TEvent ev, NetworkConnection connection = null)
+    public OutboundEventInfo(Event ev, NetworkConnection connection = null)
     {
-        EventId = eventId;
         Event = ev;
         Connection = connection;
     }
@@ -62,9 +55,8 @@ public struct OutboundEventInfo<TEvent>
     /// </summary>
     /// <param name="info">Event info.</param>
     /// <param name="connection">Connection.</param>
-    public OutboundEventInfo(OutboundEventInfo<TEvent> info, NetworkConnection connection)
+    public OutboundEventInfo(OutboundEventInfo info, NetworkConnection connection)
     {
-        EventId = info.EventId;
         Event = info.Event;
         Connection = connection;
     }

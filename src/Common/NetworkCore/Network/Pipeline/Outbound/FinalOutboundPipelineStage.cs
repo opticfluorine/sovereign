@@ -19,25 +19,32 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
+using Castle.Core.Logging;
+using Sovereign.NetworkCore.Network.Infrastructure;
 
 namespace Sovereign.NetworkCore.Network.Pipeline.Outbound;
 
-public class OutboundPipelineInstaller : IWindsorInstaller
+public class FinalOutboundPipelineStage : IOutboundPipelineStage
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
-    {
-        container.Register(Component.For<OutboundNetworkPipeline>()
-            .LifestyleSingleton());
-        container.Register(Component.For<FinalOutboundPipelineStage>()
-            .LifestyleSingleton());
+    private readonly INetworkManager networkManager;
 
-        container.Register(EngineClasses.EngineAssemblies()
-            .BasedOn<IConnectionMappingOutboundPipelineStage>()
-            .WithServiceDefaultInterfaces()
-            .LifestyleSingleton());
+    public FinalOutboundPipelineStage(INetworkManager networkManager)
+    {
+        this.networkManager = networkManager;
+    }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+    public void Process(OutboundEventInfo evInfo)
+    {
+        // Validity check.
+        if (evInfo.Event == null || evInfo.Connection == null)
+        {
+            Logger.Warn("Incomplete event info produced by output pipeline; discarding.");
+            return;
+        }
+
+        // Enqueue the event to be sent over the network.
+        networkManager.EnqueueEvent(evInfo);
     }
 }

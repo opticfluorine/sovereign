@@ -19,25 +19,21 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
+using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 
-namespace Sovereign.NetworkCore.Network.Pipeline.Outbound;
+namespace Sovereign.ClientCore.Network.Pipeline.Outbound;
 
-public class OutboundPipelineInstaller : IWindsorInstaller
+/// <summary>
+///     Maps events to connections in the client-side outbound pipeline.
+/// </summary>
+public class ClientConnectionMappingOutboundPipelineStage : IConnectionMappingOutboundPipelineStage
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
+    public void Process(OutboundEventInfo evInfo)
     {
-        container.Register(Component.For<OutboundNetworkPipeline>()
-            .LifestyleSingleton());
-        container.Register(Component.For<FinalOutboundPipelineStage>()
-            .LifestyleSingleton());
+        // TODO Map
 
-        container.Register(EngineClasses.EngineAssemblies()
-            .BasedOn<IConnectionMappingOutboundPipelineStage>()
-            .WithServiceDefaultInterfaces()
-            .LifestyleSingleton());
+        NextStage.Process(evInfo);
     }
+
+    public IOutboundPipelineStage NextStage { get; set; }
 }
