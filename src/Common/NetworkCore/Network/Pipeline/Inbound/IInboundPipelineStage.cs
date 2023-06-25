@@ -21,36 +21,43 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Infrastructure;
-using Sovereign.NetworkCore.Network.Service;
 
-namespace Sovereign.NetworkCore.Network.Pipeline
+namespace Sovereign.NetworkCore.Network.Pipeline.Inbound
 {
 
     /// <summary>
-    /// Final stage of the inbound network pipeline.
+    /// Interface to an individual stage in the inbound network pipeline.
     /// </summary>
-    public sealed class FinalInboundPipelineStage : IInboundPipelineStage
+    /// <remarks>
+    /// Inbound pipeline stages may accept or reject outbound events as well
+    /// as modify them. If an outbound event is accepted, it is passed to the
+    /// next stage of the pipeline after applying any transformation. An event
+    /// may be rejected simply by not passing anything to the next stage of
+    /// the pipeline.
+    /// </remarks>
+    public interface IInboundPipelineStage
     {
-        private readonly ReceivedEventQueue queue;
 
-        public int Priority => int.MaxValue;
+        /// <summary>
+        /// Stage priority. Lower priorities are executed earlier. The ordering
+        /// of stages having equal priority is undefined.
+        /// </summary>
+        int Priority { get; }
 
-        public IInboundPipelineStage NextStage { get; set; }
+        /// <summary>
+        /// Next stage in the inbound network pipeline.
+        /// </summary>
+        IInboundPipelineStage NextStage { get; set; }
 
-        public FinalInboundPipelineStage(ReceivedEventQueue queue)
-        {
-            this.queue = queue;
-        }
+        /// <summary>
+        /// Processes an inbound event.
+        /// </summary>
+        /// <param name="ev">Inbound event.</param>
+        /// <param name="connection">Associated connection.</param>
+        void ProcessEvent(Event ev, NetworkConnection connection);
 
-        public void ProcessEvent(Event ev, NetworkConnection connection)
-        {
-            queue.ReceivedEvents.Enqueue(ev);
-        }
     }
 
 }

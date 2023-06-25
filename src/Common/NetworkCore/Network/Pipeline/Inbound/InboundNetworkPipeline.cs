@@ -21,15 +21,14 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Castle.Core.Logging;
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Network.Infrastructure;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Castle.Core.Logging;
+using Sovereign.EngineCore.Events;
+using Sovereign.NetworkCore.Network.Infrastructure;
 
-namespace Sovereign.NetworkCore.Network.Pipeline
+namespace Sovereign.NetworkCore.Network.Pipeline.Inbound
 {
 
     /// <summary>

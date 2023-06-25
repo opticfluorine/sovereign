@@ -26,12 +26,12 @@ using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 using Sovereign.EngineUtil.IoC;
 
-namespace Sovereign.NetworkCore.Network.Pipeline;
+namespace Sovereign.NetworkCore.Network.Pipeline.Inbound;
 
 /// <summary>
 ///     IoC installer for the network pipelines.
 /// </summary>
-public sealed class NetworkPipelineInstaller : IWindsorInstaller
+public sealed class InboundPipelineInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {

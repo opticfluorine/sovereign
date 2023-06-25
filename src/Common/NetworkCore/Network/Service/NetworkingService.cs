@@ -29,6 +29,7 @@ using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline;
+using Sovereign.NetworkCore.Network.Pipeline.Inbound;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 
 namespace Sovereign.NetworkCore.Network.Service;

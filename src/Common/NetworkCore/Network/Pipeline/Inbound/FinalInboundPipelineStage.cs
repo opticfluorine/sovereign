@@ -23,44 +23,31 @@
 
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Sovereign.NetworkCore.Network.Service;
 
-namespace Sovereign.NetworkCore.Network.Pipeline
+namespace Sovereign.NetworkCore.Network.Pipeline.Inbound
 {
 
     /// <summary>
-    /// Interface to an individual stage in the inbound network pipeline.
+    /// Final stage of the inbound network pipeline.
     /// </summary>
-    /// <remarks>
-    /// Inbound pipeline stages may accept or reject outbound events as well
-    /// as modify them. If an outbound event is accepted, it is passed to the
-    /// next stage of the pipeline after applying any transformation. An event
-    /// may be rejected simply by not passing anything to the next stage of
-    /// the pipeline.
-    /// </remarks>
-    public interface IInboundPipelineStage
+    public sealed class FinalInboundPipelineStage : IInboundPipelineStage
     {
+        private readonly ReceivedEventQueue queue;
 
-        /// <summary>
-        /// Stage priority. Lower priorities are executed earlier. The ordering
-        /// of stages having equal priority is undefined.
-        /// </summary>
-        int Priority { get; }
+        public int Priority => int.MaxValue;
 
-        /// <summary>
-        /// Next stage in the inbound network pipeline.
-        /// </summary>
-        IInboundPipelineStage NextStage { get; set; }
+        public IInboundPipelineStage NextStage { get; set; }
 
-        /// <summary>
-        /// Processes an inbound event.
-        /// </summary>
-        /// <param name="ev">Inbound event.</param>
-        /// <param name="connection">Associated connection.</param>
-        void ProcessEvent(Event ev, NetworkConnection connection);
+        public FinalInboundPipelineStage(ReceivedEventQueue queue)
+        {
+            this.queue = queue;
+        }
 
+        public void ProcessEvent(Event ev, NetworkConnection connection)
+        {
+            queue.ReceivedEvents.Enqueue(ev);
+        }
     }
 
 }
