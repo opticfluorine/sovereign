@@ -4,6 +4,11 @@
 
 ### June
 
+#### 26 June 2023
+
+* On my lunch break, fix up the `Castle.Core` and `Castle.Windsor` dependency
+  versions to get rid of the warnings introduced by the Dependabot upgrade.
+
 #### 25 June 2023
 
 * Update the event server connection protocol to only require the account UUID
