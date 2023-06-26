@@ -12,7 +12,7 @@
         <PackageReference Include="Castle.Core-log4net" Version="4.4.1"/>
         <PackageReference Include="Castle.LoggingFacility" Version="5.1.2"/>
         <PackageReference Include="Castle.Windsor" Version="5.1.2"/>
-        <PackageReference Include="MessagePack" Version="2.3.85"/>
+        <PackageReference Include="MessagePack" Version="2.5.108"/>
         <PackageReference Include="System.Numerics.Vectors" Version="4.5.0"/>
         <PackageReference Include="YamlDotNet" Version="11.2.1"/>
     </ItemGroup>
