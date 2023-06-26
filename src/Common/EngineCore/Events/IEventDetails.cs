@@ -21,24 +21,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using ProtoBuf;
+using MessagePack;
+using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Systems.Movement.Events;
 
-namespace Sovereign.EngineCore.Events
+namespace Sovereign.EngineCore.Events;
+
+/// <summary>
+///     Interface implemented by event detail classes.
+/// </summary>
+/// <remarks>
+///     Ensure that derived types are linked with a ProtoInclude here.
+/// </remarks>
+[Union(0, typeof(SetVelocityEventDetails))]
+[Union(1, typeof(MoveOnceEventDetails))]
+[Union(2, typeof(EntityEventDetails))]
+[Union(3, typeof(EntityVectorEventDetails))]
+public interface IEventDetails
 {
-
-    /// <summary>
-    /// Interface implemented by event detail classes.
-    /// </summary>
-    /// <remarks>
-    /// Ensure that derived types are linked with a ProtoInclude here.
-    /// </remarks>
-    [ProtoContract]
-    [ProtoInclude(1, "SetVelocityEventDetails")]
-    [ProtoInclude(2, "MoveOnceEventDetails")]
-    [ProtoInclude(3, "EntityEventDetails")]
-    [ProtoInclude(4, "EntityVectorEventDetails")]
-    public interface IEventDetails
-    {
-    }
-
 }

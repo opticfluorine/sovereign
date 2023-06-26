@@ -131,7 +131,13 @@ public sealed class ServerNetworkManager : INetworkManager
 
     public void Poll()
     {
+        // Handle incoming messages, connections, etc.
         netManager.PollEvents();
+
+        // Send whatever is in the outbound event queue.
+        while (outboundEventQueue.TryDequeue(out var evInfo))
+        {
+        }
     }
 
     public void EnqueueEvent(OutboundEventInfo evInfo)

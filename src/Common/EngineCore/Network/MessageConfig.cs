@@ -21,44 +21,62 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using MessagePack;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
+using MessagePack;
 
-namespace Sovereign.EngineCore.Network
+namespace Sovereign.EngineCore.Network;
+
+/// <summary>
+///     Provides common configuration for message handling.
+/// </summary>
+public sealed class MessageConfig
 {
+    /// <summary>
+    ///     MessagePack options for untruested and compressed messages.
+    /// </summary>
+    public static MessagePackSerializerOptions CompressedUntrustedMessagePackOptions =>
+        MessagePackSerializerOptions
+            .Standard.WithCompression(MessagePackCompression.Lz4BlockArray)
+            .WithSecurity(MessagePackSecurity.UntrustedData);
 
     /// <summary>
-    /// Provides common configuration for message handling.
+    ///     MessagePack options for untrusted messages without compression.
     /// </summary>
-    public sealed class MessageConfig
+    public static MessagePackSerializerOptions UntrustedMessagePackOptions =>
+        MessagePackSerializerOptions
+            .Standard
+            .WithSecurity(MessagePackSecurity.UntrustedData);
+
+    /// <summary>
+    ///     JSON serializer options.
+    /// </summary>
+    public static JsonSerializerOptions JsonOptions => new(JsonSerializerDefaults.Web);
+
+    /// <summary>
+    ///     Utility method that serializes an object using MessagePack.
+    ///     This applies default settings for untrusted data.
+    /// </summary>
+    /// <param name="obj">Object to serialize.</param>
+    /// <param name="compressed">Whether to compress the output.</param>
+    /// <typeparam name="T">Type of object to serialize.</typeparam>
+    /// <returns>Serialized object.</returns>
+    public static byte[] SerializeMsgPack<T>(T obj, bool compressed = false)
     {
-
-        /// <summary>
-        /// MessagePack options for untruested and compressed messages.
-        /// </summary>
-        public static MessagePackSerializerOptions CompressedUntrustedMessagePackOptions => 
-            MessagePackSerializerOptions
-                .Standard.WithCompression(MessagePackCompression.Lz4BlockArray)
-                .WithSecurity(MessagePackSecurity.UntrustedData);
-
-        /// <summary>
-        /// MessagePack options for untrusted messages without compression.
-        /// </summary>
-        public static MessagePackSerializerOptions UntrustedMessagePackOptions => 
-            MessagePackSerializerOptions
-                .Standard
-                .WithSecurity(MessagePackSecurity.UntrustedData);
-
-        /// <summary>
-        /// JSON serializer options.
-        /// </summary>
-        public static JsonSerializerOptions JsonOptions => new(JsonSerializerDefaults.Web);
-
+        return MessagePackSerializer.Serialize(obj,
+            compressed ? CompressedUntrustedMessagePackOptions : UntrustedMessagePackOptions);
     }
 
+    /// <summary>
+    ///     Utility method that deserializes an object using MessagePack.
+    ///     This applies default settings for untrusted data.
+    /// </summary>
+    /// <param name="data">Potentially untrusted data to deserialize.</param>
+    /// <param name="compressed">Whether the object is compressed.</param>
+    /// <typeparam name="T">Type of object to deserialize.</typeparam>
+    /// <returns>Deserialized object.</returns>
+    public static T DeserializeMsgPack<T>(byte[] data, bool compressed = false)
+    {
+        return MessagePackSerializer.Deserialize<T>(data,
+            compressed ? CompressedUntrustedMessagePackOptions : UntrustedMessagePackOptions);
+    }
 }

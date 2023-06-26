@@ -21,43 +21,47 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using ProtoBuf;
+using MessagePack;
 using Sovereign.EngineCore.Events;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Sovereign.NetworkCore.Network
+namespace Sovereign.NetworkCore.Network;
+
+/// <summary>
+///     Payload of a network packet.
+/// </summary>
+[MessagePackObject]
+public sealed class NetworkPayload
 {
-
     /// <summary>
-    /// Payload of a network packet.
+    ///     Creates an empty payload.
     /// </summary>
-    [ProtoContract]
-    public sealed class NetworkPayload
+    public NetworkPayload()
     {
-
-        /// <summary>
-        /// Nonce for this payload.
-        /// </summary>
-        /// <remarks>
-        /// The nonce only needs to be unique for the connection.
-        /// </remarks>
-        [ProtoMember(0, IsRequired = true)]
-        public uint Nonce { get; set; }
-
-        /// <summary>
-        /// Type of event in this packet.
-        /// </summary>
-        [ProtoMember(1, IsRequired = true)]
-        public EventId EventId { get; set; }
-
-        /// <summary>
-        /// Serialized packet details.
-        /// </summary>
-        [ProtoMember(2, IsRequired = true)]
-        public byte[] SerializedDetails { get; set; }
-
     }
 
+    /// <summary>
+    ///     Creates a new payload.
+    /// </summary>
+    /// <param name="nonce">Nonce.</param>
+    /// <param name="ev">Event.</param>
+    public NetworkPayload(uint nonce, Event ev)
+    {
+        Nonce = nonce;
+        Event = ev;
+    }
+
+    /// <summary>
+    ///     Nonce for this payload.
+    /// </summary>
+    /// <remarks>
+    ///     The nonce only needs to be unique for the connection.
+    /// </remarks>
+    [Key(0)]
+    public uint Nonce { get; set; }
+
+    /// <summary>
+    ///     Event for this payload.
+    /// </summary>
+    [Key(1)]
+    public Event Event { get; set; }
 }

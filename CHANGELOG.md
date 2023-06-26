@@ -17,6 +17,13 @@
   not normally be publicly known anyway, and because it would be difficult to
   time the attack to occur during the login stage (and a brute force attack would
   be easily detected and blocked).
+* Replace Protobuf with MessagePack throughout the existing code. This is currently
+  untested, I think there will likely be an issue with `Vector3` that will need
+  to be handled.
+* Greatly simplify the event serialization/deserialization logic.
+* Add utility methods for serializing and deserialzing objects using MessagePack
+  to `MessageConfig`. These methods ensure that the correct settings are applied
+  to handle potentially untrusted data.
 
 #### 24 June 2023
 

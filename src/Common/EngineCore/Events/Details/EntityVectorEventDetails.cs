@@ -21,36 +21,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using ProtoBuf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+using MessagePack;
 
-namespace Sovereign.EngineCore.Events.Details
+namespace Sovereign.EngineCore.Events.Details;
+
+/// <summary>
+///     Reusable event details for events with an entity ID and a Vector3.
+/// </summary>
+[MessagePackObject]
+public sealed class EntityVectorEventDetails : IEventDetails
 {
+    /// <summary>
+    ///     Entity ID.
+    /// </summary>
+    [Key(0)]
+    public ulong EntityId { get; set; }
 
     /// <summary>
-    /// Reusable event details for events with an entity ID and a Vector3.
+    ///     Position.
     /// </summary>
-    [ProtoContract]
-    public sealed class EntityVectorEventDetails : IEventDetails
-    {
-
-        /// <summary>
-        /// Entity ID.
-        /// </summary>
-        [ProtoMember(1, IsRequired = true)]
-        public ulong EntityId { get; set; }
-
-        /// <summary>
-        /// Position.
-        /// </summary>
-        [ProtoMember(2, IsRequired = true)]
-        public Vector3 Vector { get; set; }
-
-    }
-
+    [Key(1)]
+    public Vector3 Vector { get; set; }
 }

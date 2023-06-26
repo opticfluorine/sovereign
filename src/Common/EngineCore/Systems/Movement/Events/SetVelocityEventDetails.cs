@@ -21,39 +21,34 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using ProtoBuf;
+using MessagePack;
 using Sovereign.EngineCore.Events;
 
-namespace Sovereign.EngineCore.Systems.Movement.Events
+namespace Sovereign.EngineCore.Systems.Movement.Events;
+
+/// <summary>
+///     Sets the velocity of an entity. The entity will move under this
+///     velocity until the velocity is changed, movement is ended, or the
+///     entity cannot proceed to move.
+/// </summary>
+[MessagePackObject]
+public class SetVelocityEventDetails : IEventDetails
 {
+    /// <summary>
+    ///     Entity identifier.
+    /// </summary>
+    [Key(0)]
+    public ulong EntityId { get; set; }
 
     /// <summary>
-    /// Sets the velocity of an entity. The entity will move under this
-    /// velocity until the velocity is changed, movement is ended, or the
-    /// entity cannot proceed to move.
+    ///     Relative rate of movement along X as a ratio of the entity's base speed.
     /// </summary>
-    [ProtoContract]
-    public class SetVelocityEventDetails : IEventDetails
-    {
+    [Key(1)]
+    public float RateX { get; set; }
 
-        /// <summary>
-        /// Entity identifier.
-        /// </summary>
-        [ProtoMember(1, IsRequired = true)]
-        public ulong EntityId { get; set; }
-
-        /// <summary>
-        /// Relative rate of movement along X as a ratio of the entity's base speed.
-        /// </summary>
-        [ProtoMember(2, IsRequired = true)]
-        public float RateX { get; set; }
-
-        /// <summary>
-        /// Relative rate of movement along Y as a ratio of the entity's base speed.
-        /// </summary>
-        [ProtoMember(3, IsRequired = true)]
-        public float RateY { get; set; }
-
-    }
-
+    /// <summary>
+    ///     Relative rate of movement along Y as a ratio of the entity's base speed.
+    /// </summary>
+    [Key(2)]
+    public float RateY { get; set; }
 }

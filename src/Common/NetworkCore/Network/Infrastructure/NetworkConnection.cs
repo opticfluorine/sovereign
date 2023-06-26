@@ -23,8 +23,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using LiteNetLib;
+using Sovereign.EngineCore.Events;
 
 namespace Sovereign.NetworkCore.Network.Infrastructure;
 
@@ -34,21 +34,14 @@ namespace Sovereign.NetworkCore.Network.Infrastructure;
 public sealed class NetworkConnection : IDisposable
 {
     /// <summary>
-    ///     Backing array for the HMAC key.
+    ///     Network peer.
     /// </summary>
-    private readonly byte[] _Key;
-
-    /// <summary>
-    ///     GC handle used to pin the HMAC key.
-    /// </summary>
-    private readonly GCHandle keyHandle;
-
     private readonly NetPeer peer;
 
     /// <summary>
     ///     Set of received nonces that are no longer valid for this connection.
     /// </summary>
-    private readonly ISet<uint> receivedNonces = new HashSet<uint>();
+    private readonly HashSet<uint> receivedNonces = new();
 
     /// <summary>
     ///     Next available outbound nonce.
@@ -62,15 +55,8 @@ public sealed class NetworkConnection : IDisposable
     /// <param name="key">HMAC key.</param>
     public NetworkConnection(NetPeer peer, byte[] key)
     {
-        /* Set up. */
         this.peer = peer;
-
-        /* Allocate and pin the key memory. */
-        _Key = new byte[key.Length];
-        keyHandle = GCHandle.Alloc(_Key, GCHandleType.Pinned);
-
-        /* Copy the key. */
-        Array.Copy(key, Key, key.Length);
+        Key = key;
     }
 
     /// <summary>
@@ -81,13 +67,11 @@ public sealed class NetworkConnection : IDisposable
     /// <summary>
     ///     Key used for HMAC.
     /// </summary>
-    internal byte[] Key => _Key;
+    internal byte[] Key { get; }
 
     public void Dispose()
     {
-        /* Zero the key and release the pin. */
-        Array.Clear(_Key, 0, _Key.Length);
-        keyHandle.Free();
+        if (peer.ConnectionState == ConnectionState.Connected) peer.Disconnect();
     }
 
     /// <summary>
@@ -109,6 +93,19 @@ public sealed class NetworkConnection : IDisposable
     public uint GetOutboundNonce()
     {
         return nextOutboundNonce++;
+    }
+
+    /// <summary>
+    ///     Serializes and sends an event to the remote endpoint.
+    /// </summary>
+    /// <param name="ev">Event.</param>
+    public void SendEvent(Event ev)
+    {
+        // Check state.
+        if (peer.ConnectionState != ConnectionState.Connected)
+            throw new NetworkException("Cannot send event to disconnected peer.");
+
+        // Serialize event.
     }
 
     /// <summary>

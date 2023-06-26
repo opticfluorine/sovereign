@@ -21,42 +21,31 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using ProtoBuf;
+using MessagePack;
 using Sovereign.EngineCore.Events;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.Systems.Movement.Events
+namespace Sovereign.EngineCore.Systems.Movement.Events;
+
+/// <summary>
+///     Event details associated with the Core_Movement event, which
+///     describes an attempt to move an entity relative to its current
+///     position.
+///     If the entity is able to move to the new position (i.e. the entity
+///     is not fixed and is not somehow forbidden from the new position),
+///     the movement is successful. Otherwise no movement occurs.
+/// </summary>
+[MessagePackObject]
+public class MoveOnceEventDetails : IEventDetails
 {
+    /// <summary>
+    ///     Identifier of the entity that is moving.
+    /// </summary>
+    [Key(0)]
+    public ulong EntityId { get; set; }
 
     /// <summary>
-    /// Event details associated with the Core_Movement event, which
-    /// describes an attempt to move an entity relative to its current
-    /// position.
-    /// 
-    /// If the entity is able to move to the new position (i.e. the entity
-    /// is not fixed and is not somehow forbidden from the new position),
-    /// the movement is successful. Otherwise no movement occurs.
+    ///     Unique movement phase used to filter expired events.
     /// </summary>
-    [ProtoContract]
-    public class MoveOnceEventDetails : IEventDetails
-    {
-
-        /// <summary>
-        /// Identifier of the entity that is moving.
-        /// </summary>
-        [ProtoMember(1, IsRequired = true)]
-        public ulong EntityId { get; set; }
-
-        /// <summary>
-        /// Unique movement phase used to filter expired events.
-        /// </summary>
-        [ProtoMember(2, IsRequired = true)]
-        public uint MovementPhase { get; set; }
-
-    }
-
+    [Key(1)]
+    public uint MovementPhase { get; set; }
 }
