@@ -21,251 +21,274 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace Sovereign.EngineCore.Events
+namespace Sovereign.EngineCore.Events;
+
+/// <summary>
+///     Enumerates the event ID numbers.
+/// </summary>
+public enum EventId
 {
+    #region Core
 
     /// <summary>
-    /// Enumerates the event ID numbers.
+    ///     Unknown event type.
     /// </summary>
-    public enum EventId
-    {
+    /// Associated details: None
+    Unknown = 0,
 
-        #region Core
+    /// <summary>
+    ///     Quit event ID.
+    /// </summary>
+    /// Associated details: None
+    Core_Quit = 1,
 
-        /// <summary>
-        /// Unknown event type.
-        /// </summary>
-        /// Associated details: None
-        Unknown = 0,
+    /// <summary>
+    ///     Event sent at the beginning of a new tick.
+    /// </summary>
+    /// Associated details: None
+    Core_Tick = 2,
 
-        /// <summary>
-        /// Quit event ID.
-        /// </summary>
-        /// Associated details: None
-        Core_Quit = 1,
+    #region Movement
 
-        /// <summary>
-        /// Event sent at the beginning of a new tick.
-        /// </summary>
-        /// Associated details: None
-        Core_Tick = 2,
+    /// <summary>
+    ///     Attempted one-time relative movement of an entity.
+    /// </summary>
+    /// Associated details: MoveOnceEventDetails
+    Core_Move_Once = 100,
 
-        #region Movement
+    /// <summary>
+    ///     Sets the velocity of an entity.
+    /// </summary>
+    /// Associated details: SetVelocityEventDetails
+    Core_Set_Velocity = 101,
 
-        /// <summary>
-        /// Attempted one-time relative movement of an entity.
-        /// </summary>
-        /// Associated details: MoveOnceEventDetails
-        Core_Move_Once = 100,
+    /// <summary>
+    ///     Ends the continous movement, if any, of an entity.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Core_End_Movement = 102,
 
-        /// <summary>
-        /// Sets the velocity of an entity.
-        /// </summary>
-        /// Associated details: SetVelocityEventDetails
-        Core_Set_Velocity = 101,
+    #endregion Movement
 
-        /// <summary>
-        /// Ends the continous movement, if any, of an entity.
-        /// </summary>
-        /// Associated details: EntityEventDetails
-        Core_End_Movement = 102,
+    #region Blocks
 
-        #endregion Movement
+    /// <summary>
+    ///     Adds a single block.
+    /// </summary>
+    /// Associated details: BlockAddEventDetails
+    Core_Block_Add = 200,
 
-        #region Blocks
+    /// <summary>
+    ///     Adds a batch of blocks at once.
+    /// </summary>
+    /// Associated details: BlockAddBatchEventDetails
+    Core_Block_AddBatch = 201,
 
-        /// <summary>
-        /// Adds a single block.
-        /// </summary>
-        /// Associated details: BlockAddEventDetails
-        Core_Block_Add = 200,
+    /// <summary>
+    ///     Removes a single block.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Core_Block_Remove = 202,
 
-        /// <summary>
-        /// Adds a batch of blocks at once.
-        /// </summary>
-        /// Associated details: BlockAddBatchEventDetails
-        Core_Block_AddBatch = 201,
+    /// <summary>
+    ///     Removes a batch of blocks at once.
+    /// </summary>
+    /// Associated details: BlockRemoveBatchEventDetails
+    Core_Block_RemoveBatch = 203,
 
-        /// <summary>
-        /// Removes a single block.
-        /// </summary>
-        /// Associated details: EntityEventDetails
-        Core_Block_Remove = 202,
+    #endregion Blocks
 
-        /// <summary>
-        /// Removes a batch of blocks at once.
-        /// </summary>
-        /// Associated details: BlockRemoveBatchEventDetails
-        Core_Block_RemoveBatch = 203,
+    #region WorldManagement
 
-        #endregion Blocks
+    /// <summary>
+    ///     Event sent to load a world segment.
+    /// </summary>
+    /// Associated details: WorldSegmentEventDetails
+    Core_WorldManagement_LoadSegment = 300,
 
-        #region WorldManagement
+    /// <summary>
+    ///     Unloads a world segment from memory.
+    /// </summary>
+    /// Associated details: WorldSegmentEventDetails
+    Core_WorldManagement_UnloadSegment = 301,
 
-        /// <summary>
-        /// Event sent to load a world segment.
-        /// </summary>
-        /// Associated details: WorldSegmentEventDetails
-        Core_WorldManagement_LoadSegment = 300,
+    /// <summary>
+    ///     Signals that the entities of a world segment have been loaded.
+    /// </summary>
+    /// Asssociated details: WorldSegmentEventDetails
+    Core_WorldManagement_WorldSegmentLoaded = 302,
 
-        /// <summary>
-        /// Unloads a world segment from memory.
-        /// </summary>
-        /// Associated details: WorldSegmentEventDetails
-        Core_WorldManagement_UnloadSegment = 301,
+    #endregion WorldManagement
 
-        /// <summary>
-        /// Signals that the entities of a world segment have been loaded.
-        /// </summary>
-        /// Asssociated details: WorldSegmentEventDetails
-        Core_WorldManagement_WorldSegmentLoaded = 302,
+    #region Performance
 
-        #endregion WorldManagement
+    /// <summary>
+    ///     Sent to perform a local event loop latency test.
+    /// </summary>
+    /// Associated details: TimeEventDetails
+    Core_Performance_EventLatencyTest = 400,
 
-        #region Performance
+    #endregion Performance
 
-        /// <summary>
-        /// Sent to perform a local event loop latency test.
-        /// </summary>
-        /// Associated details: TimeEventDetails
-        Core_Performance_EventLatencyTest = 400,
+    #region Ping
 
-        #endregion Performance
+    /// <summary>
+    ///     Sent to initiate a ping.
+    /// </summary>
+    /// Associated details: None
+    Core_Ping_Ping = 500,
 
-        #endregion Core
+    /// <summary>
+    ///     Sent as reply to a ping.
+    /// </summary>
+    /// Associated details: None
+    Core_Ping_Pong = 501,
 
-        #region Client
+    /// <summary>
+    ///     Sent to command the ping system to initiate a ping.
+    /// </summary>
+    /// Associated details: None
+    Core_Ping_Start = 502,
 
-        #region Client_Input
+    /// <summary>
+    ///     Sent to command the ping system to enable or disable automatic pinging.
+    /// </summary>
+    /// Associated details: AutoPingEventDetails
+    Core_Ping_SetAuto = 503,
 
-        /// <summary>
-        /// Event sent when a key is pressed.
-        /// </summary>
-        /// Associated details: KeyEventDetails
-        Client_Input_KeyDown = 100000,
+    #endregion Ping
 
-        /// <summary>
-        /// Event sent when a key is released.
-        /// </summary>
-        /// Associated details: KeyEventDetails
-        Client_Input_KeyUp = 100001,
+    #endregion Core
 
-        #endregion Client_Input
+    #region Client
 
-        #region Client_Camera
+    #region Client_Input
 
-        /// <summary>
-        /// Event sent when the camera is attached to another entity.
-        /// </summary>
-        /// Associated details: EntityEventDetails
-        Client_Camera_Attach = 100100,
+    /// <summary>
+    ///     Event sent when a key is pressed.
+    /// </summary>
+    /// Associated details: KeyEventDetails
+    Client_Input_KeyDown = 100000,
 
-        /// <summary>
-        /// Event sent when the camera is detached from another entity.
-        /// </summary>
-        /// Associated details: None
-        Client_Camera_Detach = 100101,
+    /// <summary>
+    ///     Event sent when a key is released.
+    /// </summary>
+    /// Associated details: KeyEventDetails
+    Client_Input_KeyUp = 100001,
 
-        #endregion Client_Camera
+    #endregion Client_Input
 
-        #region Client_Network
+    #region Client_Camera
 
-        /// <summary>
-        /// Event sent when the client believes the connection to the server has been lost.
-        /// </summary>
-        /// Associated details: None
-        Client_Network_ConnectionLost = 100200,
+    /// <summary>
+    ///     Event sent when the camera is attached to another entity.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Client_Camera_Attach = 100100,
 
-        /// <summary>
-        /// Event sent to command ClientNetworkSystem to begin connecting to the server.
-        /// This causes an asynchronous authentication attempt to be made with the REST server.
-        /// </summary>
-        /// Associated details: BeginConnectionEventDetails
-        Client_Network_BeginConnection = 100201,
+    /// <summary>
+    ///     Event sent when the camera is detached from another entity.
+    /// </summary>
+    /// Associated details: None
+    Client_Camera_Detach = 100101,
 
-        /// <summary>
-        /// Event sent when the client has failed to authenticate with the REST server.
-        /// </summary>
-        /// Associated details: ErrorEventDetails
-        Client_Network_LoginFailed = 100202,
+    #endregion Client_Camera
 
-        /// <summary>
-        /// Event sent when the client has failed to establish an event server connection.
-        /// </summary>
-        /// Associated details: ErrorEventDetails
-        Client_Network_ConnectionAttemptFailed = 100203,
+    #region Client_Network
 
-        /// <summary>
-        /// Event sent when the client has successfully connected to the event server.
-        /// </summary>
-        /// Associated details: None
-        Client_Network_Connected = 100204,
+    /// <summary>
+    ///     Event sent when the client believes the connection to the server has been lost.
+    /// </summary>
+    /// Associated details: None
+    Client_Network_ConnectionLost = 100200,
 
-        /// <summary>
-        /// Event sent to command ClientNetworkSystem to register a new account.
-        /// </summary>
-        /// Associated details: RegisterAccountEventDetails
-        Client_Network_RegisterAccount = 100205,
+    /// <summary>
+    ///     Event sent to command ClientNetworkSystem to begin connecting to the server.
+    ///     This causes an asynchronous authentication attempt to be made with the REST server.
+    /// </summary>
+    /// Associated details: BeginConnectionEventDetails
+    Client_Network_BeginConnection = 100201,
 
-        /// <summary>
-        /// Event sent to announce a successful account registration.
-        /// </summary>
-        /// Associated details: None
-        Client_Network_RegisterSuccess = 100206,
+    /// <summary>
+    ///     Event sent when the client has failed to authenticate with the REST server.
+    /// </summary>
+    /// Associated details: ErrorEventDetails
+    Client_Network_LoginFailed = 100202,
 
-        /// <summary>
-        /// Event sent to announce a failed account registration.
-        /// </summary>
-        /// Associated details: ErrorEventDetails
-        Client_Network_RegisterFailed = 100207,
+    /// <summary>
+    ///     Event sent when the client has failed to establish an event server connection.
+    /// </summary>
+    /// Associated details: ErrorEventDetails
+    Client_Network_ConnectionAttemptFailed = 100203,
 
-        #endregion Client_Network
+    /// <summary>
+    ///     Event sent when the client has successfully connected to the event server.
+    /// </summary>
+    /// Associated details: None
+    Client_Network_Connected = 100204,
 
-        #endregion Client
+    /// <summary>
+    ///     Event sent to command ClientNetworkSystem to register a new account.
+    /// </summary>
+    /// Associated details: RegisterAccountEventDetails
+    Client_Network_RegisterAccount = 100205,
 
-        #region Server
+    /// <summary>
+    ///     Event sent to announce a successful account registration.
+    /// </summary>
+    /// Associated details: None
+    Client_Network_RegisterSuccess = 100206,
 
-        #region Server_Persistence
+    /// <summary>
+    ///     Event sent to announce a failed account registration.
+    /// </summary>
+    /// Associated details: ErrorEventDetails
+    Client_Network_RegisterFailed = 100207,
 
-        /// <summary>
-        /// Event sent to retrieve a specific entity from the database.
-        /// </summary>
-        /// Associated details: EntityEventDetails
-        Server_Persistence_RetrieveEntity = 200000,
+    #endregion Client_Network
 
-        /// <summary>
-        /// Event sent to retrieve all entities positioned within a range
-        /// from the database.
-        /// </summary>
-        /// Associated details: VectorPairEventDetails
-        Server_Persistence_RetrieveEntitiesInRange = 200001,
+    #endregion Client
 
-        /// <summary>
-        /// Event sent to load a world segment from the database.
-        /// </summary>
-        /// Associated details: WorldSegmentEventDetails
-        Server_Persistence_RetrieveWorldSegment = 200002,
+    #region Server
 
-        /// <summary>
-        /// Event sent to synchronize the server with the database.
-        /// </summary>
-        /// Associated details: None
-        Server_Persistence_Synchronize = 200099,
+    #region Server_Persistence
 
-        #endregion Server_Persistence
-        
-        #region Server_Debug
-        
-        /// <summary>
-        /// Event sent to issue a debug command.
-        /// </summary>
-        /// Associated details: DebugCommandEventDetails
-        Server_Debug_Command = 200100,
-        
-        #endregion Server_Debug
+    /// <summary>
+    ///     Event sent to retrieve a specific entity from the database.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Server_Persistence_RetrieveEntity = 200000,
 
-        #endregion Server
+    /// <summary>
+    ///     Event sent to retrieve all entities positioned within a range
+    ///     from the database.
+    /// </summary>
+    /// Associated details: VectorPairEventDetails
+    Server_Persistence_RetrieveEntitiesInRange = 200001,
 
-    }
+    /// <summary>
+    ///     Event sent to load a world segment from the database.
+    /// </summary>
+    /// Associated details: WorldSegmentEventDetails
+    Server_Persistence_RetrieveWorldSegment = 200002,
 
+    /// <summary>
+    ///     Event sent to synchronize the server with the database.
+    /// </summary>
+    /// Associated details: None
+    Server_Persistence_Synchronize = 200099,
+
+    #endregion Server_Persistence
+
+    #region Server_Debug
+
+    /// <summary>
+    ///     Event sent to issue a debug command.
+    /// </summary>
+    /// Associated details: DebugCommandEventDetails
+    Server_Debug_Command = 200100,
+
+    #endregion Server_Debug
+
+    #endregion Server
 }

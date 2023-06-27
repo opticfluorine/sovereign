@@ -4,6 +4,11 @@
 
 ### June
 
+#### 27 June 2023
+
+* Begin adding a `PingSystem` for providing network ping. This will be used
+  for both performance measurement and heartbeat. Work in progress.
+
 #### 26 June 2023
 
 * On my lunch break, fix up the `Castle.Core` and `Castle.Windsor` dependency

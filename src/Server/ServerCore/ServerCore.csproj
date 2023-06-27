@@ -13,4 +13,8 @@
     <ProjectReference Include="..\..\Common\WorldManagement\WorldManagement.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Systems\Ping\" />
+  </ItemGroup>
+
 </Project>
