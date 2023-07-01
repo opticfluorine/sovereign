@@ -33,9 +33,10 @@ public class PingController
     ///     Commands the ping system to initiate a new ping.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
-    public void StartPing(IEventSender eventSender)
+    /// <param name="eventTime">System time at which the ping should be sent.</param>
+    public void StartPing(IEventSender eventSender, ulong eventTime = Event.Immediate)
     {
-        var ev = new Event(EventId.Core_Ping_Start);
+        var ev = new Event(EventId.Core_Ping_Start, eventTime);
         eventSender.SendEvent(ev);
     }
 
@@ -44,11 +45,31 @@ public class PingController
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
     /// <param name="enabled">If true, enable auto-ping; if false, disable.</param>
-    /// <param name="intervalTicks">Ticks between pings. Ignored if auto-ping is disabled.</param>
-    public void SetAutoPing(IEventSender eventSender, bool enabled, uint intervalTicks)
+    /// <param name="intervalMs">Milliseconds between pings. Ignored if auto-ping is disabled.</param>
+    public void SetAutoPing(IEventSender eventSender, bool enabled, uint intervalMs)
     {
-        var details = new AutoPingEventDetails(enabled, intervalTicks);
+        var details = new AutoPingEventDetails(enabled, intervalMs);
         var ev = new Event(EventId.Core_Ping_SetAuto, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Internal API to immediately publishes a ping.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    internal void Ping(IEventSender eventSender)
+    {
+        var ev = new Event(EventId.Core_Ping_Ping);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Internal API to immediately publish a pong.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    internal void Pong(IEventSender eventSender)
+    {
+        var ev = new Event(EventId.Core_Ping_Pong);
         eventSender.SendEvent(ev);
     }
 }

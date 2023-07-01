@@ -2,6 +2,17 @@
 
 ## 2023
 
+### July
+
+#### 01 July 2023
+
+* Finish the initial implementation of `PingSystem`. I'll need to circle back
+  to this for the server in order to do per-connection ping. This will require
+  associating nonlocal events to their connection, so starting to think about
+  what this will look like.
+* Next up, need to add client- and server-specific startup sequences that
+  send appropriate startup events (e.g. enabling auto ping).
+
 ### June
 
 #### 27 June 2023

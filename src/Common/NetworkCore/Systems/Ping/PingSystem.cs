@@ -20,8 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System.Collections.Generic;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Timing;
+using Sovereign.EngineCore.Util;
 
 namespace Sovereign.NetworkCore.Systems.Ping;
 
@@ -31,22 +35,49 @@ namespace Sovereign.NetworkCore.Systems.Ping;
 /// </summary>
 public class PingSystem : ISystem
 {
-    public PingSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop)
+    private readonly IEventSender eventSender;
+    private readonly PingController pingController;
+    private readonly ISystemTimer timer;
+
+    /// <summary>
+    ///     Whether auto ping is currently enabled.
+    /// </summary>
+    private bool autoPingEnabled;
+
+    /// <summary>
+    ///     Interval in milliseconds between each automatic ping.
+    /// </summary>
+    private uint autoPingIntervalMs;
+
+    /// <summary>
+    ///     System time of last ping.
+    /// </summary>
+    private ulong lastPingTime;
+
+    public PingSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, ISystemTimer timer,
+        PingController pingController, IEventSender eventSender)
     {
         EventCommunicator = eventCommunicator;
+        this.timer = timer;
+        this.pingController = pingController;
+        this.eventSender = eventSender;
 
         eventLoop.RegisterSystem(this);
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 
     public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>
     {
         EventId.Core_Ping_Ping,
-        EventId.Core_Ping_Pong
+        EventId.Core_Ping_Pong,
+        EventId.Core_Ping_Start,
+        EventId.Core_Ping_SetAuto
     };
 
-    public int WorkloadEstimate => 10;
+    public int WorkloadEstimate => 1;
 
     public void Initialize()
     {
@@ -58,6 +89,79 @@ public class PingSystem : ISystem
 
     public int ExecuteOnce()
     {
-        return 0;
+        var eventsProcessed = 0;
+        while (EventCommunicator.GetIncomingEvent(out var ev))
+        {
+            eventsProcessed++;
+            switch (ev.EventId)
+            {
+                case EventId.Core_Ping_Start:
+                    OnPingStart();
+                    break;
+
+                case EventId.Core_Ping_SetAuto:
+                    OnSetAuto((AutoPingEventDetails)ev.EventDetails);
+                    break;
+
+                case EventId.Core_Ping_Ping:
+                    // Ignore local pings as they depart the system.
+                    if (!ev.Local)
+                        OnPing();
+                    break;
+
+                case EventId.Core_Ping_Pong:
+                    // Ignore local pongs as they depart the system.
+                    if (!ev.Local)
+                        OnPong();
+                    break;
+
+                default:
+                    Logger.ErrorFormat("Received unhandled event with type {0}.", ev.EventId);
+                    break;
+            }
+        }
+
+        return eventsProcessed;
+    }
+
+    private void OnPong()
+    {
+        // Compute round trip time.
+        var now = timer.GetTime();
+        var delta = now - lastPingTime;
+
+        Logger.DebugFormat("Ping roundtrip time: {0} ms", (float)delta / Units.SystemTime.Millisecond);
+    }
+
+    private void OnPing()
+    {
+        // Ping received, respond with a pong.
+        pingController.Pong(eventSender);
+    }
+
+    private void OnSetAuto(AutoPingEventDetails evEventDetails)
+    {
+        // Update state.
+        var lastState = autoPingEnabled;
+        autoPingEnabled = evEventDetails.Enable;
+        autoPingIntervalMs = evEventDetails.IntervalMs;
+
+        // If auto ping was just enabled, schedule the first ping.
+        if (autoPingEnabled && !lastState)
+            pingController.StartPing(eventSender, timer.GetTime() + autoPingIntervalMs * Units.SystemTime.Millisecond);
+    }
+
+    private void OnPingStart()
+    {
+        // Emit a ping.
+        pingController.Ping(eventSender);
+        lastPingTime = timer.GetTime();
+
+        // If auto ping is enabled, schedule the next ping.
+        if (autoPingEnabled)
+        {
+            var nextTime = lastPingTime + autoPingIntervalMs * Units.SystemTime.Millisecond;
+            pingController.StartPing(eventSender, nextTime);
+        }
     }
 }

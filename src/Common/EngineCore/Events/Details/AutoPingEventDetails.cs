@@ -30,11 +30,11 @@ public class AutoPingEventDetails : IEventDetails
     ///     Creates auto ping event details.
     /// </summary>
     /// <param name="enable">Whether to enable auto ping.</param>
-    /// <param name="intervalTicks">Interval in ticks between pings.</param>
-    public AutoPingEventDetails(bool enable, uint intervalTicks)
+    /// <param name="intervalMs">Interval in milliseconds between pings.</param>
+    public AutoPingEventDetails(bool enable, uint intervalMs)
     {
         Enable = enable;
-        IntervalTicks = intervalTicks;
+        IntervalMs = intervalMs;
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ public class AutoPingEventDetails : IEventDetails
     public bool Enable { get; set; }
 
     /// <summary>
-    ///     How many ticks between each automatic ping.
+    ///     Time in milliseconds between each automatic ping.
     /// </summary>
-    public uint IntervalTicks { get; set; }
+    public uint IntervalMs { get; set; }
 }
