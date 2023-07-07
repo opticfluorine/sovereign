@@ -33,8 +33,9 @@ Client systems are only present in the client.
 
 Server systems are only present in the server.
 
-| System        | System Class        | Description                                           |
-|---------------|---------------------|-------------------------------------------------------|
-| `Accounts`    | `AccountsSystem`    | Responsible for managing the locked account list.     |
-| `Debug`       | `DebugSystem`       | Responsible for providing a debug interface for test. |
-| `Persistence` | `PersistenceSystem` | Responsible for managing the database.                |
+| System             | System Class             | Description                                                      |
+|--------------------|--------------------------|------------------------------------------------------------------|
+| `Accounts`         | `AccountsSystem`         | Responsible for managing the locked account list.                |
+| `Debug`            | `DebugSystem`            | Responsible for providing a debug interface for test.            |
+| `Persistence`      | `PersistenceSystem`      | Responsible for managing the database.                           |
+| `ServerManagement` | `ServerManagementSystem` | Responsible for managing the engine in its server configuration. |

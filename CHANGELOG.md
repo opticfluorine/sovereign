@@ -4,6 +4,15 @@
 
 ### July
 
+#### 07 July 2023
+
+* Add new settings to the server network configuration for ping interval and
+  connection timeout period. The default behavior of the server will be
+  to disconnect any client which does not send any traffic, including a
+  response to a ping, within the timeout period.
+* Add `ServerManagementSystem` which currently just enables the auto-ping
+  behavior in the server.
+
 #### 01 July 2023
 
 * Finish the initial implementation of `PingSystem`. I'll need to circle back

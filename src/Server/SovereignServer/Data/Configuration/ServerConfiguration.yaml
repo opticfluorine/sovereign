@@ -2,174 +2,188 @@
 # Accounts Configuration
 # ----------------------
 Accounts:
-
-    # ----------------------
-    # MaxFailedLoginAttempts
-    # ----------------------
-    # Maximum number of failed login attempts before access to an account
-    # is temporarily disabled.
-    MaxFailedLoginAttempts: 10
-
-    # ------------------------
-    # LoginDenialPeriodSeconds
-    # ------------------------
-    # Length of the login denial period, in seconds. The failed login attempt
-    # count is reset after this amount of time has elapsed since the last
-    # failed login attempt.
-    LoginDenialPeriodSeconds: 1800
-
-    # ---------------------
-    # MinimumPasswordLength
-    # ---------------------
-    # Minimum length of all new passwords.
-    MinimumPasswordLength: 8
-
-    # --------------------
-    # HandoffPeriodSeconds
-    # --------------------
-    # Length of the connection handoff period following a successful login.
-    # The connection may only be established during the handoff period, beyond
-    # which the handoff will be invalidated.
-    HandoffPeriodSeconds: 30
+  
+  # ----------------------
+  # MaxFailedLoginAttempts
+  # ----------------------
+  # Maximum number of failed login attempts before access to an account
+  # is temporarily disabled.
+  MaxFailedLoginAttempts: 10
+  
+  # ------------------------
+  # LoginDenialPeriodSeconds
+  # ------------------------
+  # Length of the login denial period, in seconds. The failed login attempt
+  # count is reset after this amount of time has elapsed since the last
+  # failed login attempt.
+  LoginDenialPeriodSeconds: 1800
+  
+  # ---------------------
+  # MinimumPasswordLength
+  # ---------------------
+  # Minimum length of all new passwords.
+  MinimumPasswordLength: 8
+  
+  # --------------------
+  # HandoffPeriodSeconds
+  # --------------------
+  # Length of the connection handoff period following a successful login.
+  # The connection may only be established during the handoff period, beyond
+  # which the handoff will be invalidated.
+  HandoffPeriodSeconds: 30
 
 
 # ----------------------
 # Database Configuration
 # ----------------------
 Database:
-
-    # ------------
-    # DatabaseType
-    # ------------
-    # Specifies the type of database to use.
-    # Valid options are 'sqlite', 'postgres'
-    DatabaseType: sqlite
-
-    # ----
-    # Host
-    # ----
-    # For postgres, specifies the database host.
-    # For sqlite, specifies the data source file.
-    Host: Data/sovereign.db
-
-    # ----
-    # Port
-    # ----
-    # For postgres, specifies the database port. Defaults to 5432.
-    # Not used for sqlite.
-    Port: 5432
-
-    # --------
-    # Database
-    # --------
-    # For postgres, specifies the database name. Defaults to 'sovereign'.
-    # Not used for sqlite.
-    Database: sovereign
-
-    # --------
-    # Username
-    # --------
-    # For postgres, specifies the database username. Defaults to
-    # 'sovereign'.
-    # Not used for sqlite.
-    Username: sovereign
-
-    # --------
-    # Password
-    # --------
-    # For postgres, specifies the database password. Defaults to no
-    # password.
-    # Not used for sqlite.
-    # Password: sovereign
-
-    # -------
-    # Pooling
-    # -------
-    # Whether or not to use database connection pooling.
-    # Allowed values: true, false.
-    Pooling: true
-
-    # -----------
-    # PoolSizeMin
-    # -----------
-    # Minimum size of the database connection pool.
-    PoolSizeMin: 1
-
-    # -----------
-    # PoolSizeMax
-    # -----------
-    # Maximum size of the database connection pool.
-    PoolSizeMax: 100
-
-    # -------------------
-    # SyncIntervalSeconds
-    # -------------------
-    # Maximum number of seconds between database synchronizations.
-    SyncIntervalSeconds: 60
+  
+  # ------------
+  # DatabaseType
+  # ------------
+  # Specifies the type of database to use.
+  # Valid options are 'sqlite', 'postgres'
+  DatabaseType: sqlite
+  
+  # ----
+  # Host
+  # ----
+  # For postgres, specifies the database host.
+  # For sqlite, specifies the data source file.
+  Host: Data/sovereign.db
+  
+  # ----
+  # Port
+  # ----
+  # For postgres, specifies the database port. Defaults to 5432.
+  # Not used for sqlite.
+  Port: 5432
+  
+  # --------
+  # Database
+  # --------
+  # For postgres, specifies the database name. Defaults to 'sovereign'.
+  # Not used for sqlite.
+  Database: sovereign
+  
+  # --------
+  # Username
+  # --------
+  # For postgres, specifies the database username. Defaults to
+  # 'sovereign'.
+  # Not used for sqlite.
+  Username: sovereign
+  
+  # --------
+  # Password
+  # --------
+  # For postgres, specifies the database password. Defaults to no
+  # password.
+  # Not used for sqlite.
+  # Password: sovereign
+  
+  # -------
+  # Pooling
+  # -------
+  # Whether or not to use database connection pooling.
+  # Allowed values: true, false.
+  Pooling: true
+  
+  # -----------
+  # PoolSizeMin
+  # -----------
+  # Minimum size of the database connection pool.
+  PoolSizeMin: 1
+  
+  # -----------
+  # PoolSizeMax
+  # -----------
+  # Maximum size of the database connection pool.
+  PoolSizeMax: 100
+  
+  # -------------------
+  # SyncIntervalSeconds
+  # -------------------
+  # Maximum number of seconds between database synchronizations.
+  SyncIntervalSeconds: 60
 
 
 # ---------------------
 # Network Configuration
 # ---------------------
 Network:
-
-    # --------------------
-    # NetworkInterfaceIPv4
-    # --------------------
-    # IPv4 interface to bind.
-    NetworkInterfaceIPv4: 0.0.0.0
-
-    # --------------------
-    # NetworkInterfaceIPv6
-    # --------------------
-    # IPv6 interface to bind.
-    NetworkInterfaceIPv6: ::0
-
-    # ----
-    # Host
-    # ----
-    # Server hostname to use for connection handoff.
-    Host: localhost
-
-    # ----
-    # Port
-    # ----
-    # Server port.
-    Port: 12820
-
-    # ------------
-    # RestHostname
-    # ------------
-    # Hostname to use for the local REST server.
-    RestHostname: 127.0.0.1
-
-    # --------
-    # RestPort
-    # --------
-    # Port to use for the local REST server.
-    RestPort: 8080
+  
+  # --------------------
+  # NetworkInterfaceIPv4
+  # --------------------
+  # IPv4 interface to bind.
+  NetworkInterfaceIPv4: 0.0.0.0
+  
+  # --------------------
+  # NetworkInterfaceIPv6
+  # --------------------
+  # IPv6 interface to bind.
+  NetworkInterfaceIPv6: ::0
+  
+  # ----
+  # Host
+  # ----
+  # Server hostname to use for connection handoff.
+  Host: localhost
+  
+  # ----
+  # Port
+  # ----
+  # Server port.
+  Port: 12820
+  
+  # ------------
+  # RestHostname
+  # ------------
+  # Hostname to use for the local REST server.
+  RestHostname: 127.0.0.1
+  
+  # --------
+  # RestPort
+  # --------
+  # Port to use for the local REST server.
+  RestPort: 8080
+  
+  # --------------
+  # PingIntervalMs
+  # --------------
+  # Automatic ping interval, in milliseconds.
+  PingIntervalMs: 10000
+  
+  # ---------------
+  # ConnectionTimeoutMs
+  # ---------------
+  # Timeout period (in milliseconds) after which a client will be disconnected.
+  # This is recommended to be at least 2.5x PingIntervalMs for low-activity connections
+  # where a ping is dropped.
+  ConnectionTimeoutMs: 30000
 
 
 # -------------------
 # World Configuration
 # -------------------
 World:
+  
+  # ---------
+  # ChunkSize
+  # ---------
+  # Size, in blocks, of the length of a discrete chunk of the world.
+  ChunkSize: 32
 
-    # ---------
-    # ChunkSize
-    # ---------
-    # Size, in blocks, of the length of a discrete chunk of the world.
-    ChunkSize: 32
-    
 # -------------------
 # Debug Configuration
 # -------------------
 Debug:
-    
-    # ---------------
-    # EnableDebugMode
-    # ---------------
-    # Whether or not to enable debug mode.
-    # Debug mode should only be enabled for development purposes.
-    # It must be disabled for production use.
-    EnableDebugMode: false
+  
+  # ---------------
+  # EnableDebugMode
+  # ---------------
+  # Whether or not to enable debug mode.
+  # Debug mode should only be enabled for development purposes.
+  # It must be disabled for production use.
+  EnableDebugMode: false
