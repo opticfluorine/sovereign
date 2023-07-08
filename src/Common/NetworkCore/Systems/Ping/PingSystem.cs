@@ -112,7 +112,7 @@ public class PingSystem : ISystem
                 case EventId.Core_Ping_Pong:
                     // Ignore local pongs as they depart the system.
                     if (!ev.Local)
-                        OnPong();
+                        OnPong(ev);
                     break;
 
                 default:
@@ -124,13 +124,15 @@ public class PingSystem : ISystem
         return eventsProcessed;
     }
 
-    private void OnPong()
+    private void OnPong(Event ev)
     {
         // Compute round trip time.
         var now = timer.GetTime();
         var delta = now - lastPingTime;
 
-        Logger.DebugFormat("Ping roundtrip time: {0} ms", (float)delta / Units.SystemTime.Millisecond);
+        Logger.DebugFormat("Ping roundtrip time for connection {0}: {1} ms",
+            ev.FromConnectionId,
+            (float)delta / Units.SystemTime.Millisecond);
     }
 
     private void OnPing()

@@ -4,6 +4,13 @@
 
 ### July
 
+#### 08 July 2023
+
+* Tag each event received over the network with the originating connection ID.
+* Report ping roundtrip timings per connection in the server if debug logging
+  is enabled. Should be useful for performance monitoring while developing the
+  rest of the network code.
+
 #### 07 July 2023
 
 * Add new settings to the server network configuration for ping interval and

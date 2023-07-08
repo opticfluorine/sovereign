@@ -21,27 +21,18 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.EngineCore.Events;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
+using Sovereign.EngineCore.Events;
 
-namespace Sovereign.NetworkCore.Network.Service
+namespace Sovereign.NetworkCore.Network.Service;
+
+/// <summary>
+///     Manages the queue of events received from the network.
+/// </summary>
+public sealed class ReceivedEventQueue
 {
-
     /// <summary>
-    /// Manages the queue of events received from the network.
+    ///     Queue of processed events received and accepted from the network.
     /// </summary>
-    public sealed class ReceivedEventQueue
-    {
-
-        /// <summary>
-        /// Queue of processed events received and accepted from the network.
-        /// </summary>
-        public ConcurrentQueue<Event> ReceivedEvents { get; }
-            = new ConcurrentQueue<Event>();
-
-    }
-
+    public ConcurrentQueue<Event> ReceivedEvents { get; } = new();
 }

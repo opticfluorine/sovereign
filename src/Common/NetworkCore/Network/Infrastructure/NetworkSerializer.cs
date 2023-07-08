@@ -191,6 +191,7 @@ public sealed class NetworkSerializer
 
         // All good.
         payload.Event.Local = false;
+        payload.Event.FromConnectionId = connection.Id;
         return payload.Event;
     }
 

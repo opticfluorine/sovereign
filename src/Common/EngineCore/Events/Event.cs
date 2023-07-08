@@ -116,6 +116,12 @@ public class Event
     public bool SyncToTick { get; set; }
 
     /// <summary>
+    ///     Connection ID that this originated from. Only meaningful if Local is false.
+    /// </summary>
+    [IgnoreMember]
+    public int FromConnectionId { get; set; }
+
+    /// <summary>
     ///     Details associated with the event.
     /// </summary>
     [Key(1)]
