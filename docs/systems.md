@@ -39,3 +39,4 @@ Server systems are only present in the server.
 | `Debug`            | `DebugSystem`            | Responsible for providing a debug interface for test.            |
 | `Persistence`      | `PersistenceSystem`      | Responsible for managing the database.                           |
 | `ServerManagement` | `ServerManagementSystem` | Responsible for managing the engine in its server configuration. |
+| `ServerNetwork`    | `ServerNetworkSystem`    | Responsible for managing server network resources.               |

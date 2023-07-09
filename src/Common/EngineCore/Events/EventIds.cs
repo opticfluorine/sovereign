@@ -290,5 +290,15 @@ public enum EventId
 
     #endregion Server_Debug
 
+    #region Server_Network
+
+    /// <summary>
+    ///     Event sent to disconnect a client.
+    /// </summary>
+    /// Associated details: ConnectionIdEventDetails
+    Server_Network_DisconnectClient = 200200,
+
+    #endregion Server_Network
+
     #endregion Server
 }

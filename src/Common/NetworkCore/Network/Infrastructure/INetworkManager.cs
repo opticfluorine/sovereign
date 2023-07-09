@@ -59,4 +59,10 @@ public interface INetworkManager : IDisposable
     /// </summary>
     /// <param name="evInfo">Event info.</param>
     void EnqueueEvent(OutboundEventInfo evInfo);
+
+    /// <summary>
+    ///     Disconnects the connection with the given connection ID.
+    /// </summary>
+    /// <param name="connectionId">Connection ID.</param>
+    void Disconnect(int connectionId);
 }

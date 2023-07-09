@@ -90,6 +90,12 @@ public sealed class ClientNetworkManager : INetworkManager
     private readonly EventBasedNetListener netListener;
     private readonly NetManager netManager;
     private readonly NetworkSerializer networkSerializer;
+
+    /// <summary>
+    ///     Outbound event queue from the outbound pipeline.
+    /// </summary>
+    private readonly ConcurrentQueue<OutboundEventInfo> outboundEventQueue = new();
+
     private readonly RestClient restClient;
 
     /// <summary>
@@ -157,13 +163,24 @@ public sealed class ClientNetworkManager : INetworkManager
         // Handle any inbound commands.
         HandleCommands();
 
+        // Send any events that have been enqueued.
+        while (outboundEventQueue.TryDequeue(out var evInfo))
+        {
+            // TODO Send event
+        }
+
         // Poll the network.
         netManager.PollEvents();
     }
 
     public void EnqueueEvent(OutboundEventInfo evInfo)
     {
-        // TODO
+        outboundEventQueue.Enqueue(evInfo);
+    }
+
+    public void Disconnect(int connectionId)
+    {
+        // Not implemented for client.
     }
 
     /// <summary>

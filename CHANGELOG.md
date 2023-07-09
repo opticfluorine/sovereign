@@ -4,6 +4,13 @@
 
 ### July
 
+#### 09 July 2023
+
+* Map out remaining work to get the event client/server up and running.
+* Add event allowlists to client and server to strictly limit which events
+  can be received from the network.
+* Start work on plumbing outgoing events to their connections.
+
 #### 08 July 2023
 
 * Tag each event received over the network with the originating connection ID.
