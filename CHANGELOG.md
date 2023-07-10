@@ -12,6 +12,11 @@
 * Start work on plumbing outgoing events to their connections.
 * Correctly route client-side events to the main connection when the client
   is connected.
+* Add a strategy-based connection mapper to the server that selects a mapping
+  strategy based on the event ID. For now we just have the global strategy which
+  forwards an event to all connections. The ping event in the server is
+  distributed to all clients using this strategy.
+* Fix issue where the connection manager was not thread-safe.
 
 #### 08 July 2023
 

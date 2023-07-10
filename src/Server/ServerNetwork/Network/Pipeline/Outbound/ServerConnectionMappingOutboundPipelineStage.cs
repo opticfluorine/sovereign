@@ -19,7 +19,11 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+using System.Collections.Generic;
+using Castle.Core.Logging;
+using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
+using Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
 
 namespace Sovereign.ServerNetwork.Network.Pipeline.Outbound;
 
@@ -28,12 +32,38 @@ namespace Sovereign.ServerNetwork.Network.Pipeline.Outbound;
 /// </summary>
 public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOutboundPipelineStage
 {
-    public void Process(OutboundEventInfo evInfo)
-    {
-        // TODO Map
+    /// <summary>
+    ///     Map of outbound events to specialized connection mappers.
+    /// </summary>
+    private readonly Dictionary<EventId, ISpecificConnectionMapper> specificMappers = new();
 
-        NextStage.Process(evInfo);
+    private IOutboundPipelineStage nextStage;
+
+    public ServerConnectionMappingOutboundPipelineStage(GlobalConnectionMapper globalMapper)
+    {
+        // Configure specific connection mappers.
+        specificMappers[EventId.Core_Ping_Ping] = globalMapper;
     }
 
-    public IOutboundPipelineStage NextStage { get; set; }
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+    public void Process(OutboundEventInfo evInfo)
+    {
+        // Dispatch to the correct mapping strategy.
+        if (specificMappers.TryGetValue(evInfo.Event.EventId, out var mapper))
+            mapper.Process(evInfo);
+        else
+            // No mapper found for this event type.
+            Logger.ErrorFormat("No connection mapper available for event ID {0}.", evInfo.Event.EventId);
+    }
+
+    public IOutboundPipelineStage NextStage
+    {
+        get => nextStage;
+        set
+        {
+            nextStage = value;
+            foreach (var mapper in specificMappers.Values) mapper.NextStage = nextStage;
+        }
+    }
 }
