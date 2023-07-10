@@ -132,7 +132,15 @@ public sealed class ServerNetworkManager : INetworkManager
     public void Poll()
     {
         // Send whatever is in the outbound event queue.
-        while (outboundEventQueue.TryDequeue(out var evInfo)) evInfo.Connection.SendEvent(evInfo.Event);
+        while (outboundEventQueue.TryDequeue(out var evInfo))
+            try
+            {
+                evInfo.Connection.SendEvent(evInfo.Event, evInfo.DeliveryMethod, serializer);
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Failed to send event to client.", e);
+            }
 
         // Handle incoming messages, connections, etc.
         netManager.PollEvents();

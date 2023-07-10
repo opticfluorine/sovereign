@@ -19,6 +19,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+using LiteNetLib;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Infrastructure;
 
@@ -40,14 +41,22 @@ public struct OutboundEventInfo
     public NetworkConnection Connection { get; }
 
     /// <summary>
+    ///     Delivery method for sending this event.
+    /// </summary>
+    public DeliveryMethod DeliveryMethod { get; }
+
+    /// <summary>
     ///     Creates an outbound event info.
     /// </summary>
     /// <param name="ev">Event.</param>
     /// <param name="connection">Connection.</param>
-    public OutboundEventInfo(Event ev, NetworkConnection connection = null)
+    /// <param name="deliveryMethod">Delivery method.</param>
+    public OutboundEventInfo(Event ev, NetworkConnection connection = null,
+        DeliveryMethod deliveryMethod = DeliveryMethod.Unreliable)
     {
         Event = ev;
         Connection = connection;
+        DeliveryMethod = deliveryMethod;
     }
 
     /// <summary>
@@ -59,5 +68,18 @@ public struct OutboundEventInfo
     {
         Event = info.Event;
         Connection = connection;
+        DeliveryMethod = info.DeliveryMethod;
+    }
+
+    /// <summary>
+    ///     Convenience constructor for adding a delivery method to an existing event info.
+    /// </summary>
+    /// <param name="info"></param>
+    /// <param name="deliveryMethod"></param>
+    public OutboundEventInfo(OutboundEventInfo info, DeliveryMethod deliveryMethod)
+    {
+        Event = info.Event;
+        Connection = info.Connection;
+        DeliveryMethod = deliveryMethod;
     }
 }

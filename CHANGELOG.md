@@ -19,6 +19,8 @@
 * Fix issue where the connection manager was not thread-safe.
 * Drive events from the outbound queues into the event sending pathway. Looks like
   I implemented half of this and then stopped.
+* Finish implementation of event sending. All that's left is to update the outbound
+  pipeline to select the delivery method based on event ID, then test everything.
 
 #### 08 July 2023
 

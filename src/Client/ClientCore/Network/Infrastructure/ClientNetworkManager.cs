@@ -164,7 +164,15 @@ public sealed class ClientNetworkManager : INetworkManager
         HandleCommands();
 
         // Send any events that have been enqueued.
-        while (outboundEventQueue.TryDequeue(out var evInfo)) evInfo.Connection.SendEvent(evInfo.Event);
+        while (outboundEventQueue.TryDequeue(out var evInfo))
+            try
+            {
+                evInfo.Connection.SendEvent(evInfo.Event, evInfo.DeliveryMethod, networkSerializer);
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Failed to send event to server.", e);
+            }
 
         // Poll the network.
         netManager.PollEvents();

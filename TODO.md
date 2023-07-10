@@ -4,5 +4,5 @@
 
 ### Event Client/Server
 
-* Finish implementing event sending in `NetworkConnection`.
+* Add outbound pipeline stage for selecting delivery method.
 * Test network code.

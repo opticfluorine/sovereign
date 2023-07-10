@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using LiteNetLib;
+using LiteNetLib.Utils;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.NetworkCore.Network.Infrastructure;
@@ -99,13 +100,21 @@ public sealed class NetworkConnection : IDisposable
     ///     Serializes and sends an event to the remote endpoint.
     /// </summary>
     /// <param name="ev">Event.</param>
-    public void SendEvent(Event ev)
+    /// <param name="deliveryMethod">Delivery method.</param>
+    /// <param name="serializer">Network serializer.</param>
+    public void SendEvent(Event ev, DeliveryMethod deliveryMethod, NetworkSerializer serializer)
     {
         // Check state.
         if (peer.ConnectionState != ConnectionState.Connected)
             throw new NetworkException("Cannot send event to disconnected peer.");
 
         // Serialize event.
+        var bytes = serializer.SerializeEvent(this, ev);
+
+        // Send event.
+        var writer = new NetDataWriter();
+        writer.Put(bytes);
+        peer.Send(writer, deliveryMethod);
     }
 
     /// <summary>
