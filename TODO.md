@@ -4,5 +4,5 @@
 
 ### Event Client/Server
 
-* Wire up the outbound event queues in the network managers.
+* Finish implementing event sending in `NetworkConnection`.
 * Test network code.

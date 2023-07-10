@@ -17,6 +17,8 @@
   forwards an event to all connections. The ping event in the server is
   distributed to all clients using this strategy.
 * Fix issue where the connection manager was not thread-safe.
+* Drive events from the outbound queues into the event sending pathway. Looks like
+  I implemented half of this and then stopped.
 
 #### 08 July 2023
 

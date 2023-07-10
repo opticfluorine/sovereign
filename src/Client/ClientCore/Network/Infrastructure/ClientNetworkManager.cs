@@ -164,10 +164,7 @@ public sealed class ClientNetworkManager : INetworkManager
         HandleCommands();
 
         // Send any events that have been enqueued.
-        while (outboundEventQueue.TryDequeue(out var evInfo))
-        {
-            // TODO Send event
-        }
+        while (outboundEventQueue.TryDequeue(out var evInfo)) evInfo.Connection.SendEvent(evInfo.Event);
 
         // Poll the network.
         netManager.PollEvents();
