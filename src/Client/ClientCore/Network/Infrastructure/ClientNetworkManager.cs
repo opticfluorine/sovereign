@@ -99,11 +99,6 @@ public sealed class ClientNetworkManager : INetworkManager
     private readonly RestClient restClient;
 
     /// <summary>
-    ///     Active connection.
-    /// </summary>
-    private NetworkConnection conn;
-
-    /// <summary>
     ///     Latest login response.
     /// </summary>
     private LoginResponse loginResponse;
@@ -127,6 +122,11 @@ public sealed class ClientNetworkManager : INetworkManager
         netListener.NetworkReceiveEvent += NetListener_NetworkReceiveEvent;
         netListener.NetworkErrorEvent += NetListener_NetworkErrorEvent;
     }
+
+    /// <summary>
+    ///     Active connection.
+    /// </summary>
+    public NetworkConnection Connection { get; private set; }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -262,6 +262,7 @@ public sealed class ClientNetworkManager : INetworkManager
         if (ClientState != NetworkClientState.Failed) throw new InvalidOperationException("Client has not failed.");
 
         ClientState = NetworkClientState.Disconnected;
+        Connection = null;
     }
 
     /// <summary>
@@ -325,7 +326,7 @@ public sealed class ClientNetworkManager : INetworkManager
             var peer = netManager.Connect(new IPEndPoint(addr, port), loginResponse.UserId);
 
             // Record the connection.
-            conn = connectionManager.CreateConnection(peer, hmacKey);
+            Connection = connectionManager.CreateConnection(peer, hmacKey);
             ClientState = NetworkClientState.Connected;
             clientNetworkController.Connected(eventSender);
         }
@@ -353,14 +354,15 @@ public sealed class ClientNetworkManager : INetworkManager
         // Disconnect.
         try
         {
-            if (conn != null)
+            if (Connection != null)
             {
-                connectionManager.RemoveConnection(conn);
-                conn = null;
+                connectionManager.RemoveConnection(Connection);
+                Connection = null;
             }
 
             Logger.Error("Disconnected.");
             ClientState = NetworkClientState.Disconnected;
+            Connection = null;
         }
         catch (Exception e)
         {
@@ -380,10 +382,10 @@ public sealed class ClientNetworkManager : INetworkManager
     private void NetListener_NetworkErrorEvent(IPEndPoint endPoint, SocketError socketError)
     {
         // Disconnect if the connection survived.
-        if (conn != null)
+        if (Connection != null)
         {
-            connectionManager.RemoveConnection(conn);
-            conn = null;
+            connectionManager.RemoveConnection(Connection);
+            Connection = null;
         }
 
         // Record error.
@@ -403,7 +405,7 @@ public sealed class ClientNetworkManager : INetworkManager
     private void NetListener_NetworkReceiveEvent(NetPeer peer, NetPacketReader reader, byte channelNumber,
         DeliveryMethod deliveryMethod)
     {
-        if (conn == null)
+        if (Connection == null)
         {
             Logger.Error("Received packet when client not ready.");
             return;
@@ -411,8 +413,8 @@ public sealed class ClientNetworkManager : INetworkManager
 
         try
         {
-            var ev = networkSerializer.DeserializeEvent(conn, reader.GetRemainingBytes());
-            OnNetworkReceive(ev, conn);
+            var ev = networkSerializer.DeserializeEvent(Connection, reader.GetRemainingBytes());
+            OnNetworkReceive(ev, Connection);
         }
         catch (Exception e)
         {

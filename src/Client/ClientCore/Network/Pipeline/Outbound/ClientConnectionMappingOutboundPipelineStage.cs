@@ -28,11 +28,18 @@ namespace Sovereign.ClientCore.Network.Pipeline.Outbound;
 /// </summary>
 public class ClientConnectionMappingOutboundPipelineStage : IConnectionMappingOutboundPipelineStage
 {
+    private readonly INetworkClient client;
+
+    public ClientConnectionMappingOutboundPipelineStage(INetworkClient client)
+    {
+        this.client = client;
+    }
+
     public void Process(OutboundEventInfo evInfo)
     {
-        // TODO Map
-
-        NextStage.Process(evInfo);
+        // If the client is connected, associate the event to the connection and proceed.
+        if (client.ClientState == NetworkClientState.Connected)
+            NextStage.Process(new OutboundEventInfo(evInfo, client.Connection));
     }
 
     public IOutboundPipelineStage NextStage { get; set; }

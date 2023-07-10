@@ -21,45 +21,45 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
-namespace Sovereign.ClientCore.Network.Infrastructure
+namespace Sovereign.ClientCore.Network.Infrastructure;
+
+/// <summary>
+///     Network client implementation.
+/// </summary>
+public sealed class NetworkClient : INetworkClient
 {
+    private readonly ClientNetworkManager clientNetworkManager;
 
-    /// <summary>
-    /// Network client implementation.
-    /// </summary>
-    public sealed class NetworkClient : INetworkClient
+    public NetworkClient(ClientNetworkManager clientNetworkManager)
     {
-        private readonly ClientNetworkManager clientNetworkManager;
+        this.clientNetworkManager = clientNetworkManager;
+    }
 
-        public NetworkClient(ClientNetworkManager clientNetworkManager)
-        {
-            this.clientNetworkManager = clientNetworkManager;
-        }
+    public NetworkClientState ClientState => clientNetworkManager.ClientState;
 
-        public NetworkClientState ClientState => clientNetworkManager.ClientState;
+    public NetworkConnection Connection => clientNetworkManager.Connection;
 
-        public string ErrorMessage => clientNetworkManager.ErrorMessage;
+    public string ErrorMessage => clientNetworkManager.ErrorMessage;
 
-        public void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
-        {
-            clientNetworkManager.BeginConnection(connectionParameters, loginParameters);
-        }
+    public void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
+    {
+        clientNetworkManager.BeginConnection(connectionParameters, loginParameters);
+    }
 
-        public void ContinueConnection(LoginResponse loginResponse)
-        {
+    public void ContinueConnection(LoginResponse loginResponse)
+    {
+    }
 
-        }
+    public void EndConnection()
+    {
+        clientNetworkManager.EndConnection();
+    }
 
-        public void EndConnection()
-        {
-            clientNetworkManager.EndConnection();
-        }
-
-        public void ResetError()
-        {
-            clientNetworkManager.ResetError();
-        }
+    public void ResetError()
+    {
+        clientNetworkManager.ResetError();
     }
 }

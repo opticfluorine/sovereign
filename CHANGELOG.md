@@ -10,6 +10,8 @@
 * Add event allowlists to client and server to strictly limit which events
   can be received from the network.
 * Start work on plumbing outgoing events to their connections.
+* Correctly route client-side events to the main connection when the client
+  is connected.
 
 #### 08 July 2023
 
