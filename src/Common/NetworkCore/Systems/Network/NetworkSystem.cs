@@ -57,9 +57,8 @@ public sealed class NetworkSystem : ISystem
     /// </summary>
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
-        EventId.Core_Set_Velocity,
-        EventId.Core_Move_Once,
-        EventId.Core_End_Movement
+        EventId.Core_Ping_Ping,
+        EventId.Core_Ping_Pong
     };
 
     public int WorkloadEstimate => 50;

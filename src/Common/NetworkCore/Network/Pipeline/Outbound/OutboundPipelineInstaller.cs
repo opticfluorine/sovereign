@@ -32,6 +32,7 @@ public class OutboundPipelineInstaller : IWindsorInstaller
     {
         container.Register(Component.For<OutboundNetworkPipeline>()
             .LifestyleSingleton());
+        container.Register(Component.For<DeliveryMethodOutboundPipelineStage>().LifestyleSingleton());
         container.Register(Component.For<FinalOutboundPipelineStage>()
             .LifestyleSingleton());
 

@@ -7,6 +7,10 @@
 #### 10 July 2023
 
 * Properly disconnect clients from server.
+* Update outbound network pipeline to select delivery method (unreliable,
+  sequenced, etc) based on event ID.
+* Update `NetworkSystem` to only ingest ping and pong events for right now.
+  More events will be added as needed.
 
 #### 09 July 2023
 

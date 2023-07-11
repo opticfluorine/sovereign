@@ -32,20 +32,24 @@ namespace Sovereign.NetworkCore.Network.Pipeline.Outbound;
 public sealed class OutboundNetworkPipeline
 {
     private readonly IConnectionMappingOutboundPipelineStage connectionMappingStage;
+    private readonly DeliveryMethodOutboundPipelineStage deliveryMappingStage;
     private readonly FinalOutboundPipelineStage finalStage;
 
     private readonly IOutboundPipelineStage firstStage;
 
     public OutboundNetworkPipeline(IConnectionMappingOutboundPipelineStage connectionMappingStage,
+        DeliveryMethodOutboundPipelineStage deliveryMappingStage,
         FinalOutboundPipelineStage finalStage)
     {
         // Dependency injection.
+        this.deliveryMappingStage = deliveryMappingStage;
         this.connectionMappingStage = connectionMappingStage;
         this.finalStage = finalStage;
 
         // Wire up the stages.
+        deliveryMappingStage.NextStage = connectionMappingStage;
         connectionMappingStage.NextStage = finalStage;
-        firstStage = connectionMappingStage;
+        firstStage = deliveryMappingStage;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
