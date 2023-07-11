@@ -4,6 +4,10 @@
 
 ### July
 
+#### 10 July 2023
+
+* Properly disconnect clients from server.
+
 #### 09 July 2023
 
 * Map out remaining work to get the event client/server up and running.

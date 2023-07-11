@@ -153,7 +153,9 @@ public sealed class ServerNetworkManager : INetworkManager
 
     public void Disconnect(int connectionId)
     {
-        // TODO
+        // TODO Clean up any resources associated to the connection
+
+        connectionManager.RemoveConnection(connectionId);
     }
 
     /// <summary>
