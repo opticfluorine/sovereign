@@ -86,7 +86,7 @@ public class Event
     ///     Unique identifier for the event type.
     /// </summary>
     [Key(0)]
-    public EventId EventId { get; }
+    public EventId EventId { get; set; }
 
     /// <summary>
     ///     Time at which the event becomes valid, in microseconds.
@@ -125,5 +125,5 @@ public class Event
     ///     Details associated with the event.
     /// </summary>
     [Key(1)]
-    public IEventDetails EventDetails { get; }
+    public IEventDetails EventDetails { get; set; }
 }

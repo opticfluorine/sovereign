@@ -39,6 +39,11 @@ public sealed class NetworkConnectionManager
     private readonly ConcurrentDictionary<int, NetworkConnection> connections = new();
 
     /// <summary>
+    ///     Number of current connections.
+    /// </summary>
+    public int ConnectionCount => connections.Count;
+
+    /// <summary>
     ///     Gets a connection by ID.
     /// </summary>
     /// <param name="connectionId">Connection ID.</param>

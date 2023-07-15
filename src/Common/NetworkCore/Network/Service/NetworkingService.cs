@@ -101,7 +101,6 @@ public sealed class NetworkingService
     private void Run()
     {
         Logger.Info("Networking service is started.");
-        OutputStartupDiagnostics();
 
         /* Start the network manager. */
         try
@@ -139,14 +138,6 @@ public sealed class NetworkingService
         }
 
         Logger.Info("Networking service is stopped.");
-    }
-
-    /// <summary>
-    ///     Outputs startup diagnonstic messages.
-    /// </summary>
-    private void OutputStartupDiagnostics()
-    {
-        inboundPipeline.OutputStartupDiagnostics();
     }
 
     /// <summary>

@@ -4,6 +4,11 @@
 
 ### July
 
+#### 15 July 2023
+
+* Begin testing event network code. Fix issue where `Event` was not
+  deserialized properly.
+
 #### 10 July 2023
 
 * Properly disconnect clients from server.
