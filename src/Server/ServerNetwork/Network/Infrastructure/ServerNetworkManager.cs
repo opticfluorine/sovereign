@@ -28,12 +28,14 @@ using System.Net.Sockets;
 using System.Text;
 using Castle.Core.Logging;
 using LiteNetLib;
+using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.ServerNetwork.Configuration;
 using Sovereign.ServerNetwork.Network.Connections;
 using Sovereign.ServerNetwork.Network.Rest;
+using Sovereign.ServerNetwork.Network.ServerNetwork;
 
 namespace Sovereign.ServerNetwork.Network.Infrastructure;
 
@@ -44,6 +46,7 @@ public sealed class ServerNetworkManager : INetworkManager
 {
     private readonly IServerNetworkConfiguration config;
     private readonly NetworkConnectionManager connectionManager;
+    private readonly IEventSender eventSender;
 
     /// <summary>
     ///     Backing LiteNetLib NetListener.
@@ -54,6 +57,8 @@ public sealed class ServerNetworkManager : INetworkManager
     ///     Backing LiteNetLib NetManager.
     /// </summary>
     private readonly NetManager netManager;
+
+    private readonly ServerNetworkController networkController;
 
     private readonly NewConnectionProcessor newConnectionProcessor;
 
@@ -69,7 +74,9 @@ public sealed class ServerNetworkManager : INetworkManager
         NetworkConnectionManager connectionManager,
         NetworkSerializer serializer,
         RestServer restServer,
-        NewConnectionProcessor newConnectionProcessor)
+        NewConnectionProcessor newConnectionProcessor,
+        ServerNetworkController networkController,
+        IEventSender eventSender)
     {
         /* Dependency injection. */
         this.config = config;
@@ -77,6 +84,8 @@ public sealed class ServerNetworkManager : INetworkManager
         this.serializer = serializer;
         this.restServer = restServer;
         this.newConnectionProcessor = newConnectionProcessor;
+        this.networkController = networkController;
+        this.eventSender = eventSender;
 
         /* Connect the network event plumbing. */
         netListener = new EventBasedNetListener();
@@ -250,7 +259,7 @@ public sealed class ServerNetworkManager : INetworkManager
         try
         {
             connectionManager.RemoveConnection(peer.Id);
-
+            networkController.ClientDisconnected(eventSender, peer.Id);
             Logger.InfoFormat("Connection closed from {0}.",
                 peer.EndPoint.ToString());
         }

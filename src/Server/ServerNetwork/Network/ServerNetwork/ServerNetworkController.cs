@@ -40,4 +40,16 @@ public class ServerNetworkController
             new ConnectionIdEventDetails { ConnectionId = connectionId });
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Announces that the client associated with the given connection ID has disconnected.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="connectionId">Connection ID.</param>
+    public void ClientDisconnected(IEventSender eventSender, int connectionId)
+    {
+        var ev = new Event(EventId.Server_Network_ClientDisconnected,
+            new ConnectionIdEventDetails { ConnectionId = connectionId });
+        eventSender.SendEvent(ev);
+    }
 }

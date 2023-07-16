@@ -298,6 +298,12 @@ public enum EventId
     /// Associated details: ConnectionIdEventDetails
     Server_Network_DisconnectClient = 200200,
 
+    /// <summary>
+    ///     Event sent when a client has disconnected.
+    /// </summary>
+    /// Associated details: ConnectionIdEventDetails
+    Server_Network_ClientDisconnected = 200201,
+
     #endregion Server_Network
 
     #endregion Server

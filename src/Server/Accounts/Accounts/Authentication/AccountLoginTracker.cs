@@ -23,51 +23,75 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Sovereign.Accounts.Accounts.Authentication
+namespace Sovereign.Accounts.Accounts.Authentication;
+
+/// <summary>
+///     Responsible for tracking which accounts are currently logged in.
+/// </summary>
+public sealed class AccountLoginTracker
 {
+    /// <summary>
+    ///     Map from connection IDs to logged in account IDs.
+    /// </summary>
+    private readonly Dictionary<int, Guid> connectionsToAccounts = new();
 
     /// <summary>
-    /// Responsible for tracking which accounts are currently logged in.
+    ///     Set of all currently logged in account IDs.
     /// </summary>
-    public sealed class AccountLoginTracker
+    private readonly HashSet<Guid> loggedInAccountIds = new();
+
+    /// <summary>
+    ///     Signals that the given account has logged in.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    public void Login(Guid accountId)
     {
-
-        /// <summary>
-        /// Set of all currently logged in account IDs.
-        /// </summary>
-        private readonly ISet<Guid> LoggedInAccountIds
-            = new HashSet<Guid>();
-
-        /// <summary>
-        /// Signals that the given account has logged in.
-        /// </summary>
-        /// <param name="accountId">Account ID.</param>
-        public void Login(Guid accountId)
-        {
-            LoggedInAccountIds.Add(accountId);
-        }
-
-        /// <summary>
-        /// Signals that the given account has logged out.
-        /// </summary>
-        /// <param name="accountId">Account ID.</param>
-        public void Logout(Guid accountId)
-        {
-            LoggedInAccountIds.Remove(accountId);
-        }
-
-        /// <summary>
-        /// Checks whether the given account ID is already logged in.
-        /// </summary>
-        /// <param name="accountId">Account ID.</param>
-        /// <returns>true if logged in, false otherwise.</returns>
-        public bool IsLoggedIn(Guid accountId)
-        {
-            return LoggedInAccountIds.Contains(accountId);
-        }
-
+        loggedInAccountIds.Add(accountId);
     }
 
+    /// <summary>
+    ///     Signals that the given account has logged out.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    public void Logout(Guid accountId)
+    {
+        loggedInAccountIds.Remove(accountId);
+    }
+
+    /// <summary>
+    ///     Checks whether the given account ID is already logged in.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <returns>true if logged in, false otherwise.</returns>
+    public bool IsLoggedIn(Guid accountId)
+    {
+        return loggedInAccountIds.Contains(accountId);
+    }
+
+    /// <summary>
+    ///     Associates a logged in account to its event server connection.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <param name="connectionId">Event server connection ID.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the connection ID is already mapped.</exception>
+    public void AssociateConnection(Guid accountId, int connectionId)
+    {
+        if (connectionsToAccounts.TryGetValue(connectionId, out var otherAcctId))
+            throw new InvalidOperationException(
+                $"Connection ID {connectionId} is already mapped to account {otherAcctId}.");
+
+        connectionsToAccounts.Add(connectionId, accountId);
+    }
+
+    /// <summary>
+    ///     If the given connection is associated to an account, triggers a logout for the account.
+    /// </summary>
+    /// <param name="connectionId">Connection ID.</param>
+    public void HandleDisconnect(int connectionId)
+    {
+        if (!connectionsToAccounts.TryGetValue(connectionId, out var accountId)) return;
+        connectionsToAccounts.Remove(connectionId);
+        Logout(accountId);
+    }
 }

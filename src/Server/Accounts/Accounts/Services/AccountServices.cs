@@ -120,15 +120,6 @@ public sealed class AccountServices
     }
 
     /// <summary>
-    ///     Logs out the given account.
-    /// </summary>
-    /// <param name="id">Account ID.</param>
-    public void Logout(Guid id)
-    {
-        loginTracker.Logout(id);
-    }
-
-    /// <summary>
     ///     Registers a new account.
     /// </summary>
     /// <param name="username">Username.</param>

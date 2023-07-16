@@ -4,10 +4,20 @@
 
 ### July
 
+#### 16 July 2023
+
+* Centrally handle client disconnects in the server. The disconnect is originated in `ServerNetworkManager` from
+  a LiteNetLib peer disconnect event. This in turn produces a `Server_Network_ClientDisconnected` event which
+  propagates to all systems responsible for cleaning up resources after a disconnect. This ensures there is a single
+  consistent flow for disconnect/logout.
+* Automatically trigger logout if a client disconnects from the event server.
+
 #### 15 July 2023
 
 * Begin testing event network code. Fix issue where `Event` was not
   deserialized properly.
+* First successful roundtrip of a ping/pong event pair! The client and server
+  can finally talk.
 
 #### 10 July 2023
 

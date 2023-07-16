@@ -41,15 +41,18 @@ public sealed class NewConnectionProcessor
 
     private readonly NetworkConnectionManager connectionManager;
     private readonly LoginHandoffTracker loginHandoffTracker;
+    private readonly AccountLoginTracker loginTracker;
     private readonly SharedSecretManager sharedSecretManager;
 
     public NewConnectionProcessor(NetworkConnectionManager connectionManager,
         LoginHandoffTracker loginHandoffTracker,
-        SharedSecretManager sharedSecretManager)
+        SharedSecretManager sharedSecretManager,
+        AccountLoginTracker loginTracker)
     {
         this.connectionManager = connectionManager;
         this.loginHandoffTracker = loginHandoffTracker;
         this.sharedSecretManager = sharedSecretManager;
+        this.loginTracker = loginTracker;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -83,8 +86,10 @@ public sealed class NewConnectionProcessor
 
         // Accept the connection.
         Logger.InfoFormat("Accepting new connection for user {0} from {1}.",
-            null, request.RemoteEndPoint.ToString());
-        connectionManager.CreateConnection(request.Accept(), sharedSecret);
+            accountId, request.RemoteEndPoint.ToString());
+        var peer = request.Accept();
+        loginTracker.AssociateConnection(accountId, peer.Id);
+        connectionManager.CreateConnection(peer, sharedSecret);
     }
 
     /// <summary>
