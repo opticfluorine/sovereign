@@ -4,6 +4,16 @@
 
 ### July
 
+#### 22 July 2023
+
+* Add `persistence.md` documentation to describe how the persistence system works. This is a work in progress and
+  isn't fully synchronized with the code yet.
+* Defined the rules for how entities are loaded from the database. These still need to be fully implemented in
+  the server, but they're fairly simple (relatively speaking) and unambiguous - shouldn't be that difficult to
+  implement. The harder part will be determining when to unload entities. "There are only two hard things in
+  computer science: cache invalidation and naming things." Sovereign's architecture was designed with this in mind,
+  so it won't be *excessively* painful to implement. (Famous last words, right?)
+
 #### 16 July 2023
 
 * Centrally handle client disconnects in the server. The disconnect is originated in `ServerNetworkManager` from
