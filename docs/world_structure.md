@@ -2,13 +2,6 @@
 
 ## Game World
 
-The game world is a collection of one or more "domains", where a domain is a
-disconnected three-dimensional segment of the world. By "disconnected", we
-mean that there is no trajectory in three-dimensional space by which an
-object may transition from one domain to another. Note that this does not
-preclude the existence of "portals" or other scripted gateways which move
-objects from one domain to another.
-
 The world exists in a three-dimensional coordinate system where the
 x coordinate runs west to east, the y coordinate runs south to north, and
 the z coordinate runs bottom to top (in depth). The domain is comprised of
@@ -21,7 +14,7 @@ corresponding component.
 ## Materials
 
 A material defines the base type of a block. The material of a block
-is specified by a pair of unsigned 32-bit integers, the material ID and the 
+is specified by a pair of unsigned 32-bit integers, the material ID and the
 material modifier. The material ID defines the specific type of material
 (e.g. grass, sand, water). The material modifier indicates which particular
 appearance of the material the block will take.
@@ -33,7 +26,7 @@ surface in the xz plane.
 
 ## Blocks
 
-Each domain is constructed of a collection of blocks as described above.
+The world is constructed of a collection of blocks as described above.
 A block is a unit cube (in position units) with side lengths equal to the
 tile dimension (in pixels) when rendered. Material blocks must be of unit
 length, but other entities may have arbitrary dimensions. All entities
@@ -42,3 +35,20 @@ of the unit length block whose base is centered on the bottom plane of
 the entity.
 
 ![Block structure](img/BlockStructure.png)
+
+The game world is composed of a non-overlapping set of blocks positioned at integer
+coordinates on a three-dimensional grid. By non-overlapping, we mean that each coordinate
+(x,y,z) (where x, y, and z are signed integers) is the position of zero or one blocks.
+The absence of a block at a coordinate implies that the special "air" block exists at
+that position. The "air" block is not stored in memory as a real block; it is only used
+to imply the absence of a block which enables certain optimizations when transferring
+world data from server to client (see the [networking documentation](networking.md) for
+more information).
+
+## World Segments
+
+The game world is normally handled in small three-dimensional regions known as
+*world segments*. Each world segment is a cube having a length of 32 blocks, therefore
+containing up to 32768 blocks per world segment. The game state is loaded, unloaded, and
+synchronized one world segment at a time; see the [networking documentation](networking.md)
+and the [persistence documentation](persistence.md) for more details.

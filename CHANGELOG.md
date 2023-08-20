@@ -2,6 +2,15 @@
 
 ## 2023
 
+### August
+
+#### 20 August 2023
+
+* This change was started roughly a month ago, but I'm just now finally circling back to this. Updated the
+  documentation to specify how entities will be synchronized between server and client. This will be done via
+  a pub-sub model where clients are subscribed to world segments. The server subscribes and unsubscribes the
+  clients based on player position.
+
 ### July
 
 #### 22 July 2023
