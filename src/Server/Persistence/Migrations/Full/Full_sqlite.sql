@@ -27,8 +27,8 @@
 
 CREATE TABLE MigrationLog
 (
-    id          INTEGER PRIMARY KEY,
-	name        VARCHAR(255) NOT NULL
+    id   INTEGER PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
 );
 
 -------------------
@@ -39,8 +39,8 @@ CREATE TABLE MigrationLog
 
 CREATE TABLE Account
 (
-    id              BLOB PRIMARY KEY NOT NULL,
-	username        VARCHAR(255) NOT NULL
+    id       BLOB PRIMARY KEY NOT NULL,
+    username VARCHAR(255)     NOT NULL
 );
 
 CREATE UNIQUE INDEX Account_Username_Index ON Account (username);
@@ -54,12 +54,12 @@ CREATE UNIQUE INDEX Account_Username_Index ON Account (username);
 
 CREATE TABLE Account_Authentication
 (
-    id             BLOB PRIMARY KEY NOT NULL,
-	password_salt  BLOB NOT NULL,
-	password_hash  BLOB NOT NULL,
-	opslimit       INTEGER NOT NULL,
-	memlimit       INTEGER NOT NULL,
-	FOREIGN KEY (id) REFERENCES Account(id)
+    id            BLOB PRIMARY KEY NOT NULL,
+    password_salt BLOB             NOT NULL,
+    password_hash BLOB             NOT NULL,
+    opslimit      INTEGER          NOT NULL,
+    memlimit      INTEGER          NOT NULL,
+    FOREIGN KEY (id) REFERENCES Account (id)
 );
 
 
@@ -69,7 +69,7 @@ CREATE TABLE Account_Authentication
 
 CREATE TABLE Entity
 (
-    id          INTEGER PRIMARY KEY NOT NULL
+    id INTEGER PRIMARY KEY NOT NULL
 );
 
 
@@ -79,9 +79,9 @@ CREATE TABLE Entity
 
 CREATE TABLE Material
 (
-	id	        INTEGER PRIMARY KEY NOT NULL,
-	material    INTEGER NOT NULL,
-	FOREIGN KEY (id) REFERENCES Entity(id)
+    id       INTEGER PRIMARY KEY NOT NULL,
+    material INTEGER             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
 
@@ -91,9 +91,9 @@ CREATE TABLE Material
 
 CREATE TABLE MaterialModifier
 (
-    id          INTEGER PRIMARY KEY NOT NULL,
-    modifier    INTEGER NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity(id)
+    id       INTEGER PRIMARY KEY NOT NULL,
+    modifier INTEGER             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
 
@@ -103,15 +103,27 @@ CREATE TABLE MaterialModifier
 
 CREATE TABLE Position
 (
-    id    INTEGER PRIMARY KEY NOT NULL,
-	x     FLOAT NOT NULL,
-	y     FLOAT NOT NULL,
-	z     FLOAT NOT NULL,
-	FOREIGN KEY (id) REFERENCES Entity(id)
+    id INTEGER PRIMARY KEY NOT NULL,
+    x  FLOAT               NOT NULL,
+    y  FLOAT               NOT NULL,
+    z  FLOAT               NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
 -- Index the position coordinates.
 CREATE INDEX Position_Xyz_Index ON Position (x, y, z);
+
+
+-------------------------
+-- PlayerCharacter Tag --
+-------------------------
+
+CREATE TABLE PlayerCharacter
+(
+    id    INTEGER PRIMARY KEY NOT NULL,
+    value BOOLEAN             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
 
 
 --------------------------------------
@@ -119,14 +131,14 @@ CREATE INDEX Position_Xyz_Index ON Position (x, y, z);
 --------------------------------------
 
 CREATE VIEW AccountWithAuthentication AS
-	SELECT Account.id AS id,
-	       Account.username AS username,
-	       Account_Authentication.password_salt AS salt,
-		   Account_Authentication.password_hash AS hash,
-		   Account_Authentication.opslimit AS opslimit,
-		   Account_Authentication.memlimit AS memlimit
-	FROM Account
-	INNER JOIN Account_Authentication ON Account.id = Account_Authentication.id;
+SELECT Account.id                           AS id,
+       Account.username                     AS username,
+       Account_Authentication.password_salt AS salt,
+       Account_Authentication.password_hash AS hash,
+       Account_Authentication.opslimit      AS opslimit,
+       Account_Authentication.memlimit      AS memlimit
+FROM Account
+         INNER JOIN Account_Authentication ON Account.id = Account_Authentication.id;
 
 
 ---------------------------------
@@ -134,17 +146,20 @@ CREATE VIEW AccountWithAuthentication AS
 ---------------------------------
 
 CREATE VIEW EntityWithComponents AS
-    SELECT Entity.id AS id,
-           Position.x AS x,
-           Position.y AS y,
-           Position.z AS z,
-           Material.material AS material,
-           MaterialModifier.modifier AS materialModifier
-    FROM Entity
-    LEFT JOIN Position ON Position.id = Entity.id
-    LEFT JOIN Material ON Material.id = Entity.id
-    LEFT JOIN MaterialModifier ON MaterialModifier.id = Entity.id;
+SELECT Entity.id                 AS id,
+       Position.x                AS x,
+       Position.y                AS y,
+       Position.z                AS z,
+       Material.material         AS material,
+       MaterialModifier.modifier AS materialModifier,
+       PlayerCharacter.value     AS playerCharacter
+FROM Entity
+         LEFT JOIN Position ON Position.id = Entity.id
+         LEFT JOIN Material ON Material.id = Entity.id
+         LEFT JOIN MaterialModifier ON MaterialModifier.id = Entity.id
+         LEFT JOIN PlayerCharacter on Entity.id = PlayerCharacter.id;
 
 
 -- Log the migration.
-INSERT INTO MigrationLog VALUES (1, 'Baseline');
+INSERT INTO MigrationLog
+VALUES (1, 'Baseline');

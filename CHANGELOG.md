@@ -6,6 +6,7 @@
 
 #### 20 August 2023
 
+* Update database schema to include `PlayerCharacter` tag.
 * Add a special type of component called a *tag*. This is essentially a void-typed component with no value.
   Under the hood it is implemented as a boolean component, but an abstraction is provided over
   `BaseComponentCollection<T>` to make it easier to work with.
