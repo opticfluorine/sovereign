@@ -21,73 +21,72 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Sovereign.EngineCore.Systems.Player.Components;
 
-namespace Sovereign.EngineCore.Components
+namespace Sovereign.EngineCore.Components;
+
+/// <summary>
+///     Enumeration of all component types.
+/// </summary>
+public enum ComponentType
 {
+    #region Common
 
     /// <summary>
-    /// Enumeration of all component types.
+    ///     Position component.
     /// </summary>
-    public enum ComponentType
-    {
+    /// <seealso cref="Sovereign.EngineCore.Systems.Movement.Components.PositionComponentCollection" />
+    Position = 0x0000,
 
-        #region Common
+    /// <summary>
+    ///     Velocity component.
+    /// </summary>
+    /// <seealso cref="Sovereign.EngineCore.Systems.Movement.Components.VelocityComponentCollection" />
+    Velocity = 0x0001,
 
-        /// <summary>
-        /// Position component.
-        /// </summary>
-        /// <seealso cref="PositionComponentCollection"/>
-        Position = 0x0000,
+    /// <summary>
+    ///     Material component.
+    /// </summary>
+    /// <seealso cref="Sovereign.EngineCore.Systems.Block.Components.MaterialComponentCollection" />
+    Material = 0x0002,
 
-        /// <summary>
-        /// Velocity component.
-        /// </summary>
-        /// <seealso cref="VelocityComponentCollection"/>
-        Velocity = 0x0001,
+    /// <summary>
+    ///     Material modifier component.
+    /// </summary>
+    /// <seealso cref="Sovereign.EngineCore.Systems.Block.Components.MaterialModifierComponentCollection" />
+    MaterialModifier = 0x0003,
 
-        /// <summary>
-        /// Material component.
-        /// </summary>
-        /// <seealso cref="MaterialComponentCollection"/>
-        Material = 0x0002,
+    /// <summary>
+    ///     Above block component.
+    /// </summary>
+    /// <seealso cref="Sovereign.EngineCore.Systems.Block.Components.AboveBlockComponentCollection" />
+    AboveBlock = 0x0004,
 
-        /// <summary>
-        /// Material modifier component.
-        /// </summary>
-        /// <seealso cref="MaterialModifierComponentCollection"/>
-        MaterialModifier = 0x0003,
+    /// <summary>
+    ///     Tag indicating that an entity is a player character.
+    /// </summary>
+    /// <seealso cref="PlayerCharacterTagCollection" />
+    PlayerCharacter = 0x0005,
 
-        /// <summary>
-        /// Above block component.
-        /// </summary>
-        /// <seealso cref="AboveBlockComponentCollection"/>
-        AboveBlock = 0x0004,
+    #endregion Common
 
-        #endregion Common
+    #region Client
 
-        #region Client
+    /// <summary>
+    ///     Animated sprite component.
+    /// </summary>
+    /// <seealso cref="Sovereign.ClientCore.Rendering.Components.AnimatedSpriteComponentCollection" />
+    AnimatedSprite = 0x1000,
 
-        /// <summary>
-        /// Animated sprite component.
-        /// </summary>
-        /// <seealso cref="AnimatedSpriteComponentCollection"/>
-        AnimatedSprite = 0x1000,
+    /// <summary>
+    ///     Drawable component.
+    /// </summary>
+    /// <seealso cref="Sovereign.ClientCore.Rendering.Components.DrawableComponentCollection" />
+    Drawable = 0x1001,
 
-        /// <summary>
-        /// Drawable component.
-        /// </summary>
-        /// <seealso cref="DrawableComponentCollection"/>
-        Drawable = 0x1001,
+    #endregion Client
 
-        #endregion Client
+    #region Server
 
-        #region Server
-
-        #endregion Server
-
-    }
-
+    #endregion Server
 }

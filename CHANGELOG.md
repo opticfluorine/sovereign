@@ -6,6 +6,11 @@
 
 #### 20 August 2023
 
+* Add a special type of component called a *tag*. This is essentially a void-typed component with no value.
+  Under the hood it is implemented as a boolean component, but an abstraction is provided over
+  `BaseComponentCollection<T>` to make it easier to work with.
+* Add `PlayerCharacterTagCollection` which allows an entity to be tagged as a player character. This tag
+  will drive a lot of player-specific logic including character selection, entity synchronization, etc.
 * This change was started roughly a month ago, but I'm just now finally circling back to this. Updated the
   documentation to specify how entities will be synchronized between server and client. This will be done via
   a pub-sub model where clients are subscribed to world segments. The server subscribes and unsubscribes the
