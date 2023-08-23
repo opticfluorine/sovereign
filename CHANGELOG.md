@@ -4,6 +4,10 @@
 
 ### August
 
+#### 23 August 2023
+
+* Persist the `PlayerCharacter` tag in the database.
+
 #### 20 August 2023
 
 * Update database schema to include `PlayerCharacter` tag.

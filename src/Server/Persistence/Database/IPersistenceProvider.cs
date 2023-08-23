@@ -21,125 +21,134 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Sovereign.Persistence.Database.Queries;
-using System;
 using System.Data;
 using System.Numerics;
+using Sovereign.Persistence.Database.Queries;
 
-namespace Sovereign.Persistence.Database
+namespace Sovereign.Persistence.Database;
+
+/// <summary>
+///     Interface implemented by persistence providers.
+/// </summary>
+public interface IPersistenceProvider
 {
+    /// <summary>
+    // Database connection.
+    /// </summary>
+    IDbConnection Connection { get; }
 
     /// <summary>
-    /// Interface implemented by persistence providers.
+    ///     IMigrationQuery for this persistence provider.
     /// </summary>
-    public interface IPersistenceProvider
-    {
+    IMigrationQuery MigrationQuery { get; }
 
-        /// <summary>
-        // Database connection.
-        /// </summary>
-        IDbConnection Connection { get; }
+    /// <summary>
+    ///     INextPersistedIdQuery for this persistence provider.
+    /// </summary>
+    INextPersistedIdQuery NextPersistedIdQuery { get; }
 
-        /// <summary>
-        /// IMigrationQuery for this persistence provider.
-        /// </summary>
-        IMigrationQuery MigrationQuery { get; }
+    /// <summary>
+    ///     IAddAccountQuery for this persistence provider.
+    /// </summary>
+    IAddAccountQuery AddAccountQuery { get; }
 
-        /// <summary>
-        /// INextPersistedIdQuery for this persistence provider.
-        /// </summary>
-        INextPersistedIdQuery NextPersistedIdQuery { get; }
+    /// <summary>
+    ///     IRetrieveAccountQuery for this persistence provider.
+    /// </summary>
+    IRetrieveAccountQuery RetrieveAccountQuery { get; }
 
-        /// <summary>
-        /// IAddAccountQuery for this persistence provider.
-        /// </summary>
-        IAddAccountQuery AddAccountQuery { get; }
+    /// <summary>
+    ///     IRetrieveAccountWithAuthQUery for this persistence provider.
+    /// </summary>
+    IRetrieveAccountWithAuthQuery RetrieveAccountWithAuthQuery { get; }
 
-        /// <summary>
-        /// IRetrieveAccountQuery for this persistence provider.
-        /// </summary>
-        IRetrieveAccountQuery RetrieveAccountQuery { get; }
+    /// <summary>
+    ///     IRetrieveEntityQuery for this persistence provider.
+    /// </summary>
+    IRetrieveEntityQuery RetrieveEntityQuery { get; }
 
-        /// <summary>
-        /// IRetrieveAccountWithAuthQUery for this persistence provider.
-        /// </summary>
-        IRetrieveAccountWithAuthQuery RetrieveAccountWithAuthQuery { get; }
+    /// <summary>
+    ///     IRetrieveRangeQuery for this persistence provider.
+    /// </summary>
+    IRetrieveRangeQuery RetrieveRangeQuery { get; }
 
-        /// <summary>
-        /// IRetrieveEntityQuery for this persistence provider.
-        /// </summary>
-        IRetrieveEntityQuery RetrieveEntityQuery { get; }
+    /// <summary>
+    ///     IAddEntityQuery for this persistence provider.
+    /// </summary>
+    IAddEntityQuery AddEntityQuery { get; }
 
-        /// <summary>
-        /// IRetrieveRangeQuery for this persistence provider.
-        /// </summary>
-        IRetrieveRangeQuery RetrieveRangeQuery { get; }
+    /// <summary>
+    ///     IRemoveEntityQuery for this persistence provider.
+    /// </summary>
+    IRemoveEntityQuery RemoveEntityQuery { get; }
 
-        /// <summary>
-        /// IAddEntityQuery for this persistence provider.
-        /// </summary>
-        IAddEntityQuery AddEntityQuery { get; }
+    /// <summary>
+    ///     IAddComponentQuery for the Position component.
+    /// </summary>
+    IAddComponentQuery<Vector3> AddPositionQuery { get; }
 
-        /// <summary>
-        /// IRemoveEntityQuery for this persistence provider.
-        /// </summary>
-        IRemoveEntityQuery RemoveEntityQuery { get; }
+    /// <summary>
+    ///     IModifyComponentQuery for the Position component.
+    /// </summary>
+    IModifyComponentQuery<Vector3> ModifyPositionQuery { get; }
 
-        /// <summary>
-        /// IAddComponentQuery for the Position component.
-        /// </summary>
-        IAddComponentQuery<Vector3> AddPositionQuery { get; }
+    /// <summary>
+    ///     IRemoveComponentQuery for the Position component.
+    /// </summary>
+    IRemoveComponentQuery RemovePositionQuery { get; }
 
-        /// <summary>
-        /// IModifyComponentQuery for the Position component.
-        /// </summary>
-        IModifyComponentQuery<Vector3> ModifyPositionQuery { get; }
+    /// <summary>
+    ///     IAddComponentQuery for the Material component.
+    /// </summary>
+    IAddComponentQuery<int> AddMaterialQuery { get; }
 
-        /// <summary>
-        /// IRemoveComponentQuery for the Position component.
-        /// </summary>
-        IRemoveComponentQuery RemovePositionQuery { get; }
+    /// <summary>
+    ///     IModifyComponentQuery for the Material component.
+    /// </summary>
+    IModifyComponentQuery<int> ModifyMaterialQuery { get; }
 
-        /// <summary>
-        /// IAddComponentQuery for the Material component.
-        /// </summary>
-        IAddComponentQuery<int> AddMaterialQuery { get; }
+    /// <summary>
+    ///     IRemoveComponentQuery for the Material component.
+    /// </summary>
+    IRemoveComponentQuery RemoveMaterialQuery { get; }
 
-        /// <summary>
-        /// IModifyComponentQuery for the Material component.
-        /// </summary>
-        IModifyComponentQuery<int> ModifyMaterialQuery { get; }
+    /// <summary>
+    ///     IAddComponentQuery for the MaterialModifier component.
+    /// </summary>
+    IAddComponentQuery<int> AddMaterialModifierQuery { get; }
 
-        /// <summary>
-        /// IRemoveComponentQuery for the Material component.
-        /// </summary>
-        IRemoveComponentQuery RemoveMaterialQuery { get; }
+    /// <summary>
+    ///     IModifyComponentQuery for the MaterialModifier component.
+    /// </summary>
+    IModifyComponentQuery<int> ModifyMaterialModifierQuery { get; }
 
-        /// <summary>
-        /// IAddComponentQuery for the MaterialModifier component.
-        /// </summary>
-        IAddComponentQuery<int> AddMaterialModifierQuery { get; }
+    /// <summary>
+    ///     IRemoveComponentQuery for the MaterialModifier component.
+    /// </summary>
+    IRemoveComponentQuery RemoveMaterialModifierQuery { get; }
 
-        /// <summary>
-        /// IModifyComponentQuery for the MaterialModifier component.
-        /// </summary>
-        IModifyComponentQuery<int> ModifyMaterialModifierQuery { get; }
+    /// <summary>
+    ///     IAddComponentQuery for the PlayerCharacter tag.
+    /// </summary>
+    IAddComponentQuery<bool> AddPlayerCharacterQuery { get; }
 
-        /// <summary>
-        /// IRemoveComponentQuery for the MaterialModifier component.
-        /// </summary>
-        IRemoveComponentQuery RemoveMaterialModifierQuery { get; }
+    /// <summary>
+    ///     IModifyComponentQuery for the PlayerCharacter tag.
+    /// </summary>
+    IModifyComponentQuery<bool> ModifyPlayerCharacterQuery { get; }
 
-        /// <summary>
-        /// Initializes the persistence provider.
-        /// </summary>
-        void Initialize();
+    /// <summary>
+    ///     IRemoveComponentQuery for the PlayerCharacter tag.
+    /// </summary>
+    IRemoveComponentQuery RemovePlayerCharacterQuery { get; }
 
-        /// <summary>
-        /// Cleans up the persistence provider.
-        /// </summary>
-        void Cleanup();
+    /// <summary>
+    ///     Initializes the persistence provider.
+    /// </summary>
+    void Initialize();
 
-    }
-
+    /// <summary>
+    ///     Cleans up the persistence provider.
+    /// </summary>
+    void Cleanup();
 }

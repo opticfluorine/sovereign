@@ -25,23 +25,25 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 
-namespace Sovereign.Persistence.State.Trackers
+namespace Sovereign.Persistence.State.Trackers;
+
+public sealed class StateTrackerInstaller : IWindsorInstaller
 {
-    public sealed class StateTrackerInstaller : IWindsorInstaller
+    public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<TrackerManager>()
-                .LifestyleSingleton());
+        container.Register(Component.For<TrackerManager>()
+            .LifestyleSingleton());
 
-            container.Register(Component.For<PositionStateTracker>()
-                .LifestyleSingleton());
+        container.Register(Component.For<PositionStateTracker>()
+            .LifestyleSingleton());
 
-            container.Register(Component.For<MaterialStateTracker>()
-                .LifestyleSingleton());
+        container.Register(Component.For<MaterialStateTracker>()
+            .LifestyleSingleton());
 
-            container.Register(Component.For<MaterialModifierStateTracker>()
-                .LifestyleSingleton());
-        }
+        container.Register(Component.For<MaterialModifierStateTracker>()
+            .LifestyleSingleton());
+
+        container.Register(Component.For<PlayerCharacterStateTracker>()
+            .LifestyleSingleton());
     }
 }

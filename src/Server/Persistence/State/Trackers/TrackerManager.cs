@@ -21,32 +21,27 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Sovereign.Persistence.State.Trackers;
 
-namespace Sovereign.Persistence.State.Trackers
+/// <summary>
+///     Manages the trackers, allowing them to be integrated
+///     through a single dependency.
+/// </summary>
+public sealed class TrackerManager
 {
-
-    /// <summary>
-    /// Manages the trackers, allowing them to be integrated
-    /// through a single dependency.
-    /// </summary>
-    public sealed class TrackerManager
+    public TrackerManager(PositionStateTracker positionStateTracker,
+        MaterialStateTracker materialStateTracker,
+        MaterialModifierStateTracker materialModifierStateTracker,
+        PlayerCharacterStateTracker playerCharacterStateTracker)
     {
-
-        public TrackerManager(PositionStateTracker positionStateTracker,
-            MaterialStateTracker materialStateTracker,
-            MaterialModifierStateTracker materialModifierStateTracker)
-        {
-            PositionStateTracker = positionStateTracker;
-            MaterialStateTracker = materialStateTracker;
-            MaterialModifierStateTracker = materialModifierStateTracker;
-        }
-
-        public PositionStateTracker PositionStateTracker { get; }
-        public MaterialStateTracker MaterialStateTracker { get; }
-        public MaterialModifierStateTracker MaterialModifierStateTracker { get; }
+        PositionStateTracker = positionStateTracker;
+        MaterialStateTracker = materialStateTracker;
+        MaterialModifierStateTracker = materialModifierStateTracker;
+        PlayerCharacterStateTracker = playerCharacterStateTracker;
     }
 
+    public PositionStateTracker PositionStateTracker { get; }
+    public MaterialStateTracker MaterialStateTracker { get; }
+    public MaterialModifierStateTracker MaterialModifierStateTracker { get; }
+    public PlayerCharacterStateTracker PlayerCharacterStateTracker { get; }
 }
