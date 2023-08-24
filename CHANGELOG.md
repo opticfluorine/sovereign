@@ -7,6 +7,7 @@
 #### 23 August 2023
 
 * Persist the `PlayerCharacter` tag in the database.
+* Define REST interfaces for player character operations.
 
 #### 20 August 2023
 

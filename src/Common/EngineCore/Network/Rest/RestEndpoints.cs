@@ -21,35 +21,35 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace Sovereign.EngineCore.Network.Rest
+namespace Sovereign.EngineCore.Network.Rest;
+
+/// <summary>
+///     Contains constants that specify the relative URIs for REST endpoints.
+/// </summary>
+public sealed class RestEndpoints
 {
+    /// <summary>
+    ///     Relative path to REST endpoint for the account registration service.
+    /// </summary>
+    public const string AccountRegistration = "/register";
 
     /// <summary>
-    /// Contains constants that specify the relative URIs for REST endpoints.
+    ///     Relative path to REST endpoint for the authentication service.
     /// </summary>
-    public sealed class RestEndpoints
-    {
+    public const string Authentication = "/login";
 
-        /// <summary>
-        /// Relative path to REST endpoint for the account registration service.
-        /// </summary>
-        public const string AccountRegistration = "/register";
+    /// <summary>
+    ///     Relative path to REST endpoint for the world segment service.
+    /// </summary>
+    public const string WorldSegment = "/world";
 
-        /// <summary>
-        /// Relative path to REST endpoint for the authentication service.
-        /// </summary>
-        public const string Authentication = "/login";
+    /// <summary>
+    ///     Relative path to REST endpoint for the debug service.
+    /// </summary>
+    public const string Debug = "/debug";
 
-        /// <summary>
-        /// Relative path to REST endpoint for the world segment service.
-        /// </summary>
-        public const string WorldSegment = "/world";
-
-        /// <summary>
-        /// Relative path to REST endpoint for the debug service.
-        /// </summary>
-        public const string Debug = "/debug";
-
-    }
-
+    /// <summary>
+    ///     Relative path to REST endpoint for player services.
+    /// </summary>
+    public const string Player = "/player";
 }
