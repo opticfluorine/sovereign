@@ -27,6 +27,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
+using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
@@ -49,6 +50,8 @@ public sealed class AuthenticationRestService : IRestService
 
     private readonly AccountServices accountServices;
     private readonly IServerNetworkConfiguration configuration;
+
+    private readonly AccountLoginTracker loginTracker;
 
     /// <summary>
     ///     Map from result to HTTP status code.
@@ -78,10 +81,12 @@ public sealed class AuthenticationRestService : IRestService
         };
 
     public AuthenticationRestService(AccountServices accountServices,
-        IServerNetworkConfiguration configuration)
+        IServerNetworkConfiguration configuration,
+        AccountLoginTracker loginTracker)
     {
         this.accountServices = accountServices;
         this.configuration = configuration;
+        this.loginTracker = loginTracker;
     }
 
 
@@ -130,6 +135,7 @@ public sealed class AuthenticationRestService : IRestService
                 ResultToStatus[result],
                 ResultToString[result],
                 guid.ToString(),
+                loginTracker.GetApiKey(guid),
                 secret,
                 configuration.Host,
                 configuration.Port);
@@ -160,7 +166,7 @@ public sealed class AuthenticationRestService : IRestService
     }
 
     private async Task SendResponse(HttpContext ctx,
-        int status, string result, string id = null,
+        int status, string result, string id = null, string apiKey = null,
         string secret = null, string host = null,
         ushort port = 0)
     {
@@ -170,6 +176,7 @@ public sealed class AuthenticationRestService : IRestService
         {
             Result = result,
             UserId = id,
+            RestApiKey = apiKey,
             SharedSecret = secret,
             ServerHost = host,
             ServerPort = port

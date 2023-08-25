@@ -24,34 +24,29 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Sovereign.Accounts.Accounts.Authentication
+namespace Sovereign.Accounts.Accounts.Authentication;
+
+/// <summary>
+///     IoC installer for account authentication classes.
+/// </summary>
+public sealed class AccountsAuthenticationInstaller : IWindsorInstaller
 {
-
-    /// <summary>
-    /// IoC installer for account authentication classes.
-    /// </summary>
-    public sealed class AccountsAuthenticationInstaller : IWindsorInstaller
+    public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(Component.For<AccountAuthenticator>()
-                .LifestyleSingleton());
+        container.Register(Component.For<AccountAuthenticator>()
+            .LifestyleSingleton());
 
-            container.Register(Component.For<AccountLoginTracker>()
-                .LifestyleSingleton());
+        container.Register(Component.For<AccountLoginTracker>()
+            .LifestyleSingleton());
 
-            container.Register(Component.For<AuthenticationAttemptLimiter>()
-                .LifestyleSingleton());
+        container.Register(Component.For<AuthenticationAttemptLimiter>()
+            .LifestyleSingleton());
 
-            container.Register(Component.For<SharedSecretManager>()
-                .LifestyleSingleton());
+        container.Register(Component.For<SharedSecretManager>()
+            .LifestyleSingleton());
 
-            container.Register(Component.For<LoginHandoffTracker>()
-                .LifestyleSingleton());
-        }
+        container.Register(Component.For<LoginHandoffTracker>()
+            .LifestyleSingleton());
     }
 }

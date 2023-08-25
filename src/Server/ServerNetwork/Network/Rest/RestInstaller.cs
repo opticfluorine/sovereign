@@ -25,29 +25,25 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 using Sovereign.EngineUtil.IoC;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Sovereign.ServerNetwork.Network.Rest
+namespace Sovereign.ServerNetwork.Network.Rest;
+
+/// <summary>
+///     IoC installer for REST services.
+/// </summary>
+public sealed class RestInstaller : IWindsorInstaller
 {
-
-    /// <summary>
-    /// IoC installer for REST services.
-    /// </summary>
-    public sealed class RestInstaller : IWindsorInstaller
+    public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        public void Install(IWindsorContainer container, IConfigurationStore store)
-        {
-            container.Register(EngineClasses.EngineAssemblies()
-                .BasedOn<IRestService>()
-                .WithServiceAllInterfaces()
-                .LifestyleSingleton()
-                .AllowMultipleMatches());
+        container.Register(EngineClasses.EngineAssemblies()
+            .BasedOn<IRestService>()
+            .WithServiceAllInterfaces()
+            .LifestyleSingleton()
+            .AllowMultipleMatches());
 
-            container.Register(Component.For<RestServer>()
-                .LifestyleSingleton());
-        }
+        container.Register(Component.For<RestServer>()
+            .LifestyleSingleton());
+
+        container.Register(Component.For<RestAuthenticator>().LifestyleSingleton());
     }
-
 }

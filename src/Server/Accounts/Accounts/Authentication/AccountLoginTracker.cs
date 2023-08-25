@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using Sodium;
 
 namespace Sovereign.Accounts.Accounts.Authentication;
 
@@ -31,6 +32,16 @@ namespace Sovereign.Accounts.Accounts.Authentication;
 /// </summary>
 public sealed class AccountLoginTracker
 {
+    /// <summary>
+    ///     Size of generated API keys in bytes.
+    /// </summary>
+    private const int ApiKeySize = 32;
+
+    /// <summary>
+    ///     Map from account IDs to current API keys.
+    /// </summary>
+    private readonly Dictionary<Guid, string> accountIdsToApiKeys = new();
+
     /// <summary>
     ///     Map from connection IDs to logged in account IDs.
     /// </summary>
@@ -47,6 +58,11 @@ public sealed class AccountLoginTracker
     /// <param name="accountId">Account ID.</param>
     public void Login(Guid accountId)
     {
+        // Generate temporary API key for the account.
+        var apiKey = Convert.ToBase64String(SodiumCore.GetRandomBytes(ApiKeySize));
+        accountIdsToApiKeys[accountId] = apiKey;
+
+        // Register the login.
         loggedInAccountIds.Add(accountId);
     }
 
@@ -56,6 +72,7 @@ public sealed class AccountLoginTracker
     /// <param name="accountId">Account ID.</param>
     public void Logout(Guid accountId)
     {
+        accountIdsToApiKeys.Remove(accountId);
         loggedInAccountIds.Remove(accountId);
     }
 
@@ -93,5 +110,16 @@ public sealed class AccountLoginTracker
         if (!connectionsToAccounts.TryGetValue(connectionId, out var accountId)) return;
         connectionsToAccounts.Remove(connectionId);
         Logout(accountId);
+    }
+
+    /// <summary>
+    ///     Gets the API key for the given account.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <returns>API key.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the account is not logged in.</exception>
+    public string GetApiKey(Guid accountId)
+    {
+        return accountIdsToApiKeys[accountId];
     }
 }

@@ -21,40 +21,40 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace Sovereign.NetworkCore.Network.Rest.Data
+namespace Sovereign.NetworkCore.Network.Rest.Data;
+
+/// <summary>
+///     Login response data record.
+/// </summary>
+public class LoginResponse
 {
+    /// <summary>
+    ///     Human-readable string describing the result of the login attempt.
+    /// </summary>
+    public string Result { get; set; }
 
     /// <summary>
-    /// Login response data record.
+    ///     User ID. Used for connection handoff.
     /// </summary>
-    public class LoginResponse
-    {
+    public string UserId { get; set; }
 
-        /// <summary>
-        /// Human-readable string describing the result of the login attempt.
-        /// </summary>
-        public string Result { get; set; }
+    /// <summary>
+    ///     Secret REST API key for this user.
+    /// </summary>
+    public string RestApiKey { get; set; }
 
-        /// <summary>
-        /// User ID. Used for connection handoff.
-        /// </summary>
-        public string UserId { get; set; }
+    /// <summary>
+    ///     Shared secret between the client and server.
+    /// </summary>
+    public string SharedSecret { get; set; }
 
-        /// <summary>
-        /// Shared secret between the client and server.
-        /// </summary>
-        public string SharedSecret { get; set; }
+    /// <summary>
+    ///     Hostname of the server to connect to.
+    /// </summary>
+    public string ServerHost { get; set; }
 
-        /// <summary>
-        /// Hostname of the server to connect to.
-        /// </summary>
-        public string ServerHost { get; set; }
-
-        /// <summary>
-        /// Port of the server to connect to.
-        /// </summary>
-        public ushort ServerPort { get; set; }
-
-    }
-
+    /// <summary>
+    ///     Port of the server to connect to.
+    /// </summary>
+    public ushort ServerPort { get; set; }
 }

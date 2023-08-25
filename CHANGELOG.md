@@ -4,6 +4,14 @@
 
 ### August
 
+#### 25 August 2023
+
+* Added `AuthenticatedRestService` to make it easy to create REST endpoints that require login credentials.
+  Along with this, added a REST API key that is uniquely generated for each successful login. Authenticated
+  REST API endpoints use HTTP Basic authentication with the account ID as username and the API key as password,
+  so these should still go over a TLS encrypted connection to be safe. Still need to add the client-side implementation
+  for interacting with the authenticated endpoints.
+
 #### 23 August 2023
 
 * Persist the `PlayerCharacter` tag in the database.

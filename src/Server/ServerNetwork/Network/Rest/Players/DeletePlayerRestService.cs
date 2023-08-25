@@ -29,13 +29,17 @@ namespace Sovereign.ServerNetwork.Network.Rest.Players;
 /// <summary>
 ///     REST service for deleting existing player characters.
 /// </summary>
-public class DeletePlayerRestService : IRestService
+public class DeletePlayerRestService : AuthenticatedRestService
 {
-    public string Path => RestEndpoints.Player + "/{id}";
-    public RestPathType PathType => RestPathType.Parameter;
-    public HttpMethod RequestType => HttpMethod.DELETE;
+    public DeletePlayerRestService(RestAuthenticator authenticator) : base(authenticator)
+    {
+    }
 
-    public Task OnRequest(HttpContext ctx)
+    public override string Path => RestEndpoints.Player + "/{id}";
+    public override RestPathType PathType => RestPathType.Parameter;
+    public override HttpMethod RequestType => HttpMethod.DELETE;
+
+    protected override Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
     {
         throw new NotImplementedException();
     }

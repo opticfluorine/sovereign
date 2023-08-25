@@ -29,13 +29,17 @@ namespace Sovereign.ServerNetwork.Network.Rest.Players;
 /// <summary>
 ///     REST service for selecting a player character for use.
 /// </summary>
-public class SelectPlayerRestService : IRestService
+public class SelectPlayerRestService : AuthenticatedRestService
 {
-    public string Path => RestEndpoints.Player + "/{id}/select";
-    public RestPathType PathType => RestPathType.Parameter;
-    public HttpMethod RequestType => HttpMethod.POST;
+    public SelectPlayerRestService(RestAuthenticator authenticator) : base(authenticator)
+    {
+    }
 
-    public Task OnRequest(HttpContext ctx)
+    public override string Path => RestEndpoints.Player + "/{id}/select";
+    public override RestPathType PathType => RestPathType.Parameter;
+    public override HttpMethod RequestType => HttpMethod.POST;
+
+    protected override Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
     {
         throw new NotImplementedException();
     }

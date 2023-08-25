@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Persistence\Persistence.csproj"/>
-        <ProjectReference Include="..\ServerCore\ServerCore.csproj"/>
+        <ProjectReference Include="..\Persistence\Persistence.csproj" />
+        <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
     </ItemGroup>
 
 </Project>

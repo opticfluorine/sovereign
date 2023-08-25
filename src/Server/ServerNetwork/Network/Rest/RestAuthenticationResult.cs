@@ -19,28 +19,25 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-using System;
-using System.Threading.Tasks;
-using Sovereign.EngineCore.Network.Rest;
-using WatsonWebserver;
-
-namespace Sovereign.ServerNetwork.Network.Rest.Players;
+namespace Sovereign.ServerNetwork.Network.Rest;
 
 /// <summary>
-///     REST service for listing player characters.
+///     Result type for REST authentication.
 /// </summary>
-public class ListPlayerRestService : AuthenticatedRestService
+public enum RestAuthenticationResult
 {
-    public ListPlayerRestService(RestAuthenticator authenticator) : base(authenticator)
-    {
-    }
+    /// <summary>
+    ///     Indicates that authentication was successful.
+    /// </summary>
+    Success,
 
-    public override string Path => RestEndpoints.Player;
-    public override RestPathType PathType => RestPathType.Static;
-    public override HttpMethod RequestType => HttpMethod.GET;
+    /// <summary>
+    ///     Indicates that authentication was denied.
+    /// </summary>
+    Denied,
 
-    protected override Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    ///     Indicates that no credentials were provided.
+    /// </summary>
+    MissingCredentials
 }
