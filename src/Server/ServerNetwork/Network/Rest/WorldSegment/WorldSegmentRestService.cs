@@ -21,73 +21,69 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using MessagePack;
+using System;
+using System.Threading.Tasks;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Systems.WorldManagement;
-using System.Threading.Tasks;
 using WatsonWebserver;
 
-namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment
+namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment;
+
+/// <summary>
+///     REST service providing batch transfer of world segment block data from
+///     server to client.
+/// </summary>
+public sealed class WorldSegmentRestService : AuthenticatedRestService
 {
+    private readonly WorldSegmentBlockDataManager blockDataManager;
 
-    /// <summary>
-    /// REST service providing batch transfer of world segment block data from 
-    /// server to client.
-    /// </summary>
-    public sealed class WorldSegmentRestService : IRestService
+    public WorldSegmentRestService(RestAuthenticator authenticator, WorldSegmentBlockDataManager blockDataManager)
+        : base(authenticator)
     {
-        private readonly WorldSegmentBlockDataManager blockDataManager;
+        this.blockDataManager = blockDataManager;
+    }
 
-        public string Path => RestEndpoints.WorldSegment + "/{x}/{y}/{z}";
+    public override string Path => RestEndpoints.WorldSegment + "/{x}/{y}/{z}";
 
-        public RestPathType PathType => RestPathType.Parameter;
+    public override RestPathType PathType => RestPathType.Parameter;
 
-        public HttpMethod RequestType => HttpMethod.GET;
+    public override HttpMethod RequestType => HttpMethod.GET;
 
-        public WorldSegmentRestService(WorldSegmentBlockDataManager blockDataManager)
+    protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
+    {
+        // Parse parameters.
+        int x, y, z;
+        if (int.TryParse(ctx.Request.Url.Parameters["x"], out x)
+            && int.TryParse(ctx.Request.Url.Parameters["y"], out y)
+            && int.TryParse(ctx.Request.Url.Parameters["z"], out z))
         {
-            this.blockDataManager = blockDataManager;
-        }
-
-        public async Task OnRequest(HttpContext ctx)
-        {
-            // Parse parameters.
-            int x, y, z;
-            if (int.TryParse(ctx.Request.Url.Parameters["x"], out x)
-                && int.TryParse(ctx.Request.Url.Parameters["y"], out y)
-                && int.TryParse(ctx.Request.Url.Parameters["z"], out z))
+            // Successful parse, try to fulfill the request.
+            // At some point we should also check that the segment is in range for the
+            // user that requested it, we don't want to be leaking data for the other
+            // side of the world.
+            var dataTask = blockDataManager.GetWorldSegmentBlockData(new GridPosition(x, y, z));
+            if (dataTask != null)
             {
-                // Successful parse, try to fulfill the request.
-                // At some point we should also check that the segment is in range for the
-                // user that requested it, we don't want to be leaking data for the other
-                // side of the world.
-                var dataTask = blockDataManager.GetWorldSegmentBlockData(new GridPosition(x, y, z));
-                if (dataTask != null)
-                {
-                    // Get the latest version of the block data and encode it for transfer.
-                    var blockData = await dataTask;
+                // Get the latest version of the block data and encode it for transfer.
+                var blockData = await dataTask;
 
-                    ctx.Response.ContentType = "application/octet-stream";
-                    ctx.Response.ContentLength = blockData.Length;
-                    await ctx.Response.Send(blockData);
-                }
-                else
-                {
-                    // Segment is not loaded by server at this time.
-                    ctx.Response.StatusCode = 503;
-                    await ctx.Response.Send();
-                }
+                ctx.Response.ContentType = "application/octet-stream";
+                ctx.Response.ContentLength = blockData.Length;
+                await ctx.Response.Send(blockData);
             }
             else
             {
-                // Invalid coordinates.
-                ctx.Response.StatusCode = 404;
+                // Segment is not loaded by server at this time.
+                ctx.Response.StatusCode = 503;
                 await ctx.Response.Send();
             }
         }
+        else
+        {
+            // Invalid coordinates.
+            ctx.Response.StatusCode = 404;
+            await ctx.Response.Send();
+        }
     }
-
 }
-

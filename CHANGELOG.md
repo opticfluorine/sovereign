@@ -9,6 +9,9 @@
 * Automatically enable authenticated REST requests from the client once a successful login has occurred.
 * Add logging for failed authentication attempts in REST API calls. It should be possible to set up a regex
   in fail2ban based on this.
+* Switch `WorldSegmentRestService` to an authenticated REST service - there's no need to be pulling down world block
+  segment data if you're not logged in. In the future, I plan to make this more restrictive by refusing requests for
+  blocks that are too far from the player's current position.
 
 #### 25 August 2023
 
