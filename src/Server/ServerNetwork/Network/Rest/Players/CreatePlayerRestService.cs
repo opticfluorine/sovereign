@@ -20,8 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
+using Sovereign.NetworkCore.Network.Rest.Data;
 using WatsonWebserver;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
@@ -31,6 +35,11 @@ namespace Sovereign.ServerNetwork.Network.Rest.Players;
 /// </summary>
 public class CreatePlayerRestService : AuthenticatedRestService
 {
+    /// <summary>
+    ///     Maximum request length, in bytes.
+    /// </summary>
+    private const int MaxRequestLength = 1024;
+
     public CreatePlayerRestService(RestAuthenticator authenticator) : base(authenticator)
     {
     }
@@ -39,8 +48,62 @@ public class CreatePlayerRestService : AuthenticatedRestService
     public override RestPathType PathType => RestPathType.Parameter;
     public override HttpMethod RequestType => HttpMethod.POST;
 
-    protected override Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
+    protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
     {
+        try
+        {
+            // Safety check.
+            if (ctx.Request.ContentLength > MaxRequestLength)
+            {
+                await SendResponse(ctx, 413, "Request too large.");
+                return;
+            }
+
+            // Decode and validate input.
+            var requestJson = ctx.Request.DataAsString;
+            var requestData = JsonSerializer.Deserialize<CreatePlayerRequest>(requestJson,
+                MessageConfig.JsonOptions);
+            if (requestData.PlayerName == null)
+            {
+                await SendResponse(ctx, 400, "Incomplete input.");
+                return;
+            }
+
+            // Attempt player creation.
+            // TODO
+        }
+        catch (Exception e)
+        {
+            Logger.Error("Error handling create player request.", e);
+            try
+            {
+                await SendResponse(ctx, 500, "Error processing request.");
+            }
+            catch (Exception e2)
+            {
+                Logger.Error("Error sending error response.", e2);
+            }
+        }
+
         throw new NotImplementedException();
+    }
+
+    /// <summary>
+    ///     Sends a response.
+    /// </summary>
+    /// <param name="ctx">HTTP context.</param>
+    /// <param name="status">Response status code.</param>
+    /// <param name="result">Human-readable string describing the result.</param>
+    private async Task SendResponse(HttpContext ctx, int status, string result)
+    {
+        ctx.Response.StatusCode = status;
+
+        var responseData = new CreatePlayerResponse
+        {
+            Result = result
+        };
+        var responseJson = JsonSerializer.Serialize(responseData);
+
+        await ctx.Response.Send(Encoding.UTF8.GetBytes(responseJson));
     }
 }

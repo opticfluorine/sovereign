@@ -38,7 +38,7 @@ public abstract class AuthenticatedRestService : IRestService
         this.authenticator = authenticator;
     }
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
+    public ILogger Logger { protected get; set; } = NullLogger.Instance;
 
     public abstract string Path { get; }
     public abstract RestPathType PathType { get; }

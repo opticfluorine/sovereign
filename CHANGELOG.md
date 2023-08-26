@@ -12,6 +12,8 @@
 * Switch `WorldSegmentRestService` to an authenticated REST service - there's no need to be pulling down world block
   segment data if you're not logged in. In the future, I plan to make this more restrictive by refusing requests for
   blocks that are too far from the player's current position.
+* Start implementing the `CreatePlayerRestService` stub. Basically just request handling, need to make the necessary
+  persistence updates before going further.
 
 #### 25 August 2023
 
