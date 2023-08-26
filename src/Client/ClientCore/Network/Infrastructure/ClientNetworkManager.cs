@@ -279,6 +279,9 @@ public sealed class ClientNetworkManager : INetworkManager
         // Store the login details.
         this.loginResponse = loginResponse;
 
+        // Configure the REST API to make authenticated calls going forward.
+        restClient.SetCredentials(Guid.Parse(loginResponse.UserId), loginResponse.RestApiKey);
+
         // Start up the connection to the event server.
         var cmd = new ClientNetworkCommand();
         cmd.CommandType = ClientNetworkCommandType.BeginConnection;

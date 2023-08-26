@@ -23,7 +23,9 @@
 
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Threading.Tasks;
 using Sovereign.NetworkCore.Network;
 
@@ -66,12 +68,28 @@ public sealed class RestClient
     }
 
     /// <summary>
+    ///     Sets the credentials to use for future requests.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <param name="apiKey">API key.</param>
+    public void SetCredentials(Guid accountId, string apiKey)
+    {
+        // Pack the account ID and API key into an HTTP Basic authentication string.
+        var sb = new StringBuilder().Append(accountId.ToString()).Append(":").Append(apiKey);
+        var token = Convert.ToBase64String(Encoding.UTF8.GetBytes(sb.ToString()));
+
+        // Set the authorization header for future requests.
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
+    }
+
+    /// <summary>
     ///     Sets the REST client to the disconnected state to prevent accidental requests
     ///     to the server after the session has ended.
     /// </summary>
     /// If the REST client is not in the connected state, this method does nothing.
     public void Disconnect()
     {
+        httpClient.DefaultRequestHeaders.Authorization = null;
         Connected = false;
     }
 

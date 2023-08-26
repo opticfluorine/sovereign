@@ -4,6 +4,10 @@
 
 ### August
 
+#### 26 August 2023
+
+* Automatically enable authenticated REST requests from the client once a successful login has occurred.
+
 #### 25 August 2023
 
 * Added `AuthenticatedRestService` to make it easy to create REST endpoints that require login credentials.
