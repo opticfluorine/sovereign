@@ -73,7 +73,7 @@ public class RestAuthenticator
             accountId = new Maybe<Guid>(claimedAccountId);
             return RestAuthenticationResult.Success;
         }
-        catch (Exception e)
+        catch (Exception)
         {
             // If we get here, there was something malformed with the header. Deny access.
             return RestAuthenticationResult.Denied;

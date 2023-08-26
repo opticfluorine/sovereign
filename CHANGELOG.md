@@ -7,6 +7,8 @@
 #### 26 August 2023
 
 * Automatically enable authenticated REST requests from the client once a successful login has occurred.
+* Add logging for failed authentication attempts in REST API calls. It should be possible to set up a regex
+  in fail2ban based on this.
 
 #### 25 August 2023
 

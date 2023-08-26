@@ -21,6 +21,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Castle.Core.Logging;
 using WatsonWebserver;
 
 namespace Sovereign.ServerNetwork.Network.Rest;
@@ -36,6 +37,8 @@ public abstract class AuthenticatedRestService : IRestService
     {
         this.authenticator = authenticator;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public abstract string Path { get; }
     public abstract RestPathType PathType { get; }
@@ -56,6 +59,8 @@ public abstract class AuthenticatedRestService : IRestService
 
             case RestAuthenticationResult.Denied:
             default:
+                Logger.InfoFormat("403 Forbidden - {0} for {1}", ctx.Request.Source.IpAddress,
+                    ctx.Request.Url.Full);
                 ctx.Response.StatusCode = 403;
                 await ctx.Response.Send();
                 break;
