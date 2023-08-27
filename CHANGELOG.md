@@ -14,6 +14,7 @@
   blocks that are too far from the player's current position.
 * Start implementing the `CreatePlayerRestService` stub. Basically just request handling, need to make the necessary
   persistence updates before going further.
+* Add `Name` component for naming entities, along with the associated persistence code.
 
 #### 25 August 2023
 

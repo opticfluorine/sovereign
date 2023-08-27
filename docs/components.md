@@ -19,6 +19,7 @@ Core components are available in both the client and server.
 | `AboveBlock`       | `AboveBlockComponentCollection`       | For material block entities (see `Material` component), denotes the entity ID of the block that sits atop this entity. |
 | `Material`         | `MaterialComponentCollection`         | Indicates that the entity is a block of the given material ID.                                                         |
 | `MaterialModifier` | `MaterialModifierComponentCollection` | For material block entities (see `Material` component), denotes the material modifier of the block.                    |
+| `Name`             | `NameComponentCollection`             | Gives the name of the entity.                                                                                          |
 | `PlayerCharacter`  | `PlayerCharacterTagCollection`        | Indicates that an entity is a player character.                                                                        |
 | `Position`         | `PositionComponentCollection`         | Three-dimensional position of an entity.                                                                               |
 | `Velocity`         | `VelocityComponentCollection`         | Three-dimensional velocity of an entity.                                                                               |

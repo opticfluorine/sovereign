@@ -23,86 +23,82 @@
 
 using System.Numerics;
 
-namespace Sovereign.EngineCore.Entities
+namespace Sovereign.EngineCore.Entities;
+
+/// <summary>
+///     Utility interface for creating new entities.
+/// </summary>
+public interface IEntityBuilder
 {
+    /// <summary>
+    ///     Builds the entity.
+    /// </summary>
+    /// <returns>Entity ID.</returns>
+    ulong Build();
 
     /// <summary>
-    /// Utility interface for creating new entities.
+    ///     Makes the new entity positionable with the given position and velocity.
     /// </summary>
-    public interface IEntityBuilder
-    {
+    /// <param name="position">Position.</param>
+    /// <param name="velocity">Velocity.</param>
+    /// <returns></returns>
+    IEntityBuilder Positionable(Vector3 position, Vector3 velocity);
 
-        /// <summary>
-        /// Builds the entity.
-        /// </summary>
-        /// <returns>Entity ID.</returns>
-        ulong Build();
+    /// <summary>
+    ///     Makes the new entity positionable with the given position and
+    ///     zero velocity.
+    /// </summary>
+    /// <param name="position">Position.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder Positionable(Vector3 position);
 
-        #region Positioning
+    /// <summary>
+    ///     Makes the new entity positionable with zero position
+    ///     and zero velocity.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder Positionable();
 
-        /// <summary>
-        /// Makes the new entity positionable with the given position and velocity.
-        /// </summary>
-        /// <param name="position">Position.</param>
-        /// <param name="velocity">Velocity.</param>
-        /// <returns></returns>
-        IEntityBuilder Positionable(Vector3 position, Vector3 velocity);
+    /// <summary>
+    ///     Makes the new entity drawable.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder Drawable();
 
-        /// <summary>
-        /// Makes the new entity positionable with the given position and
-        /// zero velocity.
-        /// </summary>
-        /// <param name="position">Position.</param>
-        /// <returns>Builder.</returns>
-        IEntityBuilder Positionable(Vector3 position);
+    /// <summary>
+    ///     Uses the given animated sprite when rendering the new entity.
+    /// </summary>
+    /// <param name="animatedSpriteId">Animated sprite ID.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder AnimatedSprite(int animatedSpriteId);
 
-        /// <summary>
-        /// Makes the new entity positionable with zero position
-        /// and zero velocity.
-        /// </summary>
-        /// <returns>Builder.</returns>
-        IEntityBuilder Positionable();
+    /// <summary>
+    ///     Makes the new entity a block of the given material.
+    /// </summary>
+    /// <param name="materialId">Material ID.</param>
+    /// <param name="materialModifier">Material modifier.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder Material(int materialId, int materialModifier);
 
-        #endregion Positioning
+    /// <summary>
+    ///     Records the entity ID of the block above this block.
+    ///     Note that this does not move either block, only records the
+    ///     topological relationship.
+    /// </summary>
+    /// <param name="aboveBlock"></param>
+    /// <returns></returns>
+    IEntityBuilder AboveBlock(ulong aboveBlock);
 
-        #region Rendering
+    /// <summary>
+    ///     Tags the entity as a player character.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder PlayerCharacter();
 
-        /// <summary>
-        /// Makes the new entity drawable.
-        /// </summary>
-        /// <returns>Builder.</returns>
-        IEntityBuilder Drawable();
-
-        /// <summary>
-        /// Uses the given animated sprite when rendering the new entity.
-        /// </summary>
-        /// <param name="animatedSpriteId">Animated sprite ID.</param>
-        /// <returns>Builder.</returns>
-        IEntityBuilder AnimatedSprite(int animatedSpriteId);
-
-        #endregion Rendering
-
-        #region Blocks
-
-        /// <summary>
-        /// Makes the new entity a block of the given material.
-        /// </summary>
-        /// <param name="materialId">Material ID.</param>
-        /// <param name="materialModifier">Material modifier.</param>
-        /// <returns>Builder.</returns>
-        IEntityBuilder Material(int materialId, int materialModifier);
-
-        /// <summary>
-        /// Records the entity ID of the block above this block.
-        /// Note that this does not move either block, only records the
-        /// topological relationship.
-        /// </summary>
-        /// <param name="aboveBlock"></param>
-        /// <returns></returns>
-        IEntityBuilder AboveBlock(ulong aboveBlock);
-
-        #endregion Blocks
-
-    }
-
+    /// <summary>
+    ///     Assigns a name to the entity.
+    /// </summary>
+    /// <param name="name">Entity name.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder Name(string name);
 }

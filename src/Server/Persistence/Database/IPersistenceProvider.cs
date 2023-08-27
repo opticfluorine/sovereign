@@ -143,6 +143,21 @@ public interface IPersistenceProvider
     IRemoveComponentQuery RemovePlayerCharacterQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for the Name component.
+    /// </summary>
+    IAddComponentQuery<string> AddNameQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the Name component.
+    /// </summary>
+    IModifyComponentQuery<string> ModifyNameQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the Name component.
+    /// </summary>
+    IRemoveComponentQuery RemoveNameQuery { get; }
+
+    /// <summary>
     ///     Initializes the persistence provider.
     /// </summary>
     void Initialize();

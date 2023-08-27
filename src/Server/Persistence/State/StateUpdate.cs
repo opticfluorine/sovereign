@@ -21,35 +21,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Sovereign.Persistence.State;
 
-namespace Sovereign.Persistence.State
+/// <summary>
+///     Record of a persistence state update.
+/// </summary>
+/// <typeparam name="T">Component value type.</typeparam>
+public struct StateUpdate<T>
 {
+    /// <summary>
+    ///     Internal entity ID.
+    /// </summary>
+    public ulong EntityId;
 
     /// <summary>
-    /// Record of a persistence state update.
+    ///     State update type.
     /// </summary>
-    /// <typeparam name="T">Component value type.</typeparam>
-    public struct StateUpdate<T> where T : unmanaged
-    {
+    public StateUpdateType StateUpdateType;
 
-        /// <summary>
-        /// Internal entity ID.
-        /// </summary>
-        public ulong EntityId;
-
-        /// <summary>
-        /// State update type.
-        /// </summary>
-        public StateUpdateType StateUpdateType;
-
-        /// <summary>
-        /// Latest value.
-        /// </summary>
-        public T Value;
-
-    }
-
+    /// <summary>
+    ///     Latest value.
+    /// </summary>
+    public T Value;
 }

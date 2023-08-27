@@ -23,75 +23,76 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.EngineCore.Components
+namespace Sovereign.EngineCore.Components;
+
+/// <summary>
+///     Standard operators for common component types.
+/// </summary>
+public static class ComponentOperators
 {
+    /// <summary>
+    ///     Standard operators for int-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<int, int, int>>
+        IntOperators = new()
+        {
+            { ComponentOperation.Set, (a, b) => b },
+            { ComponentOperation.Add, (a, b) => a + b },
+            { ComponentOperation.Multiply, (a, b) => a * b },
+            { ComponentOperation.Divide, (a, b) => a / b }
+        };
 
     /// <summary>
-    /// Standard operators for common component types.
+    ///     Standard operators for ulong-valued components.
     /// </summary>
-    public static class ComponentOperators
-    {
+    public static readonly Dictionary<ComponentOperation, Func<ulong, ulong, ulong>>
+        UlongOperators = new()
+        {
+            { ComponentOperation.Set, (a, b) => b },
+            { ComponentOperation.Add, (a, b) => a + b },
+            { ComponentOperation.Multiply, (a, b) => a * b },
+            { ComponentOperation.Divide, (a, b) => a / b }
+        };
 
-        /// <summary>
-        /// Standard operators for int-valued components.
-        /// </summary>
-        public static readonly IDictionary<ComponentOperation, Func<int, int, int>>
-            IntOperators = new Dictionary<ComponentOperation, Func<int, int, int>>()
-            {
-                {ComponentOperation.Set, (a, b) => b},
-                {ComponentOperation.Add, (a, b) => a + b},
-                {ComponentOperation.Multiply, (a, b) => a * b},
-                {ComponentOperation.Divide, (a, b) => a / b},
-            };
+    /// <summary>
+    ///     Standard operators for float-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<float, float, float>>
+        FloatOperators = new()
+        {
+            { ComponentOperation.Set, (a, b) => b },
+            { ComponentOperation.Add, (a, b) => a + b },
+            { ComponentOperation.Multiply, (a, b) => a * b },
+            { ComponentOperation.Divide, (a, b) => a / b }
+        };
 
-        /// <summary>
-        /// Standard operators for ulong-valued components.
-        /// </summary>
-        public static readonly IDictionary<ComponentOperation, Func<ulong, ulong, ulong>>
-            UlongOperators = new Dictionary<ComponentOperation, Func<ulong, ulong, ulong>>()
-            {
-                {ComponentOperation.Set, (a, b) => b},
-                {ComponentOperation.Add, (a, b) => a + b},
-                {ComponentOperation.Multiply, (a, b) => a * b},
-                {ComponentOperation.Divide, (a, b) => a / b},
-            };
+    /// <summary>
+    ///     Standard operators for vector-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<Vector3, Vector3, Vector3>>
+        VectorOperators = new()
+        {
+            { ComponentOperation.Set, (a, b) => b },
+            { ComponentOperation.Add, Vector3.Add }
+        };
 
-        /// <summary>
-        /// Standard operators for float-valued components.
-        /// </summary>
-        public static readonly IDictionary<ComponentOperation, Func<float, float, float>>
-            FloatOperators = new Dictionary<ComponentOperation, Func<float, float, float>>()
-            {
-                {ComponentOperation.Set, (a, b) => b},
-                {ComponentOperation.Add, (a, b) => a + b},
-                {ComponentOperation.Multiply, (a, b) => a * b},
-                {ComponentOperation.Divide, (a, b) => a / b},
-            };
+    /// <summary>
+    ///     Standard operators for boolean-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<bool, bool, bool>>
+        BoolOperators = new()
+        {
+            { ComponentOperation.Set, (a, b) => b }
+        };
 
-        /// <summary>
-        /// Standard operators for vector-valued components.
-        /// </summary>
-        public static readonly IDictionary<ComponentOperation, Func<Vector3, Vector3, Vector3>>
-            VectorOperators = new Dictionary<ComponentOperation, Func<Vector3, Vector3, Vector3>>()
-            {
-                {ComponentOperation.Set, (a, b) => b},
-                {ComponentOperation.Add, Vector3.Add},
-            };
-
-        /// <summary>
-        /// Standard operators for boolean-valued components.
-        /// </summary>
-        public static readonly IDictionary<ComponentOperation, Func<bool, bool, bool>>
-            BoolOperators = new Dictionary<ComponentOperation, Func<bool, bool, bool>>()
-            {
-                {ComponentOperation.Set, (a, b) => b},
-            };
-
-    }
-
+    /// <summary>
+    ///     Standard operators for string-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<string, string, string>>
+        StringOperators = new()
+        {
+            { ComponentOperation.Set, (a, b) => b }
+        };
 }

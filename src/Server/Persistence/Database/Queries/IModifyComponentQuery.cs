@@ -23,23 +23,18 @@
 
 using System.Data;
 
-namespace Sovereign.Persistence.Database.Queries
+namespace Sovereign.Persistence.Database.Queries;
+
+/// <summary>
+///     Generic query interface for modifying components.
+/// </summary>
+public interface IModifyComponentQuery<T>
 {
-
     /// <summary>
-    /// Generic query interface for modifying components.
+    ///     Modifies a component.
     /// </summary>
-    public interface IModifyComponentQuery<T> where T : unmanaged
-    {
-
-        /// <summary>
-        /// Modifies a component.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        /// <param name="value">Component value.</param>
-        /// <param name="transaction">Database transaction.</param>
-        void Modify(ulong entityId, T value, IDbTransaction transaction);
-
-    }
-
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="value">Component value.</param>
+    /// <param name="transaction">Database transaction.</param>
+    void Modify(ulong entityId, T value, IDbTransaction transaction);
 }

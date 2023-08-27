@@ -26,46 +26,45 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
+using Sovereign.EngineCore.Systems.Player.Components;
 
-namespace Sovereign.ClientCore.Entities
+namespace Sovereign.ClientCore.Entities;
+
+/// <summary>
+///     Entity builder for the client.
+/// </summary>
+public sealed class ClientEntityBuilder : AbstractEntityBuilder
 {
+    private readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly DrawableComponentCollection drawables;
 
-    /// <summary>
-    /// Entity builder for the client.
-    /// </summary>
-    public sealed class ClientEntityBuilder : AbstractEntityBuilder
+    public ClientEntityBuilder(ulong entityId,
+        ComponentManager componentManager,
+        PositionComponentCollection positions,
+        VelocityComponentCollection velocities,
+        DrawableComponentCollection drawables,
+        MaterialComponentCollection materials,
+        MaterialModifierComponentCollection materialModifiers,
+        AboveBlockComponentCollection aboveBlocks,
+        AnimatedSpriteComponentCollection animatedSprites,
+        PlayerCharacterTagCollection playerCharacterTags,
+        NameComponentCollection names)
+        : base(entityId, componentManager, positions, velocities, materials,
+            materialModifiers, aboveBlocks, playerCharacterTags, names)
     {
-        private readonly DrawableComponentCollection drawables;
-        private readonly AnimatedSpriteComponentCollection animatedSprites;
-
-        public ClientEntityBuilder(ulong entityId,
-            ComponentManager componentManager,
-            PositionComponentCollection positions,
-            VelocityComponentCollection velocities,
-            DrawableComponentCollection drawables,
-            MaterialComponentCollection materials,
-            MaterialModifierComponentCollection materialModifiers,
-            AboveBlockComponentCollection aboveBlocks,
-            AnimatedSpriteComponentCollection animatedSprites)
-            : base(entityId, componentManager, positions, velocities, materials,
-                  materialModifiers, aboveBlocks)
-        {
-            this.drawables = drawables;
-            this.animatedSprites = animatedSprites;
-        }
-
-        public override IEntityBuilder Drawable()
-        {
-            drawables.AddComponent(entityId, true);
-            return this;
-        }
-
-        public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
-        {
-            animatedSprites.AddComponent(entityId, animatedSpriteId);
-            return this;
-        }
-
+        this.drawables = drawables;
+        this.animatedSprites = animatedSprites;
     }
 
+    public override IEntityBuilder Drawable()
+    {
+        drawables.AddComponent(entityId, true);
+        return this;
+    }
+
+    public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
+    {
+        animatedSprites.AddComponent(entityId, animatedSpriteId);
+        return this;
+    }
 }

@@ -68,6 +68,12 @@ public enum ComponentType
     /// <seealso cref="PlayerCharacterTagCollection" />
     PlayerCharacter = 0x0005,
 
+    /// <summary>
+    ///     Component giving an entity its name.
+    /// </summary>
+    /// <seealso cref="Sovereign.EngineCore.Components.NameComponentCollection" />
+    Name = 0x0006,
+
     #endregion Common
 
     #region Client

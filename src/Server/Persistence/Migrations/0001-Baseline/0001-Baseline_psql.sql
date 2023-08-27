@@ -127,6 +127,18 @@ CREATE TABLE PlayerCharacter
 );
 
 
+--------------------
+-- Name Component --
+--------------------
+
+CREATE TABLE Name
+(
+    id    INTEGER PRIMARY KEY NOT NULL,
+    value TEXT                NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+
 -- Create views.
 
 --------------------------------------
@@ -155,12 +167,14 @@ SELECT Entity.id                 AS id,
        Position.z                AS z,
        Material.material         AS material,
        MaterialModifier.modifier AS materialModifier,
-       PlayerCharacter.value     AS playerCharacter
+       PlayerCharacter.value     AS playerCharacter,
+       Name.value                AS name
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
          LEFT JOIN MaterialModifier ON MaterialModifier.id = Entity.id
-         LEFT JOIN PlayerCharacter ON PlayerCharacter.id = Entity.id;
+         LEFT JOIN PlayerCharacter ON PlayerCharacter.id = Entity.id
+         LEFT JOIN Name ON Name.id = Entity.id;
 
 
 -- Create stored procedures and functions.
@@ -178,7 +192,8 @@ CREATE FUNCTION EntityDetails(entityId BIGINT)
                 pos_z            REAL,
                 material         INTEGER,
                 materialModifier INTEGER,
-                playerCharacter  BOOLEAN
+                playerCharacter  BOOLEAN,
+                name             TEXT
             )
     LANGUAGE SQL
 AS
@@ -203,7 +218,8 @@ CREATE FUNCTION PositionedEntitiesInRange(x_min REAL, y_min REAL, z_min REAL,
                 pos_z            REAL,
                 material         INTEGER,
                 materialModifier INTEGER,
-                playerCharacter  BOOLEAN
+                playerCharacter  BOOLEAN,
+                name             TEXT
             )
     LANGUAGE SQL
 AS
@@ -237,4 +253,3 @@ $$;
 -- Log the migration.
 INSERT INTO MigrationLog
 VALUES (1, 'Baseline');
-

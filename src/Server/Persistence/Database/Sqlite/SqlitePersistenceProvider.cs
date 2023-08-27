@@ -39,19 +39,23 @@ namespace Sovereign.Persistence.Database.Sqlite;
 /// </summary>
 public sealed class SqlitePersistenceProvider : IPersistenceProvider
 {
-    private const string positionTableName = "Position";
+    private const string POSITION_TABLE_NAME = "Position";
 
-    private const string materialTableName = "Material";
-    private const string materialParamName = "material";
-    private const SqliteType materialParamType = SqliteType.Integer;
+    private const string MATERIAL_TABLE_NAME = "Material";
+    private const string MATERIAL_PARAM_NAME = "material";
+    private const SqliteType MATERIAL_PARAM_TYPE = SqliteType.Integer;
 
-    private const string materialModifierTableName = "MaterialModifier";
-    private const string materialModifierParamName = "modifier";
-    private const SqliteType materialModifierParamType = SqliteType.Integer;
+    private const string MATERIAL_MODIFIER_TABLE_NAME = "MaterialModifier";
+    private const string MATERIAL_MODIFIER_PARAM_NAME = "modifier";
+    private const SqliteType MATERIAL_MODIFIER_PARAM_TYPE = SqliteType.Integer;
 
-    private const string playerCharacterTableName = "PlayerCharacter";
-    private const string playerCharacterParamName = "value";
-    private const SqliteType playerCharacterParamType = SqliteType.Integer;
+    private const string PLAYER_CHARACTER_TABLE_NAME = "PlayerCharacter";
+    private const string PLAYER_CHARACTER_PARAM_NAME = "value";
+    private const SqliteType PLAYER_CHARACTER_PARAM_TYPE = SqliteType.Integer;
+
+    private const string NAME_TABLE_NAME = "Name";
+    private const string NAME_PARAM_NAME = "value";
+    private const SqliteType NAME_PARAM_TYPE = SqliteType.Text;
 
     private readonly IPersistenceConfiguration configuration;
 
@@ -61,6 +65,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
+    public IAddComponentQuery<string> AddNameQuery { get; private set; }
+    public IModifyComponentQuery<string> ModifyNameQuery { get; private set; }
+    public IRemoveComponentQuery RemoveNameQuery { get; private set; }
 
     public IMigrationQuery MigrationQuery { get; private set; }
 
@@ -111,40 +118,47 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         RemoveEntityQuery = new SqliteRemoveEntityQuery(Connection);
 
         /* Position component. */
-        AddPositionQuery = new Vector3SqliteAddComponentQuery(positionTableName,
+        AddPositionQuery = new Vector3SqliteAddComponentQuery(POSITION_TABLE_NAME,
             (SqliteConnection)Connection);
-        ModifyPositionQuery = new Vector3SqliteModifyComponentQuery(positionTableName,
+        ModifyPositionQuery = new Vector3SqliteModifyComponentQuery(POSITION_TABLE_NAME,
             (SqliteConnection)Connection);
-        RemovePositionQuery = new SqliteRemoveComponentQuery(positionTableName,
+        RemovePositionQuery = new SqliteRemoveComponentQuery(POSITION_TABLE_NAME,
             (SqliteConnection)Connection);
 
         /* Material component. */
         AddMaterialQuery = new SimpleSqliteAddComponentQuery<int>(
-            materialTableName, materialParamName, materialParamType,
+            MATERIAL_TABLE_NAME, MATERIAL_PARAM_NAME, MATERIAL_PARAM_TYPE,
             (SqliteConnection)Connection);
         ModifyMaterialQuery = new SimpleSqliteModifyComponentQuery<int>(
-            materialTableName, materialParamName, materialParamType,
+            MATERIAL_TABLE_NAME, MATERIAL_PARAM_NAME, MATERIAL_PARAM_TYPE,
             (SqliteConnection)Connection);
-        RemoveMaterialQuery = new SqliteRemoveComponentQuery(materialTableName,
+        RemoveMaterialQuery = new SqliteRemoveComponentQuery(MATERIAL_TABLE_NAME,
             (SqliteConnection)Connection);
 
         /* MaterialModifier component. */
         AddMaterialModifierQuery = new SimpleSqliteAddComponentQuery<int>(
-            materialModifierTableName, materialModifierParamName,
-            materialModifierParamType, (SqliteConnection)Connection);
+            MATERIAL_MODIFIER_TABLE_NAME, MATERIAL_MODIFIER_PARAM_NAME,
+            MATERIAL_MODIFIER_PARAM_TYPE, (SqliteConnection)Connection);
         ModifyMaterialModifierQuery = new SimpleSqliteModifyComponentQuery<int>(
-            materialModifierTableName, materialModifierParamName,
-            materialModifierParamType, (SqliteConnection)Connection);
-        RemoveMaterialModifierQuery = new SqliteRemoveComponentQuery(materialModifierTableName,
+            MATERIAL_MODIFIER_TABLE_NAME, MATERIAL_MODIFIER_PARAM_NAME,
+            MATERIAL_MODIFIER_PARAM_TYPE, (SqliteConnection)Connection);
+        RemoveMaterialModifierQuery = new SqliteRemoveComponentQuery(MATERIAL_MODIFIER_TABLE_NAME,
             (SqliteConnection)Connection);
 
         /* PlayerCharacter tag. */
-        AddPlayerCharacterQuery = new SimpleSqliteAddComponentQuery<bool>(playerCharacterTableName,
-            playerCharacterParamName, playerCharacterParamType, (SqliteConnection)Connection);
-        ModifyPlayerCharacterQuery = new SimpleSqliteModifyComponentQuery<bool>(playerCharacterTableName,
-            playerCharacterParamName, playerCharacterParamType, (SqliteConnection)Connection);
-        RemovePlayerCharacterQuery = new SqliteRemoveComponentQuery(playerCharacterTableName,
+        AddPlayerCharacterQuery = new SimpleSqliteAddComponentQuery<bool>(PLAYER_CHARACTER_TABLE_NAME,
+            PLAYER_CHARACTER_PARAM_NAME, PLAYER_CHARACTER_PARAM_TYPE, (SqliteConnection)Connection);
+        ModifyPlayerCharacterQuery = new SimpleSqliteModifyComponentQuery<bool>(PLAYER_CHARACTER_TABLE_NAME,
+            PLAYER_CHARACTER_PARAM_NAME, PLAYER_CHARACTER_PARAM_TYPE, (SqliteConnection)Connection);
+        RemovePlayerCharacterQuery = new SqliteRemoveComponentQuery(PLAYER_CHARACTER_TABLE_NAME,
             (SqliteConnection)Connection);
+
+        /* Name component. */
+        AddNameQuery = new SimpleSqliteAddComponentQuery<string>(NAME_TABLE_NAME,
+            NAME_PARAM_NAME, NAME_PARAM_TYPE, (SqliteConnection)Connection);
+        ModifyNameQuery = new SimpleSqliteModifyComponentQuery<string>(NAME_TABLE_NAME, NAME_PARAM_NAME,
+            NAME_PARAM_TYPE, (SqliteConnection)Connection);
+        RemoveNameQuery = new SqliteRemoveComponentQuery(NAME_TABLE_NAME, (SqliteConnection)Connection);
     }
 
     public void Cleanup()

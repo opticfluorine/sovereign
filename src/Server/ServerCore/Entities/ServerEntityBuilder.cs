@@ -25,41 +25,38 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
+using Sovereign.EngineCore.Systems.Player.Components;
 
-namespace Sovereign.ServerCore.Entities
+namespace Sovereign.ServerCore.Entities;
+
+/// <summary>
+///     Server-side entity builder.
+/// </summary>
+public sealed class ServerEntityBuilder : AbstractEntityBuilder
 {
-
-    /// <summary>
-    /// Server-side entity builder.
-    /// </summary>
-    public sealed class ServerEntityBuilder : AbstractEntityBuilder
+    public ServerEntityBuilder(ulong entityId,
+        ComponentManager componentManager,
+        PositionComponentCollection positions,
+        VelocityComponentCollection velocities,
+        MaterialComponentCollection materials,
+        MaterialModifierComponentCollection materialModifiers,
+        AboveBlockComponentCollection aboveBlocks,
+        PlayerCharacterTagCollection playerCharacterTags,
+        NameComponentCollection names)
+        : base(entityId, componentManager, positions, velocities, materials,
+            materialModifiers, aboveBlocks, playerCharacterTags, names)
     {
-
-        public ServerEntityBuilder(ulong entityId,
-            ComponentManager componentManager,
-            PositionComponentCollection positions,
-            VelocityComponentCollection velocities,
-            MaterialComponentCollection materials,
-            MaterialModifierComponentCollection materialModifiers,
-            AboveBlockComponentCollection aboveBlocks)
-            : base(entityId, componentManager, positions, velocities, materials,
-                  materialModifiers, aboveBlocks)
-        {
-
-        }
-
-        public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
-        {
-            /* no-op */
-            return this;
-        }
-
-        public override IEntityBuilder Drawable()
-        {
-            /* no-op */
-            return this;
-        }
-
     }
 
+    public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
+    {
+        /* no-op */
+        return this;
+    }
+
+    public override IEntityBuilder Drawable()
+    {
+        /* no-op */
+        return this;
+    }
 }

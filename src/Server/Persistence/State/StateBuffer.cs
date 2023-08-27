@@ -45,7 +45,7 @@ public sealed class StateBuffer
 
     private readonly FatalErrorHandler fatalErrorHandler;
 
-    private readonly ILogger Logger;
+    private readonly ILogger logger;
 
     /// <summary>
     ///     Material modifier state updates.
@@ -56,6 +56,11 @@ public sealed class StateBuffer
     ///     Material state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<int>> materialUpdates = new(BufferSize);
+
+    /// <summary>
+    ///     Name component updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<string>> nameUpdates = new(BufferSize);
 
     /// <summary>
     ///     New entity IDs.
@@ -79,7 +84,7 @@ public sealed class StateBuffer
 
     public StateBuffer(ILogger logger, FatalErrorHandler fatalErrorHandler)
     {
-        Logger = logger;
+        this.logger = logger;
         this.fatalErrorHandler = fatalErrorHandler;
     }
 
@@ -137,6 +142,11 @@ public sealed class StateBuffer
         playerCharacterUpdates.Add(ref update);
     }
 
+    public void UpdateName(ref StateUpdate<string> update)
+    {
+        nameUpdates.Add(ref update);
+    }
+
     /// <summary>
     ///     Resets the buffer.
     /// </summary>
@@ -148,6 +158,7 @@ public sealed class StateBuffer
         materialUpdates.Clear();
         materialModifierUpdates.Clear();
         playerCharacterUpdates.Clear();
+        nameUpdates.Clear();
     }
 
     /// <summary>
@@ -199,6 +210,13 @@ public sealed class StateBuffer
                     persistenceProvider.RemovePlayerCharacterQuery,
                     transaction);
 
+                /* Name. */
+                SynchronizeComponent(nameUpdates,
+                    persistenceProvider.AddNameQuery,
+                    persistenceProvider.ModifyNameQuery,
+                    persistenceProvider.RemoveNameQuery,
+                    transaction);
+
                 SynchronizeRemovedEntities(persistenceProvider, transaction);
 
                 transaction.Commit();
@@ -206,7 +224,7 @@ public sealed class StateBuffer
         }
         catch (Exception e)
         {
-            Logger.Fatal("Error while synchronizing database.", e);
+            logger.Fatal("Error while synchronizing database.", e);
             fatalErrorHandler.FatalError();
         }
     }
@@ -243,10 +261,10 @@ public sealed class StateBuffer
     /// <param name="addQuery">Add query.</param>
     /// <param name="modQuery">Modify query.</param>
     /// <param name="remQuery">Remove query.</param>
+    /// <param name="transaction">Transaction.</param>
     private void SynchronizeComponent<T>(StructBuffer<StateUpdate<T>> buffer,
         IAddComponentQuery<T> addQuery, IModifyComponentQuery<T> modQuery,
         IRemoveComponentQuery remQuery, IDbTransaction transaction)
-        where T : unmanaged
     {
         foreach (var update in buffer)
             switch (update.StateUpdateType)

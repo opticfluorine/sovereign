@@ -21,96 +21,111 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
+using System.Numerics;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
+using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.EngineUtil.Threading;
-using System;
-using System.Numerics;
 
-namespace Sovereign.EngineCore.Entities
+namespace Sovereign.EngineCore.Entities;
+
+/// <summary>
+///     Base builder class for new entities.
+/// </summary>
+public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 {
+    protected readonly AboveBlockComponentCollection aboveBlocks;
+    protected readonly ComponentManager componentManager;
 
-    /// <summary>
-    /// Base builder class for new entities.
-    /// </summary>
-    public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
+    protected readonly ulong entityId;
+    protected readonly MaterialModifierComponentCollection materialModifiers;
+    protected readonly MaterialComponentCollection materials;
+    protected readonly NameComponentCollection names;
+    protected readonly PlayerCharacterTagCollection playerCharacterTags;
+    protected readonly PositionComponentCollection positions;
+    protected readonly VelocityComponentCollection velocities;
+
+    private IncrementalGuard.IncrementalGuardWeakLock weakLock;
+
+    public AbstractEntityBuilder(ulong entityId,
+        ComponentManager componentManager, PositionComponentCollection positions,
+        VelocityComponentCollection velocities, MaterialComponentCollection materials,
+        MaterialModifierComponentCollection materialModifiers,
+        AboveBlockComponentCollection aboveBlocks,
+        PlayerCharacterTagCollection playerCharacterTags,
+        NameComponentCollection names)
     {
+        this.entityId = entityId;
+        this.componentManager = componentManager;
+        this.positions = positions;
+        this.velocities = velocities;
+        this.materials = materials;
+        this.materialModifiers = materialModifiers;
+        this.aboveBlocks = aboveBlocks;
+        this.playerCharacterTags = playerCharacterTags;
+        this.names = names;
 
-        protected readonly ulong entityId;
-        protected readonly ComponentManager componentManager;
-        protected readonly PositionComponentCollection positions;
-        protected readonly VelocityComponentCollection velocities;
-        protected readonly MaterialComponentCollection materials;
-        protected readonly MaterialModifierComponentCollection materialModifiers;
-        protected readonly AboveBlockComponentCollection aboveBlocks;
-
-        private IncrementalGuard.IncrementalGuardWeakLock weakLock;
-
-        public AbstractEntityBuilder(ulong entityId,
-            ComponentManager componentManager, PositionComponentCollection positions,
-            VelocityComponentCollection velocities, MaterialComponentCollection materials,
-            MaterialModifierComponentCollection materialModifiers,
-            AboveBlockComponentCollection aboveBlocks)
-        {
-            this.entityId = entityId;
-            this.componentManager = componentManager;
-            this.positions = positions;
-            this.velocities = velocities;
-            this.materials = materials;
-            this.materialModifiers = materialModifiers;
-            this.aboveBlocks = aboveBlocks;
-
-            weakLock = componentManager.ComponentGuard.AcquireWeakLock();
-        }
-
-        public void Dispose()
-        {
-            weakLock?.Dispose();
-        }
-
-        public ulong Build()
-        {
-            weakLock.Dispose();
-            weakLock = null;
-
-            return entityId;
-        }
-
-        public IEntityBuilder Positionable(Vector3 position, Vector3 velocity)
-        {
-            positions.AddComponent(entityId, position);
-            velocities.AddComponent(entityId, velocity);
-            return this;
-        }
-
-        public IEntityBuilder Positionable(Vector3 position)
-        {
-            return Positionable(position, Vector3.Zero);
-        }
-
-        public IEntityBuilder Positionable()
-        {
-            return Positionable(Vector3.Zero, Vector3.Zero);
-        }
-
-        public IEntityBuilder Material(int materialId, int materialModifier)
-        {
-            materials.AddComponent(entityId, materialId);
-            materialModifiers.AddComponent(entityId, materialModifier);
-            return this;
-        }
-
-        public IEntityBuilder AboveBlock(ulong otherEntityId)
-        {
-            aboveBlocks.AddComponent(entityId, otherEntityId);
-            return this;
-        }
-
-        abstract public IEntityBuilder Drawable();
-
-        abstract public IEntityBuilder AnimatedSprite(int animatedSpriteId);
-
+        weakLock = componentManager.ComponentGuard.AcquireWeakLock();
     }
 
+    public void Dispose()
+    {
+        weakLock?.Dispose();
+    }
+
+    public ulong Build()
+    {
+        weakLock.Dispose();
+        weakLock = null;
+
+        return entityId;
+    }
+
+    public IEntityBuilder Positionable(Vector3 position, Vector3 velocity)
+    {
+        positions.AddComponent(entityId, position);
+        velocities.AddComponent(entityId, velocity);
+        return this;
+    }
+
+    public IEntityBuilder Positionable(Vector3 position)
+    {
+        return Positionable(position, Vector3.Zero);
+    }
+
+    public IEntityBuilder Positionable()
+    {
+        return Positionable(Vector3.Zero, Vector3.Zero);
+    }
+
+    public IEntityBuilder Material(int materialId, int materialModifier)
+    {
+        materials.AddComponent(entityId, materialId);
+        materialModifiers.AddComponent(entityId, materialModifier);
+        return this;
+    }
+
+    public IEntityBuilder AboveBlock(ulong otherEntityId)
+    {
+        aboveBlocks.AddComponent(entityId, otherEntityId);
+        return this;
+    }
+
+    public IEntityBuilder PlayerCharacter()
+    {
+        playerCharacterTags.TagEntity(entityId);
+        return this;
+    }
+
+    public IEntityBuilder Name(string name)
+    {
+        names.AddComponent(entityId, name);
+        return this;
+    }
+
+    public abstract IEntityBuilder Drawable();
+
+    public abstract IEntityBuilder AnimatedSprite(int animatedSpriteId);
 }

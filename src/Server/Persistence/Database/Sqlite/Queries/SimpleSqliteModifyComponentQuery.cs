@@ -21,70 +21,63 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Microsoft.Data.Sqlite;
-using Sovereign.Persistence.Database.Queries;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using Microsoft.Data.Sqlite;
+using Sovereign.Persistence.Database.Queries;
 
-namespace Sovereign.Persistence.Database.Sqlite.Queries
+namespace Sovereign.Persistence.Database.Sqlite.Queries;
+
+/// <summary>
+///     Reusable SQLite query for modifying a single-valued component.
+/// </summary>
+/// <remarks>
+///     Do not pass user-supplied data to the constructor; it will not
+///     be sanitized.
+/// </remarks>
+public class SimpleSqliteModifyComponentQuery<T> : IModifyComponentQuery<T>
 {
+    private readonly SqliteConnection dbConnection;
+    private readonly SqliteType paramType;
+    private readonly string sql;
 
     /// <summary>
-    /// Reusable SQLite query for modifying a single-valued component.
+    ///     Creates the modify component query.
     /// </summary>
+    /// <param name="tableName">Database table name.</param>
+    /// <param name="paramName">Database parameter name.</param>
+    /// <param name="paramType">Database parameter type.</param>
+    /// <param name="dbConnection">Database connection.</param>
     /// <remarks>
-    /// Do not pass user-supplied data to the constructor; it will not
-    /// be sanitized.
+    ///     Do not pass user-supplied data for tableName or paramName; it
+    ///     will not be sanitized.
     /// </remarks>
-    public class SimpleSqliteModifyComponentQuery<T> : IModifyComponentQuery<T>
-        where T : unmanaged
+    public SimpleSqliteModifyComponentQuery(string tableName, string paramName,
+        SqliteType paramType, SqliteConnection dbConnection)
     {
-        private readonly SqliteConnection dbConnection;
-        private readonly SqliteType paramType;
-        private readonly string sql;
+        this.dbConnection = dbConnection;
+        this.paramType = paramType;
 
-        /// <summary>
-        /// Creates the modify component query.
-        /// </summary>
-        /// <param name="tableName">Database table name.</param>
-        /// <param name="paramName">Database parameter name.</param>
-        /// <param name="paramType">Database parameter type.</param>
-        /// <param name="dbConnection">Database connection.</param>
-        /// <remarks>
-        /// Do not pass user-supplied data for tableName or paramName; it
-        /// will not be sanitized.
-        /// </remarks>
-        public SimpleSqliteModifyComponentQuery(string tableName, string paramName,
-            SqliteType paramType, SqliteConnection dbConnection)
-        {
-            this.dbConnection = dbConnection;
-            this.paramType = paramType;
-
-            var sb = new StringBuilder();
-            sb.Append("UPDATE ").Append(tableName)
-                .Append(" SET ").Append(paramName)
-                .Append(" = @Val WHERE id = @Id");
-            sql = sb.ToString();
-        }
-
-        public void Modify(ulong entityId, T value, IDbTransaction transaction)
-        {
-            using (var cmd = new SqliteCommand(sql, dbConnection, (SqliteTransaction)transaction))
-            {
-                var idParam = new SqliteParameter("Id", entityId);
-                idParam.SqliteType = SqliteType.Integer;
-                cmd.Parameters.Add(idParam);
-
-                var valParam = new SqliteParameter("Val", value);
-                valParam.SqliteType = paramType;
-                cmd.Parameters.Add(valParam);
-
-                cmd.ExecuteNonQuery();
-            }
-        }
-
+        var sb = new StringBuilder();
+        sb.Append("UPDATE ").Append(tableName)
+            .Append(" SET ").Append(paramName)
+            .Append(" = @Val WHERE id = @Id");
+        sql = sb.ToString();
     }
 
+    public void Modify(ulong entityId, T value, IDbTransaction transaction)
+    {
+        using (var cmd = new SqliteCommand(sql, dbConnection, (SqliteTransaction)transaction))
+        {
+            var idParam = new SqliteParameter("Id", entityId);
+            idParam.SqliteType = SqliteType.Integer;
+            cmd.Parameters.Add(idParam);
+
+            var valParam = new SqliteParameter("Val", value);
+            valParam.SqliteType = paramType;
+            cmd.Parameters.Add(valParam);
+
+            cmd.ExecuteNonQuery();
+        }
+    }
 }

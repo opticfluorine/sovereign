@@ -23,24 +23,19 @@
 
 using System.Data;
 
-namespace Sovereign.Persistence.Database.Queries
+namespace Sovereign.Persistence.Database.Queries;
+
+/// <summary>
+///     Generic query interface for adding a component.
+/// </summary>
+/// <typeparam name="T">Component value type.</typeparam>
+public interface IAddComponentQuery<T>
 {
-
     /// <summary>
-    /// Generic query interface for adding a component.
+    ///     Adds a component to the database.
     /// </summary>
-    /// <typeparam name="T">Component value type.</typeparam>
-    public interface IAddComponentQuery<T> where T : unmanaged
-    {
-
-        /// <summary>
-        /// Adds a component to the database.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        /// <param name="value">Component value.</param>
-        /// <param name="transaction">Database transaction.</param>
-        void Add(ulong entityId, T value, IDbTransaction transaction);
-
-    }
-
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="value">Component value.</param>
+    /// <param name="transaction">Database transaction.</param>
+    void Add(ulong entityId, T value, IDbTransaction transaction);
 }

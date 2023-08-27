@@ -25,63 +25,68 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
+using Sovereign.EngineCore.Systems.Player.Components;
 
-namespace Sovereign.ServerCore.Entities
+namespace Sovereign.ServerCore.Entities;
+
+/// <summary>
+///     Server-side entity factory.
+/// </summary>
+public sealed class ServerEntityFactory : IEntityFactory
 {
+    private readonly AboveBlockComponentCollection aboveBlocks;
+    private readonly ComponentManager componentManager;
+    private readonly EntityManager entityManager;
+    private readonly MaterialModifierComponentCollection materialModifiers;
+    private readonly MaterialComponentCollection materials;
+    private readonly NameComponentCollection names;
+    private readonly PlayerCharacterTagCollection playerCharacterTags;
+    private readonly PositionComponentCollection positions;
+    private readonly VelocityComponentCollection velocities;
 
-    /// <summary>
-    /// Server-side entity factory.
-    /// </summary>
-    public sealed class ServerEntityFactory : IEntityFactory
+    private EntityAssigner entityAssigner;
+
+    public ServerEntityFactory(
+        EntityManager entityManager,
+        ComponentManager componentManager,
+        PositionComponentCollection positions,
+        VelocityComponentCollection velocities,
+        MaterialComponentCollection materials,
+        MaterialModifierComponentCollection materialModifiers,
+        AboveBlockComponentCollection aboveBlocks,
+        PlayerCharacterTagCollection playerCharacterTags,
+        NameComponentCollection names)
     {
-        private readonly EntityManager entityManager;
-        private readonly ComponentManager componentManager;
-        private readonly PositionComponentCollection positions;
-        private readonly VelocityComponentCollection velocities;
-        private readonly MaterialComponentCollection materials;
-        private readonly MaterialModifierComponentCollection materialModifiers;
-        private readonly AboveBlockComponentCollection aboveBlocks;
-
-        private EntityAssigner entityAssigner;
-
-        public ServerEntityFactory(
-            EntityManager entityManager,
-            ComponentManager componentManager,
-            PositionComponentCollection positions,
-            VelocityComponentCollection velocities,
-            MaterialComponentCollection materials,
-            MaterialModifierComponentCollection materialModifiers,
-            AboveBlockComponentCollection aboveBlocks)
-        {
-            this.entityManager = entityManager;
-            this.componentManager = componentManager;
-            this.positions = positions;
-            this.velocities = velocities;
-            this.materials = materials;
-            this.materialModifiers = materialModifiers;
-            this.aboveBlocks = aboveBlocks;
-        }
-
-        public IEntityBuilder GetBuilder()
-        {
-            if (entityAssigner == null)
-                entityAssigner = entityManager.GetNewAssigner();
-
-            return GetBuilder(entityAssigner.GetNextId());
-        }
-
-        public IEntityBuilder GetBuilder(ulong entityId)
-        {
-            return new ServerEntityBuilder(
-                entityId,
-                componentManager,
-                positions,
-                velocities,
-                materials,
-                materialModifiers,
-                aboveBlocks);
-        }
-
+        this.entityManager = entityManager;
+        this.componentManager = componentManager;
+        this.positions = positions;
+        this.velocities = velocities;
+        this.materials = materials;
+        this.materialModifiers = materialModifiers;
+        this.aboveBlocks = aboveBlocks;
+        this.playerCharacterTags = playerCharacterTags;
+        this.names = names;
     }
 
+    public IEntityBuilder GetBuilder()
+    {
+        if (entityAssigner == null)
+            entityAssigner = entityManager.GetNewAssigner();
+
+        return GetBuilder(entityAssigner.GetNextId());
+    }
+
+    public IEntityBuilder GetBuilder(ulong entityId)
+    {
+        return new ServerEntityBuilder(
+            entityId,
+            componentManager,
+            positions,
+            velocities,
+            materials,
+            materialModifiers,
+            aboveBlocks,
+            playerCharacterTags,
+            names);
+    }
 }

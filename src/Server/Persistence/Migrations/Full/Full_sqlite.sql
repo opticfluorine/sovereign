@@ -125,6 +125,17 @@ CREATE TABLE PlayerCharacter
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
+--------------------
+-- Name Component --
+--------------------
+
+CREATE TABLE Name
+(
+    id    INTEGER PRIMARY KEY NOT NULL,
+    value TEXT                NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
 
 --------------------------------------
 -- Account With Authentication View --
@@ -152,12 +163,14 @@ SELECT Entity.id                 AS id,
        Position.z                AS z,
        Material.material         AS material,
        MaterialModifier.modifier AS materialModifier,
-       PlayerCharacter.value     AS playerCharacter
+       PlayerCharacter.value     AS playerCharacter,
+       Name.value                AS name
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
          LEFT JOIN MaterialModifier ON MaterialModifier.id = Entity.id
-         LEFT JOIN PlayerCharacter on Entity.id = PlayerCharacter.id;
+         LEFT JOIN PlayerCharacter on Entity.id = PlayerCharacter.id
+         LEFT JOIN Name on Entity.id = Name.id;
 
 
 -- Log the migration.
