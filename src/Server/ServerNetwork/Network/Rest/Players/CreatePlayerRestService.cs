@@ -20,9 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
@@ -40,8 +42,21 @@ public class CreatePlayerRestService : AuthenticatedRestService
     /// </summary>
     private const int MaxRequestLength = 1024;
 
-    public CreatePlayerRestService(RestAuthenticator authenticator) : base(authenticator)
+    /// <summary>
+    ///     Object used as a lock to avoid name duplication due to a race condition.
+    /// </summary>
+    private readonly object creationLock = new();
+
+    private readonly IEntityFactory entityFactory;
+
+    /// <summary>
+    ///     Tracks which names have been used recently in order to avoid duplication.
+    /// </summary>
+    private readonly HashSet<string> recentNames = new();
+
+    public CreatePlayerRestService(RestAuthenticator authenticator, IEntityFactory entityFactory) : base(authenticator)
     {
+        this.entityFactory = entityFactory;
     }
 
     public override string Path => RestEndpoints.Player + "/{id}";
@@ -105,5 +120,56 @@ public class CreatePlayerRestService : AuthenticatedRestService
         var responseJson = JsonSerializer.Serialize(responseData);
 
         await ctx.Response.Send(Encoding.UTF8.GetBytes(responseJson));
+    }
+
+    /// <summary>
+    ///     Attempts to create a new player character.
+    /// </summary>
+    /// <param name="request">Request.</param>
+    /// <returns>true on success, false otherwise.</returns>
+    private bool CreatePlayer(CreatePlayerRequest request)
+    {
+        // Lock to avoid creating new player characters in parallel.
+        // The persistence scheme for the entity-component-system implementation forces a tradeoff
+        // between good component design and the ability to enforce a unique player name constraint
+        // in the database. To enforce a unique player name constraint, the player name component
+        // would have to be its own component separate from Name - not ideal. Instead we opt to
+        // not enforce a constraint in the database, and instead use a mutex to ensure that we don't
+        // have a race condition leading to the creation of multiple player characters with the smae
+        // name.
+        var result = false;
+        lock (creationLock)
+        {
+            if (!recentNames.Contains(request.PlayerName) && NameAvailable(request.PlayerName))
+            {
+                // Name is available and wasn't created recently - let's take it.
+                entityFactory.GetBuilder()
+                    .Name(request.PlayerName)
+                    .PlayerCharacter()
+                    // TODO Default starting position
+                    .Build();
+
+                recentNames.Add(request.PlayerName);
+                result = true;
+            }
+            else
+            {
+                // Name already taken.
+                result = false;
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    ///     Checks whether the given player name is currently available.
+    /// </summary>
+    /// <param name="requestPlayerName"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    private bool NameAvailable(string requestPlayerName)
+    {
+        throw new NotImplementedException();
     }
 }
