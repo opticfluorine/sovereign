@@ -28,6 +28,7 @@ using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
+using Sovereign.Persistence.Players;
 using WatsonWebserver;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
@@ -48,15 +49,22 @@ public class CreatePlayerRestService : AuthenticatedRestService
     private readonly object creationLock = new();
 
     private readonly IEntityFactory entityFactory;
+    private readonly PersistencePlayerServices playerServices;
 
     /// <summary>
     ///     Tracks which names have been used recently in order to avoid duplication.
     /// </summary>
     private readonly HashSet<string> recentNames = new();
 
-    public CreatePlayerRestService(RestAuthenticator authenticator, IEntityFactory entityFactory) : base(authenticator)
+    private readonly CreatePlayerRequestValidator requestValidator;
+
+    public CreatePlayerRestService(RestAuthenticator authenticator, IEntityFactory entityFactory,
+        CreatePlayerRequestValidator requestValidator, PersistencePlayerServices playerServices)
+        : base(authenticator)
     {
         this.entityFactory = entityFactory;
+        this.requestValidator = requestValidator;
+        this.playerServices = playerServices;
     }
 
     public override string Path => RestEndpoints.Player + "/{id}";
@@ -78,14 +86,14 @@ public class CreatePlayerRestService : AuthenticatedRestService
             var requestJson = ctx.Request.DataAsString;
             var requestData = JsonSerializer.Deserialize<CreatePlayerRequest>(requestJson,
                 MessageConfig.JsonOptions);
-            if (requestData.PlayerName == null)
+            if (!requestValidator.IsValid(requestData))
             {
                 await SendResponse(ctx, 400, "Incomplete input.");
                 return;
             }
 
             // Attempt player creation.
-            // TODO
+            var result = CreatePlayer(requestData);
         }
         catch (Exception e)
         {
@@ -99,8 +107,6 @@ public class CreatePlayerRestService : AuthenticatedRestService
                 Logger.Error("Error sending error response.", e2);
             }
         }
-
-        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -125,7 +131,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
     /// <summary>
     ///     Attempts to create a new player character.
     /// </summary>
-    /// <param name="request">Request.</param>
+    /// <param name="request">Validated request.</param>
     /// <returns>true on success, false otherwise.</returns>
     private bool CreatePlayer(CreatePlayerRequest request)
     {
@@ -138,38 +144,24 @@ public class CreatePlayerRestService : AuthenticatedRestService
         // have a race condition leading to the creation of multiple player characters with the smae
         // name.
         var result = false;
+
         lock (creationLock)
         {
-            if (!recentNames.Contains(request.PlayerName) && NameAvailable(request.PlayerName))
+            if (!recentNames.Contains(request.PlayerName) && !playerServices.IsPlayerNameTaken(request.PlayerName))
             {
                 // Name is available and wasn't created recently - let's take it.
                 entityFactory.GetBuilder()
                     .Name(request.PlayerName)
                     .PlayerCharacter()
                     // TODO Default starting position
+                    // TODO Link to account ID
                     .Build();
 
                 recentNames.Add(request.PlayerName);
                 result = true;
             }
-            else
-            {
-                // Name already taken.
-                result = false;
-            }
         }
 
         return result;
-    }
-
-    /// <summary>
-    ///     Checks whether the given player name is currently available.
-    /// </summary>
-    /// <param name="requestPlayerName"></param>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    private bool NameAvailable(string requestPlayerName)
-    {
-        throw new NotImplementedException();
     }
 }

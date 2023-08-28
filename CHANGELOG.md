@@ -4,6 +4,10 @@
 
 ### August
 
+#### 27 August 2023
+
+* More work on player creation.
+
 #### 26 August 2023
 
 * Automatically enable authenticated REST requests from the client once a successful login has occurred.
