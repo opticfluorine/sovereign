@@ -21,11 +21,13 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.Systems.Player.Components;
+using Sovereign.ServerCore.Components;
 
 namespace Sovereign.ServerCore.Entities;
 
@@ -34,6 +36,8 @@ namespace Sovereign.ServerCore.Entities;
 /// </summary>
 public sealed class ServerEntityBuilder : AbstractEntityBuilder
 {
+    private readonly AccountComponentCollection accounts;
+
     public ServerEntityBuilder(ulong entityId,
         ComponentManager componentManager,
         PositionComponentCollection positions,
@@ -42,10 +46,12 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,
         PlayerCharacterTagCollection playerCharacterTags,
-        NameComponentCollection names)
+        NameComponentCollection names,
+        AccountComponentCollection accounts)
         : base(entityId, componentManager, positions, velocities, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names)
     {
+        this.accounts = accounts;
     }
 
     public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
@@ -57,6 +63,12 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
     public override IEntityBuilder Drawable()
     {
         /* no-op */
+        return this;
+    }
+
+    public override IEntityBuilder Account(Guid accountId)
+    {
+        accounts.AddComponent(entityId, accountId);
         return this;
     }
 }

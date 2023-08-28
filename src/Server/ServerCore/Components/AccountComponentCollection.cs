@@ -1,4 +1,4 @@
-// Sovereign Engine
+﻿// Sovereign Engine
 // Copyright (c) 2023 opticfluorine
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -19,17 +19,23 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-namespace Sovereign.EngineCore.Components;
+using System;
+using Sovereign.EngineCore.Components;
+
+namespace Sovereign.ServerCore.Components;
 
 /// <summary>
-///     Component collection for the Name component which gives a name to its entity.
+///     Component that links an entity to a specific account. Normally used for player character entities.
 /// </summary>
-public class NameComponentCollection : BaseComponentCollection<string>
+public class AccountComponentCollection : BaseComponentCollection<Guid>
 {
-    private const int InitialSize = 4096;
+    /// <summary>
+    ///     Default size of collection.
+    /// </summary>
+    private const int InitialSize = 512;
 
-    public NameComponentCollection(ComponentManager componentManager)
-        : base(componentManager, InitialSize, ComponentOperators.StringOperators, ComponentType.Name)
+    public AccountComponentCollection(ComponentManager componentManager) : base(
+        componentManager, InitialSize, ComponentOperators.GuidOperators, ComponentType.Account)
     {
     }
 }

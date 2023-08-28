@@ -93,7 +93,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
             }
 
             // Attempt player creation.
-            var result = CreatePlayer(requestData);
+            var result = CreatePlayer(requestData, accountId);
         }
         catch (Exception e)
         {
@@ -132,8 +132,9 @@ public class CreatePlayerRestService : AuthenticatedRestService
     ///     Attempts to create a new player character.
     /// </summary>
     /// <param name="request">Validated request.</param>
+    /// <param name="accountId">Account ID.</param>
     /// <returns>true on success, false otherwise.</returns>
-    private bool CreatePlayer(CreatePlayerRequest request)
+    private bool CreatePlayer(CreatePlayerRequest request, Guid accountId)
     {
         // Lock to avoid creating new player characters in parallel.
         // The persistence scheme for the entity-component-system implementation forces a tradeoff
@@ -154,7 +155,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
                     .Name(request.PlayerName)
                     .PlayerCharacter()
                     // TODO Default starting position
-                    // TODO Link to account ID
+                    .Account(accountId)
                     .Build();
 
                 recentNames.Add(request.PlayerName);

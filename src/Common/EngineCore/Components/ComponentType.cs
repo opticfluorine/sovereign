@@ -94,5 +94,11 @@ public enum ComponentType
 
     #region Server
 
+    /// <summary>
+    ///     Account component.
+    /// </summary>
+    /// <seealso cref="Sovereign.ServerCore.Components.AccountComponentCollection" />
+    Account = 0x2000,
+
     #endregion Server
 }

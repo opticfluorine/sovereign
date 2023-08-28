@@ -95,4 +95,13 @@ public static class ComponentOperators
         {
             { ComponentOperation.Set, (a, b) => b }
         };
+
+    /// <summary>
+    ///     Standard operators for GUID-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<Guid, Guid, Guid>>
+        GuidOperators = new()
+        {
+            { ComponentOperation.Set, (a, b) => b }
+        };
 }

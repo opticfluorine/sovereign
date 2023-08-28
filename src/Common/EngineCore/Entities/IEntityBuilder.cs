@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using System.Numerics;
 
 namespace Sovereign.EngineCore.Entities;
@@ -101,4 +102,11 @@ public interface IEntityBuilder
     /// <param name="name">Entity name.</param>
     /// <returns>Builder.</returns>
     IEntityBuilder Name(string name);
+
+    /// <summary>
+    ///     Assigns an account ID to the entity.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder Account(Guid accountId);
 }

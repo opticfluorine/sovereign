@@ -128,4 +128,6 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     public abstract IEntityBuilder Drawable();
 
     public abstract IEntityBuilder AnimatedSprite(int animatedSpriteId);
+
+    public abstract IEntityBuilder Account(Guid accountId);
 }

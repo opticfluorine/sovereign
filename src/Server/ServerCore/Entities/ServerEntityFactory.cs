@@ -26,6 +26,7 @@ using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.Systems.Player.Components;
+using Sovereign.ServerCore.Components;
 
 namespace Sovereign.ServerCore.Entities;
 
@@ -35,6 +36,7 @@ namespace Sovereign.ServerCore.Entities;
 public sealed class ServerEntityFactory : IEntityFactory
 {
     private readonly AboveBlockComponentCollection aboveBlocks;
+    private readonly AccountComponentCollection accounts;
     private readonly ComponentManager componentManager;
     private readonly EntityManager entityManager;
     private readonly MaterialModifierComponentCollection materialModifiers;
@@ -55,7 +57,8 @@ public sealed class ServerEntityFactory : IEntityFactory
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,
         PlayerCharacterTagCollection playerCharacterTags,
-        NameComponentCollection names)
+        NameComponentCollection names,
+        AccountComponentCollection accounts)
     {
         this.entityManager = entityManager;
         this.componentManager = componentManager;
@@ -66,6 +69,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.aboveBlocks = aboveBlocks;
         this.playerCharacterTags = playerCharacterTags;
         this.names = names;
+        this.accounts = accounts;
     }
 
     public IEntityBuilder GetBuilder()
@@ -87,6 +91,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             materialModifiers,
             aboveBlocks,
             playerCharacterTags,
-            names);
+            names,
+            accounts);
     }
 }

@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using Sovereign.ClientCore.Rendering.Components;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
@@ -65,6 +66,12 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
     public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
     {
         animatedSprites.AddComponent(entityId, animatedSpriteId);
+        return this;
+    }
+
+    public override IEntityBuilder Account(Guid accountId)
+    {
+        /* no-op */
         return this;
     }
 }
