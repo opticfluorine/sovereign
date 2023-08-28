@@ -43,6 +43,11 @@ public sealed class StateBuffer
     /// </summary>
     private const int BufferSize = 8192;
 
+    /// <summary>
+    ///     Account state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<Guid>> accountUpdates = new(BufferSize);
+
     private readonly FatalErrorHandler fatalErrorHandler;
 
     private readonly ILogger logger;
@@ -147,6 +152,11 @@ public sealed class StateBuffer
         nameUpdates.Add(ref update);
     }
 
+    public void UpdateAccount(ref StateUpdate<Guid> update)
+    {
+        accountUpdates.Add(ref update);
+    }
+
     /// <summary>
     ///     Resets the buffer.
     /// </summary>
@@ -159,6 +169,7 @@ public sealed class StateBuffer
         materialModifierUpdates.Clear();
         playerCharacterUpdates.Clear();
         nameUpdates.Clear();
+        accountUpdates.Clear();
     }
 
     /// <summary>
@@ -215,6 +226,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddNameQuery,
                     persistenceProvider.ModifyNameQuery,
                     persistenceProvider.RemoveNameQuery,
+                    transaction);
+
+                /* Account. */
+                SynchronizeComponent(accountUpdates,
+                    persistenceProvider.AddAccountComponentQuery,
+                    persistenceProvider.ModifyAccountComponentQuery,
+                    persistenceProvider.RemoveAccountComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

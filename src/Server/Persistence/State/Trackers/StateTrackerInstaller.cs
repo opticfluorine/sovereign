@@ -45,5 +45,8 @@ public sealed class StateTrackerInstaller : IWindsorInstaller
 
         container.Register(Component.For<PlayerCharacterStateTracker>()
             .LifestyleSingleton());
+
+        container.Register(Component.For<NameStateTracker>()
+            .LifestyleSingleton());
     }
 }

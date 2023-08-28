@@ -139,6 +139,19 @@ CREATE TABLE Name
 );
 
 
+-----------------------
+-- Account Component --
+-----------------------
+
+CREATE TABLE AccountComponent
+(
+    id         INTEGER PRIMARY KEY NOT NULL,
+    account_id BYTEA               NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id),
+    FOREIGN KEY (account_id) REFERENCES Account (id)
+);
+
+
 -- Create views.
 
 --------------------------------------
@@ -161,20 +174,22 @@ FROM Account
 ---------------------------------
 
 CREATE VIEW EntityWithComponents AS
-SELECT Entity.id                 AS id,
-       Position.x                AS x,
-       Position.y                AS y,
-       Position.z                AS z,
-       Material.material         AS material,
-       MaterialModifier.modifier AS materialModifier,
-       PlayerCharacter.value     AS playerCharacter,
-       Name.value                AS name
+SELECT Entity.id                   AS id,
+       Position.x                  AS x,
+       Position.y                  AS y,
+       Position.z                  AS z,
+       Material.material           AS material,
+       MaterialModifier.modifier   AS materialModifier,
+       PlayerCharacter.value       AS playerCharacter,
+       Name.value                  AS name,
+       AccountComponent.account_id AS account
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
          LEFT JOIN MaterialModifier ON MaterialModifier.id = Entity.id
          LEFT JOIN PlayerCharacter ON PlayerCharacter.id = Entity.id
-         LEFT JOIN Name ON Name.id = Entity.id;
+         LEFT JOIN Name ON Name.id = Entity.id
+         LEFT JOIN AccountComponent AC ON AC.id = Entity.id;
 
 
 -- Create stored procedures and functions.
@@ -193,7 +208,8 @@ CREATE FUNCTION EntityDetails(entityId BIGINT)
                 material         INTEGER,
                 materialModifier INTEGER,
                 playerCharacter  BOOLEAN,
-                name             TEXT
+                name             TEXT,
+                account          BYTEA
             )
     LANGUAGE SQL
 AS
@@ -219,7 +235,8 @@ CREATE FUNCTION PositionedEntitiesInRange(x_min REAL, y_min REAL, z_min REAL,
                 material         INTEGER,
                 materialModifier INTEGER,
                 playerCharacter  BOOLEAN,
-                name             TEXT
+                name             TEXT,
+                account          BYTEA
             )
     LANGUAGE SQL
 AS

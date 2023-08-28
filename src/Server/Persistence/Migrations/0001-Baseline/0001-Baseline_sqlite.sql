@@ -125,6 +125,7 @@ CREATE TABLE PlayerCharacter
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
+
 --------------------
 -- Name Component --
 --------------------
@@ -134,6 +135,20 @@ CREATE TABLE Name
     id    INTEGER PRIMARY KEY NOT NULL,
     value TEXT                NOT NULL,
     FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+
+-----------------------
+-- Account Component --
+-----------------------
+
+-- Note non-standard table name to deconflict from the Account table
+CREATE TABLE AccountComponent
+(
+    id         INTEGER PRIMARY KEY NOT NULL,
+    account_id BLOB                NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id),
+    FOREIGN KEY (account_id) REFERENCES Account (id)
 );
 
 
@@ -157,20 +172,22 @@ FROM Account
 ---------------------------------
 
 CREATE VIEW EntityWithComponents AS
-SELECT Entity.id                 AS id,
-       Position.x                AS x,
-       Position.y                AS y,
-       Position.z                AS z,
-       Material.material         AS material,
-       MaterialModifier.modifier AS materialModifier,
-       PlayerCharacter.value     AS playerCharacter,
-       Name.value                AS name
+SELECT Entity.id                   AS id,
+       Position.x                  AS x,
+       Position.y                  AS y,
+       Position.z                  AS z,
+       Material.material           AS material,
+       MaterialModifier.modifier   AS materialModifier,
+       PlayerCharacter.value       AS playerCharacter,
+       Name.value                  AS name,
+       AccountComponent.account_id AS account
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
          LEFT JOIN MaterialModifier ON MaterialModifier.id = Entity.id
          LEFT JOIN PlayerCharacter on Entity.id = PlayerCharacter.id
-         LEFT JOIN Name on Entity.id = Name.id;
+         LEFT JOIN Name on Entity.id = Name.id
+         LEFT JOIN AccountComponent on Entity.id = AccountComponent.id;
 
 
 -- Log the migration.

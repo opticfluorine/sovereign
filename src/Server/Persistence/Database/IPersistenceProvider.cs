@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using System.Data;
 using System.Numerics;
 using Sovereign.Persistence.Database.Queries;
@@ -156,6 +157,21 @@ public interface IPersistenceProvider
     ///     IRemoveComponentQuery for the Name component.
     /// </summary>
     IRemoveComponentQuery RemoveNameQuery { get; }
+
+    /// <summary>
+    ///     IAddComponentQuery for the Account component.
+    /// </summary>
+    IAddComponentQuery<Guid> AddAccountComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the Account component.
+    /// </summary>
+    IModifyComponentQuery<Guid> ModifyAccountComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the Account component.
+    /// </summary>
+    IRemoveComponentQuery RemoveAccountComponentQuery { get; }
 
     /// <summary>
     ///     Initializes the persistence provider.

@@ -57,6 +57,10 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const string NAME_PARAM_NAME = "value";
     private const SqliteType NAME_PARAM_TYPE = SqliteType.Text;
 
+    private const string ACCOUNT_COMPONENT_TABLE_NAME = "AccountComponent";
+    private const string ACCOUNT_COMPONENT_PARAM_NAME = "account_id";
+    private const SqliteType ACCOUNT_COMPONENT_PARAM_TYPE = SqliteType.Blob;
+
     private readonly IPersistenceConfiguration configuration;
 
     public SqlitePersistenceProvider(IPersistenceConfiguration configuration)
@@ -100,6 +104,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<bool> AddPlayerCharacterQuery { get; private set; }
     public IModifyComponentQuery<bool> ModifyPlayerCharacterQuery { get; private set; }
     public IRemoveComponentQuery RemovePlayerCharacterQuery { get; private set; }
+    public IAddComponentQuery<Guid> AddAccountComponentQuery { get; private set; }
+    public IModifyComponentQuery<Guid> ModifyAccountComponentQuery { get; private set; }
+    public IRemoveComponentQuery RemoveAccountComponentQuery { get; private set; }
 
     public void Initialize()
     {
@@ -159,6 +166,12 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         ModifyNameQuery = new SimpleSqliteModifyComponentQuery<string>(NAME_TABLE_NAME, NAME_PARAM_NAME,
             NAME_PARAM_TYPE, (SqliteConnection)Connection);
         RemoveNameQuery = new SqliteRemoveComponentQuery(NAME_TABLE_NAME, (SqliteConnection)Connection);
+
+        /* Account component. */
+        AddAccountComponentQuery = null; // TODO
+        ModifyAccountComponentQuery = null; // TODO
+        RemoveAccountComponentQuery = new SqliteRemoveComponentQuery(ACCOUNT_COMPONENT_TABLE_NAME,
+            (SqliteConnection)Connection);
     }
 
     public void Cleanup()
