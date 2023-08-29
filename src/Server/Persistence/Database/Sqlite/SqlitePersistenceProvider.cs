@@ -168,8 +168,10 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         RemoveNameQuery = new SqliteRemoveComponentQuery(NAME_TABLE_NAME, (SqliteConnection)Connection);
 
         /* Account component. */
-        AddAccountComponentQuery = null; // TODO
-        ModifyAccountComponentQuery = null; // TODO
+        AddAccountComponentQuery = new GuidSqliteAddComponentQuery(ACCOUNT_COMPONENT_TABLE_NAME,
+            ACCOUNT_COMPONENT_PARAM_NAME, (SqliteConnection)Connection);
+        ModifyAccountComponentQuery = new GuidSqliteModifyComponentQuery(ACCOUNT_COMPONENT_TABLE_NAME,
+            ACCOUNT_COMPONENT_PARAM_NAME, (SqliteConnection)Connection);
         RemoveAccountComponentQuery = new SqliteRemoveComponentQuery(ACCOUNT_COMPONENT_TABLE_NAME,
             (SqliteConnection)Connection);
     }

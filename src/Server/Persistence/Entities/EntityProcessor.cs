@@ -21,8 +21,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using System.Data;
 using System.Numerics;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.Persistence.Entities;
@@ -40,6 +42,7 @@ public sealed class EntityProcessor
     private const int INDEX_MATERIAL_MODIFIER = 5;
     private const int INDEX_PLAYER_CHARACTER = 6;
     private const int INDEX_NAME = 7;
+    private const int INDEX_ACCOUNT = 8;
     private readonly IEntityFactory entityFactory;
     private readonly EntityMapper entityMapper;
 
@@ -49,6 +52,8 @@ public sealed class EntityProcessor
         this.entityMapper = entityMapper;
         this.entityFactory = entityFactory;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Processes all entities from the given reader.
@@ -76,11 +81,41 @@ public sealed class EntityProcessor
         ProcessMaterial(reader, builder);
         ProcessPlayerCharacter(reader, builder);
         ProcessName(reader, builder);
+        ProcessAccount(reader, builder, entityId);
 
         /* Complete the entity. */
         builder.Build();
     }
 
+    /// <summary>
+    ///     Process the account component, if any, from the reader.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Entity builder.</param>
+    /// <param name="entityId">Entity ID.</param>
+    private void ProcessAccount(IDataReader reader, IEntityBuilder builder, ulong entityId)
+    {
+        /* Check for existence. */
+        if (reader.IsDBNull(INDEX_ACCOUNT)) return;
+
+        /* Extract GUID. */
+        var accountIdBytes = new byte[16];
+        var bytesRead = reader.GetBytes(INDEX_ACCOUNT, 0, accountIdBytes, 0, 16);
+        if (bytesRead < 16)
+        {
+            Logger.ErrorFormat("Account GUID for entity {0} is too short; skipping component.", entityId);
+            return;
+        }
+
+        /* Process. */
+        builder.Account(new Guid(accountIdBytes));
+    }
+
+    /// <summary>
+    ///     Process the name component, if any, from the reader.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Entity builder.</param>
     private void ProcessName(IDataReader reader, IEntityBuilder builder)
     {
         /* Check for existence. */

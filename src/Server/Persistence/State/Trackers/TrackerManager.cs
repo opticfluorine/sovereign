@@ -32,16 +32,22 @@ public sealed class TrackerManager
     public TrackerManager(PositionStateTracker positionStateTracker,
         MaterialStateTracker materialStateTracker,
         MaterialModifierStateTracker materialModifierStateTracker,
-        PlayerCharacterStateTracker playerCharacterStateTracker)
+        PlayerCharacterStateTracker playerCharacterStateTracker,
+        NameStateTracker nameStateTracker,
+        AccountStateTracker accountStateTracker)
     {
         PositionStateTracker = positionStateTracker;
         MaterialStateTracker = materialStateTracker;
         MaterialModifierStateTracker = materialModifierStateTracker;
         PlayerCharacterStateTracker = playerCharacterStateTracker;
+        NameStateTracker = nameStateTracker;
+        AccountStateTracker = accountStateTracker;
     }
 
     public PositionStateTracker PositionStateTracker { get; }
     public MaterialStateTracker MaterialStateTracker { get; }
     public MaterialModifierStateTracker MaterialModifierStateTracker { get; }
     public PlayerCharacterStateTracker PlayerCharacterStateTracker { get; }
+    public NameStateTracker NameStateTracker { get; }
+    public AccountStateTracker AccountStateTracker { get; }
 }

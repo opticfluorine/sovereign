@@ -4,6 +4,10 @@
 
 ### August
 
+#### 29 August 2023
+
+* Add persistence support for the `Account` component.
+
 #### 28 August 2023
 
 * Add an `Account` component to associate player character entities to a specific account. Still need to do
