@@ -1,4 +1,4 @@
-// Sovereign Engine
+﻿// Sovereign Engine
 // Copyright (c) 2023 opticfluorine
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -19,34 +19,38 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-using Sovereign.Persistence.Database;
+using Microsoft.Data.Sqlite;
+using Sovereign.Persistence.Database.Queries;
 
-namespace Sovereign.Persistence.Players;
+namespace Sovereign.Persistence.Database.Sqlite.Queries;
 
-/// <summary>
-///     Public API exported by Persistence to provide player-related database services.
-/// </summary>
-public class PersistencePlayerServices
+public class SqlitePlayerExistsQuery : IPlayerExistsQuery
 {
-    private readonly IPersistenceProvider provider;
+    /// <summary>
+    ///     SQL query to execute
+    /// </summary>
+    private const string query =
+        @"SELECT EXISTS(SELECT 1 FROM Name INNER JOIN PlayerCharacter PC ON Name.id = PC.id WHERE Name.value = @Name)";
 
-    public PersistencePlayerServices(IPersistenceProvider provider)
+    private readonly SqliteConnection dbConnection;
+
+    public SqlitePlayerExistsQuery(SqliteConnection dbConnection)
     {
-        this.provider = provider;
+        this.dbConnection = dbConnection;
     }
 
-    /// <summary>
-    ///     Determines whether the given player name is taken.
-    /// </summary>
-    /// <param name="name">Player name.</param>
-    /// <returns>true if taken, false otherwise.</returns>
-    /// <remarks>
-    ///     Note that this only checks whether the name exists in the database for a player character.
-    ///     It does not check whether a player character with the same name exists in memory and has not
-    ///     yet been synchronized to the database.
-    /// </remarks>
-    public bool IsPlayerNameTaken(string name)
+    public bool PlayerExists(string name)
     {
-        return provider.PlayerExistsQuery.PlayerExists(name);
+        var cmd = new SqliteCommand(query, dbConnection);
+
+        var param = new SqliteParameter("Name", name);
+        param.SqliteType = SqliteType.Text;
+        cmd.Parameters.Add(param);
+
+        var exists = false;
+        var reader = new QueryReader(cmd).Reader;
+        if (reader.Read()) exists = reader.GetBoolean(0);
+
+        return exists;
     }
 }

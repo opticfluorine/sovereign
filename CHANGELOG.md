@@ -7,6 +7,9 @@
 #### 29 August 2023
 
 * Add persistence support for the `Account` component.
+* Default new player characters to position (0, 0, 0). In the future we should make this configurable
+  at the server level.
+* Check for duplicate player names in the database before creating a new player character.
 
 #### 28 August 2023
 

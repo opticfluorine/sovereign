@@ -174,6 +174,11 @@ public interface IPersistenceProvider
     IRemoveComponentQuery RemoveAccountComponentQuery { get; }
 
     /// <summary>
+    ///     IPlayerExistsQuery for this persistence provider.
+    /// </summary>
+    IPlayerExistsQuery PlayerExistsQuery { get; }
+
+    /// <summary>
     ///     Initializes the persistence provider.
     /// </summary>
     void Initialize();

@@ -1,4 +1,4 @@
-// Sovereign Engine
+﻿// Sovereign Engine
 // Copyright (c) 2023 opticfluorine
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -19,34 +19,17 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-using Sovereign.Persistence.Database;
-
-namespace Sovereign.Persistence.Players;
+namespace Sovereign.Persistence.Database.Queries;
 
 /// <summary>
-///     Public API exported by Persistence to provide player-related database services.
+///     Query that checks for the existence of a player character with the given name.
 /// </summary>
-public class PersistencePlayerServices
+public interface IPlayerExistsQuery
 {
-    private readonly IPersistenceProvider provider;
-
-    public PersistencePlayerServices(IPersistenceProvider provider)
-    {
-        this.provider = provider;
-    }
-
     /// <summary>
-    ///     Determines whether the given player name is taken.
+    ///     Determines whether a player character with the given name exists in the database.
     /// </summary>
-    /// <param name="name">Player name.</param>
-    /// <returns>true if taken, false otherwise.</returns>
-    /// <remarks>
-    ///     Note that this only checks whether the name exists in the database for a player character.
-    ///     It does not check whether a player character with the same name exists in memory and has not
-    ///     yet been synchronized to the database.
-    /// </remarks>
-    public bool IsPlayerNameTaken(string name)
-    {
-        return provider.PlayerExistsQuery.PlayerExists(name);
-    }
+    /// <param name="name">Player character name.</param>
+    /// <returns>true if the player exists, false otherwise.</returns>
+    bool PlayerExists(string name);
 }

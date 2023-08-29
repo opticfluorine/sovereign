@@ -107,6 +107,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<Guid> AddAccountComponentQuery { get; private set; }
     public IModifyComponentQuery<Guid> ModifyAccountComponentQuery { get; private set; }
     public IRemoveComponentQuery RemoveAccountComponentQuery { get; private set; }
+    public IPlayerExistsQuery PlayerExistsQuery { get; private set; }
 
     public void Initialize()
     {
@@ -123,6 +124,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
 
         AddEntityQuery = new SqliteAddEntityQuery(Connection);
         RemoveEntityQuery = new SqliteRemoveEntityQuery(Connection);
+
+        PlayerExistsQuery = new SqlitePlayerExistsQuery((SqliteConnection)Connection);
 
         /* Position component. */
         AddPositionQuery = new Vector3SqliteAddComponentQuery(POSITION_TABLE_NAME,

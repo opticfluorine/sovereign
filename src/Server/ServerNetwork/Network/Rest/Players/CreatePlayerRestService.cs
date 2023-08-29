@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -152,10 +153,10 @@ public class CreatePlayerRestService : AuthenticatedRestService
             {
                 // Name is available and wasn't created recently - let's take it.
                 entityFactory.GetBuilder()
+                    .Account(accountId)
                     .Name(request.PlayerName)
                     .PlayerCharacter()
-                    // TODO Default starting position
-                    .Account(accountId)
+                    .Positionable(Vector3.Zero) // TODO Configurable start position
                     .Build();
 
                 recentNames.Add(request.PlayerName);
