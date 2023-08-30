@@ -179,6 +179,11 @@ public interface IPersistenceProvider
     IPlayerExistsQuery PlayerExistsQuery { get; }
 
     /// <summary>
+    ///     IGetAccountForPlayerQuery for this persistence provider.
+    /// </summary>
+    IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
+
+    /// <summary>
     ///     Initializes the persistence provider.
     /// </summary>
     void Initialize();

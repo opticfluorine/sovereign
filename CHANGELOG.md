@@ -15,6 +15,7 @@
   an intermediate step after authentication but before a player character is selected. Still need to update logic
   elsewhere - for example, the event server connection needs to be deferred until after player selection is complete.
 * When a new player character is created, automatically select that character and proceed with login.
+* Add `IGetAccountForPlayerQuery` for retrieving the account associated with a given player character.
 
 #### 28 August 2023
 
