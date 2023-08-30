@@ -25,7 +25,9 @@ using System.Numerics;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Sovereign.Accounts.Systems.Accounts;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
@@ -44,12 +46,15 @@ public class CreatePlayerRestService : AuthenticatedRestService
     /// </summary>
     private const int MaxRequestLength = 1024;
 
+    private readonly AccountsController accountsController;
+
     /// <summary>
     ///     Object used as a lock to avoid name duplication due to a race condition.
     /// </summary>
     private readonly object creationLock = new();
 
     private readonly IEntityFactory entityFactory;
+    private readonly IEventSender eventSender;
     private readonly PersistencePlayerServices playerServices;
 
     /// <summary>
@@ -60,12 +65,15 @@ public class CreatePlayerRestService : AuthenticatedRestService
     private readonly CreatePlayerRequestValidator requestValidator;
 
     public CreatePlayerRestService(RestAuthenticator authenticator, IEntityFactory entityFactory,
-        CreatePlayerRequestValidator requestValidator, PersistencePlayerServices playerServices)
+        CreatePlayerRequestValidator requestValidator, PersistencePlayerServices playerServices,
+        AccountsController accountsController, IEventSender eventSender)
         : base(authenticator)
     {
         this.entityFactory = entityFactory;
         this.requestValidator = requestValidator;
         this.playerServices = playerServices;
+        this.accountsController = accountsController;
+        this.eventSender = eventSender;
     }
 
     public override string Path => RestEndpoints.Player + "/{id}";
@@ -156,7 +164,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
             if (!recentNames.Contains(request.PlayerName) && !playerServices.IsPlayerNameTaken(request.PlayerName))
             {
                 // Name is available and wasn't created recently - let's take it.
-                entityFactory.GetBuilder()
+                var playerId = entityFactory.GetBuilder()
                     .Account(accountId)
                     .Name(request.PlayerName)
                     .PlayerCharacter()
@@ -165,6 +173,9 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
                 recentNames.Add(request.PlayerName);
                 result = true;
+
+                // Select the newly created character to continue login.
+                accountsController.SelectPlayer(eventSender, accountId, playerId);
             }
         }
 

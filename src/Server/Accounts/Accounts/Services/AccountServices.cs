@@ -95,7 +95,7 @@ public sealed class AccountServices
             }
 
             // Verify that the account is not already logged in.
-            if (loginTracker.IsLoggedIn(id))
+            if (loginTracker.GetLoginState(id) != AccountLoginState.NotLoggedIn)
             {
                 // Already logged in, log and reject.
                 Logger.InfoFormat("Rejected login for {0}: already logged in.", username);

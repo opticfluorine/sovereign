@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using Castle.Core.Logging;
 using Sodium;
 
 namespace Sovereign.Accounts.Accounts.Authentication;
@@ -43,14 +44,21 @@ public sealed class AccountLoginTracker
     private readonly Dictionary<Guid, string> accountIdsToApiKeys = new();
 
     /// <summary>
+    ///     Map from account IDs to selected entity IDs.
+    /// </summary>
+    private readonly Dictionary<Guid, ulong> accountIdsToPlayerEntityIds = new();
+
+    /// <summary>
+    ///     Current login states of connected accounts.
+    /// </summary>
+    private readonly Dictionary<Guid, AccountLoginState> accountLoginStates = new();
+
+    /// <summary>
     ///     Map from connection IDs to logged in account IDs.
     /// </summary>
     private readonly Dictionary<int, Guid> connectionsToAccounts = new();
 
-    /// <summary>
-    ///     Set of all currently logged in account IDs.
-    /// </summary>
-    private readonly HashSet<Guid> loggedInAccountIds = new();
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Signals that the given account has logged in.
@@ -62,8 +70,25 @@ public sealed class AccountLoginTracker
         var apiKey = Convert.ToBase64String(SodiumCore.GetRandomBytes(ApiKeySize));
         accountIdsToApiKeys[accountId] = apiKey;
 
-        // Register the login.
-        loggedInAccountIds.Add(accountId);
+        // Advance the connection to the player selection state.
+        accountLoginStates[accountId] = AccountLoginState.SelectingPlayer;
+    }
+
+    /// <summary>
+    ///     Selects a player character for the given account.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <param name="playerEntityId">Entity ID of player character.</param>
+    public void SelectPlayer(Guid accountId, ulong playerEntityId)
+    {
+        // State check.
+        if (GetLoginState(accountId) != AccountLoginState.SelectingPlayer)
+        {
+            Logger.ErrorFormat("Attempt to select player for account {0} in invalid state.", accountId);
+            return;
+        }
+
+        accountIdsToPlayerEntityIds[accountId] = playerEntityId;
     }
 
     /// <summary>
@@ -73,17 +98,18 @@ public sealed class AccountLoginTracker
     public void Logout(Guid accountId)
     {
         accountIdsToApiKeys.Remove(accountId);
-        loggedInAccountIds.Remove(accountId);
+        accountIdsToPlayerEntityIds.Remove(accountId);
+        accountLoginStates.Remove(accountId);
     }
 
     /// <summary>
-    ///     Checks whether the given account ID is already logged in.
+    ///     Gets the login state of the given account ID.
     /// </summary>
     /// <param name="accountId">Account ID.</param>
-    /// <returns>true if logged in, false otherwise.</returns>
-    public bool IsLoggedIn(Guid accountId)
+    /// <returns>Login state.</returns>
+    public AccountLoginState GetLoginState(Guid accountId)
     {
-        return loggedInAccountIds.Contains(accountId);
+        return accountLoginStates.TryGetValue(accountId, out var state) ? state : AccountLoginState.NotLoggedIn;
     }
 
     /// <summary>

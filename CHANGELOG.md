@@ -11,6 +11,10 @@
   at the server level.
 * Check for duplicate player names in the database before creating a new player character.
 * Send response on normal success or failure during player creation.
+* Replace logged in flag in `AccountLoginTracker` with a state enum. The login state is being expanded to include
+  an intermediate step after authentication but before a player character is selected. Still need to update logic
+  elsewhere - for example, the event server connection needs to be deferred until after player selection is complete.
+* When a new player character is created, automatically select that character and proceed with login.
 
 #### 28 August 2023
 

@@ -68,7 +68,8 @@ public sealed class AccountsSystem : ISystem
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
         EventId.Core_Tick,
-        EventId.Server_Network_ClientDisconnected
+        EventId.Server_Network_ClientDisconnected,
+        EventId.Server_Accounts_SelectPlayer
     };
 
     public int WorkloadEstimate => 10;
@@ -93,6 +94,11 @@ public sealed class AccountsSystem : ISystem
                     var details = (ConnectionIdEventDetails)ev.EventDetails;
                     OnClientDisconnect(details.ConnectionId);
                     break;
+
+                case EventId.Server_Accounts_SelectPlayer:
+                    var selectPlayerDetails = (SelectPlayerEventDetails)ev.EventDetails;
+                    OnSelectPlayer(selectPlayerDetails);
+                    break;
             }
         }
 
@@ -101,6 +107,15 @@ public sealed class AccountsSystem : ISystem
 
     public void Initialize()
     {
+    }
+
+    /// <summary>
+    ///     Called when a player is selected during the login process.
+    /// </summary>
+    /// <param name="selectPlayerDetails">Player selection details.</param>
+    private void OnSelectPlayer(SelectPlayerEventDetails selectPlayerDetails)
+    {
+        loginTracker.SelectPlayer(selectPlayerDetails.AccountId, selectPlayerDetails.PlayerCharacterEntityId);
     }
 
     /// <summary>

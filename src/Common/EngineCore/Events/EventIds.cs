@@ -306,5 +306,15 @@ public enum EventId
 
     #endregion Server_Network
 
+    #region Server_Accounts
+
+    /// <summary>
+    ///     Event sent to select a player character during account login.
+    /// </summary>
+    /// Associated details: SelectPlayerEventDetails
+    Server_Accounts_SelectPlayer = 200300,
+
+    #endregion Server_Accounts
+
     #endregion Server
 }
