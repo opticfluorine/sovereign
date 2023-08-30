@@ -10,6 +10,7 @@
 * Default new player characters to position (0, 0, 0). In the future we should make this configurable
   at the server level.
 * Check for duplicate player names in the database before creating a new player character.
+* Send response on normal success or failure during player creation.
 
 #### 28 August 2023
 

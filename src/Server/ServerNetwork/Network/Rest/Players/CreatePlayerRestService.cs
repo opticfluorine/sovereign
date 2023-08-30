@@ -95,6 +95,10 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
             // Attempt player creation.
             var result = CreatePlayer(requestData, accountId);
+            if (result)
+                await SendResponse(ctx, 200, "Success.");
+            else
+                await SendResponse(ctx, 409, "Failed.");
         }
         catch (Exception e)
         {
