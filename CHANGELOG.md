@@ -4,6 +4,10 @@
 
 ### August
 
+#### 30 August 2023
+
+* Add public API to Accounts for checking if a player character belongs to a given account.
+
 #### 29 August 2023
 
 * Add persistence support for the `Account` component.

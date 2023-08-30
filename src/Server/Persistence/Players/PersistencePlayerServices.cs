@@ -19,6 +19,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+using System;
 using Sovereign.Persistence.Database;
 
 namespace Sovereign.Persistence.Players;
@@ -48,5 +49,21 @@ public class PersistencePlayerServices
     public bool IsPlayerNameTaken(string name)
     {
         return provider.PlayerExistsQuery.PlayerExists(name);
+    }
+
+    /// <summary>
+    ///     Determines whether the given entity is a player character associated to the given account.
+    /// </summary>
+    /// <param name="playerEntityId">Entity ID to check.</param>
+    /// <param name="accountId">Account to check.</param>
+    /// <returns>true if entity is a player character belonging to the given account, false otherwise.</returns>
+    /// <remarks>
+    ///     Note that this only checks whether the relationship exists in the database for a player character.
+    ///     It does not check accounts and/or players that are not yet synchronized to the database.
+    /// </remarks>
+    public bool ValidatePlayerAccountPair(ulong playerEntityId, Guid accountId)
+    {
+        return provider.GetAccountForPlayerQuery.TryGetAccountForPlayer(playerEntityId, out var foundAccountId)
+               && foundAccountId.Equals(accountId);
     }
 }
