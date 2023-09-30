@@ -2,6 +2,12 @@
 
 ## 2023
 
+### September
+
+#### 29 September 2023
+
+* Simplify query for getting account associated with player.
+
 ### August
 
 #### 30 August 2023
