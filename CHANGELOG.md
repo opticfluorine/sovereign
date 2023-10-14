@@ -10,6 +10,10 @@
 
 ### August
 
+#### 31 August 2023
+
+* Include player entity ID in response to successful character creation requests.
+
 #### 30 August 2023
 
 * Add public API to Accounts for checking if a player character belongs to a given account.

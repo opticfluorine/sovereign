@@ -102,9 +102,9 @@ public class CreatePlayerRestService : AuthenticatedRestService
             }
 
             // Attempt player creation.
-            var result = CreatePlayer(requestData, accountId);
+            var result = CreatePlayer(requestData, accountId, out var playerId);
             if (result)
-                await SendResponse(ctx, 200, "Success.");
+                await SendResponse(ctx, 200, "Success.", playerId);
             else
                 await SendResponse(ctx, 409, "Failed.");
         }
@@ -128,13 +128,15 @@ public class CreatePlayerRestService : AuthenticatedRestService
     /// <param name="ctx">HTTP context.</param>
     /// <param name="status">Response status code.</param>
     /// <param name="result">Human-readable string describing the result.</param>
-    private async Task SendResponse(HttpContext ctx, int status, string result)
+    /// <param name="playerId">Entity ID of newly created player. Only relevant for successful requests.</param>
+    private async Task SendResponse(HttpContext ctx, int status, string result, ulong playerId = 0)
     {
         ctx.Response.StatusCode = status;
 
         var responseData = new CreatePlayerResponse
         {
-            Result = result
+            Result = result,
+            PlayerId = playerId
         };
         var responseJson = JsonSerializer.Serialize(responseData);
 
@@ -146,8 +148,9 @@ public class CreatePlayerRestService : AuthenticatedRestService
     /// </summary>
     /// <param name="request">Validated request.</param>
     /// <param name="accountId">Account ID.</param>
+    /// <param name="playerEntityId">Entity ID of newly created player. Only meaningful if method returns true.</param>
     /// <returns>true on success, false otherwise.</returns>
-    private bool CreatePlayer(CreatePlayerRequest request, Guid accountId)
+    private bool CreatePlayer(CreatePlayerRequest request, Guid accountId, out ulong playerEntityId)
     {
         // Lock to avoid creating new player characters in parallel.
         // The persistence scheme for the entity-component-system implementation forces a tradeoff
@@ -158,13 +161,14 @@ public class CreatePlayerRestService : AuthenticatedRestService
         // have a race condition leading to the creation of multiple player characters with the smae
         // name.
         var result = false;
+        playerEntityId = 0;
 
         lock (creationLock)
         {
             if (!recentNames.Contains(request.PlayerName) && !playerServices.IsPlayerNameTaken(request.PlayerName))
             {
                 // Name is available and wasn't created recently - let's take it.
-                var playerId = entityFactory.GetBuilder()
+                playerEntityId = entityFactory.GetBuilder()
                     .Account(accountId)
                     .Name(request.PlayerName)
                     .PlayerCharacter()
@@ -175,7 +179,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
                 result = true;
 
                 // Select the newly created character to continue login.
-                accountsController.SelectPlayer(eventSender, accountId, playerId);
+                accountsController.SelectPlayer(eventSender, accountId, playerEntityId);
             }
         }
 

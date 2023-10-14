@@ -22,12 +22,17 @@
 namespace Sovereign.NetworkCore.Network.Rest.Data;
 
 /// <summary>
-/// Data record for responses from the Create Player REST API endpoint.
+///     Data record for responses from the Create Player REST API endpoint.
 /// </summary>
 public class CreatePlayerResponse
 {
     /// <summary>
-    /// Human-readable string indicating the result.
+    ///     Human-readable string indicating the result.
     /// </summary>
     public string Result { get; set; }
+
+    /// <summary>
+    ///     ID of the new player character. Only valid for successful requests.
+    /// </summary>
+    public ulong PlayerId { get; set; }
 }
