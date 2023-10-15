@@ -2,81 +2,69 @@
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using Sovereign.EngineCore.Systems;
-using System.Collections.Concurrent;
 
-namespace Sovereign.EngineCore.Events
+namespace Sovereign.EngineCore.Events;
+
+/// <summary>
+///     Interface for event loops, which are implemented as top-level dispatchers.
+/// </summary>
+public interface IEventLoop
 {
+    /// <summary>
+    ///     Whether the event loop has terminated.
+    /// </summary>
+    bool Terminated { get; }
 
     /// <summary>
-    /// Interface for event loops, which are implemented as top-level dispatchers.
+    ///     Advances the event loop time to the given system time value.
+    ///     This value should be a multiple of the tick interval.
     /// </summary>
-    public interface IEventLoop
-    {
+    /// <param name="systemTime">System time of the current tick.</param>
+    void UpdateSystemTime(ulong systemTime);
 
-        /// <summary>
-        /// Advances the event loop time to the given system time value.
-        /// This value should be a multiple of the tick interval.
-        /// </summary>
-        /// <param name="systemTime">System time of the current tick.</param>
-        void UpdateSystemTime(ulong systemTime);
+    /// <summary>
+    ///     Pumps the event loop.
+    /// </summary>
+    /// <returns>
+    ///     Number of events processed by this call.
+    /// </returns>
+    int PumpEventLoop();
 
-        /// <summary>
-        /// Pumps the event loop.
-        /// </summary>
-        /// <returns>
-        /// Number of events processed by this call.
-        /// </returns>
-        int PumpEventLoop();
+    /// <summary>
+    ///     Register an event sender.
+    /// </summary>
+    /// <param name="eventSender">Event sender to register.</param>
+    void RegisterEventSender(IEventSender eventSender);
 
-        /// <summary>
-        /// Whether the event loop has terminated.
-        /// </summary>
-        bool Terminated { get; }
+    /// <summary>
+    ///     Unregisters an event sender.
+    /// </summary>
+    /// <param name="eventSender">Event sender to unregister.</param>
+    void UnregisterEventSender(IEventSender eventSender);
 
-        /// <summary>
-        /// Register an event sender.
-        /// </summary>
-        /// <param name="eventSender">Event sender to register.</param>
-        void RegisterEventSender(IEventSender eventSender);
+    /// <summary>
+    ///     Registers a system.
+    /// </summary>
+    /// <param name="system">System to register.</param>
+    void RegisterSystem(ISystem system);
 
-        /// <summary>
-        /// Unregisters an event sender.
-        /// </summary>
-        /// <param name="eventSender">Event sender to unregister.</param>
-        void UnregisterEventSender(IEventSender eventSender);
-
-        /// <summary>
-        /// Registers a system.
-        /// </summary>
-        /// <param name="system">System to register.</param>
-        void RegisterSystem(ISystem system);
-
-        /// <summary>
-        /// Unregisters a system.
-        /// </summary>
-        /// <param name="system">System to unregister.</param>
-        void UnregisterSystem(ISystem system);
-
-    }
-
+    /// <summary>
+    ///     Unregisters a system.
+    /// </summary>
+    /// <param name="system">System to unregister.</param>
+    void UnregisterSystem(ISystem system);
 }

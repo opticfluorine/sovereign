@@ -2,6 +2,21 @@
 
 ## 2023
 
+### October
+
+#### 15 October 2023
+
+* Switch to GPLv3 license for all source code. Over time my feelings about using the MIT
+  license for a game engine like this have changed based on what I've observed in the
+  broader open source community. I want to make sure that the development of this engine
+  remains open source in the future - open source is ultimately a good thing for the
+  community, and I don't want to see the proliferation of closed source forks of this
+  codebase. I stopped short of adopting AGPL for this project, despite its client-server
+  nature, as I think there is still value in having secret closed-source modifications to
+  specific instances of the server where the change is meant to implement a game feature
+  not possible with scripting and where releasing the changes to the players would spoil
+  a gameplay secret.
+
 ### September
 
 #### 29 September 2023

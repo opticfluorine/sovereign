@@ -2,136 +2,120 @@
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Main;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
-using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
 
-namespace Sovereign.Persistence.State
+namespace Sovereign.Persistence.State;
+
+/// <summary>
+///     Manages changes to state of all persisted entities.
+/// </summary>
+public sealed class StateManager : IDisposable
 {
+    private readonly ComponentManager componentManager;
+    private readonly EntityMapper entityMapper;
+    private readonly EntityNotifier entityNotifier;
+    private readonly PersistenceProviderManager persistenceProviderManager;
 
     /// <summary>
-    /// Manages changes to state of all persisted entities.
+    ///     Back state buffer, currently being processed or pending flip.
     /// </summary>
-    public sealed class StateManager : IDisposable
+    private StateBuffer backBuffer;
+
+    public StateManager(ComponentManager componentManager,
+        PersistenceProviderManager persistenceProviderManager,
+        ILogger logger, FatalErrorHandler fatalErrorHandler,
+        EntityNotifier entityNotifier, EntityMapper entityMapper)
     {
-        private readonly ComponentManager componentManager;
-        private readonly PersistenceProviderManager persistenceProviderManager;
-        private readonly EntityNotifier entityNotifier;
-        private readonly EntityMapper entityMapper;
+        FrontBuffer = new StateBuffer(logger, fatalErrorHandler);
+        backBuffer = new StateBuffer(logger, fatalErrorHandler);
 
-        /// <summary>
-        /// Front state buffer, currently accepting data.
-        /// </summary>
-        public StateBuffer FrontBuffer { get; private set; }
+        this.componentManager = componentManager;
+        this.persistenceProviderManager = persistenceProviderManager;
+        this.entityNotifier = entityNotifier;
+        this.entityMapper = entityMapper;
 
-        /// <summary>
-        /// Back state buffer, currently being processed or pending flip.
-        /// </summary>
-        private StateBuffer backBuffer;
-
-        public StateManager(ComponentManager componentManager,
-            PersistenceProviderManager persistenceProviderManager,
-            ILogger logger, FatalErrorHandler fatalErrorHandler,
-            EntityNotifier entityNotifier, EntityMapper entityMapper)
-        {
-            FrontBuffer = new StateBuffer(logger, fatalErrorHandler);
-            backBuffer = new StateBuffer(logger, fatalErrorHandler);
-
-            this.componentManager = componentManager;
-            this.persistenceProviderManager = persistenceProviderManager;
-            this.entityNotifier = entityNotifier;
-            this.entityMapper = entityMapper;
-
-            entityNotifier.OnRemoveEntity += OnRemoveEntity;
-            entityNotifier.OnUnloadEntity += OnUnloadEntity;
-        }
-
-        public void Dispose()
-        {
-            entityNotifier.OnUnloadEntity -= OnUnloadEntity;
-            entityNotifier.OnRemoveEntity -= OnRemoveEntity;
-        }
-
-        /// <summary>
-        /// Commits the changes in the front buffer, swapping the buffers
-        /// in the process.
-        /// </summary>
-        public void CommitChanges()
-        {
-            /* Swap the buffers. */
-            SwapBuffers();
-
-            /* Back buffer now contains the pending updates; synchronize. */
-            backBuffer.Synchronize(persistenceProviderManager.PersistenceProvider);
-        }
-
-        /// <summary>
-        /// Atomically swaps the component state buffers.
-        /// </summary>
-        private void SwapBuffers()
-        {
-            /* Acquire strong lock to prevent component updates during swap. */
-            using (var strongLock = componentManager.ComponentGuard.AcquireStrongLock())
-            {
-                /* Swap the buffers. */
-                var swap = backBuffer;
-                backBuffer = FrontBuffer;
-                FrontBuffer = swap;
-
-                /* Clear front buffer so that it can be reused. */
-                FrontBuffer.Reset();
-            }
-        }
-
-        /// <summary>
-        /// Called when an entity is removed.
-        /// </summary>
-        /// <param name="entityId">Removed entity ID.</param>
-        private void OnRemoveEntity(ulong entityId)
-        {
-            var persistedId = entityMapper.GetPersistedId(entityId, out bool needToCreate);
-            if (!needToCreate)
-            {
-                FrontBuffer.RemoveEntity(persistedId);
-            }
-            entityMapper.UnloadId(entityId);
-        }
-
-        /// <summary>
-        /// Called when an entity is unloaded.
-        /// </summary>
-        /// <param name="entityId">Unloaded entity ID.</param>
-        private void OnUnloadEntity(ulong entityId)
-        {
-            entityMapper.UnloadId(entityId);
-        }
-
+        entityNotifier.OnRemoveEntity += OnRemoveEntity;
+        entityNotifier.OnUnloadEntity += OnUnloadEntity;
     }
 
+    /// <summary>
+    ///     Front state buffer, currently accepting data.
+    /// </summary>
+    public StateBuffer FrontBuffer { get; private set; }
+
+    public void Dispose()
+    {
+        entityNotifier.OnUnloadEntity -= OnUnloadEntity;
+        entityNotifier.OnRemoveEntity -= OnRemoveEntity;
+    }
+
+    /// <summary>
+    ///     Commits the changes in the front buffer, swapping the buffers
+    ///     in the process.
+    /// </summary>
+    public void CommitChanges()
+    {
+        /* Swap the buffers. */
+        SwapBuffers();
+
+        /* Back buffer now contains the pending updates; synchronize. */
+        backBuffer.Synchronize(persistenceProviderManager.PersistenceProvider);
+    }
+
+    /// <summary>
+    ///     Atomically swaps the component state buffers.
+    /// </summary>
+    private void SwapBuffers()
+    {
+        /* Acquire strong lock to prevent component updates during swap. */
+        using (var strongLock = componentManager.ComponentGuard.AcquireStrongLock())
+        {
+            /* Swap the buffers. */
+            var swap = backBuffer;
+            backBuffer = FrontBuffer;
+            FrontBuffer = swap;
+
+            /* Clear front buffer so that it can be reused. */
+            FrontBuffer.Reset();
+        }
+    }
+
+    /// <summary>
+    ///     Called when an entity is removed.
+    /// </summary>
+    /// <param name="entityId">Removed entity ID.</param>
+    private void OnRemoveEntity(ulong entityId)
+    {
+        var persistedId = entityMapper.GetPersistedId(entityId, out var needToCreate);
+        if (!needToCreate) FrontBuffer.RemoveEntity(persistedId);
+        entityMapper.UnloadId(entityId);
+    }
+
+    /// <summary>
+    ///     Called when an entity is unloaded.
+    /// </summary>
+    /// <param name="entityId">Unloaded entity ID.</param>
+    private void OnUnloadEntity(ulong entityId)
+    {
+        entityMapper.UnloadId(entityId);
+    }
 }

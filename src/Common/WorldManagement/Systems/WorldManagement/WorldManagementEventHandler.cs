@@ -2,118 +2,105 @@
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
-namespace Sovereign.WorldManagement.Systems.WorldManagement
+namespace Sovereign.WorldManagement.Systems.WorldManagement;
+
+/// <summary>
+///     Event handler for WorldManagementSystem.
+/// </summary>
+public sealed class WorldManagementEventHandler
 {
+    private readonly IWorldSegmentLoadedHandler loadedHandler;
+    private readonly IWorldSegmentLoader loader;
+    private readonly IWorldSegmentUnloader unloader;
 
-    /// <summary>
-    /// Event handler for WorldManagementSystem.
-    /// </summary>
-    public sealed class WorldManagementEventHandler
+    public WorldManagementEventHandler(IWorldSegmentLoader loader,
+        IWorldSegmentUnloader unloader,
+        IWorldSegmentLoadedHandler loadedHandler)
     {
-        private readonly IWorldSegmentLoader loader;
-        private readonly IWorldSegmentUnloader unloader;
-        private readonly IWorldSegmentLoadedHandler loadedHandler;
-
-        public ILogger Logger { private get; set; } = NullLogger.Instance;
-
-        public WorldManagementEventHandler(IWorldSegmentLoader loader,
-            IWorldSegmentUnloader unloader,
-            IWorldSegmentLoadedHandler loadedHandler)
-        {
-            this.loader = loader;
-            this.unloader = unloader;
-            this.loadedHandler = loadedHandler;
-        }
-
-        /// <summary>
-        /// Handles an incoming event.
-        /// </summary>
-        /// <param name="ev">Event.</param>
-        public void HandleEvent(Event ev)
-        {
-            switch (ev.EventId)
-            {
-                case EventId.Core_WorldManagement_LoadSegment:
-                    {
-                        var details = (WorldSegmentEventDetails)ev.EventDetails;
-                        OnLoadSegment(details.SegmentIndex);
-                    }
-                    break;
-
-                case EventId.Core_WorldManagement_UnloadSegment:
-                    {
-                        var details = (WorldSegmentEventDetails)ev.EventDetails;
-                        OnUnloadSegment(details.SegmentIndex);
-                    }
-                    break;
-
-                case EventId.Core_WorldManagement_WorldSegmentLoaded:
-                    {
-                        var details = (WorldSegmentEventDetails)ev.EventDetails;
-                        OnWorldSegmentLoaded(details.SegmentIndex);
-                    }
-                    break;
-
-                default:
-                    Logger.ErrorFormat("Unhandled event ID {0}.", ev.EventId);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Handles a load segment request.
-        /// </summary>
-        /// <param name="segmentIndex">Segment index.</param>
-        private void OnLoadSegment(GridPosition segmentIndex)
-        {
-            loader.LoadSegment(segmentIndex);
-        }
-
-        /// <summary>
-        /// Handles an unload segment request.
-        /// </summary>
-        /// <param name="segmentIndex">Segment to unload.</param>
-        private void OnUnloadSegment(GridPosition segmentIndex)
-        {
-            unloader.UnloadSegment(segmentIndex);
-        }
-
-        /// <summary>
-        /// Handles a segment loaded event.
-        /// </summary>
-        /// <param name="segmentIndex">Segment index.</param>
-        private void OnWorldSegmentLoaded(GridPosition segmentIndex)
-        {
-            loadedHandler.OnWorldSegmentLoaded(segmentIndex);
-        }
-
+        this.loader = loader;
+        this.unloader = unloader;
+        this.loadedHandler = loadedHandler;
     }
 
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+    /// <summary>
+    ///     Handles an incoming event.
+    /// </summary>
+    /// <param name="ev">Event.</param>
+    public void HandleEvent(Event ev)
+    {
+        switch (ev.EventId)
+        {
+            case EventId.Core_WorldManagement_LoadSegment:
+            {
+                var details = (WorldSegmentEventDetails)ev.EventDetails;
+                OnLoadSegment(details.SegmentIndex);
+            }
+                break;
+
+            case EventId.Core_WorldManagement_UnloadSegment:
+            {
+                var details = (WorldSegmentEventDetails)ev.EventDetails;
+                OnUnloadSegment(details.SegmentIndex);
+            }
+                break;
+
+            case EventId.Core_WorldManagement_WorldSegmentLoaded:
+            {
+                var details = (WorldSegmentEventDetails)ev.EventDetails;
+                OnWorldSegmentLoaded(details.SegmentIndex);
+            }
+                break;
+
+            default:
+                Logger.ErrorFormat("Unhandled event ID {0}.", ev.EventId);
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Handles a load segment request.
+    /// </summary>
+    /// <param name="segmentIndex">Segment index.</param>
+    private void OnLoadSegment(GridPosition segmentIndex)
+    {
+        loader.LoadSegment(segmentIndex);
+    }
+
+    /// <summary>
+    ///     Handles an unload segment request.
+    /// </summary>
+    /// <param name="segmentIndex">Segment to unload.</param>
+    private void OnUnloadSegment(GridPosition segmentIndex)
+    {
+        unloader.UnloadSegment(segmentIndex);
+    }
+
+    /// <summary>
+    ///     Handles a segment loaded event.
+    /// </summary>
+    /// <param name="segmentIndex">Segment index.</param>
+    private void OnWorldSegmentLoaded(GridPosition segmentIndex)
+    {
+        loadedHandler.OnWorldSegmentLoaded(segmentIndex);
+    }
 }

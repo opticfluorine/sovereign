@@ -2,84 +2,68 @@
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using System;
 using System.Collections.Concurrent;
 
-namespace Sovereign.EngineUtil.Collections
+namespace Sovereign.EngineUtil.Collections;
+
+/// <summary>
+///     Simple object pool.
+/// </summary>
+/// <typeparam name="T">Type to object to pool.</typeparam>
+public sealed class ObjectPool<T>
 {
-
     /// <summary>
-    /// Simple object pool.
+    ///     Default size of the object pool.
     /// </summary>
-    /// <typeparam name="T">Type to object to pool.</typeparam>
-    public sealed class ObjectPool<T>
+    public const int DefaultSize = 32;
+
+    private readonly ConcurrentBag<T> bag;
+
+    private readonly Func<T> producer;
+
+    public ObjectPool(Func<T> producer, int size = DefaultSize)
     {
-
-        /// <summary>
-        /// Default size of the object pool.
-        /// </summary>
-        public const int DefaultSize = 32;
-
-        private readonly ConcurrentBag<T> bag;
-
-        private readonly Func<T> producer;
-
-        public ObjectPool(Func<T> producer, int size = DefaultSize)
-        {
-            this.producer = producer;
-            bag = new ConcurrentBag<T>();
-            for (int i = 0; i < size; ++i)
-            {
-                ReturnObject(producer());
-            }
-        }
-
-        public ObjectPool(int size = DefaultSize)
-            : this(() => Activator.CreateInstance<T>(), size)
-        {
-
-        }
-
-        /// <summary>
-        /// Takes an object from the pool, creating a new object if none are available.
-        /// </summary>
-        /// <returns>Pooled object.</returns>
-        public T TakeObject()
-        {
-            if (bag.TryTake(out T obj))
-                return obj;
-            else
-                return producer();
-        }
-
-        /// <summary>
-        /// Returns an object to the pool.
-        /// </summary>
-        /// <param name="t">Pooled object.</param>
-        public void ReturnObject(T t)
-        {
-            bag.Add(t);
-        }
-
+        this.producer = producer;
+        bag = new ConcurrentBag<T>();
+        for (var i = 0; i < size; ++i) ReturnObject(producer());
     }
 
+    public ObjectPool(int size = DefaultSize)
+        : this(() => Activator.CreateInstance<T>(), size)
+    {
+    }
+
+    /// <summary>
+    ///     Takes an object from the pool, creating a new object if none are available.
+    /// </summary>
+    /// <returns>Pooled object.</returns>
+    public T TakeObject()
+    {
+        if (bag.TryTake(out var obj))
+            return obj;
+        return producer();
+    }
+
+    /// <summary>
+    ///     Returns an object to the pool.
+    /// </summary>
+    /// <param name="t">Pooled object.</param>
+    public void ReturnObject(T t)
+    {
+        bag.Add(t);
+    }
 }

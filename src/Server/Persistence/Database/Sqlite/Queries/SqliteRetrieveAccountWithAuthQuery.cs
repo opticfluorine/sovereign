@@ -2,67 +2,53 @@
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Data;
 using Microsoft.Data.Sqlite;
 using Sovereign.Persistence.Database.Queries;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Sovereign.Persistence.Database.Sqlite.Queries
+namespace Sovereign.Persistence.Database.Sqlite.Queries;
+
+/// <summary>
+///     IRetrieveAccountWithAuthQuery for the SQLite persistence provider.
+/// </summary>
+public sealed class SqliteRetrieveAccountWithAuthQuery : IRetrieveAccountWithAuthQuery
 {
-
     /// <summary>
-    /// IRetrieveAccountWithAuthQuery for the SQLite persistence provider.
+    ///     SQL query.
     /// </summary>
-    public sealed class SqliteRetrieveAccountWithAuthQuery : IRetrieveAccountWithAuthQuery
-    {
-
-        private readonly SqliteConnection dbConnection;
-
-        /// <summary>
-        /// SQL query.
-        /// </summary>
-        private const string Query =
-            @"SELECT id, salt, hash, opslimit, memlimit
+    private const string Query =
+        @"SELECT id, salt, hash, opslimit, memlimit
                 FROM AccountWithAuthentication
                 WHERE username = @Username";
 
-        public SqliteRetrieveAccountWithAuthQuery(IDbConnection dbConnection)
-        {
-            this.dbConnection = (SqliteConnection)dbConnection;
-        }
+    private readonly SqliteConnection dbConnection;
 
-        public QueryReader RetrieveAccountWithAuth(string username)
-        {
-            var cmd = new SqliteCommand(Query, dbConnection);
+    public SqliteRetrieveAccountWithAuthQuery(IDbConnection dbConnection)
+    {
+        this.dbConnection = (SqliteConnection)dbConnection;
+    }
 
-            var param = new SqliteParameter("Username", username);
-            param.SqliteType = SqliteType.Text;
-            cmd.Parameters.Add(param);
+    public QueryReader RetrieveAccountWithAuth(string username)
+    {
+        var cmd = new SqliteCommand(Query, dbConnection);
 
-            return new QueryReader(cmd);
-        }
+        var param = new SqliteParameter("Username", username);
+        param.SqliteType = SqliteType.Text;
+        cmd.Parameters.Add(param);
 
+        return new QueryReader(cmd);
     }
 }

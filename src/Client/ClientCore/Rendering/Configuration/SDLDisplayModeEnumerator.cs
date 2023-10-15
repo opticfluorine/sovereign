@@ -2,23 +2,17 @@
  * Sovereign Engine
  * Copyright (c) 2022 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using System;
@@ -28,20 +22,19 @@ using SDL2;
 namespace Sovereign.ClientCore.Rendering.Configuration;
 
 /// <summary>
-/// Common display mode emulator using SDL2 functions.
+///     Common display mode emulator using SDL2 functions.
 /// </summary>
 public class SDLDisplayModeEnumerator : IDisplayModeEnumerator
 {
-
     public IEnumerable<IDisplayMode> EnumerateDisplayModes(IVideoAdapter adapter)
     {
         // Query display modes from all displays.
-        int displayCount = SDL.SDL_GetNumVideoDisplays();
+        var displayCount = SDL.SDL_GetNumVideoDisplays();
         var modes = new List<SDLDisplayMode>();
-        for (int i = 0; i < displayCount; ++i)
+        for (var i = 0; i < displayCount; ++i)
         {
-            int modeCount = SDL.SDL_GetNumDisplayModes(i);
-            for (int j = 0; j < modeCount; ++j)
+            var modeCount = SDL.SDL_GetNumDisplayModes(i);
+            for (var j = 0; j < modeCount; ++j)
             {
                 SDL.SDL_GetDisplayMode(i, j, out var mode);
 
@@ -51,9 +44,9 @@ public class SDLDisplayModeEnumerator : IDisplayModeEnumerator
 
                 // Otherwise add it to the list.
                 modes.Add(new SDLDisplayMode(
-                    width: mode.w,
-                    height: mode.h,
-                    format: DisplayFormat.B8G8R8A8_UNorm
+                    mode.w,
+                    mode.h,
+                    DisplayFormat.B8G8R8A8_UNorm
                 ));
             }
         }
@@ -62,7 +55,7 @@ public class SDLDisplayModeEnumerator : IDisplayModeEnumerator
     }
 
     /// <summary>
-    /// Converts an SDL format.
+    ///     Converts an SDL format.
     /// </summary>
     /// <param name="format"></param>
     /// <returns></returns>

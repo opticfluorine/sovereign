@@ -2,43 +2,35 @@
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
-using Sovereign.EngineUtil.Validation;
-using System;
 using System.Linq;
 using System.Text;
+using Castle.Core.Logging;
+using Sovereign.EngineUtil.Validation;
 
 namespace Sovereign.EngineCore.World.Materials;
 
 /// <summary>
-/// Input validator for MaterialDefinitions.
+///     Input validator for MaterialDefinitions.
 /// </summary>
 public sealed class MaterialDefinitionsValidator
 {
-
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
-    /// Validates the given material definitions.
+    ///     Validates the given material definitions.
     /// </summary>
     /// <param name="materialDefinitions">Material definitions to be validated.</param>
     /// <param name="errorMessages">Error messages produced, if any.</param>
@@ -48,14 +40,14 @@ public sealed class MaterialDefinitionsValidator
         var sb = new StringBuilder();
 
         var valid = CheckMaterialModifierUniqueness(materialDefinitions, sb)
-            && ValidateIds(materialDefinitions, sb);
+                    && ValidateIds(materialDefinitions, sb);
 
         errorMessages = sb.ToString().Trim();
         return valid;
     }
 
     /// <summary>
-    /// Checks that IDs are not duplicated and run from 1 to n.
+    ///     Checks that IDs are not duplicated and run from 1 to n.
     /// </summary>
     /// <param name="definitions">Definitions.</param>
     /// <param name="sb">StringBuilder for error reporting.</param>
@@ -77,10 +69,7 @@ public sealed class MaterialDefinitionsValidator
             if (hasDuplicates)
             {
                 sb.Append("The following material IDs are duplicated:\n\n");
-                foreach (var id in duplicateIds)
-                {
-                    sb.Append("Material ").Append(id).Append("\n");
-                }
+                foreach (var id in duplicateIds) sb.Append("Material ").Append(id).Append("\n");
             }
 
             if (hasDuplicates && hasOutOfRanges) sb.Append("\n");
@@ -89,10 +78,7 @@ public sealed class MaterialDefinitionsValidator
             {
                 sb.Append("Material IDs must run consecutively from 1.\n")
                     .Append("The following IDs are out of range:\n\n");
-                foreach (var id in outOfRangeIds)
-                {
-                    sb.Append("Material ").Append(id).Append("\n");
-                }
+                foreach (var id in outOfRangeIds) sb.Append("Material ").Append(id).Append("\n");
             }
         }
 
@@ -100,7 +86,7 @@ public sealed class MaterialDefinitionsValidator
     }
 
     /// <summary>
-    /// Checks that material modifiers are not duplicated within any materials.
+    ///     Checks that material modifiers are not duplicated within any materials.
     /// </summary>
     /// <param name="materialDefinitions">Material definitions.</param>
     /// <param name="errorStringBuilder">String builder for error messages.</param>
@@ -111,14 +97,12 @@ public sealed class MaterialDefinitionsValidator
         /* Check each material individually. */
         var satisfied = true;
         foreach (var material in materialDefinitions.Materials)
-        {
             satisfied = satisfied && CheckSingleMaterialModiferUniqueness(material, errorStringBuilder);
-        }
         return satisfied;
     }
 
     /// <summary>
-    /// Checks that material modifiers are not duplicated within a material.
+    ///     Checks that material modifiers are not duplicated within a material.
     /// </summary>
     /// <param name="material">Material.</param>
     /// <param name="errorStringBuilder">String builder for error messages.</param>
@@ -144,7 +128,7 @@ public sealed class MaterialDefinitionsValidator
     }
 
     /// <summary>
-    /// Gets the error message for duplicated material IDs.
+    ///     Gets the error message for duplicated material IDs.
     /// </summary>
     /// <param name="materialDefinitions">Material definitions.</param>
     /// <returns>Error message.</returns>
@@ -161,16 +145,13 @@ public sealed class MaterialDefinitionsValidator
         var sb = new StringBuilder();
         sb.Append("Material IDs must be unique within the material definitions.\n")
             .Append("The following Material IDs are duplicated:");
-        foreach (var duplicateId in duplicateIds)
-        {
-            sb.Append("\nMaterial ID ").Append(duplicateId);
-        }
+        foreach (var duplicateId in duplicateIds) sb.Append("\nMaterial ID ").Append(duplicateId);
 
         return sb.ToString();
     }
 
     /// <summary>
-    /// Gets the error message for duplicated modifiers within a material.
+    ///     Gets the error message for duplicated modifiers within a material.
     /// </summary>
     /// <param name="material">Material.</param>
     /// <returns>Error messages.</returns>
@@ -188,17 +169,15 @@ public sealed class MaterialDefinitionsValidator
         sb.Append("Material modifiers must be unique within a single Material.\n")
             .Append("For Material ").Append(material.Id)
             .Append(" (\"").Append(material.MaterialName).Append("\"), the following "
-            + "modifiers are duplicated:");
+                                                                 + "modifiers are duplicated:");
         foreach (var duplicateModifier in duplicateModifiers)
-        {
             sb.Append("\nMaterial Modifier ").Append(duplicateModifier);
-        }
 
         return sb.ToString();
     }
 
     /// <summary>
-    /// Gets the error message for an invalid material ID.
+    ///     Gets the error message for an invalid material ID.
     /// </summary>
     /// <param name="definitions">Definitions.</param>
     /// <returns>Error message.</returns>
@@ -206,17 +185,13 @@ public sealed class MaterialDefinitionsValidator
     {
         /* Identify any invalid IDs. */
         var badIds = definitions.Materials
-            .Where((material) => material.Id < 1)
+            .Where(material => material.Id < 1)
             .Select((material, idx) => material.Id);
 
         var sb = new StringBuilder();
         sb.Append("Material IDs must be greater than zero. Bad material IDs found:");
-        foreach (var id in badIds)
-        {
-            sb.Append("\nMaterial ").Append(id);
-        }
+        foreach (var id in badIds) sb.Append("\nMaterial ").Append(id);
 
         return sb.ToString();
     }
-
 }

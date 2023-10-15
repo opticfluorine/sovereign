@@ -2,46 +2,35 @@
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using Sovereign.EngineCore.Components;
 
-namespace Sovereign.ClientCore.Rendering.Components
+namespace Sovereign.ClientCore.Rendering.Components;
+
+/// <summary>
+///     Describes a component that indicates whether an entity can be drawn.
+/// </summary>
+/// This component is of type bool, but the value has no meaning; the existence of
+/// any Drawable component for an entity indicates that the entity is drawable.
+public sealed class DrawableComponentCollection : BaseComponentCollection<bool>
 {
+    private const int BaseSize = 65536;
 
-    /// <summary>
-    /// Describes a component that indicates whether an entity can be drawn.
-    /// </summary>
-    /// 
-    /// This component is of type bool, but the value has no meaning; the existence of
-    /// any Drawable component for an entity indicates that the entity is drawable.
-    public sealed class DrawableComponentCollection : BaseComponentCollection<bool>
+    public DrawableComponentCollection(ComponentManager componentManager)
+        : base(componentManager, BaseSize, ComponentOperators.BoolOperators,
+            ComponentType.Drawable)
     {
-
-        private const int BaseSize = 65536;
-
-        public DrawableComponentCollection(ComponentManager componentManager)
-            : base(componentManager, BaseSize, ComponentOperators.BoolOperators,
-                  ComponentType.Drawable)
-        {
-        }
-
     }
 }

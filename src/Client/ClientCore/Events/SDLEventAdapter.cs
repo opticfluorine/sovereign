@@ -2,112 +2,94 @@
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.ClientCore.Rendering.Display;
-using Sovereign.EngineCore.Events;
 using SDL2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.EngineCore.Events;
 
-namespace Sovereign.ClientCore.Events
+namespace Sovereign.ClientCore.Events;
+
+/// <summary>
+///     Converts SDL events into engine events.
+/// </summary>
+public class SDLEventAdapter : IEventAdapter
 {
+    private readonly CommonGuiManager guiManager;
 
-    /// <summary>
-    /// Converts SDL events into engine events.
-    /// </summary>
-    public class SDLEventAdapter : IEventAdapter
+    public SDLEventAdapter(EventAdapterManager adapterManager, CommonGuiManager guiManager)
     {
-        private readonly CommonGuiManager guiManager;
+        this.guiManager = guiManager;
 
-        public SDLEventAdapter(EventAdapterManager adapterManager, CommonGuiManager guiManager)
-        {
-            this.guiManager = guiManager;
-
-            adapterManager.RegisterEventAdapter(this);
-        }
-
-        public void PrepareEvents()
-        {
-            /* No preparation is needed with SDL. */
-        }
-
-        public bool PollEvent(out Event ev)
-        {
-            /* 
-             * Attempt to adapt the next available event until successful 
-             * or no events remain.
-             */
-            ev = null;
-            while (ev == null && SDL.SDL_PollEvent(out var sdlEv) == 1)
-            {
-                /*
-                 * Occasionally the GUI system will entirely consume keyboard
-                 * and mouse events. When this occurs, we do not convert the
-                 * SDL event to the corresponding internal event.
-                 */
-                guiManager.ProcessEvent(ref sdlEv, out var shouldDispatch);
-                if (!shouldDispatch) continue;
-
-                switch (sdlEv.type)
-                {
-                    case SDL.SDL_EventType.SDL_QUIT:
-                        ev = AdaptSdlQuit(sdlEv);
-                        break;
-
-                    case SDL.SDL_EventType.SDL_KEYDOWN:
-                        ev = AdaptSdlKeyDown(sdlEv);
-                        break;
-
-                    case SDL.SDL_EventType.SDL_KEYUP:
-                        ev = AdaptSdlKeyUp(sdlEv);
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-            return ev != null;
-        }
-
-        private Event AdaptSdlQuit(SDL.SDL_Event sdlEv)
-        {
-            return new Event(EventId.Core_Quit);
-        }
-
-        private Event AdaptSdlKeyDown(SDL.SDL_Event sdlEv)
-        {
-            var details = new KeyEventDetails() { Key = sdlEv.key.keysym.sym };
-            return new Event(EventId.Client_Input_KeyDown, details);
-        }
-
-        private Event AdaptSdlKeyUp(SDL.SDL_Event sdlEv)
-        {
-            var details = new KeyEventDetails() { Key = sdlEv.key.keysym.sym };
-            return new Event(EventId.Client_Input_KeyUp, details);
-        }
-
+        adapterManager.RegisterEventAdapter(this);
     }
 
+    public void PrepareEvents()
+    {
+        /* No preparation is needed with SDL. */
+    }
+
+    public bool PollEvent(out Event ev)
+    {
+        /* 
+         * Attempt to adapt the next available event until successful 
+         * or no events remain.
+         */
+        ev = null;
+        while (ev == null && SDL.SDL_PollEvent(out var sdlEv) == 1)
+        {
+            /*
+             * Occasionally the GUI system will entirely consume keyboard
+             * and mouse events. When this occurs, we do not convert the
+             * SDL event to the corresponding internal event.
+             */
+            guiManager.ProcessEvent(ref sdlEv, out var shouldDispatch);
+            if (!shouldDispatch) continue;
+
+            switch (sdlEv.type)
+            {
+                case SDL.SDL_EventType.SDL_QUIT:
+                    ev = AdaptSdlQuit(sdlEv);
+                    break;
+
+                case SDL.SDL_EventType.SDL_KEYDOWN:
+                    ev = AdaptSdlKeyDown(sdlEv);
+                    break;
+
+                case SDL.SDL_EventType.SDL_KEYUP:
+                    ev = AdaptSdlKeyUp(sdlEv);
+                    break;
+            }
+        }
+
+        return ev != null;
+    }
+
+    private Event AdaptSdlQuit(SDL.SDL_Event sdlEv)
+    {
+        return new Event(EventId.Core_Quit);
+    }
+
+    private Event AdaptSdlKeyDown(SDL.SDL_Event sdlEv)
+    {
+        var details = new KeyEventDetails { Key = sdlEv.key.keysym.sym };
+        return new Event(EventId.Client_Input_KeyDown, details);
+    }
+
+    private Event AdaptSdlKeyUp(SDL.SDL_Event sdlEv)
+    {
+        var details = new KeyEventDetails { Key = sdlEv.key.keysym.sym };
+        return new Event(EventId.Client_Input_KeyUp, details);
+    }
 }

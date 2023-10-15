@@ -2,49 +2,42 @@
  * Sovereign Engine
  * Copyright (c) 2022 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using System;
-using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.VeldridRenderer.Rendering.Resources;
 using Veldrid;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 
 /// <summary>
-/// Responsible for rendering the game world.
+///     Responsible for rendering the game world.
 /// </summary>
 public class WorldRenderer : IDisposable
 {
     private readonly VeldridDevice device;
+    private readonly GameResourceManager gameResMgr;
     private readonly WorldPipeline pipeline;
     private readonly VeldridResourceManager resMgr;
-    private readonly GameResourceManager gameResMgr;
 
     /// <summary>
-    /// Bindable resource set used by the world renderer.
+    ///     Bindable resource set used by the world renderer.
     /// </summary>
     private ResourceSet resourceSet;
 
     /// <summary>
-    /// Viewport used for world rendering.
+    ///     Viewport used for world rendering.
     /// </summary>
     private Viewport viewport;
 
@@ -57,8 +50,14 @@ public class WorldRenderer : IDisposable
         this.gameResMgr = gameResMgr;
     }
 
+    public void Dispose()
+    {
+        resourceSet?.Dispose();
+        pipeline.Dispose();
+    }
+
     /// <summary>
-    /// Initializes the world renderer.
+    ///     Initializes the world renderer.
     /// </summary>
     public void Initialize()
     {
@@ -68,23 +67,17 @@ public class WorldRenderer : IDisposable
 
         // Define world rendering viewport.
         viewport = new Viewport(
-            x: 0.0f,
-            y: 0.0f,
-            width: device.DisplayMode.Width,
-            height: device.DisplayMode.Height,
-            minDepth: 0.0f,
-            maxDepth: 1.0f
+            0.0f,
+            0.0f,
+            device.DisplayMode.Width,
+            device.DisplayMode.Height,
+            0.0f,
+            1.0f
         );
     }
 
-    public void Dispose()
-    {
-        resourceSet?.Dispose();
-        pipeline.Dispose();
-    }
-
     /// <summary>
-    /// Renders the game world.
+    ///     Renders the game world.
     /// </summary>
     /// <param name="commandList">Active command list.</param>
     public void Render(CommandList commandList)
@@ -100,9 +93,9 @@ public class WorldRenderer : IDisposable
             IndexFormat.UInt32);
 
         // Execute draw commands from the buffer.
-        for (int i = 0; i < gameResMgr.DrawCount; ++i)
+        for (var i = 0; i < gameResMgr.DrawCount; ++i)
         {
-            int drawSize = gameResMgr.DrawBuffer[i];
+            var drawSize = gameResMgr.DrawBuffer[i];
             commandList.DrawIndexed((uint)drawSize);
         }
 
@@ -110,30 +103,23 @@ public class WorldRenderer : IDisposable
     }
 
     /// <summary>
-    /// Creates the bindable resource set.
+    ///     Creates the bindable resource set.
     /// </summary>
     private void CreateResourceSet()
     {
-        var resLayoutDesc = new ResourceLayoutDescription(
-            new ResourceLayoutElementDescription[]
-            {
-                new ResourceLayoutElementDescription(
-                    GameResourceManager.RES_SHADER_CONSTANTS,
-                    ResourceKind.UniformBuffer,
-                    ShaderStages.Vertex
-                ),
-                new ResourceLayoutElementDescription(
-                    GameResourceManager.RES_TEXTURE_ATLAS,
-                    ResourceKind.TextureReadOnly,
-                    ShaderStages.Fragment
-                ),
-                new ResourceLayoutElementDescription(
-                    GameResourceManager.RES_TEXTURE_ATLAS_SAMPLER,
-                    ResourceKind.Sampler,
-                    ShaderStages.Fragment
-                )
-            }
-        );
+        var resLayoutDesc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
+            GameResourceManager.RES_SHADER_CONSTANTS,
+            ResourceKind.UniformBuffer,
+            ShaderStages.Vertex
+        ), new ResourceLayoutElementDescription(
+            GameResourceManager.RES_TEXTURE_ATLAS,
+            ResourceKind.TextureReadOnly,
+            ShaderStages.Fragment
+        ), new ResourceLayoutElementDescription(
+            GameResourceManager.RES_TEXTURE_ATLAS_SAMPLER,
+            ResourceKind.Sampler,
+            ShaderStages.Fragment
+        ));
         var resLayout = device.Device.ResourceFactory.CreateResourceLayout(resLayoutDesc);
 
         var resSetDesc = new ResourceSetDescription(
@@ -144,5 +130,4 @@ public class WorldRenderer : IDisposable
         );
         resourceSet = device.Device.ResourceFactory.CreateResourceSet(resSetDesc);
     }
-
 }
