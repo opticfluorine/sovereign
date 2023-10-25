@@ -41,6 +41,15 @@ public sealed class RegistrationClient
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
+    /// <summary>
+    ///     Sends a request to the server to register a new account.
+    /// </summary>
+    /// <param name="connectionParameters">Connection parameters for server.</param>
+    /// <param name="request">Registration request.</param>
+    /// <returns>
+    ///     Async task that will yield either the response on success,
+    ///     or an error message string on failure.
+    /// </returns>
     public async Task<Option<RegistrationResponse, string>> RegisterAsync(
         ClientConnectionParameters connectionParameters,
         RegistrationRequest request)

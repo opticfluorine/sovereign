@@ -29,6 +29,7 @@ public sealed class ClientNetworkInfrastructureInstaller : IWindsorInstaller
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
         container.Register(Component.For<AuthenticationClient>().LifestyleSingleton());
+        container.Register(Component.For<PlayerManagementClient>().LifestyleSingleton());
         container.Register(Component.For<RegistrationClient>().LifestyleSingleton());
     }
 }

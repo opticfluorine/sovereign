@@ -71,8 +71,8 @@ public class CreatePlayerRestService : AuthenticatedRestService
         this.eventSender = eventSender;
     }
 
-    public override string Path => RestEndpoints.Player + "/{id}";
-    public override RestPathType PathType => RestPathType.Parameter;
+    public override string Path => RestEndpoints.Player;
+    public override RestPathType PathType => RestPathType.Static;
     public override HttpMethod RequestType => HttpMethod.POST;
 
     protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
@@ -99,7 +99,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
             // Attempt player creation.
             var result = CreatePlayer(requestData, accountId, out var playerId);
             if (result)
-                await SendResponse(ctx, 200, "Success.", playerId);
+                await SendResponse(ctx, 201, "Success.", playerId);
             else
                 await SendResponse(ctx, 409, "Failed.");
         }

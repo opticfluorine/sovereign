@@ -4,6 +4,13 @@
 
 ### October
 
+#### 24 October 2023
+
+* Fix various issues with REST services.
+* Create `PlayerManagementClient` as an interface to the player management
+  REST services. For now only player creation is supported, other APIs
+  will be added soon.
+
 #### 15 October 2023
 
 * Switch to GPLv3 license for all source code. Over time my feelings about using the MIT

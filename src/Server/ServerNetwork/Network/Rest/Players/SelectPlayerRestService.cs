@@ -30,7 +30,7 @@ public class SelectPlayerRestService : AuthenticatedRestService
     {
     }
 
-    public override string Path => RestEndpoints.Player + "/{id}/select";
+    public override string Path => RestEndpoints.Player + "/{id}";
     public override RestPathType PathType => RestPathType.Parameter;
     public override HttpMethod RequestType => HttpMethod.POST;
 
