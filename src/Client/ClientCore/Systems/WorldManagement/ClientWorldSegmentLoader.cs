@@ -2,23 +2,17 @@
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using System;
@@ -59,6 +53,11 @@ public sealed class ClientWorldSegmentLoader : IWorldSegmentLoader
     ///     Delay between consecutive retries, in milliseconds.
     /// </summary>
     public const int RetryDelayMs = 2000;
+
+    /// <summary>
+    ///     Maximum response length in bytes.
+    /// </summary>
+    private const long MaxResponseLength = 128 * 1024;
 
     private readonly BlockController blockController;
     private readonly IWorldManagementConfiguration config;
@@ -101,11 +100,11 @@ public sealed class ClientWorldSegmentLoader : IWorldSegmentLoader
     {
         var retryCount = 0;
         while (retryCount < MaxRetries)
-        {
             try
             {
                 /* If this is a retry, delay. */
                 if (retryCount > 0) await Task.Delay(RetryDelayMs);
+                retryCount++;
 
                 /* Attempt to retreive segment from server. */
                 var endpoint = new StringBuilder();
@@ -117,6 +116,13 @@ public sealed class ClientWorldSegmentLoader : IWorldSegmentLoader
                     .Append("/")
                     .Append(segmentIndex.Z);
                 var response = await restClient.Get(endpoint.ToString());
+                var contentLen = response.Content.Headers.ContentLength;
+                if (contentLen > MaxResponseLength)
+                {
+                    Logger.ErrorFormat("Response length {0} too long.", contentLen);
+                    continue;
+                }
+
                 switch (response.StatusCode)
                 {
                     case HttpStatusCode.OK:
@@ -147,9 +153,6 @@ public sealed class ClientWorldSegmentLoader : IWorldSegmentLoader
             {
                 Logger.ErrorFormat(e, "Exception while retrieving segment data for {0}.", segmentIndex);
             }
-
-            retryCount++;
-        }
 
         /* If we get here, all the retries failed and we hit the limit. */
         Logger.ErrorFormat("Failed to retrieve segment data for {0} after {1} tries; connection assumed lost.",

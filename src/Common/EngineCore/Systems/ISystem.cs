@@ -2,70 +2,59 @@
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Events;
 using System.Collections.Generic;
+using Sovereign.EngineCore.Events;
 
-namespace Sovereign.EngineCore.Systems
+namespace Sovereign.EngineCore.Systems;
+
+/// <summary>
+///     Interface implemented by all Systems in the ECS framework.
+/// </summary>
+public interface ISystem
 {
+    /// <summary>
+    ///     Event communicator for the given service.
+    /// </summary>
+    EventCommunicator EventCommunicator { get; }
 
     /// <summary>
-    /// Interface implemented by all Systems in the ECS framework.
+    ///     The set of event IDs that this system is listening for.
     /// </summary>
-    public interface ISystem
-    {
+    ISet<EventId> EventIdsOfInterest { get; }
 
-        /// <summary>
-        /// Event communicator for the given service.
-        /// </summary>
-        EventCommunicator EventCommunicator { get; }
+    /// <summary>
+    ///     Estimated scale of the workload performed by this system.
+    ///     Larger values indicate greater expected workloads.
+    ///     This value is used to balance the system threads.
+    /// </summary>
+    int WorkloadEstimate { get; }
 
-        /// <summary>
-        /// The set of event IDs that this system is listening for.
-        /// </summary>
-        ISet<EventId> EventIdsOfInterest { get; }
+    /// <summary>
+    ///     Initializes the system. Called from the system thread.
+    /// </summary>
+    void Initialize();
 
-        /// <summary>
-        /// Estimated scale of the workload performed by this system.
-        /// Larger values indicate greater expected workloads.
-        /// This value is used to balance the system threads.
-        /// </summary>
-        int WorkloadEstimate { get; }
+    /// <summary>
+    ///     Cleans up the system. Called from the system thread.
+    /// </summary>
+    void Cleanup();
 
-        /// <summary>
-        /// Initializes the system. Called from the system thread.
-        /// </summary>
-        void Initialize();
-
-        /// <summary>
-        /// Cleans up the system. Called from the system thread.
-        /// </summary>
-        void Cleanup();
-
-        /// <summary>
-        /// Executes the system once.
-        /// </summary>
-        /// <returns>Number of events processed by the system during this call.</returns>
-        int ExecuteOnce();
-
-    }
-
+    /// <summary>
+    ///     Executes the system once.
+    /// </summary>
+    /// <returns>Number of events processed by the system during this call.</returns>
+    int ExecuteOnce();
 }

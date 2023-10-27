@@ -2,23 +2,17 @@
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using System;
@@ -27,6 +21,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
+using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
@@ -49,6 +44,8 @@ public sealed class AuthenticationRestService : IRestService
 
     private readonly AccountServices accountServices;
     private readonly IServerNetworkConfiguration configuration;
+
+    private readonly AccountLoginTracker loginTracker;
 
     /// <summary>
     ///     Map from result to HTTP status code.
@@ -78,10 +75,12 @@ public sealed class AuthenticationRestService : IRestService
         };
 
     public AuthenticationRestService(AccountServices accountServices,
-        IServerNetworkConfiguration configuration)
+        IServerNetworkConfiguration configuration,
+        AccountLoginTracker loginTracker)
     {
         this.accountServices = accountServices;
         this.configuration = configuration;
+        this.loginTracker = loginTracker;
     }
 
 
@@ -130,6 +129,7 @@ public sealed class AuthenticationRestService : IRestService
                 ResultToStatus[result],
                 ResultToString[result],
                 guid.ToString(),
+                loginTracker.GetApiKey(guid),
                 secret,
                 configuration.Host,
                 configuration.Port);
@@ -160,7 +160,7 @@ public sealed class AuthenticationRestService : IRestService
     }
 
     private async Task SendResponse(HttpContext ctx,
-        int status, string result, string id = null,
+        int status, string result, string id = null, string apiKey = null,
         string secret = null, string host = null,
         ushort port = 0)
     {
@@ -170,6 +170,7 @@ public sealed class AuthenticationRestService : IRestService
         {
             Result = result,
             UserId = id,
+            RestApiKey = apiKey,
             SharedSecret = secret,
             ServerHost = host,
             ServerPort = port

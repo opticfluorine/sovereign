@@ -2,101 +2,91 @@
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
+using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems.Block.Events;
-using System;
-using System.Collections.Generic;
 
-namespace Sovereign.EngineCore.Systems.Block
+namespace Sovereign.EngineCore.Systems.Block;
+
+/// <summary>
+///     System responsible for managing the block entities.
+/// </summary>
+public sealed class BlockSystem : ISystem, IDisposable
 {
+    private readonly BlockEventHandler eventHandler;
+    private readonly IEventLoop eventLoop;
 
-    /// <summary>
-    /// System responsible for managing the block entities.
-    /// </summary>
-    public sealed class BlockSystem : ISystem, IDisposable
+    public BlockSystem(BlockEventHandler eventHandler, IEventLoop eventLoop,
+        EventCommunicator eventCommunicator, EventDescriptions eventDescriptions)
     {
-        private readonly BlockEventHandler eventHandler;
-        private readonly IEventLoop eventLoop;
+        /* Dependency injection. */
+        this.eventHandler = eventHandler;
+        this.eventLoop = eventLoop;
+        EventCommunicator = eventCommunicator;
 
-        public ILogger Logger { private get; set; } = NullLogger.Instance;
+        /* Register events. */
+        eventDescriptions.RegisterEvent<BlockAddEventDetails>(EventId.Core_Block_Add);
+        eventDescriptions.RegisterEvent<BlockAddBatchEventDetails>(EventId.Core_Block_AddBatch);
+        eventDescriptions.RegisterEvent<EntityEventDetails>(EventId.Core_Block_Remove);
+        eventDescriptions.RegisterEvent<BlockRemoveBatchEventDetails>(EventId.Core_Block_RemoveBatch);
 
-        public EventCommunicator EventCommunicator { get; private set; }
-
-        public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>()
-        {
-            EventId.Core_Block_Add,
-            EventId.Core_Block_AddBatch,
-            EventId.Core_Block_Remove,
-            EventId.Core_Block_RemoveBatch,
-        };
-
-        public int WorkloadEstimate => 50;
-
-        public BlockSystem(BlockEventHandler eventHandler, IEventLoop eventLoop,
-            EventCommunicator eventCommunicator, EventDescriptions eventDescriptions)
-        {
-            /* Dependency injection. */
-            this.eventHandler = eventHandler;
-            this.eventLoop = eventLoop;
-            EventCommunicator = eventCommunicator;
-
-            /* Register events. */
-            eventDescriptions.RegisterEvent<BlockAddEventDetails>(EventId.Core_Block_Add);
-            eventDescriptions.RegisterEvent<BlockAddBatchEventDetails>(EventId.Core_Block_AddBatch);
-            eventDescriptions.RegisterEvent<EntityEventDetails>(EventId.Core_Block_Remove);
-            eventDescriptions.RegisterEvent<BlockRemoveBatchEventDetails>(EventId.Core_Block_RemoveBatch);
-
-            /* Register system. */
-            eventLoop.RegisterSystem(this);
-        }
-
-        public void Dispose()
-        {
-            eventLoop.UnregisterSystem(this);
-        }
-
-        public void Initialize()
-        {
-        }
-
-        public void Cleanup()
-        {
-        }
-
-        public int ExecuteOnce()
-        {
-            var eventsProcessed = 0;
-            while (EventCommunicator.GetIncomingEvent(out var ev))
-            {
-                Logger.DebugFormat("Received event with type {0}.", ev.EventId);
-                eventHandler.HandleEvent(ev);
-                eventsProcessed++;
-            }
-
-            return eventsProcessed;
-        }
-
+        /* Register system. */
+        eventLoop.RegisterSystem(this);
     }
 
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+    public void Dispose()
+    {
+        eventLoop.UnregisterSystem(this);
+    }
+
+    public EventCommunicator EventCommunicator { get; }
+
+    public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>
+    {
+        EventId.Core_Block_Add,
+        EventId.Core_Block_AddBatch,
+        EventId.Core_Block_Remove,
+        EventId.Core_Block_RemoveBatch
+    };
+
+    public int WorkloadEstimate => 50;
+
+    public void Initialize()
+    {
+    }
+
+    public void Cleanup()
+    {
+    }
+
+    public int ExecuteOnce()
+    {
+        var eventsProcessed = 0;
+        while (EventCommunicator.GetIncomingEvent(out var ev))
+        {
+            Logger.DebugFormat("Received event with type {0}.", ev.EventId);
+            eventHandler.HandleEvent(ev);
+            eventsProcessed++;
+        }
+
+        return eventsProcessed;
+    }
 }

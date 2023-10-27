@@ -2,25 +2,21 @@
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
+using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -29,39 +25,22 @@ using Sovereign.EngineCore.Systems;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
 using Sovereign.Persistence.State.Trackers;
-using System;
-using System.Collections.Generic;
 
 namespace Sovereign.Persistence.Systems.Persistence;
 
 /// <summary>
-/// System responsible for managing server state persistence.
+///     System responsible for managing server state persistence.
 /// </summary>
 public sealed class PersistenceSystem : ISystem
 {
-    private readonly PersistenceProviderManager providerManager;
     private readonly DatabaseValidator databaseValidator;
-    private readonly PersistenceEventHandler eventHandler;
-    private readonly PersistenceScheduler scheduler;
-    private readonly IEventLoop eventLoop;
     private readonly EntityMapper entityMapper;
+    private readonly PersistenceEventHandler eventHandler;
+
+    private readonly IEventLoop eventLoop;
+    private readonly PersistenceProviderManager providerManager;
+    private readonly PersistenceScheduler scheduler;
     private readonly TrackerManager trackerManager;
-
-    private ILogger Logger { get; set; } = NullLogger.Instance;
-
-    private readonly ISet<EventId> eventIdsOfInterest = new HashSet<EventId>()
-        {
-            EventId.Core_Quit,
-            EventId.Server_Persistence_RetrieveEntity,
-            EventId.Server_Persistence_RetrieveEntitiesInRange,
-            EventId.Server_Persistence_Synchronize
-        };
-
-    public EventCommunicator EventCommunicator { get; private set; }
-
-    public ISet<EventId> EventIdsOfInterest { get => eventIdsOfInterest; }
-
-    public int WorkloadEstimate => 20;
 
     public PersistenceSystem(PersistenceProviderManager providerManager,
         DatabaseValidator databaseValidator,
@@ -102,6 +81,20 @@ public sealed class PersistenceSystem : ISystem
         ConfigurePersistence();
     }
 
+    private ILogger Logger { get; } = NullLogger.Instance;
+
+    public EventCommunicator EventCommunicator { get; }
+
+    public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
+    {
+        EventId.Core_Quit,
+        EventId.Server_Persistence_RetrieveEntity,
+        EventId.Server_Persistence_RetrieveEntitiesInRange,
+        EventId.Server_Persistence_Synchronize
+    };
+
+    public int WorkloadEstimate => 20;
+
     public void Initialize()
     {
         Logger.Info("Starting Persistence system.");
@@ -135,15 +128,12 @@ public sealed class PersistenceSystem : ISystem
     }
 
     /// <summary>
-    /// Configures the persistence engine based on the current state of the database.
+    ///     Configures the persistence engine based on the current state of the database.
     /// </summary>
     private void ConfigurePersistence()
     {
         /* Validate the database. */
-        if (!databaseValidator.ValidateDatabase(providerManager.PersistenceProvider))
-        {
-            throw new FatalErrorException();
-        }
+        if (!databaseValidator.ValidateDatabase(providerManager.PersistenceProvider)) throw new FatalErrorException();
 
         /* Set up the entity mapper. */
         try
@@ -159,5 +149,4 @@ public sealed class PersistenceSystem : ISystem
             throw new FatalErrorException();
         }
     }
-
 }

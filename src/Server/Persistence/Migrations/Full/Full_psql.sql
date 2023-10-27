@@ -27,8 +27,8 @@
 
 CREATE TABLE MigrationLog
 (
-    id          INTEGER PRIMARY KEY,
-	name        VARCHAR(255) NOT NULL
+    id   INTEGER PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
 );
 
 
@@ -40,8 +40,8 @@ CREATE TABLE MigrationLog
 
 CREATE TABLE Account
 (
-    id          BYTEA PRIMARY KEY NOT NULL,
-	username    VARCHAR(255) UNIQUE NOT NULL
+    id       BYTEA PRIMARY KEY   NOT NULL,
+    username VARCHAR(255) UNIQUE NOT NULL
 );
 
 CREATE UNIQUE INDEX Account_Username_Index ON Account (username);
@@ -55,12 +55,12 @@ CREATE UNIQUE INDEX Account_Username_Index ON Account (username);
 
 CREATE TABLE Account_Authentication
 (
-	id             BYTEA PRIMARY KEY NOT NULL,
-	password_salt  BYTEA NOT NULL,
-	password_hash  BYTEA NOT NULL,
-	opslimit       BIGINT NOT NULL,
-	memlimit       BIGINT NOT NULL,
-	FOREIGN KEY (id) REFERENCES Account(id) ON DELETE CASCADE
+    id            BYTEA PRIMARY KEY NOT NULL,
+    password_salt BYTEA             NOT NULL,
+    password_hash BYTEA             NOT NULL,
+    opslimit      BIGINT            NOT NULL,
+    memlimit      BIGINT            NOT NULL,
+    FOREIGN KEY (id) REFERENCES Account (id) ON DELETE CASCADE
 );
 
 
@@ -70,7 +70,7 @@ CREATE TABLE Account_Authentication
 
 CREATE TABLE Entity
 (
-    id          BIGINT PRIMARY KEY
+    id BIGINT PRIMARY KEY
 );
 
 
@@ -80,9 +80,9 @@ CREATE TABLE Entity
 
 CREATE TABLE Material
 (
-	id	        BIGINT PRIMARY KEY,
-    material    INTEGER NOT NULL,
-	FOREIGN KEY (id) REFERENCES Entity(id) ON DELETE CASCADE
+    id       BIGINT PRIMARY KEY,
+    material INTEGER NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id) ON DELETE CASCADE
 );
 
 
@@ -92,9 +92,9 @@ CREATE TABLE Material
 
 CREATE TABLE MaterialModifier
 (
-    id          BIGINT PRIMARY KEY,
-    modifier    INTEGER NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity(id) ON DELETE CASCADE
+    id       BIGINT PRIMARY KEY,
+    modifier INTEGER NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id) ON DELETE CASCADE
 );
 
 
@@ -104,15 +104,52 @@ CREATE TABLE MaterialModifier
 
 CREATE TABLE Position
 (
-    id    BIGINT PRIMARY KEY,
-	x     REAL NOT NULL,
-	y     REAL NOT NULL,
-	z     REAL NOT NULL,
-	FOREIGN KEY (id) REFERENCES Entity(id) ON DELETE CASCADE
+    id BIGINT PRIMARY KEY,
+    x  REAL NOT NULL,
+    y  REAL NOT NULL,
+    z  REAL NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id) ON DELETE CASCADE
 );
 
 -- Index the position coordinates.
 CREATE INDEX Position_Xyz_Index ON Position (x, y, z);
+
+
+-------------------------
+-- PlayerCharacter Tag --
+-------------------------
+
+CREATE TABLE PlayerCharacter
+(
+    id    INTEGER PRIMARY KEY NOT NULL,
+    value BOOLEAN             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+
+--------------------
+-- Name Component --
+--------------------
+
+CREATE TABLE Name
+(
+    id    INTEGER PRIMARY KEY NOT NULL,
+    value TEXT                NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+
+-----------------------
+-- Account Component --
+-----------------------
+
+CREATE TABLE AccountComponent
+(
+    id         INTEGER PRIMARY KEY NOT NULL,
+    account_id BYTEA               NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id),
+    FOREIGN KEY (account_id) REFERENCES Account (id)
+);
 
 
 -- Create views.
@@ -122,14 +159,14 @@ CREATE INDEX Position_Xyz_Index ON Position (x, y, z);
 --------------------------------------
 
 CREATE VIEW AccountWithAuthentication AS
-	SELECT Account.id AS id,
-		   Account.username AS username,
-		   Account_Authentication.password_salt AS salt,
-		   Account_Authentication.password_hash AS hash,
-		   Account_Authentication.opslimit AS opslimit,
-		   Account_Authentication.memlimit AS memlimit
-	FROM Account
-	INNER JOIN Account_Authentication ON Account.id = Account_Authentication.id;
+SELECT Account.id                           AS id,
+       Account.username                     AS username,
+       Account_Authentication.password_salt AS salt,
+       Account_Authentication.password_hash AS hash,
+       Account_Authentication.opslimit      AS opslimit,
+       Account_Authentication.memlimit      AS memlimit
+FROM Account
+         INNER JOIN Account_Authentication ON Account.id = Account_Authentication.id;
 
 
 ---------------------------------
@@ -137,16 +174,22 @@ CREATE VIEW AccountWithAuthentication AS
 ---------------------------------
 
 CREATE VIEW EntityWithComponents AS
-    SELECT Entity.id AS id,
-           Position.x AS x,
-           Position.y AS y,
-           Position.z AS z,
-           Material.material AS material,
-           MaterialModifier.modifier AS materialModifier
-    FROM Entity
-    LEFT JOIN Position ON Position.id = Entity.id
-    LEFT JOIN Material ON Material.id = Entity.id
-    LEFT JOIN MaterialModifier ON MaterialModifier.id = Entity.id;
+SELECT Entity.id                   AS id,
+       Position.x                  AS x,
+       Position.y                  AS y,
+       Position.z                  AS z,
+       Material.material           AS material,
+       MaterialModifier.modifier   AS materialModifier,
+       PlayerCharacter.value       AS playerCharacter,
+       Name.value                  AS name,
+       AccountComponent.account_id AS account
+FROM Entity
+         LEFT JOIN Position ON Position.id = Entity.id
+         LEFT JOIN Material ON Material.id = Entity.id
+         LEFT JOIN MaterialModifier ON MaterialModifier.id = Entity.id
+         LEFT JOIN PlayerCharacter ON PlayerCharacter.id = Entity.id
+         LEFT JOIN Name ON Name.id = Entity.id
+         LEFT JOIN AccountComponent AC ON AC.id = Entity.id;
 
 
 -- Create stored procedures and functions.
@@ -155,21 +198,25 @@ CREATE VIEW EntityWithComponents AS
 -- EntityDetails(entityId)
 -- Retrieves all components for the given entity.
 --
-CREATE FUNCTION EntityDetails (entityId BIGINT)
-RETURNS TABLE 
-(
-    entityId BIGINT,
-	pos_x REAL,
-	pos_y REAL,
-	pos_z REAL,
-	material INTEGER,
-	materialModifier INTEGER
-)
-LANGUAGE SQL
-AS $$
-  SELECT *
-  FROM EntityWithComponents
-  WHERE id = entityId;
+CREATE FUNCTION EntityDetails(entityId BIGINT)
+    RETURNS TABLE
+            (
+                id               BIGINT,
+                pos_x            REAL,
+                pos_y            REAL,
+                pos_z            REAL,
+                material         INTEGER,
+                materialModifier INTEGER,
+                playerCharacter  BOOLEAN,
+                name             TEXT,
+                account          BYTEA
+            )
+    LANGUAGE SQL
+AS
+$$
+SELECT *
+FROM EntityWithComponents
+WHERE id = entityId;
 $$;
 
 --
@@ -177,25 +224,31 @@ $$;
 -- Retrieves all entities and components that are positioned within
 -- the given range (inclusive min, exclusive max).
 --
-CREATE FUNCTION PositionedEntitiesInRange
-	(x_min REAL, y_min REAL, z_min REAL,
-	 x_max REAL, y_max REAL, z_max REAL)
-RETURNS TABLE
-(
-	entityId BIGINT,
-	pos_x REAL,
-	pos_y REAL,
-	pos_z REAL,
-	material INTEGER,
-	materialModifier INTEGER
-)
-LANGUAGE SQL
-AS $$
-  SELECT *
-  FROM EntityWithComponents
-  WHERE x >= x_min AND x < x_max AND
-	    y >= y_min AND y < y_max AND
-		z >= z_min AND z < z_max;
+CREATE FUNCTION PositionedEntitiesInRange(x_min REAL, y_min REAL, z_min REAL,
+                                          x_max REAL, y_max REAL, z_max REAL)
+    RETURNS TABLE
+            (
+                entityId         BIGINT,
+                pos_x            REAL,
+                pos_y            REAL,
+                pos_z            REAL,
+                material         INTEGER,
+                materialModifier INTEGER,
+                playerCharacter  BOOLEAN,
+                name             TEXT,
+                account          BYTEA
+            )
+    LANGUAGE SQL
+AS
+$$
+SELECT *
+FROM EntityWithComponents
+WHERE x >= x_min
+  AND x < x_max
+  AND y >= y_min
+  AND y < y_max
+  AND z >= z_min
+  AND z < z_max;
 $$;
 
 --
@@ -203,14 +256,17 @@ $$;
 -- Gets the next available persisted entity ID.
 --
 CREATE FUNCTION NextAvailablePersistedId() RETURNS BIGINT
-LANGUAGE SQL
-AS $$
-	SELECT MAX(used_ids.id) + 1 FROM 
-		(SELECT MAX(id) AS id FROM Entity          -- take greatest used id
-		 UNION SELECT x'7ffeffffffffffff'::bigint) -- or (first persisted id - 1) otherwise.
-		 AS used_ids;
+    LANGUAGE SQL
+AS
+$$
+SELECT MAX(used_ids.id) + 1
+FROM (SELECT MAX(id) AS id
+      FROM Entity -- take greatest used id
+      UNION
+      SELECT x'7ffeffffffffffff'::bigint) -- or (first persisted id - 1) otherwise.
+         AS used_ids;
 $$;
 
 -- Log the migration.
-INSERT INTO MigrationLog VALUES (1, 'Baseline');
-
+INSERT INTO MigrationLog
+VALUES (1, 'Baseline');

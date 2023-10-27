@@ -2,27 +2,23 @@
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 using System;
 using System.Collections.Generic;
+using Castle.Core.Logging;
+using Sodium;
 
 namespace Sovereign.Accounts.Accounts.Authentication;
 
@@ -32,14 +28,31 @@ namespace Sovereign.Accounts.Accounts.Authentication;
 public sealed class AccountLoginTracker
 {
     /// <summary>
+    ///     Size of generated API keys in bytes.
+    /// </summary>
+    private const int ApiKeySize = 32;
+
+    /// <summary>
+    ///     Map from account IDs to current API keys.
+    /// </summary>
+    private readonly Dictionary<Guid, string> accountIdsToApiKeys = new();
+
+    /// <summary>
+    ///     Map from account IDs to selected entity IDs.
+    /// </summary>
+    private readonly Dictionary<Guid, ulong> accountIdsToPlayerEntityIds = new();
+
+    /// <summary>
+    ///     Current login states of connected accounts.
+    /// </summary>
+    private readonly Dictionary<Guid, AccountLoginState> accountLoginStates = new();
+
+    /// <summary>
     ///     Map from connection IDs to logged in account IDs.
     /// </summary>
     private readonly Dictionary<int, Guid> connectionsToAccounts = new();
 
-    /// <summary>
-    ///     Set of all currently logged in account IDs.
-    /// </summary>
-    private readonly HashSet<Guid> loggedInAccountIds = new();
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Signals that the given account has logged in.
@@ -47,7 +60,29 @@ public sealed class AccountLoginTracker
     /// <param name="accountId">Account ID.</param>
     public void Login(Guid accountId)
     {
-        loggedInAccountIds.Add(accountId);
+        // Generate temporary API key for the account.
+        var apiKey = Convert.ToBase64String(SodiumCore.GetRandomBytes(ApiKeySize));
+        accountIdsToApiKeys[accountId] = apiKey;
+
+        // Advance the connection to the player selection state.
+        accountLoginStates[accountId] = AccountLoginState.SelectingPlayer;
+    }
+
+    /// <summary>
+    ///     Selects a player character for the given account.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <param name="playerEntityId">Entity ID of player character.</param>
+    public void SelectPlayer(Guid accountId, ulong playerEntityId)
+    {
+        // State check.
+        if (GetLoginState(accountId) != AccountLoginState.SelectingPlayer)
+        {
+            Logger.ErrorFormat("Attempt to select player for account {0} in invalid state.", accountId);
+            return;
+        }
+
+        accountIdsToPlayerEntityIds[accountId] = playerEntityId;
     }
 
     /// <summary>
@@ -56,17 +91,19 @@ public sealed class AccountLoginTracker
     /// <param name="accountId">Account ID.</param>
     public void Logout(Guid accountId)
     {
-        loggedInAccountIds.Remove(accountId);
+        accountIdsToApiKeys.Remove(accountId);
+        accountIdsToPlayerEntityIds.Remove(accountId);
+        accountLoginStates.Remove(accountId);
     }
 
     /// <summary>
-    ///     Checks whether the given account ID is already logged in.
+    ///     Gets the login state of the given account ID.
     /// </summary>
     /// <param name="accountId">Account ID.</param>
-    /// <returns>true if logged in, false otherwise.</returns>
-    public bool IsLoggedIn(Guid accountId)
+    /// <returns>Login state.</returns>
+    public AccountLoginState GetLoginState(Guid accountId)
     {
-        return loggedInAccountIds.Contains(accountId);
+        return accountLoginStates.TryGetValue(accountId, out var state) ? state : AccountLoginState.NotLoggedIn;
     }
 
     /// <summary>
@@ -93,5 +130,16 @@ public sealed class AccountLoginTracker
         if (!connectionsToAccounts.TryGetValue(connectionId, out var accountId)) return;
         connectionsToAccounts.Remove(connectionId);
         Logout(accountId);
+    }
+
+    /// <summary>
+    ///     Gets the API key for the given account.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <returns>API key.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the account is not logged in.</exception>
+    public string GetApiKey(Guid accountId)
+    {
+        return accountIdsToApiKeys[accountId];
     }
 }

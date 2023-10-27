@@ -2,92 +2,82 @@
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using MessagePack;
+using System;
+using System.Threading.Tasks;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Systems.WorldManagement;
-using System.Threading.Tasks;
 using WatsonWebserver;
 
-namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment
+namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment;
+
+/// <summary>
+///     REST service providing batch transfer of world segment block data from
+///     server to client.
+/// </summary>
+public sealed class WorldSegmentRestService : AuthenticatedRestService
 {
+    private readonly WorldSegmentBlockDataManager blockDataManager;
 
-    /// <summary>
-    /// REST service providing batch transfer of world segment block data from 
-    /// server to client.
-    /// </summary>
-    public sealed class WorldSegmentRestService : IRestService
+    public WorldSegmentRestService(RestAuthenticator authenticator, WorldSegmentBlockDataManager blockDataManager)
+        : base(authenticator)
     {
-        private readonly WorldSegmentBlockDataManager blockDataManager;
+        this.blockDataManager = blockDataManager;
+    }
 
-        public string Path => RestEndpoints.WorldSegment + "/{x}/{y}/{z}";
+    public override string Path => RestEndpoints.WorldSegment + "/{x}/{y}/{z}";
 
-        public RestPathType PathType => RestPathType.Parameter;
+    public override RestPathType PathType => RestPathType.Parameter;
 
-        public HttpMethod RequestType => HttpMethod.GET;
+    public override HttpMethod RequestType => HttpMethod.GET;
 
-        public WorldSegmentRestService(WorldSegmentBlockDataManager blockDataManager)
+    protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
+    {
+        // Parse parameters.
+        int x, y, z;
+        if (int.TryParse(ctx.Request.Url.Parameters["x"], out x)
+            && int.TryParse(ctx.Request.Url.Parameters["y"], out y)
+            && int.TryParse(ctx.Request.Url.Parameters["z"], out z))
         {
-            this.blockDataManager = blockDataManager;
-        }
-
-        public async Task OnRequest(HttpContext ctx)
-        {
-            // Parse parameters.
-            int x, y, z;
-            if (int.TryParse(ctx.Request.Url.Parameters["x"], out x)
-                && int.TryParse(ctx.Request.Url.Parameters["y"], out y)
-                && int.TryParse(ctx.Request.Url.Parameters["z"], out z))
+            // Successful parse, try to fulfill the request.
+            // At some point we should also check that the segment is in range for the
+            // user that requested it, we don't want to be leaking data for the other
+            // side of the world.
+            var dataTask = blockDataManager.GetWorldSegmentBlockData(new GridPosition(x, y, z));
+            if (dataTask != null)
             {
-                // Successful parse, try to fulfill the request.
-                // At some point we should also check that the segment is in range for the
-                // user that requested it, we don't want to be leaking data for the other
-                // side of the world.
-                var dataTask = blockDataManager.GetWorldSegmentBlockData(new GridPosition(x, y, z));
-                if (dataTask != null)
-                {
-                    // Get the latest version of the block data and encode it for transfer.
-                    var blockData = await dataTask;
+                // Get the latest version of the block data and encode it for transfer.
+                var blockData = await dataTask;
 
-                    ctx.Response.ContentType = "application/octet-stream";
-                    ctx.Response.ContentLength = blockData.Length;
-                    await ctx.Response.Send(blockData);
-                }
-                else
-                {
-                    // Segment is not loaded by server at this time.
-                    ctx.Response.StatusCode = 503;
-                    await ctx.Response.Send();
-                }
+                ctx.Response.ContentType = "application/octet-stream";
+                ctx.Response.ContentLength = blockData.Length;
+                await ctx.Response.Send(blockData);
             }
             else
             {
-                // Invalid coordinates.
-                ctx.Response.StatusCode = 404;
+                // Segment is not loaded by server at this time.
+                ctx.Response.StatusCode = 503;
                 await ctx.Response.Send();
             }
         }
+        else
+        {
+            // Invalid coordinates.
+            ctx.Response.StatusCode = 404;
+            await ctx.Response.Send();
+        }
     }
-
 }
-

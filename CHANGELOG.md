@@ -2,6 +2,109 @@
 
 ## 2023
 
+### October
+
+#### 26 October 2023
+
+* Add safety checks to REST client calls to make sure that the response size
+  is appropriately bounded.
+
+#### 24 October 2023
+
+* Fix various issues with REST services.
+* Create `PlayerManagementClient` as an interface to the player management
+  REST services. For now only player creation is supported, other APIs
+  will be added soon.
+
+#### 15 October 2023
+
+* Switch to GPLv3 license for all source code. Over time my feelings about using the MIT
+  license for a game engine like this have changed based on what I've observed in the
+  broader open source community. I want to make sure that the development of this engine
+  remains open source in the future - open source is ultimately a good thing for the
+  community, and I don't want to see the proliferation of closed source forks of this
+  codebase. I stopped short of adopting AGPL for this project, despite its client-server
+  nature, as I think there is still value in having secret closed-source modifications to
+  specific instances of the server where the change is meant to implement a game feature
+  not possible with scripting and where releasing the changes to the players would spoil
+  a gameplay secret.
+
+### September
+
+#### 29 September 2023
+
+* Simplify query for getting account associated with player.
+
+### August
+
+#### 31 August 2023
+
+* Include player entity ID in response to successful character creation requests.
+
+#### 30 August 2023
+
+* Add public API to Accounts for checking if a player character belongs to a given account.
+
+#### 29 August 2023
+
+* Add persistence support for the `Account` component.
+* Default new player characters to position (0, 0, 0). In the future we should make this configurable
+  at the server level.
+* Check for duplicate player names in the database before creating a new player character.
+* Send response on normal success or failure during player creation.
+* Replace logged in flag in `AccountLoginTracker` with a state enum. The login state is being expanded to include
+  an intermediate step after authentication but before a player character is selected. Still need to update logic
+  elsewhere - for example, the event server connection needs to be deferred until after player selection is complete.
+* When a new player character is created, automatically select that character and proceed with login.
+* Add `IGetAccountForPlayerQuery` for retrieving the account associated with a given player character.
+
+#### 28 August 2023
+
+* Add an `Account` component to associate player character entities to a specific account. Still need to do
+  persistence for this component; this part is a work in progress.
+
+#### 27 August 2023
+
+* More work on player creation.
+
+#### 26 August 2023
+
+* Automatically enable authenticated REST requests from the client once a successful login has occurred.
+* Add logging for failed authentication attempts in REST API calls. It should be possible to set up a regex
+  in fail2ban based on this.
+* Switch `WorldSegmentRestService` to an authenticated REST service - there's no need to be pulling down world block
+  segment data if you're not logged in. In the future, I plan to make this more restrictive by refusing requests for
+  blocks that are too far from the player's current position.
+* Start implementing the `CreatePlayerRestService` stub. Basically just request handling, need to make the necessary
+  persistence updates before going further.
+* Add `Name` component for naming entities, along with the associated persistence code.
+
+#### 25 August 2023
+
+* Added `AuthenticatedRestService` to make it easy to create REST endpoints that require login credentials.
+  Along with this, added a REST API key that is uniquely generated for each successful login. Authenticated
+  REST API endpoints use HTTP Basic authentication with the account ID as username and the API key as password,
+  so these should still go over a TLS encrypted connection to be safe. Still need to add the client-side implementation
+  for interacting with the authenticated endpoints.
+
+#### 23 August 2023
+
+* Persist the `PlayerCharacter` tag in the database.
+* Define REST interfaces for player character operations.
+
+#### 20 August 2023
+
+* Update database schema to include `PlayerCharacter` tag.
+* Add a special type of component called a *tag*. This is essentially a void-typed component with no value.
+  Under the hood it is implemented as a boolean component, but an abstraction is provided over
+  `BaseComponentCollection<T>` to make it easier to work with.
+* Add `PlayerCharacterTagCollection` which allows an entity to be tagged as a player character. This tag
+  will drive a lot of player-specific logic including character selection, entity synchronization, etc.
+* This change was started roughly a month ago, but I'm just now finally circling back to this. Updated the
+  documentation to specify how entities will be synchronized between server and client. This will be done via
+  a pub-sub model where clients are subscribed to world segments. The server subscribes and unsubscribes the
+  clients based on player position.
+
 ### July
 
 #### 22 July 2023
