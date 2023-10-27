@@ -54,6 +54,11 @@ public sealed class ClientWorldSegmentLoader : IWorldSegmentLoader
     /// </summary>
     public const int RetryDelayMs = 2000;
 
+    /// <summary>
+    ///     Maximum response length in bytes.
+    /// </summary>
+    private const long MaxResponseLength = 128 * 1024;
+
     private readonly BlockController blockController;
     private readonly IWorldManagementConfiguration config;
     private readonly IEventSender eventSender;
@@ -95,11 +100,11 @@ public sealed class ClientWorldSegmentLoader : IWorldSegmentLoader
     {
         var retryCount = 0;
         while (retryCount < MaxRetries)
-        {
             try
             {
                 /* If this is a retry, delay. */
                 if (retryCount > 0) await Task.Delay(RetryDelayMs);
+                retryCount++;
 
                 /* Attempt to retreive segment from server. */
                 var endpoint = new StringBuilder();
@@ -111,6 +116,13 @@ public sealed class ClientWorldSegmentLoader : IWorldSegmentLoader
                     .Append("/")
                     .Append(segmentIndex.Z);
                 var response = await restClient.Get(endpoint.ToString());
+                var contentLen = response.Content.Headers.ContentLength;
+                if (contentLen > MaxResponseLength)
+                {
+                    Logger.ErrorFormat("Response length {0} too long.", contentLen);
+                    continue;
+                }
+
                 switch (response.StatusCode)
                 {
                     case HttpStatusCode.OK:
@@ -141,9 +153,6 @@ public sealed class ClientWorldSegmentLoader : IWorldSegmentLoader
             {
                 Logger.ErrorFormat(e, "Exception while retrieving segment data for {0}.", segmentIndex);
             }
-
-            retryCount++;
-        }
 
         /* If we get here, all the retries failed and we hit the limit. */
         Logger.ErrorFormat("Failed to retrieve segment data for {0} after {1} tries; connection assumed lost.",

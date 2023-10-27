@@ -4,6 +4,11 @@
 
 ### October
 
+#### 26 October 2023
+
+* Add safety checks to REST client calls to make sure that the response size
+  is appropriately bounded.
+
 #### 24 October 2023
 
 * Fix various issues with REST services.

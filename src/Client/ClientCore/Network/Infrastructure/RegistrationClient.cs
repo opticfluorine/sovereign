@@ -32,6 +32,7 @@ namespace Sovereign.ClientCore.Network.Infrastructure;
 /// </summary>
 public sealed class RegistrationClient
 {
+    private const long MaxResponseLength = 1024;
     private readonly RestClient restClient;
 
     public RegistrationClient(RestClient restClient)
@@ -74,6 +75,14 @@ public sealed class RegistrationClient
 
             // Send the registration request.
             var httpResponse = await restClient.PostJson(RestEndpoints.AccountRegistration, request);
+            if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
+            {
+                Logger.ErrorFormat("Registration response length {0} is too long.",
+                    httpResponse.Content.Headers.ContentLength);
+                result = new Option<RegistrationResponse, string>("Response too long.");
+                return result;
+            }
+
             var response = await httpResponse.Content.ReadFromJsonAsync<RegistrationResponse>();
             if (httpResponse.StatusCode == HttpStatusCode.Created)
             {

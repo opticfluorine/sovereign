@@ -33,6 +33,11 @@ namespace Sovereign.ClientCore.Network.Infrastructure;
 /// </summary>
 public sealed class AuthenticationClient
 {
+    /// <summary>
+    ///     Maximum length in bytes of a response.
+    /// </summary>
+    private const long MaxResponseLength = 1024;
+
     private readonly RestClient restClient;
 
     public AuthenticationClient(RestClient restClient)
@@ -61,7 +66,14 @@ public sealed class AuthenticationClient
 
             // Send request, handle response.
             var response = await restClient.PostJson(RestEndpoints.Authentication, request);
+            var contentLen = response.Content.Headers.ContentLength;
             var result = new Maybe<LoginResponse>();
+            if (contentLen > MaxResponseLength)
+            {
+                Logger.ErrorFormat("Response length {0} too long.", contentLen);
+                return result;
+            }
+
             switch (response.StatusCode)
             {
                 case HttpStatusCode.Created:
