@@ -21,7 +21,7 @@ namespace Sovereign.Persistence.State.Trackers;
 
 public class NameStateTracker : BaseStateTracker<string>
 {
-    public NameStateTracker(NameComponentCollection components, string defaultElement, EntityMapper entityMapper,
+    public NameStateTracker(NameComponentCollection components, EntityMapper entityMapper,
         StateManager stateManager)
         : base(components, string.Empty, entityMapper, stateManager)
     {

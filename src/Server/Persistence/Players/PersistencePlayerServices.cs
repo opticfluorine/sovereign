@@ -26,9 +26,9 @@ public class PersistencePlayerServices
 {
     private readonly IPersistenceProvider provider;
 
-    public PersistencePlayerServices(IPersistenceProvider provider)
+    public PersistencePlayerServices(PersistenceProviderManager manager)
     {
-        this.provider = provider;
+        provider = manager.PersistenceProvider;
     }
 
     /// <summary>

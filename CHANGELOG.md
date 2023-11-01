@@ -2,6 +2,12 @@
 
 ## 2023
 
+### November
+
+#### 1 November 2023
+
+* Fix random issues that were introduced to the persistence system.
+
 ### October
 
 #### 31 October 2023

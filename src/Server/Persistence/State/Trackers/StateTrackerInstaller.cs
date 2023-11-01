@@ -25,6 +25,9 @@ public sealed class StateTrackerInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
+        container.Register(Component.For<AccountStateTracker>()
+            .LifestyleSingleton());
+
         container.Register(Component.For<TrackerManager>()
             .LifestyleSingleton());
 
