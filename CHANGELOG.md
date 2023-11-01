@@ -4,6 +4,11 @@
 
 ### October
 
+#### 31 October 2023
+
+* Add database query for retrieving player character entities associated
+  with a given account.
+
 #### 26 October 2023
 
 * Add safety checks to REST client calls to make sure that the response size

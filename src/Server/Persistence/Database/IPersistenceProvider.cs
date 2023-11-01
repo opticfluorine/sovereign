@@ -177,6 +177,8 @@ public interface IPersistenceProvider
     /// </summary>
     IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
 
+    IListPlayersQuery ListPlayersQuery { get; }
+
     /// <summary>
     ///     Initializes the persistence provider.
     /// </summary>
