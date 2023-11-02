@@ -7,6 +7,7 @@
 #### 1 November 2023
 
 * Fix random issues that were introduced to the persistence system.
+* Upgrade to Castle Windsor 6.0.0 for dependency injection.
 
 ### October
 
