@@ -4,6 +4,10 @@
 
 ### November
 
+#### 5 November 2023
+
+* Fix warnings in unit tests that were introduced with latest dependency updates.
+
 #### 1 November 2023
 
 * Fix random issues that were introduced to the persistence system.

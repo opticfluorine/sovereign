@@ -39,7 +39,7 @@ public class TestBinaryHeap
     {
         /* Create heap with default comparer. */
         IHeap<int> heap = new BinaryHeap<int>();
-        Assert.Equal(0, heap.Count);
+        Assert.Empty(heap);
         Assert.False(heap.IsReadOnly);
 
         /* Populate heap. */
@@ -88,7 +88,7 @@ public class TestBinaryHeap
         }
 
         /* Confirm that the heap is empty. */
-        Assert.Equal(0, heap.Count);
+        Assert.Empty(heap);
     }
 
     /// <summary>
