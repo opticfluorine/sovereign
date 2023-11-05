@@ -15,16 +15,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 6.0.x
-    - name: Setup glslc
-      run: curl https://storage.googleapis.com/shaderc/artifacts/prod/graphics_shader_compiler/shaderc/linux/continuous_clang_release/418/20230531-104531/install.tgz -o install.tgz && tar -xzf install.tgz && sudo cp -r install/bin/* /usr/local/bin && sudo cp -r install/include/* /usr/local/include && sudo cp -r install/lib/* /usr/local/lib && sudo ldconfig
-    - name: Restore dependencies
-      run: dotnet restore
-      working-directory: src
-    - name: Build
-      run: dotnet build --no-restore
-      working-directory: src
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+      - name: Setup glslc
+        run: curl https://storage.googleapis.com/shaderc/artifacts/prod/graphics_shader_compiler/shaderc/linux/continuous_clang_release/418/20230531-104531/install.tgz -o install.tgz && tar -xzf install.tgz && sudo cp -r install/bin/* /usr/local/bin && sudo cp -r install/include/* /usr/local/include && sudo cp -r install/lib/* /usr/local/lib && sudo ldconfig
+      - name: Restore dependencies
+        run: dotnet restore
+        working-directory: src
+      - name: Build
+        run: dotnet build --no-restore
+        working-directory: src
+      - name: Test
+        run: dotnet test
+        working-directory: src

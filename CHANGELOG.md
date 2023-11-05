@@ -10,6 +10,7 @@
 * Implement `ListPlayersRestService` for getting the list of player characters associated
   with the currently logged in account.
 * Add support for listing players in an account to `PlayerManagementClient`.
+* Get the unit tests running again.
 
 #### 1 November 2023
 
