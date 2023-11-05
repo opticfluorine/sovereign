@@ -48,6 +48,51 @@ public class PlayerManagementClient
 
     /// <summary>
     /// </summary>
+    /// <returns></returns>
+    public async Task<Option<ListPlayersResponse, string>> ListPlayersAsync()
+    {
+        var result = new Option<ListPlayersResponse, string>("Unexpected error occurred.");
+        try
+        {
+            // REST client needs to be connected and authenticated.
+            if (!restClient.Connected)
+            {
+                Logger.Error("Cannot create player while disconnected from server.");
+                result = new Option<ListPlayersResponse, string>("Not connected.");
+                return result;
+            }
+
+            // Send request.
+            var httpResponse = await restClient.Get(RestEndpoints.Player);
+            if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
+            {
+                Logger.ErrorFormat("ListPlayers response length {0} is too long.",
+                    httpResponse.Content.Headers.ContentLength);
+                result = new Option<ListPlayersResponse, string>("Response too long.");
+                return result;
+            }
+
+            if (httpResponse.StatusCode != HttpStatusCode.OK)
+            {
+                Logger.ErrorFormat("ListPlayers response status {0}.", httpResponse.StatusCode);
+                result = new Option<ListPlayersResponse, string>("Bad response from server.");
+                return result;
+            }
+
+            var response = await httpResponse.Content.ReadFromJsonAsync<ListPlayersResponse>();
+            result = new Option<ListPlayersResponse, string>(response);
+        }
+        catch (Exception e)
+        {
+            Logger.Error("Exception while listing players.", e);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    ///     Sends a request to the server to create a new player using the current account.
+    /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
     public async Task<Option<CreatePlayerResponse, string>> CreatePlayerAsync(

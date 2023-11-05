@@ -9,6 +9,7 @@
 * Fix warnings in unit tests that were introduced with latest dependency updates.
 * Implement `ListPlayersRestService` for getting the list of player characters associated
   with the currently logged in account.
+* Add support for listing players in an account to `PlayerManagementClient`.
 
 #### 1 November 2023
 

@@ -69,10 +69,10 @@ public class PersistencePlayerServices
     /// </summary>
     /// <param name="accountId">Account ID.</param>
     /// <returns>
-    ///     Associated player characters, if any. An empty IEnumerable is returned if the account
+    ///     Associated player characters, if any. An empty list is returned if the account
     ///     does not exist.
     /// </returns>
-    public IEnumerable<PlayerInfo> GetPlayersForAccount(Guid accountId)
+    public IList<PlayerInfo> GetPlayersForAccount(Guid accountId)
     {
         return provider.ListPlayersQuery.ListPlayersForAccount(accountId);
     }
