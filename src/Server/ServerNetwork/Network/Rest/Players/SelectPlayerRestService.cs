@@ -17,6 +17,7 @@
 using System;
 using System.Threading.Tasks;
 using Sovereign.EngineCore.Network.Rest;
+using Sovereign.Persistence.Players;
 using WatsonWebserver;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
@@ -26,8 +27,12 @@ namespace Sovereign.ServerNetwork.Network.Rest.Players;
 /// </summary>
 public class SelectPlayerRestService : AuthenticatedRestService
 {
-    public SelectPlayerRestService(RestAuthenticator authenticator) : base(authenticator)
+    private readonly PersistencePlayerServices playerServices;
+
+    public SelectPlayerRestService(RestAuthenticator authenticator, PersistencePlayerServices playerServices) :
+        base(authenticator)
     {
+        this.playerServices = playerServices;
     }
 
     public override string Path => RestEndpoints.Player + "/{id}";

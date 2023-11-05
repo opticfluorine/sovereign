@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
+using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Database;
 
 namespace Sovereign.Persistence.Players;
@@ -60,5 +62,18 @@ public class PersistencePlayerServices
     {
         return provider.GetAccountForPlayerQuery.TryGetAccountForPlayer(playerEntityId, out var foundAccountId)
                && foundAccountId.Equals(accountId);
+    }
+
+    /// <summary>
+    ///     Gets the player characters associated with a given account, if any.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <returns>
+    ///     Associated player characters, if any. An empty IEnumerable is returned if the account
+    ///     does not exist.
+    /// </returns>
+    public IEnumerable<PlayerInfo> GetPlayersForAccount(Guid accountId)
+    {
+        return provider.ListPlayersQuery.ListPlayersForAccount(accountId);
     }
 }

@@ -7,6 +7,8 @@
 #### 5 November 2023
 
 * Fix warnings in unit tests that were introduced with latest dependency updates.
+* Implement `ListPlayersRestService` for getting the list of player characters associated
+  with the currently logged in account.
 
 #### 1 November 2023
 
