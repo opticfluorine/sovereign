@@ -11,6 +11,9 @@
   with the currently logged in account.
 * Add support for listing players in an account to `PlayerManagementClient`.
 * Get the unit tests running again.
+* Update `TestContentSystem` to automatically create a debug player when first connected.
+  This is just temporary for debugging; it will eventually be removed and replaced by the
+  full player character selection/creation system.
 
 #### 1 November 2023
 

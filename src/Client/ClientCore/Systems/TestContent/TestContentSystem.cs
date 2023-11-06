@@ -17,8 +17,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Network;
+using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
@@ -47,6 +49,16 @@ public sealed class TestContentSystem : ISystem, IDisposable
     private const string password = "debug12345";
 
     /// <summary>
+    ///     Hardcoded player name for debug. Remove once connection is configurable.
+    /// </summary>
+    private const string playerName = "debug";
+
+    /// <summary>
+    ///     REST request timeout in millisecondds.
+    /// </summary>
+    private const int requestTimeoutMs = 5000;
+
+    /// <summary>
     ///     Hardcoded connection parameters for debug. Remove once connection is configurable.
     /// </summary>
     private readonly ClientConnectionParameters connectionParameters =
@@ -56,19 +68,22 @@ public sealed class TestContentSystem : ISystem, IDisposable
 
     private readonly IEventSender eventSender;
     private readonly ClientNetworkController networkController;
+    private readonly PlayerManagementClient playerManagementClient;
     private readonly WorldManagementController worldManagementController;
 
     public TestContentSystem(IEventLoop eventLoop,
         EventCommunicator eventCommunicator,
         IEventSender eventSender,
         WorldManagementController worldManagementController,
-        ClientNetworkController networkController)
+        ClientNetworkController networkController,
+        PlayerManagementClient playerManagementClient)
     {
         this.eventLoop = eventLoop;
         EventCommunicator = eventCommunicator;
         this.eventSender = eventSender;
         this.worldManagementController = worldManagementController;
         this.networkController = networkController;
+        this.playerManagementClient = playerManagementClient;
 
         eventLoop.RegisterSystem(this);
     }
@@ -114,7 +129,7 @@ public sealed class TestContentSystem : ISystem, IDisposable
                     break;
 
                 case EventId.Client_Network_Connected:
-                    //LoadSegmentsNearOrigin();
+                    AutomatePlayerSelect();
                     break;
             }
 
@@ -149,6 +164,65 @@ public sealed class TestContentSystem : ISystem, IDisposable
         networkController.BeginConnection(eventSender,
             connectionParameters,
             new LoginParameters(username, password));
+    }
+
+    /// <summary>
+    ///     Automatically selects a player character, creating one if needed.
+    /// </summary>
+    private void AutomatePlayerSelect()
+    {
+        // List the player characters for the account.
+        var listTask = playerManagementClient.ListPlayersAsync();
+        if (!listTask.Wait(requestTimeoutMs))
+        {
+            // Timed out.
+            Logger.Error("Player list request timed out.");
+            return;
+        }
+
+        var listResponse = listTask.Result;
+        if (listResponse.HasSecond)
+        {
+            // Failed.
+            Logger.ErrorFormat("Player list failed: {0}", listResponse.Second);
+            return;
+        }
+
+        // Check if the debug player already exists. If so, automatically select it.
+        var playerList = listResponse.First.Players;
+        var matches = from player in playerList
+            where player.Name == playerName
+            select player;
+        var players = matches.ToList();
+        if (players.Any())
+        {
+            var player = players.First();
+            // TODO Select player
+            return;
+        }
+
+        // Otherwise, create the debug player. This also automatically selects it.
+        var createRequest = new CreatePlayerRequest
+        {
+            PlayerName = playerName
+        };
+        var createTask = playerManagementClient.CreatePlayerAsync(createRequest);
+        if (!createTask.Wait(requestTimeoutMs))
+        {
+            // Timed out.
+            Logger.Error("Create player request timed out.");
+            return;
+        }
+
+        var createResult = createTask.Result;
+        if (createResult.HasSecond)
+        {
+            Logger.ErrorFormat("Create player failed: {0}", createResult.Second);
+            return;
+        }
+
+        var response = createResult.First;
+        // TODO Use the player ID.
     }
 
     /// <summary>
