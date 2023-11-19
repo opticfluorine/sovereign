@@ -4,6 +4,11 @@
 
 ### November
 
+#### 19 November 2023
+
+* Begin testing the last batch of changes.
+* Fix issue with SQL in `SqliteListPlayersQuery`.
+
 #### 5 November 2023
 
 * Fix warnings in unit tests that were introduced with latest dependency updates.

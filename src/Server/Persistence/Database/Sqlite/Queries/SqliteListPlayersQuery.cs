@@ -31,7 +31,7 @@ public class SqliteListPlayersQuery : IListPlayersQuery
     ///     SQL query.
     /// </summary>
     private const string query =
-        @"SELECT PC.id, N.name
+        @"SELECT PC.id, N.value
           FROM AccountComponent AC
           INNER JOIN Name N ON AC.id = N.id
           INNER JOIN PlayerCharacter PC ON AC.id = PC.id
