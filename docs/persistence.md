@@ -104,3 +104,41 @@ consider the following example that occurs when a player logs into an otherwise 
    child entities of their own which are then activated (see "Child Entities" above). As before, these child
    entities may have child entities of their own, and so on recursively to an arbitrary depth; all of these
    entities are then loaded by the same rules.
+
+#### System-Level Activation Sequences
+
+##### General loading case, server-side
+
+```mermaid
+sequenceDiagram
+    WorldManagement ->> WorldManagement: Player subscribes to currently inactive world segment
+    WorldManagement ->> WorldManagement: Segment marked as active
+    WorldManagement ->> Persistence: Request load of entities in segment
+    Persistence ->> Database: Get non-player entity trees positioned in segment
+    activate Database
+    Database ->> Persistence: Entities
+    deactivate Database
+```
+
+##### Player enters world (except for new player creation which bypasses persistence), server-side
+
+```mermaid
+sequenceDiagram
+    WorldManagement ->> WorldManagement: Player enters world
+    WorldManagement ->> Persistence: Request load of player
+    Persistence ->> Database: Get entity tree corresponding to player
+    activate Database
+    Database ->> Persistence: Entities
+    deactivate Database
+```
+
+##### Server startup
+
+```mermaid
+sequenceDiagram
+    Persistence ->> Persistence: Server startup
+    Persistence ->> Database: Get entity tree rooted at base global entity
+    activate Database
+    Database ->> Persistence: Entities
+    deactivate Database
+```
