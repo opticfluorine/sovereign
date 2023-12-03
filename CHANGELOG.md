@@ -2,6 +2,13 @@
 
 ## 2023
 
+### December
+
+#### 3 December 2023
+
+* Update database schema to include table for `Parent` component which will allow entities
+  to be hierarchically ordered in a tree.
+
 ### November
 
 #### 19 November 2023

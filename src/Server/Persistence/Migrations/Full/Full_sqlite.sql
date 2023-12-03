@@ -152,6 +152,19 @@ CREATE TABLE AccountComponent
 );
 
 
+----------------------
+-- Parent Component --
+----------------------
+
+CREATE TABLE Parent
+(
+    id        INTEGER PRIMARY KEY NOT NULL,
+    parent_id INTEGER             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id),
+    FOREIGN KEY (parent_id) REFERENCES Entity (id)
+);
+
+
 --------------------------------------
 -- Account With Authentication View --
 --------------------------------------
@@ -180,14 +193,16 @@ SELECT Entity.id                   AS id,
        MaterialModifier.modifier   AS materialModifier,
        PlayerCharacter.value       AS playerCharacter,
        Name.value                  AS name,
-       AccountComponent.account_id AS account
+       AccountComponent.account_id AS account,
+       Parent.parent_id            AS parent
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
          LEFT JOIN MaterialModifier ON MaterialModifier.id = Entity.id
          LEFT JOIN PlayerCharacter on Entity.id = PlayerCharacter.id
          LEFT JOIN Name on Entity.id = Name.id
-         LEFT JOIN AccountComponent on Entity.id = AccountComponent.id;
+         LEFT JOIN AccountComponent on Entity.id = AccountComponent.id
+         LEFT JOIN Parent on Entity.id = Parent.id;
 
 
 -- Log the migration.
