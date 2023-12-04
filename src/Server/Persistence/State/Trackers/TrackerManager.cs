@@ -28,7 +28,8 @@ public sealed class TrackerManager
         MaterialModifierStateTracker materialModifierStateTracker,
         PlayerCharacterStateTracker playerCharacterStateTracker,
         NameStateTracker nameStateTracker,
-        AccountStateTracker accountStateTracker)
+        AccountStateTracker accountStateTracker,
+        ParentStateTracker parentStateTracker)
     {
         PositionStateTracker = positionStateTracker;
         MaterialStateTracker = materialStateTracker;
@@ -36,12 +37,41 @@ public sealed class TrackerManager
         PlayerCharacterStateTracker = playerCharacterStateTracker;
         NameStateTracker = nameStateTracker;
         AccountStateTracker = accountStateTracker;
+        ParentStateTracker = parentStateTracker;
     }
 
+    /// <summary>
+    ///     Position state tracker.
+    /// </summary>
     public PositionStateTracker PositionStateTracker { get; }
+
+    /// <summary>
+    ///     Material state tracker.
+    /// </summary>
     public MaterialStateTracker MaterialStateTracker { get; }
+
+    /// <summary>
+    ///     Material modifier state tracker.
+    /// </summary>
     public MaterialModifierStateTracker MaterialModifierStateTracker { get; }
+
+    /// <summary>
+    ///     Player character state tracker.
+    /// </summary>
     public PlayerCharacterStateTracker PlayerCharacterStateTracker { get; }
+
+    /// <summary>
+    ///     Name state tracker.
+    /// </summary>
     public NameStateTracker NameStateTracker { get; }
+
+    /// <summary>
+    ///     Account linkage state tracker.
+    /// </summary>
     public AccountStateTracker AccountStateTracker { get; }
+
+    /// <summary>
+    ///     Parent entity linkage state tracker.
+    /// </summary>
+    public ParentStateTracker ParentStateTracker { get; }
 }

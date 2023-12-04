@@ -55,6 +55,21 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const string ACCOUNT_COMPONENT_PARAM_NAME = "account_id";
     private const SqliteType ACCOUNT_COMPONENT_PARAM_TYPE = SqliteType.Blob;
 
+    /// <summary>
+    ///     Database value type for Parent component.
+    /// </summary>
+    private const SqliteType PARENT_PARAM_TYPE = SqliteType.Integer;
+
+    /// <summary>
+    ///     Database column name for Parent component value.
+    /// </summary>
+    private const string PARENT_PARAM_NAME = "parent_id";
+
+    /// <summary>
+    ///     Database table name for Parent component.
+    /// </summary>
+    private const string PARENT_TABLE_NAME = "Parent";
+
     private readonly IPersistenceConfiguration configuration;
 
     public SqlitePersistenceProvider(IPersistenceConfiguration configuration)
@@ -101,6 +116,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<Guid> AddAccountComponentQuery { get; private set; }
     public IModifyComponentQuery<Guid> ModifyAccountComponentQuery { get; private set; }
     public IRemoveComponentQuery RemoveAccountComponentQuery { get; private set; }
+    public IAddComponentQuery<ulong> AddParentComponentQuery { get; private set; }
+    public IModifyComponentQuery<ulong> ModifyParentComponentQuery { get; private set; }
+    public IRemoveComponentQuery RemoveParentComponentQuery { get; private set; }
     public IPlayerExistsQuery PlayerExistsQuery { get; private set; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; private set; }
     public IListPlayersQuery ListPlayersQuery { get; private set; }
@@ -175,6 +193,13 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             ACCOUNT_COMPONENT_PARAM_NAME, (SqliteConnection)Connection);
         RemoveAccountComponentQuery = new SqliteRemoveComponentQuery(ACCOUNT_COMPONENT_TABLE_NAME,
             (SqliteConnection)Connection);
+
+        // Parent component.
+        AddParentComponentQuery = new SimpleSqliteAddComponentQuery<ulong>(PARENT_TABLE_NAME, PARENT_PARAM_NAME,
+            PARENT_PARAM_TYPE, (SqliteConnection)Connection);
+        ModifyParentComponentQuery = new SimpleSqliteModifyComponentQuery<ulong>(PARENT_TABLE_NAME, PARENT_PARAM_NAME,
+            PARENT_PARAM_TYPE, (SqliteConnection)Connection);
+        RemoveParentComponentQuery = new SqliteRemoveComponentQuery(PARENT_TABLE_NAME, (SqliteConnection)Connection);
     }
 
     public void Cleanup()

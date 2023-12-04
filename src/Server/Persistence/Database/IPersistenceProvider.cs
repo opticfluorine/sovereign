@@ -168,6 +168,21 @@ public interface IPersistenceProvider
     IRemoveComponentQuery RemoveAccountComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for the Parent component.
+    /// </summary>
+    IAddComponentQuery<ulong> AddParentComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the Parent component.
+    /// </summary>
+    IModifyComponentQuery<ulong> ModifyParentComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the Parent component.
+    /// </summary>
+    IRemoveComponentQuery RemoveParentComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }

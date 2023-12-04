@@ -6,8 +6,10 @@
 
 #### 3 December 2023
 
-* Update database schema to include table for `Parent` component which will allow entities
-  to be hierarchically ordered in a tree.
+* Add `Parent` component for mapping entities to parent entities, enabling entities to
+  be organized as a tree.
+* Update database schema to include table for the `Parent` component.
+* Set up persistence code for synchronizing `Parent` component with database.
 
 ### November
 

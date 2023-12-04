@@ -67,6 +67,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<ulong> newEntities = new(BufferSize);
 
     /// <summary>
+    ///     Parent entity linkage updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<ulong>> parentUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Player character tag state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<bool>> playerCharacterUpdates = new(BufferSize);
@@ -135,20 +140,37 @@ public sealed class StateBuffer
     /// <summary>
     ///     Queues a player character update.
     /// </summary>
-    /// <param name="update"></param>
+    /// <param name="update">State update.</param>
     public void UpdatePlayerCharacter(ref StateUpdate<bool> update)
     {
         playerCharacterUpdates.Add(ref update);
     }
 
+    /// <summary>
+    ///     Queues a name update.
+    /// </summary>
+    /// <param name="update">State update.</param>
     public void UpdateName(ref StateUpdate<string> update)
     {
         nameUpdates.Add(ref update);
     }
 
+    /// <summary>
+    ///     Queues an account linkage update.
+    /// </summary>
+    /// <param name="update">State update.</param>
     public void UpdateAccount(ref StateUpdate<Guid> update)
     {
         accountUpdates.Add(ref update);
+    }
+
+    /// <summary>
+    ///     Queues a parent entity linkage update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateParent(ref StateUpdate<ulong> update)
+    {
+        parentUpdates.Add(ref update);
     }
 
     /// <summary>
@@ -164,6 +186,7 @@ public sealed class StateBuffer
         playerCharacterUpdates.Clear();
         nameUpdates.Clear();
         accountUpdates.Clear();
+        parentUpdates.Clear();
     }
 
     /// <summary>
@@ -185,6 +208,9 @@ public sealed class StateBuffer
         {
             using (var transaction = persistenceProvider.Connection.BeginTransaction())
             {
+                // Synchronize the entities first before the components.
+                // This ensures that any foreign key relationships between components
+                // and entities are satisfied when the components are updated.
                 SynchronizeAddedEntities(persistenceProvider, transaction);
 
                 /* Position. */
@@ -227,6 +253,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddAccountComponentQuery,
                     persistenceProvider.ModifyAccountComponentQuery,
                     persistenceProvider.RemoveAccountComponentQuery,
+                    transaction);
+
+                /* Parent. */
+                SynchronizeComponent(parentUpdates,
+                    persistenceProvider.AddParentComponentQuery,
+                    persistenceProvider.ModifyParentComponentQuery,
+                    persistenceProvider.RemoveParentComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

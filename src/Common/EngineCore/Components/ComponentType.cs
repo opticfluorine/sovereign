@@ -68,6 +68,12 @@ public enum ComponentType
     /// <seealso cref="Sovereign.EngineCore.Components.NameComponentCollection" />
     Name = 0x0006,
 
+    /// <summary>
+    ///     Component mapping an entity to its parent entity.
+    /// </summary>
+    /// <seealso cref="Sovereign.EngineCore.Components.ParentComponentCollection" />
+    Parent = 0x0007,
+
     #endregion Common
 
     #region Client
