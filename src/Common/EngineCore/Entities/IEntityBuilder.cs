@@ -103,4 +103,11 @@ public interface IEntityBuilder
     /// <param name="accountId">Account ID.</param>
     /// <returns>Builder.</returns>
     IEntityBuilder Account(Guid accountId);
+
+    /// <summary>
+    ///     Assigns a parent entity ID to the entity.
+    /// </summary>
+    /// <param name="parentEntityId">Parent entity ID.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder Parent(ulong parentEntityId);
 }

@@ -37,6 +37,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     protected readonly MaterialModifierComponentCollection materialModifiers;
     protected readonly MaterialComponentCollection materials;
     protected readonly NameComponentCollection names;
+    protected readonly ParentComponentCollection parents;
     protected readonly PlayerCharacterTagCollection playerCharacterTags;
     protected readonly PositionComponentCollection positions;
     protected readonly VelocityComponentCollection velocities;
@@ -49,7 +50,8 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,
         PlayerCharacterTagCollection playerCharacterTags,
-        NameComponentCollection names)
+        NameComponentCollection names,
+        ParentComponentCollection parents)
     {
         this.entityId = entityId;
         this.componentManager = componentManager;
@@ -60,6 +62,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         this.aboveBlocks = aboveBlocks;
         this.playerCharacterTags = playerCharacterTags;
         this.names = names;
+        this.parents = parents;
 
         weakLock = componentManager.ComponentGuard.AcquireWeakLock();
     }
@@ -116,6 +119,12 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     public IEntityBuilder Name(string name)
     {
         names.AddComponent(entityId, name);
+        return this;
+    }
+
+    public IEntityBuilder Parent(ulong parentEntityId)
+    {
+        parents.AddComponent(entityId, parentEntityId);
         return this;
     }
 

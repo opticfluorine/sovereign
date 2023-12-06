@@ -36,6 +36,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
+    private readonly ParentComponentCollection parents;
     private readonly PlayerCharacterTagCollection playerCharacterTags;
     private readonly PositionComponentCollection positions;
     private readonly VelocityComponentCollection velocities;
@@ -52,7 +53,8 @@ public sealed class ServerEntityFactory : IEntityFactory
         AboveBlockComponentCollection aboveBlocks,
         PlayerCharacterTagCollection playerCharacterTags,
         NameComponentCollection names,
-        AccountComponentCollection accounts)
+        AccountComponentCollection accounts,
+        ParentComponentCollection parents)
     {
         this.entityManager = entityManager;
         this.componentManager = componentManager;
@@ -64,6 +66,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.playerCharacterTags = playerCharacterTags;
         this.names = names;
         this.accounts = accounts;
+        this.parents = parents;
     }
 
     public IEntityBuilder GetBuilder()
@@ -86,6 +89,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             aboveBlocks,
             playerCharacterTags,
             names,
-            accounts);
+            accounts,
+            parents);
     }
 }

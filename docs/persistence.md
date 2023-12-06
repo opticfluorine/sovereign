@@ -88,6 +88,9 @@ segment is out of range of all active player character entities (though they may
 if resources permit). As usual, the exception is for other player character entities - as described above, player
 character entities are only loaded as a result of that player logging in.
 
+Note that positioned entities must not have a parent entity; they must be at the root level in
+order for range-based entity activation to work correctly.
+
 #### Activation Rules Example
 
 To understand how the activation rules work together to ensure the correct entities are loaded for processing,

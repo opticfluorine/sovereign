@@ -37,6 +37,7 @@ public sealed class EntityProcessor
     private const int INDEX_PLAYER_CHARACTER = 6;
     private const int INDEX_NAME = 7;
     private const int INDEX_ACCOUNT = 8;
+    private const int INDEX_PARENT = 9;
     private readonly IEntityFactory entityFactory;
     private readonly EntityMapper entityMapper;
 
@@ -65,7 +66,7 @@ public sealed class EntityProcessor
     private void ProcessSingleEntity(IDataReader reader)
     {
         /* Get the entity ID. */
-        var entityId = (ulong)reader.GetInt64(0);
+        var entityId = (ulong)reader.GetInt64(INDEX_ID);
 
         /* Start creating the entity. */
         var builder = entityFactory.GetBuilder(entityId);
@@ -76,6 +77,7 @@ public sealed class EntityProcessor
         ProcessPlayerCharacter(reader, builder);
         ProcessName(reader, builder);
         ProcessAccount(reader, builder, entityId);
+        ProcessParent(reader, builder);
 
         /* Complete the entity. */
         builder.Build();
@@ -149,6 +151,11 @@ public sealed class EntityProcessor
             reader.GetInt32(INDEX_MATERIAL_MODIFIER));
     }
 
+    /// <summary>
+    ///     Processes the player character flag if present.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Entity builder.</param>
     private void ProcessPlayerCharacter(IDataReader reader, IEntityBuilder builder)
     {
         /* Check for existence. */
@@ -156,6 +163,21 @@ public sealed class EntityProcessor
 
         /* Process. */
         if (reader.GetBoolean(INDEX_PLAYER_CHARACTER)) builder.PlayerCharacter();
+    }
+
+    /// <summary>
+    ///     Processes the parent entity mapping if present.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Entity builder.</param>
+    private void ProcessParent(IDataReader reader, IEntityBuilder builder)
+    {
+        // Check for existence.
+        if (reader.IsDBNull(INDEX_PARENT)) return;
+
+        // Process.
+        var parentEntityId = (ulong)reader.GetInt64(INDEX_PARENT);
+        builder.Parent(parentEntityId);
     }
 
     /// <summary>

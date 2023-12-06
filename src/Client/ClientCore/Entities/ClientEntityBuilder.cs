@@ -43,9 +43,10 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         AboveBlockComponentCollection aboveBlocks,
         AnimatedSpriteComponentCollection animatedSprites,
         PlayerCharacterTagCollection playerCharacterTags,
-        NameComponentCollection names)
+        NameComponentCollection names,
+        ParentComponentCollection parents)
         : base(entityId, componentManager, positions, velocities, materials,
-            materialModifiers, aboveBlocks, playerCharacterTags, names)
+            materialModifiers, aboveBlocks, playerCharacterTags, names, parents)
     {
         this.drawables = drawables;
         this.animatedSprites = animatedSprites;

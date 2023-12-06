@@ -4,6 +4,12 @@
 
 ### December
 
+#### 5 December 2023
+
+* Update entity retrieval queries to pull entire entity trees at once via a recursive query.
+  For the range retrieval query, also added logic to the query to exclude player character
+  entities as these are never activated by a range retrieval, only by an ID retrieval.
+
 #### 3 December 2023
 
 * Add `Parent` component for mapping entities to parent entities, enabling entities to

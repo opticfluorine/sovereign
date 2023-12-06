@@ -23,9 +23,9 @@ namespace Sovereign.Persistence.Database.Queries;
 public interface IRetrieveEntityQuery
 {
     /// <summary>
-    ///     Retrieves an entity from the database.
+    ///     Retrieves an entity and all of its child entities from the database.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    /// <returns>IDataReader to supply the result.</returns>
+    /// <returns>IDataReader to supply the result of zero or more entities.</returns>
     QueryReader RetrieveEntity(ulong entityId);
 }

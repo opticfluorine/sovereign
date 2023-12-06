@@ -41,9 +41,10 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         AboveBlockComponentCollection aboveBlocks,
         PlayerCharacterTagCollection playerCharacterTags,
         NameComponentCollection names,
-        AccountComponentCollection accounts)
+        AccountComponentCollection accounts,
+        ParentComponentCollection parents)
         : base(entityId, componentManager, positions, velocities, materials,
-            materialModifiers, aboveBlocks, playerCharacterTags, names)
+            materialModifiers, aboveBlocks, playerCharacterTags, names, parents)
     {
         this.accounts = accounts;
     }

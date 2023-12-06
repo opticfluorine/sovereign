@@ -20,15 +20,23 @@ using System.Numerics;
 namespace Sovereign.Persistence.Database.Queries;
 
 /// <summary>
-///     Interface for retrieving all entities in a position range.
+///     Interface for retrieving all entities in a position range,
+///     excluding player character entities. This includes entities
+///     which are part of the entity tree rooted at the positioned entity.
 /// </summary>
 public interface IRetrieveRangeQuery
 {
     /// <summary>
-    ///     Queries the database for all entities in the given range.
+    ///     Queries the database for all entities in the given range
+    ///     (excluding player character entities). This includes entities
+    ///     which are part of the entity tree rooted at the positioned
+    ///     entity.
     /// </summary>
-    /// <param name="minPos">Minimum position.</param>
-    /// <param name="maxPos">Maximum position.</param>
-    /// <returns></returns>
+    /// <param name="minPos">Minimum position, inclusive.</param>
+    /// <param name="maxPos">Maximum position, exclusive.</param>
+    /// <returns>
+    ///     Query reader that provides all entity trees which are rooted
+    ///     at s positioned entity within the given range.
+    /// </returns>
     QueryReader RetrieveEntitiesInRange(Vector3 minPos, Vector3 maxPos);
 }
