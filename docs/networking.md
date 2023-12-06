@@ -122,6 +122,73 @@ unnecessary performance hits.
 
 ## Connections
 
+### Connection Sequence
+
+The following connection sequence assumes that the client provides valid login credentials for
+an existing account which is not banned.
+
+```mermaid
+sequenceDiagram
+    activate Client
+    Note left of Client: Client begins authentication sequence
+    Client ->> RestServer: Request to authenticate
+    activate RestServer
+    RestServer ->> Accounts: Validate login
+    activate Accounts
+    Accounts ->> Persistence: Get account information
+    activate Persistence
+    Persistence -->> Accounts: Account information
+    deactivate Persistence
+    Accounts ->> Accounts: Validate login
+    Accounts -->> RestServer: Account information
+    deactivate Accounts
+    RestServer -->> Client: Authentication response
+    deactivate RestServer
+    deactivate Client
+    Note left of Client: Client begins player selection sequence
+    activate Client
+    Client ->> RestServer: Request player list
+    activate RestServer
+    RestServer ->> Persistence: Get player list
+    activate Persistence
+    Persistence -->> RestServer: Player list
+    deactivate Persistence
+    RestServer -->> Client: Player list
+    deactivate RestServer
+    alt New player
+        Client ->> RestServer: Request player creation
+        RestServer ->> EntityFactory: Build player entity tree
+        activate EntityFactory
+        EntityFactory -->> RestServer: Player entity ID
+        deactivate EntityFactory
+    else Existing player
+        Client ->> RestServer: Request select player
+    end
+    activate RestServer
+    RestServer ->> Accounts: Select player
+    RestServer -->> Client: Response
+    deactivate RestServer
+    deactivate Client
+    Note left of Client: Client begins event server connection
+    activate Client
+    Client --> EventServer: Connect
+    activate EventServer
+    EventServer -) Client: Synchronization event for player entity tree
+    loop For each world segment player is subscribed to
+        par Non-block entity synchronization
+            EventServer -) Client: Synchronization events for world segment
+        and Block entity synchronization
+            Client ->> RestServer: Request world segment block data
+            activate RestServer
+            RestServer -->> Client: World segment block data
+            deactivate RestServer
+        end
+    end
+    deactivate EventServer
+    deactivate Client
+    Note left of Client: Player is in game
+```
+
 ### Authentication
 
 The first stage of establishing a connection is to authenticate. This is done

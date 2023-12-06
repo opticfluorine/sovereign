@@ -9,6 +9,8 @@
 * Update entity retrieval queries to pull entire entity trees at once via a recursive query.
   For the range retrieval query, also added logic to the query to exclude player character
   entities as these are never activated by a range retrieval, only by an ID retrieval.
+* Document the current state of the login/player select process in a sequence diagram
+  in `networking.md`. This is a starting point for designing the rest of the behavior.
 
 #### 3 December 2023
 
