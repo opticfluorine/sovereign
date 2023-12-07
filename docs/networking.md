@@ -125,10 +125,17 @@ unnecessary performance hits.
 ### Connection Sequence
 
 The following connection sequence assumes that the client provides valid login credentials for
-an existing account which is not banned.
+an existing account which is not banned, and generally does not specify behavior on error cases.
 
 ```mermaid
 sequenceDiagram
+    participant Client
+    participant RestServer
+    participant EventServer
+    participant Accounts
+    participant EntityFactory
+    participant WorldManagement
+    participant Persistence
     activate Client
     Note left of Client: Client begins authentication sequence
     Client ->> RestServer: Request to authenticate
@@ -165,10 +172,28 @@ sequenceDiagram
         Client ->> RestServer: Request select player
     end
     activate RestServer
-    RestServer ->> Accounts: Select player
+    RestServer -) Accounts: Select player
+    activate Accounts
     RestServer -->> Client: Response
     deactivate RestServer
     deactivate Client
+    Accounts ->> Accounts: Set player to account
+    Accounts ->> WorldManagement: Activate player entity
+    deactivate Accounts
+    activate WorldManagement
+    WorldManagement ->> Persistence: Load player entity tree
+    activate Persistence
+    Persistence --) WorldManagement: Player entity tree
+    deactivate Persistence
+    loop For each subscribed world segment
+         opt If world segment is not already activated
+            WorldManagement ->> Persistence: Load entities for world segment
+            activate Persistence
+            Persistence --) WorldManagement: Entity trees for world segment
+            deactivate Persistence
+         end
+    end
+    deactivate WorldManagement
     Note left of Client: Client begins event server connection
     activate Client
     Client --> EventServer: Connect

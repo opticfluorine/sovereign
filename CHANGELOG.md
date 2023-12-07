@@ -4,6 +4,11 @@
 
 ### December
 
+#### 6 December 2023
+
+* Update sequence diagram for login/player select process to add detail about when entity
+  trees are loaded along with allocation of responsibilities to systems.
+
 #### 5 December 2023
 
 * Update entity retrieval queries to pull entire entity trees at once via a recursive query.
