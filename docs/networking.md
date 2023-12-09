@@ -151,6 +151,7 @@ sequenceDiagram
     deactivate Accounts
     RestServer -->> Client: Authentication response
     deactivate RestServer
+    Client --> EventServer: Connect
     deactivate Client
     Note left of Client: Client begins player selection sequence
     activate Client
@@ -196,7 +197,6 @@ sequenceDiagram
     deactivate WorldManagement
     Note left of Client: Client begins event server connection
     activate Client
-    Client --> EventServer: Connect
     activate EventServer
     EventServer -) Client: Synchronization event for player entity tree
     loop For each world segment player is subscribed to

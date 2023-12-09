@@ -7,6 +7,7 @@
 #### 9 December 2023
 
 * Implement `SelectPlayerRestService` for selecting a player character that already exists.
+* Adjust connection sequence diagram to show correct position of event server connection.
 
 #### 6 December 2023
 
