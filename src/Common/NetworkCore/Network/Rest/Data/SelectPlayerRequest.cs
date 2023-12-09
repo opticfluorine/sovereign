@@ -14,19 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+namespace Sovereign.NetworkCore.Network.Rest.Data;
 
-namespace Sovereign.ServerNetwork.Network.Rest.Players;
-
-public class PlayerRestServicesInstaller : IWindsorInstaller
+/// <summary>
+///     Player selection request data record.
+/// </summary>
+public class SelectPlayerRequest
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
-    {
-        container.Register(Component.For<CreatePlayerRequestValidator>()
-            .LifestyleSingleton());
-        container.Register(Component.For<SelectPlayerRequestValidator>()
-            .LifestyleSingleton());
-    }
+    /// <summary>
+    ///     Player entity ID.
+    /// </summary>
+    public ulong PlayerEntityId { get; set; }
 }

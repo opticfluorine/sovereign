@@ -4,6 +4,10 @@
 
 ### December
 
+#### 9 December 2023
+
+* Implement `SelectPlayerRestService` for selecting a player character that already exists.
+
 #### 6 December 2023
 
 * Update sequence diagram for login/player select process to add detail about when entity
