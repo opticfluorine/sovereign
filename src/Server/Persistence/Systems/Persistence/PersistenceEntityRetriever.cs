@@ -41,19 +41,19 @@ public sealed class PersistenceEntityRetriever
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
-    ///     Retrieves the given entity from the database.
+    ///     Retrieves the entity tree rooted at the given entity from the database.
     /// </summary>
     /// <param name="entityId">Entity ID to retrieve.</param>
     public void RetrieveEntity(ulong entityId)
     {
-        Logger.DebugFormat("Retrieve entity ID {0}.", entityId);
+        Logger.DebugFormat("Retrieve entity tree for entity ID {0}.", entityId);
 
         /* Asynchronously retrieve the entity using a worker thread. */
         Task.Run(() => DoRetrieve(entityId));
     }
 
     /// <summary>
-    ///     Does the work of retrieving the given entity.
+    ///     Does the work of retrieving the entity tree rooted at the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID to retrieve.</param>
     private void DoRetrieve(ulong entityId)

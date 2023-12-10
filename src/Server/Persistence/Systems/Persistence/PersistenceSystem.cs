@@ -90,7 +90,8 @@ public sealed class PersistenceSystem : ISystem
         EventId.Core_Quit,
         EventId.Server_Persistence_RetrieveEntity,
         EventId.Server_Persistence_RetrieveEntitiesInRange,
-        EventId.Server_Persistence_Synchronize
+        EventId.Server_Persistence_Synchronize,
+        EventId.Server_Accounts_SelectPlayer
     };
 
     public int WorkloadEstimate => 20;

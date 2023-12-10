@@ -18,7 +18,7 @@
 namespace Sovereign.Persistence.Database.Queries;
 
 /// <summary>
-///     Interface for retrieving a single entity from the database.
+///     Interface for retrieving a single entity tree from the database.
 /// </summary>
 public interface IRetrieveEntityQuery
 {

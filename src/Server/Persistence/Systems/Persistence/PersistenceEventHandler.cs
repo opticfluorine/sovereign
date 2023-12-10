@@ -19,6 +19,7 @@ using System.Numerics;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.ServerCore.Events;
 
 namespace Sovereign.Persistence.Systems.Persistence;
 
@@ -75,7 +76,25 @@ public sealed class PersistenceEventHandler
             case EventId.Server_Persistence_Synchronize:
                 OnSynchronize();
                 break;
+
+            case EventId.Server_Accounts_SelectPlayer:
+            {
+                var details = (SelectPlayerEventDetails)ev.EventDetails;
+                OnSelectPlayer(details);
+            }
+                break;
         }
+    }
+
+    /// <summary>
+    ///     Called to handle a Server_Accounts_SelectPlayer event.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void OnSelectPlayer(SelectPlayerEventDetails details)
+    {
+        // Map this request directly to an entity retrieval for the player character entity,
+        // but only if the player isn't newly created (and therefore already in memory).
+        if (details.NewPlayer) OnRetrieveEntity(details.PlayerCharacterEntityId);
     }
 
     /// <summary>

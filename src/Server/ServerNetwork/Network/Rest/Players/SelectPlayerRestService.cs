@@ -81,7 +81,8 @@ public class SelectPlayerRestService : AuthenticatedRestService
             }
 
             // Select player.
-            accountsController.SelectPlayer(eventSender, accountId, requestData.PlayerEntityId);
+            const bool newPlayer = false;
+            accountsController.SelectPlayer(eventSender, accountId, requestData.PlayerEntityId, newPlayer);
             await SendResponse(ctx, 200, "Success.");
         }
         catch (Exception e)

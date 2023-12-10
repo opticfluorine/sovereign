@@ -31,12 +31,14 @@ public class AccountsController
     /// <param name="eventSender">Event sender.</param>
     /// <param name="accountId">Account ID.</param>
     /// <param name="playerCharacterEntityId">Player character entity ID.</param>
-    public void SelectPlayer(IEventSender eventSender, Guid accountId, ulong playerCharacterEntityId)
+    /// <param name="newPlayer">Whether the selected player is a new player character.</param>
+    public void SelectPlayer(IEventSender eventSender, Guid accountId, ulong playerCharacterEntityId, bool newPlayer)
     {
         var details = new SelectPlayerEventDetails
         {
             AccountId = accountId,
-            PlayerCharacterEntityId = playerCharacterEntityId
+            PlayerCharacterEntityId = playerCharacterEntityId,
+            NewPlayer = newPlayer
         };
         var ev = new Event(EventId.Server_Accounts_SelectPlayer, details);
         eventSender.SendEvent(ev);

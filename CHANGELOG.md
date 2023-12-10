@@ -4,6 +4,11 @@
 
 ### December
 
+#### 10 December 2023
+
+* Rework connection sequence to simplify player entity load process.
+* Load player character entity tree from database after selection.
+
 #### 9 December 2023
 
 * Implement `SelectPlayerRestService` for selecting a player character that already exists.

@@ -174,7 +174,8 @@ public class CreatePlayerRestService : AuthenticatedRestService
                 result = true;
 
                 // Select the newly created character to continue login.
-                accountsController.SelectPlayer(eventSender, accountId, playerEntityId);
+                const bool newPlayer = true;
+                accountsController.SelectPlayer(eventSender, accountId, playerEntityId, newPlayer);
             }
         }
 

@@ -175,17 +175,16 @@ sequenceDiagram
     activate RestServer
     RestServer -) Accounts: Select player
     activate Accounts
+    RestServer -) Persistence: Load player entity
+    activate Persistence
     RestServer -->> Client: Response
     deactivate RestServer
     deactivate Client
     Accounts ->> Accounts: Set player to account
-    Accounts ->> WorldManagement: Activate player entity
     deactivate Accounts
-    activate WorldManagement
-    WorldManagement ->> Persistence: Load player entity tree
-    activate Persistence
-    Persistence --) WorldManagement: Player entity tree
+    Persistence ->> Persistence: Load player entity tree
     deactivate Persistence
+    activate WorldManagement
     loop For each subscribed world segment
          opt If world segment is not already activated
             WorldManagement ->> Persistence: Load entities for world segment

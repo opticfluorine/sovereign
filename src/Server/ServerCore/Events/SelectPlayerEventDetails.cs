@@ -33,4 +33,9 @@ public class SelectPlayerEventDetails : IEventDetails
     ///     Player character entity ID.
     /// </summary>
     public ulong PlayerCharacterEntityId { get; set; }
+
+    /// <summary>
+    ///     Flag indicating whether the player character is new (true = new).
+    /// </summary>
+    public bool NewPlayer { get; set; }
 }
