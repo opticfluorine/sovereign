@@ -17,9 +17,8 @@
 
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.World;
 using Sovereign.ServerCore.Systems.Persistence;
-using Sovereign.WorldManagement.Systems.WorldManagement;
-using Sovereign.WorldManagement.WorldSegments;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 

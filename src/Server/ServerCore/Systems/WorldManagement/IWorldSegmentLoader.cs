@@ -1,6 +1,6 @@
-/*
+﻿/*
  * Sovereign Engine
- * Copyright (c) 2022 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using Sovereign.EngineCore.Components.Indexers;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
-public sealed class ServerWorldManagementInstaller : IWindsorInstaller
+/// <summary>
+///     Interface for loading world segments.
+/// </summary>
+public interface IWorldSegmentLoader
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
-    {
-        container.Register(Component.For<WorldSegmentBlockDataManager>()
-            .LifestyleSingleton());
-        container.Register(Component.For<WorldSegmentBlockDataGenerator>()
-            .LifestyleSingleton());
-    }
+    /// <summary>
+    ///     Loads the given world segment if it is not already loaded.
+    /// </summary>
+    /// <param name="segmentIndex">Segment index.</param>
+    void LoadSegment(GridPosition segmentIndex);
 }

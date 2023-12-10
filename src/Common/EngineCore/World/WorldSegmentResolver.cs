@@ -18,9 +18,9 @@
 using System;
 using System.Numerics;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.WorldManagement.Configuration;
+using Sovereign.EngineCore.Configuration;
 
-namespace Sovereign.WorldManagement.WorldSegments;
+namespace Sovereign.EngineCore.World;
 
 /// <summary>
 ///     Resolves world segments to position ranges.

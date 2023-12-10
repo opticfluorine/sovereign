@@ -1,6 +1,6 @@
-/*
+﻿/*
  * Sovereign Engine
- * Copyright (c) 2022 opticfluorine
+ * Copyright (c) 2019 opticfluorine
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
 using Sovereign.EngineCore.Components.Indexers;
 
-namespace Sovereign.WorldManagement.Systems.WorldManagement;
+namespace Sovereign.ServerCore.Systems.WorldManagement;
 
 /// <summary>
-///     Interface for postprocessing a newly loaded world segment.
+///     Responsible for tracking which world segments are currently loaded.
 /// </summary>
-public interface IWorldSegmentLoadedHandler
+public sealed class WorldSegmentRegistry
 {
     /// <summary>
-    ///     Called by the WorldManagement system to do any postprocessing for a
-    ///     newly loaded world segment.
+    ///     Set of currently loaded world segment indices.
     /// </summary>
-    /// <param name="segmentIndex">World segment index.</param>
-    void OnWorldSegmentLoaded(GridPosition segmentIndex);
+    private readonly ISet<GridPosition> loadedSegments = new HashSet<GridPosition>();
+
+    public bool IsLoaded(GridPosition segmentIndex)
+    {
+        return loadedSegments.Contains(segmentIndex);
+    }
+
+    public void OnSegmentLoaded(GridPosition segmentIndex)
+    {
+        loadedSegments.Add(segmentIndex);
+    }
+
+    public void OnSegmentUnloaded(GridPosition segmentIndex)
+    {
+        loadedSegments.Remove(segmentIndex);
+    }
 }

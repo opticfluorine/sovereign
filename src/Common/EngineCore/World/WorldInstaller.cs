@@ -30,5 +30,7 @@ public class WorldInstaller : IWindsorInstaller
     {
         container.Register(Component.For<WorldManager>()
             .LifestyleSingleton());
+        container.Register(Component.For<WorldSegmentResolver>()
+            .LifestyleSingleton());
     }
 }

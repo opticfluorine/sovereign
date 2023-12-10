@@ -24,7 +24,6 @@
     <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
     <ProjectReference Include="..\ServerNetwork\ServerNetwork.csproj" />
     <ProjectReference Include="..\..\Common\Performance\Performance.csproj" />
-    <ProjectReference Include="..\..\Common\WorldManagement\WorldManagement.csproj" />
   </ItemGroup>
 
   <ItemGroup>

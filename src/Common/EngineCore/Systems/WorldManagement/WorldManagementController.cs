@@ -37,7 +37,7 @@ public sealed class WorldManagementController
         {
             SegmentIndex = segmentIndex
         };
-        var ev = new Event(EventId.Core_WorldManagement_LoadSegment, details);
+        var ev = new Event(EventId.Server_WorldManagement_LoadSegment, details);
         eventSender.SendEvent(ev);
     }
 
@@ -52,7 +52,7 @@ public sealed class WorldManagementController
         {
             SegmentIndex = segmentIndex
         };
-        var ev = new Event(EventId.Core_WorldManagement_UnloadSegment, details);
+        var ev = new Event(EventId.Server_WorldManagement_UnloadSegment, details);
         eventSender.SendEvent(ev);
     }
 }

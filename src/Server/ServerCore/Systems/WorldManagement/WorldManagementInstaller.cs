@@ -20,15 +20,39 @@ using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 using Sovereign.EngineUtil.IoC;
 
-namespace Sovereign.WorldManagement.Configuration;
+namespace Sovereign.ServerCore.Systems.WorldManagement;
 
-public sealed class WorldManagementConfigurationInstaller : IWindsorInstaller
+/// <summary>
+///     IoC installer for WorldManagementSystem support classes.
+/// </summary>
+public sealed class WorldManagementInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
+        container.Register(Component.For<WorldManagementEventHandler>()
+            .LifestyleSingleton());
+
         container.Register(EngineClasses.EngineAssemblies()
-            .BasedOn<IWorldManagementConfiguration>()
+            .BasedOn<IWorldSegmentLoader>()
             .WithServiceDefaultInterfaces()
+            .LifestyleSingleton());
+
+        container.Register(EngineClasses.EngineAssemblies()
+            .BasedOn<IWorldSegmentUnloader>()
+            .WithServiceDefaultInterfaces()
+            .LifestyleSingleton());
+
+        container.Register(Component.For<WorldSegmentRegistry>()
+            .LifestyleSingleton());
+
+        container.Register(EngineClasses.EngineAssemblies()
+            .BasedOn<IWorldSegmentLoadedHandler>()
+            .WithServiceDefaultInterfaces()
+            .LifestyleSingleton());
+
+        container.Register(Component.For<WorldSegmentBlockDataManager>()
+            .LifestyleSingleton());
+        container.Register(Component.For<WorldSegmentBlockDataGenerator>()
             .LifestyleSingleton());
     }
 }

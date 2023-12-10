@@ -92,28 +92,6 @@ public enum EventId
 
     #endregion Blocks
 
-    #region WorldManagement
-
-    /// <summary>
-    ///     Event sent to load a world segment.
-    /// </summary>
-    /// Associated details: WorldSegmentEventDetails
-    Core_WorldManagement_LoadSegment = 300,
-
-    /// <summary>
-    ///     Unloads a world segment from memory.
-    /// </summary>
-    /// Associated details: WorldSegmentEventDetails
-    Core_WorldManagement_UnloadSegment = 301,
-
-    /// <summary>
-    ///     Signals that the entities of a world segment have been loaded.
-    /// </summary>
-    /// Asssociated details: WorldSegmentEventDetails
-    Core_WorldManagement_WorldSegmentLoaded = 302,
-
-    #endregion WorldManagement
-
     #region Performance
 
     /// <summary>
@@ -309,6 +287,28 @@ public enum EventId
     Server_Accounts_SelectPlayer = 200300,
 
     #endregion Server_Accounts
+
+    #region WorldManagement
+
+    /// <summary>
+    ///     Event sent to load a world segment.
+    /// </summary>
+    /// Associated details: WorldSegmentEventDetails
+    Server_WorldManagement_LoadSegment = 200400,
+
+    /// <summary>
+    ///     Unloads a world segment from memory.
+    /// </summary>
+    /// Associated details: WorldSegmentEventDetails
+    Server_WorldManagement_UnloadSegment = 200401,
+
+    /// <summary>
+    ///     Signals that the entities of a world segment have been loaded.
+    /// </summary>
+    /// Asssociated details: WorldSegmentEventDetails
+    Server_WorldManagement_WorldSegmentLoaded = 200402,
+
+    #endregion WorldManagement
 
     #endregion Server
 }

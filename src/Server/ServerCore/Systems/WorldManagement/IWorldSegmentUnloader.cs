@@ -15,12 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Sovereign.WorldManagement.Configuration;
+using Sovereign.EngineCore.Components.Indexers;
+
+namespace Sovereign.ServerCore.Systems.WorldManagement;
 
 /// <summary>
-///     Hardcoded configuration for WorldManagementSystem.
+///     Interface for unloading world segments.
 /// </summary>
-public sealed class WorldManagementConfiguration : IWorldManagementConfiguration
+public interface IWorldSegmentUnloader
 {
-    public uint SegmentLength => 32;
+    /// <summary>
+    ///     Unloads the given world segment.
+    /// </summary>
+    /// <param name="segmentIndex">Index to world segment.</param>
+    void UnloadSegment(GridPosition segmentIndex);
 }

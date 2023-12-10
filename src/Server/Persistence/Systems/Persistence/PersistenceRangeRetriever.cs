@@ -22,9 +22,9 @@ using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.World;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
-using Sovereign.WorldManagement.WorldSegments;
 
 namespace Sovereign.Persistence.Systems.Persistence;
 
@@ -83,7 +83,7 @@ public sealed class PersistenceRangeRetriever
             // Sync the event to the next tick to ensure that the loaded entities
             // and components have been fully processed.
             var details = new WorldSegmentEventDetails { SegmentIndex = segmentIndex };
-            var ev = new Event(EventId.Core_WorldManagement_WorldSegmentLoaded, details);
+            var ev = new Event(EventId.Server_WorldManagement_WorldSegmentLoaded, details);
             ev.SyncToTick = true;
             eventSender.SendEvent(ev);
         });

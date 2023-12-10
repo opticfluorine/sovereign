@@ -10,7 +10,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Common\EngineCore\EngineCore.csproj" />
     <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj" />
-    <ProjectReference Include="..\..\Common\WorldManagement\WorldManagement.csproj" />
   </ItemGroup>
 
   <ItemGroup>

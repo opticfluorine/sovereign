@@ -20,9 +20,9 @@ using System.Collections.Generic;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Movement.Components.Indexers;
-using Sovereign.WorldManagement.WorldSegments;
+using Sovereign.EngineCore.World;
 
-namespace Sovereign.WorldManagement.Systems.WorldManagement;
+namespace Sovereign.ServerCore.Systems.WorldManagement;
 
 /// <summary>
 ///     Responsible for unloading discrete world segments.

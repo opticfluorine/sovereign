@@ -16,17 +16,18 @@
  */
 
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.WorldManagement.Systems.WorldManagement;
 
-namespace Sovereign.ClientCore.Systems.WorldManagement;
+namespace Sovereign.ServerCore.Systems.WorldManagement;
 
 /// <summary>
-///     Handles client postprocessing of newly loaded world segments.
+///     Interface for postprocessing a newly loaded world segment.
 /// </summary>
-public class ClientWorldSegmentLoadedHandler : IWorldSegmentLoadedHandler
+public interface IWorldSegmentLoadedHandler
 {
-    public void OnWorldSegmentLoaded(GridPosition segmentIndex)
-    {
-        // no-op
-    }
+    /// <summary>
+    ///     Called by the WorldManagement system to do any postprocessing for a
+    ///     newly loaded world segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    void OnWorldSegmentLoaded(GridPosition segmentIndex);
 }

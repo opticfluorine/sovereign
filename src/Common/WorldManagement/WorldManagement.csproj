@@ -11,4 +11,9 @@
     <ProjectReference Include="..\EngineUtil\EngineUtil.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Configuration\" />
+    <Folder Include="Systems\WorldManagement\" />
+  </ItemGroup>
+
 </Project>

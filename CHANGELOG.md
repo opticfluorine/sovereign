@@ -8,6 +8,11 @@
 
 * Implement `SelectPlayerRestService` for selecting a player character that already exists.
 * Adjust connection sequence diagram to show correct position of event server connection.
+* Refactor `WorldManagement` into a server-only system within ServerCore, not as its own
+  class library. With the new pub-sub design for players and world segments, it no longer
+  makes sense to replicate this logic in both applications. Instead, the server will govern
+  all world management functions, and the client will react to a (yet to be created) set
+  of events which drive the synchronization of state.
 
 #### 6 December 2023
 

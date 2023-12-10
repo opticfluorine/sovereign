@@ -16,12 +16,12 @@
 
 using System.Collections.Generic;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Block.Events;
+using Sovereign.EngineCore.World;
 using Sovereign.ServerCore.Events;
-using Sovereign.WorldManagement.Configuration;
-using Sovereign.WorldManagement.WorldSegments;
 
 namespace Sovereign.ServerCore.Systems.Debug;
 
@@ -31,9 +31,9 @@ namespace Sovereign.ServerCore.Systems.Debug;
 public sealed class DebugEventHandler
 {
     private readonly BlockController blockController;
+    private readonly IEventSender eventSender;
     private readonly IWorldManagementConfiguration worldManagementConfig;
     private readonly WorldSegmentResolver worldSegmentResolver;
-    private readonly IEventSender eventSender;
 
     public DebugEventHandler(WorldSegmentResolver worldSegmentResolver,
         IWorldManagementConfiguration worldManagementConfig,

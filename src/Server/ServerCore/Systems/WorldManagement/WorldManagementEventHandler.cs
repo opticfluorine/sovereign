@@ -20,7 +20,7 @@ using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
-namespace Sovereign.WorldManagement.Systems.WorldManagement;
+namespace Sovereign.ServerCore.Systems.WorldManagement;
 
 /// <summary>
 ///     Event handler for WorldManagementSystem.
@@ -50,21 +50,21 @@ public sealed class WorldManagementEventHandler
     {
         switch (ev.EventId)
         {
-            case EventId.Core_WorldManagement_LoadSegment:
+            case EventId.Server_WorldManagement_LoadSegment:
             {
                 var details = (WorldSegmentEventDetails)ev.EventDetails;
                 OnLoadSegment(details.SegmentIndex);
             }
                 break;
 
-            case EventId.Core_WorldManagement_UnloadSegment:
+            case EventId.Server_WorldManagement_UnloadSegment:
             {
                 var details = (WorldSegmentEventDetails)ev.EventDetails;
                 OnUnloadSegment(details.SegmentIndex);
             }
                 break;
 
-            case EventId.Core_WorldManagement_WorldSegmentLoaded:
+            case EventId.Server_WorldManagement_WorldSegmentLoaded:
             {
                 var details = (WorldSegmentEventDetails)ev.EventDetails;
                 OnWorldSegmentLoaded(details.SegmentIndex);

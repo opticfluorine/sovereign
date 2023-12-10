@@ -17,12 +17,12 @@
 
 using System.Collections.Generic;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.Systems.WorldManagement;
+using Sovereign.EngineCore.World;
 using Sovereign.EngineCore.World.Materials;
-using Sovereign.WorldManagement.Configuration;
-using Sovereign.WorldManagement.WorldSegments;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -253,22 +253,22 @@ public sealed class WorldSegmentBlockDataGenerator
     /// </summary>
     private class DepthPlane
     {
-        private int airBlockCount;
-
         /// <summary>
         ///     Blocks in the depth plane.
         /// </summary>
         public readonly List<BlockData> Blocks = new();
 
         /// <summary>
-        ///     Cached count of most frequent material type.
-        /// </summary>
-        private int leadingMaterialCount;
-
-        /// <summary>
         ///     Running count of material types in this depth plane.
         /// </summary>
         private readonly Dictionary<BlockMaterialData, int> MaterialCounts = new();
+
+        private int airBlockCount;
+
+        /// <summary>
+        ///     Cached count of most frequent material type.
+        /// </summary>
+        private int leadingMaterialCount;
 
         /// <summary>
         ///     Creates an empty depth plane.

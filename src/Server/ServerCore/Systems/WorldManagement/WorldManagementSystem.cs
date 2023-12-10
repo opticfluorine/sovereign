@@ -20,7 +20,7 @@ using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 
-namespace Sovereign.WorldManagement.Systems.WorldManagement;
+namespace Sovereign.ServerCore.Systems.WorldManagement;
 
 /// <summary>
 ///     System responsible for managing the world state lifecycle.
@@ -41,9 +41,9 @@ public sealed class WorldManagementSystem : ISystem
         this.eventHandler = eventHandler;
 
         /* Register events. */
-        eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Core_WorldManagement_LoadSegment);
-        eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Core_WorldManagement_UnloadSegment);
-        eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Core_WorldManagement_WorldSegmentLoaded);
+        eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Server_WorldManagement_LoadSegment);
+        eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Server_WorldManagement_UnloadSegment);
+        eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Server_WorldManagement_WorldSegmentLoaded);
 
         /* Register system. */
         eventLoop.RegisterSystem(this);
@@ -53,8 +53,8 @@ public sealed class WorldManagementSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
-        EventId.Core_WorldManagement_LoadSegment,
-        EventId.Core_WorldManagement_UnloadSegment
+        EventId.Server_WorldManagement_LoadSegment,
+        EventId.Server_WorldManagement_UnloadSegment
     };
 
     public int WorkloadEstimate => 80;

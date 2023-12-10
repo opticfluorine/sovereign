@@ -15,18 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Components.Indexers;
-
-namespace Sovereign.WorldManagement.Systems.WorldManagement;
+namespace Sovereign.EngineCore.Configuration;
 
 /// <summary>
-///     Interface for loading world segments.
+///     Hardcoded configuration for WorldManagementSystem.
 /// </summary>
-public interface IWorldSegmentLoader
+public sealed class WorldManagementConfiguration : IWorldManagementConfiguration
 {
-    /// <summary>
-    ///     Loads the given world segment if it is not already loaded.
-    /// </summary>
-    /// <param name="segmentIndex">Segment index.</param>
-    void LoadSegment(GridPosition segmentIndex);
+    public uint SegmentLength => 32;
 }
