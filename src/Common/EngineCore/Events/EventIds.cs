@@ -130,6 +130,22 @@ public enum EventId
 
     #endregion Ping
 
+    #region WorldManagement
+
+    /// <summary>
+    ///     Sent from server to client to announce subscription to a world segment.
+    /// </summary>
+    /// Associated details: WorldSegmentSubscriptionEventDetails
+    Core_WorldManagement_Subscribe = 600,
+
+    /// <summary>
+    ///     Sent from server to client to announce unsubscription from a world segment.
+    /// </summary>
+    /// Associated details: WorldSegmentSubscriptionEventDetails
+    Core_WorldManagement_Unsubscribe = 601,
+
+    #endregion WorldManagement
+
     #endregion Core
 
     #region Client
@@ -291,22 +307,10 @@ public enum EventId
     #region WorldManagement
 
     /// <summary>
-    ///     Event sent to load a world segment.
-    /// </summary>
-    /// Associated details: WorldSegmentEventDetails
-    Server_WorldManagement_LoadSegment = 200400,
-
-    /// <summary>
-    ///     Unloads a world segment from memory.
-    /// </summary>
-    /// Associated details: WorldSegmentEventDetails
-    Server_WorldManagement_UnloadSegment = 200401,
-
-    /// <summary>
     ///     Signals that the entities of a world segment have been loaded.
     /// </summary>
     /// Asssociated details: WorldSegmentEventDetails
-    Server_WorldManagement_WorldSegmentLoaded = 200402,
+    Server_WorldManagement_WorldSegmentLoaded = 200400,
 
     #endregion WorldManagement
 

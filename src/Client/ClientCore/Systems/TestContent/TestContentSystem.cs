@@ -22,10 +22,8 @@ using Castle.Core.Logging;
 using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Systems.ClientNetwork;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
-using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
 namespace Sovereign.ClientCore.Systems.TestContent;
@@ -69,19 +67,16 @@ public sealed class TestContentSystem : ISystem, IDisposable
     private readonly IEventSender eventSender;
     private readonly ClientNetworkController networkController;
     private readonly PlayerManagementClient playerManagementClient;
-    private readonly WorldManagementController worldManagementController;
 
     public TestContentSystem(IEventLoop eventLoop,
         EventCommunicator eventCommunicator,
         IEventSender eventSender,
-        WorldManagementController worldManagementController,
         ClientNetworkController networkController,
         PlayerManagementClient playerManagementClient)
     {
         this.eventLoop = eventLoop;
         EventCommunicator = eventCommunicator;
         this.eventSender = eventSender;
-        this.worldManagementController = worldManagementController;
         this.networkController = networkController;
         this.playerManagementClient = playerManagementClient;
 
@@ -223,18 +218,5 @@ public sealed class TestContentSystem : ISystem, IDisposable
 
         var response = createResult.First;
         // TODO Use the player ID.
-    }
-
-    /// <summary>
-    ///     Automatically loads some test world segments near the global origin.
-    /// </summary>
-    private void LoadSegmentsNearOrigin()
-    {
-        /* Load some test world segments. */
-        Logger.Info("Automatically loading test world segments.");
-        for (var i = -1; i < 2; ++i)
-        for (var j = -1; j < 2; ++j)
-            worldManagementController.LoadSegment(eventSender,
-                new GridPosition(i, j, 0));
     }
 }

@@ -4,10 +4,18 @@
 
 ### December
 
+#### 13 December 2023
+
+* Heavily refactor `WorldManagement` even further to accomodate the pub-sub approach to
+  world synchronization between client and server. Most things are wired up now, aside from
+  a mechanism to deactivate segments with no subscribers (which is straightforward to do with
+  the new architecture).
+
 #### 10 December 2023
 
 * Rework connection sequence to simplify player entity load process.
 * Load player character entity tree from database after selection.
+* Add component event filter for filtering down to player position component events.
 
 #### 9 December 2023
 

@@ -38,11 +38,6 @@ public sealed class ServerConfiguration
     public NetworkRecord Network { get; set; }
 
     /// <summary>
-    ///     World configuration settings.
-    /// </summary>
-    public WorldRecord World { get; set; }
-
-    /// <summary>
     ///     Debug configuration settings.
     /// </summary>
     public DebugRecord Debug { get; set; }
@@ -180,17 +175,6 @@ public sealed class ServerConfiguration
         ///     the event server if the server has not received any messages.
         /// </summary>
         public uint ConnectionTimeoutMs { get; set; } = 30000;
-    }
-
-    /// <summary>
-    ///     Full description of the world configuration.
-    /// </summary>
-    public sealed class WorldRecord
-    {
-        /// <summary>
-        ///     Length, in blocks, of each discrete chunk of the world.
-        /// </summary>
-        public int ChunkSize { get; set; } = 32;
     }
 
     /// <summary>

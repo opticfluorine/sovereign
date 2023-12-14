@@ -17,7 +17,6 @@
 
 using System.Collections.Generic;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -30,20 +29,17 @@ public sealed class WorldManagementSystem : ISystem
     private readonly WorldManagementEventHandler eventHandler;
 
     private readonly IEventLoop eventLoop;
+    private readonly WorldSegmentSubscriptionManager subscriptionManager;
 
     public WorldManagementSystem(EventCommunicator eventCommunicator,
         IEventLoop eventLoop, WorldManagementEventHandler eventHandler,
-        EventDescriptions eventDescriptions)
+        EventDescriptions eventDescriptions, WorldSegmentSubscriptionManager subscriptionManager)
     {
         /* Dependency injection. */
         EventCommunicator = eventCommunicator;
         this.eventLoop = eventLoop;
         this.eventHandler = eventHandler;
-
-        /* Register events. */
-        eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Server_WorldManagement_LoadSegment);
-        eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Server_WorldManagement_UnloadSegment);
-        eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Server_WorldManagement_WorldSegmentLoaded);
+        this.subscriptionManager = subscriptionManager;
 
         /* Register system. */
         eventLoop.RegisterSystem(this);
@@ -51,11 +47,7 @@ public sealed class WorldManagementSystem : ISystem
 
     public EventCommunicator EventCommunicator { get; }
 
-    public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
-    {
-        EventId.Server_WorldManagement_LoadSegment,
-        EventId.Server_WorldManagement_UnloadSegment
-    };
+    public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>();
 
     public int WorkloadEstimate => 80;
 

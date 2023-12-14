@@ -26,4 +26,9 @@ public interface IWorldManagementConfiguration
     ///     Length of a world segment, in blocks.
     /// </summary>
     uint SegmentLength { get; }
+
+    /// <summary>
+    ///     Number of world segments away from the current segment that clients will subscribe to.
+    /// </summary>
+    int SubscriptionRange { get; }
 }

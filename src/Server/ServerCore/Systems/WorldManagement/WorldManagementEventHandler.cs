@@ -16,9 +16,7 @@
  */
 
 using Castle.Core.Logging;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -27,19 +25,6 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public sealed class WorldManagementEventHandler
 {
-    private readonly IWorldSegmentLoadedHandler loadedHandler;
-    private readonly IWorldSegmentLoader loader;
-    private readonly IWorldSegmentUnloader unloader;
-
-    public WorldManagementEventHandler(IWorldSegmentLoader loader,
-        IWorldSegmentUnloader unloader,
-        IWorldSegmentLoadedHandler loadedHandler)
-    {
-        this.loader = loader;
-        this.unloader = unloader;
-        this.loadedHandler = loadedHandler;
-    }
-
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
@@ -50,57 +35,9 @@ public sealed class WorldManagementEventHandler
     {
         switch (ev.EventId)
         {
-            case EventId.Server_WorldManagement_LoadSegment:
-            {
-                var details = (WorldSegmentEventDetails)ev.EventDetails;
-                OnLoadSegment(details.SegmentIndex);
-            }
-                break;
-
-            case EventId.Server_WorldManagement_UnloadSegment:
-            {
-                var details = (WorldSegmentEventDetails)ev.EventDetails;
-                OnUnloadSegment(details.SegmentIndex);
-            }
-                break;
-
-            case EventId.Server_WorldManagement_WorldSegmentLoaded:
-            {
-                var details = (WorldSegmentEventDetails)ev.EventDetails;
-                OnWorldSegmentLoaded(details.SegmentIndex);
-            }
-                break;
-
             default:
                 Logger.ErrorFormat("Unhandled event ID {0}.", ev.EventId);
                 break;
         }
-    }
-
-    /// <summary>
-    ///     Handles a load segment request.
-    /// </summary>
-    /// <param name="segmentIndex">Segment index.</param>
-    private void OnLoadSegment(GridPosition segmentIndex)
-    {
-        loader.LoadSegment(segmentIndex);
-    }
-
-    /// <summary>
-    ///     Handles an unload segment request.
-    /// </summary>
-    /// <param name="segmentIndex">Segment to unload.</param>
-    private void OnUnloadSegment(GridPosition segmentIndex)
-    {
-        unloader.UnloadSegment(segmentIndex);
-    }
-
-    /// <summary>
-    ///     Handles a segment loaded event.
-    /// </summary>
-    /// <param name="segmentIndex">Segment index.</param>
-    private void OnWorldSegmentLoaded(GridPosition segmentIndex)
-    {
-        loadedHandler.OnWorldSegmentLoaded(segmentIndex);
     }
 }

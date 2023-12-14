@@ -165,17 +165,6 @@ Network:
 
 
 # -------------------
-# World Configuration
-# -------------------
-World:
-  
-  # ---------
-  # ChunkSize
-  # ---------
-  # Size, in blocks, of the length of a discrete chunk of the world.
-  ChunkSize: 32
-
-# -------------------
 # Debug Configuration
 # -------------------
 Debug:
