@@ -20,6 +20,7 @@ using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 
 namespace Sovereign.ClientCore.Systems.ClientNetwork;
 
@@ -32,14 +33,17 @@ public sealed class ClientNetworkEventHandler
     private readonly INetworkClient networkClient;
     private readonly ClientNetworkController networkController;
     private readonly RegistrationClient registrationClient;
+    private readonly ClientWorldSegmentSubscriptionManager worldSegmentSubscriptionManager;
 
     public ClientNetworkEventHandler(INetworkClient networkClient, RegistrationClient registrationClient,
-        ClientNetworkController networkController, IEventSender eventSender)
+        ClientNetworkController networkController, IEventSender eventSender,
+        ClientWorldSegmentSubscriptionManager worldSegmentSubscriptionManager)
     {
         this.networkClient = networkClient;
         this.registrationClient = registrationClient;
         this.networkController = networkController;
         this.eventSender = eventSender;
+        this.worldSegmentSubscriptionManager = worldSegmentSubscriptionManager;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -64,10 +68,36 @@ public sealed class ClientNetworkEventHandler
                 HandleRegisterAccount((RegisterAccountEventDetails)ev.EventDetails);
                 break;
 
+            case EventId.Core_WorldManagement_Subscribe:
+                HandleWorldSegmentSubscribe((WorldSegmentSubscriptionEventDetails)ev.EventDetails);
+                break;
+
+            case EventId.Core_WorldManagement_Unsubscribe:
+                HandleWorldSegmentUnsubscribe((WorldSegmentSubscriptionEventDetails)ev.EventDetails);
+                break;
+
             default:
                 Logger.WarnFormat("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
                 break;
         }
+    }
+
+    /// <summary>
+    ///     Handles a world segment subscribe event.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandleWorldSegmentUnsubscribe(WorldSegmentSubscriptionEventDetails details)
+    {
+        worldSegmentSubscriptionManager.Subscribe(details.SegmentIndex);
+    }
+
+    /// <summary>
+    ///     Handles a world segment unsubscribe event.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandleWorldSegmentSubscribe(WorldSegmentSubscriptionEventDetails details)
+    {
+        worldSegmentSubscriptionManager.Unsubscribe(details.SegmentIndex);
     }
 
     /// <summary>

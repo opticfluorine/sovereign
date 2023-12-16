@@ -4,6 +4,20 @@
 
 ### December
 
+#### 16 December 2023
+
+* Bring back the code for loading world segment block data in the client that was accidentally
+  deleted during the `WorldManagement` refactoring; refactor this into a REST client class
+  with the others in the client network infrastructure namespace.
+* Update `AccountLoginTracker` and friends to maintain an additional mapping from player
+  entity ID back to the associated connection ID. This will allow the outbound network pipeline
+  in the server to correctly route outbound network events when the context is player-dependent.
+* Allow world segment subscribe/unsubscribe events to pass from server to client. These are
+  sent reliable-unordered as the client needs to know when it has been subscribed to a world
+  segment, but does not care about the relative ordering of subscriptions.
+* Load world segment block data in the client when a subscribe event is received for that world
+  segment.
+
 #### 13 December 2023
 
 * Heavily refactor `WorldManagement` even further to accomodate the pub-sub approach to

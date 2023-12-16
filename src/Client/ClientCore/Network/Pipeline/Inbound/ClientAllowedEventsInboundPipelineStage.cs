@@ -33,7 +33,9 @@ public class ClientAllowedEventsInboundPipelineStage : IInboundPipelineStage
     /// </summary>
     private readonly HashSet<EventId> allowList = new()
     {
-        EventId.Core_Ping_Ping
+        EventId.Core_Ping_Ping,
+        EventId.Core_WorldManagement_Subscribe,
+        EventId.Core_WorldManagement_Unsubscribe
     };
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

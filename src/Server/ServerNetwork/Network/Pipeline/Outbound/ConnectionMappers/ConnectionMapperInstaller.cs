@@ -26,5 +26,7 @@ public class ConnectionMapperInstaller : IWindsorInstaller
     {
         container.Register(Component.For<GlobalConnectionMapper>()
             .LifestyleSingleton());
+        container.Register(Component.For<SingleEntityConnectionMapperFactory>()
+            .LifestyleSingleton());
     }
 }

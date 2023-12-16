@@ -19,6 +19,7 @@ using System;
 using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Registration;
+using Sovereign.EngineUtil.Monads;
 
 namespace Sovereign.Accounts.Accounts.Services;
 
@@ -144,5 +145,21 @@ public sealed class AccountServices
             Logger.Error("Error handling registration request.", e);
             return RegistrationResult.UnknownFailure;
         }
+    }
+
+    /// <summary>
+    ///     Gets the connection ID associated with a logged in player.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <returns>Connection ID if the player is logged in.</returns>
+    public Maybe<int> GetConnectionIdForPlayer(ulong playerEntityId)
+    {
+        var result = new Maybe<int>();
+        if (loginTracker.TryGetConnectionIdForPlayer(playerEntityId, out var connectionId))
+        {
+            result = new Maybe<int>(connectionId);
+        }
+
+        return result;
     }
 }

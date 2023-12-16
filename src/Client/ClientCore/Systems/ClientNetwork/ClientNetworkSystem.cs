@@ -63,7 +63,9 @@ public sealed class ClientNetworkSystem : ISystem, IDisposable
     {
         EventId.Client_Network_ConnectionLost,
         EventId.Client_Network_BeginConnection,
-        EventId.Client_Network_RegisterAccount
+        EventId.Client_Network_RegisterAccount,
+        EventId.Core_WorldManagement_Subscribe,
+        EventId.Core_WorldManagement_Unsubscribe
     };
 
     public int WorkloadEstimate => 20;

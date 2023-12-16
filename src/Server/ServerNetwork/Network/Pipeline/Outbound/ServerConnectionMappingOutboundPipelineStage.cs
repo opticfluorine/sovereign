@@ -16,7 +16,9 @@
 
 using System.Collections.Generic;
 using Castle.Core.Logging;
+using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
 
@@ -34,10 +36,21 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
 
     private IOutboundPipelineStage nextStage;
 
-    public ServerConnectionMappingOutboundPipelineStage(GlobalConnectionMapper globalMapper)
+    public ServerConnectionMappingOutboundPipelineStage(GlobalConnectionMapper globalMapper,
+        SingleEntityConnectionMapperFactory singleConnMapperFactory,
+        AccountServices accountServices)
     {
+        // Create delegate mappers.
+        var worldSubEventMapper = singleConnMapperFactory.Create(evInfo =>
+        {
+            var details = (WorldSegmentSubscriptionEventDetails)evInfo.Event.EventDetails;
+            return accountServices.GetConnectionIdForPlayer(details.EntityId);
+        });
+
         // Configure specific connection mappers.
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
+        specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
+        specificMappers[EventId.Core_WorldManagement_Unsubscribe] = worldSubEventMapper;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

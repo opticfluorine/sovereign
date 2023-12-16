@@ -33,5 +33,7 @@ public sealed class ClientNetworkSystemInstaller : IWindsorInstaller
                 .LifestyleSingleton()
         );
         container.Register(Component.For<ClientNetworkEventHandler>().LifestyleSingleton());
+        container.Register(Component.For<ClientWorldSegmentSubscriptionManager>()
+            .LifestyleSingleton());
     }
 }

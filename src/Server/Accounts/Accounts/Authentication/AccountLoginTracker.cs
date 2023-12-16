@@ -48,9 +48,19 @@ public sealed class AccountLoginTracker
     private readonly Dictionary<Guid, AccountLoginState> accountLoginStates = new();
 
     /// <summary>
+    ///     Map from account ID to connection ID.
+    /// </summary>
+    private readonly Dictionary<Guid, int> accountsToConnections = new();
+
+    /// <summary>
     ///     Map from connection IDs to logged in account IDs.
     /// </summary>
     private readonly Dictionary<int, Guid> connectionsToAccounts = new();
+
+    /// <summary>
+    ///     Map from player entity ID to connection ID.
+    /// </summary>
+    private readonly Dictionary<ulong, int> playersToConnections = new();
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -82,7 +92,21 @@ public sealed class AccountLoginTracker
             return;
         }
 
-        accountIdsToPlayerEntityIds[accountId] = playerEntityId;
+        // Select the player and update records.
+        try
+        {
+            accountIdsToPlayerEntityIds[accountId] = playerEntityId;
+            playersToConnections[playerEntityId] = accountsToConnections[accountId];
+            accountLoginStates[accountId] = AccountLoginState.InGame;
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorFormat(e, "Exception while selecting player {0} for account {1}.", playerEntityId, accountId);
+
+            // Roll back any change.
+            playersToConnections.Remove(playerEntityId);
+            accountIdsToPlayerEntityIds.Remove(accountId);
+        }
     }
 
     /// <summary>
@@ -107,6 +131,17 @@ public sealed class AccountLoginTracker
     }
 
     /// <summary>
+    ///     Gets the connection associated with a player, if any.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <param name="connectionId">Connection ID. Only set if return value is true.</param>
+    /// <returns>true if a connection ID was found, false otherwise.</returns>
+    public bool TryGetConnectionIdForPlayer(ulong playerEntityId, out int connectionId)
+    {
+        return playersToConnections.TryGetValue(playerEntityId, out connectionId);
+    }
+
+    /// <summary>
     ///     Associates a logged in account to its event server connection.
     /// </summary>
     /// <param name="accountId">Account ID.</param>
@@ -119,6 +154,7 @@ public sealed class AccountLoginTracker
                 $"Connection ID {connectionId} is already mapped to account {otherAcctId}.");
 
         connectionsToAccounts.Add(connectionId, accountId);
+        accountsToConnections.Add(accountId, connectionId);
     }
 
     /// <summary>
@@ -127,9 +163,14 @@ public sealed class AccountLoginTracker
     /// <param name="connectionId">Connection ID.</param>
     public void HandleDisconnect(int connectionId)
     {
-        if (!connectionsToAccounts.TryGetValue(connectionId, out var accountId)) return;
-        connectionsToAccounts.Remove(connectionId);
-        Logout(accountId);
+        if (connectionsToAccounts.TryGetValue(connectionId, out var accountId))
+        {
+            accountsToConnections.Remove(accountId);
+            connectionsToAccounts.Remove(connectionId);
+            if (accountIdsToPlayerEntityIds.TryGetValue(accountId, out var entityId))
+                playersToConnections.Remove(entityId);
+            Logout(accountId);
+        }
     }
 
     /// <summary>

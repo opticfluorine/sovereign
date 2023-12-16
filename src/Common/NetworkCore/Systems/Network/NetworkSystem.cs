@@ -52,7 +52,9 @@ public sealed class NetworkSystem : ISystem
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
         EventId.Core_Ping_Ping,
-        EventId.Core_Ping_Pong
+        EventId.Core_Ping_Pong,
+        EventId.Core_WorldManagement_Subscribe,
+        EventId.Core_WorldManagement_Unsubscribe
     };
 
     public int WorkloadEstimate => 50;
