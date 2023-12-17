@@ -26,7 +26,5 @@ public class PlayerRestServicesInstaller : IWindsorInstaller
     {
         container.Register(Component.For<CreatePlayerRequestValidator>()
             .LifestyleSingleton());
-        container.Register(Component.For<SelectPlayerRequestValidator>()
-            .LifestyleSingleton());
     }
 }

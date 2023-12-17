@@ -7,6 +7,9 @@
 #### 17 December 2023
 
 * Send event in client when the player ID is established.
+* Update `SelectPlayerRestService` to use a URL parameter instead of a JSON request. This is a
+  more RESTful design since the player entity "object" is associated with a unique URI; other APIs
+  such as player deletion then follow naturally.
 
 #### 16 December 2023
 

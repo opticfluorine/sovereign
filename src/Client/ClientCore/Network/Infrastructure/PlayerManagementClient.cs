@@ -102,7 +102,7 @@ public class PlayerManagementClient
     ///     Sends a request to the server to create a new player using the current account.
     /// </summary>
     /// <param name="request"></param>
-    /// <returns></returns>
+    /// <returns>Response or error string.</returns>
     public async Task<Option<CreatePlayerResponse, string>> CreatePlayerAsync(
         CreatePlayerRequest request)
     {
@@ -153,6 +153,11 @@ public class PlayerManagementClient
         return result;
     }
 
+    /// <summary>
+    ///     Selects an existing player character for use in game.
+    /// </summary>
+    /// <param name="playerEntityId">PLayer entity ID.</param>
+    /// <returns>Response or error string.</returns>
     public async Task<Option<SelectPlayerResponse, string>> SelectPlayerAsync(ulong playerEntityId)
     {
         var result = new Option<SelectPlayerResponse, string>("Unexpected error occurred.");

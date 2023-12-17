@@ -19,7 +19,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Sovereign.Accounts.Systems.Accounts;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Players;
@@ -35,21 +34,18 @@ public class SelectPlayerRestService : AuthenticatedRestService
     /// <summary>
     ///     Maximum request length, in bytes.
     /// </summary>
-    private const int MAX_REQUEST_LENGTH = 256;
+    private const int MAX_REQUEST_LENGTH = 0;
 
     private readonly AccountsController accountsController;
     private readonly IEventSender eventSender;
 
     private readonly PersistencePlayerServices playerServices;
-    private readonly SelectPlayerRequestValidator requestValidator;
 
     public SelectPlayerRestService(RestAuthenticator authenticator, PersistencePlayerServices playerServices,
-        SelectPlayerRequestValidator requestValidator, AccountsController accountsController,
-        IEventSender eventSender) :
+        AccountsController accountsController, IEventSender eventSender) :
         base(authenticator)
     {
         this.playerServices = playerServices;
-        this.requestValidator = requestValidator;
         this.accountsController = accountsController;
         this.eventSender = eventSender;
     }
@@ -72,17 +68,22 @@ public class SelectPlayerRestService : AuthenticatedRestService
             // Decode and validate input.
             // Validation checks that the requested player character is a player
             // character belonging to the currently authenticated account.
-            var requestJson = ctx.Request.DataAsString;
-            var requestData = JsonSerializer.Deserialize<SelectPlayerRequest>(requestJson, MessageConfig.JsonOptions);
-            if (!requestValidator.IsValid(requestData, accountId))
+            var idParam = ctx.Request.Url.Parameters["id"];
+            ulong playerEntityId;
+            try
             {
-                await SendResponse(ctx, 403, "Player does not belong to current account.");
+                playerEntityId = Convert.ToUInt64(idParam);
+            }
+            catch (FormatException)
+            {
+                Logger.ErrorFormat("Account {0} tried to select invalid player entity {1}.", accountId, idParam);
+                await SendResponse(ctx, 400, "Invalid player entity ID.");
                 return;
             }
 
             // Select player.
             const bool newPlayer = false;
-            accountsController.SelectPlayer(eventSender, accountId, requestData.PlayerEntityId, newPlayer);
+            accountsController.SelectPlayer(eventSender, accountId, playerEntityId, newPlayer);
             await SendResponse(ctx, 200, "Success.");
         }
         catch (Exception e)
