@@ -17,6 +17,7 @@
 
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineUtil.Monads;
 
 namespace Sovereign.ClientCore.Systems.Camera;
 
@@ -26,6 +27,11 @@ namespace Sovereign.ClientCore.Systems.Camera;
 public sealed class CameraEventHandler
 {
     private readonly CameraManager manager;
+
+    /// <summary>
+    ///     Default entity for tracking.
+    /// </summary>
+    private Maybe<ulong> defaultEntity = new();
 
     public CameraEventHandler(CameraManager manager)
     {
@@ -51,7 +57,21 @@ public sealed class CameraEventHandler
             case EventId.Core_Tick:
                 manager.UpdateCamera();
                 break;
+
+            case EventId.Client_Network_PlayerEntitySelected:
+                HandlePlayerSelect((EntityEventDetails)ev.EventDetails);
+                break;
         }
+    }
+
+    /// <summary>
+    ///     Handles player selection by setting the player entity as the default camera target.
+    /// </summary>
+    /// <param name="details">Details.</param>
+    private void HandlePlayerSelect(EntityEventDetails details)
+    {
+        defaultEntity = new Maybe<ulong>(details.EntityId);
+        Attach(details.EntityId);
     }
 
     /// <summary>
@@ -60,16 +80,33 @@ public sealed class CameraEventHandler
     /// <param name="details">Event details.</param>
     private void HandleAttachEvent(EntityEventDetails details)
     {
-        manager.SetCameraState(true, details.EntityId);
-        manager.UpdateCamera();
+        Attach(details.EntityId);
     }
 
     /// <summary>
-    ///     Detaches the camera from an entity.
+    ///     Detaches the camera from an entity. If a default entity is set, the camera is reattached to the
+    ///     default entity.
     /// </summary>
     private void HandleDetachEvent()
     {
-        manager.SetCameraState(false, 0);
+        if (defaultEntity.HasValue)
+        {
+            Attach(defaultEntity.Value);
+        }
+        else
+        {
+            manager.SetCameraState(false, 0);
+            manager.UpdateCamera();
+        }
+    }
+
+    /// <summary>
+    ///     Attaches the camera to an entity.
+    /// </summary>
+    /// <param name="entityId">Entity to track.</param>
+    private void Attach(ulong entityId)
+    {
+        manager.SetCameraState(true, entityId);
         manager.UpdateCamera();
     }
 }

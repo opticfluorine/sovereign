@@ -61,7 +61,8 @@ public sealed class CameraSystem : ISystem, IDisposable
     {
         EventId.Client_Camera_Attach,
         EventId.Client_Camera_Detach,
-        EventId.Core_Tick
+        EventId.Core_Tick,
+        EventId.Client_Network_PlayerEntitySelected
     };
 
     public EventCommunicator EventCommunicator { get; }

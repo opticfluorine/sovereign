@@ -192,7 +192,16 @@ public sealed class TestContentSystem : ISystem, IDisposable
         if (players.Any())
         {
             var player = players.First();
-            // TODO Select player
+            var selectTask = playerManagementClient.SelectPlayerAsync(player.Id);
+            if (!selectTask.Wait(requestTimeoutMs))
+            {
+                // Timed out.
+                Logger.Error("Select player request timed out.");
+                return;
+            }
+
+            var selectResult = selectTask.Result;
+            if (selectResult.HasSecond) Logger.ErrorFormat("Select player failed: {0}", selectResult.Second);
             return;
         }
 
@@ -210,9 +219,6 @@ public sealed class TestContentSystem : ISystem, IDisposable
         }
 
         var createResult = createTask.Result;
-        if (createResult.HasSecond)
-        {
-            Logger.ErrorFormat("Create player failed: {0}", createResult.Second);
-        }
+        if (createResult.HasSecond) Logger.ErrorFormat("Create player failed: {0}", createResult.Second);
     }
 }

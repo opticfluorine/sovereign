@@ -10,6 +10,7 @@
 * Update `SelectPlayerRestService` to use a URL parameter instead of a JSON request. This is a
   more RESTful design since the player entity "object" is associated with a unique URI; other APIs
   such as player deletion then follow naturally.
+* Attach camera to player entity once the player entity is selected.
 
 #### 16 December 2023
 
