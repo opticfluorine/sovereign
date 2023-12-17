@@ -34,5 +34,7 @@ public sealed class ClientNetworkInstaller : IWindsorInstaller
                 .BasedOn<INetworkClient>()
                 .WithServiceAllInterfaces()
                 .LifestyleSingleton());
+        container.Register(Component.For<ClientNetworkInternalController>()
+            .LifestyleSingleton());
     }
 }

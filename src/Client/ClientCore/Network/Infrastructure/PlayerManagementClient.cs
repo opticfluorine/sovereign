@@ -17,9 +17,11 @@
 using System;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Network.Rest;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Rest.Data;
@@ -37,11 +39,17 @@ public class PlayerManagementClient
     /// </summary>
     private const int MaxResponseLength = 1024;
 
+    private readonly IEventSender eventSender;
+    private readonly ClientNetworkInternalController internalController;
+
     private readonly RestClient restClient;
 
-    public PlayerManagementClient(RestClient restClient)
+    public PlayerManagementClient(RestClient restClient, ClientNetworkInternalController internalController,
+        IEventSender eventSender)
     {
         this.restClient = restClient;
+        this.internalController = internalController;
+        this.eventSender = eventSender;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -127,6 +135,7 @@ public class PlayerManagementClient
                 // Success
                 Logger.InfoFormat("Successfully created new player {0} (ID {1}).", request.PlayerName,
                     response.PlayerId);
+                internalController.SetPlayerEntityId(eventSender, response.PlayerId);
                 result = new Option<CreatePlayerResponse, string>(response);
             }
             else
@@ -134,6 +143,55 @@ public class PlayerManagementClient
                 // Failed
                 Logger.ErrorFormat("Failed to create new player {0}: {1}", request.PlayerName, response.Result);
                 result = new Option<CreatePlayerResponse, string>(response.Result);
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.Error("Exception thrown during player management.", e);
+        }
+
+        return result;
+    }
+
+    public async Task<Option<SelectPlayerResponse, string>> SelectPlayerAsync(ulong playerEntityId)
+    {
+        var result = new Option<SelectPlayerResponse, string>("Unexpected error occurred.");
+
+        try
+        {
+            // REST client needs to be connected and authenticated in order to
+            // access player management APIs.
+            if (!restClient.Connected)
+            {
+                Logger.Error("Cannot manage players while disconnected from server.");
+                result = new Option<SelectPlayerResponse, string>("Not connected.");
+                return result;
+            }
+
+            // Send the request.
+            var playerUrl = new StringBuilder(RestEndpoints.Player).Append("/").Append(playerEntityId).ToString();
+            var httpResponse = await restClient.Post(playerUrl);
+            if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
+            {
+                Logger.ErrorFormat("SelectPlayer response length {0} is too long.",
+                    httpResponse.Content.Headers.ContentLength);
+                result = new Option<SelectPlayerResponse, string>("Response too long.");
+                return result;
+            }
+
+            var response = await httpResponse.Content.ReadFromJsonAsync<SelectPlayerResponse>();
+            if (httpResponse.StatusCode == HttpStatusCode.OK)
+            {
+                // Success
+                Logger.InfoFormat("Selected player ID {0}.", playerEntityId);
+                internalController.SetPlayerEntityId(eventSender, playerEntityId);
+                result = new Option<SelectPlayerResponse, string>(response);
+            }
+            else
+            {
+                // Failed
+                Logger.ErrorFormat("Failed to select player {0}: {1}", playerEntityId, response.Result);
+                result = new Option<SelectPlayerResponse, string>(response.Result);
             }
         }
         catch (Exception e)

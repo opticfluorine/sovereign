@@ -115,4 +115,17 @@ public sealed class RestClient
         jsonContent.Headers.ContentLength = jsonContent.ReadAsStream().Length;
         return httpClient.PostAsync(uri, jsonContent);
     }
+
+    /// <summary>
+    ///     Asynchronously makes an empty POST request to the REST server with no payload.
+    /// </summary>
+    /// <param name="url">Relative URL of the REST endpoint.</param>
+    /// <returns>Task awaiting the response.</returns>
+    /// <exception cref="NetworkException">Thrown if the REST client is not in the connected state.</exception>
+    public Task<HttpResponseMessage> Post(string url)
+    {
+        if (!Connected) throw new NetworkException("REST client is not connected.");
+        var uri = new Uri(baseUri, url);
+        return httpClient.PostAsync(url, null);
+    }
 }

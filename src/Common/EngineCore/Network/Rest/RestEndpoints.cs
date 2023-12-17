@@ -46,4 +46,6 @@ public sealed class RestEndpoints
     ///     Relative path to REST endpoint for player services.
     /// </summary>
     public const string Player = "/player";
+
+    public const string PlayerSelect = "/player/select";
 }

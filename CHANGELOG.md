@@ -4,6 +4,10 @@
 
 ### December
 
+#### 17 December 2023
+
+* Send event in client when the player ID is established.
+
 #### 16 December 2023
 
 * Bring back the code for loading world segment block data in the client that was accidentally

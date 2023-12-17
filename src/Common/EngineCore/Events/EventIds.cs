@@ -233,6 +233,12 @@ public enum EventId
     /// Associated details: ErrorEventDetails
     Client_Network_RegisterFailed = 100207,
 
+    /// <summary>
+    ///     Event sent to set the entity ID corresponding to the logged in player.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Client_Network_PlayerEntitySelected = 100208,
+
     #endregion Client_Network
 
     #endregion Client

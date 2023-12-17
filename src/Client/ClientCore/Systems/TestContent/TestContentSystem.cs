@@ -213,10 +213,6 @@ public sealed class TestContentSystem : ISystem, IDisposable
         if (createResult.HasSecond)
         {
             Logger.ErrorFormat("Create player failed: {0}", createResult.Second);
-            return;
         }
-
-        var response = createResult.First;
-        // TODO Use the player ID.
     }
 }
