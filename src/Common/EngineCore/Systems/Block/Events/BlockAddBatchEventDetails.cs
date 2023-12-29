@@ -28,5 +28,5 @@ public sealed class BlockAddBatchEventDetails : IEventDetails
     /// <summary>
     ///     Blocks to be added.
     /// </summary>
-    public IList<BlockRecord> BlockRecords { get; set; }
+    public List<BlockRecord> BlockRecords { get; set; } = new();
 }

@@ -28,7 +28,7 @@ public class EventCommunicator
     /// <summary>
     ///     Events being sent from the event loop to the system thread.
     /// </summary>
-    private readonly ConcurrentQueue<Event> incomingEvents = new();
+    private readonly ConcurrentQueue<Event?> incomingEvents = new();
 
     /// <summary>
     ///     Tries to get the next event being sent to the system thread.
@@ -39,14 +39,14 @@ public class EventCommunicator
     /// <returns>true if an event was retrieved, false if not.</returns>
     public bool GetIncomingEvent(out Event ev)
     {
-        return incomingEvents.TryDequeue(out ev);
+        return incomingEvents.TryDequeue(out ev!);
     }
 
     /// <summary>
     ///     Sends an event to the system thread.
     /// </summary>
     /// <param name="ev">Event to be sent.</param>
-    public void SendEventToSystem(Event ev)
+    public void SendEventToSystem(Event? ev)
     {
         incomingEvents.Enqueue(ev);
     }

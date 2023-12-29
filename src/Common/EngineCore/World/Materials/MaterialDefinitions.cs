@@ -27,5 +27,5 @@ public class MaterialDefinitions
     /// <summary>
     ///     Materials.
     /// </summary>
-    public IList<Material> Materials { get; set; }
+    public List<Material> Materials { get; set; } = new();
 }

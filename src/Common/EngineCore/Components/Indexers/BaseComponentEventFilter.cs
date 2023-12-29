@@ -29,12 +29,12 @@ public abstract class BaseComponentEventFilter<T> : BaseComponentIndexer<T>, ICo
     {
     }
 
-    public event EventHandler OnStartUpdates;
-    public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentAdded;
-    public event ComponentEventDelegates<T>.ComponentRemovedEventHandler OnComponentRemoved;
-    public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentModified;
-    public event ComponentEventDelegates<T>.ComponentUnloadedEventHandler OnComponentUnloaded;
-    public event EventHandler OnEndUpdates;
+    public event Action? OnStartUpdates;
+    public event ComponentEventDelegates<T>.ComponentEventHandler? OnComponentAdded;
+    public event ComponentEventDelegates<T>.ComponentRemovedEventHandler? OnComponentRemoved;
+    public event ComponentEventDelegates<T>.ComponentEventHandler? OnComponentModified;
+    public event ComponentEventDelegates<T>.ComponentUnloadedEventHandler? OnComponentUnloaded;
+    public event Action? OnEndUpdates;
 
     /// <summary>
     ///     Determines whether the given entity should pass this filter.
@@ -43,33 +43,33 @@ public abstract class BaseComponentEventFilter<T> : BaseComponentIndexer<T>, ICo
     /// <returns>true if the entity should pass, false otherwise.</returns>
     protected abstract bool ShouldAccept(ulong entityId);
 
-    protected override void StartUpdatesCallback(object sender, EventArgs e)
+    protected override void StartUpdatesCallback()
     {
-        OnStartUpdates(sender, e);
+        OnStartUpdates?.Invoke();
     }
 
-    protected override void EndUpdatesCallback(object sender, EventArgs e)
+    protected override void EndUpdatesCallback()
     {
-        OnEndUpdates(sender, e);
+        OnEndUpdates?.Invoke();
     }
 
     protected override void ComponentAddedCallback(ulong entityId, T componentValue)
     {
-        if (ShouldAccept(entityId)) OnComponentAdded(entityId, componentValue);
+        if (ShouldAccept(entityId)) OnComponentAdded?.Invoke(entityId, componentValue);
     }
 
     protected override void ComponentModifiedCallback(ulong entityId, T componentValue)
     {
-        if (ShouldAccept(entityId)) OnComponentModified(entityId, componentValue);
+        if (ShouldAccept(entityId)) OnComponentModified?.Invoke(entityId, componentValue);
     }
 
     protected override void ComponentRemovedCallback(ulong entityId)
     {
-        if (ShouldAccept(entityId)) OnComponentRemoved(entityId);
+        if (ShouldAccept(entityId)) OnComponentRemoved?.Invoke(entityId);
     }
 
     protected override void ComponentUnloadedCallback(ulong entityId)
     {
-        if (ShouldAccept(entityId)) OnComponentUnloaded(entityId);
+        if (ShouldAccept(entityId)) OnComponentUnloaded?.Invoke(entityId);
     }
 }

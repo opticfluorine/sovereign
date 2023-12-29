@@ -82,6 +82,8 @@ public class MovementSystem : ISystem, IDisposable
         var eventsProcessed = 0;
         while (EventCommunicator.GetIncomingEvent(out var ev))
         {
+            if (ev == null) continue;
+
             switch (ev.EventId)
             {
                 /* Handle direct movements. */
@@ -121,7 +123,7 @@ public class MovementSystem : ISystem, IDisposable
         SetVelocityEventDetails details;
         try
         {
-            details = (SetVelocityEventDetails)ev.EventDetails;
+            details = (SetVelocityEventDetails)ev.EventDetails!;
         }
         catch (InvalidCastException e)
         {
@@ -145,7 +147,7 @@ public class MovementSystem : ISystem, IDisposable
         EntityEventDetails details;
         try
         {
-            details = (EntityEventDetails)ev.EventDetails;
+            details = (EntityEventDetails)ev.EventDetails!;
         }
         catch (InvalidCastException e)
         {
@@ -168,7 +170,7 @@ public class MovementSystem : ISystem, IDisposable
         MoveOnceEventDetails details;
         try
         {
-            details = (MoveOnceEventDetails)ev.EventDetails;
+            details = (MoveOnceEventDetails)ev.EventDetails!;
         }
         catch (InvalidCastException e)
         {

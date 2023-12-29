@@ -4,6 +4,12 @@
 
 ### December
 
+#### 29 December 2023
+
+* Begin implementation of entity synchronization starting with an event layer over the
+  existing `IEntityBuilder` API.
+* Lots of minor fixes around nullability checks in `EngineCore`.
+
 #### 17 December 2023
 
 * Send event in client when the player ID is established.

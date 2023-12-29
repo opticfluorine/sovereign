@@ -121,7 +121,7 @@ public struct GridPosition : IEquatable<GridPosition>
         return hash;
     }
 
-    public override bool Equals([NotNullWhen(true)] object obj)
+    public override bool Equals([NotNullWhen(true)] object? obj)
     {
         if (!(obj is GridPosition)) return false;
         return Equals((GridPosition)obj);

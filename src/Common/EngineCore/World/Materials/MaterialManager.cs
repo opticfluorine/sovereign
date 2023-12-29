@@ -35,19 +35,19 @@ public class MaterialManager
     /// </summary>
     public const string MaterialDefinitionsFilename = "MaterialDefinitions.yaml";
 
+    private readonly IErrorHandler errorHandler;
+
     /// <summary>
     ///     Material definitions loader.
     /// </summary>
     private readonly MaterialDefinitionsLoader loader;
 
+    private readonly ILogger logger;
+
     /// <summary>
     ///     Resource path builder.
     /// </summary>
     private readonly IResourcePathBuilder pathBuilder;
-
-    private readonly IErrorHandler errorHandler;
-
-    private readonly ILogger logger;
 
     public MaterialManager(MaterialDefinitionsLoader loader, IResourcePathBuilder pathBuilder,
         ILogger logger, IErrorHandler errorHandler)
@@ -62,7 +62,7 @@ public class MaterialManager
     /// <summary>
     ///     Material definitions.
     /// </summary>
-    public IList<Material> Materials { get; private set; }
+    public List<Material> Materials { get; private set; } = new();
 
     /// <summary>
     ///     Initializes the materials.
@@ -115,7 +115,7 @@ public class MaterialManager
         {
             Id = 0,
             MaterialName = "Air",
-            MaterialSubtypes = new[]
+            MaterialSubtypes = new List<MaterialSubtype>
             {
                 new MaterialSubtype
                 {

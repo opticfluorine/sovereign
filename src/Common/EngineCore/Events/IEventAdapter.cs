@@ -36,5 +36,5 @@ public interface IEventAdapter
     /// <returns>
     ///     true if an event was available, false otherwise.
     /// </returns>
-    bool PollEvent(out Event ev);
+    bool PollEvent(out Event? ev);
 }

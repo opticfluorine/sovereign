@@ -48,7 +48,7 @@ public class EventSender : IEventSender, IDisposable
         outgoingEvents.Enqueue(ev);
     }
 
-    public bool TryGetOutgoingEvent(out Event ev)
+    public bool TryGetOutgoingEvent(out Event? ev)
     {
         return outgoingEvents.TryDequeue(out ev);
     }

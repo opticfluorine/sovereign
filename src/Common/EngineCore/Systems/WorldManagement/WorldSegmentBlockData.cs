@@ -38,7 +38,7 @@ public sealed class BlockMaterialData
     /// </summary>
     [Key(1)] public int ModifierId;
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is BlockMaterialData data &&
                MaterialId == data.MaterialId &&
@@ -60,7 +60,7 @@ public sealed class LinePositionedBlockData
     /// <summary>
     ///     Block material data.
     /// </summary>
-    [Key(1)] public BlockMaterialData MaterialData;
+    [Key(1)] public BlockMaterialData MaterialData = new();
 
     /// <summary>
     ///     X offset from segment origin.
@@ -79,7 +79,7 @@ public sealed class WorldSegmentBlockDataLine
     ///     The absence of a block at a given position indicates that that position
     ///     is occupied by a block of the default material for this depth plane.
     /// </summary>
-    [Key(1)] public List<LinePositionedBlockData> BlockData;
+    [Key(1)] public List<LinePositionedBlockData> BlockData = new();
 
     /// <summary>
     ///     Y offset relative to segment origin of this line within its depth plane.
@@ -98,7 +98,7 @@ public sealed class WorldSegmentBlockDataPlane
     ///     The absence of a line for a given Y offset indicates that all positions
     ///     on that line are occupied with blocks of the default material.
     /// </summary>
-    [Key(1)] public List<WorldSegmentBlockDataLine> Lines;
+    [Key(1)] public List<WorldSegmentBlockDataLine> Lines = new();
 
     /// <summary>
     ///     Z offset relative to segment origin of this depth plane.
@@ -117,11 +117,11 @@ public sealed class WorldSegmentBlockData
     ///     The absence of a plane indicates that it is entirely comprised of the
     ///     default block for that plane.
     /// </summary>
-    [Key(1)] public List<WorldSegmentBlockDataPlane> DataPlanes;
+    [Key(1)] public List<WorldSegmentBlockDataPlane> DataPlanes = new();
 
     /// <summary>
     ///     Default materials for unspecified blocks in each depth plane,
     ///     indexed by z offset from segment origin.
     /// </summary>
-    [Key(0)] public BlockMaterialData[] DefaultMaterialsPerPlane;
+    [Key(0)] public BlockMaterialData[] DefaultMaterialsPerPlane = Array.Empty<BlockMaterialData>();
 }

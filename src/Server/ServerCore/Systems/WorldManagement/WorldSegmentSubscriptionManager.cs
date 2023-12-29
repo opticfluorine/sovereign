@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Sovereign.EngineCore.Components.Indexers;
@@ -130,9 +129,7 @@ public class WorldSegmentSubscriptionManager
     /// <summary>
     ///     Called when a batch of player position updates completes.
     /// </summary>
-    /// <param name="sender">Unused.</param>
-    /// <param name="e">Unused.</param>
-    private void OnEndUpdates(object sender, EventArgs e)
+    private void OnEndUpdates()
     {
         activationManager.ProcessChanges(changeCounts);
     }
@@ -140,9 +137,7 @@ public class WorldSegmentSubscriptionManager
     /// <summary>
     ///     Called when a batch of player position updates begins.
     /// </summary>
-    /// <param name="sender">Unused.</param>
-    /// <param name="e">Unused.</param>
-    private void OnStartUpdates(object sender, EventArgs e)
+    private void OnStartUpdates()
     {
         // Reset working structures to a clear state.
         changeCounts.Clear();

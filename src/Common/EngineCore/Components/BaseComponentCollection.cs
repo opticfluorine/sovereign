@@ -55,14 +55,12 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <summary>
     ///     Map from component buffer index to associated entity ID.
     /// </summary>
-    private readonly IDictionary<int, ulong> componentToEntityMap
-        = new ConcurrentDictionary<int, ulong>();
+    private readonly ConcurrentDictionary<int, ulong> componentToEntityMap = new();
 
     /// <summary>
     ///     Map from entity ID to associated component.
     /// </summary>
-    private readonly IDictionary<ulong, int> entityToComponentMap
-        = new ConcurrentDictionary<ulong, int>();
+    private readonly ConcurrentDictionary<ulong, int> entityToComponentMap = new();
 
     /// <summary>
     ///     Buffer indices ready for reuse.
@@ -72,12 +70,12 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <summary>
     ///     Operators associated with this component.
     /// </summary>
-    private readonly IDictionary<ComponentOperation, Func<T, T, T>> operators;
+    private readonly Dictionary<ComponentOperation, Func<T, T, T>> operators;
 
     /// <summary>
     ///     Entity IDs of pending adds.
     /// </summary>
-    private readonly ISet<ulong> pendingAddEntityIds = new HashSet<ulong>();
+    private readonly HashSet<ulong> pendingAddEntityIds = new();
 
     /// <summary>
     ///     Add events that are pending invocation.
@@ -92,8 +90,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <summary>
     ///     Pending component modifications binned by operation.
     /// </summary>
-    private readonly IDictionary<ComponentOperation, StructBuffer<PendingModify>>
-        pendingModifications = new Dictionary<ComponentOperation, StructBuffer<PendingModify>>();
+    private readonly Dictionary<ComponentOperation, StructBuffer<PendingModify>>
+        pendingModifications = new();
 
     /// <summary>
     ///     Modify events that are pending invocation.
@@ -126,6 +124,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <param name="componentManager">Component manager.</param>
     /// <param name="initialSize">Initial size of the component buffer.</param>
     /// <param name="operators">Dict of component operators for use in updates.</param>
+    /// <param name="componentType">Component type.</param>
     protected BaseComponentCollection(ComponentManager componentManager, int initialSize,
         Dictionary<ComponentOperation, Func<T, T, T>> operators,
         ComponentType componentType)
@@ -153,7 +152,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
 
     /// <summary>
     ///     Provides access to the components indexed by the associated
-    ///     enttiy ID.
+    ///     entity ID.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <returns>Component associated with the given entity.</returns>
@@ -162,17 +161,17 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// </exception>
     public T this[ulong entityId] => components[entityToComponentMap[entityId]];
 
-    public event EventHandler OnStartUpdates;
+    public event Action? OnStartUpdates;
 
-    public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentAdded;
+    public event ComponentEventDelegates<T>.ComponentEventHandler? OnComponentAdded;
 
-    public event ComponentEventDelegates<T>.ComponentRemovedEventHandler OnComponentRemoved;
+    public event ComponentEventDelegates<T>.ComponentRemovedEventHandler? OnComponentRemoved;
 
-    public event ComponentEventDelegates<T>.ComponentEventHandler OnComponentModified;
+    public event ComponentEventDelegates<T>.ComponentEventHandler? OnComponentModified;
 
-    public event ComponentEventDelegates<T>.ComponentUnloadedEventHandler OnComponentUnloaded;
+    public event ComponentEventDelegates<T>.ComponentUnloadedEventHandler? OnComponentUnloaded;
 
-    public event EventHandler OnEndUpdates;
+    public event Action? OnEndUpdates;
 
     public void RemoveComponent(ulong entityId)
     {
@@ -267,7 +266,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         var componentIndex = entityToComponentMap[entityId];
 
         /* Ensure that the operation is supported by this component. */
-        if (!operators.Keys.Contains(operation))
+        if (!operators.ContainsKey(operation))
             throw new NotSupportedException();
 
         /* Enqueue a modification. */
@@ -337,7 +336,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private void FireComponentEvents()
     {
         /* Announce that events are being fired. */
-        OnStartUpdates?.Invoke(this, null);
+        OnStartUpdates?.Invoke();
 
         /* Fire events. */
         FireAddEvents();
@@ -346,7 +345,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         FireUnloadEvents();
 
         /* Announce that events are done being fired. */
-        OnEndUpdates?.Invoke(this, null);
+        OnEndUpdates?.Invoke();
     }
 
     /// <summary>
@@ -507,7 +506,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
 
         /* Remove the component, but leave it allocated for later reuse. */
         var index = entityToComponentMap[entityId];
-        entityToComponentMap.Remove(entityId);
+        entityToComponentMap.Remove(entityId, out _);
         indexQueue.Enqueue(index);
     }
 

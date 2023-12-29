@@ -30,8 +30,7 @@ public sealed class EventDescriptions
     /// <summary>
     ///     Map from event ID to detail type.
     /// </summary>
-    private readonly IDictionary<EventId, Type> detailTypes
-        = new Dictionary<EventId, Type>();
+    private readonly Dictionary<EventId, Type?> detailTypes = new();
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -43,10 +42,10 @@ public sealed class EventDescriptions
     /// <exception cref="KeyNotFoundException">
     ///     Thrown if the event ID has not been registered.
     /// </exception>
-    public Type GetDetailType(EventId eventId)
+    public Type? GetDetailType(EventId eventId)
     {
-        if (detailTypes.ContainsKey(eventId))
-            return detailTypes[eventId];
+        if (detailTypes.TryGetValue(eventId, out var type))
+            return type;
         throw new KeyNotFoundException("Event ID " + eventId + " not recognized.");
     }
 
@@ -84,7 +83,7 @@ public sealed class EventDescriptions
         }
     }
 
-    private void RegisterEvent(EventId eventId, Type detailType)
+    private void RegisterEvent(EventId eventId, Type? detailType)
     {
         lock (detailTypes)
         {

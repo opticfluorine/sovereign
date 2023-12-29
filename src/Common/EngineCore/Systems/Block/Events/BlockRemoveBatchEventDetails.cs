@@ -28,5 +28,5 @@ public sealed class BlockRemoveBatchEventDetails : IEventDetails
     /// <summary>
     ///     List of block entity IDs to remove.
     /// </summary>
-    public IList<ulong> EntityIds { get; set; }
+    public List<ulong> EntityIds { get; set; } = new();
 }

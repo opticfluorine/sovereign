@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.Collections.Generic;
 using Sovereign.EngineCore.Events;
 
@@ -31,7 +30,7 @@ public abstract class BaseComponentReducer<T> : BaseComponentIndexer<T> where T 
     /// <summary>
     ///     Entity IDs that need an update.
     /// </summary>
-    private readonly ISet<ulong> entityIds = new HashSet<ulong>();
+    private readonly HashSet<ulong> entityIds = new();
 
     private readonly IEventSender eventSender;
     private readonly EventId primaryEventId;
@@ -56,7 +55,7 @@ public abstract class BaseComponentReducer<T> : BaseComponentIndexer<T> where T 
         entityIds.Add(entityId);
     }
 
-    protected override void EndUpdatesCallback(object sender, EventArgs e)
+    protected override void EndUpdatesCallback()
     {
         /* Produce an event for each affected entity. */
         foreach (var entityId in entityIds)

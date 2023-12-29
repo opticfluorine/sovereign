@@ -56,9 +56,7 @@ public class BaseComponentIndexer<T> : IDisposable
     ///     Called when the event source signals that updates are beginning.
     ///     Defaults to no action.
     /// </summary>
-    /// <param name="sender">Event sender.</param>
-    /// <param name="e">Event arguments.</param>
-    protected virtual void StartUpdatesCallback(object sender, EventArgs e)
+    protected virtual void StartUpdatesCallback()
     {
     }
 
@@ -104,9 +102,7 @@ public class BaseComponentIndexer<T> : IDisposable
     ///     Called when the event source signals that updates are complete.
     ///     Defaults to no action.
     /// </summary>
-    /// <param name="sender">Event sender.</param>
-    /// <param name="e">Event arguments.</param>
-    protected virtual void EndUpdatesCallback(object sender, EventArgs e)
+    protected virtual void EndUpdatesCallback()
     {
     }
 }

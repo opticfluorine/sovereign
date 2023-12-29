@@ -353,9 +353,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <summary>
     ///     Called when a materials update begins.
     /// </summary>
-    /// <param name="sender">Not used.</param>
-    /// <param name="e">Not used.</param>
-    private void OnStartUpdates(object sender, EventArgs e)
+    private void OnStartUpdates()
     {
         if (updateCount == 0)
         {
@@ -372,9 +370,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <summary>
     ///     Called when a materials update ends.
     /// </summary>
-    /// <param name="sender">Not used.</param>
-    /// <param name="e">Not used.</param>
-    private void OnEndUpdates(object sender, EventArgs e)
+    private void OnEndUpdates()
     {
         /* Check whether both materials and modifiers have updated. */
         if (updateCount >= UpdatedCollectionCount)

@@ -35,7 +35,7 @@ public class CoreMain
         Thread.CurrentThread.Name = "Main";
 
         /* Start up the IoC container */
-        IWindsorContainer iocContainer = null;
+        IWindsorContainer? iocContainer = null;
         try
         {
             iocContainer = IoCUtil.InitializeIoC();
@@ -53,7 +53,7 @@ public class CoreMain
         }
 
         /* Shut down the IoC container */
-        ShutdownIoC(iocContainer);
+        if (iocContainer != null) ShutdownIoC(iocContainer);
     }
 
     private void ShutdownIoC(IWindsorContainer iocContainer)
@@ -67,12 +67,14 @@ public class CoreMain
     /// <param name="message">Message to log.</param>
     /// <param name="e">Exception to log.</param>
     /// <param name="iocContainer">IoC container.</param>
-    private void LogEarlyError(string message, Exception e, IWindsorContainer iocContainer)
+    private void LogEarlyError(string message, Exception e, IWindsorContainer? iocContainer)
     {
         /* Attempt to resolve a logger. */
         try
         {
+            if (iocContainer == null) throw new Exception();
             var logger = iocContainer.Resolve<ILogger>();
+            if (logger == null) throw new Exception();
             logger.Fatal(message, e);
         }
         catch

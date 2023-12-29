@@ -43,7 +43,7 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     /// </summary>
     /// <param name="position">Position to query.</param>
     /// <returns>The set of entities at the position, or null if there are none.</returns>
-    public ISet<ulong> GetEntitiesAtPosition(GridPosition position)
+    public ISet<ulong>? GetEntitiesAtPosition(GridPosition position)
     {
         return entitiesByPosition.TryGetValue(position, out var entities)
             ? entities
@@ -80,7 +80,7 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     {
         var gridPos = new GridPosition(position);
         var set = GetSetForPosition(gridPos);
-        set.Add(entityId);
+        set?.Add(entityId);
     }
 
     /// <summary>
@@ -88,10 +88,10 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     /// </summary>
     /// <param name="position">Grid position.</param>
     /// <returns>Set.</returns>
-    private ISet<ulong> GetSetForPosition(GridPosition position)
+    private ISet<ulong>? GetSetForPosition(GridPosition position)
     {
         var exists = entitiesByPosition.TryGetValue(position, out var set);
-        if (!exists)
+        if (!exists || set == null)
         {
             set = new HashSet<ulong>();
             entitiesByPosition[position] = set;

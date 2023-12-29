@@ -34,5 +34,5 @@ public interface IEventSender
     /// </summary>
     /// <param name="ev">Next event being sent to the event loop, or null if none is available.</param>
     /// <returns>true if an event was available, false otherwise.</returns>
-    bool TryGetOutgoingEvent(out Event ev);
+    bool TryGetOutgoingEvent(out Event? ev);
 }

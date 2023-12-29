@@ -18,6 +18,7 @@
 using System;
 using System.Numerics;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.Systems.Player.Components;
@@ -42,7 +43,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     protected readonly PositionComponentCollection positions;
     protected readonly VelocityComponentCollection velocities;
 
-    private IncrementalGuard.IncrementalGuardWeakLock weakLock;
+    private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
 
     public AbstractEntityBuilder(ulong entityId,
         ComponentManager componentManager, PositionComponentCollection positions,
@@ -75,7 +76,6 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     public ulong Build()
     {
         weakLock.Dispose();
-        weakLock = null;
 
         return entityId;
     }
@@ -102,6 +102,11 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         materials.AddComponent(entityId, materialId);
         materialModifiers.AddComponent(entityId, materialModifier);
         return this;
+    }
+
+    public IEntityBuilder Material(MaterialPair material)
+    {
+        return Material(material.MaterialId, material.MaterialModifier);
     }
 
     public IEntityBuilder AboveBlock(ulong otherEntityId)

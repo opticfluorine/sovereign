@@ -193,7 +193,7 @@ public class MainEventLoop : IEventLoop
         foreach (var eventSender in eventSenders)
             while (eventSender.TryGetOutgoingEvent(out var ev))
             {
-                EnqueueEvent(ev);
+                if (ev != null) EnqueueEvent(ev);
                 eventsProcessed++;
             }
 
@@ -215,7 +215,7 @@ public class MainEventLoop : IEventLoop
 
             while (eventAdapter.PollEvent(out var ev))
             {
-                EnqueueEvent(ev);
+                if (ev != null) EnqueueEvent(ev);
                 eventsProcessed++;
             }
         }
@@ -289,9 +289,11 @@ public class MainEventLoop : IEventLoop
     /// </summary>
     private class EventTimeComparer : Comparer<Event>
     {
-        public override int Compare(Event x, Event y)
+        public override int Compare(Event? x, Event? y)
         {
-            return x.EventTime.CompareTo(y.EventTime);
+            if (x == null && y == null) return 0;
+            if (x == null) return -1;
+            return y == null ? 1 : x.EventTime.CompareTo(y.EventTime);
         }
     }
 }

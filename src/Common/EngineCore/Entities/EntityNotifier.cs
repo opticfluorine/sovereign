@@ -37,12 +37,12 @@ public sealed class EntityNotifier
     /// <summary>
     ///     Event triggered when an entity is removed.
     /// </summary>
-    public event EntityEventDelegates.RemoveEntityEvent OnRemoveEntity;
+    public event EntityEventDelegates.RemoveEntityEvent? OnRemoveEntity;
 
     /// <summary>
     ///     Event triggered when an entity is unloaded.
     /// </summary>
-    public event EntityEventDelegates.UnloadEntityEvent OnUnloadEntity;
+    public event EntityEventDelegates.UnloadEntityEvent? OnUnloadEntity;
 
     /// <summary>
     ///     Enqueues an entity remove event.
@@ -71,8 +71,8 @@ public sealed class EntityNotifier
     /// </remarks>
     public void Dispatch()
     {
-        foreach (var entityId in queuedRemoveEvents) OnRemoveEntity.Invoke(entityId);
-        foreach (var entityId in queuedUnloadEvents) OnUnloadEntity.Invoke(entityId);
+        foreach (var entityId in queuedRemoveEvents) OnRemoveEntity?.Invoke(entityId);
+        foreach (var entityId in queuedUnloadEvents) OnUnloadEntity?.Invoke(entityId);
 
         queuedRemoveEvents.Clear();
         queuedUnloadEvents.Clear();

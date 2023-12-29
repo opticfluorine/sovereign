@@ -296,3 +296,25 @@ Once the entity IDs are synchronized, updates to the entity proceed via the same
 that mutate entity state on the server. These events, where they might mutate publicly
 visible components of an entity, are relayed via the event server to the client. See
 the above discussion on primary (idempotent) defining events for additional details.
+
+#### Entity Synchronization Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant WorldManagement
+    
+    note left of Client: Player enters game
+    activate WorldManagement
+    WorldManagement -) Client: Entity tree for player (self tree)
+    activate Client
+    deactivate Client
+    deactivate WorldManagement
+    
+    note left of Client: Player subscribes to world segment
+    activate WorldManagement
+    WorldManagement -) Client: All non-block entities in segment (except self tree)
+    activate Client
+    deactivate Client
+    deactivate WorldManagement
+```

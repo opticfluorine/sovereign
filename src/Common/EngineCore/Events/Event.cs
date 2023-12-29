@@ -50,7 +50,7 @@ public class Event
     /// <param name="eventTime">
     ///     System time (us) when this event should be dispatched.
     /// </param>
-    public Event(EventId eventId, IEventDetails details,
+    public Event(EventId eventId, IEventDetails? details,
         ulong eventTime = Immediate, bool local = true)
     {
         EventId = eventId;
@@ -119,5 +119,5 @@ public class Event
     ///     Details associated with the event.
     /// </summary>
     [Key(1)]
-    public IEventDetails EventDetails { get; set; }
+    public IEventDetails? EventDetails { get; set; }
 }

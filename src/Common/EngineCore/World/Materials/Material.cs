@@ -38,10 +38,10 @@ public sealed class Material
     /// <summary>
     ///     Name of the material.
     /// </summary>
-    public string MaterialName { get; set; }
+    public string MaterialName { get; set; } = "";
 
     /// <summary>
     ///     Associated material subtypes.
     /// </summary>
-    public IList<MaterialSubtype> MaterialSubtypes { get; set; }
+    public List<MaterialSubtype> MaterialSubtypes { get; set; } = new();
 }

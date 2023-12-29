@@ -38,12 +38,12 @@ public class BlockController
     /// <summary>
     ///     Reusable object pool to manage batch add buffers.
     /// </summary>
-    private readonly ObjectPool<IList<BlockRecord>> batchAddPool = new(() => new List<BlockRecord>(DefaultBufferSize));
+    private readonly ObjectPool<List<BlockRecord>> batchAddPool = new(() => new List<BlockRecord>(DefaultBufferSize));
 
     /// <summary>
     ///     Reusable object pool to manage batch remove buffers.
     /// </summary>
-    private readonly ObjectPool<IList<ulong>> batchRemovePool = new(() => new List<ulong>(DefaultBufferSize));
+    private readonly ObjectPool<List<ulong>> batchRemovePool = new(() => new List<ulong>(DefaultBufferSize));
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -129,7 +129,7 @@ public class BlockController
     ///     Returns an add buffer to the object pool. This should only be called internally.
     /// </summary>
     /// <param name="addBuffer">Buffer to return.</param>
-    internal void ReturnAddBuffer(IList<BlockRecord> addBuffer)
+    internal void ReturnAddBuffer(List<BlockRecord> addBuffer)
     {
         batchAddPool.ReturnObject(addBuffer);
     }
@@ -138,7 +138,7 @@ public class BlockController
     ///     Returns a remove buffer to the object pool. This should only be called internally.
     /// </summary>
     /// <param name="removeBuffer">Buffer to return.</param>
-    internal void ReturnRemoveBuffer(IList<ulong> removeBuffer)
+    internal void ReturnRemoveBuffer(List<ulong> removeBuffer)
     {
         batchRemovePool.ReturnObject(removeBuffer);
     }

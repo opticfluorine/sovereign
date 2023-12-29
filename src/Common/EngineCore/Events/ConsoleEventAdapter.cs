@@ -28,7 +28,7 @@ public sealed class ConsoleEventAdapter : IEventAdapter
     /// <summary>
     ///     Whether the server has been requested to stop from the console.
     /// </summary>
-    private bool StopRequested;
+    private bool stopRequested;
 
     public ConsoleEventAdapter(EventAdapterManager adapterManager)
     {
@@ -43,14 +43,14 @@ public sealed class ConsoleEventAdapter : IEventAdapter
     {
     }
 
-    public bool PollEvent(out Event ev)
+    public bool PollEvent(out Event? ev)
     {
-        if (StopRequested)
+        if (stopRequested)
         {
             Logger.Info("Received SIGINT, shutting down.");
 
             Console.CancelKeyPress -= Console_CancelKeyPress;
-            StopRequested = false;
+            stopRequested = false;
 
             ev = new Event(EventId.Core_Quit);
             return true;
@@ -65,9 +65,9 @@ public sealed class ConsoleEventAdapter : IEventAdapter
     /// </summary>
     /// <param name="sender">Not used.</param>
     /// <param name="e">Event.</param>
-    private void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+    private void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
     {
         e.Cancel = true;
-        StopRequested = true;
+        stopRequested = true;
     }
 }

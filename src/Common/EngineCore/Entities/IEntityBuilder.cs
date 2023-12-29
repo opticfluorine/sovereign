@@ -17,6 +17,7 @@
 
 using System;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Entities;
 
@@ -74,6 +75,13 @@ public interface IEntityBuilder
     /// <param name="materialModifier">Material modifier.</param>
     /// <returns>Builder.</returns>
     IEntityBuilder Material(int materialId, int materialModifier);
+
+    /// <summary>
+    ///     Makes the new entity a block of the given material.
+    /// </summary>
+    /// <param name="material">Material.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder Material(MaterialPair material);
 
     /// <summary>
     ///     Records the entity ID of the block above this block.
