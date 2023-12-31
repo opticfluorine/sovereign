@@ -24,6 +24,7 @@ namespace Sovereign.EngineCore.Components.Indexers;
 /// </summary>
 /// <typeparam name="T">Component value type.</typeparam>
 public class BaseComponentIndexer<T> : IDisposable
+    where T : notnull
 {
     protected readonly BaseComponentCollection<T> components;
     protected readonly IComponentEventSource<T> eventSource;

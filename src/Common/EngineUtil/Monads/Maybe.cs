@@ -24,12 +24,12 @@ namespace Sovereign.EngineUtil.Monads;
 ///     Implementation of the "Maybe" monad.
 /// </summary>
 /// <typeparam name="T">Type of the value.</typeparam>
-public class Maybe<T>
+public class Maybe<T> where T : notnull
 {
     /// <summary>
     ///     Underlying value.
     /// </summary>
-    private T value;
+    private T? value;
 
     /// <summary>
     ///     Creates a Maybe with no underlying value.
@@ -62,7 +62,7 @@ public class Maybe<T>
     {
         get
         {
-            if (!HasValue) throw new NoValueException();
+            if (!HasValue || value == null) throw new NoValueException();
             return value;
         }
 

@@ -23,6 +23,8 @@ namespace Sovereign.EngineUtil.Monads;
 ///     Option type.
 /// </summary>
 public sealed class Option<T1, T2>
+    where T1 : notnull
+    where T2 : notnull
 {
     /// <summary>
     ///     Backing maybe for first type.

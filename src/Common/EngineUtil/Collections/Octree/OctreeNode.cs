@@ -30,7 +30,7 @@ namespace Sovereign.EngineUtil.Collections.Octree;
 /// <typeparam name="T">Element type.</typeparam>
 /// This class is intended for use as an internal data structure by Octree.
 [DebuggerDisplay("{minPosition} - {maxPosition}, Count = {elementPositions.Count}")]
-internal sealed class OctreeNode<T>
+internal sealed class OctreeNode<T> where T : notnull
 {
     /// <summary>
     ///     Threshold for length comparisons.
@@ -40,7 +40,7 @@ internal sealed class OctreeNode<T>
     /// <summary>
     ///     Child nodes indexed by the eight possible combinations of OctreeOctant flags.
     /// </summary>
-    public readonly OctreeNode<T>[] childNodes = new OctreeNode<T>[8];
+    public readonly OctreeNode<T>?[] childNodes = new OctreeNode<T>?[8];
 
     /// <summary>
     ///     Maximum position (exclusive) of the node's box.
@@ -70,7 +70,7 @@ internal sealed class OctreeNode<T>
     /// <summary>
     ///     Parent node.
     /// </summary>
-    public OctreeNode<T> parentNode;
+    public OctreeNode<T>? parentNode;
 
     /// <summary>
     ///     Creates a new node of the given octree.
@@ -79,7 +79,7 @@ internal sealed class OctreeNode<T>
     /// <param name="parentNode">Parent node.</param>
     /// <param name="minPosition">Minimum position (inclusive) of the node's box.</param>
     /// <param name="maxPosition">Maximum position (exclusive) of the node's box.</param>
-    public OctreeNode(Octree<T> octree, OctreeNode<T> parentNode,
+    public OctreeNode(Octree<T> octree, OctreeNode<T>? parentNode,
         Vector3 minPosition, Vector3 maxPosition)
     {
         /* Set fields. */
@@ -149,7 +149,7 @@ internal sealed class OctreeNode<T>
             childNodes[(int)octant] = new OctreeNode<T>(octree, this, minPosition, maxPosition);
         }
 
-        return childNodes[(int)octant];
+        return childNodes[(int)octant]!;
     }
 
     /// <summary>
@@ -377,7 +377,7 @@ internal sealed class OctreeNode<T>
             }
 
             /* Distribute the element. */
-            childNodes[(int)octant].elementPositions[element] = elementPositions[element];
+            childNodes[(int)octant]!.elementPositions[element] = elementPositions[element];
         }
     }
 }

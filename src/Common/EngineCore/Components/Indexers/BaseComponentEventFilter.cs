@@ -23,6 +23,7 @@ namespace Sovereign.EngineCore.Components.Indexers;
 ///     Base class for component event filters.
 /// </summary>
 public abstract class BaseComponentEventFilter<T> : BaseComponentIndexer<T>, IComponentEventSource<T>
+    where T : notnull
 {
     public BaseComponentEventFilter(BaseComponentCollection<T> components,
         IComponentEventSource<T> eventSource) : base(components, eventSource)

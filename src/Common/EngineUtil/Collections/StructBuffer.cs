@@ -130,6 +130,8 @@ public class StructBuffer<T> : IEnumerable<T>
         /// </summary>
         private readonly StructBuffer<T1> structBuffer;
 
+        private T1? _current;
+
         /// <summary>
         ///     Current index into the buffer.
         /// </summary>
@@ -141,9 +143,32 @@ public class StructBuffer<T> : IEnumerable<T>
             currentIndex = -1;
         }
 
-        public T1 Current { get; private set; }
+        public T1 Current
+        {
+            get
+            {
+                if (_current == null)
+                {
+                    throw new InvalidOperationException("Enumerator is before first element.");
+                }
 
-        object IEnumerator.Current => Current;
+                return _current;
+            }
+            private set => _current = value;
+        }
+
+        object IEnumerator.Current
+        {
+            get
+            {
+                if (_current == null)
+                {
+                    throw new InvalidOperationException("Enumerator is before first element.");
+                }
+
+                return _current;
+            }
+        }
 
         public void Dispose()
         {

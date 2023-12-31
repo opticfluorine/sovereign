@@ -41,6 +41,7 @@ namespace Sovereign.EngineCore.Components;
 /// is currently enqueued for addition.
 /// <typeparam name="T">Component value type.</typeparam>
 public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSource<T>, IComponentRemover
+    where T : notnull
 {
     /// <summary>
     ///     Internal operation buffer size.

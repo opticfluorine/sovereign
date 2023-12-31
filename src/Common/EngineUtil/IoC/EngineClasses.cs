@@ -34,7 +34,7 @@ public static class EngineClasses
     {
         var thisAssembly = Assembly.GetExecutingAssembly();
         var dir = Path.GetDirectoryName(thisAssembly.Location);
-        var prefix = thisAssembly.FullName.Substring(0, thisAssembly.FullName.IndexOf('.'));
+        var prefix = thisAssembly.FullName!.Substring(0, thisAssembly.FullName.IndexOf('.'));
 
         return Classes.FromAssemblyInDirectory(EngineAssemblyFilter());
     }
@@ -48,7 +48,7 @@ public static class EngineClasses
     {
         var thisAssembly = Assembly.GetExecutingAssembly();
         var dir = Path.GetDirectoryName(thisAssembly.Location);
-        var prefix = thisAssembly.FullName.Substring(0, thisAssembly.FullName.IndexOf('.'));
+        var prefix = thisAssembly.FullName!.Substring(0, thisAssembly.FullName.IndexOf('.'));
 
         return new AssemblyFilter(dir).FilterByName(name => name.FullName.StartsWith(prefix));
     }

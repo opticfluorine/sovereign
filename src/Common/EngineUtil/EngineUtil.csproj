@@ -5,6 +5,8 @@
         <RootNamespace>Sovereign.EngineUtil</RootNamespace>
         <AssemblyName>Sovereign.EngineUtil</AssemblyName>
         <Platforms>AnyCPU;x64</Platforms>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>

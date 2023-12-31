@@ -4,6 +4,14 @@
 
 ### December
 
+#### 31 December 2023
+
+* Treat all warnings as errors. Thought I had already enabled this but apparently not.
+  Together with the nullability warnings, this should help catch a lot of potential bugs
+  at compile time instead of at runtime.
+* Enable nullability warnings and fix those warnings for `EngineUtil`. These are extremely
+  valuable, so I'm going to do the same for the other class libraries moving forward.
+
 #### 29 December 2023
 
 * Begin implementation of entity synchronization starting with an event layer over the

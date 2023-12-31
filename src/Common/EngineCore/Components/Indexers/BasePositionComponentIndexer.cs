@@ -88,9 +88,14 @@ public class BasePositionComponentIndexer : BaseComponentIndexer<Vector3>
     public bool TryAcquireLock(out IndexerLock? indexerLock)
     {
         /* Attempt to acquire a lock on the octree. */
-        var acquired = octree.TryAcquireLock(out var octreeLock);
-        indexerLock = acquired ? new IndexerLock(octreeLock) : null;
-        return acquired;
+        if (octree.TryAcquireLock(out var octreeLock))
+        {
+            indexerLock = new IndexerLock(octreeLock);
+            return true;
+        }
+
+        indexerLock = null;
+        return false;
     }
 
     protected override void StartUpdatesCallback()
@@ -100,22 +105,26 @@ public class BasePositionComponentIndexer : BaseComponentIndexer<Vector3>
 
     protected override void ComponentAddedCallback(ulong entityId, Vector3 position)
     {
-        octree.Add(updateLock?.octreeLock, position, entityId);
+        if (updateLock == null) return;
+        octree.Add(updateLock.octreeLock, position, entityId);
     }
 
     protected override void ComponentModifiedCallback(ulong entityId, Vector3 position)
     {
-        octree.UpdatePosition(updateLock?.octreeLock, entityId, position);
+        if (updateLock == null) return;
+        octree.UpdatePosition(updateLock.octreeLock, entityId, position);
     }
 
     protected override void ComponentRemovedCallback(ulong entityId)
     {
-        octree.Remove(updateLock?.octreeLock, entityId);
+        if (updateLock == null) return;
+        octree.Remove(updateLock.octreeLock, entityId);
     }
 
     protected override void ComponentUnloadedCallback(ulong entityId)
     {
-        octree.Remove(updateLock?.octreeLock, entityId);
+        if (updateLock == null) return;
+        octree.Remove(updateLock.octreeLock, entityId);
     }
 
     protected override void EndUpdatesCallback()

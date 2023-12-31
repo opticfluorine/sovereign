@@ -26,6 +26,7 @@ namespace Sovereign.EngineCore.Systems.Player.Components.Indexers;
 /// </summary>
 /// <typeparam name="T">Component value type.</typeparam>
 public class PlayerComponentEventFilter<T> : BaseComponentEventFilter<T>
+    where T : notnull
 {
     private readonly PlayerCharacterTagCollection playerTags;
 

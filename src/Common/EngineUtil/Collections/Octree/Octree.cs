@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Threading;
 using Sovereign.EngineUtil.Ranges;
@@ -28,7 +29,7 @@ namespace Sovereign.EngineUtil.Collections.Octree;
 ///     distinct objects in three-dimensional space.
 /// </summary>
 /// The Octree class is thread-safe.
-public sealed class Octree<T>
+public sealed class Octree<T> where T : notnull
 {
     /// <summary>
     ///     Default number of levels to initially generate in the tree.
@@ -165,7 +166,7 @@ public sealed class Octree<T>
             currentNode.elementPositions.Remove(element);
 
             /* Descend if needed. */
-            OctreeNode<T> nextNode = null;
+            OctreeNode<T>? nextNode = null;
             foreach (var childNode in currentNode.childNodes)
             {
                 if (childNode == null) continue;
@@ -249,7 +250,7 @@ public sealed class Octree<T>
     /// </summary>
     /// <param name="octreeLock">Octree lock. Undefined if this method returns false.</param>
     /// <returns>true if a lock was acquired, false otherwise.</returns>
-    public bool TryAcquireLock(out OctreeLock octreeLock)
+    public bool TryAcquireLock([NotNullWhen(true)] out OctreeLock? octreeLock)
     {
         var acquired = Monitor.TryEnter(lockObject);
         octreeLock = acquired ? AcquireLock() : null;
@@ -277,7 +278,7 @@ public sealed class Octree<T>
     /// </summary>
     /// <param name="element">Element.</param>
     /// <returns>Leaf node containing the element, or null if the element is not found.</returns>
-    private OctreeNode<T> FindNodeForElement(T element)
+    private OctreeNode<T>? FindNodeForElement(T element)
     {
         /* Bail if the element is not present. */
         if (!rootNode.elementPositions.ContainsKey(element)) return null;
@@ -287,7 +288,7 @@ public sealed class Octree<T>
         while (!currentNode.IsLeafNode())
         {
             /* Descend into the node containing the element. */
-            OctreeNode<T> nextNode = null;
+            OctreeNode<T>? nextNode = null;
             foreach (var childNode in currentNode.childNodes)
                 if (childNode != null && childNode.elementPositions.ContainsKey(element))
                 {

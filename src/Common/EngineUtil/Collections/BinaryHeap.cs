@@ -25,7 +25,7 @@ namespace Sovereign.EngineUtil.Collections;
 ///     Concrete implementation of a generic binary heap in an array.
 /// </summary>
 /// <typeparam name="T">Type of object stored in the heap.</typeparam>
-public class BinaryHeap<T> : IHeap<T>
+public class BinaryHeap<T> : IHeap<T> where T : notnull
 {
     /// <summary>
     ///     Default size of the heap.
@@ -52,7 +52,7 @@ public class BinaryHeap<T> : IHeap<T>
     /// </summary>
     /// <param name="size">Initial size of the underlying array.  Should be a power of 2.</param>
     /// <param name="comparer">Optional comparer between elements.</param>
-    public BinaryHeap(int size = DEFAULT_SIZE, IComparer<T> comparer = null)
+    public BinaryHeap(int size = DEFAULT_SIZE, IComparer<T>? comparer = null)
     {
         /* Create the backing array. */
         HeapArray = new T[size];
@@ -398,11 +398,10 @@ public class BinaryHeap<T> : IHeap<T>
     /// </summary>
     protected class Enumerator : IEnumerator<T>
     {
-        private int CurrentIndex = -1;
-
         private readonly BinaryHeap<T> Heap;
 
         private readonly long ReferenceAction;
+        private int CurrentIndex = -1;
 
         internal Enumerator(BinaryHeap<T> heap, long referenceAction)
         {
