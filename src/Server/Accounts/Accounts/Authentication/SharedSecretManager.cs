@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Sodium;
 using Sovereign.Accounts.Configuration;
 using Sovereign.EngineCore.Timing;
@@ -30,7 +31,7 @@ internal sealed class PendingSecret
 {
     public ulong GenerationTime { get; set; }
 
-    public byte[] SharedSecret { get; set; }
+    public byte[] SharedSecret { get; set; } = Array.Empty<byte>();
 }
 
 /// <summary>
@@ -80,9 +81,9 @@ public sealed class SharedSecretManager
     ///     Takes the secret for the given user ID if one is pending.
     /// </summary>
     /// <param name="userId">User ID.</param>
-    /// <param name="sharedSecret"></param>
+    /// <param name="sharedSecret">Secret if one was pending, or undefined otherwise.</param>
     /// <returns>true if a secret was pending, false otherwise.</returns>
-    public bool TakeSecret(Guid userId, out byte[] sharedSecret)
+    public bool TakeSecret(Guid userId, [NotNullWhen(true)] out byte[]? sharedSecret)
     {
         sharedSecret = null;
         var hasSecret = pendingSecrets.ContainsKey(userId);

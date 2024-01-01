@@ -4,11 +4,13 @@
         <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>Sovereign.Accounts</AssemblyName>
         <RootNamespace>Sovereign.Accounts</RootNamespace>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Persistence\Persistence.csproj" />
-        <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
+        <ProjectReference Include="..\Persistence\Persistence.csproj"/>
+        <ProjectReference Include="..\ServerCore\ServerCore.csproj"/>
     </ItemGroup>
 
 </Project>
