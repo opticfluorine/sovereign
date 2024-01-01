@@ -56,7 +56,9 @@ public sealed class TestSqliteAddEntityQuery
             var param = new SqliteParameter("Id", entityId);
             cmd.Parameters.Add(param);
 
-            var result = (ulong)(long)cmd.ExecuteScalar();
+            var scalar = cmd.ExecuteScalar();
+            Assert.NotNull(scalar);
+            var result = (ulong)(long)scalar;
             Assert.Equal(1ul, result);
         }
     }

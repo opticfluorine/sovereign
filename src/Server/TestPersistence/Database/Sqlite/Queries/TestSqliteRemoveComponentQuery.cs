@@ -65,7 +65,9 @@ public sealed class TestSqliteRemoveComponentQuery
             param.SqliteType = SqliteType.Integer;
             cmd.Parameters.Add(param);
 
-            var count = (long)cmd.ExecuteScalar();
+            var scalar = cmd.ExecuteScalar();
+            Assert.NotNull(scalar);
+            var count = (long)scalar;
             Assert.Equal(0, count);
         }
 
@@ -76,7 +78,9 @@ public sealed class TestSqliteRemoveComponentQuery
             param.SqliteType = SqliteType.Integer;
             cmd.Parameters.Add(param);
 
-            var count = (long)cmd.ExecuteScalar();
+            var scalar = cmd.ExecuteScalar();
+            Assert.NotNull(scalar);
+            var count = (long)scalar;
             Assert.Equal(1, count);
         }
     }

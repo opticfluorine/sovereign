@@ -71,7 +71,9 @@ public sealed class TestSimpleSqliteModifyComponentQuery
             paramMat.SqliteType = SqliteType.Integer;
             cmd.Parameters.Add(paramMat);
 
-            var result = (long)cmd.ExecuteScalar();
+            var scalar = cmd.ExecuteScalar();
+            Assert.NotNull(scalar);
+            var result = (long)scalar;
             Assert.Equal(1, result);
         }
     }
