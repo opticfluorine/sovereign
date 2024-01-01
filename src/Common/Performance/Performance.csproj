@@ -10,4 +10,9 @@
     <ProjectReference Include="..\EngineCore\EngineCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Performance\" />
+    <Folder Include="Systems\Performance\" />
+  </ItemGroup>
+
 </Project>

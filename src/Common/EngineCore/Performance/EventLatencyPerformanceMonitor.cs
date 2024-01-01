@@ -20,7 +20,7 @@ using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Timing;
 
-namespace Sovereign.Performance.Performance;
+namespace Sovereign.EngineCore.Performance;
 
 /// <summary>
 ///     Responsible for monitoring local event loop latency.

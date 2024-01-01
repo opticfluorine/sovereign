@@ -16,14 +16,14 @@
  */
 
 using System.Collections.Generic;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
-using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Performance;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineCore.Util;
-using Sovereign.Performance.Performance;
 
-namespace Sovereign.Performance.Systems.Performance;
+namespace Sovereign.EngineCore.Systems.Performance;
 
 /// <summary>
 ///     Responsible for monitoring engine performance.
@@ -66,6 +66,8 @@ public class PerformanceSystem : ISystem
         eventLoop.RegisterSystem(this);
     }
 
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
     public int WorkloadEstimate => 0;
     public EventCommunicator EventCommunicator { get; }
 
@@ -96,6 +98,12 @@ public class PerformanceSystem : ISystem
                     break;
 
                 case EventId.Core_Performance_EventLatencyTest:
+                    if (ev.EventDetails == null)
+                    {
+                        Logger.Error("Received event EventLatencyTest without details.");
+                        break;
+                    }
+
                     eventLatency.OnPerformanceEvent(ev.EventDetails);
                     break;
             }

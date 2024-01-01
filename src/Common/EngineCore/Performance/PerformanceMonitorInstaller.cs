@@ -15,23 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Events;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-namespace Sovereign.Performance.Performance;
+namespace Sovereign.EngineCore.Performance;
 
-/// <summary>
-///     Interface for classes that monitor engine performance.
-/// </summary>
-public interface IPerformanceMonitor
+public sealed class PerformanceMonitorInstaller : IWindsorInstaller
 {
-    /// <summary>
-    ///     Called when a performance event occurs.
-    /// </summary>
-    /// <param name="eventDetails"></param>
-    void OnPerformanceEvent(IEventDetails eventDetails);
-
-    /// <summary>
-    ///     Called when one minute of system time has elapsed.
-    /// </summary>
-    void ReportPerformance();
+    public void Install(IWindsorContainer container, IConfigurationStore store)
+    {
+        container.Register(Component.For<EventLatencyPerformanceMonitor>()
+            .LifestyleSingleton());
+    }
 }

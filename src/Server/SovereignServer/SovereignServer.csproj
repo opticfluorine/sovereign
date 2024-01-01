@@ -23,7 +23,6 @@
     <ProjectReference Include="..\Persistence\Persistence.csproj" />
     <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
     <ProjectReference Include="..\ServerNetwork\ServerNetwork.csproj" />
-    <ProjectReference Include="..\..\Common\Performance\Performance.csproj" />
   </ItemGroup>
 
   <ItemGroup>

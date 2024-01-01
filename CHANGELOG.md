@@ -1,5 +1,13 @@
 # Sovereign Engine Changelog
 
+## 2024
+
+### January
+
+#### 01 January 2024
+
+* Merge `Performance` into `EngineCore` to clean things up; fix nullability warnings.
+
 ## 2023
 
 ### December
