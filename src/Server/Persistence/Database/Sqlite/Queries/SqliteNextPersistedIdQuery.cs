@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Data;
 using Microsoft.Data.Sqlite;
 using Sovereign.Persistence.Database.Queries;
@@ -45,7 +46,8 @@ public sealed class SqliteNextPersistedIdQuery : INextPersistedIdQuery
     {
         using (var cmd = new SqliteCommand(query, dbConnection))
         {
-            var result = (long)cmd.ExecuteScalar();
+            var result = cmd.ExecuteScalar();
+            if (result == null) throw new Exception("Database is in an invalid state.");
             return (ulong)result;
         }
     }

@@ -73,10 +73,6 @@ public sealed class PersistenceSystem : ISystem
         /* Register system. */
         eventLoop.RegisterSystem(this);
 
-        /* Initialize provider and connect to database. */
-        var provider = providerManager.PersistenceProvider;
-        provider.Initialize();
-
         /* Configure the persistence engine against the database. */
         ConfigurePersistence();
     }
@@ -123,7 +119,7 @@ public sealed class PersistenceSystem : ISystem
         Logger.Info("Stopping Persistence system.");
 
         var provider = providerManager.PersistenceProvider;
-        provider.Cleanup();
+        provider.Dispose();
 
         Logger.Info("Persistence system stopped.");
     }
@@ -139,7 +135,7 @@ public sealed class PersistenceSystem : ISystem
         /* Set up the entity mapper. */
         try
         {
-            entityMapper.InitializeMapper(providerManager.PersistenceProvider.NextPersistedIdQuery);
+            entityMapper.InitializeMapper(providerManager.PersistenceProvider.NextPersistedIdQuery!);
 
             Logger.DebugFormat("First available persisted entity ID is {0:X}.",
                 entityMapper.NextPersistedId);

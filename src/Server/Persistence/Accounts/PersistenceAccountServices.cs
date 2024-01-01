@@ -48,7 +48,7 @@ public sealed class PersistenceAccountServices
     public Maybe<Account> RetrieveAccount(string username)
     {
         var query = providerManager.PersistenceProvider.RetrieveAccountQuery;
-        using (var reader = query.RetrieveAccount(username))
+        using (var reader = query!.RetrieveAccount(username))
         {
             if (reader.Reader.Read())
             {
@@ -71,7 +71,7 @@ public sealed class PersistenceAccountServices
     public Maybe<Account> RetrieveAccountWithAuth(string username)
     {
         var query = providerManager.PersistenceProvider.RetrieveAccountWithAuthQuery;
-        using (var reader = query.RetrieveAccountWithAuth(username))
+        using (var reader = query!.RetrieveAccountWithAuth(username))
         {
             if (reader.Reader.Read())
             {

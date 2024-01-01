@@ -25,7 +25,7 @@ namespace Sovereign.Persistence.Database;
 /// <summary>
 ///     Interface implemented by persistence providers.
 /// </summary>
-public interface IPersistenceProvider
+public interface IPersistenceProvider : IDisposable
 {
     /// <summary>
     // Database connection.
@@ -196,14 +196,4 @@ public interface IPersistenceProvider
     ///     IListPlayersQuery for this persistence provider.
     /// </summary>
     IListPlayersQuery ListPlayersQuery { get; }
-
-    /// <summary>
-    ///     Initializes the persistence provider.
-    /// </summary>
-    void Initialize();
-
-    /// <summary>
-    ///     Cleans up the persistence provider.
-    /// </summary>
-    void Cleanup();
 }
