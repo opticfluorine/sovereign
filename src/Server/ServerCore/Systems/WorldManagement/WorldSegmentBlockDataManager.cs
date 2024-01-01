@@ -37,7 +37,7 @@ public sealed class WorldSegmentBlockDataManager
     ///     Updates are made via continuations of the tasks.
     ///     This allows the REST endpoint to await any segment data.
     /// </summary>
-    private readonly ConcurrentDictionary<GridPosition, Task<byte[]>> dataProducers = new();
+    private readonly ConcurrentDictionary<GridPosition, Task<byte[]?>> dataProducers = new();
 
     /// <summary>
     ///     Deletion tasks. The presence of a deletion task in this map indicates
@@ -62,7 +62,7 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
     /// <returns>Summary block data, or null if no summary block data is available.</returns>
-    public Task<byte[]> GetWorldSegmentBlockData(GridPosition segmentIndex)
+    public Task<byte[]?>? GetWorldSegmentBlockData(GridPosition segmentIndex)
     {
         return dataProducers.TryGetValue(segmentIndex, out var data) ? data : null;
     }
@@ -125,7 +125,7 @@ public sealed class WorldSegmentBlockDataManager
     ///     Blocking call that adds a world segment to the data set.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
-    private byte[] DoAddWorldSegment(GridPosition segmentIndex)
+    private byte[]? DoAddWorldSegment(GridPosition segmentIndex)
     {
         try
         {

@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using Sovereign.ServerCore.Events;
@@ -41,6 +42,8 @@ public sealed class DebugSystem : ISystem, IDisposable
         // Register system.
         eventLoop.RegisterSystem(this);
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void Dispose()
     {
@@ -70,6 +73,12 @@ public sealed class DebugSystem : ISystem, IDisposable
         var eventsProcessed = 0;
         while (EventCommunicator.GetIncomingEvent(out var ev))
         {
+            if (ev.EventDetails == null)
+            {
+                Logger.Error("Received debug command without details.");
+                continue;
+            }
+
             eventHandler.HandleDebugCommand((DebugCommandEventDetails)ev.EventDetails);
             eventsProcessed++;
         }

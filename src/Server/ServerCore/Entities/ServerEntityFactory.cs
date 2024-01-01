@@ -41,7 +41,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly PositionComponentCollection positions;
     private readonly VelocityComponentCollection velocities;
 
-    private EntityAssigner entityAssigner;
+    private readonly EntityAssigner entityAssigner;
 
     public ServerEntityFactory(
         EntityManager entityManager,
@@ -67,13 +67,11 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.names = names;
         this.accounts = accounts;
         this.parents = parents;
+        entityAssigner = entityManager.GetNewAssigner();
     }
 
     public IEntityBuilder GetBuilder()
     {
-        if (entityAssigner == null)
-            entityAssigner = entityManager.GetNewAssigner();
-
         return GetBuilder(entityAssigner.GetNextId());
     }
 
