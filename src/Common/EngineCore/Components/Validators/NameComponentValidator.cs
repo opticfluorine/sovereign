@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace Sovereign.EngineCore.Components.Validators;
@@ -38,7 +39,7 @@ public class NameComponentValidator
     /// </summary>
     /// <param name="name">Name.</param>
     /// <returns>true if valid, false otherwise.</returns>
-    public bool IsValid(string name)
+    public bool IsValid([NotNullWhen(true)] string? name)
     {
         return name is { Length: > 0 and <= MaxLength } && validNameRegex.IsMatch(name);
     }

@@ -25,5 +25,5 @@ public class RegistrationResponse
     /// <summary>
     ///     Human-readable description of the registration result.
     /// </summary>
-    public string Result { get; set; } = "";
+    public string? Result { get; set; }
 }

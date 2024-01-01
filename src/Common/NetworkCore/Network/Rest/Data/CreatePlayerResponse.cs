@@ -24,7 +24,7 @@ public class CreatePlayerResponse
     /// <summary>
     ///     Human-readable string indicating the result.
     /// </summary>
-    public string Result { get; set; } = "";
+    public string? Result { get; set; }
 
     /// <summary>
     ///     ID of the new player character. Only valid for successful requests.

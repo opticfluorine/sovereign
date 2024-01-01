@@ -26,5 +26,5 @@ public class ListPlayersResponse
     /// <summary>
     ///     Players associated with the currently logged in account.
     /// </summary>
-    public List<PlayerInfo> Players { get; set; } = new();
+    public List<PlayerInfo>? Players { get; set; }
 }
