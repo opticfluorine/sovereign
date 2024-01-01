@@ -35,7 +35,7 @@ public sealed class NetworkEventAdapter : IEventAdapter
         adapterManager.RegisterEventAdapter(this);
     }
 
-    public bool PollEvent(out Event ev)
+    public bool PollEvent(out Event? ev)
     {
         return eventQueue.ReceivedEvents.TryDequeue(out ev);
     }
