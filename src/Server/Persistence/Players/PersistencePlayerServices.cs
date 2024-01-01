@@ -72,7 +72,7 @@ public class PersistencePlayerServices
     ///     Associated player characters, if any. An empty list is returned if the account
     ///     does not exist.
     /// </returns>
-    public IList<PlayerInfo> GetPlayersForAccount(Guid accountId)
+    public List<PlayerInfo> GetPlayersForAccount(Guid accountId)
     {
         return provider.ListPlayersQuery.ListPlayersForAccount(accountId);
     }

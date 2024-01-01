@@ -39,9 +39,10 @@ public interface IInboundPipelineStage
     int Priority { get; }
 
     /// <summary>
-    ///     Next stage in the inbound network pipeline.
+    ///     Next stage in the inbound network pipeline. Set to null if this is
+    ///     a terminal stage of the pipeline.
     /// </summary>
-    IInboundPipelineStage NextStage { get; set; }
+    IInboundPipelineStage? NextStage { get; set; }
 
     /// <summary>
     ///     Processes an inbound event.

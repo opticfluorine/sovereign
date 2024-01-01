@@ -34,5 +34,5 @@ public interface IListPlayersQuery
     ///     If there is no account associated with the given account ID,
     ///     no player characters are returned.
     /// </remarks>
-    IList<PlayerInfo> ListPlayersForAccount(Guid accountId);
+    List<PlayerInfo> ListPlayersForAccount(Guid accountId);
 }

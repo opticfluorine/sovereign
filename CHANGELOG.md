@@ -7,6 +7,7 @@
 #### 01 January 2024
 
 * Merge `Performance` into `EngineCore` to clean things up; fix nullability warnings.
+* Clean up null checking warnings in `NetworkCore`.
 
 ## 2023
 

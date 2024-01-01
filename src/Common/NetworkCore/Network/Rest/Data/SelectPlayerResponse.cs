@@ -24,5 +24,5 @@ public class SelectPlayerResponse
     /// <summary>
     ///     Human-readable string indicating the result.
     /// </summary>
-    public string Result { get; set; }
+    public string Result { get; set; } = "";
 }
