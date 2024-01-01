@@ -47,7 +47,7 @@ public sealed class RestServer : IDisposable
     /// <summary>
     ///     Embedded web server.
     /// </summary>
-    private Server restServer;
+    private readonly Lazy<Server> restServer;
 
     public RestServer(IServerNetworkConfiguration networkConfiguration,
         ICollection<IRestService> restServices,
@@ -56,6 +56,12 @@ public sealed class RestServer : IDisposable
         this.networkConfiguration = networkConfiguration;
         this.restServices = restServices;
         this.fatalErrorHandler = fatalErrorHandler;
+
+        restServer = new Lazy<Server>(() =>
+        {
+            return new Server(networkConfiguration.RestHostname,
+                networkConfiguration.RestPort, false, OnUnmappedRequest);
+        });
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -63,7 +69,7 @@ public sealed class RestServer : IDisposable
     public void Dispose()
     {
         Logger.Info("Stopping REST server.");
-        if (restServer.IsListening) restServer.Stop();
+        if (restServer.Value.IsListening) restServer.Value.Stop();
     }
 
     /// <summary>
@@ -74,21 +80,19 @@ public sealed class RestServer : IDisposable
         try
         {
             // Create REST server.
-            restServer = new Server(networkConfiguration.RestHostname,
-                networkConfiguration.RestPort, false, OnUnmappedRequest);
-            restServer.Start();
+            restServer.Value.Start();
 
             // Add routes for each service.
             foreach (var service in restServices)
                 switch (service.PathType)
                 {
                     case RestPathType.Static:
-                        restServer.Routes.Static.Add(service.RequestType,
+                        restServer.Value.Routes.Static.Add(service.RequestType,
                             service.Path, service.OnRequest);
                         break;
 
                     case RestPathType.Parameter:
-                        restServer.Routes.Parameter.Add(service.RequestType,
+                        restServer.Value.Routes.Parameter.Add(service.RequestType,
                             service.Path, service.OnRequest);
                         break;
 

@@ -7,7 +7,8 @@
 #### 01 January 2024
 
 * Merge `Performance` into `EngineCore` to clean things up; fix nullability warnings.
-* Clean up null checking warnings in `NetworkCore`, `ServerCore`, `Persistence`, and `Accounts`.
+* Clean up null checking warnings in `NetworkCore`, `ServerCore`, `Persistence`, `Accounts`,
+  and `ServerNetwork`. Still need to go back and make sure the JSON types are nullable.
 
 ## 2023
 

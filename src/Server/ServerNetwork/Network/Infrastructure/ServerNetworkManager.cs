@@ -94,7 +94,7 @@ public sealed class ServerNetworkManager : INetworkManager
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-    public event OnNetworkReceive OnNetworkReceive;
+    public event OnNetworkReceive? OnNetworkReceive;
 
     public void Initialize()
     {
@@ -138,7 +138,7 @@ public sealed class ServerNetworkManager : INetworkManager
         while (outboundEventQueue.TryDequeue(out var evInfo))
             try
             {
-                evInfo.Connection.SendEvent(evInfo.Event, evInfo.DeliveryMethod, serializer);
+                evInfo.Connection?.SendEvent(evInfo.Event, evInfo.DeliveryMethod, serializer);
             }
             catch (Exception e)
             {
@@ -186,7 +186,7 @@ public sealed class ServerNetworkManager : INetworkManager
             var conn = connectionManager.GetConnection(peer.Id);
             var ev = serializer.DeserializeEvent(conn, reader.GetRemainingBytes());
 
-            OnNetworkReceive(ev, conn);
+            OnNetworkReceive?.Invoke(ev, conn);
         }
         catch (Exception e)
         {

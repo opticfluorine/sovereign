@@ -50,14 +50,14 @@ public class ServerAllowedEventsInboundPipelineStage : IInboundPipelineStage
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public int Priority => int.MinValue; // always first stage
-    public IInboundPipelineStage NextStage { get; set; }
+    public IInboundPipelineStage? NextStage { get; set; }
 
     public void ProcessEvent(Event ev, NetworkConnection connection)
     {
         if (allowList.Contains(ev.EventId))
             // Event type is permitted, pass to the next stage of the pipeline.
         {
-            NextStage.ProcessEvent(ev, connection);
+            NextStage?.ProcessEvent(ev, connection);
         }
         else
         {

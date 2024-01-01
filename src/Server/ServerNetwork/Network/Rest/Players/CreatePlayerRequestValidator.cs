@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Diagnostics.CodeAnalysis;
 using Sovereign.EngineCore.Components.Validators;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
@@ -36,8 +37,8 @@ public class CreatePlayerRequestValidator
     /// </summary>
     /// <param name="request">Request.</param>
     /// <returns>true if valid, false otherwise.</returns>
-    public bool IsValid(CreatePlayerRequest request)
+    public bool IsValid([NotNullWhen(true)] CreatePlayerRequest? request)
     {
-        return nameValidator.IsValid(request.PlayerName);
+        return request != null && nameValidator.IsValid(request.PlayerName);
     }
 }

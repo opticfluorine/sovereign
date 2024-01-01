@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Castle.Core.Logging;
 using LiteNetLib;
 using Sovereign.Accounts.Accounts.Authentication;
@@ -94,7 +95,7 @@ public sealed class NewConnectionProcessor
     /// <param name="sharedSecret">Shared secret, or undefined if handoff unsuccessful.</param>
     /// <returns>true if the handoff was successful, false otherwise.</returns>
     private bool AttemptHandoff(ConnectionRequest request, Guid accountId,
-        out byte[] sharedSecret)
+        [NotNullWhen(true)] out byte[]? sharedSecret)
     {
         // Check for a valid login.
         sharedSecret = null;
@@ -104,12 +105,7 @@ public sealed class NewConnectionProcessor
             return false;
 
         // Attempt the handoff.
-        if (!sharedSecretManager.TakeSecret(accountId, out sharedSecret))
-            // Handoff expired.
-            return false;
-
-        // Handoff successful.
-        return true;
+        return sharedSecretManager.TakeSecret(accountId, out sharedSecret);
     }
 
     /// <summary>
