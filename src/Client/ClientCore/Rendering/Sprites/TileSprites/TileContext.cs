@@ -48,7 +48,7 @@ public sealed class TileContext
     /// <summary>
     ///     List of animated sprite IDs to be drawn in order if the context matches.
     /// </summary>
-    public List<int> AnimatedSpriteIds { get; set; }
+    public List<int> AnimatedSpriteIds { get; set; } = new();
 
     /// <summary>
     ///     Determines whether the context matches the given neighboring tile IDs.

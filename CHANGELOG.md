@@ -4,6 +4,10 @@
 
 ### January
 
+#### 02 January 2024
+
+* Clean up null checking warnings in `ClientCore`.
+
 #### 01 January 2024
 
 * Merge `Performance` into `EngineCore` to clean things up; fix nullability warnings.

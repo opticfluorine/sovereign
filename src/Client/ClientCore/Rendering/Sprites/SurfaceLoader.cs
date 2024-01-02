@@ -74,6 +74,8 @@ public class SurfaceLoader
     /// <returns>Surface converted to the display format.</returns>
     private Surface ConvertSurfaceToDisplayFormat(Surface original)
     {
+        if (mainDisplay.DisplayMode == null)
+            throw new SurfaceException("Tried to create surface without display format.");
         var targetFormat = mainDisplay.DisplayMode.DisplayFormat;
         var converted = new Surface(original, targetFormat);
         if (!converted.IsValid) throw new SurfaceException(SDL.SDL_GetError());

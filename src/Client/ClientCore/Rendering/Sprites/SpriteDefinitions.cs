@@ -27,5 +27,5 @@ public sealed class SpriteDefinitions
     /// <summary>
     ///     Sprites.
     /// </summary>
-    public IList<Sprite> Sprites { get; set; }
+    public List<Sprite> Sprites { get; set; } = new();
 }
