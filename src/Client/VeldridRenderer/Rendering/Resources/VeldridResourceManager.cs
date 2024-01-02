@@ -48,12 +48,12 @@ public class VeldridResourceManager : IDisposable
     /// <summary>
     ///     Veldrid texture containing the full texture atlas.
     /// </summary>
-    public VeldridTexture AtlasTexture { get; private set; }
+    public VeldridTexture? AtlasTexture { get; private set; }
 
     /// <summary>
     ///     Veldrid command list used for rendering.
     /// </summary>
-    public CommandList CommandList { get; private set; }
+    public CommandList? CommandList { get; private set; }
 
     /// <summary>
     ///     Cleans up the resources when done.
@@ -72,6 +72,8 @@ public class VeldridResourceManager : IDisposable
         Logger.Info("Initializing base renderer resources.");
 
         // Command lists.
+        if (device.Device == null)
+            throw new InvalidOperationException("Tried to create resources without a device.");
         CommandList = device.Device.ResourceFactory.CreateCommandList();
 
         // Textures.
@@ -85,6 +87,8 @@ public class VeldridResourceManager : IDisposable
     /// </summary>
     private void CreateAtlasTexture()
     {
+        if (atlasManager.TextureAtlas == null)
+            throw new InvalidOperationException("Tried to create Vulkan texture atlas without data.");
         AtlasTexture = new VeldridTexture(device,
             atlasManager.TextureAtlas.AtlasSurface);
     }

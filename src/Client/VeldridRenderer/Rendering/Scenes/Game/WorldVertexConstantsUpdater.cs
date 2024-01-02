@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using Sovereign.ClientCore.Rendering.Scenes;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
@@ -37,6 +38,9 @@ public class WorldVertexConstantsUpdater
     /// <param name="scene">Active scene.</param>
     public void Update(IScene scene)
     {
+        if (gameResourceManager.VertexUniformBuffer == null)
+            throw new InvalidOperationException("Vertex uniform buffer not ready.");
+
         /* Retrieve the needed constants. */
         scene.PopulateWorldVertexConstants(out var widthInTiles,
             out var heightInTiles,

@@ -73,17 +73,17 @@ public class GameResourceManager : IDisposable
     /// <summary>
     ///     Updateable vertex buffer.
     /// </summary>
-    public VeldridUpdateBuffer<WorldVertex> VertexBuffer { get; private set; }
+    public VeldridUpdateBuffer<WorldVertex>? VertexBuffer { get; private set; }
 
     /// <summary>
     ///     Index buffer into the vertex buffer.
     /// </summary>
-    public VeldridUpdateBuffer<uint> IndexBuffer { get; private set; }
+    public VeldridUpdateBuffer<uint>? IndexBuffer { get; private set; }
 
     /// <summary>
     ///     Uniform buffer for the vertex shader.
     /// </summary>
-    public VeldridUpdateBuffer<WorldVertexShaderConstants> VertexUniformBuffer { get; private set; }
+    public VeldridUpdateBuffer<WorldVertexShaderConstants>? VertexUniformBuffer { get; private set; }
 
     /// <summary>
     ///     Number of elements to use in each draw.
@@ -98,12 +98,12 @@ public class GameResourceManager : IDisposable
     /// <summary>
     ///     Vertex shader for game world rendering.
     /// </summary>
-    public Shader WorldVertexShader { get; private set; }
+    public Shader? WorldVertexShader { get; private set; }
 
     /// <summary>
     ///     Fragment shader for game world rendering.
     /// </summary>
-    public Shader WorldFragmentShader { get; private set; }
+    public Shader? WorldFragmentShader { get; private set; }
 
     public void Dispose()
     {
@@ -143,13 +143,20 @@ public class GameResourceManager : IDisposable
     /// <param name="commandList">Active command list.</param>
     public void UpdateBuffers(CommandList commandList)
     {
-        VertexBuffer.Update(commandList);
-        IndexBuffer.Update(commandList);
-        VertexUniformBuffer.Update(commandList);
+        VertexBuffer?.Update(commandList);
+        IndexBuffer?.Update(commandList);
+        VertexUniformBuffer?.Update(commandList);
     }
 
+    /// <summary>
+    ///     Loads shaders.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the device has not yet been created.</exception>
     private void LoadWorldShaders()
     {
+        if (device.Device == null)
+            throw new InvalidOperationException("Tried to create shaders without device.");
+
         // Load shader bytes.
         var vertexShaderBytes = device.LoadShaderBytes("World.vert.spv");
         var fragmentShaderBytes = device.LoadShaderBytes("World.frag.spv");

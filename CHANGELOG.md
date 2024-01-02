@@ -6,7 +6,7 @@
 
 #### 02 January 2024
 
-* Clean up null checking warnings in `ClientCore`.
+* Finish up null checking updates for all projects.
 
 #### 01 January 2024
 

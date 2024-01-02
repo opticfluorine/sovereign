@@ -40,6 +40,9 @@ public class VeldridTexture : IDisposable
 
     public VeldridTexture(VeldridDevice device, Surface surface)
     {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+
         Texture = CreateTexture(device, surface);
 
         var desc = new TextureViewDescription(Texture);
@@ -64,6 +67,9 @@ public class VeldridTexture : IDisposable
 
     private Texture CreateTexture(VeldridDevice device, Surface surface)
     {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+
         /* Allocate a texture on the GPU. */
         var desc = TextureDescription.Texture2D((uint)surface.Properties.Width,
             (uint)surface.Properties.Height, 1, 1, formatMap[surface.Properties.Format],

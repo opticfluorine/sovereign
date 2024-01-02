@@ -37,7 +37,7 @@ public class WorldPipeline : IDisposable
     /// <summary>
     ///     Veldrid pipeline for world rendering.
     /// </summary>
-    public Pipeline Pipeline { get; private set; }
+    public Pipeline? Pipeline { get; private set; }
 
     public void Dispose()
     {
@@ -49,6 +49,9 @@ public class WorldPipeline : IDisposable
     /// </summary>
     public void Initialize()
     {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+
         var pipelineDesc = new GraphicsPipelineDescription(
             BlendStateDescription.SingleAlphaBlend,
             DepthStencilStateDescription.Disabled,
@@ -83,6 +86,9 @@ public class WorldPipeline : IDisposable
     private ShaderSetDescription CreateShaderSet()
     {
         // Describe the vertex format.
+        if (gameResMgr.VertexBuffer == null)
+            throw new InvalidOperationException("Vertex buffer not ready.");
+
         var vertexDesc = new VertexLayoutDescription(
             gameResMgr.VertexBuffer.ElementSize,
             new VertexElementDescription(
@@ -116,6 +122,9 @@ public class WorldPipeline : IDisposable
     /// <returns>Resource layout for the world rendering pipeline.</returns>
     private ResourceLayout CreateResourceLayout()
     {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+
         var desc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
             GameResourceManager.RES_SHADER_CONSTANTS,
             ResourceKind.UniformBuffer,

@@ -98,6 +98,11 @@ public class VeldridRenderer : IRenderer
 
     public void Render()
     {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+        if (resourceManager.CommandList == null)
+            throw new InvalidOperationException("Command list not ready.");
+
         try
         {
             /* Prepare for rendering. */
