@@ -27,7 +27,7 @@ public sealed class AnimatedSpriteDefinitions
     /// <summary>
     ///     List of animated sprite definitions.
     /// </summary>
-    public IList<AnimatedSpriteDefinition> AnimatedSprites { get; set; }
+    public List<AnimatedSpriteDefinition> AnimatedSprites { get; set; } = new();
 
     /// <summary>
     ///     Single definition of an animated sprite.
@@ -47,6 +47,6 @@ public sealed class AnimatedSpriteDefinitions
         /// <summary>
         ///     Sprite IDs for each frame.
         /// </summary>
-        public IList<int> SpriteIds { get; set; }
+        public List<int> SpriteIds { get; set; } = new();
     }
 }

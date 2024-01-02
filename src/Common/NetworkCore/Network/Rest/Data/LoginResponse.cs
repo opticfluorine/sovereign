@@ -25,27 +25,27 @@ public class LoginResponse
     /// <summary>
     ///     Human-readable string describing the result of the login attempt.
     /// </summary>
-    public string Result { get; set; }
+    public string? Result { get; set; }
 
     /// <summary>
     ///     User ID. Used for connection handoff.
     /// </summary>
-    public string UserId { get; set; }
+    public string? UserId { get; set; }
 
     /// <summary>
     ///     Secret REST API key for this user.
     /// </summary>
-    public string RestApiKey { get; set; }
+    public string? RestApiKey { get; set; }
 
     /// <summary>
     ///     Shared secret between the client and server.
     /// </summary>
-    public string SharedSecret { get; set; }
+    public string? SharedSecret { get; set; }
 
     /// <summary>
     ///     Hostname of the server to connect to.
     /// </summary>
-    public string ServerHost { get; set; }
+    public string? ServerHost { get; set; }
 
     /// <summary>
     ///     Port of the server to connect to.

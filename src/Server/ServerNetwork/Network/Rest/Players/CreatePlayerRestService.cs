@@ -160,7 +160,8 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
         lock (creationLock)
         {
-            if (!recentNames.Contains(request.PlayerName) && !playerServices.IsPlayerNameTaken(request.PlayerName))
+            if (request.PlayerName != null && !recentNames.Contains(request.PlayerName) &&
+                !playerServices.IsPlayerNameTaken(request.PlayerName))
             {
                 // Name is available and wasn't created recently - let's take it.
                 playerEntityId = entityFactory.GetBuilder()

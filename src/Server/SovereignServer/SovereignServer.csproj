@@ -1,37 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>Sovereign.Server</RootNamespace>
-    <AssemblyName>Sovereign.Server</AssemblyName>
-    <Platforms>AnyCPU;x64</Platforms>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <RootNamespace>Sovereign.Server</RootNamespace>
+        <AssemblyName>Sovereign.Server</AssemblyName>
+        <Platforms>AnyCPU;x64</Platforms>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Data\Logging.xml" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Remove="Data\Logging.xml"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Data\Logging.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+    <ItemGroup>
+        <Content Include="Data\Logging.xml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Accounts\Accounts.csproj" />
-    <ProjectReference Include="..\Persistence\Persistence.csproj" />
-    <ProjectReference Include="..\ServerCore\ServerCore.csproj" />
-    <ProjectReference Include="..\ServerNetwork\ServerNetwork.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Accounts\Accounts.csproj"/>
+        <ProjectReference Include="..\Persistence\Persistence.csproj"/>
+        <ProjectReference Include="..\ServerCore\ServerCore.csproj"/>
+        <ProjectReference Include="..\ServerNetwork\ServerNetwork.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Data\Configuration\ServerConfiguration.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Logs\README.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <None Update="Data\Configuration\ServerConfiguration.yaml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Logs\README.md">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
 </Project>

@@ -35,7 +35,7 @@ public sealed class FinalInboundPipelineStage : IInboundPipelineStage
 
     public int Priority => int.MaxValue;
 
-    public IInboundPipelineStage NextStage { get; set; }
+    public IInboundPipelineStage? NextStage { get; set; }
 
     public void ProcessEvent(Event ev, NetworkConnection connection)
     {

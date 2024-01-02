@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineUtil.Monads;
@@ -38,6 +39,8 @@ public sealed class CameraEventHandler
         this.manager = manager;
     }
 
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
     /// <summary>
     ///     Handles a camera-related event.
     /// </summary>
@@ -47,6 +50,12 @@ public sealed class CameraEventHandler
         switch (ev.EventId)
         {
             case EventId.Client_Camera_Attach:
+                if (ev.EventDetails == null)
+                {
+                    Logger.Error("Received Attach without details.");
+                    break;
+                }
+
                 HandleAttachEvent((EntityEventDetails)ev.EventDetails);
                 break;
 
@@ -59,6 +68,12 @@ public sealed class CameraEventHandler
                 break;
 
             case EventId.Client_Network_PlayerEntitySelected:
+                if (ev.EventDetails == null)
+                {
+                    Logger.Error("Received PlayerEntitySelected without details.");
+                    break;
+                }
+
                 HandlePlayerSelect((EntityEventDetails)ev.EventDetails);
                 break;
         }

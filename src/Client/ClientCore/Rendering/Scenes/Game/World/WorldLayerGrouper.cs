@@ -218,7 +218,7 @@ public sealed class WorldLayerGrouper
             Layers[zFloor] = layer;
         }
 
-        return layer;
+        return layer!;
     }
 
     /// <summary>

@@ -49,9 +49,9 @@ public class SingleEntityConnectionMapper : ISpecificConnectionMapper
         if (connId.HasValue)
         {
             var connection = connectionManager.GetConnection(connId.Value);
-            NextStage.Process(new OutboundEventInfo(evInfo, connection));
+            NextStage?.Process(new OutboundEventInfo(evInfo, connection));
         }
     }
 
-    public IOutboundPipelineStage NextStage { get; set; }
+    public IOutboundPipelineStage? NextStage { get; set; }
 }

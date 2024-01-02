@@ -45,7 +45,7 @@ public class PersistencePlayerServices
     /// </remarks>
     public bool IsPlayerNameTaken(string name)
     {
-        return provider.PlayerExistsQuery.PlayerExists(name);
+        return provider.PlayerExistsQuery!.PlayerExists(name);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class PersistencePlayerServices
     /// </remarks>
     public bool ValidatePlayerAccountPair(ulong playerEntityId, Guid accountId)
     {
-        return provider.GetAccountForPlayerQuery.TryGetAccountForPlayer(playerEntityId, out var foundAccountId)
+        return provider.GetAccountForPlayerQuery!.TryGetAccountForPlayer(playerEntityId, out var foundAccountId)
                && foundAccountId.Equals(accountId);
     }
 
@@ -72,8 +72,8 @@ public class PersistencePlayerServices
     ///     Associated player characters, if any. An empty list is returned if the account
     ///     does not exist.
     /// </returns>
-    public IList<PlayerInfo> GetPlayersForAccount(Guid accountId)
+    public List<PlayerInfo> GetPlayersForAccount(Guid accountId)
     {
-        return provider.ListPlayersQuery.ListPlayersForAccount(accountId);
+        return provider.ListPlayersQuery!.ListPlayersForAccount(accountId);
     }
 }

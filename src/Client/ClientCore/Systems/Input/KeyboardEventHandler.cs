@@ -68,6 +68,12 @@ public class KeyboardEventHandler
     /// <param name="ev">Key down event.</param>
     private void HandleKeyDownEvent(Event ev)
     {
+        if (ev.EventDetails == null)
+        {
+            Logger.Error("Received KeyDown without details.");
+            return;
+        }
+
         var details = (KeyEventDetails)ev.EventDetails;
 
         /* Update the keyboard state. */
@@ -95,6 +101,12 @@ public class KeyboardEventHandler
     /// <param name="ev">Key up event.</param>
     private void HandleKeyUpEvent(Event ev)
     {
+        if (ev.EventDetails == null)
+        {
+            Logger.Error("Received KeyUp without details.");
+            return;
+        }
+
         var details = (KeyEventDetails)ev.EventDetails;
 
         /* Update the keyboard state. */

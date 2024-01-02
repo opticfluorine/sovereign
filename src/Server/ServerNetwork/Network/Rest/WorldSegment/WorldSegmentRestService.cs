@@ -56,11 +56,20 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
             // At some point we should also check that the segment is in range for the
             // user that requested it, we don't want to be leaking data for the other
             // side of the world.
-            var dataTask = blockDataManager.GetWorldSegmentBlockData(new GridPosition(x, y, z));
+            var segmentIndex = new GridPosition(x, y, z);
+            var dataTask = blockDataManager.GetWorldSegmentBlockData(segmentIndex);
             if (dataTask != null)
             {
                 // Get the latest version of the block data and encode it for transfer.
                 var blockData = await dataTask;
+                if (blockData == null)
+                {
+                    // Segment data was processed but is empty.     
+                    Logger.ErrorFormat("Got empty block data for world segment {0}.", segmentIndex);
+                    ctx.Response.StatusCode = 500;
+                    await ctx.Response.Send();
+                    return;
+                }
 
                 ctx.Response.ContentType = "application/octet-stream";
                 ctx.Response.ContentLength = blockData.Length;

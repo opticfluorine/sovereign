@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using Sovereign.NetworkCore.Network.Infrastructure;
@@ -36,6 +37,8 @@ public class ServerNetworkSystem : ISystem
         EventCommunicator = eventCommunicator;
         eventLoop.RegisterSystem(this);
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 
@@ -62,6 +65,12 @@ public class ServerNetworkSystem : ISystem
             switch (ev.EventId)
             {
                 case EventId.Server_Network_DisconnectClient:
+                    if (ev.EventDetails == null)
+                    {
+                        Logger.Error("Received DisconnectClient event without details.");
+                        break;
+                    }
+
                     OnDisconnectClient((ConnectionIdEventDetails)ev.EventDetails);
                     break;
             }

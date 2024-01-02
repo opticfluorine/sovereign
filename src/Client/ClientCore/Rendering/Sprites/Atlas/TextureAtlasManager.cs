@@ -57,7 +57,7 @@ public class TextureAtlasManager
     /// <summary>
     ///     Texture atlas.
     /// </summary>
-    public TextureAtlas TextureAtlas { get; private set; }
+    public TextureAtlas? TextureAtlas { get; private set; }
 
     /// <summary>
     ///     Initializes the texture atlas.
@@ -65,6 +65,14 @@ public class TextureAtlasManager
     public void InitializeTextureAtlas()
     {
         Logger.Info("Creating the texture atlas.");
+
+        if (mainDisplay.DisplayMode == null)
+        {
+            var msg = "Attempted to create texture atlas without a display mode.";
+            Logger.Fatal(msg);
+            ErrorHandler.Error(msg);
+            throw new FatalErrorException(msg);
+        }
 
         try
         {
@@ -94,6 +102,6 @@ public class TextureAtlasManager
     /// </summary>
     public void ReleaseTextureAtlas()
     {
-        TextureAtlas.Dispose();
+        TextureAtlas?.Dispose();
     }
 }

@@ -86,12 +86,12 @@ public sealed class Account
     /// <summary>
     ///     Password salt.
     /// </summary>
-    public byte[] Salt { get; }
+    public byte[] Salt { get; } = Array.Empty<byte>();
 
     /// <summary>
     ///     Password hash.
     /// </summary>
-    public byte[] Hash { get; }
+    public byte[] Hash { get; } = Array.Empty<byte>();
 
     /// <summary>
     ///     Argon2 operations limit for password hashing.

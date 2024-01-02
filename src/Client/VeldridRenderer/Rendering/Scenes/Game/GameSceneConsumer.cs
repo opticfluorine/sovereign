@@ -58,6 +58,11 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
 
     public void ConsumeScene(IScene scene)
     {
+        if (gameResManager.VertexBuffer == null || gameResManager.IndexBuffer == null)
+            throw new InvalidOperationException("Buffers not ready.");
+        if (resManager.CommandList == null)
+            throw new InvalidOperationException("Command list not ready.");
+
         /* General processing. */
         scene.PopulateBuffers(gameResManager.VertexBuffer.Buffer,
             gameResManager.IndexBuffer.Buffer,

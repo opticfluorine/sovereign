@@ -206,7 +206,7 @@ public sealed class StateBuffer
     {
         try
         {
-            using (var transaction = persistenceProvider.Connection.BeginTransaction())
+            using (var transaction = persistenceProvider.Connection!.BeginTransaction())
             {
                 // Synchronize the entities first before the components.
                 // This ensures that any foreign key relationships between components
@@ -215,23 +215,23 @@ public sealed class StateBuffer
 
                 /* Position. */
                 SynchronizeComponent(positionUpdates,
-                    persistenceProvider.AddPositionQuery,
-                    persistenceProvider.ModifyPositionQuery,
-                    persistenceProvider.RemovePositionQuery,
+                    persistenceProvider.AddPositionQuery!,
+                    persistenceProvider.ModifyPositionQuery!,
+                    persistenceProvider.RemovePositionQuery!,
                     transaction);
 
                 /* Material. */
                 SynchronizeComponent(materialUpdates,
-                    persistenceProvider.AddMaterialQuery,
-                    persistenceProvider.ModifyMaterialQuery,
-                    persistenceProvider.RemoveMaterialQuery,
+                    persistenceProvider.AddMaterialQuery!,
+                    persistenceProvider.ModifyMaterialQuery!,
+                    persistenceProvider.RemoveMaterialQuery!,
                     transaction);
 
                 /* MaterialModifier. */
                 SynchronizeComponent(materialModifierUpdates,
-                    persistenceProvider.AddMaterialModifierQuery,
-                    persistenceProvider.ModifyMaterialModifierQuery,
-                    persistenceProvider.RemoveMaterialModifierQuery,
+                    persistenceProvider.AddMaterialModifierQuery!,
+                    persistenceProvider.ModifyMaterialModifierQuery!,
+                    persistenceProvider.RemoveMaterialModifierQuery!,
                     transaction);
 
                 /* PlayerCharacter. */

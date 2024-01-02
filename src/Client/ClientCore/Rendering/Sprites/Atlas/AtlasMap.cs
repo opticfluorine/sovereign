@@ -47,7 +47,7 @@ public sealed class AtlasMap
     /// <summary>
     ///     Maps each sprite ID to its texture atlas coordinates.
     /// </summary>
-    public IList<AtlasMapElement> MapElements { get; private set; }
+    public List<AtlasMapElement> MapElements { get; private set; } = new();
 
     /// <summary>
     ///     Initializes the atlas map.
@@ -76,6 +76,9 @@ public sealed class AtlasMap
         var spriteHeight = sheet.Definition.SpriteHeight;
 
         /* Locate spritesheet in atlas. */
+        if (atlasManager.TextureAtlas == null)
+            throw new InvalidOperationException("Tried to add sprite to a nonexistant texture atlas.");
+
         var (stlx, stly) = atlasManager.TextureAtlas.SpriteSheetMap[sprite.SpritesheetName];
         var atlasWidth = atlasManager.TextureAtlas.Width;
         var atlasHeight = atlasManager.TextureAtlas.Height;

@@ -27,5 +27,5 @@ public sealed class DebugCommandEventDetails : IEventDetails
     /// <summary>
     ///     Debug command carried by this event.
     /// </summary>
-    public DebugCommand Command { get; set; }
+    public DebugCommand Command { get; set; } = new();
 }

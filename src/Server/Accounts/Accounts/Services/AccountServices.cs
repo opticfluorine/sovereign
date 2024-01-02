@@ -60,14 +60,14 @@ public sealed class AccountServices
     /// </summary>
     /// <param name="username">Account username.</param>
     /// <param name="password">Password attempt.</param>
-    /// <param name="guid">Account ID.</param>
-    /// <param name="secret">Shared secret.</param>
+    /// <param name="guid">Account ID, or an empty GUID on failure.</param>
+    /// <param name="secret">Shared secret, or an empty string on failure.</param>
     /// <returns>Authentication result.</returns>
     public AuthenticationResult Authenticate(string username, string password,
         out Guid guid, out string secret)
     {
         guid = Guid.Empty;
-        secret = null;
+        secret = "";
 
         try
         {
@@ -156,9 +156,7 @@ public sealed class AccountServices
     {
         var result = new Maybe<int>();
         if (loginTracker.TryGetConnectionIdForPlayer(playerEntityId, out var connectionId))
-        {
             result = new Maybe<int>(connectionId);
-        }
 
         return result;
     }

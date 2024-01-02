@@ -34,8 +34,8 @@ public class GlobalConnectionMapper : ISpecificConnectionMapper
     public void Process(OutboundEventInfo evInfo)
     {
         // Broadcast the event info to all connections.
-        connectionManager.Broadcast(conn => NextStage.Process(new OutboundEventInfo(evInfo, conn)));
+        connectionManager.Broadcast(conn => NextStage?.Process(new OutboundEventInfo(evInfo, conn)));
     }
 
-    public IOutboundPipelineStage NextStage { get; set; }
+    public IOutboundPipelineStage? NextStage { get; set; }
 }

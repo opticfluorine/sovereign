@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
@@ -34,7 +35,14 @@ public sealed class NetworkClient : INetworkClient
 
     public NetworkClientState ClientState => clientNetworkManager.ClientState;
 
-    public NetworkConnection Connection => clientNetworkManager.Connection;
+    public NetworkConnection Connection
+    {
+        get
+        {
+            if (clientNetworkManager.Connection == null) throw new InvalidOperationException("Client not connected.");
+            return clientNetworkManager.Connection;
+        }
+    }
 
     public string ErrorMessage => clientNetworkManager.ErrorMessage;
 

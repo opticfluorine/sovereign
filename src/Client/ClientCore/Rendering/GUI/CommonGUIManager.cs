@@ -155,8 +155,8 @@ public sealed class CommonGuiManager : IDisposable
             }
 
         // Screen size.
-        io.DisplaySize = new Vector2(mainDisplay.DisplayMode.Width,
-            mainDisplay.DisplayMode.Height);
+        io.DisplaySize = new Vector2(mainDisplay.DisplayMode!.Width,
+            mainDisplay.DisplayMode!.Height);
         io.DisplayFramebufferScale = Vector2.One;
     }
 

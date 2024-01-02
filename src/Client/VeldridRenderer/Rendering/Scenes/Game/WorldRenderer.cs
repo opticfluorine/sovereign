@@ -34,7 +34,7 @@ public class WorldRenderer : IDisposable
     /// <summary>
     ///     Bindable resource set used by the world renderer.
     /// </summary>
-    private ResourceSet resourceSet;
+    private ResourceSet? resourceSet;
 
     /// <summary>
     ///     Viewport used for world rendering.
@@ -61,6 +61,9 @@ public class WorldRenderer : IDisposable
     /// </summary>
     public void Initialize()
     {
+        if (device.DisplayMode == null)
+            throw new InvalidOperationException("Display mode not set.");
+
         // Create resources.
         pipeline.Initialize();
         CreateResourceSet();
@@ -82,6 +85,9 @@ public class WorldRenderer : IDisposable
     /// <param name="commandList">Active command list.</param>
     public void Render(CommandList commandList)
     {
+        if (gameResMgr.VertexBuffer == null || gameResMgr.IndexBuffer == null)
+            throw new InvalidOperationException("Buffers not ready.");
+
         commandList.PushDebugGroup("WorldRenderer.Render");
 
         // Set pipeline and bind resources.
@@ -107,6 +113,13 @@ public class WorldRenderer : IDisposable
     /// </summary>
     private void CreateResourceSet()
     {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+        if (gameResMgr.VertexUniformBuffer == null)
+            throw new InvalidOperationException("Vertex uniform buffer not ready.");
+        if (resMgr.AtlasTexture == null)
+            throw new InvalidOperationException("Texture atlas not ready.");
+
         var resLayoutDesc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
             GameResourceManager.RES_SHADER_CONSTANTS,
             ResourceKind.UniformBuffer,

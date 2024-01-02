@@ -88,7 +88,9 @@ public class PlayerManagementClient
             }
 
             var response = await httpResponse.Content.ReadFromJsonAsync<ListPlayersResponse>();
-            result = new Option<ListPlayersResponse, string>(response);
+            result = response != null
+                ? new Option<ListPlayersResponse, string>(response)
+                : new Option<ListPlayersResponse, string>("Null response received.");
         }
         catch (Exception e)
         {
@@ -130,6 +132,13 @@ public class PlayerManagementClient
             }
 
             var response = await httpResponse.Content.ReadFromJsonAsync<CreatePlayerResponse>();
+            if (response == null)
+            {
+                var msg = "Received null response from server.";
+                Logger.Error(msg);
+                return new Option<CreatePlayerResponse, string>(msg);
+            }
+
             if (httpResponse.StatusCode == HttpStatusCode.Created)
             {
                 // Success
@@ -141,8 +150,16 @@ public class PlayerManagementClient
             else
             {
                 // Failed
-                Logger.ErrorFormat("Failed to create new player {0}: {1}", request.PlayerName, response.Result);
-                result = new Option<CreatePlayerResponse, string>(response.Result);
+                if (response.Result != null)
+                {
+                    Logger.ErrorFormat("Failed to create new player {0}: {1}", request.PlayerName, response.Result);
+                    result = new Option<CreatePlayerResponse, string>(response.Result);
+                }
+                else
+                {
+                    Logger.ErrorFormat("Failed to create new player {0}: unknown error.", request.PlayerName);
+                    result = new Option<CreatePlayerResponse, string>("Unknown error.");
+                }
             }
         }
         catch (Exception e)
@@ -185,6 +202,13 @@ public class PlayerManagementClient
             }
 
             var response = await httpResponse.Content.ReadFromJsonAsync<SelectPlayerResponse>();
+            if (response == null)
+            {
+                var msg = "Null response received from server.";
+                Logger.Error(msg);
+                return new Option<SelectPlayerResponse, string>(msg);
+            }
+
             if (httpResponse.StatusCode == HttpStatusCode.OK)
             {
                 // Success
@@ -195,8 +219,16 @@ public class PlayerManagementClient
             else
             {
                 // Failed
-                Logger.ErrorFormat("Failed to select player {0}: {1}", playerEntityId, response.Result);
-                result = new Option<SelectPlayerResponse, string>(response.Result);
+                if (response.Result != null)
+                {
+                    Logger.ErrorFormat("Failed to select player {0}: {1}", playerEntityId, response.Result);
+                    result = new Option<SelectPlayerResponse, string>(response.Result);
+                }
+                else
+                {
+                    Logger.ErrorFormat("Failed to select player {0}: Unknown error", playerEntityId);
+                    result = new Option<SelectPlayerResponse, string>("Unknown error.");
+                }
             }
         }
         catch (Exception e)

@@ -42,7 +42,7 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
     /// <summary>
     ///     Next stage of the pipeline.
     /// </summary>
-    public IOutboundPipelineStage NextStage { get; set; }
+    public IOutboundPipelineStage? NextStage { get; set; }
 
     public void Process(OutboundEventInfo evInfo)
     {
@@ -53,6 +53,6 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
             Logger.WarnFormat("No delivery method specified for event ID {0}; defaulting to unreliable",
                 evInfo.Event.EventId);
 
-        NextStage.Process(new OutboundEventInfo(evInfo, method));
+        NextStage?.Process(new OutboundEventInfo(evInfo, method));
     }
 }

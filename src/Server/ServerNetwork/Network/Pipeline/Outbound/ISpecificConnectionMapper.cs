@@ -24,7 +24,7 @@ namespace Sovereign.ServerNetwork.Network.Pipeline.Outbound;
 public interface ISpecificConnectionMapper : IOutboundPipelineStage
 {
     /// <summary>
-    ///     Next stage in the pipeline.
+    ///     Next stage in the pipeline, or null if no stage is set.
     /// </summary>
-    IOutboundPipelineStage NextStage { get; set; }
+    IOutboundPipelineStage? NextStage { get; set; }
 }

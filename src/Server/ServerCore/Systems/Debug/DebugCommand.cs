@@ -40,7 +40,7 @@ public sealed class DebugCommand
     ///     Debug command type.
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public DebugCommandType Type { get; set; }
+    public DebugCommandType? Type { get; set; }
 
     /// <summary>
     ///     Checks whether the record is valid.

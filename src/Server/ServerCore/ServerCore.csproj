@@ -1,19 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>Sovereign.ServerCore</AssemblyName>
-    <RootNamespace>Sovereign.ServerCore</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <AssemblyName>Sovereign.ServerCore</AssemblyName>
+        <RootNamespace>Sovereign.ServerCore</RootNamespace>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Common\EngineCore\EngineCore.csproj" />
-    <ProjectReference Include="..\..\Common\EngineUtil\EngineUtil.csproj" />
-    <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\Common\EngineCore\EngineCore.csproj"/>
+        <ProjectReference Include="..\..\Common\EngineUtil\EngineUtil.csproj"/>
+        <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Systems\Ping\" />
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Systems\Ping\"/>
+    </ItemGroup>
 
 </Project>

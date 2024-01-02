@@ -75,57 +75,14 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public SqlitePersistenceProvider(IPersistenceConfiguration configuration)
     {
         this.configuration = configuration;
-    }
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
-    public IAddComponentQuery<string> AddNameQuery { get; private set; }
-    public IModifyComponentQuery<string> ModifyNameQuery { get; private set; }
-    public IRemoveComponentQuery RemoveNameQuery { get; private set; }
-
-    public IMigrationQuery MigrationQuery { get; private set; }
-
-    public INextPersistedIdQuery NextPersistedIdQuery { get; private set; }
-
-    public IAddAccountQuery AddAccountQuery { get; private set; }
-
-    public IRetrieveAccountQuery RetrieveAccountQuery { get; private set; }
-
-    public IRetrieveAccountWithAuthQuery RetrieveAccountWithAuthQuery { get; private set; }
-
-    public IRetrieveEntityQuery RetrieveEntityQuery { get; private set; }
-
-    public IRetrieveRangeQuery RetrieveRangeQuery { get; private set; }
-
-    public IDbConnection Connection { get; private set; }
-
-    public IAddEntityQuery AddEntityQuery { get; private set; }
-
-    public IRemoveEntityQuery RemoveEntityQuery { get; private set; }
-    public IAddComponentQuery<Vector3> AddPositionQuery { get; private set; }
-    public IModifyComponentQuery<Vector3> ModifyPositionQuery { get; private set; }
-    public IRemoveComponentQuery RemovePositionQuery { get; private set; }
-    public IAddComponentQuery<int> AddMaterialQuery { get; private set; }
-    public IModifyComponentQuery<int> ModifyMaterialQuery { get; private set; }
-    public IRemoveComponentQuery RemoveMaterialQuery { get; private set; }
-    public IAddComponentQuery<int> AddMaterialModifierQuery { get; private set; }
-    public IModifyComponentQuery<int> ModifyMaterialModifierQuery { get; private set; }
-    public IRemoveComponentQuery RemoveMaterialModifierQuery { get; private set; }
-    public IAddComponentQuery<bool> AddPlayerCharacterQuery { get; private set; }
-    public IModifyComponentQuery<bool> ModifyPlayerCharacterQuery { get; private set; }
-    public IRemoveComponentQuery RemovePlayerCharacterQuery { get; private set; }
-    public IAddComponentQuery<Guid> AddAccountComponentQuery { get; private set; }
-    public IModifyComponentQuery<Guid> ModifyAccountComponentQuery { get; private set; }
-    public IRemoveComponentQuery RemoveAccountComponentQuery { get; private set; }
-    public IAddComponentQuery<ulong> AddParentComponentQuery { get; private set; }
-    public IModifyComponentQuery<ulong> ModifyParentComponentQuery { get; private set; }
-    public IRemoveComponentQuery RemoveParentComponentQuery { get; private set; }
-    public IPlayerExistsQuery PlayerExistsQuery { get; private set; }
-    public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; private set; }
-    public IListPlayersQuery ListPlayersQuery { get; private set; }
-
-    public void Initialize()
-    {
         Connect();
+        if (Connection == null)
+        {
+            Logger.Fatal("Connection unexpectedly null.");
+            throw new FatalErrorException();
+        }
+
         MigrationQuery = new SqliteMigrationQuery(Connection);
         NextPersistedIdQuery = new SqliteNextPersistedIdQuery(Connection);
 
@@ -202,7 +159,53 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         RemoveParentComponentQuery = new SqliteRemoveComponentQuery(PARENT_TABLE_NAME, (SqliteConnection)Connection);
     }
 
-    public void Cleanup()
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+    public IAddComponentQuery<string> AddNameQuery { get; }
+    public IModifyComponentQuery<string> ModifyNameQuery { get; }
+    public IRemoveComponentQuery RemoveNameQuery { get; }
+
+    public IMigrationQuery MigrationQuery { get; }
+
+    public INextPersistedIdQuery NextPersistedIdQuery { get; }
+
+    public IAddAccountQuery AddAccountQuery { get; }
+
+    public IRetrieveAccountQuery RetrieveAccountQuery { get; }
+
+    public IRetrieveAccountWithAuthQuery RetrieveAccountWithAuthQuery { get; }
+
+    public IRetrieveEntityQuery RetrieveEntityQuery { get; }
+
+    public IRetrieveRangeQuery RetrieveRangeQuery { get; }
+
+    public IDbConnection Connection { get; private set; }
+
+    public IAddEntityQuery AddEntityQuery { get; }
+
+    public IRemoveEntityQuery RemoveEntityQuery { get; }
+    public IAddComponentQuery<Vector3> AddPositionQuery { get; }
+    public IModifyComponentQuery<Vector3> ModifyPositionQuery { get; }
+    public IRemoveComponentQuery RemovePositionQuery { get; }
+    public IAddComponentQuery<int> AddMaterialQuery { get; }
+    public IModifyComponentQuery<int> ModifyMaterialQuery { get; }
+    public IRemoveComponentQuery RemoveMaterialQuery { get; }
+    public IAddComponentQuery<int> AddMaterialModifierQuery { get; }
+    public IModifyComponentQuery<int> ModifyMaterialModifierQuery { get; }
+    public IRemoveComponentQuery RemoveMaterialModifierQuery { get; }
+    public IAddComponentQuery<bool> AddPlayerCharacterQuery { get; }
+    public IModifyComponentQuery<bool> ModifyPlayerCharacterQuery { get; }
+    public IRemoveComponentQuery RemovePlayerCharacterQuery { get; }
+    public IAddComponentQuery<Guid> AddAccountComponentQuery { get; }
+    public IModifyComponentQuery<Guid> ModifyAccountComponentQuery { get; }
+    public IRemoveComponentQuery RemoveAccountComponentQuery { get; }
+    public IAddComponentQuery<ulong> AddParentComponentQuery { get; }
+    public IModifyComponentQuery<ulong> ModifyParentComponentQuery { get; }
+    public IRemoveComponentQuery RemoveParentComponentQuery { get; }
+    public IPlayerExistsQuery PlayerExistsQuery { get; }
+    public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
+    public IListPlayersQuery ListPlayersQuery { get; }
+
+    public void Dispose()
     {
         Logger.InfoFormat("Closing the SQLite database if open.");
 

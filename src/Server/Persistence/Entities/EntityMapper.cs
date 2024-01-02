@@ -27,18 +27,18 @@ namespace Sovereign.Persistence.Entities;
 /// </summary>
 public sealed class EntityMapper
 {
-    /// <summary>
-    ///     Whether the subsystem has been initialized.
-    /// </summary>
-    private bool initialized;
-
-    private INextPersistedIdQuery nextIdQuery;
-
     private readonly IDictionary<ulong, ulong> persistedToVolatile
         = new Dictionary<ulong, ulong>();
 
     private readonly IDictionary<ulong, ulong> volatileToPersisted
         = new Dictionary<ulong, ulong>();
+
+    /// <summary>
+    ///     Whether the subsystem has been initialized.
+    /// </summary>
+    private bool initialized;
+
+    private INextPersistedIdQuery? nextIdQuery;
 
     /// <summary>
     ///     Next available persisted ID.
@@ -72,10 +72,7 @@ public sealed class EntityMapper
         needToCreate = false;
         if (volatileEntityId >= EntityAssigner.FirstPersistedId) return volatileEntityId;
 
-        if (volatileToPersisted.ContainsKey(volatileEntityId))
-        {
-            return volatileToPersisted[volatileEntityId];
-        }
+        if (volatileToPersisted.ContainsKey(volatileEntityId)) return volatileToPersisted[volatileEntityId];
 
         needToCreate = true;
         return GetNewPersistedId(volatileEntityId);

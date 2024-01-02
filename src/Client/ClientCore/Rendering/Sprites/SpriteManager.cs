@@ -59,7 +59,7 @@ public sealed class SpriteManager
     /// <summary>
     ///     Sprites.
     /// </summary>
-    public IList<Sprite> Sprites { get; private set; }
+    public List<Sprite> Sprites { get; private set; } = new();
 
     /// <summary>
     ///     Initializes the sprites.
@@ -102,7 +102,7 @@ public sealed class SpriteManager
     /// </summary>
     /// <param name="definitions">Sprite definitions.</param>
     /// <returns>Sprites.</returns>
-    private IList<Sprite> UnpackSprites(SpriteDefinitions definitions)
+    private List<Sprite> UnpackSprites(SpriteDefinitions definitions)
     {
         return definitions.Sprites
             .OrderBy(sprite => sprite.Id)

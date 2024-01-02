@@ -27,7 +27,7 @@ public sealed class TileSpriteDefinitions
     /// <summary>
     ///     Tile sprites.
     /// </summary>
-    public IList<TileSpriteRecord> TileSprites { get; set; }
+    public List<TileSpriteRecord> TileSprites { get; set; } = new();
 
     /// <summary>
     ///     Serializable record of a tile sprite.
@@ -42,6 +42,6 @@ public sealed class TileSpriteDefinitions
         /// <summary>
         ///     Tile contexts.
         /// </summary>
-        public IList<TileContext> TileContexts { get; set; }
+        public List<TileContext> TileContexts { get; set; } = new();
     }
 }

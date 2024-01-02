@@ -46,12 +46,12 @@ public class RenderingManager : IStartable
     /// <summary>
     ///     Selected video adapter.
     /// </summary>
-    private IVideoAdapter selectedAdapter;
+    private IVideoAdapter? selectedAdapter;
 
     /// <summary>
     ///     Selected display mode.
     /// </summary>
-    private IDisplayMode selectedDisplayMode;
+    private IDisplayMode? selectedDisplayMode;
 
     public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
         DisplayModeSelector displayModeSelector, IRenderer renderer,
@@ -125,6 +125,14 @@ public class RenderingManager : IStartable
     /// </summary>
     private void CreateMainDisplay()
     {
+        if (selectedDisplayMode == null)
+        {
+            var msg = "Attempted to create main display without a display mode.";
+            Logger.Fatal(msg);
+            ErrorHandler.Error(msg);
+            throw new FatalErrorException(msg);
+        }
+
         try
         {
             /* Configure the display. */
@@ -148,6 +156,14 @@ public class RenderingManager : IStartable
     /// </summary>
     private void InitializeRenderer()
     {
+        if (selectedAdapter == null)
+        {
+            var msg = "Attempted to initialize renderer without a display adapter.";
+            Logger.Fatal(msg);
+            ErrorHandler.Error(msg);
+            throw new FatalErrorException(msg);
+        }
+
         try
         {
             renderer.Initialize(selectedAdapter);

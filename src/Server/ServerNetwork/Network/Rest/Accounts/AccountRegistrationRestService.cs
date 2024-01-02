@@ -93,7 +93,7 @@ public sealed class AccountRegistrationRestService : IRestService
             var registrationRequest = JsonSerializer.Deserialize<RegistrationRequest>(requestBody,
                 MessageConfig.JsonOptions);
 
-            if (registrationRequest.Username == null ||
+            if (registrationRequest == null || registrationRequest.Username == null ||
                 registrationRequest.Password == null)
             {
                 Logger.ErrorFormat("Received incomplete registration request from {0}.",
@@ -142,12 +142,10 @@ public sealed class AccountRegistrationRestService : IRestService
     /// <summary>
     ///     Creates the HTTP response.
     /// </summary>
-    /// <param name="ctx">
-    ///     HTTP context.
-    ///     <jparam>
-    ///         <param name="status">HTTP status code.</param>
-    ///         <param name="result">Result string.</param>
-    ///         <returns>HTTP response.</returns>
+    /// <param name="ctx">HTTP context.</param>
+    /// <param name="status">HTTP status code.</param>
+    /// <param name="result">Result string.</param>
+    /// <returns>HTTP response.</returns>
     private async Task SendResponse(HttpContext ctx, int status, string result)
     {
         var responseData = new RegistrationResponse

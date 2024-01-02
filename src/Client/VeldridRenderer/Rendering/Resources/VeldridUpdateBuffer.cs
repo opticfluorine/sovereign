@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Veldrid;
 
@@ -96,8 +97,11 @@ public class VeldridUpdateBuffer<T> : IDisposable
     ///     Creates the buffer.
     /// </summary>
     /// <param name="device">Veldrid device.</param>
+    [MemberNotNull("DeviceBuffer")]
     private void CreateBuffers(VeldridDevice device, BufferUsage usage)
     {
+        if (device.Device == null)
+            throw new InvalidOperationException("Tried to create buffers without device.");
         var desc = new BufferDescription(bufferLenBytes, usage);
         DeviceBuffer = device.Device.ResourceFactory.CreateBuffer(desc);
     }
@@ -105,6 +109,7 @@ public class VeldridUpdateBuffer<T> : IDisposable
     /// <summary>
     ///     Allocates the local update buffer.
     /// </summary>
+    [MemberNotNull("Buffer")]
     private void AllocateLocalMemory()
     {
         Buffer = new T[Length];

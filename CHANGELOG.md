@@ -4,9 +4,18 @@
 
 ### January
 
+#### 02 January 2024
+
+* Finish up null checking updates for all projects.
+
 #### 01 January 2024
 
 * Merge `Performance` into `EngineCore` to clean things up; fix nullability warnings.
+* Clean up null checking warnings in `NetworkCore`, `ServerCore`, `Persistence`, `Accounts`,
+  `ServerNetwork`, `SovereignServer`.
+* Flag all reference typed members in JSON-serialized types as nullable since `System.Text.Json`
+  currently doesn't enforce nullability rules on deserialization. This way we can get compile-time
+  errors if we forget to check for missing fields in untrusted inputs.
 
 ## 2023
 

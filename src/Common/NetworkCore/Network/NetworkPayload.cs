@@ -27,13 +27,6 @@ namespace Sovereign.NetworkCore.Network;
 public sealed class NetworkPayload
 {
     /// <summary>
-    ///     Creates an empty payload.
-    /// </summary>
-    public NetworkPayload()
-    {
-    }
-
-    /// <summary>
     ///     Creates a new payload.
     /// </summary>
     /// <param name="nonce">Nonce.</param>

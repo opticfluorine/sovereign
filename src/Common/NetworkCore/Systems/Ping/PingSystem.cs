@@ -95,6 +95,12 @@ public class PingSystem : ISystem
                     break;
 
                 case EventId.Core_Ping_SetAuto:
+                    if (ev.EventDetails == null)
+                    {
+                        Logger.Error("Received SetAuto event without details.");
+                        break;
+                    }
+
                     OnSetAuto((AutoPingEventDetails)ev.EventDetails);
                     break;
 

@@ -22,7 +22,6 @@
 //
 
 using System;
-using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
@@ -31,33 +30,19 @@ using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Systems.Debug;
 using WatsonWebserver;
-using YamlDotNet.Serialization.NodeDeserializers;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Debug;
 
 public class DebugRestService : IRestService
 {
-    private readonly ServerConfiguration config;
-    private readonly IEventSender eventSender;
-    private readonly DebugController debugController;
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
-
-    public string Path => RestEndpoints.Debug;
-    
-    public RestPathType PathType => RestPathType.Static;
-    
-    public HttpMethod RequestType => HttpMethod.POST;
-
     /// <summary>
-    /// Whether debug mode is enabled.
-    /// </summary>
-    private bool Enabled => config.Debug.EnableDebugMode;
-
-    /// <summary>
-    /// Maximum request size, in bytes.
+    ///     Maximum request size, in bytes.
     /// </summary>
     private const int MaxRequestSize = 1024;
+
+    private readonly ServerConfiguration config;
+    private readonly DebugController debugController;
+    private readonly IEventSender eventSender;
 
     public DebugRestService(IServerConfigurationManager configManager, DebugController debugController,
         IEventSender eventSender)
@@ -66,7 +51,20 @@ public class DebugRestService : IRestService
         this.debugController = debugController;
         this.eventSender = eventSender;
     }
-    
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+    /// <summary>
+    ///     Whether debug mode is enabled.
+    /// </summary>
+    private bool Enabled => config.Debug.EnableDebugMode;
+
+    public string Path => RestEndpoints.Debug;
+
+    public RestPathType PathType => RestPathType.Static;
+
+    public HttpMethod RequestType => HttpMethod.POST;
+
     public async Task OnRequest(HttpContext ctx)
     {
         try
@@ -88,14 +86,11 @@ public class DebugRestService : IRestService
                     await ctx.Response.Send();
                     return;
                 }
-                
+
                 // Process request.
                 var data = ctx.Request.DataAsBytes;
                 var command = JsonSerializer.Deserialize<DebugCommand>(data);
-                if (!command.IsValid)
-                {
-                    throw new ArgumentException("Bad debug command.");
-                }
+                if (command == null || !command.IsValid) throw new ArgumentException("Bad debug command.");
 
                 debugController.SendDebugCommand(eventSender, command);
 
@@ -119,5 +114,4 @@ public class DebugRestService : IRestService
             await ctx.Response.Send();
         }
     }
-    
 }

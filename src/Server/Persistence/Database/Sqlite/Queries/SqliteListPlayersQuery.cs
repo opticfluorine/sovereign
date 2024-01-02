@@ -44,7 +44,7 @@ public class SqliteListPlayersQuery : IListPlayersQuery
         this.connection = connection;
     }
 
-    public IList<PlayerInfo> ListPlayersForAccount(Guid accountId)
+    public List<PlayerInfo> ListPlayersForAccount(Guid accountId)
     {
         // Prepare query.
         var cmd = new SqliteCommand(query, connection);

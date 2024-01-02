@@ -97,12 +97,12 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <summary>
     ///     Block entity IDs that have been added or modified since the last cache update.
     /// </summary>
-    private HashSet<ulong> changedBlocks;
+    private HashSet<ulong> changedBlocks = new();
 
     /// <summary>
     ///     Block entity IDs that have been removed since the last cache update.
     /// </summary>
-    private HashSet<ulong> removedBlocks;
+    private HashSet<ulong> removedBlocks = new();
 
     /// <summary>
     ///     Number of component update rounds since the last cache update.
@@ -384,8 +384,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
             }
 
             /* Reset state for the next tick. */
-            changedBlocks = null;
-            removedBlocks = null;
             updateCount = 0;
         }
     }

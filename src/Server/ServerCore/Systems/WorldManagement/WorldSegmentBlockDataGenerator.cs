@@ -240,7 +240,7 @@ public sealed class WorldSegmentBlockDataGenerator
         /// <summary>
         ///     Block type.
         /// </summary>
-        public BlockMaterialData BlockType;
+        public BlockMaterialData BlockType = new();
 
         /// <summary>
         ///     Block position.

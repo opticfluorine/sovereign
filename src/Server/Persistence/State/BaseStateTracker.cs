@@ -26,6 +26,7 @@ namespace Sovereign.Persistence.State;
 /// </summary>
 /// <typeparam name="T">Component type.</typeparam>
 public abstract class BaseStateTracker<T> : IDisposable
+    where T : notnull
 {
     private readonly BaseComponentCollection<T> components;
     private readonly T defaultElement;

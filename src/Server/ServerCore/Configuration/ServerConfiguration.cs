@@ -25,22 +25,22 @@ public sealed class ServerConfiguration
     /// <summary>
     ///     Accounts configuration settings.
     /// </summary>
-    public AccountsRecord Accounts { get; set; }
+    public AccountsRecord Accounts { get; set; } = new();
 
     /// <summary>
     ///     Database configuration settings.
     /// </summary>
-    public DatabaseRecord Database { get; set; }
+    public DatabaseRecord Database { get; set; } = new();
 
     /// <summary>
     ///     Server-side network configuration settings.
     /// </summary>
-    public NetworkRecord Network { get; set; }
+    public NetworkRecord Network { get; set; } = new();
 
     /// <summary>
     ///     Debug configuration settings.
     /// </summary>
-    public DebugRecord Debug { get; set; }
+    public DebugRecord Debug { get; set; } = new();
 
     /// <summary>
     ///     Full description of the accounts configuration.
@@ -86,7 +86,7 @@ public sealed class ServerConfiguration
         /// <summary>
         ///     Database host for database servers, or data source for sqlite.
         /// </summary>
-        public string Host { get; set; }
+        public string Host { get; set; } = "";
 
         /// <summary>
         ///     Database port for database servers. Not used for sqlite.

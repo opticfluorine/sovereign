@@ -14,11 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
 
@@ -34,7 +36,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
     /// </summary>
     private readonly Dictionary<EventId, ISpecificConnectionMapper> specificMappers = new();
 
-    private IOutboundPipelineStage nextStage;
+    private IOutboundPipelineStage? nextStage;
 
     public ServerConnectionMappingOutboundPipelineStage(GlobalConnectionMapper globalMapper,
         SingleEntityConnectionMapperFactory singleConnMapperFactory,
@@ -43,6 +45,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         // Create delegate mappers.
         var worldSubEventMapper = singleConnMapperFactory.Create(evInfo =>
         {
+            if (evInfo.Event.EventDetails == null) return new Maybe<int>();
             var details = (WorldSegmentSubscriptionEventDetails)evInfo.Event.EventDetails;
             return accountServices.GetConnectionIdForPlayer(details.EntityId);
         });
@@ -67,7 +70,11 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
 
     public IOutboundPipelineStage NextStage
     {
-        get => nextStage;
+        get
+        {
+            if (nextStage == null) throw new InvalidOperationException("Next stage not set.");
+            return nextStage;
+        }
         set
         {
             nextStage = value;

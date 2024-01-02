@@ -41,7 +41,7 @@ public sealed class NetworkingService
     /// <summary>
     ///     Thread that the service is running on.
     /// </summary>
-    private Thread serviceThread;
+    private readonly Thread serviceThread;
 
     /// <summary>
     ///     Flag indicating whether the service has been requested to stop.
@@ -63,6 +63,12 @@ public sealed class NetworkingService
 
         // Wire up pipelines.
         networkManager.OnNetworkReceive += NetworkManager_OnNetworkReceive;
+
+        // Set up thread, but do not start.
+        serviceThread = new Thread(Run)
+        {
+            Name = "Networking"
+        };
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -73,10 +79,6 @@ public sealed class NetworkingService
     public void Start()
     {
         stopRequested = false;
-        serviceThread = new Thread(Run)
-        {
-            Name = "Networking"
-        };
         serviceThread.Start();
     }
 

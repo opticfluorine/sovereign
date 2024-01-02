@@ -16,6 +16,7 @@
  */
 
 using System.Numerics;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -44,6 +45,8 @@ public sealed class PersistenceEventHandler
         this.rangeRetriever = rangeRetriever;
     }
 
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
     public void HandleEvent(Event ev)
     {
         switch (ev.EventId)
@@ -54,6 +57,12 @@ public sealed class PersistenceEventHandler
 
             case EventId.Server_Persistence_RetrieveEntity:
             {
+                if (ev.EventDetails == null)
+                {
+                    Logger.Error("Received RetrieveEntity event with no details.");
+                    break;
+                }
+
                 var details = (EntityEventDetails)ev.EventDetails;
                 OnRetrieveEntity(details.EntityId);
             }
@@ -61,6 +70,12 @@ public sealed class PersistenceEventHandler
 
             case EventId.Server_Persistence_RetrieveEntitiesInRange:
             {
+                if (ev.EventDetails == null)
+                {
+                    Logger.Error("Received RetrieveEntitiesInRange event with no details.");
+                    break;
+                }
+
                 var details = (VectorPairEventDetails)ev.EventDetails;
                 OnRetrieveEntitiesInRange(details.First, details.Second);
             }
@@ -68,6 +83,12 @@ public sealed class PersistenceEventHandler
 
             case EventId.Server_Persistence_RetrieveWorldSegment:
             {
+                if (ev.EventDetails == null)
+                {
+                    Logger.Error("Received RetrieveWorldSegment event with no details.");
+                    break;
+                }
+
                 var details = (WorldSegmentEventDetails)ev.EventDetails;
                 OnRetrieveWorldSegment(details.SegmentIndex);
             }
@@ -79,6 +100,12 @@ public sealed class PersistenceEventHandler
 
             case EventId.Server_Accounts_SelectPlayer:
             {
+                if (ev.EventDetails == null)
+                {
+                    Logger.Error("Received SelectPlayer event with no details.");
+                    break;
+                }
+
                 var details = (SelectPlayerEventDetails)ev.EventDetails;
                 OnSelectPlayer(details);
             }

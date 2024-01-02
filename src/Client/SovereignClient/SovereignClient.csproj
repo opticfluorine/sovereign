@@ -1,45 +1,47 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>Sovereign.SovereignClient</AssemblyName>
-    <RootNamespace>Sovereign.SovereignClient</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <AssemblyName>Sovereign.SovereignClient</AssemblyName>
+        <RootNamespace>Sovereign.SovereignClient</RootNamespace>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ClientCore\ClientCore.csproj" />
-    <ProjectReference Include="..\VeldridRenderer\VeldridRenderer.csproj" />
-  </ItemGroup>
-
-  <Target Name="CopyDataAfterBuild" AfterTargets="AfterBuild">
     <ItemGroup>
-      <DataFiles Include="Data/**/*" />
+        <ProjectReference Include="..\ClientCore\ClientCore.csproj"/>
+        <ProjectReference Include="..\VeldridRenderer\VeldridRenderer.csproj"/>
     </ItemGroup>
-    <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)" />
-  </Target>
 
-  <Target Name="CopyContribAfterBuild" AfterTargets="Build">
-    <ItemGroup>
-      <SdlLibs Include="Contrib/SDL/*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(SdlLibs)" DestinationFolder="$(OutDir)" />
-  </Target>
+    <Target Name="CopyDataAfterBuild" AfterTargets="AfterBuild">
+        <ItemGroup>
+            <DataFiles Include="Data/**/*"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"/>
+    </Target>
 
-  <Target Name="CopyDataAfterPublish" AfterTargets="Publish">
-    <ItemGroup>
-      <DataFiles Include="$(OutDir)Data/**/*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(PublishDir)Data/%(RecursiveDir)" />
-  </Target>
+    <Target Name="CopyContribAfterBuild" AfterTargets="Build">
+        <ItemGroup>
+            <SdlLibs Include="Contrib/SDL/*"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(SdlLibs)" DestinationFolder="$(OutDir)"/>
+    </Target>
 
-  <Target Name="CompileShaders" BeforeTargets="Build">
-    <Message Text="Compiling shaders to SPIR-V." />
-    <ItemGroup>
-      <GlslFiles Include="Shader/*.vert;Shader/*.frag" />
-    </ItemGroup>
-    <MakeDir Directories="$(OutDir)Data/Shader" />
-    <Exec Command="glslc @(GlslFiles) -o $(OutDir)Data/Shader/%(Filename)%(Extension).spv" Outputs="$(OutDir)Data/Shader/%(Filename)%(Extension).spv" />
-  </Target>
+    <Target Name="CopyDataAfterPublish" AfterTargets="Publish">
+        <ItemGroup>
+            <DataFiles Include="$(OutDir)Data/**/*"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(PublishDir)Data/%(RecursiveDir)"/>
+    </Target>
+
+    <Target Name="CompileShaders" BeforeTargets="Build">
+        <Message Text="Compiling shaders to SPIR-V."/>
+        <ItemGroup>
+            <GlslFiles Include="Shader/*.vert;Shader/*.frag"/>
+        </ItemGroup>
+        <MakeDir Directories="$(OutDir)Data/Shader"/>
+        <Exec Command="glslc @(GlslFiles) -o $(OutDir)Data/Shader/%(Filename)%(Extension).spv" Outputs="$(OutDir)Data/Shader/%(Filename)%(Extension).spv"/>
+    </Target>
 
 </Project>

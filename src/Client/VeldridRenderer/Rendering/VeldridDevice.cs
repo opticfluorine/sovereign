@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using SDL2;
 using Sovereign.ClientCore.Rendering;
@@ -49,12 +50,12 @@ public class VeldridDevice : IDisposable
     /// <summary>
     ///     Backing Veldrid graphics device.
     /// </summary>
-    public GraphicsDevice Device { get; private set; }
+    public GraphicsDevice? Device { get; private set; }
 
     /// <summary>
     ///     Provides access to the currently selected display mode.
     /// </summary>
-    public IDisplayMode DisplayMode => mainDisplay.DisplayMode;
+    public IDisplayMode? DisplayMode => mainDisplay.DisplayMode;
 
 
     /// <summary>
@@ -68,6 +69,7 @@ public class VeldridDevice : IDisposable
     /// <summary>
     ///     Creates the Veldrid device.
     /// </summary>
+    [MemberNotNull("Device")]
     public void CreateDevice()
     {
         // No fancy options for now, just enable debug mode.
@@ -77,6 +79,9 @@ public class VeldridDevice : IDisposable
 
         // We use the Vulkan renderer since it is reasonably cross-platform
         // and more stable than the OpenGL renderer on Linux.
+        if (DisplayMode == null)
+            throw new InvalidOperationException("Tried to create device without display mode.");
+
         Device = GraphicsDevice.CreateVulkan(
             options,
             CreateVkSurfaceSource(),

@@ -24,5 +24,5 @@ public class CreatePlayerRequest
     /// <summary>
     ///     Player name.
     /// </summary>
-    public string PlayerName { get; set; }
+    public string? PlayerName { get; set; }
 }

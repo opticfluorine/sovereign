@@ -29,32 +29,12 @@ namespace Sovereign.Persistence.Database;
 /// </summary>
 public sealed class PersistenceProviderManager
 {
-    private readonly IPersistenceConfiguration configuration;
-    private readonly SqlitePersistenceProvider sqlitePersistenceProvider;
-
-    public PersistenceProviderManager(IPersistenceConfiguration configuration,
-        SqlitePersistenceProvider sqlitePersistenceProvider)
-    {
-        this.configuration = configuration;
-        this.sqlitePersistenceProvider = sqlitePersistenceProvider;
-
-        Initialize();
-    }
-
-    /// <summary>
-    ///     Currently active persistence provider.
-    /// </summary>
-    public IPersistenceProvider PersistenceProvider { get; private set; }
-
-    /// <summary>
-    ///     Initializes the provider manager based on the current configuration.
-    /// </summary>
-    private void Initialize()
+    public PersistenceProviderManager(IPersistenceConfiguration configuration)
     {
         switch (configuration.DatabaseType)
         {
             case DatabaseType.Sqlite:
-                PersistenceProvider = sqlitePersistenceProvider;
+                PersistenceProvider = new SqlitePersistenceProvider(configuration);
                 break;
 
             case DatabaseType.Postgres:
@@ -64,4 +44,9 @@ public sealed class PersistenceProviderManager
                 throw new NotImplementedException();
         }
     }
+
+    /// <summary>
+    ///     Currently active persistence provider.
+    /// </summary>
+    public IPersistenceProvider PersistenceProvider { get; private set; }
 }

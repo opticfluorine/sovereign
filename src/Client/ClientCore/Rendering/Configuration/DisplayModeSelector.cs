@@ -70,7 +70,7 @@ public class DisplayModeSelector
             throw new VideoAdapterException("No display modes found for selected video adapter.");
 
         /* Use the preferred mode if it is available. */
-        IDisplayMode selectedMode = null;
+        IDisplayMode? selectedMode = null;
         var preferredModes = from mode in availableModes
             where mode.Width == DefaultWidth && mode.Height == DefaultHeight
             select mode;

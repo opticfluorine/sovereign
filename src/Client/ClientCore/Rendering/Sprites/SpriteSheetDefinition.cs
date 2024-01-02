@@ -25,7 +25,7 @@ public class SpriteSheetDefinition
     /// <summary>
     ///     Name of the spritesheet image file.
     /// </summary>
-    public string Filename { get; set; }
+    public string Filename { get; set; } = "";
 
     /// <summary>
     ///     Sprite width.
@@ -40,10 +40,10 @@ public class SpriteSheetDefinition
     /// <summary>
     ///     Author of the spritesheet.
     /// </summary>
-    public string Author { get; set; }
+    public string Author { get; set; } = "";
 
     /// <summary>
     ///     License rights of the spritesheet.f
     /// </summary>
-    public string License { get; set; }
+    public string License { get; set; } = "";
 }

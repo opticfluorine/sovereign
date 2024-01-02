@@ -25,10 +25,10 @@ public sealed class AuthenticationResponse
     /// <summary>
     ///     Base64-encoded HMAC key. Secret.
     /// </summary>
-    public string Base64HMACKey { get; set; }
+    public string Base64HMACKey { get; set; } = "";
 
     /// <summary>
     ///     Base64-encoded connection key. Public.
     /// </summary>
-    public string ConnectionKey { get; set; }
+    public string ConnectionKey { get; set; } = "";
 }

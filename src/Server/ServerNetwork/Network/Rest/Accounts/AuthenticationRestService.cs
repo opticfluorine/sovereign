@@ -107,7 +107,7 @@ public sealed class AuthenticationRestService : IRestService
             var requestJson = ctx.Request.DataAsString;
             var requestData = JsonSerializer.Deserialize<LoginRequest>(requestJson,
                 MessageConfig.JsonOptions);
-            if (requestData.Username == null || requestData.Password == null)
+            if (requestData == null || requestData.Username == null || requestData.Password == null)
             {
                 await SendResponse(ctx, 400, "Incomplete input.");
                 return;
@@ -160,8 +160,8 @@ public sealed class AuthenticationRestService : IRestService
     }
 
     private async Task SendResponse(HttpContext ctx,
-        int status, string result, string id = null, string apiKey = null,
-        string secret = null, string host = null,
+        int status, string result, string id = "", string apiKey = "",
+        string secret = "", string host = "",
         ushort port = 0)
     {
         ctx.Response.StatusCode = status;

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Diagnostics.CodeAnalysis;
 using SDL2;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.EngineCore.Events;
@@ -40,10 +41,10 @@ public class SDLEventAdapter : IEventAdapter
         /* No preparation is needed with SDL. */
     }
 
-    public bool PollEvent(out Event ev)
+    public bool PollEvent([NotNullWhen(true)] out Event? ev)
     {
-        /* 
-         * Attempt to adapt the next available event until successful 
+        /*
+         * Attempt to adapt the next available event until successful
          * or no events remain.
          */
         ev = null;

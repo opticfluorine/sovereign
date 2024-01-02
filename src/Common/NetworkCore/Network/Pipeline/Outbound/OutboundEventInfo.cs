@@ -33,7 +33,7 @@ public struct OutboundEventInfo
     /// <summary>
     ///     Connection to send event with. Optional, but must be specified by the end of the pipeline.
     /// </summary>
-    public NetworkConnection Connection { get; }
+    public NetworkConnection? Connection { get; }
 
     /// <summary>
     ///     Delivery method for sending this event.
@@ -46,7 +46,7 @@ public struct OutboundEventInfo
     /// <param name="ev">Event.</param>
     /// <param name="connection">Connection.</param>
     /// <param name="deliveryMethod">Delivery method.</param>
-    public OutboundEventInfo(Event ev, NetworkConnection connection = null,
+    public OutboundEventInfo(Event ev, NetworkConnection? connection = null,
         DeliveryMethod deliveryMethod = DeliveryMethod.Unreliable)
     {
         Event = ev;
