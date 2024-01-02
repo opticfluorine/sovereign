@@ -61,18 +61,42 @@ public sealed class ClientNetworkEventHandler
                 break;
 
             case EventId.Client_Network_BeginConnection:
+                if (ev.EventDetails == null)
+                {
+                    Logger.Error("Received BeginConnection without details.");
+                    break;
+                }
+
                 HandleBeginConnection((BeginConnectionEventDetails)ev.EventDetails);
                 break;
 
             case EventId.Client_Network_RegisterAccount:
+                if (ev.EventDetails == null)
+                {
+                    Logger.Error("Received RegisterAccount without details.");
+                    break;
+                }
+
                 HandleRegisterAccount((RegisterAccountEventDetails)ev.EventDetails);
                 break;
 
             case EventId.Core_WorldManagement_Subscribe:
+                if (ev.EventDetails == null)
+                {
+                    Logger.Error("Received Subscribe without details.");
+                    break;
+                }
+
                 HandleWorldSegmentSubscribe((WorldSegmentSubscriptionEventDetails)ev.EventDetails);
                 break;
 
             case EventId.Core_WorldManagement_Unsubscribe:
+                if (ev.EventDetails == null)
+                {
+                    Logger.Error("Received Unsubscribe without details.");
+                    break;
+                }
+
                 HandleWorldSegmentUnsubscribe((WorldSegmentSubscriptionEventDetails)ev.EventDetails);
                 break;
 

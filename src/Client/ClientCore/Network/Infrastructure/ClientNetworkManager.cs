@@ -58,7 +58,7 @@ internal sealed class ClientNetworkCommand
     /// <summary>
     ///     Server host. Only used for BeginConnection.
     /// </summary>
-    public string Host { get; set; }
+    public string Host { get; set; } = "";
 
     /// <summary>
     ///     Server port. Only used for EndConnection.
@@ -95,7 +95,7 @@ public sealed class ClientNetworkManager : INetworkManager
     /// <summary>
     ///     Latest login response.
     /// </summary>
-    private LoginResponse loginResponse;
+    private LoginResponse? loginResponse;
 
     public ClientNetworkManager(NetworkConnectionManager connectionManager,
         NetworkSerializer networkSerializer, RestClient restClient,
@@ -120,14 +120,14 @@ public sealed class ClientNetworkManager : INetworkManager
     /// <summary>
     ///     Active connection.
     /// </summary>
-    public NetworkConnection Connection { get; private set; }
+    public NetworkConnection? Connection { get; private set; }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Current connection parameters.
     /// </summary>
-    public ClientConnectionParameters ConnectionParameters { get; private set; }
+    public ClientConnectionParameters? ConnectionParameters { get; private set; }
 
     /// <summary>
     ///     Client state.
@@ -138,9 +138,9 @@ public sealed class ClientNetworkManager : INetworkManager
     /// <summary>
     ///     Last network error message.
     /// </summary>
-    internal string ErrorMessage { get; private set; }
+    internal string ErrorMessage { get; private set; } = "";
 
-    public event OnNetworkReceive OnNetworkReceive;
+    public event OnNetworkReceive? OnNetworkReceive;
 
     public void Initialize()
     {
@@ -161,7 +161,7 @@ public sealed class ClientNetworkManager : INetworkManager
         while (outboundEventQueue.TryDequeue(out var evInfo))
             try
             {
-                evInfo.Connection.SendEvent(evInfo.Event, evInfo.DeliveryMethod, networkSerializer);
+                evInfo.Connection?.SendEvent(evInfo.Event, evInfo.DeliveryMethod, networkSerializer);
             }
             catch (Exception e)
             {
@@ -274,9 +274,21 @@ public sealed class ClientNetworkManager : INetworkManager
         this.loginResponse = loginResponse;
 
         // Configure the REST API to make authenticated calls going forward.
+        if (loginResponse.UserId == null || loginResponse.RestApiKey == null)
+        {
+            Logger.Error("Received incomplete login response from server; aborting connection.");
+            return;
+        }
+
         restClient.SetCredentials(Guid.Parse(loginResponse.UserId), loginResponse.RestApiKey);
 
         // Start up the connection to the event server.
+        if (ConnectionParameters == null)
+        {
+            Logger.Error("No connection parameters set when continuing connection; aborting connection.");
+            return;
+        }
+
         var cmd = new ClientNetworkCommand();
         cmd.CommandType = ClientNetworkCommandType.BeginConnection;
         cmd.Host = ConnectionParameters.Host;
@@ -322,6 +334,12 @@ public sealed class ClientNetworkManager : INetworkManager
             var addr = resolvedHost.AddressList[0];
 
             // Grab HMAC key (shared secret) from the login response.
+            if (loginResponse == null || loginResponse.SharedSecret == null || loginResponse.UserId == null)
+            {
+                Logger.Error("Login response missing or incomplete; aborting connection.");
+                return;
+            }
+
             var hmacKey = Utilities.HexToBinary(loginResponse.SharedSecret);
 
             // Connect.
@@ -416,7 +434,7 @@ public sealed class ClientNetworkManager : INetworkManager
         try
         {
             var ev = networkSerializer.DeserializeEvent(Connection, reader.GetRemainingBytes());
-            OnNetworkReceive(ev, Connection);
+            OnNetworkReceive?.Invoke(ev, Connection);
         }
         catch (Exception e)
         {

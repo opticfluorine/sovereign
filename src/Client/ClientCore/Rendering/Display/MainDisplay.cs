@@ -51,9 +51,9 @@ public class MainDisplay
     }
 
     /// <summary>
-    ///     Display mode in use. Only valid after calling Show().
+    ///     Display mode in use. Only valid after calling Show(), null otherwise.
     /// </summary>
-    public IDisplayMode DisplayMode { get; private set; }
+    public IDisplayMode? DisplayMode { get; private set; }
 
     /// <summary>
     ///     Whether the display is set to fullscreen mode.

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 
 namespace Sovereign.ClientCore.Network.Pipeline.Outbound;
@@ -24,6 +25,7 @@ namespace Sovereign.ClientCore.Network.Pipeline.Outbound;
 public class ClientConnectionMappingOutboundPipelineStage : IConnectionMappingOutboundPipelineStage
 {
     private readonly INetworkClient client;
+    private IOutboundPipelineStage? nextStage;
 
     public ClientConnectionMappingOutboundPipelineStage(INetworkClient client)
     {
@@ -37,5 +39,13 @@ public class ClientConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             NextStage.Process(new OutboundEventInfo(evInfo, client.Connection));
     }
 
-    public IOutboundPipelineStage NextStage { get; set; }
+    public IOutboundPipelineStage NextStage
+    {
+        get
+        {
+            if (nextStage == null) throw new InvalidOperationException("Next stage not set.");
+            return nextStage;
+        }
+        set => nextStage = value;
+    }
 }

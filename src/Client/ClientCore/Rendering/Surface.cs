@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using SDL2;
 using Sovereign.ClientCore.Rendering.Configuration;
@@ -52,7 +53,7 @@ public class Surface : IDisposable
     /// <summary>
     ///     Underlying surface properties.
     /// </summary>
-    private SurfaceProperties properties;
+    private SurfaceProperties? properties;
 
     /// <summary>
     /// </summary>
@@ -101,7 +102,8 @@ public class Surface : IDisposable
     /// <summary>
     ///     Whether the surface is backed by a valid pointer.
     /// </summary>
-    public bool IsValid => SurfacePointer != IntPtr.Zero;
+    [MemberNotNullWhen(true, "properties")]
+    public bool IsValid => SurfacePointer != IntPtr.Zero && properties != null;
 
     /// <summary>
     ///     Read-only property that provides access to underlying surface properties.

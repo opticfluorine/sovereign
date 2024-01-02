@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Configuration;
 
@@ -29,7 +30,7 @@ public sealed class GuiFontAtlas : IDisposable
     /// <summary>
     ///     Pointer to the SDL surface containing the font atlas.
     /// </summary>
-    private Surface fontAtlasSurface;
+    private Surface? fontAtlasSurface;
 
     /// <summary>
     ///     Height.
@@ -88,6 +89,7 @@ public sealed class GuiFontAtlas : IDisposable
     /// <summary>
     ///     Initializes the font atlas surface.
     /// </summary>
+    [MemberNotNull("fontAtlasSurface")]
     private void InitializeSurface()
     {
         // Retrieve raw data from ImGui.

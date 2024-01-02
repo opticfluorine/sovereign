@@ -38,7 +38,7 @@ public sealed class RestClient
     /// <summary>
     ///     Base URI for the REST server.
     /// </summary>
-    private Uri baseUri;
+    private Uri baseUri = new("http://localhost");
 
     /// <summary>
     ///     Flag indicating whether the REST client should be considered "connected".
