@@ -8,7 +8,7 @@
 
 * Merge `Performance` into `EngineCore` to clean things up; fix nullability warnings.
 * Clean up null checking warnings in `NetworkCore`, `ServerCore`, `Persistence`, `Accounts`,
-  and `ServerNetwork`.
+  `ServerNetwork`, `SovereignServer`.
 * Flag all reference typed members in JSON-serialized types as nullable since `System.Text.Json`
   currently doesn't enforce nullability rules on deserialization. This way we can get compile-time
   errors if we forget to check for missing fields in untrusted inputs.
