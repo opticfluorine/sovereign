@@ -131,7 +131,8 @@ public sealed class AuthenticationClient
     {
         try
         {
-            return new Maybe<LoginResponse>(await response.Content.ReadFromJsonAsync<LoginResponse>());
+            var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+            return result != null ? new Maybe<LoginResponse>(result) : new Maybe<LoginResponse>();
         }
         catch (Exception e)
         {

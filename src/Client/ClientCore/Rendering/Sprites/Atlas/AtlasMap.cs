@@ -47,7 +47,7 @@ public sealed class AtlasMap
     /// <summary>
     ///     Maps each sprite ID to its texture atlas coordinates.
     /// </summary>
-    public IList<AtlasMapElement> MapElements { get; private set; }
+    public List<AtlasMapElement> MapElements { get; private set; } = new();
 
     /// <summary>
     ///     Initializes the atlas map.

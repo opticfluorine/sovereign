@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.GUI;
@@ -88,7 +89,7 @@ public class TextureAtlas : IDisposable
     /// <summary>
     ///     Top-left point of the font atlas within the texture atlas.
     /// </summary>
-    public Tuple<int, int> FontAtlasPosition { get; private set; }
+    public Tuple<int, int> FontAtlasPosition { get; private set; } = new(0, 0);
 
     public void Dispose()
     {
@@ -215,6 +216,7 @@ public class TextureAtlas : IDisposable
     /// <param name="atlasWidth">Atlas width.</param>
     /// <param name="atlasHeight">Atlas height.</param>
     /// <param name="format">Display format.</param>
+    [MemberNotNull("AtlasSurface")]
     private void CreateAtlas(IList<PlanElement> plan, int atlasWidth, int atlasHeight,
         DisplayFormat format)
     {
@@ -231,6 +233,7 @@ public class TextureAtlas : IDisposable
     /// <param name="atlasWidth">Atlas width.</param>
     /// <param name="atlasHeight">Atlas height.</param>
     /// <param name="format">Format.</param>
+    [MemberNotNull("AtlasSurface")]
     private void CreateAtlasSurface(int atlasWidth, int atlasHeight,
         DisplayFormat format)
     {

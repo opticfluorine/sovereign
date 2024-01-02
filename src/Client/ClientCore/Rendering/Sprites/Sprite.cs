@@ -30,7 +30,7 @@ public sealed class Sprite
     /// <summary>
     ///     Spritesheet filename.
     /// </summary>
-    public string SpritesheetName { get; set; }
+    public string SpritesheetName { get; set; } = "";
 
     /// <summary>
     ///     Row containing the sprite.

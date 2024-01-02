@@ -84,6 +84,13 @@ public sealed class RegistrationClient
             }
 
             var response = await httpResponse.Content.ReadFromJsonAsync<RegistrationResponse>();
+            if (response == null)
+            {
+                var msg = "Received null response from server.";
+                Logger.Error(msg);
+                return new Option<RegistrationResponse, string>(msg);
+            }
+
             if (httpResponse.StatusCode == HttpStatusCode.Created)
             {
                 Logger.Info("Registration successful.");
@@ -91,8 +98,16 @@ public sealed class RegistrationClient
             }
             else
             {
-                Logger.ErrorFormat("Registration failed: {0}", response.Result);
-                result = new Option<RegistrationResponse, string>(response.Result);
+                if (response.Result != null)
+                {
+                    Logger.ErrorFormat("Registration failed: {0}", response.Result);
+                    result = new Option<RegistrationResponse, string>(response.Result);
+                }
+                else
+                {
+                    Logger.Error("Registration failed: Unknown error.");
+                    result = new Option<RegistrationResponse, string>("Unknown error.");
+                }
             }
         }
         catch (Exception e)
