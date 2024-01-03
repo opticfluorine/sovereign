@@ -48,19 +48,45 @@ public class EntityDefinitionProcessor
             return;
         }
 
-        // TODO Handle update case if entity already exists.
-
         // Build entity.
         var builder = factory.GetBuilder(definition.EntityId);
-        if (definition.Position.HasValue) builder.Positionable(definition.Position.Value);
-        if (definition.AnimatedSpriteId.HasValue) builder.AnimatedSprite(definition.AnimatedSpriteId.Value);
-        if (definition.Drawable) builder.Drawable();
-        if (definition.Material != null) builder.Material(definition.Material);
-        if (definition.PlayerCharacter) builder.PlayerCharacter();
-        if (definition.Name != null) builder.Name(definition.Name);
-        if (definition.Parent.HasValue) builder.Parent(definition.Parent.Value);
-        var entityId = builder.Build();
 
-        Logger.DebugFormat("Built entity ID {0}.", entityId);
+        if (definition.Position.HasValue)
+            builder.Positionable(definition.Position.Value);
+        else
+            builder.WithoutPositionable();
+
+        if (definition.AnimatedSpriteId.HasValue)
+            builder.AnimatedSprite(definition.AnimatedSpriteId.Value);
+        else
+            builder.WithoutAnimatedSprite();
+
+        if (definition.Drawable)
+            builder.Drawable();
+        else
+            builder.WithoutDrawable();
+
+        if (definition.Material != null)
+            builder.Material(definition.Material);
+        else
+            builder.WithoutMaterial();
+
+        if (definition.PlayerCharacter)
+            builder.PlayerCharacter();
+        else
+            builder.WithoutPlayerCharacter();
+
+        if (definition.Name != null)
+            builder.Name(definition.Name);
+        else
+            builder.WithoutName();
+
+        if (definition.Parent.HasValue)
+            builder.Parent(definition.Parent.Value);
+        else
+            builder.WithoutParent();
+
+        var entityId = builder.Build();
+        Logger.DebugFormat("Processed entity ID {0}.", entityId);
     }
 }

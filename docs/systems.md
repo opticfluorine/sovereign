@@ -21,12 +21,13 @@ Core systems are present in both the client and server.
 
 Client systems are only present in the client.
 
-| System          | System Class          | Description                                                               |
-|-----------------|-----------------------|---------------------------------------------------------------------------|
-| `Camera`        | `CameraSystem`        | Responsible for managing the camera used for rendering.                   |
-| `ClientNetwork` | `ClientNetworkSystem` | Responsible for managing the client-side network connection.              |
-| `Input`         | `InputSystem`         | Responsible for responding to user input (keyboard, mouse, gamepad, etc). |
-| `TestContent`   | `TestContentSystem`   | Generates content for development and testing.                            |
+| System                  | System Class                  | Description                                                               |
+|-------------------------|-------------------------------|---------------------------------------------------------------------------|
+| `Camera`                | `CameraSystem`                | Responsible for managing the camera used for rendering.                   |
+| `ClientNetwork`         | `ClientNetworkSystem`         | Responsible for managing the client-side network connection.              |
+| `EntitySynchronization` | `EntitySynchronizationSystem` | Responsible for non-block entity synchronization in the client.           |
+| `Input`                 | `InputSystem`                 | Responsible for responding to user input (keyboard, mouse, gamepad, etc). |
+| `TestContent`           | `TestContentSystem`           | Generates content for development and testing.                            |
 
 ## Server Systems
 

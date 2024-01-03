@@ -4,6 +4,10 @@
 
 ### January
 
+#### 03 January 2024
+
+* Add `EntitySynchronizationSystem` for processing non-block entity synchronization updates from the server.
+
 #### 02 January 2024
 
 * Finish up null checking updates for all projects.

@@ -241,6 +241,16 @@ public enum EventId
 
     #endregion Client_Network
 
+    #region Client_EntitySynchronization
+
+    /// <summary>
+    ///     Event sent from server to client to synchronize non-block entities.
+    /// </summary>
+    /// Associated details: EntityDefinitionEventDetails
+    Client_EntitySynchronization_Update = 100300,
+
+    #endregion Client_EntitySynchronization
+
     #endregion Client
 
     #region Server

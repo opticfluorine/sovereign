@@ -26,6 +26,11 @@ namespace Sovereign.EngineCore.Events.Details;
 public class EntityDefinitionEventDetails : IEventDetails
 {
     /// <summary>
+    ///     Entity ID of the player to receive this synchronization event.
+    /// </summary>
+    public ulong PlayerEntityId { get; set; }
+
+    /// <summary>
     ///     Entity definitions.
     /// </summary>
     public List<EntityDefinition> EntityDefinitions { get; set; } = new();
