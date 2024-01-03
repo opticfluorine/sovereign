@@ -48,7 +48,7 @@ public sealed class SqliteNextPersistedIdQuery : INextPersistedIdQuery
         {
             var result = cmd.ExecuteScalar();
             if (result == null) throw new Exception("Database is in an invalid state.");
-            return (ulong)result;
+            return (ulong)(long)result;
         }
     }
 }
