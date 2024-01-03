@@ -22,7 +22,7 @@ using Sovereign.EngineCore.Components.Types;
 namespace Sovereign.EngineCore.Entities;
 
 /// <summary>
-///     Utility interface for creating new entities.
+///     Utility interface for creating and updating entities.
 /// </summary>
 public interface IEntityBuilder
 {
@@ -37,7 +37,7 @@ public interface IEntityBuilder
     /// </summary>
     /// <param name="position">Position.</param>
     /// <param name="velocity">Velocity.</param>
-    /// <returns></returns>
+    /// <returns>Builder.</returns>
     IEntityBuilder Positionable(Vector3 position, Vector3 velocity);
 
     /// <summary>
@@ -56,10 +56,22 @@ public interface IEntityBuilder
     IEntityBuilder Positionable();
 
     /// <summary>
+    ///     Removes positionable components if they are currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutPositionable();
+
+    /// <summary>
     ///     Makes the new entity drawable.
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder Drawable();
+
+    /// <summary>
+    ///     Removes drawable component if they are currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutDrawable();
 
     /// <summary>
     ///     Uses the given animated sprite when rendering the new entity.
@@ -67,6 +79,12 @@ public interface IEntityBuilder
     /// <param name="animatedSpriteId">Animated sprite ID.</param>
     /// <returns>Builder.</returns>
     IEntityBuilder AnimatedSprite(int animatedSpriteId);
+
+    /// <summary>
+    ///     Removes animated sprite component if currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutAnimatedSprite();
 
     /// <summary>
     ///     Makes the new entity a block of the given material.
@@ -84,19 +102,37 @@ public interface IEntityBuilder
     IEntityBuilder Material(MaterialPair material);
 
     /// <summary>
+    ///     Removes material components if currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutMaterial();
+
+    /// <summary>
     ///     Records the entity ID of the block above this block.
     ///     Note that this does not move either block, only records the
     ///     topological relationship.
     /// </summary>
-    /// <param name="aboveBlock"></param>
-    /// <returns></returns>
+    /// <param name="aboveBlock">Above block.</param>
+    /// <returns>Builder.</returns>
     IEntityBuilder AboveBlock(ulong aboveBlock);
+
+    /// <summary>
+    ///     Removes the above block component if currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutAboveBlock();
 
     /// <summary>
     ///     Tags the entity as a player character.
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder PlayerCharacter();
+
+    /// <summary>
+    ///     Removes the player component tag if currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutPlayerCharacter();
 
     /// <summary>
     ///     Assigns a name to the entity.
@@ -106,6 +142,12 @@ public interface IEntityBuilder
     IEntityBuilder Name(string name);
 
     /// <summary>
+    ///     Removes the name component if currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutName();
+
+    /// <summary>
     ///     Assigns an account ID to the entity.
     /// </summary>
     /// <param name="accountId">Account ID.</param>
@@ -113,9 +155,21 @@ public interface IEntityBuilder
     IEntityBuilder Account(Guid accountId);
 
     /// <summary>
+    ///     Removes the account component if currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutAccount();
+
+    /// <summary>
     ///     Assigns a parent entity ID to the entity.
     /// </summary>
     /// <param name="parentEntityId">Parent entity ID.</param>
     /// <returns>Builder.</returns>
     IEntityBuilder Parent(ulong parentEntityId);
+
+    /// <summary>
+    ///     Removes the parent component if currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutParent();
 }

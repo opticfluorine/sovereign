@@ -17,7 +17,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineUtil.Collections;
@@ -39,10 +39,7 @@ public class MainEventLoop : IEventLoop
     /// </summary>
     private readonly Dictionary<EventId, List<EventCommunicator>> communicatorsByEventId = new();
 
-    /// <summary>
-    ///     Component manager.
-    /// </summary>
-    private readonly ComponentManager componentManager;
+    private readonly EntityManager entityManager;
 
     /// <summary>
     ///     Event adapter manager.
@@ -75,11 +72,12 @@ public class MainEventLoop : IEventLoop
     /// </summary>
     private ulong lastUpdateTime;
 
-    public MainEventLoop(ComponentManager componentManager,
-        EventAdapterManager eventAdapterManager)
+    public MainEventLoop(
+        EventAdapterManager eventAdapterManager,
+        EntityManager entityManager)
     {
-        this.componentManager = componentManager;
         this.eventAdapterManager = eventAdapterManager;
+        this.entityManager = entityManager;
     }
 
     public bool Terminated { get; private set; }
@@ -100,8 +98,8 @@ public class MainEventLoop : IEventLoop
     /// </summary>
     public void UpdateSystemTime(ulong systemTime)
     {
-        /* Merge the component updates. */
-        componentManager.UpdateAllComponents();
+        /* Merge the entity and component updates. */
+        entityManager.ApplyUpdates();
 
         /* Advance the system time. */
         lastUpdateTime = systemTime;

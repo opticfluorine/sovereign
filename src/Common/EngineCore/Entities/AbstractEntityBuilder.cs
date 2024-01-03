@@ -35,6 +35,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     protected readonly ComponentManager componentManager;
 
     protected readonly ulong entityId;
+    private readonly EntityTable entityTable;
     protected readonly MaterialModifierComponentCollection materialModifiers;
     protected readonly MaterialComponentCollection materials;
     protected readonly NameComponentCollection names;
@@ -52,7 +53,8 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         AboveBlockComponentCollection aboveBlocks,
         PlayerCharacterTagCollection playerCharacterTags,
         NameComponentCollection names,
-        ParentComponentCollection parents)
+        ParentComponentCollection parents,
+        EntityTable entityTable)
     {
         this.entityId = entityId;
         this.componentManager = componentManager;
@@ -64,6 +66,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         this.playerCharacterTags = playerCharacterTags;
         this.names = names;
         this.parents = parents;
+        this.entityTable = entityTable;
 
         weakLock = componentManager.ComponentGuard.AcquireWeakLock();
     }
@@ -75,15 +78,16 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public ulong Build()
     {
-        weakLock.Dispose();
+        if (!entityTable.Exists(entityId)) entityTable.Add(entityId);
+        Dispose();
 
         return entityId;
     }
 
     public IEntityBuilder Positionable(Vector3 position, Vector3 velocity)
     {
-        positions.AddComponent(entityId, position);
-        velocities.AddComponent(entityId, velocity);
+        positions.AddOrUpdateComponent(entityId, position);
+        velocities.AddOrUpdateComponent(entityId, velocity);
         return this;
     }
 
@@ -97,10 +101,17 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         return Positionable(Vector3.Zero, Vector3.Zero);
     }
 
+    public IEntityBuilder WithoutPositionable()
+    {
+        positions.RemoveComponent(entityId);
+        velocities.RemoveComponent(entityId);
+        return this;
+    }
+
     public IEntityBuilder Material(int materialId, int materialModifier)
     {
-        materials.AddComponent(entityId, materialId);
-        materialModifiers.AddComponent(entityId, materialModifier);
+        materials.AddOrUpdateComponent(entityId, materialId);
+        materialModifiers.AddOrUpdateComponent(entityId, materialModifier);
         return this;
     }
 
@@ -109,9 +120,22 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         return Material(material.MaterialId, material.MaterialModifier);
     }
 
+    public IEntityBuilder WithoutMaterial()
+    {
+        materials.RemoveComponent(entityId);
+        materialModifiers.RemoveComponent(entityId);
+        return this;
+    }
+
     public IEntityBuilder AboveBlock(ulong otherEntityId)
     {
-        aboveBlocks.AddComponent(entityId, otherEntityId);
+        aboveBlocks.AddOrUpdateComponent(entityId, otherEntityId);
+        return this;
+    }
+
+    public IEntityBuilder WithoutAboveBlock()
+    {
+        aboveBlocks.RemoveComponent(entityId);
         return this;
     }
 
@@ -121,21 +145,45 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         return this;
     }
 
+    public IEntityBuilder WithoutPlayerCharacter()
+    {
+        playerCharacterTags.UntagEntity(entityId);
+        return this;
+    }
+
     public IEntityBuilder Name(string name)
     {
-        names.AddComponent(entityId, name);
+        names.AddOrUpdateComponent(entityId, name);
+        return this;
+    }
+
+    public IEntityBuilder WithoutName()
+    {
+        names.RemoveComponent(entityId);
         return this;
     }
 
     public IEntityBuilder Parent(ulong parentEntityId)
     {
-        parents.AddComponent(entityId, parentEntityId);
+        parents.AddOrUpdateComponent(entityId, parentEntityId);
+        return this;
+    }
+
+    public IEntityBuilder WithoutParent()
+    {
+        parents.RemoveComponent(entityId);
         return this;
     }
 
     public abstract IEntityBuilder Drawable();
 
+    public abstract IEntityBuilder WithoutDrawable();
+
     public abstract IEntityBuilder AnimatedSprite(int animatedSpriteId);
 
+    public abstract IEntityBuilder WithoutAnimatedSprite();
+
     public abstract IEntityBuilder Account(Guid accountId);
+
+    public abstract IEntityBuilder WithoutAccount();
 }

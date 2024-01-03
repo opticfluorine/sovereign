@@ -44,9 +44,10 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         AnimatedSpriteComponentCollection animatedSprites,
         PlayerCharacterTagCollection playerCharacterTags,
         NameComponentCollection names,
-        ParentComponentCollection parents)
+        ParentComponentCollection parents,
+        EntityTable entityTable)
         : base(entityId, componentManager, positions, velocities, materials,
-            materialModifiers, aboveBlocks, playerCharacterTags, names, parents)
+            materialModifiers, aboveBlocks, playerCharacterTags, names, parents, entityTable)
     {
         this.drawables = drawables;
         this.animatedSprites = animatedSprites;
@@ -58,15 +59,33 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         return this;
     }
 
+    public override IEntityBuilder WithoutDrawable()
+    {
+        drawables.RemoveComponent(entityId);
+        return this;
+    }
+
     public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
     {
         animatedSprites.AddComponent(entityId, animatedSpriteId);
         return this;
     }
 
+    public override IEntityBuilder WithoutAnimatedSprite()
+    {
+        drawables.RemoveComponent(entityId);
+        return this;
+    }
+
     public override IEntityBuilder Account(Guid accountId)
     {
         /* no-op */
+        return this;
+    }
+
+    public override IEntityBuilder WithoutAccount()
+    {
+        // no-op
         return this;
     }
 }

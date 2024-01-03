@@ -36,6 +36,10 @@ public class EntityDefinitionProcessor
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
+    /// <summary>
+    ///     Processes an entity definition to create an entity.
+    /// </summary>
+    /// <param name="definition"></param>
     public void ProcessDefinition(EntityDefinition definition)
     {
         if (!validator.Validate(definition))

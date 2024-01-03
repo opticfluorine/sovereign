@@ -32,7 +32,10 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AccountComponentCollection accounts;
     private readonly ComponentManager componentManager;
+
+    private readonly EntityAssigner entityAssigner;
     private readonly EntityManager entityManager;
+    private readonly EntityTable entityTable;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
@@ -40,8 +43,6 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly PlayerCharacterTagCollection playerCharacterTags;
     private readonly PositionComponentCollection positions;
     private readonly VelocityComponentCollection velocities;
-
-    private readonly EntityAssigner entityAssigner;
 
     public ServerEntityFactory(
         EntityManager entityManager,
@@ -54,7 +55,8 @@ public sealed class ServerEntityFactory : IEntityFactory
         PlayerCharacterTagCollection playerCharacterTags,
         NameComponentCollection names,
         AccountComponentCollection accounts,
-        ParentComponentCollection parents)
+        ParentComponentCollection parents,
+        EntityTable entityTable)
     {
         this.entityManager = entityManager;
         this.componentManager = componentManager;
@@ -67,6 +69,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.names = names;
         this.accounts = accounts;
         this.parents = parents;
+        this.entityTable = entityTable;
         entityAssigner = entityManager.GetNewAssigner();
     }
 
@@ -88,6 +91,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             playerCharacterTags,
             names,
             accounts,
-            parents);
+            parents,
+            entityTable);
     }
 }

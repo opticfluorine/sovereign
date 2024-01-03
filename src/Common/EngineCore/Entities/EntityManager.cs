@@ -39,16 +39,29 @@ public class EntityManager
     private readonly ComponentManager componentManager;
     private readonly EntityNotifier entityNotifier;
 
+    private readonly EntityTable entityTable;
+
     /// <summary>
     ///     Next block identifier.
     /// </summary>
     private int nextBlock = (int)FirstReservedBlock;
 
     public EntityManager(ComponentManager componentManager,
-        EntityNotifier entityNotifier)
+        EntityNotifier entityNotifier,
+        EntityTable entityTable)
     {
         this.componentManager = componentManager;
         this.entityNotifier = entityNotifier;
+        this.entityTable = entityTable;
+    }
+
+    /// <summary>
+    ///     Applies all entity and component updates.
+    /// </summary>
+    public void ApplyUpdates()
+    {
+        componentManager.UpdateAllComponents();
+        entityTable.UpdateAllEntities();
     }
 
     /// <summary>

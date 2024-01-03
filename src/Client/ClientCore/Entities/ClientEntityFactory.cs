@@ -35,6 +35,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly ComponentManager componentManager;
     private readonly DrawableComponentCollection drawables;
     private readonly EntityManager entityManager;
+    private readonly EntityTable entityTable;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
@@ -54,7 +55,8 @@ public sealed class ClientEntityFactory : IEntityFactory
         AnimatedSpriteComponentCollection animatedSprites,
         PlayerCharacterTagCollection playerCharacterTags,
         NameComponentCollection names,
-        ParentComponentCollection parents)
+        ParentComponentCollection parents,
+        EntityTable entityTable)
     {
         this.entityManager = entityManager;
         this.componentManager = componentManager;
@@ -68,6 +70,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         this.playerCharacterTags = playerCharacterTags;
         this.names = names;
         this.parents = parents;
+        this.entityTable = entityTable;
 
         assigner = entityManager.GetNewAssigner();
     }
@@ -81,6 +84,6 @@ public sealed class ClientEntityFactory : IEntityFactory
     {
         return new ClientEntityBuilder(entityId,
             componentManager, positions, velocities, drawables, materials,
-            materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents);
+            materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents, entityTable);
     }
 }

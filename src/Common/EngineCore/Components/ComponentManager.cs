@@ -29,12 +29,12 @@ public class ComponentManager
     /// <summary>
     ///     All known component removers.
     /// </summary>
-    private readonly IList<IComponentRemover> componentRemovers = new List<IComponentRemover>();
+    private readonly List<IComponentRemover> componentRemovers = new();
 
     /// <summary>
     ///     All known component updaters.
     /// </summary>
-    private readonly IList<IComponentUpdater> componentUpdaters = new List<IComponentUpdater>();
+    private readonly List<IComponentUpdater> componentUpdaters = new();
 
     private readonly EntityNotifier entityNotifier;
 

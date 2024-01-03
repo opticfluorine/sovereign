@@ -39,5 +39,7 @@ public sealed class EntityInstaller : IWindsorInstaller
 
         container.Register(Component.For<EntityNotifier>()
             .LifestyleSingleton());
+
+        container.Register(Component.For<EntityTable>().LifestyleSingleton());
     }
 }

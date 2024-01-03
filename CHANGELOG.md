@@ -7,6 +7,9 @@
 #### 02 January 2024
 
 * Finish up null checking updates for all projects.
+* Add `EntityTable` for tracking the existence of entities above the component level.
+* Update `IEntityBuilder` API to support modification of existing entities in order to
+  support entity synchronization.
 
 #### 01 January 2024
 

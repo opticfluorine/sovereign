@@ -281,6 +281,19 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     }
 
     /// <summary>
+    ///     Convenience method that adds a new component or replaces its value if it already exists.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="newValue">New value.</param>
+    public void AddOrUpdateComponent(ulong entityId, T newValue)
+    {
+        if (HasComponentForEntity(entityId))
+            ModifyComponent(entityId, ComponentOperation.Set, newValue);
+        else
+            AddComponent(entityId, newValue);
+    }
+
+    /// <summary>
     ///     Determines whether a component is associated with the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
