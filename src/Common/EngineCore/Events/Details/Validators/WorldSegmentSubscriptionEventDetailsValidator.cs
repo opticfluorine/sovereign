@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,21 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
-
 namespace Sovereign.EngineCore.Events.Details.Validators;
 
-public class EventDetailsValidatorsInstaller : IWindsorInstaller
+/// <summary>
+///     Event details validator for WorldSegmentSubscriptionEventDetails.
+/// </summary>
+public class WorldSegmentSubscriptionEventDetailsValidator : IEventDetailsValidator
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
+    public bool IsValid(IEventDetails? details)
     {
-        container.Register(Component.For<EntityDefinitionValidator>()
-            .LifestyleSingleton());
-        container.Register(EngineClasses.EngineAssemblies()
-            .BasedOn<IEventDetailsValidator>()
-            .WithServiceAllInterfaces());
+        return details is WorldSegmentEventDetails;
     }
 }

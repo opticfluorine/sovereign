@@ -4,6 +4,11 @@
 
 ### January
 
+#### 08 January 2024
+
+* Add event details validation to all inbound network pipelines. If a validator type is not found for a
+  received event ID, the event will be rejected and an error logged.
+
 #### 03 January 2024
 
 * Add `EntitySynchronizationSystem` for processing non-block entity synchronization updates from the server.

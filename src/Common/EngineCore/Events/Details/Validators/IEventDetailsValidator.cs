@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,21 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
-
 namespace Sovereign.EngineCore.Events.Details.Validators;
 
-public class EventDetailsValidatorsInstaller : IWindsorInstaller
+/// <summary>
+///     Validation interface for event details.
+/// </summary>
+public interface IEventDetailsValidator
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
-    {
-        container.Register(Component.For<EntityDefinitionValidator>()
-            .LifestyleSingleton());
-        container.Register(EngineClasses.EngineAssemblies()
-            .BasedOn<IEventDetailsValidator>()
-            .WithServiceAllInterfaces());
-    }
+    /// <summary>
+    ///     Checks the validity of the event details.
+    /// </summary>
+    /// <param name="details">Event details, or null if the event lacks details.</param>
+    /// <returns>true if valid, false otherwise.</returns>
+    public bool IsValid(IEventDetails? details);
 }
