@@ -70,9 +70,6 @@ of entities. With one very important exception, all of the children of an entity
 becomes active. The exception is for entities corresponding to player characters - these entities only become
 active under the specific conditions described in their section below.
 
-Note that the implicit root entity *never* becomes active, and so the parent-child activation rules only apply to
-at most a portion of the game world.
-
 #### Player Character Entities
 
 Player character entities are activated and retrieved one-by-one as they log in. They are never activated as a result

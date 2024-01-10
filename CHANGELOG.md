@@ -4,6 +4,17 @@
 
 ### January
 
+#### 10 January 2024
+
+* Add `NonBlockWorldSegmentIndexer` for tracking which entities are positioned in each active world segment.
+* Add `EntityHierarchyIndexer` to track the hierarchy of parent-child relationships among the loaded entities.
+* These two indexers are the building blocks for the non-block entity synchronization process.
+* Add restriction to the synchronization documentation in `networking.md` that any child entities of block entities
+  will not be synchronized to the client. These entities should be considered as hidden and can be used for
+  storing private data on the server. For example, you could have a child entity on a rock-type block indicating
+  what type of resource will be dropped if the rock is mined; this would be hidden from the client so that the
+  player can't "cheat" at mining by inspecting the client memory to determine the location of rare resources.
+
 #### 09 January 2024
 
 * Fix bug where world segment load events were dropped by the Persistence system.

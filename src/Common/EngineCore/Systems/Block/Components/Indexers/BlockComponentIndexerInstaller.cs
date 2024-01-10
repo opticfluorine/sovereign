@@ -37,5 +37,8 @@ public sealed class BlockComponentIndexerInstaller : IWindsorInstaller
 
         container.Register(Component.For<BlockPositionIndexer>()
             .LifestyleSingleton());
+
+        container.Register(Component.For<NonBlockPositionEventFilter>()
+            .LifestyleSingleton());
     }
 }

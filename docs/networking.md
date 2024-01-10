@@ -276,6 +276,11 @@ the received events to maintain synchronization. Block synchronization depends o
 the coordinates of the blocks - the entity ID of a block entity is never synchronized
 between the server and client.
 
+Note that child entities of block entities are never synchronized to the client; they are
+always treated as hidden to the client. This limitation allows for a higher degree of
+uniformity among the world segment structure, thereby leading to better compression
+of world segment data during synchronization.
+
 ### Entity Synchronization
 
 Non-block entities are similarly synchronized between the server and a client whenever
