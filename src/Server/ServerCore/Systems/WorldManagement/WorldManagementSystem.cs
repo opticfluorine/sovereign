@@ -47,7 +47,10 @@ public sealed class WorldManagementSystem : ISystem
 
     public EventCommunicator EventCommunicator { get; }
 
-    public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>();
+    public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
+    {
+        EventId.Server_WorldManagement_WorldSegmentLoaded
+    };
 
     public int WorkloadEstimate => 80;
 

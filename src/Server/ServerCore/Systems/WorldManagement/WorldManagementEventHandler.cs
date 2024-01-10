@@ -17,6 +17,7 @@
 
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -25,6 +26,16 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public sealed class WorldManagementEventHandler
 {
+    private readonly WorldSegmentActivationManager activationManager;
+    private readonly WorldSegmentSynchronizationManager syncManager;
+
+    public WorldManagementEventHandler(WorldSegmentActivationManager activationManager,
+        WorldSegmentSynchronizationManager syncManager)
+    {
+        this.activationManager = activationManager;
+        this.syncManager = syncManager;
+    }
+
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
@@ -35,6 +46,18 @@ public sealed class WorldManagementEventHandler
     {
         switch (ev.EventId)
         {
+            case EventId.Server_WorldManagement_WorldSegmentLoaded:
+                if (!(ev.EventDetails is WorldSegmentEventDetails))
+                {
+                    Logger.Error("Received WorldSegmentLoaded without details.");
+                    break;
+                }
+
+                var details = (WorldSegmentEventDetails)ev.EventDetails;
+                activationManager.OnWorldSegmentLoaded(details.SegmentIndex);
+                syncManager.OnWorldSegmentLoaded(details.SegmentIndex);
+                break;
+
             default:
                 Logger.ErrorFormat("Unhandled event ID {0}.", ev.EventId);
                 break;

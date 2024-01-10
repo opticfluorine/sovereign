@@ -158,6 +158,7 @@ public sealed class PersistenceEventHandler
     /// <param name="segmentIndex">World segment index.</param>
     private void OnRetrieveWorldSegment(GridPosition segmentIndex)
     {
+        rangeRetriever.RetrieveWorldSegment(segmentIndex);
     }
 
     /// <summary>

@@ -4,6 +4,11 @@
 
 ### January
 
+#### 09 January 2024
+
+* Fix bug where world segment load events were dropped by the Persistence system.
+* Begin implementation of world segment synchronization from server to client.
+
 #### 08 January 2024
 
 * Add event details validation to all inbound network pipelines. If a validator type is not found for a

@@ -48,5 +48,8 @@ public sealed class WorldManagementInstaller : IWindsorInstaller
 
         container.Register(Component.For<WorldManagementInternalController>()
             .LifestyleSingleton());
+
+        container.Register(Component.For<WorldSegmentSynchronizationManager>()
+            .LifestyleSingleton());
     }
 }

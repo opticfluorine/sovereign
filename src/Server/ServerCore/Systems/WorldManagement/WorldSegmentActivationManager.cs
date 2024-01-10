@@ -28,6 +28,11 @@ public class WorldSegmentActivationManager
 {
     private readonly IEventSender eventSender;
 
+    /// <summary>
+    ///     Set of world segments which are currently loaded in memory.
+    /// </summary>
+    private readonly HashSet<GridPosition> loadedSegments = new();
+
     private readonly PersistenceController persistenceController;
 
     /// <summary>
@@ -60,5 +65,24 @@ public class WorldSegmentActivationManager
                 // Change in reference count to an existing activation.
                 segmentRefCounts[segmentIndex] += changes[segmentIndex];
             }
+    }
+
+    /// <summary>
+    ///     Called when a world segment has been loaded into memory.
+    /// </summary>
+    /// <param name="segmentIndex">Segment index.</param>
+    public void OnWorldSegmentLoaded(GridPosition segmentIndex)
+    {
+        loadedSegments.Add(segmentIndex);
+    }
+
+    /// <summary>
+    ///     Checks whether the given world segment is currently loaded into memory.
+    /// </summary>
+    /// <param name="segmentIndex">Segment index.</param>
+    /// <returns>true if loaded, false otherwise.</returns>
+    public bool IsWorldSegmentLoaded(GridPosition segmentIndex)
+    {
+        return loadedSegments.Contains(segmentIndex);
     }
 }

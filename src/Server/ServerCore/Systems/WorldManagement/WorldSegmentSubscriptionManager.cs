@@ -60,12 +60,15 @@ public class WorldSegmentSubscriptionManager
     /// </summary>
     private readonly Dictionary<ulong, HashSet<GridPosition>> subscriptions = new();
 
+    private readonly WorldSegmentSynchronizationManager syncManager;
+
     private readonly IWorldManagementConfiguration worldConfig;
 
     public WorldSegmentSubscriptionManager(PlayerPositionEventFilter positionEventFilter,
         WorldSegmentResolver resolver, IWorldManagementConfiguration worldConfig,
         WorldSegmentActivationManager activationManager,
-        IEventSender eventSender, WorldManagementInternalController internalController)
+        IEventSender eventSender, WorldManagementInternalController internalController,
+        WorldSegmentSynchronizationManager syncManager)
     {
         this.positionEventFilter = positionEventFilter;
         this.resolver = resolver;
@@ -73,6 +76,7 @@ public class WorldSegmentSubscriptionManager
         this.activationManager = activationManager;
         this.eventSender = eventSender;
         this.internalController = internalController;
+        this.syncManager = syncManager;
 
         // Register event handlers.
         this.positionEventFilter.OnStartUpdates += OnStartUpdates;
@@ -182,6 +186,7 @@ public class WorldSegmentSubscriptionManager
             {
                 internalController.PushSubscribe(eventSender, playerEntityId, segment);
                 currentSubscriptionSet.Add(segment);
+                syncManager.OnPlayerSubscribe(playerEntityId, segment);
                 if (changeCounts.ContainsKey(segment))
                     changeCounts[segment] += 1;
                 else
