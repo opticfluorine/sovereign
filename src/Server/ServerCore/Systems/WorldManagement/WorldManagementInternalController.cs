@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
@@ -42,6 +44,23 @@ public class WorldManagementInternalController
     public void PushUnsubscribe(IEventSender eventSender, ulong entityId, GridPosition worldSegmentIndex)
     {
         PushSubscriptionEvent(eventSender, entityId, worldSegmentIndex, EventId.Core_WorldManagement_Unsubscribe);
+    }
+
+    /// <summary>
+    ///     Pushes a batch of entity synchronizations to the client.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Player entity ID.</param>
+    /// <param name="definitions">Entity definitions to send.</param>
+    public void PushSyncEvent(IEventSender eventSender, ulong entityId, List<EntityDefinition> definitions)
+    {
+        var details = new EntityDefinitionEventDetails
+        {
+            PlayerEntityId = entityId,
+            EntityDefinitions = definitions
+        };
+        var ev = new Event(EventId.Client_EntitySynchronization_Update, details);
+        eventSender.SendEvent(ev);
     }
 
     /// <summary>

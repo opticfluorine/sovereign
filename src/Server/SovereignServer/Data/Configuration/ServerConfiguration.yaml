@@ -162,6 +162,15 @@ Network:
   # This is recommended to be at least 2.5x PingIntervalMs for low-activity connections
   # where a ping is dropped.
   ConnectionTimeoutMs: 30000
+  
+  # ---------------
+  # EntitySyncBatchSize
+  # ---------------
+  # Timeout period (in milliseconds) after which a client will be disconnected.
+  # Maximum number of entities to synchronize to the client in a single event.
+  # Greater values improve throughput at the cost of increased latency due to a 
+  # higher packet loss rate.
+  EntitySyncBatchSize: 16
 
 
 # -------------------

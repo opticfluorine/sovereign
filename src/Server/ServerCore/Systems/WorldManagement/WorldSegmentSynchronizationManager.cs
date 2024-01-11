@@ -15,7 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Linq;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -25,15 +27,24 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 public class WorldSegmentSynchronizationManager
 {
     private readonly WorldSegmentActivationManager activationManager;
+    private readonly EntityHierarchyIndexer hierarchyIndexer;
 
     /// <summary>
     ///     Map from segment index to a queue of player entity IDs needing synchronization.
     /// </summary>
     private readonly Dictionary<GridPosition, Queue<ulong>> pendingPlayersBySegment = new();
 
-    public WorldSegmentSynchronizationManager(WorldSegmentActivationManager activationManager)
+    private readonly EntitySynchronizer synchronizer;
+    private readonly NonBlockWorldSegmentIndexer worldSegmentIndexer;
+
+    public WorldSegmentSynchronizationManager(WorldSegmentActivationManager activationManager,
+        EntitySynchronizer synchronizer, NonBlockWorldSegmentIndexer worldSegmentIndexer,
+        EntityHierarchyIndexer hierarchyIndexer)
     {
         this.activationManager = activationManager;
+        this.synchronizer = synchronizer;
+        this.worldSegmentIndexer = worldSegmentIndexer;
+        this.hierarchyIndexer = hierarchyIndexer;
     }
 
     /// <summary>
@@ -82,5 +93,19 @@ public class WorldSegmentSynchronizationManager
     /// <param name="segmentIndex">World segment index to synchronize.</param>
     private void SendSynchronizationEvents(ulong playerEntityId, GridPosition segmentIndex)
     {
+        // Retrieve the top-level entities from the world segment, then fill in their descendants.
+        var positionedEntities = worldSegmentIndexer.GetNonBlockEntitiesInWorldSegment(segmentIndex);
+
+        // Fill in the hierarchy beneath the entities.
+        var allEntities = worldSegmentIndexer.GetNonBlockEntitiesInWorldSegment(segmentIndex)
+            .SelectMany(entityId =>
+            {
+                var all = hierarchyIndexer.GetAllDescendants(entityId);
+                all.Add(entityId);
+                return all;
+            });
+
+        // Synchronize all entities.
+        synchronizer.Synchronize(playerEntityId, allEntities);
     }
 }

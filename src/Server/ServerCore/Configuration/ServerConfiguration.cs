@@ -175,6 +175,12 @@ public sealed class ServerConfiguration
         ///     the event server if the server has not received any messages.
         /// </summary>
         public uint ConnectionTimeoutMs { get; set; } = 30000;
+
+        /// <summary>
+        ///     Maximum number of entities to synchronize to the client in a single event.
+        ///     Greater values improve throughput at the cost of increased latency due to a higher packet loss rate.
+        /// </summary>
+        public int EntitySyncBatchSize { get; set; } = 16;
     }
 
     /// <summary>
