@@ -14,9 +14,7 @@
   storing private data on the server. For example, you could have a child entity on a rock-type block indicating
   what type of resource will be dropped if the rock is mined; this would be hidden from the client so that the
   player can't "cheat" at mining by inspecting the client memory to determine the location of rare resources.
-* Set up the framework for sending non-block entity synchronization events. What remains is to generate the
-  entity definitions; currently a blank definition is sent to the client for each non-block entity in a world
-  segment when it is synchronized.
+* Implement entity definition generation on the server side.
 
 #### 09 January 2024
 

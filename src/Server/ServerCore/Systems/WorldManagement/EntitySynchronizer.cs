@@ -16,8 +16,13 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems.Block.Components;
+using Sovereign.EngineCore.Systems.Movement.Components;
+using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.ServerCore.Configuration;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -30,13 +35,28 @@ public class EntitySynchronizer
     private readonly IServerConfigurationManager configManager;
     private readonly WorldManagementInternalController controller;
     private readonly IEventSender eventSender;
+    private readonly MaterialModifierComponentCollection materialModifiers;
+    private readonly MaterialComponentCollection materials;
+    private readonly NameComponentCollection names;
+    private readonly ParentComponentCollection parents;
+    private readonly PlayerCharacterTagCollection playerCharacters;
+    private readonly PositionComponentCollection positions;
 
     public EntitySynchronizer(IEventSender eventSender, IServerConfigurationManager configManager,
-        WorldManagementInternalController controller)
+        WorldManagementInternalController controller, PositionComponentCollection positions,
+        MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
+        PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
+        ParentComponentCollection parents)
     {
         this.eventSender = eventSender;
         this.configManager = configManager;
         this.controller = controller;
+        this.positions = positions;
+        this.materials = materials;
+        this.materialModifiers = materialModifiers;
+        this.playerCharacters = playerCharacters;
+        this.names = names;
+        this.parents = parents;
     }
 
     /// <summary>
@@ -53,14 +73,33 @@ public class EntitySynchronizer
                 .Select(batch => batch.Select(GenerateDefinition).ToList());
 
         // Send each batch to the client as its own event.
-        foreach (var batch in definitionBatches)
-        {
-            controller.PushSyncEvent(eventSender, playerEntityId, batch);
-        }
+        foreach (var batch in definitionBatches) controller.PushSyncEvent(eventSender, playerEntityId, batch);
     }
 
+    /// <summary>
+    ///     Generates an entity definition for a single entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>Definition.</returns>
     public EntityDefinition GenerateDefinition(ulong entityId)
     {
-        return new EntityDefinition();
+        var def = new EntityDefinition();
+        def.EntityId = entityId;
+
+        if (positions.HasComponentForEntity(entityId))
+            def.Position = positions[entityId];
+
+        if (materials.HasComponentForEntity(entityId))
+            def.Material = new MaterialPair(materials[entityId], materialModifiers[entityId]);
+
+        def.PlayerCharacter = playerCharacters.HasTagForEntity(entityId);
+
+        if (names.HasComponentForEntity(entityId))
+            def.Name = names[entityId];
+
+        if (parents.HasComponentForEntity(entityId))
+            def.Parent = parents[entityId];
+
+        return def;
     }
 }

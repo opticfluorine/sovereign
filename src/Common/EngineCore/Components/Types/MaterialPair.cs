@@ -22,6 +22,12 @@ namespace Sovereign.EngineCore.Components.Types;
 /// </summary>
 public class MaterialPair
 {
+    public MaterialPair(int materialId, int materialModifier)
+    {
+        MaterialId = materialId;
+        MaterialModifier = materialModifier;
+    }
+
     /// <summary>
     ///     Material ID.
     /// </summary>
