@@ -38,7 +38,7 @@ public class EngineBase : IEngineBase
     /// <remarks>
     ///     This can be set to zero to disable.
     /// </remarks>
-    private const int ThreadSleepEventLimit = 2;
+    private const int ThreadSleepEventLimit = 0;
 
     private readonly EventDescriptions eventDescriptions;
 

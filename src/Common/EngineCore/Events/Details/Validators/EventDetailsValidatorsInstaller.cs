@@ -29,6 +29,7 @@ public class EventDetailsValidatorsInstaller : IWindsorInstaller
             .LifestyleSingleton());
         container.Register(EngineClasses.EngineAssemblies()
             .BasedOn<IEventDetailsValidator>()
-            .WithServiceAllInterfaces());
+            .WithServiceSelf()
+            .LifestyleSingleton());
     }
 }

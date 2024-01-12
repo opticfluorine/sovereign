@@ -23,7 +23,7 @@ public class ParentComponentCollection : BaseComponentCollection<ulong>
 {
     private const int INITIAL_SIZE = 65536;
 
-    protected ParentComponentCollection(ComponentManager componentManager)
+    public ParentComponentCollection(ComponentManager componentManager)
         : base(componentManager, INITIAL_SIZE, ComponentOperators.UlongOperators, ComponentType.Parent)
     {
     }

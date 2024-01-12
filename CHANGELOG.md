@@ -4,6 +4,10 @@
 
 ### January
 
+#### 11 January 2024
+
+* Fix minor issues preventing the server from starting after a long list of untested changes.
+
 #### 10 January 2024
 
 * Add `NonBlockWorldSegmentIndexer` for tracking which entities are positioned in each active world segment.
