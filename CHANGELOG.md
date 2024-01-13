@@ -4,6 +4,14 @@
 
 ### January
 
+#### 12 January 2024
+
+* Fix race condition in entity table where entity creation could cross a tick boundary.
+* Noticed something odd where when the `Sleep()` calls in the various threads are relaxed, some sort
+  of deadlock occurs when a debugger is attached. It does not appear when the threads yield periodically,
+  or when the `Sleep()` calls are disabled but no debugger is attached. Not sure what this is yet, but
+  documenting it here in case it reappears in other cases.
+
 #### 11 January 2024
 
 * Fix minor issues preventing the server from starting after a long list of untested changes.

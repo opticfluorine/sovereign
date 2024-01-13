@@ -34,7 +34,7 @@ public class SystemExecutor
     ///     of events in a single pass. This reduces system load under light
     ///     conditions in exchange for a temporary increase in event latency.
     /// </summary>
-    private const int ThreadYieldEventLimit = 0;
+    private const int ThreadYieldEventLimit = 1;
 
     /// <summary>
     ///     Event loop.

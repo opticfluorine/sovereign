@@ -17,7 +17,6 @@
 
 using System;
 using Castle.Core.Logging;
-using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Main;
 using Sovereign.Persistence.Database;
@@ -30,7 +29,7 @@ namespace Sovereign.Persistence.State;
 /// </summary>
 public sealed class StateManager : IDisposable
 {
-    private readonly ComponentManager componentManager;
+    private readonly EntityManager entityManager;
     private readonly EntityMapper entityMapper;
     private readonly EntityNotifier entityNotifier;
     private readonly PersistenceProviderManager persistenceProviderManager;
@@ -40,7 +39,7 @@ public sealed class StateManager : IDisposable
     /// </summary>
     private StateBuffer backBuffer;
 
-    public StateManager(ComponentManager componentManager,
+    public StateManager(EntityManager entityManager,
         PersistenceProviderManager persistenceProviderManager,
         ILogger logger, FatalErrorHandler fatalErrorHandler,
         EntityNotifier entityNotifier, EntityMapper entityMapper)
@@ -48,7 +47,7 @@ public sealed class StateManager : IDisposable
         FrontBuffer = new StateBuffer(logger, fatalErrorHandler);
         backBuffer = new StateBuffer(logger, fatalErrorHandler);
 
-        this.componentManager = componentManager;
+        this.entityManager = entityManager;
         this.persistenceProviderManager = persistenceProviderManager;
         this.entityNotifier = entityNotifier;
         this.entityMapper = entityMapper;
@@ -87,12 +86,10 @@ public sealed class StateManager : IDisposable
     private void SwapBuffers()
     {
         /* Acquire strong lock to prevent component updates during swap. */
-        using (var strongLock = componentManager.ComponentGuard.AcquireStrongLock())
+        using (var strongLock = entityManager.UpdateGuard.AcquireStrongLock())
         {
             /* Swap the buffers. */
-            var swap = backBuffer;
-            backBuffer = FrontBuffer;
-            FrontBuffer = swap;
+            (backBuffer, FrontBuffer) = (FrontBuffer, backBuffer);
 
             /* Clear front buffer so that it can be reused. */
             FrontBuffer.Reset();

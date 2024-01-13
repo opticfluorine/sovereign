@@ -31,7 +31,6 @@ public sealed class ServerEntityFactory : IEntityFactory
 {
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AccountComponentCollection accounts;
-    private readonly ComponentManager componentManager;
 
     private readonly EntityAssigner entityAssigner;
     private readonly EntityManager entityManager;
@@ -46,7 +45,6 @@ public sealed class ServerEntityFactory : IEntityFactory
 
     public ServerEntityFactory(
         EntityManager entityManager,
-        ComponentManager componentManager,
         PositionComponentCollection positions,
         VelocityComponentCollection velocities,
         MaterialComponentCollection materials,
@@ -59,7 +57,6 @@ public sealed class ServerEntityFactory : IEntityFactory
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
-        this.componentManager = componentManager;
         this.positions = positions;
         this.velocities = velocities;
         this.materials = materials;
@@ -82,7 +79,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     {
         return new ServerEntityBuilder(
             entityId,
-            componentManager,
+            entityManager,
             positions,
             velocities,
             materials,

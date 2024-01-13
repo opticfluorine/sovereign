@@ -32,7 +32,6 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly EntityAssigner assigner;
-    private readonly ComponentManager componentManager;
     private readonly DrawableComponentCollection drawables;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
@@ -45,7 +44,6 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly VelocityComponentCollection velocities;
 
     public ClientEntityFactory(EntityManager entityManager,
-        ComponentManager componentManager,
         PositionComponentCollection positions,
         VelocityComponentCollection velocities,
         DrawableComponentCollection drawables,
@@ -59,7 +57,6 @@ public sealed class ClientEntityFactory : IEntityFactory
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
-        this.componentManager = componentManager;
         this.positions = positions;
         this.velocities = velocities;
         this.drawables = drawables;
@@ -83,7 +80,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     public IEntityBuilder GetBuilder(ulong entityId)
     {
         return new ClientEntityBuilder(entityId,
-            componentManager, positions, velocities, drawables, materials,
+            entityManager, positions, velocities, drawables, materials,
             materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents, entityTable);
     }
 }

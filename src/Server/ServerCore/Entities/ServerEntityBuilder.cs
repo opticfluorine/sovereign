@@ -33,7 +33,7 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
     private readonly AccountComponentCollection accounts;
 
     public ServerEntityBuilder(ulong entityId,
-        ComponentManager componentManager,
+        EntityManager entityManager,
         PositionComponentCollection positions,
         VelocityComponentCollection velocities,
         MaterialComponentCollection materials,
@@ -44,7 +44,7 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         AccountComponentCollection accounts,
         ParentComponentCollection parents,
         EntityTable entityTable)
-        : base(entityId, componentManager, positions, velocities, materials,
+        : base(entityId, entityManager, positions, velocities, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents, entityTable)
     {
         this.accounts = accounts;

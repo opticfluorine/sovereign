@@ -32,7 +32,6 @@ namespace Sovereign.EngineCore.Entities;
 public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 {
     protected readonly AboveBlockComponentCollection aboveBlocks;
-    protected readonly ComponentManager componentManager;
 
     protected readonly ulong entityId;
     private readonly EntityTable entityTable;
@@ -46,8 +45,8 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
 
-    public AbstractEntityBuilder(ulong entityId,
-        ComponentManager componentManager, PositionComponentCollection positions,
+    protected AbstractEntityBuilder(ulong entityId,
+        EntityManager entityManager, PositionComponentCollection positions,
         VelocityComponentCollection velocities, MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,
@@ -57,7 +56,6 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         EntityTable entityTable)
     {
         this.entityId = entityId;
-        this.componentManager = componentManager;
         this.positions = positions;
         this.velocities = velocities;
         this.materials = materials;
@@ -68,12 +66,12 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         this.parents = parents;
         this.entityTable = entityTable;
 
-        weakLock = componentManager.ComponentGuard.AcquireWeakLock();
+        weakLock = entityManager.UpdateGuard.AcquireWeakLock();
     }
 
     public void Dispose()
     {
-        weakLock?.Dispose();
+        weakLock.Dispose();
     }
 
     public ulong Build()

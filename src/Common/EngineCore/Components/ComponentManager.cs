@@ -17,7 +17,6 @@
 
 using System.Collections.Generic;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineUtil.Threading;
 
 namespace Sovereign.EngineCore.Components;
 
@@ -43,10 +42,6 @@ public class ComponentManager
         this.entityNotifier = entityNotifier;
     }
 
-    /// <summary>
-    ///     Incremental guard used to synchronize component updates.
-    /// </summary>
-    public IncrementalGuard ComponentGuard { get; } = new();
 
     /// <summary>
     ///     Registers a component updater with the manager.
@@ -63,14 +58,11 @@ public class ComponentManager
     /// </summary>
     public void UpdateAllComponents()
     {
-        using (var strongLock = ComponentGuard.AcquireStrongLock())
-        {
-            /* Update components. */
-            foreach (var updater in componentUpdaters) updater.ApplyComponentUpdates();
+        /* Update components. */
+        foreach (var updater in componentUpdaters) updater.ApplyComponentUpdates();
 
-            /* Trigger pending entity events. */
-            entityNotifier.Dispatch();
-        }
+        /* Trigger pending entity events. */
+        entityNotifier.Dispatch();
     }
 
     /// <summary>

@@ -34,7 +34,7 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
     private readonly DrawableComponentCollection drawables;
 
     public ClientEntityBuilder(ulong entityId,
-        ComponentManager componentManager,
+        EntityManager entityManager,
         PositionComponentCollection positions,
         VelocityComponentCollection velocities,
         DrawableComponentCollection drawables,
@@ -46,7 +46,7 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         NameComponentCollection names,
         ParentComponentCollection parents,
         EntityTable entityTable)
-        : base(entityId, componentManager, positions, velocities, materials,
+        : base(entityId, entityManager, positions, velocities, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents, entityTable)
     {
         this.drawables = drawables;

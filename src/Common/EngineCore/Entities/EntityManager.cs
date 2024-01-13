@@ -17,6 +17,7 @@
 
 using System.Threading;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineUtil.Threading;
 
 namespace Sovereign.EngineCore.Entities;
 
@@ -56,10 +57,17 @@ public class EntityManager
     }
 
     /// <summary>
+    ///     Incremental guard used to synchronize component updates.
+    /// </summary>
+    public IncrementalGuard UpdateGuard { get; } = new();
+
+    /// <summary>
     ///     Applies all entity and component updates.
     /// </summary>
     public void ApplyUpdates()
     {
+        using var strongLock = UpdateGuard.AcquireStrongLock();
+
         componentManager.UpdateAllComponents();
         entityTable.UpdateAllEntities();
     }
