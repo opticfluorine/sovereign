@@ -103,7 +103,7 @@ public class Surface : IDisposable
     ///     Whether the surface is backed by a valid pointer.
     /// </summary>
     [MemberNotNullWhen(true, "properties")]
-    public bool IsValid => SurfacePointer != IntPtr.Zero && properties != null;
+    public bool IsValid => SurfacePointer != IntPtr.Zero;
 
     /// <summary>
     ///     Read-only property that provides access to underlying surface properties.

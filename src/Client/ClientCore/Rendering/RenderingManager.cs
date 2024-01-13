@@ -77,16 +77,10 @@ public class RenderingManager : IStartable
 
     public void Start()
     {
-        /* Create the main display. */
+        SelectConfiguration();
         CreateMainDisplay();
-
-        /* Initialize the GUI. */
         InitializeGUI();
-
-        /* Load resources used by the renderer. */
         LoadResources();
-
-        /* Initialize the renderer. */
         InitializeRenderer();
     }
 
@@ -135,9 +129,6 @@ public class RenderingManager : IStartable
 
         try
         {
-            /* Configure the display. */
-            SelectConfiguration();
-
             /* Create the main window. */
             mainDisplay.Show(selectedDisplayMode, clientConfiguration.Fullscreen);
         }

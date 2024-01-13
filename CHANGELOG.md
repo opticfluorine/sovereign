@@ -4,6 +4,10 @@
 
 ### January
 
+#### 13 January 2024
+
+* Fix several errors with client startup that were introduced by the null checks.
+
 #### 12 January 2024
 
 * Fix race condition in entity table where entity creation could cross a tick boundary.
