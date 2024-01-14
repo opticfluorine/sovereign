@@ -128,8 +128,6 @@ public class WorldSegmentSubscriptionManager
     /// <param name="position">New position.</param>
     private void OnPlayerAdded(ulong entityId, Vector3 position)
     {
-        Logger.DebugFormat("Add player {0} at {1}.", entityId, position);
-        
         subscriptions[entityId] = new HashSet<GridPosition>();
         var center = resolver.GetWorldSegmentForPosition(position);
         currentWorldSegments[entityId] = center;
@@ -189,6 +187,7 @@ public class WorldSegmentSubscriptionManager
         var newSubscriptionSet = BuildSubscriptionSet(center);
 
         // There are no changes for the intersection of the current and new subscription sets.
+        var lastSubscriptionSet = new HashSet<GridPosition>(currentSubscriptionSet);
         var unchangedSet = new HashSet<GridPosition>(newSubscriptionSet);
         unchangedSet.IntersectWith(currentSubscriptionSet);
 
@@ -207,7 +206,7 @@ public class WorldSegmentSubscriptionManager
             }
 
         // Unsubscribe from anything old that isn't in the intersection.
-        foreach (var segment in currentSubscriptionSet)
+        foreach (var segment in lastSubscriptionSet)
             if (!unchangedSet.Contains(segment))
             {
                 Logger.DebugFormat("Unsubscribe {0} from {1}.", playerEntityId, segment);

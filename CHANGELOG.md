@@ -11,6 +11,7 @@
 * Add custom resolver/formatter for MsgPack to handle `Vector3`.
 * Saw the player character entity synchronized from server to client. More testing is needed, but this is
   fantastic progress.
+* Fix issue where players were immediately unsubscribed from world segments as soon as they subscribed.
 
 #### 13 January 2024
 
