@@ -8,7 +8,9 @@
 
 * Fix issue in `PlayerComponentEventFilter` that caused event triggers for new player characters to be missed.
 * Fix various issues with world segment subscriptions and entity synchronization.
-* Begin fixing MessagePack issues with new event types. Still need to add support for serializing `Vector3<T>`.
+* Add custom resolver/formatter for MsgPack to handle `Vector3`.
+* Saw the player character entity synchronized from server to client. More testing is needed, but this is
+  fantastic progress.
 
 #### 13 January 2024
 

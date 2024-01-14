@@ -17,6 +17,8 @@
 
 using System.Text.Json;
 using MessagePack;
+using MessagePack.Resolvers;
+using Sovereign.EngineCore.Network.MsgPack;
 
 namespace Sovereign.EngineCore.Network;
 
@@ -26,12 +28,21 @@ namespace Sovereign.EngineCore.Network;
 public sealed class MessageConfig
 {
     /// <summary>
+    ///     MessagePack composite resolver that includes custom resolvers.
+    /// </summary>
+    public static readonly IFormatterResolver MessagePackResolver = CompositeResolver.Create(
+        VectorResolver.Instance,
+        StandardResolver.Instance
+    );
+    
+    /// <summary>
     ///     MessagePack options for untruested and compressed messages.
     /// </summary>
-    public static MessagePackSerializerOptions CompressedUntrustedMessagePackOptions =>
+    public static readonly MessagePackSerializerOptions CompressedUntrustedMessagePackOptions =
         MessagePackSerializerOptions
             .Standard.WithCompression(MessagePackCompression.Lz4BlockArray)
-            .WithSecurity(MessagePackSecurity.UntrustedData);
+            .WithSecurity(MessagePackSecurity.UntrustedData)
+            .WithResolver(MessagePackResolver);
 
     /// <summary>
     ///     MessagePack options for untrusted messages without compression.
@@ -39,7 +50,8 @@ public sealed class MessageConfig
     public static MessagePackSerializerOptions UntrustedMessagePackOptions =>
         MessagePackSerializerOptions
             .Standard
-            .WithSecurity(MessagePackSecurity.UntrustedData);
+            .WithSecurity(MessagePackSecurity.UntrustedData)
+            .WithResolver(MessagePackResolver);
 
     /// <summary>
     ///     JSON serializer options.
