@@ -51,6 +51,21 @@ public class BaseTagCollection : BaseComponentCollection<bool>
     }
 
     /// <summary>
+    ///     Determines whether the given entity will be newly tagged in the following tick.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>true if will be tagged, false otherwise.</returns>
+    /// <remarks>
+    ///     It is possible that this will return true but the entity will not be tagged
+    ///     if the tag value is false. However, false tags are unsupported behavior, so
+    ///     this is also unsupported behavior.
+    /// </remarks>
+    public bool HasPendingTagForEntity(ulong entityId)
+    {
+        return HasPendingComponentForEntity(entityId);
+    }
+
+    /// <summary>
     ///     Sets a tag on the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>

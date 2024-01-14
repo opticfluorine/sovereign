@@ -16,6 +16,8 @@
 
 using System.Collections.Generic;
 using System.Numerics;
+using Castle.Core.Logging;
+using log4net.Repository.Hierarchy;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
@@ -63,6 +65,8 @@ public class WorldSegmentSubscriptionManager
     private readonly WorldSegmentSynchronizationManager syncManager;
 
     private readonly IWorldManagementConfiguration worldConfig;
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public WorldSegmentSubscriptionManager(PlayerPositionEventFilter positionEventFilter,
         WorldSegmentResolver resolver, IWorldManagementConfiguration worldConfig,
@@ -124,6 +128,8 @@ public class WorldSegmentSubscriptionManager
     /// <param name="position">New position.</param>
     private void OnPlayerAdded(ulong entityId, Vector3 position)
     {
+        Logger.DebugFormat("Add player {0} at {1}.", entityId, position);
+        
         subscriptions[entityId] = new HashSet<GridPosition>();
         var center = resolver.GetWorldSegmentForPosition(position);
         currentWorldSegments[entityId] = center;

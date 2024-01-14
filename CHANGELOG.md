@@ -4,6 +4,10 @@
 
 ### January
 
+#### 14 January 2024
+
+* Fix issue in `PlayerComponentEventFilter` that caused event triggers for new player characters to be missed.
+
 #### 13 January 2024
 
 * Fix several errors with client startup that were introduced by the null checks.
