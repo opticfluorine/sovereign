@@ -45,6 +45,7 @@ public class SingleEntityConnectionMapper : ISpecificConnectionMapper
 
     public void Process(OutboundEventInfo evInfo)
     {
+        if (NextStage == null) throw new Exception("unexpected null stage");
         var connId = mapper.Invoke(evInfo);
         if (connId.HasValue)
         {

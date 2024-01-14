@@ -54,7 +54,8 @@ public sealed class NetworkSystem : ISystem
         EventId.Core_Ping_Ping,
         EventId.Core_Ping_Pong,
         EventId.Core_WorldManagement_Subscribe,
-        EventId.Core_WorldManagement_Unsubscribe
+        EventId.Core_WorldManagement_Unsubscribe,
+        EventId.Client_EntitySynchronization_Update,
     };
 
     public int WorkloadEstimate => 50;

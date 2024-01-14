@@ -34,7 +34,8 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Core_Ping_Ping, DeliveryMethod.Unreliable },
         { EventId.Core_Ping_Pong, DeliveryMethod.Unreliable },
         { EventId.Core_WorldManagement_Subscribe, DeliveryMethod.ReliableUnordered },
-        { EventId.Core_WorldManagement_Unsubscribe, DeliveryMethod.ReliableUnordered }
+        { EventId.Core_WorldManagement_Unsubscribe, DeliveryMethod.ReliableUnordered },
+        { EventId.Client_EntitySynchronization_Update, DeliveryMethod.ReliableUnordered }
     };
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

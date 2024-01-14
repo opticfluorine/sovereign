@@ -14,12 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MessagePack;
+
 namespace Sovereign.EngineCore.Components.Types;
 
 /// <summary>
 ///     Represents a material identifier as a pair of material ID and
 ///     material modifier.
 /// </summary>
+[MessagePackObject]
 public class MaterialPair
 {
     public MaterialPair(int materialId, int materialModifier)
@@ -31,10 +34,12 @@ public class MaterialPair
     /// <summary>
     ///     Material ID.
     /// </summary>
+    [Key(0)]
     public int MaterialId { get; set; }
 
     /// <summary>
     ///     Material modifier.
     /// </summary>
+    [Key(1)]
     public int MaterialModifier { get; set; }
 }

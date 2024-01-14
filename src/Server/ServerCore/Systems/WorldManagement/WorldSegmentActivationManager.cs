@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Castle.Core.Logging;
+using log4net.Repository.Hierarchy;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.ServerCore.Systems.Persistence;
@@ -40,6 +42,8 @@ public class WorldSegmentActivationManager
     /// </summary>
     private readonly Dictionary<GridPosition, int> segmentRefCounts = new();
 
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
     public WorldSegmentActivationManager(IEventSender eventSender, PersistenceController persistenceController)
     {
         this.eventSender = eventSender;
@@ -57,6 +61,7 @@ public class WorldSegmentActivationManager
             if (!segmentRefCounts.ContainsKey(segmentIndex))
             {
                 // New activation.
+                Logger.DebugFormat("New activation for {0}.", segmentIndex);
                 segmentRefCounts.Add(segmentIndex, changes[segmentIndex]);
                 persistenceController.RetrieveWorldSegment(eventSender, segmentIndex);
             }
@@ -64,6 +69,8 @@ public class WorldSegmentActivationManager
             {
                 // Change in reference count to an existing activation.
                 segmentRefCounts[segmentIndex] += changes[segmentIndex];
+                Logger.DebugFormat("Update ref count for {0} to {1}.", segmentIndex, 
+                    segmentRefCounts[segmentIndex]);
             }
     }
 

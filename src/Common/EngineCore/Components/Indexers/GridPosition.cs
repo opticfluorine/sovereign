@@ -19,12 +19,14 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
+using MessagePack;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
 ///     Represents an integer position, useful for aligning blocks on the unit grid.
 /// </summary>
+[MessagePackObject]
 public struct GridPosition : IEquatable<GridPosition>
 {
     public static readonly GridPosition OneX = new(1, 0, 0);
@@ -36,17 +38,20 @@ public struct GridPosition : IEquatable<GridPosition>
     /// <summary>
     ///     X position.
     /// </summary>
-    public int X;
+    [Key(0)]
+    public int X { get; set; }
 
     /// <summary>
     ///     Y position.
     /// </summary>
-    public int Y;
+    [Key(1)]
+    public int Y { get; set; }
 
     /// <summary>
     ///     Z position.
     /// </summary>
-    public int Z;
+    [Key(2)]
+    public int Z { get; set; }
 
     /// <summary>
     ///     Creates a grid position.

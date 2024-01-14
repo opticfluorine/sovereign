@@ -54,6 +54,7 @@ public sealed class OutboundNetworkPipeline
     /// <param name="ev">Event.</param>
     public void ProcessEvent(Event ev)
     {
+        Logger.DebugFormat("Event type {0} entering pipeline.", ev.EventId);
         firstStage.Process(new OutboundEventInfo(ev));
     }
 }

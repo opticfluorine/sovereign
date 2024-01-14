@@ -49,11 +49,18 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             var details = (WorldSegmentSubscriptionEventDetails)evInfo.Event.EventDetails;
             return accountServices.GetConnectionIdForPlayer(details.EntityId);
         });
+        var entityDefMapper = singleConnMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails == null) return new Maybe<int>();
+            var details = (EntityDefinitionEventDetails)evInfo.Event.EventDetails;
+            return accountServices.GetConnectionIdForPlayer(details.PlayerEntityId);
+        });
 
         // Configure specific connection mappers.
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
         specificMappers[EventId.Core_WorldManagement_Unsubscribe] = worldSubEventMapper;
+        specificMappers[EventId.Client_EntitySynchronization_Update] = entityDefMapper;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

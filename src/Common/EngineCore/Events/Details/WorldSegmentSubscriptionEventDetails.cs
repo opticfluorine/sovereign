@@ -14,19 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MessagePack;
 using Sovereign.EngineCore.Components.Indexers;
 
 namespace Sovereign.EngineCore.Events.Details;
 
+[MessagePackObject]
 public class WorldSegmentSubscriptionEventDetails : IEventDetails
 {
     /// <summary>
     ///     Entity ID of the subscribing player.
     /// </summary>
+    [IgnoreMember]
     public ulong EntityId;
 
     /// <summary>
     ///     Segment index of the subscribed world segment.
     /// </summary>
+    [Key(0)]
     public GridPosition SegmentIndex;
 }

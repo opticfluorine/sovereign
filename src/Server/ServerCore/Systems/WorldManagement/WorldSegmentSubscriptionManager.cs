@@ -161,13 +161,19 @@ public class WorldSegmentSubscriptionManager
     {
         var result = new HashSet<GridPosition>(worldConfig.SubscriptionRange * worldConfig.SubscriptionRange);
         for (var x = center.X - worldConfig.SubscriptionRange; x < center.X + worldConfig.SubscriptionRange + 1; ++x)
-        for (var y = center.Y - worldConfig.SubscriptionRange;
-             y < center.Y + worldConfig.SubscriptionRange + 1;
-             ++y)
-        for (var z = center.Z - worldConfig.SubscriptionRange;
-             z < center.Z + worldConfig.SubscriptionRange + 1;
-             ++z)
-            result.Add(new GridPosition(x, y, z));
+        {
+            for (var y = center.Y - worldConfig.SubscriptionRange;
+                 y < center.Y + worldConfig.SubscriptionRange + 1;
+                 ++y)
+            {
+                for (var z = center.Z - worldConfig.SubscriptionRange;
+                     z < center.Z + worldConfig.SubscriptionRange + 1;
+                     ++z)
+                {
+                    result.Add(new GridPosition(x, y, z));
+                }
+            }
+        }
 
         return result;
     }
@@ -190,6 +196,7 @@ public class WorldSegmentSubscriptionManager
         foreach (var segment in newSubscriptionSet)
             if (!unchangedSet.Contains(segment))
             {
+                Logger.DebugFormat("Subscribe {0} to {1}.", playerEntityId, segment);
                 internalController.PushSubscribe(eventSender, playerEntityId, segment);
                 currentSubscriptionSet.Add(segment);
                 syncManager.OnPlayerSubscribe(playerEntityId, segment);
@@ -203,6 +210,7 @@ public class WorldSegmentSubscriptionManager
         foreach (var segment in currentSubscriptionSet)
             if (!unchangedSet.Contains(segment))
             {
+                Logger.DebugFormat("Unsubscribe {0} from {1}.", playerEntityId, segment);
                 internalController.PushUnsubscribe(eventSender, playerEntityId, segment);
                 currentSubscriptionSet.Remove(segment);
                 if (changeCounts.ContainsKey(segment))

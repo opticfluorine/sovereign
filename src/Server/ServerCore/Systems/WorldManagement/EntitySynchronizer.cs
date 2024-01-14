@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
@@ -41,6 +42,8 @@ public class EntitySynchronizer
     private readonly ParentComponentCollection parents;
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly PositionComponentCollection positions;
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EntitySynchronizer(IEventSender eventSender, IServerConfigurationManager configManager,
         WorldManagementInternalController controller, PositionComponentCollection positions,
@@ -73,7 +76,11 @@ public class EntitySynchronizer
                 .Select(batch => batch.Select(GenerateDefinition).ToList());
 
         // Send each batch to the client as its own event.
-        foreach (var batch in definitionBatches) controller.PushSyncEvent(eventSender, playerEntityId, batch);
+        foreach (var batch in definitionBatches)
+        {
+            Logger.DebugFormat("Sync {0} entities to player {1}.", batch.Count, playerEntityId);
+            controller.PushSyncEvent(eventSender, playerEntityId, batch);
+        }
     }
 
     /// <summary>

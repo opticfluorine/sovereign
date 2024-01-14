@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 
@@ -36,6 +37,8 @@ public class WorldSegmentSynchronizationManager
 
     private readonly EntitySynchronizer synchronizer;
     private readonly NonBlockWorldSegmentIndexer worldSegmentIndexer;
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public WorldSegmentSynchronizationManager(WorldSegmentActivationManager activationManager,
         EntitySynchronizer synchronizer, NonBlockWorldSegmentIndexer worldSegmentIndexer,
@@ -58,11 +61,13 @@ public class WorldSegmentSynchronizationManager
         if (activationManager.IsWorldSegmentLoaded(segmentIndex))
         {
             // World segment is already loaded, so we can immediately send the synchronization events.
+            Logger.DebugFormat("Segment already loaded; sync {0} to {1}.", segmentIndex, playerEntityId);
             SendSynchronizationEvents(playerEntityId, segmentIndex);
         }
         else
         {
             // World segment still loading, so enqueue for later synchronization.
+            Logger.DebugFormat("Segment load in process; enqueue {0} for {1}.", segmentIndex, playerEntityId);
             if (!pendingPlayersBySegment.ContainsKey(segmentIndex))
                 pendingPlayersBySegment[segmentIndex] = new Queue<ulong>();
 
@@ -79,6 +84,7 @@ public class WorldSegmentSynchronizationManager
         // Process synchronization for any players that were waiting on the loaded world segment.
         if (pendingPlayersBySegment.TryGetValue(segmentIndex, out var queue))
         {
+            Logger.DebugFormat("Processing pending syncs for newly loaded segment {0}.", segmentIndex);
             while (queue.TryDequeue(out var playerEntityId))
             {
                 SendSynchronizationEvents(playerEntityId, segmentIndex);
@@ -93,9 +99,6 @@ public class WorldSegmentSynchronizationManager
     /// <param name="segmentIndex">World segment index to synchronize.</param>
     private void SendSynchronizationEvents(ulong playerEntityId, GridPosition segmentIndex)
     {
-        // Retrieve the top-level entities from the world segment, then fill in their descendants.
-        var positionedEntities = worldSegmentIndexer.GetNonBlockEntitiesInWorldSegment(segmentIndex);
-
         // Fill in the hierarchy beneath the entities.
         var allEntities = worldSegmentIndexer.GetNonBlockEntitiesInWorldSegment(segmentIndex)
             .SelectMany(entityId =>

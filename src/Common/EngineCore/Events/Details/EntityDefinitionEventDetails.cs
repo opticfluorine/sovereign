@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using MessagePack;
 using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.EngineCore.Events.Details;
@@ -23,15 +24,18 @@ namespace Sovereign.EngineCore.Events.Details;
 ///     Event details specifying the definition of a single entity for replication
 ///     from server to client.
 /// </summary>
+[MessagePackObject]
 public class EntityDefinitionEventDetails : IEventDetails
 {
     /// <summary>
     ///     Entity ID of the player to receive this synchronization event.
     /// </summary>
+    [IgnoreMember]
     public ulong PlayerEntityId { get; set; }
 
     /// <summary>
     ///     Entity definitions.
     /// </summary>
+    [Key(0)]
     public List<EntityDefinition> EntityDefinitions { get; set; } = new();
 }
