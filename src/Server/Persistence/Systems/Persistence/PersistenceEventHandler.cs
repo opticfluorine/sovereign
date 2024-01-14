@@ -121,7 +121,7 @@ public sealed class PersistenceEventHandler
     {
         // Map this request directly to an entity retrieval for the player character entity,
         // but only if the player isn't newly created (and therefore already in memory).
-        if (details.NewPlayer) OnRetrieveEntity(details.PlayerCharacterEntityId);
+        if (!details.NewPlayer) OnRetrieveEntity(details.PlayerCharacterEntityId);
     }
 
     /// <summary>

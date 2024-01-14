@@ -7,6 +7,7 @@
 #### 13 January 2024
 
 * Fix several errors with client startup that were introduced by the null checks.
+* Fix issue with reversed logic for entity load following player selection.
 
 #### 12 January 2024
 
