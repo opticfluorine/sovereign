@@ -91,9 +91,6 @@ public sealed class BlockManager
 
         if (hasAboveBlock) builder.AboveBlock(aboveBlock);
 
-        if (blockRecord.Position.X == 0 && blockRecord.Position.Y >= 0 && blockRecord.Position.Y < 4)
-            Logger.DebugFormat("New block at {0}, material {1}.", blockRecord.Position, blockRecord.Material);
-
         return builder.Build();
     }
 
