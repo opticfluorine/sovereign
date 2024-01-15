@@ -100,6 +100,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private readonly HashSet<ulong> pendingModifyEvents = new();
 
     /// <summary>
+    ///     Components ready to be reclaimed on the next tick after a remove/unload.
+    /// </summary>
+    private readonly HashSet<ulong> pendingReclaims = new();
+
+    /// <summary>
     ///     Remove events that are pending invocation.
     /// </summary>
     private readonly HashSet<ulong> pendingRemoveEvents = new();
@@ -206,6 +211,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     public void ApplyComponentUpdates()
     {
         /* Apply all pending operations. */
+        ApplyReclaims();
         ApplyAdds();
         ApplyModifications();
         ApplyRemoves();
@@ -300,7 +306,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <returns>true if a component is associated, false otherwise.</returns>
     public bool HasComponentForEntity(ulong entityId)
     {
-        return entityToComponentMap.ContainsKey(entityId);
+        return entityToComponentMap.ContainsKey(entityId) && !pendingReclaims.Contains(entityId);
     }
 
     /// <summary>
@@ -320,11 +326,18 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     ///     instantiate
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
+    /// <param name="lookback">If true, get the value of a removed or unloaded component that has not been reclaimed.</param>
     /// <returns>Component associated with the given entity.</returns>
-    public Maybe<T> GetComponentForEntity(ulong entityId)
+    /// <remarks>
+    ///     When lookback is true, this method will retrieve the value of the component if it has been removed or
+    ///     unloaded during the previous tick transition. This one-tick delay to resource reclaiming allows for
+    ///     prior values to be inspected during update processing, e.g. in a remove or unload delegate function.
+    /// </remarks>
+    public Maybe<T> GetComponentForEntity(ulong entityId, bool lookback = false)
     {
         var maybe = new Maybe<T>();
-        if (entityToComponentMap.TryGetValue(entityId, out var componentId))
+        if ((lookback || !pendingReclaims.Contains(entityId))
+            && entityToComponentMap.TryGetValue(entityId, out var componentId))
             maybe.Value = components[componentId];
         return maybe;
     }
@@ -360,6 +373,15 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
 
         /* Announce that events are done being fired. */
         OnEndUpdates?.Invoke();
+    }
+
+    /// <summary>
+    ///     Applies all pending component reclaims.
+    /// </summary>
+    private void ApplyReclaims()
+    {
+        foreach (var entityId in pendingReclaims) ApplyReclaim(entityId);
+        pendingReclaims.Clear();
     }
 
     /// <summary>
@@ -508,12 +530,23 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     }
 
     /// <summary>
+    ///     Removes/unloads the given component, keeping it in memory for one additional tick so that
+    ///     the value may be referenced from code triggered by remove/unload delegates.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    private void ApplyRemoveOrUnloadComponent(ulong entityId)
+    {
+        if (!entityToComponentMap.ContainsKey(entityId)) return;
+        pendingReclaims.Add(entityId);
+    }
+
+    /// <summary>
     ///     Immediately removes or unloads the component associated with the given entity.
     ///     If no component is associated, this method has no effect.
     ///     This method should only be used from the main thread.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    private void ApplyRemoveOrUnloadComponent(ulong entityId)
+    private void ApplyReclaim(ulong entityId)
     {
         /* Ensure that a component is associated to the entity. */
         if (!entityToComponentMap.ContainsKey(entityId)) return;

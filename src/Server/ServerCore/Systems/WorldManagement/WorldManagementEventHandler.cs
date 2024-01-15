@@ -27,13 +27,16 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 public sealed class WorldManagementEventHandler
 {
     private readonly WorldSegmentActivationManager activationManager;
+    private readonly WorldSegmentBlockDataManager blockDataManager;
     private readonly WorldSegmentSynchronizationManager syncManager;
 
     public WorldManagementEventHandler(WorldSegmentActivationManager activationManager,
-        WorldSegmentSynchronizationManager syncManager)
+        WorldSegmentSynchronizationManager syncManager,
+        WorldSegmentBlockDataManager blockDataManager)
     {
         this.activationManager = activationManager;
         this.syncManager = syncManager;
+        this.blockDataManager = blockDataManager;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -56,6 +59,7 @@ public sealed class WorldManagementEventHandler
                 var details = (WorldSegmentEventDetails)ev.EventDetails;
                 activationManager.OnWorldSegmentLoaded(details.SegmentIndex);
                 syncManager.OnWorldSegmentLoaded(details.SegmentIndex);
+                blockDataManager.AddWorldSegment(details.SegmentIndex);
                 break;
 
             default:

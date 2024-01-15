@@ -17,12 +17,16 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using MessagePack;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Network;
-using Sovereign.EngineCore.Systems.Block.Components.Indexers;
+using Sovereign.EngineCore.Systems.Block.Components;
+using Sovereign.EngineCore.Systems.Movement.Components;
+using Sovereign.EngineCore.World;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -31,6 +35,11 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public sealed class WorldSegmentBlockDataManager
 {
+    /// <summary>
+    ///     Set of changed blocks whose segments need to be scheduled for regeneration.
+    /// </summary>
+    private readonly Queue<ulong> changedBlocks = new();
+
     /// <summary>
     ///     Summary block data for loaded world segments via their producer tasks.
     ///     A producer task is created when segment load is completed.
@@ -45,15 +54,38 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     private readonly ConcurrentDictionary<GridPosition, Task> deletionTasks = new();
 
-    private readonly BlockPositionEventFilter eventFilter;
     private readonly WorldSegmentBlockDataGenerator generator;
 
-    public WorldSegmentBlockDataManager(BlockPositionEventFilter eventFilter,
-        WorldSegmentBlockDataGenerator generator)
+    private readonly PositionComponentCollection positions;
+    private readonly WorldSegmentResolver resolver;
+
+    /// <summary>
+    ///     Set of world segments to schedule for regeneration.
+    /// </summary>
+    private readonly HashSet<GridPosition> segmentsToRegenerate = new();
+
+    public WorldSegmentBlockDataManager(
+        WorldSegmentBlockDataGenerator generator,
+        MaterialComponentCollection materials,
+        MaterialModifierComponentCollection materialModifiers,
+        PositionComponentCollection positions,
+        WorldSegmentResolver resolver,
+        EntityManager entityManager)
     {
-        this.eventFilter = eventFilter;
         this.generator = generator;
+        this.positions = positions;
+        this.resolver = resolver;
+
+        materials.OnComponentAdded += OnBlockChanged;
+        materialModifiers.OnComponentAdded += OnBlockChanged;
+        materials.OnComponentModified += OnBlockChanged;
+        materialModifiers.OnComponentModified += OnBlockChanged;
+        materials.OnComponentRemoved += ScheduleFromBlock;
+        materialModifiers.OnComponentRemoved += ScheduleFromBlock;
+
+        entityManager.OnUpdatesComplete += OnEndUpdates;
     }
+
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -64,6 +96,13 @@ public sealed class WorldSegmentBlockDataManager
     /// <returns>Summary block data, or null if no summary block data is available.</returns>
     public Task<byte[]?>? GetWorldSegmentBlockData(GridPosition segmentIndex)
     {
+        // If the segment is scheduled for regeneration, kick off the lazy load now that it's been requested.
+        if (segmentsToRegenerate.Contains(segmentIndex))
+        {
+            AddWorldSegment(segmentIndex);
+            segmentsToRegenerate.Remove(segmentIndex);
+        }
+
         return dataProducers.TryGetValue(segmentIndex, out var data) ? data : null;
     }
 
@@ -81,27 +120,6 @@ public sealed class WorldSegmentBlockDataManager
             // Segment has not yet been loaded or has been fully unloaded.
             // Start a new processing chain from scratch for this segment.
             dataProducers[segmentIndex] = Task.Factory.StartNew(() => DoAddWorldSegment(segmentIndex));
-    }
-
-    /// <summary>
-    ///     Asynchronously updates a world segment in the data set.
-    /// </summary>
-    /// <param name="segmentIndex">World segment index.</param>
-    public void UpdateWorldSegment(GridPosition segmentIndex)
-    {
-        if (deletionTasks.ContainsKey(segmentIndex))
-        {
-            // Segment already being deleted, do not update.
-            Logger.WarnFormat("Tried to update world segment data for {0} during deletion.", segmentIndex);
-            return;
-        }
-
-        if (dataProducers.TryGetValue(segmentIndex, out var currentTask))
-            // Just redo the creation instead of trying to do an incremental update.
-            // We can come back here and optimize later if this causes too big of a
-            // performance hit.
-            dataProducers[segmentIndex] = currentTask.ContinueWith(
-                task => DoAddWorldSegment(segmentIndex));
     }
 
     /// <summary>
@@ -148,5 +166,42 @@ public sealed class WorldSegmentBlockDataManager
     {
         // Clear deletion task.
         deletionTasks.TryRemove(segmentIndex, out var unused);
+    }
+
+    /// <summary>
+    ///     Called when a block is added or modified.
+    /// </summary>
+    /// <param name="entityId">Block entity ID.</param>
+    /// <param name="newValue">Unused.</param>
+    private void OnBlockChanged(ulong entityId, int newValue)
+    {
+        // The block position may not be committed yet, so enqueue the block for processing after updates finish.
+        changedBlocks.Enqueue(entityId);
+    }
+
+    /// <summary>
+    ///     Called when a block is removed.
+    /// </summary>
+    /// <param name="entityId">Block entity ID.</param>
+    private void ScheduleFromBlock(ulong entityId)
+    {
+        var lastPosition = positions.GetComponentForEntity(entityId, true);
+        if (lastPosition.HasValue)
+        {
+            var segmentIndex = resolver.GetWorldSegmentForPosition(lastPosition.Value);
+            segmentsToRegenerate.Add(segmentIndex);
+        }
+        else
+        {
+            Logger.ErrorFormat("Could not resolve position of removed block {0}.", entityId);
+        }
+    }
+
+    /// <summary>
+    ///     Called when a round of entity/component updates are complete and data generation can proceed.
+    /// </summary>
+    private void OnEndUpdates()
+    {
+        while (changedBlocks.TryDequeue(out var entityId)) ScheduleFromBlock(entityId);
     }
 }

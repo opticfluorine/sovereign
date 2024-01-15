@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Threading;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineUtil.Threading;
@@ -70,6 +71,7 @@ public class EntityManager
 
         componentManager.UpdateAllComponents();
         entityTable.UpdateAllEntities();
+        OnUpdatesComplete?.Invoke();
     }
 
     /// <summary>
@@ -116,4 +118,9 @@ public class EntityManager
         componentManager.UnloadAllComponentsForEntity(entityId);
         entityNotifier.EnqueueUnload(entityId);
     }
+
+    /// <summary>
+    ///     Event triggered when a round of entity/component updates are complete.
+    /// </summary>
+    public event Action? OnUpdatesComplete;
 }

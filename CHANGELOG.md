@@ -16,6 +16,13 @@
   outbound pipeline before the player select event could be processed (since the entity is created for a new player
   before the select event is sent, leading to a race condition).
 * Fix issue where the client interpreted subscribe as unsubscribe, and vice versa.
+* Add a one tick grace period before reclaiming component memory after a remove or unload in
+  `BaseComponentCollection<T>`. This way the value before removal can be referenced in an event handler immediately
+  following the component removal.
+* Wire up `WorldSegmentBlockDataManager` to support lazy regeneration of world segment block data. It actively tracks
+  which segments have expired based on component updates, then regenerates the segment on the fly if a request is
+  received and the segment is flagged for update. This way most updates do not trigger a full regeneration of the
+  segment data, only the update closest to the next request.
 
 #### 13 January 2024
 
