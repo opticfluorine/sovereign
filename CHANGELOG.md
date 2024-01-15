@@ -25,6 +25,7 @@
   segment data, only the update closest to the next request.
 * Fix some minor issues in `WorldSegmentBlockDataGenerator`. Successfully (sort of) sent some block data to the
   client where it was rendered to the screen.
+* Fix race condition in `EntityTable`.
 
 #### 13 January 2024
 

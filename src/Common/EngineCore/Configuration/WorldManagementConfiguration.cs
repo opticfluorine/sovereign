@@ -24,5 +24,5 @@ public sealed class WorldManagementConfiguration : IWorldManagementConfiguration
 {
     public uint SegmentLength => 32;
 
-    public int SubscriptionRange => 0;
+    public int SubscriptionRange => 1;
 }

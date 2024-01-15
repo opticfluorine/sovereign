@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Sovereign.EngineCore.Entities;
@@ -28,12 +29,12 @@ public class EntityTable
     /// <summary>
     ///     Set of all entities that are enqueued to be added to the table.
     /// </summary>
-    private readonly HashSet<ulong> pendingAdds = new();
+    private readonly ConcurrentBag<ulong> pendingAdds = new();
 
     /// <summary>
     ///     Set of all entities that are enqueued to be removed from the table.
     /// </summary>
-    private readonly HashSet<ulong> pendingRemoves = new();
+    private readonly ConcurrentBag<ulong> pendingRemoves = new();
 
     /// <summary>
     ///     Checks whether the given entity is current in memory.
@@ -62,7 +63,7 @@ public class EntityTable
     public void Remove(ulong entityId)
     {
         if (!Exists(entityId)) return;
-        pendingRemoves.Remove(entityId);
+        pendingRemoves.Add(entityId);
     }
 
     /// <summary>
