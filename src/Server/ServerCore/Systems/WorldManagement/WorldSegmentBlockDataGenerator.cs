@@ -148,15 +148,16 @@ public sealed class WorldSegmentBlockDataGenerator
         // Allocate all possible data lines.
         var lines = new WorldSegmentBlockDataLine[config.SegmentLength];
         for (var i = 0; i < lines.Length; ++i)
-        {
-            lines[i].OffsetY = (byte)i;
-            lines[i].BlockData = new List<LinePositionedBlockData>();
-        }
+            lines[i] = new WorldSegmentBlockDataLine
+            {
+                OffsetY = (byte)i,
+                BlockData = new List<LinePositionedBlockData>()
+            };
 
         // Filter to exclude default blocks.
         var keptBlocks = new List<BlockData>();
         foreach (var block in depthPlane.Blocks)
-            if (block.BlockType != depthPlane.DefaultBlockType)
+            if (!block.BlockType.Equals(depthPlane.DefaultBlockType))
                 keptBlocks.Add(block);
 
         // As a special case, if the default block is not air, the air blocks

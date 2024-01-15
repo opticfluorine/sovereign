@@ -23,6 +23,8 @@
   which segments have expired based on component updates, then regenerates the segment on the fly if a request is
   received and the segment is flagged for update. This way most updates do not trigger a full regeneration of the
   segment data, only the update closest to the next request.
+* Fix some minor issues in `WorldSegmentBlockDataGenerator`. Successfully (sort of) sent some block data to the
+  client where it was rendered to the screen.
 
 #### 13 January 2024
 
