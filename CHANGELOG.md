@@ -12,6 +12,10 @@
 * Saw the player character entity synchronized from server to client. More testing is needed, but this is
   fantastic progress.
 * Fix issue where players were immediately unsubscribed from world segments as soon as they subscribed.
+* Fix issue where world segment subscribe events were not sent for new players because they were routed into the
+  outbound pipeline before the player select event could be processed (since the entity is created for a new player
+  before the select event is sent, leading to a race condition).
+* Fix issue where the client interpreted subscribe as unsubscribe, and vice versa.
 
 #### 13 January 2024
 

@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.NetworkCore.Network.Pipeline.Outbound;
@@ -46,15 +45,12 @@ public sealed class OutboundNetworkPipeline
         firstStage = deliveryMappingStage;
     }
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
-
     /// <summary>
     ///     Processes an outbound event.
     /// </summary>
     /// <param name="ev">Event.</param>
     public void ProcessEvent(Event ev)
     {
-        Logger.DebugFormat("Event type {0} entering pipeline.", ev.EventId);
         firstStage.Process(new OutboundEventInfo(ev));
     }
 }

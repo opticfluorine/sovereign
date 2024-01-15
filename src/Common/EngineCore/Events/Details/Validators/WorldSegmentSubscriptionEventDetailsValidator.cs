@@ -23,6 +23,6 @@ public class WorldSegmentSubscriptionEventDetailsValidator : IEventDetailsValida
 {
     public bool IsValid(IEventDetails? details)
     {
-        return details is WorldSegmentEventDetails;
+        return details is WorldSegmentSubscriptionEventDetails;
     }
 }

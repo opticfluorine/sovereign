@@ -112,7 +112,7 @@ public sealed class ClientNetworkEventHandler
     /// <param name="details">Event details.</param>
     private void HandleWorldSegmentUnsubscribe(WorldSegmentSubscriptionEventDetails details)
     {
-        worldSegmentSubscriptionManager.Subscribe(details.SegmentIndex);
+        worldSegmentSubscriptionManager.Unsubscribe(details.SegmentIndex);
     }
 
     /// <summary>
@@ -121,7 +121,7 @@ public sealed class ClientNetworkEventHandler
     /// <param name="details">Event details.</param>
     private void HandleWorldSegmentSubscribe(WorldSegmentSubscriptionEventDetails details)
     {
-        worldSegmentSubscriptionManager.Unsubscribe(details.SegmentIndex);
+        worldSegmentSubscriptionManager.Subscribe(details.SegmentIndex);
     }
 
     /// <summary>

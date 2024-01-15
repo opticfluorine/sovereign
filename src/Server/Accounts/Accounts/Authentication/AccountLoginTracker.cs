@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sodium;
+using Sovereign.ServerCore.Components;
 
 namespace Sovereign.Accounts.Accounts.Authentication;
 
@@ -48,6 +49,11 @@ public sealed class AccountLoginTracker
     private readonly Dictionary<Guid, AccountLoginState> accountLoginStates = new();
 
     /// <summary>
+    ///     Account components.
+    /// </summary>
+    private readonly AccountComponentCollection accounts;
+
+    /// <summary>
     ///     Map from account ID to connection ID.
     /// </summary>
     private readonly Dictionary<Guid, int> accountsToConnections = new();
@@ -61,6 +67,11 @@ public sealed class AccountLoginTracker
     ///     Map from player entity ID to connection ID.
     /// </summary>
     private readonly Dictionary<ulong, int> playersToConnections = new();
+
+    public AccountLoginTracker(AccountComponentCollection accounts)
+    {
+        this.accounts = accounts;
+    }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -92,7 +103,7 @@ public sealed class AccountLoginTracker
             return;
         }
 
-        // Select the player and update records.
+        // Select the player and update records, updating the mapping caches along the way.
         try
         {
             accountIdsToPlayerEntityIds[accountId] = playerEntityId;
@@ -138,7 +149,18 @@ public sealed class AccountLoginTracker
     /// <returns>true if a connection ID was found, false otherwise.</returns>
     public bool TryGetConnectionIdForPlayer(ulong playerEntityId, out int connectionId)
     {
-        return playersToConnections.TryGetValue(playerEntityId, out connectionId);
+        // Look for cached value.
+        if (playersToConnections.TryGetValue(playerEntityId, out connectionId))
+            return true;
+
+        // If not found, try to look up the account mapping, caching the result.
+        if (!accounts.HasComponentForEntity(playerEntityId)) return false;
+        var accountId = accounts[playerEntityId];
+        accountIdsToPlayerEntityIds[accountId] = playerEntityId;
+        playersToConnections[playerEntityId] = accountsToConnections[accountId];
+
+        connectionId = playersToConnections[playerEntityId];
+        return true;
     }
 
     /// <summary>
