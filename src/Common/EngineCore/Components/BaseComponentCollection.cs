@@ -189,7 +189,10 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         {
             EntityId = entityId
         };
-        pendingRemoves.Add(ref pendingRemove);
+        lock (pendingRemoves)
+        {
+            pendingRemoves.Add(ref pendingRemove);
+        }
     }
 
     public void UnloadComponent(ulong entityId)
@@ -202,7 +205,10 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         {
             EntityId = entityId
         };
-        pendingUnloads.Add(ref pendingUnload);
+        lock (pendingUnloads)
+        {
+            pendingUnloads.Add(ref pendingUnload);
+        }
     }
 
     /// <summary>
@@ -249,8 +255,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
                 EntityId = entityId,
                 InitialValue = initialValue
             };
-            pendingAdds.Add(ref pendingAdd);
-            pendingAddEntityIds.Add(entityId);
+            lock (pendingAdds)
+            {
+                pendingAdds.Add(ref pendingAdd);
+                pendingAddEntityIds.Add(entityId);
+            }
         }
     }
 
@@ -283,7 +292,10 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             ComponentOperation = operation,
             Adjustment = adjustment
         };
-        pendingModifications[operation].Add(ref pendingModify);
+        lock (pendingModifications)
+        {
+            pendingModifications[operation].Add(ref pendingModify);
+        }
     }
 
     /// <summary>

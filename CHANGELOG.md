@@ -4,6 +4,12 @@
 
 ### January
 
+#### 15 January 2024
+
+* Fix race condition in `BaseComponentCollection<T>` when multiple workers try to enqueue
+  creates/updates/removes/unloads simultaneously (e.g. when multiple world segments are loaded in parallel
+  by `Persistence`).
+
 #### 14 January 2024
 
 * Fix issue in `PlayerComponentEventFilter` that caused event triggers for new player characters to be missed.
