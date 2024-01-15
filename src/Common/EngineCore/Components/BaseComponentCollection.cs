@@ -89,6 +89,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private readonly StructBuffer<PendingAdd> pendingAdds = new(OperationBufferSize);
 
     /// <summary>
+    ///     Load events that are pending invocation.
+    /// </summary>
+    private readonly HashSet<ulong> pendingLoadEvents = new();
+
+    /// <summary>
     ///     Pending component modifications binned by operation.
     /// </summary>
     private readonly Dictionary<ComponentOperation, StructBuffer<PendingModify>>
@@ -118,11 +123,6 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     ///     Unload events that are pending invocation.
     /// </summary>
     private readonly HashSet<ulong> pendingUnloadEvents = new();
-
-    /// <summary>
-    ///     Pending component unloads.
-    /// </summary>
-    private readonly StructBuffer<PendingUnload> pendingUnloads = new(OperationBufferSize);
 
     /// <summary>
     ///     Creates a base component collection.
@@ -175,41 +175,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
 
     public event ComponentEventDelegates<T>.ComponentEventHandler? OnComponentModified;
 
-    public event ComponentEventDelegates<T>.ComponentUnloadedEventHandler? OnComponentUnloaded;
-
     public event Action? OnEndUpdates;
-
-    public void RemoveComponent(ulong entityId)
-    {
-        /* Ensure that a component is associated. */
-        if (!HasComponentForEntity(entityId)) return;
-
-        /* Enqueue the removal. */
-        var pendingRemove = new PendingRemove
-        {
-            EntityId = entityId
-        };
-        lock (pendingRemoves)
-        {
-            pendingRemoves.Add(ref pendingRemove);
-        }
-    }
-
-    public void UnloadComponent(ulong entityId)
-    {
-        /* Ensure that a component is associated. */
-        if (!HasComponentForEntity(entityId)) return;
-
-        /* Enqueue the unload. */
-        var pendingUnload = new PendingUnload
-        {
-            EntityId = entityId
-        };
-        lock (pendingUnloads)
-        {
-            pendingUnloads.Add(ref pendingUnload);
-        }
-    }
 
     /// <summary>
     ///     Applies pending component updates.
@@ -221,10 +187,31 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         ApplyAdds();
         ApplyModifications();
         ApplyRemoves();
-        ApplyUnloads();
 
         /* Dispatch events as needed. */
         FireComponentEvents();
+    }
+
+    /// <summary>
+    ///     Fully removes a component from the collection.
+    /// </summary>
+    /// <param name="entityId">Entity ID whose component is to be removed.</param>
+    /// <param name="isUnload">If true, treat this as an unload rather than a full remove.</param>
+    public void RemoveComponent(ulong entityId, bool isUnload = false)
+    {
+        /* Ensure that a component is associated. */
+        if (!HasComponentForEntity(entityId)) return;
+
+        /* Enqueue the removal. */
+        var pendingRemove = new PendingRemove
+        {
+            EntityId = entityId,
+            IsUnload = isUnload
+        };
+        lock (pendingRemoves)
+        {
+            pendingRemoves.Add(ref pendingRemove);
+        }
     }
 
     /// <summary>
@@ -234,11 +221,12 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="initialValue">Initial value of the component.</param>
+    /// <param name="isLoad">If true, treat the add as a load.</param>
     /// <exception cref="NotSupportedException">
     ///     Thrown if a component is already associated with the entity, and the
     ///     Set operation is not supported.
     /// </exception>
-    public void AddComponent(ulong entityId, T initialValue)
+    public void AddComponent(ulong entityId, T initialValue, bool isLoad = false)
     {
         if (HasComponentForEntity(entityId))
         {
@@ -253,7 +241,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             var pendingAdd = new PendingAdd
             {
                 EntityId = entityId,
-                InitialValue = initialValue
+                InitialValue = initialValue,
+                IsLoad = isLoad
             };
             lock (pendingAdds)
             {
@@ -378,10 +367,9 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         OnStartUpdates?.Invoke();
 
         /* Fire events. */
-        FireAddEvents();
+        FireAddAndLoadEvents();
         FireModificationEvents();
-        FireRemoveEvents();
-        FireUnloadEvents();
+        FireRemoveAndUnloadEvents();
 
         /* Announce that events are done being fired. */
         OnEndUpdates?.Invoke();
@@ -405,7 +393,10 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         foreach (var pendingAdd in pendingAdds)
         {
             ApplyAddComponent(pendingAdd.EntityId, pendingAdd.InitialValue);
-            pendingAddEvents.Add(pendingAdd.EntityId);
+            if (pendingAdd.IsLoad)
+                pendingLoadEvents.Add(pendingAdd.EntityId);
+            else
+                pendingAddEvents.Add(pendingAdd.EntityId);
         }
 
         /* Reset the buffer. */
@@ -442,37 +433,34 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private void ApplyRemoves()
     {
         /* Apply operations. */
-        foreach (var pendingRemove in pendingRemoves) ApplyRemoveOrUnloadComponent(pendingRemove.EntityId);
+        foreach (var pendingRemove in pendingRemoves)
+            ApplyRemoveOrUnloadComponent(pendingRemove.EntityId, pendingRemove.IsUnload);
 
         /* Clear the buffer. */
         pendingRemoves.Clear();
     }
 
     /// <summary>
-    ///     Applies all pending component unloads.
-    /// </summary>
-    private void ApplyUnloads()
-    {
-        /* Apply operations. */
-        foreach (var pendingUnload in pendingUnloads) ApplyRemoveOrUnloadComponent(pendingUnload.EntityId);
-
-        /* Clear the buffer. */
-        pendingUnloads.Clear();
-    }
-
-    /// <summary>
     ///     Fires events for component additions.
     /// </summary>
-    private void FireAddEvents()
+    private void FireAddAndLoadEvents()
     {
-        /* Iterate over entities that have been added. */
         if (OnComponentAdded != null)
+        {
+            // Adds.
             foreach (var entityId in pendingAddEvents)
             {
-                /* Notify all listeners. */
                 var value = this[entityId];
-                OnComponentAdded?.Invoke(entityId, value);
+                OnComponentAdded.Invoke(entityId, value, false);
             }
+
+            // Loads.
+            foreach (var entityId in pendingLoadEvents)
+            {
+                var value = this[entityId];
+                OnComponentAdded.Invoke(entityId, value, true);
+            }
+        }
 
         /* Reset the pending events. */
         pendingAddEvents.Clear();
@@ -489,7 +477,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             {
                 /* Notify all listeners. */
                 var value = this[entityId];
-                OnComponentModified.Invoke(entityId, value);
+                OnComponentModified.Invoke(entityId, value, false);
             }
 
         /* Reset the pending events. */
@@ -499,30 +487,19 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <summary>
     ///     Fires events for component removals.
     /// </summary>
-    private void FireRemoveEvents()
+    private void FireRemoveAndUnloadEvents()
     {
-        /* Iterate over entities that have been removed. */
         if (OnComponentRemoved != null)
-            foreach (var entityId in pendingRemoveEvents)
-                /* Notify all listeners. */
-                OnComponentRemoved.Invoke(entityId);
+        {
+            // Removes.
+            foreach (var entityId in pendingRemoveEvents) OnComponentRemoved.Invoke(entityId, false);
+
+            // Unloads.
+            foreach (var entityId in pendingUnloadEvents) OnComponentRemoved.Invoke(entityId, true);
+        }
 
         /* Reset the pending events. */
         pendingRemoveEvents.Clear();
-    }
-
-    /// <summary>
-    ///     Fires events for component unloads.
-    /// </summary>
-    private void FireUnloadEvents()
-    {
-        /* Iterate over entities that have been unloaded. */
-        if (OnComponentUnloaded != null)
-            foreach (var entityId in pendingUnloadEvents)
-                /* Notify all listeners. */
-                OnComponentUnloaded.Invoke(entityId);
-
-        /* Reset the pending events. */
         pendingUnloadEvents.Clear();
     }
 
@@ -546,9 +523,15 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     ///     the value may be referenced from code triggered by remove/unload delegates.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    private void ApplyRemoveOrUnloadComponent(ulong entityId)
+    /// <param name="isUnload">If true, treat as unload.</param>
+    private void ApplyRemoveOrUnloadComponent(ulong entityId, bool isUnload)
     {
         if (!entityToComponentMap.ContainsKey(entityId)) return;
+        if (isUnload)
+            pendingUnloadEvents.Add(entityId);
+        else
+            pendingRemoveEvents.Add(entityId);
+
         pendingReclaims.Add(entityId);
     }
 
@@ -645,6 +628,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         ///     Initial value of the new component.
         /// </summary>
         public T InitialValue;
+
+        /// <summary>
+        ///     Whether this add is a load.
+        /// </summary>
+        public bool IsLoad;
     }
 
     /// <summary>
@@ -657,14 +645,10 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         ///     ID of the associated entity.
         /// </summary>
         public ulong EntityId;
-    }
 
-    [DebuggerDisplay("{EntityId}")]
-    private struct PendingUnload
-    {
         /// <summary>
-        ///     ID of the associated entity.
+        ///     Whether this remove is an unload.
         /// </summary>
-        public ulong EntityId;
+        public bool IsUnload;
     }
 }

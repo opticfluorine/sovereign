@@ -28,17 +28,13 @@ public static class ComponentEventDelegates<T>
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="componentValue">New component value.</param>
-    public delegate void ComponentEventHandler(ulong entityId, T componentValue);
+    /// <param name="isLoad">Whether this action is a load (true), or a new change (false).</param>
+    public delegate void ComponentEventHandler(ulong entityId, T componentValue, bool isLoad);
 
     /// <summary>
     ///     Delegate type used to communicate component remove events.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    public delegate void ComponentRemovedEventHandler(ulong entityId);
-
-    /// <summary>
-    ///     Delegate type used to communicate component unload events.
-    /// </summary>
-    /// <param name="entityId"></param>
-    public delegate void ComponentUnloadedEventHandler(ulong entityId);
+    /// <param name="isUnload">Whether this action is an unload (true), or a full deletion (false).</param>
+    public delegate void ComponentRemovedEventHandler(ulong entityId, bool isUnload);
 }
