@@ -479,6 +479,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
 
         /* Reset the pending events. */
         pendingAddEvents.Clear();
+        pendingLoadEvents.Clear();
     }
 
     /// <summary>
