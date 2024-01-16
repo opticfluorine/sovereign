@@ -52,6 +52,8 @@ internal sealed class OctreeNode<T> where T : notnull
     /// </summary>
     public readonly Vector3 minPosition;
 
+    private readonly Stack<OctreeNode<T>> nodesToVisit = new(16);
+
     /// <summary>
     ///     Octree to which this node belongs.
     /// </summary>
@@ -248,7 +250,7 @@ internal sealed class OctreeNode<T> where T : notnull
     private void RebalanceLeafNode()
     {
         /* Depth-first search through the leaf nodes. */
-        var nodesToVisit = new Stack<OctreeNode<T>>();
+        nodesToVisit.Clear();
         nodesToVisit.Push(this);
         while (nodesToVisit.Count > 0)
         {

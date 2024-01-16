@@ -197,15 +197,15 @@ public sealed class WorldSegmentBlockDataManager
     /// <param name="isUnload">Unused.</param>
     private void ScheduleFromBlock(ulong entityId, bool isUnload)
     {
-        var lastPosition = positions.GetComponentForEntity(entityId, true);
-        if (lastPosition.HasValue)
+        try
         {
-            var segmentIndex = resolver.GetWorldSegmentForPosition(lastPosition.Value);
+            var lastPosition = positions.GetComponentWithLookback(entityId);
+            var segmentIndex = resolver.GetWorldSegmentForPosition(lastPosition);
             segmentsToRegenerate.Add(segmentIndex);
         }
-        else
+        catch (Exception e)
         {
-            Logger.ErrorFormat("Could not resolve position of removed block {0}.", entityId);
+            Logger.ErrorFormat(e, "Could not schedule block for entity {0}.", entityId);
         }
     }
 

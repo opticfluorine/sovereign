@@ -346,6 +346,19 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     }
 
     /// <summary>
+    ///     Gets a component, even if it was removed in the last tick.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>Component value.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if no value is associated to the entity.</exception>
+    public T GetComponentWithLookback(ulong entityId)
+    {
+        if (entityToComponentMap.TryGetValue(entityId, out var componentId))
+            return components[componentId];
+        throw new KeyNotFoundException("No component for entity");
+    }
+
+    /// <summary>
     ///     Creates a dictionary mapping entity IDs to all known components.
     /// </summary>
     /// This method should be used sparingly - it requires allocation and creation of
