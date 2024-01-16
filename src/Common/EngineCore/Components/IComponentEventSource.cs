@@ -37,14 +37,14 @@ public interface IComponentEventSource<T>
     /// </summary>
     /// This is intended for use with data view objects that are updated
     /// on the main thread once component updates for a given tick are complete.
-    event ComponentEventDelegates<T>.ComponentEventHandler? OnComponentAdded;
+    event ComponentEventDelegates<T>.ComponentAddedEventHandler? OnComponentAdded;
 
     /// <summary>
     ///     Event triggered when an existing component is updated.
     /// </summary>
     /// This is intended for use with data view objects that are updated
     /// on the main thread once component updates for a given tick are complete.
-    event ComponentEventDelegates<T>.ComponentEventHandler? OnComponentModified;
+    event ComponentEventDelegates<T>.ComponentModifiedEventHandler? OnComponentModified;
 
     /// <summary>
     ///     Event triggered when a component is removed from the collection.

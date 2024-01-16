@@ -76,10 +76,10 @@ public sealed class WorldSegmentBlockDataManager
         this.positions = positions;
         this.resolver = resolver;
 
-        materials.OnComponentAdded += OnBlockChanged;
-        materialModifiers.OnComponentAdded += OnBlockChanged;
-        materials.OnComponentModified += OnBlockChanged;
-        materialModifiers.OnComponentModified += OnBlockChanged;
+        materials.OnComponentAdded += OnBlockAdded;
+        materialModifiers.OnComponentAdded += OnBlockAdded;
+        materials.OnComponentModified += OnBlockModified;
+        materialModifiers.OnComponentModified += OnBlockModified;
         materials.OnComponentRemoved += ScheduleFromBlock;
         materialModifiers.OnComponentRemoved += ScheduleFromBlock;
 
@@ -173,17 +173,29 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="newValue">Unused.</param>
-    private void OnBlockChanged(ulong entityId, int newValue)
+    /// <param name="isLoad">Unused.</param>
+    private void OnBlockAdded(ulong entityId, int newValue, bool isLoad)
     {
         // The block position may not be committed yet, so enqueue the block for processing after updates finish.
         changedBlocks.Enqueue(entityId);
     }
 
     /// <summary>
+    ///     Called when a block is modified.
+    /// </summary>
+    /// <param name="entityId">Block entity ID.</param>
+    /// <param name="newValue">Unused.</param>
+    private void OnBlockModified(ulong entityId, int newValue)
+    {
+        OnBlockAdded(entityId, newValue, false);
+    }
+
+    /// <summary>
     ///     Called when a block is removed.
     /// </summary>
     /// <param name="entityId">Block entity ID.</param>
-    private void ScheduleFromBlock(ulong entityId)
+    /// <param name="isUnload">Unused.</param>
+    private void ScheduleFromBlock(ulong entityId, bool isUnload)
     {
         var lastPosition = positions.GetComponentForEntity(entityId, true);
         if (lastPosition.HasValue)
@@ -202,6 +214,6 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     private void OnEndUpdates()
     {
-        while (changedBlocks.TryDequeue(out var entityId)) ScheduleFromBlock(entityId);
+        while (changedBlocks.TryDequeue(out var entityId)) ScheduleFromBlock(entityId, false);
     }
 }

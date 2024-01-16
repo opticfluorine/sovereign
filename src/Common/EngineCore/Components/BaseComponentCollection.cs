@@ -169,28 +169,13 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
 
     public event Action? OnStartUpdates;
 
-    public event ComponentEventDelegates<T>.ComponentEventHandler? OnComponentAdded;
+    public event ComponentEventDelegates<T>.ComponentAddedEventHandler? OnComponentAdded;
 
     public event ComponentEventDelegates<T>.ComponentRemovedEventHandler? OnComponentRemoved;
 
-    public event ComponentEventDelegates<T>.ComponentEventHandler? OnComponentModified;
+    public event ComponentEventDelegates<T>.ComponentModifiedEventHandler? OnComponentModified;
 
     public event Action? OnEndUpdates;
-
-    /// <summary>
-    ///     Applies pending component updates.
-    /// </summary>
-    public void ApplyComponentUpdates()
-    {
-        /* Apply all pending operations. */
-        ApplyReclaims();
-        ApplyAdds();
-        ApplyModifications();
-        ApplyRemoves();
-
-        /* Dispatch events as needed. */
-        FireComponentEvents();
-    }
 
     /// <summary>
     ///     Fully removes a component from the collection.
@@ -212,6 +197,21 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         {
             pendingRemoves.Add(ref pendingRemove);
         }
+    }
+
+    /// <summary>
+    ///     Applies pending component updates.
+    /// </summary>
+    public void ApplyComponentUpdates()
+    {
+        /* Apply all pending operations. */
+        ApplyReclaims();
+        ApplyAdds();
+        ApplyModifications();
+        ApplyRemoves();
+
+        /* Dispatch events as needed. */
+        FireComponentEvents();
     }
 
     /// <summary>
@@ -477,7 +477,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             {
                 /* Notify all listeners. */
                 var value = this[entityId];
-                OnComponentModified.Invoke(entityId, value, false);
+                OnComponentModified.Invoke(entityId, value);
             }
 
         /* Reset the pending events. */

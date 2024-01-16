@@ -45,7 +45,7 @@ public abstract class BaseComponentReducer<T> : BaseComponentIndexer<T> where T 
         this.eventSender = eventSender;
     }
 
-    protected override void ComponentAddedCallback(ulong entityId, T componentValue)
+    protected override void ComponentAddedCallback(ulong entityId, T componentValue, bool isLoad)
     {
         entityIds.Add(entityId);
     }
