@@ -35,6 +35,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     protected readonly ulong entityId;
     private readonly EntityTable entityTable;
+    protected readonly bool load;
     protected readonly MaterialModifierComponentCollection materialModifiers;
     protected readonly MaterialComponentCollection materials;
     protected readonly NameComponentCollection names;
@@ -45,7 +46,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
 
-    protected AbstractEntityBuilder(ulong entityId,
+    protected AbstractEntityBuilder(ulong entityId, bool load,
         EntityManager entityManager, PositionComponentCollection positions,
         VelocityComponentCollection velocities, MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
@@ -56,6 +57,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         EntityTable entityTable)
     {
         this.entityId = entityId;
+        this.load = load;
         this.positions = positions;
         this.velocities = velocities;
         this.materials = materials;
@@ -84,8 +86,8 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder Positionable(Vector3 position, Vector3 velocity)
     {
-        positions.AddOrUpdateComponent(entityId, position);
-        velocities.AddOrUpdateComponent(entityId, velocity);
+        positions.AddOrUpdateComponent(entityId, position, load);
+        velocities.AddOrUpdateComponent(entityId, velocity, load);
         return this;
     }
 
@@ -101,15 +103,15 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder WithoutPositionable()
     {
-        positions.RemoveComponent(entityId);
-        velocities.RemoveComponent(entityId);
+        positions.RemoveComponent(entityId, load);
+        velocities.RemoveComponent(entityId, load);
         return this;
     }
 
     public IEntityBuilder Material(int materialId, int materialModifier)
     {
-        materials.AddOrUpdateComponent(entityId, materialId);
-        materialModifiers.AddOrUpdateComponent(entityId, materialModifier);
+        materials.AddOrUpdateComponent(entityId, materialId, load);
+        materialModifiers.AddOrUpdateComponent(entityId, materialModifier, load);
         return this;
     }
 
@@ -120,56 +122,56 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder WithoutMaterial()
     {
-        materials.RemoveComponent(entityId);
-        materialModifiers.RemoveComponent(entityId);
+        materials.RemoveComponent(entityId, load);
+        materialModifiers.RemoveComponent(entityId, load);
         return this;
     }
 
     public IEntityBuilder AboveBlock(ulong otherEntityId)
     {
-        aboveBlocks.AddOrUpdateComponent(entityId, otherEntityId);
+        aboveBlocks.AddOrUpdateComponent(entityId, otherEntityId, load);
         return this;
     }
 
     public IEntityBuilder WithoutAboveBlock()
     {
-        aboveBlocks.RemoveComponent(entityId);
+        aboveBlocks.RemoveComponent(entityId, load);
         return this;
     }
 
     public IEntityBuilder PlayerCharacter()
     {
-        playerCharacterTags.TagEntity(entityId);
+        playerCharacterTags.TagEntity(entityId, load);
         return this;
     }
 
     public IEntityBuilder WithoutPlayerCharacter()
     {
-        playerCharacterTags.UntagEntity(entityId);
+        playerCharacterTags.UntagEntity(entityId, load);
         return this;
     }
 
     public IEntityBuilder Name(string name)
     {
-        names.AddOrUpdateComponent(entityId, name);
+        names.AddOrUpdateComponent(entityId, name, load);
         return this;
     }
 
     public IEntityBuilder WithoutName()
     {
-        names.RemoveComponent(entityId);
+        names.RemoveComponent(entityId, load);
         return this;
     }
 
     public IEntityBuilder Parent(ulong parentEntityId)
     {
-        parents.AddOrUpdateComponent(entityId, parentEntityId);
+        parents.AddOrUpdateComponent(entityId, parentEntityId, load);
         return this;
     }
 
     public IEntityBuilder WithoutParent()
     {
-        parents.RemoveComponent(entityId);
+        parents.RemoveComponent(entityId, load);
         return this;
     }
 

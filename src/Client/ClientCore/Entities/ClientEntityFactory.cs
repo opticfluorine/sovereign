@@ -77,9 +77,9 @@ public sealed class ClientEntityFactory : IEntityFactory
         return GetBuilder(assigner.GetNextId());
     }
 
-    public IEntityBuilder GetBuilder(ulong entityId)
+    public IEntityBuilder GetBuilder(ulong entityId, bool isLoad = false)
     {
-        return new ClientEntityBuilder(entityId,
+        return new ClientEntityBuilder(entityId, isLoad,
             entityManager, positions, velocities, drawables, materials,
             materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents, entityTable);
     }

@@ -292,12 +292,14 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="newValue">New value.</param>
-    public void AddOrUpdateComponent(ulong entityId, T newValue)
+    /// <
+    /// <param name="isLoad">For adds, whether to treat as a load rather than an add.</param>
+    public void AddOrUpdateComponent(ulong entityId, T newValue, bool isLoad = false)
     {
         if (HasComponentForEntity(entityId))
             ModifyComponent(entityId, ComponentOperation.Set, newValue);
         else
-            AddComponent(entityId, newValue);
+            AddComponent(entityId, newValue, isLoad);
     }
 
     /// <summary>
