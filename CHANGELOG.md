@@ -9,6 +9,9 @@
 * Fix race condition in `BaseComponentCollection<T>` when multiple workers try to enqueue
   creates/updates/removes/unloads simultaneously (e.g. when multiple world segments are loaded in parallel
   by `Persistence`).
+* Refactor the component event APIs to distinguish between add/load similar to remove/unload. This is needed
+  to allow the persistence state trackers to ignore loaded components and avoid attempting to duplicate
+  components in the database.
 
 #### 14 January 2024
 

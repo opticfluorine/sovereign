@@ -103,7 +103,7 @@ public class BasePositionComponentIndexer : BaseComponentIndexer<Vector3>
         updateLock = AcquireLock();
     }
 
-    protected override void ComponentAddedCallback(ulong entityId, Vector3 position)
+    protected override void ComponentAddedCallback(ulong entityId, Vector3 position, bool isLoad)
     {
         if (updateLock == null) return;
         octree.Add(updateLock.octreeLock, position, entityId);
@@ -115,13 +115,7 @@ public class BasePositionComponentIndexer : BaseComponentIndexer<Vector3>
         octree.UpdatePosition(updateLock.octreeLock, entityId, position);
     }
 
-    protected override void ComponentRemovedCallback(ulong entityId)
-    {
-        if (updateLock == null) return;
-        octree.Remove(updateLock.octreeLock, entityId);
-    }
-
-    protected override void ComponentUnloadedCallback(ulong entityId)
+    protected override void ComponentRemovedCallback(ulong entityId, bool isUnload)
     {
         if (updateLock == null) return;
         octree.Remove(updateLock.octreeLock, entityId);

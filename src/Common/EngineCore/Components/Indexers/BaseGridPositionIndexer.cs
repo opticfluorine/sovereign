@@ -50,7 +50,7 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
             : null;
     }
 
-    protected override void ComponentAddedCallback(ulong entityId, Vector3 componentValue)
+    protected override void ComponentAddedCallback(ulong entityId, Vector3 componentValue, bool isLoad)
     {
         AddEntity(entityId, componentValue);
     }
@@ -61,12 +61,7 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
         AddEntity(entityId, componentValue);
     }
 
-    protected override void ComponentRemovedCallback(ulong entityId)
-    {
-        RemoveEntity(entityId);
-    }
-
-    protected override void ComponentUnloadedCallback(ulong entityId)
+    protected override void ComponentRemovedCallback(ulong entityId, bool isUnload)
     {
         RemoveEntity(entityId);
     }

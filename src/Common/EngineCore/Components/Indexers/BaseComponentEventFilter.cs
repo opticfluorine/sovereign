@@ -31,10 +31,9 @@ public abstract class BaseComponentEventFilter<T> : BaseComponentIndexer<T>, ICo
     }
 
     public event Action? OnStartUpdates;
-    public event ComponentEventDelegates<T>.ComponentEventHandler? OnComponentAdded;
+    public event ComponentEventDelegates<T>.ComponentAddedEventHandler? OnComponentAdded;
     public event ComponentEventDelegates<T>.ComponentRemovedEventHandler? OnComponentRemoved;
-    public event ComponentEventDelegates<T>.ComponentEventHandler? OnComponentModified;
-    public event ComponentEventDelegates<T>.ComponentUnloadedEventHandler? OnComponentUnloaded;
+    public event ComponentEventDelegates<T>.ComponentModifiedEventHandler? OnComponentModified;
     public event Action? OnEndUpdates;
 
     /// <summary>
@@ -54,9 +53,9 @@ public abstract class BaseComponentEventFilter<T> : BaseComponentIndexer<T>, ICo
         OnEndUpdates?.Invoke();
     }
 
-    protected override void ComponentAddedCallback(ulong entityId, T componentValue)
+    protected override void ComponentAddedCallback(ulong entityId, T componentValue, bool isLoad)
     {
-        if (ShouldAccept(entityId)) OnComponentAdded?.Invoke(entityId, componentValue);
+        if (ShouldAccept(entityId)) OnComponentAdded?.Invoke(entityId, componentValue, isLoad);
     }
 
     protected override void ComponentModifiedCallback(ulong entityId, T componentValue)
@@ -64,13 +63,8 @@ public abstract class BaseComponentEventFilter<T> : BaseComponentIndexer<T>, ICo
         if (ShouldAccept(entityId)) OnComponentModified?.Invoke(entityId, componentValue);
     }
 
-    protected override void ComponentRemovedCallback(ulong entityId)
+    protected override void ComponentRemovedCallback(ulong entityId, bool isUnload)
     {
-        if (ShouldAccept(entityId)) OnComponentRemoved?.Invoke(entityId);
-    }
-
-    protected override void ComponentUnloadedCallback(ulong entityId)
-    {
-        if (ShouldAccept(entityId)) OnComponentUnloaded?.Invoke(entityId);
+        if (ShouldAccept(entityId)) OnComponentRemoved?.Invoke(entityId, isUnload);
     }
 }

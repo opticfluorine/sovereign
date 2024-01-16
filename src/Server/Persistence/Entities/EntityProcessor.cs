@@ -68,8 +68,8 @@ public sealed class EntityProcessor
         /* Get the entity ID. */
         var entityId = (ulong)reader.GetInt64(INDEX_ID);
 
-        /* Start creating the entity. */
-        var builder = entityFactory.GetBuilder(entityId);
+        /* Start loading the entity. */
+        var builder = entityFactory.GetBuilder(entityId, true);
 
         /* Process components. */
         ProcessPosition(reader, builder);

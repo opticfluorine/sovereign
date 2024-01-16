@@ -24,21 +24,24 @@ namespace Sovereign.EngineCore.Components;
 public static class ComponentEventDelegates<T>
 {
     /// <summary>
-    ///     Delegate type used to communicate component add and update events.
+    ///     Delegate type used to communicate component add and load events.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="componentValue">New component value.</param>
-    public delegate void ComponentEventHandler(ulong entityId, T componentValue);
+    /// <param name="isLoad">Whether this action is a load (true), or a new change (false).</param>
+    public delegate void ComponentAddedEventHandler(ulong entityId, T componentValue, bool isLoad);
 
     /// <summary>
-    ///     Delegate type used to communicate component remove events.
+    ///     Delegate type used to communicate component update events.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    public delegate void ComponentRemovedEventHandler(ulong entityId);
+    /// <param name="componentValue">New component value.</param>
+    public delegate void ComponentModifiedEventHandler(ulong entityId, T componentValue);
 
     /// <summary>
-    ///     Delegate type used to communicate component unload events.
+    ///     Delegate type used to communicate component remove and unload events.
     /// </summary>
-    /// <param name="entityId"></param>
-    public delegate void ComponentUnloadedEventHandler(ulong entityId);
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="isUnload">Whether this action is an unload (true), or a full deletion (false).</param>
+    public delegate void ComponentRemovedEventHandler(ulong entityId, bool isUnload);
 }

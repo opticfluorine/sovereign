@@ -69,17 +69,19 @@ public class BaseTagCollection : BaseComponentCollection<bool>
     ///     Sets a tag on the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    public void TagEntity(ulong entityId)
+    /// <param name="isLoad">Whether to treat as a load instead of an add.</param>
+    public void TagEntity(ulong entityId, bool isLoad = false)
     {
-        if (!HasTagForEntity(entityId)) AddComponent(entityId, true);
+        if (!HasTagForEntity(entityId)) AddComponent(entityId, true, isLoad);
     }
 
     /// <summary>
     ///     Removes a tag from the given entity. If the entity is not tagged, this method silently fails.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    public void UntagEntity(ulong entityId)
+    /// <param name="isUnload">Whether to treat as an unload isntead of a remove.</param>
+    public void UntagEntity(ulong entityId, bool isUnload = false)
     {
-        if (HasTagForEntity(entityId)) RemoveComponent(entityId);
+        if (HasTagForEntity(entityId)) RemoveComponent(entityId, isUnload);
     }
 }

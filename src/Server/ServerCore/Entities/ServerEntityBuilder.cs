@@ -32,7 +32,7 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
 {
     private readonly AccountComponentCollection accounts;
 
-    public ServerEntityBuilder(ulong entityId,
+    public ServerEntityBuilder(ulong entityId, bool load,
         EntityManager entityManager,
         PositionComponentCollection positions,
         VelocityComponentCollection velocities,
@@ -44,7 +44,7 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         AccountComponentCollection accounts,
         ParentComponentCollection parents,
         EntityTable entityTable)
-        : base(entityId, entityManager, positions, velocities, materials,
+        : base(entityId, load, entityManager, positions, velocities, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents, entityTable)
     {
         this.accounts = accounts;
@@ -76,13 +76,13 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
 
     public override IEntityBuilder Account(Guid accountId)
     {
-        accounts.AddComponent(entityId, accountId);
+        accounts.AddComponent(entityId, accountId, load);
         return this;
     }
 
     public override IEntityBuilder WithoutAccount()
     {
-        accounts.RemoveComponent(entityId);
+        accounts.RemoveComponent(entityId, load);
         return this;
     }
 }

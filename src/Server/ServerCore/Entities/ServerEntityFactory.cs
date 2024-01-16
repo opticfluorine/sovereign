@@ -75,10 +75,11 @@ public sealed class ServerEntityFactory : IEntityFactory
         return GetBuilder(entityAssigner.GetNextId());
     }
 
-    public IEntityBuilder GetBuilder(ulong entityId)
+    public IEntityBuilder GetBuilder(ulong entityId, bool load = false)
     {
         return new ServerEntityBuilder(
             entityId,
+            load,
             entityManager,
             positions,
             velocities,

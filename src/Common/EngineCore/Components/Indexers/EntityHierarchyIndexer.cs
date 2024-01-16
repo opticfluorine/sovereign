@@ -83,7 +83,7 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
         return new HashSet<ulong>();
     }
 
-    protected override void ComponentAddedCallback(ulong entityId, ulong parentId)
+    protected override void ComponentAddedCallback(ulong entityId, ulong parentId, bool isLoad)
     {
         AddEntity(entityId, parentId);
     }
@@ -96,12 +96,7 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
         AddEntity(entityId, parentId);
     }
 
-    protected override void ComponentRemovedCallback(ulong entityId)
-    {
-        RemoveEntity(entityId);
-    }
-
-    protected override void ComponentUnloadedCallback(ulong entityId)
+    protected override void ComponentRemovedCallback(ulong entityId, bool isUnload)
     {
         RemoveEntity(entityId);
     }
@@ -158,10 +153,7 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
         while (trackedParent.TryGetValue(parentId, out parentId))
         {
             allDescendants[parentId].Remove(entityId);
-            foreach (var childId in childSpan)
-            {
-                allDescendants[parentId].Remove(childId);
-            }
+            foreach (var childId in childSpan) allDescendants[parentId].Remove(childId);
         }
 
         trackedParent.Remove(entityId, out _);

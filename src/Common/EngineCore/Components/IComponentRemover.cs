@@ -27,12 +27,6 @@ public interface IComponentRemover
     ///     If no entity is associated with the given entity, no action is performed.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    void RemoveComponent(ulong entityId);
-
-    /// <summary>
-    ///     Enqueues the unloading of the component associated with the given entity ID.
-    ///     If no entity is associated with the given entity, no action is performed.
-    /// </summary>
-    /// <param name="entityId">Entity ID.</param>
-    void UnloadComponent(ulong entityId);
+    /// <param name="isUnload">If true, treat as an unload rather than a remove.</param>
+    void RemoveComponent(ulong entityId, bool isUnload);
 }

@@ -33,7 +33,7 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly DrawableComponentCollection drawables;
 
-    public ClientEntityBuilder(ulong entityId,
+    public ClientEntityBuilder(ulong entityId, bool isLoad,
         EntityManager entityManager,
         PositionComponentCollection positions,
         VelocityComponentCollection velocities,
@@ -46,7 +46,7 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         NameComponentCollection names,
         ParentComponentCollection parents,
         EntityTable entityTable)
-        : base(entityId, entityManager, positions, velocities, materials,
+        : base(entityId, isLoad, entityManager, positions, velocities, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents, entityTable)
     {
         this.drawables = drawables;
@@ -55,25 +55,25 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
 
     public override IEntityBuilder Drawable()
     {
-        drawables.AddComponent(entityId, true);
+        drawables.AddComponent(entityId, true, load);
         return this;
     }
 
     public override IEntityBuilder WithoutDrawable()
     {
-        drawables.RemoveComponent(entityId);
+        drawables.RemoveComponent(entityId, load);
         return this;
     }
 
     public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
     {
-        animatedSprites.AddComponent(entityId, animatedSpriteId);
+        animatedSprites.AddComponent(entityId, animatedSpriteId, load);
         return this;
     }
 
     public override IEntityBuilder WithoutAnimatedSprite()
     {
-        drawables.RemoveComponent(entityId);
+        drawables.RemoveComponent(entityId, load);
         return this;
     }
 

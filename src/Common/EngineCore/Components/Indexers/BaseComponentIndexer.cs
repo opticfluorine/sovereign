@@ -39,14 +39,12 @@ public class BaseComponentIndexer<T> : IDisposable
         eventSource.OnComponentAdded += ComponentAddedCallback;
         eventSource.OnComponentModified += ComponentModifiedCallback;
         eventSource.OnComponentRemoved += ComponentRemovedCallback;
-        eventSource.OnComponentUnloaded += ComponentUnloadedCallback;
         eventSource.OnEndUpdates += EndUpdatesCallback;
     }
 
     public void Dispose()
     {
         eventSource.OnEndUpdates -= EndUpdatesCallback;
-        eventSource.OnComponentUnloaded -= ComponentUnloadedCallback;
         eventSource.OnComponentRemoved -= ComponentRemovedCallback;
         eventSource.OnComponentModified -= ComponentModifiedCallback;
         eventSource.OnComponentAdded -= ComponentAddedCallback;
@@ -67,7 +65,8 @@ public class BaseComponentIndexer<T> : IDisposable
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="componentValue">New component value.</param>
-    protected virtual void ComponentAddedCallback(ulong entityId, T componentValue)
+    /// <param name="isLoad">If true, indicates the component was loaded rather than added.</param>
+    protected virtual void ComponentAddedCallback(ulong entityId, T componentValue, bool isLoad)
     {
     }
 
@@ -86,16 +85,8 @@ public class BaseComponentIndexer<T> : IDisposable
     ///     Defaults to no action.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    protected virtual void ComponentRemovedCallback(ulong entityId)
-    {
-    }
-
-    /// <summary>
-    ///     Called when the event source signals that a component is unloaded.
-    ///     Defaults to no action.
-    /// </summary>
-    /// <param name="entityId">Entity ID.</param>
-    protected virtual void ComponentUnloadedCallback(ulong entityId)
+    /// <param name="isUnload">If true, indicates the component was unloaded rather than removed.</param>
+    protected virtual void ComponentRemovedCallback(ulong entityId, bool isUnload)
     {
     }
 

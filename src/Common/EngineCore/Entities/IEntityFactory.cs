@@ -32,6 +32,7 @@ public interface IEntityFactory
     ///     Gets an entity builder for the given entity ID.
     /// </summary>
     /// <param name="entityId">Entity ID for the new entity.</param>
+    /// <param name="load">If true, loads rather than creates the entity.</param>
     /// <returns>Entity builder.</returns>
-    IEntityBuilder GetBuilder(ulong entityId);
+    IEntityBuilder GetBuilder(ulong entityId, bool load = false);
 }

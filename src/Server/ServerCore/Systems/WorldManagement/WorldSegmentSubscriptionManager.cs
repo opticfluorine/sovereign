@@ -17,7 +17,6 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
-using log4net.Repository.Hierarchy;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
@@ -66,8 +65,6 @@ public class WorldSegmentSubscriptionManager
 
     private readonly IWorldManagementConfiguration worldConfig;
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
-
     public WorldSegmentSubscriptionManager(PlayerPositionEventFilter positionEventFilter,
         WorldSegmentResolver resolver, IWorldManagementConfiguration worldConfig,
         WorldSegmentActivationManager activationManager,
@@ -90,11 +87,14 @@ public class WorldSegmentSubscriptionManager
         this.positionEventFilter.OnComponentRemoved += OnPlayerRemoved;
     }
 
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
     /// <summary>
     ///     Called when a player is unloaded.
     /// </summary>
     /// <param name="entityId">Player entity ID.</param>
-    private void OnPlayerRemoved(ulong entityId)
+    /// <param name="isUnload">Unused.</param>
+    private void OnPlayerRemoved(ulong entityId, bool isUnload)
     {
         // Special case: for removal, unsubscribe from all.
         foreach (var segment in subscriptions[entityId]) changeCounts[segment] -= 1;
@@ -126,7 +126,8 @@ public class WorldSegmentSubscriptionManager
     /// </summary>
     /// <param name="entityId">Player entity ID.</param>
     /// <param name="position">New position.</param>
-    private void OnPlayerAdded(ulong entityId, Vector3 position)
+    /// <param name="isLoad">Unused.</param>
+    private void OnPlayerAdded(ulong entityId, Vector3 position, bool isLoad)
     {
         subscriptions[entityId] = new HashSet<GridPosition>();
         var center = resolver.GetWorldSegmentForPosition(position);
@@ -159,19 +160,13 @@ public class WorldSegmentSubscriptionManager
     {
         var result = new HashSet<GridPosition>(worldConfig.SubscriptionRange * worldConfig.SubscriptionRange);
         for (var x = center.X - worldConfig.SubscriptionRange; x < center.X + worldConfig.SubscriptionRange + 1; ++x)
-        {
-            for (var y = center.Y - worldConfig.SubscriptionRange;
-                 y < center.Y + worldConfig.SubscriptionRange + 1;
-                 ++y)
-            {
-                for (var z = center.Z - worldConfig.SubscriptionRange;
-                     z < center.Z + worldConfig.SubscriptionRange + 1;
-                     ++z)
-                {
-                    result.Add(new GridPosition(x, y, z));
-                }
-            }
-        }
+        for (var y = center.Y - worldConfig.SubscriptionRange;
+             y < center.Y + worldConfig.SubscriptionRange + 1;
+             ++y)
+        for (var z = center.Z - worldConfig.SubscriptionRange;
+             z < center.Z + worldConfig.SubscriptionRange + 1;
+             ++z)
+            result.Add(new GridPosition(x, y, z));
 
         return result;
     }

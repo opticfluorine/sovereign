@@ -389,20 +389,33 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     }
 
     /// <summary>
-    ///     Called when a component is added or modified.
+    ///     Called when a component is added.
     /// </summary>
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="componentValue">Not used.</param>
-    private void OnComponentChanged(ulong entityId, int componentValue)
+    /// <param name="isLoad">Not used.</param>
+    private void OnComponentAdded(ulong entityId, int componentValue, bool isLoad)
     {
         changedBlocks.Add(entityId);
+    }
+
+    /// <summary>
+    ///     Called when a component is modified.
+    /// </summary>
+    /// <param name="entityId">Block entity ID.</param>
+    /// <param name="componentValue">Not used.</param>
+    private void OnComponentModified(ulong entityId, int componentValue)
+    {
+        // Treat it as an add.
+        OnComponentAdded(entityId, componentValue, false);
     }
 
     /// <summary>
     ///     Called when a component is removed.
     /// </summary>
     /// <param name="entityId">Block entity ID.</param>
-    private void OnComponentRemoved(ulong entityId)
+    /// <param name="isUnload">Not used.</param>
+    private void OnComponentRemoved(ulong entityId, bool isUnload)
     {
         removedBlocks.Add(entityId);
     }
@@ -412,9 +425,15 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="componentValue">Not used.</param>
-    private void OnPositionChanged(ulong entityId, Vector3 componentValue)
+    /// <param name="isLoad">Not used.</param>
+    private void OnPositionAdded(ulong entityId, Vector3 componentValue, bool isLoad)
     {
-        OnComponentChanged(entityId, 0);
+        OnComponentModified(entityId, 0);
+    }
+
+    private void OnPositionModified(ulong entityId, Vector3 componentValue)
+    {
+        OnComponentModified(entityId, 0);
     }
 
     /// <summary>
@@ -423,22 +442,22 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private void RegisterEventHandlers()
     {
         materials.OnStartUpdates += OnStartUpdates;
-        materials.OnComponentAdded += OnComponentChanged;
-        materials.OnComponentModified += OnComponentChanged;
+        materials.OnComponentAdded += OnComponentAdded;
+        materials.OnComponentModified += OnComponentModified;
         materials.OnComponentRemoved += OnComponentRemoved;
         materials.OnEndUpdates += OnEndUpdates;
 
         materialModifiers.OnStartUpdates += OnStartUpdates;
-        materialModifiers.OnComponentAdded += OnComponentChanged;
-        materialModifiers.OnComponentModified += OnComponentChanged;
+        materialModifiers.OnComponentAdded += OnComponentAdded;
+        materialModifiers.OnComponentModified += OnComponentModified;
         materialModifiers.OnComponentRemoved += OnComponentRemoved;
         materialModifiers.OnEndUpdates += OnEndUpdates;
 
         positions.OnStartUpdates += OnStartUpdates;
         positions.OnEndUpdates += OnEndUpdates;
 
-        blockPositionEventFilter.OnComponentAdded += OnPositionChanged;
-        blockPositionEventFilter.OnComponentModified += OnPositionChanged;
+        blockPositionEventFilter.OnComponentAdded += OnPositionAdded;
+        blockPositionEventFilter.OnComponentModified += OnPositionModified;
 
         aboveBlocks.OnStartUpdates += OnStartUpdates;
         aboveBlocks.OnEndUpdates += OnEndUpdates;
@@ -450,22 +469,22 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private void DeregisterEventHandlers()
     {
         materials.OnStartUpdates -= OnStartUpdates;
-        materials.OnComponentAdded -= OnComponentChanged;
-        materials.OnComponentModified -= OnComponentChanged;
+        materials.OnComponentAdded -= OnComponentAdded;
+        materials.OnComponentModified -= OnComponentModified;
         materials.OnComponentRemoved -= OnComponentRemoved;
         materials.OnEndUpdates -= OnEndUpdates;
 
         materialModifiers.OnStartUpdates -= OnStartUpdates;
-        materialModifiers.OnComponentAdded -= OnComponentChanged;
-        materialModifiers.OnComponentModified -= OnComponentChanged;
+        materialModifiers.OnComponentAdded -= OnComponentAdded;
+        materialModifiers.OnComponentModified -= OnComponentModified;
         materialModifiers.OnComponentRemoved -= OnComponentRemoved;
         materialModifiers.OnEndUpdates -= OnEndUpdates;
 
         positions.OnStartUpdates -= OnStartUpdates;
         positions.OnEndUpdates -= OnEndUpdates;
 
-        blockPositionEventFilter.OnComponentAdded -= OnPositionChanged;
-        blockPositionEventFilter.OnComponentModified -= OnPositionChanged;
+        blockPositionEventFilter.OnComponentAdded -= OnPositionAdded;
+        blockPositionEventFilter.OnComponentModified -= OnPositionModified;
 
         aboveBlocks.OnStartUpdates -= OnStartUpdates;
         aboveBlocks.OnEndUpdates -= OnEndUpdates;

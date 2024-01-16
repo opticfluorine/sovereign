@@ -68,8 +68,12 @@ public abstract class BaseStateTracker<T> : IDisposable
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="componentValue">Component value.</param>
-    private void OnComponentAdded(ulong entityId, T componentValue)
+    /// <param name="isLoad">If true, this is a loaded component that should not be re-added to the database.</param>
+    private void OnComponentAdded(ulong entityId, T componentValue, bool isLoad)
     {
+        // Skip component loads - these are already in the database (that's where they were loaded from).
+        if (isLoad) return;
+
         /* Map the entity ID. */
         var persistedId = GetPersistedId(entityId);
 
@@ -107,8 +111,12 @@ public abstract class BaseStateTracker<T> : IDisposable
     ///     Called when a component is removed.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    private void OnComponentRemoved(ulong entityId)
+    /// <param name="isUnload">If true, this is just an unload from memory - do not modify the database.</param>
+    private void OnComponentRemoved(ulong entityId, bool isUnload)
     {
+        // Skip unloads.
+        if (isUnload) return;
+
         /* Map the entity ID. */
         var persistedId = GetPersistedId(entityId);
 

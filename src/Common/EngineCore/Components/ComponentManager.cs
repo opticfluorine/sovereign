@@ -71,7 +71,7 @@ public class ComponentManager
     /// <param name="entityId">Entity ID.</param>
     public void RemoveAllComponentsForEntity(ulong entityId)
     {
-        foreach (var remover in componentRemovers) remover.RemoveComponent(entityId);
+        foreach (var remover in componentRemovers) remover.RemoveComponent(entityId, false);
     }
 
     /// <summary>
@@ -81,6 +81,7 @@ public class ComponentManager
     /// <param name="entityId">Entity ID.</param>
     public void UnloadAllComponentsForEntity(ulong entityId)
     {
+        foreach (var remover in componentRemovers) remover.RemoveComponent(entityId, true);
     }
 
     /// <summary>
