@@ -4,6 +4,10 @@
 
 ### January
 
+#### 17 January 2024
+
+* Load Drawable component from database.
+
 #### 16 January 2024
 
 * Fix issue in `SqliteListPlayersQuery` that incorrectly returned no results even when players were
