@@ -126,6 +126,6 @@ public sealed class RestClient
     {
         if (!Connected) throw new NetworkException("REST client is not connected.");
         var uri = new Uri(baseUri, url);
-        return httpClient.PostAsync(url, null);
+        return httpClient.PostAsync(uri, null);
     }
 }

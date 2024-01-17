@@ -16,6 +16,7 @@
  */
 
 using System.Numerics;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Systems.Movement.Components;
 
@@ -26,10 +27,10 @@ namespace Sovereign.ClientCore.Rendering.Components.Indexers;
 /// </summary>
 public sealed class DrawablePositionEventFilter : BaseComponentEventFilter<Vector3>
 {
-    private readonly DrawableComponentCollection drawableCollection;
+    private readonly DrawableTagCollection drawableCollection;
 
     public DrawablePositionEventFilter(PositionComponentCollection positionCollection,
-        DrawableComponentCollection drawableCollection)
+        DrawableTagCollection drawableCollection)
         : base(positionCollection, positionCollection)
     {
         this.drawableCollection = drawableCollection;
@@ -37,7 +38,7 @@ public sealed class DrawablePositionEventFilter : BaseComponentEventFilter<Vecto
 
     protected override bool ShouldAccept(ulong entityId)
     {
-        return drawableCollection.HasComponentForEntity(entityId)
-               || drawableCollection.HasPendingComponentForEntity(entityId);
+        return drawableCollection.HasTagForEntity(entityId)
+               || drawableCollection.HasPendingTagForEntity(entityId);
     }
 }

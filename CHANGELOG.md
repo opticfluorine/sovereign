@@ -4,6 +4,16 @@
 
 ### January
 
+#### 16 January 2024
+
+* Fix issue in `SqliteListPlayersQuery` that incorrectly returned no results even when players were
+  associated to an account.
+* Fix issue in `PlayerManagementClient` where the select player call didn't work.
+* Convert `Drawable` from a `BaseComponentCollection` to a `BaseTagCollection`. Refactor to move this component
+  into `EngineCore` so that drawable entities can be tagged at the server with this information communicated
+  through non-block entity synchronization. Note that block entities continue to be tagged as drawable in the
+  *client* rather than in the server.
+
 #### 15 January 2024
 
 * Fix race condition in `BaseComponentCollection<T>` when multiple workers try to enqueue

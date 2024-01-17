@@ -35,7 +35,7 @@ public class SqliteListPlayersQuery : IListPlayersQuery
           FROM AccountComponent AC
           INNER JOIN Name N ON AC.id = N.id
           INNER JOIN PlayerCharacter PC ON AC.id = PC.id
-          WHERE AC.id = @AccountId AND PC.value = TRUE";
+          WHERE AC.account_id = @AccountId AND PC.value = TRUE";
 
     private readonly SqliteConnection connection;
 
@@ -49,13 +49,13 @@ public class SqliteListPlayersQuery : IListPlayersQuery
         // Prepare query.
         var cmd = new SqliteCommand(query, connection);
         var param = new SqliteParameter("AccountId", SqliteType.Blob);
-        param.Value = accountId;
+        param.Value = accountId.ToByteArray();
         cmd.Parameters.Add(param);
 
         // Execute query and process results.
         var reader = cmd.ExecuteReader();
         var results = new List<PlayerInfo>();
-        while (reader.NextResult())
+        while (reader.Read())
         {
             var player = new PlayerInfo
             {

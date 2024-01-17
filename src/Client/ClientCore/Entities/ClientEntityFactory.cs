@@ -32,7 +32,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly EntityAssigner assigner;
-    private readonly DrawableComponentCollection drawables;
+    private readonly DrawableTagCollection drawables;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
     private readonly MaterialModifierComponentCollection materialModifiers;
@@ -46,7 +46,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     public ClientEntityFactory(EntityManager entityManager,
         PositionComponentCollection positions,
         VelocityComponentCollection velocities,
-        DrawableComponentCollection drawables,
+        DrawableTagCollection drawables,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,

@@ -31,13 +31,13 @@ namespace Sovereign.ClientCore.Entities;
 public sealed class ClientEntityBuilder : AbstractEntityBuilder
 {
     private readonly AnimatedSpriteComponentCollection animatedSprites;
-    private readonly DrawableComponentCollection drawables;
+    private readonly DrawableTagCollection drawables;
 
     public ClientEntityBuilder(ulong entityId, bool isLoad,
         EntityManager entityManager,
         PositionComponentCollection positions,
         VelocityComponentCollection velocities,
-        DrawableComponentCollection drawables,
+        DrawableTagCollection drawables,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,
@@ -55,13 +55,13 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
 
     public override IEntityBuilder Drawable()
     {
-        drawables.AddComponent(entityId, true, load);
+        drawables.TagEntity(entityId, load);
         return this;
     }
 
     public override IEntityBuilder WithoutDrawable()
     {
-        drawables.RemoveComponent(entityId, load);
+        drawables.UntagEntity(entityId, load);
         return this;
     }
 

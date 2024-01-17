@@ -15,22 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Components;
-
-namespace Sovereign.ClientCore.Rendering.Components;
+namespace Sovereign.EngineCore.Components;
 
 /// <summary>
-///     Describes a component that indicates whether an entity can be drawn.
+///     Describes a component tag that indicates whether an entity can be drawn.
 /// </summary>
-/// This component is of type bool, but the value has no meaning; the existence of
-/// any Drawable component for an entity indicates that the entity is drawable.
-public sealed class DrawableComponentCollection : BaseComponentCollection<bool>
+public sealed class DrawableTagCollection : BaseTagCollection
 {
     private const int BaseSize = 65536;
 
-    public DrawableComponentCollection(ComponentManager componentManager)
-        : base(componentManager, BaseSize, ComponentOperators.BoolOperators,
-            ComponentType.Drawable)
+    public DrawableTagCollection(ComponentManager componentManager)
+        : base(componentManager, BaseSize, ComponentType.Drawable)
     {
     }
 }

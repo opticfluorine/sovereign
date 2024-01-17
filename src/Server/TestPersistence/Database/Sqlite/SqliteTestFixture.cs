@@ -120,6 +120,67 @@ public class SqliteTestFixture : IDisposable
     }
 
     /// <summary>
+    ///     Adds a name component to the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="name">Name.</param>
+    public void AddName(ulong entityId, string name)
+    {
+        const string sql = @"INSERT INTO Name (id, value) VALUES (@Id, @Name)";
+        using (var cmd = new SqliteCommand(sql, Connection))
+        {
+            var pId = new SqliteParameter("Id", entityId);
+            pId.SqliteType = SqliteType.Integer;
+            cmd.Parameters.Add(pId);
+
+            var pName = new SqliteParameter("Name", name);
+            pName.SqliteType = SqliteType.Text;
+            cmd.Parameters.Add(pName);
+
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    /// <summary>
+    ///     Adds a player character tag to the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    public void AddPlayerCharacter(ulong entityId)
+    {
+        const string sql = @"INSERT INTO PlayerCharacter (id, value) VALUES (@Id, TRUE)";
+        using (var cmd = new SqliteCommand(sql, Connection))
+        {
+            var pId = new SqliteParameter("Id", entityId);
+            pId.SqliteType = SqliteType.Integer;
+            cmd.Parameters.Add(pId);
+
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    /// <summary>
+    ///     Adds an account component to the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="accountId">Linked account ID.</param>
+    public void AddAccountComponent(ulong entityId, Guid accountId)
+    {
+        const string sql = @"INSERT INTO AccountComponent (id, account_id) VALUES (@Id, @AccountId)";
+        using (var cmd = new SqliteCommand(sql, Connection))
+        {
+            var pId = new SqliteParameter("Id", entityId);
+            pId.SqliteType = SqliteType.Integer;
+            cmd.Parameters.Add(pId);
+
+            var pAccountId = new SqliteParameter("AccountId", accountId.ToByteArray());
+            pAccountId.SqliteType = SqliteType.Blob;
+            cmd.Parameters.Add(pAccountId);
+
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    /// <summary>
     ///     Adds the given migration level to the database.
     /// </summary>
     /// <param name="level">Migration level.</param>
