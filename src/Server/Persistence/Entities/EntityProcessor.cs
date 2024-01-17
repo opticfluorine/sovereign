@@ -38,6 +38,7 @@ public sealed class EntityProcessor
     private const int INDEX_NAME = 7;
     private const int INDEX_ACCOUNT = 8;
     private const int INDEX_PARENT = 9;
+    private const int INDEX_DRAWABLE = 10;
     private readonly IEntityFactory entityFactory;
     private readonly EntityMapper entityMapper;
 
@@ -78,6 +79,7 @@ public sealed class EntityProcessor
         ProcessName(reader, builder);
         ProcessAccount(reader, builder, entityId);
         ProcessParent(reader, builder);
+        ProcessDrawable(reader, builder);
 
         /* Complete the entity. */
         builder.Build();
@@ -178,6 +180,17 @@ public sealed class EntityProcessor
         // Process.
         var parentEntityId = (ulong)reader.GetInt64(INDEX_PARENT);
         builder.Parent(parentEntityId);
+    }
+
+    /// <summary>
+    ///     Processes the Drawable component if present.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Entity builder.</param>
+    private void ProcessDrawable(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(INDEX_DRAWABLE)) return;
+        if (reader.GetBoolean(INDEX_DRAWABLE)) builder.Drawable();
     }
 
     /// <summary>

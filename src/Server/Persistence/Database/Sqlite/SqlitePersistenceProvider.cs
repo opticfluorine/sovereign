@@ -70,6 +70,10 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     /// </summary>
     private const string PARENT_TABLE_NAME = "Parent";
 
+    private const SqliteType DRAWABLE_PARAM_TYPE = SqliteType.Integer;
+    private const string DRAWABLE_TABLE_NAME = "Drawable";
+    private const string DRAWABLE_PARAM_NAME = "value";
+
     private readonly IPersistenceConfiguration configuration;
 
     public SqlitePersistenceProvider(IPersistenceConfiguration configuration)
@@ -157,6 +161,15 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         ModifyParentComponentQuery = new SimpleSqliteModifyComponentQuery<ulong>(PARENT_TABLE_NAME, PARENT_PARAM_NAME,
             PARENT_PARAM_TYPE, (SqliteConnection)Connection);
         RemoveParentComponentQuery = new SqliteRemoveComponentQuery(PARENT_TABLE_NAME, (SqliteConnection)Connection);
+
+        // Drawable component.
+        AddDrawableComponentQuery = new SimpleSqliteAddComponentQuery<bool>(DRAWABLE_TABLE_NAME, DRAWABLE_PARAM_NAME,
+            DRAWABLE_PARAM_TYPE, (SqliteConnection)Connection);
+        ModifyDrawableComponentQuery = new SimpleSqliteModifyComponentQuery<bool>(DRAWABLE_TABLE_NAME,
+            DRAWABLE_PARAM_NAME,
+            DRAWABLE_PARAM_TYPE, (SqliteConnection)Connection);
+        RemoveDrawableComponentQuery =
+            new SqliteRemoveComponentQuery(DRAWABLE_TABLE_NAME, (SqliteConnection)Connection);
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -201,6 +214,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<ulong> AddParentComponentQuery { get; }
     public IModifyComponentQuery<ulong> ModifyParentComponentQuery { get; }
     public IRemoveComponentQuery RemoveParentComponentQuery { get; }
+    public IAddComponentQuery<bool> AddDrawableComponentQuery { get; }
+    public IModifyComponentQuery<bool> ModifyDrawableComponentQuery { get; }
+    public IRemoveComponentQuery RemoveDrawableComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

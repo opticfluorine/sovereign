@@ -165,6 +165,18 @@ CREATE TABLE Parent
 );
 
 
+------------------
+-- Drawable Tag --
+------------------
+
+CREATE TABLE Drawable
+(
+    id    INTEGER PRIMARY KEY NOT NULL,
+    value BOOLEAN             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+
 --------------------------------------
 -- Account With Authentication View --
 --------------------------------------
@@ -194,15 +206,17 @@ SELECT Entity.id                   AS id,
        PlayerCharacter.value       AS playerCharacter,
        Name.value                  AS name,
        AccountComponent.account_id AS account,
-       Parent.parent_id            AS parent
+       Parent.parent_id            AS parent,
+       Drawable.value              AS drawable
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
          LEFT JOIN MaterialModifier ON MaterialModifier.id = Entity.id
-         LEFT JOIN PlayerCharacter on Entity.id = PlayerCharacter.id
-         LEFT JOIN Name on Entity.id = Name.id
-         LEFT JOIN AccountComponent on Entity.id = AccountComponent.id
-         LEFT JOIN Parent on Entity.id = Parent.id;
+         LEFT JOIN PlayerCharacter ON Entity.id = PlayerCharacter.id
+         LEFT JOIN Name ON Entity.id = Name.id
+         LEFT JOIN AccountComponent ON Entity.id = AccountComponent.id
+         LEFT JOIN Parent ON Entity.id = Parent.id
+         LEFT JOIN Drawable ON Entity.id = Drawable.id;
 
 
 -- Log the migration.

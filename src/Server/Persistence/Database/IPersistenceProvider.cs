@@ -183,6 +183,21 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveParentComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for the Drawable tag.
+    /// </summary>
+    IAddComponentQuery<bool> AddDrawableComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the Drawable tag.
+    /// </summary>
+    IModifyComponentQuery<bool> ModifyDrawableComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the Drawable tag.
+    /// </summary>
+    IRemoveComponentQuery RemoveDrawableComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }

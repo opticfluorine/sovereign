@@ -165,6 +165,18 @@ CREATE TABLE Parent
 );
 
 
+------------------
+-- Drawable Tag --
+------------------
+
+CREATE TABLE Drawable
+(
+    id    INTEGER PRIMARY KEY NOT NULL,
+    value BOOLEAN             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+
 -- Create views.
 
 --------------------------------------
@@ -196,7 +208,8 @@ SELECT Entity.id                   AS id,
        PlayerCharacter.value       AS playerCharacter,
        Name.value                  AS name,
        AccountComponent.account_id AS account,
-       Parent.parent_id            AS parent
+       Parent.parent_id            AS parent,
+       Drawable.value              AS drawable
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
@@ -204,7 +217,8 @@ FROM Entity
          LEFT JOIN PlayerCharacter ON PlayerCharacter.id = Entity.id
          LEFT JOIN Name ON Name.id = Entity.id
          LEFT JOIN AccountComponent ON AccountComponent.id = Entity.id
-         LEFT JOIN Parent ON Parent.id = Entity.id;
+         LEFT JOIN Parent ON Parent.id = Entity.id
+         LEFT JOIN Drawable ON Drawable.id = Entity.id;
 
 
 -- Create stored procedures and functions.

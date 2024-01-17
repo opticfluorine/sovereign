@@ -10,7 +10,7 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU General Public License for more detailsStateTracker.
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
@@ -41,6 +41,8 @@ public sealed class StateBuffer
     ///     Account state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<Guid>> accountUpdates = new(BufferSize);
+
+    private readonly StructBuffer<StateUpdate<bool>> drawableUpdates = new(BufferSize);
 
     private readonly FatalErrorHandler fatalErrorHandler;
 
@@ -173,6 +175,10 @@ public sealed class StateBuffer
         parentUpdates.Add(ref update);
     }
 
+    public void UpdateDrawable(ref StateUpdate<bool> update)
+    {
+    }
+
     /// <summary>
     ///     Resets the buffer.
     /// </summary>
@@ -187,6 +193,7 @@ public sealed class StateBuffer
         nameUpdates.Clear();
         accountUpdates.Clear();
         parentUpdates.Clear();
+        drawableUpdates.Clear();
     }
 
     /// <summary>
@@ -260,6 +267,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddParentComponentQuery,
                     persistenceProvider.ModifyParentComponentQuery,
                     persistenceProvider.RemoveParentComponentQuery,
+                    transaction);
+
+                /* Drawable. */
+                SynchronizeComponent(drawableUpdates,
+                    persistenceProvider.AddDrawableComponentQuery,
+                    persistenceProvider.ModifyDrawableComponentQuery,
+                    persistenceProvider.RemoveDrawableComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

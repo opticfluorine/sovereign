@@ -14,6 +14,7 @@
   through non-block entity synchronization. Note that block entities continue to be tagged as drawable in the
   *client* rather than in the server.
 * Update entity synchronization to populate `Drawable` component in entity definitions generated at the server.
+* Add `Drawable` component to persistence.
 
 #### 15 January 2024
 
