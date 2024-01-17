@@ -13,6 +13,7 @@
   into `EngineCore` so that drawable entities can be tagged at the server with this information communicated
   through non-block entity synchronization. Note that block entities continue to be tagged as drawable in the
   *client* rather than in the server.
+* Update entity synchronization to populate `Drawable` component in entity definitions generated at the server.
 
 #### 15 January 2024
 

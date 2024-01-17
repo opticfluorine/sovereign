@@ -43,9 +43,11 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         NameComponentCollection names,
         AccountComponentCollection accounts,
         ParentComponentCollection parents,
+        DrawableTagCollection drawables,
         EntityTable entityTable)
         : base(entityId, load, entityManager, positions, velocities, materials,
-            materialModifiers, aboveBlocks, playerCharacterTags, names, parents, entityTable)
+            materialModifiers, aboveBlocks, playerCharacterTags, names, parents,
+            drawables, entityTable)
     {
         this.accounts = accounts;
     }
@@ -57,18 +59,6 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
     }
 
     public override IEntityBuilder WithoutAnimatedSprite()
-    {
-        // no-op
-        return this;
-    }
-
-    public override IEntityBuilder Drawable()
-    {
-        /* no-op */
-        return this;
-    }
-
-    public override IEntityBuilder WithoutDrawable()
     {
         // no-op
         return this;

@@ -35,6 +35,7 @@ public class EntitySynchronizer
 {
     private readonly IServerConfigurationManager configManager;
     private readonly WorldManagementInternalController controller;
+    private readonly DrawableTagCollection drawables;
     private readonly IEventSender eventSender;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
@@ -43,13 +44,11 @@ public class EntitySynchronizer
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly PositionComponentCollection positions;
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
-
     public EntitySynchronizer(IEventSender eventSender, IServerConfigurationManager configManager,
         WorldManagementInternalController controller, PositionComponentCollection positions,
         MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
-        ParentComponentCollection parents)
+        ParentComponentCollection parents, DrawableTagCollection drawables)
     {
         this.eventSender = eventSender;
         this.configManager = configManager;
@@ -60,7 +59,10 @@ public class EntitySynchronizer
         this.playerCharacters = playerCharacters;
         this.names = names;
         this.parents = parents;
+        this.drawables = drawables;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Synchronizes the given set of entities to a client.
@@ -95,6 +97,8 @@ public class EntitySynchronizer
 
         if (positions.HasComponentForEntity(entityId))
             def.Position = positions[entityId];
+
+        def.Drawable = drawables.HasTagForEntity(entityId);
 
         if (materials.HasComponentForEntity(entityId))
             def.Material = new MaterialPair(materials[entityId], materialModifiers[entityId]);

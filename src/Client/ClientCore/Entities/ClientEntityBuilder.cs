@@ -31,7 +31,6 @@ namespace Sovereign.ClientCore.Entities;
 public sealed class ClientEntityBuilder : AbstractEntityBuilder
 {
     private readonly AnimatedSpriteComponentCollection animatedSprites;
-    private readonly DrawableTagCollection drawables;
 
     public ClientEntityBuilder(ulong entityId, bool isLoad,
         EntityManager entityManager,
@@ -47,22 +46,9 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         ParentComponentCollection parents,
         EntityTable entityTable)
         : base(entityId, isLoad, entityManager, positions, velocities, materials,
-            materialModifiers, aboveBlocks, playerCharacterTags, names, parents, entityTable)
+            materialModifiers, aboveBlocks, playerCharacterTags, names, parents, drawables, entityTable)
     {
-        this.drawables = drawables;
         this.animatedSprites = animatedSprites;
-    }
-
-    public override IEntityBuilder Drawable()
-    {
-        drawables.TagEntity(entityId, load);
-        return this;
-    }
-
-    public override IEntityBuilder WithoutDrawable()
-    {
-        drawables.UntagEntity(entityId, load);
-        return this;
     }
 
     public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
