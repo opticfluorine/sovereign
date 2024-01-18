@@ -7,6 +7,9 @@
 #### 17 January 2024
 
 * Load Drawable component from database.
+* Fix minor issue in `BaseTagCollection` that was affecting Drawables.
+* Move `AnimatedSprite` component to `EngineCore` similar to `Drawable`, along with the necessary persistence
+  changes.
 
 #### 16 January 2024
 

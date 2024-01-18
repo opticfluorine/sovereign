@@ -169,6 +169,8 @@ public class CreatePlayerRestService : AuthenticatedRestService
                     .Name(request.PlayerName)
                     .PlayerCharacter()
                     .Positionable(Vector3.Zero) // TODO Configurable start position
+                    .Drawable()
+                    .AnimatedSprite(4) // TODO Configurable appearance
                     .Build();
 
                 recentNames.Add(request.PlayerName);

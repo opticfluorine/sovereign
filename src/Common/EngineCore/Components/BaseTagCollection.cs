@@ -46,8 +46,7 @@ public class BaseTagCollection : BaseComponentCollection<bool>
     /// <returns>true if tagged, false otherwise.</returns>
     public bool HasTagForEntity(ulong entityId)
     {
-        var val = GetComponentForEntity(entityId);
-        return val.HasValue && val.Value;
+        return HasComponentForEntity(entityId) && this[entityId];
     }
 
     /// <summary>

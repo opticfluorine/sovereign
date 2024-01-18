@@ -32,6 +32,7 @@ namespace Sovereign.EngineCore.Entities;
 public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 {
     protected readonly AboveBlockComponentCollection aboveBlocks;
+    protected readonly AnimatedSpriteComponentCollection animatedSprites;
     protected readonly DrawableTagCollection drawables;
 
     protected readonly ulong entityId;
@@ -56,6 +57,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         NameComponentCollection names,
         ParentComponentCollection parents,
         DrawableTagCollection drawables,
+        AnimatedSpriteComponentCollection animatedSprites,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -69,6 +71,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         this.names = names;
         this.parents = parents;
         this.drawables = drawables;
+        this.animatedSprites = animatedSprites;
         this.entityTable = entityTable;
 
         weakLock = entityManager.UpdateGuard.AcquireWeakLock();
@@ -190,9 +193,17 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         return this;
     }
 
-    public abstract IEntityBuilder AnimatedSprite(int animatedSpriteId);
+    public IEntityBuilder AnimatedSprite(int animatedSpriteId)
+    {
+        animatedSprites.AddOrUpdateComponent(entityId, animatedSpriteId, load);
+        return this;
+    }
 
-    public abstract IEntityBuilder WithoutAnimatedSprite();
+    public IEntityBuilder WithoutAnimatedSprite()
+    {
+        animatedSprites.RemoveComponent(entityId, load);
+        return this;
+    }
 
     public abstract IEntityBuilder Account(Guid accountId);
 

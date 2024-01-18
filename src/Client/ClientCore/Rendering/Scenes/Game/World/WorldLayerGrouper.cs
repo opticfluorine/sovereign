@@ -18,7 +18,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
-using Sovereign.ClientCore.Rendering.Components;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Movement.Components;

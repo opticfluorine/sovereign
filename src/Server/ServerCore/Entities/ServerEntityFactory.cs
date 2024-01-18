@@ -31,6 +31,7 @@ public sealed class ServerEntityFactory : IEntityFactory
 {
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AccountComponentCollection accounts;
+    private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly DrawableTagCollection drawables;
 
     private readonly EntityAssigner entityAssigner;
@@ -56,6 +57,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         AccountComponentCollection accounts,
         ParentComponentCollection parents,
         DrawableTagCollection drawables,
+        AnimatedSpriteComponentCollection animatedSprites,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -69,6 +71,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.accounts = accounts;
         this.parents = parents;
         this.drawables = drawables;
+        this.animatedSprites = animatedSprites;
         this.entityTable = entityTable;
         entityAssigner = entityManager.GetNewAssigner();
     }
@@ -94,6 +97,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             accounts,
             parents,
             drawables,
+            animatedSprites,
             entityTable);
     }
 }

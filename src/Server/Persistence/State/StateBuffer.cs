@@ -42,6 +42,11 @@ public sealed class StateBuffer
     /// </summary>
     private readonly StructBuffer<StateUpdate<Guid>> accountUpdates = new(BufferSize);
 
+    /// <summary>
+    ///     Animated sprite state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<int>> animatedSpriteUpdates = new(BufferSize);
+
     private readonly StructBuffer<StateUpdate<bool>> drawableUpdates = new(BufferSize);
 
     private readonly FatalErrorHandler fatalErrorHandler;
@@ -175,8 +180,22 @@ public sealed class StateBuffer
         parentUpdates.Add(ref update);
     }
 
+    /// <summary>
+    ///     Queues a drawable tag update.
+    /// </summary>
+    /// <param name="update"></param>
     public void UpdateDrawable(ref StateUpdate<bool> update)
     {
+        drawableUpdates.Add(ref update);
+    }
+
+    /// <summary>
+    ///     Enqueues an animated sprite update.
+    /// </summary>
+    /// <param name="update"></param>
+    public void UpdateAnimatedSprite(ref StateUpdate<int> update)
+    {
+        animatedSpriteUpdates.Add(ref update);
     }
 
     /// <summary>
@@ -194,6 +213,7 @@ public sealed class StateBuffer
         accountUpdates.Clear();
         parentUpdates.Clear();
         drawableUpdates.Clear();
+        animatedSpriteUpdates.Clear();
     }
 
     /// <summary>
@@ -274,6 +294,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddDrawableComponentQuery,
                     persistenceProvider.ModifyDrawableComponentQuery,
                     persistenceProvider.RemoveDrawableComponentQuery,
+                    transaction);
+
+                /* AnimatedSprite. */
+                SynchronizeComponent(animatedSpriteUpdates,
+                    persistenceProvider.AddAnimatedSpriteComponentQuery,
+                    persistenceProvider.ModifyAnimatedSpriteComponentQuery,
+                    persistenceProvider.RemoveAnimatedSpriteComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

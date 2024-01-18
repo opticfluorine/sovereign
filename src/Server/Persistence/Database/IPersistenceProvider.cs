@@ -198,6 +198,21 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveDrawableComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for the AnimatedSprite component.
+    /// </summary>
+    IAddComponentQuery<int> AddAnimatedSpriteComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the AnimatedSprite component.
+    /// </summary>
+    IModifyComponentQuery<int> ModifyAnimatedSpriteComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the AnimatedSprite component.
+    /// </summary>
+    IRemoveComponentQuery RemoveAnimatedSpriteComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }

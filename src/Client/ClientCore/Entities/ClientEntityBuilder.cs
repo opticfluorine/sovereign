@@ -16,7 +16,6 @@
  */
 
 using System;
-using Sovereign.ClientCore.Rendering.Components;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
@@ -30,8 +29,6 @@ namespace Sovereign.ClientCore.Entities;
 /// </summary>
 public sealed class ClientEntityBuilder : AbstractEntityBuilder
 {
-    private readonly AnimatedSpriteComponentCollection animatedSprites;
-
     public ClientEntityBuilder(ulong entityId, bool isLoad,
         EntityManager entityManager,
         PositionComponentCollection positions,
@@ -46,21 +43,9 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         ParentComponentCollection parents,
         EntityTable entityTable)
         : base(entityId, isLoad, entityManager, positions, velocities, materials,
-            materialModifiers, aboveBlocks, playerCharacterTags, names, parents, drawables, entityTable)
+            materialModifiers, aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
+            entityTable)
     {
-        this.animatedSprites = animatedSprites;
-    }
-
-    public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
-    {
-        animatedSprites.AddComponent(entityId, animatedSpriteId, load);
-        return this;
-    }
-
-    public override IEntityBuilder WithoutAnimatedSprite()
-    {
-        drawables.RemoveComponent(entityId, load);
-        return this;
     }
 
     public override IEntityBuilder Account(Guid accountId)

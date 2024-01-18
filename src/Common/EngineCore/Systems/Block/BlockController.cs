@@ -80,14 +80,17 @@ public class BlockController
         recordList.Clear();
         recordProvider(recordList);
 
-        /* Send the event. */
-        Logger.DebugFormat("Requesting to add {0} blocks.", recordList.Count);
-        var details = new BlockAddBatchEventDetails
+        /* Send the event if there are any blocks to create. */
+        if (recordList.Count > 0)
         {
-            BlockRecords = recordList
-        };
-        var ev = new Event(EventId.Core_Block_AddBatch, details, eventTime);
-        eventSender.SendEvent(ev);
+            Logger.DebugFormat("Requesting to add {0} blocks.", recordList.Count);
+            var details = new BlockAddBatchEventDetails
+            {
+                BlockRecords = recordList
+            };
+            var ev = new Event(EventId.Core_Block_AddBatch, details, eventTime);
+            eventSender.SendEvent(ev);
+        }
     }
 
     /// <summary>

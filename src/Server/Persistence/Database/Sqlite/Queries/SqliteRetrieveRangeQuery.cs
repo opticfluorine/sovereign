@@ -31,21 +31,25 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
     ///     SQL query.
     /// </summary>
     private const string Query =
-        @"WITH RECURSIVE EntityTree(id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable)
+        @"WITH RECURSIVE EntityTree(id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
+                drawable, animatedSprite)
 	        AS (
-	        	SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable
+	        	SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable,
+                        animatedSprite
 	        		FROM EntityWithComponents
 	        		WHERE x >= @X1 AND x < @X2
 	        		  AND y >= @Y1 AND y < @Y2
 	        		  AND z >= @Z1 AND z < @Z2
 	        		  AND playerCharacter IS NULL
 	        	UNION ALL
-	        	SELECT ec.id, ec.x, ec.y, ec.z, ec.material, ec.materialModifier, ec.playerCharacter, ec.name, ec.account, ec.parent, ec.drawable
+	        	SELECT ec.id, ec.x, ec.y, ec.z, ec.material, ec.materialModifier, ec.playerCharacter, ec.name, 
+                        ec.account, ec.parent, ec.drawable, ec.animatedSprite
 	        		FROM EntityWithComponents ec, EntityTree et
 	        		WHERE ec.parent = et.id 
                       AND ec.playerCharacter IS NULL
 	        )
-            SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable FROM EntityTree";
+            SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable,
+                animatedSprite FROM EntityTree";
 
     private readonly SqliteConnection dbConnection;
 

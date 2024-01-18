@@ -48,5 +48,11 @@ public sealed class StateTrackerInstaller : IWindsorInstaller
 
         container.Register(Component.For<ParentStateTracker>()
             .LifestyleSingleton());
+
+        container.Register(Component.For<DrawableStateTracker>()
+            .LifestyleSingleton());
+
+        container.Register(Component.For<AnimatedSpriteStateTracker>()
+            .LifestyleSingleton());
     }
 }

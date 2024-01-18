@@ -33,6 +33,7 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public class EntitySynchronizer
 {
+    private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly IServerConfigurationManager configManager;
     private readonly WorldManagementInternalController controller;
     private readonly DrawableTagCollection drawables;
@@ -48,7 +49,8 @@ public class EntitySynchronizer
         WorldManagementInternalController controller, PositionComponentCollection positions,
         MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
-        ParentComponentCollection parents, DrawableTagCollection drawables)
+        ParentComponentCollection parents, DrawableTagCollection drawables,
+        AnimatedSpriteComponentCollection animatedSprites)
     {
         this.eventSender = eventSender;
         this.configManager = configManager;
@@ -60,6 +62,7 @@ public class EntitySynchronizer
         this.names = names;
         this.parents = parents;
         this.drawables = drawables;
+        this.animatedSprites = animatedSprites;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -99,6 +102,9 @@ public class EntitySynchronizer
             def.Position = positions[entityId];
 
         def.Drawable = drawables.HasTagForEntity(entityId);
+
+        if (animatedSprites.HasComponentForEntity(entityId))
+            def.AnimatedSpriteId = animatedSprites[entityId];
 
         if (materials.HasComponentForEntity(entityId))
             def.Material = new MaterialPair(materials[entityId], materialModifiers[entityId]);

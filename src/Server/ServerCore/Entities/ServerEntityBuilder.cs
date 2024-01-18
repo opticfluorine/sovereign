@@ -44,24 +44,13 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         AccountComponentCollection accounts,
         ParentComponentCollection parents,
         DrawableTagCollection drawables,
+        AnimatedSpriteComponentCollection animatedSprites,
         EntityTable entityTable)
         : base(entityId, load, entityManager, positions, velocities, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents,
-            drawables, entityTable)
+            drawables, animatedSprites, entityTable)
     {
         this.accounts = accounts;
-    }
-
-    public override IEntityBuilder AnimatedSprite(int animatedSpriteId)
-    {
-        /* no-op */
-        return this;
-    }
-
-    public override IEntityBuilder WithoutAnimatedSprite()
-    {
-        // no-op
-        return this;
     }
 
     public override IEntityBuilder Account(Guid accountId)

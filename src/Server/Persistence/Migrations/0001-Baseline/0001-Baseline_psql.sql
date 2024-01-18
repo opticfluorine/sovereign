@@ -121,8 +121,8 @@ CREATE INDEX Position_Xyz_Index ON Position (x, y, z);
 
 CREATE TABLE PlayerCharacter
 (
-    id    INTEGER PRIMARY KEY NOT NULL,
-    value BOOLEAN             NOT NULL,
+    id    BIGINT PRIMARY KEY NOT NULL,
+    value BOOLEAN            NOT NULL,
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
@@ -133,8 +133,8 @@ CREATE TABLE PlayerCharacter
 
 CREATE TABLE Name
 (
-    id    INTEGER PRIMARY KEY NOT NULL,
-    value TEXT                NOT NULL,
+    id    BIGINT PRIMARY KEY NOT NULL,
+    value TEXT               NOT NULL,
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
@@ -145,8 +145,8 @@ CREATE TABLE Name
 
 CREATE TABLE AccountComponent
 (
-    id         INTEGER PRIMARY KEY NOT NULL,
-    account_id BYTEA               NOT NULL,
+    id         BIGINT PRIMARY KEY NOT NULL,
+    account_id BYTEA              NOT NULL,
     FOREIGN KEY (id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
 );
@@ -158,8 +158,8 @@ CREATE TABLE AccountComponent
 
 CREATE TABLE Parent
 (
-    id        INTEGER PRIMARY KEY NOT NULL,
-    parent_id INTEGER             NOT NULL,
+    id        BIGINT PRIMARY KEY NOT NULL,
+    parent_id BIGINT             NOT NULL,
     FOREIGN KEY (id) REFERENCES Entity (id),
     FOREIGN KEY (parent_id) REFERENCES Entity (id)
 );
@@ -171,8 +171,20 @@ CREATE TABLE Parent
 
 CREATE TABLE Drawable
 (
-    id    INTEGER PRIMARY KEY NOT NULL,
-    value BOOLEAN             NOT NULL,
+    id    BIGINT PRIMARY KEY NOT NULL,
+    value BOOLEAN            NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+
+------------------------------
+-- AnimatedSprite Component --
+------------------------------
+
+CREATE TABLE AnimatedSprite
+(
+    id    BIGINT PRIMARY KEY NOT NULL,
+    value INTEGER            NOT NULL,
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
@@ -209,7 +221,8 @@ SELECT Entity.id                   AS id,
        Name.value                  AS name,
        AccountComponent.account_id AS account,
        Parent.parent_id            AS parent,
-       Drawable.value              AS drawable
+       Drawable.value              AS drawable,
+       AnimatedSprite.value        AS animatedSprite
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
@@ -218,7 +231,8 @@ FROM Entity
          LEFT JOIN Name ON Name.id = Entity.id
          LEFT JOIN AccountComponent ON AccountComponent.id = Entity.id
          LEFT JOIN Parent ON Parent.id = Entity.id
-         LEFT JOIN Drawable ON Drawable.id = Entity.id;
+         LEFT JOIN Drawable ON Drawable.id = Entity.id
+         LEFT JOIN AnimatedSprite ON AnimatedSprite.id = Entity.id;
 
 
 -- Create stored procedures and functions.
@@ -238,7 +252,10 @@ CREATE FUNCTION EntityDetails(entityId BIGINT)
                 materialModifier INTEGER,
                 playerCharacter  BOOLEAN,
                 name             TEXT,
-                account          BYTEA
+                account          BYTEA,
+                parent           BIGINT,
+                drawable         BOOLEAN,
+                animatedSprite   INTEGER
             )
     LANGUAGE SQL
 AS
@@ -265,7 +282,10 @@ CREATE FUNCTION PositionedEntitiesInRange(x_min REAL, y_min REAL, z_min REAL,
                 materialModifier INTEGER,
                 playerCharacter  BOOLEAN,
                 name             TEXT,
-                account          BYTEA
+                account          BYTEA,
+                parent           BIGINT,
+                drawable         BOOLEAN,
+                animatedSprite   INTEGER
             )
     LANGUAGE SQL
 AS

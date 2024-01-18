@@ -15,9 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Components;
-
-namespace Sovereign.ClientCore.Rendering.Components;
+namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     The AnimatedSprite component denotes the animated sprite ID to use for

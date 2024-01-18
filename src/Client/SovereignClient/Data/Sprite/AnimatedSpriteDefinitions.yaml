@@ -6,22 +6,37 @@ AnimatedSprites:
   - Id: 0
     AnimationTimestep: 1
     SpriteIds:
-    - 0
+      - 0
 
   # Grass, center
   - Id: 1
     AnimationTimestep: 1
     SpriteIds:
-    - 1
+      - 1
 
   # Light dirt, center
   - Id: 2
     AnimationTimestep: 1
     SpriteIds:
-    - 2
+      - 2
 
   # Dark dirt, center
   - Id: 3
     AnimationTimestep: 1
     SpriteIds:
-    - 3
+      - 3
+  
+  # Slime, downward facing, static
+  - Id: 4
+    AnimationTimestep: 1
+    SpriteIds:
+      - 5
+  
+  # Slime, downward facing, walking
+  - Id: 5
+    AnimationTimestep: 1
+    SpriteIds:
+      - 5
+      - 6
+      - 5
+      - 4

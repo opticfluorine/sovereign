@@ -30,16 +30,20 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
     ///     SQL query to execute.
     /// </summary>
     private const string query =
-        @"WITH RECURSIVE EntityTree(id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable)
+        @"WITH RECURSIVE EntityTree(id, x, y, z, material, materialModifier, playerCharacter, name, account, 
+                parent, drawable, animatedSprite)
 	        AS (
-		        SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable
+		        SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
+                        drawable, animatedSprite
 			        FROM EntityWithComponents WHERE id = @Id
 		        UNION ALL
-            		SELECT ec.id, ec.x, ec.y, ec.z, ec.material, ec.materialModifier, ec.playerCharacter, ec.name, ec.account, ec.parent, ec.drawable
+            		SELECT ec.id, ec.x, ec.y, ec.z, ec.material, ec.materialModifier, ec.playerCharacter, ec.name, 
+                        ec.account, ec.parent, ec.drawable, ec.animatedSprite
 			        FROM EntityWithComponents ec, EntityTree et
         			WHERE ec.parent = et.id
 	        )
-            SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable FROM EntityTree";
+            SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable,
+                animatedSprite FROM EntityTree";
 
     private readonly SqliteConnection dbConnection;
 

@@ -29,7 +29,9 @@ public sealed class TrackerManager
         PlayerCharacterStateTracker playerCharacterStateTracker,
         NameStateTracker nameStateTracker,
         AccountStateTracker accountStateTracker,
-        ParentStateTracker parentStateTracker)
+        ParentStateTracker parentStateTracker,
+        DrawableStateTracker drawableStateTracker,
+        AnimatedSpriteStateTracker animatedSpriteStateTracker)
     {
         PositionStateTracker = positionStateTracker;
         MaterialStateTracker = materialStateTracker;
@@ -38,6 +40,8 @@ public sealed class TrackerManager
         NameStateTracker = nameStateTracker;
         AccountStateTracker = accountStateTracker;
         ParentStateTracker = parentStateTracker;
+        DrawableStateTracker = drawableStateTracker;
+        AnimatedSpriteStateTracker = animatedSpriteStateTracker;
     }
 
     /// <summary>
@@ -74,4 +78,14 @@ public sealed class TrackerManager
     ///     Parent entity linkage state tracker.
     /// </summary>
     public ParentStateTracker ParentStateTracker { get; }
+
+    /// <summary>
+    ///     Drawable tag state tracker.
+    /// </summary>
+    public DrawableStateTracker DrawableStateTracker { get; }
+
+    /// <summary>
+    ///     AnimatedSprite component state tracker.
+    /// </summary>
+    public AnimatedSpriteStateTracker AnimatedSpriteStateTracker { get; }
 }

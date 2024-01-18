@@ -2,7 +2,7 @@
 #
 
 Sprites:
-    # Water, center
+  # Water, center
   - Id: 0
     SpritesheetName: lpc_atlas_2.png
     Row: 12
@@ -25,3 +25,21 @@ Sprites:
     SpritesheetName: lpc_atlas_2.png
     Row: 3
     Column: 19
+    
+    # Slime, facing down, left frame
+  - Id: 4
+    SpritesheetName: slime.png
+    Row: 2
+    Column: 0
+    
+    # Slime, facing down, center frame
+  - Id: 5
+    SpritesheetName: slime.png
+    Row: 2
+    Column: 1
+    
+    # Slime, facing down, right frame
+  - Id: 6
+    SpritesheetName: slime.png
+    Row: 2
+    Column: 2

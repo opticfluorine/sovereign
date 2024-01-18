@@ -74,6 +74,10 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const string DRAWABLE_TABLE_NAME = "Drawable";
     private const string DRAWABLE_PARAM_NAME = "value";
 
+    private const SqliteType ANIMATEDSPRITE_PARAM_TYPE = SqliteType.Integer;
+    private const string ANIMATEDSPRITE_TABLE_NAME = "AnimatedSprite";
+    private const string ANIMATEDSPRITE_PARAM_NAME = "value";
+
     private readonly IPersistenceConfiguration configuration;
 
     public SqlitePersistenceProvider(IPersistenceConfiguration configuration)
@@ -170,6 +174,14 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             DRAWABLE_PARAM_TYPE, (SqliteConnection)Connection);
         RemoveDrawableComponentQuery =
             new SqliteRemoveComponentQuery(DRAWABLE_TABLE_NAME, (SqliteConnection)Connection);
+
+        // AnimatedSprite component.
+        AddAnimatedSpriteComponentQuery = new SimpleSqliteAddComponentQuery<int>(ANIMATEDSPRITE_TABLE_NAME,
+            ANIMATEDSPRITE_PARAM_NAME, ANIMATEDSPRITE_PARAM_TYPE, (SqliteConnection)Connection);
+        ModifyAnimatedSpriteComponentQuery = new SimpleSqliteModifyComponentQuery<int>(ANIMATEDSPRITE_TABLE_NAME,
+            ANIMATEDSPRITE_PARAM_NAME, ANIMATEDSPRITE_PARAM_TYPE, (SqliteConnection)Connection);
+        RemoveAnimatedSpriteComponentQuery = new SqliteRemoveComponentQuery(
+            ANIMATEDSPRITE_TABLE_NAME, (SqliteConnection)Connection);
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -217,6 +229,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<bool> AddDrawableComponentQuery { get; }
     public IModifyComponentQuery<bool> ModifyDrawableComponentQuery { get; }
     public IRemoveComponentQuery RemoveDrawableComponentQuery { get; }
+    public IAddComponentQuery<int> AddAnimatedSpriteComponentQuery { get; }
+    public IModifyComponentQuery<int> ModifyAnimatedSpriteComponentQuery { get; }
+    public IRemoveComponentQuery RemoveAnimatedSpriteComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }
