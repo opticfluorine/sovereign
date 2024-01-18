@@ -56,30 +56,22 @@ public sealed class WorldLayerVertexSequencer
     /// <param name="indicesAdded">Number of indices added to the buffer.</param>
     public void AddLayer(WorldLayer layer, WorldVertex[] vertexBuffer,
         uint[] indexBuffer, int bufferOffset, int indexBufferOffset, ulong systemTime,
-        out int verticesAdded, out int indicesAdded)
+        out int blockVerticesAdded, out int blockIndicesAdded, out int spriteVerticesAdded, out int spriteIndicesAdded)
     {
         /* Sequence the tile sprites into the buffers. */
         sequencedSprites.Clear();
         tileSpriteSequencer.SequenceTileSprites(sequencedSprites, layer.TopFaceTileSprites, true);
         tileSpriteSequencer.SequenceTileSprites(sequencedSprites, layer.FrontFaceTileSprites, false);
 
-        var totalVerticesAdded = 0;
-        var totalIndicesAdded = 0;
-
         spriteSequencer.SequenceAnimatedSprites(sequencedSprites,
             vertexBuffer, indexBuffer,
             bufferOffset, indexBufferOffset, systemTime,
-            out var lastVerticesAdded, out var lastIndicesAdded);
-        totalVerticesAdded += lastVerticesAdded;
-        totalIndicesAdded += lastIndicesAdded;
+            out blockVerticesAdded, out blockIndicesAdded);
 
         /* Sequence the remaining animated sprites into the buffers. */
         spriteSequencer.SequenceAnimatedSprites(layer.AnimatedSprites,
             vertexBuffer, indexBuffer,
-            bufferOffset + totalVerticesAdded, indexBufferOffset + totalIndicesAdded,
-            systemTime, out lastVerticesAdded, out lastIndicesAdded);
-
-        verticesAdded = totalVerticesAdded + lastVerticesAdded;
-        indicesAdded = totalIndicesAdded + lastIndicesAdded;
+            bufferOffset + blockVerticesAdded, indexBufferOffset + blockIndicesAdded,
+            systemTime, out spriteVerticesAdded, out spriteIndicesAdded);
     }
 }

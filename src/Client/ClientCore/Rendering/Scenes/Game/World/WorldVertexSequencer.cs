@@ -83,7 +83,7 @@ public sealed class WorldVertexSequencer
     private void GroupLayers(out int drawCount)
     {
         grouper.GroupDrawables(drawables);
-        drawCount = grouper.Layers.Count;
+        drawCount = 2 * grouper.Layers.Count;
     }
 
     /// <summary>
@@ -103,12 +103,15 @@ public sealed class WorldVertexSequencer
         {
             AddLayerToVertexBuffer(layer, vertexBuffer,
                 indexBuffer, bufferOffset, indexBufferOffset, systemTime,
-                out var verticesAdded,
-                out var indicesAdded);
-            drawLengths[layerIndex] = indicesAdded;
+                out var blockVerticesAdded,
+                out var blockIndicesAdded,
+                out var spriteVerticesAdded,
+                out var spriteIndicesAdded);
+            drawLengths[2 * layerIndex] = blockIndicesAdded;
+            drawLengths[2 * layerIndex + 1] = spriteIndicesAdded;
 
-            bufferOffset += verticesAdded;
-            indexBufferOffset += indicesAdded;
+            bufferOffset += blockVerticesAdded + spriteVerticesAdded;
+            indexBufferOffset += blockIndicesAdded + spriteIndicesAdded;
             layerIndex++;
         }
     }
@@ -122,14 +125,16 @@ public sealed class WorldVertexSequencer
     /// <param name="bufferOffset">Offset into the vertex buffer.</param>
     /// <param name="indexBufferOffset">Offset into the index buffer.</param>
     /// <param name="systemTime">System time of the current frame.</param>
-    /// <param name="verticesAdded">Number of vertices added to the buffer.</param>
-    /// <param name="indicesAdded">Number of indices added to the buffer.</param>
+    /// <param name="blockVerticesAdded">Number of block vertices added to the buffer.</param>
+    /// <param name="blockIndicesAdded">Number of block indices added to the buffer.</param>
+    /// <param name="spriteVerticesAdded">Number of animated sprite vertices added to the buffer.</param>
+    /// <param name="spriteIndicesAdded">Number of animated sprite indices added to the buffer.</param>
     private void AddLayerToVertexBuffer(WorldLayer layer, WorldVertex[] vertexBuffer,
         uint[] indexBuffer, int bufferOffset, int indexBufferOffset, ulong systemTime,
-        out int verticesAdded, out int indicesAdded)
+        out int blockVerticesAdded, out int blockIndicesAdded, out int spriteVerticesAdded, out int spriteIndicesAdded)
     {
         layerVertexSequencer.AddLayer(layer, vertexBuffer, indexBuffer,
             bufferOffset, indexBufferOffset, systemTime,
-            out verticesAdded, out indicesAdded);
+            out blockVerticesAdded, out blockIndicesAdded, out spriteVerticesAdded, out spriteIndicesAdded);
     }
 }

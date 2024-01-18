@@ -24,7 +24,7 @@ namespace Sovereign.EngineUtil.Monads;
 ///     Implementation of the "Maybe" monad.
 /// </summary>
 /// <typeparam name="T">Type of the value.</typeparam>
-public class Maybe<T> where T : notnull
+public struct Maybe<T> where T : notnull
 {
     /// <summary>
     ///     Underlying value.
@@ -36,6 +36,8 @@ public class Maybe<T> where T : notnull
     /// </summary>
     public Maybe()
     {
+        value = default;
+        HasValue = false;
     }
 
     /// <summary>
@@ -44,7 +46,8 @@ public class Maybe<T> where T : notnull
     /// <param name="value">Underlying value.</param>
     public Maybe(T value)
     {
-        Value = value;
+        this.value = value;
+        HasValue = true;
     }
 
     /// <summary>

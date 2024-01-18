@@ -10,6 +10,7 @@
 * Fix minor issue in `BaseTagCollection` that was affecting Drawables.
 * Move `AnimatedSprite` component to `EngineCore` similar to `Drawable`, along with the necessary persistence
   changes.
+* Begin work on getting non-block animated sprites to render correctly.
 
 #### 16 January 2024
 
