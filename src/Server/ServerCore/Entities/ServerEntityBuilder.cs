@@ -19,7 +19,6 @@ using System;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.ServerCore.Components;
 

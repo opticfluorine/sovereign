@@ -16,23 +16,22 @@
  */
 
 using System.Numerics;
-using Sovereign.EngineCore.Components;
 
-namespace Sovereign.EngineCore.Systems.Movement.Components;
+namespace Sovereign.EngineCore.Components;
 
 /// <summary>
-///     Manages the positions of all positionable entities.
+///     Manages the velocities of all mobile entities.
 /// </summary>
-public sealed class PositionComponentCollection : BaseComponentCollection<Vector3>
+public sealed class VelocityComponentCollection : BaseComponentCollection<Vector3>
 {
     /// <summary>
-    ///     Initial number of allocated components.
+    ///     Default size of component buffer.
     /// </summary>
     private const int BaseSize = 65536;
 
-    public PositionComponentCollection(ComponentManager componentManager)
+    public VelocityComponentCollection(ComponentManager componentManager)
         : base(componentManager, BaseSize, ComponentOperators.VectorOperators,
-            ComponentType.Position)
+            ComponentType.Velocity)
     {
     }
 }

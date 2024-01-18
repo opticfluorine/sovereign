@@ -17,22 +17,16 @@
 
 using MessagePack;
 using Sovereign.EngineCore.Events.Details;
-using Sovereign.EngineCore.Systems.Movement.Events;
 
 namespace Sovereign.EngineCore.Events;
 
 /// <summary>
 ///     Interface implemented by event detail classes.
 /// </summary>
-/// <remarks>
-///     Ensure that derived types are linked with a ProtoInclude here.
-/// </remarks>
-[Union(0, typeof(SetVelocityEventDetails))]
-[Union(1, typeof(MoveOnceEventDetails))]
-[Union(2, typeof(EntityEventDetails))]
-[Union(3, typeof(EntityVectorEventDetails))]
-[Union(4, typeof(WorldSegmentSubscriptionEventDetails))]
-[Union(5, typeof(EntityDefinitionEventDetails))]
+[Union(0, typeof(EntityEventDetails))]
+[Union(1, typeof(EntityVectorEventDetails))]
+[Union(2, typeof(WorldSegmentSubscriptionEventDetails))]
+[Union(3, typeof(EntityDefinitionEventDetails))]
 public interface IEventDetails
 {
 }

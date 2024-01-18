@@ -20,7 +20,6 @@ using System.Numerics;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.EngineUtil.Threading;
 

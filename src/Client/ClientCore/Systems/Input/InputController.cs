@@ -16,8 +16,6 @@
  */
 
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
-using Sovereign.EngineCore.Systems.Movement.Events;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -47,14 +45,6 @@ public class InputController
     /// </param>
     public void SetPlayerMovement(float dx, float dy)
     {
-        var details = new SetVelocityEventDetails
-        {
-            EntityId = 0,
-            RateX = dx,
-            RateY = dy
-        };
-        var ev = new Event(EventId.Core_Set_Velocity, details);
-        eventSender.SendEvent(ev);
     }
 
     /// <summary>
@@ -62,11 +52,5 @@ public class InputController
     /// </summary>
     public void StopPlayerMovement()
     {
-        var details = new EntityEventDetails
-        {
-            EntityId = 0
-        };
-        var ev = new Event(EventId.Core_End_Movement, details);
-        eventSender.SendEvent(ev);
     }
 }

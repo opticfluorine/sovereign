@@ -16,8 +16,8 @@
  */
 
 using System.Numerics;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Systems.Movement.Components;
 
 namespace Sovereign.EngineCore.Systems.Block.Components.Indexers;
 

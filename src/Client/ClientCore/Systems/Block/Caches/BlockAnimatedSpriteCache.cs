@@ -24,10 +24,10 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
-using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.World.Materials;
 using Sovereign.EngineUtil.Collections;
 

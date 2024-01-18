@@ -9,7 +9,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EngineUtil\EngineUtil.csproj" />
+        <ProjectReference Include="..\EngineUtil\EngineUtil.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Systems\Movement\"/>
     </ItemGroup>
 
 </Project>

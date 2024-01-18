@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Systems.Movement.Components;
 
 namespace Sovereign.EngineCore.Systems.Block.Components.Indexers;
 

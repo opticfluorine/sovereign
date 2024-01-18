@@ -45,22 +45,11 @@ public enum EventId
     #region Movement
 
     /// <summary>
-    ///     Attempted one-time relative movement of an entity.
+    ///     Moves
     /// </summary>
-    /// Associated details: MoveOnceEventDetails
-    Core_Move_Once = 100,
+    Core_Movement_Move = 100,
 
-    /// <summary>
-    ///     Sets the velocity of an entity.
-    /// </summary>
-    /// Associated details: SetVelocityEventDetails
-    Core_Set_Velocity = 101,
-
-    /// <summary>
-    ///     Ends the continous movement, if any, of an entity.
-    /// </summary>
-    /// Associated details: EntityEventDetails
-    Core_End_Movement = 102,
+    Core_Movement_SetVelocity = 101,
 
     #endregion Movement
 

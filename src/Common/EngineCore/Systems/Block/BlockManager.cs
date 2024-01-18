@@ -18,12 +18,12 @@
 using System.Linq;
 using System.Numerics;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.Systems.Block.Events;
-using Sovereign.EngineCore.Systems.Movement.Components;
 
 namespace Sovereign.EngineCore.Systems.Block;
 

@@ -99,10 +99,12 @@ public class WorldRenderer : IDisposable
             IndexFormat.UInt32);
 
         // Execute draw commands from the buffer.
+        uint offset = 0;
         for (var i = 0; i < gameResMgr.DrawCount; ++i)
         {
             var drawSize = gameResMgr.DrawBuffer[i];
-            commandList.DrawIndexed((uint)drawSize);
+            commandList.DrawIndexed((uint)drawSize, 1, offset, 0, 0);
+            offset += (uint)drawSize;
         }
 
         commandList.PopDebugGroup();

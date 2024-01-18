@@ -21,7 +21,6 @@ using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.World.Materials;
 using Sovereign.EngineUtil.Collections;
 

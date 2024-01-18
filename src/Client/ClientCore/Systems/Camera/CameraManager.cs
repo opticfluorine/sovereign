@@ -16,7 +16,7 @@
  */
 
 using System.Numerics;
-using Sovereign.EngineCore.Systems.Movement.Components;
+using Sovereign.EngineCore.Components;
 
 namespace Sovereign.ClientCore.Systems.Camera;
 

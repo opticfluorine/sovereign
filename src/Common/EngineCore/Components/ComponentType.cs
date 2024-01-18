@@ -29,13 +29,13 @@ public enum ComponentType
     /// <summary>
     ///     Position component.
     /// </summary>
-    /// <seealso cref="Sovereign.EngineCore.Systems.Movement.Components.PositionComponentCollection" />
+    /// <seealso cref="PositionComponentCollection" />
     Position = 0x0000,
 
     /// <summary>
     ///     Velocity component.
     /// </summary>
-    /// <seealso cref="Sovereign.EngineCore.Systems.Movement.Components.VelocityComponentCollection" />
+    /// <seealso cref="VelocityComponentCollection" />
     Velocity = 0x0001,
 
     /// <summary>

@@ -4,6 +4,13 @@
 
 ### January
 
+#### 18 January 2024
+
+* Fix issue where multiple renders from the same index buffer did not use the correct buffer offset, leading
+  to incorrect output after the first draw call.
+* Remove the old `Movement` system to be replaced by a new implementation. The original implementation is from
+  an old test of the ECS layer and does not map well onto the networking model that was designed later.
+
 #### 17 January 2024
 
 * Load Drawable component from database.

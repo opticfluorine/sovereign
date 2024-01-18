@@ -15,11 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.ClientCore.Rendering.Components;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.Systems.Player.Components;
 
 namespace Sovereign.ClientCore.Entities;

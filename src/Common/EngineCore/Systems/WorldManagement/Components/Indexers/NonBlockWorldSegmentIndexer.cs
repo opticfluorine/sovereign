@@ -16,9 +16,9 @@
 
 using System.Collections.Generic;
 using System.Numerics;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
-using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;

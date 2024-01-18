@@ -21,11 +21,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using MessagePack;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Movement.Components;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;

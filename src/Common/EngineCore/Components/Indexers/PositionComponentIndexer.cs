@@ -15,21 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-
-namespace Sovereign.EngineCore.Systems.Movement.Components.Indexers;
+namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
-///     IoC installer for Movement system ComponentIndexers.
+///     Indexes the PositionComponentCollection by the entity position.
 /// </summary>
-public class MovementComponentIndexerInstaller : IWindsorInstaller
+public class PositionComponentIndexer : BasePositionComponentIndexer
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
+    /// <summary>
+    ///     Creates the PositionComponentCollection position indexer.
+    /// </summary>
+    /// <param name="componentCollection">PositionComponentCollection.</param>
+    public PositionComponentIndexer(PositionComponentCollection componentCollection)
+        : base(componentCollection, componentCollection)
     {
-        /* PositionComponentIndexer. */
-        container.Register(Component.For<PositionComponentIndexer>()
-            .LifestyleSingleton());
     }
 }

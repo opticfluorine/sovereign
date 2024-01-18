@@ -16,7 +16,7 @@
  */
 
 using System.Numerics;
-using Sovereign.EngineCore.Systems.Movement.Components;
+using Sovereign.EngineCore.Components;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;

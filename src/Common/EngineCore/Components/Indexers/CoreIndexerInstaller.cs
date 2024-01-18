@@ -26,5 +26,7 @@ public class CoreIndexerInstaller : IWindsorInstaller
     {
         container.Register(Component.For<EntityHierarchyIndexer>()
             .LifestyleSingleton());
+        container.Register(Component.For<PositionComponentIndexer>()
+            .LifestyleSingleton());
     }
 }

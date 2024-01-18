@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using Sovereign.EngineCore.Systems.Movement.Components;
+using Sovereign.EngineCore.Components;
 
 namespace Sovereign.EngineCore.Systems.Player.Components.Indexers;
 
