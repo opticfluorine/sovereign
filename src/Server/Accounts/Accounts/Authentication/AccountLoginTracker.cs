@@ -164,6 +164,21 @@ public sealed class AccountLoginTracker
     }
 
     /// <summary>
+    ///     Gets the player associated with a connection, if any.
+    /// </summary>
+    /// <param name="connectionId">Connection ID.</param>
+    /// <param name="playerEntityId">Player entity ID. Only set if return value is true.</param>
+    /// <returns>true if an associated player was found, false otherwise.</returns>
+    public bool TryGetPlayerForConnectionId(int connectionId, out ulong playerEntityId)
+    {
+        if (connectionsToAccounts.TryGetValue(connectionId, out var accountId))
+            return accountIdsToPlayerEntityIds.TryGetValue(accountId, out playerEntityId);
+
+        playerEntityId = 0;
+        return false;
+    }
+
+    /// <summary>
     ///     Associates a logged in account to its event server connection.
     /// </summary>
     /// <param name="accountId">Account ID.</param>

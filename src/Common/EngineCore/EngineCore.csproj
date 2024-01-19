@@ -12,8 +12,4 @@
         <ProjectReference Include="..\EngineUtil\EngineUtil.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Systems\Movement\"/>
-    </ItemGroup>
-
 </Project>

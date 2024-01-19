@@ -44,7 +44,8 @@ public class ServerNetworkSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>
     {
-        EventId.Server_Network_DisconnectClient
+        EventId.Server_Network_DisconnectClient,
+        EventId.Core_Movement_Move
     };
 
     public int WorkloadEstimate => 5;

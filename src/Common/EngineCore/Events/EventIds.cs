@@ -45,11 +45,16 @@ public enum EventId
     #region Movement
 
     /// <summary>
-    ///     Moves
+    ///     Request from client to server to move the player character.
     /// </summary>
-    Core_Movement_Move = 100,
+    /// Associated details: MoveEventDetails
+    Core_Movement_RequestMove = 100,
 
-    Core_Movement_SetVelocity = 101,
+    /// <summary>
+    ///     Movement notification.
+    /// </summary>
+    /// Associated details: MoveEventDetails
+    Core_Movement_Move = 101,
 
     #endregion Movement
 

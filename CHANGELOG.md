@@ -10,6 +10,7 @@
   to incorrect output after the first draw call.
 * Remove the old `Movement` system to be replaced by a new implementation. The original implementation is from
   an old test of the ECS layer and does not map well onto the networking model that was designed later.
+* Begin implementing a new `Movement` system with better reconciliation between client and server.
 
 #### 17 January 2024
 

@@ -32,7 +32,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
 
     public ValidationInboundPipelineStage(NullEventDetailsValidator nullValidator,
         EntityDefinitionEventDetailsValidator entityDefinitionValidator,
-        WorldSegmentSubscriptionEventDetailsValidator worldSegmentSubscriptionValidator)
+        WorldSegmentSubscriptionEventDetailsValidator worldSegmentSubscriptionValidator,
+        MoveEventDetailsValidator moveValidator)
     {
         this.nullValidator = nullValidator;
         validators = new Dictionary<EventId, IEventDetailsValidator>
@@ -41,7 +42,9 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Ping_Pong, nullValidator },
             { EventId.Core_WorldManagement_Subscribe, worldSegmentSubscriptionValidator },
             { EventId.Core_WorldManagement_Unsubscribe, worldSegmentSubscriptionValidator },
-            { EventId.Client_EntitySynchronization_Update, entityDefinitionValidator }
+            { EventId.Client_EntitySynchronization_Update, entityDefinitionValidator },
+            { EventId.Core_Movement_Move, moveValidator },
+            { EventId.Core_Movement_RequestMove, moveValidator }
         };
     }
 

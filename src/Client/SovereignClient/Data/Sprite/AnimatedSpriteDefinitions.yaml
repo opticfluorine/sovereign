@@ -26,17 +26,18 @@ AnimatedSprites:
     SpriteIds:
       - 3
   
-  # Slime, downward facing, static
-  - Id: 4
-    AnimationTimestep: 1
-    SpriteIds:
-      - 5
-  
   # Slime, downward facing, walking
-  - Id: 5
-    AnimationTimestep: 1
+  - Id: 4
+    AnimationTimestep: 200000
     SpriteIds:
       - 5
       - 6
       - 5
       - 4
+  
+  # Slime, downward facing, static
+  - Id: 5
+    AnimationTimestep: 1
+    SpriteIds:
+      - 5
+  

@@ -160,4 +160,17 @@ public sealed class AccountServices
 
         return result;
     }
+
+    /// <summary>
+    ///     Gets the player entity ID associated with a network connection.
+    /// </summary>
+    /// <param name="connectionId">Connection ID.</param>
+    /// <returns>Player entity ID if the connection is associated with a player.</returns>
+    public Maybe<ulong> GetPlayerForConnectionId(int connectionId)
+    {
+        var result = new Maybe<ulong>();
+        if (loginTracker.TryGetPlayerForConnectionId(connectionId, out var playerEntityId))
+            result = new Maybe<ulong>(playerEntityId);
+        return result;
+    }
 }

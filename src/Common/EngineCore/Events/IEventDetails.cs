@@ -27,6 +27,7 @@ namespace Sovereign.EngineCore.Events;
 [Union(1, typeof(EntityVectorEventDetails))]
 [Union(2, typeof(WorldSegmentSubscriptionEventDetails))]
 [Union(3, typeof(EntityDefinitionEventDetails))]
+[Union(4, typeof(MoveEventDetails))]
 public interface IEventDetails
 {
 }

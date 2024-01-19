@@ -65,7 +65,8 @@ public sealed class ClientNetworkSystem : ISystem, IDisposable
         EventId.Client_Network_BeginConnection,
         EventId.Client_Network_RegisterAccount,
         EventId.Core_WorldManagement_Subscribe,
-        EventId.Core_WorldManagement_Unsubscribe
+        EventId.Core_WorldManagement_Unsubscribe,
+        EventId.Core_Movement_RequestMove
     };
 
     public int WorkloadEstimate => 20;
