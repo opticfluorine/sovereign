@@ -28,5 +28,7 @@ public class CoreIndexerInstaller : IWindsorInstaller
             .LifestyleSingleton());
         container.Register(Component.For<PositionComponentIndexer>()
             .LifestyleSingleton());
+        container.Register(Component.For<MovingComponentIndexer>()
+            .LifestyleSingleton());
     }
 }

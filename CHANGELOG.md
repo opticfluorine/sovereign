@@ -4,6 +4,11 @@
 
 ### January
 
+#### 19 January 2024
+
+* Add `MovingComponentIndexer` to track entities which are currently in motion so that they can be
+  iterated over directly by the `Movement` system.
+
 #### 18 January 2024
 
 * Fix issue where multiple renders from the same index buffer did not use the correct buffer offset, leading
