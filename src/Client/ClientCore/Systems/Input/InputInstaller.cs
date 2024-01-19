@@ -39,9 +39,5 @@ public class InputInstaller : IWindsorInstaller
         /* PlayerInputMovementMapper */
         container.Register(Component.For<PlayerInputMovementMapper>()
             .LifestyleSingleton());
-
-        /* InputController. */
-        container.Register(Component.For<InputController>()
-            .LifestyleSingleton());
     }
 }

@@ -158,6 +158,12 @@ public enum EventId
     /// Associated details: KeyEventDetails
     Client_Input_KeyUp = 100001,
 
+    /// <summary>
+    ///     Event sent to repeat an active movement keypress.
+    /// </summary>
+    /// Associated details: SequenceEventDetails
+    Client_Input_RepeatMove = 100002,
+
     #endregion Client_Input
 
     #region Client_Camera

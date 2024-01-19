@@ -30,15 +30,9 @@ public class PlayerInputMovementMapper
     /// </summary>
     private readonly IEventSender eventSender;
 
-    /// <summary>
-    ///     Input controller.
-    /// </summary>
-    private readonly InputController inputController;
-
-    public PlayerInputMovementMapper(IEventSender eventSender, InputController inputController)
+    public PlayerInputMovementMapper(IEventSender eventSender)
     {
         this.eventSender = eventSender;
-        this.inputController = inputController;
     }
 
     /// <summary>
@@ -58,16 +52,9 @@ public class PlayerInputMovementMapper
             var dy = (down ? 1.0f : 0.0f) - (up ? 1.0f : 0.0f);
             var norm = (float)Math.Sqrt(dx * dx + dy * dy);
 
-            /* Set the player movement. */
-            if (dx == 0.0 && dy == 0.0)
-                inputController.StopPlayerMovement();
-            else
-                inputController.SetPlayerMovement(dx / norm, dy / norm);
+            // TODO Set player movement
+            // TODO Schedule repeat event if keyboard state unchanged
         }
-        else
-        {
-            /* Stop the player movement. */
-            inputController.StopPlayerMovement();
-        }
+        // TODO Stop player movement if no keys are pressed
     }
 }
