@@ -28,16 +28,13 @@ public class InputInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        /* KeyboardEventHandler. */
         container.Register(Component.For<KeyboardEventHandler>()
             .LifestyleSingleton());
-
-        /* KeyboardState. */
         container.Register(Component.For<KeyboardState>()
             .LifestyleSingleton());
-
-        /* PlayerInputMovementMapper */
         container.Register(Component.For<PlayerInputMovementMapper>()
+            .LifestyleSingleton());
+        container.Register(Component.For<InputInternalController>()
             .LifestyleSingleton());
     }
 }

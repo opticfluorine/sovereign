@@ -14,38 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
-using MessagePack;
-
-namespace Sovereign.EngineCore.Events.Details;
+namespace Sovereign.EngineCore.Events.Details.Validators;
 
 /// <summary>
-///     Event details for various movement-related events.
+///     Validator for RequestMoveEventDetails.
 /// </summary>
-[MessagePackObject]
-public class MoveEventDetails : IEventDetails
+public class RequestMoveEventDetailsValidator : IEventDetailsValidator
 {
-    /// <summary>
-    ///     Latest position.
-    /// </summary>
-    [Key(0)]
-    public Vector3 Position { get; set; }
-
-    /// <summary>
-    ///     Velocity.
-    /// </summary>
-    [Key(1)]
-    public Vector3 Velocity { get; set; }
-
-    /// <summary>
-    ///     Affected entity ID.
-    /// </summary>
-    [Key(2)]
-    public ulong EntityId { get; set; }
-
-    /// <summary>
-    ///     Sequence number. Used for synchronization.
-    /// </summary>
-    [Key(3)]
-    public byte Sequence { get; set; }
+    public bool IsValid(IEventDetails? details)
+    {
+        if (details is not RequestMoveEventDetails) return false;
+        var requestDetails = (RequestMoveEventDetails)details;
+        return requestDetails.RelativeVelocity.LengthSquared() <= 1.0f;
+    }
 }

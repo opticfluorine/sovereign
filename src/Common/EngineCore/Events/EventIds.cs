@@ -47,7 +47,7 @@ public enum EventId
     /// <summary>
     ///     Request from client to server to move the player character.
     /// </summary>
-    /// Associated details: MoveEventDetails
+    /// Associated details: RequestMoveEventDetails
     Core_Movement_RequestMove = 100,
 
     /// <summary>

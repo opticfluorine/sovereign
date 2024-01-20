@@ -8,6 +8,8 @@
 
 * Add `MovingComponentIndexer` to track entities which are currently in motion so that they can be
   iterated over directly by the `Movement` system.
+* Update `InputSystem` to periodically generate movement requests while direction keys are pressed.
+* Fix issue where disconnecting a client from the server would cause the server to crash.
 
 #### 18 January 2024
 

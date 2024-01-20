@@ -19,33 +19,24 @@ using MessagePack;
 
 namespace Sovereign.EngineCore.Events.Details;
 
-/// <summary>
-///     Event details for various movement-related events.
-/// </summary>
 [MessagePackObject]
-public class MoveEventDetails : IEventDetails
+public class RequestMoveEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Latest position.
+    ///     Relative velocity. Norm is not to exceed 1.0.
     /// </summary>
     [Key(0)]
-    public Vector3 Position { get; set; }
-
-    /// <summary>
-    ///     Velocity.
-    /// </summary>
-    [Key(1)]
-    public Vector3 Velocity { get; set; }
+    public Vector3 RelativeVelocity { get; set; }
 
     /// <summary>
     ///     Affected entity ID.
     /// </summary>
-    [Key(2)]
+    [Key(1)]
     public ulong EntityId { get; set; }
 
     /// <summary>
     ///     Sequence number. Used for synchronization.
     /// </summary>
-    [Key(3)]
+    [Key(2)]
     public byte Sequence { get; set; }
 }

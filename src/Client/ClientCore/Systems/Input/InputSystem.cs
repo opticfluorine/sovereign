@@ -17,8 +17,9 @@
 
 using System;
 using System.Collections.Generic;
-using Sovereign.ClientCore.Events;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 
 namespace Sovereign.ClientCore.Systems.Input;
@@ -31,23 +32,22 @@ public class InputSystem : ISystem, IDisposable
     private readonly IEventLoop eventLoop;
 
     private readonly KeyboardEventHandler keyboardEventHandler;
+    private readonly PlayerInputMovementMapper movementMapper;
 
     public InputSystem(KeyboardEventHandler keyboardEventHandler,
-        IEventLoop eventLoop, EventCommunicator eventCommunicator,
-        EventDescriptions eventDescriptions)
+        IEventLoop eventLoop, EventCommunicator eventCommunicator, PlayerInputMovementMapper movementMapper)
     {
         /* Dependency injection. */
         this.keyboardEventHandler = keyboardEventHandler;
         this.eventLoop = eventLoop;
         EventCommunicator = eventCommunicator;
-
-        /* Register events. */
-        eventDescriptions.RegisterEvent<KeyEventDetails>(EventId.Client_Input_KeyUp);
-        eventDescriptions.RegisterEvent<KeyEventDetails>(EventId.Client_Input_KeyDown);
+        this.movementMapper = movementMapper;
 
         /* Register system. */
         eventLoop.RegisterSystem(this);
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void Dispose()
     {
@@ -60,7 +60,9 @@ public class InputSystem : ISystem, IDisposable
         = new HashSet<EventId>
         {
             EventId.Client_Input_KeyUp,
-            EventId.Client_Input_KeyDown
+            EventId.Client_Input_KeyDown,
+            EventId.Client_Input_RepeatMove,
+            EventId.Client_Network_PlayerEntitySelected
         };
 
     public int WorkloadEstimate { get; } = 50;
@@ -85,6 +87,26 @@ public class InputSystem : ISystem, IDisposable
                 case EventId.Client_Input_KeyUp:
                 case EventId.Client_Input_KeyDown:
                     keyboardEventHandler.HandleEvent(ev);
+                    break;
+
+                case EventId.Client_Input_RepeatMove:
+                    if (ev.EventDetails is not SequenceEventDetails)
+                    {
+                        Logger.Error("Received RepeatMove with bad details.");
+                        break;
+                    }
+
+                    movementMapper.RepeatMovement((SequenceEventDetails)ev.EventDetails);
+                    break;
+
+                case EventId.Client_Network_PlayerEntitySelected:
+                    if (ev.EventDetails is not EntityEventDetails)
+                    {
+                        Logger.Error("Received PlayerEntitySelected with bad details.");
+                        break;
+                    }
+
+                    movementMapper.SelectPlayer((EntityEventDetails)ev.EventDetails);
                     break;
 
                 /* Ignore other events. */

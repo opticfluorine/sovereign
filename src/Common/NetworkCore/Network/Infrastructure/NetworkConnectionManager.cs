@@ -38,6 +38,16 @@ public sealed class NetworkConnectionManager
     public int ConnectionCount => connections.Count;
 
     /// <summary>
+    ///     Checks whether the given connection ID is known to the server.
+    /// </summary>
+    /// <param name="connectionId">Connection ID.</param>
+    /// <returns>true if known, false otherwise.</returns>
+    public bool HasConnection(int connectionId)
+    {
+        return connections.ContainsKey(connectionId);
+    }
+
+    /// <summary>
     ///     Gets a connection by ID.
     /// </summary>
     /// <param name="connectionId">Connection ID.</param>
@@ -93,8 +103,11 @@ public sealed class NetworkConnectionManager
     /// </exception>
     public void RemoveConnection(int id)
     {
-        var conn = GetConnection(id);
-        RemoveConnection(conn);
+        if (HasConnection(id))
+        {
+            var conn = GetConnection(id);
+            RemoveConnection(conn);
+        }
     }
 
     /// <summary>

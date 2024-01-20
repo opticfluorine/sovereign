@@ -52,7 +52,7 @@ public class MovementEventHandler
                     break;
                 }
 
-                OnRequestMove((MoveEventDetails)ev.EventDetails);
+                OnRequestMove((RequestMoveEventDetails)ev.EventDetails);
                 break;
 
             case EventId.Core_Tick:
@@ -61,7 +61,7 @@ public class MovementEventHandler
         }
     }
 
-    private void OnRequestMove(MoveEventDetails eventDetails)
+    private void OnRequestMove(RequestMoveEventDetails eventDetails)
     {
     }
 

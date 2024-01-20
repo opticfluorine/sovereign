@@ -34,7 +34,8 @@ public class ServerAllowedEventsInboundPipelineStage : IInboundPipelineStage
     /// </summary>
     private readonly HashSet<EventId> allowList = new()
     {
-        EventId.Core_Ping_Pong
+        EventId.Core_Ping_Pong,
+        EventId.Core_Movement_RequestMove
     };
 
     private readonly IEventSender eventSender;

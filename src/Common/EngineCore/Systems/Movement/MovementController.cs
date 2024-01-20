@@ -38,7 +38,7 @@ public class MovementController
     /// <param name="relativeVelocity">Relative velocity, norm not to exceed 1.0.</param>
     public void RequestMovement(IEventSender eventSender, ulong entityId, Vector3 relativeVelocity)
     {
-        var details = new MoveEventDetails
+        var details = new RequestMoveEventDetails
         {
             EntityId = entityId,
             RelativeVelocity = relativeVelocity,
@@ -53,14 +53,16 @@ public class MovementController
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
     /// <param name="entityId">Entity ID.</param>
-    /// <param name="relativeVelocity">Relative velocity.</param>
+    /// <param name="position">Position.</param>
+    /// <param name="velocity">Velocity.</param>
     /// <param name="sequence">Sequence number.</param>
-    public void Move(IEventSender eventSender, ulong entityId, Vector3 relativeVelocity, byte sequence)
+    public void Move(IEventSender eventSender, ulong entityId, Vector3 position, Vector3 velocity, byte sequence)
     {
         var details = new MoveEventDetails
         {
             EntityId = entityId,
-            RelativeVelocity = relativeVelocity,
+            Position = position,
+            Velocity = velocity,
             Sequence = sequence
         };
         var ev = new Event(EventId.Core_Movement_Move, details);

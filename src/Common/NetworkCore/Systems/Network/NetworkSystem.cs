@@ -56,6 +56,7 @@ public sealed class NetworkSystem : ISystem
         EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_Unsubscribe,
         EventId.Client_EntitySynchronization_Update,
+        EventId.Core_Movement_RequestMove
     };
 
     public int WorkloadEstimate => 50;
