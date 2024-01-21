@@ -7,6 +7,11 @@
 #### 21 January 2024
 
 * Fix rare race condition with tile sprite caching.
+* Fix issue where component modify events were not being sent.
+* Movement is sort of working now. The velocity is way too high and there appears to be some sort of issue where
+  the client is rendering the player in multiple locations simultaneously with full animation - is this a caching
+  issue in the renderer or are we incorrectly generating extra player entities through a sync bug? Need to investigate
+  further.
 
 #### 20 January 2024
 

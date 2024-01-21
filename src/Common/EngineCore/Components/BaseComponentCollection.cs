@@ -277,6 +277,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         /* Enqueue a modification. */
         var pendingModify = new PendingModify
         {
+            EntityId = entityId,
             ComponentIndex = componentIndex,
             ComponentOperation = operation,
             Adjustment = adjustment
@@ -435,6 +436,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
                 var transformed = op(components[pendingModify.ComponentIndex],
                     pendingModify.Adjustment);
                 components[pendingModify.ComponentIndex] = transformed;
+                pendingModifyEvents.Add(pendingModify.EntityId);
             }
 
             /* Reset the buffer. */
@@ -613,6 +615,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     [DebuggerDisplay("{ComponentIndex} => {ComponentOperation} {Adjustment}")]
     private struct PendingModify
     {
+        /// <summary>
+        ///     Affected entity ID.
+        /// </summary>
+        public ulong EntityId;
+
         /// <summary>
         ///     Component index for update.
         /// </summary>
