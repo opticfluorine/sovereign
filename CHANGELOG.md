@@ -4,6 +4,10 @@
 
 ### January
 
+#### 21 January 2024
+
+* Fix rare race condition with tile sprite caching.
+
 #### 20 January 2024
 
 * Finish initial implementation of movement, although there's an issue where it doesn't really work and

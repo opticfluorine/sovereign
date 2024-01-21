@@ -90,6 +90,7 @@ public class InputSystem : ISystem, IDisposable
                     break;
 
                 case EventId.Core_Tick:
+                    movementMapper.OnTick();
                     break;
 
                 case EventId.Client_Network_PlayerEntitySelected:

@@ -49,7 +49,7 @@ public class MovementEventHandler
                     break;
                 }
 
-                manager.HandleeAuthoritativeMove(details);
+                manager.HandleAuthoritativeMove(details);
             }
                 break;
 

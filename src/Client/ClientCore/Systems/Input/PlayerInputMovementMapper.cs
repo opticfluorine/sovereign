@@ -94,8 +94,8 @@ public class PlayerInputMovementMapper
         {
             // Stop movement if keys were released, canceling any outstanding repeat events.
             currentRelativeVelocity = Vector3.Zero;
-            sequenceCount++;
             movementController.RequestMovement(eventSender, playerEntityId, currentRelativeVelocity);
+            sequenceCount++;
         }
     }
 
@@ -127,7 +127,10 @@ public class PlayerInputMovementMapper
         movementController.RequestMovement(eventSender, playerEntityId, currentRelativeVelocity);
 
         // Schedule a repeat movement.
-        sequenceCount++;
-        ticksUntilRepeat = MovementConfiguration.DefaultMovementLengthTicks;
+        if (currentRelativeVelocity != Vector3.Zero)
+        {
+            sequenceCount++;
+            ticksUntilRepeat = MovementConfiguration.DefaultMovementLengthTicks - 1;
+        }
     }
 }

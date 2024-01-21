@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using static Sovereign.ClientCore.Rendering.Sprites.TileSprites.TileSpriteDefinitions;
@@ -34,15 +35,15 @@ public sealed class TileSprite
     public const int Wildcard = -1;
 
     /// <summary>
-    ///     Tile contexts sorted in priority order.
-    /// </summary>
-    private readonly IList<TileContext> tileContexts;
-
-    /// <summary>
     ///     Cache of previously resolved tile contexts.
     /// </summary>
     private readonly IDictionary<Tuple<int, int, int, int>, TileContext> lookupCache
-        = new Dictionary<Tuple<int, int, int, int>, TileContext>();
+        = new ConcurrentDictionary<Tuple<int, int, int, int>, TileContext>();
+
+    /// <summary>
+    ///     Tile contexts sorted in priority order.
+    /// </summary>
+    private readonly IList<TileContext> tileContexts;
 
     public TileSprite(TileSpriteRecord definition)
     {

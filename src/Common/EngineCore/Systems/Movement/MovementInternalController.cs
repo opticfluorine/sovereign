@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
@@ -25,6 +26,8 @@ namespace Sovereign.EngineCore.Systems.Movement;
 /// </summary>
 public class MovementInternalController
 {
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
     /// <summary>
     ///     Moves an entity.
     /// </summary>
@@ -35,6 +38,8 @@ public class MovementInternalController
     /// <param name="sequence">Sequence number.</param>
     public void Move(IEventSender eventSender, ulong entityId, Vector3 position, Vector3 velocity, byte sequence)
     {
+        Logger.DebugFormat("Send move event for {0}, pos {1}, vel {2}, seq {3}", entityId, position, velocity,
+            sequence);
         var details = new MoveEventDetails
         {
             EntityId = entityId,

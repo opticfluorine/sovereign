@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Numerics;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
@@ -89,7 +90,11 @@ public class MovementManager
 
         for (var i = 0; i < pendingChecks.Length; ++i)
             pendingChecks[i] = new List<PendingCheck>();
+
+        velocities.OnStartUpdates += OnStartUpdates;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Called when movement is requested.
@@ -106,6 +111,8 @@ public class MovementManager
         }
 
         // Set velocity and update records.
+        Logger.DebugFormat("Move request for {0}, vel {1}, seq {2}", details.EntityId, details.RelativeVelocity,
+            details.Sequence);
         var velocity = details.RelativeVelocity * MovementConfiguration.DefaultBaseVelocity;
         velocities.ModifyComponent(details.EntityId, ComponentOperation.Set, velocity);
         sequenceCountsByEntity[details.EntityId] = details.Sequence;
@@ -123,9 +130,11 @@ public class MovementManager
     ///     Called when an authoritative movement event is received from the server.
     /// </summary>
     /// <param name="details">Details.</param>
-    public void HandleeAuthoritativeMove(MoveEventDetails details)
+    public void HandleAuthoritativeMove(MoveEventDetails details)
     {
         // Set position and velocity.
+        Logger.DebugFormat("Authoritative move, {0}, pos {1}, vel {2}", details.EntityId, details.Position,
+            details.Velocity);
         positions.ModifyComponent(details.EntityId, ComponentOperation.Set, details.Position);
         velocities.ModifyComponent(details.EntityId, ComponentOperation.Set, details.Velocity);
     }
@@ -159,6 +168,8 @@ public class MovementManager
             if (!velocity.HasValue) continue;
 
             var deltaPosition = delta * velocity.Value;
+            Logger.DebugFormat("Move {0} by {1}, {2}, {3}.", entityId, deltaPosition.X, deltaPosition.Y,
+                deltaPosition.Z);
             positions.ModifyComponent(entityId, ComponentOperation.Add, deltaPosition);
         }
 
@@ -181,6 +192,7 @@ public class MovementManager
 
             // Check is current and no newer move request has been received.
             // Stop movement and send a move event.
+            Logger.DebugFormat("Move expired for {0}", check.EntityId);
             velocities.ModifyComponent(check.EntityId, ComponentOperation.Set, Vector3.Zero);
             internalController.Move(eventSender, check.EntityId, positions[check.EntityId],
                 Vector3.Zero, check.SequenceCount);
@@ -192,6 +204,15 @@ public class MovementManager
 
         // Process any move requests that arrived this tick before the pending checks were processed.
         while (checkTableReady && pendingRequests.TryDequeue(out var details)) HandleRequestMove(details);
+    }
+
+    /// <summary>
+    ///     Called when velocity updates begin between ticks.
+    /// </summary>
+    private void OnStartUpdates()
+    {
+        // Pause request processing until checks are processed again.
+        checkTableReady = false;
     }
 
     /// <summary>
