@@ -42,7 +42,7 @@ public class MovementSystem : ISystem
         EventId.Core_Tick
     };
 
-    public int WorkloadEstimate => 100;
+    public int WorkloadEstimate => 300;
 
     public void Initialize()
     {

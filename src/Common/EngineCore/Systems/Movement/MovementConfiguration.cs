@@ -14,23 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using System.Numerics;
 
 namespace Sovereign.EngineCore.Systems.Movement;
 
-public class MovementInstaller : IWindsorInstaller
+/// <summary>
+///     Configuration for the Movement system.
+/// </summary>
+public class MovementConfiguration
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
-    {
-        container.Register(Component.For<MovementEventHandler>()
-            .LifestyleSingleton());
-        container.Register(Component.For<MovementController>()
-            .LifestyleSingleton());
-        container.Register(Component.For<MovementManager>()
-            .LifestyleSingleton());
-        container.Register(Component.For<MovementInternalController>()
-            .LifestyleSingleton());
-    }
+    /// <summary>
+    ///     Default length in ticks of a movement interval.
+    /// </summary>
+    public const int DefaultMovementLengthTicks = 10;
+
+    /// <summary>
+    ///     Default base velocity for all entities.
+    /// </summary>
+    public static readonly Vector3 DefaultBaseVelocity = new(64.0f, 64.0f, 0.0f);
 }

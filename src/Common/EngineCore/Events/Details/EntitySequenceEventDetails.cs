@@ -14,23 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+namespace Sovereign.EngineCore.Events.Details;
 
-namespace Sovereign.EngineCore.Systems.Movement;
-
-public class MovementInstaller : IWindsorInstaller
+/// <summary>
+///     Event details that associate a sequence count to an entity.
+/// </summary>
+public class EntitySequenceEventDetails : IEventDetails
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
-    {
-        container.Register(Component.For<MovementEventHandler>()
-            .LifestyleSingleton());
-        container.Register(Component.For<MovementController>()
-            .LifestyleSingleton());
-        container.Register(Component.For<MovementManager>()
-            .LifestyleSingleton());
-        container.Register(Component.For<MovementInternalController>()
-            .LifestyleSingleton());
-    }
+    /// <summary>
+    ///     Entity ID.
+    /// </summary>
+    public ulong EntityId { get; set; }
+
+    /// <summary>
+    ///     Sequence count.
+    /// </summary>
+    public uint SequenceCount { get; set; }
 }

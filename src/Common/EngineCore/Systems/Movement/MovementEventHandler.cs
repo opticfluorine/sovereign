@@ -31,45 +31,43 @@ public class MovementEventHandler
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
+    /// <summary>
+    ///     Handles a movement event.
+    /// </summary>
+    /// <param name="ev">Movement event.</param>
     public void HandleEvent(Event ev)
     {
         switch (ev.EventId)
         {
             case EventId.Core_Movement_Move:
-                if (ev.EventDetails == null)
+            {
+                // Ignore local events that originated here - only process authoritative updates from server.
+                if (ev.Local) break;
+                if (ev.EventDetails is not MoveEventDetails details)
                 {
-                    Logger.Error("Received Move event with no details.");
+                    Logger.Error("Received Move event with bad details.");
                     break;
                 }
 
-                OnMove((MoveEventDetails)ev.EventDetails);
+                manager.HandleeAuthoritativeMove(details);
+            }
                 break;
 
             case EventId.Core_Movement_RequestMove:
-                if (ev.EventDetails == null)
+            {
+                if (ev.EventDetails is not RequestMoveEventDetails details)
                 {
-                    Logger.Error("Received RequestMove event with no details.");
+                    Logger.Error("Received RequestMove event with bad details.");
                     break;
                 }
 
-                OnRequestMove((RequestMoveEventDetails)ev.EventDetails);
+                manager.HandleRequestMove(details);
+            }
                 break;
 
             case EventId.Core_Tick:
-                OnTick();
+                manager.HandleTick();
                 break;
         }
-    }
-
-    private void OnRequestMove(RequestMoveEventDetails eventDetails)
-    {
-    }
-
-    private void OnMove(MoveEventDetails eventDetails)
-    {
-    }
-
-    private void OnTick()
-    {
     }
 }

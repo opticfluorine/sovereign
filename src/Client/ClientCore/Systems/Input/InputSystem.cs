@@ -61,8 +61,8 @@ public class InputSystem : ISystem, IDisposable
         {
             EventId.Client_Input_KeyUp,
             EventId.Client_Input_KeyDown,
-            EventId.Client_Input_RepeatMove,
-            EventId.Client_Network_PlayerEntitySelected
+            EventId.Client_Network_PlayerEntitySelected,
+            EventId.Core_Tick
         };
 
     public int WorkloadEstimate { get; } = 50;
@@ -89,14 +89,7 @@ public class InputSystem : ISystem, IDisposable
                     keyboardEventHandler.HandleEvent(ev);
                     break;
 
-                case EventId.Client_Input_RepeatMove:
-                    if (ev.EventDetails is not SequenceEventDetails)
-                    {
-                        Logger.Error("Received RepeatMove with bad details.");
-                        break;
-                    }
-
-                    movementMapper.RepeatMovement((SequenceEventDetails)ev.EventDetails);
+                case EventId.Core_Tick:
                     break;
 
                 case EventId.Client_Network_PlayerEntitySelected:

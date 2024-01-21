@@ -4,6 +4,11 @@
 
 ### January
 
+#### 20 January 2024
+
+* Finish initial implementation of movement, although there's an issue where it doesn't really work and
+  needs testing.
+
 #### 19 January 2024
 
 * Add `MovingComponentIndexer` to track entities which are currently in motion so that they can be

@@ -14,29 +14,35 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Numerics;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
-namespace Sovereign.ClientCore.Systems.Input;
+namespace Sovereign.EngineCore.Systems.Movement;
 
 /// <summary>
-///     Internal controller for input system events.
+///     Internal controller for the Movement system.
 /// </summary>
-public class InputInternalController
+public class MovementInternalController
 {
     /// <summary>
-    ///     Schedules a repeat movement event to the Input system.
+    ///     Moves an entity.
     /// </summary>
-    /// <param name="sender">Event sender.</param>
-    /// <param name="sequenceCount">Keypress sequence number.</param>
-    /// <param name="nextTime">System time to handle next event.</param>
-    public void ScheduleRepeatMove(IEventSender sender, uint sequenceCount, ulong nextTime)
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="position">Position.</param>
+    /// <param name="velocity">Velocity.</param>
+    /// <param name="sequence">Sequence number.</param>
+    public void Move(IEventSender eventSender, ulong entityId, Vector3 position, Vector3 velocity, byte sequence)
     {
-        var details = new SequenceEventDetails
+        var details = new MoveEventDetails
         {
-            SequenceCount = sequenceCount
+            EntityId = entityId,
+            Position = position,
+            Velocity = velocity,
+            Sequence = sequence
         };
-        var ev = new Event(EventId.Client_Input_RepeatMove, details, nextTime);
-        sender.SendEvent(ev);
+        var ev = new Event(EventId.Core_Movement_Move, details);
+        eventSender.SendEvent(ev);
     }
 }

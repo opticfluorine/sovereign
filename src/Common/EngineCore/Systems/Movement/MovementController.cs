@@ -47,25 +47,4 @@ public class MovementController
         var ev = new Event(EventId.Core_Movement_RequestMove, details);
         eventSender.SendEvent(ev);
     }
-
-    /// <summary>
-    ///     Moves an entity.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="entityId">Entity ID.</param>
-    /// <param name="position">Position.</param>
-    /// <param name="velocity">Velocity.</param>
-    /// <param name="sequence">Sequence number.</param>
-    public void Move(IEventSender eventSender, ulong entityId, Vector3 position, Vector3 velocity, byte sequence)
-    {
-        var details = new MoveEventDetails
-        {
-            EntityId = entityId,
-            Position = position,
-            Velocity = velocity,
-            Sequence = sequence
-        };
-        var ev = new Event(EventId.Core_Movement_Move, details);
-        eventSender.SendEvent(ev);
-    }
 }

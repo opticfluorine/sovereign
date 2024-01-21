@@ -19,7 +19,6 @@ using System.Numerics;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems.Movement;
-using Sovereign.EngineCore.Timing;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -29,30 +28,16 @@ namespace Sovereign.ClientCore.Systems.Input;
 public class PlayerInputMovementMapper
 {
     /// <summary>
-    ///     Interval in microseconds between subsequent repeat movement events.
-    /// </summary>
-    private const ulong RepeatIntervalUs = 100000;
-
-    /// <summary>
     ///     Event communicator.
     /// </summary>
     private readonly IEventSender eventSender;
 
-    private readonly InputInternalController internalController;
-
     private readonly MovementController movementController;
-
-    private readonly ISystemTimer systemTimer;
 
     /// <summary>
     ///     Current target velocity for the player based on user input.
     /// </summary>
     private Vector3 currentRelativeVelocity = Vector3.Zero;
-
-    /// <summary>
-    ///     System time of next repeat movement.
-    /// </summary>
-    private ulong nextRepeatTime;
 
     /// <summary>
     ///     Current player entity ID.
@@ -69,13 +54,16 @@ public class PlayerInputMovementMapper
     /// </summary>
     private uint sequenceCount;
 
-    public PlayerInputMovementMapper(IEventSender eventSender, InputInternalController internalController,
-        MovementController movementController, ISystemTimer systemTimer)
+    /// <summary>
+    ///     Ticks remaining until repeat.
+    /// </summary>
+    private int ticksUntilRepeat = -1;
+
+    public PlayerInputMovementMapper(IEventSender eventSender,
+        MovementController movementController)
     {
         this.eventSender = eventSender;
-        this.internalController = internalController;
         this.movementController = movementController;
-        this.systemTimer = systemTimer;
     }
 
     /// <summary>
@@ -96,7 +84,7 @@ public class PlayerInputMovementMapper
             // Compute direction of movement in the xy plane.
             // z movement will be handled by a rotation applied in the Movement system.
             var dx = (right ? 1.0f : 0.0f) - (left ? 1.0f : 0.0f);
-            var dy = (down ? 1.0f : 0.0f) - (up ? 1.0f : 0.0f);
+            var dy = (up ? 1.0f : 0.0f) - (down ? 1.0f : 0.0f);
             currentRelativeVelocity = new Vector3(dx, dy, 0.0f);
             currentRelativeVelocity /= currentRelativeVelocity.Length();
 
@@ -111,17 +99,13 @@ public class PlayerInputMovementMapper
         }
     }
 
-    /// <summary>
-    ///     Processes a repeat movement event.
-    /// </summary>
-    /// <param name="details">Event details.</param>
-    public void RepeatMovement(SequenceEventDetails details)
+    public void OnTick()
     {
-        // Ignore event if it has expired.
-        if (!playerSelected || sequenceCount != details.SequenceCount) return;
-
-        // Otherwise, if it hasn't expired, request the next movement and schedule another repeat.
-        RequestNextMovement();
+        if (ticksUntilRepeat > 0)
+        {
+            ticksUntilRepeat--;
+            if (ticksUntilRepeat == 0) RequestNextMovement();
+        }
     }
 
     /// <summary>
@@ -143,8 +127,7 @@ public class PlayerInputMovementMapper
         movementController.RequestMovement(eventSender, playerEntityId, currentRelativeVelocity);
 
         // Schedule a repeat movement.
-        nextRepeatTime = systemTimer.GetTime() + RepeatIntervalUs;
         sequenceCount++;
-        internalController.ScheduleRepeatMove(eventSender, sequenceCount, nextRepeatTime);
+        ticksUntilRepeat = MovementConfiguration.DefaultMovementLengthTicks;
     }
 }
