@@ -12,6 +12,8 @@
   the client is rendering the player in multiple locations simultaneously with full animation - is this a caching
   issue in the renderer or are we incorrectly generating extra player entities through a sync bug? Need to investigate
   further.
+* Fix velocity, I used the wrong units when I set the default movement velocity. Still need to figure out the caching
+  issue and forward the authoritative updates from the server.
 
 #### 20 January 2024
 

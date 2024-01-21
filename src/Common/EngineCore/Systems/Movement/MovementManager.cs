@@ -111,8 +111,6 @@ public class MovementManager
         }
 
         // Set velocity and update records.
-        Logger.DebugFormat("Move request for {0}, vel {1}, seq {2}", details.EntityId, details.RelativeVelocity,
-            details.Sequence);
         var velocity = details.RelativeVelocity * MovementConfiguration.DefaultBaseVelocity;
         velocities.ModifyComponent(details.EntityId, ComponentOperation.Set, velocity);
         sequenceCountsByEntity[details.EntityId] = details.Sequence;
@@ -168,8 +166,6 @@ public class MovementManager
             if (!velocity.HasValue) continue;
 
             var deltaPosition = delta * velocity.Value;
-            Logger.DebugFormat("Move {0} by {1}, {2}, {3}.", entityId, deltaPosition.X, deltaPosition.Y,
-                deltaPosition.Z);
             positions.ModifyComponent(entityId, ComponentOperation.Add, deltaPosition);
         }
 
@@ -192,7 +188,6 @@ public class MovementManager
 
             // Check is current and no newer move request has been received.
             // Stop movement and send a move event.
-            Logger.DebugFormat("Move expired for {0}", check.EntityId);
             velocities.ModifyComponent(check.EntityId, ComponentOperation.Set, Vector3.Zero);
             internalController.Move(eventSender, check.EntityId, positions[check.EntityId],
                 Vector3.Zero, check.SequenceCount);
