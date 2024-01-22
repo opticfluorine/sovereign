@@ -145,7 +145,11 @@ public sealed class Octree<T> where T : notnull
 
         /* Clear any links that are invalidated. */
         var currentNode = initialNode;
-        while (currentNode != null && !currentNode.IsPositionInterior(position)) currentNode = currentNode.parentNode;
+        while (currentNode != null && !currentNode.IsPositionInterior(position))
+        {
+            currentNode.elementPositions.Remove(element);
+            currentNode = currentNode.parentNode;
+        }
 
         /* Old links are cleared, now add the element. */
         Add(lockHandle, position, element);

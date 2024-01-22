@@ -4,6 +4,12 @@
 
 ### January
 
+#### 22 January 2024
+
+* Fix issue in `Octree` where moving entities were not properly removed from nodes they no longer overlap,
+  leading to the incorrect rendering of duplicate entities whenever the player moves across an (arbitrary)
+  boundary between two octree nodes.
+
 #### 21 January 2024
 
 * Fix rare race condition with tile sprite caching.
