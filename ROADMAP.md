@@ -6,8 +6,7 @@ Planned features are grouped by release, with earliest releases listed first.
 All features shall be implemented following the accessibility guidelines
 outlined in docs/accessibility.md.
 
-
-## Milestone 1
+## Release 0.1
 
 ### Infrastructure
 
@@ -20,19 +19,17 @@ described in docs/world_structure.md.
 
 #### Client-Server Model
 
-> :arrow_forward: In progress.
+> :white_check_mark: Complete.
 
 The client should defer to the server as the authority on the world state.
 
 #### Client-Server Communication
 
-> :arrow_forward: In progress.
+> :white_check_mark: Complete.
 
 The client and server should be able to communicate over the network. This
 will be done by extending the existing event system to repeat certain events
 over a network connection.
-
-The initial release will not support client authentication.
 
 #### Server Backend
 
@@ -42,6 +39,8 @@ The server should be able to use SQLite as the default backend database.
 
 #### Client Authentication
 
+> :white_check_mark: Complete.
+
 The client should be able to authenticate with the server with a persistent
 account for each player.
 
@@ -49,26 +48,26 @@ account for each player.
 
 #### Player Character Movement
 
+> :arrow_forward: In progress.
+
 The player should be able to control a character using the keyboard.
 
-
-## Milestone 2
+## Release 0.2
 
 ### Infrastructure
 
-#### PostgreSQL Backend Support
+#### GUI Integration
 
-The server should be able to optionally use a PostgreSQL database.
+The client should have a GUI library integrated for interactivity.
+
+#### Login via GUI
+
+The client should be able to log in, create accounts, create/select/delete players, etc. via a GUI.
 
 #### In-Game Chat
 
 The server should support in-game chat. An optional web interface to the in-game
 chat should be provided for accessibility purposes.
-
-#### Server-Side Docker Support
-
-The server should be (optionally) delivered as a Docker container so that it can
-be run in a reproducible and isolated environment on Linux targets.
 
 ### Gameplay
 
@@ -81,14 +80,17 @@ should be able to be either persistent or non-persistent.
 
 Items should be able to exist within the game world or in character inventories.
 
-
-## Future Features Not Assigned to a Release
+## Features Not Yet Assigned to a Release
 
 ### Infrastructure
 
+#### PostgreSQL Backend Support
+
+The server should be able to optionally use a PostgreSQL database.
+
 #### Client-Server Binding
 
-The client should be able to manage a local bound copy of the server for 
+The client should be able to manage a local bound copy of the server for
 single-player or multiplayer gameplay.
 
 #### Server Scripting
@@ -113,7 +115,6 @@ Certain server-side permissions should be defined at the character level, for ex
 
 Some of these permissions should be inherited from associated entities (i.e. basic
 guild permissions inherited from a guild entity associated with a character).
-
 
 ### Gameplay
 
@@ -180,8 +181,9 @@ through a UI.
 Ideally this would be integrated directly into the client, supporting the
 goal of allowing all aspects of the game world to be edited from within
 the Client. Some issues that will need to be addressed include:
+
 * How are resources known to the server (e.g. material definitions) updated?
-* How is consistency between the game resources and the world database 
+* How is consistency between the game resources and the world database
   maintained?
 
 #### Integrated World Editor
