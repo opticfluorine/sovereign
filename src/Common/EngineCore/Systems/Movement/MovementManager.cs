@@ -16,7 +16,6 @@
 
 using System.Collections.Generic;
 using System.Numerics;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
@@ -94,8 +93,6 @@ public class MovementManager
         velocities.OnStartUpdates += OnStartUpdates;
     }
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
-
     /// <summary>
     ///     Called when movement is requested.
     /// </summary>
@@ -131,8 +128,6 @@ public class MovementManager
     public void HandleAuthoritativeMove(MoveEventDetails details)
     {
         // Set position and velocity.
-        Logger.DebugFormat("Authoritative move, {0}, pos {1}, vel {2}", details.EntityId, details.Position,
-            details.Velocity);
         positions.ModifyComponent(details.EntityId, ComponentOperation.Set, details.Position);
         velocities.ModifyComponent(details.EntityId, ComponentOperation.Set, details.Velocity);
     }
