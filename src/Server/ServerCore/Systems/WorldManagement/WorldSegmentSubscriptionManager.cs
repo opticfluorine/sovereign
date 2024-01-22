@@ -52,6 +52,11 @@ public class WorldSegmentSubscriptionManager
     private readonly IEventSender eventSender;
     private readonly WorldManagementInternalController internalController;
 
+    /// <summary>
+    ///     Map from world segment index to the set of players subscribed to that world segment.
+    /// </summary>
+    private readonly Dictionary<GridPosition, HashSet<ulong>> playersByWorldSegments = new();
+
     private readonly PlayerPositionEventFilter positionEventFilter;
 
     private readonly WorldSegmentResolver resolver;
@@ -90,6 +95,18 @@ public class WorldSegmentSubscriptionManager
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
+    ///     Gets the players who are currently subscribed to the given world segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <returns>Set of players (possibly empty) subscribed to the world segment.</returns>
+    public IReadOnlySet<ulong> GetSubscribersForWorldSegment(GridPosition segmentIndex)
+    {
+        return playersByWorldSegments.TryGetValue(segmentIndex, out var players)
+            ? players
+            : new HashSet<ulong>();
+    }
+
+    /// <summary>
     ///     Called when a player is unloaded.
     /// </summary>
     /// <param name="entityId">Player entity ID.</param>
@@ -97,7 +114,11 @@ public class WorldSegmentSubscriptionManager
     private void OnPlayerRemoved(ulong entityId, bool isUnload)
     {
         // Special case: for removal, unsubscribe from all.
-        foreach (var segment in subscriptions[entityId]) changeCounts[segment] -= 1;
+        foreach (var segment in subscriptions[entityId])
+        {
+            changeCounts[segment] -= 1;
+            playersByWorldSegments[segment].Remove(entityId);
+        }
 
         // Clean up any info for the entity.
         subscriptions.Remove(entityId);
@@ -193,6 +214,9 @@ public class WorldSegmentSubscriptionManager
                 Logger.DebugFormat("Subscribe {0} to {1}.", playerEntityId, segment);
                 internalController.PushSubscribe(eventSender, playerEntityId, segment);
                 currentSubscriptionSet.Add(segment);
+                if (!playersByWorldSegments.ContainsKey(segment))
+                    playersByWorldSegments[segment] = new HashSet<ulong>();
+                playersByWorldSegments[segment].Add(playerEntityId);
                 syncManager.OnPlayerSubscribe(playerEntityId, segment);
                 if (changeCounts.ContainsKey(segment))
                     changeCounts[segment] += 1;
@@ -207,6 +231,7 @@ public class WorldSegmentSubscriptionManager
                 Logger.DebugFormat("Unsubscribe {0} from {1}.", playerEntityId, segment);
                 internalController.PushUnsubscribe(eventSender, playerEntityId, segment);
                 currentSubscriptionSet.Remove(segment);
+                playersByWorldSegments[segment].Remove(playerEntityId);
                 if (changeCounts.ContainsKey(segment))
                     changeCounts[segment] -= 1;
                 else

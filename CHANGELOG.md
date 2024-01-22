@@ -14,6 +14,7 @@
   further.
 * Fix velocity, I used the wrong units when I set the default movement velocity. Still need to figure out the caching
   issue and forward the authoritative updates from the server.
+* Add connection mapper for movement events.
 
 #### 20 January 2024
 
