@@ -40,20 +40,26 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
 
     public ServerConnectionMappingOutboundPipelineStage(GlobalConnectionMapper globalMapper,
         SingleEntityConnectionMapperFactory singleConnMapperFactory,
+        EntityWorldSegmentConnectionMapperFactory entityWorldSegmentMapperFactory,
         AccountServices accountServices)
     {
         // Create delegate mappers.
         var worldSubEventMapper = singleConnMapperFactory.Create(evInfo =>
         {
-            if (evInfo.Event.EventDetails == null) return new Maybe<int>();
-            var details = (WorldSegmentSubscriptionEventDetails)evInfo.Event.EventDetails;
+            if (evInfo.Event.EventDetails is not WorldSegmentSubscriptionEventDetails details) return new Maybe<int>();
             return accountServices.GetConnectionIdForPlayer(details.EntityId);
         });
+
         var entityDefMapper = singleConnMapperFactory.Create(evInfo =>
         {
-            if (evInfo.Event.EventDetails == null) return new Maybe<int>();
-            var details = (EntityDefinitionEventDetails)evInfo.Event.EventDetails;
+            if (evInfo.Event.EventDetails is not EntityDefinitionEventDetails details) return new Maybe<int>();
             return accountServices.GetConnectionIdForPlayer(details.PlayerEntityId);
+        });
+
+        var moveMapper = entityWorldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not MoveEventDetails details) return new Maybe<ulong>();
+            return new Maybe<ulong>(details.EntityId);
         });
 
         // Configure specific connection mappers.
@@ -61,6 +67,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
         specificMappers[EventId.Core_WorldManagement_Unsubscribe] = worldSubEventMapper;
         specificMappers[EventId.Client_EntitySynchronization_Update] = entityDefMapper;
+        specificMappers[EventId.Core_Movement_Move] = moveMapper;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
