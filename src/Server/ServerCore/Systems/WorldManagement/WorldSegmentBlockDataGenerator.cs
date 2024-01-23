@@ -16,6 +16,7 @@
  */
 
 using System.Collections.Generic;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Systems.Block.Components;
@@ -47,6 +48,8 @@ public sealed class WorldSegmentBlockDataGenerator
         this.modifiers = modifiers;
         this.config = config;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Creates summary block data for the given world segment.
@@ -279,7 +282,7 @@ public sealed class WorldSegmentBlockDataGenerator
         public DepthPlane(uint sideLength, int offsetZ)
         {
             OffsetZ = offsetZ;
-            airBlockCount = (int)(sideLength * sideLength * sideLength);
+            airBlockCount = (int)(sideLength * sideLength);
         }
 
         /// <summary>

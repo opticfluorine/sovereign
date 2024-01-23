@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Threading;
@@ -125,6 +126,7 @@ public sealed class Octree<T> where T : notnull
 
         /* Add the element to the leaf node. */
         leafNode.AddElement(element, position);
+        Debug.Assert(leafNode.IsPositionInterior(position));
     }
 
     /// <summary>
@@ -190,9 +192,9 @@ public sealed class Octree<T> where T : notnull
     /// <param name="maxPosition">Maximum position (exclusive).</param>
     /// <param name="buffer">Buffer to hold the results.</param>
     /// <param name="recordProducer">Lambda to produce buffer records.</param>
-    /// <typeparam name="R">Buffer record type.</typeparam>
-    public void GetElementsInRange<R>(OctreeLock lockHandle, Vector3 minPosition,
-        Vector3 maxPosition, IList<R> buffer, Func<Vector3, T, R> recordProducer)
+    /// <typeparam name="TR">Buffer record type.</typeparam>
+    public void GetElementsInRange<TR>(OctreeLock lockHandle, Vector3 minPosition,
+        Vector3 maxPosition, IList<TR> buffer, Func<Vector3, T, TR> recordProducer)
     {
         /* Depth-first search of overlapping nodes. */
         var nodesToSearch = new Stack<OctreeNode<T>>();

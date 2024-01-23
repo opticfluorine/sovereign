@@ -4,6 +4,15 @@
 
 ### January
 
+#### 23 January 2024
+
+* Fix issue in `WorldSegmentBlockDataGenerator` where non-air default blocks were never being selected
+  as the algorithm was counting down from the maximum number of air blocks in an entire world segment,
+  not just the depth plane in question.
+* Traced the issue with occasional gaps in loaded block entities to the server-side `Octree` instance,
+  or possibly the indexer that populates it. The missing blocks when the bug occurs appear exactly at the
+  edge of the octree's root node. Need to investigate further.
+
 #### 22 January 2024
 
 * Fix issue in `Octree` where moving entities were not properly removed from nodes they no longer overlap,

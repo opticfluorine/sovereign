@@ -302,7 +302,7 @@ internal sealed class OctreeNode<T> where T : notnull
 
             /* Compute distance squared. */
             var delta = corners[i] - position;
-            distancesSquared[i] = Vector3.Dot(delta, delta);
+            distancesSquared[i] = delta.LengthSquared();
         }
 
         /* Select the octant that minimizes the distance. */
