@@ -216,7 +216,8 @@ internal sealed class OctreeNode<T> where T : notnull
     public bool IsLeafNode()
     {
         var isLeaf = true;
-        foreach (var child in childNodes) isLeaf = isLeaf && (child == null || child.Count == 0);
+        // DEBUG: Is the child.Count == 0 check correct here?
+        foreach (var child in childNodes) isLeaf = isLeaf && child is null;
         return isLeaf;
     }
 

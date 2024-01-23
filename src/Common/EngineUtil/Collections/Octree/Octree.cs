@@ -113,6 +113,24 @@ public sealed class Octree<T> where T : notnull
     public int Count => rootNode.elementPositions.Count;
 
     /// <summary>
+    ///     Gets the minimum extent of the current octree.
+    /// </summary>
+    /// <remarks>
+    ///     This is not an invariant. The octree will expand if elements are added
+    ///     which are exterior to the current extent.
+    /// </remarks>
+    public Vector3 MinimumExtent => rootNode.minPosition;
+
+    /// <summary>
+    ///     Gets the maximum extent of the current octree.
+    /// </summary>
+    /// <remarks>
+    ///     This is not an invariant. The octree will expand if elements are added
+    ///     which are exterior to the current extent.
+    /// </remarks>
+    public Vector3 MaximumExtent => rootNode.maxPosition;
+
+    /// <summary>
     ///     Adds the given element to the octree at the given position.
     /// </summary>
     /// If the element is already in the octree, this method has no effect.

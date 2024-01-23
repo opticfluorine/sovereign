@@ -222,4 +222,29 @@ public class TestOctree
         Assert.Single(matchList);
         Assert.Contains(remainingTuple, matchList);
     }
+
+    [Theory]
+    [InlineData(true, 0.5f, 0.0f, 0.0f)]
+    [InlineData(true, 0.0f, 0.5f, 0.0f)]
+    [InlineData(true, 0.0f, 0.0f, 0.5f)]
+    [InlineData(false, 0.5f, 0.0f, 0.0f)]
+    [InlineData(false, 0.0f, 0.5f, 0.0f)]
+    [InlineData(false, 0.0f, 0.0f, 0.5f)]
+    public void TestOutwardExpansion(bool fromMaxExtent, float deltaX, float deltaY, float deltaZ)
+    {
+        // Create octree with a single element.
+        var data = new Dictionary<ulong, Vector3>
+        {
+            [0] = new(1.0f, 1.0f, 1.0f)
+        };
+        var octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin, data);
+
+        // Force the octree to expand.
+        var delta = new Vector3(deltaX, deltaY, deltaZ);
+        var newPoint = fromMaxExtent ? octree.MaximumExtent + delta : octree.MinimumExtent - delta;
+        using (var octreeLock = octree.AcquireLock())
+        {
+            octree.Add(octreeLock, newPoint, 1);
+        }
+    }
 }
