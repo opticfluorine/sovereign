@@ -14,22 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Systems.Block.Components.Indexers;
-using Sovereign.EngineCore.World;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 
-namespace Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
+namespace Sovereign.ClientCore.Systems.EntitySynchronization;
 
 /// <summary>
-///     Indexer that tracks the world segment that each positioned non-block entity
-///     is located in. Note that only the positioned entities are tracked here,
-///     not their children (if any).
+///     Responsible for unloading entities from memory for the client.
 /// </summary>
-public class NonBlockWorldSegmentIndexer : BaseWorldSegmentIndexer
+public class ClientEntityUnloader
 {
-    public NonBlockWorldSegmentIndexer(PositionComponentCollection positions,
-        NonBlockPositionEventFilter filter, WorldSegmentResolver resolver)
-        : base(positions, filter, resolver)
+    private readonly WorldSegmentIndexer segmentIndexer;
+
+    public ClientEntityUnloader(WorldSegmentIndexer segmentIndexer)
     {
+        this.segmentIndexer = segmentIndexer;
+    }
+
+    /// <summary>
+    ///     Unloads all entities from the given world segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    public void UnloadWorldSegment(GridPosition segmentIndex)
+    {
+        
     }
 }

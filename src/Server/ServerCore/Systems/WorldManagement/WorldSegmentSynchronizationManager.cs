@@ -38,8 +38,6 @@ public class WorldSegmentSynchronizationManager
     private readonly EntitySynchronizer synchronizer;
     private readonly NonBlockWorldSegmentIndexer worldSegmentIndexer;
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
-
     public WorldSegmentSynchronizationManager(WorldSegmentActivationManager activationManager,
         EntitySynchronizer synchronizer, NonBlockWorldSegmentIndexer worldSegmentIndexer,
         EntityHierarchyIndexer hierarchyIndexer)
@@ -49,6 +47,8 @@ public class WorldSegmentSynchronizationManager
         this.worldSegmentIndexer = worldSegmentIndexer;
         this.hierarchyIndexer = hierarchyIndexer;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Called when a player has subscribed to a world segment to initiate the
@@ -100,7 +100,7 @@ public class WorldSegmentSynchronizationManager
     private void SendSynchronizationEvents(ulong playerEntityId, GridPosition segmentIndex)
     {
         // Fill in the hierarchy beneath the entities.
-        var allEntities = worldSegmentIndexer.GetNonBlockEntitiesInWorldSegment(segmentIndex)
+        var allEntities = worldSegmentIndexer.GetEntitiesInWorldSegment(segmentIndex)
             .SelectMany(entityId =>
             {
                 var all = hierarchyIndexer.GetAllDescendants(entityId);

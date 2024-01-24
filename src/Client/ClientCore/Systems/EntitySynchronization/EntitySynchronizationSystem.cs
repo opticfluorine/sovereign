@@ -27,12 +27,15 @@ public class EntitySynchronizationSystem : ISystem
 {
     private readonly IEventLoop eventLoop;
     private readonly EntityDefinitionProcessor processor;
+    private readonly ClientEntityUnloader unloader;
 
     public EntitySynchronizationSystem(EventCommunicator eventCommunicator,
-        IEventLoop eventLoop, EntityDefinitionProcessor processor)
+        IEventLoop eventLoop, EntityDefinitionProcessor processor,
+        ClientEntityUnloader unloader)
     {
         this.eventLoop = eventLoop;
         this.processor = processor;
+        this.unloader = unloader;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
@@ -44,7 +47,9 @@ public class EntitySynchronizationSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
-        EventId.Client_EntitySynchronization_Update
+        EventId.Client_EntitySynchronization_Update,
+        EventId.Core_WorldManagement_Unsubscribe,
+        EventId.Client_Network_PlayerEntitySelected
     };
 
     public int WorkloadEstimate => 50;
@@ -66,7 +71,7 @@ public class EntitySynchronizationSystem : ISystem
             switch (ev.EventId)
             {
                 case EventId.Client_EntitySynchronization_Update:
-                    if (ev.EventDetails == null)
+                    if (ev.EventDetails is not EntityDefinitionEventDetails)
                     {
                         Logger.Error("Received Update event without details.");
                         break;
@@ -74,10 +79,29 @@ public class EntitySynchronizationSystem : ISystem
 
                     HandleUpdate((EntityDefinitionEventDetails)ev.EventDetails);
                     break;
+
+                case EventId.Core_WorldManagement_Unsubscribe:
+                    if (ev.EventDetails is not WorldSegmentSubscriptionEventDetails)
+                    {
+                        Logger.Error("Received Unsubscribe event without details.");
+                        break;
+                    }
+
+                    HandleUnsubscribe((WorldSegmentSubscriptionEventDetails)ev.EventDetails);
+                    break;
             }
         }
 
         return eventsProcessed;
+    }
+
+    /// <summary>
+    ///     Handles a world segment unsubscribe event.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandleUnsubscribe(WorldSegmentSubscriptionEventDetails details)
+    {
+        unloader.UnloadWorldSegment(details.SegmentIndex);
     }
 
     /// <summary>

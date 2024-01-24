@@ -15,21 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 
 /// <summary>
-///     Indexer that tracks the world segment that each positioned non-block entity
-///     is located in. Note that only the positioned entities are tracked here,
-///     not their children (if any).
 /// </summary>
-public class NonBlockWorldSegmentIndexer : BaseWorldSegmentIndexer
+public class WorldSegmentIndexer : BaseWorldSegmentIndexer
 {
-    public NonBlockWorldSegmentIndexer(PositionComponentCollection positions,
-        NonBlockPositionEventFilter filter, WorldSegmentResolver resolver)
-        : base(positions, filter, resolver)
+    public WorldSegmentIndexer(PositionComponentCollection positions, WorldSegmentResolver resolver)
+        : base(positions, positions, resolver)
     {
     }
 }

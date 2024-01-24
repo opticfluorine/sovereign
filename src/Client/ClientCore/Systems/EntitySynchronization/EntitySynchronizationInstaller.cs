@@ -14,22 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Systems.Block.Components.Indexers;
-using Sovereign.EngineCore.World;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-namespace Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
+namespace Sovereign.ClientCore.Systems.EntitySynchronization;
 
-/// <summary>
-///     Indexer that tracks the world segment that each positioned non-block entity
-///     is located in. Note that only the positioned entities are tracked here,
-///     not their children (if any).
-/// </summary>
-public class NonBlockWorldSegmentIndexer : BaseWorldSegmentIndexer
+public class EntitySynchronizationInstaller : IWindsorInstaller
 {
-    public NonBlockWorldSegmentIndexer(PositionComponentCollection positions,
-        NonBlockPositionEventFilter filter, WorldSegmentResolver resolver)
-        : base(positions, filter, resolver)
+    public void Install(IWindsorContainer container, IConfigurationStore store)
     {
+        container.Register(Component.For<ClientEntityUnloader>()
+            .LifestyleSingleton());
     }
 }
