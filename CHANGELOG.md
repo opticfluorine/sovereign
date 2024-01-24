@@ -4,6 +4,17 @@
 
 ### January
 
+#### 24 January 2024
+
+* Fix various issues with `Octree` again. This time the logic for identifying a leaf node was incorrect,
+  ultimately leading to incomplete range query results - a child node could be left unpopulated because
+  the octree incorrectly treated its parent as a leaf node, and if that empty child node was completely
+  interior to the search range but the parent was not, any entities belonging to that node would not be
+  returned. This was responsible for at least some of the issues seen in testing where
+  `WorldSegmentBlockDataGenerator` was missing large numbers of blocks depending on the order in which
+  world segments were loaded from the database.
+* Add some additional unit tests for `Octree`.
+
 #### 23 January 2024
 
 * Fix issue in `WorldSegmentBlockDataGenerator` where non-air default blocks were never being selected

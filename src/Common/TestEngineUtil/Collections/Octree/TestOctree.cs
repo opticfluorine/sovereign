@@ -233,18 +233,47 @@ public class TestOctree
     public void TestOutwardExpansion(bool fromMaxExtent, float deltaX, float deltaY, float deltaZ)
     {
         // Create octree with a single element.
+        const ulong firstId = 0;
+        const ulong secondId = 1;
+        var firstPoint = new Vector3(1.0f);
         var data = new Dictionary<ulong, Vector3>
         {
-            [0] = new(1.0f, 1.0f, 1.0f)
+            [firstId] = firstPoint
         };
         var octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin, data);
 
         // Force the octree to expand.
         var delta = new Vector3(deltaX, deltaY, deltaZ);
-        var newPoint = fromMaxExtent ? octree.MaximumExtent + delta : octree.MinimumExtent - delta;
+        var secondPoint = fromMaxExtent ? octree.MaximumExtent + delta : octree.MinimumExtent - delta;
         using (var octreeLock = octree.AcquireLock())
         {
-            octree.Add(octreeLock, newPoint, 1);
+            octree.Add(octreeLock, secondPoint, secondId);
         }
+
+        // Check total number of elements.
+        Assert.Equal(2, octree.Count);
+
+        // Query the full extent, expect to get both positions.
+        var queryResults = new List<ulong>();
+        using (var octreeLock = octree.AcquireLock())
+        {
+            octree.GetElementsInRange(octreeLock, octree.MinimumExtent, octree.MaximumExtent, queryResults,
+                (_, id) => id);
+        }
+
+        Assert.Contains(firstId, queryResults);
+        Assert.Contains(secondId, queryResults);
+
+        // Query a subrange just excluding the second element.
+        queryResults.Clear();
+        using (var octreeLock = octree.AcquireLock())
+        {
+            octree.GetElementsInRange(octreeLock, fromMaxExtent ? firstPoint : 0.99f * secondPoint,
+                fromMaxExtent ? 0.99f * secondPoint : 1.01f * firstPoint, queryResults,
+                (_, id) => id);
+        }
+
+        Assert.Contains(firstId, queryResults);
+        Assert.DoesNotContain(secondId, queryResults);
     }
 }

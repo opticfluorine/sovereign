@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Threading;
@@ -144,7 +143,6 @@ public sealed class Octree<T> where T : notnull
 
         /* Add the element to the leaf node. */
         leafNode.AddElement(element, position);
-        Debug.Assert(leafNode.IsPositionInterior(position));
     }
 
     /// <summary>
