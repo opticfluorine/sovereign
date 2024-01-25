@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
@@ -224,18 +225,30 @@ public class WorldSegmentSubscriptionManager
                     changeCounts[segment] = 1;
             }
 
-        // Unsubscribe from anything old that isn't in the intersection.
+        // Unsubscribe from anything old that isn't in the intersection if the world segment is more than
+        // one segment outside of the subscription radius. Adding this one-segment-wide gap between subscribe
+        // and unsubscribe helps to prevent players from rapidly toggling the subscription through small
+        // movements over the border.
         foreach (var segment in lastSubscriptionSet)
             if (!unchangedSet.Contains(segment))
             {
-                Logger.DebugFormat("Unsubscribe {0} from {1}.", playerEntityId, segment);
-                internalController.PushUnsubscribe(eventSender, playerEntityId, segment);
-                currentSubscriptionSet.Remove(segment);
-                playersByWorldSegments[segment].Remove(playerEntityId);
-                if (changeCounts.ContainsKey(segment))
-                    changeCounts[segment] -= 1;
-                else
-                    changeCounts[segment] = -1;
+                // Beyond the subscribe radius, now check whether beyond the unsubscribe radius.
+                var unsubRadius = worldConfig.SubscriptionRange + 1;
+                var dx = Math.Abs(segment.X - center.X);
+                var dy = Math.Abs(segment.Y - center.Y);
+                var dz = Math.Abs(segment.Z - center.Z);
+                if (dx > unsubRadius || dy > unsubRadius || dz > unsubRadius)
+                {
+                    // Beyond the unsubscribe radius, trigger unsubscribe.
+                    Logger.DebugFormat("Unsubscribe {0} from {1}.", playerEntityId, segment);
+                    internalController.PushUnsubscribe(eventSender, playerEntityId, segment);
+                    currentSubscriptionSet.Remove(segment);
+                    playersByWorldSegments[segment].Remove(playerEntityId);
+                    if (changeCounts.ContainsKey(segment))
+                        changeCounts[segment] -= 1;
+                    else
+                        changeCounts[segment] = -1;
+                }
             }
     }
 }

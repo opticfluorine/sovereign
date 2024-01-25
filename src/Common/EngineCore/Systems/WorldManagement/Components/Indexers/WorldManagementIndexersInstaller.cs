@@ -26,5 +26,7 @@ public class WorldManagementIndexersInstaller : IWindsorInstaller
     {
         container.Register(Component.For<NonBlockWorldSegmentIndexer>()
             .LifestyleSingleton());
+        container.Register(Component.For<WorldSegmentIndexer>()
+            .LifestyleSingleton());
     }
 }

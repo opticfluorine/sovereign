@@ -14,6 +14,8 @@
   `WorldSegmentBlockDataGenerator` was missing large numbers of blocks depending on the order in which
   world segments were loaded from the database.
 * Add some additional unit tests for `Octree`.
+* Start work on unloading world segments on unsubscribe in the client. This broke a lot of things and/or
+  revealed many strange bugs, so working through these now.
 
 #### 23 January 2024
 

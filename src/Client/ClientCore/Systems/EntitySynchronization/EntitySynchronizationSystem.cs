@@ -89,10 +89,29 @@ public class EntitySynchronizationSystem : ISystem
 
                     HandleUnsubscribe((WorldSegmentSubscriptionEventDetails)ev.EventDetails);
                     break;
+
+                case EventId.Client_Network_PlayerEntitySelected:
+                    if (ev.EventDetails is not EntityEventDetails)
+                    {
+                        Logger.Error("Received PlayerEntitySelected event without details.");
+                        break;
+                    }
+
+                    HandlePlayerSelect((EntityEventDetails)ev.EventDetails);
+                    break;
             }
         }
 
         return eventsProcessed;
+    }
+
+    /// <summary>
+    ///     Handles a player select event from the server.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandlePlayerSelect(EntityEventDetails details)
+    {
+        unloader.SetPlayer(details.EntityId);
     }
 
     /// <summary>

@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Linq;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 
 namespace Sovereign.ClientCore.Systems.EntitySynchronization;
@@ -24,11 +26,21 @@ namespace Sovereign.ClientCore.Systems.EntitySynchronization;
 /// </summary>
 public class ClientEntityUnloader
 {
+    private readonly EntityManager entityManager;
+    private readonly EntityHierarchyIndexer hierarchyIndexer;
     private readonly WorldSegmentIndexer segmentIndexer;
 
-    public ClientEntityUnloader(WorldSegmentIndexer segmentIndexer)
+    /// <summary>
+    ///     Current player entity ID.
+    /// </summary>
+    private ulong playerEntityId;
+
+    public ClientEntityUnloader(WorldSegmentIndexer segmentIndexer, EntityHierarchyIndexer hierarchyIndexer,
+        EntityManager entityManager)
     {
         this.segmentIndexer = segmentIndexer;
+        this.hierarchyIndexer = hierarchyIndexer;
+        this.entityManager = entityManager;
     }
 
     /// <summary>
@@ -37,6 +49,26 @@ public class ClientEntityUnloader
     /// <param name="segmentIndex">World segment index.</param>
     public void UnloadWorldSegment(GridPosition segmentIndex)
     {
-        
+        // Get all positioned entities in the segment, excluding the player (which can occur rarely if the
+        // client is far behind the server when the unsubscribe event is received).
+        // Then join them with any descendants.
+        var entitiesToUnload = segmentIndexer.GetEntitiesInWorldSegment(segmentIndex)
+            .Where(entityId => entityId != playerEntityId)
+            .SelectMany(entityId =>
+            {
+                var descendants = hierarchyIndexer.GetAllDescendants(entityId);
+                descendants.Add(entityId);
+                return descendants;
+            });
+        foreach (var entityId in entitiesToUnload) entityManager.UnloadEntity(entityId);
+    }
+
+    /// <summary>
+    ///     Sets the current player entity ID to prevent accidental unloading in high-latency situations.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    public void SetPlayer(ulong playerEntityId)
+    {
+        this.playerEntityId = playerEntityId;
     }
 }
