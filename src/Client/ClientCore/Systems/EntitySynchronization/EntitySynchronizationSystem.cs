@@ -48,8 +48,10 @@ public class EntitySynchronizationSystem : ISystem
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
         EventId.Client_EntitySynchronization_Update,
+        EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_Unsubscribe,
-        EventId.Client_Network_PlayerEntitySelected
+        EventId.Client_Network_PlayerEntitySelected,
+        EventId.Core_WorldManagement_EntityLeaveWorldSegment
     };
 
     public int WorkloadEstimate => 50;
@@ -80,6 +82,16 @@ public class EntitySynchronizationSystem : ISystem
                     HandleUpdate((EntityDefinitionEventDetails)ev.EventDetails);
                     break;
 
+                case EventId.Core_WorldManagement_Subscribe:
+                    if (ev.EventDetails is not WorldSegmentSubscriptionEventDetails)
+                    {
+                        Logger.Error("Received Subscribe event without details.");
+                        break;
+                    }
+
+                    HandleSubscribe((WorldSegmentSubscriptionEventDetails)ev.EventDetails);
+                    break;
+
                 case EventId.Core_WorldManagement_Unsubscribe:
                     if (ev.EventDetails is not WorldSegmentSubscriptionEventDetails)
                     {
@@ -99,10 +111,44 @@ public class EntitySynchronizationSystem : ISystem
 
                     HandlePlayerSelect((EntityEventDetails)ev.EventDetails);
                     break;
+
+                case EventId.Core_WorldManagement_EntityLeaveWorldSegment:
+                    if (ev.EventDetails is not EntityChangeWorldSegmentEventDetails)
+                    {
+                        Logger.Error("Received EntityLeaveWorldSegment event without details.");
+                        break;
+                    }
+
+                    HandleChangeWorldSegment((EntityChangeWorldSegmentEventDetails)ev.EventDetails);
+                    break;
             }
         }
 
         return eventsProcessed;
+    }
+
+    private void HandleSubscribe(WorldSegmentSubscriptionEventDetails details)
+    {
+        unloader.OnSubscribe(details.SegmentIndex);
+    }
+
+    /// <summary>
+    ///     Handles a world segment unsubscribe event.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandleUnsubscribe(WorldSegmentSubscriptionEventDetails details)
+    {
+        unloader.OnUnsubscribe(details.SegmentIndex);
+    }
+
+    /// <summary>
+    ///     Handles notification of an entity leaving a world segment.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandleChangeWorldSegment(EntityChangeWorldSegmentEventDetails details)
+    {
+        unloader.OnEntityChangeWorldSegment(details.EntityId,
+            details.NewSegmentIndex);
     }
 
     /// <summary>
@@ -112,15 +158,6 @@ public class EntitySynchronizationSystem : ISystem
     private void HandlePlayerSelect(EntityEventDetails details)
     {
         unloader.SetPlayer(details.EntityId);
-    }
-
-    /// <summary>
-    ///     Handles a world segment unsubscribe event.
-    /// </summary>
-    /// <param name="details">Event details.</param>
-    private void HandleUnsubscribe(WorldSegmentSubscriptionEventDetails details)
-    {
-        unloader.UnloadWorldSegment(details.SegmentIndex);
     }
 
     /// <summary>

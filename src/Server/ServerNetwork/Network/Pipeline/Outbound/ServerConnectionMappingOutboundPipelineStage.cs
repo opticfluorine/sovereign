@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Services;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineUtil.Monads;
@@ -41,6 +42,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
     public ServerConnectionMappingOutboundPipelineStage(GlobalConnectionMapper globalMapper,
         SingleEntityConnectionMapperFactory singleConnMapperFactory,
         EntityWorldSegmentConnectionMapperFactory entityWorldSegmentMapperFactory,
+        WorldSegmentConnectionMapperFactory worldSegmentMapperFactory,
         AccountServices accountServices)
     {
         // Create delegate mappers.
@@ -62,12 +64,20 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             return new Maybe<ulong>(details.EntityId);
         });
 
+        var entityGridMapper = worldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not EntityChangeWorldSegmentEventDetails details)
+                return new Maybe<GridPosition>();
+            return new Maybe<GridPosition>(details.PreviousSegmentIndex);
+        });
+
         // Configure specific connection mappers.
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
         specificMappers[EventId.Core_WorldManagement_Unsubscribe] = worldSubEventMapper;
         specificMappers[EventId.Client_EntitySynchronization_Update] = entityDefMapper;
         specificMappers[EventId.Core_Movement_Move] = moveMapper;
+        specificMappers[EventId.Core_WorldManagement_EntityLeaveWorldSegment] = entityGridMapper;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Sovereign.EngineCore.Components;
@@ -65,6 +66,13 @@ public class BaseWorldSegmentIndexer : BaseComponentIndexer<Vector3>
         return new HashSet<ulong>(index[segmentIndex]);
     }
 
+    /// <summary>
+    ///     Event invoked when an entity changes its world segment.
+    ///     The first GridPosition argument is the previous world segment.
+    ///     The second GridPosition argument is the new world segment.
+    /// </summary>
+    public event Action<ulong, GridPosition, GridPosition>? OnChangeWorldSegment;
+
     protected override void ComponentAddedCallback(ulong entityId, Vector3 componentValue, bool isLoad)
     {
         AddEntity(entityId, componentValue);
@@ -78,6 +86,7 @@ public class BaseWorldSegmentIndexer : BaseComponentIndexer<Vector3>
         {
             RemoveEntity(entityId);
             AddEntity(entityId, componentValue);
+            OnChangeWorldSegment?.Invoke(entityId, oldSegmentIndex, newSegmentIndex);
         }
     }
 

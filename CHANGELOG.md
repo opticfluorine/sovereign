@@ -12,6 +12,11 @@
   where the client would load part of a world segment and never reload it until unsubscribing and resubscribing
   again.
 * At this point the world segment block data generators and loaders appear stable and performant.
+* Unload entities in the client that move to a world segment that the client is not currently subscribed to,
+  since the client will receive no further synchronization updates for that entity until it resubscribes to a
+  (possibly different) world segment where that entity exists - at which point it will be synchronized in full
+  again.
+* Proper player and account logout on disconnect (untested).
 
 #### 25 January 2024
 

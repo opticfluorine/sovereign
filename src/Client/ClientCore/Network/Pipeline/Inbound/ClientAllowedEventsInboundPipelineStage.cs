@@ -37,7 +37,8 @@ public class ClientAllowedEventsInboundPipelineStage : IInboundPipelineStage
         EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_Unsubscribe,
         EventId.Client_EntitySynchronization_Update,
-        EventId.Core_Movement_Move
+        EventId.Core_Movement_Move,
+        EventId.Core_WorldManagement_EntityLeaveWorldSegment
     };
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

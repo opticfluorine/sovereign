@@ -14,24 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Systems.Network;
+using MessagePack;
+using Sovereign.EngineCore.Components.Indexers;
 
-namespace Sovereign.ServerNetwork.Systems.Network;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Provides the set of event IDs that the server will forward out to the network.
+///     Event details for an entity moving between world segments.
 /// </summary>
-public class ServerOutboundEventSet : IOutboundEventSet
+[MessagePackObject]
+public class EntityChangeWorldSegmentEventDetails : IEventDetails
 {
-    public HashSet<EventId> EventIdsToSend { get; } = new()
-    {
-        EventId.Core_Ping_Ping,
-        EventId.Core_WorldManagement_Subscribe,
-        EventId.Core_WorldManagement_Unsubscribe,
-        EventId.Client_EntitySynchronization_Update,
-        EventId.Core_Movement_Move,
-        EventId.Core_WorldManagement_EntityLeaveWorldSegment
-    };
+    /// <summary>
+    ///     Associated entity ID.
+    /// </summary>
+    [Key(0)]
+    public ulong EntityId { get; set; }
+
+    /// <summary>
+    ///     Previous world segment index.
+    /// </summary>
+    [Key(1)]
+    public GridPosition PreviousSegmentIndex { get; set; }
+
+    /// <summary>
+    ///     New world segment index.
+    /// </summary>
+    [Key(2)]
+    public GridPosition NewSegmentIndex { get; set; }
 }

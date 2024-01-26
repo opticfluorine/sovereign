@@ -64,6 +64,26 @@ public class WorldManagementInternalController
     }
 
     /// <summary>
+    ///     Announces that an entity has left the given world segment.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="prevSegmentIndex">Segment index of the world segment that was left.</param>
+    /// <param name="newSegmentIndex">Segment index of the world segment that was entered.</param>
+    public void PushChangeSegment(IEventSender eventSender, ulong entityId, GridPosition prevSegmentIndex,
+        GridPosition newSegmentIndex)
+    {
+        var details = new EntityChangeWorldSegmentEventDetails
+        {
+            EntityId = entityId,
+            PreviousSegmentIndex = prevSegmentIndex,
+            NewSegmentIndex = newSegmentIndex
+        };
+        var ev = new Event(EventId.Core_WorldManagement_EntityLeaveWorldSegment, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
     ///     Pushes a world segment subscribe/unsubscribe event to the client.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>

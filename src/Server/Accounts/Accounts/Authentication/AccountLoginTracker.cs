@@ -19,6 +19,8 @@ using System;
 using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sodium;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Entities;
 using Sovereign.ServerCore.Components;
 
 namespace Sovereign.Accounts.Accounts.Authentication;
@@ -63,14 +65,21 @@ public sealed class AccountLoginTracker
     /// </summary>
     private readonly Dictionary<int, Guid> connectionsToAccounts = new();
 
+    private readonly EntityManager entityManager;
+
+    private readonly EntityHierarchyIndexer hierarchyIndexer;
+
     /// <summary>
     ///     Map from player entity ID to connection ID.
     /// </summary>
     private readonly Dictionary<ulong, int> playersToConnections = new();
 
-    public AccountLoginTracker(AccountComponentCollection accounts)
+    public AccountLoginTracker(AccountComponentCollection accounts, EntityHierarchyIndexer hierarchyIndexer,
+        EntityManager entityManager)
     {
         this.accounts = accounts;
+        this.hierarchyIndexer = hierarchyIndexer;
+        this.entityManager = entityManager;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -118,17 +127,6 @@ public sealed class AccountLoginTracker
             playersToConnections.Remove(playerEntityId);
             accountIdsToPlayerEntityIds.Remove(accountId);
         }
-    }
-
-    /// <summary>
-    ///     Signals that the given account has logged out.
-    /// </summary>
-    /// <param name="accountId">Account ID.</param>
-    public void Logout(Guid accountId)
-    {
-        accountIdsToApiKeys.Remove(accountId);
-        accountIdsToPlayerEntityIds.Remove(accountId);
-        accountLoginStates.Remove(accountId);
     }
 
     /// <summary>
@@ -202,11 +200,16 @@ public sealed class AccountLoginTracker
     {
         if (connectionsToAccounts.TryGetValue(connectionId, out var accountId))
         {
+            // Log the player out if already logged in.
+            if (accountIdsToPlayerEntityIds.TryGetValue(accountId, out var entityId))
+                LogoutPlayer(entityId);
+
+            // Log the account out.
+            LogoutAccount(accountId);
+
+            // Clean up mappings.
             accountsToConnections.Remove(accountId);
             connectionsToAccounts.Remove(connectionId);
-            if (accountIdsToPlayerEntityIds.TryGetValue(accountId, out var entityId))
-                playersToConnections.Remove(entityId);
-            Logout(accountId);
         }
     }
 
@@ -219,5 +222,37 @@ public sealed class AccountLoginTracker
     public string GetApiKey(Guid accountId)
     {
         return accountIdsToApiKeys[accountId];
+    }
+
+    /// <summary>
+    ///     Logs out the given player.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    private void LogoutPlayer(ulong playerEntityId)
+    {
+        // Unload the player entity tree.
+        var entitiesToUnload = hierarchyIndexer.GetAllDescendants(playerEntityId);
+        entitiesToUnload.Add(playerEntityId);
+        foreach (var entityId in entitiesToUnload) entityManager.UnloadEntity(entityId);
+
+        // Transition back to the player selection state.
+        var connId = playersToConnections[playerEntityId];
+        var accountId = connectionsToAccounts[connId];
+        accountLoginStates[accountId] = AccountLoginState.SelectingPlayer;
+
+        // Clean up mappings.
+        playersToConnections.Remove(playerEntityId);
+        accountIdsToPlayerEntityIds.Remove(accountId);
+    }
+
+    /// <summary>
+    ///     Logs out the given account.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    private void LogoutAccount(Guid accountId)
+    {
+        accountIdsToApiKeys.Remove(accountId);
+        accountIdsToPlayerEntityIds.Remove(accountId);
+        accountLoginStates.Remove(accountId);
     }
 }

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using System.Linq;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
@@ -31,6 +32,11 @@ public class ClientEntityUnloader
     private readonly WorldSegmentIndexer segmentIndexer;
 
     /// <summary>
+    ///     Set of currently subscribed world segments.
+    /// </summary>
+    private readonly HashSet<GridPosition> subscribedSegments = new();
+
+    /// <summary>
     ///     Current player entity ID.
     /// </summary>
     private ulong playerEntityId;
@@ -44,10 +50,52 @@ public class ClientEntityUnloader
     }
 
     /// <summary>
+    ///     Sets the current player entity ID to prevent accidental unloading in high-latency situations.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    public void SetPlayer(ulong playerEntityId)
+    {
+        this.playerEntityId = playerEntityId;
+    }
+
+    /// <summary>
+    ///     Called when an entity leaves a world segment.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="newSegmentIndex">Segment index of the world segment entered by the entity.</param>
+    public void OnEntityChangeWorldSegment(ulong entityId, GridPosition newSegmentIndex)
+    {
+        // If the entity made an authoritative move to a segment we aren't subscribed to, unload it.
+        if (!subscribedSegments.Contains(newSegmentIndex))
+        {
+            UnloadEntity(entityId);
+        }
+    }
+
+    /// <summary>
+    ///     Called when the player is subscribed to a world segment.
+    /// </summary>
+    /// <param name="segmentIndex">Segment index.</param>
+    public void OnSubscribe(GridPosition segmentIndex)
+    {
+        subscribedSegments.Add(segmentIndex);
+    }
+
+    /// <summary>
+    ///     Called when the player is unsubscribed from a world segment.
+    /// </summary>
+    /// <param name="segmentIndex">Segment index.</param>
+    public void OnUnsubscribe(GridPosition segmentIndex)
+    {
+        subscribedSegments.Remove(segmentIndex);
+        UnloadWorldSegment(segmentIndex);
+    }
+
+    /// <summary>
     ///     Unloads all entities from the given world segment.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
-    public void UnloadWorldSegment(GridPosition segmentIndex)
+    private void UnloadWorldSegment(GridPosition segmentIndex)
     {
         // Get all positioned entities in the segment, excluding the player (which can occur rarely if the
         // client is far behind the server when the unsubscribe event is received).
@@ -64,11 +112,13 @@ public class ClientEntityUnloader
     }
 
     /// <summary>
-    ///     Sets the current player entity ID to prevent accidental unloading in high-latency situations.
+    ///     Unloads a single entity and its descendants.
     /// </summary>
-    /// <param name="playerEntityId">Player entity ID.</param>
-    public void SetPlayer(ulong playerEntityId)
+    /// <param name="entityId">Entity ID.</param>
+    private void UnloadEntity(ulong entityId)
     {
-        this.playerEntityId = playerEntityId;
+        var entitiesToUnload = hierarchyIndexer.GetAllDescendants(entityId);
+        entitiesToUnload.Add(entityId);
+        foreach (var nextEntityId in entitiesToUnload) entityManager.UnloadEntity(nextEntityId);
     }
 }

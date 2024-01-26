@@ -138,6 +138,14 @@ public enum EventId
     /// Associated details: WorldSegmentSubscriptionEventDetails
     Core_WorldManagement_Unsubscribe = 601,
 
+    /// <summary>
+    ///     Sent from server to client to announce that an entity has left a world segment.
+    ///     Used to assist with unloading entities from the client if they exit the subscribed
+    ///     area. Sent to clients subscribed to the previous world segment.
+    /// </summary>
+    /// Associated details: EntityChangeWorldSegmentEventDetails
+    Core_WorldManagement_EntityLeaveWorldSegment = 602,
+
     #endregion WorldManagement
 
     #endregion Core
