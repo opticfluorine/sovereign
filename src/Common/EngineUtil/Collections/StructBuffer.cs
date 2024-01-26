@@ -66,7 +66,6 @@ public class StructBuffer<T> : IEnumerable<T>
 
     public IEnumerator<T> GetEnumerator()
     {
-        Monitor.Enter(list);
         return new StructBufferEnumerator<T>(this);
     }
 
@@ -141,16 +140,15 @@ public class StructBuffer<T> : IEnumerable<T>
         {
             this.structBuffer = structBuffer;
             currentIndex = -1;
+
+            Monitor.Enter(structBuffer);
         }
 
         public T1 Current
         {
             get
             {
-                if (_current == null)
-                {
-                    throw new InvalidOperationException("Enumerator is before first element.");
-                }
+                if (_current == null) throw new InvalidOperationException("Enumerator is before first element.");
 
                 return _current;
             }
@@ -161,10 +159,7 @@ public class StructBuffer<T> : IEnumerable<T>
         {
             get
             {
-                if (_current == null)
-                {
-                    throw new InvalidOperationException("Enumerator is before first element.");
-                }
+                if (_current == null) throw new InvalidOperationException("Enumerator is before first element.");
 
                 return _current;
             }
@@ -172,7 +167,7 @@ public class StructBuffer<T> : IEnumerable<T>
 
         public void Dispose()
         {
-            Monitor.Exit(structBuffer.list);
+            Monitor.Exit(structBuffer);
         }
 
         public bool MoveNext()

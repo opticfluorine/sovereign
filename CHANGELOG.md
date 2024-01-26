@@ -4,6 +4,14 @@
 
 ### January
 
+#### 25 January 2024
+
+* Fix race condition in `StructBuffer<T>` (and `BaseComponentCollection<T>`) caused by a mismatched lock
+  target between modification and enumeration.
+* Update `EntityManager` to also publish a C# `event` that is invoked when entity/component processing begins.
+* Change the set of component events tracked in `BlockAnimatedSpriteCache` to avoid large amounts of redundant
+  processing when block entities are added, modified, and removed.
+
 #### 24 January 2024
 
 * Fix various issues with `Octree` again. This time the logic for identifying a leaf node was incorrect,

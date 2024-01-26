@@ -69,6 +69,7 @@ public class EntityManager
     {
         using var strongLock = UpdateGuard.AcquireStrongLock();
 
+        OnUpdatesStarted?.Invoke();
         componentManager.UpdateAllComponents();
         entityTable.UpdateAllEntities();
         OnUpdatesComplete?.Invoke();
@@ -118,6 +119,11 @@ public class EntityManager
         componentManager.UnloadAllComponentsForEntity(entityId);
         entityNotifier.EnqueueUnload(entityId);
     }
+
+    /// <summary>
+    ///     Event triggered when a round of entity/component updates are started.
+    /// </summary>
+    public event Action? OnUpdatesStarted;
 
     /// <summary>
     ///     Event triggered when a round of entity/component updates are complete.
