@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Numerics;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
@@ -65,19 +64,6 @@ public sealed class PersistenceEventHandler
 
                 var details = (EntityEventDetails)ev.EventDetails;
                 OnRetrieveEntity(details.EntityId);
-            }
-                break;
-
-            case EventId.Server_Persistence_RetrieveEntitiesInRange:
-            {
-                if (ev.EventDetails == null)
-                {
-                    Logger.Error("Received RetrieveEntitiesInRange event with no details.");
-                    break;
-                }
-
-                var details = (VectorPairEventDetails)ev.EventDetails;
-                OnRetrieveEntitiesInRange(details.First, details.Second);
             }
                 break;
 
@@ -140,16 +126,6 @@ public sealed class PersistenceEventHandler
     private void OnRetrieveEntity(ulong entityId)
     {
         entityRetriever.RetrieveEntity(entityId);
-    }
-
-    /// <summary>
-    ///     Called to handle a Server_Persistence_RetrieveEntitiesInRange event.
-    /// </summary>
-    /// <param name="minPos">Minimum position in the range.</param>
-    /// <param name="maxPos">Maximum position in the range.</param>
-    private void OnRetrieveEntitiesInRange(Vector3 minPos, Vector3 maxPos)
-    {
-        rangeRetriever.RetrieveRange(minPos, maxPos);
     }
 
     /// <summary>

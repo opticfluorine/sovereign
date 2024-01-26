@@ -30,12 +30,13 @@ namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment;
 /// </summary>
 public sealed class WorldSegmentRestService : AuthenticatedRestService
 {
-    private readonly WorldSegmentBlockDataManager blockDataManager;
+    private readonly WorldManagementServices worldManagementServices;
 
-    public WorldSegmentRestService(RestAuthenticator authenticator, WorldSegmentBlockDataManager blockDataManager)
+    public WorldSegmentRestService(RestAuthenticator authenticator,
+        WorldManagementServices worldManagementServices)
         : base(authenticator)
     {
-        this.blockDataManager = blockDataManager;
+        this.worldManagementServices = worldManagementServices;
     }
 
     public override string Path => RestEndpoints.WorldSegment + "/{x}/{y}/{z}";
@@ -57,7 +58,19 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
             // user that requested it, we don't want to be leaking data for the other
             // side of the world.
             var segmentIndex = new GridPosition(x, y, z);
-            var dataTask = blockDataManager.GetWorldSegmentBlockData(segmentIndex);
+
+            // First check whether the world segment has been fully loaded.
+            // If not, tell the client to try again later.
+            if (!worldManagementServices.IsWorldSegmentLoaded(segmentIndex))
+            {
+                Logger.DebugFormat("Delaying response for segment {0} while load in progress.", segmentIndex);
+                ctx.Response.StatusCode = 503;
+                await ctx.Response.Send();
+                return;
+            }
+
+            // Get the data and send it over.
+            var dataTask = worldManagementServices.GetWorldSegmentBlockData(segmentIndex);
             if (dataTask != null)
             {
                 // Get the latest version of the block data and encode it for transfer.

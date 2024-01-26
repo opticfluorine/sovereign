@@ -264,17 +264,10 @@ public enum EventId
     Server_Persistence_RetrieveEntity = 200000,
 
     /// <summary>
-    ///     Event sent to retrieve all entities positioned within a range
-    ///     from the database.
-    /// </summary>
-    /// Associated details: VectorPairEventDetails
-    Server_Persistence_RetrieveEntitiesInRange = 200001,
-
-    /// <summary>
     ///     Event sent to load a world segment from the database.
     /// </summary>
     /// Associated details: WorldSegmentEventDetails
-    Server_Persistence_RetrieveWorldSegment = 200002,
+    Server_Persistence_RetrieveWorldSegment = 200001,
 
     /// <summary>
     ///     Event sent to synchronize the server with the database.

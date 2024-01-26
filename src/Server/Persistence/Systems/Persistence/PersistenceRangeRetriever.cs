@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
@@ -52,19 +51,6 @@ public sealed class PersistenceRangeRetriever
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
-    ///     Retrieves all entities in the given range.
-    /// </summary>
-    /// <param name="minPos">Minimum position.</param>
-    /// <param name="maxPos">Maximum position.</param>
-    public void RetrieveRange(Vector3 minPos, Vector3 maxPos)
-    {
-        Logger.DebugFormat("Retrieve entities from {0} to {1}.",
-            minPos, maxPos);
-
-        Task.Factory.StartNew(() => DoRetrieve(minPos, maxPos));
-    }
-
-    /// <summary>
     ///     Retrieves all entities in the given world segment.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
@@ -73,11 +59,10 @@ public sealed class PersistenceRangeRetriever
         Logger.DebugFormat("Retrieve world segment {0}.", segmentIndex);
 
         // Retrieve, then send a completion event.
-        var (rangeMin, rangeMax) = worldSegmentResolver.GetRangeForWorldSegment(segmentIndex);
         Task.Factory.StartNew(() =>
         {
             // Retrieve world segment.
-            DoRetrieve(rangeMin, rangeMax);
+            DoRetrieve(segmentIndex);
 
             // Signal completion.
             // Sync the event to the next tick to ensure that the loaded entities
@@ -90,19 +75,20 @@ public sealed class PersistenceRangeRetriever
     }
 
     /// <summary>
-    ///     Blocking call that retrieves all entities within a given range.
+    ///     Blocking call that retrieves all entities within a given world segment.
     /// </summary>
-    /// <param name="minPos">Minimum position.</param>
-    /// <param name="maxPos">Maximum position.</param>
-    private void DoRetrieve(Vector3 minPos, Vector3 maxPos)
+    /// <param name="segmentIndex">World segment index.</param>
+    private void DoRetrieve(GridPosition segmentIndex)
     {
+        var (minPos, maxPos) = worldSegmentResolver.GetRangeForWorldSegment(segmentIndex);
         try
         {
             /* Execute query. */
             var query = providerManager.PersistenceProvider.RetrieveRangeQuery;
             using (var reader = query.RetrieveEntitiesInRange(minPos, maxPos))
             {
-                entityProcessor.ProcessFromReader(reader.Reader);
+                var count = entityProcessor.ProcessFromReader(reader.Reader);
+                Logger.DebugFormat("Retrieved {0} entities for segment {1}.", count, segmentIndex);
             }
         }
         catch (Exception e)

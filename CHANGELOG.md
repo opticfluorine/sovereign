@@ -4,6 +4,15 @@
 
 ### January
 
+#### 26 January 2024
+
+* Fix issue where a poorly timed REST call would trigger world segment block data generation while the
+  block data was partially loaded from the database (due to the retrieval task overlapping multiple ticks
+  and the block entities being committed in several batches as a result). This, in turn, led to a situation
+  where the client would load part of a world segment and never reload it until unsubscribing and resubscribing
+  again.
+* At this point the world segment block data generators and loaders appear stable and performant.
+
 #### 25 January 2024
 
 * Fix race condition in `StructBuffer<T>` (and `BaseComponentCollection<T>`) caused by a mismatched lock
@@ -11,6 +20,13 @@
 * Update `EntityManager` to also publish a C# `event` that is invoked when entity/component processing begins.
 * Change the set of component events tracked in `BlockAnimatedSpriteCache` to avoid large amounts of redundant
   processing when block entities are added, modified, and removed.
+* Expand the unsubscribe distance for world segments to one segment greater than the subscribe distance. This
+  ensures there is a full segment between the player and the subscribe point after an unsubscribe (and vice
+  versa) so the player can't rapidly subscribe and unsubscribe by straddling the line between two segments.
+  This comes at the cost of having to maintain synchronization events for a larger set of segments; however, the
+  initial synchronization on subscribe is unaffected as the subscribe radius is unchanged. (In fact it may under
+  some cases be better overall, since the client is effectively caching the bulk of the data for longer - so if
+  the player backtracks, it may save a few extra bulk synchronizations on subscribe.)
 
 #### 24 January 2024
 

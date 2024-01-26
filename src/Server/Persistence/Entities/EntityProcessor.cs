@@ -56,9 +56,17 @@ public sealed class EntityProcessor
     ///     Processes all entities from the given reader.
     /// </summary>
     /// <param name="reader">Reader.</param>
-    public void ProcessFromReader(IDataReader reader)
+    /// <returns>Number of entities processed.</returns>
+    public int ProcessFromReader(IDataReader reader)
     {
-        while (reader.Read()) ProcessSingleEntity(reader);
+        var count = 0;
+        while (reader.Read())
+        {
+            ProcessSingleEntity(reader);
+            count++;
+        }
+
+        return count;
     }
 
     /// <summary>

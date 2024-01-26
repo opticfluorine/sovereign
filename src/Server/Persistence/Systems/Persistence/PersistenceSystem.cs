@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Systems;
 using Sovereign.Persistence.Database;
@@ -64,12 +63,6 @@ public sealed class PersistenceSystem : ISystem
         EventCommunicator = eventCommunicator;
         Logger = logger;
 
-        /* Register events. */
-        eventDescriptions.RegisterEvent<EntityEventDetails>(EventId.Server_Persistence_RetrieveEntity);
-        eventDescriptions.RegisterEvent<VectorPairEventDetails>(EventId.Server_Persistence_RetrieveEntitiesInRange);
-        eventDescriptions.RegisterEvent<WorldSegmentEventDetails>(EventId.Server_Persistence_RetrieveWorldSegment);
-        eventDescriptions.RegisterNullEvent(EventId.Server_Persistence_Synchronize);
-
         /* Register system. */
         eventLoop.RegisterSystem(this);
 
@@ -77,7 +70,7 @@ public sealed class PersistenceSystem : ISystem
         ConfigurePersistence();
     }
 
-    private ILogger Logger { get; } = NullLogger.Instance;
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 
@@ -85,7 +78,6 @@ public sealed class PersistenceSystem : ISystem
     {
         EventId.Core_Quit,
         EventId.Server_Persistence_RetrieveEntity,
-        EventId.Server_Persistence_RetrieveEntitiesInRange,
         EventId.Server_Persistence_RetrieveWorldSegment,
         EventId.Server_Persistence_Synchronize,
         EventId.Server_Accounts_SelectPlayer

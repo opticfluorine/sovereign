@@ -66,6 +66,8 @@ public sealed class WorldSegmentBlockDataGenerator
             indexer.GetEntitiesInRange(lockHandle, range.Item1, range.Item2, blocks);
         }
 
+        Logger.DebugFormat("Segment {0} has {1} blocks.", segmentIndex, blocks.Count);
+
         // Retrieve material data, group into depth planes.
         var basePoint = resolver.GetRangeForWorldSegment(segmentIndex).Item1;
         var depthPlanes = new DepthPlane[config.SegmentLength];

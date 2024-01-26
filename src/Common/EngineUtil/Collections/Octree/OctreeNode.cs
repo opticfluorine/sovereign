@@ -35,7 +35,7 @@ internal sealed class OctreeNode<T> where T : notnull
     /// <summary>
     ///     Threshold for length comparisons.
     /// </summary>
-    private const float Threshold = 1e-4f;
+    private const float Threshold = 1.0f;
 
     /// <summary>
     ///     Child nodes indexed by the eight possible combinations of OctreeOctant flags.
@@ -343,7 +343,7 @@ internal sealed class OctreeNode<T> where T : notnull
     private bool CanNodeBeSubdivided()
     {
         var nodeLength = maxPosition.X - minPosition.X;
-        return !(Math.Abs(nodeLength - octree.MinimumNodeSize) < Threshold);
+        return Math.Abs(nodeLength - octree.MinimumNodeSize) >= Threshold;
     }
 
     /// <summary>
