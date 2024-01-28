@@ -4,6 +4,19 @@
 
 ### January
 
+#### 28 January 2024
+
+* Fix issue where the player entity was not synchronized to the client under certain conditions when
+  logging in.
+
+#### 27 January 2024
+
+* Fix issue where a read-only query executing at the same time as persistence synchronization would fail
+  due to a lack of database transaction.
+* Fix issue where a player logout and re-login before a persistence synchronization completes would result
+  in a reload of out-of-date entity data from the last synchronization point, effectively allowing a player
+  to "roll back" the player by a single persistence synchronization interval.
+
 #### 26 January 2024
 
 * Fix issue where a poorly timed REST call would trigger world segment block data generation while the

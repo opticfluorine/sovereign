@@ -20,10 +20,12 @@ using System.Data;
 using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineUtil.Collections;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Database.Queries;
+using Sovereign.Persistence.Systems.Persistence;
 
 namespace Sovereign.Persistence.State;
 
@@ -48,8 +50,10 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<int>> animatedSpriteUpdates = new(BufferSize);
 
     private readonly StructBuffer<StateUpdate<bool>> drawableUpdates = new(BufferSize);
+    private readonly IEventSender eventSender;
 
     private readonly FatalErrorHandler fatalErrorHandler;
+    private readonly PersistenceInternalController internalController;
 
     private readonly ILogger logger;
 
@@ -93,10 +97,13 @@ public sealed class StateBuffer
     /// </summary>
     private readonly StructBuffer<ulong> removedEntities = new(BufferSize);
 
-    public StateBuffer(ILogger logger, FatalErrorHandler fatalErrorHandler)
+    public StateBuffer(ILogger logger, FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
+        PersistenceInternalController internalController)
     {
         this.logger = logger;
         this.fatalErrorHandler = fatalErrorHandler;
+        this.eventSender = eventSender;
+        this.internalController = internalController;
     }
 
     /// <summary>
@@ -306,6 +313,7 @@ public sealed class StateBuffer
                 SynchronizeRemovedEntities(persistenceProvider, transaction);
 
                 transaction.Commit();
+                internalController.CompleteSync(eventSender);
             }
         }
         catch (Exception e)

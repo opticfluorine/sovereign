@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Data;
 using Microsoft.Data.Sqlite;
 using Sovereign.Persistence.Database.Queries;
 
@@ -37,13 +38,15 @@ public class SqlitePlayerExistsQuery : IPlayerExistsQuery
     public bool PlayerExists(string name)
     {
         var cmd = new SqliteCommand(query, dbConnection);
+        var transaction = dbConnection.BeginTransaction(IsolationLevel.RepeatableRead);
+        cmd.Transaction = transaction;
 
         var param = new SqliteParameter("Name", name);
         param.SqliteType = SqliteType.Text;
         cmd.Parameters.Add(param);
 
         var exists = false;
-        var reader = new QueryReader(cmd).Reader;
+        using var reader = new QueryReader(cmd).Reader;
         if (reader.Read()) exists = reader.GetBoolean(0);
 
         return exists;

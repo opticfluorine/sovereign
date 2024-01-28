@@ -18,9 +18,11 @@
 using System;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
+using Sovereign.Persistence.Systems.Persistence;
 
 namespace Sovereign.Persistence.State;
 
@@ -42,10 +44,11 @@ public sealed class StateManager : IDisposable
     public StateManager(EntityManager entityManager,
         PersistenceProviderManager persistenceProviderManager,
         ILogger logger, FatalErrorHandler fatalErrorHandler,
-        EntityNotifier entityNotifier, EntityMapper entityMapper)
+        EntityNotifier entityNotifier, EntityMapper entityMapper,
+        IEventSender eventSender, PersistenceInternalController internalController)
     {
-        FrontBuffer = new StateBuffer(logger, fatalErrorHandler);
-        backBuffer = new StateBuffer(logger, fatalErrorHandler);
+        FrontBuffer = new StateBuffer(logger, fatalErrorHandler, eventSender, internalController);
+        backBuffer = new StateBuffer(logger, fatalErrorHandler, eventSender, internalController);
 
         this.entityManager = entityManager;
         this.persistenceProviderManager = persistenceProviderManager;

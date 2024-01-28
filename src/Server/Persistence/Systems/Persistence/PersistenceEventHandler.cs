@@ -29,6 +29,8 @@ namespace Sovereign.Persistence.Systems.Persistence;
 public sealed class PersistenceEventHandler
 {
     private readonly PersistenceEntityRetriever entityRetriever;
+    private readonly IEventSender eventSender;
+    private readonly PersistenceInternalController internalController;
     private readonly PersistenceRangeRetriever rangeRetriever;
     private readonly PersistenceScheduler scheduler;
     private readonly PersistenceSynchronizer synchronizer;
@@ -36,12 +38,16 @@ public sealed class PersistenceEventHandler
     public PersistenceEventHandler(PersistenceScheduler scheduler,
         PersistenceSynchronizer synchronizer,
         PersistenceEntityRetriever entityRetriever,
-        PersistenceRangeRetriever rangeRetriever)
+        PersistenceRangeRetriever rangeRetriever,
+        PersistenceInternalController internalController,
+        IEventSender eventSender)
     {
         this.scheduler = scheduler;
         this.synchronizer = synchronizer;
         this.entityRetriever = entityRetriever;
         this.rangeRetriever = rangeRetriever;
+        this.internalController = internalController;
+        this.eventSender = eventSender;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -107,7 +113,12 @@ public sealed class PersistenceEventHandler
     {
         // Map this request directly to an entity retrieval for the player character entity,
         // but only if the player isn't newly created (and therefore already in memory).
-        if (!details.NewPlayer) OnRetrieveEntity(details.PlayerCharacterEntityId);
+        if (!details.NewPlayer)
+            OnRetrieveEntity(details.PlayerCharacterEntityId);
+        else
+            // Entity already exists locally, but act like it was retrieved so that the
+            // same process can be used for new and existing players.
+            internalController.EntityRetrieved(eventSender, details.PlayerCharacterEntityId);
     }
 
     /// <summary>

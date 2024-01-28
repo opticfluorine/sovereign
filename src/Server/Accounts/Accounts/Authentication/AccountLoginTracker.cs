@@ -70,6 +70,11 @@ public sealed class AccountLoginTracker
     private readonly EntityHierarchyIndexer hierarchyIndexer;
 
     /// <summary>
+    ///     Set of players that are currently in cooldown until the next persistence sync completes.
+    /// </summary>
+    private readonly HashSet<ulong> playersInCooldown = new();
+
+    /// <summary>
     ///     Map from player entity ID to connection ID.
     /// </summary>
     private readonly Dictionary<ulong, int> playersToConnections = new();
@@ -225,11 +230,34 @@ public sealed class AccountLoginTracker
     }
 
     /// <summary>
+    ///     Cale when a round of perisstence synchronization is complete.
+    /// </summary>
+    public void OnSyncComplete()
+    {
+        playersInCooldown.Clear();
+    }
+
+    /// <summary>
+    ///     Checks whether the given player is in cooldown and cannot currently log in.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <returns>true if in cooldown, false otherwise.</returns>
+    public bool IsPlayerInCooldown(ulong playerEntityId)
+    {
+        return playersInCooldown.Contains(playerEntityId);
+    }
+
+    /// <summary>
     ///     Logs out the given player.
     /// </summary>
     /// <param name="playerEntityId">Player entity ID.</param>
     private void LogoutPlayer(ulong playerEntityId)
     {
+        // Put the player into cooldown to prevent login before the persistence system has a chance to sync
+        // the database. Otherwise a rapid logout/login cycle could "roll back" the player state to the last
+        // synchronization point.
+        playersInCooldown.Add(playerEntityId);
+
         // Unload the player entity tree.
         var entitiesToUnload = hierarchyIndexer.GetAllDescendants(playerEntityId);
         entitiesToUnload.Add(playerEntityId);

@@ -74,6 +74,7 @@ public class EntitySynchronizer
     public void Synchronize(ulong playerEntityId, IEnumerable<ulong> entities)
     {
         // Batch the entities and generate definitions for each.
+        Logger.DebugFormat("Generating sync events for {0} entities.", entities.Count());
         var definitionBatches =
             entities
                 .Chunk(configManager.ServerConfiguration.Network.EntitySyncBatchSize)

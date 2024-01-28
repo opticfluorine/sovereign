@@ -17,10 +17,12 @@
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Sovereign.Accounts.Accounts.Services;
 using Sovereign.Accounts.Systems.Accounts;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
+using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Players;
 using WatsonWebserver;
 
@@ -37,17 +39,22 @@ public class SelectPlayerRestService : AuthenticatedRestService
     private const int MAX_REQUEST_LENGTH = 0;
 
     private readonly AccountsController accountsController;
+    private readonly AccountServices accountServices;
     private readonly IEventSender eventSender;
+    private readonly PersistenceProviderManager persistenceProviderManager;
 
     private readonly PersistencePlayerServices playerServices;
 
     public SelectPlayerRestService(RestAuthenticator authenticator, PersistencePlayerServices playerServices,
-        AccountsController accountsController, IEventSender eventSender) :
+        AccountsController accountsController, IEventSender eventSender, AccountServices accountServices,
+        PersistenceProviderManager persistenceProviderManager) :
         base(authenticator)
     {
         this.playerServices = playerServices;
         this.accountsController = accountsController;
         this.eventSender = eventSender;
+        this.accountServices = accountServices;
+        this.persistenceProviderManager = persistenceProviderManager;
     }
 
     public override string Path => RestEndpoints.Player + "/{id}";
@@ -78,6 +85,34 @@ public class SelectPlayerRestService : AuthenticatedRestService
             {
                 Logger.ErrorFormat("Account {0} tried to select invalid player entity {1}.", accountId, idParam);
                 await SendResponse(ctx, 400, "Invalid player entity ID.");
+                return;
+            }
+
+            // Verify tha the entity is a player belonging to the logged in account.
+            if (!persistenceProviderManager.PersistenceProvider.GetAccountForPlayerQuery.TryGetAccountForPlayer(
+                    playerEntityId, out var trueAccountId))
+            {
+                Logger.ErrorFormat("No account found for player {0}.", playerEntityId);
+                await SendResponse(ctx, 400, "No account found for player.");
+                return;
+            }
+
+            if (!trueAccountId.Equals(accountId))
+            {
+                Logger.ErrorFormat("Entity {0} is not a player assigned to account {1}.", playerEntityId,
+                    accountId);
+                await SendResponse(ctx, 400, "Selected player dues not belong to this account.");
+                return;
+            }
+
+            // Verify that the player is not in cooldown.
+            // If the player is in cooldown, they cannot log in until the next persistence synchronization completes.
+            // Otherwise a player could "roll back" the state of their player to the last synchronization point by
+            // logging out and back in, triggering a load from the database before the latest changes have been
+            // committed.
+            if (accountServices.IsPlayerInCooldown(playerEntityId))
+            {
+                await SendResponse(ctx, 503, "Player is in cooldown.");
                 return;
             }
 

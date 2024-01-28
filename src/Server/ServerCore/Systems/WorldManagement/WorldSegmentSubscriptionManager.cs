@@ -117,7 +117,10 @@ public class WorldSegmentSubscriptionManager
         // Special case: for removal, unsubscribe from all.
         foreach (var segment in subscriptions[entityId])
         {
-            changeCounts[segment] -= 1;
+            if (changeCounts.ContainsKey(segment))
+                changeCounts[segment] -= 1;
+            else
+                changeCounts[segment] = -1;
             playersByWorldSegments[segment].Remove(entityId);
         }
 

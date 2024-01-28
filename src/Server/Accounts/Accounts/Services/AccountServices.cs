@@ -173,4 +173,14 @@ public sealed class AccountServices
             result = new Maybe<ulong>(playerEntityId);
         return result;
     }
+
+    /// <summary>
+    ///     Checks whether a player is in cooldown and therefore cannot log in.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <returns>true if in cooldown, false otherwise.</returns>
+    public bool IsPlayerInCooldown(ulong playerEntityId)
+    {
+        return loginTracker.IsPlayerInCooldown(playerEntityId);
+    }
 }

@@ -45,6 +45,7 @@ public sealed class QueryReader : IDisposable
 
     public void Dispose()
     {
+        command.Transaction?.Commit();
         command.Dispose();
         Reader.Dispose();
     }

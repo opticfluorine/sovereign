@@ -37,7 +37,8 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Core_WorldManagement_Unsubscribe, DeliveryMethod.ReliableUnordered },
         { EventId.Client_EntitySynchronization_Update, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Movement_Move, DeliveryMethod.ReliableUnordered },
-        { EventId.Core_Movement_RequestMove, DeliveryMethod.ReliableUnordered }
+        { EventId.Core_Movement_RequestMove, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_WorldManagement_EntityLeaveWorldSegment, DeliveryMethod.ReliableUnordered }
     };
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

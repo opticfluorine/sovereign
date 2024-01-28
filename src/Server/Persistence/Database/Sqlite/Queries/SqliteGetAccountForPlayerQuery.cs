@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Data;
 using Microsoft.Data.Sqlite;
 using Sovereign.Persistence.Database.Queries;
 
@@ -43,25 +44,34 @@ public class SqliteGetAccountForPlayerQuery : IGetAccountForPlayerQuery
     {
         // Prepare query.
         var cmd = new SqliteCommand(query, connection);
-        var param = new SqliteParameter("PlayerId", SqliteType.Integer);
-        param.Value = playerEntityId;
-        cmd.Parameters.Add(param);
+        cmd.Transaction = connection.BeginTransaction(IsolationLevel.RepeatableRead);
 
-        // Execute query and parse result if any.
-        var reader = cmd.ExecuteReader();
-        var result = false;
-        accountId = Guid.Empty;
-        if (reader.NextResult())
+        try
         {
-            var accountIdBytes = new byte[16];
-            var len = reader.GetBytes(0, 0, accountIdBytes, 0, accountIdBytes.Length);
-            if (len == accountIdBytes.Length)
-            {
-                result = true;
-                accountId = new Guid(accountIdBytes);
-            }
-        }
+            var param = new SqliteParameter("PlayerId", SqliteType.Integer);
+            param.Value = playerEntityId;
+            cmd.Parameters.Add(param);
 
-        return result;
+            // Execute query and parse result if any.
+            var reader = cmd.ExecuteReader();
+            var result = false;
+            accountId = Guid.Empty;
+            if (reader.Read())
+            {
+                var accountIdBytes = new byte[16];
+                var len = reader.GetBytes(0, 0, accountIdBytes, 0, accountIdBytes.Length);
+                if (len == accountIdBytes.Length)
+                {
+                    result = true;
+                    accountId = new Guid(accountIdBytes);
+                }
+            }
+
+            return result;
+        }
+        finally
+        {
+            cmd.Transaction.Commit();
+        }
     }
 }

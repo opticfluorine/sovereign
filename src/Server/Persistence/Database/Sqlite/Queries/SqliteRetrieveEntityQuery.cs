@@ -54,7 +54,9 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
 
     public QueryReader RetrieveEntity(ulong entityId)
     {
+        var transaction = dbConnection.BeginTransaction(IsolationLevel.RepeatableRead);
         var cmd = PrepareCommand(entityId);
+        cmd.Transaction = transaction;
         return new QueryReader(cmd);
     }
 

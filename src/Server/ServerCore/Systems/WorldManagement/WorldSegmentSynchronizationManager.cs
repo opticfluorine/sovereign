@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -35,17 +36,20 @@ public class WorldSegmentSynchronizationManager
     /// </summary>
     private readonly Dictionary<GridPosition, Queue<ulong>> pendingPlayersBySegment = new();
 
+    private readonly PlayerCharacterTagCollection playerCharacters;
+
     private readonly EntitySynchronizer synchronizer;
     private readonly NonBlockWorldSegmentIndexer worldSegmentIndexer;
 
     public WorldSegmentSynchronizationManager(WorldSegmentActivationManager activationManager,
         EntitySynchronizer synchronizer, NonBlockWorldSegmentIndexer worldSegmentIndexer,
-        EntityHierarchyIndexer hierarchyIndexer)
+        EntityHierarchyIndexer hierarchyIndexer, PlayerCharacterTagCollection playerCharacters)
     {
         this.activationManager = activationManager;
         this.synchronizer = synchronizer;
         this.worldSegmentIndexer = worldSegmentIndexer;
         this.hierarchyIndexer = hierarchyIndexer;
+        this.playerCharacters = playerCharacters;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -85,10 +89,7 @@ public class WorldSegmentSynchronizationManager
         if (pendingPlayersBySegment.TryGetValue(segmentIndex, out var queue))
         {
             Logger.DebugFormat("Processing pending syncs for newly loaded segment {0}.", segmentIndex);
-            while (queue.TryDequeue(out var playerEntityId))
-            {
-                SendSynchronizationEvents(playerEntityId, segmentIndex);
-            }
+            while (queue.TryDequeue(out var playerEntityId)) SendSynchronizationEvents(playerEntityId, segmentIndex);
         }
     }
 
@@ -110,5 +111,19 @@ public class WorldSegmentSynchronizationManager
 
         // Synchronize all entities.
         synchronizer.Synchronize(playerEntityId, allEntities);
+    }
+
+    /// <summary>
+    ///     Called once Persistence has fully loaded a player entity tree on login.
+    /// </summary>
+    /// <param name="entityId">Player entity ID.</param>
+    public void OnPlayerLoaded(ulong entityId)
+    {
+        // Synchronize the newly loaded player entity with the player in case the load completed
+        // after the initial subscription-driven synchronizations.
+        if (!playerCharacters.HasTagForEntity(entityId)) return;
+        var entities = hierarchyIndexer.GetAllDescendants(entityId);
+        entities.Add(entityId);
+        synchronizer.Synchronize(entityId, entities);
     }
 }
