@@ -20,6 +20,7 @@ using System.Data;
 using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineUtil.Collections;
@@ -76,6 +77,11 @@ public sealed class StateBuffer
     ///     New entity IDs.
     /// </summary>
     private readonly StructBuffer<ulong> newEntities = new(BufferSize);
+
+    /// <summary>
+    ///     Orientation state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<Orientation>> orientationUpdates = new(BufferSize);
 
     /// <summary>
     ///     Parent entity linkage updates.
@@ -206,6 +212,16 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Enqueues an orientation update.
+    /// </summary>
+    /// <param name="update"></param>
+    /// <exception cref="NotImplementedException"></exception>
+    public void UpdateOrientation(ref StateUpdate<Orientation> update)
+    {
+        orientationUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Resets the buffer.
     /// </summary>
     public void Reset()
@@ -221,6 +237,7 @@ public sealed class StateBuffer
         parentUpdates.Clear();
         drawableUpdates.Clear();
         animatedSpriteUpdates.Clear();
+        orientationUpdates.Clear();
     }
 
     /// <summary>
@@ -310,11 +327,19 @@ public sealed class StateBuffer
                     persistenceProvider.RemoveAnimatedSpriteComponentQuery,
                     transaction);
 
+                // Orientation.
+                SynchronizeComponent(orientationUpdates,
+                    persistenceProvider.AddOrientationComponentQuery,
+                    persistenceProvider.ModifyOrientationComponentQuery,
+                    persistenceProvider.RemoveOrientationComponentQuery,
+                    transaction);
+
                 SynchronizeRemovedEntities(persistenceProvider, transaction);
 
                 transaction.Commit();
-                internalController.CompleteSync(eventSender);
             }
+
+            internalController.CompleteSync(eventSender);
         }
         catch (Exception e)
         {

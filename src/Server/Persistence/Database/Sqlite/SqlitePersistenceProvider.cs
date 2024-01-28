@@ -21,6 +21,7 @@ using System.Numerics;
 using System.Text;
 using Castle.Core.Logging;
 using Microsoft.Data.Sqlite;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Main;
 using Sovereign.Persistence.Configuration;
 using Sovereign.Persistence.Database.Queries;
@@ -77,6 +78,10 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const SqliteType ANIMATEDSPRITE_PARAM_TYPE = SqliteType.Integer;
     private const string ANIMATEDSPRITE_TABLE_NAME = "AnimatedSprite";
     private const string ANIMATEDSPRITE_PARAM_NAME = "value";
+
+    private const string ORIENTATION_TABLE_NAME = "Orientation";
+    private const string ORIENTATION_PARAM_NAME = "value";
+    private const SqliteType ORIENTATION_PARAM_TYPE = SqliteType.Integer;
 
     private readonly IPersistenceConfiguration configuration;
 
@@ -182,6 +187,14 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             ANIMATEDSPRITE_PARAM_NAME, ANIMATEDSPRITE_PARAM_TYPE, (SqliteConnection)Connection);
         RemoveAnimatedSpriteComponentQuery = new SqliteRemoveComponentQuery(
             ANIMATEDSPRITE_TABLE_NAME, (SqliteConnection)Connection);
+
+        // Orientation component.
+        AddOrientationComponentQuery = new SimpleSqliteAddComponentQuery<Orientation>(ORIENTATION_TABLE_NAME,
+            ORIENTATION_PARAM_NAME, ORIENTATION_PARAM_TYPE, (SqliteConnection)Connection);
+        ModifyOrientationComponentQuery = new SimpleSqliteModifyComponentQuery<Orientation>(ORIENTATION_TABLE_NAME,
+            ORIENTATION_PARAM_NAME, ORIENTATION_PARAM_TYPE, (SqliteConnection)Connection);
+        RemoveOrientationComponentQuery =
+            new SqliteRemoveComponentQuery(ORIENTATION_TABLE_NAME, (SqliteConnection)Connection);
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -232,6 +245,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<int> AddAnimatedSpriteComponentQuery { get; }
     public IModifyComponentQuery<int> ModifyAnimatedSpriteComponentQuery { get; }
     public IRemoveComponentQuery RemoveAnimatedSpriteComponentQuery { get; }
+    public IAddComponentQuery<Orientation> AddOrientationComponentQuery { get; }
+    public IModifyComponentQuery<Orientation> ModifyOrientationComponentQuery { get; }
+    public IRemoveComponentQuery RemoveOrientationComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

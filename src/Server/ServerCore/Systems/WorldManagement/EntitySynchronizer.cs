@@ -40,6 +40,7 @@ public class EntitySynchronizer
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
+    private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly PositionComponentCollection positions;
@@ -49,7 +50,7 @@ public class EntitySynchronizer
         MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
         ParentComponentCollection parents, DrawableTagCollection drawables,
-        AnimatedSpriteComponentCollection animatedSprites)
+        AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations)
     {
         this.eventSender = eventSender;
         this.configManager = configManager;
@@ -62,6 +63,7 @@ public class EntitySynchronizer
         this.parents = parents;
         this.drawables = drawables;
         this.animatedSprites = animatedSprites;
+        this.orientations = orientations;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -74,7 +76,6 @@ public class EntitySynchronizer
     public void Synchronize(ulong playerEntityId, IEnumerable<ulong> entities)
     {
         // Batch the entities and generate definitions for each.
-        Logger.DebugFormat("Generating sync events for {0} entities.", entities.Count());
         var definitionBatches =
             entities
                 .Chunk(configManager.ServerConfiguration.Network.EntitySyncBatchSize)
@@ -116,6 +117,9 @@ public class EntitySynchronizer
 
         if (parents.HasComponentForEntity(entityId))
             def.Parent = parents[entityId];
+
+        if (orientations.HasComponentForEntity(entityId))
+            def.Orientation = orientations[entityId];
 
         return def;
     }

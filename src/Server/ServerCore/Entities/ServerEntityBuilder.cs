@@ -44,10 +44,11 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         ParentComponentCollection parents,
         DrawableTagCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites,
+        OrientationComponentCollection orientations,
         EntityTable entityTable)
         : base(entityId, load, entityManager, positions, velocities, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents,
-            drawables, animatedSprites, entityTable)
+            drawables, animatedSprites, orientations, entityTable)
     {
         this.accounts = accounts;
     }

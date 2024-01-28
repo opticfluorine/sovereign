@@ -7,7 +7,16 @@
 #### 28 January 2024
 
 * Fix issue where the player entity was not synchronized to the client under certain conditions when
-  logging in.
+  logging in. Specifically, if the world segment where the player is located is already loaded into memory,
+  the initial entity synchronization will typically occur faster than the load of the player entity tree
+  from the database. As a result, the player entity is not synchronized in the first call (or, in some rare
+  cases, only partially synchronized when the sync event occurs in the middle of a persistence load spread
+  across two or more ticks). Sending (or potentially resending) the synchronization events for the player
+  entity tree only ensures that the entity is fully synchronized.
+* Add `Orientation` component for tracking which direction an enttiy is facing. The orientation is set in
+  the `Movement` system based on the direction of the entity's velocity.
+* Revert some changes related to database transactions from last night that were breaking things. I should
+  really go to bed when I'm tired instead of messing with database transactions.
 
 #### 27 January 2024
 

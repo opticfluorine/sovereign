@@ -189,6 +189,18 @@ CREATE TABLE AnimatedSprite
 );
 
 
+---------------------------
+-- Orientation Component --
+---------------------------
+
+CREATE TABLE Orientation
+(
+    id    INTEGER PRIMARY KEY NOT NULL,
+    value INTEGER             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+
 --------------------------------------
 -- Account With Authentication View --
 --------------------------------------
@@ -220,7 +232,8 @@ SELECT Entity.id                   AS id,
        AccountComponent.account_id AS account,
        Parent.parent_id            AS parent,
        Drawable.value              AS drawable,
-       AnimatedSprite.value        AS animatedSprite
+       AnimatedSprite.value        AS animatedSprite,
+       Orientation.value           AS orientation
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
@@ -230,7 +243,8 @@ FROM Entity
          LEFT JOIN AccountComponent ON Entity.id = AccountComponent.id
          LEFT JOIN Parent ON Entity.id = Parent.id
          LEFT JOIN Drawable ON Entity.id = Drawable.id
-         LEFT JOIN AnimatedSprite ON Entity.id = AnimatedSprite.id;
+         LEFT JOIN AnimatedSprite ON Entity.id = AnimatedSprite.id
+         LEFT JOIN Orientation ON Entity.id = Orientation.id;
 
 
 -- Log the migration.

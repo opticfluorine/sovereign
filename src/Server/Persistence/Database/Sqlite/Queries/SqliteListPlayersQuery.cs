@@ -47,13 +47,13 @@ public class SqliteListPlayersQuery : IListPlayersQuery
     public List<PlayerInfo> ListPlayersForAccount(Guid accountId)
     {
         // Prepare query.
-        var cmd = new SqliteCommand(query, connection);
+        using var cmd = new SqliteCommand(query, connection);
         var param = new SqliteParameter("AccountId", SqliteType.Blob);
         param.Value = accountId.ToByteArray();
         cmd.Parameters.Add(param);
 
         // Execute query and process results.
-        var reader = cmd.ExecuteReader();
+        using var reader = cmd.ExecuteReader();
         var results = new List<PlayerInfo>();
         while (reader.Read())
         {

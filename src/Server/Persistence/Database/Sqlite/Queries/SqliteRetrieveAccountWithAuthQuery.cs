@@ -44,7 +44,6 @@ public sealed class SqliteRetrieveAccountWithAuthQuery : IRetrieveAccountWithAut
     public QueryReader RetrieveAccountWithAuth(string username)
     {
         var cmd = new SqliteCommand(Query, dbConnection);
-        cmd.Transaction = dbConnection.BeginTransaction(IsolationLevel.RepeatableRead);
 
         var param = new SqliteParameter("Username", username);
         param.SqliteType = SqliteType.Text;

@@ -86,6 +86,11 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutParent();
 
+        if (definition.Orientation.HasValue)
+            builder.Orientation(definition.Orientation.Value);
+        else
+            builder.WithoutOrientation();
+
         var entityId = builder.Build();
         Logger.DebugFormat("Processed entity ID {0}.", entityId);
     }

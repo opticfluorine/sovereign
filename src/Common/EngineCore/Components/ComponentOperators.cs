@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Components;
 
@@ -95,6 +96,15 @@ public static class ComponentOperators
     /// </summary>
     public static readonly Dictionary<ComponentOperation, Func<Guid, Guid, Guid>>
         GuidOperators = new()
+        {
+            { ComponentOperation.Set, (a, b) => b }
+        };
+
+    /// <summary>
+    ///     Standard operators for orientation-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<Orientation, Orientation, Orientation>>
+        OrientationOperators = new()
         {
             { ComponentOperation.Set, (a, b) => b }
         };

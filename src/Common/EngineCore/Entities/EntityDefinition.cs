@@ -74,4 +74,10 @@ public class EntityDefinition
     /// </summary>
     [Key(7)]
     public ulong? Parent { get; set; }
+
+    /// <summary>
+    ///     Orientation, or null if the entity has no orientation.
+    /// </summary>
+    [Key(8)]
+    public Orientation? Orientation { get; set; }
 }
