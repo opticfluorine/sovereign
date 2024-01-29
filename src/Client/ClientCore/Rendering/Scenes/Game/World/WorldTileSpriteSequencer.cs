@@ -18,6 +18,8 @@
 using System.Collections.Generic;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.ClientCore.Systems.Block.Caches;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.World.Materials;
@@ -39,6 +41,7 @@ public sealed class WorldTileSpriteSequencer
     private readonly MaterialManager materialManager;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
+    private readonly OrientationComponentCollection orientations;
     private readonly IBlockAnimatedSpriteCache spriteCache;
     private readonly TileSpriteManager tileSpriteManager;
 
@@ -48,7 +51,8 @@ public sealed class WorldTileSpriteSequencer
         MaterialManager materialManager,
         AboveBlockComponentCollection aboveBlocks,
         TileSpriteManager tileSpriteManager,
-        IBlockAnimatedSpriteCache spriteCache)
+        IBlockAnimatedSpriteCache spriteCache,
+        OrientationComponentCollection orientations)
     {
         this.materials = materials;
         this.materialModifiers = materialModifiers;
@@ -57,6 +61,7 @@ public sealed class WorldTileSpriteSequencer
         this.aboveBlocks = aboveBlocks;
         this.tileSpriteManager = tileSpriteManager;
         this.spriteCache = spriteCache;
+        this.orientations = orientations;
     }
 
     /// <summary>
@@ -77,12 +82,11 @@ public sealed class WorldTileSpriteSequencer
 
             /* Sequence the sprite information. */
             foreach (var spriteId in cachedSprites)
-                animatedSprites.Add(new PosVelId
+                animatedSprites.Add(tileSpriteInfo with
                 {
-                    Position = tileSpriteInfo.Position,
-                    Velocity = tileSpriteInfo.Velocity,
                     Id = spriteId,
-                    EntityId = tileSpriteInfo.EntityId
+                    Orientation = orientations.GetComponentForEntity(tileSpriteInfo.EntityId)
+                        .OrElseDefault(Orientation.South)
                 });
         }
     }

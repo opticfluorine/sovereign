@@ -26,20 +26,74 @@ Sprites:
     Row: 3
     Column: 19
     
-    # Slime, facing down, left frame
+    # Slime, facing south, left frame
   - Id: 4
     SpritesheetName: slime.png
     Row: 2
     Column: 0
     
-    # Slime, facing down, center frame
+    # Slime, facing south, center frame
   - Id: 5
     SpritesheetName: slime.png
     Row: 2
     Column: 1
     
-    # Slime, facing down, right frame
+    # Slime, facing south, right frame
   - Id: 6
     SpritesheetName: slime.png
     Row: 2
+    Column: 2
+    
+    # Slime, facing west, left frame
+  - Id: 7
+    SpritesheetName: slime.png
+    Row: 3
+    Column: 0
+    
+    # Slime, facing west, center frame
+  - Id: 8
+    SpritesheetName: slime.png
+    Row: 3
+    Column: 1
+    
+    # Slime, facing west, right frame
+  - Id: 9
+    SpritesheetName: slime.png
+    Row: 3
+    Column: 2
+    
+    # Slime, facing north, left frame
+  - Id: 10
+    SpritesheetName: slime.png
+    Row: 0
+    Column: 0
+    
+    # Slime, facing north, center frame
+  - Id: 11
+    SpritesheetName: slime.png
+    Row: 0
+    Column: 1
+    
+    # Slime, facing north, right frame
+  - Id: 12
+    SpritesheetName: slime.png
+    Row: 0
+    Column: 2
+    
+    # Slime, facing east, left frame
+  - Id: 13
+    SpritesheetName: slime.png
+    Row: 1
+    Column: 0
+    
+    # Slime, facing east, center frame
+  - Id: 14
+    SpritesheetName: slime.png
+    Row: 1
+    Column: 1
+    
+    # Slime, facing east, right frame
+  - Id: 15
+    SpritesheetName: slime.png
+    Row: 1
     Column: 2

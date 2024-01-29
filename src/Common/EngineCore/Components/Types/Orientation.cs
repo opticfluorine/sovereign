@@ -22,11 +22,11 @@ namespace Sovereign.EngineCore.Components.Types;
 public enum Orientation
 {
     South = 0,
-    Southwest = 1,
-    West = 2,
-    Northwest = 3,
+    Southeast = 1,
+    East = 2,
+    Northeast = 3,
     North = 4,
-    Northeast = 5,
-    East = 6,
-    Southeast = 7
+    Northwest = 5,
+    West = 6,
+    Southwest = 7
 }

@@ -17,6 +17,8 @@
   the `Movement` system based on the direction of the entity's velocity.
 * Revert some changes related to database transactions from last night that were breaking things. I should
   really go to bed when I'm tired instead of messing with database transactions.
+* Update renderer to apply orientations to the animated sprites as they are rendered. Also update the animated
+  sprite definitions to include orientation information.
 
 #### 27 January 2024
 

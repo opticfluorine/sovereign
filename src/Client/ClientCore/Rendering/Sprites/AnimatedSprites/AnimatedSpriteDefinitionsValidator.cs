@@ -18,6 +18,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Validation;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -49,7 +50,8 @@ public sealed class AnimatedSpriteDefinitionsValidator
         var sb = new StringBuilder();
         var valid = ValidateIds(definitions, sb)
                     && ValidateNonzeroAnimationTimestep(definitions, sb)
-                    && ValidateSpriteIds(definitions, sb);
+                    && ValidateSpriteIds(definitions, sb)
+                    && ValidateDefaultFaces(definitions, sb);
         if (!valid) throw new AnimatedSpriteDefinitionsException(sb.ToString().Trim());
     }
 
@@ -127,8 +129,8 @@ public sealed class AnimatedSpriteDefinitionsValidator
         StringBuilder sb)
     {
         var badSprites = definitions.AnimatedSprites
-            .Where(sprite => HasInvalidSpriteIds(sprite.SpriteIds));
-        var valid = badSprites.Count() == 0;
+            .Where(sprite => sprite.Faces.Values.Any(face => HasInvalidSpriteIds(face.SpriteIds)));
+        var valid = !badSprites.Any();
 
         if (!valid)
         {
@@ -152,16 +154,24 @@ public sealed class AnimatedSpriteDefinitionsValidator
     }
 
     /// <summary>
-    ///     Gets the unknown sprite IDs from a list of sprite IDs.
+    ///     Checks whether any sprites are missing their default South face.
     /// </summary>
-    /// <param name="spriteIds">Sprite IDs to check.</param>
-    /// <returns>Unknown sprite IDs.</returns>
-    private IList<int> GetUnknownSpriteIds(IEnumerable<int> spriteIds)
+    /// <param name="definitions">Definitions.</param>
+    /// <param name="sb">StringBuilder used to build an error message if any.</param>
+    /// <returns>true if valid, false otherwise.</returns>
+    private bool ValidateDefaultFaces(AnimatedSpriteDefinitions definitions,
+        StringBuilder sb)
     {
-        var unknowns = new List<int>();
-        unknowns.AddRange(spriteIds
-            .Where(id => id < 0 || id >= spriteManager.Sprites.Count)
-            .OrderBy(id => id));
-        return unknowns;
+        var badSprites = definitions.AnimatedSprites
+            .Where(sprite => !sprite.Faces.ContainsKey(Orientation.South));
+        var valid = !badSprites.Any();
+
+        if (!valid)
+        {
+            sb.Append("The following animated sprites lack a default South face:\n\n");
+            foreach (var sprite in badSprites) sb.Append("Animated Sprite ").Append(sprite.Id).Append("\n");
+        }
+
+        return valid;
     }
 }

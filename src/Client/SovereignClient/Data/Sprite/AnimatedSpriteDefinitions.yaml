@@ -5,39 +5,69 @@ AnimatedSprites:
   # Water, center
   - Id: 0
     AnimationTimestep: 1
-    SpriteIds:
-      - 0
+    Faces:
+      South:
+        SpriteIds:
+          - 0
 
   # Grass, center
   - Id: 1
     AnimationTimestep: 1
-    SpriteIds:
-      - 1
+    Faces:
+      South:
+        SpriteIds:
+          - 1
 
   # Light dirt, center
   - Id: 2
     AnimationTimestep: 1
-    SpriteIds:
-      - 2
+    Faces:
+      South:
+        SpriteIds:
+          - 2
 
   # Dark dirt, center
   - Id: 3
     AnimationTimestep: 1
-    SpriteIds:
-      - 3
+    Faces:
+      South:
+        SpriteIds:
+          - 3
   
   # Slime, downward facing, walking
   - Id: 4
     AnimationTimestep: 200000
-    SpriteIds:
-      - 5
-      - 6
-      - 5
-      - 4
+    Faces:
+      South:
+        SpriteIds:
+          - 5
+          - 6
+          - 5
+          - 4
+      West:
+        SpriteIds:
+          - 8
+          - 9
+          - 8
+          - 7
+      North:
+        SpriteIds:
+          - 11
+          - 12
+          - 11
+          - 10
+      East:
+        SpriteIds:
+          - 14
+          - 15
+          - 14
+          - 13
   
   # Slime, downward facing, static
   - Id: 5
     AnimationTimestep: 1
-    SpriteIds:
-      - 5
+    Faces:
+      South:
+        SpriteIds:
+          - 5
   

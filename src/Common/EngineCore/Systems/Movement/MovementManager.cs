@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
@@ -96,6 +97,8 @@ public class MovementManager
 
         velocities.OnStartUpdates += OnStartUpdates;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Called when movement is requested.
@@ -221,15 +224,17 @@ public class MovementManager
         // Find the angle of movement in the orthogonal space of the screen.
         // Project y and z together to account for z-oriented motion being projected onto the y axis for rendering.
         // Note that Math.Atan2 properly handles the boundaries of the quadrants for us.
-        var theta = (float)Math.Atan2(velocity.Y + velocity.Z, velocity.X);
+        var projY = velocity.Y + velocity.Z;
+        var theta = (float)Math.Atan2(projY, velocity.X);
 
         // Map the angle onto the defined orientations.
         // Rotate by pi/8 radians so that the first bin starts at 0.
+        // Rotate by another 2pi radians to bring the quadrant 3 and 4 angles to positive
         // Then bins begin at angles of n(pi/4) for integer n (modulo 8), offset by two from the enum ordering.
         const float invBinWidth = 1.0f / (0.25f * (float)Math.PI);
         const int orientationCount = 8; // Eight defined orientations
         const int orientationOffset = 2; // theta=0 is East, so offset by two to give South as the first in
-        var adjTheta = theta + 0.125f * (float)Math.PI;
+        var adjTheta = theta + 2.125f * (float)Math.PI;
         var orientation = (Orientation)((int)(adjTheta * invBinWidth + orientationOffset) % orientationCount);
 
         orientations.AddOrUpdateComponent(entityId, orientation);

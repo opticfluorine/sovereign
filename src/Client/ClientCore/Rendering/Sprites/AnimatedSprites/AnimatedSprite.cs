@@ -15,8 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sovereign.EngineCore.Components.Types;
 using static Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites.AnimatedSpriteDefinitions;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -26,12 +28,36 @@ namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 /// </summary>
 public sealed class AnimatedSprite
 {
+    /// <summary>
+    ///     Default orientation.
+    /// </summary>
+    private const Orientation DefaultOrientation = Orientation.South;
+
+    /// <summary>
+    ///     Specifies which orientation to try next if a given orientation is not defined for a sprite.
+    /// </summary>
+    private static readonly Dictionary<Orientation, Orientation> FallbackOrientations = new()
+    {
+        { Orientation.Northeast, Orientation.East },
+        { Orientation.Southeast, Orientation.East },
+        { Orientation.Northwest, Orientation.West },
+        { Orientation.Southwest, Orientation.West },
+        { Orientation.North, Orientation.South },
+        { Orientation.East, Orientation.South },
+        { Orientation.West, Orientation.South }
+    };
+
     public AnimatedSprite(AnimatedSpriteDefinition definition, SpriteManager spriteManager)
     {
         FrameTime = definition.AnimationTimestep;
-        Sprites = definition.SpriteIds
-            .Select(id => spriteManager.Sprites[id])
-            .ToList();
+        Faces = definition.Faces
+            .Select(pair => new Tuple<Orientation, List<Sprite>>(pair.Key,
+                pair.Value.SpriteIds
+                    .Select(id => spriteManager.Sprites[id])
+                    .ToList()))
+            .ToDictionary(
+                pair => pair.Item1,
+                pair => pair.Item2);
     }
 
     /// <summary>
@@ -40,18 +66,42 @@ public sealed class AnimatedSprite
     public ulong FrameTime { get; }
 
     /// <summary>
-    ///     Sprite IDs for each animation frame.
+    ///     Sprite IDs for each defined orientation.
     /// </summary>
-    public IList<Sprite> Sprites { get; }
+    public Dictionary<Orientation, List<Sprite>> Faces { get; }
 
     /// <summary>
-    ///     Gets the sprite for the given system time.
+    ///     Gets the sprite for the given system time and orientation.
     /// </summary>
     /// <param name="systemTime">System time.</param>
-    /// <returns>Sprite for the given system time.</returns>
-    public Sprite GetSpriteForTime(ulong systemTime)
+    /// <param name="orientation">Orientation.</param>
+    /// <returns>Sprite for the given system time and orientation.</returns>
+    public Sprite GetSpriteForTime(ulong systemTime, Orientation orientation)
     {
-        var spriteFrame = (int)(systemTime / FrameTime) % Sprites.Count;
-        return Sprites[spriteFrame];
+        var sprites = GetSpritesForOrientation(orientation);
+        var spriteFrame = (int)(systemTime / FrameTime) % sprites.Count;
+        return sprites[spriteFrame];
+    }
+
+    /// <summary>
+    ///     Gets the sprite list for the given orientation, applying fallback logic if the specified
+    ///     orientation does not have a defined face for this sprite.
+    /// </summary>
+    /// <param name="orientation">Orientation.</param>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown if no suitable face is found for this sprite.
+    /// </exception>
+    /// <returns></returns>
+    private List<Sprite> GetSpritesForOrientation(Orientation orientation)
+    {
+        // Iterate over the fallback table until we reach an orientation with a face definition.
+        var nextOrientation = orientation;
+        while (!Faces.ContainsKey(nextOrientation) && nextOrientation != DefaultOrientation)
+            nextOrientation = FallbackOrientations[nextOrientation];
+
+        if (!Faces.ContainsKey(nextOrientation))
+            throw new InvalidOperationException("No suitable face found for sprite.");
+
+        return Faces[nextOrientation];
     }
 }
