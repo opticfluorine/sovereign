@@ -18,8 +18,10 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Player.Components.Indexers;
 using Sovereign.EngineCore.World;
@@ -51,6 +53,7 @@ public class WorldSegmentSubscriptionManager
     private readonly Dictionary<ulong, GridPosition> currentWorldSegments = new();
 
     private readonly IEventSender eventSender;
+    private readonly EntityHierarchyIndexer hierarchyIndexer;
     private readonly WorldManagementInternalController internalController;
 
     /// <summary>
@@ -59,6 +62,7 @@ public class WorldSegmentSubscriptionManager
     private readonly Dictionary<GridPosition, HashSet<ulong>> playersByWorldSegments = new();
 
     private readonly PlayerPositionEventFilter positionEventFilter;
+    private readonly PositionComponentCollection positions;
 
     private readonly WorldSegmentResolver resolver;
 
@@ -66,6 +70,8 @@ public class WorldSegmentSubscriptionManager
     ///     Dictionary mapping player entity IDs to subscribed world segments.
     /// </summary>
     private readonly Dictionary<ulong, HashSet<GridPosition>> subscriptions = new();
+
+    private readonly EntitySynchronizer synchronizer;
 
     private readonly WorldSegmentSynchronizationManager syncManager;
 
@@ -75,7 +81,9 @@ public class WorldSegmentSubscriptionManager
         WorldSegmentResolver resolver, IWorldManagementConfiguration worldConfig,
         WorldSegmentActivationManager activationManager,
         IEventSender eventSender, WorldManagementInternalController internalController,
-        WorldSegmentSynchronizationManager syncManager)
+        WorldSegmentSynchronizationManager syncManager, PositionComponentCollection positions,
+        EntitySynchronizer synchronizer, EntityHierarchyIndexer hierarchyIndexer,
+        EntityTable entityTable)
     {
         this.positionEventFilter = positionEventFilter;
         this.resolver = resolver;
@@ -84,6 +92,9 @@ public class WorldSegmentSubscriptionManager
         this.eventSender = eventSender;
         this.internalController = internalController;
         this.syncManager = syncManager;
+        this.positions = positions;
+        this.synchronizer = synchronizer;
+        this.hierarchyIndexer = hierarchyIndexer;
 
         // Register event handlers.
         this.positionEventFilter.OnStartUpdates += OnStartUpdates;
@@ -91,6 +102,7 @@ public class WorldSegmentSubscriptionManager
         this.positionEventFilter.OnComponentAdded += OnPlayerAdded;
         this.positionEventFilter.OnComponentModified += OnPlayerMoved;
         this.positionEventFilter.OnComponentRemoved += OnPlayerRemoved;
+        entityTable.OnNonBlockEntityAdded += OnNonBlockEntityAdded;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -253,5 +265,25 @@ public class WorldSegmentSubscriptionManager
                         changeCounts[segment] = -1;
                 }
             }
+    }
+
+    /// <summary>
+    ///     Called when an entity has been fully added to synchronize the entity with any subscribers.
+    /// </summary>
+    /// <param name="entityId">Entity.</param>
+    private void OnNonBlockEntityAdded(ulong entityId)
+    {
+        // Skip if not a positioned entity.
+        if (!positions.HasComponentForEntity(entityId)) return;
+
+        // Skip if there are no subscribers to the relevant world segment.
+        var segmentIndex = resolver.GetWorldSegmentForPosition(positions[entityId]);
+        var playerEntityIds = GetSubscribersForWorldSegment(segmentIndex);
+        if (playerEntityIds.Count == 0) return;
+
+        // Identify the new entity tree.
+        var entitiesToSync = hierarchyIndexer.GetAllDescendants(entityId);
+        entitiesToSync.Add(entityId);
+        synchronizer.Synchronize(playerEntityIds, entitiesToSync);
     }
 }

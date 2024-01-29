@@ -151,15 +151,16 @@ public sealed class Octree<T> where T : notnull
     /// <param name="lockHandle">Active lock handle.</param>
     /// <param name="element">Element to be updated.</param>
     /// <param name="position">New position of the element.</param>
-    /// <exception cref="KeyNotFoundException">
-    ///     Thrown if the element is not in the octree.
-    /// </exception>
     public void UpdatePosition(OctreeLock lockHandle, T element, Vector3 position)
     {
         /* Locate the leaf node containing the element. */
         var initialNode = FindNodeForElement(element);
         if (initialNode == null)
-            throw new KeyNotFoundException(element.ToString());
+        {
+            // Not yet added - go ahead and add instead of modifying.
+            Add(lockHandle, position, element);
+            return;
+        }
 
         /* Clear any links that are invalidated. */
         var currentNode = initialNode;

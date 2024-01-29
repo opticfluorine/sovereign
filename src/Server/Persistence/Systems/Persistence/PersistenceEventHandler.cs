@@ -115,10 +115,6 @@ public sealed class PersistenceEventHandler
         // but only if the player isn't newly created (and therefore already in memory).
         if (!details.NewPlayer)
             OnRetrieveEntity(details.PlayerCharacterEntityId);
-        else
-            // Entity already exists locally, but act like it was retrieved so that the
-            // same process can be used for new and existing players.
-            internalController.EntityRetrieved(eventSender, details.PlayerCharacterEntityId);
     }
 
     /// <summary>

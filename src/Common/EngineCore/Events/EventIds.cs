@@ -278,13 +278,6 @@ public enum EventId
     Server_Persistence_RetrieveWorldSegment = 200001,
 
     /// <summary>
-    ///     Event sent when a specific entity retrieval is complete. This is not sent for
-    ///     bulk retrievals by world segment.
-    /// </summary>
-    /// Associated details: EntityEventDetails
-    Server_Persistence_EntityRetrieved = 200002,
-
-    /// <summary>
     ///     Event sent to synchronize the server with the database.
     /// </summary>
     /// Associated details: None

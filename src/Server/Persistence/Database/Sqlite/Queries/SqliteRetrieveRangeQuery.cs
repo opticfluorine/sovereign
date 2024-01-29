@@ -49,7 +49,7 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                       AND ec.playerCharacter IS NULL
 	        )
             SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable,
-                animatedSprite, orientation FROM EntityTree";
+                animatedSprite, orientation FROM EntityTree ORDER BY parent NULLS LAST";
 
     private readonly SqliteConnection dbConnection;
 

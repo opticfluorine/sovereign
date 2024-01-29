@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
 
 namespace Sovereign.Persistence.Systems.Persistence;
 
@@ -31,18 +30,6 @@ public class PersistenceInternalController
     public void CompleteSync(IEventSender eventSender)
     {
         var ev = new Event(EventId.Server_Persistence_SynchronizeComplete);
-        eventSender.SendEvent(ev);
-    }
-
-    /// <summary>
-    ///     Reports that an entity and its tree have been loaded.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="entityId">Entity ID.</param>
-    public void EntityRetrieved(IEventSender eventSender, ulong entityId)
-    {
-        var details = new EntityEventDetails { EntityId = entityId };
-        var ev = new Event(EventId.Server_Persistence_EntityRetrieved, details);
         eventSender.SendEvent(ev);
     }
 }

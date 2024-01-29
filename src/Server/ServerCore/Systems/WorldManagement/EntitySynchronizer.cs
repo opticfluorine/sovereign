@@ -75,6 +75,16 @@ public class EntitySynchronizer
     /// <param name="entities">Entities to synchronize.</param>
     public void Synchronize(ulong playerEntityId, IEnumerable<ulong> entities)
     {
+        Synchronize(Enumerable.Repeat(playerEntityId, 1), entities);
+    }
+
+    /// <summary>
+    ///     Synchronizes the given set of entities to a client.
+    /// </summary>
+    /// <param name="playerEntityIds">Players to synchronize with.</param>
+    /// <param name="entities">Entities to synchronize.</param>
+    public void Synchronize(IEnumerable<ulong> playerEntityIds, IEnumerable<ulong> entities)
+    {
         // Batch the entities and generate definitions for each.
         var definitionBatches =
             entities
@@ -83,6 +93,7 @@ public class EntitySynchronizer
 
         // Send each batch to the client as its own event.
         foreach (var batch in definitionBatches)
+        foreach (var playerEntityId in playerEntityIds)
         {
             Logger.DebugFormat("Sync {0} entities to player {1}.", batch.Count, playerEntityId);
             controller.PushSyncEvent(eventSender, playerEntityId, batch);

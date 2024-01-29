@@ -19,6 +19,12 @@
   really go to bed when I'm tired instead of messing with database transactions.
 * Update renderer to apply orientations to the animated sprites as they are rendered. Also update the animated
   sprite definitions to include orientation information.
+* Synchronize entity trees to subscribed clients when they are committed to memory. This supersedes the earlier
+  work from the first bullet. Again, I should get more sleep.
+* Update entity retrieval queries to sort null parents to the end of the result set. This ensures that when
+  an entity tree is retrieved, the root of the tree is the last entity processed. Therefore, the entity loaded
+  event for the root node is guaranteed to come after the full tree is committed to memory, and so it is safe
+  to synchronize the tree once the event is invoked.
 
 #### 27 January 2024
 

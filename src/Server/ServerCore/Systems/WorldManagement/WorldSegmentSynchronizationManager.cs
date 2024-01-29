@@ -30,6 +30,7 @@ public class WorldSegmentSynchronizationManager
 {
     private readonly WorldSegmentActivationManager activationManager;
     private readonly EntityHierarchyIndexer hierarchyIndexer;
+    private readonly NonBlockWorldSegmentIndexer nonBlockSegmentIndexer;
 
     /// <summary>
     ///     Map from segment index to a queue of player entity IDs needing synchronization.
@@ -39,15 +40,14 @@ public class WorldSegmentSynchronizationManager
     private readonly PlayerCharacterTagCollection playerCharacters;
 
     private readonly EntitySynchronizer synchronizer;
-    private readonly NonBlockWorldSegmentIndexer worldSegmentIndexer;
 
     public WorldSegmentSynchronizationManager(WorldSegmentActivationManager activationManager,
-        EntitySynchronizer synchronizer, NonBlockWorldSegmentIndexer worldSegmentIndexer,
+        EntitySynchronizer synchronizer, NonBlockWorldSegmentIndexer nonBlockSegmentIndexer,
         EntityHierarchyIndexer hierarchyIndexer, PlayerCharacterTagCollection playerCharacters)
     {
         this.activationManager = activationManager;
         this.synchronizer = synchronizer;
-        this.worldSegmentIndexer = worldSegmentIndexer;
+        this.nonBlockSegmentIndexer = nonBlockSegmentIndexer;
         this.hierarchyIndexer = hierarchyIndexer;
         this.playerCharacters = playerCharacters;
     }
@@ -101,7 +101,7 @@ public class WorldSegmentSynchronizationManager
     private void SendSynchronizationEvents(ulong playerEntityId, GridPosition segmentIndex)
     {
         // Fill in the hierarchy beneath the entities.
-        var allEntities = worldSegmentIndexer.GetEntitiesInWorldSegment(segmentIndex)
+        var allEntities = nonBlockSegmentIndexer.GetEntitiesInWorldSegment(segmentIndex)
             .SelectMany(entityId =>
             {
                 var all = hierarchyIndexer.GetAllDescendants(entityId);
@@ -111,19 +111,5 @@ public class WorldSegmentSynchronizationManager
 
         // Synchronize all entities.
         synchronizer.Synchronize(playerEntityId, allEntities);
-    }
-
-    /// <summary>
-    ///     Called once Persistence has fully loaded a player entity tree on login.
-    /// </summary>
-    /// <param name="entityId">Player entity ID.</param>
-    public void OnPlayerLoaded(ulong entityId)
-    {
-        // Synchronize the newly loaded player entity with the player in case the load completed
-        // after the initial subscription-driven synchronizations.
-        if (!playerCharacters.HasTagForEntity(entityId)) return;
-        var entities = hierarchyIndexer.GetAllDescendants(entityId);
-        entities.Add(entityId);
-        synchronizer.Synchronize(entityId, entities);
     }
 }

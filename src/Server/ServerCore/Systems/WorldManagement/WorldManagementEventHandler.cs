@@ -63,18 +63,6 @@ public sealed class WorldManagementEventHandler
             }
                 break;
 
-            case EventId.Server_Persistence_EntityRetrieved:
-            {
-                if (ev.EventDetails is not EntityEventDetails details)
-                {
-                    Logger.Error("Received EntityRetrieved without details.");
-                    break;
-                }
-
-                syncManager.OnPlayerLoaded(details.EntityId);
-            }
-                break;
-
             default:
                 Logger.ErrorFormat("Unhandled event ID {0}.", ev.EventId);
                 break;

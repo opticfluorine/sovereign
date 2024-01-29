@@ -73,8 +73,6 @@ public sealed class PersistenceEntityRetriever
                 /* Process results. */
                 entityProcessor.ProcessFromReader(reader.Reader);
             }
-
-            internalController.EntityRetrieved(eventSender, entityId);
         }
         catch (Exception e)
         {

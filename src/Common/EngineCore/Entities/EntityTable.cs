@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Sovereign.EngineCore.Systems.Block.Components;
 
 namespace Sovereign.EngineCore.Entities;
 
@@ -26,6 +28,8 @@ public class EntityTable
     /// </summary>
     private readonly HashSet<ulong> entities = new();
 
+    private readonly MaterialComponentCollection materials;
+
     /// <summary>
     ///     Set of all entities that are enqueued to be added to the table.
     /// </summary>
@@ -35,6 +39,11 @@ public class EntityTable
     ///     Set of all entities that are enqueued to be removed from the table.
     /// </summary>
     private readonly ConcurrentBag<ulong> pendingRemoves = new();
+
+    public EntityTable(MaterialComponentCollection materials)
+    {
+        this.materials = materials;
+    }
 
     /// <summary>
     ///     Checks whether the given entity is current in memory.
@@ -72,7 +81,12 @@ public class EntityTable
     public void UpdateAllEntities()
     {
         // Additions.
-        foreach (var entityId in pendingAdds) entities.Add(entityId);
+        foreach (var entityId in pendingAdds)
+        {
+            entities.Add(entityId);
+            if (!materials.HasComponentForEntity(entityId))
+                OnNonBlockEntityAdded?.Invoke(entityId);
+        }
 
         // Removals.
         foreach (var entityId in pendingRemoves) entities.Remove(entityId);
@@ -81,4 +95,9 @@ public class EntityTable
         pendingAdds.Clear();
         pendingRemoves.Clear();
     }
+
+    /// <summary>
+    ///     Event invoked when an entity has been added.
+    /// </summary>
+    public event Action<ulong>? OnNonBlockEntityAdded;
 }
