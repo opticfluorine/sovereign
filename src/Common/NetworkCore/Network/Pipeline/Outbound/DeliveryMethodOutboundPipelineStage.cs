@@ -35,7 +35,8 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Core_Ping_Pong, DeliveryMethod.Unreliable },
         { EventId.Core_WorldManagement_Subscribe, DeliveryMethod.ReliableUnordered },
         { EventId.Core_WorldManagement_Unsubscribe, DeliveryMethod.ReliableUnordered },
-        { EventId.Client_EntitySynchronization_Update, DeliveryMethod.ReliableUnordered },
+        { EventId.Client_EntitySynchronization_Sync, DeliveryMethod.ReliableUnordered },
+        { EventId.Client_EntitySynchronization_Desync, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Movement_Move, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Movement_RequestMove, DeliveryMethod.ReliableUnordered },
         { EventId.Core_WorldManagement_EntityLeaveWorldSegment, DeliveryMethod.ReliableUnordered }

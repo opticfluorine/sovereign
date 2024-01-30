@@ -34,7 +34,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         EntityDefinitionEventDetailsValidator entityDefinitionValidator,
         WorldSegmentSubscriptionEventDetailsValidator worldSegmentSubscriptionValidator,
         MoveEventDetailsValidator moveValidator, RequestMoveEventDetailsValidator requestMoveValidator,
-        EntityGridPositionEventDetailsValidator entityGridPositionValidator)
+        EntityGridPositionEventDetailsValidator entityGridPositionValidator,
+        EntityDesyncEventDetailsValidator entityDesyncValidator)
     {
         this.nullValidator = nullValidator;
         validators = new Dictionary<EventId, IEventDetailsValidator>
@@ -43,7 +44,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Ping_Pong, nullValidator },
             { EventId.Core_WorldManagement_Subscribe, worldSegmentSubscriptionValidator },
             { EventId.Core_WorldManagement_Unsubscribe, worldSegmentSubscriptionValidator },
-            { EventId.Client_EntitySynchronization_Update, entityDefinitionValidator },
+            { EventId.Client_EntitySynchronization_Sync, entityDefinitionValidator },
+            { EventId.Client_EntitySynchronization_Desync, entityDesyncValidator },
             { EventId.Core_Movement_Move, moveValidator },
             { EventId.Core_Movement_RequestMove, requestMoveValidator },
             { EventId.Core_WorldManagement_EntityLeaveWorldSegment, entityGridPositionValidator }

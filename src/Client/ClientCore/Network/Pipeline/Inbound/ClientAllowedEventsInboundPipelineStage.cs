@@ -36,7 +36,8 @@ public class ClientAllowedEventsInboundPipelineStage : IInboundPipelineStage
         EventId.Core_Ping_Ping,
         EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_Unsubscribe,
-        EventId.Client_EntitySynchronization_Update,
+        EventId.Client_EntitySynchronization_Sync,
+        EventId.Client_EntitySynchronization_Desync,
         EventId.Core_Movement_Move,
         EventId.Core_WorldManagement_EntityLeaveWorldSegment
     };

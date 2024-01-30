@@ -59,7 +59,24 @@ public class WorldManagementInternalController
             PlayerEntityId = entityId,
             EntityDefinitions = definitions
         };
-        var ev = new Event(EventId.Client_EntitySynchronization_Update, details);
+        var ev = new Event(EventId.Client_EntitySynchronization_Sync, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Pushes a non-block entity desynchronization to all subscribers of the given world segment.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="segmentIndex">World segment index.</param>
+    public void PushDesyncEvent(IEventSender eventSender, ulong entityId, GridPosition segmentIndex)
+    {
+        var details = new EntityDesyncEventDetails
+        {
+            EntityId = entityId,
+            WorldSegmentIndex = segmentIndex
+        };
+        var ev = new Event(EventId.Client_EntitySynchronization_Desync, details);
         eventSender.SendEvent(ev);
     }
 

@@ -71,11 +71,19 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             return new Maybe<GridPosition>(details.PreviousSegmentIndex);
         });
 
+        var desyncMapper = worldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not EntityDesyncEventDetails details)
+                return new Maybe<GridPosition>();
+            return new Maybe<GridPosition>(details.WorldSegmentIndex);
+        });
+
         // Configure specific connection mappers.
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
         specificMappers[EventId.Core_WorldManagement_Unsubscribe] = worldSubEventMapper;
-        specificMappers[EventId.Client_EntitySynchronization_Update] = entityDefMapper;
+        specificMappers[EventId.Client_EntitySynchronization_Sync] = entityDefMapper;
+        specificMappers[EventId.Client_EntitySynchronization_Desync] = desyncMapper;
         specificMappers[EventId.Core_Movement_Move] = moveMapper;
         specificMappers[EventId.Core_WorldManagement_EntityLeaveWorldSegment] = entityGridMapper;
     }

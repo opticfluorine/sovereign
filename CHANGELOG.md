@@ -4,6 +4,18 @@
 
 ### January
 
+#### 29 January 2024
+
+* Desynchronize entity trees from affected clients when a positioned entity is removed or unloaded.
+  Note that this does not desynchronize individual child entities as they are removed. This aligns with
+  entity synchronization which synchronizes an entire tree at once beginning from the positioned root entity.
+  This has impacts on future design - child entities should be created/removed outside of the tree synchronization
+  by separate events which deterministically produce the correct entity tree (up to a change in entity IDs) when
+  played back on both client and server. Since these are only guaranteed to be synchronized up to a change in entity
+  ID, events referencing these child entities will also need to use an indirect reference if the events are to
+  be replicated across the network. Alternatively, the separate events could specify the entity ID themselves - this
+  could be useful for e.g. inventory where reference to a specific entity is desired.
+
 #### 28 January 2024
 
 * Fix issue where the player entity was not synchronized to the client under certain conditions when

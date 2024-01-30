@@ -92,6 +92,15 @@ public class ClientEntityUnloader
     }
 
     /// <summary>
+    ///     Called when the server directs the client to desynchronize an entity tree.
+    /// </summary>
+    /// <param name="entityId">Root of the entity tree to be desynchronized.</param>
+    public void OnDesync(ulong entityId)
+    {
+        UnloadEntity(entityId);
+    }
+
+    /// <summary>
     ///     Unloads all entities from the given world segment.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>

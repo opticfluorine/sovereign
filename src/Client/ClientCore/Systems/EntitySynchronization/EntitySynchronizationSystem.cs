@@ -47,7 +47,8 @@ public class EntitySynchronizationSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
-        EventId.Client_EntitySynchronization_Update,
+        EventId.Client_EntitySynchronization_Sync,
+        EventId.Client_EntitySynchronization_Desync,
         EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_Unsubscribe,
         EventId.Client_Network_PlayerEntitySelected,
@@ -72,14 +73,24 @@ public class EntitySynchronizationSystem : ISystem
             eventsProcessed++;
             switch (ev.EventId)
             {
-                case EventId.Client_EntitySynchronization_Update:
+                case EventId.Client_EntitySynchronization_Sync:
                     if (ev.EventDetails is not EntityDefinitionEventDetails)
                     {
-                        Logger.Error("Received Update event without details.");
+                        Logger.Error("Received Sync event without details.");
                         break;
                     }
 
-                    HandleUpdate((EntityDefinitionEventDetails)ev.EventDetails);
+                    HandleSync((EntityDefinitionEventDetails)ev.EventDetails);
+                    break;
+
+                case EventId.Client_EntitySynchronization_Desync:
+                    if (ev.EventDetails is not EntityDesyncEventDetails)
+                    {
+                        Logger.Error("Received Desync event without details.");
+                        break;
+                    }
+
+                    HandleDesync((EntityDesyncEventDetails)ev.EventDetails);
                     break;
 
                 case EventId.Core_WorldManagement_Subscribe:
@@ -164,10 +175,20 @@ public class EntitySynchronizationSystem : ISystem
     ///     Handles an entity synchronization update.
     /// </summary>
     /// <param name="details">Update details.</param>
-    private void HandleUpdate(EntityDefinitionEventDetails details)
+    private void HandleSync(EntityDefinitionEventDetails details)
     {
         Logger.DebugFormat("Processing {0} entity definitions.", details.EntityDefinitions.Count);
         foreach (var definition in details.EntityDefinitions)
             processor.ProcessDefinition(definition);
+    }
+
+    /// <summary>
+    ///     Handles an entity desynchronization.
+    /// </summary>
+    /// <param name="details">Desync details.</param>
+    private void HandleDesync(EntityDesyncEventDetails details)
+    {
+        Logger.DebugFormat("Desynchronizing entity ID {0} and descendants.", details.EntityId);
+        unloader.OnDesync(details.EntityId);
     }
 }

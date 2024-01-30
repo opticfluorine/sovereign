@@ -30,6 +30,7 @@ namespace Sovereign.EngineCore.Events;
 [Union(4, typeof(MoveEventDetails))]
 [Union(5, typeof(RequestMoveEventDetails))]
 [Union(6, typeof(EntityChangeWorldSegmentEventDetails))]
+[Union(7, typeof(EntityDesyncEventDetails))]
 public interface IEventDetails
 {
 }

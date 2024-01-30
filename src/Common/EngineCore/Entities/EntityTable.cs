@@ -89,7 +89,12 @@ public class EntityTable
         }
 
         // Removals.
-        foreach (var entityId in pendingRemoves) entities.Remove(entityId);
+        foreach (var entityId in pendingRemoves)
+        {
+            entities.Remove(entityId);
+            if (!materials.GetComponentForEntity(entityId, true).HasValue)
+                OnNonBlockEntityRemoved?.Invoke(entityId);
+        }
 
         // Reset pending sets.
         pendingAdds.Clear();
@@ -97,7 +102,12 @@ public class EntityTable
     }
 
     /// <summary>
-    ///     Event invoked when an entity has been added.
+    ///     Event invoked when a non-block entity has been added.
     /// </summary>
     public event Action<ulong>? OnNonBlockEntityAdded;
+
+    /// <summary>
+    ///     Event invoked when a non-block entity has been removed.
+    /// </summary>
+    public event Action<ulong>? OnNonBlockEntityRemoved;
 }

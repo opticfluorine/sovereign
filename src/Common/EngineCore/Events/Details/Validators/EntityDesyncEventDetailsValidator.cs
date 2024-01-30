@@ -14,25 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Systems.Network;
-
-namespace Sovereign.ServerNetwork.Systems.Network;
+namespace Sovereign.EngineCore.Events.Details.Validators;
 
 /// <summary>
-///     Provides the set of event IDs that the server will forward out to the network.
+///     Validator for EntityDesyncEventDetails.
 /// </summary>
-public class ServerOutboundEventSet : IOutboundEventSet
+public class EntityDesyncEventDetailsValidator : IEventDetailsValidator
 {
-    public HashSet<EventId> EventIdsToSend { get; } = new()
+    public bool IsValid(IEventDetails? details)
     {
-        EventId.Core_Ping_Ping,
-        EventId.Core_WorldManagement_Subscribe,
-        EventId.Core_WorldManagement_Unsubscribe,
-        EventId.Client_EntitySynchronization_Sync,
-        EventId.Client_EntitySynchronization_Desync,
-        EventId.Core_Movement_Move,
-        EventId.Core_WorldManagement_EntityLeaveWorldSegment
-    };
+        return details is EntityDesyncEventDetails;
+    }
 }

@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
@@ -101,11 +102,21 @@ public class EntitySynchronizer
     }
 
     /// <summary>
+    ///     Desynchronizes an entity tree across a world segment.
+    /// </summary>
+    /// <param name="rootEntityId">Root of the entity tree to be desynchronized.</param>
+    public void Desynchronize(ulong rootEntityId, GridPosition segmentIndex)
+    {
+        Logger.DebugFormat("Desync {0} for world segment {1}.", rootEntityId, segmentIndex);
+        controller.PushDesyncEvent(eventSender, rootEntityId, segmentIndex);
+    }
+
+    /// <summary>
     ///     Generates an entity definition for a single entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <returns>Definition.</returns>
-    public EntityDefinition GenerateDefinition(ulong entityId)
+    private EntityDefinition GenerateDefinition(ulong entityId)
     {
         var def = new EntityDefinition();
         def.EntityId = entityId;

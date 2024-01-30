@@ -255,7 +255,17 @@ public enum EventId
     ///     Event sent from server to client to synchronize non-block entities.
     /// </summary>
     /// Associated details: EntityDefinitionEventDetails
-    Client_EntitySynchronization_Update = 100300,
+    Client_EntitySynchronization_Sync = 100300,
+
+    /// <summary>
+    ///     Event sent from server to client to desynchronize a non-block entity.
+    /// </summary>
+    /// <remarks>
+    ///     The entity ID in the details corresponds to the root of the entity tree to be desynchronized.
+    ///     The grid position is the world segment index for which the entity is being desynchronized.
+    /// </remarks>
+    /// Associated details: EntityDesyncEventDetails
+    Client_EntitySynchronization_Desync = 100301,
 
     #endregion Client_EntitySynchronization
 

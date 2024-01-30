@@ -23,6 +23,7 @@ using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.Systems.Player.Components.Indexers;
 using Sovereign.EngineCore.World;
 
@@ -52,9 +53,17 @@ public class WorldSegmentSubscriptionManager
     /// </summary>
     private readonly Dictionary<ulong, GridPosition> currentWorldSegments = new();
 
+    private readonly EntityTable entityTable;
+
     private readonly IEventSender eventSender;
     private readonly EntityHierarchyIndexer hierarchyIndexer;
     private readonly WorldManagementInternalController internalController;
+    private readonly NonBlockPositionEventFilter nonBlockPositionEventFilter;
+
+    /// <summary>
+    ///     Map of entity ID to last known world segment for entities that are expected to desynchronize soon.
+    /// </summary>
+    private readonly Dictionary<ulong, GridPosition> pendingDesyncs = new();
 
     /// <summary>
     ///     Map from world segment index to the set of players subscribed to that world segment.
@@ -83,7 +92,7 @@ public class WorldSegmentSubscriptionManager
         IEventSender eventSender, WorldManagementInternalController internalController,
         WorldSegmentSynchronizationManager syncManager, PositionComponentCollection positions,
         EntitySynchronizer synchronizer, EntityHierarchyIndexer hierarchyIndexer,
-        EntityTable entityTable)
+        EntityTable entityTable, NonBlockPositionEventFilter nonBlockPositionEventFilter)
     {
         this.positionEventFilter = positionEventFilter;
         this.resolver = resolver;
@@ -95,6 +104,8 @@ public class WorldSegmentSubscriptionManager
         this.positions = positions;
         this.synchronizer = synchronizer;
         this.hierarchyIndexer = hierarchyIndexer;
+        this.entityTable = entityTable;
+        this.nonBlockPositionEventFilter = nonBlockPositionEventFilter;
 
         // Register event handlers.
         this.positionEventFilter.OnStartUpdates += OnStartUpdates;
@@ -102,7 +113,9 @@ public class WorldSegmentSubscriptionManager
         this.positionEventFilter.OnComponentAdded += OnPlayerAdded;
         this.positionEventFilter.OnComponentModified += OnPlayerMoved;
         this.positionEventFilter.OnComponentRemoved += OnPlayerRemoved;
-        entityTable.OnNonBlockEntityAdded += OnNonBlockEntityAdded;
+        this.entityTable.OnNonBlockEntityAdded += OnNonBlockEntityAdded;
+        this.entityTable.OnNonBlockEntityRemoved += OnNonBlockEntityRemoved;
+        this.nonBlockPositionEventFilter.OnComponentRemoved += OnNonBlockPositionRemoved;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -285,5 +298,31 @@ public class WorldSegmentSubscriptionManager
         var entitiesToSync = hierarchyIndexer.GetAllDescendants(entityId);
         entitiesToSync.Add(entityId);
         synchronizer.Synchronize(playerEntityIds, entitiesToSync);
+    }
+
+    /// <summary>
+    ///     Called when a non-block entity is removed or unloaded.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    private void OnNonBlockEntityRemoved(ulong entityId)
+    {
+        if (!pendingDesyncs.Remove(entityId, out var segmentIndex)) return;
+
+        // Desync pending - desynchronize entity tree across all clients subscribed to its world segment.         
+        synchronizer.Desynchronize(entityId, segmentIndex);
+    }
+
+    /// <summary>
+    ///     Called when the position component of a non-block entity is removed.
+    ///     This is treated as a cue to prepare to desynchronize the entity.
+    /// </summary>
+    /// <param name="entityId">Affected entity ID.</param>
+    /// <param name="isUnload">Unused.</param>
+    private void OnNonBlockPositionRemoved(ulong entityId, bool isUnload)
+    {
+        // Grab the last known world segment and cache it for eventual desync.
+        var pos = positions.GetComponentWithLookback(entityId);
+        var segmentIndex = resolver.GetWorldSegmentForPosition(pos);
+        pendingDesyncs[entityId] = segmentIndex;
     }
 }
