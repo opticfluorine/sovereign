@@ -97,10 +97,13 @@ public sealed class WorldSegmentBlockDataManager
     public Task<byte[]?>? GetWorldSegmentBlockData(GridPosition segmentIndex)
     {
         // If the segment is scheduled for regeneration, kick off the lazy load now that it's been requested.
-        if (segmentsToRegenerate.Contains(segmentIndex))
+        lock (segmentsToRegenerate)
         {
-            AddWorldSegment(segmentIndex);
-            segmentsToRegenerate.Remove(segmentIndex);
+            if (segmentsToRegenerate.Contains(segmentIndex))
+            {
+                AddWorldSegment(segmentIndex);
+                segmentsToRegenerate.Remove(segmentIndex);
+            }
         }
 
         return dataProducers.TryGetValue(segmentIndex, out var data) ? data : null;
@@ -201,7 +204,10 @@ public sealed class WorldSegmentBlockDataManager
         {
             var lastPosition = positions.GetComponentWithLookback(entityId);
             var segmentIndex = resolver.GetWorldSegmentForPosition(lastPosition);
-            segmentsToRegenerate.Add(segmentIndex);
+            lock (segmentsToRegenerate)
+            {
+                segmentsToRegenerate.Add(segmentIndex);
+            }
         }
         catch (Exception e)
         {

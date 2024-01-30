@@ -29,17 +29,20 @@ public sealed class WorldManagementSystem : ISystem
     private readonly WorldManagementEventHandler eventHandler;
 
     private readonly IEventLoop eventLoop;
+    private readonly WorldSegmentChangeMonitor segmentChangeMonitor;
     private readonly WorldSegmentSubscriptionManager subscriptionManager;
 
     public WorldManagementSystem(EventCommunicator eventCommunicator,
         IEventLoop eventLoop, WorldManagementEventHandler eventHandler,
-        EventDescriptions eventDescriptions, WorldSegmentSubscriptionManager subscriptionManager)
+        EventDescriptions eventDescriptions, WorldSegmentSubscriptionManager subscriptionManager,
+        WorldSegmentChangeMonitor segmentChangeMonitor)
     {
         /* Dependency injection. */
         EventCommunicator = eventCommunicator;
         this.eventLoop = eventLoop;
         this.eventHandler = eventHandler;
         this.subscriptionManager = subscriptionManager;
+        this.segmentChangeMonitor = segmentChangeMonitor;
 
         /* Register system. */
         eventLoop.RegisterSystem(this);

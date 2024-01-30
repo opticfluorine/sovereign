@@ -29,17 +29,20 @@ namespace Sovereign.NetworkCore.Systems.Network;
 public sealed class NetworkSystem : ISystem
 {
     private readonly NetworkingService networkingService;
+    private readonly IOutboundEventSet outboundEventSet;
     private readonly OutboundNetworkPipeline outboundPipeline;
 
     public NetworkSystem(NetworkingService networkingService,
         EventCommunicator eventCommunicator,
         IEventLoop eventLoop,
         NetworkEventAdapter eventAdapter,
-        OutboundNetworkPipeline outboundPipeline)
+        OutboundNetworkPipeline outboundPipeline,
+        IOutboundEventSet outboundEventSet)
     {
         this.networkingService = networkingService;
         EventCommunicator = eventCommunicator;
         this.outboundPipeline = outboundPipeline;
+        this.outboundEventSet = outboundEventSet;
 
         eventLoop.RegisterSystem(this);
     }
@@ -49,15 +52,7 @@ public sealed class NetworkSystem : ISystem
     /// <summary>
     ///     Event IDs that are candidates to be replicated onto the network.
     /// </summary>
-    public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
-    {
-        EventId.Core_Ping_Ping,
-        EventId.Core_Ping_Pong,
-        EventId.Core_WorldManagement_Subscribe,
-        EventId.Core_WorldManagement_Unsubscribe,
-        EventId.Client_EntitySynchronization_Update,
-        EventId.Core_Movement_RequestMove
-    };
+    public ISet<EventId> EventIdsOfInterest => outboundEventSet.EventIdsToSend;
 
     public int WorkloadEstimate => 50;
 

@@ -55,59 +55,57 @@ public sealed class SqliteAddAccountQuery : IAddAccountQuery
         ulong memlimit)
     {
         // Open a transaction.
-        using (var transaction = connection.BeginTransaction())
+        using var transaction = connection.BeginTransaction();
+        try
         {
-            try
+            // Add the username.
+            using var cmdAccount = new SqliteCommand(sqlAccount, connection, transaction);
+
+            var pId = new SqliteParameter("Id", id.ToByteArray());
+            pId.SqliteType = SqliteType.Blob;
+            cmdAccount.Parameters.Add(pId);
+
+            var pUsername = new SqliteParameter("Username", username);
+            pUsername.SqliteType = SqliteType.Text;
+            cmdAccount.Parameters.Add(pUsername);
+
+            cmdAccount.ExecuteNonQuery();
+
+            // Add the authentication details.
+            using var cmdAuth = new SqliteCommand(sqlAuth, connection, transaction);
+            cmdAuth.Parameters.Add(pId);
+
+            var pSalt = new SqliteParameter("Salt", passwordSalt);
+            pSalt.SqliteType = SqliteType.Blob;
+            cmdAuth.Parameters.Add(pSalt);
+
+            var pHash = new SqliteParameter("Hash", passwordHash);
+            pHash.SqliteType = SqliteType.Blob;
+            cmdAuth.Parameters.Add(pHash);
+
+            var pOpslimit = new SqliteParameter("Opslimit", opslimit);
+            pOpslimit.SqliteType = SqliteType.Integer;
+            cmdAuth.Parameters.Add(pOpslimit);
+
+            var pMemlimit = new SqliteParameter("Memlimit", memlimit);
+            pMemlimit.SqliteType = SqliteType.Integer;
+            cmdAuth.Parameters.Add(pMemlimit);
+
+            cmdAuth.ExecuteNonQuery();
+
+            transaction.Commit();
+        }
+        catch (SqliteException e)
+        {
+            if (e.SqliteErrorCode == SQLITE_ERROR_CONSTRAINT)
             {
-                // Add the username.
-                var cmdAccount = new SqliteCommand(sqlAccount, connection, transaction);
-
-                var pId = new SqliteParameter("Id", id.ToByteArray());
-                pId.SqliteType = SqliteType.Blob;
-                cmdAccount.Parameters.Add(pId);
-
-                var pUsername = new SqliteParameter("Username", username);
-                pUsername.SqliteType = SqliteType.Text;
-                cmdAccount.Parameters.Add(pUsername);
-
-                cmdAccount.ExecuteNonQuery();
-
-                // Add the authentication details.
-                var cmdAuth = new SqliteCommand(sqlAuth, connection, transaction);
-                cmdAuth.Parameters.Add(pId);
-
-                var pSalt = new SqliteParameter("Salt", passwordSalt);
-                pSalt.SqliteType = SqliteType.Blob;
-                cmdAuth.Parameters.Add(pSalt);
-
-                var pHash = new SqliteParameter("Hash", passwordHash);
-                pHash.SqliteType = SqliteType.Blob;
-                cmdAuth.Parameters.Add(pHash);
-
-                var pOpslimit = new SqliteParameter("Opslimit", opslimit);
-                pOpslimit.SqliteType = SqliteType.Integer;
-                cmdAuth.Parameters.Add(pOpslimit);
-
-                var pMemlimit = new SqliteParameter("Memlimit", memlimit);
-                pMemlimit.SqliteType = SqliteType.Integer;
-                cmdAuth.Parameters.Add(pMemlimit);
-
-                cmdAuth.ExecuteNonQuery();
-
-                transaction.Commit();
+                // Constraint violation - ID or username already taken.
+                transaction.Rollback();
+                return false;
             }
-            catch (SqliteException e)
-            {
-                if (e.SqliteErrorCode == SQLITE_ERROR_CONSTRAINT)
-                {
-                    // Constraint violation - ID or username already taken.
-                    transaction.Rollback();
-                    return false;
-                }
 
-                // Some other error; propagate.
-                throw;
-            }
+            // Some other error; propagate.
+            throw;
         }
 
         return true;

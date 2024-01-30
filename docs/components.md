@@ -22,6 +22,7 @@ Core components are available in both the client and server.
 | `Material`         | `MaterialComponentCollection`         | Indicates that the entity is a block of the given material ID.                                                         |
 | `MaterialModifier` | `MaterialModifierComponentCollection` | For material block entities (see `Material` component), denotes the material modifier of the block.                    |
 | `Name`             | `NameComponentCollection`             | Gives the name of the entity.                                                                                          |
+| `Orientation`      | `OrientationComponentCollection`      | Specifies the directional orientation of the entity.                                                                   |
 | `Parent`           | `ParentComponentCollection`           | Maps an entity to its parent entity.                                                                                   |
 | `PlayerCharacter`  | `PlayerCharacterTagCollection`        | Indicates that an entity is a player character.                                                                        |
 | `Position`         | `PositionComponentCollection`         | Three-dimensional position of an entity.                                                                               |

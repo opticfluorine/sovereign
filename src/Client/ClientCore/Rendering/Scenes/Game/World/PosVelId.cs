@@ -16,6 +16,7 @@
  */
 
 using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 
@@ -44,4 +45,9 @@ public struct PosVelId
     ///     Associated entity ID.
     /// </summary>
     public ulong EntityId;
+
+    /// <summary>
+    ///     Orientation.
+    /// </summary>
+    public Orientation Orientation;
 }

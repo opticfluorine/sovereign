@@ -18,6 +18,7 @@
 using System;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Events;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
 
@@ -29,13 +30,18 @@ namespace Sovereign.Persistence.Systems.Persistence;
 public sealed class PersistenceEntityRetriever
 {
     private readonly EntityProcessor entityProcessor;
+    private readonly IEventSender eventSender;
+    private readonly PersistenceInternalController internalController;
     private readonly PersistenceProviderManager providerManager;
 
     public PersistenceEntityRetriever(PersistenceProviderManager providerManager,
-        EntityProcessor entityProcessor)
+        EntityProcessor entityProcessor, PersistenceInternalController internalController,
+        IEventSender eventSender)
     {
         this.providerManager = providerManager;
         this.entityProcessor = entityProcessor;
+        this.internalController = internalController;
+        this.eventSender = eventSender;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

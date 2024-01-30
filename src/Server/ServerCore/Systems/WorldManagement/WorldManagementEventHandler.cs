@@ -50,16 +50,17 @@ public sealed class WorldManagementEventHandler
         switch (ev.EventId)
         {
             case EventId.Server_WorldManagement_WorldSegmentLoaded:
-                if (!(ev.EventDetails is WorldSegmentEventDetails))
+            {
+                if (ev.EventDetails is not WorldSegmentEventDetails details)
                 {
                     Logger.Error("Received WorldSegmentLoaded without details.");
                     break;
                 }
 
-                var details = (WorldSegmentEventDetails)ev.EventDetails;
                 activationManager.OnWorldSegmentLoaded(details.SegmentIndex);
                 syncManager.OnWorldSegmentLoaded(details.SegmentIndex);
                 blockDataManager.AddWorldSegment(details.SegmentIndex);
+            }
                 break;
 
             default:

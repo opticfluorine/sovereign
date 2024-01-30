@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Numerics;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -36,21 +35,6 @@ public sealed class PersistenceController
     {
         var details = new EntityEventDetails { EntityId = persistedEntityId };
         var ev = new Event(EventId.Server_Persistence_RetrieveEntity, details);
-        eventSender.SendEvent(ev);
-    }
-
-    /// <summary>
-    ///     Requests that the persistence engine load all entities positioned
-    ///     within the given range.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="rangeMin">Minimum extent of range.</param>
-    /// <param name="rangeMax">Maximum extent of range.</param>
-    public void RetrieveEntitiesInRange(IEventSender eventSender, Vector3 rangeMin,
-        Vector3 rangeMax)
-    {
-        var details = new VectorPairEventDetails { First = rangeMin, Second = rangeMax };
-        var ev = new Event(EventId.Server_Persistence_RetrieveEntitiesInRange, details);
         eventSender.SendEvent(ev);
     }
 

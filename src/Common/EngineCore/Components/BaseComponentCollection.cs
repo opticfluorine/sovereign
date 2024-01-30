@@ -233,7 +233,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             /* Component already exists - enqueue an update. */
             ModifyComponent(entityId, ComponentOperation.Set, initialValue);
 
-            Log.WarnFormat("Attempted duplicate component addition for entity {1}.", entityId);
+            Log.WarnFormat("Attempted duplicate component addition for entity {0}.", entityId);
         }
         else
         {

@@ -14,11 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Timing;
@@ -34,6 +36,7 @@ public class MovementManager
     private readonly IEventSender eventSender;
     private readonly MovementInternalController internalController;
     private readonly MovingComponentIndexer movingComponents;
+    private readonly OrientationComponentCollection orientations;
 
     /// <summary>
     ///     Circular buffer of lists of pending checks per tick.
@@ -79,7 +82,7 @@ public class MovementManager
 
     public MovementManager(MovingComponentIndexer movingComponents, PositionComponentCollection positions,
         VelocityComponentCollection velocities, ISystemTimer systemTimer, MovementInternalController internalController,
-        IEventSender eventSender)
+        IEventSender eventSender, OrientationComponentCollection orientations)
     {
         this.movingComponents = movingComponents;
         this.positions = positions;
@@ -87,6 +90,7 @@ public class MovementManager
         this.systemTimer = systemTimer;
         this.internalController = internalController;
         this.eventSender = eventSender;
+        this.orientations = orientations;
 
         for (var i = 0; i < pendingChecks.Length; ++i)
             pendingChecks[i] = new List<PendingCheck>();
@@ -116,6 +120,8 @@ public class MovementManager
         sequenceCountsByEntity[details.EntityId] = details.Sequence;
         pendingMoveEvents.Enqueue(details.EntityId);
 
+        SetOrientation(details.EntityId, details.RelativeVelocity);
+
         // Schedule a check at the end of the movement interval.
         pendingChecks[currentTickIndex].Add(new PendingCheck
         {
@@ -124,6 +130,7 @@ public class MovementManager
         });
     }
 
+
     /// <summary>
     ///     Called when an authoritative movement event is received from the server.
     /// </summary>
@@ -131,10 +138,9 @@ public class MovementManager
     public void HandleAuthoritativeMove(MoveEventDetails details)
     {
         // Set position and velocity.
-        Logger.DebugFormat("Authoritative move, {0}, pos {1}, vel {2}", details.EntityId, details.Position,
-            details.Velocity);
         positions.ModifyComponent(details.EntityId, ComponentOperation.Set, details.Position);
         velocities.ModifyComponent(details.EntityId, ComponentOperation.Set, details.Velocity);
+        SetOrientation(details.EntityId, details.Velocity);
     }
 
     /// <summary>
@@ -208,6 +214,30 @@ public class MovementManager
     {
         // Pause request processing until checks are processed again.
         checkTableReady = false;
+    }
+
+    private void SetOrientation(ulong entityId, Vector3 velocity)
+    {
+        // Special case, if velocity is zero then do not change the orientation.
+        if (velocity.Equals(Vector3.Zero)) return;
+
+        // Find the angle of movement in the orthogonal space of the screen.
+        // Project y and z together to account for z-oriented motion being projected onto the y axis for rendering.
+        // Note that Math.Atan2 properly handles the boundaries of the quadrants for us.
+        var projY = velocity.Y + velocity.Z;
+        var theta = (float)Math.Atan2(projY, velocity.X);
+
+        // Map the angle onto the defined orientations.
+        // Rotate by pi/8 radians so that the first bin starts at 0.
+        // Rotate by another 2pi radians to bring the quadrant 3 and 4 angles to positive
+        // Then bins begin at angles of n(pi/4) for integer n (modulo 8), offset by two from the enum ordering.
+        const float invBinWidth = 1.0f / (0.25f * (float)Math.PI);
+        const int orientationCount = 8; // Eight defined orientations
+        const int orientationOffset = 2; // theta=0 is East, so offset by two to give South as the first in
+        var adjTheta = theta + 2.125f * (float)Math.PI;
+        var orientation = (Orientation)((int)(adjTheta * invBinWidth + orientationOffset) % orientationCount);
+
+        orientations.AddOrUpdateComponent(entityId, orientation);
     }
 
     /// <summary>

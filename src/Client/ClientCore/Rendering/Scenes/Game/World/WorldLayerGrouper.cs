@@ -20,6 +20,7 @@ using System.Numerics;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.World.Materials;
 using Sovereign.EngineUtil.Collections;
@@ -43,6 +44,7 @@ public sealed class WorldLayerGrouper
     private readonly MaterialModifierComponentCollection materialModifiers;
 
     private readonly MaterialComponentCollection materials;
+    private readonly OrientationComponentCollection orientations;
     private readonly VelocityComponentCollection velocities;
 
     public WorldLayerGrouper(MaterialComponentCollection materials,
@@ -50,7 +52,8 @@ public sealed class WorldLayerGrouper
         AnimatedSpriteComponentCollection animatedSprites,
         AboveBlockComponentCollection aboveBlocks,
         VelocityComponentCollection velocities,
-        MaterialManager materialManager)
+        MaterialManager materialManager,
+        OrientationComponentCollection orientations)
     {
         this.materials = materials;
         this.materialModifiers = materialModifiers;
@@ -58,6 +61,7 @@ public sealed class WorldLayerGrouper
         this.aboveBlocks = aboveBlocks;
         this.velocities = velocities;
         this.materialManager = materialManager;
+        this.orientations = orientations;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -112,7 +116,9 @@ public sealed class WorldLayerGrouper
                 Position = drawable.Position,
                 Velocity = velocity,
                 Id = sprite.Value,
-                EntityId = drawable.EntityId
+                EntityId = drawable.EntityId,
+                Orientation = orientations.GetComponentForEntity(drawable.EntityId)
+                    .OrElseDefault(Orientation.South)
             });
     }
 

@@ -59,7 +59,44 @@ public class WorldManagementInternalController
             PlayerEntityId = entityId,
             EntityDefinitions = definitions
         };
-        var ev = new Event(EventId.Client_EntitySynchronization_Update, details);
+        var ev = new Event(EventId.Client_EntitySynchronization_Sync, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Pushes a non-block entity desynchronization to all subscribers of the given world segment.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="segmentIndex">World segment index.</param>
+    public void PushDesyncEvent(IEventSender eventSender, ulong entityId, GridPosition segmentIndex)
+    {
+        var details = new EntityDesyncEventDetails
+        {
+            EntityId = entityId,
+            WorldSegmentIndex = segmentIndex
+        };
+        var ev = new Event(EventId.Client_EntitySynchronization_Desync, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Announces that an entity has left the given world segment.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="prevSegmentIndex">Segment index of the world segment that was left.</param>
+    /// <param name="newSegmentIndex">Segment index of the world segment that was entered.</param>
+    public void PushChangeSegment(IEventSender eventSender, ulong entityId, GridPosition prevSegmentIndex,
+        GridPosition newSegmentIndex)
+    {
+        var details = new EntityChangeWorldSegmentEventDetails
+        {
+            EntityId = entityId,
+            PreviousSegmentIndex = prevSegmentIndex,
+            NewSegmentIndex = newSegmentIndex
+        };
+        var ev = new Event(EventId.Core_WorldManagement_EntityLeaveWorldSegment, details);
         eventSender.SendEvent(ev);
     }
 

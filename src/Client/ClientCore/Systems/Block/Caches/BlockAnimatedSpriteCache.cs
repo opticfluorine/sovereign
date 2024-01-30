@@ -26,6 +26,7 @@ using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.World.Materials;
@@ -64,6 +65,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private readonly IList<int> emptyList
         = new ReadOnlyCollection<int>(new List<int>());
 
+    private readonly EntityManager entityManager;
+
     /// <summary>
     ///     Front face animated sprite cache.
     /// </summary>
@@ -80,11 +83,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly PositionComponentCollection positions;
-
-    /// <summary>
-    ///     Sprite ID list pool.
-    /// </summary>
-    private readonly ObjectPool<List<int>> spriteListPool = new(1024);
 
     private readonly TileSpriteManager tileSpriteManager;
 
@@ -116,7 +114,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         BlockPositionEventFilter blockPositionEventFilter,
         MaterialManager materialManager,
         AboveBlockComponentCollection aboveBlocks,
-        TileSpriteManager tileSpriteManager)
+        TileSpriteManager tileSpriteManager,
+        EntityManager entityManager)
     {
         this.materials = materials;
         this.materialModifiers = materialModifiers;
@@ -126,6 +125,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         this.materialManager = materialManager;
         this.aboveBlocks = aboveBlocks;
         this.tileSpriteManager = tileSpriteManager;
+        this.entityManager = entityManager;
 
         RegisterEventHandlers();
     }
@@ -184,7 +184,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
                 continue;
             }
 
-            UpdateCacheForBlock(blockId, knownPositions[blockId], true);
+            UpdateCacheForBlock(knownPositions[blockId], true);
         }
     }
 
@@ -204,7 +204,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
                 continue;
             }
 
-            UpdateCacheForBlock(blockId, knownPositions[blockId], false);
+            UpdateCacheForBlock(knownPositions[blockId], false);
 
             knownPositions.Remove(blockId);
         }
@@ -213,10 +213,9 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <summary>
     ///     Updates the cache for a change to a given block.
     /// </summary>
-    /// <param name="blockId">Block entity ID that is changed or removed.</param>
     /// <param name="gridPosition">Grid position of the block.</param>
     /// <param name="updateSelf">Whether to update the cache entry for the block itself.</param>
-    private void UpdateCacheForBlock(ulong blockId, GridPosition gridPosition, bool updateSelf)
+    private void UpdateCacheForBlock(GridPosition gridPosition, bool updateSelf)
     {
         /* Identify neighbors. */
         var north = gridPosition + GridPosition.OneY;
@@ -335,7 +334,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="blockId">Block to update.</param>
     private void UpdatePositionForBlock(ulong blockId)
     {
-        if (!positions.HasComponentForEntity(blockId)) return;
+        if (!positions.HasComponentForEntity(blockId))
+        {
+            Logger.ErrorFormat("Block {0} has no position.", blockId);
+            return;
+        }
 
         knownPositions[blockId] = (GridPosition)positions[blockId];
     }
@@ -441,26 +444,14 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     private void RegisterEventHandlers()
     {
-        materials.OnStartUpdates += OnStartUpdates;
         materials.OnComponentAdded += OnComponentAdded;
         materials.OnComponentModified += OnComponentModified;
         materials.OnComponentRemoved += OnComponentRemoved;
-        materials.OnEndUpdates += OnEndUpdates;
-
-        materialModifiers.OnStartUpdates += OnStartUpdates;
-        materialModifiers.OnComponentAdded += OnComponentAdded;
         materialModifiers.OnComponentModified += OnComponentModified;
-        materialModifiers.OnComponentRemoved += OnComponentRemoved;
-        materialModifiers.OnEndUpdates += OnEndUpdates;
-
-        positions.OnStartUpdates += OnStartUpdates;
-        positions.OnEndUpdates += OnEndUpdates;
-
         blockPositionEventFilter.OnComponentAdded += OnPositionAdded;
         blockPositionEventFilter.OnComponentModified += OnPositionModified;
-
-        aboveBlocks.OnStartUpdates += OnStartUpdates;
-        aboveBlocks.OnEndUpdates += OnEndUpdates;
+        entityManager.OnUpdatesStarted += OnStartUpdates;
+        entityManager.OnUpdatesComplete += OnEndUpdates;
     }
 
     /// <summary>
@@ -468,25 +459,13 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     private void DeregisterEventHandlers()
     {
-        materials.OnStartUpdates -= OnStartUpdates;
         materials.OnComponentAdded -= OnComponentAdded;
         materials.OnComponentModified -= OnComponentModified;
         materials.OnComponentRemoved -= OnComponentRemoved;
-        materials.OnEndUpdates -= OnEndUpdates;
-
-        materialModifiers.OnStartUpdates -= OnStartUpdates;
-        materialModifiers.OnComponentAdded -= OnComponentAdded;
         materialModifiers.OnComponentModified -= OnComponentModified;
-        materialModifiers.OnComponentRemoved -= OnComponentRemoved;
-        materialModifiers.OnEndUpdates -= OnEndUpdates;
-
-        positions.OnStartUpdates -= OnStartUpdates;
-        positions.OnEndUpdates -= OnEndUpdates;
-
         blockPositionEventFilter.OnComponentAdded -= OnPositionAdded;
         blockPositionEventFilter.OnComponentModified -= OnPositionModified;
-
-        aboveBlocks.OnStartUpdates -= OnStartUpdates;
-        aboveBlocks.OnEndUpdates -= OnEndUpdates;
+        entityManager.OnUpdatesStarted -= OnStartUpdates;
+        entityManager.OnUpdatesComplete -= OnEndUpdates;
     }
 }

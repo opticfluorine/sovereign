@@ -39,6 +39,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
+    private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PlayerCharacterTagCollection playerCharacterTags;
     private readonly PositionComponentCollection positions;
@@ -57,6 +58,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         ParentComponentCollection parents,
         DrawableTagCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites,
+        OrientationComponentCollection orientations,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -71,6 +73,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.parents = parents;
         this.drawables = drawables;
         this.animatedSprites = animatedSprites;
+        this.orientations = orientations;
         this.entityTable = entityTable;
         entityAssigner = entityManager.GetNewAssigner();
     }
@@ -97,6 +100,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             parents,
             drawables,
             animatedSprites,
+            orientations,
             entityTable);
     }
 }

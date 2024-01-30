@@ -19,6 +19,7 @@ using System;
 using System.Data;
 using System.Numerics;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.Persistence.Entities;
@@ -28,18 +29,19 @@ namespace Sovereign.Persistence.Entities;
 /// </summary>
 public sealed class EntityProcessor
 {
-    private const int INDEX_ID = 0;
-    private const int INDEX_POS_X = 1;
-    private const int INDEX_POS_Y = 2;
-    private const int INDEX_POS_Z = 3;
-    private const int INDEX_MATERIAL = 4;
-    private const int INDEX_MATERIAL_MODIFIER = 5;
-    private const int INDEX_PLAYER_CHARACTER = 6;
-    private const int INDEX_NAME = 7;
-    private const int INDEX_ACCOUNT = 8;
-    private const int INDEX_PARENT = 9;
-    private const int INDEX_DRAWABLE = 10;
-    private const int INDEX_ANIMATEDSPRITE = 11;
+    private const int IndexId = 0;
+    private const int IndexPosX = 1;
+    private const int IndexPosY = 2;
+    private const int IndexPosZ = 3;
+    private const int IndexMaterial = 4;
+    private const int IndexMaterialModifier = 5;
+    private const int IndexPlayerCharacter = 6;
+    private const int IndexName = 7;
+    private const int IndexAccount = 8;
+    private const int IndexParent = 9;
+    private const int IndexDrawable = 10;
+    private const int IndexAnimatedSprite = 11;
+    private const int IndexOrientation = 12;
     private readonly IEntityFactory entityFactory;
     private readonly EntityMapper entityMapper;
 
@@ -56,9 +58,17 @@ public sealed class EntityProcessor
     ///     Processes all entities from the given reader.
     /// </summary>
     /// <param name="reader">Reader.</param>
-    public void ProcessFromReader(IDataReader reader)
+    /// <returns>Number of entities processed.</returns>
+    public int ProcessFromReader(IDataReader reader)
     {
-        while (reader.Read()) ProcessSingleEntity(reader);
+        var count = 0;
+        while (reader.Read())
+        {
+            ProcessSingleEntity(reader);
+            count++;
+        }
+
+        return count;
     }
 
     /// <summary>
@@ -68,7 +78,7 @@ public sealed class EntityProcessor
     private void ProcessSingleEntity(IDataReader reader)
     {
         /* Get the entity ID. */
-        var entityId = (ulong)reader.GetInt64(INDEX_ID);
+        var entityId = (ulong)reader.GetInt64(IndexId);
 
         /* Start loading the entity. */
         var builder = entityFactory.GetBuilder(entityId, true);
@@ -82,6 +92,7 @@ public sealed class EntityProcessor
         ProcessParent(reader, builder);
         ProcessDrawable(reader, builder);
         ProcessAnimatedSprite(reader, builder);
+        ProcessOrientation(reader, builder);
 
         /* Complete the entity. */
         builder.Build();
@@ -96,11 +107,11 @@ public sealed class EntityProcessor
     private void ProcessAccount(IDataReader reader, IEntityBuilder builder, ulong entityId)
     {
         /* Check for existence. */
-        if (reader.IsDBNull(INDEX_ACCOUNT)) return;
+        if (reader.IsDBNull(IndexAccount)) return;
 
         /* Extract GUID. */
         var accountIdBytes = new byte[16];
-        var bytesRead = reader.GetBytes(INDEX_ACCOUNT, 0, accountIdBytes, 0, 16);
+        var bytesRead = reader.GetBytes(IndexAccount, 0, accountIdBytes, 0, 16);
         if (bytesRead < 16)
         {
             Logger.ErrorFormat("Account GUID for entity {0} is too short; skipping component.", entityId);
@@ -119,10 +130,10 @@ public sealed class EntityProcessor
     private void ProcessName(IDataReader reader, IEntityBuilder builder)
     {
         /* Check for existence. */
-        if (reader.IsDBNull(INDEX_NAME)) return;
+        if (reader.IsDBNull(IndexName)) return;
 
         /* Process. */
-        builder.Name(reader.GetString(INDEX_NAME));
+        builder.Name(reader.GetString(IndexName));
     }
 
     /// <summary>
@@ -133,11 +144,11 @@ public sealed class EntityProcessor
     private void ProcessPosition(IDataReader reader, IEntityBuilder builder)
     {
         /* Check for existence. */
-        if (reader.IsDBNull(INDEX_POS_X)) return;
+        if (reader.IsDBNull(IndexPosX)) return;
 
         /* Process. */
         builder.Positionable(GetVector3(reader,
-            INDEX_POS_X, INDEX_POS_Y, INDEX_POS_Z));
+            IndexPosX, IndexPosY, IndexPosZ));
     }
 
     /// <summary>
@@ -148,11 +159,11 @@ public sealed class EntityProcessor
     private void ProcessMaterial(IDataReader reader, IEntityBuilder builder)
     {
         /* Check for existence. */
-        if (reader.IsDBNull(INDEX_MATERIAL)) return;
+        if (reader.IsDBNull(IndexMaterial)) return;
 
         /* Process. */
-        builder.Material(reader.GetInt32(INDEX_MATERIAL),
-            reader.GetInt32(INDEX_MATERIAL_MODIFIER));
+        builder.Material(reader.GetInt32(IndexMaterial),
+            reader.GetInt32(IndexMaterialModifier));
     }
 
     /// <summary>
@@ -163,10 +174,10 @@ public sealed class EntityProcessor
     private void ProcessPlayerCharacter(IDataReader reader, IEntityBuilder builder)
     {
         /* Check for existence. */
-        if (reader.IsDBNull(INDEX_PLAYER_CHARACTER)) return;
+        if (reader.IsDBNull(IndexPlayerCharacter)) return;
 
         /* Process. */
-        if (reader.GetBoolean(INDEX_PLAYER_CHARACTER)) builder.PlayerCharacter();
+        if (reader.GetBoolean(IndexPlayerCharacter)) builder.PlayerCharacter();
     }
 
     /// <summary>
@@ -177,10 +188,10 @@ public sealed class EntityProcessor
     private void ProcessParent(IDataReader reader, IEntityBuilder builder)
     {
         // Check for existence.
-        if (reader.IsDBNull(INDEX_PARENT)) return;
+        if (reader.IsDBNull(IndexParent)) return;
 
         // Process.
-        var parentEntityId = (ulong)reader.GetInt64(INDEX_PARENT);
+        var parentEntityId = (ulong)reader.GetInt64(IndexParent);
         builder.Parent(parentEntityId);
     }
 
@@ -191,8 +202,8 @@ public sealed class EntityProcessor
     /// <param name="builder">Entity builder.</param>
     private void ProcessDrawable(IDataReader reader, IEntityBuilder builder)
     {
-        if (reader.IsDBNull(INDEX_DRAWABLE)) return;
-        if (reader.GetBoolean(INDEX_DRAWABLE)) builder.Drawable();
+        if (reader.IsDBNull(IndexDrawable)) return;
+        if (reader.GetBoolean(IndexDrawable)) builder.Drawable();
     }
 
     /// <summary>
@@ -202,8 +213,19 @@ public sealed class EntityProcessor
     /// <param name="builder">Entity builder.</param>
     private void ProcessAnimatedSprite(IDataReader reader, IEntityBuilder builder)
     {
-        if (reader.IsDBNull(INDEX_ANIMATEDSPRITE)) return;
-        builder.AnimatedSprite(reader.GetInt32(INDEX_ANIMATEDSPRITE));
+        if (reader.IsDBNull(IndexAnimatedSprite)) return;
+        builder.AnimatedSprite(reader.GetInt32(IndexAnimatedSprite));
+    }
+
+    /// <summary>
+    ///     Processes the Orientation component if present.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Entity builder.</param>
+    private void ProcessOrientation(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexOrientation)) return;
+        builder.Orientation((Orientation)reader.GetByte(IndexOrientation));
     }
 
     /// <summary>

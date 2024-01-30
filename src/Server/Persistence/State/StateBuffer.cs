@@ -20,10 +20,13 @@ using System.Data;
 using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineUtil.Collections;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Database.Queries;
+using Sovereign.Persistence.Systems.Persistence;
 
 namespace Sovereign.Persistence.State;
 
@@ -48,8 +51,10 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<int>> animatedSpriteUpdates = new(BufferSize);
 
     private readonly StructBuffer<StateUpdate<bool>> drawableUpdates = new(BufferSize);
+    private readonly IEventSender eventSender;
 
     private readonly FatalErrorHandler fatalErrorHandler;
+    private readonly PersistenceInternalController internalController;
 
     private readonly ILogger logger;
 
@@ -74,6 +79,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<ulong> newEntities = new(BufferSize);
 
     /// <summary>
+    ///     Orientation state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<Orientation>> orientationUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Parent entity linkage updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<ulong>> parentUpdates = new(BufferSize);
@@ -93,10 +103,13 @@ public sealed class StateBuffer
     /// </summary>
     private readonly StructBuffer<ulong> removedEntities = new(BufferSize);
 
-    public StateBuffer(ILogger logger, FatalErrorHandler fatalErrorHandler)
+    public StateBuffer(ILogger logger, FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
+        PersistenceInternalController internalController)
     {
         this.logger = logger;
         this.fatalErrorHandler = fatalErrorHandler;
+        this.eventSender = eventSender;
+        this.internalController = internalController;
     }
 
     /// <summary>
@@ -199,6 +212,16 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Enqueues an orientation update.
+    /// </summary>
+    /// <param name="update"></param>
+    /// <exception cref="NotImplementedException"></exception>
+    public void UpdateOrientation(ref StateUpdate<Orientation> update)
+    {
+        orientationUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Resets the buffer.
     /// </summary>
     public void Reset()
@@ -214,6 +237,7 @@ public sealed class StateBuffer
         parentUpdates.Clear();
         drawableUpdates.Clear();
         animatedSpriteUpdates.Clear();
+        orientationUpdates.Clear();
     }
 
     /// <summary>
@@ -303,10 +327,19 @@ public sealed class StateBuffer
                     persistenceProvider.RemoveAnimatedSpriteComponentQuery,
                     transaction);
 
+                // Orientation.
+                SynchronizeComponent(orientationUpdates,
+                    persistenceProvider.AddOrientationComponentQuery,
+                    persistenceProvider.ModifyOrientationComponentQuery,
+                    persistenceProvider.RemoveOrientationComponentQuery,
+                    transaction);
+
                 SynchronizeRemovedEntities(persistenceProvider, transaction);
 
                 transaction.Commit();
             }
+
+            internalController.CompleteSync(eventSender);
         }
         catch (Exception e)
         {

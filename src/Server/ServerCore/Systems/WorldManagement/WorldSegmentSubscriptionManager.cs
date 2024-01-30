@@ -14,12 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.Systems.Player.Components.Indexers;
 using Sovereign.EngineCore.World;
 
@@ -49,10 +53,25 @@ public class WorldSegmentSubscriptionManager
     /// </summary>
     private readonly Dictionary<ulong, GridPosition> currentWorldSegments = new();
 
+    private readonly EntityTable entityTable;
+
     private readonly IEventSender eventSender;
+    private readonly EntityHierarchyIndexer hierarchyIndexer;
     private readonly WorldManagementInternalController internalController;
+    private readonly NonBlockPositionEventFilter nonBlockPositionEventFilter;
+
+    /// <summary>
+    ///     Map of entity ID to last known world segment for entities that are expected to desynchronize soon.
+    /// </summary>
+    private readonly Dictionary<ulong, GridPosition> pendingDesyncs = new();
+
+    /// <summary>
+    ///     Map from world segment index to the set of players subscribed to that world segment.
+    /// </summary>
+    private readonly Dictionary<GridPosition, HashSet<ulong>> playersByWorldSegments = new();
 
     private readonly PlayerPositionEventFilter positionEventFilter;
+    private readonly PositionComponentCollection positions;
 
     private readonly WorldSegmentResolver resolver;
 
@@ -60,6 +79,8 @@ public class WorldSegmentSubscriptionManager
     ///     Dictionary mapping player entity IDs to subscribed world segments.
     /// </summary>
     private readonly Dictionary<ulong, HashSet<GridPosition>> subscriptions = new();
+
+    private readonly EntitySynchronizer synchronizer;
 
     private readonly WorldSegmentSynchronizationManager syncManager;
 
@@ -69,7 +90,9 @@ public class WorldSegmentSubscriptionManager
         WorldSegmentResolver resolver, IWorldManagementConfiguration worldConfig,
         WorldSegmentActivationManager activationManager,
         IEventSender eventSender, WorldManagementInternalController internalController,
-        WorldSegmentSynchronizationManager syncManager)
+        WorldSegmentSynchronizationManager syncManager, PositionComponentCollection positions,
+        EntitySynchronizer synchronizer, EntityHierarchyIndexer hierarchyIndexer,
+        EntityTable entityTable, NonBlockPositionEventFilter nonBlockPositionEventFilter)
     {
         this.positionEventFilter = positionEventFilter;
         this.resolver = resolver;
@@ -78,6 +101,11 @@ public class WorldSegmentSubscriptionManager
         this.eventSender = eventSender;
         this.internalController = internalController;
         this.syncManager = syncManager;
+        this.positions = positions;
+        this.synchronizer = synchronizer;
+        this.hierarchyIndexer = hierarchyIndexer;
+        this.entityTable = entityTable;
+        this.nonBlockPositionEventFilter = nonBlockPositionEventFilter;
 
         // Register event handlers.
         this.positionEventFilter.OnStartUpdates += OnStartUpdates;
@@ -85,9 +113,24 @@ public class WorldSegmentSubscriptionManager
         this.positionEventFilter.OnComponentAdded += OnPlayerAdded;
         this.positionEventFilter.OnComponentModified += OnPlayerMoved;
         this.positionEventFilter.OnComponentRemoved += OnPlayerRemoved;
+        this.entityTable.OnNonBlockEntityAdded += OnNonBlockEntityAdded;
+        this.entityTable.OnNonBlockEntityRemoved += OnNonBlockEntityRemoved;
+        this.nonBlockPositionEventFilter.OnComponentRemoved += OnNonBlockPositionRemoved;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+    /// <summary>
+    ///     Gets the players who are currently subscribed to the given world segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <returns>Set of players (possibly empty) subscribed to the world segment.</returns>
+    public IReadOnlySet<ulong> GetSubscribersForWorldSegment(GridPosition segmentIndex)
+    {
+        return playersByWorldSegments.TryGetValue(segmentIndex, out var players)
+            ? players
+            : new HashSet<ulong>();
+    }
 
     /// <summary>
     ///     Called when a player is unloaded.
@@ -97,7 +140,14 @@ public class WorldSegmentSubscriptionManager
     private void OnPlayerRemoved(ulong entityId, bool isUnload)
     {
         // Special case: for removal, unsubscribe from all.
-        foreach (var segment in subscriptions[entityId]) changeCounts[segment] -= 1;
+        foreach (var segment in subscriptions[entityId])
+        {
+            if (changeCounts.ContainsKey(segment))
+                changeCounts[segment] -= 1;
+            else
+                changeCounts[segment] = -1;
+            playersByWorldSegments[segment].Remove(entityId);
+        }
 
         // Clean up any info for the entity.
         subscriptions.Remove(entityId);
@@ -193,6 +243,9 @@ public class WorldSegmentSubscriptionManager
                 Logger.DebugFormat("Subscribe {0} to {1}.", playerEntityId, segment);
                 internalController.PushSubscribe(eventSender, playerEntityId, segment);
                 currentSubscriptionSet.Add(segment);
+                if (!playersByWorldSegments.ContainsKey(segment))
+                    playersByWorldSegments[segment] = new HashSet<ulong>();
+                playersByWorldSegments[segment].Add(playerEntityId);
                 syncManager.OnPlayerSubscribe(playerEntityId, segment);
                 if (changeCounts.ContainsKey(segment))
                     changeCounts[segment] += 1;
@@ -200,17 +253,76 @@ public class WorldSegmentSubscriptionManager
                     changeCounts[segment] = 1;
             }
 
-        // Unsubscribe from anything old that isn't in the intersection.
+        // Unsubscribe from anything old that isn't in the intersection if the world segment is more than
+        // one segment outside of the subscription radius. Adding this one-segment-wide gap between subscribe
+        // and unsubscribe helps to prevent players from rapidly toggling the subscription through small
+        // movements over the border.
         foreach (var segment in lastSubscriptionSet)
             if (!unchangedSet.Contains(segment))
             {
-                Logger.DebugFormat("Unsubscribe {0} from {1}.", playerEntityId, segment);
-                internalController.PushUnsubscribe(eventSender, playerEntityId, segment);
-                currentSubscriptionSet.Remove(segment);
-                if (changeCounts.ContainsKey(segment))
-                    changeCounts[segment] -= 1;
-                else
-                    changeCounts[segment] = -1;
+                // Beyond the subscribe radius, now check whether beyond the unsubscribe radius.
+                var unsubRadius = worldConfig.SubscriptionRange + 1;
+                var dx = Math.Abs(segment.X - center.X);
+                var dy = Math.Abs(segment.Y - center.Y);
+                var dz = Math.Abs(segment.Z - center.Z);
+                if (dx > unsubRadius || dy > unsubRadius || dz > unsubRadius)
+                {
+                    // Beyond the unsubscribe radius, trigger unsubscribe.
+                    Logger.DebugFormat("Unsubscribe {0} from {1}.", playerEntityId, segment);
+                    internalController.PushUnsubscribe(eventSender, playerEntityId, segment);
+                    currentSubscriptionSet.Remove(segment);
+                    playersByWorldSegments[segment].Remove(playerEntityId);
+                    if (changeCounts.ContainsKey(segment))
+                        changeCounts[segment] -= 1;
+                    else
+                        changeCounts[segment] = -1;
+                }
             }
+    }
+
+    /// <summary>
+    ///     Called when an entity has been fully added to synchronize the entity with any subscribers.
+    /// </summary>
+    /// <param name="entityId">Entity.</param>
+    private void OnNonBlockEntityAdded(ulong entityId)
+    {
+        // Skip if not a positioned entity.
+        if (!positions.HasComponentForEntity(entityId)) return;
+
+        // Skip if there are no subscribers to the relevant world segment.
+        var segmentIndex = resolver.GetWorldSegmentForPosition(positions[entityId]);
+        var playerEntityIds = GetSubscribersForWorldSegment(segmentIndex);
+        if (playerEntityIds.Count == 0) return;
+
+        // Identify the new entity tree.
+        var entitiesToSync = hierarchyIndexer.GetAllDescendants(entityId);
+        entitiesToSync.Add(entityId);
+        synchronizer.Synchronize(playerEntityIds, entitiesToSync);
+    }
+
+    /// <summary>
+    ///     Called when a non-block entity is removed or unloaded.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    private void OnNonBlockEntityRemoved(ulong entityId)
+    {
+        if (!pendingDesyncs.Remove(entityId, out var segmentIndex)) return;
+
+        // Desync pending - desynchronize entity tree across all clients subscribed to its world segment.         
+        synchronizer.Desynchronize(entityId, segmentIndex);
+    }
+
+    /// <summary>
+    ///     Called when the position component of a non-block entity is removed.
+    ///     This is treated as a cue to prepare to desynchronize the entity.
+    /// </summary>
+    /// <param name="entityId">Affected entity ID.</param>
+    /// <param name="isUnload">Unused.</param>
+    private void OnNonBlockPositionRemoved(ulong entityId, bool isUnload)
+    {
+        // Grab the last known world segment and cache it for eventual desync.
+        var pos = positions.GetComponentWithLookback(entityId);
+        var segmentIndex = resolver.GetWorldSegmentForPosition(pos);
+        pendingDesyncs[entityId] = segmentIndex;
     }
 }

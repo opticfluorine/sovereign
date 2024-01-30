@@ -82,7 +82,6 @@ public sealed class BlockSystem : ISystem, IDisposable
         var eventsProcessed = 0;
         while (EventCommunicator.GetIncomingEvent(out var ev))
         {
-            Logger.DebugFormat("Received event with type {0}.", ev.EventId);
             eventHandler.HandleEvent(ev);
             eventsProcessed++;
         }

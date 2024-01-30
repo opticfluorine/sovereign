@@ -16,6 +16,7 @@
  */
 
 using System.Collections.Generic;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 
@@ -44,6 +45,17 @@ public sealed class AnimatedSpriteDefinitions
         /// </summary>
         public ulong AnimationTimestep { get; set; }
 
+        /// <summary>
+        ///     Sprite IDs for each frame.
+        /// </summary>
+        public Dictionary<Orientation, AnimatedSpriteFaceDefinition> Faces { get; set; } = new();
+    }
+
+    /// <summary>
+    ///     Defines a single face of an animated sprite.
+    /// </summary>
+    public sealed class AnimatedSpriteFaceDefinition
+    {
         /// <summary>
         ///     Sprite IDs for each frame.
         /// </summary>

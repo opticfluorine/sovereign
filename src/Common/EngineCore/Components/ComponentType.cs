@@ -74,21 +74,26 @@ public enum ComponentType
     /// <seealso cref="Sovereign.EngineCore.Components.ParentComponentCollection" />
     Parent = 0x0007,
 
-    #endregion Common
-
-    #region Client
-
     /// <summary>
     ///     Animated sprite component.
     /// </summary>
     /// <seealso cref="Sovereign.ClientCore.Rendering.Components.AnimatedSpriteComponentCollection" />
-    AnimatedSprite = 0x1000,
+    AnimatedSprite = 0x0008,
 
     /// <summary>
     ///     Drawable component.
     /// </summary>
     /// <seealso cref="Sovereign.ClientCore.Rendering.Components.DrawableComponentCollection" />
-    Drawable = 0x1001,
+    Drawable = 0x0009,
+
+    /// <summary>
+    ///     Orientation component.
+    /// </summary>
+    Orientation = 0x000A,
+
+    #endregion Common
+
+    #region Client
 
     #endregion Client
 

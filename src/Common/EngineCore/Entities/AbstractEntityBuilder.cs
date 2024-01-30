@@ -40,6 +40,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     protected readonly MaterialModifierComponentCollection materialModifiers;
     protected readonly MaterialComponentCollection materials;
     protected readonly NameComponentCollection names;
+    protected readonly OrientationComponentCollection orientations;
     protected readonly ParentComponentCollection parents;
     protected readonly PlayerCharacterTagCollection playerCharacterTags;
     protected readonly PositionComponentCollection positions;
@@ -57,6 +58,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         ParentComponentCollection parents,
         DrawableTagCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites,
+        OrientationComponentCollection orientations,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -71,6 +73,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         this.parents = parents;
         this.drawables = drawables;
         this.animatedSprites = animatedSprites;
+        this.orientations = orientations;
         this.entityTable = entityTable;
 
         weakLock = entityManager.UpdateGuard.AcquireWeakLock();
@@ -201,6 +204,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     public IEntityBuilder WithoutAnimatedSprite()
     {
         animatedSprites.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder Orientation(Orientation orientation)
+    {
+        orientations.AddOrUpdateComponent(entityId, orientation, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutOrientation()
+    {
+        orientations.RemoveComponent(entityId, load);
         return this;
     }
 

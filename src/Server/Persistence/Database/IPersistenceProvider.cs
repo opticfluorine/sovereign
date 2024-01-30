@@ -18,6 +18,7 @@
 using System;
 using System.Data;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.Persistence.Database.Queries;
 
 namespace Sovereign.Persistence.Database;
@@ -211,6 +212,21 @@ public interface IPersistenceProvider : IDisposable
     ///     IRemoveComponentQuery for the AnimatedSprite component.
     /// </summary>
     IRemoveComponentQuery RemoveAnimatedSpriteComponentQuery { get; }
+
+    /// <summary>
+    ///     IAddComponentQuery for Orientation component.
+    /// </summary>
+    IAddComponentQuery<Orientation> AddOrientationComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for Orientation component.
+    /// </summary>
+    IModifyComponentQuery<Orientation> ModifyOrientationComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for Orientation component.
+    /// </summary>
+    IRemoveComponentQuery RemoveOrientationComponentQuery { get; }
 
     /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.

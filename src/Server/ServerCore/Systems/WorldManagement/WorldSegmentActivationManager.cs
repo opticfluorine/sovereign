@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Threading;
 using Castle.Core.Logging;
-using log4net.Repository.Hierarchy;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.ServerCore.Systems.Persistence;
@@ -42,13 +42,18 @@ public class WorldSegmentActivationManager
     /// </summary>
     private readonly Dictionary<GridPosition, int> segmentRefCounts = new();
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
+    /// <summary>
+    ///     Spin lock for protecting loadedSegments.
+    /// </summary>
+    private SpinLock loadedSegmentsSpinLock;
 
     public WorldSegmentActivationManager(IEventSender eventSender, PersistenceController persistenceController)
     {
         this.eventSender = eventSender;
         this.persistenceController = persistenceController;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Processes a set of changes to the activation counts of a set of world segments.
@@ -69,7 +74,7 @@ public class WorldSegmentActivationManager
             {
                 // Change in reference count to an existing activation.
                 segmentRefCounts[segmentIndex] += changes[segmentIndex];
-                Logger.DebugFormat("Update ref count for {0} to {1}.", segmentIndex, 
+                Logger.DebugFormat("Update ref count for {0} to {1}.", segmentIndex,
                     segmentRefCounts[segmentIndex]);
             }
     }
@@ -80,7 +85,18 @@ public class WorldSegmentActivationManager
     /// <param name="segmentIndex">Segment index.</param>
     public void OnWorldSegmentLoaded(GridPosition segmentIndex)
     {
-        loadedSegments.Add(segmentIndex);
+        var taken = false;
+        try
+        {
+            loadedSegmentsSpinLock.Enter(ref taken);
+            loadedSegments.Add(segmentIndex);
+        }
+        finally
+        {
+            if (taken) loadedSegmentsSpinLock.Exit();
+        }
+
+        Logger.DebugFormat("Segment {0} recorded as loaded.", segmentIndex);
     }
 
     /// <summary>
@@ -90,6 +106,15 @@ public class WorldSegmentActivationManager
     /// <returns>true if loaded, false otherwise.</returns>
     public bool IsWorldSegmentLoaded(GridPosition segmentIndex)
     {
-        return loadedSegments.Contains(segmentIndex);
+        var taken = false;
+        try
+        {
+            loadedSegmentsSpinLock.Enter(ref taken);
+            return loadedSegments.Contains(segmentIndex);
+        }
+        finally
+        {
+            if (taken) loadedSegmentsSpinLock.Exit();
+        }
     }
 }

@@ -138,6 +138,14 @@ public enum EventId
     /// Associated details: WorldSegmentSubscriptionEventDetails
     Core_WorldManagement_Unsubscribe = 601,
 
+    /// <summary>
+    ///     Sent from server to client to announce that an entity has left a world segment.
+    ///     Used to assist with unloading entities from the client if they exit the subscribed
+    ///     area. Sent to clients subscribed to the previous world segment.
+    /// </summary>
+    /// Associated details: EntityChangeWorldSegmentEventDetails
+    Core_WorldManagement_EntityLeaveWorldSegment = 602,
+
     #endregion WorldManagement
 
     #endregion Core
@@ -247,7 +255,17 @@ public enum EventId
     ///     Event sent from server to client to synchronize non-block entities.
     /// </summary>
     /// Associated details: EntityDefinitionEventDetails
-    Client_EntitySynchronization_Update = 100300,
+    Client_EntitySynchronization_Sync = 100300,
+
+    /// <summary>
+    ///     Event sent from server to client to desynchronize a non-block entity.
+    /// </summary>
+    /// <remarks>
+    ///     The entity ID in the details corresponds to the root of the entity tree to be desynchronized.
+    ///     The grid position is the world segment index for which the entity is being desynchronized.
+    /// </remarks>
+    /// Associated details: EntityDesyncEventDetails
+    Client_EntitySynchronization_Desync = 100301,
 
     #endregion Client_EntitySynchronization
 
@@ -264,23 +282,22 @@ public enum EventId
     Server_Persistence_RetrieveEntity = 200000,
 
     /// <summary>
-    ///     Event sent to retrieve all entities positioned within a range
-    ///     from the database.
-    /// </summary>
-    /// Associated details: VectorPairEventDetails
-    Server_Persistence_RetrieveEntitiesInRange = 200001,
-
-    /// <summary>
     ///     Event sent to load a world segment from the database.
     /// </summary>
     /// Associated details: WorldSegmentEventDetails
-    Server_Persistence_RetrieveWorldSegment = 200002,
+    Server_Persistence_RetrieveWorldSegment = 200001,
 
     /// <summary>
     ///     Event sent to synchronize the server with the database.
     /// </summary>
     /// Associated details: None
-    Server_Persistence_Synchronize = 200099,
+    Server_Persistence_Synchronize = 200098,
+
+    /// <summary>
+    ///     Event sent to announce that entity synchronization is complete.
+    /// </summary>
+    /// Associated details: None
+    Server_Persistence_SynchronizeComplete = 200099,
 
     #endregion Server_Persistence
 

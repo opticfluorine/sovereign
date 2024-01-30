@@ -4,6 +4,105 @@
 
 ### January
 
+#### 29 January 2024
+
+* Desynchronize entity trees from affected clients when a positioned entity is removed or unloaded.
+  Note that this does not desynchronize individual child entities as they are removed. This aligns with
+  entity synchronization which synchronizes an entire tree at once beginning from the positioned root entity.
+  This has impacts on future design - child entities should be created/removed outside of the tree synchronization
+  by separate events which deterministically produce the correct entity tree (up to a change in entity IDs) when
+  played back on both client and server. Since these are only guaranteed to be synchronized up to a change in entity
+  ID, events referencing these child entities will also need to use an indirect reference if the events are to
+  be replicated across the network. Alternatively, the separate events could specify the entity ID themselves - this
+  could be useful for e.g. inventory where reference to a specific entity is desired.
+
+#### 28 January 2024
+
+* Fix issue where the player entity was not synchronized to the client under certain conditions when
+  logging in. Specifically, if the world segment where the player is located is already loaded into memory,
+  the initial entity synchronization will typically occur faster than the load of the player entity tree
+  from the database. As a result, the player entity is not synchronized in the first call (or, in some rare
+  cases, only partially synchronized when the sync event occurs in the middle of a persistence load spread
+  across two or more ticks). Sending (or potentially resending) the synchronization events for the player
+  entity tree only ensures that the entity is fully synchronized.
+* Add `Orientation` component for tracking which direction an enttiy is facing. The orientation is set in
+  the `Movement` system based on the direction of the entity's velocity.
+* Revert some changes related to database transactions from last night that were breaking things. I should
+  really go to bed when I'm tired instead of messing with database transactions.
+* Update renderer to apply orientations to the animated sprites as they are rendered. Also update the animated
+  sprite definitions to include orientation information.
+* Synchronize entity trees to subscribed clients when they are committed to memory. This supersedes the earlier
+  work from the first bullet. Again, I should get more sleep.
+* Update entity retrieval queries to sort null parents to the end of the result set. This ensures that when
+  an entity tree is retrieved, the root of the tree is the last entity processed. Therefore, the entity loaded
+  event for the root node is guaranteed to come after the full tree is committed to memory, and so it is safe
+  to synchronize the tree once the event is invoked.
+
+#### 27 January 2024
+
+* Fix issue where a read-only query executing at the same time as persistence synchronization would fail
+  due to a lack of database transaction.
+* Fix issue where a player logout and re-login before a persistence synchronization completes would result
+  in a reload of out-of-date entity data from the last synchronization point, effectively allowing a player
+  to "roll back" the player by a single persistence synchronization interval.
+
+#### 26 January 2024
+
+* Fix issue where a poorly timed REST call would trigger world segment block data generation while the
+  block data was partially loaded from the database (due to the retrieval task overlapping multiple ticks
+  and the block entities being committed in several batches as a result). This, in turn, led to a situation
+  where the client would load part of a world segment and never reload it until unsubscribing and resubscribing
+  again.
+* At this point the world segment block data generators and loaders appear stable and performant.
+* Unload entities in the client that move to a world segment that the client is not currently subscribed to,
+  since the client will receive no further synchronization updates for that entity until it resubscribes to a
+  (possibly different) world segment where that entity exists - at which point it will be synchronized in full
+  again.
+* Proper player and account logout on disconnect (untested).
+
+#### 25 January 2024
+
+* Fix race condition in `StructBuffer<T>` (and `BaseComponentCollection<T>`) caused by a mismatched lock
+  target between modification and enumeration.
+* Update `EntityManager` to also publish a C# `event` that is invoked when entity/component processing begins.
+* Change the set of component events tracked in `BlockAnimatedSpriteCache` to avoid large amounts of redundant
+  processing when block entities are added, modified, and removed.
+* Expand the unsubscribe distance for world segments to one segment greater than the subscribe distance. This
+  ensures there is a full segment between the player and the subscribe point after an unsubscribe (and vice
+  versa) so the player can't rapidly subscribe and unsubscribe by straddling the line between two segments.
+  This comes at the cost of having to maintain synchronization events for a larger set of segments; however, the
+  initial synchronization on subscribe is unaffected as the subscribe radius is unchanged. (In fact it may under
+  some cases be better overall, since the client is effectively caching the bulk of the data for longer - so if
+  the player backtracks, it may save a few extra bulk synchronizations on subscribe.)
+
+#### 24 January 2024
+
+* Fix various issues with `Octree` again. This time the logic for identifying a leaf node was incorrect,
+  ultimately leading to incomplete range query results - a child node could be left unpopulated because
+  the octree incorrectly treated its parent as a leaf node, and if that empty child node was completely
+  interior to the search range but the parent was not, any entities belonging to that node would not be
+  returned. This was responsible for at least some of the issues seen in testing where
+  `WorldSegmentBlockDataGenerator` was missing large numbers of blocks depending on the order in which
+  world segments were loaded from the database.
+* Add some additional unit tests for `Octree`.
+* Start work on unloading world segments on unsubscribe in the client. This broke a lot of things and/or
+  revealed many strange bugs, so working through these now.
+
+#### 23 January 2024
+
+* Fix issue in `WorldSegmentBlockDataGenerator` where non-air default blocks were never being selected
+  as the algorithm was counting down from the maximum number of air blocks in an entire world segment,
+  not just the depth plane in question.
+* Traced the issue with occasional gaps in loaded block entities to the server-side `Octree` instance,
+  or possibly the indexer that populates it. The missing blocks when the bug occurs appear exactly at the
+  edge of the octree's root node. Need to investigate further.
+
+#### 22 January 2024
+
+* Fix issue in `Octree` where moving entities were not properly removed from nodes they no longer overlap,
+  leading to the incorrect rendering of duplicate entities whenever the player moves across an (arbitrary)
+  boundary between two octree nodes.
+
 #### 21 January 2024
 
 * Fix rare race condition with tile sprite caching.
@@ -14,6 +113,8 @@
   further.
 * Fix velocity, I used the wrong units when I set the default movement velocity. Still need to figure out the caching
   issue and forward the authoritative updates from the server.
+* Add connection mapper for movement events.
+* Send authoritative position and velocity updates from server to client.
 
 #### 20 January 2024
 

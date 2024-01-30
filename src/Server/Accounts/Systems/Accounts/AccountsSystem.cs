@@ -66,7 +66,8 @@ public sealed class AccountsSystem : ISystem
     {
         EventId.Core_Tick,
         EventId.Server_Network_ClientDisconnected,
-        EventId.Server_Accounts_SelectPlayer
+        EventId.Server_Accounts_SelectPlayer,
+        EventId.Server_Persistence_SynchronizeComplete
     };
 
     public int WorkloadEstimate => 10;
@@ -107,6 +108,10 @@ public sealed class AccountsSystem : ISystem
 
                     var selectPlayerDetails = (SelectPlayerEventDetails)ev.EventDetails;
                     OnSelectPlayer(selectPlayerDetails);
+                    break;
+
+                case EventId.Server_Persistence_SynchronizeComplete:
+                    OnSyncComplete();
                     break;
             }
         }
@@ -149,5 +154,13 @@ public sealed class AccountsSystem : ISystem
             sharedSecretManager.PurgeOldSecrets();
             ticksSincePurge = 0;
         }
+    }
+
+    /// <summary>
+    ///     Called when a round of persistence synchronization has been completed.
+    /// </summary>
+    private void OnSyncComplete()
+    {
+        loginTracker.OnSyncComplete();
     }
 }

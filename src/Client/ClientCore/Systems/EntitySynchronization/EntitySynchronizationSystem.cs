@@ -27,12 +27,15 @@ public class EntitySynchronizationSystem : ISystem
 {
     private readonly IEventLoop eventLoop;
     private readonly EntityDefinitionProcessor processor;
+    private readonly ClientEntityUnloader unloader;
 
     public EntitySynchronizationSystem(EventCommunicator eventCommunicator,
-        IEventLoop eventLoop, EntityDefinitionProcessor processor)
+        IEventLoop eventLoop, EntityDefinitionProcessor processor,
+        ClientEntityUnloader unloader)
     {
         this.eventLoop = eventLoop;
         this.processor = processor;
+        this.unloader = unloader;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
@@ -44,7 +47,12 @@ public class EntitySynchronizationSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
-        EventId.Client_EntitySynchronization_Update
+        EventId.Client_EntitySynchronization_Sync,
+        EventId.Client_EntitySynchronization_Desync,
+        EventId.Core_WorldManagement_Subscribe,
+        EventId.Core_WorldManagement_Unsubscribe,
+        EventId.Client_Network_PlayerEntitySelected,
+        EventId.Core_WorldManagement_EntityLeaveWorldSegment
     };
 
     public int WorkloadEstimate => 50;
@@ -65,14 +73,64 @@ public class EntitySynchronizationSystem : ISystem
             eventsProcessed++;
             switch (ev.EventId)
             {
-                case EventId.Client_EntitySynchronization_Update:
-                    if (ev.EventDetails == null)
+                case EventId.Client_EntitySynchronization_Sync:
+                    if (ev.EventDetails is not EntityDefinitionEventDetails)
                     {
-                        Logger.Error("Received Update event without details.");
+                        Logger.Error("Received Sync event without details.");
                         break;
                     }
 
-                    HandleUpdate((EntityDefinitionEventDetails)ev.EventDetails);
+                    HandleSync((EntityDefinitionEventDetails)ev.EventDetails);
+                    break;
+
+                case EventId.Client_EntitySynchronization_Desync:
+                    if (ev.EventDetails is not EntityDesyncEventDetails)
+                    {
+                        Logger.Error("Received Desync event without details.");
+                        break;
+                    }
+
+                    HandleDesync((EntityDesyncEventDetails)ev.EventDetails);
+                    break;
+
+                case EventId.Core_WorldManagement_Subscribe:
+                    if (ev.EventDetails is not WorldSegmentSubscriptionEventDetails)
+                    {
+                        Logger.Error("Received Subscribe event without details.");
+                        break;
+                    }
+
+                    HandleSubscribe((WorldSegmentSubscriptionEventDetails)ev.EventDetails);
+                    break;
+
+                case EventId.Core_WorldManagement_Unsubscribe:
+                    if (ev.EventDetails is not WorldSegmentSubscriptionEventDetails)
+                    {
+                        Logger.Error("Received Unsubscribe event without details.");
+                        break;
+                    }
+
+                    HandleUnsubscribe((WorldSegmentSubscriptionEventDetails)ev.EventDetails);
+                    break;
+
+                case EventId.Client_Network_PlayerEntitySelected:
+                    if (ev.EventDetails is not EntityEventDetails)
+                    {
+                        Logger.Error("Received PlayerEntitySelected event without details.");
+                        break;
+                    }
+
+                    HandlePlayerSelect((EntityEventDetails)ev.EventDetails);
+                    break;
+
+                case EventId.Core_WorldManagement_EntityLeaveWorldSegment:
+                    if (ev.EventDetails is not EntityChangeWorldSegmentEventDetails)
+                    {
+                        Logger.Error("Received EntityLeaveWorldSegment event without details.");
+                        break;
+                    }
+
+                    HandleChangeWorldSegment((EntityChangeWorldSegmentEventDetails)ev.EventDetails);
                     break;
             }
         }
@@ -80,14 +138,57 @@ public class EntitySynchronizationSystem : ISystem
         return eventsProcessed;
     }
 
+    private void HandleSubscribe(WorldSegmentSubscriptionEventDetails details)
+    {
+        unloader.OnSubscribe(details.SegmentIndex);
+    }
+
+    /// <summary>
+    ///     Handles a world segment unsubscribe event.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandleUnsubscribe(WorldSegmentSubscriptionEventDetails details)
+    {
+        unloader.OnUnsubscribe(details.SegmentIndex);
+    }
+
+    /// <summary>
+    ///     Handles notification of an entity leaving a world segment.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandleChangeWorldSegment(EntityChangeWorldSegmentEventDetails details)
+    {
+        unloader.OnEntityChangeWorldSegment(details.EntityId,
+            details.NewSegmentIndex);
+    }
+
+    /// <summary>
+    ///     Handles a player select event from the server.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandlePlayerSelect(EntityEventDetails details)
+    {
+        unloader.SetPlayer(details.EntityId);
+    }
+
     /// <summary>
     ///     Handles an entity synchronization update.
     /// </summary>
     /// <param name="details">Update details.</param>
-    private void HandleUpdate(EntityDefinitionEventDetails details)
+    private void HandleSync(EntityDefinitionEventDetails details)
     {
         Logger.DebugFormat("Processing {0} entity definitions.", details.EntityDefinitions.Count);
         foreach (var definition in details.EntityDefinitions)
             processor.ProcessDefinition(definition);
+    }
+
+    /// <summary>
+    ///     Handles an entity desynchronization.
+    /// </summary>
+    /// <param name="details">Desync details.</param>
+    private void HandleDesync(EntityDesyncEventDetails details)
+    {
+        Logger.DebugFormat("Desynchronizing entity ID {0} and descendants.", details.EntityId);
+        unloader.OnDesync(details.EntityId);
     }
 }

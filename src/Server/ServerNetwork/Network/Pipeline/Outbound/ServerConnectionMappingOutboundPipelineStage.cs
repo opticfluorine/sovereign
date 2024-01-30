@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Services;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineUtil.Monads;
@@ -40,27 +41,51 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
 
     public ServerConnectionMappingOutboundPipelineStage(GlobalConnectionMapper globalMapper,
         SingleEntityConnectionMapperFactory singleConnMapperFactory,
+        EntityWorldSegmentConnectionMapperFactory entityWorldSegmentMapperFactory,
+        WorldSegmentConnectionMapperFactory worldSegmentMapperFactory,
         AccountServices accountServices)
     {
         // Create delegate mappers.
         var worldSubEventMapper = singleConnMapperFactory.Create(evInfo =>
         {
-            if (evInfo.Event.EventDetails == null) return new Maybe<int>();
-            var details = (WorldSegmentSubscriptionEventDetails)evInfo.Event.EventDetails;
+            if (evInfo.Event.EventDetails is not WorldSegmentSubscriptionEventDetails details) return new Maybe<int>();
             return accountServices.GetConnectionIdForPlayer(details.EntityId);
         });
+
         var entityDefMapper = singleConnMapperFactory.Create(evInfo =>
         {
-            if (evInfo.Event.EventDetails == null) return new Maybe<int>();
-            var details = (EntityDefinitionEventDetails)evInfo.Event.EventDetails;
+            if (evInfo.Event.EventDetails is not EntityDefinitionEventDetails details) return new Maybe<int>();
             return accountServices.GetConnectionIdForPlayer(details.PlayerEntityId);
+        });
+
+        var moveMapper = entityWorldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not MoveEventDetails details) return new Maybe<ulong>();
+            return new Maybe<ulong>(details.EntityId);
+        });
+
+        var entityGridMapper = worldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not EntityChangeWorldSegmentEventDetails details)
+                return new Maybe<GridPosition>();
+            return new Maybe<GridPosition>(details.PreviousSegmentIndex);
+        });
+
+        var desyncMapper = worldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not EntityDesyncEventDetails details)
+                return new Maybe<GridPosition>();
+            return new Maybe<GridPosition>(details.WorldSegmentIndex);
         });
 
         // Configure specific connection mappers.
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
         specificMappers[EventId.Core_WorldManagement_Unsubscribe] = worldSubEventMapper;
-        specificMappers[EventId.Client_EntitySynchronization_Update] = entityDefMapper;
+        specificMappers[EventId.Client_EntitySynchronization_Sync] = entityDefMapper;
+        specificMappers[EventId.Client_EntitySynchronization_Desync] = desyncMapper;
+        specificMappers[EventId.Core_Movement_Move] = moveMapper;
+        specificMappers[EventId.Core_WorldManagement_EntityLeaveWorldSegment] = entityGridMapper;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

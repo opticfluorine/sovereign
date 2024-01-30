@@ -35,7 +35,7 @@ internal sealed class OctreeNode<T> where T : notnull
     /// <summary>
     ///     Threshold for length comparisons.
     /// </summary>
-    private const float Threshold = 1e-4f;
+    private const float Threshold = 1.0f;
 
     /// <summary>
     ///     Child nodes indexed by the eight possible combinations of OctreeOctant flags.
@@ -216,7 +216,8 @@ internal sealed class OctreeNode<T> where T : notnull
     public bool IsLeafNode()
     {
         var isLeaf = true;
-        foreach (var child in childNodes) isLeaf = isLeaf && (child == null || child.Count == 0);
+        // DEBUG: Is the child.Count == 0 check correct here?
+        foreach (var child in childNodes) isLeaf = isLeaf && child is null;
         return isLeaf;
     }
 
@@ -302,7 +303,7 @@ internal sealed class OctreeNode<T> where T : notnull
 
             /* Compute distance squared. */
             var delta = corners[i] - position;
-            distancesSquared[i] = Vector3.Dot(delta, delta);
+            distancesSquared[i] = delta.LengthSquared();
         }
 
         /* Select the octant that minimizes the distance. */
@@ -342,7 +343,7 @@ internal sealed class OctreeNode<T> where T : notnull
     private bool CanNodeBeSubdivided()
     {
         var nodeLength = maxPosition.X - minPosition.X;
-        return !(Math.Abs(nodeLength - octree.MinimumNodeSize) < Threshold);
+        return Math.Abs(nodeLength - octree.MinimumNodeSize) >= Threshold;
     }
 
     /// <summary>

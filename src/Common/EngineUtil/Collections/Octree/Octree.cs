@@ -112,6 +112,24 @@ public sealed class Octree<T> where T : notnull
     public int Count => rootNode.elementPositions.Count;
 
     /// <summary>
+    ///     Gets the minimum extent of the current octree.
+    /// </summary>
+    /// <remarks>
+    ///     This is not an invariant. The octree will expand if elements are added
+    ///     which are exterior to the current extent.
+    /// </remarks>
+    public Vector3 MinimumExtent => rootNode.minPosition;
+
+    /// <summary>
+    ///     Gets the maximum extent of the current octree.
+    /// </summary>
+    /// <remarks>
+    ///     This is not an invariant. The octree will expand if elements are added
+    ///     which are exterior to the current extent.
+    /// </remarks>
+    public Vector3 MaximumExtent => rootNode.maxPosition;
+
+    /// <summary>
     ///     Adds the given element to the octree at the given position.
     /// </summary>
     /// If the element is already in the octree, this method has no effect.
@@ -133,19 +151,24 @@ public sealed class Octree<T> where T : notnull
     /// <param name="lockHandle">Active lock handle.</param>
     /// <param name="element">Element to be updated.</param>
     /// <param name="position">New position of the element.</param>
-    /// <exception cref="KeyNotFoundException">
-    ///     Thrown if the element is not in the octree.
-    /// </exception>
     public void UpdatePosition(OctreeLock lockHandle, T element, Vector3 position)
     {
         /* Locate the leaf node containing the element. */
         var initialNode = FindNodeForElement(element);
         if (initialNode == null)
-            throw new KeyNotFoundException(element.ToString());
+        {
+            // Not yet added - go ahead and add instead of modifying.
+            Add(lockHandle, position, element);
+            return;
+        }
 
         /* Clear any links that are invalidated. */
         var currentNode = initialNode;
-        while (currentNode != null && !currentNode.IsPositionInterior(position)) currentNode = currentNode.parentNode;
+        while (currentNode != null && !currentNode.IsPositionInterior(position))
+        {
+            currentNode.elementPositions.Remove(element);
+            currentNode = currentNode.parentNode;
+        }
 
         /* Old links are cleared, now add the element. */
         Add(lockHandle, position, element);
@@ -186,9 +209,9 @@ public sealed class Octree<T> where T : notnull
     /// <param name="maxPosition">Maximum position (exclusive).</param>
     /// <param name="buffer">Buffer to hold the results.</param>
     /// <param name="recordProducer">Lambda to produce buffer records.</param>
-    /// <typeparam name="R">Buffer record type.</typeparam>
-    public void GetElementsInRange<R>(OctreeLock lockHandle, Vector3 minPosition,
-        Vector3 maxPosition, IList<R> buffer, Func<Vector3, T, R> recordProducer)
+    /// <typeparam name="TR">Buffer record type.</typeparam>
+    public void GetElementsInRange<TR>(OctreeLock lockHandle, Vector3 minPosition,
+        Vector3 maxPosition, IList<TR> buffer, Func<Vector3, T, TR> recordProducer)
     {
         /* Depth-first search of overlapping nodes. */
         var nodesToSearch = new Stack<OctreeNode<T>>();

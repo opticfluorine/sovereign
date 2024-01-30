@@ -172,4 +172,17 @@ public interface IEntityBuilder
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutParent();
+
+    /// <summary>
+    ///     Assigns an orientation to the entity.
+    /// </summary>
+    /// <param name="orientation">Orientation.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder Orientation(Orientation orientation);
+
+    /// <summary>
+    ///     Removes the orientation component if currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutOrientation();
 }

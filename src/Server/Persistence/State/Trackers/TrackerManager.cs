@@ -31,8 +31,10 @@ public sealed class TrackerManager
         AccountStateTracker accountStateTracker,
         ParentStateTracker parentStateTracker,
         DrawableStateTracker drawableStateTracker,
-        AnimatedSpriteStateTracker animatedSpriteStateTracker)
+        AnimatedSpriteStateTracker animatedSpriteStateTracker,
+        OrientationStateTracker orientationStateTracker)
     {
+        OrientationStateTracker = orientationStateTracker;
         PositionStateTracker = positionStateTracker;
         MaterialStateTracker = materialStateTracker;
         MaterialModifierStateTracker = materialModifierStateTracker;
@@ -43,6 +45,11 @@ public sealed class TrackerManager
         DrawableStateTracker = drawableStateTracker;
         AnimatedSpriteStateTracker = animatedSpriteStateTracker;
     }
+
+    /// <summary>
+    ///     Orientation state tracker.
+    /// </summary>
+    public OrientationStateTracker OrientationStateTracker { get; }
 
     /// <summary>
     ///     Position state tracker.

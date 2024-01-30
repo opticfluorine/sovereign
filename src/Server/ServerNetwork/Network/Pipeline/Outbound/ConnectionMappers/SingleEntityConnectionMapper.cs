@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using Castle.Core.Logging;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
@@ -27,19 +28,22 @@ namespace Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
 public class SingleEntityConnectionMapper : ISpecificConnectionMapper
 {
     private readonly NetworkConnectionManager connectionManager;
+    private readonly ILogger logger;
     private readonly Func<OutboundEventInfo, Maybe<int>> mapper;
 
     /// <summary>
     ///     Creates a new connection mapper.
     /// </summary>
     /// <param name="connectionManager">Connection manager.</param>
+    /// <param name="logger">Logger.</param>
     /// <param name="mapper">Function taking event info to a connection ID.</param>
     /// <seealso cref="SingleEntityConnectionMapperFactory" />
     internal SingleEntityConnectionMapper(
         NetworkConnectionManager connectionManager,
-        Func<OutboundEventInfo, Maybe<int>> mapper)
+        ILogger logger, Func<OutboundEventInfo, Maybe<int>> mapper)
     {
         this.connectionManager = connectionManager;
+        this.logger = logger;
         this.mapper = mapper;
     }
 
@@ -51,6 +55,10 @@ public class SingleEntityConnectionMapper : ISpecificConnectionMapper
         {
             var connection = connectionManager.GetConnection(connId.Value);
             NextStage?.Process(new OutboundEventInfo(evInfo, connection));
+        }
+        else
+        {
+            logger.ErrorFormat("No connection found to forward {0}.", evInfo.Event.EventId);
         }
     }
 

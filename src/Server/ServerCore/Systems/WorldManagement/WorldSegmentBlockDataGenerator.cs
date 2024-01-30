@@ -16,6 +16,7 @@
  */
 
 using System.Collections.Generic;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Systems.Block.Components;
@@ -48,6 +49,8 @@ public sealed class WorldSegmentBlockDataGenerator
         this.config = config;
     }
 
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
     /// <summary>
     ///     Creates summary block data for the given world segment.
     /// </summary>
@@ -62,6 +65,8 @@ public sealed class WorldSegmentBlockDataGenerator
         {
             indexer.GetEntitiesInRange(lockHandle, range.Item1, range.Item2, blocks);
         }
+
+        Logger.DebugFormat("Segment {0} has {1} blocks.", segmentIndex, blocks.Count);
 
         // Retrieve material data, group into depth planes.
         var basePoint = resolver.GetRangeForWorldSegment(segmentIndex).Item1;
@@ -279,7 +284,7 @@ public sealed class WorldSegmentBlockDataGenerator
         public DepthPlane(uint sideLength, int offsetZ)
         {
             OffsetZ = offsetZ;
-            airBlockCount = (int)(sideLength * sideLength * sideLength);
+            airBlockCount = (int)(sideLength * sideLength);
         }
 
         /// <summary>

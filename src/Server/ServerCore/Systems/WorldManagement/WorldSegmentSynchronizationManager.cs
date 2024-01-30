@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -29,26 +30,29 @@ public class WorldSegmentSynchronizationManager
 {
     private readonly WorldSegmentActivationManager activationManager;
     private readonly EntityHierarchyIndexer hierarchyIndexer;
+    private readonly NonBlockWorldSegmentIndexer nonBlockSegmentIndexer;
 
     /// <summary>
     ///     Map from segment index to a queue of player entity IDs needing synchronization.
     /// </summary>
     private readonly Dictionary<GridPosition, Queue<ulong>> pendingPlayersBySegment = new();
 
-    private readonly EntitySynchronizer synchronizer;
-    private readonly NonBlockWorldSegmentIndexer worldSegmentIndexer;
+    private readonly PlayerCharacterTagCollection playerCharacters;
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
+    private readonly EntitySynchronizer synchronizer;
 
     public WorldSegmentSynchronizationManager(WorldSegmentActivationManager activationManager,
-        EntitySynchronizer synchronizer, NonBlockWorldSegmentIndexer worldSegmentIndexer,
-        EntityHierarchyIndexer hierarchyIndexer)
+        EntitySynchronizer synchronizer, NonBlockWorldSegmentIndexer nonBlockSegmentIndexer,
+        EntityHierarchyIndexer hierarchyIndexer, PlayerCharacterTagCollection playerCharacters)
     {
         this.activationManager = activationManager;
         this.synchronizer = synchronizer;
-        this.worldSegmentIndexer = worldSegmentIndexer;
+        this.nonBlockSegmentIndexer = nonBlockSegmentIndexer;
         this.hierarchyIndexer = hierarchyIndexer;
+        this.playerCharacters = playerCharacters;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Called when a player has subscribed to a world segment to initiate the
@@ -85,10 +89,7 @@ public class WorldSegmentSynchronizationManager
         if (pendingPlayersBySegment.TryGetValue(segmentIndex, out var queue))
         {
             Logger.DebugFormat("Processing pending syncs for newly loaded segment {0}.", segmentIndex);
-            while (queue.TryDequeue(out var playerEntityId))
-            {
-                SendSynchronizationEvents(playerEntityId, segmentIndex);
-            }
+            while (queue.TryDequeue(out var playerEntityId)) SendSynchronizationEvents(playerEntityId, segmentIndex);
         }
     }
 
@@ -100,7 +101,7 @@ public class WorldSegmentSynchronizationManager
     private void SendSynchronizationEvents(ulong playerEntityId, GridPosition segmentIndex)
     {
         // Fill in the hierarchy beneath the entities.
-        var allEntities = worldSegmentIndexer.GetNonBlockEntitiesInWorldSegment(segmentIndex)
+        var allEntities = nonBlockSegmentIndexer.GetEntitiesInWorldSegment(segmentIndex)
             .SelectMany(entityId =>
             {
                 var all = hierarchyIndexer.GetAllDescendants(entityId);

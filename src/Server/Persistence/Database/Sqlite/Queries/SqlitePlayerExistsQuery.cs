@@ -36,14 +36,14 @@ public class SqlitePlayerExistsQuery : IPlayerExistsQuery
 
     public bool PlayerExists(string name)
     {
-        var cmd = new SqliteCommand(query, dbConnection);
+        using var cmd = new SqliteCommand(query, dbConnection);
 
         var param = new SqliteParameter("Name", name);
         param.SqliteType = SqliteType.Text;
         cmd.Parameters.Add(param);
 
         var exists = false;
-        var reader = new QueryReader(cmd).Reader;
+        using var reader = new QueryReader(cmd).Reader;
         if (reader.Read()) exists = reader.GetBoolean(0);
 
         return exists;

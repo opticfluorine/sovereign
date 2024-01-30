@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
@@ -40,6 +41,7 @@ public class EntitySynchronizer
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
+    private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly PositionComponentCollection positions;
@@ -49,7 +51,7 @@ public class EntitySynchronizer
         MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
         ParentComponentCollection parents, DrawableTagCollection drawables,
-        AnimatedSpriteComponentCollection animatedSprites)
+        AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations)
     {
         this.eventSender = eventSender;
         this.configManager = configManager;
@@ -62,6 +64,7 @@ public class EntitySynchronizer
         this.parents = parents;
         this.drawables = drawables;
         this.animatedSprites = animatedSprites;
+        this.orientations = orientations;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -73,6 +76,16 @@ public class EntitySynchronizer
     /// <param name="entities">Entities to synchronize.</param>
     public void Synchronize(ulong playerEntityId, IEnumerable<ulong> entities)
     {
+        Synchronize(Enumerable.Repeat(playerEntityId, 1), entities);
+    }
+
+    /// <summary>
+    ///     Synchronizes the given set of entities to a client.
+    /// </summary>
+    /// <param name="playerEntityIds">Players to synchronize with.</param>
+    /// <param name="entities">Entities to synchronize.</param>
+    public void Synchronize(IEnumerable<ulong> playerEntityIds, IEnumerable<ulong> entities)
+    {
         // Batch the entities and generate definitions for each.
         var definitionBatches =
             entities
@@ -81,6 +94,7 @@ public class EntitySynchronizer
 
         // Send each batch to the client as its own event.
         foreach (var batch in definitionBatches)
+        foreach (var playerEntityId in playerEntityIds)
         {
             Logger.DebugFormat("Sync {0} entities to player {1}.", batch.Count, playerEntityId);
             controller.PushSyncEvent(eventSender, playerEntityId, batch);
@@ -88,11 +102,21 @@ public class EntitySynchronizer
     }
 
     /// <summary>
+    ///     Desynchronizes an entity tree across a world segment.
+    /// </summary>
+    /// <param name="rootEntityId">Root of the entity tree to be desynchronized.</param>
+    public void Desynchronize(ulong rootEntityId, GridPosition segmentIndex)
+    {
+        Logger.DebugFormat("Desync {0} for world segment {1}.", rootEntityId, segmentIndex);
+        controller.PushDesyncEvent(eventSender, rootEntityId, segmentIndex);
+    }
+
+    /// <summary>
     ///     Generates an entity definition for a single entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <returns>Definition.</returns>
-    public EntityDefinition GenerateDefinition(ulong entityId)
+    private EntityDefinition GenerateDefinition(ulong entityId)
     {
         var def = new EntityDefinition();
         def.EntityId = entityId;
@@ -115,6 +139,9 @@ public class EntitySynchronizer
 
         if (parents.HasComponentForEntity(entityId))
             def.Parent = parents[entityId];
+
+        if (orientations.HasComponentForEntity(entityId))
+            def.Orientation = orientations[entityId];
 
         return def;
     }

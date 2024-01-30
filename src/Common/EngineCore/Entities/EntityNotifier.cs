@@ -27,12 +27,12 @@ public sealed class EntityNotifier
     /// <summary>
     ///     Remove events pending dispatch.
     /// </summary>
-    private readonly ISet<ulong> queuedRemoveEvents = new HashSet<ulong>();
+    private readonly HashSet<ulong> queuedRemoveEvents = new();
 
     /// <summary>
     ///     Unload events pending dispatch.
     /// </summary>
-    private readonly ISet<ulong> queuedUnloadEvents = new HashSet<ulong>();
+    private readonly HashSet<ulong> queuedUnloadEvents = new();
 
     /// <summary>
     ///     Event triggered when an entity is removed.
@@ -50,7 +50,10 @@ public sealed class EntityNotifier
     /// <param name="entityId">Removed entity ID.</param>
     public void EnqueueRemove(ulong entityId)
     {
-        queuedRemoveEvents.Add(entityId);
+        lock (queuedRemoveEvents)
+        {
+            queuedRemoveEvents.Add(entityId);
+        }
     }
 
     /// <summary>
@@ -59,7 +62,10 @@ public sealed class EntityNotifier
     /// <param name="entityId">Unloaded entity ID.</param>
     public void EnqueueUnload(ulong entityId)
     {
-        queuedUnloadEvents.Add(entityId);
+        lock (queuedUnloadEvents)
+        {
+            queuedUnloadEvents.Add(entityId);
+        }
     }
 
     /// <summary>
@@ -71,10 +77,16 @@ public sealed class EntityNotifier
     /// </remarks>
     public void Dispatch()
     {
-        foreach (var entityId in queuedRemoveEvents) OnRemoveEntity?.Invoke(entityId);
-        foreach (var entityId in queuedUnloadEvents) OnUnloadEntity?.Invoke(entityId);
+        lock (queuedRemoveEvents)
+        {
+            foreach (var entityId in queuedRemoveEvents) OnRemoveEntity?.Invoke(entityId);
+            queuedRemoveEvents.Clear();
+        }
 
-        queuedRemoveEvents.Clear();
-        queuedUnloadEvents.Clear();
+        lock (queuedUnloadEvents)
+        {
+            foreach (var entityId in queuedUnloadEvents) OnUnloadEntity?.Invoke(entityId);
+            queuedUnloadEvents.Clear();
+        }
     }
 }

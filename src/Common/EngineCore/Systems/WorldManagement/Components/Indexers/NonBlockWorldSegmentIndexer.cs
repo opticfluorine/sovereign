@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Numerics;
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.World;
 
@@ -28,86 +25,11 @@ namespace Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 ///     is located in. Note that only the positioned entities are tracked here,
 ///     not their children (if any).
 /// </summary>
-public class NonBlockWorldSegmentIndexer : BaseComponentIndexer<Vector3>
+public class NonBlockWorldSegmentIndexer : BaseWorldSegmentIndexer
 {
-    /// <summary>
-    ///     Map from world segment index to the set of non-block entities positioned there.
-    /// </summary>
-    private readonly Dictionary<GridPosition, HashSet<ulong>> index = new();
-
-    /// <summary>
-    ///     Inverse map to index.
-    /// </summary>
-    private readonly Dictionary<ulong, GridPosition> inverse = new();
-
-    private readonly WorldSegmentResolver resolver;
-
     public NonBlockWorldSegmentIndexer(PositionComponentCollection positions,
         NonBlockPositionEventFilter filter, WorldSegmentResolver resolver)
-        : base(positions, filter)
+        : base(positions, filter, resolver)
     {
-        this.resolver = resolver;
-    }
-
-    /// <summary>
-    ///     Gets the non-block entities in the given world segment.
-    /// </summary>
-    /// <param name="segmentIndex">World segment index.</param>
-    /// <returns>Set (possibly empty) of non-block entities in the world segment.</returns>
-    /// <remarks>
-    ///     This method returns a copy of the set of entities, and ownership of
-    ///     the set is transferred to the caller. It is only guaranteed to be
-    ///     current at the moment the method was called, and only if the method
-    ///     was called during normal processing of a tick (i.e. not during the
-    ///     component update step between ticks).
-    /// </remarks>
-    public HashSet<ulong> GetNonBlockEntitiesInWorldSegment(GridPosition segmentIndex)
-    {
-        if (!index.ContainsKey(segmentIndex))
-            index[segmentIndex] = new HashSet<ulong>();
-
-        return new HashSet<ulong>(index[segmentIndex]);
-    }
-
-    protected override void ComponentAddedCallback(ulong entityId, Vector3 componentValue, bool isLoad)
-    {
-        AddEntity(entityId, componentValue);
-    }
-
-    protected override void ComponentModifiedCallback(ulong entityId, Vector3 componentValue)
-    {
-        var newSegmentIndex = resolver.GetWorldSegmentForPosition(componentValue);
-        var oldSegmentIndex = inverse[entityId];
-        if (newSegmentIndex != oldSegmentIndex)
-        {
-            RemoveEntity(entityId);
-            AddEntity(entityId, componentValue);
-        }
-    }
-
-    protected override void ComponentRemovedCallback(ulong entityId, bool isUnload)
-    {
-        RemoveEntity(entityId);
-    }
-
-    /// <summary>
-    ///     Adds a positioned entity to the index.
-    /// </summary>
-    /// <param name="entityId">Entity ID.</param>
-    /// <param name="position">Position.</param>
-    private void AddEntity(ulong entityId, Vector3 position)
-    {
-        var segmentIndex = resolver.GetWorldSegmentForPosition(position);
-        if (!index.ContainsKey(segmentIndex))
-            index[segmentIndex] = new HashSet<ulong>();
-
-        index[segmentIndex].Add(entityId);
-        inverse[entityId] = segmentIndex;
-    }
-
-    private void RemoveEntity(ulong entityId)
-    {
-        inverse.Remove(entityId, out var segmentIndex);
-        index[segmentIndex].Remove(entityId);
     }
 }

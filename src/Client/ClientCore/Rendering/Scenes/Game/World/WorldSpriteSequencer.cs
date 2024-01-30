@@ -83,7 +83,7 @@ public sealed class WorldSpriteSequencer
                     var vel = positionedAnimatedSprite.Velocity;
                     var animId = positionedAnimatedSprite.Id;
                     var animatedSprite = animatedSpriteManager.AnimatedSprites[animId];
-                    var sprite = animatedSprite.GetSpriteForTime(systemTime);
+                    var sprite = animatedSprite.GetSpriteForTime(systemTime, positionedAnimatedSprite.Orientation);
 
                     AddVerticesForSprite(sprite, pos, vel, vertexBase, vertexPos);
                     AddIndicesForSprite(indexBase, indexPos, (uint)vertexPos);
