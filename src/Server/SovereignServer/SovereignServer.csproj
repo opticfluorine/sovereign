@@ -20,6 +20,15 @@
         </Content>
     </ItemGroup>
 
+    <Target Name="CopyAfterPublish" AfterTargets="Publish">
+        <ItemGroup>
+            <MigrationFiles Include="$(SolutionDir)Server/Persistence/Migrations/**/*"/>
+            <LicenseFile Include="$(SolutionDir)../LICENSE"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(MigrationFiles)" DestinationFolder="$(PublishDir)Migrations/%(RecursiveDir)"/>
+        <Copy SourceFiles="@(LicenseFile)" DestinationFolder="$(PublishDir)"/>
+    </Target>
+
     <ItemGroup>
         <ProjectReference Include="..\Accounts\Accounts.csproj"/>
         <ProjectReference Include="..\Persistence\Persistence.csproj"/>

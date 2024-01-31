@@ -49,7 +49,7 @@ public sealed class TestContentSystem : ISystem, IDisposable
     /// <summary>
     ///     Hardcoded player name for debug. Remove once connection is configurable.
     /// </summary>
-    private const string playerName = "debug2";
+    private const string playerName = "debug";
 
     /// <summary>
     ///     REST request timeout in millisecondds.

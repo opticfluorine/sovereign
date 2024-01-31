@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
-        <AssemblyName>Sovereign.SovereignClient</AssemblyName>
+        <AssemblyName>Sovereign.Client</AssemblyName>
         <RootNamespace>Sovereign.SovereignClient</RootNamespace>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -21,18 +21,13 @@
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"/>
     </Target>
 
-    <Target Name="CopyContribAfterBuild" AfterTargets="Build">
-        <ItemGroup>
-            <SdlLibs Include="Contrib/SDL/*"/>
-        </ItemGroup>
-        <Copy SourceFiles="@(SdlLibs)" DestinationFolder="$(OutDir)"/>
-    </Target>
-
-    <Target Name="CopyDataAfterPublish" AfterTargets="Publish">
+    <Target Name="CopyAfterPublish" AfterTargets="Publish">
         <ItemGroup>
             <DataFiles Include="$(OutDir)Data/**/*"/>
+            <LicenseFile Include="$(SolutionDir)../LICENSE"/>
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(PublishDir)Data/%(RecursiveDir)"/>
+        <Copy SourceFiles="$(LicenseFile)" DestinationFolder="@(PublishDir)"/>
     </Target>
 
     <Target Name="CompileShaders" BeforeTargets="Build">

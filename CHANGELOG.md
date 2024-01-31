@@ -4,6 +4,11 @@
 
 ### January
 
+#### 30 January 2024
+
+* Update deployment targets.
+* Add release step to GitHub Actions build pipeline.
+
 #### 29 January 2024
 
 * Desynchronize entity trees from affected clients when a positioned entity is removed or unloaded.

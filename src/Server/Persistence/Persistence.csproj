@@ -17,8 +17,4 @@
         <ProjectReference Include="..\ServerCore\ServerCore.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Database\Postgres\"/>
-    </ItemGroup>
-
 </Project>
