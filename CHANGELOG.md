@@ -4,6 +4,14 @@
 
 ### January
 
+#### 31 January 2024
+
+* **Release 0.1.0**
+* Fix issue where the server would accept a `NaN` movement request which led to an infinite loop in both client
+  and server where an octree tried to expand endlessly until it contained the `NaN` (which it never could).
+* Fix issue where the client could generate a `NaN` relative velocity in response to player input.
+* Update `README.md`.
+
 #### 30 January 2024
 
 * Update deployment targets.

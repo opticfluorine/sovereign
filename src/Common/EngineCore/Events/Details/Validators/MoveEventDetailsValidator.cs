@@ -23,6 +23,9 @@ public class MoveEventDetailsValidator : IEventDetailsValidator
 {
     public bool IsValid(IEventDetails? details)
     {
-        return details is MoveEventDetails;
+        return details is MoveEventDetails moveDetails
+               && float.IsFinite(moveDetails.Velocity.X)
+               && float.IsFinite(moveDetails.Velocity.Y)
+               && float.IsFinite(moveDetails.Velocity.Z);
     }
 }

@@ -78,24 +78,23 @@ public class PlayerInputMovementMapper
         // Only handle a movement update if a player is currently logged in.
         if (!playerSelected) return;
 
-        /* Check whether movement has started or stopped. */
-        if (up || down || left || right)
+        // Compute direction of movement in the xy plane.
+        // z movement will be handled by a rotation applied in the Movement system.
+        var dx = (right ? 1 : 0) - (left ? 1 : 0);
+        var dy = (up ? 1 : 0) - (down ? 1 : 0);
+        if (dx == 0 && dy == 0)
         {
-            // Compute direction of movement in the xy plane.
-            // z movement will be handled by a rotation applied in the Movement system.
-            var dx = (right ? 1.0f : 0.0f) - (left ? 1.0f : 0.0f);
-            var dy = (up ? 1.0f : 0.0f) - (down ? 1.0f : 0.0f);
-            currentRelativeVelocity = new Vector3(dx, dy, 0.0f);
-            currentRelativeVelocity /= currentRelativeVelocity.Length();
-
-            RequestNextMovement();
-        }
-        else
-        {
-            // Stop movement if keys were released, canceling any outstanding repeat events.
+            // Stop movement.
             currentRelativeVelocity = Vector3.Zero;
             movementController.RequestMovement(eventSender, playerEntityId, currentRelativeVelocity);
             sequenceCount++;
+        }
+        else
+        {
+            // Move.
+            currentRelativeVelocity = new Vector3(dx, dy, 0.0f);
+            currentRelativeVelocity /= currentRelativeVelocity.Length();
+            RequestNextMovement();
         }
     }
 

@@ -25,6 +25,9 @@ public class RequestMoveEventDetailsValidator : IEventDetailsValidator
     {
         if (details is not RequestMoveEventDetails) return false;
         var requestDetails = (RequestMoveEventDetails)details;
-        return requestDetails.RelativeVelocity.LengthSquared() <= 1.0f;
+        return requestDetails.RelativeVelocity.LengthSquared() <= 1.0f
+               && float.IsFinite(requestDetails.RelativeVelocity.X)
+               && float.IsFinite(requestDetails.RelativeVelocity.Y)
+               && float.IsFinite(requestDetails.RelativeVelocity.Z);
     }
 }

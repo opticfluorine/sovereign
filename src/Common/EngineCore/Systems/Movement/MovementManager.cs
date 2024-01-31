@@ -216,6 +216,11 @@ public class MovementManager
         checkTableReady = false;
     }
 
+    /// <summary>
+    ///     Sets the orientation of an entity based on its velocity.
+    /// </summary>
+    /// <param name="entityId"></param>
+    /// <param name="velocity"></param>
     private void SetOrientation(ulong entityId, Vector3 velocity)
     {
         // Special case, if velocity is zero then do not change the orientation.
