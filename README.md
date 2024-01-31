@@ -46,6 +46,10 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 
 ### Server
 
+> [!WARNING]
+> Ensure that `EnableDebugMode` is set to `false` before exposing the
+> server's REST API to an external network. The debug API is not authenticated.
+
 1. Download the server binaries for your platform, or compile binaries from source (via
    `dotnet build` and `dotnet publish` from the `src` directory after cloning the Git repository).
 2. From the server directory, initialize a new SQLite database:
@@ -55,9 +59,6 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
    ```
 3. Enable the debug command interface by editing `Data/Configuration/ServerConfiguration.yaml`
    and changing `EnableDebugMode` to `true`.
-   > [!WARNING]
-   > Ensure that `EnableDebugMode` is set to `false` before exposing the
-   > server's REST API to an external network. The debug API is not authenticated.
 4. Run the server:
    ```bash
    $ ./Sovereign.Server
