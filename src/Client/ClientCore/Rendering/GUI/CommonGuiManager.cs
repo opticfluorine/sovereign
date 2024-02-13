@@ -152,6 +152,8 @@ public sealed class CommonGuiManager : IDisposable
 
         UpdateMousePosAndButtons();
         UpdateMouseCursor();
+        
+        ImGui.NewFrame();
     }
 
     /// <summary>

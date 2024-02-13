@@ -111,6 +111,7 @@ public class RenderingManager : IStartable
     /// </summary>
     public void Render()
     {
+        guiManager.NewFrame();
         renderer.Render();
     }
 
