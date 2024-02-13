@@ -2,6 +2,13 @@
 
 ## 2024
 
+### February
+
+#### 12 February 2024
+
+* Update Dear ImGui to v1.90.1.1.
+* Update `CommonGuiManager` to mirror latest Dear ImGui SDL2 backend source.
+
 ### January
 
 #### 31 January 2024
