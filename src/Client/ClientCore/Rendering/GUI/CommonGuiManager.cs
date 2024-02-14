@@ -152,8 +152,18 @@ public sealed class CommonGuiManager : IDisposable
 
         UpdateMousePosAndButtons();
         UpdateMouseCursor();
-        
+
         ImGui.NewFrame();
+    }
+
+    /// <summary>
+    ///     Renders the GUI into the Dear ImGui internal buffers.
+    /// </summary>
+    /// <returns>Draw data for rendering the GUI layer of the next frame.</returns>
+    public ImDrawDataPtr Render()
+    {
+        ImGui.Render();
+        return ImGui.GetDrawData();
     }
 
     /// <summary>

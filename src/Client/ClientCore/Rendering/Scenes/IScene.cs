@@ -16,7 +16,6 @@
  */
 
 using System.Numerics;
-using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 
 namespace Sovereign.ClientCore.Rendering.Scenes;
@@ -74,12 +73,10 @@ public interface IScene
         out Vector3 cameraPos, out float timeSinceTick);
 
     /// <summary>
-    ///     Populates the various buffers used for GUI rendering.
+    ///     Called to update the GUI for the scene.
     /// </summary>
-    /// <param name="vertexBuffer">Vertex buffer to be populated.</param>
-    /// <param name="indexBuffer">Index buffer to be populated.</param>
     /// <remarks>
-    ///     This method will only be called if RenderGui is true.
+    ///     This method will only be called if the RenderGui property is true.
     /// </remarks>
-    void PopulateGuiBuffers(ImDrawVert[] vertexBuffer, ushort[] indexBuffer);
+    void UpdateGui();
 }

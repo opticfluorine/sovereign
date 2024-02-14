@@ -39,11 +39,6 @@ public class VeldridUpdateBuffer<T> : IDisposable
     private uint bufferLenBytes;
 
     /// <summary>
-    ///     Pointer to the beginning of the local buffer.
-    /// </summary>
-    private IntPtr bufferPtr;
-
-    /// <summary>
     ///     Creates a new updateable buffer.
     /// </summary>
     /// <param name="device">Veldrid device.</param>
@@ -57,6 +52,11 @@ public class VeldridUpdateBuffer<T> : IDisposable
         AllocateLocalMemory();
         CreateBuffers(device, usage);
     }
+
+    /// <summary>
+    ///     Pointer to the beginning of the local buffer.
+    /// </summary>
+    public IntPtr BufferPtr { get; private set; }
 
     /// <summary>
     ///     Backing Veldrid device buffer.
@@ -90,7 +90,7 @@ public class VeldridUpdateBuffer<T> : IDisposable
     /// <param name="commandList">Active command list.</param>
     public void Update(CommandList commandList)
     {
-        commandList.UpdateBuffer(DeviceBuffer, 0, bufferPtr, bufferLenBytes);
+        commandList.UpdateBuffer(DeviceBuffer, 0, BufferPtr, bufferLenBytes);
     }
 
     /// <summary>
@@ -114,7 +114,7 @@ public class VeldridUpdateBuffer<T> : IDisposable
     {
         Buffer = new T[Length];
         bufferHandle = GCHandle.Alloc(Buffer, GCHandleType.Pinned);
-        bufferPtr = bufferHandle.AddrOfPinnedObject();
+        BufferPtr = bufferHandle.AddrOfPinnedObject();
         bufferLenBytes = Length * ElementSize;
     }
 }

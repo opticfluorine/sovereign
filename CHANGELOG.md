@@ -4,6 +4,10 @@
 
 ### February
 
+#### 13 February 2024
+
+* Start integrating Dear ImGui into the renderer.
+
 #### 12 February 2024
 
 * Update Dear ImGui to v1.90.1.1.

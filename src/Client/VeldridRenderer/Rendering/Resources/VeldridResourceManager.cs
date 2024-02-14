@@ -17,6 +17,7 @@
 
 using System;
 using Castle.Core.Logging;
+using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Veldrid;
 
@@ -27,6 +28,16 @@ namespace Sovereign.VeldridRenderer.Rendering.Resources;
 /// </summary>
 public class VeldridResourceManager : IDisposable
 {
+    /// <summary>
+    ///     Size of GUI vertex buffer.
+    /// </summary>
+    private const int GuiVertexBufferSize = 8192;
+
+    /// <summary>
+    ///     Size of GUI index buffer.
+    /// </summary>
+    private const int GuiIndexBufferSize = 8192;
+
     /// <summary>
     ///     Texture atlas manager.
     /// </summary>
@@ -56,10 +67,22 @@ public class VeldridResourceManager : IDisposable
     public CommandList? CommandList { get; private set; }
 
     /// <summary>
+    ///     Vertex buffer for GUI rendering.
+    /// </summary>
+    public VeldridUpdateBuffer<ImDrawVert>? GuiVertexBuffer { get; private set; }
+
+    /// <summary>
+    ///     Index buffer for GUI rendering.
+    /// </summary>
+    public VeldridUpdateBuffer<ushort>? GuiIndexBuffer { get; private set; }
+
+    /// <summary>
     ///     Cleans up the resources when done.
     /// </summary>
     public void Dispose()
     {
+        GuiIndexBuffer?.Dispose();
+        GuiVertexBuffer?.Dispose();
         AtlasTexture?.Dispose();
         CommandList?.Dispose();
     }
@@ -79,7 +102,21 @@ public class VeldridResourceManager : IDisposable
         // Textures.
         CreateAtlasTexture();
 
+        // GUI.
+        CreateGuiResources();
+
         Logger.Info("Base renderer resource initialization complete.");
+    }
+
+    /// <summary>
+    ///     Creates the GPU resources for GUI rendering.
+    /// </summary>
+    private void CreateGuiResources()
+    {
+        GuiVertexBuffer = new VeldridUpdateBuffer<ImDrawVert>(device!,
+            BufferUsage.VertexBuffer | BufferUsage.Dynamic, GuiVertexBufferSize);
+        GuiIndexBuffer = new VeldridUpdateBuffer<ushort>(device!,
+            BufferUsage.IndexBuffer | BufferUsage.Dynamic, GuiIndexBufferSize);
     }
 
     /// <summary>
