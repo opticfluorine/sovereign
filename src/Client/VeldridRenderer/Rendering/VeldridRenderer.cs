@@ -23,6 +23,7 @@ using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Scenes;
+using Sovereign.VeldridRenderer.Rendering.Gui;
 using Sovereign.VeldridRenderer.Rendering.Resources;
 using Veldrid;
 
@@ -39,6 +40,8 @@ public class VeldridRenderer : IRenderer
     private readonly VeldridDevice device;
 
     private readonly CommonGuiManager guiManager;
+    private readonly GuiPipeline guiPipeline;
+    private readonly GuiResourceManager guiResourceManager;
 
     /// <summary>
     ///     Veldrid resource manager.
@@ -61,13 +64,16 @@ public class VeldridRenderer : IRenderer
     private bool isDisposed;
 
     public VeldridRenderer(VeldridDevice device, VeldridResourceManager resourceManager,
-        SceneManager sceneManager, VeldridSceneConsumer sceneConsumer, CommonGuiManager guiManager)
+        SceneManager sceneManager, VeldridSceneConsumer sceneConsumer, CommonGuiManager guiManager,
+        GuiResourceManager guiResourceManager, GuiPipeline guiPipeline)
     {
         this.device = device;
         this.resourceManager = resourceManager;
         this.sceneManager = sceneManager;
         this.sceneConsumer = sceneConsumer;
         this.guiManager = guiManager;
+        this.guiResourceManager = guiResourceManager;
+        this.guiPipeline = guiPipeline;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -81,6 +87,8 @@ public class VeldridRenderer : IRenderer
 
             /* Install main resources. */
             resourceManager.InitializeBaseResources();
+            guiResourceManager.Initialize();
+            guiPipeline.Initialize();
 
             /* Initialize all scenes. */
             sceneConsumer.Initialize();
@@ -96,6 +104,8 @@ public class VeldridRenderer : IRenderer
         if (!isDisposed)
         {
             sceneConsumer.Dispose();
+            guiPipeline.Dispose();
+            guiResourceManager.Dispose();
             resourceManager.Dispose();
             device.Dispose();
             isDisposed = true;
@@ -149,8 +159,8 @@ public class VeldridRenderer : IRenderer
 
         // Second stage, set up GUI rendering resources.
         // Check validity.
-        var vertexBuf = resourceManager.GuiVertexBuffer;
-        var indexBuf = resourceManager.GuiIndexBuffer;
+        var vertexBuf = guiResourceManager.GuiVertexBuffer;
+        var indexBuf = guiResourceManager.GuiIndexBuffer;
         if (vertexBuf == null || indexBuf == null)
             throw new InvalidOperationException("Tried to render GUI without buffers.");
         if (drawData.CmdListsCount == 0) return;
@@ -172,6 +182,7 @@ public class VeldridRenderer : IRenderer
             var vertexIn = curList.VtxBuffer.Data.ToPointer();
             var vertexOut = (vertexBuf.BufferPtr + vertexOffset * vertexSize).ToPointer();
             var vertexBytes = curList.VtxBuffer.Size * vertexSize;
+
             var indexIn = curList.IdxBuffer.Data.ToPointer();
             var indexOut = (indexBuf.BufferPtr + indexOffset * indexSize).ToPointer();
             var indexBytes = curList.IdxBuffer.Size * indexSize;
@@ -205,6 +216,7 @@ public class VeldridRenderer : IRenderer
                 var curCmd = curList.CmdBuffer[j];
 
                 // Resource binding for next draw call.
+                commandList.SetPipeline(guiPipeline.Pipeline);
 
                 // Execute draw call.
                 commandList.DrawIndexed(curCmd.ElemCount, 1,

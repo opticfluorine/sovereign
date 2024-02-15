@@ -4,6 +4,11 @@
 
 ### February
 
+#### 14 February 2024
+
+* Continue work on Dear ImGui integration by adding a GUI rendering pipeline to the Veldrid renderer.
+  There's still some work to be done with resource binding and texture loading.
+
 #### 13 February 2024
 
 * Start integrating Dear ImGui into the renderer.
