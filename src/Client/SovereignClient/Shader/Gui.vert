@@ -1,6 +1,6 @@
 /*
  * Sovereign Engine
- * Copyright (c) 2022 opticfluorine
+ * Copyright (c) 2024 opticfluorine
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,22 @@
 
 #version 450
 
-layout(location = 0) in vec2 texCoord;
-layout(location = 1) in vec4 color;
+layout (binding = 0) uniform ShaderConstants
+{
+    mat4 g_projection;
+    vec2 g_texOffset;
+} shaderConstants;
 
-layout(location = 0) out vec4 colorOut;
+layout (location = 0) in vec2 vPosition;
+layout (location = 1) in vec2 vTexCoord;
+layout (location = 2) in vec4 vColor;
 
-layout(set = 0, binding = 1) uniform texture2D g_textureAtlas;
-layout(set = 0, binding = 2) uniform sampler g_textureAtlasSampler;
+layout (location = 0) out vec2 vTexCoordOut;
+layout (location = 1) out vec4 vColorOut;
 
 void main()
 {
-    colorOut = color * texture(sampler2D(g_textureAtlas, g_textureAtlasSampler), texCoord);
+    gl_Position = shaderConstants.g_projection * vec4(vPosition, 0, 1);
+    vColorOut = vColor;
+    vTexCoordOut = vTexCoord + shaderConstants.g_texOffset;
 }

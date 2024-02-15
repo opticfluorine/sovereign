@@ -192,5 +192,28 @@ public class VeldridRenderer : IRenderer
         // Synchronize buffers to device.
         vertexBuf.Update(commandList);
         indexBuf.Update(commandList);
+
+        // Execute draw commands.
+        vertexOffset = 0;
+        indexOffset = 0;
+        for (var i = 0; i < drawData.CmdListsCount; ++i)
+        {
+            var curList = drawData.CmdLists[i];
+            var listIndexOffset = 0;
+            for (var j = 0; j < curList.CmdBuffer.Size; ++j)
+            {
+                var curCmd = curList.CmdBuffer[j];
+
+                // Resource binding for next draw call.
+
+                // Execute draw call.
+                commandList.DrawIndexed(curCmd.ElemCount, 1,
+                    (uint)(indexOffset + listIndexOffset), vertexOffset, 0);
+                listIndexOffset += (int)curCmd.ElemCount;
+            }
+
+            vertexOffset += curList.VtxBuffer.Size;
+            indexOffset += curList.IdxBuffer.Size;
+        }
     }
 }
