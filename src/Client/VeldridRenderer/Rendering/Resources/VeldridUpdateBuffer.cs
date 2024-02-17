@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Veldrid;
@@ -29,14 +30,26 @@ public class VeldridUpdateBuffer<T> : IDisposable
     where T : unmanaged
 {
     /// <summary>
-    ///     GC handle for the local buffer.
-    /// </summary>
-    private GCHandle bufferHandle;
-
-    /// <summary>
     ///     Length of the local buffer in bytes.
     /// </summary>
-    private uint bufferLenBytes;
+    private readonly uint bufferLenBytes;
+
+    /// <summary>
+    ///     Whether the buffer supports multiple updates per frame.
+    /// </summary>
+    private readonly bool isMultiUpdate;
+
+    /// <summary>
+    ///     Buffers not yet used this frame.
+    /// </summary>
+    private readonly Stack<PinnedBuffer> unusedBuffers = new();
+
+    /// <summary>
+    ///     Buffers already used this frame.
+    /// </summary>
+    private readonly Stack<PinnedBuffer> usedBuffers = new();
+
+    private PinnedBuffer currentBuffer;
 
     /// <summary>
     ///     Creates a new updateable buffer.
@@ -44,19 +57,22 @@ public class VeldridUpdateBuffer<T> : IDisposable
     /// <param name="device">Veldrid device.</param>
     /// <param name="usage">Buffer usage.</param>
     /// <param name="sizeInT">Number of T objects in the buffer.</param>
+    /// <param name="isMultiUpdate">Whether the buffer should support multiple updates per frame.</param>
     public VeldridUpdateBuffer(VeldridDevice device, BufferUsage usage,
-        uint sizeInT)
+        uint sizeInT, bool isMultiUpdate = false)
     {
+        this.isMultiUpdate = isMultiUpdate;
         Length = sizeInT;
         ElementSize = (uint)Marshal.SizeOf<T>();
-        AllocateLocalMemory();
+        bufferLenBytes = sizeInT * ElementSize;
+        currentBuffer = new PinnedBuffer(sizeInT);
         CreateBuffers(device, usage);
     }
 
     /// <summary>
     ///     Pointer to the beginning of the local buffer.
     /// </summary>
-    public IntPtr BufferPtr { get; private set; }
+    public IntPtr BufferPtr => currentBuffer.BufferPtr;
 
     /// <summary>
     ///     Backing Veldrid device buffer.
@@ -71,7 +87,7 @@ public class VeldridUpdateBuffer<T> : IDisposable
     /// <summary>
     ///     Local buffer for update.
     /// </summary>
-    public T[] Buffer { get; private set; }
+    public T[] Buffer => currentBuffer.Buffer;
 
     /// <summary>
     ///     Size of each element in bytes.
@@ -80,8 +96,18 @@ public class VeldridUpdateBuffer<T> : IDisposable
 
     public void Dispose()
     {
-        DeviceBuffer?.Dispose();
-        bufferHandle.Free();
+        DeviceBuffer.Dispose();
+        while (usedBuffers.TryPop(out var buf))
+        {
+            buf.Dispose();
+        }
+
+        while (unusedBuffers.TryPop(out var buf))
+        {
+            buf.Dispose();
+        }
+
+        currentBuffer.Dispose();
     }
 
     /// <summary>
@@ -90,13 +116,31 @@ public class VeldridUpdateBuffer<T> : IDisposable
     /// <param name="commandList">Active command list.</param>
     public void Update(CommandList commandList)
     {
-        commandList.UpdateBuffer(DeviceBuffer, 0, BufferPtr, bufferLenBytes);
+        commandList.UpdateBuffer(DeviceBuffer, 0, currentBuffer.BufferPtr, bufferLenBytes);
+        if (isMultiUpdate)
+        {
+            usedBuffers.Push(currentBuffer);
+            if (unusedBuffers.TryPop(out var nextBuffer))
+                currentBuffer = nextBuffer;
+            else
+                currentBuffer = new PinnedBuffer(Length);
+        }
+    }
+
+    /// <summary>
+    ///     Resets state for the end of a frame.
+    /// </summary>
+    public void EndFrame()
+    {
+        while (usedBuffers.TryPop(out var nextBuffer))
+            unusedBuffers.Push(nextBuffer);
     }
 
     /// <summary>
     ///     Creates the buffer.
     /// </summary>
     /// <param name="device">Veldrid device.</param>
+    /// <param name="usage">Intended usage of the buffer.</param>
     [MemberNotNull("DeviceBuffer")]
     private void CreateBuffers(VeldridDevice device, BufferUsage usage)
     {
@@ -107,14 +151,35 @@ public class VeldridUpdateBuffer<T> : IDisposable
     }
 
     /// <summary>
-    ///     Allocates the local update buffer.
+    ///     Struct containing a GC-pinned buffer.
     /// </summary>
-    [MemberNotNull("Buffer")]
-    private void AllocateLocalMemory()
+    private class PinnedBuffer : IDisposable
     {
-        Buffer = new T[Length];
-        bufferHandle = GCHandle.Alloc(Buffer, GCHandleType.Pinned);
-        BufferPtr = bufferHandle.AddrOfPinnedObject();
-        bufferLenBytes = Length * ElementSize;
+        /// <summary>
+        ///     Buffer array.
+        /// </summary>
+        public readonly T[] Buffer;
+
+        /// <summary>
+        ///     Buffer pointer.
+        /// </summary>
+        public readonly IntPtr BufferPtr;
+
+        /// <summary>
+        ///     Garbage collector handle for pinning.
+        /// </summary>
+        public GCHandle GcHandle;
+
+        public PinnedBuffer(uint length)
+        {
+            Buffer = new T[length];
+            GcHandle = GCHandle.Alloc(Buffer, GCHandleType.Pinned);
+            BufferPtr = GcHandle.AddrOfPinnedObject();
+        }
+
+        public void Dispose()
+        {
+            GcHandle.Free();
+        }
     }
 }

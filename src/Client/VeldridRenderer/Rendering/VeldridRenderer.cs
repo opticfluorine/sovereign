@@ -200,9 +200,11 @@ public class VeldridRenderer : IRenderer
             indexOffset += curList.IdxBuffer.Size;
         }
 
-        // Synchronize buffers to device.
+        // Synchronize buffers to device; bind resources that will be
+        // used by all GUI draw calls.
         vertexBuf.Update(commandList);
         indexBuf.Update(commandList);
+        commandList.SetPipeline(guiPipeline.Pipeline);
 
         // Execute draw commands.
         vertexOffset = 0;
@@ -216,7 +218,6 @@ public class VeldridRenderer : IRenderer
                 var curCmd = curList.CmdBuffer[j];
 
                 // Resource binding for next draw call.
-                commandList.SetPipeline(guiPipeline.Pipeline);
 
                 // Execute draw call.
                 commandList.DrawIndexed(curCmd.ElemCount, 1,
