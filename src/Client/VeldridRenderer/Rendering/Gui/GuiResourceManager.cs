@@ -37,6 +37,11 @@ public class GuiResourceManager : IDisposable
     private const int GuiIndexBufferSize = 8192;
 
     /// <summary>
+    ///     Size of GUI uniform buffer.
+    /// </summary>
+    private const int GuiUniformBufferSize = 1;
+
+    /// <summary>
     ///     Resource name for the shader constants uniform buffer.
     /// </summary>
     public static string RES_SHADER_CONSTANTS = "ShaderConstants";
@@ -67,6 +72,8 @@ public class GuiResourceManager : IDisposable
     ///     Index buffer for GUI rendering.
     /// </summary>
     public VeldridUpdateBuffer<ushort>? GuiIndexBuffer { get; private set; }
+
+    public VeldridUpdateBuffer<GuiVertexShaderConstants>? GuiUniformBuffer { get; private set; }
 
     /// <summary>
     ///     Vertex shader for GUI rendering.
@@ -110,5 +117,13 @@ public class GuiResourceManager : IDisposable
             BufferUsage.VertexBuffer | BufferUsage.Dynamic, GuiVertexBufferSize);
         GuiIndexBuffer = new VeldridUpdateBuffer<ushort>(device,
             BufferUsage.IndexBuffer | BufferUsage.Dynamic, GuiIndexBufferSize);
+        GuiUniformBuffer = new VeldridUpdateBuffer<GuiVertexShaderConstants>(device,
+            BufferUsage.Dynamic | BufferUsage.UniformBuffer, GuiUniformBufferSize, true);
+    }
+
+    public void EndFrame()
+    {
+        GuiVertexBuffer?.EndFrame();
+        GuiIndexBuffer?.EndFrame();
     }
 }

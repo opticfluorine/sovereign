@@ -16,9 +16,7 @@
  */
 
 using System;
-using System.Runtime.InteropServices;
 using Castle.Core.Logging;
-using ImGuiNET;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Gui;
@@ -39,9 +37,7 @@ public class VeldridRenderer : IRenderer
     /// </summary>
     private readonly VeldridDevice device;
 
-    private readonly CommonGuiManager guiManager;
-    private readonly GuiPipeline guiPipeline;
-    private readonly GuiResourceManager guiResourceManager;
+    private readonly GuiRenderer guiRenderer;
 
     /// <summary>
     ///     Veldrid resource manager.
@@ -65,15 +61,13 @@ public class VeldridRenderer : IRenderer
 
     public VeldridRenderer(VeldridDevice device, VeldridResourceManager resourceManager,
         SceneManager sceneManager, VeldridSceneConsumer sceneConsumer, CommonGuiManager guiManager,
-        GuiResourceManager guiResourceManager, GuiPipeline guiPipeline)
+        GuiResourceManager guiResourceManager, GuiPipeline guiPipeline, GuiRenderer guiRenderer)
     {
         this.device = device;
         this.resourceManager = resourceManager;
         this.sceneManager = sceneManager;
         this.sceneConsumer = sceneConsumer;
-        this.guiManager = guiManager;
-        this.guiResourceManager = guiResourceManager;
-        this.guiPipeline = guiPipeline;
+        this.guiRenderer = guiRenderer;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -87,11 +81,12 @@ public class VeldridRenderer : IRenderer
 
             /* Install main resources. */
             resourceManager.InitializeBaseResources();
-            guiResourceManager.Initialize();
-            guiPipeline.Initialize();
 
             /* Initialize all scenes. */
             sceneConsumer.Initialize();
+
+            // Initialize additional rendering layers.
+            guiRenderer.Initialize();
         }
         catch (Exception e)
         {
@@ -103,9 +98,8 @@ public class VeldridRenderer : IRenderer
     {
         if (!isDisposed)
         {
+            guiRenderer.Dispose();
             sceneConsumer.Dispose();
-            guiPipeline.Dispose();
-            guiResourceManager.Dispose();
             resourceManager.Dispose();
             device.Dispose();
             isDisposed = true;
@@ -134,99 +128,18 @@ public class VeldridRenderer : IRenderer
             scene.EndScene();
 
             // GUI rendering from Dear ImGui.
-            RenderGui(commandList);
+            guiRenderer.RenderGui(commandList);
 
             /* Render and present the next frame. */
             commandList.End();
             device.Device.SubmitCommands(commandList);
             device.Device.WaitForIdle();
             device.Device.SwapBuffers();
+            guiRenderer.EndFrame();
         }
         catch (Exception e)
         {
             Logger.Error("Error during rendering.", e);
-        }
-    }
-
-    /// <summary>
-    ///     Renders the GUI layer.
-    /// </summary>
-    /// <param name="commandList">Active command list.</param>
-    private unsafe void RenderGui(CommandList commandList)
-    {
-        // First stage, convert pending ImGui commands to drawing-level data
-        var drawData = guiManager.Render();
-
-        // Second stage, set up GUI rendering resources.
-        // Check validity.
-        var vertexBuf = guiResourceManager.GuiVertexBuffer;
-        var indexBuf = guiResourceManager.GuiIndexBuffer;
-        if (vertexBuf == null || indexBuf == null)
-            throw new InvalidOperationException("Tried to render GUI without buffers.");
-        if (drawData.CmdListsCount == 0) return;
-        if (drawData.TotalVtxCount > vertexBuf.Length)
-            throw new InvalidOperationException("Vertex buffer too small for GUI render.");
-        if (drawData.TotalIdxCount > indexBuf.Length)
-            throw new InvalidOperationException("Index buffer too small for GUI render.");
-
-        // Populate buffers.
-        var vertexOffset = 0;
-        var indexOffset = 0;
-        var vertexSize = Marshal.SizeOf(typeof(ImDrawVert));
-        var indexSize = Marshal.SizeOf<ushort>();
-        for (var i = 0; i < drawData.CmdListsCount; ++i)
-        {
-            var curList = drawData.CmdLists[i];
-
-            // Grab buffers from ImGui.
-            var vertexIn = curList.VtxBuffer.Data.ToPointer();
-            var vertexOut = (vertexBuf.BufferPtr + vertexOffset * vertexSize).ToPointer();
-            var vertexBytes = curList.VtxBuffer.Size * vertexSize;
-
-            var indexIn = curList.IdxBuffer.Data.ToPointer();
-            var indexOut = (indexBuf.BufferPtr + indexOffset * indexSize).ToPointer();
-            var indexBytes = curList.IdxBuffer.Size * indexSize;
-
-            // Copy into the device buffers. This is a redundant copy but we can optimize it away later
-            // if it's a significant performance impact.
-            Buffer.MemoryCopy(vertexIn, vertexOut,
-                vertexSize * (vertexBuf.Length - vertexOffset),
-                vertexBytes);
-            Buffer.MemoryCopy(indexIn, indexOut,
-                indexSize * (indexBuf.Length - indexOffset),
-                indexBytes);
-
-            vertexOffset += curList.VtxBuffer.Size;
-            indexOffset += curList.IdxBuffer.Size;
-        }
-
-        // Synchronize buffers to device; bind resources that will be
-        // used by all GUI draw calls.
-        vertexBuf.Update(commandList);
-        indexBuf.Update(commandList);
-        commandList.SetPipeline(guiPipeline.Pipeline);
-
-        // Execute draw commands.
-        vertexOffset = 0;
-        indexOffset = 0;
-        for (var i = 0; i < drawData.CmdListsCount; ++i)
-        {
-            var curList = drawData.CmdLists[i];
-            var listIndexOffset = 0;
-            for (var j = 0; j < curList.CmdBuffer.Size; ++j)
-            {
-                var curCmd = curList.CmdBuffer[j];
-
-                // Resource binding for next draw call.
-
-                // Execute draw call.
-                commandList.DrawIndexed(curCmd.ElemCount, 1,
-                    (uint)(indexOffset + listIndexOffset), vertexOffset, 0);
-                listIndexOffset += (int)curCmd.ElemCount;
-            }
-
-            vertexOffset += curList.VtxBuffer.Size;
-            indexOffset += curList.IdxBuffer.Size;
         }
     }
 }

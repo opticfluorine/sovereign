@@ -26,6 +26,8 @@ public class GuiInstaller : IWindsorInstaller
     {
         container.Register(Component.For<GuiPipeline>()
             .LifestyleSingleton());
+        container.Register(Component.For<GuiRenderer>()
+            .LifestyleSingleton());
         container.Register(Component.For<GuiResourceManager>()
             .LifestyleSingleton());
     }

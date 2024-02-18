@@ -4,6 +4,11 @@
 
 ### February
 
+#### 18 February 2024
+
+* More work on Dear ImGui integration. Refactor the current GUI rendering code into a separate
+  `GuiRenderer` class that coordinates everything
+
 #### 14 February 2024
 
 * Continue work on Dear ImGui integration by adding a GUI rendering pipeline to the Veldrid renderer.
