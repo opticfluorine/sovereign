@@ -70,8 +70,20 @@ public class GuiRenderer : IDisposable
     /// </summary>
     public void Initialize()
     {
+        // Initialize resources.
         guiResourceManager.Initialize();
         guiPipeline.Initialize();
+
+        // Compute constant projection matrix.
+        var io = ImGui.GetIO();
+        vertexConstants.ProjectionMatrix = Matrix4x4.CreateOrthographicOffCenter(
+            0.0f,
+            io.DisplaySize.X,
+            io.DisplaySize.Y,
+            0.0f,
+            -1.0f,
+            1.0f
+        );
     }
 
     /// <summary>
@@ -146,10 +158,7 @@ public class GuiRenderer : IDisposable
         if (atlasManager.TextureAtlas == null) throw new InvalidOperationException("Texture atlas is null.");
 
         // Resolve the texture ID to an offset into the texture atlas.
-        float startX;
-        float startY;
-        var endX = 0.0f;
-        var endY = 0.0f;
+        float startX, startY, endX, endY;
         if (curCmd.TextureId == GuiFontAtlas.TextureId)
         {
             // Font render.
