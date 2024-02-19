@@ -31,7 +31,12 @@ public struct GuiVertexShaderConstants
     public Matrix4x4 ProjectionMatrix;
 
     /// <summary>
-    ///     Texture coordinate offset.
+    ///     Upper-left corner of texture in normalized units.
     /// </summary>
-    public Vector2 TextureOffset;
+    public Vector2 TextureStart;
+
+    /// <summary>
+    ///     Bottom-right corner of texture in normalized units.
+    /// </summary>
+    public Vector2 TextureEnd;
 }

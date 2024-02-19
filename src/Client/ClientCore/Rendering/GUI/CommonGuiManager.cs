@@ -21,6 +21,7 @@ using System.Text;
 using ImGuiNET;
 using SDL2;
 using Sovereign.ClientCore.Rendering.Display;
+using Sovereign.ClientCore.Rendering.GUI;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Timing;
@@ -134,6 +135,9 @@ public sealed class CommonGuiManager : IDisposable
         io.DisplaySize = new Vector2(mainDisplay.DisplayMode!.Width,
             mainDisplay.DisplayMode!.Height);
         io.DisplayFramebufferScale = Vector2.One;
+
+        // Font.
+        io.Fonts.SetTexID(GuiFontAtlas.TextureId);
     }
 
     /// <summary>

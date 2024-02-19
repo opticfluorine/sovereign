@@ -91,6 +91,11 @@ public class TextureAtlas : IDisposable
     /// </summary>
     public Tuple<int, int> FontAtlasPosition { get; private set; } = new(0, 0);
 
+    /// <summary>
+    ///     Relative coordinates of the font atlas bounds ((topLeftX, topLeftY), (bottomRightX, bottomRightY)).
+    /// </summary>
+    public Tuple<float, float, float, float> FontAtlasBounds { get; private set; } = new(0.0f, 0.0f, 0.0f, 0.0f);
+
     public void Dispose()
     {
         AtlasSurface.Dispose();
@@ -224,7 +229,7 @@ public class TextureAtlas : IDisposable
         CreateAtlasSurface(atlasWidth, atlasHeight, format);
 
         /* Pack the atlas. */
-        PackAtlas(plan);
+        PackAtlas(plan, atlasWidth, atlasHeight);
     }
 
     /// <summary>
@@ -244,7 +249,9 @@ public class TextureAtlas : IDisposable
     ///     Packs the atlas.
     /// </summary>
     /// <param name="plan">Packing plan.</param>
-    private void PackAtlas(IList<PlanElement> plan)
+    /// <param name="atlasWidth">Total texture atlas width.</param>
+    /// <param name="atlasHeight">Total texture atlas height.</param>
+    private void PackAtlas(IList<PlanElement> plan, int atlasWidth, int atlasHeight)
     {
         /* Iterate over the plan. */
         foreach (var planElement in plan)
@@ -256,11 +263,21 @@ public class TextureAtlas : IDisposable
 
             /* Perform any type-specific processing. */
             if (planElement.PlanElementType == PlanElementType.Spritesheet)
+            {
                 SpriteSheetMap[planElement.Name]
                     = new Tuple<int, int>(planElement.TopLeftX, planElement.TopLeftY);
+            }
             else if (planElement.PlanElementType == PlanElementType.FontAtlas)
+            {
                 FontAtlasPosition = new Tuple<int, int>(
                     planElement.TopLeftX, planElement.TopLeftY);
+                FontAtlasBounds = new Tuple<float, float, float, float>(
+                    planElement.TopLeftX / (float)atlasWidth,
+                    planElement.TopLeftY / (float)atlasHeight,
+                    (planElement.TopLeftX + planElement.Surface.Properties.Width) / (float)atlasWidth,
+                    (planElement.TopLeftY + planElement.Surface.Properties.Height) / (float)atlasHeight
+                );
+            }
         }
     }
 

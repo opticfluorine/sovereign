@@ -28,6 +28,11 @@ namespace Sovereign.ClientCore.Rendering.GUI;
 public sealed class GuiFontAtlas : IDisposable
 {
     /// <summary>
+    ///     ImGui texture ID for the font atlas.
+    /// </summary>
+    public static readonly IntPtr TextureId = (IntPtr)1;
+
+    /// <summary>
     ///     Pointer to the SDL surface containing the font atlas.
     /// </summary>
     private Surface? fontAtlasSurface;

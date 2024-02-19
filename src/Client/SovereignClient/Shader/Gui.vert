@@ -20,7 +20,8 @@
 layout (binding = 0) uniform ShaderConstants
 {
     mat4 g_projection;
-    vec2 g_texOffset;
+    vec2 g_texStart;
+    vec2 g_texEnd;
 } shaderConstants;
 
 layout (location = 0) in vec2 vPosition;
@@ -34,5 +35,5 @@ void main()
 {
     gl_Position = shaderConstants.g_projection * vec4(vPosition, 0, 1);
     vColorOut = vColor;
-    vTexCoordOut = vTexCoord + shaderConstants.g_texOffset;
+    vTexCoordOut = shaderConstants.g_Start + vTexCoord * (shaderConstants.g_texEnd - shaderConstants.g_texStart);
 }
