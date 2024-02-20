@@ -85,17 +85,18 @@ public class GuiPipeline : IDisposable
             guiResourceManager.GuiVertexBuffer.ElementSize,
             new VertexElementDescription(
                 "vPosition",
-                VertexElementFormat.Float3,
+                VertexElementFormat.Float2,
                 VertexElementSemantic.Position
-            ), new VertexElementDescription(
-                "vVelocity",
-                VertexElementFormat.Float3,
-                VertexElementSemantic.Position
-            ), new VertexElementDescription(
+            ),
+            new VertexElementDescription(
                 "vTexCoord",
                 VertexElementFormat.Float2,
                 VertexElementSemantic.TextureCoordinate
-            ));
+            ),
+            new VertexElementDescription(
+                "vColor",
+                VertexElementFormat.Float4,
+                VertexElementSemantic.Color));
 
         // Create the shader set.
         return new ShaderSetDescription(

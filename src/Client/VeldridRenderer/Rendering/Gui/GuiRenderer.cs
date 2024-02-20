@@ -24,6 +24,8 @@ using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Timing;
+using Sovereign.VeldridRenderer.Rendering.Resources;
+using Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 using Veldrid;
 
 namespace Sovereign.VeldridRenderer.Rendering.Gui;
@@ -33,13 +35,25 @@ namespace Sovereign.VeldridRenderer.Rendering.Gui;
 /// </summary>
 public class GuiRenderer : IDisposable
 {
+    /// <summary>
+    ///     GUI scale factor.
+    /// </summary>
+    private static readonly Vector2 ScaleFactor = Vector2.One;
+
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly TextureAtlasManager atlasManager;
     private readonly AtlasMap atlasMap;
+    private readonly VeldridDevice device;
     private readonly CommonGuiManager guiManager;
     private readonly GuiPipeline guiPipeline;
     private readonly GuiResourceManager guiResourceManager;
+    private readonly VeldridResourceManager resourceManager;
     private readonly ISystemTimer systemTimer;
+
+    /// <summary>
+    ///     Resource set for GUI rendering.
+    /// </summary>
+    private ResourceSet? resourceSet;
 
     /// <summary>
     ///     Working copy of the vertex shader constants.
@@ -48,7 +62,7 @@ public class GuiRenderer : IDisposable
 
     public GuiRenderer(CommonGuiManager guiManager, GuiResourceManager guiResourceManager, GuiPipeline guiPipeline,
         TextureAtlasManager atlasManager, ISystemTimer systemTimer, AnimatedSpriteManager animatedSpriteManager,
-        AtlasMap atlasMap)
+        AtlasMap atlasMap, VeldridDevice device, VeldridResourceManager resourceManager)
     {
         this.guiManager = guiManager;
         this.guiResourceManager = guiResourceManager;
@@ -57,10 +71,13 @@ public class GuiRenderer : IDisposable
         this.systemTimer = systemTimer;
         this.animatedSpriteManager = animatedSpriteManager;
         this.atlasMap = atlasMap;
+        this.device = device;
+        this.resourceManager = resourceManager;
     }
 
     public void Dispose()
     {
+        resourceSet?.Dispose();
         guiPipeline.Dispose();
         guiResourceManager.Dispose();
     }
@@ -70,9 +87,13 @@ public class GuiRenderer : IDisposable
     /// </summary>
     public void Initialize()
     {
+        if (device.DisplayMode == null)
+            throw new InvalidOperationException("Display mode is null.");
+
         // Initialize resources.
         guiResourceManager.Initialize();
         guiPipeline.Initialize();
+        CreateResourceSet();
 
         // Compute constant projection matrix.
         var io = ImGui.GetIO();
@@ -84,6 +105,9 @@ public class GuiRenderer : IDisposable
             -1.0f,
             1.0f
         );
+        io.DisplaySize = new Vector2(device.DisplayMode.Width / ScaleFactor.X,
+            device.DisplayMode.Height / ScaleFactor.Y);
+        io.DisplayFramebufferScale = ScaleFactor;
     }
 
     /// <summary>
@@ -102,14 +126,18 @@ public class GuiRenderer : IDisposable
     {
         if (guiResourceManager.GuiUniformBuffer == null)
             throw new InvalidOperationException("GUI uniform buffer is null.");
+        if (resourceSet == null)
+            throw new InvalidOperationException("GUI resource set is null.");
 
         // First stage, convert pending ImGui commands to drawing-level data
         var drawData = guiManager.Render();
         if (drawData.CmdListsCount == 0) return;
+        drawData.ScaleClipRects(ScaleFactor);
 
         // Update and bind resources used across all GUI draw calls.
         UpdateBuffers(commandList, drawData);
         commandList.SetPipeline(guiPipeline.Pipeline);
+        commandList.SetGraphicsResourceSet(0, resourceSet);
 
         // Execute draw commands.
         var vertexOffset = 0;
@@ -131,6 +159,12 @@ public class GuiRenderer : IDisposable
                     guiResourceManager.GuiUniformBuffer.Update(commandList);
                     constantsUpdated = true;
                 }
+
+                commandList.SetScissorRect(0,
+                    (uint)curCmd.ClipRect.X,
+                    (uint)curCmd.ClipRect.Y,
+                    (uint)(curCmd.ClipRect.Z - curCmd.ClipRect.X),
+                    (uint)(curCmd.ClipRect.W - curCmd.ClipRect.Y));
 
                 // Execute draw call.
                 commandList.DrawIndexed(curCmd.ElemCount, 1,
@@ -240,5 +274,42 @@ public class GuiRenderer : IDisposable
         // used by all GUI draw calls.
         vertexBuf.Update(commandList);
         indexBuf.Update(commandList);
+    }
+
+    /// <summary>
+    ///     Creates the resource set for GUI rendering.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if resources are not properly initialized.</exception>
+    private void CreateResourceSet()
+    {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+        if (guiResourceManager.GuiUniformBuffer == null)
+            throw new InvalidOperationException("Vertex uniform buffer not ready.");
+        if (resourceManager.AtlasTexture == null)
+            throw new InvalidOperationException("Texture atlas not ready.");
+
+        var resLayoutDesc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
+            GameResourceManager.RES_SHADER_CONSTANTS,
+            ResourceKind.UniformBuffer,
+            ShaderStages.Vertex
+        ), new ResourceLayoutElementDescription(
+            GameResourceManager.RES_TEXTURE_ATLAS,
+            ResourceKind.TextureReadOnly,
+            ShaderStages.Fragment
+        ), new ResourceLayoutElementDescription(
+            GameResourceManager.RES_TEXTURE_ATLAS_SAMPLER,
+            ResourceKind.Sampler,
+            ShaderStages.Fragment
+        ));
+        var resLayout = device.Device.ResourceFactory.CreateResourceLayout(resLayoutDesc);
+
+        var resSetDesc = new ResourceSetDescription(
+            resLayout,
+            guiResourceManager.GuiUniformBuffer.DeviceBuffer,
+            resourceManager.AtlasTexture.TextureView,
+            device.Device.PointSampler
+        );
+        resourceSet = device.Device.ResourceFactory.CreateResourceSet(resSetDesc);
     }
 }

@@ -35,5 +35,5 @@ void main()
 {
     gl_Position = shaderConstants.g_projection * vec4(vPosition, 0, 1);
     vColorOut = vColor;
-    vTexCoordOut = shaderConstants.g_Start + vTexCoord * (shaderConstants.g_texEnd - shaderConstants.g_texStart);
+    vTexCoordOut = shaderConstants.g_texStart + vTexCoord * (shaderConstants.g_texEnd - shaderConstants.g_texStart);
 }
