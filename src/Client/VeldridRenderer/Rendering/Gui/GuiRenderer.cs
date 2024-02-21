@@ -17,7 +17,6 @@
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Text;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.GUI;
@@ -154,12 +153,8 @@ public class GuiRenderer : IDisposable
             {
                 var curCmd = curList.CmdBuffer[j];
 
-                var sb = new StringBuilder("GUI Cmd ").Append(i).Append(".").Append(j)
-                    .Append(" (Tex ").Append(curCmd.TextureId).Append(")");
-                commandList.PushDebugGroup(sb.ToString());
-
                 // Resource binding for next draw call.
-                if (TryBindTexture(commandList, curCmd, systemTime) || !constantsUpdated)
+                if (TryBindTexture(curCmd, systemTime) || !constantsUpdated)
                 {
                     guiResourceManager.GuiUniformBuffer.Buffer[0] = vertexConstants;
                     guiResourceManager.GuiUniformBuffer.Update(commandList);
@@ -176,8 +171,6 @@ public class GuiRenderer : IDisposable
                 commandList.DrawIndexed(curCmd.ElemCount, 1,
                     (uint)(indexOffset + listIndexOffset), vertexOffset, 0);
                 listIndexOffset += (int)curCmd.ElemCount;
-
-                commandList.PopDebugGroup();
             }
 
             vertexOffset += curList.VtxBuffer.Size;
@@ -190,20 +183,20 @@ public class GuiRenderer : IDisposable
     /// <summary>
     ///     Binds the texture for a draw call.
     /// </summary>
-    /// <param name="commandList">Active command list.</param>
     /// <param name="curCmd">Current draw command.</param>
     /// <param name="systemTime">Current system time.</param>
     /// <returns>
     ///     true if vertex shader constants were updated, false otherwise.
     /// </returns>
-    private bool TryBindTexture(CommandList commandList, ImDrawCmdPtr curCmd, ulong systemTime)
+    private bool TryBindTexture(ImDrawCmdPtr curCmd, ulong systemTime)
     {
-        if (curCmd.TextureId == IntPtr.Zero) return false;
+        var texId = curCmd.GetTexID();
+        if (texId == IntPtr.Zero) return false;
         if (atlasManager.TextureAtlas == null) throw new InvalidOperationException("Texture atlas is null.");
 
         // Resolve the texture ID to an offset into the texture atlas.
         float startX, startY, endX, endY;
-        if (curCmd.TextureId == GuiFontAtlas.TextureId)
+        if (texId == GuiFontAtlas.TextureId)
         {
             // Font render.
             (startX, startY, endX, endY) = atlasManager.TextureAtlas.FontAtlasBounds;
@@ -212,7 +205,7 @@ public class GuiRenderer : IDisposable
         {
             // Animated sprite render. Resolve to sprite.
             const int spriteIdOffset = 2;
-            var animSpriteId = (int)curCmd.TextureId - spriteIdOffset;
+            var animSpriteId = (int)texId - spriteIdOffset;
             var animSprite = animatedSpriteManager.AnimatedSprites[animSpriteId];
             var sprite = animSprite.GetSpriteForTime(systemTime, Orientation.South);
 

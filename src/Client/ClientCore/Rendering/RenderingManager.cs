@@ -79,7 +79,7 @@ public class RenderingManager : IStartable
     {
         SelectConfiguration();
         CreateMainDisplay();
-        InitializeGUI();
+        InitializeGui();
         LoadResources();
         InitializeRenderer();
     }
@@ -173,7 +173,7 @@ public class RenderingManager : IStartable
     /// <summary>
     ///     Initializes the GUI.
     /// </summary>
-    private void InitializeGUI()
+    private void InitializeGui()
     {
         try
         {
