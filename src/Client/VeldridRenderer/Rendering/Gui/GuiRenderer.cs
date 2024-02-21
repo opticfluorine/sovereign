@@ -17,6 +17,7 @@
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Text;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.GUI;
@@ -135,6 +136,7 @@ public class GuiRenderer : IDisposable
         drawData.ScaleClipRects(ScaleFactor);
 
         // Update and bind resources used across all GUI draw calls.
+        commandList.PushDebugGroup("GUI");
         UpdateBuffers(commandList, drawData);
         commandList.SetPipeline(guiPipeline.Pipeline);
         commandList.SetGraphicsResourceSet(0, resourceSet);
@@ -151,6 +153,10 @@ public class GuiRenderer : IDisposable
             for (var j = 0; j < curList.CmdBuffer.Size; ++j)
             {
                 var curCmd = curList.CmdBuffer[j];
+
+                var sb = new StringBuilder("GUI Cmd ").Append(i).Append(".").Append(j)
+                    .Append(" (Tex ").Append(curCmd.TextureId).Append(")");
+                commandList.PushDebugGroup(sb.ToString());
 
                 // Resource binding for next draw call.
                 if (TryBindTexture(commandList, curCmd, systemTime) || !constantsUpdated)
@@ -170,11 +176,15 @@ public class GuiRenderer : IDisposable
                 commandList.DrawIndexed(curCmd.ElemCount, 1,
                     (uint)(indexOffset + listIndexOffset), vertexOffset, 0);
                 listIndexOffset += (int)curCmd.ElemCount;
+
+                commandList.PopDebugGroup();
             }
 
             vertexOffset += curList.VtxBuffer.Size;
             indexOffset += curList.IdxBuffer.Size;
         }
+
+        commandList.PopDebugGroup();
     }
 
     /// <summary>
@@ -270,10 +280,11 @@ public class GuiRenderer : IDisposable
             indexOffset += curList.IdxBuffer.Size;
         }
 
-        // Synchronize buffers to device; bind resources that will be
-        // used by all GUI draw calls.
+        // Synchronize and select buffers.
         vertexBuf.Update(commandList);
         indexBuf.Update(commandList);
+        commandList.SetVertexBuffer(0, vertexBuf.DeviceBuffer);
+        commandList.SetIndexBuffer(indexBuf.DeviceBuffer, IndexFormat.UInt16);
     }
 
     /// <summary>
