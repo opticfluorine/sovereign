@@ -4,6 +4,11 @@
 
 ### February
 
+#### 21 February 2024
+
+* Successfully integrated Dear ImGui with the renderer - now the client can have GUIs. Still need
+  to do some additional testing, reskinning, etc. So far so good.
+
 #### 18 February 2024
 
 * More work on Dear ImGui integration. Refactor the current GUI rendering code into a separate

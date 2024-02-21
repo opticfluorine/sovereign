@@ -100,8 +100,8 @@ public class GuiRenderer : IDisposable
         vertexConstants.ProjectionMatrix = Matrix4x4.CreateOrthographicOffCenter(
             0.0f,
             io.DisplaySize.X,
-            io.DisplaySize.Y,
             0.0f,
+            io.DisplaySize.Y,
             -1.0f,
             1.0f
         );
@@ -145,6 +145,7 @@ public class GuiRenderer : IDisposable
         var indexOffset = 0;
         var constantsUpdated = false;
         var systemTime = systemTimer.GetTime();
+        var clipOffset = drawData.DisplayPos;
         for (var i = 0; i < drawData.CmdListsCount; ++i)
         {
             var curList = drawData.CmdLists[i];
@@ -161,9 +162,11 @@ public class GuiRenderer : IDisposable
                     constantsUpdated = true;
                 }
 
+                var startX = curCmd.ClipRect.X - clipOffset.X;
+                var startY = curCmd.ClipRect.Y - clipOffset.Y;
                 commandList.SetScissorRect(0,
-                    (uint)curCmd.ClipRect.X,
-                    (uint)curCmd.ClipRect.Y,
+                    (uint)startX,
+                    (uint)startY,
                     (uint)(curCmd.ClipRect.Z - curCmd.ClipRect.X),
                     (uint)(curCmd.ClipRect.W - curCmd.ClipRect.Y));
 

@@ -93,9 +93,7 @@ public sealed class GameScene : IScene
 
     public void UpdateGui()
     {
-        ImGui.Begin("Hello World!");
-        ImGui.Text("Hello World!");
-        ImGui.End();
+        ImGui.ShowDemoWindow();
     }
 
     /// <summary>
