@@ -43,12 +43,12 @@ public class RenderingMainLoopAction : IMainLoopAction
     private ulong lastFrameTime;
 
     public RenderingMainLoopAction(RenderingManager renderingManager,
-        ISystemTimer systemTimer, IClientConfiguration clientConfiguration)
+        ISystemTimer systemTimer, ClientConfigurationManager configManager)
     {
         this.renderingManager = renderingManager;
         this.systemTimer = systemTimer;
 
-        minimumTimeDelta = Units.SystemTime.Second / (ulong)clientConfiguration.MaxFramerate;
+        minimumTimeDelta = Units.SystemTime.Second / (ulong)configManager.ClientConfiguration.MaxFramerate;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

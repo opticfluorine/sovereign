@@ -24,15 +24,30 @@ namespace Sovereign.ClientCore.Configuration;
 ///     In the future, the values of IClientConfiguration will be loaded at
 ///     runtime from a file.
 /// </remarks>
-public sealed class ClientConfiguration : IClientConfiguration
+public sealed class ClientConfiguration
 {
-    public int TileWidth => 32;
+    /// <summary>
+    ///     Width of a tile in pixels.
+    /// </summary>
+    public int TileWidth { get; set; } = 32;
 
-    public float RenderSearchSpacerX => 4.0f;
+    /// <summary>
+    ///     Extra tiles to search for renderable entities along the x axis.
+    /// </summary>
+    public float RenderSearchSpacerX { get; set; } = 4.0f;
 
-    public float RenderSearchSpacerY => 8.0f;
+    /// <summary>
+    ///     Extra tiles to search for renderable entities along the y axis.
+    /// </summary>
+    public float RenderSearchSpacerY { get; set; } = 8.0f;
 
-    public int MaxFramerate => 120;
+    /// <summary>
+    ///     Maximum framerate (in frames per second).
+    /// </summary>
+    public int MaxFramerate { get; set; } = 120;
 
-    public bool Fullscreen => false;
+    /// <summary>
+    ///     Whether to run in fullscreen mode.
+    /// </summary>
+    public bool Fullscreen { get; set; } = false;
 }

@@ -34,7 +34,7 @@ namespace Sovereign.ClientCore.Rendering;
 public class RenderingManager : IStartable
 {
     private readonly AdapterSelector adapterSelector;
-    private readonly IClientConfiguration clientConfiguration;
+    private readonly ClientConfigurationManager configManager;
     private readonly DisplayModeSelector displayModeSelector;
     private readonly CommonGuiManager guiManager;
 
@@ -55,7 +55,7 @@ public class RenderingManager : IStartable
 
     public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
         DisplayModeSelector displayModeSelector, IRenderer renderer,
-        RenderingResourceManager resourceManager, IClientConfiguration clientConfiguration,
+        RenderingResourceManager resourceManager, ClientConfigurationManager configManager,
         SDLEventAdapter sdlEventAdapter, CommonGuiManager guiManager)
     {
         this.mainDisplay = mainDisplay;
@@ -63,7 +63,7 @@ public class RenderingManager : IStartable
         this.displayModeSelector = displayModeSelector;
         this.renderer = renderer;
         this.resourceManager = resourceManager;
-        this.clientConfiguration = clientConfiguration;
+        this.configManager = configManager;
         this.sdlEventAdapter = sdlEventAdapter;
         this.guiManager = guiManager;
     }
@@ -131,7 +131,7 @@ public class RenderingManager : IStartable
         try
         {
             /* Create the main window. */
-            mainDisplay.Show(selectedDisplayMode, clientConfiguration.Fullscreen);
+            mainDisplay.Show(selectedDisplayMode, configManager.ClientConfiguration.Fullscreen);
         }
         catch (Exception e)
         {

@@ -19,7 +19,6 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
 
 namespace Sovereign.ClientCore.Configuration;
 
@@ -30,9 +29,7 @@ public sealed class ClientConfigurationInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(EngineClasses.EngineAssemblies()
-            .BasedOn<IClientConfiguration>()
-            .WithServiceDefaultInterfaces()
+        container.Register(Component.For<ClientConfigurationManager>()
             .LifestyleSingleton());
     }
 }

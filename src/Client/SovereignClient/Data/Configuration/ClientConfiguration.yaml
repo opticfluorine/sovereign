@@ -1,0 +1,29 @@
+# ---------
+# TileWidth
+# ---------
+# Width of each tile in pixels.
+TileWidth: 32
+
+# -------------------
+# RenderSearchSpacerX
+# -------------------
+# Extra tiles to search for renderable entities along the x axis.
+RenderSearchSpacerX: 4.0
+
+# -------------------
+# RenderSearchSpacerY
+# -------------------
+# Extra tiles to search for renderable entities along the y axis.
+RenderSearchSpacerY: 8.0
+
+# ------------
+# MaxFramerate
+# ------------
+# Maximum framerate (in frames per second).
+MaxFramerate: 120
+
+# ----------
+# Fullscreen
+# ----------
+# Whether to run in fullscreen mode.
+Fullscreen: false
