@@ -97,15 +97,9 @@ public class VeldridUpdateBuffer<T> : IDisposable
     public void Dispose()
     {
         DeviceBuffer.Dispose();
-        while (usedBuffers.TryPop(out var buf))
-        {
-            buf.Dispose();
-        }
+        while (usedBuffers.TryPop(out var buf)) buf.Dispose();
 
-        while (unusedBuffers.TryPop(out var buf))
-        {
-            buf.Dispose();
-        }
+        while (unusedBuffers.TryPop(out var buf)) buf.Dispose();
 
         currentBuffer.Dispose();
     }
@@ -179,7 +173,7 @@ public class VeldridUpdateBuffer<T> : IDisposable
 
         public void Dispose()
         {
-            GcHandle.Free();
+            if (GcHandle.IsAllocated) GcHandle.Free();
         }
     }
 }

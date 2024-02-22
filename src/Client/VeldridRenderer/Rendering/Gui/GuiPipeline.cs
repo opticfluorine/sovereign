@@ -95,7 +95,7 @@ public class GuiPipeline : IDisposable
             ),
             new VertexElementDescription(
                 "vColor",
-                VertexElementFormat.Float4,
+                VertexElementFormat.Byte4_Norm,
                 VertexElementSemantic.Color));
 
         // Create the shader set.
