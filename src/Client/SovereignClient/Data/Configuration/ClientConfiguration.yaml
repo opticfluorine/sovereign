@@ -1,3 +1,39 @@
+# --------------------
+# ConnectionParameters
+# --------------------
+# Connection parameters.
+ConnectionParameters:
+  # ----
+  # Host
+  # ----
+  # Server host.
+  Host: 127.0.0.1
+  
+  # ----
+  # Port
+  # ----
+  # Server port.
+  Port: 12820
+  
+  # --------
+  # RestHost
+  # --------
+  # REST server host.
+  RestHost: 127.0.0.1
+  
+  # --------
+  # RestPort
+  # --------
+  # REST server port.
+  RestPort: 8080
+  
+  # -------
+  # RestTls
+  # -------
+  # Whether to use TLS encryption for REST server connections.
+  # For security reasons, this should always be true for production servers.
+  RestTls: false
+
 # ---------
 # TileWidth
 # ---------

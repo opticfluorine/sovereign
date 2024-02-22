@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.IO;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Resources;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -35,13 +37,21 @@ public class ClientConfigurationManager
         .WithNamingConvention(PascalCaseNamingConvention.Instance)
         .Build();
 
-    public ClientConfigurationManager(IResourcePathBuilder pathBuilder)
+    public ClientConfigurationManager(IResourcePathBuilder pathBuilder, ILogger logger)
     {
-        var cfgPath = pathBuilder.BuildPathToResource(
-            ResourceType.Configuration, Filename);
-        using (var reader = new StreamReader(cfgPath))
+        try
         {
-            ClientConfiguration = deserializer.Deserialize<ClientConfiguration>(reader);
+            var cfgPath = pathBuilder.BuildPathToResource(
+                ResourceType.Configuration, Filename);
+            using (var reader = new StreamReader(cfgPath))
+            {
+                ClientConfiguration = deserializer.Deserialize<ClientConfiguration>(reader);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.Fatal("Error loading configuration file.", e);
+            throw;
         }
     }
 

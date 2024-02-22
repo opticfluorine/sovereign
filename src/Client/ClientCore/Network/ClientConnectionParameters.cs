@@ -22,6 +22,21 @@ namespace Sovereign.ClientCore.Network;
 /// </summary>
 public sealed class ClientConnectionParameters
 {
+    public const string DefaultHost = "127.0.0.1";
+
+    public const ushort DefaultPort = 12820;
+
+    public const string DefaultRestHost = "127.0.0.1";
+
+    public const ushort DefaultRestPort = 8080;
+
+    public const bool DefaultRestTls = false;
+
+    public ClientConnectionParameters() : this(DefaultHost, DefaultPort, DefaultRestHost,
+        DefaultRestPort, DefaultRestTls)
+    {
+    }
+
     public ClientConnectionParameters(string host, ushort port, string restHost, ushort restPort, bool restTls)
     {
         Host = host;

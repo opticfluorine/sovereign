@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Sovereign.ClientCore.Network;
+
 namespace Sovereign.ClientCore.Configuration;
 
 /// <summary>
@@ -50,4 +52,9 @@ public sealed class ClientConfiguration
     ///     Whether to run in fullscreen mode.
     /// </summary>
     public bool Fullscreen { get; set; } = false;
+
+    /// <summary>
+    ///     Connection parameters.
+    /// </summary>
+    public ClientConnectionParameters ConnectionParameters { get; set; } = new();
 }
