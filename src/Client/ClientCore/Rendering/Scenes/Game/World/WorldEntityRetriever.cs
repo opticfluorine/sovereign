@@ -32,7 +32,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 public sealed class WorldEntityRetriever
 {
     private readonly CameraManager camera;
-    private readonly IClientConfiguration clientConfiguration;
+    private readonly ClientConfigurationManager configManager;
     private readonly DrawablePositionComponentIndexer drawableIndexer;
 
     /// <summary>
@@ -48,12 +48,12 @@ public sealed class WorldEntityRetriever
     private readonly DisplayViewport viewport;
 
     public WorldEntityRetriever(DrawablePositionComponentIndexer drawableIndexer,
-        CameraManager camera, DisplayViewport viewport, IClientConfiguration clientConfiguration)
+        CameraManager camera, DisplayViewport viewport, ClientConfigurationManager configManager)
     {
         this.drawableIndexer = drawableIndexer;
         this.camera = camera;
         this.viewport = viewport;
-        this.clientConfiguration = clientConfiguration;
+        this.configManager = configManager;
 
         halfX = viewport.WidthInTiles * 0.5f;
         halfY = viewport.HeightInTiles * 0.5f;
@@ -85,6 +85,7 @@ public sealed class WorldEntityRetriever
         /* Interpolate the camera position */
         var centerPos = camera.Position.InterpolateByTime(camera.Velocity, timeSinceTick);
 
+        var clientConfiguration = configManager.ClientConfiguration;
         var minX = centerPos.X - halfX - clientConfiguration.RenderSearchSpacerX;
         var maxX = centerPos.X + halfX + clientConfiguration.RenderSearchSpacerX;
 

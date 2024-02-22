@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Systems.ClientNetwork;
@@ -56,11 +57,7 @@ public sealed class TestContentSystem : ISystem, IDisposable
     /// </summary>
     private const int requestTimeoutMs = 5000;
 
-    /// <summary>
-    ///     Hardcoded connection parameters for debug. Remove once connection is configurable.
-    /// </summary>
-    private readonly ClientConnectionParameters connectionParameters =
-        new("127.0.0.1", 12820, "127.0.0.1", 8080, false);
+    private readonly ClientConfigurationManager configManager;
 
     private readonly IEventLoop eventLoop;
 
@@ -72,13 +69,15 @@ public sealed class TestContentSystem : ISystem, IDisposable
         EventCommunicator eventCommunicator,
         IEventSender eventSender,
         ClientNetworkController networkController,
-        PlayerManagementClient playerManagementClient)
+        PlayerManagementClient playerManagementClient,
+        ClientConfigurationManager configManager)
     {
         this.eventLoop = eventLoop;
         EventCommunicator = eventCommunicator;
         this.eventSender = eventSender;
         this.networkController = networkController;
         this.playerManagementClient = playerManagementClient;
+        this.configManager = configManager;
 
         eventLoop.RegisterSystem(this);
     }
@@ -146,7 +145,7 @@ public sealed class TestContentSystem : ISystem, IDisposable
                 Username = username,
                 Password = password
             },
-            connectionParameters);
+            configManager.ClientConfiguration.ConnectionParameters);
     }
 
     /// <summary>
@@ -157,7 +156,7 @@ public sealed class TestContentSystem : ISystem, IDisposable
         /* Automatically connect to a local server with debug credentials. */
         Logger.Info("Automatically connecting to local server.");
         networkController.BeginConnection(eventSender,
-            connectionParameters,
+            configManager.ClientConfiguration.ConnectionParameters,
             new LoginParameters(username, password));
     }
 

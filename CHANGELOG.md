@@ -4,6 +4,11 @@
 
 ### February
 
+#### 22 February 2024
+
+* Load client configuration from file instead of hardcoding the values.
+* Move client connection settings to the configuration file.
+
 #### 21 February 2024
 
 * Successfully integrated Dear ImGui with the renderer - now the client can have GUIs. Still need

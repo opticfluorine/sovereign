@@ -14,6 +14,12 @@
         <ProjectReference Include="..\VeldridRenderer\VeldridRenderer.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <None Update="Data\Configuration\ClientConfiguration.yaml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
     <Target Name="CopyDataAfterBuild" AfterTargets="AfterBuild">
         <ItemGroup>
             <DataFiles Include="Data/**/*"/>
