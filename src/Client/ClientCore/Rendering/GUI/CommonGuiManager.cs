@@ -17,6 +17,7 @@
 
 using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using ImGuiNET;
 using SDL2;
@@ -221,7 +222,7 @@ public sealed class CommonGuiManager : IDisposable
                 break;
 
             case SDL.SDL_EventType.SDL_TEXTINPUT:
-                io.AddInputCharactersUTF8(ev.text.ToString());
+                HandleTextInput(ref ev, io);
                 break;
 
             case SDL.SDL_EventType.SDL_KEYDOWN:
@@ -246,6 +247,20 @@ public sealed class CommonGuiManager : IDisposable
                 else if (ev.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST)
                     io.AddFocusEvent(false);
                 break;
+        }
+    }
+
+    /// <summary>
+    ///     Handles a text input event.
+    /// </summary>
+    /// <param name="ev">Event.</param>
+    /// <param name="io">ImGui IO object.</param>
+    private unsafe void HandleTextInput(ref SDL.SDL_Event ev, ImGuiIOPtr io)
+    {
+        fixed (byte* ptr = ev.text.text)
+        {
+            var str = Marshal.PtrToStringUTF8(new IntPtr(ptr));
+            if (str != null) io.AddInputCharactersUTF8(str);
         }
     }
 

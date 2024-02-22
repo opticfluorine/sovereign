@@ -8,6 +8,8 @@
 
 * Successfully integrated Dear ImGui with the renderer - now the client can have GUIs. Still need
   to do some additional testing, reskinning, etc. So far so good.
+* Increase GUI vertex and index buffer sizes - they were filling up with rounded windows.
+* Fix handling of SDL2 text input events.
 
 #### 18 February 2024
 

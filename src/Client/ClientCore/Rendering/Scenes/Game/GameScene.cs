@@ -93,10 +93,6 @@ public sealed class GameScene : IScene
 
     public void UpdateGui()
     {
-        ImGui.Begin("Style Config");
-        ImGui.ShowStyleSelector("Style");
-        ImGui.End();
-
         ImGui.ShowDemoWindow();
     }
 
