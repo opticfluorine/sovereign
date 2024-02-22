@@ -2,6 +2,34 @@
 
 ## 2024
 
+### February
+
+#### 21 February 2024
+
+* Successfully integrated Dear ImGui with the renderer - now the client can have GUIs. Still need
+  to do some additional testing, reskinning, etc. So far so good.
+* Increase GUI vertex and index buffer sizes - they were filling up with rounded windows.
+* Fix handling of SDL2 text input events.
+
+#### 18 February 2024
+
+* More work on Dear ImGui integration. Refactor the current GUI rendering code into a separate
+  `GuiRenderer` class that coordinates everything
+
+#### 14 February 2024
+
+* Continue work on Dear ImGui integration by adding a GUI rendering pipeline to the Veldrid renderer.
+  There's still some work to be done with resource binding and texture loading.
+
+#### 13 February 2024
+
+* Start integrating Dear ImGui into the renderer.
+
+#### 12 February 2024
+
+* Update Dear ImGui to v1.90.1.1.
+* Update `CommonGuiManager` to mirror latest Dear ImGui SDL2 backend source.
+
 ### January
 
 #### 31 January 2024

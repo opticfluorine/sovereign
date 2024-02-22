@@ -28,6 +28,11 @@ namespace Sovereign.ClientCore.Rendering.GUI;
 public sealed class GuiFontAtlas : IDisposable
 {
     /// <summary>
+    ///     ImGui texture ID for the font atlas.
+    /// </summary>
+    public static readonly IntPtr TextureId = (IntPtr)1;
+
+    /// <summary>
     ///     Pointer to the SDL surface containing the font atlas.
     /// </summary>
     private Surface? fontAtlasSurface;
@@ -93,7 +98,8 @@ public sealed class GuiFontAtlas : IDisposable
     private void InitializeSurface()
     {
         // Retrieve raw data from ImGui.
-        ImGui.GetIO().Fonts.GetTexDataAsRGBA32(out IntPtr outPixels,
+        var io = ImGui.GetIO();
+        io.Fonts.GetTexDataAsRGBA32(out IntPtr outPixels,
             out var outWidth, out var outHeight);
         width = outWidth;
         height = outHeight;
@@ -101,5 +107,8 @@ public sealed class GuiFontAtlas : IDisposable
         // Create an SDL_Surface to hold the atlas.
         fontAtlasSurface = Surface.CreateSurfaceFrom(outPixels, outWidth, outHeight,
             DisplayFormat.B8G8R8A8_UNorm);
+
+        // Tag the font texture for later lookup.
+        io.Fonts.SetTexID(TextureId);
     }
 }

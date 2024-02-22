@@ -91,9 +91,9 @@ public sealed class GameScene : IScene
         timeSinceTick = this.timeSinceTick;
     }
 
-    public void PopulateGuiBuffers(ImDrawVert[] vertexBuffer, ushort[] indexBuffer)
+    public void UpdateGui()
     {
-        // TODO
+        ImGui.ShowDemoWindow();
     }
 
     /// <summary>

@@ -49,12 +49,18 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
 
     public void ConsumeScene(IScene scene)
     {
-        /* Dispatch. */
+        /* Dispatch to scene-specific consumers. */
         switch (scene.SceneType)
         {
             case SceneType.Game:
                 gameSceneConsumer.ConsumeScene(scene);
                 break;
+        }
+
+        // General processing.
+        if (scene.RenderGui)
+        {
+            scene.UpdateGui();
         }
     }
 
