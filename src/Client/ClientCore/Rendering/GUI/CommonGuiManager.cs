@@ -134,6 +134,12 @@ public sealed class CommonGuiManager : IDisposable
         io.DisplaySize = new Vector2(mainDisplay.DisplayMode!.Width,
             mainDisplay.DisplayMode!.Height);
         io.DisplayFramebufferScale = Vector2.One;
+
+        // Style.
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, new Vector4(0.125f, 0.0f, 0.522f, 1.0f));
+        ImGui.PushStyleColor(ImGuiCol.TitleBg, new Vector4(0.176f, 0.0f, 0.722f, 1.0f));
+        ImGui.PushStyleColor(ImGuiCol.TitleBgActive, new Vector4(0.176f, 0.0f, 0.722f, 1.0f));
+        ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, new Vector4(0.176f, 0.0f, 0.722f, 1.0f));
     }
 
     /// <summary>

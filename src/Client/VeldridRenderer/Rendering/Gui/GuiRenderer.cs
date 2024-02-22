@@ -51,6 +51,11 @@ public class GuiRenderer : IDisposable
     private readonly ISystemTimer systemTimer;
 
     /// <summary>
+    ///     Last bound texture.
+    /// </summary>
+    private IntPtr lastTexture = IntPtr.Zero;
+
+    /// <summary>
     ///     Resource set for GUI rendering.
     /// </summary>
     private ResourceSet? resourceSet;
@@ -194,7 +199,7 @@ public class GuiRenderer : IDisposable
     private bool TryBindTexture(ImDrawCmdPtr curCmd, ulong systemTime)
     {
         var texId = curCmd.GetTexID();
-        if (texId == IntPtr.Zero) return false;
+        if (texId == IntPtr.Zero || texId == lastTexture) return false;
         if (atlasManager.TextureAtlas == null) throw new InvalidOperationException("Texture atlas is null.");
 
         // Resolve the texture ID to an offset into the texture atlas.
@@ -223,6 +228,7 @@ public class GuiRenderer : IDisposable
         // Update the vertex shader constants with the new offset.
         vertexConstants.TextureStart = new Vector2(startX, startY);
         vertexConstants.TextureEnd = new Vector2(endX, endY);
+        lastTexture = texId;
         return true;
     }
 

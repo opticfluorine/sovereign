@@ -19,7 +19,6 @@ using System;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
-using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Scenes;
 using Sovereign.VeldridRenderer.Rendering.Gui;
 using Sovereign.VeldridRenderer.Rendering.Resources;
@@ -60,8 +59,7 @@ public class VeldridRenderer : IRenderer
     private bool isDisposed;
 
     public VeldridRenderer(VeldridDevice device, VeldridResourceManager resourceManager,
-        SceneManager sceneManager, VeldridSceneConsumer sceneConsumer, CommonGuiManager guiManager,
-        GuiResourceManager guiResourceManager, GuiPipeline guiPipeline, GuiRenderer guiRenderer)
+        SceneManager sceneManager, VeldridSceneConsumer sceneConsumer, GuiRenderer guiRenderer)
     {
         this.device = device;
         this.resourceManager = resourceManager;
@@ -113,10 +111,10 @@ public class VeldridRenderer : IRenderer
         if (resourceManager.CommandList == null)
             throw new InvalidOperationException("Command list not ready.");
 
+        var commandList = resourceManager.CommandList;
         try
         {
             /* Prepare for rendering. */
-            var commandList = resourceManager.CommandList;
             commandList.Begin();
             commandList.SetFramebuffer(device.Device.SwapchainFramebuffer);
             commandList.ClearColorTarget(0, RgbaFloat.Black);
@@ -129,17 +127,17 @@ public class VeldridRenderer : IRenderer
 
             // GUI rendering from Dear ImGui.
             guiRenderer.RenderGui(commandList);
-
-            /* Render and present the next frame. */
-            commandList.End();
-            device.Device.SubmitCommands(commandList);
-            device.Device.WaitForIdle();
-            device.Device.SwapBuffers();
-            guiRenderer.EndFrame();
         }
         catch (Exception e)
         {
             Logger.Error("Error during rendering.", e);
         }
+
+        /* Render and present the next frame. */
+        commandList.End();
+        device.Device.SubmitCommands(commandList);
+        device.Device.WaitForIdle();
+        device.Device.SwapBuffers();
+        guiRenderer.EndFrame();
     }
 }
