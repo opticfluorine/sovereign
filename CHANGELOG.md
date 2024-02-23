@@ -4,6 +4,11 @@
 
 ### February
 
+#### 23 February 2024
+
+* Add `ClientStateSystem` for managing the top-level client state (main menu, in-game, etc.).
+* Update `SceneManager` to select the renderer scene based on the current client state.
+
 #### 22 February 2024
 
 * Load client configuration from file instead of hardcoding the values.

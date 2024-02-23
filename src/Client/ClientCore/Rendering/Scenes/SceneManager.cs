@@ -16,6 +16,7 @@
  */
 
 using Sovereign.ClientCore.Rendering.Scenes.Game;
+using Sovereign.ClientCore.Systems.ClientState;
 
 namespace Sovereign.ClientCore.Rendering.Scenes;
 
@@ -24,13 +25,31 @@ namespace Sovereign.ClientCore.Rendering.Scenes;
 /// </summary>
 public sealed class SceneManager
 {
-    public SceneManager(GameScene gameScene)
+    private readonly GameScene gameScene;
+    private readonly ClientStateServices stateServices;
+
+    public SceneManager(ClientStateServices stateServices, GameScene gameScene)
     {
-        ActiveScene = gameScene;
+        this.stateServices = stateServices;
+        this.gameScene = gameScene;
     }
+
+    /// <summary>
+    ///     Active scene type.
+    /// </summary>
+    public SceneType ActiveSceneType => stateServices.State switch
+    {
+        ClientState.MainMenu => SceneType.MainMenu,
+        ClientState.InGame => SceneType.Game,
+        _ => SceneType.Game
+    };
 
     /// <summary>
     ///     Current active scene.
     /// </summary>
-    public IScene ActiveScene { get; set; }
+    public IScene ActiveScene => ActiveSceneType switch
+    {
+        SceneType.Game => gameScene,
+        _ => gameScene
+    };
 }

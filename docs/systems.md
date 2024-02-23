@@ -25,6 +25,7 @@ Client systems are only present in the client.
 |-------------------------|-------------------------------|---------------------------------------------------------------------------|
 | `Camera`                | `CameraSystem`                | Responsible for managing the camera used for rendering.                   |
 | `ClientNetwork`         | `ClientNetworkSystem`         | Responsible for managing the client-side network connection.              |
+| `ClientState`           | `ClientStateSystem`           | Responsible for managing the top-level client state machine.              |
 | `EntitySynchronization` | `EntitySynchronizationSystem` | Responsible for non-block entity synchronization in the client.           |
 | `Input`                 | `InputSystem`                 | Responsible for responding to user input (keyboard, mouse, gamepad, etc). |
 | `TestContent`           | `TestContentSystem`           | Generates content for development and testing.                            |
