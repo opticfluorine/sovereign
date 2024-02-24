@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Numerics;
 using ImGuiNET;
+using Sovereign.ClientCore.Rendering.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
 
@@ -23,10 +25,16 @@ namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
 /// </summary>
 public class StartupGui
 {
-    private const string Title = "Sovereign";
+    private const string Title = "Sovereign Engine";
     private const string Login = "Login";
     private const string Register = "Register";
     private const string Exit = "Exit";
+    private readonly DisplayViewport viewport;
+
+    public StartupGui(DisplayViewport viewport)
+    {
+        this.viewport = viewport;
+    }
 
     /// <summary>
     ///     Renders the startup GUI.
@@ -38,13 +46,19 @@ public class StartupGui
     {
         var newState = MainMenuState.Startup;
 
-        ImGui.Begin(Title);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
 
+        var io = ImGui.GetIO();
+        ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
+        ImGui.SetNextWindowSize(Vector2.Zero, ImGuiCond.Always);
+        ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
+        ImGui.Begin(Title);
         if (ImGui.Button(Login)) newState = MainMenuState.Login;
         ImGui.Button(Register);
         ImGui.Button(Exit);
-
         ImGui.End();
+
+        ImGui.PopStyleVar();
 
         return newState;
     }

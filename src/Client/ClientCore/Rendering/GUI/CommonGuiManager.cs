@@ -25,6 +25,7 @@ using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Timing;
+using Sovereign.EngineUtil.Numerics;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
 
@@ -148,7 +149,7 @@ public sealed class CommonGuiManager : IDisposable
     {
         var io = ImGui.GetIO();
         var now = systemTimer.GetTime();
-        io.DeltaTime = (now - lastSystemTime) * 1E-3f;
+        io.DeltaTime = (now - lastSystemTime) * UnitConversions.UsToS;
         lastSystemTime = now;
 
         UpdateMousePosAndButtons();
