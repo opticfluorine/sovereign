@@ -29,10 +29,11 @@ public class LoginGui
     private const string Password = "Password";
     private const string Login = "Login";
     private const string Cancel = "Cancel";
+    private const string LoggingIn = "Logging in...";
 
     private const int MaxFieldSize = 256;
+    private LoginState loginState = LoginState.Input;
     private string passwordInput = "";
-
     private string usernameInput = "";
 
     /// <summary>
@@ -53,21 +54,12 @@ public class LoginGui
         ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
         ImGui.Begin(Title);
 
-        ImGui.Text(Username);
-        ImGui.SameLine();
-        ImGui.InputText("##username", ref usernameInput, MaxFieldSize);
-
-        ImGui.Text(Password);
-        ImGui.SameLine();
-        ImGui.InputText("##password", ref passwordInput, MaxFieldSize, ImGuiInputTextFlags.Password);
-
-        ImGui.Button(Login);
-        ImGui.SameLine();
-        if (ImGui.Button(Cancel))
+        nextState = loginState switch
         {
-            Reset();
-            nextState = MainMenuState.Startup;
-        }
+            LoginState.Input => DoInputState(),
+            LoginState.Pending => DoPendingState(),
+            _ => DoInputState()
+        };
 
         ImGui.End();
 
@@ -77,11 +69,74 @@ public class LoginGui
     }
 
     /// <summary>
+    ///     Renders login window contents
+    /// </summary>
+    /// <returns>Next main menu state.</returns>
+    private MainMenuState DoInputState()
+    {
+        var nextState = MainMenuState.Login;
+
+        ImGui.Text(Username);
+        ImGui.SameLine();
+        ImGui.InputText("##username", ref usernameInput, MaxFieldSize);
+
+        ImGui.Text(Password);
+        ImGui.SameLine();
+        ImGui.InputText("##password", ref passwordInput, MaxFieldSize, ImGuiInputTextFlags.Password);
+
+        if (ImGui.Button(Login)) DoLogin();
+        ImGui.SameLine();
+        if (ImGui.Button(Cancel))
+        {
+            Reset();
+            nextState = MainMenuState.Startup;
+        }
+
+        return nextState;
+    }
+
+    /// <summary>
+    ///     Renders login window contents for the login pending state.
+    /// </summary>
+    /// <returns>Next aain menu state.</returns>
+    private MainMenuState DoPendingState()
+    {
+        ImGui.Text(LoggingIn);
+        return MainMenuState.Login;
+    }
+
+    private void DoLogin()
+    {
+        loginState = LoginState.Pending;
+    }
+
+    /// <summary>
     ///     Resets dialog state.
     /// </summary>
     private void Reset()
     {
         usernameInput = "";
         passwordInput = "";
+    }
+
+    /// <summary>
+    ///     Internal login states.
+    /// </summary>
+    private enum LoginState
+    {
+        /// <summary>
+        ///     Login dialog is accepting input.
+        /// </summary>
+        Input,
+
+        /// <summary>
+        ///     Login is pending.
+        /// </summary>
+        Pending,
+
+        /// <summary>
+        ///     Login dialog is reporting an error.
+        /// </summary>
+        Error
     }
 }
