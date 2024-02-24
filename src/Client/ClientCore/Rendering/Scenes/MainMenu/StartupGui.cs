@@ -16,7 +16,6 @@
 
 using System.Numerics;
 using ImGuiNET;
-using Sovereign.ClientCore.Rendering.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
 
@@ -29,12 +28,6 @@ public class StartupGui
     private const string Login = "Login";
     private const string Register = "Register";
     private const string Exit = "Exit";
-    private readonly DisplayViewport viewport;
-
-    public StartupGui(DisplayViewport viewport)
-    {
-        this.viewport = viewport;
-    }
 
     /// <summary>
     ///     Renders the startup GUI.

@@ -100,7 +100,7 @@ public class MainMenuScene : IScene
                 break;
 
             case MainMenuState.Login:
-                loginGui.Render();
+                state = loginGui.Render();
                 break;
         }
     }
