@@ -28,7 +28,7 @@ public sealed class GeneralGameSceneInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(Component.For<GameSceneCamera>()
+        container.Register(Component.For<RenderCamera>()
             .LifestyleSingleton());
     }
 }

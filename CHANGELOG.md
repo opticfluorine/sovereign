@@ -8,6 +8,11 @@
 
 * Add `ClientStateSystem` for managing the top-level client state (main menu, in-game, etc.).
 * Update `SceneManager` to select the renderer scene based on the current client state.
+* Create a main menu scene for displaying the startup GUIs covering login, registration, etc. Start implementing
+  these GUIs.
+* Disable the automatic registration/login/etc actions in `TestContentSystem`. These behaviors are transitioning
+  to being driven by the `MainMenuScene` and its GUI classes. Once implementation is done, it should be possible
+  to entirely remove `TestContentSystem`.
 
 #### 22 February 2024
 

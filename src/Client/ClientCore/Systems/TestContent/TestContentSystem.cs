@@ -102,7 +102,7 @@ public sealed class TestContentSystem : ISystem, IDisposable
 
     public void Initialize()
     {
-        AutomateRegister();
+        //AutomateRegister();
     }
 
     public void Cleanup()
@@ -114,7 +114,7 @@ public sealed class TestContentSystem : ISystem, IDisposable
         /* Poll for events. */
         var eventsProcessed = 0;
         while (EventCommunicator.GetIncomingEvent(out var ev))
-        {
+            /*
             switch (ev.EventId)
             {
                 case EventId.Client_Network_RegisterSuccess:
@@ -126,9 +126,8 @@ public sealed class TestContentSystem : ISystem, IDisposable
                     AutomatePlayerSelect();
                     break;
             }
-
+            */
             eventsProcessed++;
-        }
 
         return eventsProcessed;
     }

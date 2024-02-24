@@ -20,16 +20,16 @@ using System.Numerics;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.EngineUtil.Numerics;
 
-namespace Sovereign.ClientCore.Rendering.Scenes.Game;
+namespace Sovereign.ClientCore.Rendering.Scenes;
 
 /// <summary>
 ///     Responsible for configuring the camera for game scene rendering.
 /// </summary>
-public sealed class GameSceneCamera
+public sealed class RenderCamera
 {
     private readonly CameraManager cameraManager;
 
-    public GameSceneCamera(CameraManager cameraManager)
+    public RenderCamera(CameraManager cameraManager)
     {
         this.cameraManager = cameraManager;
     }

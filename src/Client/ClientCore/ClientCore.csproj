@@ -19,8 +19,4 @@
         <PackageReference Include="ppy.SDL2-CS" Version="1.0.693-alpha"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Rendering\Scenes\MainMenu\"/>
-    </ItemGroup>
-
 </Project>

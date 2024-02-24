@@ -32,7 +32,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game;
 /// </summary>
 public sealed class GameScene : IScene
 {
-    private readonly GameSceneCamera camera;
+    private readonly RenderCamera camera;
     private readonly IEngineConfiguration engineConfiguration;
     private readonly MainDisplay mainDisplay;
     private readonly ISystemTimer systemTimer;
@@ -51,7 +51,7 @@ public sealed class GameScene : IScene
     private float timeSinceTick;
 
     public GameScene(ISystemTimer systemTimer, IEngineConfiguration engineConfiguration,
-        GameSceneCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
+        RenderCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
         WorldVertexSequencer worldVertexSequencer)
     {
         this.systemTimer = systemTimer;
