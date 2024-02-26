@@ -30,8 +30,10 @@ public class LoginGui
     private const string Login = "Login";
     private const string Cancel = "Cancel";
     private const string LoggingIn = "Logging in...";
+    private const string Ok = "OK";
 
     private const int MaxFieldSize = 256;
+    private readonly string errorText = "";
     private LoginState loginState = LoginState.Input;
     private string passwordInput = "";
     private string usernameInput = "";
@@ -44,8 +46,6 @@ public class LoginGui
     /// </returns>
     public MainMenuState Render()
     {
-        var nextState = MainMenuState.Login;
-
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
 
         var io = ImGui.GetIO();
@@ -54,10 +54,11 @@ public class LoginGui
         ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
         ImGui.Begin(Title);
 
-        nextState = loginState switch
+        var nextState = loginState switch
         {
             LoginState.Input => DoInputState(),
             LoginState.Pending => DoPendingState(),
+            LoginState.Error => DoErrorState(),
             _ => DoInputState()
         };
 
@@ -79,6 +80,7 @@ public class LoginGui
         ImGui.Text(Username);
         ImGui.SameLine();
         ImGui.InputText("##username", ref usernameInput, MaxFieldSize);
+        ImGui.SetItemDefaultFocus();
 
         ImGui.Text(Password);
         ImGui.SameLine();
@@ -102,6 +104,13 @@ public class LoginGui
     private MainMenuState DoPendingState()
     {
         ImGui.Text(LoggingIn);
+        return MainMenuState.Login;
+    }
+
+    private MainMenuState DoErrorState()
+    {
+        ImGui.Text(errorText);
+        if (ImGui.Button(Ok)) loginState = LoginState.Input;
         return MainMenuState.Login;
     }
 

@@ -29,6 +29,8 @@ public class StartupGui
     private const string Register = "Register";
     private const string Exit = "Exit";
 
+    private static readonly Vector2 ButtonSize = new(128.0f, 24.0f);
+
     /// <summary>
     ///     Renders the startup GUI.
     /// </summary>
@@ -43,12 +45,25 @@ public class StartupGui
 
         var io = ImGui.GetIO();
         ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
-        ImGui.SetNextWindowSize(Vector2.Zero, ImGuiCond.Always);
+        ImGui.SetNextWindowSize(new Vector2(160.0f, 0.0f), ImGuiCond.Always);
         ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
         ImGui.Begin(Title);
-        if (ImGui.Button(Login)) newState = MainMenuState.Login;
-        ImGui.Button(Register);
-        ImGui.Button(Exit);
+
+        if (ImGui.BeginTable("startup", 1))
+        {
+            ImGui.TableNextColumn();
+            ImGui.TableSetupColumn("##startupCol", ImGuiTableColumnFlags.WidthStretch);
+            if (ImGui.Button(Login, ButtonSize)) newState = MainMenuState.Login;
+
+            ImGui.TableNextColumn();
+            if (ImGui.Button(Register, ButtonSize)) newState = MainMenuState.Registration;
+
+            ImGui.TableNextColumn();
+            ImGui.Button(Exit, ButtonSize);
+
+            ImGui.EndTable();
+        }
+
         ImGui.End();
 
         ImGui.PopStyleVar();

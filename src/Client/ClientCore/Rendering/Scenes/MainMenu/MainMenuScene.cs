@@ -31,6 +31,7 @@ public class MainMenuScene : IScene
     private readonly RenderCamera camera;
     private readonly IEngineConfiguration engineConfiguration;
     private readonly LoginGui loginGui;
+    private readonly RegistrationGui registrationGui;
     private readonly StartupGui startupGui;
 
     private readonly ISystemTimer systemTimer;
@@ -53,7 +54,8 @@ public class MainMenuScene : IScene
     private float timeSinceTick;
 
     public MainMenuScene(RenderCamera camera, DisplayViewport viewport, ISystemTimer systemTimer,
-        IEngineConfiguration engineConfiguration, StartupGui startupGui, LoginGui loginGui)
+        IEngineConfiguration engineConfiguration, StartupGui startupGui, LoginGui loginGui,
+        RegistrationGui registrationGui)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -61,6 +63,7 @@ public class MainMenuScene : IScene
         this.engineConfiguration = engineConfiguration;
         this.startupGui = startupGui;
         this.loginGui = loginGui;
+        this.registrationGui = registrationGui;
     }
 
     public SceneType SceneType => SceneType.MainMenu;
@@ -101,6 +104,10 @@ public class MainMenuScene : IScene
 
             case MainMenuState.Login:
                 state = loginGui.Render();
+                break;
+
+            case MainMenuState.Registration:
+                state = registrationGui.Render();
                 break;
         }
     }

@@ -29,5 +29,10 @@ public enum MainMenuState
     /// <summary>
     ///     Login dialog.
     /// </summary>
-    Login
+    Login,
+
+    /// <summary>
+    ///     Registration dialog.
+    /// </summary>
+    Registration
 }
