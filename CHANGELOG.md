@@ -10,6 +10,7 @@
 * Remove the event-based client API for registration, instead having the GUI use the async method from
   `RegistrationClient` directly.
 * Implement the login GUI.
+* Wire up "Exit" button on the startup screen to exit the client.
 
 #### 23 February 2024
 

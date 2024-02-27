@@ -16,6 +16,8 @@
 
 using System.Numerics;
 using ImGuiNET;
+using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Main;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
 
@@ -30,6 +32,14 @@ public class StartupGui
     private const string Exit = "Exit";
 
     private static readonly Vector2 ButtonSize = new(128.0f, 24.0f);
+    private readonly CoreController coreController;
+    private readonly IEventSender eventSender;
+
+    public StartupGui(IEventSender eventSender, CoreController coreController)
+    {
+        this.eventSender = eventSender;
+        this.coreController = coreController;
+    }
 
     /// <summary>
     ///     Renders the startup GUI.
@@ -59,7 +69,7 @@ public class StartupGui
             if (ImGui.Button(Register, ButtonSize)) newState = MainMenuState.Registration;
 
             ImGui.TableNextColumn();
-            ImGui.Button(Exit, ButtonSize);
+            if (ImGui.Button(Exit, ButtonSize)) coreController.Quit(eventSender);
 
             ImGui.EndTable();
         }
