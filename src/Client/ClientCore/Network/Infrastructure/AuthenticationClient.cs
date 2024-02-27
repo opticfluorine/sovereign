@@ -51,8 +51,8 @@ public sealed class AuthenticationClient
     ///     Attempts to login to the server with the given username and password.
     /// </summary>
     /// <param name="loginParameters">Login parameters.</param>
-    /// <returns>Login response on successful login, or an empty Maybe on failure.</returns>
-    public async Task<Maybe<LoginResponse>> LoginAsync(LoginParameters loginParameters)
+    /// <returns>Login response on successful login, or an error message on failure.</returns>
+    public async Task<Option<LoginResponse, string>> LoginAsync(LoginParameters loginParameters)
     {
         try
         {
@@ -67,7 +67,7 @@ public sealed class AuthenticationClient
             // Send request, handle response.
             var response = await restClient.PostJson(RestEndpoints.Authentication, request);
             var contentLen = response.Content.Headers.ContentLength;
-            var result = new Maybe<LoginResponse>();
+            var result = new Option<LoginResponse, string>("Unknown error.");
             if (contentLen > MaxResponseLength)
             {
                 Logger.ErrorFormat("Response length {0} too long.", contentLen);
@@ -79,37 +79,49 @@ public sealed class AuthenticationClient
                 case HttpStatusCode.Created:
                     // Successful login.
                     Logger.Info("Login successful.");
-                    result = await ProcessSuccessfulLogin(response);
+                    result = new Option<LoginResponse, string>((await ProcessSuccessfulLogin(response)).Value);
                     break;
 
                 case HttpStatusCode.TooManyRequests:
                     // Failed: Too many login attempts, try again later.
-                    Logger.Error("Login failed: too many attempts, try again later.");
+                    const string tooManyAttempts = "Login failed: too many attempts, try again later.";
+                    Logger.Error(tooManyAttempts);
+                    result = new Option<LoginResponse, string>(tooManyAttempts);
                     break;
 
                 case HttpStatusCode.Conflict:
                     // Failed: Account is already logged in.
-                    Logger.Error("Login failed: account is already logged in.");
+                    const string alreadyLoggedIn = "Login failed: account is already logged in.";
+                    Logger.Error(alreadyLoggedIn);
+                    result = new Option<LoginResponse, string>(alreadyLoggedIn);
                     break;
 
                 case HttpStatusCode.Forbidden:
                     // Failed: Invalid username or password.
-                    Logger.Error("Login failed: invalid username or password.");
+                    const string invalidInfo = "Login failed: invalid username or password.";
+                    Logger.Error(invalidInfo);
+                    result = new Option<LoginResponse, string>(invalidInfo);
                     break;
 
                 case HttpStatusCode.BadRequest:
                     // Failed: Invalid request.
-                    Logger.Error("Login failed: invalid request.");
+                    const string invalidRequest = "Login failed: invalid request.";
+                    Logger.Error(invalidRequest);
+                    result = new Option<LoginResponse, string>(invalidRequest);
                     break;
 
                 case HttpStatusCode.InternalServerError:
                     // Failed: Server error.
-                    Logger.Error("Login failed: server error.");
+                    const string serverError = "Login failed: server error.";
+                    Logger.Error(serverError);
+                    result = new Option<LoginResponse, string>(serverError);
                     break;
 
                 default:
                     // Failed: Unknown error.
-                    Logger.Error("Login failed: unknown error.");
+                    const string unknownError = "Login failed: unknown error.";
+                    Logger.Error(unknownError);
+                    result = new Option<LoginResponse, string>(unknownError);
                     break;
             }
 
@@ -118,7 +130,7 @@ public sealed class AuthenticationClient
         catch (Exception e)
         {
             Logger.Error("Unhandled exception during login.", e);
-            return new Maybe<LoginResponse>();
+            return new Option<LoginResponse, string>(e.Message);
         }
     }
 

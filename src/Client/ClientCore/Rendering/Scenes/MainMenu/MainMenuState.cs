@@ -34,5 +34,15 @@ public enum MainMenuState
     /// <summary>
     ///     Registration dialog.
     /// </summary>
-    Registration
+    Registration,
+
+    /// <summary>
+    ///     Player selection dialog.
+    /// </summary>
+    PlayerSelection,
+
+    /// <summary>
+    ///     Player creation dialog.
+    /// </summary>
+    PlayerCreation
 }

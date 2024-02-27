@@ -16,6 +16,11 @@
 
 using System.Numerics;
 using ImGuiNET;
+using Sovereign.ClientCore.Configuration;
+using Sovereign.ClientCore.Network;
+using Sovereign.ClientCore.Network.Infrastructure;
+using Sovereign.ClientCore.Systems.ClientNetwork;
+using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
 
@@ -33,10 +38,23 @@ public class LoginGui
     private const string Ok = "OK";
 
     private const int MaxFieldSize = 256;
-    private readonly string errorText = "";
+    private readonly ClientNetworkController clientNetworkController;
+    private readonly ClientConfigurationManager configManager;
+    private readonly IEventSender eventSender;
+    private readonly ClientNetworkManager networkManager;
+    private string errorText = "";
     private LoginState loginState = LoginState.Input;
     private string passwordInput = "";
     private string usernameInput = "";
+
+    public LoginGui(ClientNetworkManager networkManager, IEventSender eventSender,
+        ClientNetworkController clientNetworkController, ClientConfigurationManager configManager)
+    {
+        this.networkManager = networkManager;
+        this.eventSender = eventSender;
+        this.clientNetworkController = clientNetworkController;
+        this.configManager = configManager;
+    }
 
     /// <summary>
     ///     Renders the login dialog.
@@ -104,9 +122,25 @@ public class LoginGui
     private MainMenuState DoPendingState()
     {
         ImGui.Text(LoggingIn);
+
+        if (networkManager.ClientState == NetworkClientState.Connected)
+            // Success.
+            return MainMenuState.PlayerSelection;
+
+        if (networkManager.ClientState == NetworkClientState.Failed)
+        {
+            // Error.
+            errorText = networkManager.ErrorMessage;
+            loginState = LoginState.Error;
+        }
+
         return MainMenuState.Login;
     }
 
+    /// <summary>
+    ///     Renders error message.
+    /// </summary>
+    /// <returns></returns>
     private MainMenuState DoErrorState()
     {
         ImGui.Text(errorText);
@@ -114,9 +148,30 @@ public class LoginGui
         return MainMenuState.Login;
     }
 
+    /// <summary>
+    ///     Initiates a login.
+    /// </summary>
     private void DoLogin()
     {
+        // Validate input.
+        if (usernameInput.Length == 0)
+        {
+            errorText = "Username must not be empty.";
+            loginState = LoginState.Error;
+            return;
+        }
+
+        if (passwordInput.Length == 0)
+        {
+            errorText = "Password must not be empty.";
+            loginState = LoginState.Error;
+            return;
+        }
+
+        // Initiate login.
         loginState = LoginState.Pending;
+        clientNetworkController.BeginConnection(eventSender, configManager.ClientConfiguration.ConnectionParameters,
+            new LoginParameters(usernameInput, passwordInput));
     }
 
     /// <summary>

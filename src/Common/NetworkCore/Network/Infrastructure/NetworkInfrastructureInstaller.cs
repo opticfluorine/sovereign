@@ -29,6 +29,7 @@ public sealed class NetworkInfrastructureInstaller : IWindsorInstaller
         container.Register(EngineClasses.EngineAssemblies()
             .BasedOn<INetworkManager>()
             .WithServiceDefaultInterfaces()
+            .WithServiceAllInterfaces()
             .WithServiceSelf()
             .LifestyleSingleton());
 

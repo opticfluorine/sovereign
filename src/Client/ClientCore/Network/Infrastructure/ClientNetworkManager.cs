@@ -132,13 +132,13 @@ public sealed class ClientNetworkManager : INetworkManager
     /// <summary>
     ///     Client state.
     /// </summary>
-    internal NetworkClientState ClientState { get; private set; }
+    public NetworkClientState ClientState { get; private set; }
         = NetworkClientState.Disconnected;
 
     /// <summary>
     ///     Last network error message.
     /// </summary>
-    internal string ErrorMessage { get; private set; } = "";
+    public string ErrorMessage { get; private set; } = "";
 
     public event OnNetworkReceive? OnNetworkReceive;
 
@@ -192,7 +192,7 @@ public sealed class ClientNetworkManager : INetworkManager
     /// </exception>
     internal void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
     {
-        if (ClientState != NetworkClientState.Disconnected)
+        if (ClientState != NetworkClientState.Disconnected && ClientState != NetworkClientState.Failed)
             throw new InvalidOperationException("Client is not disconnected.");
 
         ConnectionParameters = connectionParameters;
@@ -211,16 +211,25 @@ public sealed class ClientNetworkManager : INetworkManager
             {
                 // Special failure case.
                 Logger.Error("Login failed with unhandled exception; connection stopped.", task.Exception);
+                ClientState = NetworkClientState.Failed;
+                if (task.Exception != null) ErrorMessage = task.Exception.Message;
                 clientNetworkController.LoginFailed(eventSender, "Unhandled exception occurred during login.");
             }
             else
             {
-                if (task.Result.HasValue)
+                if (task.Result.HasFirst)
+                {
                     // Authentication succeeded, proceed with connection.
-                    ContinueConnection(task.Result.Value);
+                    ContinueConnection(task.Result.First);
+                }
                 else
+                {
                     // Authentication failed.
                     clientNetworkController.LoginFailed(eventSender, "Login failed.");
+                    restClient.Disconnect();
+                    ClientState = NetworkClientState.Failed;
+                    ErrorMessage = task.Result.Second;
+                }
             }
         });
     }
