@@ -47,6 +47,8 @@ public class RegistrationGui
     private const string Registering = "Registering...";
     private const string UnknownError = "An unknown error occurred during registration.";
 
+    private const string Successful = "Registration successful.";
+
     private readonly ClientConfigurationManager configManager;
 
     private readonly RegistrationClient registrationClient;
@@ -91,6 +93,7 @@ public class RegistrationGui
         {
             RegistrationState.Input => DoInputState(),
             RegistrationState.Pending => OnPendingState(),
+            RegistrationState.Success => OnSuccessState(),
             RegistrationState.Error => DoErrorState(),
             _ => DoInputState()
         };
@@ -165,7 +168,7 @@ public class RegistrationGui
             return;
         }
 
-        if (passwordInput.Equals(confirmPasswordInput))
+        if (!passwordInput.Equals(confirmPasswordInput))
         {
             errorMessage = "Passwords do not match.";
             registrationState = RegistrationState.Error;
@@ -206,17 +209,28 @@ public class RegistrationGui
             if (result.HasFirst)
             {
                 // Successful registration.
+                registrationState = RegistrationState.Success;
             }
             else
             {
                 // Error.
                 errorMessage = result.Second;
                 registrationState = RegistrationState.Error;
-                return nextState;
             }
         }
 
         return nextState;
+    }
+
+    /// <summary>
+    ///     Renders the registration dialog contents in the success state.
+    /// </summary>
+    /// <returns>Next state.</returns>
+    private MainMenuState OnSuccessState()
+    {
+        ImGui.Text(Successful);
+        if (ImGui.Button(Ok)) return MainMenuState.Login;
+        return MainMenuState.Registration;
     }
 
     /// <summary>
@@ -244,6 +258,7 @@ public class RegistrationGui
     {
         Input,
         Pending,
+        Success,
         Error
     }
 }

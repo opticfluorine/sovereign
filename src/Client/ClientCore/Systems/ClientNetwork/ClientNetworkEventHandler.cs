@@ -18,7 +18,6 @@
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Network;
-using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
@@ -29,20 +28,13 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork;
 /// </summary>
 public sealed class ClientNetworkEventHandler
 {
-    private readonly IEventSender eventSender;
     private readonly INetworkClient networkClient;
-    private readonly ClientNetworkController networkController;
-    private readonly RegistrationClient registrationClient;
     private readonly ClientWorldSegmentSubscriptionManager worldSegmentSubscriptionManager;
 
-    public ClientNetworkEventHandler(INetworkClient networkClient, RegistrationClient registrationClient,
-        ClientNetworkController networkController, IEventSender eventSender,
+    public ClientNetworkEventHandler(INetworkClient networkClient,
         ClientWorldSegmentSubscriptionManager worldSegmentSubscriptionManager)
     {
         this.networkClient = networkClient;
-        this.registrationClient = registrationClient;
-        this.networkController = networkController;
-        this.eventSender = eventSender;
         this.worldSegmentSubscriptionManager = worldSegmentSubscriptionManager;
     }
 
@@ -68,16 +60,6 @@ public sealed class ClientNetworkEventHandler
                 }
 
                 HandleBeginConnection((BeginConnectionEventDetails)ev.EventDetails);
-                break;
-
-            case EventId.Client_Network_RegisterAccount:
-                if (ev.EventDetails == null)
-                {
-                    Logger.Error("Received RegisterAccount without details.");
-                    break;
-                }
-
-                HandleRegisterAccount((RegisterAccountEventDetails)ev.EventDetails);
                 break;
 
             case EventId.Core_WorldManagement_Subscribe:
@@ -122,29 +104,6 @@ public sealed class ClientNetworkEventHandler
     private void HandleWorldSegmentSubscribe(WorldSegmentSubscriptionEventDetails details)
     {
         worldSegmentSubscriptionManager.Subscribe(details.SegmentIndex);
-    }
-
-    /// <summary>
-    ///     Handles a register account event.
-    /// </summary>
-    /// <param name="eventDetails">Registration details.</param>
-    private void HandleRegisterAccount(RegisterAccountEventDetails eventDetails)
-    {
-        registrationClient.RegisterAsync(eventDetails.ConnectionParameters, eventDetails.RegistrationRequest)
-            .ContinueWith(task =>
-            {
-                if (task.IsFaulted)
-                {
-                    networkController.RegistrationFailed(eventSender, "Registration failed due to an internal error.");
-                    return;
-                }
-
-                var option = task.Result;
-                if (option.HasFirst)
-                    networkController.RegistrationSucceeded(eventSender);
-                else
-                    networkController.RegistrationFailed(eventSender, option.Second);
-            });
     }
 
     /// <summary>

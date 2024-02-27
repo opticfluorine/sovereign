@@ -93,9 +93,7 @@ public sealed class TestContentSystem : ISystem, IDisposable
 
     public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>
     {
-        EventId.Client_Network_Connected,
-        EventId.Client_Network_RegisterSuccess,
-        EventId.Client_Network_RegisterFailed
+        EventId.Client_Network_Connected
     };
 
     public int WorkloadEstimate => 0;
@@ -130,21 +128,6 @@ public sealed class TestContentSystem : ISystem, IDisposable
             eventsProcessed++;
 
         return eventsProcessed;
-    }
-
-    /// <summary>
-    ///     Automatically attempts to register the debug account with the local server.
-    /// </summary>
-    private void AutomateRegister()
-    {
-        Logger.Info("Automatically registering debug account with local server.");
-        networkController.RegisterAccount(eventSender,
-            new RegistrationRequest
-            {
-                Username = username,
-                Password = password
-            },
-            configManager.ClientConfiguration.ConnectionParameters);
     }
 
     /// <summary>

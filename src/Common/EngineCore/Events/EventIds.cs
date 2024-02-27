@@ -224,28 +224,10 @@ public enum EventId
     Client_Network_Connected = 100204,
 
     /// <summary>
-    ///     Event sent to command ClientNetworkSystem to register a new account.
-    /// </summary>
-    /// Associated details: RegisterAccountEventDetails
-    Client_Network_RegisterAccount = 100205,
-
-    /// <summary>
-    ///     Event sent to announce a successful account registration.
-    /// </summary>
-    /// Associated details: None
-    Client_Network_RegisterSuccess = 100206,
-
-    /// <summary>
-    ///     Event sent to announce a failed account registration.
-    /// </summary>
-    /// Associated details: ErrorEventDetails
-    Client_Network_RegisterFailed = 100207,
-
-    /// <summary>
     ///     Event sent to set the entity ID corresponding to the logged in player.
     /// </summary>
     /// Associated details: EntityEventDetails
-    Client_Network_PlayerEntitySelected = 100208,
+    Client_Network_PlayerEntitySelected = 100205,
 
     #endregion Client_Network
 

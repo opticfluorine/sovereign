@@ -4,6 +4,12 @@
 
 ### February
 
+#### 26 February 2024
+
+* Implement the registration GUI.
+* Remove the event-based client API for registration, instead having the GUI use the async method from
+  `RegistrationClient` directly.
+
 #### 23 February 2024
 
 * Add `ClientStateSystem` for managing the top-level client state (main menu, in-game, etc.).
