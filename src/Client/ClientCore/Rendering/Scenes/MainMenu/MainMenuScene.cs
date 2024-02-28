@@ -31,11 +31,17 @@ public class MainMenuScene : IScene
     private readonly RenderCamera camera;
     private readonly IEngineConfiguration engineConfiguration;
     private readonly LoginGui loginGui;
+    private readonly PlayerSelectionGui playerSelectionGui;
     private readonly RegistrationGui registrationGui;
     private readonly StartupGui startupGui;
 
     private readonly ISystemTimer systemTimer;
     private readonly DisplayViewport viewport;
+
+    /// <summary>
+    ///     Previous internal state.
+    /// </summary>
+    private MainMenuState lastState = MainMenuState.Login;
 
     /// <summary>
     ///     Current internal state.
@@ -55,7 +61,7 @@ public class MainMenuScene : IScene
 
     public MainMenuScene(RenderCamera camera, DisplayViewport viewport, ISystemTimer systemTimer,
         IEngineConfiguration engineConfiguration, StartupGui startupGui, LoginGui loginGui,
-        RegistrationGui registrationGui)
+        RegistrationGui registrationGui, PlayerSelectionGui playerSelectionGui)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -64,6 +70,7 @@ public class MainMenuScene : IScene
         this.startupGui = startupGui;
         this.loginGui = loginGui;
         this.registrationGui = registrationGui;
+        this.playerSelectionGui = playerSelectionGui;
     }
 
     public SceneType SceneType => SceneType.MainMenu;
@@ -96,6 +103,8 @@ public class MainMenuScene : IScene
 
     public void UpdateGui()
     {
+        var needToInit = lastState != state;
+        lastState = state;
         switch (state)
         {
             case MainMenuState.Startup:
@@ -103,11 +112,18 @@ public class MainMenuScene : IScene
                 break;
 
             case MainMenuState.Login:
+                if (needToInit) loginGui.Initialize();
                 state = loginGui.Render();
                 break;
 
             case MainMenuState.Registration:
+                if (needToInit) registrationGui.Initialize();
                 state = registrationGui.Render();
+                break;
+
+            case MainMenuState.PlayerSelection:
+                if (needToInit) playerSelectionGui.Initialize();
+                state = playerSelectionGui.Render();
                 break;
         }
     }

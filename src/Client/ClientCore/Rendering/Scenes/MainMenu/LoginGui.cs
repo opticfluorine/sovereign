@@ -57,6 +57,14 @@ public class LoginGui
     }
 
     /// <summary>
+    ///     Initializes the GUI on main menu state change.
+    /// </summary>
+    public void Initialize()
+    {
+        Reset();
+    }
+
+    /// <summary>
     ///     Renders the login dialog.
     /// </summary>
     /// <returns>

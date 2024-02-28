@@ -78,6 +78,14 @@ public class RegistrationGui
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
+    ///     Initializes the registration GUI on main menu state change.
+    /// </summary>
+    public void Initialize()
+    {
+        Reset();
+    }
+
+    /// <summary>
     ///     Renders the registration dialog.
     /// </summary>
     /// <returns>Next main menu state.</returns>
