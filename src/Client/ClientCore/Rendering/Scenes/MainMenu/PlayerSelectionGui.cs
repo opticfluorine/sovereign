@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
+using System.Text;
 using System.Threading.Tasks;
 using ImGuiNET;
 using Sovereign.ClientCore.Network.Infrastructure;
@@ -29,6 +30,10 @@ namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
 public class PlayerSelectionGui
 {
     private const string Title = "Select Player";
+
+    private const string Ok = "OK";
+
+    private const string createPlayer = "Create New Player";
     private readonly PlayerManagementClient client;
     private string errorMessage = "";
     private Task<Option<ListPlayersResponse, string>>? playerListRequest;
@@ -66,6 +71,8 @@ public class PlayerSelectionGui
         var nextState = selectionState switch
         {
             PlayerSelectionState.Loading => DoLoading(),
+            PlayerSelectionState.Error => DoError(),
+            PlayerSelectionState.Input => DoInput(),
             _ => DoLoading()
         };
 
@@ -84,19 +91,15 @@ public class PlayerSelectionGui
         {
             errorMessage = "Error: playerListRequest is null.";
             selectionState = PlayerSelectionState.Error;
-            return MainMenuState.PlayerSelection;
         }
-
-        if (playerListRequest.IsFaulted)
+        else if (playerListRequest.IsFaulted)
         {
             errorMessage = playerListRequest.Exception != null
                 ? playerListRequest.Exception.Message
                 : "An unknown error occurred.";
             selectionState = PlayerSelectionState.Error;
-            return MainMenuState.PlayerSelection;
         }
-
-        if (playerListRequest.IsCompletedSuccessfully)
+        else if (playerListRequest.IsCompletedSuccessfully)
         {
             var result = playerListRequest.Result;
             if (result.HasFirst)
@@ -109,12 +112,77 @@ public class PlayerSelectionGui
                 selectionState = PlayerSelectionState.Error;
                 errorMessage = result.Second;
             }
-
-            return MainMenuState.PlayerSelection;
         }
 
         // If we get here, the load is still in progress.
         ImGui.Text("Retrieving player list from server...");
+        return MainMenuState.PlayerSelection;
+    }
+
+    /// <summary>
+    ///     Renders the input state.
+    /// </summary>
+    /// <returns>Next main menu state.</returns>
+    private MainMenuState DoInput()
+    {
+        if (playerListRequest == null)
+        {
+            errorMessage = "Player list request is null.";
+            selectionState = PlayerSelectionState.Error;
+            return MainMenuState.PlayerSelection;
+        }
+
+        var playerList = playerListRequest.Result.First.Players;
+        if (playerList == null)
+        {
+            errorMessage = "Missing response from server.";
+            selectionState = PlayerSelectionState.Error;
+            return MainMenuState.PlayerSelection;
+        }
+
+        ImGui.BeginTable("players", 3, ImGuiTableFlags.BordersH | ImGuiTableFlags.ScrollY);
+        foreach (var player in playerList)
+        {
+            RenderPlayer(player);
+        }
+
+        ImGui.EndTable();
+
+        return ImGui.Button(createPlayer) ? MainMenuState.PlayerCreation : MainMenuState.PlayerSelection;
+    }
+
+    /// <summary>
+    ///     Renders a single player character into a row of the player character table.
+    /// </summary>
+    /// <param name="player">Player.</param>
+    private void RenderPlayer(PlayerInfo player)
+    {
+        ImGui.TableNextColumn();
+        // TODO Player sprite
+
+        ImGui.TableNextColumn();
+        ImGui.Text(player.Name);
+
+        ImGui.TableNextColumn();
+        ImGui.Button(new StringBuilder("Play##").Append(player.Id).ToString());
+        ImGui.Button(new StringBuilder("Delete##").Append(player.Id).ToString());
+
+        ImGui.TableNextRow();
+    }
+
+    /// <summary>
+    ///     Renders an error message.
+    /// </summary>
+    /// <returns>Next main menu state.</returns>
+    private MainMenuState DoError()
+    {
+        ImGui.Text(errorMessage);
+        if (ImGui.Button(Ok))
+        {
+            // Full logout.
+            return MainMenuState.Startup;
+        }
+
         return MainMenuState.PlayerSelection;
     }
 

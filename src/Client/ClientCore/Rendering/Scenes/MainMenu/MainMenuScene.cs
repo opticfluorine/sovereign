@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
+using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.EngineCore.Configuration;
@@ -103,6 +104,8 @@ public class MainMenuScene : IScene
 
     public void UpdateGui()
     {
+        ImGui.ShowDemoWindow();
+
         var needToInit = lastState != state;
         lastState = state;
         switch (state)
