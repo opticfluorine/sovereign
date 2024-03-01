@@ -19,6 +19,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ImGuiNET;
 using Sovereign.ClientCore.Network.Infrastructure;
+using Sovereign.ClientCore.Rendering.GUI;
+using Sovereign.ClientCore.Systems.ClientNetwork;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
@@ -33,15 +36,35 @@ public class PlayerSelectionGui
 
     private const string Ok = "OK";
 
-    private const string createPlayer = "Create New Player";
+    private const string CreatePlayer = "Create New Player";
+
+    private const string Logout = "Logout";
+
+    private const string Yes = "Yes";
+    private const string No = "No";
+
+    private const string ConfirmDelete = "ConfirmDelete";
     private readonly PlayerManagementClient client;
+    private readonly IEventSender eventSender;
+    private readonly GuiExtensions guiExtensions;
+    private readonly ClientNetworkController networkController;
     private string errorMessage = "";
     private Task<Option<ListPlayersResponse, string>>? playerListRequest;
+
+    /// <summary>
+    ///     If not null, specifies the player that is pending deletion.
+    /// </summary>
+    private PlayerInfo? playerToDelete;
+
     private PlayerSelectionState selectionState = PlayerSelectionState.Loading;
 
-    public PlayerSelectionGui(PlayerManagementClient client)
+    public PlayerSelectionGui(PlayerManagementClient client, ClientNetworkController networkController,
+        IEventSender eventSender, GuiExtensions guiExtensions)
     {
         this.client = client;
+        this.networkController = networkController;
+        this.eventSender = eventSender;
+        this.guiExtensions = guiExtensions;
     }
 
     /// <summary>
@@ -140,15 +163,41 @@ public class PlayerSelectionGui
             return MainMenuState.PlayerSelection;
         }
 
-        ImGui.BeginTable("players", 3, ImGuiTableFlags.BordersH | ImGuiTableFlags.ScrollY);
-        foreach (var player in playerList)
+        if (playerToDelete != null && ImGui.BeginPopupModal(ConfirmDelete))
         {
-            RenderPlayer(player);
+            var message = new StringBuilder("Are you sure that you want to permanently delete player ")
+                .Append(playerToDelete.Name).Append('?').ToString();
+            ImGui.Text(message);
+            if (ImGui.Button(Yes))
+            {
+                OnDelete(playerToDelete);
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button(No))
+            {
+                playerToDelete = null;
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.EndPopup();
         }
+
+        ImGui.BeginTable("players", 3, ImGuiTableFlags.BordersH | ImGuiTableFlags.ScrollY);
+        foreach (var player in playerList) RenderPlayer(player);
 
         ImGui.EndTable();
 
-        return ImGui.Button(createPlayer) ? MainMenuState.PlayerCreation : MainMenuState.PlayerSelection;
+        if (ImGui.Button(CreatePlayer)) return MainMenuState.PlayerCreation;
+        ImGui.SameLine();
+        if (ImGui.Button(Logout))
+        {
+            networkController.EndConnection(eventSender);
+            return MainMenuState.Startup;
+        }
+
+        return MainMenuState.PlayerSelection;
     }
 
     /// <summary>
@@ -158,16 +207,37 @@ public class PlayerSelectionGui
     private void RenderPlayer(PlayerInfo player)
     {
         ImGui.TableNextColumn();
-        // TODO Player sprite
+        if (player.AnimatedSprite.HasValue) guiExtensions.AnimatedSprite(player.AnimatedSprite.Value);
 
         ImGui.TableNextColumn();
         ImGui.Text(player.Name);
 
         ImGui.TableNextColumn();
-        ImGui.Button(new StringBuilder("Play##").Append(player.Id).ToString());
-        ImGui.Button(new StringBuilder("Delete##").Append(player.Id).ToString());
+        if (ImGui.Button(new StringBuilder("Play##").Append(player.Id).ToString())) OnSelect(player);
+        ImGui.SameLine();
+        if (ImGui.Button(new StringBuilder("Delete##").Append(player.Id).ToString()))
+        {
+            playerToDelete = player;
+            ImGui.OpenPopup(ConfirmDelete);
+        }
 
         ImGui.TableNextRow();
+    }
+
+    /// <summary>
+    ///     Handles a player selection.
+    /// </summary>
+    /// <param name="player">Selected player.</param>
+    private void OnSelect(PlayerInfo player)
+    {
+    }
+
+    /// <summary>
+    ///     Handles a player deletion.
+    /// </summary>
+    /// <param name="player">Player to delete.</param>
+    private void OnDelete(PlayerInfo player)
+    {
     }
 
     /// <summary>
@@ -180,6 +250,7 @@ public class PlayerSelectionGui
         if (ImGui.Button(Ok))
         {
             // Full logout.
+            networkController.EndConnection(eventSender);
             return MainMenuState.Startup;
         }
 

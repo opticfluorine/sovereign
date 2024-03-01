@@ -212,8 +212,7 @@ public class GuiRenderer : IDisposable
         else
         {
             // Animated sprite render. Resolve to sprite.
-            const int spriteIdOffset = 2;
-            var animSpriteId = (int)texId - spriteIdOffset;
+            var animSpriteId = AnimatedSprite.FromGuiTextureHandle(texId);
             var animSprite = animatedSpriteManager.AnimatedSprites[animSpriteId];
             var sprite = animSprite.GetSpriteForTime(systemTime, Orientation.South);
 

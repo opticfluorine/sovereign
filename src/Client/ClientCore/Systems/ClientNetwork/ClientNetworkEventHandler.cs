@@ -82,6 +82,10 @@ public sealed class ClientNetworkEventHandler
                 HandleWorldSegmentUnsubscribe((WorldSegmentSubscriptionEventDetails)ev.EventDetails);
                 break;
 
+            case EventId.Client_Network_EndConnection:
+                HandleEndConnection();
+                break;
+
             default:
                 Logger.WarnFormat("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
                 break;
@@ -113,6 +117,14 @@ public sealed class ClientNetworkEventHandler
     private void HandleBeginConnection(BeginConnectionEventDetails details)
     {
         networkClient.BeginConnection(details.ConnectionParameters, details.LoginParameters);
+    }
+
+    /// <summary>
+    ///     Handles an end connection event.
+    /// </summary>
+    private void HandleEndConnection()
+    {
+        networkClient.EndConnection();
     }
 
     /// <summary>

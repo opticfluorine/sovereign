@@ -52,6 +52,16 @@ public sealed class ClientNetworkController
     }
 
     /// <summary>
+    ///     Sends an event commanding the system to end its connection to the server.
+    /// </summary>
+    /// <param name="eventSender"></param>
+    public void EndConnection(IEventSender eventSender)
+    {
+        var ev = new Event(EventId.Client_Network_EndConnection);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
     ///     Sends an event announcing that a login attempt failed.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>

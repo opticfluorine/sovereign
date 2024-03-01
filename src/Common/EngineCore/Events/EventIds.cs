@@ -229,6 +229,12 @@ public enum EventId
     /// Associated details: EntityEventDetails
     Client_Network_PlayerEntitySelected = 100205,
 
+    /// <summary>
+    ///     Event sent to disconnect from the server if connected.
+    /// </summary>
+    /// Associated details: None
+    Client_Network_EndConnection = 100206,
+
     #endregion Client_Network
 
     #region Client_EntitySynchronization
