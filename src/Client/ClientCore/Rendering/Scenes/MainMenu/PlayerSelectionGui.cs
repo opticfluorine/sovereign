@@ -44,6 +44,8 @@ public class PlayerSelectionGui
     private const string No = "No";
 
     private const string ConfirmDelete = "ConfirmDelete";
+
+    private const string EnteringWorld = "Entering world...";
     private readonly PlayerManagementClient client;
     private readonly IEventSender eventSender;
     private readonly GuiExtensions guiExtensions;
@@ -57,6 +59,7 @@ public class PlayerSelectionGui
     private PlayerInfo? playerToDelete;
 
     private PlayerSelectionState selectionState = PlayerSelectionState.Loading;
+    private Task<Option<SelectPlayerResponse, string>>? selectionTask;
 
     public PlayerSelectionGui(PlayerManagementClient client, ClientNetworkController networkController,
         IEventSender eventSender, GuiExtensions guiExtensions)
@@ -72,9 +75,7 @@ public class PlayerSelectionGui
     /// </summary>
     public void Initialize()
     {
-        // Start retrieval of characters from server.
-        selectionState = PlayerSelectionState.Loading;
-        playerListRequest = client.ListPlayersAsync();
+        LoadSelections();
     }
 
     /// <summary>
@@ -96,6 +97,7 @@ public class PlayerSelectionGui
             PlayerSelectionState.Loading => DoLoading(),
             PlayerSelectionState.Error => DoError(),
             PlayerSelectionState.Input => DoInput(),
+            PlayerSelectionState.Selected => DoSelected(),
             _ => DoLoading()
         };
 
@@ -230,6 +232,8 @@ public class PlayerSelectionGui
     /// <param name="player">Selected player.</param>
     private void OnSelect(PlayerInfo player)
     {
+        selectionTask = client.SelectPlayerAsync(player.Id);
+        selectionState = PlayerSelectionState.Selected;
     }
 
     /// <summary>
@@ -238,6 +242,10 @@ public class PlayerSelectionGui
     /// <param name="player">Player to delete.</param>
     private void OnDelete(PlayerInfo player)
     {
+        ImGui.BeginPopup("Not Supported");
+        ImGui.Text("Player deletion is not currently supported.");
+        if (ImGui.Button(Ok)) ImGui.CloseCurrentPopup();
+        ImGui.EndPopup();
     }
 
     /// <summary>
@@ -258,6 +266,54 @@ public class PlayerSelectionGui
     }
 
     /// <summary>
+    ///     Renders the GUI for the Selected state while waiting for world entry.
+    /// </summary>
+    /// <returns></returns>
+    private MainMenuState DoSelected()
+    {
+        if (selectionTask == null)
+        {
+            errorMessage = "selectionTask is null.";
+            selectionState = PlayerSelectionState.Error;
+        }
+        else if (selectionTask.IsCompletedSuccessfully)
+        {
+            if (selectionTask.Result.HasSecond)
+            {
+                ImGui.Text(selectionTask.Result.Second);
+                if (ImGui.Button(Ok)) LoadSelections();
+            }
+        }
+        else if (selectionTask.IsFaulted)
+        {
+            if (selectionTask.Exception != null)
+            {
+                var message = new StringBuilder("Error: ").Append(selectionTask.Exception.Message).ToString();
+                ImGui.Text(message);
+                if (ImGui.Button(Ok)) LoadSelections();
+            }
+        }
+        else
+        {
+            // This is the final state of the selection flow in the GUI.
+            // Once the client is notified that it has entered the world, it will automatically
+            // transition to the in-game state.
+            ImGui.Text(EnteringWorld);
+        }
+
+        return MainMenuState.PlayerSelection;
+    }
+
+    /// <summary>
+    ///     Asynchronously loads selectable players.
+    /// </summary>
+    private void LoadSelections()
+    {
+        selectionState = PlayerSelectionState.Loading;
+        playerListRequest = client.ListPlayersAsync();
+    }
+
+    /// <summary>
     ///     Internal states for the player selection GUI.
     /// </summary>
     private enum PlayerSelectionState
@@ -275,6 +331,11 @@ public class PlayerSelectionGui
         /// <summary>
         ///     Input state while the player selects a player.
         /// </summary>
-        Input
+        Input,
+
+        /// <summary>
+        ///     Player selected and world entry is in progress.
+        /// </summary>
+        Selected
     }
 }

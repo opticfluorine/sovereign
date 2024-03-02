@@ -26,10 +26,13 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 public class ClientStateSystem : ISystem
 {
     private readonly IEventLoop eventLoop;
+    private readonly WorldEntryDetector worldEntryDetector;
 
-    public ClientStateSystem(IEventLoop eventLoop, EventCommunicator eventCommunicator)
+    public ClientStateSystem(IEventLoop eventLoop, EventCommunicator eventCommunicator,
+        WorldEntryDetector worldEntryDetector)
     {
         this.eventLoop = eventLoop;
+        this.worldEntryDetector = worldEntryDetector;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
@@ -37,7 +40,13 @@ public class ClientStateSystem : ISystem
 
     public EventCommunicator EventCommunicator { get; }
 
-    public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>();
+    public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>
+    {
+        EventId.Client_Network_BeginConnection,
+        EventId.Client_Network_PlayerEntitySelected,
+        EventId.Core_WorldManagement_Subscribe,
+        EventId.Client_State_WorldSegmentLoaded
+    };
 
     public int WorkloadEstimate => 10;
 
@@ -51,6 +60,30 @@ public class ClientStateSystem : ISystem
 
     public int ExecuteOnce()
     {
-        return 0;
+        var processed = 0;
+        while (EventCommunicator.GetIncomingEvent(out var ev))
+        {
+            processed++;
+            switch (ev.EventId)
+            {
+                case EventId.Client_Network_BeginConnection:
+                    worldEntryDetector.OnLogin();
+                    break;
+
+                case EventId.Client_Network_PlayerEntitySelected:
+                    worldEntryDetector.OnPlayerSelected();
+                    break;
+
+                case EventId.Core_WorldManagement_Subscribe:
+                    worldEntryDetector.OnSegmentSubscribe();
+                    break;
+
+                case EventId.Client_State_WorldSegmentLoaded:
+                    worldEntryDetector.OnSegmentLoaded();
+                    break;
+            }
+        }
+
+        return processed;
     }
 }

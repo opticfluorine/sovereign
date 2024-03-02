@@ -257,6 +257,16 @@ public enum EventId
 
     #endregion Client_EntitySynchronization
 
+    #region Client_State
+
+    /// <summary>
+    ///     Event sent when the client has loaded a world segment from the server.
+    /// </summary>
+    /// Associated details: WorldSegmentEventDetails
+    Client_State_WorldSegmentLoaded = 100400,
+
+    #endregion Client_State
+
     #endregion Client
 
     #region Server
