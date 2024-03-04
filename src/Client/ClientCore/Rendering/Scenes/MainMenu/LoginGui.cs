@@ -116,7 +116,6 @@ public class LoginGui
         ImGui.SameLine();
         if (ImGui.Button(Cancel))
         {
-            Reset();
             nextState = MainMenuState.Startup;
         }
 
@@ -187,6 +186,7 @@ public class LoginGui
     /// </summary>
     private void Reset()
     {
+        loginState = LoginState.Input;
         usernameInput = "";
         passwordInput = "";
     }

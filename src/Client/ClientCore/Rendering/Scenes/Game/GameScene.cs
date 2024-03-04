@@ -16,7 +16,6 @@
  */
 
 using System.Numerics;
-using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
@@ -93,7 +92,6 @@ public sealed class GameScene : IScene
 
     public void UpdateGui()
     {
-        ImGui.ShowDemoWindow();
     }
 
     /// <summary>

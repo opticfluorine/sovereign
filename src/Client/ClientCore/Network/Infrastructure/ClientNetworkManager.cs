@@ -376,8 +376,8 @@ public sealed class ClientNetworkManager : INetworkManager
     private void HandleEndCommand()
     {
         // If already disconnected, silently fail.
-        if (ClientState != NetworkClientState.Connecting ||
-            ClientState != NetworkClientState.Connected)
+        if (ClientState == NetworkClientState.Disconnected ||
+            ClientState == NetworkClientState.Failed)
             return;
 
         // Disconnect.

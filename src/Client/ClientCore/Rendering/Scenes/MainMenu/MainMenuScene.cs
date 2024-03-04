@@ -106,7 +106,7 @@ public class MainMenuScene : IScene
 
     public void UpdateGui()
     {
-        ImGui.ShowDemoWindow();
+        ImGui.ShowMetricsWindow();
 
         var needToInit = lastState != state;
         lastState = state;

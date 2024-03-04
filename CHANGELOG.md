@@ -2,6 +2,13 @@
 
 ## 2024
 
+### March
+
+#### 3 March 2024
+
+* Fix issue where client did not properly disconnect due to a logic error.
+* Start testing the various startup GUIs through player creation and selection.
+
 ### February
 
 #### 26 February 2024
