@@ -31,14 +31,14 @@ public class GuiExtensions
 {
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly AtlasMap atlasMap;
-    private readonly ClientConfiguration clientConfiguration;
+    private readonly ClientConfigurationManager clientConfigurationManager;
 
     public GuiExtensions(AnimatedSpriteManager animatedSpriteManager, AtlasMap atlasMap,
-        ClientConfiguration clientConfiguration)
+        ClientConfigurationManager clientConfigurationManager)
     {
         this.animatedSpriteManager = animatedSpriteManager;
         this.atlasMap = atlasMap;
-        this.clientConfiguration = clientConfiguration;
+        this.clientConfigurationManager = clientConfigurationManager;
     }
 
     /// <summary>
@@ -53,6 +53,7 @@ public class GuiExtensions
         var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
         var firstSprite = animatedSprite.GetSpriteForTime(0, Orientation.South);
         var spriteBounds = atlasMap.MapElements[firstSprite.Id];
+        var clientConfiguration = clientConfigurationManager.ClientConfiguration;
         var width = spriteBounds.WidthInTiles * clientConfiguration.TileWidth;
         var height = spriteBounds.HeightInTiles * clientConfiguration.TileWidth;
 

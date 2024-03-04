@@ -30,6 +30,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
 public class MainMenuScene : IScene
 {
     private readonly RenderCamera camera;
+    private readonly CreatePlayerGui createPlayerGui;
     private readonly IEngineConfiguration engineConfiguration;
     private readonly LoginGui loginGui;
     private readonly PlayerSelectionGui playerSelectionGui;
@@ -62,7 +63,7 @@ public class MainMenuScene : IScene
 
     public MainMenuScene(RenderCamera camera, DisplayViewport viewport, ISystemTimer systemTimer,
         IEngineConfiguration engineConfiguration, StartupGui startupGui, LoginGui loginGui,
-        RegistrationGui registrationGui, PlayerSelectionGui playerSelectionGui)
+        RegistrationGui registrationGui, PlayerSelectionGui playerSelectionGui, CreatePlayerGui createPlayerGui)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -72,6 +73,7 @@ public class MainMenuScene : IScene
         this.loginGui = loginGui;
         this.registrationGui = registrationGui;
         this.playerSelectionGui = playerSelectionGui;
+        this.createPlayerGui = createPlayerGui;
     }
 
     public SceneType SceneType => SceneType.MainMenu;
@@ -127,6 +129,11 @@ public class MainMenuScene : IScene
             case MainMenuState.PlayerSelection:
                 if (needToInit) playerSelectionGui.Initialize();
                 state = playerSelectionGui.Render();
+                break;
+
+            case MainMenuState.PlayerCreation:
+                if (needToInit) createPlayerGui.Initialize();
+                state = createPlayerGui.Render();
                 break;
         }
     }
