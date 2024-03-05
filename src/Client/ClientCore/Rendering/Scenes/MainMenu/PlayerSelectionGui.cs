@@ -86,9 +86,11 @@ public class PlayerSelectionGui
     {
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
 
+        var windowSize = selectionState == PlayerSelectionState.Input ? new Vector2(0.0f, 520.0f) : Vector2.Zero;
+
         var io = ImGui.GetIO();
         ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
-        ImGui.SetNextWindowSize(Vector2.Zero, ImGuiCond.Always);
+        ImGui.SetNextWindowSize(windowSize, ImGuiCond.Always);
         ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
         ImGui.Begin(Title);
 
@@ -165,6 +167,20 @@ public class PlayerSelectionGui
             return MainMenuState.PlayerSelection;
         }
 
+        ImGui.BeginTable("players", 3, ImGuiTableFlags.BordersH | ImGuiTableFlags.ScrollY,
+            new Vector2(0.0f, 440.0f));
+        foreach (var player in playerList) RenderPlayer(player);
+
+        ImGui.EndTable();
+
+        if (ImGui.Button(CreatePlayer)) return MainMenuState.PlayerCreation;
+        ImGui.SameLine();
+        if (ImGui.Button(Logout))
+        {
+            networkController.EndConnection(eventSender);
+            return MainMenuState.Startup;
+        }
+
         if (playerToDelete != null && ImGui.BeginPopupModal(ConfirmDelete))
         {
             var message = new StringBuilder("Are you sure that you want to permanently delete player ")
@@ -184,19 +200,6 @@ public class PlayerSelectionGui
             }
 
             ImGui.EndPopup();
-        }
-
-        ImGui.BeginTable("players", 3, ImGuiTableFlags.BordersH | ImGuiTableFlags.ScrollY);
-        foreach (var player in playerList) RenderPlayer(player);
-
-        ImGui.EndTable();
-
-        if (ImGui.Button(CreatePlayer)) return MainMenuState.PlayerCreation;
-        ImGui.SameLine();
-        if (ImGui.Button(Logout))
-        {
-            networkController.EndConnection(eventSender);
-            return MainMenuState.Startup;
         }
 
         return MainMenuState.PlayerSelection;
@@ -222,8 +225,6 @@ public class PlayerSelectionGui
             playerToDelete = player;
             ImGui.OpenPopup(ConfirmDelete);
         }
-
-        ImGui.TableNextRow();
     }
 
     /// <summary>
@@ -282,6 +283,10 @@ public class PlayerSelectionGui
             {
                 ImGui.Text(selectionTask.Result.Second);
                 if (ImGui.Button(Ok)) LoadSelections();
+            }
+            else
+            {
+                ImGui.Text(EnteringWorld);
             }
         }
         else if (selectionTask.IsFaulted)

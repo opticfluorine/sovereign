@@ -58,10 +58,7 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
         }
 
         // General processing.
-        if (scene.RenderGui)
-        {
-            scene.UpdateGui();
-        }
+        if (scene.RenderGui) scene.UpdateGui();
     }
 
     /// <summary>
