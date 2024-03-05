@@ -28,6 +28,7 @@ public class EntitySynchronizationSystem : ISystem
     private readonly IEventLoop eventLoop;
     private readonly EntityDefinitionProcessor processor;
     private readonly ClientEntityUnloader unloader;
+    private ulong playerEntityId;
 
     public EntitySynchronizationSystem(EventCommunicator eventCommunicator,
         IEventLoop eventLoop, EntityDefinitionProcessor processor,
@@ -158,6 +159,9 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Event details.</param>
     private void HandleChangeWorldSegment(EntityChangeWorldSegmentEventDetails details)
     {
+        if (details.EntityId == playerEntityId)
+            Logger.DebugFormat("Player entered world segment {0}.", details.NewSegmentIndex);
+
         unloader.OnEntityChangeWorldSegment(details.EntityId,
             details.NewSegmentIndex);
     }
@@ -168,6 +172,7 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Event details.</param>
     private void HandlePlayerSelect(EntityEventDetails details)
     {
+        playerEntityId = details.EntityId;
         unloader.SetPlayer(details.EntityId);
     }
 

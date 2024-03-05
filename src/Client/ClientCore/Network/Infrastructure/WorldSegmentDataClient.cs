@@ -210,6 +210,9 @@ public sealed class WorldSegmentDataClient
         for (var i = 0; i < processed.Length; i++)
             if (!processed[i] && segmentData.DefaultMaterialsPerPlane[i].MaterialId != Material.Air)
                 ProcessDefaultPlane(segmentIndex, i, segmentData.DefaultMaterialsPerPlane[i], blocksToAdd);
+
+        if (blocksToAdd.Count > 0)
+            Logger.DebugFormat("Adding {0} blocks for world segment {1}.", blocksToAdd.Count, segmentIndex);
     }
 
     /// <summary>
