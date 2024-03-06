@@ -17,7 +17,9 @@
 using System.Numerics;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
 
@@ -31,23 +33,16 @@ public class MainMenuScene : IScene
     private readonly RenderCamera camera;
     private readonly CreatePlayerGui createPlayerGui;
     private readonly IEngineConfiguration engineConfiguration;
+    private readonly IEventSender eventSender;
     private readonly LoginGui loginGui;
     private readonly PlayerSelectionGui playerSelectionGui;
     private readonly RegistrationGui registrationGui;
     private readonly StartupGui startupGui;
+    private readonly ClientStateController stateController;
+    private readonly ClientStateServices stateServices;
 
     private readonly ISystemTimer systemTimer;
     private readonly DisplayViewport viewport;
-
-    /// <summary>
-    ///     Previous internal state.
-    /// </summary>
-    private MainMenuState lastState = MainMenuState.Login;
-
-    /// <summary>
-    ///     Current internal state.
-    /// </summary>
-    private MainMenuState state = MainMenuState.Startup;
 
     /// <summary>
     ///     System time of the current frame, in microseconds.
@@ -62,7 +57,8 @@ public class MainMenuScene : IScene
 
     public MainMenuScene(RenderCamera camera, DisplayViewport viewport, ISystemTimer systemTimer,
         IEngineConfiguration engineConfiguration, StartupGui startupGui, LoginGui loginGui,
-        RegistrationGui registrationGui, PlayerSelectionGui playerSelectionGui, CreatePlayerGui createPlayerGui)
+        RegistrationGui registrationGui, PlayerSelectionGui playerSelectionGui, CreatePlayerGui createPlayerGui,
+        IEventSender eventSender, ClientStateController stateController, ClientStateServices stateServices)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -73,6 +69,9 @@ public class MainMenuScene : IScene
         this.registrationGui = registrationGui;
         this.playerSelectionGui = playerSelectionGui;
         this.createPlayerGui = createPlayerGui;
+        this.eventSender = eventSender;
+        this.stateController = stateController;
+        this.stateServices = stateServices;
     }
 
     public SceneType SceneType => SceneType.MainMenu;
@@ -105,33 +104,37 @@ public class MainMenuScene : IScene
 
     public void UpdateGui()
     {
-        var needToInit = lastState != state;
-        lastState = state;
-        switch (state)
+        var needToInit = stateServices.CheckAndClearMainMenuResetFlag();
+        var lastState = stateServices.MainMenuState;
+        var newState = lastState;
+        switch (stateServices.MainMenuState)
         {
             case MainMenuState.Startup:
-                state = startupGui.Render();
+                newState = startupGui.Render();
                 break;
 
             case MainMenuState.Login:
                 if (needToInit) loginGui.Initialize();
-                state = loginGui.Render();
+                newState = loginGui.Render();
                 break;
 
             case MainMenuState.Registration:
                 if (needToInit) registrationGui.Initialize();
-                state = registrationGui.Render();
+                newState = registrationGui.Render();
                 break;
 
             case MainMenuState.PlayerSelection:
                 if (needToInit) playerSelectionGui.Initialize();
-                state = playerSelectionGui.Render();
+                newState = playerSelectionGui.Render();
                 break;
 
             case MainMenuState.PlayerCreation:
                 if (needToInit) createPlayerGui.Initialize();
-                state = createPlayerGui.Render();
+                newState = createPlayerGui.Render();
                 break;
         }
+
+        if (newState != lastState)
+            stateController.SetMainMenuState(eventSender, newState);
     }
 }

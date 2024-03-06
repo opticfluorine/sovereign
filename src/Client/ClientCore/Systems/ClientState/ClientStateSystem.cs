@@ -30,17 +30,22 @@ public class ClientStateSystem : ISystem
 {
     private readonly IEventLoop eventLoop;
     private readonly ClientStateFlagManager flagManager;
+    private readonly MainMenuStateMachine mainMenuStateMachine;
     private readonly PlayerStateManager playerStateManager;
+    private readonly ClientStateMachine stateMachine;
     private readonly WorldEntryDetector worldEntryDetector;
 
     public ClientStateSystem(IEventLoop eventLoop, EventCommunicator eventCommunicator,
         WorldEntryDetector worldEntryDetector, ClientStateFlagManager flagManager,
-        PlayerStateManager playerStateManager)
+        PlayerStateManager playerStateManager, ClientStateMachine stateMachine,
+        MainMenuStateMachine mainMenuStateMachine)
     {
         this.eventLoop = eventLoop;
         this.worldEntryDetector = worldEntryDetector;
         this.flagManager = flagManager;
         this.playerStateManager = playerStateManager;
+        this.stateMachine = stateMachine;
+        this.mainMenuStateMachine = mainMenuStateMachine;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
@@ -57,7 +62,8 @@ public class ClientStateSystem : ISystem
         EventId.Core_WorldManagement_Subscribe,
         EventId.Client_State_WorldSegmentLoaded,
         EventId.Client_State_SetFlag,
-        EventId.Core_Network_Logout
+        EventId.Core_Network_Logout,
+        EventId.Client_State_SetMainMenuState
     };
 
     public int WorkloadEstimate => 10;
@@ -96,7 +102,7 @@ public class ClientStateSystem : ISystem
                     break;
 
                 case EventId.Core_Network_Logout:
-                    playerStateManager.PlayerLogout();
+                    OnLogout();
                     break;
 
                 case EventId.Core_WorldManagement_Subscribe:
@@ -118,9 +124,31 @@ public class ClientStateSystem : ISystem
                     flagManager.SetStateFlagValue(details.Flag, details.NewValue);
                 }
                     break;
+
+                case EventId.Client_State_SetMainMenuState:
+                {
+                    if (ev.EventDetails is not MainMenuEventDetails details)
+                    {
+                        Logger.Error("Received SetMainMenuState event without details.");
+                        break;
+                    }
+
+                    mainMenuStateMachine.SetState(details.MainMenuState);
+                }
+                    break;
             }
         }
 
         return processed;
+    }
+
+    /// <summary>
+    ///     Called when the player logs out to player selection.
+    /// </summary>
+    private void OnLogout()
+    {
+        playerStateManager.PlayerLogout();
+        stateMachine.TryTransition(MainClientState.MainMenu);
+        mainMenuStateMachine.SetState(MainMenuState.PlayerSelection);
     }
 }

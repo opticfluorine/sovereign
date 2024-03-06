@@ -57,4 +57,19 @@ public class ClientStateController
         var ev = new Event(EventId.Client_State_SetFlag, details);
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Sets the main menu state.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="state">New state.</param>
+    public void SetMainMenuState(IEventSender eventSender, MainMenuState state)
+    {
+        var details = new MainMenuEventDetails
+        {
+            MainMenuState = state
+        };
+        var ev = new Event(EventId.Client_State_SetMainMenuState, details);
+        eventSender.SendEvent(ev);
+    }
 }

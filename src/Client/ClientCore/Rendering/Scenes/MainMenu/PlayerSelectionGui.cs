@@ -21,6 +21,7 @@ using ImGuiNET;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Rendering.GUI;
 using Sovereign.ClientCore.Systems.ClientNetwork;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Rest.Data;

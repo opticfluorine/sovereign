@@ -281,6 +281,12 @@ public enum EventId
     /// Associated details: ClientStateFlagEventDetails
     Client_State_SetFlag = 100401,
 
+    /// <summary>
+    ///     Event sent to update the main menu state.
+    /// </summary>
+    /// Associated details: MainMenuStateEventDetails
+    Client_State_SetMainMenuState = 100402,
+
     #endregion Client_State
 
     #endregion Client

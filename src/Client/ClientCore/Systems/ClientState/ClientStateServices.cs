@@ -22,21 +22,28 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 public class ClientStateServices
 {
     private readonly ClientStateFlagManager flagManager;
+    private readonly MainMenuStateMachine mainMenuStateMachine;
     private readonly PlayerStateManager playerStateManager;
     private readonly ClientStateMachine stateMachine;
 
     public ClientStateServices(ClientStateMachine stateMachine, ClientStateFlagManager flagManager,
-        PlayerStateManager playerStateManager)
+        PlayerStateManager playerStateManager, MainMenuStateMachine mainMenuStateMachine)
     {
         this.stateMachine = stateMachine;
         this.flagManager = flagManager;
         this.playerStateManager = playerStateManager;
+        this.mainMenuStateMachine = mainMenuStateMachine;
     }
 
     /// <summary>
     ///     Current state of the top-level client state machine.
     /// </summary>
     public MainClientState State => stateMachine.State;
+
+    /// <summary>
+    ///     Current state of the main menu.
+    /// </summary>
+    public MainMenuState MainMenuState => mainMenuStateMachine.State;
 
     /// <summary>
     ///     Gets the current value of a state flag.
@@ -56,5 +63,16 @@ public class ClientStateServices
     public bool TryGetSelectedPlayer(out ulong playerEntityId)
     {
         return playerStateManager.TryGetPlayerEntityId(out playerEntityId);
+    }
+
+    /// <summary>
+    ///     Gets the value of the main menu reset flag, then clears it.
+    /// </summary>
+    /// <returns>Main menu reset flag.</returns>
+    public bool CheckAndClearMainMenuResetFlag()
+    {
+        var value = mainMenuStateMachine.NeedReset;
+        mainMenuStateMachine.ClearReset();
+        return value;
     }
 }

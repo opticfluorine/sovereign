@@ -20,6 +20,7 @@ using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Systems.ClientNetwork;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
@@ -114,10 +115,7 @@ public class LoginGui
 
         if (ImGui.Button(Login)) DoLogin();
         ImGui.SameLine();
-        if (ImGui.Button(Cancel))
-        {
-            nextState = MainMenuState.Startup;
-        }
+        if (ImGui.Button(Cancel)) nextState = MainMenuState.Startup;
 
         return nextState;
     }

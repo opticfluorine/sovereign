@@ -16,6 +16,7 @@
 
 using System.Numerics;
 using ImGuiNET;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 

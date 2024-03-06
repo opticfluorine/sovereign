@@ -53,7 +53,8 @@ public class EntitySynchronizationSystem : ISystem
         EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_Unsubscribe,
         EventId.Client_Network_PlayerEntitySelected,
-        EventId.Core_WorldManagement_EntityLeaveWorldSegment
+        EventId.Core_WorldManagement_EntityLeaveWorldSegment,
+        EventId.Core_Network_Logout
     };
 
     public int WorkloadEstimate => 50;
@@ -133,10 +134,19 @@ public class EntitySynchronizationSystem : ISystem
 
                     HandleChangeWorldSegment((EntityChangeWorldSegmentEventDetails)ev.EventDetails);
                     break;
+
+                case EventId.Core_Network_Logout:
+                    OnLogout();
+                    break;
             }
         }
 
         return eventsProcessed;
+    }
+
+    private void OnLogout()
+    {
+        unloader.UnsubscribeAll();
     }
 
     private void HandleSubscribe(WorldSegmentSubscriptionEventDetails details)

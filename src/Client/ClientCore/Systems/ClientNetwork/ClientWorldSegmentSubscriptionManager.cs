@@ -70,4 +70,12 @@ public class ClientWorldSegmentSubscriptionManager
             Logger.WarnFormat("Unsubscribe from non-subscribed world segment {0}.", worldSegmentIndex);
         }
     }
+
+    /// <summary>
+    ///     Unsubscribes from all world segments.
+    /// </summary>
+    public void UnsubscribeAll()
+    {
+        foreach (var segmentIndex in subscribedSegments) Unsubscribe(segmentIndex);
+    }
 }

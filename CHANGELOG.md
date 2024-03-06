@@ -4,6 +4,13 @@
 
 ### March
 
+#### 5 March 2024
+
+* Add keyboard binding processing to the various client states. Initially these are hardcoded and only mapped
+  to various debug windows from Dear ImGui, along with the in-game menu via the Escape key.
+* Allow players to log out but keep their account logged in, returning to the player selection screen.
+* Unload all entities from the client upon logout or disconnect. Also clear all world segment subscriptions.
+
 #### 3 March 2024
 
 * Fix issue where client did not properly disconnect due to a logic error.

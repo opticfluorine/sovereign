@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 using Sovereign.ServerCore.Events;
 
@@ -67,7 +68,8 @@ public sealed class AccountsSystem : ISystem
         EventId.Core_Tick,
         EventId.Server_Network_ClientDisconnected,
         EventId.Server_Accounts_SelectPlayer,
-        EventId.Server_Persistence_SynchronizeComplete
+        EventId.Server_Persistence_SynchronizeComplete,
+        EventId.Core_Network_Logout
     };
 
     public int WorkloadEstimate => 10;
@@ -112,6 +114,18 @@ public sealed class AccountsSystem : ISystem
 
                 case EventId.Server_Persistence_SynchronizeComplete:
                     OnSyncComplete();
+                    break;
+
+                case EventId.Core_Network_Logout:
+                {
+                    if (ev.EventDetails is not EntityEventDetails entityDetails)
+                    {
+                        Logger.Error("Received Logout event without details.");
+                        break;
+                    }
+
+                    OnLogout(entityDetails.EntityId);
+                }
                     break;
             }
         }
@@ -162,5 +176,14 @@ public sealed class AccountsSystem : ISystem
     private void OnSyncComplete()
     {
         loginTracker.OnSyncComplete();
+    }
+
+    /// <summary>
+    ///     Called when a player logs out to player selection.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    private void OnLogout(ulong playerEntityId)
+    {
+        loginTracker.Logout(playerEntityId);
     }
 }

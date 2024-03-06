@@ -18,6 +18,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using ImGuiNET;
 using Sovereign.ClientCore.Network.Infrastructure;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
@@ -144,10 +145,7 @@ public class CreatePlayerGui
     private MainMenuState DoError()
     {
         ImGui.Text(errorMessage);
-        if (ImGui.Button(Ok))
-        {
-            createState = CreatePlayerState.Input;
-        }
+        if (ImGui.Button(Ok)) createState = CreatePlayerState.Input;
 
         return MainMenuState.PlayerCreation;
     }

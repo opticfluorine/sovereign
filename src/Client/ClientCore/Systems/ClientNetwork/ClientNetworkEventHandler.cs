@@ -86,10 +86,22 @@ public sealed class ClientNetworkEventHandler
                 HandleEndConnection();
                 break;
 
+            case EventId.Core_Network_Logout:
+                HandleLogout();
+                break;
+
             default:
                 Logger.WarnFormat("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
                 break;
         }
+    }
+
+    /// <summary>
+    ///     Called when a logout occurs.
+    /// </summary>
+    private void HandleLogout()
+    {
+        worldSegmentSubscriptionManager.UnsubscribeAll();
     }
 
     /// <summary>
@@ -125,6 +137,7 @@ public sealed class ClientNetworkEventHandler
     private void HandleEndConnection()
     {
         networkClient.EndConnection();
+        worldSegmentSubscriptionManager.UnsubscribeAll();
     }
 
     /// <summary>

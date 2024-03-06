@@ -14,35 +14,38 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
+namespace Sovereign.ClientCore.Systems.ClientState;
 
 /// <summary>
-///     Internal states for main menu.
+///     State machine governing the main menu.
 /// </summary>
-public enum MainMenuState
+public class MainMenuStateMachine
 {
     /// <summary>
-    ///     Startup menu.
+    ///     Current main menu state.
     /// </summary>
-    Startup,
+    public MainMenuState State { get; private set; } = MainMenuState.Startup;
 
     /// <summary>
-    ///     Login dialog.
+    ///     Flag indicating whether an internal GUI reset is required.
     /// </summary>
-    Login,
+    public bool NeedReset { get; private set; }
 
     /// <summary>
-    ///     Registration dialog.
+    ///     Sets the main menu state.
     /// </summary>
-    Registration,
+    /// <param name="state">Main menu state.</param>
+    public void SetState(MainMenuState state)
+    {
+        State = state;
+        NeedReset = true;
+    }
 
     /// <summary>
-    ///     Player selection dialog.
+    ///     Clears the reset flag.
     /// </summary>
-    PlayerSelection,
-
-    /// <summary>
-    ///     Player creation dialog.
-    /// </summary>
-    PlayerCreation
+    public void ClearReset()
+    {
+        NeedReset = false;
+    }
 }

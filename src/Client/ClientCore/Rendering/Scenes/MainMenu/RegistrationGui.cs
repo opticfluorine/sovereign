@@ -20,6 +20,7 @@ using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network.Infrastructure;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
