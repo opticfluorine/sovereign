@@ -42,8 +42,8 @@ public sealed class SceneManager
     /// </summary>
     public SceneType ActiveSceneType => stateServices.State switch
     {
-        ClientState.MainMenu => SceneType.MainMenu,
-        ClientState.InGame => SceneType.Game,
+        MainClientState.MainMenu => SceneType.MainMenu,
+        MainClientState.InGame => SceneType.Game,
         _ => SceneType.Game
     };
 

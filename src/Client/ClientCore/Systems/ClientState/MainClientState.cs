@@ -19,7 +19,7 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 /// <summary>
 ///     Enumeration of states in the top-level client state machine.
 /// </summary>
-public enum ClientState
+public enum MainClientState
 {
     /// <summary>
     ///     Main menu - the initial state of the client at startup.

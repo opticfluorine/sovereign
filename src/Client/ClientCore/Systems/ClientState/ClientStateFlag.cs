@@ -14,21 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Systems.Network;
-
-namespace Sovereign.ClientCore.Systems.Network;
+namespace Sovereign.ClientCore.Systems.ClientState;
 
 /// <summary>
-///     Provides the set of event IDs that the client will forward to the network.
 /// </summary>
-public class ClientOutboundEventSet : IOutboundEventSet
+public enum ClientStateFlag
 {
-    public HashSet<EventId> EventIdsToSend { get; } = new()
-    {
-        EventId.Core_Ping_Pong,
-        EventId.Core_Movement_RequestMove,
-        EventId.Core_Network_Logout
-    };
+    /// <summary>
+    ///     Flag indicating that the Dear ImGui metrics window should be displayed.
+    /// </summary>
+    ShowImGuiMetrics,
+
+    /// <summary>
+    ///     Flag indicating that the Dear ImGui debug log window should be displayed.
+    /// </summary>
+    ShowImGuiDebugLog,
+
+    /// <summary>
+    ///     Flag indicating that the in-game menu should be displayed.
+    /// </summary>
+    ShowInGameMenu
 }

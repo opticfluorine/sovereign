@@ -91,14 +91,14 @@ public class WorldEntryDetector
     /// </summary>
     private void CheckForDetection()
     {
-        if (stateMachine.State != ClientState.MainMenu) return;
+        if (stateMachine.State != MainClientState.MainMenu) return;
         if (!isPlayerSelected) return;
         if (subscribeCount < MinSubscribeCount) return;
         if (subscribeCount != loadCount) return;
 
         // Detection.
         Logger.Info("Sufficient world data loaded, transitioning to in-game.");
-        if (!stateMachine.TryTransition(ClientState.InGame))
+        if (!stateMachine.TryTransition(MainClientState.InGame))
         {
             Logger.Error("Unexpectedly failed to transition to in-game state.");
         }

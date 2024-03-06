@@ -14,21 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Systems.Network;
+using Sovereign.ClientCore.Events;
 
-namespace Sovereign.ClientCore.Systems.Network;
+namespace Sovereign.ClientCore.Systems.Input;
 
 /// <summary>
-///     Provides the set of event IDs that the client will forward to the network.
+///     Interface for input handlers.
 /// </summary>
-public class ClientOutboundEventSet : IOutboundEventSet
+public interface IInputHandler
 {
-    public HashSet<EventId> EventIdsToSend { get; } = new()
-    {
-        EventId.Core_Ping_Pong,
-        EventId.Core_Movement_RequestMove,
-        EventId.Core_Network_Logout
-    };
+    /// <summary>
+    ///     Handles an input event.
+    /// </summary>
+    /// <param name="details">Keyboard event details.</param>
+    /// <param name="isKeyUp">If true, key up event; key down otherwise.</param>
+    /// <param name="oldState">Previous state of the affected key.</param>
+    void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState);
 }

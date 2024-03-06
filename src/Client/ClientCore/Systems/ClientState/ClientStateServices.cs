@@ -21,15 +21,40 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 /// </summary>
 public class ClientStateServices
 {
+    private readonly ClientStateFlagManager flagManager;
+    private readonly PlayerStateManager playerStateManager;
     private readonly ClientStateMachine stateMachine;
 
-    public ClientStateServices(ClientStateMachine stateMachine)
+    public ClientStateServices(ClientStateMachine stateMachine, ClientStateFlagManager flagManager,
+        PlayerStateManager playerStateManager)
     {
         this.stateMachine = stateMachine;
+        this.flagManager = flagManager;
+        this.playerStateManager = playerStateManager;
     }
 
     /// <summary>
     ///     Current state of the top-level client state machine.
     /// </summary>
-    public ClientState State => stateMachine.State;
+    public MainClientState State => stateMachine.State;
+
+    /// <summary>
+    ///     Gets the current value of a state flag.
+    /// </summary>
+    /// <param name="flag">Flag.</param>
+    /// <returns>Current value.</returns>
+    public bool GetStateFlagValue(ClientStateFlag flag)
+    {
+        return flagManager.GetStateFlagValue(flag);
+    }
+
+    /// <summary>
+    ///     Gets the entity ID of the currently selected player, if any.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID, only valid if method returns true.</param>
+    /// <returns>true if a player has been selected, false otherwise.</returns>
+    public bool TryGetSelectedPlayer(out ulong playerEntityId)
+    {
+        return playerStateManager.TryGetPlayerEntityId(out playerEntityId);
+    }
 }

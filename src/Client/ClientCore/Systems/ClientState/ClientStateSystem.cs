@@ -15,7 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Castle.Core.Logging;
+using Sovereign.ClientCore.Events;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 
 namespace Sovereign.ClientCore.Systems.ClientState;
@@ -26,17 +29,24 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 public class ClientStateSystem : ISystem
 {
     private readonly IEventLoop eventLoop;
+    private readonly ClientStateFlagManager flagManager;
+    private readonly PlayerStateManager playerStateManager;
     private readonly WorldEntryDetector worldEntryDetector;
 
     public ClientStateSystem(IEventLoop eventLoop, EventCommunicator eventCommunicator,
-        WorldEntryDetector worldEntryDetector)
+        WorldEntryDetector worldEntryDetector, ClientStateFlagManager flagManager,
+        PlayerStateManager playerStateManager)
     {
         this.eventLoop = eventLoop;
         this.worldEntryDetector = worldEntryDetector;
+        this.flagManager = flagManager;
+        this.playerStateManager = playerStateManager;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 
@@ -45,7 +55,9 @@ public class ClientStateSystem : ISystem
         EventId.Client_Network_BeginConnection,
         EventId.Client_Network_PlayerEntitySelected,
         EventId.Core_WorldManagement_Subscribe,
-        EventId.Client_State_WorldSegmentLoaded
+        EventId.Client_State_WorldSegmentLoaded,
+        EventId.Client_State_SetFlag,
+        EventId.Core_Network_Logout
     };
 
     public int WorkloadEstimate => 10;
@@ -71,7 +83,20 @@ public class ClientStateSystem : ISystem
                     break;
 
                 case EventId.Client_Network_PlayerEntitySelected:
+                {
+                    if (ev.EventDetails is not EntityEventDetails details)
+                    {
+                        Logger.Error("Received OnPlayerSelected without details.");
+                        break;
+                    }
+
+                    playerStateManager.PlayerSelected(details.EntityId);
+                }
                     worldEntryDetector.OnPlayerSelected();
+                    break;
+
+                case EventId.Core_Network_Logout:
+                    playerStateManager.PlayerLogout();
                     break;
 
                 case EventId.Core_WorldManagement_Subscribe:
@@ -80,6 +105,18 @@ public class ClientStateSystem : ISystem
 
                 case EventId.Client_State_WorldSegmentLoaded:
                     worldEntryDetector.OnSegmentLoaded();
+                    break;
+
+                case EventId.Client_State_SetFlag:
+                {
+                    if (ev.EventDetails is not ClientStateFlagEventDetails details)
+                    {
+                        Logger.Error("Received SetFlag event without details.");
+                        break;
+                    }
+
+                    flagManager.SetStateFlagValue(details.Flag, details.NewValue);
+                }
                     break;
             }
         }

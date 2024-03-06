@@ -14,21 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Systems.Network;
 
-namespace Sovereign.ClientCore.Systems.Network;
+namespace Sovereign.ClientCore.Events;
 
 /// <summary>
-///     Provides the set of event IDs that the client will forward to the network.
+///     Event details for updating a client state flag.
 /// </summary>
-public class ClientOutboundEventSet : IOutboundEventSet
+public class ClientStateFlagEventDetails : IEventDetails
 {
-    public HashSet<EventId> EventIdsToSend { get; } = new()
-    {
-        EventId.Core_Ping_Pong,
-        EventId.Core_Movement_RequestMove,
-        EventId.Core_Network_Logout
-    };
+    /// <summary>
+    ///     Flag to be updated.
+    /// </summary>
+    public ClientStateFlag Flag { get; set; }
+
+    /// <summary>
+    ///     New value for the flag.
+    /// </summary>
+    public bool NewValue { get; set; }
 }

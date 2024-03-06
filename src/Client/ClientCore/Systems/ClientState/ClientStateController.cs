@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.ClientCore.Events;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -37,6 +38,23 @@ public class ClientStateController
             SegmentIndex = segmentIndex
         };
         var ev = new Event(EventId.Client_State_WorldSegmentLoaded, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Sets a state flag.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="flag">State flag.</param>
+    /// <param name="newValue">New value.</param>
+    public void SetStateFlag(IEventSender eventSender, ClientStateFlag flag, bool newValue)
+    {
+        var details = new ClientStateFlagEventDetails
+        {
+            Flag = flag,
+            NewValue = newValue
+        };
+        var ev = new Event(EventId.Client_State_SetFlag, details);
         eventSender.SendEvent(ev);
     }
 }

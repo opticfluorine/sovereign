@@ -14,32 +14,35 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Concurrent;
+
 namespace Sovereign.ClientCore.Systems.ClientState;
 
 /// <summary>
-///     Top-level client state machine.
+///     Manages the set of client state flags and their values.
 /// </summary>
-public class ClientStateMachine
+public class ClientStateFlagManager
 {
-    /// <summary>
-    ///     Current client state.
-    /// </summary>
-    public MainClientState State { get; private set; } = MainClientState.MainMenu;
+    private readonly ConcurrentDictionary<ClientStateFlag, bool> flags = new();
 
     /// <summary>
-    ///     Attempts a state transition.
+    ///     Gets the current value of a state flag, initializing the flag to false if it hasn't already been set.
     /// </summary>
-    /// <param name="desiredState">Desired target state.</param>
-    /// <returns>true if successful, false otherwise.</returns>
-    public bool TryTransition(MainClientState desiredState)
+    /// <param name="flag">Flag.</param>
+    /// <returns>Flag value.</returns>
+    public bool GetStateFlagValue(ClientStateFlag flag)
     {
-        var valid = (State, desiredState) switch
-        {
-            (MainClientState.MainMenu, MainClientState.InGame) => true,
-            (MainClientState.InGame, MainClientState.MainMenu) => true,
-            _ => false
-        };
-        if (valid) State = desiredState;
-        return valid;
+        flags.TryAdd(flag, false);
+        return flags[flag];
+    }
+
+    /// <summary>
+    ///     Sets the value of a state flag.
+    /// </summary>
+    /// <param name="flag">Flag.</param>
+    /// <param name="value">Flag value.</param>
+    public void SetStateFlagValue(ClientStateFlag flag, bool value)
+    {
+        flags[flag] = value;
     }
 }

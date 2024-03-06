@@ -148,6 +148,16 @@ public enum EventId
 
     #endregion WorldManagement
 
+    #region Network
+
+    /// <summary>
+    ///     Sent from client to server to log out of the current player and return to player selection.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Core_Network_Logout = 700,
+
+    #endregion Network
+
     #endregion Core
 
     #region Client
@@ -264,6 +274,12 @@ public enum EventId
     /// </summary>
     /// Associated details: WorldSegmentEventDetails
     Client_State_WorldSegmentLoaded = 100400,
+
+    /// <summary>
+    ///     Event sent to update the state of an individual client state flag.
+    /// </summary>
+    /// Associated details: ClientStateFlagEventDetails
+    Client_State_SetFlag = 100401,
 
     #endregion Client_State
 

@@ -20,6 +20,7 @@ using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.ClientCore.Rendering.Scenes.Game.World;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
@@ -34,6 +35,8 @@ public sealed class GameScene : IScene
     private readonly RenderCamera camera;
     private readonly IEngineConfiguration engineConfiguration;
     private readonly MainDisplay mainDisplay;
+    private readonly InGameMenuGui menuGui;
+    private readonly ClientStateServices stateServices;
     private readonly ISystemTimer systemTimer;
     private readonly DisplayViewport viewport;
     private readonly WorldVertexSequencer worldVertexSequencer;
@@ -51,7 +54,7 @@ public sealed class GameScene : IScene
 
     public GameScene(ISystemTimer systemTimer, IEngineConfiguration engineConfiguration,
         RenderCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
-        WorldVertexSequencer worldVertexSequencer)
+        WorldVertexSequencer worldVertexSequencer, ClientStateServices stateServices, InGameMenuGui menuGui)
     {
         this.systemTimer = systemTimer;
         this.engineConfiguration = engineConfiguration;
@@ -59,6 +62,8 @@ public sealed class GameScene : IScene
         this.viewport = viewport;
         this.mainDisplay = mainDisplay;
         this.worldVertexSequencer = worldVertexSequencer;
+        this.stateServices = stateServices;
+        this.menuGui = menuGui;
     }
 
     public SceneType SceneType => SceneType.Game;
@@ -92,6 +97,7 @@ public sealed class GameScene : IScene
 
     public void UpdateGui()
     {
+        if (stateServices.GetStateFlagValue(ClientStateFlag.ShowInGameMenu)) menuGui.Render();
     }
 
     /// <summary>

@@ -28,5 +28,7 @@ public class ClientStateInstaller : IWindsorInstaller
         container.Register(Component.For<ClientStateServices>().LifestyleSingleton());
         container.Register(Component.For<WorldEntryDetector>().LifestyleSingleton());
         container.Register(Component.For<ClientStateController>().LifestyleSingleton());
+        container.Register(Component.For<ClientStateFlagManager>().LifestyleSingleton());
+        container.Register(Component.For<PlayerStateManager>().LifestyleSingleton());
     }
 }

@@ -16,7 +16,9 @@
  */
 
 using System;
+using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Scenes;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 
 namespace Sovereign.VeldridRenderer.Rendering;
@@ -27,15 +29,17 @@ namespace Sovereign.VeldridRenderer.Rendering;
 public class VeldridSceneConsumer : ISceneConsumer, IDisposable
 {
     private readonly GameSceneConsumer gameSceneConsumer;
+    private readonly ClientStateServices stateServices;
 
     /// <summary>
     ///     Dispose flag.
     /// </summary>
     private bool isDisposed;
 
-    public VeldridSceneConsumer(GameSceneConsumer gameSceneConsumer)
+    public VeldridSceneConsumer(GameSceneConsumer gameSceneConsumer, ClientStateServices stateServices)
     {
         this.gameSceneConsumer = gameSceneConsumer;
+        this.stateServices = stateServices;
     }
 
     public void Dispose()
@@ -58,7 +62,15 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
         }
 
         // General processing.
-        if (scene.RenderGui) scene.UpdateGui();
+        if (scene.RenderGui)
+        {
+            // Global debug menus.
+            if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiMetrics)) ImGui.ShowMetricsWindow();
+            if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiDebugLog)) ImGui.ShowDebugLogWindow();
+
+            // State specific updates.
+            scene.UpdateGui();
+        }
     }
 
     /// <summary>

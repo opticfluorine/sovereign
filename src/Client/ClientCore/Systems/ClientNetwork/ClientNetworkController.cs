@@ -15,8 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Castle.Core.Logging;
 using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Network;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
@@ -27,6 +29,15 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork;
 /// </summary>
 public sealed class ClientNetworkController
 {
+    private readonly ClientStateServices stateServices;
+
+    public ClientNetworkController(ClientStateServices stateServices)
+    {
+        this.stateServices = stateServices;
+    }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
     /// <summary>
     ///     Sends an event announcing that the connection has been lost.
     /// </summary>
@@ -58,6 +69,26 @@ public sealed class ClientNetworkController
     public void EndConnection(IEventSender eventSender)
     {
         var ev = new Event(EventId.Client_Network_EndConnection);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Logs out to player selection.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    public void LogoutPlayer(IEventSender eventSender)
+    {
+        if (!stateServices.TryGetSelectedPlayer(out var playerEntityId))
+        {
+            Logger.Error("No player is selected.");
+            return;
+        }
+
+        var details = new EntityEventDetails
+        {
+            EntityId = playerEntityId
+        };
+        var ev = new Event(EventId.Core_Network_Logout, details);
         eventSender.SendEvent(ev);
     }
 

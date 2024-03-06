@@ -16,8 +16,8 @@
  */
 
 using Castle.Core.Logging;
-using SDL2;
 using Sovereign.ClientCore.Events;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Systems.Input;
@@ -27,21 +27,34 @@ namespace Sovereign.ClientCore.Systems.Input;
 /// </summary>
 public class KeyboardEventHandler
 {
+    private readonly GlobalKeyboardShortcuts globalKeyboardShortcuts;
+    private readonly InGameInputHandler inGameInputHandler;
+
     /// <summary>
     ///     Keyboard state.
     /// </summary>
     private readonly KeyboardState keyboardState;
+
+    private readonly NullInputHandler nullInputHandler;
 
     /// <summary>
     ///     Player input movement mapper.
     /// </summary>
     private readonly PlayerInputMovementMapper playerInputMovementMapper;
 
+    private readonly ClientStateServices stateServices;
+
     public KeyboardEventHandler(KeyboardState keyboardState,
-        PlayerInputMovementMapper playerInputMovementMapper)
+        PlayerInputMovementMapper playerInputMovementMapper,
+        ClientStateServices stateServices, InGameInputHandler inGameInputHandler,
+        NullInputHandler nullInputHandler, GlobalKeyboardShortcuts globalKeyboardShortcuts)
     {
         this.keyboardState = keyboardState;
         this.playerInputMovementMapper = playerInputMovementMapper;
+        this.stateServices = stateServices;
+        this.inGameInputHandler = inGameInputHandler;
+        this.nullInputHandler = nullInputHandler;
+        this.globalKeyboardShortcuts = globalKeyboardShortcuts;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -80,19 +93,7 @@ public class KeyboardEventHandler
         var oldState = keyboardState[details.Key];
         keyboardState.KeyDown(details.Key);
 
-        /* Perform additional processing. */
-        switch (details.Key)
-        {
-            /* Direction keys. */
-            case SDL.SDL_Keycode.SDLK_UP:
-            case SDL.SDL_Keycode.SDLK_DOWN:
-            case SDL.SDL_Keycode.SDLK_LEFT:
-            case SDL.SDL_Keycode.SDLK_RIGHT:
-                HandleDirectionKeyEvent(ev, oldState, true);
-                break;
-
-            /* Ignore keys that don't do anything for now. */
-        }
+        DoStateSpecificProcessing(details, false, oldState);
     }
 
     /// <summary>
@@ -113,34 +114,24 @@ public class KeyboardEventHandler
         var oldState = keyboardState[details.Key];
         keyboardState.KeyUp(details.Key);
 
-        /* Perform additional processing. */
-        switch (details.Key)
-        {
-            /* Direction keys. */
-            case SDL.SDL_Keycode.SDLK_UP:
-            case SDL.SDL_Keycode.SDLK_DOWN:
-            case SDL.SDL_Keycode.SDLK_LEFT:
-            case SDL.SDL_Keycode.SDLK_RIGHT:
-                HandleDirectionKeyEvent(ev, oldState, false);
-                break;
-
-            /* Ignore keys that don't do anything for now. */
-        }
+        globalKeyboardShortcuts.OnKeyUp(details.Key);
+        DoStateSpecificProcessing(details, true, oldState);
     }
 
     /// <summary>
-    ///     Handles direction key events.
+    ///     Performs additional keyboard input processing based on the current client state.
     /// </summary>
-    /// <param name="ev">Direction key event.</param>
-    /// <param name="oldState">Old state of the key.</param>
-    /// <param name="newState">New state of the key.</param>
-    private void HandleDirectionKeyEvent(Event ev, bool oldState, bool newState)
+    /// <param name="details">Keyboard event details.</param>
+    /// <param name="isKeyUp">If true, treat as a key up event; key down event otherwise.</param>
+    /// <param name="oldState">Previous state of the affected key (true is key down).</param>
+    private void DoStateSpecificProcessing(KeyEventDetails details, bool isKeyUp, bool oldState)
     {
-        /* Only update movement if the state has changed. */
-        if (oldState != newState)
-            playerInputMovementMapper.UpdateMovement(keyboardState[SDL.SDL_Keycode.SDLK_UP],
-                keyboardState[SDL.SDL_Keycode.SDLK_DOWN],
-                keyboardState[SDL.SDL_Keycode.SDLK_LEFT],
-                keyboardState[SDL.SDL_Keycode.SDLK_RIGHT]);
+        IInputHandler handler = stateServices.State switch
+        {
+            MainClientState.MainMenu => nullInputHandler,
+            MainClientState.InGame => inGameInputHandler,
+            _ => nullInputHandler
+        };
+        handler.HandleKeyboardEvent(details, isKeyUp, oldState);
     }
 }
