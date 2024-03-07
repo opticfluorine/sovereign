@@ -4,6 +4,13 @@
 
 ### March
 
+#### 6 March 2024
+
+* Add player debug window to the in-game scene, toggled via the F2 key, for viewing local player data
+  at runtime.
+* Fix issue in `WorldSegmentResolver` where negative segments had an off-by-one error in their resolution
+  from position coordinates due to an arithmetic error in the direction of rounding.
+
 #### 5 March 2024
 
 * Add keyboard binding processing to the various client states. Initially these are hardcoded and only mapped

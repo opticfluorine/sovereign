@@ -93,9 +93,10 @@ public sealed class CommonGuiManager : IDisposable
     /// </remarks>
     public void Initialize()
     {
-        // Initialize ImGui.
+        // Initialize ImGui, configure global style.
         context = ImGui.CreateContext();
         ImGui.StyleColorsDark();
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
 
         // Configure input settings.
         var io = ImGui.GetIO();

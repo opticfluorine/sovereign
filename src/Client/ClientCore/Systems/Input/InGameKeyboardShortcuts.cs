@@ -43,6 +43,7 @@ public class InGameKeyboardShortcuts
 
         // For now the shortcuts are hardcoded.
         shortcutTable[SDL.SDL_Keycode.SDLK_ESCAPE] = () => Toggle(ClientStateFlag.ShowInGameMenu);
+        shortcutTable[SDL.SDL_Keycode.SDLK_F2] = () => Toggle(ClientStateFlag.ShowPlayerDebug);
     }
 
     /// <summary>
@@ -51,8 +52,8 @@ public class InGameKeyboardShortcuts
     /// <param name="key">Released key.</param>
     public void OnKeyUp(SDL.SDL_Keycode key)
     {
-        if (shortcutTable.ContainsKey(key))
-            shortcutTable[key].Invoke();
+        if (shortcutTable.TryGetValue(key, out var action))
+            action.Invoke();
     }
 
     /// <summary>

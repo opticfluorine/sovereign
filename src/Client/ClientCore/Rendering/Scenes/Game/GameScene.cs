@@ -19,6 +19,7 @@ using System.Numerics;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Debug;
 using Sovereign.ClientCore.Rendering.Scenes.Game.World;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Configuration;
@@ -36,6 +37,7 @@ public sealed class GameScene : IScene
     private readonly IEngineConfiguration engineConfiguration;
     private readonly MainDisplay mainDisplay;
     private readonly InGameMenuGui menuGui;
+    private readonly PlayerDebugGui playerDebugGui;
     private readonly ClientStateServices stateServices;
     private readonly ISystemTimer systemTimer;
     private readonly DisplayViewport viewport;
@@ -54,7 +56,8 @@ public sealed class GameScene : IScene
 
     public GameScene(ISystemTimer systemTimer, IEngineConfiguration engineConfiguration,
         RenderCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
-        WorldVertexSequencer worldVertexSequencer, ClientStateServices stateServices, InGameMenuGui menuGui)
+        WorldVertexSequencer worldVertexSequencer, ClientStateServices stateServices, InGameMenuGui menuGui,
+        PlayerDebugGui playerDebugGui)
     {
         this.systemTimer = systemTimer;
         this.engineConfiguration = engineConfiguration;
@@ -64,6 +67,7 @@ public sealed class GameScene : IScene
         this.worldVertexSequencer = worldVertexSequencer;
         this.stateServices = stateServices;
         this.menuGui = menuGui;
+        this.playerDebugGui = playerDebugGui;
     }
 
     public SceneType SceneType => SceneType.Game;
@@ -97,6 +101,8 @@ public sealed class GameScene : IScene
 
     public void UpdateGui()
     {
+        UpdateDebugGui();
+
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowInGameMenu)) menuGui.Render();
     }
 
@@ -108,5 +114,13 @@ public sealed class GameScene : IScene
         systemTime = systemTimer.GetTime();
         timeSinceTick = systemTime % engineConfiguration.EventTickInterval
                         * UnitConversions.UsToS;
+    }
+
+    /// <summary>
+    ///     Renders any open in-game debug windows.
+    /// </summary>
+    private void UpdateDebugGui()
+    {
+        if (stateServices.GetStateFlagValue(ClientStateFlag.ShowPlayerDebug)) playerDebugGui.Render();
     }
 }

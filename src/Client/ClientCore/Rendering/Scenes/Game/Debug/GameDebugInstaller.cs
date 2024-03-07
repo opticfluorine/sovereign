@@ -14,29 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Systems.ClientState;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-/// <summary>
-/// </summary>
-public enum ClientStateFlag
+namespace Sovereign.ClientCore.Rendering.Scenes.Game.Debug;
+
+public class GameDebugInstaller : IWindsorInstaller
 {
-    /// <summary>
-    ///     Flag indicating that the Dear ImGui metrics window should be displayed.
-    /// </summary>
-    ShowImGuiMetrics,
-
-    /// <summary>
-    ///     Flag indicating that the Dear ImGui debug log window should be displayed.
-    /// </summary>
-    ShowImGuiDebugLog,
-
-    /// <summary>
-    ///     Flag indicating that the in-game menu should be displayed.
-    /// </summary>
-    ShowInGameMenu,
-
-    /// <summary>
-    ///     Flag indicating that the in-game player debug window should be displayed.
-    /// </summary>
-    ShowPlayerDebug
+    public void Install(IWindsorContainer container, IConfigurationStore store)
+    {
+        container.Register(Component.For<PlayerDebugGui>().LifestyleSingleton());
+    }
 }
