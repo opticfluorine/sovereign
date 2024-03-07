@@ -75,7 +75,8 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     {
         var gridPos = new GridPosition(position);
         var set = GetSetForPosition(gridPos);
-        set?.Add(entityId);
+        set.Add(entityId);
+        knownPositions[entityId] = gridPos;
     }
 
     /// <summary>
@@ -83,7 +84,7 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     /// </summary>
     /// <param name="position">Grid position.</param>
     /// <returns>Set.</returns>
-    private ISet<ulong>? GetSetForPosition(GridPosition position)
+    private ISet<ulong> GetSetForPosition(GridPosition position)
     {
         var exists = entitiesByPosition.TryGetValue(position, out var set);
         if (!exists || set == null)
