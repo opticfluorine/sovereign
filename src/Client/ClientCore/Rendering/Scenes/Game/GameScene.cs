@@ -35,7 +35,7 @@ public sealed class GameScene : IScene
 {
     private readonly RenderCamera camera;
     private readonly IEngineConfiguration engineConfiguration;
-    private readonly MainDisplay mainDisplay;
+    private readonly EntityDebugGui entityDebugGui;
     private readonly InGameMenuGui menuGui;
     private readonly PlayerDebugGui playerDebugGui;
     private readonly ClientStateServices stateServices;
@@ -57,17 +57,17 @@ public sealed class GameScene : IScene
     public GameScene(ISystemTimer systemTimer, IEngineConfiguration engineConfiguration,
         RenderCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
         WorldVertexSequencer worldVertexSequencer, ClientStateServices stateServices, InGameMenuGui menuGui,
-        PlayerDebugGui playerDebugGui)
+        PlayerDebugGui playerDebugGui, EntityDebugGui entityDebugGui)
     {
         this.systemTimer = systemTimer;
         this.engineConfiguration = engineConfiguration;
         this.camera = camera;
         this.viewport = viewport;
-        this.mainDisplay = mainDisplay;
         this.worldVertexSequencer = worldVertexSequencer;
         this.stateServices = stateServices;
         this.menuGui = menuGui;
         this.playerDebugGui = playerDebugGui;
+        this.entityDebugGui = entityDebugGui;
     }
 
     public SceneType SceneType => SceneType.Game;
@@ -122,5 +122,6 @@ public sealed class GameScene : IScene
     private void UpdateDebugGui()
     {
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowPlayerDebug)) playerDebugGui.Render();
+        if (stateServices.GetStateFlagValue(ClientStateFlag.ShowEntityDebug)) entityDebugGui.Render();
     }
 }

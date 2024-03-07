@@ -19,6 +19,9 @@ using System.Numerics;
 using ImGuiNET;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.Block.Components;
+using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.EngineCore.World;
 
@@ -30,7 +33,10 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Debug;
 public class PlayerDebugGui
 {
     private readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly BlockGridPositionIndexer blocks;
     private readonly DrawableTagCollection drawables;
+    private readonly MaterialModifierComponentCollection materialModifiers;
+    private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly PlayerCharacterTagCollection players;
@@ -43,7 +49,8 @@ public class PlayerDebugGui
         PositionComponentCollection positions, VelocityComponentCollection velocities,
         AnimatedSpriteComponentCollection animatedSprites, WorldSegmentResolver worldSegmentResolver,
         DrawableTagCollection drawables, PlayerCharacterTagCollection players,
-        OrientationComponentCollection orientations)
+        OrientationComponentCollection orientations, BlockGridPositionIndexer blocks,
+        MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers)
     {
         this.stateServices = stateServices;
         this.names = names;
@@ -54,6 +61,9 @@ public class PlayerDebugGui
         this.drawables = drawables;
         this.players = players;
         this.orientations = orientations;
+        this.blocks = blocks;
+        this.materials = materials;
+        this.materialModifiers = materialModifiers;
     }
 
     /// <summary>
@@ -68,7 +78,7 @@ public class PlayerDebugGui
         {
             if (ImGui.BeginTable("debugPlayerInfo", 2))
             {
-                AddValueRow("Player ID:", playerEntityId);
+                AddValueRow("Player ID:", $"{playerEntityId:X}");
                 AddComponentRow("Player Name:", playerEntityId, names);
                 AddComponentRow("Player Character:", playerEntityId, players);
                 AddComponentRow("Drawable:", playerEntityId, drawables);
@@ -79,6 +89,8 @@ public class PlayerDebugGui
                 AddComponentRow("World Segment:", playerEntityId, positions,
                     x => worldSegmentResolver.GetWorldSegmentForPosition(x).ToString());
 
+                AddBelowBlockInfo(playerEntityId);
+
                 ImGui.EndTable();
             }
         }
@@ -88,6 +100,30 @@ public class PlayerDebugGui
         }
 
         ImGui.End();
+    }
+
+    /// <summary>
+    ///     Adds inforamtion about the block below the player, if any.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    private void AddBelowBlockInfo(ulong playerEntityId)
+    {
+        if (!positions.HasComponentForEntity(playerEntityId)) return;
+
+        var blockPos = new GridPosition(positions[playerEntityId]);
+        var blocksBelow = blocks.GetEntitiesAtPosition(blockPos);
+        if (blocksBelow is null)
+        {
+            AddValueRow("Below Block ID:", "[None]");
+            return;
+        }
+
+        foreach (var block in blocksBelow)
+        {
+            AddValueRow("Below Block ID:", $"{block:X}");
+            AddComponentRow("Below Block Material:", block, materials);
+            AddComponentRow("Below Block Material Mod:", block, materialModifiers);
+        }
     }
 
     /// <summary>

@@ -25,5 +25,6 @@ public class GameDebugInstaller : IWindsorInstaller
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
         container.Register(Component.For<PlayerDebugGui>().LifestyleSingleton());
+        container.Register(Component.For<EntityDebugGui>().LifestyleSingleton());
     }
 }

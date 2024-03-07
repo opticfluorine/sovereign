@@ -4,6 +4,10 @@
 
 ### March
 
+#### 7 March 2024
+
+* Add a basic entity debug window (toggle via F3 key) for examining entities and components at runtime.
+
 #### 6 March 2024
 
 * Add player debug window to the in-game scene, toggled via the F2 key, for viewing local player data
