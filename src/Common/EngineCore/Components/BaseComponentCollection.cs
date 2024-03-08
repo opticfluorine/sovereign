@@ -307,10 +307,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     ///     Determines whether a component is associated with the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
+    /// <param name="lookback">Whether to consider newly removed components in the same tick.</param>
     /// <returns>true if a component is associated, false otherwise.</returns>
-    public bool HasComponentForEntity(ulong entityId)
+    public bool HasComponentForEntity(ulong entityId, bool lookback = false)
     {
-        return entityToComponentMap.ContainsKey(entityId) && !pendingReclaims.Contains(entityId);
+        return entityToComponentMap.ContainsKey(entityId) && (lookback || !pendingReclaims.Contains(entityId));
     }
 
     /// <summary>

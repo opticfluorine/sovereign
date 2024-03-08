@@ -121,8 +121,9 @@ CREATE INDEX Position_Xyz_Index ON Position (x, y, z);
 
 CREATE TABLE PlayerCharacter
 (
-    id    BIGINT PRIMARY KEY NOT NULL,
-    value BOOLEAN            NOT NULL,
+    id      BIGINT PRIMARY KEY NOT NULL,
+    value   BOOLEAN            NOT NULL,
+    deleted BOOLEAN            NOT NULL DEFAULT FALSE,
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 

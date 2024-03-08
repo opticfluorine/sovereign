@@ -51,6 +51,7 @@ public class PlayerSelectionGui
     private readonly IEventSender eventSender;
     private readonly GuiExtensions guiExtensions;
     private readonly ClientNetworkController networkController;
+    private Task<Option<DeletePlayerResponse, string>>? deletionTask;
     private string errorMessage = "";
     private Task<Option<ListPlayersResponse, string>>? playerListRequest;
 
@@ -101,6 +102,7 @@ public class PlayerSelectionGui
             PlayerSelectionState.Error => DoError(),
             PlayerSelectionState.Input => DoInput(),
             PlayerSelectionState.Selected => DoSelected(),
+            PlayerSelectionState.Deleting => DoDeleting(),
             _ => DoLoading()
         };
 
@@ -244,10 +246,8 @@ public class PlayerSelectionGui
     /// <param name="player">Player to delete.</param>
     private void OnDelete(PlayerInfo player)
     {
-        ImGui.BeginPopup("Not Supported");
-        ImGui.Text("Player deletion is not currently supported.");
-        if (ImGui.Button(Ok)) ImGui.CloseCurrentPopup();
-        ImGui.EndPopup();
+        deletionTask = client.DeletePlayerAsync(player.Id);
+        selectionState = PlayerSelectionState.Deleting;
     }
 
     /// <summary>
@@ -311,6 +311,42 @@ public class PlayerSelectionGui
     }
 
     /// <summary>
+    ///     Renders the GUI while deletion is in progress.
+    /// </summary>
+    /// <returns></returns>
+    private MainMenuState DoDeleting()
+    {
+        if (deletionTask == null)
+        {
+            errorMessage = "deletionTask is null.";
+            selectionState = PlayerSelectionState.Error;
+        }
+        else if (deletionTask.IsCompletedSuccessfully)
+        {
+            if (deletionTask.Result.HasSecond)
+            {
+                errorMessage = deletionTask.Result.Second;
+                selectionState = PlayerSelectionState.Error;
+            }
+            else
+            {
+                DoLoading();
+            }
+        }
+        else if (deletionTask.IsFaulted)
+        {
+            errorMessage = deletionTask.Exception == null ? "Unknown error." : deletionTask.Exception.Message;
+            selectionState = PlayerSelectionState.Error;
+        }
+        else
+        {
+            ImGui.Text("Deleting player...");
+        }
+
+        return MainMenuState.PlayerSelection;
+    }
+
+    /// <summary>
     ///     Asynchronously loads selectable players.
     /// </summary>
     private void LoadSelections()
@@ -342,6 +378,11 @@ public class PlayerSelectionGui
         /// <summary>
         ///     Player selected and world entry is in progress.
         /// </summary>
-        Selected
+        Selected,
+
+        /// <summary>
+        ///     Player deletion in progress.
+        /// </summary>
+        Deleting
     }
 }

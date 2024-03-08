@@ -36,7 +36,7 @@ public class SqliteListPlayersQuery : IListPlayersQuery
           INNER JOIN Name N ON AC.id = N.id
           INNER JOIN PlayerCharacter PC ON AC.id = PC.id
           INNER JOIN AnimatedSprite A ON AC.id = A.id
-          WHERE AC.account_id = @AccountId AND PC.value = TRUE";
+          WHERE AC.account_id = @AccountId AND PC.value = TRUE AND PC.deleted = FALSE";
 
     private readonly SqliteConnection connection;
 

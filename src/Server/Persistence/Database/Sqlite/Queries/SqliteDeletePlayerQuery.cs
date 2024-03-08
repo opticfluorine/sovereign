@@ -1,5 +1,5 @@
-﻿// Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Sovereign Engine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,34 +19,31 @@ using Sovereign.Persistence.Database.Queries;
 
 namespace Sovereign.Persistence.Database.Sqlite.Queries;
 
-public class SqlitePlayerExistsQuery : IPlayerExistsQuery
+/// <summary>
+///     DeletePlayerQuery implementation for SQLite.
+/// </summary>
+public class SqliteDeletePlayerQuery : IDeletePlayerQuery
 {
     /// <summary>
-    ///     SQL query to execute
+    ///     SQL query.
     /// </summary>
-    private const string query =
-        @"SELECT EXISTS(SELECT 1 FROM Name INNER JOIN PlayerCharacter PC ON Name.id = PC.id 
-            WHERE Name.value = @Name AND PC.deleted = FALSE)";
+    private const string Query = @"UPDATE PlayerCharacter SET deleted = TRUE WHERE id = @Id";
 
     private readonly SqliteConnection dbConnection;
 
-    public SqlitePlayerExistsQuery(SqliteConnection dbConnection)
+    public SqliteDeletePlayerQuery(SqliteConnection dbConnection)
     {
         this.dbConnection = dbConnection;
     }
 
-    public bool PlayerExists(string name)
+    public void DeletePlayer(ulong playerEntityId)
     {
-        using var cmd = new SqliteCommand(query, dbConnection);
+        using var cmd = new SqliteCommand(Query, dbConnection);
 
-        var param = new SqliteParameter("Name", name);
-        param.SqliteType = SqliteType.Text;
+        var param = new SqliteParameter("Id", playerEntityId);
+        param.SqliteType = SqliteType.Integer;
         cmd.Parameters.Add(param);
 
-        var exists = false;
-        using var reader = new QueryReader(cmd).Reader;
-        if (reader.Read()) exists = reader.GetBoolean(0);
-
-        return exists;
+        cmd.ExecuteScalar();
     }
 }

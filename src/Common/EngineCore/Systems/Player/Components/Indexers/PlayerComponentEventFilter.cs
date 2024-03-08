@@ -39,6 +39,6 @@ public class PlayerComponentEventFilter<T> : BaseComponentEventFilter<T>
 
     protected override bool ShouldAccept(ulong entityId)
     {
-        return playerTags.HasTagForEntity(entityId) || playerTags.HasPendingTagForEntity(entityId);
+        return playerTags.HasTagForEntity(entityId, true) || playerTags.HasPendingTagForEntity(entityId);
     }
 }

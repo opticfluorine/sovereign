@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using System.Numerics;
+using Castle.Core.Logging;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
@@ -32,10 +33,13 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     private readonly IDictionary<ulong, GridPosition> knownPositions
         = new Dictionary<ulong, GridPosition>();
 
+    private readonly ILogger logger;
+
     protected BaseGridPositionIndexer(BaseComponentCollection<Vector3> components,
-        IComponentEventSource<Vector3> eventSource)
+        IComponentEventSource<Vector3> eventSource, ILogger logger)
         : base(components, eventSource)
     {
+        this.logger = logger;
     }
 
     /// <summary>
@@ -102,7 +106,12 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     /// <param name="entityId">Entity ID to remove.</param>
     private void RemoveEntity(ulong entityId)
     {
-        if (!knownPositions.ContainsKey(entityId)) return;
+        if (!knownPositions.ContainsKey(entityId))
+        {
+            logger.ErrorFormat("Could not find entity {0:X} to remove.", entityId);
+            return;
+        }
+
         var gridPos = knownPositions[entityId];
         var set = entitiesByPosition[gridPos];
 

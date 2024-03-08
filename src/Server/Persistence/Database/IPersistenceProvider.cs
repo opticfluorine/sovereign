@@ -242,4 +242,9 @@ public interface IPersistenceProvider : IDisposable
     ///     IListPlayersQuery for this persistence provider.
     /// </summary>
     IListPlayersQuery ListPlayersQuery { get; }
+
+    /// <summary>
+    ///     IDeletePlayerQuery for this persistence provider.
+    /// </summary>
+    IDeletePlayerQuery DeletePlayerQuery { get; }
 }

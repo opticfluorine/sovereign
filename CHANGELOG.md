@@ -7,6 +7,12 @@
 #### 7 March 2024
 
 * Add a basic entity debug window (toggle via F3 key) for examining entities and components at runtime.
+* Fix issue where position caches were not unloading correctly in response to remove/unload events due to
+  filtered components being removed before the position component is removed/unloaded.
+* Add developer documentation for keeping track of common types of difficult-to-debug issues that arise
+  during development (such as the component filtering issues with remove/unload).
+* Remove `TestContentSystem` as it is no longer needed now that the startup GUIs are developed.
+* Add support for deleting player characters.
 
 #### 6 March 2024
 

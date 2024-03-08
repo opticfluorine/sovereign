@@ -37,7 +37,7 @@ public sealed class DrawablePositionEventFilter : BaseComponentEventFilter<Vecto
 
     protected override bool ShouldAccept(ulong entityId)
     {
-        return drawableCollection.HasTagForEntity(entityId)
+        return drawableCollection.HasTagForEntity(entityId, true)
                || drawableCollection.HasPendingTagForEntity(entityId);
     }
 }
