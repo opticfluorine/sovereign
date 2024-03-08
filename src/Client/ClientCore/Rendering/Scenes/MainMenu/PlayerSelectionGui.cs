@@ -44,7 +44,7 @@ public class PlayerSelectionGui
     private const string Yes = "Yes";
     private const string No = "No";
 
-    private const string ConfirmDelete = "ConfirmDelete";
+    private const string ConfirmDelete = "Confirm Player Delete";
 
     private const string EnteringWorld = "Entering world...";
     private readonly PlayerManagementClient client;
@@ -184,26 +184,6 @@ public class PlayerSelectionGui
             return MainMenuState.Startup;
         }
 
-        if (playerToDelete != null && ImGui.BeginPopupModal(ConfirmDelete))
-        {
-            var message = new StringBuilder("Are you sure that you want to permanently delete player ")
-                .Append(playerToDelete.Name).Append('?').ToString();
-            ImGui.Text(message);
-            if (ImGui.Button(Yes))
-            {
-                OnDelete(playerToDelete);
-                ImGui.CloseCurrentPopup();
-            }
-
-            ImGui.SameLine();
-            if (ImGui.Button(No))
-            {
-                playerToDelete = null;
-                ImGui.CloseCurrentPopup();
-            }
-
-            ImGui.EndPopup();
-        }
 
         return MainMenuState.PlayerSelection;
     }
@@ -227,6 +207,27 @@ public class PlayerSelectionGui
         {
             playerToDelete = player;
             ImGui.OpenPopup(ConfirmDelete);
+        }
+
+        if (playerToDelete != null && ImGui.BeginPopupModal(ConfirmDelete))
+        {
+            var message = new StringBuilder("Are you sure that you want to permanently delete player ")
+                .Append(playerToDelete.Name).Append('?').ToString();
+            ImGui.Text(message);
+            if (ImGui.Button(Yes))
+            {
+                OnDelete(playerToDelete);
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button(No))
+            {
+                playerToDelete = null;
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.EndPopup();
         }
     }
 
@@ -330,7 +331,7 @@ public class PlayerSelectionGui
             }
             else
             {
-                DoLoading();
+                LoadSelections();
             }
         }
         else if (deletionTask.IsFaulted)

@@ -45,6 +45,7 @@ public class GlobalKeyboardShortcuts
         this.stateController = stateController;
 
         // For now the shortcuts are hardcoded.
+        shortcutTable[SDL.SDL_Keycode.SDLK_F10] = () => Toggle(ClientStateFlag.ShowImGuiIdStackTool);
         shortcutTable[SDL.SDL_Keycode.SDLK_F11] = () => Toggle(ClientStateFlag.ShowImGuiMetrics);
         shortcutTable[SDL.SDL_Keycode.SDLK_F12] = () => Toggle(ClientStateFlag.ShowImGuiDebugLog);
     }
@@ -55,8 +56,8 @@ public class GlobalKeyboardShortcuts
     /// <param name="key">Released key.</param>
     public void OnKeyUp(SDL.SDL_Keycode key)
     {
-        if (shortcutTable.ContainsKey(key))
-            shortcutTable[key].Invoke();
+        if (shortcutTable.TryGetValue(key, out var action))
+            action.Invoke();
     }
 
     /// <summary>

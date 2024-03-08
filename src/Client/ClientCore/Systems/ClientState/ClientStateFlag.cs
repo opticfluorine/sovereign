@@ -31,6 +31,11 @@ public enum ClientStateFlag
     ShowImGuiDebugLog,
 
     /// <summary>
+    ///     Flag indicating that the Dear ImGui ID stack tool window should be displayed.
+    /// </summary>
+    ShowImGuiIdStackTool,
+
+    /// <summary>
     ///     Flag indicating that the in-game menu should be displayed.
     /// </summary>
     ShowInGameMenu,

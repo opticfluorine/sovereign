@@ -67,6 +67,7 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
             // Global debug menus.
             if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiMetrics)) ImGui.ShowMetricsWindow();
             if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiDebugLog)) ImGui.ShowDebugLogWindow();
+            if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiIdStackTool)) ImGui.ShowIDStackToolWindow();
 
             // State specific updates.
             scene.UpdateGui();

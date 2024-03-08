@@ -159,6 +159,20 @@ public class GuiRenderer : IDisposable
             {
                 var curCmd = curList.CmdBuffer[j];
 
+                // Check scissor rect for a positive area.
+                // If the area isn't positive, then there is nothing to draw with this call.
+                var minX = Math.Max(curCmd.ClipRect.X - clipOffset.X, 0f);
+                var minY = Math.Max(curCmd.ClipRect.Y - clipOffset.Y, 0f);
+                var maxX = curCmd.ClipRect.Z - clipOffset.X;
+                var maxY = curCmd.ClipRect.W - clipOffset.Y;
+                if (maxX <= minX || maxY <= minY) continue;
+
+                commandList.SetScissorRect(0,
+                    (uint)minX,
+                    (uint)minY,
+                    (uint)(maxX - minX),
+                    (uint)(maxY - minY));
+
                 // Resource binding for next draw call.
                 if (TryBindTexture(curCmd, systemTime) || !constantsUpdated)
                 {
@@ -166,14 +180,6 @@ public class GuiRenderer : IDisposable
                     guiResourceManager.GuiUniformBuffer.Update(commandList);
                     constantsUpdated = true;
                 }
-
-                var startX = curCmd.ClipRect.X - clipOffset.X;
-                var startY = curCmd.ClipRect.Y - clipOffset.Y;
-                commandList.SetScissorRect(0,
-                    (uint)startX,
-                    (uint)startY,
-                    (uint)(curCmd.ClipRect.Z - curCmd.ClipRect.X),
-                    (uint)(curCmd.ClipRect.W - curCmd.ClipRect.Y));
 
                 // Execute draw call.
                 commandList.DrawIndexed(curCmd.ElemCount, 1,
