@@ -4,6 +4,11 @@
 
 ### March
 
+#### 8 March 2024
+
+* **Feature freeze for release v0.2.0.**
+* Update GitHub Actions workflow to fix various issues that came up in v0.1.0.
+
 #### 7 March 2024
 
 * Add a basic entity debug window (toggle via F3 key) for examining entities and components at runtime.
