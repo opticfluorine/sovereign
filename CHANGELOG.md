@@ -4,6 +4,10 @@
 
 ### March
 
+#### 10 March 2024
+
+* Fix issues with missing runtime dependencies in the Windows build of the client.
+
 #### 8 March 2024
 
 * **Feature freeze for release v0.2.0.**

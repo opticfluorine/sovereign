@@ -46,6 +46,11 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 > The below instructions are provided for users who are interesting in trying out the
 > current features or using the engine as a starting point for their own development.
 
+### Install Dependencies
+
+Sovereign Engine requires the .NET 6 (or later) SDK and SQLite 3.x to be 
+installed on your system.
+
 ### Server
 
 > [!WARNING]
@@ -54,10 +59,15 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 
 1. Download the server binaries for your platform, or compile binaries from source (via
    `dotnet build` and `dotnet publish` from the `src` directory after cloning the Git repository).
-2. From the server directory, initialize a new SQLite database:
+2. From the server directory, initialize a new SQLite database. Using bash:
    ```bash
    $ cd Data
    $ sqlite3 sovereign.db < ../Migrations/Full/Full_sqlite.sql
+   ```
+   Using PowerShell:
+   ```powershell
+   cd Data
+   Get-Content ..\Migrations\Full\Full_sqlite.sql | sqlite3 sovereign.db
    ```
 3. Enable the debug command interface by editing `Data/Configuration/ServerConfiguration.yaml`
    and changing `EnableDebugMode` to `true`.
@@ -65,9 +75,13 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
    ```bash
    $ ./Sovereign.Server
    ```
-5. If using a new database, generate a test set of initial world data via the debug interface:
+5. If using a new database, generate a test set of initial world data via the debug interface. Using bash:
    ```bash
-   $ curl -X POST -d'{"Type":"GenerateWorldData"}' http://localhost:8080/debug
+   $ curl -X POST -d'{"Type":"GenerateWorldData"}' http://127.0.0.1:8080/debug
+   ```
+   Using PowerShell:
+   ```powershell
+   Invoke-RestMethod -Uri http://127.0.0.1:8080/debug -Method POST -Body '{"Type": "GenerateWorldData"}'
    ```
 
 ### Client
