@@ -72,9 +72,9 @@ public struct GridPosition : IEquatable<GridPosition>
     /// <param name="position">Floating position.</param>
     public GridPosition(Vector3 position)
     {
-        X = (int)position.X;
-        Y = (int)position.Y;
-        Z = (int)position.Z;
+        X = (int)Math.Floor(position.X);
+        Y = (int)Math.Floor(position.Y);
+        Z = (int)Math.Floor(position.Z);
     }
 
     public static explicit operator Vector3(GridPosition gridPosition)

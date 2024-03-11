@@ -58,9 +58,9 @@ public sealed class WorldSegmentResolver
     {
         return new GridPosition
         {
-            X = (int)position.X / (int)config.SegmentLength,
-            Y = (int)position.Y / (int)config.SegmentLength,
-            Z = (int)position.Z / (int)config.SegmentLength
+            X = (int)Math.Floor(position.X / config.SegmentLength),
+            Y = (int)Math.Floor(position.Y / config.SegmentLength),
+            Z = (int)Math.Floor(position.Z / config.SegmentLength)
         };
     }
 }

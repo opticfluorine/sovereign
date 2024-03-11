@@ -25,6 +25,7 @@ using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Timing;
+using Sovereign.EngineUtil.Numerics;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
 
@@ -92,9 +93,10 @@ public sealed class CommonGuiManager : IDisposable
     /// </remarks>
     public void Initialize()
     {
-        // Initialize ImGui.
+        // Initialize ImGui, configure global style.
         context = ImGui.CreateContext();
         ImGui.StyleColorsDark();
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
 
         // Configure input settings.
         var io = ImGui.GetIO();
@@ -148,7 +150,7 @@ public sealed class CommonGuiManager : IDisposable
     {
         var io = ImGui.GetIO();
         var now = systemTimer.GetTime();
-        io.DeltaTime = (now - lastSystemTime) * 1E-3f;
+        io.DeltaTime = (now - lastSystemTime) * UnitConversions.UsToS;
         lastSystemTime = now;
 
         UpdateMousePosAndButtons();

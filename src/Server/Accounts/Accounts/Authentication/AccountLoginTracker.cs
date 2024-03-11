@@ -206,8 +206,7 @@ public sealed class AccountLoginTracker
         if (connectionsToAccounts.TryGetValue(connectionId, out var accountId))
         {
             // Log the player out if already logged in.
-            if (accountIdsToPlayerEntityIds.TryGetValue(accountId, out var entityId))
-                LogoutPlayer(entityId);
+            if (accountIdsToPlayerEntityIds.TryGetValue(accountId, out var entityId)) LogoutPlayer(entityId);
 
             // Log the account out.
             LogoutAccount(accountId);
@@ -282,5 +281,14 @@ public sealed class AccountLoginTracker
         accountIdsToApiKeys.Remove(accountId);
         accountIdsToPlayerEntityIds.Remove(accountId);
         accountLoginStates.Remove(accountId);
+    }
+
+    /// <summary>
+    ///     Called when a player logs out to player selection.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    public void Logout(ulong playerEntityId)
+    {
+        LogoutPlayer(playerEntityId);
     }
 }

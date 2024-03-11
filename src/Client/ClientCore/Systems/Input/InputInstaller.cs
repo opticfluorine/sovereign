@@ -18,6 +18,7 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
+using Sovereign.EngineUtil.IoC;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -33,6 +34,14 @@ public class InputInstaller : IWindsorInstaller
         container.Register(Component.For<KeyboardState>()
             .LifestyleSingleton());
         container.Register(Component.For<PlayerInputMovementMapper>()
+            .LifestyleSingleton());
+        container.Register(Component.For<GlobalKeyboardShortcuts>()
+            .LifestyleSingleton());
+        container.Register(Component.For<InGameKeyboardShortcuts>()
+            .LifestyleSingleton());
+        container.Register(EngineClasses.EngineAssemblies()
+            .BasedOn<IInputHandler>()
+            .WithServiceSelf()
             .LifestyleSingleton());
     }
 }

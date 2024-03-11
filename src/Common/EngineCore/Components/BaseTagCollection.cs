@@ -43,10 +43,11 @@ public class BaseTagCollection : BaseComponentCollection<bool>
     ///     Determines whether the given entity is tagged.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
+    /// <param name="lookback">If true, consider newly removed tags that were removed in the same tick.</param>
     /// <returns>true if tagged, false otherwise.</returns>
-    public bool HasTagForEntity(ulong entityId)
+    public bool HasTagForEntity(ulong entityId, bool lookback = false)
     {
-        return HasComponentForEntity(entityId) && this[entityId];
+        return HasComponentForEntity(entityId, lookback) && this[entityId];
     }
 
     /// <summary>

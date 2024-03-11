@@ -54,7 +54,6 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
 
     private const string ACCOUNT_COMPONENT_TABLE_NAME = "AccountComponent";
     private const string ACCOUNT_COMPONENT_PARAM_NAME = "account_id";
-    private const SqliteType ACCOUNT_COMPONENT_PARAM_TYPE = SqliteType.Blob;
 
     /// <summary>
     ///     Database value type for Parent component.
@@ -112,6 +111,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         PlayerExistsQuery = new SqlitePlayerExistsQuery((SqliteConnection)Connection);
         GetAccountForPlayerQuery = new SqliteGetAccountForPlayerQuery((SqliteConnection)Connection);
         ListPlayersQuery = new SqliteListPlayersQuery((SqliteConnection)Connection);
+        DeletePlayerQuery = new SqliteDeletePlayerQuery((SqliteConnection)Connection);
 
         /* Position component. */
         AddPositionQuery = new Vector3SqliteAddComponentQuery(POSITION_TABLE_NAME,
@@ -251,12 +251,13 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }
+    public IDeletePlayerQuery DeletePlayerQuery { get; }
 
     public void Dispose()
     {
         Logger.InfoFormat("Closing the SQLite database if open.");
 
-        Connection?.Close();
+        Connection.Close();
 
         Logger.InfoFormat("SQLite database closed.");
     }

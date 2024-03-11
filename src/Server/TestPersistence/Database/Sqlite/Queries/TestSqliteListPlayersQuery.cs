@@ -52,11 +52,13 @@ public class TestSqliteListPlayersQuery
         testFixture.AddPlayerCharacter(firstPlayerId);
         testFixture.AddName(firstPlayerId, username1);
         testFixture.AddAccountComponent(firstPlayerId, id1);
+        testFixture.AddAnimatedSprite(firstPlayerId, 0);
 
         testFixture.AddEntity(secondPlayerId);
         testFixture.AddPlayerCharacter(secondPlayerId);
         testFixture.AddName(secondPlayerId, username2);
         testFixture.AddAccountComponent(secondPlayerId, id2);
+        testFixture.AddAnimatedSprite(secondPlayerId, 0);
 
         // List the players for the first account.
         // Verify that only the correct player is returned.

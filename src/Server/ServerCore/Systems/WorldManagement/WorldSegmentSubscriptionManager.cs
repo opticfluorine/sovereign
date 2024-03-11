@@ -133,6 +133,18 @@ public class WorldSegmentSubscriptionManager
     }
 
     /// <summary>
+    ///     Called when an entity moves into a new world segment. This synchronizes the entity to all
+    ///     subscribers of the new world segment in case any subscribers do not yet know of the entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    public void OnEntityChangeSegment(ulong entityId)
+    {
+        // Treat this entity as if it were newly added to the world segment that it just entered,
+        // as this will trigger all of the necessary synchronization logic.
+        OnNonBlockEntityAdded(entityId);
+    }
+
+    /// <summary>
     ///     Called when a player is unloaded.
     /// </summary>
     /// <param name="entityId">Player entity ID.</param>

@@ -148,6 +148,16 @@ public enum EventId
 
     #endregion WorldManagement
 
+    #region Network
+
+    /// <summary>
+    ///     Sent from client to server to log out of the current player and return to player selection.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Core_Network_Logout = 700,
+
+    #endregion Network
+
     #endregion Core
 
     #region Client
@@ -224,28 +234,16 @@ public enum EventId
     Client_Network_Connected = 100204,
 
     /// <summary>
-    ///     Event sent to command ClientNetworkSystem to register a new account.
-    /// </summary>
-    /// Associated details: RegisterAccountEventDetails
-    Client_Network_RegisterAccount = 100205,
-
-    /// <summary>
-    ///     Event sent to announce a successful account registration.
-    /// </summary>
-    /// Associated details: None
-    Client_Network_RegisterSuccess = 100206,
-
-    /// <summary>
-    ///     Event sent to announce a failed account registration.
-    /// </summary>
-    /// Associated details: ErrorEventDetails
-    Client_Network_RegisterFailed = 100207,
-
-    /// <summary>
     ///     Event sent to set the entity ID corresponding to the logged in player.
     /// </summary>
     /// Associated details: EntityEventDetails
-    Client_Network_PlayerEntitySelected = 100208,
+    Client_Network_PlayerEntitySelected = 100205,
+
+    /// <summary>
+    ///     Event sent to disconnect from the server if connected.
+    /// </summary>
+    /// Associated details: None
+    Client_Network_EndConnection = 100206,
 
     #endregion Client_Network
 
@@ -268,6 +266,28 @@ public enum EventId
     Client_EntitySynchronization_Desync = 100301,
 
     #endregion Client_EntitySynchronization
+
+    #region Client_State
+
+    /// <summary>
+    ///     Event sent when the client has loaded a world segment from the server.
+    /// </summary>
+    /// Associated details: WorldSegmentEventDetails
+    Client_State_WorldSegmentLoaded = 100400,
+
+    /// <summary>
+    ///     Event sent to update the state of an individual client state flag.
+    /// </summary>
+    /// Associated details: ClientStateFlagEventDetails
+    Client_State_SetFlag = 100401,
+
+    /// <summary>
+    ///     Event sent to update the main menu state.
+    /// </summary>
+    /// Associated details: MainMenuStateEventDetails
+    Client_State_SetMainMenuState = 100402,
+
+    #endregion Client_State
 
     #endregion Client
 

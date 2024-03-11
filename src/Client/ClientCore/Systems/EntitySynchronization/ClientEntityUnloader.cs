@@ -66,10 +66,7 @@ public class ClientEntityUnloader
     public void OnEntityChangeWorldSegment(ulong entityId, GridPosition newSegmentIndex)
     {
         // If the entity made an authoritative move to a segment we aren't subscribed to, unload it.
-        if (!subscribedSegments.Contains(newSegmentIndex))
-        {
-            UnloadEntity(entityId);
-        }
+        if (!subscribedSegments.Contains(newSegmentIndex)) UnloadEntity(entityId);
     }
 
     /// <summary>
@@ -129,5 +126,13 @@ public class ClientEntityUnloader
         var entitiesToUnload = hierarchyIndexer.GetAllDescendants(entityId);
         entitiesToUnload.Add(entityId);
         foreach (var nextEntityId in entitiesToUnload) entityManager.UnloadEntity(nextEntityId);
+    }
+
+    /// <summary>
+    ///     Unsubscribes from all world segments.
+    /// </summary>
+    public void UnsubscribeAll()
+    {
+        foreach (var segmentIndex in subscribedSegments) UnloadWorldSegment(segmentIndex);
     }
 }

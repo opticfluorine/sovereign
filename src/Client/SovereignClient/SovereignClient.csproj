@@ -8,6 +8,19 @@
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
+    
+    <Choose>
+        <When Condition=" '$(RuntimeIdentifier)' == '' ">
+            <PropertyGroup>
+                <ContribSet>win-x64</ContribSet>
+            </PropertyGroup>
+        </When>
+        <Otherwise>
+            <PropertyGroup>
+                <ContribSet>$(RuntimeIdentifier)</ContribSet>
+            </PropertyGroup>
+        </Otherwise>
+    </Choose>
 
     <ItemGroup>
         <ProjectReference Include="..\ClientCore\ClientCore.csproj"/>
@@ -20,20 +33,30 @@
         </None>
     </ItemGroup>
 
-    <Target Name="CopyDataAfterBuild" AfterTargets="AfterBuild">
+    <ItemGroup>
+      <Folder Include="Contrib\win-x64\" />
+    </ItemGroup>
+
+    <Target Name="CopyAfterBuild" AfterTargets="AfterBuild">
+        <Message Text="RuntimeIdentifier=$(RuntimeIdentifier)"/>
         <ItemGroup>
             <DataFiles Include="Data/**/*"/>
+            <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"/>
+        <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(OutDir)"/>
     </Target>
 
     <Target Name="CopyAfterPublish" AfterTargets="Publish">
+        <Message Text="RuntimeIdentifier=$(RuntimeIdentifier)"/>
         <ItemGroup>
             <DataFiles Include="$(OutDir)Data/**/*"/>
             <LicenseFile Include="$(SolutionDir)../LICENSE"/>
+            <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(PublishDir)Data/%(RecursiveDir)"/>
         <Copy SourceFiles="$(LicenseFile)" DestinationFolder="@(PublishDir)"/>
+        <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(PublishDir)"/>
     </Target>
 
     <Target Name="CompileShaders" BeforeTargets="Build">

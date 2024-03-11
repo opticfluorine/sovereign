@@ -28,6 +28,7 @@ public class ClientOutboundEventSet : IOutboundEventSet
     public HashSet<EventId> EventIdsToSend { get; } = new()
     {
         EventId.Core_Ping_Pong,
-        EventId.Core_Movement_RequestMove
+        EventId.Core_Movement_RequestMove,
+        EventId.Core_Network_Logout
     };
 }

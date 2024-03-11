@@ -31,11 +31,12 @@ public class SqliteListPlayersQuery : IListPlayersQuery
     ///     SQL query.
     /// </summary>
     private const string query =
-        @"SELECT PC.id, N.value
+        @"SELECT PC.id, N.value, A.value
           FROM AccountComponent AC
           INNER JOIN Name N ON AC.id = N.id
           INNER JOIN PlayerCharacter PC ON AC.id = PC.id
-          WHERE AC.account_id = @AccountId AND PC.value = TRUE";
+          INNER JOIN AnimatedSprite A ON AC.id = A.id
+          WHERE AC.account_id = @AccountId AND PC.value = TRUE AND PC.deleted = FALSE";
 
     private readonly SqliteConnection connection;
 
@@ -60,7 +61,8 @@ public class SqliteListPlayersQuery : IListPlayersQuery
             var player = new PlayerInfo
             {
                 Id = (ulong)reader.GetInt64(0),
-                Name = reader.GetString(1)
+                Name = reader.GetString(1),
+                AnimatedSprite = reader.GetInt32(2)
             };
             results.Add(player);
         }

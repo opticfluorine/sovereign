@@ -43,7 +43,8 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
 
         mappers = new Dictionary<EventId, Action<IEventDetails, ulong>>
         {
-            { EventId.Core_Movement_RequestMove, RequestMoveEventMapper }
+            { EventId.Core_Movement_RequestMove, RequestMoveEventMapper },
+            { EventId.Core_Network_Logout, EntityEventMapper }
         };
     }
 
@@ -71,5 +72,15 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
     private static void RequestMoveEventMapper(IEventDetails details, ulong entityId)
     {
         ((RequestMoveEventDetails)details).EntityId = entityId;
+    }
+
+    /// <summary>
+    ///     Mapper for EntityEventDetails events.
+    /// </summary>
+    /// <param name="details"></param>
+    /// <param name="entityId"></param>
+    private static void EntityEventMapper(IEventDetails details, ulong entityId)
+    {
+        ((EntityEventDetails)details).EntityId = entityId;
     }
 }

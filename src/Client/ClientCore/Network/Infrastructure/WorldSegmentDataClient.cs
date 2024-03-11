@@ -23,6 +23,7 @@ using Castle.Core.Logging;
 using MessagePack;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Systems.ClientNetwork;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
@@ -62,6 +63,7 @@ public sealed class WorldSegmentDataClient
     private readonly IEventSender eventSender;
     private readonly ClientNetworkController networkController;
     private readonly RestClient restClient;
+    private readonly ClientStateController stateController;
     private readonly WorldSegmentResolver worldSegmentResolver;
 
     public WorldSegmentDataClient(IEventSender eventSender,
@@ -69,13 +71,15 @@ public sealed class WorldSegmentDataClient
         IWorldManagementConfiguration config,
         BlockController blockController,
         RestClient restClient,
-        ClientNetworkController networkController)
+        ClientNetworkController networkController,
+        ClientStateController stateController)
     {
         this.eventSender = eventSender;
         this.worldSegmentResolver = worldSegmentResolver;
         this.blockController = blockController;
         this.restClient = restClient;
         this.networkController = networkController;
+        this.stateController = stateController;
         this.config = config;
     }
 
@@ -176,6 +180,7 @@ public sealed class WorldSegmentDataClient
         /* Submit all the blocks we've added. */
         blockController.AddBlocks(eventSender,
             blocksToAdd => CreateBlocksToAdd(segmentIndex, segmentData, blocksToAdd));
+        stateController.WorldSegmentLoaded(eventSender, segmentIndex);
     }
 
     /// <summary>
@@ -205,6 +210,9 @@ public sealed class WorldSegmentDataClient
         for (var i = 0; i < processed.Length; i++)
             if (!processed[i] && segmentData.DefaultMaterialsPerPlane[i].MaterialId != Material.Air)
                 ProcessDefaultPlane(segmentIndex, i, segmentData.DefaultMaterialsPerPlane[i], blocksToAdd);
+
+        if (blocksToAdd.Count > 0)
+            Logger.DebugFormat("Adding {0} blocks for world segment {1}.", blocksToAdd.Count, segmentIndex);
     }
 
     /// <summary>

@@ -42,5 +42,8 @@ public class MainInstaller : IWindsorInstaller
 
         container.Register(Component.For<FatalErrorHandler>()
             .LifestyleTransient());
+
+        container.Register(Component.For<CoreController>()
+            .LifestyleSingleton());
     }
 }

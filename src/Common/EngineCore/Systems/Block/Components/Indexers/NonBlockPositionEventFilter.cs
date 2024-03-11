@@ -36,7 +36,7 @@ public class NonBlockPositionEventFilter : BaseComponentEventFilter<Vector3>
 
     protected override bool ShouldAccept(ulong entityId)
     {
-        return !(materials.HasComponentForEntity(entityId)
+        return !(materials.HasComponentForEntity(entityId, true)
                  || materials.HasPendingComponentForEntity(entityId));
     }
 }

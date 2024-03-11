@@ -159,6 +159,27 @@ public class SqliteTestFixture : IDisposable
     }
 
     /// <summary>
+    ///     Adds an animated sprite component to the given entity..
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="animatedSpriteId">Animated sprite ID.</param>
+    public void AddAnimatedSprite(ulong entityId, int animatedSpriteId)
+    {
+        const string sql = @"INSERT INTO AnimatedSprite (id, value) VALUES (@Id, @SpriteId)";
+        using var cmd = new SqliteCommand(sql, Connection);
+
+        var pId = new SqliteParameter("Id", entityId);
+        pId.SqliteType = SqliteType.Integer;
+        cmd.Parameters.Add(pId);
+
+        var pSpriteId = new SqliteParameter("SpriteId", animatedSpriteId);
+        pId.SqliteType = SqliteType.Integer;
+        cmd.Parameters.Add(pSpriteId);
+
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
     ///     Adds an account component to the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>

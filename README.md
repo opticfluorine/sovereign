@@ -15,11 +15,11 @@ Sovereign Engine is made available under the GPLv3 license.
 
 ![Screenshot of Sovereign Client v0.1.0 running with test data.](screenshot.png)
 
-## Current Features (v0.1.0)
+## Current Features (v0.2.0)
 
 * Client and server supporting Windows and Linux platforms
-* Login and registration (API only, GUI planned for v0.2.0 release)
-* Player listing, creation, selection during login (API only, GUI planned for v0.2.0 release)
+* Login and registration
+* Player listing, selection, creation, and deletion via in-game GUI
 * Basic rendering of world including automatic borders between neighboring tiles, animated
   sprites, directional sprites
 * Sprite metadata including attribution information for easy inclusion of third party
@@ -28,16 +28,16 @@ Sovereign Engine is made available under the GPLv3 license.
 * Distributed entity-component-system (ECS) data model with full client-side synchronization from
   server, full server-side persistence in a relational database (SQLite currently supported,
   Postgres planned)
+* Integrated debug GUI in client
 
 For full details of the latest changes and features, see the [changelog](CHANGELOG.md).
 
-## Upcoming Features (v0.2.0)
+## Upcoming Features (v0.3.0)
 
-* Client-side GUI support with [Dear ImGui](https://github.com/ocornut/imgui).
-* Login GUI.
-* Registration GUI.
-* Player list GUI.
-* Player creation GUI.
+* In-game chat
+* Integrated tools for game resource configuration (e.g. sprite definitions, material definitions, etc.)
+* Admin roles for users
+* Integrated world editing tools in client
 
 ## Getting Started
 
@@ -45,6 +45,11 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 > Sovereign Engine is in a pre-alpha state and is not ready for production use.
 > The below instructions are provided for users who are interesting in trying out the
 > current features or using the engine as a starting point for their own development.
+
+### Install Dependencies
+
+Sovereign Engine requires the .NET 6 (or later) SDK and SQLite 3.x to be 
+installed on your system.
 
 ### Server
 
@@ -54,10 +59,15 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 
 1. Download the server binaries for your platform, or compile binaries from source (via
    `dotnet build` and `dotnet publish` from the `src` directory after cloning the Git repository).
-2. From the server directory, initialize a new SQLite database:
+2. From the server directory, initialize a new SQLite database. Using bash:
    ```bash
    $ cd Data
    $ sqlite3 sovereign.db < ../Migrations/Full/Full_sqlite.sql
+   ```
+   Using PowerShell:
+   ```powershell
+   cd Data
+   Get-Content ..\Migrations\Full\Full_sqlite.sql | sqlite3 sovereign.db
    ```
 3. Enable the debug command interface by editing `Data/Configuration/ServerConfiguration.yaml`
    and changing `EnableDebugMode` to `true`.
@@ -65,18 +75,30 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
    ```bash
    $ ./Sovereign.Server
    ```
-5. If using a new database, generate a test set of initial world data via the debug interface:
+5. If using a new database, generate a test set of initial world data via the debug interface. Using bash:
    ```bash
-   $ curl -X POST -d'{"Type":"GenerateWorldData"}' http://localhost:8080/debug
+   $ curl -X POST -d'{"Type":"GenerateWorldData"}' http://127.0.0.1:8080/debug
+   ```
+   Using PowerShell:
+   ```powershell
+   Invoke-RestMethod -Uri http://127.0.0.1:8080/debug -Method POST -Body '{"Type": "GenerateWorldData"}'
    ```
 
 ### Client
 
-1. With the server running, simply run the `Sovereign.Client` executable from its directory.
-   The client will automatically log in as a default debug account and debug player, registering
-   the account and creating the player as necessary.
-2. Move the player using the keyboard arrow keys.
-3. Close the client application to log out.
+With the server running, simply run the `Sovereign.Client` executable from its directory.
+
+#### Controls
+
+| Key        | Action                                 |
+|------------|----------------------------------------|
+| Esc        | Open in-game menu                      |
+| Arrow keys | Move player                            |
+| F2         | Toggle Player Debug Window             |
+| F3         | Toggle Entity Debug Window             |
+| F10        | Toggle Dear ImGui ID Stack Tool        |
+| F11        | Toggle Dear ImGui Metrics/Debug Window |
+| F12        | Toggle Dear ImGui Debug Log            |
 
 ## Reporting Issues
 

@@ -28,6 +28,7 @@ public class EntitySynchronizationSystem : ISystem
     private readonly IEventLoop eventLoop;
     private readonly EntityDefinitionProcessor processor;
     private readonly ClientEntityUnloader unloader;
+    private ulong playerEntityId;
 
     public EntitySynchronizationSystem(EventCommunicator eventCommunicator,
         IEventLoop eventLoop, EntityDefinitionProcessor processor,
@@ -52,7 +53,8 @@ public class EntitySynchronizationSystem : ISystem
         EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_Unsubscribe,
         EventId.Client_Network_PlayerEntitySelected,
-        EventId.Core_WorldManagement_EntityLeaveWorldSegment
+        EventId.Core_WorldManagement_EntityLeaveWorldSegment,
+        EventId.Core_Network_Logout
     };
 
     public int WorkloadEstimate => 50;
@@ -132,10 +134,19 @@ public class EntitySynchronizationSystem : ISystem
 
                     HandleChangeWorldSegment((EntityChangeWorldSegmentEventDetails)ev.EventDetails);
                     break;
+
+                case EventId.Core_Network_Logout:
+                    OnLogout();
+                    break;
             }
         }
 
         return eventsProcessed;
+    }
+
+    private void OnLogout()
+    {
+        unloader.UnsubscribeAll();
     }
 
     private void HandleSubscribe(WorldSegmentSubscriptionEventDetails details)
@@ -158,6 +169,9 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Event details.</param>
     private void HandleChangeWorldSegment(EntityChangeWorldSegmentEventDetails details)
     {
+        if (details.EntityId == playerEntityId)
+            Logger.DebugFormat("Player entered world segment {0}.", details.NewSegmentIndex);
+
         unloader.OnEntityChangeWorldSegment(details.EntityId,
             details.NewSegmentIndex);
     }
@@ -168,6 +182,7 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Event details.</param>
     private void HandlePlayerSelect(EntityEventDetails details)
     {
+        playerEntityId = details.EntityId;
         unloader.SetPlayer(details.EntityId);
     }
 

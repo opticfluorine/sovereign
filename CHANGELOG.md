@@ -2,7 +2,65 @@
 
 ## 2024
 
+### March
+
+#### 10 March 2024
+
+* Fix issues with missing runtime dependencies in the Windows build of the client.
+
+#### 8 March 2024
+
+* **Feature freeze for release v0.2.0.**
+* Update GitHub Actions workflow to fix various issues that came up in v0.1.0.
+
+#### 7 March 2024
+
+* Add a basic entity debug window (toggle via F3 key) for examining entities and components at runtime.
+* Fix issue where position caches were not unloading correctly in response to remove/unload events due to
+  filtered components being removed before the position component is removed/unloaded.
+* Add developer documentation for keeping track of common types of difficult-to-debug issues that arise
+  during development (such as the component filtering issues with remove/unload).
+* Remove `TestContentSystem` as it is no longer needed now that the startup GUIs are developed.
+* Add support for deleting player characters.
+
+#### 6 March 2024
+
+* Add player debug window to the in-game scene, toggled via the F2 key, for viewing local player data
+  at runtime.
+* Fix issue in `WorldSegmentResolver` where negative segments had an off-by-one error in their resolution
+  from position coordinates due to an arithmetic error in the direction of rounding.
+
+#### 5 March 2024
+
+* Add keyboard binding processing to the various client states. Initially these are hardcoded and only mapped
+  to various debug windows from Dear ImGui, along with the in-game menu via the Escape key.
+* Allow players to log out but keep their account logged in, returning to the player selection screen.
+* Unload all entities from the client upon logout or disconnect. Also clear all world segment subscriptions.
+
+#### 3 March 2024
+
+* Fix issue where client did not properly disconnect due to a logic error.
+* Start testing the various startup GUIs through player creation and selection.
+
 ### February
+
+#### 26 February 2024
+
+* Implement the registration GUI.
+* Remove the event-based client API for registration, instead having the GUI use the async method from
+  `RegistrationClient` directly.
+* Implement the login GUI.
+* Wire up "Exit" button on the startup screen to exit the client.
+
+#### 23 February 2024
+
+* Add `ClientStateSystem` for managing the top-level client state (main menu, in-game, etc.).
+* Update `SceneManager` to select the renderer scene based on the current client state.
+* Create a main menu scene for displaying the startup GUIs covering login, registration, etc. Start implementing
+  these GUIs.
+* Disable the automatic registration/login/etc actions in `TestContentSystem`. These behaviors are transitioning
+  to being driven by the `MainMenuScene` and its GUI classes. Once implementation is done, it should be possible
+  to entirely remove `TestContentSystem`.
 
 #### 22 February 2024
 

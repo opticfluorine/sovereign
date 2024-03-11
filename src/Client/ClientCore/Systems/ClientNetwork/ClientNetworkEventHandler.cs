@@ -18,7 +18,6 @@
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Network;
-using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
@@ -29,20 +28,13 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork;
 /// </summary>
 public sealed class ClientNetworkEventHandler
 {
-    private readonly IEventSender eventSender;
     private readonly INetworkClient networkClient;
-    private readonly ClientNetworkController networkController;
-    private readonly RegistrationClient registrationClient;
     private readonly ClientWorldSegmentSubscriptionManager worldSegmentSubscriptionManager;
 
-    public ClientNetworkEventHandler(INetworkClient networkClient, RegistrationClient registrationClient,
-        ClientNetworkController networkController, IEventSender eventSender,
+    public ClientNetworkEventHandler(INetworkClient networkClient,
         ClientWorldSegmentSubscriptionManager worldSegmentSubscriptionManager)
     {
         this.networkClient = networkClient;
-        this.registrationClient = registrationClient;
-        this.networkController = networkController;
-        this.eventSender = eventSender;
         this.worldSegmentSubscriptionManager = worldSegmentSubscriptionManager;
     }
 
@@ -70,16 +62,6 @@ public sealed class ClientNetworkEventHandler
                 HandleBeginConnection((BeginConnectionEventDetails)ev.EventDetails);
                 break;
 
-            case EventId.Client_Network_RegisterAccount:
-                if (ev.EventDetails == null)
-                {
-                    Logger.Error("Received RegisterAccount without details.");
-                    break;
-                }
-
-                HandleRegisterAccount((RegisterAccountEventDetails)ev.EventDetails);
-                break;
-
             case EventId.Core_WorldManagement_Subscribe:
                 if (ev.EventDetails == null)
                 {
@@ -100,10 +82,26 @@ public sealed class ClientNetworkEventHandler
                 HandleWorldSegmentUnsubscribe((WorldSegmentSubscriptionEventDetails)ev.EventDetails);
                 break;
 
+            case EventId.Client_Network_EndConnection:
+                HandleEndConnection();
+                break;
+
+            case EventId.Core_Network_Logout:
+                HandleLogout();
+                break;
+
             default:
                 Logger.WarnFormat("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
                 break;
         }
+    }
+
+    /// <summary>
+    ///     Called when a logout occurs.
+    /// </summary>
+    private void HandleLogout()
+    {
+        worldSegmentSubscriptionManager.UnsubscribeAll();
     }
 
     /// <summary>
@@ -125,35 +123,21 @@ public sealed class ClientNetworkEventHandler
     }
 
     /// <summary>
-    ///     Handles a register account event.
-    /// </summary>
-    /// <param name="eventDetails">Registration details.</param>
-    private void HandleRegisterAccount(RegisterAccountEventDetails eventDetails)
-    {
-        registrationClient.RegisterAsync(eventDetails.ConnectionParameters, eventDetails.RegistrationRequest)
-            .ContinueWith(task =>
-            {
-                if (task.IsFaulted)
-                {
-                    networkController.RegistrationFailed(eventSender, "Registration failed due to an internal error.");
-                    return;
-                }
-
-                var option = task.Result;
-                if (option.HasFirst)
-                    networkController.RegistrationSucceeded(eventSender);
-                else
-                    networkController.RegistrationFailed(eventSender, option.Second);
-            });
-    }
-
-    /// <summary>
     ///     Handles a begin connection request.
     /// </summary>
     /// <param name="details">Connection details.</param>
     private void HandleBeginConnection(BeginConnectionEventDetails details)
     {
         networkClient.BeginConnection(details.ConnectionParameters, details.LoginParameters);
+    }
+
+    /// <summary>
+    ///     Handles an end connection event.
+    /// </summary>
+    private void HandleEndConnection()
+    {
+        networkClient.EndConnection();
+        worldSegmentSubscriptionManager.UnsubscribeAll();
     }
 
     /// <summary>

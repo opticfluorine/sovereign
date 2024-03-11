@@ -16,11 +16,12 @@
  */
 
 using System.Numerics;
-using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Debug;
 using Sovereign.ClientCore.Rendering.Scenes.Game.World;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
@@ -32,9 +33,12 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game;
 /// </summary>
 public sealed class GameScene : IScene
 {
-    private readonly GameSceneCamera camera;
+    private readonly RenderCamera camera;
     private readonly IEngineConfiguration engineConfiguration;
-    private readonly MainDisplay mainDisplay;
+    private readonly EntityDebugGui entityDebugGui;
+    private readonly InGameMenuGui menuGui;
+    private readonly PlayerDebugGui playerDebugGui;
+    private readonly ClientStateServices stateServices;
     private readonly ISystemTimer systemTimer;
     private readonly DisplayViewport viewport;
     private readonly WorldVertexSequencer worldVertexSequencer;
@@ -51,15 +55,19 @@ public sealed class GameScene : IScene
     private float timeSinceTick;
 
     public GameScene(ISystemTimer systemTimer, IEngineConfiguration engineConfiguration,
-        GameSceneCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
-        WorldVertexSequencer worldVertexSequencer)
+        RenderCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
+        WorldVertexSequencer worldVertexSequencer, ClientStateServices stateServices, InGameMenuGui menuGui,
+        PlayerDebugGui playerDebugGui, EntityDebugGui entityDebugGui)
     {
         this.systemTimer = systemTimer;
         this.engineConfiguration = engineConfiguration;
         this.camera = camera;
         this.viewport = viewport;
-        this.mainDisplay = mainDisplay;
         this.worldVertexSequencer = worldVertexSequencer;
+        this.stateServices = stateServices;
+        this.menuGui = menuGui;
+        this.playerDebugGui = playerDebugGui;
+        this.entityDebugGui = entityDebugGui;
     }
 
     public SceneType SceneType => SceneType.Game;
@@ -93,7 +101,9 @@ public sealed class GameScene : IScene
 
     public void UpdateGui()
     {
-        ImGui.ShowDemoWindow();
+        UpdateDebugGui();
+
+        if (stateServices.GetStateFlagValue(ClientStateFlag.ShowInGameMenu)) menuGui.Render();
     }
 
     /// <summary>
@@ -104,5 +114,14 @@ public sealed class GameScene : IScene
         systemTime = systemTimer.GetTime();
         timeSinceTick = systemTime % engineConfiguration.EventTickInterval
                         * UnitConversions.UsToS;
+    }
+
+    /// <summary>
+    ///     Renders any open in-game debug windows.
+    /// </summary>
+    private void UpdateDebugGui()
+    {
+        if (stateServices.GetStateFlagValue(ClientStateFlag.ShowPlayerDebug)) playerDebugGui.Render();
+        if (stateServices.GetStateFlagValue(ClientStateFlag.ShowEntityDebug)) entityDebugGui.Render();
     }
 }
