@@ -22,7 +22,7 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
 
-namespace Sovereign.ClientCore.Rendering.Scenes.Game.Debug;
+namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 
 /// <summary>
 ///     Entity debug window.

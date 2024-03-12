@@ -18,13 +18,13 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 
-namespace Sovereign.ClientCore.Rendering.Scenes.Game.Debug;
+namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 
-public class GameDebugInstaller : IWindsorInstaller
+public class GameGuiInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(Component.For<PlayerDebugGui>().LifestyleSingleton());
-        container.Register(Component.For<EntityDebugGui>().LifestyleSingleton());
+        container.Register(Component.For<ChatGui>().LifestyleSingleton());
+        container.Register(Component.For<GameGui>().LifestyleSingleton());
     }
 }

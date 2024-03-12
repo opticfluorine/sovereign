@@ -4,6 +4,10 @@
 
 ### March
 
+#### 11 March 2024
+
+* Add chat window that can be opened in-game by pressing Enter. It doesn't currently do anything.
+
 #### 10 March 2024
 
 * Fix issues with missing runtime dependencies in the Windows build of the client.

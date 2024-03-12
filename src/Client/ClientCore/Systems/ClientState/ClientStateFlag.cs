@@ -41,6 +41,11 @@ public enum ClientStateFlag
     ShowInGameMenu,
 
     /// <summary>
+    ///     Flag indicating that the chat window should be displayed.
+    /// </summary>
+    ShowChat,
+
+    /// <summary>
     ///     Flag indicating that the in-game player debug window should be displayed.
     /// </summary>
     ShowPlayerDebug,
