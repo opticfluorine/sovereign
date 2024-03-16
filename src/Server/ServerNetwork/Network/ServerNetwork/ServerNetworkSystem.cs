@@ -20,6 +20,7 @@ using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.ServerCore.Events;
+using Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
 
 namespace Sovereign.ServerNetwork.Network.ServerNetwork;
 
@@ -29,11 +30,13 @@ namespace Sovereign.ServerNetwork.Network.ServerNetwork;
 public class ServerNetworkSystem : ISystem
 {
     private readonly INetworkManager networkManager;
+    private readonly RegionalConnectionMapCache regionalConnectionMapCache;
 
     public ServerNetworkSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop,
-        INetworkManager networkManager)
+        INetworkManager networkManager, RegionalConnectionMapCache regionalConnectionMapCache)
     {
         this.networkManager = networkManager;
+        this.regionalConnectionMapCache = regionalConnectionMapCache;
         EventCommunicator = eventCommunicator;
         eventLoop.RegisterSystem(this);
     }
@@ -45,7 +48,7 @@ public class ServerNetworkSystem : ISystem
     public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>
     {
         EventId.Server_Network_DisconnectClient,
-        EventId.Core_Movement_Move
+        EventId.Core_Tick
     };
 
     public int WorkloadEstimate => 5;
@@ -73,6 +76,10 @@ public class ServerNetworkSystem : ISystem
                     }
 
                     OnDisconnectClient((ConnectionIdEventDetails)ev.EventDetails);
+                    break;
+
+                case EventId.Core_Tick:
+                    regionalConnectionMapCache.OnTick();
                     break;
             }
 

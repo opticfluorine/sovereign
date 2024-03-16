@@ -40,7 +40,10 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Core_Movement_Move, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Movement_RequestMove, DeliveryMethod.ReliableUnordered },
         { EventId.Core_WorldManagement_EntityLeaveWorldSegment, DeliveryMethod.ReliableUnordered },
-        { EventId.Core_Network_Logout, DeliveryMethod.ReliableUnordered }
+        { EventId.Core_Network_Logout, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Chat_Send, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Chat_Local, DeliveryMethod.Unreliable },
+        { EventId.Core_Chat_Global, DeliveryMethod.Unreliable }
     };
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

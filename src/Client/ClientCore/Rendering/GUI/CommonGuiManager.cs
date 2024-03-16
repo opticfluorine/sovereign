@@ -19,6 +19,7 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+using Castle.Core.Logging;
 using ImGuiNET;
 using SDL2;
 using Sovereign.ClientCore.Rendering.Display;
@@ -76,6 +77,8 @@ public sealed class CommonGuiManager : IDisposable
 
         lastSystemTime = systemTimer.GetTime();
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void Dispose()
     {
@@ -220,7 +223,7 @@ public sealed class CommonGuiManager : IDisposable
                     io.AddMouseButtonEvent(button, ev.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN);
                 }
             }
-                shouldDispatch = !io.WantCaptureMouse;
+                shouldDispatch = !io.WantCaptureKeyboard;
                 break;
 
             case SDL.SDL_EventType.SDL_TEXTINPUT:

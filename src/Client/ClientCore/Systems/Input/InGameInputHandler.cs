@@ -38,7 +38,7 @@ public class InGameInputHandler : IInputHandler
 
     public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
     {
-        if (isKeyUp) inGameKeyboardShortcuts.OnKeyUp(details.Key);
+        if (!isKeyUp) inGameKeyboardShortcuts.OnKeyDown(details.Key);
 
         switch (details.Key)
         {

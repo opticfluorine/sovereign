@@ -20,7 +20,6 @@ using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
-using Sovereign.ServerCore.Systems.WorldManagement;
 
 namespace Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
 
@@ -31,24 +30,26 @@ public class WorldSegmentConnectionMapperFactory
 {
     private readonly AccountServices accountServices;
     private readonly NetworkConnectionManager connectionManager;
-    private readonly WorldManagementServices worldManagementServices;
+    private readonly RegionalConnectionMapCache regionalConnectionMapCache;
 
-    public WorldSegmentConnectionMapperFactory(WorldManagementServices worldManagementServices,
-        AccountServices accountServices, NetworkConnectionManager connectionManager)
+    public WorldSegmentConnectionMapperFactory(
+        AccountServices accountServices, NetworkConnectionManager connectionManager,
+        RegionalConnectionMapCache regionalConnectionMapCache)
     {
-        this.worldManagementServices = worldManagementServices;
         this.accountServices = accountServices;
         this.connectionManager = connectionManager;
+        this.regionalConnectionMapCache = regionalConnectionMapCache;
     }
 
     /// <summary>
     ///     Creates a new WorldSegmentConnectionMapper.
     /// </summary>
     /// <param name="mapper">Function taking an outbound event to its associated world segment index.</param>
+    /// <param name="radius">Length of side of a cube centered on the world segment to include in mapping.</param>
     /// <returns>Connection mapper.</returns>
-    public WorldSegmentConnectionMapper Create(Func<OutboundEventInfo, Maybe<GridPosition>> mapper)
+    public WorldSegmentConnectionMapper Create(Func<OutboundEventInfo, Maybe<GridPosition>> mapper, uint radius = 0)
     {
-        return new WorldSegmentConnectionMapper(worldManagementServices, accountServices,
-            connectionManager, mapper);
+        return new WorldSegmentConnectionMapper(accountServices,
+            connectionManager, regionalConnectionMapCache, radius, mapper);
     }
 }

@@ -49,10 +49,10 @@ public class InGameKeyboardShortcuts
     }
 
     /// <summary>
-    ///     Processes shortcuts when a key is released.
+    ///     Processes shortcuts when a key is pressed.
     /// </summary>
     /// <param name="key">Released key.</param>
-    public void OnKeyUp(SDL.SDL_Keycode key)
+    public void OnKeyDown(SDL.SDL_Keycode key)
     {
         if (shortcutTable.TryGetValue(key, out var action))
             action.Invoke();

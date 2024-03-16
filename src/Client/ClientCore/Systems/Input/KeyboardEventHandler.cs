@@ -93,6 +93,7 @@ public class KeyboardEventHandler
         var oldState = keyboardState[details.Key];
         keyboardState.KeyDown(details.Key);
 
+        globalKeyboardShortcuts.OnKeyDown(details.Key);
         DoStateSpecificProcessing(details, false, oldState);
     }
 
@@ -114,7 +115,6 @@ public class KeyboardEventHandler
         var oldState = keyboardState[details.Key];
         keyboardState.KeyUp(details.Key);
 
-        globalKeyboardShortcuts.OnKeyUp(details.Key);
         DoStateSpecificProcessing(details, true, oldState);
     }
 
