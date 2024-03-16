@@ -19,6 +19,11 @@ namespace Sovereign.EngineCore.Configuration;
 public static class ChatConstants
 {
     /// <summary>
+    ///     "Radius" of world segments around sender to send local chat messages.
+    /// </summary>
+    public const uint LocalChatWorldSegmentRadius = 1;
+
+    /// <summary>
     ///     Maximum chat message length, in Chars.
     /// </summary>
     public static int MaxMessageLengthChars = 140;
