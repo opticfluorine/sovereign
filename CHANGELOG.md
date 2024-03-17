@@ -4,6 +4,12 @@
 
 ### March
 
+#### 16 March 2024
+
+* Add chat-related events along with proper network routing for these events.
+* Add a client-side `ClientChatSystem` for managing chat functions in the client.
+* Send chat messages to server from the chat window.
+
 #### 11 March 2024
 
 * Add chat window that can be opened in-game by pressing Enter. It doesn't currently do anything.

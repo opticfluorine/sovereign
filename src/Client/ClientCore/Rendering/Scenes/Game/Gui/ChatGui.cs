@@ -16,6 +16,8 @@
 
 using System.Numerics;
 using ImGuiNET;
+using Sovereign.ClientCore.Systems.ClientChat;
+using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 
@@ -26,7 +28,17 @@ public class ChatGui
 {
     private static readonly Vector2 WindowRelPos = new(0.15f, 0.75f);
     private static readonly Vector2 TableScale = new(0.7f, 0.2f);
+    private readonly ClientChatController chatController;
+    private readonly ClientChatServices chatServices;
+    private readonly IEventSender eventSender;
     private string input = "";
+
+    public ChatGui(IEventSender eventSender, ClientChatServices chatServices, ClientChatController chatController)
+    {
+        this.eventSender = eventSender;
+        this.chatServices = chatServices;
+        this.chatController = chatController;
+    }
 
     /// <summary>
     ///     Renders the chat window.
@@ -62,5 +74,11 @@ public class ChatGui
     {
         // Ignore zero-length inputs.
         if (input.Length == 0) return;
+
+        // Send message.
+        chatController.SendChat(eventSender, input);
+
+        // Clear input buffer.
+        input = "";
     }
 }
