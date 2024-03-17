@@ -55,7 +55,11 @@ public class ChatGui
         if (ImGui.Begin("Chat", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar))
         {
             var tableDims = io.DisplaySize * TableScale;
-            if (ImGui.BeginTable("chat", 1, ImGuiTableFlags.ScrollY, tableDims)) ImGui.EndTable();
+            if (ImGui.BeginTable("chat", 1, ImGuiTableFlags.ScrollY, tableDims))
+            {
+                foreach (var entry in chatServices.ChatHistory) RenderChatEntry(entry);
+                ImGui.EndTable();
+            }
 
             ImGui.PushItemWidth(tableDims.X);
             if (ImGui.InputText("##chatInput", ref input, 128,
@@ -65,6 +69,15 @@ public class ChatGui
         }
 
         ImGui.PopStyleVar();
+    }
+
+    /// <summary>
+    ///     Renders a single entry from the chat history.
+    /// </summary>
+    /// <param name="entry">Chat history entry.</param>
+    private void RenderChatEntry(ChatHistoryEntry entry)
+    {
+        ImGui.TextColored(entry.Color, entry.Message);
     }
 
     /// <summary>
