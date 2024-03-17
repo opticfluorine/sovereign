@@ -86,6 +86,12 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             return new Maybe<GridPosition>(details.SegmentIndex);
         }, ChatConstants.LocalChatWorldSegmentRadius);
 
+        var systemChatMapper = singleConnMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not SystemChatEventDetails details) return new Maybe<int>();
+            return accountServices.GetConnectionIdForPlayer(details.TargetEntityId);
+        });
+
         // Configure specific connection mappers.
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
@@ -96,6 +102,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Core_WorldManagement_EntityLeaveWorldSegment] = entityGridMapper;
         specificMappers[EventId.Core_Chat_Local] = localChatMapper;
         specificMappers[EventId.Core_Chat_Global] = globalMapper;
+        specificMappers[EventId.Core_Chat_System] = systemChatMapper;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

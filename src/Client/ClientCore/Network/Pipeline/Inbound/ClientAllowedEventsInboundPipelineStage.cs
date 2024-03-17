@@ -41,7 +41,8 @@ public class ClientAllowedEventsInboundPipelineStage : IInboundPipelineStage
         EventId.Core_Movement_Move,
         EventId.Core_WorldManagement_EntityLeaveWorldSegment,
         EventId.Core_Chat_Global,
-        EventId.Core_Chat_Local
+        EventId.Core_Chat_Local,
+        EventId.Core_Chat_System
     };
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

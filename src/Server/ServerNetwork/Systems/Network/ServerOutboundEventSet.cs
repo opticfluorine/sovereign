@@ -33,6 +33,9 @@ public class ServerOutboundEventSet : IOutboundEventSet
         EventId.Client_EntitySynchronization_Sync,
         EventId.Client_EntitySynchronization_Desync,
         EventId.Core_Movement_Move,
-        EventId.Core_WorldManagement_EntityLeaveWorldSegment
+        EventId.Core_WorldManagement_EntityLeaveWorldSegment,
+        EventId.Core_Chat_Local,
+        EventId.Core_Chat_Global,
+        EventId.Core_Chat_System
     };
 }

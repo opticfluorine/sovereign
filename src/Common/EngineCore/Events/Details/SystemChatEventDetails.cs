@@ -14,18 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Configuration;
+using MessagePack;
 
-namespace Sovereign.EngineCore.Events.Details.Validators;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Event details validator for LocalChatEventDetails.
+///     Details for a system message sent via chat event.
 /// </summary>
-public class LocalChatEventDetailsValidator : IEventDetailsValidator
+[MessagePackObject]
+public class SystemChatEventDetails : IEventDetails
 {
-    public bool IsValid(IEventDetails? details)
-    {
-        if (details is not LocalChatEventDetails chatDetails) return false;
-        return chatDetails.Message.Length > 0 && chatDetails.Message.Length <= ChatConstants.MaxMessageLengthChars;
-    }
+    /// <summary>
+    ///     Player entity ID of recipient. Only meaningful on server side.
+    /// </summary>
+    [IgnoreMember]
+    public ulong TargetEntityId { get; set; }
+
+    /// <summary>
+    ///     Chat message.
+    /// </summary>
+    [Key(0)]
+    public string Message { get; set; } = "";
 }

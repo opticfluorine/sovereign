@@ -18,14 +18,11 @@ using Sovereign.EngineCore.Configuration;
 
 namespace Sovereign.EngineCore.Events.Details.Validators;
 
-/// <summary>
-///     Event details validator for LocalChatEventDetails.
-/// </summary>
-public class LocalChatEventDetailsValidator : IEventDetailsValidator
+public class SystemChatEventDetailsValidator : IEventDetailsValidator
 {
     public bool IsValid(IEventDetails? details)
     {
-        if (details is not LocalChatEventDetails chatDetails) return false;
+        if (details is not SystemChatEventDetails chatDetails) return false;
         return chatDetails.Message.Length > 0 && chatDetails.Message.Length <= ChatConstants.MaxMessageLengthChars;
     }
 }

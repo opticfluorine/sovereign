@@ -15,32 +15,24 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.Numerics;
 
-namespace Sovereign.ClientCore.Systems.ClientChat;
+namespace Sovereign.ServerCore.Systems.ServerChat;
 
 /// <summary>
-///     Constants for client-side chat.
+///     Interface for server-side chat message processors.
 /// </summary>
-public static class ClientChatConstants
+public interface IChatProcessor
 {
     /// <summary>
-    ///     Default entity name to use if the source entity name is unknown.
+    ///     List of case-insensitive command names that will route to this processor.
     /// </summary>
-    public const string UnknownName = "???";
+    List<string> MatchingCommands { get; }
 
     /// <summary>
-    ///     Default text colors for each type of chat.
+    ///     Processes a chat command that was routed to this chat processor.
     /// </summary>
-    public static readonly Dictionary<ChatType, Vector4> ChatTextColors = new()
-    {
-        { ChatType.Local, new Vector4(0.7f, 0.7f, 0.7f, 1.0f) },
-        { ChatType.Global, new Vector4(1.0f) },
-        { ChatType.System, new Vector4(0.5f, 0.5f, 0.5f, 1.0f) }
-    };
-
-    /// <summary>
-    ///     Default text color if the chat type is not known.
-    /// </summary>
-    public static readonly Vector4 DefaultTextColor = new(1.0f);
+    /// <param name="command">Command name. Will be a lowercase string.</param>
+    /// <param name="message">Remaining portion of the message following the command invocation.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    void ProcessChat(string command, string message, ulong senderEntityId);
 }

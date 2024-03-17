@@ -37,7 +37,9 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         EntityDesyncEventDetailsValidator entityDesyncValidator,
         EntityEventDetailsValidator entityValidator,
         ChatEventDetailsValidator chatValidator,
-        LocalChatEventDetailsValidator localChatValidator)
+        LocalChatEventDetailsValidator localChatValidator,
+        GlobalChatEventDetailsValidator globalChatValidator,
+        SystemChatEventDetailsValidator systemChatValidator)
     {
         validators = new Dictionary<EventId, IEventDetailsValidator>
         {
@@ -53,7 +55,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Network_Logout, entityValidator },
             { EventId.Core_Chat_Send, chatValidator },
             { EventId.Core_Chat_Local, localChatValidator },
-            { EventId.Core_Chat_Global, chatValidator }
+            { EventId.Core_Chat_Global, globalChatValidator },
+            { EventId.Core_Chat_System, systemChatValidator }
         };
     }
 

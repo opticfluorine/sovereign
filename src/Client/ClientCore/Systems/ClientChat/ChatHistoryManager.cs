@@ -53,13 +53,34 @@ public class ChatHistoryManager
         var name = names.HasComponentForEntity(originEntityId)
             ? names[originEntityId]
             : ClientChatConstants.UnknownName;
-        var fullMessage = $"{name}: {message}";
+        AddChat(type, message, name);
+    }
+
+    /// <summary>
+    ///     Adds a line to the chat history.
+    /// </summary>
+    /// <param name="type">Chat type.</param>
+    /// <param name="message">Chat message.</param>
+    /// <param name="originName">Name of the source.</param>
+    public void AddChat(ChatType type, string message, string originName)
+    {
+        var fullMessage = $"{originName}: {message}";
+        AddChat(type, fullMessage);
+    }
+
+    /// <summary>
+    ///     Adds a line to the chat history.
+    /// </summary>
+    /// <param name="type">Chat type.</param>
+    /// <param name="message">Chat message.</param>
+    public void AddChat(ChatType type, string message)
+    {
         if (!ClientChatConstants.ChatTextColors.TryGetValue(type, out var color))
         {
             color = ClientChatConstants.DefaultTextColor;
         }
 
         // Append the chat history.
-        history.Add(new ChatHistoryEntry { Message = fullMessage, Color = color });
+        history.Add(new ChatHistoryEntry { Message = message, Color = color });
     }
 }

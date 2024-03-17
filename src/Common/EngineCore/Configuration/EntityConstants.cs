@@ -14,18 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Configuration;
-
-namespace Sovereign.EngineCore.Events.Details.Validators;
+namespace Sovereign.EngineCore.Configuration;
 
 /// <summary>
-///     Event details validator for LocalChatEventDetails.
+///     Player-related constants shared by client and server.
 /// </summary>
-public class LocalChatEventDetailsValidator : IEventDetailsValidator
+public static class EntityConstants
 {
-    public bool IsValid(IEventDetails? details)
-    {
-        if (details is not LocalChatEventDetails chatDetails) return false;
-        return chatDetails.Message.Length > 0 && chatDetails.Message.Length <= ChatConstants.MaxMessageLengthChars;
-    }
+    /// <summary>
+    ///     Maximum entity name length.
+    /// </summary>
+    public const int MaxNameLength = 32;
 }

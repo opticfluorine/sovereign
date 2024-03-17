@@ -14,18 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Configuration;
+using MessagePack;
 
-namespace Sovereign.EngineCore.Events.Details.Validators;
+namespace Sovereign.EngineCore.Events.Details;
 
-/// <summary>
-///     Event details validator for LocalChatEventDetails.
-/// </summary>
-public class LocalChatEventDetailsValidator : IEventDetailsValidator
+[MessagePackObject]
+public class GlobalChatEventDetails : IEventDetails
 {
-    public bool IsValid(IEventDetails? details)
-    {
-        if (details is not LocalChatEventDetails chatDetails) return false;
-        return chatDetails.Message.Length > 0 && chatDetails.Message.Length <= ChatConstants.MaxMessageLengthChars;
-    }
+    /// <summary>
+    ///     Name of the player who sent the message. This is a string rather than an entity ID for global
+    ///     chat since the player entity may not be known to all clients.
+    /// </summary>
+    [Key(0)]
+    public string SenderName { get; set; } = "";
+
+    /// <summary>
+    ///     Chat message.
+    /// </summary>
+    [Key(1)]
+    public string Message { get; set; } = "";
 }

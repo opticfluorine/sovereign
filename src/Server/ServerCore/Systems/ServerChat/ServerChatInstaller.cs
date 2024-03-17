@@ -14,18 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Configuration;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+using Sovereign.EngineUtil.IoC;
 
-namespace Sovereign.EngineCore.Events.Details.Validators;
+namespace Sovereign.ServerCore.Systems.ServerChat;
 
-/// <summary>
-///     Event details validator for LocalChatEventDetails.
-/// </summary>
-public class LocalChatEventDetailsValidator : IEventDetailsValidator
+public class ServerChatInstaller : IWindsorInstaller
 {
-    public bool IsValid(IEventDetails? details)
+    public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        if (details is not LocalChatEventDetails chatDetails) return false;
-        return chatDetails.Message.Length > 0 && chatDetails.Message.Length <= ChatConstants.MaxMessageLengthChars;
+        container.Register(Component.For<ChatRouter>().LifestyleSingleton());
+        container.Register(EngineClasses.EngineAssemblies()
+            .BasedOn<IChatProcessor>()
+            .WithServiceDefaultInterfaces()
+            .LifestyleSingleton()
+            .AllowMultipleMatches());
     }
 }

@@ -14,18 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Configuration;
+using System.Collections.Generic;
+using Sovereign.EngineCore.Events.Details;
 
-namespace Sovereign.EngineCore.Events.Details.Validators;
+namespace Sovereign.ServerCore.Systems.ServerChat;
 
 /// <summary>
-///     Event details validator for LocalChatEventDetails.
+///     Routes incoming chat messages to the appropriate chat processor.
 /// </summary>
-public class LocalChatEventDetailsValidator : IEventDetailsValidator
+public class ChatRouter
 {
-    public bool IsValid(IEventDetails? details)
+    public ChatRouter(IList<IChatProcessor> processors)
     {
-        if (details is not LocalChatEventDetails chatDetails) return false;
-        return chatDetails.Message.Length > 0 && chatDetails.Message.Length <= ChatConstants.MaxMessageLengthChars;
+    }
+
+    /// <summary>
+    ///     Routes an incoming chat message to the appropriate chat processor.
+    /// </summary>
+    /// <param name="details"></param>
+    public void RouteChatMessage(ChatEventDetails details)
+    {
     }
 }

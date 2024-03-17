@@ -14,18 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Components.Validators;
 using Sovereign.EngineCore.Configuration;
 
 namespace Sovereign.EngineCore.Events.Details.Validators;
 
 /// <summary>
-///     Event details validator for LocalChatEventDetails.
+///     Event details validator for global chat events.
 /// </summary>
-public class LocalChatEventDetailsValidator : IEventDetailsValidator
+public class GlobalChatEventDetailsValidator : IEventDetailsValidator
 {
+    private readonly NameComponentValidator nameComponentValidator;
+
+    public GlobalChatEventDetailsValidator(NameComponentValidator nameComponentValidator)
+    {
+        this.nameComponentValidator = nameComponentValidator;
+    }
+
     public bool IsValid(IEventDetails? details)
     {
-        if (details is not LocalChatEventDetails chatDetails) return false;
-        return chatDetails.Message.Length > 0 && chatDetails.Message.Length <= ChatConstants.MaxMessageLengthChars;
+        if (details is not GlobalChatEventDetails chatDetails) return false;
+        return nameComponentValidator.IsValid(chatDetails.SenderName) && chatDetails.Message.Length > 0
+                                                                      && chatDetails.Message.Length <=
+                                                                      ChatConstants.MaxMessageLengthChars;
     }
 }

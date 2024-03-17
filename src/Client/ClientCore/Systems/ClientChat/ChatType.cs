@@ -29,5 +29,10 @@ public enum ChatType
     /// <summary>
     ///     Global chat.
     /// </summary>
-    Global
+    Global,
+
+    /// <summary>
+    ///     System message.
+    /// </summary>
+    System
 }

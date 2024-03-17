@@ -47,7 +47,8 @@ public class ClientChatSystem : ISystem
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
         EventId.Core_Chat_Local,
-        EventId.Core_Chat_Global
+        EventId.Core_Chat_Global,
+        EventId.Core_Chat_System
     };
 
     public int WorkloadEstimate => 20;
@@ -82,13 +83,25 @@ public class ClientChatSystem : ISystem
 
                 case EventId.Core_Chat_Global:
                 {
-                    if (ev.EventDetails is not ChatEventDetails details)
+                    if (ev.EventDetails is not GlobalChatEventDetails details)
                     {
                         Logger.Warn("Received global chat without details.");
                         break;
                     }
 
                     OnGlobalChat(details);
+                }
+                    break;
+
+                case EventId.Core_Chat_System:
+                {
+                    if (ev.EventDetails is not SystemChatEventDetails details)
+                    {
+                        Logger.Warn("Received system chat without details.");
+                        break;
+                    }
+
+                    OnSystemChat(details);
                 }
                     break;
             }
@@ -110,8 +123,17 @@ public class ClientChatSystem : ISystem
     ///     Called when a global chat message is received.
     /// </summary>
     /// <param name="details">Details.</param>
-    private void OnGlobalChat(ChatEventDetails details)
+    private void OnGlobalChat(GlobalChatEventDetails details)
     {
-        chatHistoryManager.AddChat(ChatType.Global, details.Message, details.SenderEntityId);
+        chatHistoryManager.AddChat(ChatType.Global, details.Message, details.SenderName);
+    }
+
+    /// <summary>
+    ///     Called when a system message is received.
+    /// </summary>
+    /// <param name="details">Details.</param>
+    private void OnSystemChat(SystemChatEventDetails details)
+    {
+        chatHistoryManager.AddChat(ChatType.System, details.Message);
     }
 }

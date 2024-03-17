@@ -178,6 +178,12 @@ public enum EventId
     /// Associated details: ChatEventDetails
     Core_Chat_Global = 802,
 
+    /// <summary>
+    ///     Sent from server to client to deliver a system message.
+    /// </summary>
+    /// Associated details: SystemChatEventDetails
+    Core_Chat_System = 803,
+
     #endregion Chat
 
     #endregion Core
