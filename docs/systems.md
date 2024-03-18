@@ -39,6 +39,7 @@ Server systems are only present in the server.
 | `Accounts`         | `AccountsSystem`         | Responsible for managing the locked account list.                 |
 | `Debug`            | `DebugSystem`            | Responsible for providing a debug interface for test.             |
 | `Persistence`      | `PersistenceSystem`      | Responsible for managing the database.                            |
+| `ServerChat`       | `ServerChatSystem`       | Responsible for managing chat functions in the server.            |
 | `ServerManagement` | `ServerManagementSystem` | Responsible for managing the engine in its server configuration.  |
 | `ServerNetwork`    | `ServerNetworkSystem`    | Responsible for managing server network resources.                |
 | `WorldManagement`  | `WorldManagementSystem`  | Responsible for managing the in-memory lifecycle of all entities. |

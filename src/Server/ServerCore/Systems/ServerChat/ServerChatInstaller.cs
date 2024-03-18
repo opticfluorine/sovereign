@@ -31,5 +31,6 @@ public class ServerChatInstaller : IWindsorInstaller
             .WithServiceDefaultInterfaces()
             .LifestyleSingleton()
             .AllowMultipleMatches());
+        container.Register(Component.For<ServerChatInternalController>().LifestyleSingleton());
     }
 }

@@ -4,6 +4,13 @@
 
 ### March
 
+#### 17 March 2024
+
+* Add chat routing to server with command processing support.
+* Add a new "system chat" event for delivery of system messages from server to single client.
+* Add support for local and global chat. Chat is mostly implemented now, still need to test. I also want to
+  add a `/help` command that provides a list of all known commands.
+
 #### 16 March 2024
 
 * Add chat-related events along with proper network routing for these events.

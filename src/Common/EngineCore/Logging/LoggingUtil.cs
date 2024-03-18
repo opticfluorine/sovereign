@@ -14,22 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Components;
 
-public static class ChatConstants
+namespace Sovereign.EngineCore.Logging;
+
+public class LoggingUtil
 {
-    /// <summary>
-    ///     "Radius" of world segments around sender to send local chat messages.
-    /// </summary>
-    public const uint LocalChatWorldSegmentRadius = 1;
+    private readonly NameComponentCollection names;
+
+    public LoggingUtil(NameComponentCollection names)
+    {
+        this.names = names;
+    }
 
     /// <summary>
-    ///     Maximum chat message length, in Chars.
+    ///     Formats an entity using its name or ID depending on what information is available.
     /// </summary>
-    public const int MaxMessageLengthChars = 140;
-
-    /// <summary>
-    ///     Character that denotes a chat command.
-    /// </summary>
-    public const char CommandPrefix = '/';
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>Formatted string.</returns>
+    public string FormatEntity(ulong entityId)
+    {
+        return names.HasComponentForEntity(entityId) ? names[entityId] : $"Entity ID {entityId}";
+    }
 }
