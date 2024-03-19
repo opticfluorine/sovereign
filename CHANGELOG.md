@@ -4,6 +4,14 @@
 
 ### March
 
+#### 18 March 2024
+
+* Add `/help` command to list other chat commands.
+* Lock chat window scroll to bottom if the chat window is already scrolled to the bottom, this way new
+  chat messages automatically scroll into view. On the other hand, the lock is released if the chat window
+  is scrolled up, so it's possible to look back at earlier chat messages without a constant annoying
+  automatic scroll.
+
 #### 17 March 2024
 
 * Add chat routing to server with command processing support.

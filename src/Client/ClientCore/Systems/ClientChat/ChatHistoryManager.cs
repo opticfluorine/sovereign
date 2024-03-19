@@ -76,9 +76,7 @@ public class ChatHistoryManager
     public void AddChat(ChatType type, string message)
     {
         if (!ClientChatConstants.ChatTextColors.TryGetValue(type, out var color))
-        {
             color = ClientChatConstants.DefaultTextColor;
-        }
 
         // Append the chat history.
         history.Add(new ChatHistoryEntry { Message = message, Color = color });

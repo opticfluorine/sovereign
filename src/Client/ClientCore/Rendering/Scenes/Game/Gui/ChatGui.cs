@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Numerics;
+using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Systems.ClientChat;
 using Sovereign.EngineCore.Events;
@@ -32,6 +34,8 @@ public class ChatGui
     private readonly ClientChatServices chatServices;
     private readonly IEventSender eventSender;
     private string input = "";
+    private int lastHistoryCount;
+    private bool lockScrollToBottom = true;
 
     public ChatGui(IEventSender eventSender, ClientChatServices chatServices, ClientChatController chatController)
     {
@@ -39,6 +43,8 @@ public class ChatGui
         this.chatServices = chatServices;
         this.chatController = chatController;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Renders the chat window.
@@ -55,13 +61,23 @@ public class ChatGui
         if (ImGui.Begin("Chat", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar))
         {
             var tableDims = io.DisplaySize * TableScale;
-            if (ImGui.BeginTable("chat", 1, ImGuiTableFlags.ScrollY, tableDims))
+            if (ImGui.BeginTable("chat", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, tableDims))
             {
+                // Draw chat entries.
                 foreach (var entry in chatServices.ChatHistory) RenderChatEntry(entry);
+
+                // If scrolled all the way down, keep scrolling down with new messages.
+                if (lastHistoryCount == chatServices.ChatHistory.Count)
+                    lockScrollToBottom = Math.Abs(ImGui.GetScrollY() - ImGui.GetScrollMaxY()) < 1e-3;
+                if (lockScrollToBottom) ImGui.SetScrollHereY(1.0f);
+                lastHistoryCount = chatServices.ChatHistory.Count;
+
                 ImGui.EndTable();
             }
 
             ImGui.PushItemWidth(tableDims.X);
+            if (ImGui.IsWindowFocused()) ImGui.SetKeyboardFocusHere();
+
             if (ImGui.InputText("##chatInput", ref input, 128,
                     ImGuiInputTextFlags.EnterReturnsTrue)) OnSubmit();
             ImGui.PopItemWidth();
