@@ -158,6 +158,34 @@ public enum EventId
 
     #endregion Network
 
+    #region Chat
+
+    /// <summary>
+    ///     Sent from client to server to send a chat message.
+    /// </summary>
+    /// Associated details: ChatEventDetails
+    Core_Chat_Send = 800,
+
+    /// <summary>
+    ///     Sent from server to client to deliver a local chat message.
+    /// </summary>
+    /// Associated details: LocalChatEventDetails
+    Core_Chat_Local = 801,
+
+    /// <summary>
+    ///     Sent from server to client to deliver a global chat message.
+    /// </summary>
+    /// Associated details: ChatEventDetails
+    Core_Chat_Global = 802,
+
+    /// <summary>
+    ///     Sent from server to client to deliver a system message.
+    /// </summary>
+    /// Associated details: SystemChatEventDetails
+    Core_Chat_System = 803,
+
+    #endregion Chat
+
     #endregion Core
 
     #region Client

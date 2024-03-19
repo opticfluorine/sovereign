@@ -46,6 +46,7 @@ public class LoginGui
     private string errorText = "";
     private LoginState loginState = LoginState.Input;
     private string passwordInput = "";
+    private bool setDefaultFocus = true;
     private string usernameInput = "";
 
     public LoginGui(ClientNetworkManager networkManager, IEventSender eventSender,
@@ -106,12 +107,20 @@ public class LoginGui
 
         ImGui.Text(Username);
         ImGui.SameLine();
-        ImGui.InputText("##username", ref usernameInput, MaxFieldSize);
+        if (setDefaultFocus)
+        {
+            ImGui.SetKeyboardFocusHere();
+            setDefaultFocus = false;
+        }
+
+        if (ImGui.InputText("##username", ref usernameInput, MaxFieldSize,
+                ImGuiInputTextFlags.EnterReturnsTrue)) DoLogin();
         ImGui.SetItemDefaultFocus();
 
         ImGui.Text(Password);
         ImGui.SameLine();
-        ImGui.InputText("##password", ref passwordInput, MaxFieldSize, ImGuiInputTextFlags.Password);
+        if (ImGui.InputText("##password", ref passwordInput, MaxFieldSize,
+                ImGuiInputTextFlags.Password | ImGuiInputTextFlags.EnterReturnsTrue)) DoLogin();
 
         if (ImGui.Button(Login)) DoLogin();
         ImGui.SameLine();
@@ -187,6 +196,7 @@ public class LoginGui
         loginState = LoginState.Input;
         usernameInput = "";
         passwordInput = "";
+        setDefaultFocus = true;
     }
 
     /// <summary>

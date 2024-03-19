@@ -25,7 +25,7 @@ using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.EngineCore.World;
 
-namespace Sovereign.ClientCore.Rendering.Scenes.Game.Debug;
+namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 
 /// <summary>
 ///     Debug window for player information.

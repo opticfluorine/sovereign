@@ -20,7 +20,6 @@ using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
-using Sovereign.ServerCore.Systems.WorldManagement;
 
 namespace Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
 
@@ -32,22 +31,26 @@ public class WorldSegmentConnectionMapper : ISpecificConnectionMapper
     private readonly AccountServices accountServices;
     private readonly NetworkConnectionManager connectionManager;
     private readonly Func<OutboundEventInfo, Maybe<GridPosition>> mapper;
-    private readonly WorldManagementServices worldManagementServices;
+    private readonly uint radius;
+    private readonly RegionalConnectionMapCache regionalConnectionMapCache;
 
     /// <summary>
     ///     Creates a connection mapper.
     /// </summary>
-    /// <param name="worldManagementServices">World management services.</param>
     /// <param name="accountServices">Account services.</param>
     /// <param name="connectionManager">Connection manager.</param>
+    /// <param name="radius">Radius around world segment to include.</param>
+    /// <param name="regionalConnectionMapCache">Regional mapping cache.</param>
     /// <param name="mapper">Function taking an outbound event to the associated world segment.</param>
-    public WorldSegmentConnectionMapper(WorldManagementServices worldManagementServices,
+    public WorldSegmentConnectionMapper(
         AccountServices accountServices, NetworkConnectionManager connectionManager,
+        RegionalConnectionMapCache regionalConnectionMapCache, uint radius,
         Func<OutboundEventInfo, Maybe<GridPosition>> mapper)
     {
-        this.worldManagementServices = worldManagementServices;
         this.accountServices = accountServices;
         this.connectionManager = connectionManager;
+        this.regionalConnectionMapCache = regionalConnectionMapCache;
+        this.radius = radius;
         this.mapper = mapper;
     }
 
@@ -57,7 +60,7 @@ public class WorldSegmentConnectionMapper : ISpecificConnectionMapper
         var segmentIndex = mapper.Invoke(evInfo);
         if (!segmentIndex.HasValue) return;
 
-        var subscribedPlayers = worldManagementServices.GetPlayersSubscribedToWorldSegment(segmentIndex.Value);
+        var subscribedPlayers = regionalConnectionMapCache.GetPlayersNearWorldSegment(segmentIndex.Value, radius);
         foreach (var playerEntityId in subscribedPlayers)
         {
             var connectionId = accountServices.GetConnectionIdForPlayer(playerEntityId);

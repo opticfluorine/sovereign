@@ -31,6 +31,10 @@ namespace Sovereign.EngineCore.Events;
 [Union(5, typeof(RequestMoveEventDetails))]
 [Union(6, typeof(EntityChangeWorldSegmentEventDetails))]
 [Union(7, typeof(EntityDesyncEventDetails))]
+[Union(8, typeof(ChatEventDetails))]
+[Union(9, typeof(LocalChatEventDetails))]
+[Union(10, typeof(GlobalChatEventDetails))]
+[Union(11, typeof(SystemChatEventDetails))]
 public interface IEventDetails
 {
 }

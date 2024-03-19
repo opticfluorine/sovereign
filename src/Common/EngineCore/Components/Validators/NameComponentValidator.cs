@@ -16,6 +16,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
+using Sovereign.EngineCore.Configuration;
 
 namespace Sovereign.EngineCore.Components.Validators;
 
@@ -24,11 +25,6 @@ namespace Sovereign.EngineCore.Components.Validators;
 /// </summary>
 public class NameComponentValidator
 {
-    /// <summary>
-    ///     Maximum length of a name.
-    /// </summary>
-    public const int MaxLength = 64;
-
     /// <summary>
     ///     Regular expression for name validation.
     /// </summary>
@@ -41,6 +37,6 @@ public class NameComponentValidator
     /// <returns>true if valid, false otherwise.</returns>
     public bool IsValid([NotNullWhen(true)] string? name)
     {
-        return name is { Length: > 0 and <= MaxLength } && validNameRegex.IsMatch(name);
+        return name is { Length: > 0 and <= EntityConstants.MaxNameLength } && validNameRegex.IsMatch(name);
     }
 }

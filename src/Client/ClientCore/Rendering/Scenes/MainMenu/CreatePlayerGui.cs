@@ -46,6 +46,7 @@ public class CreatePlayerGui
 
     private string errorMessage = "";
     private string playerNameInput = "";
+    private bool setDefaultFocus = true;
 
     public CreatePlayerGui(PlayerManagementClient client)
     {
@@ -100,7 +101,14 @@ public class CreatePlayerGui
         ImGui.TableNextColumn();
         ImGui.Text("Player name:");
         ImGui.TableNextColumn();
-        ImGui.InputText("##playerName", ref playerNameInput, MaxPlayerNameLen);
+        if (setDefaultFocus)
+        {
+            ImGui.SetKeyboardFocusHere();
+            setDefaultFocus = false;
+        }
+
+        if (ImGui.InputText("##playerName", ref playerNameInput, MaxPlayerNameLen,
+                ImGuiInputTextFlags.EnterReturnsTrue)) OnCreate();
 
         ImGui.EndTable();
 
@@ -187,6 +195,7 @@ public class CreatePlayerGui
     private void Reset()
     {
         createState = CreatePlayerState.Input;
+        setDefaultFocus = true;
     }
 
     /// <summary>

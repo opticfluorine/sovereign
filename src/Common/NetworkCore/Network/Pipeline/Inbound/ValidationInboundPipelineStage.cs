@@ -27,7 +27,6 @@ namespace Sovereign.NetworkCore.Network.Pipeline.Inbound;
 /// </summary>
 public class ValidationInboundPipelineStage : IInboundPipelineStage
 {
-    private readonly NullEventDetailsValidator nullValidator;
     private readonly Dictionary<EventId, IEventDetailsValidator> validators;
 
     public ValidationInboundPipelineStage(NullEventDetailsValidator nullValidator,
@@ -36,9 +35,12 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         MoveEventDetailsValidator moveValidator, RequestMoveEventDetailsValidator requestMoveValidator,
         EntityGridPositionEventDetailsValidator entityGridPositionValidator,
         EntityDesyncEventDetailsValidator entityDesyncValidator,
-        EntityEventDetailsValidator entityValidator)
+        EntityEventDetailsValidator entityValidator,
+        ChatEventDetailsValidator chatValidator,
+        LocalChatEventDetailsValidator localChatValidator,
+        GlobalChatEventDetailsValidator globalChatValidator,
+        SystemChatEventDetailsValidator systemChatValidator)
     {
-        this.nullValidator = nullValidator;
         validators = new Dictionary<EventId, IEventDetailsValidator>
         {
             { EventId.Core_Ping_Ping, nullValidator },
@@ -50,7 +52,11 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Movement_Move, moveValidator },
             { EventId.Core_Movement_RequestMove, requestMoveValidator },
             { EventId.Core_WorldManagement_EntityLeaveWorldSegment, entityGridPositionValidator },
-            { EventId.Core_Network_Logout, entityValidator }
+            { EventId.Core_Network_Logout, entityValidator },
+            { EventId.Core_Chat_Send, chatValidator },
+            { EventId.Core_Chat_Local, localChatValidator },
+            { EventId.Core_Chat_Global, globalChatValidator },
+            { EventId.Core_Chat_System, systemChatValidator }
         };
     }
 

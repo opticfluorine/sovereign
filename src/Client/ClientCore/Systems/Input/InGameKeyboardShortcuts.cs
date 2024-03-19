@@ -42,16 +42,17 @@ public class InGameKeyboardShortcuts
         this.stateController = stateController;
 
         // For now the shortcuts are hardcoded.
+        shortcutTable[SDL.SDL_Keycode.SDLK_RETURN] = () => Toggle(ClientStateFlag.ShowChat);
         shortcutTable[SDL.SDL_Keycode.SDLK_ESCAPE] = () => Toggle(ClientStateFlag.ShowInGameMenu);
         shortcutTable[SDL.SDL_Keycode.SDLK_F2] = () => Toggle(ClientStateFlag.ShowPlayerDebug);
         shortcutTable[SDL.SDL_Keycode.SDLK_F3] = () => Toggle(ClientStateFlag.ShowEntityDebug);
     }
 
     /// <summary>
-    ///     Processes shortcuts when a key is released.
+    ///     Processes shortcuts when a key is pressed.
     /// </summary>
     /// <param name="key">Released key.</param>
-    public void OnKeyUp(SDL.SDL_Keycode key)
+    public void OnKeyDown(SDL.SDL_Keycode key)
     {
         if (shortcutTable.TryGetValue(key, out var action))
             action.Invoke();

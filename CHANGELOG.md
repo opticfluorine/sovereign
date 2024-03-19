@@ -4,6 +4,32 @@
 
 ### March
 
+#### 18 March 2024
+
+* Add `/help` command to list other chat commands.
+* Lock chat window scroll to bottom if the chat window is already scrolled to the bottom, this way new
+  chat messages automatically scroll into view. On the other hand, the lock is released if the chat window
+  is scrolled up, so it's possible to look back at earlier chat messages without a constant annoying
+  automatic scroll.
+* Improve startup GUIs to set default focus, accept Enter key to process forms.
+
+#### 17 March 2024
+
+* Add chat routing to server with command processing support.
+* Add a new "system chat" event for delivery of system messages from server to single client.
+* Add support for local and global chat. Chat is mostly implemented now, still need to test. I also want to
+  add a `/help` command that provides a list of all known commands.
+
+#### 16 March 2024
+
+* Add chat-related events along with proper network routing for these events.
+* Add a client-side `ClientChatSystem` for managing chat functions in the client.
+* Send chat messages to server from the chat window.
+
+#### 11 March 2024
+
+* Add chat window that can be opened in-game by pressing Enter. It doesn't currently do anything.
+
 #### 10 March 2024
 
 * Fix issues with missing runtime dependencies in the Windows build of the client.

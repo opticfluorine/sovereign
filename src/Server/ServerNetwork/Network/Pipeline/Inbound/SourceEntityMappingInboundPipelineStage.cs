@@ -44,7 +44,8 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
         mappers = new Dictionary<EventId, Action<IEventDetails, ulong>>
         {
             { EventId.Core_Movement_RequestMove, RequestMoveEventMapper },
-            { EventId.Core_Network_Logout, EntityEventMapper }
+            { EventId.Core_Network_Logout, EntityEventMapper },
+            { EventId.Core_Chat_Send, ChatEventMapper }
         };
     }
 
@@ -77,10 +78,20 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
     /// <summary>
     ///     Mapper for EntityEventDetails events.
     /// </summary>
-    /// <param name="details"></param>
-    /// <param name="entityId"></param>
+    /// <param name="details">Event details.</param>
+    /// <param name="entityId">Player entity ID.</param>
     private static void EntityEventMapper(IEventDetails details, ulong entityId)
     {
         ((EntityEventDetails)details).EntityId = entityId;
+    }
+
+    /// <summary>
+    ///     Mapper for ChatEventDetails events.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    /// <param name="entityId">Player entity ID.</param>
+    private static void ChatEventMapper(IEventDetails details, ulong entityId)
+    {
+        ((ChatEventDetails)details).SenderEntityId = entityId;
     }
 }

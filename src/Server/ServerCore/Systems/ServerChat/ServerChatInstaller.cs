@@ -17,14 +17,21 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
+using Sovereign.EngineUtil.IoC;
 
-namespace Sovereign.ClientCore.Rendering.Scenes.Game.Debug;
+namespace Sovereign.ServerCore.Systems.ServerChat;
 
-public class GameDebugInstaller : IWindsorInstaller
+public class ServerChatInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(Component.For<PlayerDebugGui>().LifestyleSingleton());
-        container.Register(Component.For<EntityDebugGui>().LifestyleSingleton());
+        container.Register(Component.For<ChatRouter>().LifestyleSingleton());
+        container.Register(EngineClasses.EngineAssemblies()
+            .BasedOn<IChatProcessor>()
+            .WithServiceDefaultInterfaces()
+            .LifestyleSingleton()
+            .AllowMultipleMatches());
+        container.Register(Component.For<ServerChatInternalController>().LifestyleSingleton());
+        container.Register(Component.For<ChatHelpManager>().LifestyleSingleton());
     }
 }
