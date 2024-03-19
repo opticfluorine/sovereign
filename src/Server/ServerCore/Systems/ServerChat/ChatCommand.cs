@@ -14,24 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Sovereign.EngineUtil.IoC;
-
 namespace Sovereign.ServerCore.Systems.ServerChat;
 
-public class ServerChatInstaller : IWindsorInstaller
+public struct ChatCommand
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
-    {
-        container.Register(Component.For<ChatRouter>().LifestyleSingleton());
-        container.Register(EngineClasses.EngineAssemblies()
-            .BasedOn<IChatProcessor>()
-            .WithServiceDefaultInterfaces()
-            .LifestyleSingleton()
-            .AllowMultipleMatches());
-        container.Register(Component.For<ServerChatInternalController>().LifestyleSingleton());
-        container.Register(Component.For<ChatHelpManager>().LifestyleSingleton());
-    }
+    /// <summary>
+    ///     Name of command.
+    /// </summary>
+    public string Command { get; set; }
+
+    /// <summary>
+    ///     One-liner help text describing the command.
+    /// </summary>
+    public string HelpSummary { get; set; }
 }

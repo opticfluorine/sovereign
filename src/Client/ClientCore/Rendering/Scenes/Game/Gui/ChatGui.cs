@@ -77,6 +77,7 @@ public class ChatGui
     /// <param name="entry">Chat history entry.</param>
     private void RenderChatEntry(ChatHistoryEntry entry)
     {
+        ImGui.TableNextColumn();
         ImGui.TextColored(entry.Color, entry.Message);
     }
 

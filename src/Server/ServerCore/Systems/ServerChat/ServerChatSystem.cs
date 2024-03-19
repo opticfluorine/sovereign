@@ -15,7 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 
 namespace Sovereign.ServerCore.Systems.ServerChat;
@@ -25,13 +27,17 @@ namespace Sovereign.ServerCore.Systems.ServerChat;
 /// </summary>
 public class ServerChatSystem : ISystem
 {
-    private readonly IEventLoop eventLoop;
+    private readonly ChatRouter router;
 
-    public ServerChatSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop)
+    public ServerChatSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, ChatRouter router)
     {
-        this.eventLoop = eventLoop;
+        this.router = router;
         EventCommunicator = eventCommunicator;
+
+        eventLoop.RegisterSystem(this);
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 
@@ -58,6 +64,15 @@ public class ServerChatSystem : ISystem
             switch (ev.EventId)
             {
                 case EventId.Core_Chat_Send:
+                {
+                    if (ev.EventDetails is not ChatEventDetails details)
+                    {
+                        Logger.Error("Received chat event without details.");
+                        break;
+                    }
+
+                    router.RouteChatMessage(details);
+                }
                     break;
             }
 

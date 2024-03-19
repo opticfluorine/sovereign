@@ -30,6 +30,12 @@ namespace Sovereign.ServerCore.Systems.ServerChat;
 /// </summary>
 public class ChatRouter
 {
+    /// <summary>
+    ///     Name of the help command.
+    /// </summary>
+    private const string HelpCommand = "help";
+
+    private readonly ChatHelpManager helpManager;
     private readonly ServerChatInternalController internalController;
     private readonly LoggingUtil loggingUtil;
     private readonly PositionComponentCollection positions;
@@ -42,22 +48,25 @@ public class ChatRouter
     private readonly WorldSegmentResolver resolver;
 
     public ChatRouter(IList<IChatProcessor> processors, ServerChatInternalController internalController,
-        PositionComponentCollection positions, WorldSegmentResolver resolver, LoggingUtil loggingUtil)
+        PositionComponentCollection positions, WorldSegmentResolver resolver, LoggingUtil loggingUtil,
+        ChatHelpManager helpManager)
     {
         this.internalController = internalController;
         this.positions = positions;
         this.resolver = resolver;
         this.loggingUtil = loggingUtil;
+        this.helpManager = helpManager;
+
         // Build lookup table.
         foreach (var proc in processors)
         {
             foreach (var command in proc.MatchingCommands)
             {
-                var lowerCommand = command.ToLower();
+                var lowerCommand = command.Command.ToLower();
                 if (processorsByCommand.TryGetValue(lowerCommand, out var otherProc))
                 {
                     Logger.WarnFormat("Command {0} already registered by {1}; {2} will not be used for this command.",
-                        command, otherProc.GetType(), proc.GetType());
+                        command.Command, otherProc.GetType(), proc.GetType());
                     continue;
                 }
 
@@ -76,7 +85,11 @@ public class ChatRouter
     {
         if (TryTokenizeCommand(details, out var command, out var remainder))
         {
-            if (processorsByCommand.TryGetValue(command, out var processor))
+            if (command.Equals(HelpCommand))
+            {
+                helpManager.SendHelp(details.SenderEntityId);
+            }
+            else if (processorsByCommand.TryGetValue(command, out var processor))
             {
                 processor.ProcessChat(command, remainder, details.SenderEntityId);
             }

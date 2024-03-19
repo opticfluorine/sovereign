@@ -21,7 +21,11 @@ public static class ChatConstants
     /// <summary>
     ///     "Radius" of world segments around sender to send local chat messages.
     /// </summary>
-    public const uint LocalChatWorldSegmentRadius = 1;
+    /// <remarks>
+    ///     Players are already subscribed to neighboring world segments, so the
+    ///     effective radius is one larger than this value.
+    /// </remarks>
+    public const uint LocalChatWorldSegmentRadius = 0;
 
     /// <summary>
     ///     Maximum chat message length, in Chars.

@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Systems;
 
 namespace Sovereign.ClientCore.Systems.ClientChat;
@@ -29,12 +30,14 @@ public class ClientChatSystem : ISystem
 {
     private readonly ChatHistoryManager chatHistoryManager;
     private readonly IEventLoop eventLoop;
+    private readonly LoggingUtil loggingUtil;
 
     public ClientChatSystem(IEventLoop eventLoop, EventCommunicator eventCommunicator,
-        ChatHistoryManager chatHistoryManager)
+        ChatHistoryManager chatHistoryManager, LoggingUtil loggingUtil)
     {
         this.eventLoop = eventLoop;
         this.chatHistoryManager = chatHistoryManager;
+        this.loggingUtil = loggingUtil;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
@@ -116,6 +119,7 @@ public class ClientChatSystem : ISystem
     /// <param name="details">Details.</param>
     private void OnLocalChat(LocalChatEventDetails details)
     {
+        Logger.InfoFormat("[Local] {0}: {1}", loggingUtil.FormatEntity(details.SenderEntityId), details.Message);
         chatHistoryManager.AddChat(ChatType.Local, details.Message, details.SenderEntityId);
     }
 
@@ -125,6 +129,7 @@ public class ClientChatSystem : ISystem
     /// <param name="details">Details.</param>
     private void OnGlobalChat(GlobalChatEventDetails details)
     {
+        Logger.InfoFormat("[Global] {0}: {1}", details.SenderName, details.Message);
         chatHistoryManager.AddChat(ChatType.Global, details.Message, details.SenderName);
     }
 
@@ -134,6 +139,7 @@ public class ClientChatSystem : ISystem
     /// <param name="details">Details.</param>
     private void OnSystemChat(SystemChatEventDetails details)
     {
+        Logger.InfoFormat("[System] {0}", details.Message);
         chatHistoryManager.AddChat(ChatType.System, details.Message);
     }
 }

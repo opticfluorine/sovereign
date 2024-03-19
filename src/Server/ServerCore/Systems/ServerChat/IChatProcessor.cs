@@ -26,7 +26,7 @@ public interface IChatProcessor
     /// <summary>
     ///     List of case-insensitive command names that will route to this processor.
     /// </summary>
-    List<string> MatchingCommands { get; }
+    List<ChatCommand> MatchingCommands { get; }
 
     /// <summary>
     ///     Processes a chat command that was routed to this chat processor.

@@ -25,6 +25,7 @@ namespace Sovereign.ServerCore.Systems.ServerChat;
 /// </summary>
 public class GlobalChatProcessor : IChatProcessor
 {
+    private const string HelpText = "Send a global chat message.";
     private readonly ServerChatInternalController internalController;
     private readonly LoggingUtil loggingUtil;
 
@@ -36,10 +37,9 @@ public class GlobalChatProcessor : IChatProcessor
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-    public List<string> MatchingCommands => new()
+    public List<ChatCommand> MatchingCommands => new()
     {
-        "g",
-        "global"
+        new ChatCommand { Command = "g", HelpSummary = HelpText }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)
