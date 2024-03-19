@@ -48,7 +48,7 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 
 ### Install Dependencies
 
-Sovereign Engine requires the .NET 6 (or later) SDK and SQLite 3.x to be 
+Sovereign Engine requires the .NET 6 (or later) SDK and SQLite 3.x to be
 installed on your system.
 
 ### Server
@@ -94,6 +94,7 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 |------------|----------------------------------------|
 | Esc        | Open in-game menu                      |
 | Arrow keys | Move player                            |
+| Enter      | Toggle chat                            |
 | F2         | Toggle Player Debug Window             |
 | F3         | Toggle Entity Debug Window             |
 | F10        | Toggle Dear ImGui ID Stack Tool        |
