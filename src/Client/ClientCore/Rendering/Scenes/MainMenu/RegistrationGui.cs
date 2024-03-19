@@ -68,6 +68,8 @@ public class RegistrationGui
     /// </summary>
     private Task<Option<RegistrationResponse, string>>? registrationTask;
 
+    private bool setDefaultFocus = true;
+
     private string usernameInput = "";
 
     public RegistrationGui(RegistrationClient registrationClient, ClientConfigurationManager configManager)
@@ -126,20 +128,28 @@ public class RegistrationGui
             ImGui.Text(Username);
             ImGui.TableNextColumn();
             ImGui.PushItemWidth(-4.0f);
-            ImGui.InputText("##username", ref usernameInput, MaxFieldSize);
-            ImGui.SetItemDefaultFocus();
+            if (setDefaultFocus)
+            {
+                ImGui.SetKeyboardFocusHere();
+                setDefaultFocus = false;
+            }
+
+            if (ImGui.InputText("##username", ref usernameInput, MaxFieldSize, ImGuiInputTextFlags.EnterReturnsTrue))
+                DoRegister();
             ImGui.TableNextRow();
 
             ImGui.TableNextColumn();
             ImGui.Text(Password);
             ImGui.TableNextColumn();
-            ImGui.InputText("##password", ref passwordInput, MaxFieldSize, ImGuiInputTextFlags.Password);
+            if (ImGui.InputText("##password", ref passwordInput, MaxFieldSize,
+                    ImGuiInputTextFlags.Password | ImGuiInputTextFlags.EnterReturnsTrue)) DoRegister();
             ImGui.TableNextRow();
 
             ImGui.TableNextColumn();
             ImGui.Text(ConfirmPassword);
             ImGui.TableNextColumn();
-            ImGui.InputText("##confirm", ref confirmPasswordInput, MaxFieldSize, ImGuiInputTextFlags.Password);
+            if (ImGui.InputText("##confirm", ref confirmPasswordInput, MaxFieldSize,
+                    ImGuiInputTextFlags.Password | ImGuiInputTextFlags.EnterReturnsTrue)) DoRegister();
 
             ImGui.PopItemWidth();
             ImGui.EndTable();
@@ -261,6 +271,7 @@ public class RegistrationGui
         usernameInput = "";
         passwordInput = "";
         confirmPasswordInput = "";
+        setDefaultFocus = true;
     }
 
     private enum RegistrationState

@@ -11,6 +11,7 @@
   chat messages automatically scroll into view. On the other hand, the lock is released if the chat window
   is scrolled up, so it's possible to look back at earlier chat messages without a constant annoying
   automatic scroll.
+* Improve startup GUIs to set default focus, accept Enter key to process forms.
 
 #### 17 March 2024
 
