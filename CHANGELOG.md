@@ -4,6 +4,11 @@
 
 ### March
 
+#### 19 March 2024
+
+* Add `Admin` tag to denote a player as an admin. Admin roles are granted at the player level rather than
+  the account level for simplicity.
+
 #### 18 March 2024
 
 * Add `/help` command to list other chat commands.

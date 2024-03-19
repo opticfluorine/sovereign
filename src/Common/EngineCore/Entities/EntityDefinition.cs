@@ -80,4 +80,10 @@ public class EntityDefinition
     /// </summary>
     [Key(8)]
     public Orientation? Orientation { get; set; }
+
+    /// <summary>
+    ///     Set to two if player is an admin, false otherwise.
+    /// </summary>
+    [Key(9)]
+    public bool Admin { get; set; }
 }

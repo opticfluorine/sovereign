@@ -17,6 +17,7 @@ Core components are available in both the client and server.
 | Component          | Component Collection Class            | Description                                                                                                            |
 |--------------------|---------------------------------------|------------------------------------------------------------------------------------------------------------------------|
 | `AboveBlock`       | `AboveBlockComponentCollection`       | For material block entities (see `Material` component), denotes the entity ID of the block that sits atop this entity. |
+| `Admin`            | `AdminTagCollection`                  | Denotes a player character as an admin.                                                                                |
 | `AnimatedSprite`   | `AnimatedSpriteComponentCollection`   | For non-block drawable entities (see `Drawable` component), denotes the animated sprite ID to use for rendering.       |
 | `Drawable`         | `DrawableTagCollection`               | The existence of this component indicates that the entity should be considered for rendering.                          |
 | `Material`         | `MaterialComponentCollection`         | Indicates that the entity is a block of the given material ID.                                                         |

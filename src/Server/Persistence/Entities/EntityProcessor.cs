@@ -42,6 +42,7 @@ public sealed class EntityProcessor
     private const int IndexDrawable = 10;
     private const int IndexAnimatedSprite = 11;
     private const int IndexOrientation = 12;
+    private const int IndexAdmin = 13;
     private readonly IEntityFactory entityFactory;
     private readonly EntityMapper entityMapper;
 
@@ -93,6 +94,7 @@ public sealed class EntityProcessor
         ProcessDrawable(reader, builder);
         ProcessAnimatedSprite(reader, builder);
         ProcessOrientation(reader, builder);
+        ProcessAdmin(reader, builder);
 
         /* Complete the entity. */
         builder.Build();
@@ -226,6 +228,17 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexOrientation)) return;
         builder.Orientation((Orientation)reader.GetByte(IndexOrientation));
+    }
+
+    /// <summary>
+    ///     Processes the Admin
+    /// </summary>
+    /// <param name="reader"></param>
+    /// <param name="builder"></param>
+    private void ProcessAdmin(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexAdmin)) return;
+        if (reader.GetBoolean(IndexAdmin)) builder.Admin();
     }
 
     /// <summary>

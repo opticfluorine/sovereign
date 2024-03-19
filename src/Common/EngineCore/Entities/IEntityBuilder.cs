@@ -185,4 +185,16 @@ public interface IEntityBuilder
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutOrientation();
+
+    /// <summary>
+    ///     Tags the entity as an admin.
+    /// </summary>
+    /// <returns></returns>
+    IEntityBuilder Admin();
+
+    /// <summary>
+    ///     Untags the entity as an admin.
+    /// </summary>
+    /// <returns></returns>
+    IEntityBuilder WithoutAdmin();
 }

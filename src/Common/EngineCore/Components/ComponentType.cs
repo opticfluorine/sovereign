@@ -91,6 +91,11 @@ public enum ComponentType
     /// </summary>
     Orientation = 0x000A,
 
+    /// <summary>
+    ///     Admin tag.
+    /// </summary>
+    Admin = 0x000B,
+
     #endregion Common
 
     #region Client

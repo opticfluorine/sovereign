@@ -229,6 +229,21 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveOrientationComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for Admin tag.
+    /// </summary>
+    IAddComponentQuery<bool> AddAdminComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for Admin tag.
+    /// </summary>
+    IModifyComponentQuery<bool> ModifyAdminComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for Admin tag.
+    /// </summary>
+    IRemoveComponentQuery RemoveAdminComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }

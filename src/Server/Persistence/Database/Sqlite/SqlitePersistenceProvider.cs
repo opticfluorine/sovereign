@@ -82,6 +82,10 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const string ORIENTATION_PARAM_NAME = "value";
     private const SqliteType ORIENTATION_PARAM_TYPE = SqliteType.Integer;
 
+    private const SqliteType ADMIN_PARAM_TYPE = SqliteType.Integer;
+    private const string ADMIN_TABLE_NAME = "Admin";
+    private const string ADMIN_PARAM_NAME = "value";
+
     private readonly IPersistenceConfiguration configuration;
 
     public SqlitePersistenceProvider(IPersistenceConfiguration configuration)
@@ -195,9 +199,17 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             ORIENTATION_PARAM_NAME, ORIENTATION_PARAM_TYPE, (SqliteConnection)Connection);
         RemoveOrientationComponentQuery =
             new SqliteRemoveComponentQuery(ORIENTATION_TABLE_NAME, (SqliteConnection)Connection);
+
+        // Admin component.
+        AddAdminComponentQuery = new SimpleSqliteAddComponentQuery<bool>(ADMIN_TABLE_NAME,
+            ADMIN_PARAM_NAME, ADMIN_PARAM_TYPE, (SqliteConnection)Connection);
+        ModifyAdminComponentQuery = new SimpleSqliteModifyComponentQuery<bool>(ADMIN_TABLE_NAME,
+            ADMIN_PARAM_NAME, ADMIN_PARAM_TYPE, (SqliteConnection)Connection);
+        RemoveAdminComponentQuery = new SqliteRemoveComponentQuery(ADMIN_TABLE_NAME, (SqliteConnection)Connection);
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
+    public IRemoveComponentQuery RemoveAdminComponentQuery { get; }
     public IAddComponentQuery<string> AddNameQuery { get; }
     public IModifyComponentQuery<string> ModifyNameQuery { get; }
     public IRemoveComponentQuery RemoveNameQuery { get; }
@@ -248,6 +260,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<Orientation> AddOrientationComponentQuery { get; }
     public IModifyComponentQuery<Orientation> ModifyOrientationComponentQuery { get; }
     public IRemoveComponentQuery RemoveOrientationComponentQuery { get; }
+    public IAddComponentQuery<bool> AddAdminComponentQuery { get; }
+    public IModifyComponentQuery<bool> ModifyAdminComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }
