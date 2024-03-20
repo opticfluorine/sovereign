@@ -32,6 +32,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 /// </summary>
 public class PlayerDebugGui
 {
+    private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockGridPositionIndexer blocks;
     private readonly DrawableTagCollection drawables;
@@ -50,7 +51,8 @@ public class PlayerDebugGui
         AnimatedSpriteComponentCollection animatedSprites, WorldSegmentResolver worldSegmentResolver,
         DrawableTagCollection drawables, PlayerCharacterTagCollection players,
         OrientationComponentCollection orientations, BlockGridPositionIndexer blocks,
-        MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers)
+        MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
+        AdminTagCollection admins)
     {
         this.stateServices = stateServices;
         this.names = names;
@@ -64,6 +66,7 @@ public class PlayerDebugGui
         this.blocks = blocks;
         this.materials = materials;
         this.materialModifiers = materialModifiers;
+        this.admins = admins;
     }
 
     /// <summary>
@@ -81,6 +84,7 @@ public class PlayerDebugGui
                 AddValueRow("Player ID:", $"{playerEntityId:X}");
                 AddComponentRow("Player Name:", playerEntityId, names);
                 AddComponentRow("Player Character:", playerEntityId, players);
+                AddComponentRow("Admin:", playerEntityId, admins);
                 AddComponentRow("Drawable:", playerEntityId, drawables);
                 AddComponentRow("AnimatedSprite:", playerEntityId, animatedSprites);
                 AddComponentRow("Position:", playerEntityId, positions, CleanVec3ToString);

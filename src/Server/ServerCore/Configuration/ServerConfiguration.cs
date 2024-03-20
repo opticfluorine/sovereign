@@ -38,6 +38,11 @@ public sealed class ServerConfiguration
     public NetworkRecord Network { get; set; } = new();
 
     /// <summary>
+    ///     New player configuration settings.
+    /// </summary>
+    public NewPlayersRecord NewPlayers { get; set; } = new();
+
+    /// <summary>
     ///     Debug configuration settings.
     /// </summary>
     public DebugRecord Debug { get; set; } = new();
@@ -196,5 +201,16 @@ public sealed class ServerConfiguration
         ///     It must be disabled for production servers.
         /// </remarks>
         public bool EnableDebugMode { get; set; } = false;
+    }
+
+    /// <summary>
+    ///     Full description of the new players configuration.
+    /// </summary>
+    public sealed class NewPlayersRecord
+    {
+        /// <summary>
+        ///     Whether to grant the admin role to new players by default.
+        /// </summary>
+        public bool AdminByDefault { get; set; } = false;
     }
 }

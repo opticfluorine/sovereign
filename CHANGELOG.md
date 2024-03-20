@@ -8,6 +8,9 @@
 
 * Add `Admin` tag to denote a player as an admin. Admin roles are granted at the player level rather than
   the account level for simplicity.
+* Add option to server config file to create new players as admins by default. This is enabled in the default
+  configuration file so that the first player created on a new server will have admin privileges; it should then
+  be disabled for obvious reasons.
 
 #### 18 March 2024
 

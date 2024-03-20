@@ -83,6 +83,9 @@ installed on your system.
    ```powershell
    Invoke-RestMethod -Uri http://127.0.0.1:8080/debug -Method POST -Body '{"Type": "GenerateWorldData"}'
    ```
+6. The server is configured by default to grant the Admin role to all new players. Once you have created
+   an initial player with Admin role, it is strongly recommended to disable this option by editing
+   the server configuration file and changing `AdminByDefault` to `false`.
 
 ### Client
 
