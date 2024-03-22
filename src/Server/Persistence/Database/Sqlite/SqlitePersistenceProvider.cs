@@ -117,6 +117,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         ListPlayersQuery = new SqliteListPlayersQuery((SqliteConnection)Connection);
         DeletePlayerQuery = new SqliteDeletePlayerQuery((SqliteConnection)Connection);
 
+        AddAdminRoleQuery = new SqliteAddAdminRoleQuery((SqliteConnection)Connection);
+
         /* Position component. */
         AddPositionQuery = new Vector3SqliteAddComponentQuery(POSITION_TABLE_NAME,
             (SqliteConnection)Connection);
@@ -266,6 +268,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }
     public IDeletePlayerQuery DeletePlayerQuery { get; }
+    public IAddAdminRoleQuery AddAdminRoleQuery { get; }
 
     public void Dispose()
     {

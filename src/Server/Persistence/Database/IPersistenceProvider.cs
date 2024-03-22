@@ -262,4 +262,9 @@ public interface IPersistenceProvider : IDisposable
     ///     IDeletePlayerQuery for this persistence provider.
     /// </summary>
     IDeletePlayerQuery DeletePlayerQuery { get; }
+
+    /// <summary>
+    ///     IAddAdminRoleQuery for this persistence provider.
+    /// </summary>
+    IAddAdminRoleQuery AddAdminRoleQuery { get; }
 }

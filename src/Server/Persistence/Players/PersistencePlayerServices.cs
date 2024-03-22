@@ -97,7 +97,7 @@ public class PersistencePlayerServices
     /// </remarks>
     public bool TryAddAdminForPlayer(string playerName)
     {
-        return false;
+        return provider.AddAdminRoleQuery.TryAddAdminRole(playerName);
     }
 
     /// <summary>
