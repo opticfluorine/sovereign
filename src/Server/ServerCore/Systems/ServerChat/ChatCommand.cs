@@ -27,4 +27,9 @@ public struct ChatCommand
     ///     One-liner help text describing the command.
     /// </summary>
     public string HelpSummary { get; set; }
+
+    /// <summary>
+    ///     Whether to include in the /help output.
+    /// </summary>
+    public bool IncludeInHelp { get; set; }
 }

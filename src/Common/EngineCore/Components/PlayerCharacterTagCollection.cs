@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components;
-
-namespace Sovereign.EngineCore.Systems.Player.Components;
+namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     Tag collection for the PlayerCharacter tag, used to indicate that an entity is a player character.

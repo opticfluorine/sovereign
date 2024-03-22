@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Castle.Core.Logging;
@@ -83,24 +84,33 @@ public class ChatRouter
     /// <param name="details">Chat message details.</param>
     public void RouteChatMessage(ChatEventDetails details)
     {
-        if (TryTokenizeCommand(details, out var command, out var remainder))
+        try
         {
-            if (command.Equals(HelpCommand))
+            if (TryTokenizeCommand(details, out var command, out var remainder))
             {
-                helpManager.SendHelp(details.SenderEntityId);
-            }
-            else if (processorsByCommand.TryGetValue(command, out var processor))
-            {
-                processor.ProcessChat(command, remainder, details.SenderEntityId);
+                if (command.Equals(HelpCommand))
+                {
+                    helpManager.SendHelp(details.SenderEntityId);
+                }
+                else if (processorsByCommand.TryGetValue(command, out var processor))
+                {
+                    processor.ProcessChat(command, remainder, details.SenderEntityId);
+                }
+                else
+                {
+                    internalController.SendSystemMessage("Unrecognized command.", details.SenderEntityId);
+                }
             }
             else
             {
-                internalController.SendSystemMessage("Unrecognized command.", details.SenderEntityId);
+                RouteLocalChat(details);
             }
         }
-        else
+        catch (Exception e)
         {
-            RouteLocalChat(details);
+            Logger.ErrorFormat(e, "Error processing chat message from {0}.",
+                loggingUtil.FormatEntity(details.SenderEntityId));
+            internalController.SendSystemMessage("An error occurred.", details.SenderEntityId);
         }
     }
 

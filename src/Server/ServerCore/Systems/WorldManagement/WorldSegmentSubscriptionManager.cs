@@ -24,7 +24,6 @@ using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
-using Sovereign.EngineCore.Systems.Player.Components.Indexers;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;

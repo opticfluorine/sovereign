@@ -39,7 +39,7 @@ public class GlobalChatProcessor : IChatProcessor
 
     public List<ChatCommand> MatchingCommands => new()
     {
-        new ChatCommand { Command = "g", HelpSummary = HelpText }
+        new ChatCommand { Command = "g", HelpSummary = HelpText, IncludeInHelp = true }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)

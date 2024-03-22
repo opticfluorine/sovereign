@@ -15,8 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Systems.Player.Components;
-
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>

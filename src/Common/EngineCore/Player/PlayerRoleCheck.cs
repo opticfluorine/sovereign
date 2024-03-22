@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,20 +15,28 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Components;
-using Sovereign.Persistence.Entities;
 
-namespace Sovereign.Persistence.State.Trackers;
+namespace Sovereign.EngineCore.Player;
 
-public class PlayerCharacterStateTracker : BaseStateTracker<bool>
+/// <summary>
+///     Provides utility methods for checking if a player has a given role.
+/// </summary>
+public class PlayerRoleCheck
 {
-    public PlayerCharacterStateTracker(PlayerCharacterTagCollection tags,
-        EntityMapper entityMapper, StateManager stateManager) : base(tags, false, entityMapper,
-        stateManager)
+    private readonly AdminTagCollection admins;
+
+    public PlayerRoleCheck(AdminTagCollection admins)
     {
+        this.admins = admins;
     }
 
-    protected override void OnStateUpdate(ref StateUpdate<bool> update)
+    /// <summary>
+    ///     Checks whether the given player is an admin.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <returns>true if admin, false otherwise.</returns>
+    public bool IsPlayerAdmin(ulong playerEntityId)
     {
-        stateManager.FrontBuffer.UpdatePlayerCharacter(ref update);
+        return admins.HasComponentForEntity(playerEntityId) && admins[playerEntityId];
     }
 }

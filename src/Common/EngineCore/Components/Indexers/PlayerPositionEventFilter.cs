@@ -14,21 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components;
-using Sovereign.Persistence.Entities;
+using System.Numerics;
 
-namespace Sovereign.Persistence.State.Trackers;
+namespace Sovereign.EngineCore.Components.Indexers;
 
-public class PlayerCharacterStateTracker : BaseStateTracker<bool>
+/// <summary>
+///     Component event filter for player position events.
+/// </summary>
+public class PlayerPositionEventFilter : PlayerComponentEventFilter<Vector3>
 {
-    public PlayerCharacterStateTracker(PlayerCharacterTagCollection tags,
-        EntityMapper entityMapper, StateManager stateManager) : base(tags, false, entityMapper,
-        stateManager)
+    public PlayerPositionEventFilter(PlayerCharacterTagCollection playerTags,
+        PositionComponentCollection positions)
+        : base(playerTags, positions, positions)
     {
-    }
-
-    protected override void OnStateUpdate(ref StateUpdate<bool> update)
-    {
-        stateManager.FrontBuffer.UpdatePlayerCharacter(ref update);
     }
 }
