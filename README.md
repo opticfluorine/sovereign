@@ -104,6 +104,15 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 | F11        | Toggle Dear ImGui Metrics/Debug Window |
 | F12        | Toggle Dear ImGui Debug Log            |
 
+#### Chat Commands
+
+| Command      | Arguments  | Action                                                |
+|--------------|------------|-------------------------------------------------------|
+| /help        |            | List commands and their descriptions.                 |
+| /g           | message    | Broadcasts a message through global chat.             |
+| /addadmin    | playerName | Admin only. Grants admin role to the given player.    |
+| /removeadmin | playerName | Admin only. Revokes admin role from the given player. |
+
 ## Reporting Issues
 
 Please report any issues to our GitHub [issues tracker](https://github.com/opticfluorine/sovereign/issues).

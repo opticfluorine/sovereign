@@ -151,6 +151,7 @@ public sealed class ClientNetworkEventHandler
         {
             Logger.Error("Connection to server lost.");
             networkClient.EndConnection();
+            worldSegmentSubscriptionManager.UnsubscribeAll();
         }
     }
 }

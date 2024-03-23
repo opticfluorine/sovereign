@@ -29,5 +29,6 @@ public class MainMenuInstaller : IWindsorInstaller
         container.Register(Component.For<RegistrationGui>().LifestyleSingleton());
         container.Register(Component.For<PlayerSelectionGui>().LifestyleSingleton());
         container.Register(Component.For<CreatePlayerGui>().LifestyleSingleton());
+        container.Register(Component.For<ConnectionLostGui>().LifestyleSingleton());
     }
 }

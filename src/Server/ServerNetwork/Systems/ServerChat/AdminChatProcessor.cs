@@ -114,6 +114,7 @@ public class AdminChatProcessor : IChatProcessor
         {
             // Modify the player directly in memory.
             admins.TagEntity(playerEntityId);
+            internalController.SendSystemMessage("You are now an admin.", playerEntityId);
         }
         else if (!persistencePlayerServices.TryAddAdminForPlayer(playerName))
         {
@@ -155,6 +156,7 @@ public class AdminChatProcessor : IChatProcessor
         {
             // Modify the player directly in memory.
             admins.UntagEntity(playerEntityId);
+            internalController.SendSystemMessage("You are no longer an admin.", playerEntityId);
         }
         else
         {

@@ -44,5 +44,10 @@ public enum MainMenuState
     /// <summary>
     ///     Player creation dialog.
     /// </summary>
-    PlayerCreation
+    PlayerCreation,
+
+    /// <summary>
+    ///     Connection lost error dialog.
+    /// </summary>
+    ConnectionLost
 }

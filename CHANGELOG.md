@@ -4,6 +4,13 @@
 
 ### March
 
+#### 23 March 2024
+
+* Add new commands `/addadmin` and `/removeadmin` for granting and revoking the admin role to players.
+* Fix issue where the client did not log out automatically when the connection is lost.
+* Fix issue where client state was not fully reset after logout or connection loss.
+* Fix issue where chat history was not cleared from the client after a logout.
+
 #### 19 March 2024
 
 * Add `Admin` tag to denote a player as an admin. Admin roles are granted at the player level rather than

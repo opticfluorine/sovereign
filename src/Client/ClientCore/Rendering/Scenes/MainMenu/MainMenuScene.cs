@@ -31,6 +31,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
 public class MainMenuScene : IScene
 {
     private readonly RenderCamera camera;
+    private readonly ConnectionLostGui connectionLostGui;
     private readonly CreatePlayerGui createPlayerGui;
     private readonly IEngineConfiguration engineConfiguration;
     private readonly IEventSender eventSender;
@@ -58,7 +59,8 @@ public class MainMenuScene : IScene
     public MainMenuScene(RenderCamera camera, DisplayViewport viewport, ISystemTimer systemTimer,
         IEngineConfiguration engineConfiguration, StartupGui startupGui, LoginGui loginGui,
         RegistrationGui registrationGui, PlayerSelectionGui playerSelectionGui, CreatePlayerGui createPlayerGui,
-        IEventSender eventSender, ClientStateController stateController, ClientStateServices stateServices)
+        IEventSender eventSender, ClientStateController stateController, ClientStateServices stateServices,
+        ConnectionLostGui connectionLostGui)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -72,6 +74,7 @@ public class MainMenuScene : IScene
         this.eventSender = eventSender;
         this.stateController = stateController;
         this.stateServices = stateServices;
+        this.connectionLostGui = connectionLostGui;
     }
 
     public SceneType SceneType => SceneType.MainMenu;
@@ -131,6 +134,10 @@ public class MainMenuScene : IScene
             case MainMenuState.PlayerCreation:
                 if (needToInit) createPlayerGui.Initialize();
                 newState = createPlayerGui.Render();
+                break;
+
+            case MainMenuState.ConnectionLost:
+                newState = connectionLostGui.Render();
                 break;
         }
 

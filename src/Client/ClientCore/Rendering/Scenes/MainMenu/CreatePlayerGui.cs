@@ -114,7 +114,7 @@ public class CreatePlayerGui
 
         if (ImGui.Button(Create)) OnCreate();
         ImGui.SameLine();
-        if (ImGui.Button(Cancel)) nextState = MainMenuState.Startup;
+        if (ImGui.Button(Cancel)) nextState = MainMenuState.PlayerSelection;
 
         return nextState;
     }
