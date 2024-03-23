@@ -10,6 +10,8 @@
 * Fix issue where the client did not log out automatically when the connection is lost.
 * Fix issue where client state was not fully reset after logout or connection loss.
 * Fix issue where chat history was not cleared from the client after a logout.
+* Add server-side API to resynchronize entity trees on demand in cases where a change was made directly instead
+  of through a repeated event sequence (e.g. adding or removing admin roles for an online player).
 
 #### 19 March 2024
 

@@ -144,6 +144,18 @@ public class WorldSegmentSubscriptionManager
     }
 
     /// <summary>
+    ///     Called when the WorldManagement system receives a request to resynchronize the given
+    ///     positioned entity with any subscribers.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    public void OnResyncRequest(ulong entityId)
+    {
+        // Treat this entity as if it were newly added to the world segment that it just entered,
+        // as this will trigger all of the necessary synchronization logic.
+        OnNonBlockEntityAdded(entityId);
+    }
+
+    /// <summary>
     ///     Called when a player is unloaded.
     /// </summary>
     /// <param name="entityId">Player entity ID.</param>
