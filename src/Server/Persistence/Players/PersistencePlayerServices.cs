@@ -112,5 +112,6 @@ public class PersistencePlayerServices
     /// </remarks>
     public void RemoveAdminForPlayer(string playerName)
     {
+        provider.RemoveAdminRoleQuery.RemoveAdminRole(playerName);
     }
 }

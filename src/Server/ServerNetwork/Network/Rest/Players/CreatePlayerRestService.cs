@@ -43,7 +43,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
     private const int MaxRequestLength = 1024;
 
     private readonly AccountsController accountsController;
-    private readonly ServerConfigurationManager configManager;
+    private readonly IServerConfigurationManager configManager;
 
     /// <summary>
     ///     Object used as a lock to avoid name duplication due to a race condition.
@@ -63,7 +63,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
     public CreatePlayerRestService(RestAuthenticator authenticator, IEntityFactory entityFactory,
         CreatePlayerRequestValidator requestValidator, PersistencePlayerServices playerServices,
-        AccountsController accountsController, IEventSender eventSender, ServerConfigurationManager configManager)
+        AccountsController accountsController, IEventSender eventSender, IServerConfigurationManager configManager)
         : base(authenticator)
     {
         this.entityFactory = entityFactory;
@@ -176,7 +176,11 @@ public class CreatePlayerRestService : AuthenticatedRestService
                     .AnimatedSprite(4); // TODO Configurable appearance
 
                 if (configManager.ServerConfiguration.NewPlayers.AdminByDefault)
+                {
+                    Logger.WarnFormat("Player {0} defaulting to admin; edit server configuration if unintended.",
+                        request.PlayerName);
                     builder.Admin();
+                }
 
                 playerEntityId = builder.Build();
 

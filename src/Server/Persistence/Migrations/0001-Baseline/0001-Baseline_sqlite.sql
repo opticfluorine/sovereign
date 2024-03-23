@@ -1,3 +1,5 @@
+-- noinspection SqlNoDataSourceInspectionForFile
+
 --
 -- Sovereign Engine
 -- Copyright (c) 2019 opticfluorine
@@ -137,6 +139,9 @@ CREATE TABLE Name
     value TEXT                NOT NULL,
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
+
+-- Index name for faster searches.
+CREATE INDEX Name_Index ON Name (value);
 
 
 -----------------------

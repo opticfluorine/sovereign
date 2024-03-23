@@ -15,9 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Validators;
+using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Player;
 using Sovereign.Persistence.Players;
 using Sovereign.ServerCore.Systems.ServerChat;
@@ -41,6 +43,8 @@ public class AdminChatProcessor : IChatProcessor
 
     private readonly AdminTagCollection admins;
     private readonly ServerChatInternalController internalController;
+    private readonly LoggingUtil loggingUtil;
+    private readonly NameComponentCollection names;
     private readonly NameComponentValidator nameValidator;
     private readonly PersistencePlayerServices persistencePlayerServices;
     private readonly PlayerNameComponentIndexer playerNameIndex;
@@ -48,7 +52,8 @@ public class AdminChatProcessor : IChatProcessor
 
     public AdminChatProcessor(AdminTagCollection admins, ServerChatInternalController internalController,
         PlayerRoleCheck playerRoleCheck, PlayerNameComponentIndexer playerNameIndex,
-        NameComponentValidator nameValidator, PersistencePlayerServices persistencePlayerServices)
+        NameComponentValidator nameValidator, PersistencePlayerServices persistencePlayerServices,
+        LoggingUtil loggingUtil, NameComponentCollection names)
     {
         this.admins = admins;
         this.internalController = internalController;
@@ -56,7 +61,11 @@ public class AdminChatProcessor : IChatProcessor
         this.playerNameIndex = playerNameIndex;
         this.nameValidator = nameValidator;
         this.persistencePlayerServices = persistencePlayerServices;
+        this.loggingUtil = loggingUtil;
+        this.names = names;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public List<ChatCommand> MatchingCommands => new()
     {
@@ -69,9 +78,14 @@ public class AdminChatProcessor : IChatProcessor
         // Must be an admin to use admin commands.
         if (!playerRoleCheck.IsPlayerAdmin(senderEntityId))
         {
+            Logger.WarnFormat("{0} attempted to use admin command {1} while not admin.",
+                loggingUtil.FormatEntity(senderEntityId), command);
             internalController.SendSystemMessage("Only admins may use this command.", senderEntityId);
             return;
         }
+
+        // Record admin commands in log for audit.
+        Logger.InfoFormat("ADMIN COMMAND: {0}: /{1} {2}", loggingUtil.FormatEntity(senderEntityId), command, message);
 
         // Admin role verified, dispatch to specific handlers.
         if (command == AddAdmin)
@@ -104,10 +118,13 @@ public class AdminChatProcessor : IChatProcessor
         else if (!persistencePlayerServices.TryAddAdminForPlayer(playerName))
         {
             // Player doesn't exist.
+            Logger.ErrorFormat("Cannot make player {0} admin: player does not exist.", playerName);
             internalController.SendSystemMessage("Player does not exist.", senderEntityId);
             return;
         }
 
+        Logger.InfoFormat("Player {0} is now admin; change made by {1}.", playerName,
+            loggingUtil.FormatEntity(senderEntityId));
         internalController.SendSystemMessage("OK.", senderEntityId);
     }
 
@@ -126,6 +143,13 @@ public class AdminChatProcessor : IChatProcessor
             return;
         }
 
+        // Do not allow players to remove their own admin role.
+        if (playerName == names[senderEntityId])
+        {
+            Logger.WarnFormat("{0} tried to remove own admin role; request denied.", playerName);
+            internalController.SendSystemMessage("Cannot remove own admin role.", senderEntityId);
+        }
+
         // Check if the affected player is online.
         if (playerNameIndex.TryGetPlayerByName(playerName, out var playerEntityId))
         {
@@ -138,6 +162,8 @@ public class AdminChatProcessor : IChatProcessor
             persistencePlayerServices.RemoveAdminForPlayer(playerName);
         }
 
+        Logger.InfoFormat("Player {0} is no longer admin (or already was not); change made by {1}.", playerName,
+            loggingUtil.FormatEntity(senderEntityId));
         internalController.SendSystemMessage("OK.", senderEntityId);
     }
 }

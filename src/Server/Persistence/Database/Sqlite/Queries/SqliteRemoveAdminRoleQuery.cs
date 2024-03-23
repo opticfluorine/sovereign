@@ -20,35 +20,34 @@ using Sovereign.Persistence.Database.Queries;
 namespace Sovereign.Persistence.Database.Sqlite.Queries;
 
 /// <summary>
-///     Sqlite implementation of IAddAdminRoleQuery.
+///     SQLite implementation of IRemoveAdminRoleQuery.
 /// </summary>
-public class SqliteAddAdminRoleQuery : IAddAdminRoleQuery
+public class SqliteRemoveAdminRoleQuery : IRemoveAdminRoleQuery
 {
     /// <summary>
     ///     SQL query.
     /// </summary>
-    private const string Query =
-        @"INSERT INTO Admin (id, value)
-	        SELECT Name.id, TRUE
-	        FROM Name
-	        INNER JOIN PlayerCharacter PC ON PC.id = Name.id
-	        WHERE Name.value = @Name AND PC.deleted = FALSE";
+    private const string Sql
+        = @"DELETE FROM Admin WHERE id in
+                (SELECT Name.id FROM Name
+                    INNER JOIN PlayerCharacter PC ON PC.id = Name.id
+                    WHERE Name.value = @Name AND PC.deleted = FALSE)";
 
     private readonly SqliteConnection connection;
 
-    public SqliteAddAdminRoleQuery(SqliteConnection connection)
+    public SqliteRemoveAdminRoleQuery(SqliteConnection connection)
     {
         this.connection = connection;
     }
 
-    public bool TryAddAdminRole(string playerName)
+    public void RemoveAdminRole(string playerName)
     {
-        using var cmd = new SqliteCommand(Query, connection);
+        using var cmd = new SqliteCommand(Sql, connection);
 
         var pName = new SqliteParameter("Name", playerName);
         pName.SqliteType = SqliteType.Text;
         cmd.Parameters.Add(pName);
 
-        return cmd.ExecuteNonQuery() > 0;
+        cmd.ExecuteNonQuery();
     }
 }

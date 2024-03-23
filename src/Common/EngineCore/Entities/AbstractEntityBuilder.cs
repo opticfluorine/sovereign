@@ -227,13 +227,13 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder Admin()
     {
-        admins.TagEntity(entityId);
+        admins.TagEntity(entityId, load);
         return this;
     }
 
     public IEntityBuilder WithoutAdmin()
     {
-        admins.UntagEntity(entityId);
+        admins.UntagEntity(entityId, load);
         return this;
     }
 }

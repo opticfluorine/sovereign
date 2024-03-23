@@ -267,4 +267,9 @@ public interface IPersistenceProvider : IDisposable
     ///     IAddAdminRoleQuery for this persistence provider.
     /// </summary>
     IAddAdminRoleQuery AddAdminRoleQuery { get; }
+
+    /// <summary>
+    ///     IRemoveAdminRoleQuery for this persistence provider.
+    /// </summary>
+    IRemoveAdminRoleQuery RemoveAdminRoleQuery { get; }
 }
