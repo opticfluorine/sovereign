@@ -51,7 +51,9 @@ public class ClientChatSystem : ISystem
     {
         EventId.Core_Chat_Local,
         EventId.Core_Chat_Global,
-        EventId.Core_Chat_System
+        EventId.Core_Chat_System,
+        EventId.Client_Network_ConnectionLost,
+        EventId.Core_Network_Logout
     };
 
     public int WorkloadEstimate => 20;
@@ -106,6 +108,11 @@ public class ClientChatSystem : ISystem
 
                     OnSystemChat(details);
                 }
+                    break;
+
+                case EventId.Client_Network_ConnectionLost:
+                case EventId.Core_Network_Logout:
+                    chatHistoryManager.Clear();
                     break;
             }
         }

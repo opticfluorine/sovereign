@@ -172,6 +172,22 @@ Network:
   # higher packet loss rate.
   EntitySyncBatchSize: 16
 
+# ------------------------
+# New Player Configuration
+# ------------------------
+NewPlayers:
+  
+  # --------------
+  # AdminByDefault
+  # --------------
+  # Whether to grant the admin role to new players by default. If true, new
+  # players will automatically be granted the admin role upon creation. If false,
+  # the admin role can only be assigned after player creation by another admin.
+  # This is set to true initially so that the first player created on a new server
+  # will have admin privileges. It should be set to false before opening the server
+  # to the public.
+  AdminByDefault: true
+
 
 # -------------------
 # Debug Configuration

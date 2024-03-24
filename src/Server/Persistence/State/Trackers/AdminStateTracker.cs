@@ -14,40 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Systems.ClientState;
+using Sovereign.EngineCore.Components;
+using Sovereign.Persistence.Entities;
+
+namespace Sovereign.Persistence.State.Trackers;
 
 /// <summary>
-///     Internal states for main menu.
+///     Persistence state tracker for the Admin tag.
 /// </summary>
-public enum MainMenuState
+public class AdminStateTracker : BaseStateTracker<bool>
 {
-    /// <summary>
-    ///     Startup menu.
-    /// </summary>
-    Startup,
+    public AdminStateTracker(AdminTagCollection tags, EntityMapper entityMapper, StateManager stateManager)
+        : base(tags, false, entityMapper, stateManager)
+    {
+    }
 
-    /// <summary>
-    ///     Login dialog.
-    /// </summary>
-    Login,
-
-    /// <summary>
-    ///     Registration dialog.
-    /// </summary>
-    Registration,
-
-    /// <summary>
-    ///     Player selection dialog.
-    /// </summary>
-    PlayerSelection,
-
-    /// <summary>
-    ///     Player creation dialog.
-    /// </summary>
-    PlayerCreation,
-
-    /// <summary>
-    ///     Connection lost error dialog.
-    /// </summary>
-    ConnectionLost
+    protected override void OnStateUpdate(ref StateUpdate<bool> update)
+    {
+        stateManager.FrontBuffer.UpdateAdmin(ref update);
+    }
 }

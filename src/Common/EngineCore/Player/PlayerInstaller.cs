@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,16 +18,12 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 
-namespace Sovereign.EngineCore.Systems.Player.Components.Indexers;
+namespace Sovereign.EngineCore.Player;
 
-/// <summary>
-///     IoC installer for player component indexers.
-/// </summary>
-public class PlayerComponentIndexerInstaller : IWindsorInstaller
+public class PlayerInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(Component.For<PlayerPositionEventFilter>()
-            .LifestyleSingleton());
+        container.Register(Component.For<PlayerRoleCheck>().LifestyleSingleton());
     }
 }

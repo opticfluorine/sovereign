@@ -63,7 +63,8 @@ public class ClientStateSystem : ISystem
         EventId.Client_State_WorldSegmentLoaded,
         EventId.Client_State_SetFlag,
         EventId.Core_Network_Logout,
-        EventId.Client_State_SetMainMenuState
+        EventId.Client_State_SetMainMenuState,
+        EventId.Client_Network_ConnectionLost
     };
 
     public int WorkloadEstimate => 10;
@@ -103,6 +104,10 @@ public class ClientStateSystem : ISystem
 
                 case EventId.Core_Network_Logout:
                     OnLogout();
+                    break;
+
+                case EventId.Client_Network_ConnectionLost:
+                    OnConnectionLost();
                     break;
 
                 case EventId.Core_WorldManagement_Subscribe:
@@ -147,8 +152,23 @@ public class ClientStateSystem : ISystem
     /// </summary>
     private void OnLogout()
     {
+        mainMenuStateMachine.SetState(MainMenuState.PlayerSelection);
+        ClearStateOnLogout();
+    }
+
+    /// <summary>
+    ///     Called when the connection to the server is lost.
+    /// </summary>
+    private void OnConnectionLost()
+    {
+        mainMenuStateMachine.SetState(MainMenuState.ConnectionLost);
+        ClearStateOnLogout();
+    }
+
+    private void ClearStateOnLogout()
+    {
         playerStateManager.PlayerLogout();
         stateMachine.TryTransition(MainClientState.MainMenu);
-        mainMenuStateMachine.SetState(MainMenuState.PlayerSelection);
+        flagManager.ResetFlags();
     }
 }

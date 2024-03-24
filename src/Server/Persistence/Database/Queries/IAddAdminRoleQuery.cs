@@ -14,40 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Systems.ClientState;
+namespace Sovereign.Persistence.Database.Queries;
 
 /// <summary>
-///     Internal states for main menu.
+///     Query for adding admin role to a player.
 /// </summary>
-public enum MainMenuState
+public interface IAddAdminRoleQuery
 {
     /// <summary>
-    ///     Startup menu.
+    ///     Tries to add the admin role to a player.
     /// </summary>
-    Startup,
-
-    /// <summary>
-    ///     Login dialog.
-    /// </summary>
-    Login,
-
-    /// <summary>
-    ///     Registration dialog.
-    /// </summary>
-    Registration,
-
-    /// <summary>
-    ///     Player selection dialog.
-    /// </summary>
-    PlayerSelection,
-
-    /// <summary>
-    ///     Player creation dialog.
-    /// </summary>
-    PlayerCreation,
-
-    /// <summary>
-    ///     Connection lost error dialog.
-    /// </summary>
-    ConnectionLost
+    /// <param name="playerName">Player name.</param>
+    /// <returns>true if the player existed, false otherwise.</returns>
+    bool TryAddAdminRole(string playerName);
 }

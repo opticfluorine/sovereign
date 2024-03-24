@@ -23,7 +23,6 @@ using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.ServerCore.Configuration;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -33,6 +32,7 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public class EntitySynchronizer
 {
+    private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly IServerConfigurationManager configManager;
     private readonly WorldManagementInternalController controller;
@@ -51,7 +51,8 @@ public class EntitySynchronizer
         MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
         ParentComponentCollection parents, DrawableTagCollection drawables,
-        AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations)
+        AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations,
+        AdminTagCollection admins)
     {
         this.eventSender = eventSender;
         this.configManager = configManager;
@@ -65,6 +66,7 @@ public class EntitySynchronizer
         this.drawables = drawables;
         this.animatedSprites = animatedSprites;
         this.orientations = orientations;
+        this.admins = admins;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -105,6 +107,7 @@ public class EntitySynchronizer
     ///     Desynchronizes an entity tree across a world segment.
     /// </summary>
     /// <param name="rootEntityId">Root of the entity tree to be desynchronized.</param>
+    /// <param name="segmentIndex">World segment index of the entity.</param>
     public void Desynchronize(ulong rootEntityId, GridPosition segmentIndex)
     {
         Logger.DebugFormat("Desync {0} for world segment {1}.", rootEntityId, segmentIndex);
@@ -142,6 +145,8 @@ public class EntitySynchronizer
 
         if (orientations.HasComponentForEntity(entityId))
             def.Orientation = orientations[entityId];
+
+        def.Admin = admins.HasTagForEntity(entityId);
 
         return def;
     }

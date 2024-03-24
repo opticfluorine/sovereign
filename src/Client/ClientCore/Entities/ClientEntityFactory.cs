@@ -18,7 +18,6 @@
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Player.Components;
 
 namespace Sovereign.ClientCore.Entities;
 
@@ -28,6 +27,7 @@ namespace Sovereign.ClientCore.Entities;
 public sealed class ClientEntityFactory : IEntityFactory
 {
     private readonly AboveBlockComponentCollection aboveBlocks;
+    private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly EntityAssigner assigner;
     private readonly DrawableTagCollection drawables;
@@ -54,6 +54,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         NameComponentCollection names,
         ParentComponentCollection parents,
         OrientationComponentCollection orientations,
+        AdminTagCollection admins,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -68,6 +69,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         this.names = names;
         this.parents = parents;
         this.orientations = orientations;
+        this.admins = admins;
         this.entityTable = entityTable;
 
         assigner = entityManager.GetNewAssigner();
@@ -83,6 +85,6 @@ public sealed class ClientEntityFactory : IEntityFactory
         return new ClientEntityBuilder(entityId, isLoad,
             entityManager, positions, velocities, drawables, materials,
             materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
-            orientations, entityTable);
+            orientations, admins, entityTable);
     }
 }

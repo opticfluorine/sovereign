@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2023 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,40 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Systems.ClientState;
+using System.Numerics;
+
+namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
-///     Internal states for main menu.
+///     Component event filter for player position events.
 /// </summary>
-public enum MainMenuState
+public class PlayerPositionEventFilter : PlayerComponentEventFilter<Vector3>
 {
-    /// <summary>
-    ///     Startup menu.
-    /// </summary>
-    Startup,
-
-    /// <summary>
-    ///     Login dialog.
-    /// </summary>
-    Login,
-
-    /// <summary>
-    ///     Registration dialog.
-    /// </summary>
-    Registration,
-
-    /// <summary>
-    ///     Player selection dialog.
-    /// </summary>
-    PlayerSelection,
-
-    /// <summary>
-    ///     Player creation dialog.
-    /// </summary>
-    PlayerCreation,
-
-    /// <summary>
-    ///     Connection lost error dialog.
-    /// </summary>
-    ConnectionLost
+    public PlayerPositionEventFilter(PlayerCharacterTagCollection playerTags,
+        PositionComponentCollection positions)
+        : base(playerTags, positions, positions)
+    {
+    }
 }

@@ -14,40 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Systems.ClientState;
+using Sovereign.EngineCore.Components;
+
+namespace Sovereign.EngineCore.Player;
 
 /// <summary>
-///     Internal states for main menu.
+///     Provides utility methods for checking if a player has a given role.
 /// </summary>
-public enum MainMenuState
+public class PlayerRoleCheck
 {
-    /// <summary>
-    ///     Startup menu.
-    /// </summary>
-    Startup,
+    private readonly AdminTagCollection admins;
+
+    public PlayerRoleCheck(AdminTagCollection admins)
+    {
+        this.admins = admins;
+    }
 
     /// <summary>
-    ///     Login dialog.
+    ///     Checks whether the given player is an admin.
     /// </summary>
-    Login,
-
-    /// <summary>
-    ///     Registration dialog.
-    /// </summary>
-    Registration,
-
-    /// <summary>
-    ///     Player selection dialog.
-    /// </summary>
-    PlayerSelection,
-
-    /// <summary>
-    ///     Player creation dialog.
-    /// </summary>
-    PlayerCreation,
-
-    /// <summary>
-    ///     Connection lost error dialog.
-    /// </summary>
-    ConnectionLost
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <returns>true if admin, false otherwise.</returns>
+    public bool IsPlayerAdmin(ulong playerEntityId)
+    {
+        return admins.HasComponentForEntity(playerEntityId) && admins[playerEntityId];
+    }
 }

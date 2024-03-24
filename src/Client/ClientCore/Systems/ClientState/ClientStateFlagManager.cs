@@ -45,4 +45,12 @@ public class ClientStateFlagManager
     {
         flags[flag] = value;
     }
+
+    /// <summary>
+    ///     Resets all flags.
+    /// </summary>
+    public void ResetFlags()
+    {
+        foreach (var flag in flags.Keys) flags[flag] = false;
+    }
 }

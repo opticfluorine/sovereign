@@ -46,6 +46,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<Guid>> accountUpdates = new(BufferSize);
 
     /// <summary>
+    ///     Admin state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<bool>> adminUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Animated sprite state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<int>> animatedSpriteUpdates = new(BufferSize);
@@ -221,6 +226,11 @@ public sealed class StateBuffer
         orientationUpdates.Add(ref update);
     }
 
+    public void UpdateAdmin(ref StateUpdate<bool> update)
+    {
+        adminUpdates.Add(ref update);
+    }
+
     /// <summary>
     ///     Resets the buffer.
     /// </summary>
@@ -238,6 +248,7 @@ public sealed class StateBuffer
         drawableUpdates.Clear();
         animatedSpriteUpdates.Clear();
         orientationUpdates.Clear();
+        adminUpdates.Clear();
     }
 
     /// <summary>
@@ -332,6 +343,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddOrientationComponentQuery,
                     persistenceProvider.ModifyOrientationComponentQuery,
                     persistenceProvider.RemoveOrientationComponentQuery,
+                    transaction);
+
+                // Admin.
+                SynchronizeComponent(adminUpdates,
+                    persistenceProvider.AddAdminComponentQuery,
+                    persistenceProvider.ModifyAdminComponentQuery,
+                    persistenceProvider.RemoveAdminComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

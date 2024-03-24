@@ -81,4 +81,12 @@ public class ChatHistoryManager
         // Append the chat history.
         history.Add(new ChatHistoryEntry { Message = message, Color = color });
     }
+
+    /// <summary>
+    ///     Clears the chat history.
+    /// </summary>
+    public void Clear()
+    {
+        history.Clear();
+    }
 }

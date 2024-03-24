@@ -201,6 +201,17 @@ CREATE TABLE Orientation
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
+------------------
+-- Drawable Tag --
+------------------
+
+CREATE TABLE Admin
+(
+    id    BIGINT PRIMARY KEY NOT NULL,
+    value BOOLEAN            NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
 
 -- Create views.
 
@@ -236,7 +247,8 @@ SELECT Entity.id                   AS id,
        Parent.parent_id            AS parent,
        Drawable.value              AS drawable,
        AnimatedSprite.value        AS animatedSprite,
-       Orientation.value           AS orientation
+       Orientation.value           AS orientation,
+       Admin.value                 AS admin
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
@@ -247,7 +259,8 @@ FROM Entity
          LEFT JOIN Parent ON Parent.id = Entity.id
          LEFT JOIN Drawable ON Drawable.id = Entity.id
          LEFT JOIN AnimatedSprite ON AnimatedSprite.id = Entity.id
-         LEFT JOIN Orientation ON Orientation.id = Entity.id;
+         LEFT JOIN Orientation ON Orientation.id = Entity.id
+         LEFT JOIN Admin ON Admin.id = Entity.id;
 
 
 -- Create stored procedures and functions.
@@ -271,7 +284,8 @@ CREATE FUNCTION EntityDetails(entityId BIGINT)
                 parent           BIGINT,
                 drawable         BOOLEAN,
                 animatedSprite   INTEGER,
-                orientation      INTEGER
+                orientation      INTEGER,
+                admin            BOOLEAN
             )
     LANGUAGE SQL
 AS
@@ -302,7 +316,8 @@ CREATE FUNCTION PositionedEntitiesInRange(x_min REAL, y_min REAL, z_min REAL,
                 parent           BIGINT,
                 drawable         BOOLEAN,
                 animatedSprite   INTEGER,
-                orientation      INTEGER
+                orientation      INTEGER,
+                admin            BOOLEAN
             )
     LANGUAGE SQL
 AS

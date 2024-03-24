@@ -83,6 +83,9 @@ installed on your system.
    ```powershell
    Invoke-RestMethod -Uri http://127.0.0.1:8080/debug -Method POST -Body '{"Type": "GenerateWorldData"}'
    ```
+6. The server is configured by default to grant the Admin role to all new players. Once you have created
+   an initial player with Admin role, it is strongly recommended to disable this option by editing
+   the server configuration file and changing `AdminByDefault` to `false`.
 
 ### Client
 
@@ -100,6 +103,15 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 | F10        | Toggle Dear ImGui ID Stack Tool        |
 | F11        | Toggle Dear ImGui Metrics/Debug Window |
 | F12        | Toggle Dear ImGui Debug Log            |
+
+#### Chat Commands
+
+| Command      | Arguments  | Action                                                |
+|--------------|------------|-------------------------------------------------------|
+| /help        |            | List commands and their descriptions.                 |
+| /g           | message    | Broadcasts a message through global chat.             |
+| /addadmin    | playerName | Admin only. Grants admin role to the given player.    |
+| /removeadmin | playerName | Admin only. Revokes admin role from the given player. |
 
 ## Reporting Issues
 

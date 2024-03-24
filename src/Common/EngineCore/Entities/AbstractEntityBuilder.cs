@@ -20,7 +20,6 @@ using System.Numerics;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.EngineUtil.Threading;
 
 namespace Sovereign.EngineCore.Entities;
@@ -31,6 +30,7 @@ namespace Sovereign.EngineCore.Entities;
 public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 {
     protected readonly AboveBlockComponentCollection aboveBlocks;
+    private readonly AdminTagCollection admins;
     protected readonly AnimatedSpriteComponentCollection animatedSprites;
     protected readonly DrawableTagCollection drawables;
 
@@ -59,6 +59,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         DrawableTagCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites,
         OrientationComponentCollection orientations,
+        AdminTagCollection admins,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -75,6 +76,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         this.animatedSprites = animatedSprites;
         this.orientations = orientations;
         this.entityTable = entityTable;
+        this.admins = admins;
 
         weakLock = entityManager.UpdateGuard.AcquireWeakLock();
     }
@@ -222,4 +224,16 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     public abstract IEntityBuilder Account(Guid accountId);
 
     public abstract IEntityBuilder WithoutAccount();
+
+    public IEntityBuilder Admin()
+    {
+        admins.TagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutAdmin()
+    {
+        admins.UntagEntity(entityId, load);
+        return this;
+    }
 }

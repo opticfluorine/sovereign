@@ -14,40 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Systems.ClientState;
+namespace Sovereign.EngineCore.Components;
 
 /// <summary>
-///     Internal states for main menu.
+///     Tag that designates a player as an administrator (admin).
 /// </summary>
-public enum MainMenuState
+public class AdminTagCollection : BaseTagCollection
 {
     /// <summary>
-    ///     Startup menu.
+    ///     Default tag collection size.
     /// </summary>
-    Startup,
+    private const int DefaultSize = 128;
 
-    /// <summary>
-    ///     Login dialog.
-    /// </summary>
-    Login,
-
-    /// <summary>
-    ///     Registration dialog.
-    /// </summary>
-    Registration,
-
-    /// <summary>
-    ///     Player selection dialog.
-    /// </summary>
-    PlayerSelection,
-
-    /// <summary>
-    ///     Player creation dialog.
-    /// </summary>
-    PlayerCreation,
-
-    /// <summary>
-    ///     Connection lost error dialog.
-    /// </summary>
-    ConnectionLost
+    public AdminTagCollection(ComponentManager componentManager)
+        : base(componentManager, DefaultSize, ComponentType.Admin)
+    {
+    }
 }

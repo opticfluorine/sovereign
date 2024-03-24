@@ -27,6 +27,7 @@ using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Players;
+using Sovereign.ServerCore.Configuration;
 using WatsonWebserver;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
@@ -42,6 +43,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
     private const int MaxRequestLength = 1024;
 
     private readonly AccountsController accountsController;
+    private readonly IServerConfigurationManager configManager;
 
     /// <summary>
     ///     Object used as a lock to avoid name duplication due to a race condition.
@@ -61,7 +63,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
     public CreatePlayerRestService(RestAuthenticator authenticator, IEntityFactory entityFactory,
         CreatePlayerRequestValidator requestValidator, PersistencePlayerServices playerServices,
-        AccountsController accountsController, IEventSender eventSender)
+        AccountsController accountsController, IEventSender eventSender, IServerConfigurationManager configManager)
         : base(authenticator)
     {
         this.entityFactory = entityFactory;
@@ -69,6 +71,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
         this.playerServices = playerServices;
         this.accountsController = accountsController;
         this.eventSender = eventSender;
+        this.configManager = configManager;
     }
 
     public override string Path => RestEndpoints.Player;
@@ -164,14 +167,22 @@ public class CreatePlayerRestService : AuthenticatedRestService
                 !playerServices.IsPlayerNameTaken(request.PlayerName))
             {
                 // Name is available and wasn't created recently - let's take it.
-                playerEntityId = entityFactory.GetBuilder()
+                var builder = entityFactory.GetBuilder()
                     .Account(accountId)
                     .Name(request.PlayerName)
                     .PlayerCharacter()
                     .Positionable(Vector3.Zero) // TODO Configurable start position
                     .Drawable()
-                    .AnimatedSprite(4) // TODO Configurable appearance
-                    .Build();
+                    .AnimatedSprite(4); // TODO Configurable appearance
+
+                if (configManager.ServerConfiguration.NewPlayers.AdminByDefault)
+                {
+                    Logger.WarnFormat("Player {0} defaulting to admin; edit server configuration if unintended.",
+                        request.PlayerName);
+                    builder.Admin();
+                }
+
+                playerEntityId = builder.Build();
 
                 recentNames.Add(request.PlayerName);
                 result = true;

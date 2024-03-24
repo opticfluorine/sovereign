@@ -1,3 +1,5 @@
+-- noinspection SqlNoDataSourceInspectionForFile
+
 --
 -- Sovereign Engine
 -- Copyright (c) 2019 opticfluorine
@@ -138,6 +140,9 @@ CREATE TABLE Name
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
+-- Index name for faster searches.
+CREATE INDEX Name_Index ON Name (value);
+
 
 -----------------------
 -- Account Component --
@@ -201,6 +206,17 @@ CREATE TABLE Orientation
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
+------------------
+-- Drawable Tag --
+------------------
+
+CREATE TABLE Admin
+(
+    id    INTEGER PRIMARY KEY NOT NULL,
+    value BOOLEAN             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
 
 --------------------------------------
 -- Account With Authentication View --
@@ -234,7 +250,8 @@ SELECT Entity.id                   AS id,
        Parent.parent_id            AS parent,
        Drawable.value              AS drawable,
        AnimatedSprite.value        AS animatedSprite,
-       Orientation.value           AS orientation
+       Orientation.value           AS orientation,
+       Admin.value                 AS admin
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
@@ -245,7 +262,8 @@ FROM Entity
          LEFT JOIN Parent ON Entity.id = Parent.id
          LEFT JOIN Drawable ON Entity.id = Drawable.id
          LEFT JOIN AnimatedSprite ON Entity.id = AnimatedSprite.id
-         LEFT JOIN Orientation ON Entity.id = Orientation.id;
+         LEFT JOIN Orientation ON Entity.id = Orientation.id
+         LEFT JOIN Admin ON Entity.id = Admin.id;
 
 
 -- Log the migration.

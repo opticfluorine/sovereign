@@ -14,40 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Systems.ClientState;
+namespace Sovereign.Persistence.Database.Queries;
 
 /// <summary>
-///     Internal states for main menu.
+///     Query for removing the admin role from a player by name.
 /// </summary>
-public enum MainMenuState
+public interface IRemoveAdminRoleQuery
 {
     /// <summary>
-    ///     Startup menu.
+    ///     Removes the admin role for the player with the given name, if any.
     /// </summary>
-    Startup,
-
-    /// <summary>
-    ///     Login dialog.
-    /// </summary>
-    Login,
-
-    /// <summary>
-    ///     Registration dialog.
-    /// </summary>
-    Registration,
-
-    /// <summary>
-    ///     Player selection dialog.
-    /// </summary>
-    PlayerSelection,
-
-    /// <summary>
-    ///     Player creation dialog.
-    /// </summary>
-    PlayerCreation,
-
-    /// <summary>
-    ///     Connection lost error dialog.
-    /// </summary>
-    ConnectionLost
+    /// <param name="playerName">Player name.</param>
+    void RemoveAdminRole(string playerName);
 }

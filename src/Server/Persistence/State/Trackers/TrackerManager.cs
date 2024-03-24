@@ -23,6 +23,8 @@ namespace Sovereign.Persistence.State.Trackers;
 /// </summary>
 public sealed class TrackerManager
 {
+    private readonly AdminStateTracker adminStateTracker;
+
     public TrackerManager(PositionStateTracker positionStateTracker,
         MaterialStateTracker materialStateTracker,
         MaterialModifierStateTracker materialModifierStateTracker,
@@ -32,8 +34,10 @@ public sealed class TrackerManager
         ParentStateTracker parentStateTracker,
         DrawableStateTracker drawableStateTracker,
         AnimatedSpriteStateTracker animatedSpriteStateTracker,
-        OrientationStateTracker orientationStateTracker)
+        OrientationStateTracker orientationStateTracker,
+        AdminStateTracker adminStateTracker)
     {
+        this.adminStateTracker = adminStateTracker;
         OrientationStateTracker = orientationStateTracker;
         PositionStateTracker = positionStateTracker;
         MaterialStateTracker = materialStateTracker;

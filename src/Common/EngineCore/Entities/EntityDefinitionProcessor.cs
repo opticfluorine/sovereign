@@ -91,6 +91,11 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutOrientation();
 
+        if (definition.Admin)
+            builder.Admin();
+        else
+            builder.WithoutAdmin();
+
         var entityId = builder.Build();
         Logger.DebugFormat("Processed entity ID {0}.", entityId);
     }

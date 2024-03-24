@@ -4,6 +4,30 @@
 
 ### March
 
+#### 24 March 2024
+
+* Fix issue where player selection GUI did not look nice when long player names were in use.
+* Fix issue where player creation GUI had a name input box that was way too small.
+* Fix issue where a connection lost error message would be incorrectly displayed when the player logs out
+  from the player selection GUI.
+
+#### 23 March 2024
+
+* Add new commands `/addadmin` and `/removeadmin` for granting and revoking the admin role to players.
+* Fix issue where the client did not log out automatically when the connection is lost.
+* Fix issue where client state was not fully reset after logout or connection loss.
+* Fix issue where chat history was not cleared from the client after a logout.
+* Add server-side API to resynchronize entity trees on demand in cases where a change was made directly instead
+  of through a repeated event sequence (e.g. adding or removing admin roles for an online player).
+
+#### 19 March 2024
+
+* Add `Admin` tag to denote a player as an admin. Admin roles are granted at the player level rather than
+  the account level for simplicity.
+* Add option to server config file to create new players as admins by default. This is enabled in the default
+  configuration file so that the first player created on a new server will have admin privileges; it should then
+  be disabled for obvious reasons.
+
 #### 18 March 2024
 
 * Add `/help` command to list other chat commands.

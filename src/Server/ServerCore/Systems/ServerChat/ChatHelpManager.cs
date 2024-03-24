@@ -37,6 +37,7 @@ public class ChatHelpManager
         this.internalController = internalController;
         var commands = processors
             .SelectMany(proc => proc.MatchingCommands)
+            .Where(command => command.IncludeInHelp)
             .OrderBy(command => command.Command);
         var sb = new StringBuilder();
         sb.Append("Available commands:\n");

@@ -24,7 +24,6 @@ using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
-using Sovereign.EngineCore.Systems.Player.Components.Indexers;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -138,6 +137,18 @@ public class WorldSegmentSubscriptionManager
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     public void OnEntityChangeSegment(ulong entityId)
+    {
+        // Treat this entity as if it were newly added to the world segment that it just entered,
+        // as this will trigger all of the necessary synchronization logic.
+        OnNonBlockEntityAdded(entityId);
+    }
+
+    /// <summary>
+    ///     Called when the WorldManagement system receives a request to resynchronize the given
+    ///     positioned entity with any subscribers.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    public void OnResyncRequest(ulong entityId)
     {
         // Treat this entity as if it were newly added to the world segment that it just entered,
         // as this will trigger all of the necessary synchronization logic.

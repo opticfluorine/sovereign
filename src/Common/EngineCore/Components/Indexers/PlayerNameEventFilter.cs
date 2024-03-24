@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,19 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
-using Sovereign.EngineCore.Components;
-
-namespace Sovereign.EngineCore.Systems.Player.Components.Indexers;
+namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
-///     Component event filter for player position events.
+///     Filters name-related events to include only those for player character entities.
 /// </summary>
-public class PlayerPositionEventFilter : PlayerComponentEventFilter<Vector3>
+public class PlayerNameEventFilter : PlayerComponentEventFilter<string>
 {
-    public PlayerPositionEventFilter(PlayerCharacterTagCollection playerTags,
-        PositionComponentCollection positions)
-        : base(playerTags, positions, positions)
+    public PlayerNameEventFilter(PlayerCharacterTagCollection players, NameComponentCollection names)
+        : base(players, names, names)
     {
     }
 }

@@ -15,8 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Systems.Player.Components;
-
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
@@ -90,6 +88,11 @@ public enum ComponentType
     ///     Orientation component.
     /// </summary>
     Orientation = 0x000A,
+
+    /// <summary>
+    ///     Admin tag.
+    /// </summary>
+    Admin = 0x000B,
 
     #endregion Common
 
