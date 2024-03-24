@@ -170,7 +170,8 @@ public class PlayerSelectionGui
             return MainMenuState.PlayerSelection;
         }
 
-        ImGui.BeginTable("players", 3, ImGuiTableFlags.BordersH | ImGuiTableFlags.ScrollY,
+        ImGui.BeginTable("players", 3,
+            ImGuiTableFlags.BordersH | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingFixedFit,
             new Vector2(0.0f, 440.0f));
         foreach (var player in playerList) RenderPlayer(player);
 

@@ -461,6 +461,7 @@ public sealed class ClientNetworkManager : INetworkManager
         // Notify any systems that care that the connection has been lost.
         // This will route back to here and gracefully clean up the connection.
         Logger.InfoFormat("Connection lost: {0}", disconnectInfo.Reason);
-        clientNetworkController.DeclareConnectionLost(eventSender);
+        if (disconnectInfo.Reason != DisconnectReason.DisconnectPeerCalled)
+            clientNetworkController.DeclareConnectionLost(eventSender);
     }
 }

@@ -4,6 +4,13 @@
 
 ### March
 
+#### 24 March 2024
+
+* Fix issue where player selection GUI did not look nice when long player names were in use.
+* Fix issue where player creation GUI had a name input box that was way too small.
+* Fix issue where a connection lost error message would be incorrectly displayed when the player logs out
+  from the player selection GUI.
+
 #### 23 March 2024
 
 * Add new commands `/addadmin` and `/removeadmin` for granting and revoking the admin role to players.

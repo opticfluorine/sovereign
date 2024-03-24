@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using ImGuiNET;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Systems.ClientState;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
@@ -39,7 +40,6 @@ public class CreatePlayerGui
 
     private const string CreatingPlayer = "Creating player and entering world...";
 
-    private const uint MaxPlayerNameLen = 64;
     private readonly PlayerManagementClient client;
     private CreatePlayerState createState = CreatePlayerState.Input;
     private Task<Option<CreatePlayerResponse, string>>? createTask;
@@ -96,7 +96,7 @@ public class CreatePlayerGui
     {
         var nextState = MainMenuState.PlayerCreation;
 
-        ImGui.BeginTable("createPlayer", 2);
+        ImGui.BeginTable("createPlayer", 2, ImGuiTableFlags.SizingFixedFit);
 
         ImGui.TableNextColumn();
         ImGui.Text("Player name:");
@@ -107,7 +107,8 @@ public class CreatePlayerGui
             setDefaultFocus = false;
         }
 
-        if (ImGui.InputText("##playerName", ref playerNameInput, MaxPlayerNameLen,
+        ImGui.SetNextItemWidth(240.0f);
+        if (ImGui.InputText("##playerName", ref playerNameInput, EntityConstants.MaxNameLength,
                 ImGuiInputTextFlags.EnterReturnsTrue)) OnCreate();
 
         ImGui.EndTable();
