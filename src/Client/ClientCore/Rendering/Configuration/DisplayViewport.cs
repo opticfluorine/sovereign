@@ -16,12 +16,12 @@ public sealed class DisplayViewport
     /// <summary>
     ///     Width of the display viewport in pixels.
     /// </summary>
-    public int Width => 800;
+    public int Width => 1024;
 
     /// <summary>
     ///     Height of the display viewport in pixels.
     /// </summary>
-    public int Height => 450;
+    public int Height => 576;
 
     /// <summary>
     ///     Width of the display viewport as a multiple of the tile width.

@@ -9,6 +9,8 @@
 * Make screen resolution configurable through the client configuration window. Only resolutions with a
   16:9 aspect ratio are supported.
 * Change the default screen resolution to 1920x1080.
+* Increase the number of tiles displayed on screen. Now an entire world segment fits across the width of the
+  display.
 
 #### 24 March 2024
 
