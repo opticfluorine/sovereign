@@ -4,6 +4,12 @@
 
 ### March
 
+#### 25 March 2024
+
+* Make screen resolution configurable through the client configuration window. Only resolutions with a
+  16:9 aspect ratio are supported.
+* Change the default screen resolution to 1920x1080.
+
 #### 24 March 2024
 
 * Fix issue where player selection GUI did not look nice when long player names were in use.

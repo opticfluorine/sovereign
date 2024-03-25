@@ -131,7 +131,7 @@ public class RenderingManager : IStartable
         try
         {
             /* Create the main window. */
-            mainDisplay.Show(selectedDisplayMode, configManager.ClientConfiguration.Fullscreen);
+            mainDisplay.Show(selectedDisplayMode, configManager.ClientConfiguration.Display.Fullscreen);
         }
         catch (Exception e)
         {

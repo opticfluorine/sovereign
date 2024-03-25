@@ -19,6 +19,7 @@ using System;
 using System.Linq;
 using System.Text;
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Configuration;
 
@@ -28,28 +29,26 @@ namespace Sovereign.ClientCore.Rendering.Configuration;
 public class DisplayModeSelector
 {
     /// <summary>
-    ///     Default width.
+    ///     Supported aspect ratio.
     /// </summary>
-    private const int DefaultWidth = 1280;
-
-    /// <summary>
-    ///     Default height.
-    /// </summary>
-    private const int DefaultHeight = 720;
+    private const float AspectRatio = 16.0f / 9.0f;
 
     /// <summary>
     ///     Comparison tolerance for aspect ratio.
     /// </summary>
     private const double AspectRatioTolerance = 1E-1;
 
+    private readonly ClientConfigurationManager configManager;
+
     /// <summary>
     ///     Display mode enumerator.
     /// </summary>
     private readonly IDisplayModeEnumerator displayModeEnumerator;
 
-    public DisplayModeSelector(IDisplayModeEnumerator displayModeEnumerator)
+    public DisplayModeSelector(IDisplayModeEnumerator displayModeEnumerator, ClientConfigurationManager configManager)
     {
         this.displayModeEnumerator = displayModeEnumerator;
+        this.configManager = configManager;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -71,25 +70,29 @@ public class DisplayModeSelector
 
         /* Use the preferred mode if it is available. */
         IDisplayMode? selectedMode = null;
+        var desiredWidth = configManager.ClientConfiguration.Display.ResolutionWidth;
+        var desiredHeight = configManager.ClientConfiguration.Display.ResolutionHeight;
         var preferredModes = from mode in availableModes
-            where mode.Width == DefaultWidth && mode.Height == DefaultHeight
+            where mode.Width == desiredWidth && mode.Height == desiredHeight
             select mode;
-        if (preferredModes.Count() > 0)
+        if (preferredModes.Count() > 0 &&
+            Math.Abs((double)desiredWidth / desiredHeight - AspectRatio) < AspectRatioTolerance)
         {
-            /* Preferred mode found, use the first matching mode. */
+            /* Preferred mode found and has the correct aspect ratio, use the first matching mode. */
             selectedMode = preferredModes.First();
         }
         else
         {
             /* Preferred mode not found, use the highest resolution mode that matches the aspect ratio. */
-            var aspectRatio = (double)DefaultWidth / DefaultHeight;
             var resSortedModes = from mode in availableModes
-                where Math.Abs((double)mode.Width / mode.Height - aspectRatio) < AspectRatioTolerance
+                where Math.Abs((double)mode.Width / mode.Height - AspectRatio) < AspectRatioTolerance
                 orderby mode.Width * mode.Height descending
                 select mode;
             try
             {
                 selectedMode = resSortedModes.First();
+                Logger.WarnFormat("Requested display size {0}x{1} not supported, falling back to {0}x{1}.",
+                    selectedMode.Width, selectedMode.Height);
             }
             catch
             {

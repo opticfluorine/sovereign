@@ -44,17 +44,43 @@ public sealed class ClientConfiguration
     public float RenderSearchSpacerY { get; set; } = 8.0f;
 
     /// <summary>
-    ///     Maximum framerate (in frames per second).
-    /// </summary>
-    public int MaxFramerate { get; set; } = 120;
-
-    /// <summary>
-    ///     Whether to run in fullscreen mode.
-    /// </summary>
-    public bool Fullscreen { get; set; } = false;
-
-    /// <summary>
     ///     Connection parameters.
     /// </summary>
     public ClientConnectionParameters ConnectionParameters { get; set; } = new();
+
+    /// <summary>
+    ///     Display settings.
+    /// </summary>
+    public DisplayConfiguration Display { get; set; } = new();
+
+    /// <summary>
+    ///     Data type for display configuration.
+    /// </summary>
+    public struct DisplayConfiguration
+    {
+        /// <summary>
+        ///     Game window width in pixels.
+        /// </summary>
+        public int ResolutionWidth { get; set; }
+
+        /// <summary>
+        ///     Game window height in pixels.
+        /// </summary>
+        public int ResolutionHeight { get; set; }
+
+        /// <summary>
+        ///     User interface scale factor.
+        /// </summary>
+        public float UiScaleFactor { get; set; }
+
+        /// <summary>
+        ///     Fullscreen flag.
+        /// </summary>
+        public bool Fullscreen { get; set; }
+
+        /// <summary>
+        ///     Maximum framerate.
+        /// </summary>
+        public int MaxFramerate { get; set; }
+    }
 }

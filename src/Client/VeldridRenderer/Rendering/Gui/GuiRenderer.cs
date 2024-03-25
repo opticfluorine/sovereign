@@ -18,6 +18,7 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using ImGuiNET;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.GUI;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -35,14 +36,10 @@ namespace Sovereign.VeldridRenderer.Rendering.Gui;
 /// </summary>
 public class GuiRenderer : IDisposable
 {
-    /// <summary>
-    ///     GUI scale factor.
-    /// </summary>
-    private static readonly Vector2 ScaleFactor = Vector2.One;
-
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly TextureAtlasManager atlasManager;
     private readonly AtlasMap atlasMap;
+    private readonly ClientConfigurationManager configManager;
     private readonly VeldridDevice device;
     private readonly CommonGuiManager guiManager;
     private readonly GuiPipeline guiPipeline;
@@ -60,6 +57,8 @@ public class GuiRenderer : IDisposable
     /// </summary>
     private ResourceSet? resourceSet;
 
+    private Vector2 scaleFactor;
+
     /// <summary>
     ///     Working copy of the vertex shader constants.
     /// </summary>
@@ -67,7 +66,8 @@ public class GuiRenderer : IDisposable
 
     public GuiRenderer(CommonGuiManager guiManager, GuiResourceManager guiResourceManager, GuiPipeline guiPipeline,
         TextureAtlasManager atlasManager, ISystemTimer systemTimer, AnimatedSpriteManager animatedSpriteManager,
-        AtlasMap atlasMap, VeldridDevice device, VeldridResourceManager resourceManager)
+        AtlasMap atlasMap, VeldridDevice device, VeldridResourceManager resourceManager,
+        ClientConfigurationManager configManager)
     {
         this.guiManager = guiManager;
         this.guiResourceManager = guiResourceManager;
@@ -78,6 +78,7 @@ public class GuiRenderer : IDisposable
         this.atlasMap = atlasMap;
         this.device = device;
         this.resourceManager = resourceManager;
+        this.configManager = configManager;
     }
 
     public void Dispose()
@@ -110,9 +111,10 @@ public class GuiRenderer : IDisposable
             -1.0f,
             1.0f
         );
-        io.DisplaySize = new Vector2(device.DisplayMode.Width / ScaleFactor.X,
-            device.DisplayMode.Height / ScaleFactor.Y);
-        io.DisplayFramebufferScale = ScaleFactor;
+        scaleFactor = new Vector2(configManager.ClientConfiguration.Display.UiScaleFactor);
+        io.DisplaySize = new Vector2(device.DisplayMode.Width / scaleFactor.X,
+            device.DisplayMode.Height / scaleFactor.Y);
+        io.DisplayFramebufferScale = scaleFactor;
     }
 
     /// <summary>
@@ -137,7 +139,7 @@ public class GuiRenderer : IDisposable
         // First stage, convert pending ImGui commands to drawing-level data
         var drawData = guiManager.Render();
         if (drawData.CmdListsCount == 0) return;
-        drawData.ScaleClipRects(ScaleFactor);
+        drawData.ScaleClipRects(scaleFactor);
 
         // Update and bind resources used across all GUI draw calls.
         commandList.PushDebugGroup("GUI");

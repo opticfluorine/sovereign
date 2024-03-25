@@ -39,7 +39,6 @@ public class SDLDisplayModeEnumerator : IDisplayModeEnumerator
                 SDL.SDL_GetDisplayMode(i, j, out var mode);
 
                 // Reject mode if we don't like the format.
-                // TODO Support more formats... or do we care?
                 if (mode.format != SDL.SDL_PIXELFORMAT_RGB888) continue;
 
                 // Otherwise add it to the list.
