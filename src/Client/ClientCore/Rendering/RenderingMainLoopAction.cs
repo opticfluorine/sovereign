@@ -48,7 +48,7 @@ public class RenderingMainLoopAction : IMainLoopAction
         this.renderingManager = renderingManager;
         this.systemTimer = systemTimer;
 
-        minimumTimeDelta = Units.SystemTime.Second / (ulong)configManager.ClientConfiguration.MaxFramerate;
+        minimumTimeDelta = Units.SystemTime.Second / (ulong)configManager.ClientConfiguration.Display.MaxFramerate;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

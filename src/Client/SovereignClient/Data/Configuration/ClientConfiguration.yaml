@@ -34,6 +34,43 @@ ConnectionParameters:
   # For security reasons, this should always be true for production servers.
   RestTls: false
 
+
+# -------
+# Display
+# -------
+# Display settings.
+Display:
+  # ---------------
+  # ResolutionWidth
+  # ---------------
+  # Game window width in pixels.
+  ResolutionWidth: 1920
+  
+  # ----------------
+  # ResolutionHeight
+  # ----------------
+  # Game window height in pixels.
+  ResolutionHeight: 1080
+  
+  # -------------
+  # UiScaleFactor
+  # -------------
+  # Scaling factor for the user interface elements.
+  UiScaleFactor: 1.0
+  
+  # ------------
+  # MaxFramerate
+  # ------------
+  # Maximum framerate (in frames per second).
+  MaxFramerate: 120
+
+  # ----------
+  # Fullscreen
+  # ----------
+  # Whether to run in fullscreen mode.
+  Fullscreen: false
+
+
 # ---------
 # TileWidth
 # ---------
@@ -52,14 +89,3 @@ RenderSearchSpacerX: 4.0
 # Extra tiles to search for renderable entities along the y axis.
 RenderSearchSpacerY: 8.0
 
-# ------------
-# MaxFramerate
-# ------------
-# Maximum framerate (in frames per second).
-MaxFramerate: 120
-
-# ----------
-# Fullscreen
-# ----------
-# Whether to run in fullscreen mode.
-Fullscreen: false
