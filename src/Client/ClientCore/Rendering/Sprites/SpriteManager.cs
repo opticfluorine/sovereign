@@ -73,6 +73,17 @@ public sealed class SpriteManager
     }
 
     /// <summary>
+    ///     Saves the currently loaded sprite definitions to the file.
+    /// </summary>
+    public void SaveSprites()
+    {
+        var definitionsPath = resourcePathBuilder.BuildPathToResource(ResourceType.Sprite,
+            SpriteDefinitionsFile);
+        loader.SaveSpriteDefinitions(definitionsPath, Sprites);
+        Logger.Info("Sprite definitions saved.");
+    }
+
+    /// <summary>
     ///     Loads the sprite definitions.
     /// </summary>
     /// <returns>Sprite definitions.</returns>

@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
@@ -50,7 +51,7 @@ public sealed class SpriteDefinitionsLoader
         SpriteDefinitions? definitions;
         try
         {
-            using var stream = new FileStream(filename, FileMode.Open);
+            using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read);
             definitions = JsonSerializer.Deserialize<SpriteDefinitions>(stream);
         }
         catch (Exception e)
@@ -63,5 +64,28 @@ public sealed class SpriteDefinitionsLoader
         validator.Validate(definitions);
 
         return definitions;
+    }
+
+    /// <summary>
+    ///     Saves the sprite definitions to the given file.
+    /// </summary>
+    /// <param name="filename">Filename.</param>
+    /// <param name="sprites">List of sprites.</param>
+    /// <exception cref="SpriteDefinitionsException">Thrown if an error occurs. Details in inner exception.</exception>
+    public void SaveSpriteDefinitions(string filename, List<Sprite> sprites)
+    {
+        // Pack definitions.
+        var defs = new SpriteDefinitions { Sprites = sprites };
+
+        // Serialize to JSON.
+        try
+        {
+            using var stream = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write);
+            JsonSerializer.Serialize(stream, defs);
+        }
+        catch (Exception e)
+        {
+            throw new SpriteDefinitionsException("Failed to write sprite definitions.", e);
+        }
     }
 }
