@@ -1,0 +1,100 @@
+﻿{
+  "Sprites": [
+    {
+      "Id": 0,
+      "SpritesheetName": "lpc_atlas_2.png",
+      "Row": 12,
+      "Column": 10
+    },
+    {
+      "Id": 1,
+      "SpritesheetName": "lpc_atlas_2.png",
+      "Row": 3,
+      "Column": 22
+    },
+    {
+      "Id": 2,
+      "SpritesheetName": "lpc_atlas_2.png",
+      "Row": 3,
+      "Column": 16
+    },
+    {
+      "Id": 3,
+      "SpritesheetName": "lpc_atlas_2.png",
+      "Row": 3,
+      "Column": 19
+    },
+    {
+      "Id": 4,
+      "SpritesheetName": "slime.png",
+      "Row": 2,
+      "Column": 0
+    },
+    {
+      "Id": 5,
+      "SpritesheetName": "slime.png",
+      "Row": 2,
+      "Column": 1
+    },
+    {
+      "Id": 6,
+      "SpritesheetName": "slime.png",
+      "Row": 2,
+      "Column": 2
+    },
+    {
+      "Id": 7,
+      "SpritesheetName": "slime.png",
+      "Row": 3,
+      "Column": 0
+    },
+    {
+      "Id": 8,
+      "SpritesheetName": "slime.png",
+      "Row": 3,
+      "Column": 1
+    },
+    {
+      "Id": 9,
+      "SpritesheetName": "slime.png",
+      "Row": 3,
+      "Column": 2
+    },
+    {
+      "Id": 10,
+      "SpritesheetName": "slime.png",
+      "Row": 0,
+      "Column": 0
+    },
+    {
+      "Id": 11,
+      "SpritesheetName": "slime.png",
+      "Row": 0,
+      "Column": 1
+    },
+    {
+      "Id": 12,
+      "SpritesheetName": "slime.png",
+      "Row": 0,
+      "Column": 2
+    },
+    {
+      "Id": 13,
+      "SpritesheetName": "slime.png",
+      "Row": 1,
+      "Column": 0
+    },
+    {
+      "Id": 14,
+      "SpritesheetName": "slime.png",
+      "Row": 1,
+      "Column": 1
+    },
+    {
+      "Id": 15,
+      "SpritesheetName": "slime.png",
+      "Row": 1,
+      "Column": 2
+    }
+  ]
+}

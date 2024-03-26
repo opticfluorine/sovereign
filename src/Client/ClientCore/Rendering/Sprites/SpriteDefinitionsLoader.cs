@@ -17,8 +17,7 @@
 
 using System;
 using System.IO;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using System.Text.Json;
 
 namespace Sovereign.ClientCore.Rendering.Sprites;
 
@@ -27,13 +26,6 @@ namespace Sovereign.ClientCore.Rendering.Sprites;
 /// </summary>
 public sealed class SpriteDefinitionsLoader
 {
-    /// <summary>
-    ///     YAML deserializer.
-    /// </summary>
-    private readonly IDeserializer deserializer = new DeserializerBuilder()
-        .WithNamingConvention(PascalCaseNamingConvention.Instance)
-        .Build();
-
     /// <summary>
     ///     Sprite definitions validator.
     /// </summary>
@@ -55,18 +47,18 @@ public sealed class SpriteDefinitionsLoader
     public SpriteDefinitions LoadSpriteDefinitions(string filename)
     {
         /* Load definitions. */
-        SpriteDefinitions definitions;
+        SpriteDefinitions? definitions;
         try
         {
-            using (var reader = new StreamReader(filename))
-            {
-                definitions = deserializer.Deserialize<SpriteDefinitions>(reader);
-            }
+            using var stream = new FileStream(filename, FileMode.Open);
+            definitions = JsonSerializer.Deserialize<SpriteDefinitions>(stream);
         }
         catch (Exception e)
         {
             throw new SpriteDefinitionsException("Failed to read sprite definitions.", e);
         }
+
+        if (definitions == null) throw new SpriteDefinitionsException("No sprite definitions found.");
 
         validator.Validate(definitions);
 

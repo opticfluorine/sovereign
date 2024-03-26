@@ -33,7 +33,7 @@ public sealed class SpriteManager
     /// <summary>
     ///     Name of the sprite definitions file.
     /// </summary>
-    private const string SpriteDefinitionsFile = "SpriteDefinitions.yaml";
+    private const string SpriteDefinitionsFile = "SpriteDefinitions.json";
 
     /// <summary>
     ///     Sprite definitions loader.
