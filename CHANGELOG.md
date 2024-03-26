@@ -11,6 +11,12 @@
 * Change the default screen resolution to 1920x1080.
 * Increase the number of tiles displayed on screen. Now an entire world segment fits across the width of the
   display.
+* Made the sprite table mutable in preparation for adding an integrated sprite definition editor. Modification of
+  the sprite table triggers rebuild of the atlas map and the animated sprites. Note that there is not any additional
+  validation or error handling for the case where an animated sprite points to a newly removed sprite. Currently I'm
+  thinking that deletion of sprites won't be supported; the sprite editor will probably be a "Generate" button that
+  automatically generates a full grid of sprites for a selected spritesheet, and a browser to identify a sprite by
+  mouseover.
 
 #### 24 March 2024
 

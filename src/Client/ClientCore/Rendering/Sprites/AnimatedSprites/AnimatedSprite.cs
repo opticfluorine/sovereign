@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Sovereign.EngineCore.Components.Types;
 using static Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites.AnimatedSpriteDefinitions;
@@ -52,7 +53,33 @@ public sealed class AnimatedSprite
         { Orientation.West, Orientation.South }
     };
 
+    private readonly AnimatedSpriteDefinition definition;
+    private readonly SpriteManager spriteManager;
+
     public AnimatedSprite(AnimatedSpriteDefinition definition, SpriteManager spriteManager)
+    {
+        this.definition = definition;
+        this.spriteManager = spriteManager;
+
+        RebuildFrames();
+    }
+
+    /// <summary>
+    ///     Time to display each frame, in microseconds.
+    /// </summary>
+    public ulong FrameTime { get; set; }
+
+    /// <summary>
+    ///     Sprite IDs for each defined orientation.
+    /// </summary>
+    public Dictionary<Orientation, List<Sprite>> Faces { get; set; }
+
+    /// <summary>
+    ///     Rebuilds the frame data if the definition and/or the sprite table is updated.
+    /// </summary>
+    [MemberNotNull("FrameTime")]
+    [MemberNotNull("Faces")]
+    public void RebuildFrames()
     {
         FrameTime = definition.AnimationTimestep;
         Faces = definition.Faces
@@ -64,16 +91,6 @@ public sealed class AnimatedSprite
                 pair => pair.Item1,
                 pair => pair.Item2);
     }
-
-    /// <summary>
-    ///     Time to display each frame, in microseconds.
-    /// </summary>
-    public ulong FrameTime { get; }
-
-    /// <summary>
-    ///     Sprite IDs for each defined orientation.
-    /// </summary>
-    public Dictionary<Orientation, List<Sprite>> Faces { get; }
 
     /// <summary>
     ///     Converts an animated sprite ID to the corresponding GUI texture handle.

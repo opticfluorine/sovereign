@@ -43,7 +43,7 @@ public sealed class AnimatedSpriteManager
     /// <summary>
     ///     Animated sprites.
     /// </summary>
-    public readonly IList<AnimatedSprite> AnimatedSprites = new List<AnimatedSprite>();
+    public readonly List<AnimatedSprite> AnimatedSprites = new();
 
     /// <summary>
     ///     Animated sprite definitions loader.
@@ -66,11 +66,14 @@ public sealed class AnimatedSpriteManager
         this.loader = loader;
         this.pathBuilder = pathBuilder;
         this.spriteManager = spriteManager;
+
+        spriteManager.OnSpritesChanged += OnSpritesChanged;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public IErrorHandler ErrorHandler { private get; set; } = NullErrorHandler.Instance;
+
 
     /// <summary>
     ///     Initializes the animated sprites.
@@ -117,5 +120,13 @@ public sealed class AnimatedSpriteManager
     {
         foreach (var def in definitions.AnimatedSprites.OrderBy(def => def.Id))
             AnimatedSprites.Add(new AnimatedSprite(def, spriteManager));
+    }
+
+    /// <summary>
+    ///     Invoked when the sprite table is updated.
+    /// </summary>
+    private void OnSpritesChanged()
+    {
+        foreach (var animatedSprite in AnimatedSprites) animatedSprite.RebuildFrames();
     }
 }
