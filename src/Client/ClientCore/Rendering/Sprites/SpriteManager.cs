@@ -73,15 +73,22 @@ public sealed class SpriteManager
     }
 
     /// <summary>
-    ///     Saves the currently loaded sprite definitions to the file.
+    ///     Updates and saves the currently loaded sprite definitions to the file.
     /// </summary>
-    public void SaveSprites()
+    public void UpdateAndSaveSprites()
     {
         var definitionsPath = resourcePathBuilder.BuildPathToResource(ResourceType.Sprite,
             SpriteDefinitionsFile);
         loader.SaveSpriteDefinitions(definitionsPath, Sprites);
         Logger.Info("Sprite definitions saved.");
+
+        OnSpritesChanged?.Invoke();
     }
+
+    /// <summary>
+    ///     Event invoked when the sprites have been changed.
+    /// </summary>
+    public event Action? OnSpritesChanged;
 
     /// <summary>
     ///     Loads the sprite definitions.
