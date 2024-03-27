@@ -18,7 +18,6 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using Sovereign.ClientCore.Rendering.GUI;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
 

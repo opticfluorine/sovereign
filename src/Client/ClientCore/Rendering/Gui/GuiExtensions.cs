@@ -22,7 +22,7 @@ using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.EngineCore.Components.Types;
 using static Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites.AnimatedSprite;
 
-namespace Sovereign.ClientCore.Rendering.GUI;
+namespace Sovereign.ClientCore.Rendering.Gui;
 
 /// <summary>
 ///     Provides specialized extensions to Dear ImGui.

@@ -19,7 +19,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ImGuiNET;
 using Sovereign.ClientCore.Network.Infrastructure;
-using Sovereign.ClientCore.Rendering.GUI;
+using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;

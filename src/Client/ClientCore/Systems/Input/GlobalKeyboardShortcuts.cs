@@ -45,6 +45,7 @@ public class GlobalKeyboardShortcuts
         this.stateController = stateController;
 
         // For now the shortcuts are hardcoded.
+        shortcutTable[SDL.SDL_Keycode.SDLK_F9] = () => Toggle(ClientStateFlag.ShowImGuiDemo);
         shortcutTable[SDL.SDL_Keycode.SDLK_F10] = () => Toggle(ClientStateFlag.ShowImGuiIdStackTool);
         shortcutTable[SDL.SDL_Keycode.SDLK_F11] = () => Toggle(ClientStateFlag.ShowImGuiMetrics);
         shortcutTable[SDL.SDL_Keycode.SDLK_F12] = () => Toggle(ClientStateFlag.ShowImGuiDebugLog);

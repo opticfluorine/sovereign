@@ -19,7 +19,7 @@ using System;
 using System.Text;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Display;
-using Sovereign.ClientCore.Rendering.GUI;
+using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 

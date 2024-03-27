@@ -20,7 +20,6 @@ using System.Runtime.InteropServices;
 using ImGuiNET;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Gui;
-using Sovereign.ClientCore.Rendering.GUI;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.EngineCore.Components.Types;

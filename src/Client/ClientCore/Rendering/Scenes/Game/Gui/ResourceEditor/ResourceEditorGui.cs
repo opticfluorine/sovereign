@@ -23,11 +23,36 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 /// </summary>
 public class ResourceEditorGui
 {
+    private readonly AnimatedSpriteEditorTab animatedSpriteEditorTab;
+    private readonly MaterialEditorTab materialEditorTab;
+    private readonly SpriteEditorTab spriteEditorTab;
+    private readonly TileSpriteEditorTab tileSpriteEditorTab;
+
+    public ResourceEditorGui(SpriteEditorTab spriteEditorTab, AnimatedSpriteEditorTab animatedSpriteEditorTab,
+        TileSpriteEditorTab tileSpriteEditorTab, MaterialEditorTab materialEditorTab)
+    {
+        this.spriteEditorTab = spriteEditorTab;
+        this.animatedSpriteEditorTab = animatedSpriteEditorTab;
+        this.tileSpriteEditorTab = tileSpriteEditorTab;
+        this.materialEditorTab = materialEditorTab;
+    }
+
     /// <summary>
     ///     Renders the resource editor window.
     /// </summary>
     public void Render()
     {
-        if (ImGui.Begin("Resource Editor")) ImGui.End();
+        if (ImGui.Begin("Resource Editor"))
+        {
+            if (ImGui.BeginTabBar("ResourceEditorTabs", ImGuiTabBarFlags.None))
+            {
+                spriteEditorTab.Render();
+                animatedSpriteEditorTab.Render();
+                tileSpriteEditorTab.Render();
+                materialEditorTab.Render();
+            }
+
+            ImGui.End();
+        }
     }
 }

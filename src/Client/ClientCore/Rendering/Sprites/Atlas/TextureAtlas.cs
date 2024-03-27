@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Sovereign.ClientCore.Rendering.Configuration;
-using Sovereign.ClientCore.Rendering.GUI;
+using Sovereign.ClientCore.Rendering.Gui;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.Atlas;
 

@@ -14,20 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using ImGuiNET;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 
-public class ResourceEditorInstaller : IWindsorInstaller
+/// <summary>
+///     Resource editor tab for Materials and MaterialModifiers.
+/// </summary>
+public class MaterialEditorTab
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
+    /// <summary>
+    ///     Renders the Materials resource editor tab.
+    /// </summary>
+    public void Render()
     {
-        container.Register(Component.For<ResourceEditorGui>().LifestyleSingleton());
-        container.Register(Component.For<SpriteEditorTab>().LifestyleSingleton());
-        container.Register(Component.For<AnimatedSpriteEditorTab>().LifestyleSingleton());
-        container.Register(Component.For<TileSpriteEditorTab>().LifestyleSingleton());
-        container.Register(Component.For<MaterialEditorTab>().LifestyleSingleton());
+        if (ImGui.BeginTabItem("Materials"))
+        {
+            ImGui.EndTabItem();
+        }
     }
 }

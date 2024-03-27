@@ -20,7 +20,7 @@ using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Configuration;
 
-namespace Sovereign.ClientCore.Rendering.GUI;
+namespace Sovereign.ClientCore.Rendering.Gui;
 
 /// <summary>
 ///     Manages the GUI font atlas as an SDL surface.
