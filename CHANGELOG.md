@@ -9,6 +9,9 @@
 * Update the GUI renderer to support rendering images other than just animated sprites. Effectively this
   lets us render anything we want from the texture atlas into the GUI.
 * Render entire spritesheets into the Sprite Editor window.
+* Remove thread-level performance throttles. This drives up CPU usage in exchange for large performance benefits;
+  on my (not very good) laptop (a 2017-era i7 with a GTX 1050), consistently able to hit 300+ FPS in the renderer
+  and one-way event latencies on the same timescale as a single context switch in the server.
 
 #### 26 March 2024
 
