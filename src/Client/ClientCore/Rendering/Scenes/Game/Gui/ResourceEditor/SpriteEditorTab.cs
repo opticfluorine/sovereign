@@ -17,6 +17,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
+using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
@@ -26,6 +27,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 /// </summary>
 public class SpriteEditorTab
 {
+    private readonly GuiExtensions guiExtensions;
     private readonly SpriteSheetManager spriteSheetManager;
 
     /// <summary>
@@ -36,9 +38,10 @@ public class SpriteEditorTab
     // Alphabetically-ordered sprite sheets.
     private List<string> orderedSpriteSheets = new();
 
-    public SpriteEditorTab(SpriteSheetManager spriteSheetManager)
+    public SpriteEditorTab(SpriteSheetManager spriteSheetManager, GuiExtensions guiExtensions)
     {
         this.spriteSheetManager = spriteSheetManager;
+        this.guiExtensions = guiExtensions;
     }
 
     /// <summary>
@@ -47,10 +50,7 @@ public class SpriteEditorTab
     public void Render()
     {
         // Initialize sprite sheet selector if not yet initialized.
-        if (orderedSpriteSheets.Count == 0)
-        {
-            Initialize();
-        }
+        if (orderedSpriteSheets.Count == 0) Initialize();
 
         //
         if (ImGui.BeginTabItem("Sprites"))
@@ -108,5 +108,12 @@ public class SpriteEditorTab
     /// </summary>
     private void DrawSpritesheetView()
     {
+        // Wrap the view in a single-cell table to get scrollbars for larger spritesheets.
+        if (ImGui.BeginTable("spritesheetView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY))
+        {
+            ImGui.TableNextColumn();
+            guiExtensions.Spritesheet(orderedSpriteSheets[currentSheetIdx]);
+            ImGui.EndTable();
+        }
     }
 }

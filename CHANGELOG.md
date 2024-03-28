@@ -4,6 +4,16 @@
 
 ### March
 
+#### 27 March 2024
+
+* Update the GUI renderer to support rendering images other than just animated sprites. Effectively this
+  lets us render anything we want from the texture atlas into the GUI.
+* Render entire spritesheets into the Sprite Editor window.
+
+#### 26 March 2024
+
+* Build out the basic framework for the resource editor window.
+
 #### 25 March 2024
 
 * Make screen resolution configurable through the client configuration window. Only resolutions with a

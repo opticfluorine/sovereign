@@ -19,8 +19,6 @@ using ImGuiNET;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
-using Sovereign.EngineCore.Components.Types;
-using static Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites.AnimatedSprite;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
 
@@ -32,13 +30,15 @@ public class GuiExtensions
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly AtlasMap atlasMap;
     private readonly ClientConfigurationManager clientConfigurationManager;
+    private readonly GuiTextureMapper textureMapper;
 
     public GuiExtensions(AnimatedSpriteManager animatedSpriteManager, AtlasMap atlasMap,
-        ClientConfigurationManager clientConfigurationManager)
+        ClientConfigurationManager clientConfigurationManager, GuiTextureMapper textureMapper)
     {
         this.animatedSpriteManager = animatedSpriteManager;
         this.atlasMap = atlasMap;
         this.clientConfigurationManager = clientConfigurationManager;
+        this.textureMapper = textureMapper;
     }
 
     /// <summary>
@@ -47,17 +47,23 @@ public class GuiExtensions
     /// <param name="animatedSpriteId">Animated sprite ID.</param>
     public void AnimatedSprite(int animatedSpriteId)
     {
-        var texId = ToGuiTextureHandle(animatedSpriteId);
-
-        // For convenience, select dimensions to match the first south-facing sprite.
-        var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
-        var firstSprite = animatedSprite.GetSpriteForTime(0, Orientation.South);
-        var spriteBounds = atlasMap.MapElements[firstSprite.Id];
-        var clientConfiguration = clientConfigurationManager.ClientConfiguration;
-        var width = spriteBounds.WidthInTiles * clientConfiguration.TileWidth;
-        var height = spriteBounds.HeightInTiles * clientConfiguration.TileWidth;
+        var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         // Render GUI component.
-        ImGui.Image(texId, new Vector2(width, height));
+        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
+    }
+
+    /// <summary>
+    ///     Renders a full spritesheet to the GUI.
+    /// </summary>
+    /// <param name="spritesheet">Spritesheet name.</param>
+    public void Spritesheet(string spritesheet)
+    {
+        var texId = textureMapper.GetTextureIdForSpritesheet(spritesheet);
+        var texData = textureMapper.GetTextureDataForTextureId(texId);
+
+        // Render GUI component.
+        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
     }
 }

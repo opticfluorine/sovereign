@@ -28,13 +28,9 @@ public class CommonGuiInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(Component.For<CommonGuiManager>()
-            .LifestyleSingleton());
-
-        container.Register(Component.For<GuiFontAtlas>()
-            .LifestyleSingleton());
-
-        container.Register(Component.For<GuiExtensions>()
-            .LifestyleSingleton());
+        container.Register(Component.For<CommonGuiManager>().LifestyleSingleton());
+        container.Register(Component.For<GuiFontAtlas>().LifestyleSingleton());
+        container.Register(Component.For<GuiExtensions>().LifestyleSingleton());
+        container.Register(Component.For<GuiTextureMapper>().LifestyleSingleton());
     }
 }

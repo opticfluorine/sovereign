@@ -35,11 +35,6 @@ public sealed class AnimatedSprite
     private const Orientation DefaultOrientation = Orientation.South;
 
     /// <summary>
-    ///     Offset to add to an animated sprite ID to get the GUI texture handle.
-    /// </summary>
-    private const int guiTextureOffset = 2;
-
-    /// <summary>
     ///     Specifies which orientation to try next if a given orientation is not defined for a sprite.
     /// </summary>
     private static readonly Dictionary<Orientation, Orientation> FallbackOrientations = new()
@@ -90,26 +85,6 @@ public sealed class AnimatedSprite
             .ToDictionary(
                 pair => pair.Item1,
                 pair => pair.Item2);
-    }
-
-    /// <summary>
-    ///     Converts an animated sprite ID to the corresponding GUI texture handle.
-    /// </summary>
-    /// <param name="animatedSpriteId">Animated sprite ID.</param>
-    /// <returns>GUI texture handle.</returns>
-    public static IntPtr ToGuiTextureHandle(int animatedSpriteId)
-    {
-        return new IntPtr(animatedSpriteId + guiTextureOffset);
-    }
-
-    /// <summary>
-    ///     Converts a GUI texture handle to the corresponding animated sprite ID.
-    /// </summary>
-    /// <param name="textureHandle">GUI texture handle.</param>
-    /// <returns>Animated sprite ID.</returns>
-    public static int FromGuiTextureHandle(IntPtr textureHandle)
-    {
-        return (int)textureHandle - guiTextureOffset;
     }
 
     /// <summary>
