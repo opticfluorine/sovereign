@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
-using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 using Sovereign.ClientCore.Systems.ClientState;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
@@ -29,18 +28,16 @@ public class GameGui
     private readonly EntityDebugGui entityDebugGui;
     private readonly InGameMenuGui menuGui;
     private readonly PlayerDebugGui playerDebugGui;
-    private readonly ResourceEditorGui resourceEditorGui;
     private readonly ClientStateServices stateServices;
 
     public GameGui(ClientStateServices stateServices, PlayerDebugGui playerDebugGui, EntityDebugGui entityDebugGui,
-        InGameMenuGui menuGui, ChatGui chatGui, ResourceEditorGui resourceEditorGui)
+        InGameMenuGui menuGui, ChatGui chatGui)
     {
         this.stateServices = stateServices;
         this.playerDebugGui = playerDebugGui;
         this.entityDebugGui = entityDebugGui;
         this.menuGui = menuGui;
         this.chatGui = chatGui;
-        this.resourceEditorGui = resourceEditorGui;
     }
 
     /// <summary>
@@ -52,7 +49,6 @@ public class GameGui
 
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowInGameMenu)) menuGui.Render();
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowChat)) chatGui.Render();
-        if (stateServices.GetStateFlagValue(ClientStateFlag.ShowResourceEditor)) resourceEditorGui.Render();
     }
 
     /// <summary>
