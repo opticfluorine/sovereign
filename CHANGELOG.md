@@ -4,6 +4,11 @@
 
 ### March
 
+#### 28 March 2024
+
+* Highlight sprites in the Sprite Editor which already have defined sprites. Also show the corresponding sprite ID
+  when the mouse is hovered over the sprite in the editor.
+
 #### 27 March 2024
 
 * Update the GUI renderer to support rendering images other than just animated sprites. Effectively this

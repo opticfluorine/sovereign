@@ -51,7 +51,7 @@ public sealed class SpriteManager
     ///     Map from spritesheet names to a 2D array of booleans indicating whether a sprite exists for
     ///     the given row and column.
     /// </summary>
-    public Dictionary<string, bool[,]> SpriteSheetCoverage = new();
+    public Dictionary<string, Sprite?[,]> SpriteSheetCoverage = new();
 
     public SpriteManager(SpriteDefinitionsLoader loader,
         IResourcePathBuilder resourcePathBuilder, SpriteSheetManager spriteSheetManager)
@@ -87,7 +87,7 @@ public sealed class SpriteManager
 
             if (!SpriteSheetCoverage.TryGetValue(spriteSheetName, out var coverageMap))
             {
-                coverageMap = new bool[rows, cols];
+                coverageMap = new Sprite?[rows, cols];
                 SpriteSheetCoverage[spriteSheetName] = coverageMap;
             }
         }
@@ -169,7 +169,7 @@ public sealed class SpriteManager
         foreach (var sprite in Sprites)
         {
             var coverageMap = SpriteSheetCoverage[sprite.SpritesheetName];
-            coverageMap[sprite.Row, sprite.Column] = true;
+            coverageMap[sprite.Row, sprite.Column] = sprite;
         }
     }
 }

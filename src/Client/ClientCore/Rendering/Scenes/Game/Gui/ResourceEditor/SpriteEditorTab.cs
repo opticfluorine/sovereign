@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -125,18 +126,37 @@ public class SpriteEditorTab
             var sheet = spriteSheetManager.SpriteSheets[sheetName];
             var rows = sheet.Surface.Properties.Height / sheet.Definition.SpriteHeight;
             var cols = sheet.Surface.Properties.Width / sheet.Definition.SpriteWidth;
+            var start = ImGui.GetWindowPos() - new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
 
             for (var i = 0; i < rows; ++i)
             for (var j = 0; j < cols; ++j)
-                if (coverageMap[i, j])
+                if (coverageMap[i, j] != null)
                 {
                     // Sprite exists, draw a box around it.
-                    var start = ImGui.GetWindowPos() - new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
                     var minPos = start + new Vector2(j * sheet.Definition.SpriteWidth,
                         i * sheet.Definition.SpriteHeight);
                     var maxPos = minPos + new Vector2(sheet.Definition.SpriteWidth, sheet.Definition.SpriteHeight);
                     drawList.AddRect(minPos, maxPos, 0xFF00FF00, 0.0f, ImDrawFlags.None, 2.0f);
                 }
+
+            // If mouse is over a covered sprite, show the sprite ID in a tooltip.
+            var relMousePos = ImGui.GetMousePos() - start;
+            if (relMousePos.X >= 0.0f && relMousePos.Y >= 0.0f && relMousePos.X < sheet.Surface.Properties.Width
+                && relMousePos.Y < sheet.Surface.Properties.Height)
+            {
+                // Mouse is overlapping the spritesheet.
+                var row = (int)Math.Floor(relMousePos.Y / sheet.Definition.SpriteHeight);
+                var col = (int)Math.Floor(relMousePos.X / sheet.Definition.SpriteWidth);
+
+                var sprite = coverageMap[row, col];
+                if (sprite != null)
+                    // Mouse is hovering over a defined sprite, show tooltip.
+                    if (ImGui.BeginTooltip())
+                    {
+                        ImGui.Text($"Sprite {sprite.Id}");
+                        ImGui.EndTooltip();
+                    }
+            }
 
             ImGui.EndTable();
         }
