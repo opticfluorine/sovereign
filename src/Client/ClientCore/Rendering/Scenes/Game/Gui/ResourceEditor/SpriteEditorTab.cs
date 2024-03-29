@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites;
@@ -28,6 +29,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 public class SpriteEditorTab
 {
     private readonly GuiExtensions guiExtensions;
+    private readonly SpriteManager spriteManager;
     private readonly SpriteSheetManager spriteSheetManager;
 
     /// <summary>
@@ -38,10 +40,12 @@ public class SpriteEditorTab
     // Alphabetically-ordered sprite sheets.
     private List<string> orderedSpriteSheets = new();
 
-    public SpriteEditorTab(SpriteSheetManager spriteSheetManager, GuiExtensions guiExtensions)
+    public SpriteEditorTab(SpriteSheetManager spriteSheetManager, GuiExtensions guiExtensions,
+        SpriteManager spriteManager)
     {
         this.spriteSheetManager = spriteSheetManager;
         this.guiExtensions = guiExtensions;
+        this.spriteManager = spriteManager;
     }
 
     /// <summary>
@@ -112,7 +116,28 @@ public class SpriteEditorTab
         if (ImGui.BeginTable("spritesheetView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY))
         {
             ImGui.TableNextColumn();
-            guiExtensions.Spritesheet(orderedSpriteSheets[currentSheetIdx]);
+            var sheetName = orderedSpriteSheets[currentSheetIdx];
+            guiExtensions.Spritesheet(sheetName);
+
+            var drawList = ImGui.GetWindowDrawList();
+            var coverageMap = spriteManager.SpriteSheetCoverage[sheetName];
+
+            var sheet = spriteSheetManager.SpriteSheets[sheetName];
+            var rows = sheet.Surface.Properties.Height / sheet.Definition.SpriteHeight;
+            var cols = sheet.Surface.Properties.Width / sheet.Definition.SpriteWidth;
+
+            for (var i = 0; i < rows; ++i)
+            for (var j = 0; j < cols; ++j)
+                if (coverageMap[i, j])
+                {
+                    // Sprite exists, draw a box around it.
+                    var start = ImGui.GetWindowPos() - new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
+                    var minPos = start + new Vector2(j * sheet.Definition.SpriteWidth,
+                        i * sheet.Definition.SpriteHeight);
+                    var maxPos = minPos + new Vector2(sheet.Definition.SpriteWidth, sheet.Definition.SpriteHeight);
+                    drawList.AddRect(minPos, maxPos, 0xFF00FF00, 0.0f, ImDrawFlags.None, 2.0f);
+                }
+
             ImGui.EndTable();
         }
     }

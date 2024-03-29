@@ -45,11 +45,20 @@ public sealed class SpriteManager
     /// </summary>
     private readonly IResourcePathBuilder resourcePathBuilder;
 
+    private readonly SpriteSheetManager spriteSheetManager;
+
+    /// <summary>
+    ///     Map from spritesheet names to a 2D array of booleans indicating whether a sprite exists for
+    ///     the given row and column.
+    /// </summary>
+    public Dictionary<string, bool[,]> SpriteSheetCoverage = new();
+
     public SpriteManager(SpriteDefinitionsLoader loader,
-        IResourcePathBuilder resourcePathBuilder)
+        IResourcePathBuilder resourcePathBuilder, SpriteSheetManager spriteSheetManager)
     {
         this.loader = loader;
         this.resourcePathBuilder = resourcePathBuilder;
+        this.spriteSheetManager = spriteSheetManager;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -69,6 +78,22 @@ public sealed class SpriteManager
         var definitions = LoadDefinitions();
         Sprites = UnpackSprites(definitions);
 
+        // Initialize the coverage maps for the spritesheets.
+        foreach (var spriteSheetName in spriteSheetManager.SpriteSheets.Keys)
+        {
+            var sheet = spriteSheetManager.SpriteSheets[spriteSheetName];
+            var rows = sheet.Surface.Properties.Height / sheet.Definition.SpriteHeight;
+            var cols = sheet.Surface.Properties.Width / sheet.Definition.SpriteWidth;
+
+            if (!SpriteSheetCoverage.TryGetValue(spriteSheetName, out var coverageMap))
+            {
+                coverageMap = new bool[rows, cols];
+                SpriteSheetCoverage[spriteSheetName] = coverageMap;
+            }
+        }
+
+        UpdateCoverageMaps();
+
         Logger.Info("Loaded " + Sprites.Count + " sprites.");
     }
 
@@ -81,6 +106,8 @@ public sealed class SpriteManager
             SpriteDefinitionsFile);
         loader.SaveSpriteDefinitions(definitionsPath, Sprites);
         Logger.Info("Sprite definitions saved.");
+
+        UpdateCoverageMaps();
 
         OnSpritesChanged?.Invoke();
     }
@@ -125,5 +152,24 @@ public sealed class SpriteManager
         return definitions.Sprites
             .OrderBy(sprite => sprite.Id)
             .ToList();
+    }
+
+    /// <summary>
+    ///     Updates the coverage maps for all spritesheets based on the current sprite table.
+    /// </summary>
+    /// <remarks>
+    ///     As sprites can only be added, not removed, at runtime, this method will only add
+    ///     coverage to the coverage maps. Do not delete sprites at runtime once they are
+    ///     created.
+    /// </remarks>
+    private void UpdateCoverageMaps()
+    {
+        // Sprites can only be added, not removed, at runtime, so we don't need to
+        // reset state between updates.
+        foreach (var sprite in Sprites)
+        {
+            var coverageMap = SpriteSheetCoverage[sprite.SpritesheetName];
+            coverageMap[sprite.Row, sprite.Column] = true;
+        }
     }
 }
