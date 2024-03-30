@@ -4,6 +4,16 @@
 
 ### March
 
+#### 30 March 2024
+
+* Switch to a new fork of the Veldrid library since the main project isn't producing releases any longer.
+  The new fork includes a bugfix for the Vulkan backend which was causing a dramatic flickering effect in the GUI
+  with certain (Radeon RX 580) hardware (aka my desktop).
+* Make the sprite editor tab look much nicer - the grid showing sprites with definitions now has a better color
+  and a nice alpha blending effect that makes the editor much easier on the eyes.
+* Add support for generating missing sprite definitions for a spritesheet from the sprite editor tab.
+* Generate sprite definitions for all of the default spritesheets.
+
 #### 28 March 2024
 
 * Highlight sprites in the Sprite Editor which already have defined sprites. Also show the corresponding sprite ID

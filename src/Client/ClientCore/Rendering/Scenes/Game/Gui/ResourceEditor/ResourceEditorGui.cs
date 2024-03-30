@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Numerics;
 using ImGuiNET;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
@@ -42,6 +43,7 @@ public class ResourceEditorGui
     /// </summary>
     public void Render()
     {
+        ImGui.SetNextWindowSize(new Vector2(900.0f, 500.0f), ImGuiCond.FirstUseEver);
         if (ImGui.Begin("Resource Editor"))
         {
             if (ImGui.BeginTabBar("ResourceEditorTabs", ImGuiTabBarFlags.None))

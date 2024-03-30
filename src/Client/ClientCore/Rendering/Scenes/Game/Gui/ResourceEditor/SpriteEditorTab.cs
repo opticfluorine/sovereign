@@ -182,7 +182,7 @@ public class SpriteEditorTab
                     var minPos = start + new Vector2(j * sheet.Definition.SpriteWidth,
                         i * sheet.Definition.SpriteHeight);
                     var maxPos = minPos + new Vector2(sheet.Definition.SpriteWidth, sheet.Definition.SpriteHeight);
-                    drawList.AddRect(minPos, maxPos, 0xFF00FF00, 0.0f, ImDrawFlags.None, 2.0f);
+                    drawList.AddRect(minPos, maxPos, 0x7FFFFFFF);
                 }
 
             // If mouse is over a covered sprite, show the sprite ID in a tooltip.
