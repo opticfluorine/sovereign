@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites;
@@ -29,6 +30,12 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 /// </summary>
 public class SpriteEditorTab
 {
+    /// <summary>
+    ///     Identifier for popup error message.
+    /// </summary>
+    private const string ErrorPopup = "Error";
+
+    private readonly SpriteDefinitionsGenerator generator;
     private readonly GuiExtensions guiExtensions;
     private readonly SpriteManager spriteManager;
     private readonly SpriteSheetManager spriteSheetManager;
@@ -38,16 +45,24 @@ public class SpriteEditorTab
     /// </summary>
     private int currentSheetIdx;
 
+    /// <summary>
+    ///     Exception to report to user, if any.
+    /// </summary>
+    private Exception? exceptionToReport;
+
     // Alphabetically-ordered sprite sheets.
     private List<string> orderedSpriteSheets = new();
 
     public SpriteEditorTab(SpriteSheetManager spriteSheetManager, GuiExtensions guiExtensions,
-        SpriteManager spriteManager)
+        SpriteManager spriteManager, SpriteDefinitionsGenerator generator)
     {
         this.spriteSheetManager = spriteSheetManager;
         this.guiExtensions = guiExtensions;
         this.spriteManager = spriteManager;
+        this.generator = generator;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Renders the Sprite Editor tab. Must be called from inside a tab bar.
@@ -99,6 +114,26 @@ public class SpriteEditorTab
         // Spritesheet control bar.
         ImGui.SameLine();
         if (ImGui.Button("Generate Missing Sprites")) GenerateSprites();
+
+        // Error modal if needed.
+        var open = true;
+        if (ImGui.BeginPopupModal(ErrorPopup, ref open, ImGuiWindowFlags.AlwaysAutoResize))
+        {
+            ImGui.Text("An error occured while generating sprites.");
+            if (exceptionToReport != null)
+            {
+                ImGui.Spacing();
+                ImGui.Text(exceptionToReport.Message);
+            }
+
+            if (ImGui.Button("OK"))
+            {
+                exceptionToReport = null;
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.EndPopup();
+        }
     }
 
     /// <summary>
@@ -106,6 +141,17 @@ public class SpriteEditorTab
     /// </summary>
     private void GenerateSprites()
     {
+        try
+        {
+            generator.GenerateMissingSpritesForSheet(orderedSpriteSheets[currentSheetIdx]);
+            spriteManager.UpdateAndSaveSprites();
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorFormat(e, "Error during sprite generation for {0}.", orderedSpriteSheets[currentSheetIdx]);
+            exceptionToReport = e;
+            ImGui.OpenPopup(ErrorPopup);
+        }
     }
 
     /// <summary>

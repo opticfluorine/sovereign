@@ -29,12 +29,12 @@ public class GuiResourceManager : IDisposable
     /// <summary>
     ///     Size of GUI vertex buffer.
     /// </summary>
-    private const int GuiVertexBufferSize = 16384;
+    private const int GuiVertexBufferSize = 65536;
 
     /// <summary>
     ///     Size of GUI index buffer.
     /// </summary>
-    private const int GuiIndexBufferSize = 16384;
+    private const int GuiIndexBufferSize = 65536;
 
     /// <summary>
     ///     Size of GUI uniform buffer.
