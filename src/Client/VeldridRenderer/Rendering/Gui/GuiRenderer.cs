@@ -20,7 +20,6 @@ using System.Runtime.InteropServices;
 using ImGuiNET;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Gui;
-using Sovereign.ClientCore.Rendering.GUI;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.EngineCore.Components.Types;
@@ -46,6 +45,7 @@ public class GuiRenderer : IDisposable
     private readonly GuiResourceManager guiResourceManager;
     private readonly VeldridResourceManager resourceManager;
     private readonly ISystemTimer systemTimer;
+    private readonly GuiTextureMapper textureMapper;
 
     /// <summary>
     ///     Last bound texture.
@@ -67,7 +67,7 @@ public class GuiRenderer : IDisposable
     public GuiRenderer(CommonGuiManager guiManager, GuiResourceManager guiResourceManager, GuiPipeline guiPipeline,
         TextureAtlasManager atlasManager, ISystemTimer systemTimer, AnimatedSpriteManager animatedSpriteManager,
         AtlasMap atlasMap, VeldridDevice device, VeldridResourceManager resourceManager,
-        ClientConfigurationManager configManager)
+        ClientConfigurationManager configManager, GuiTextureMapper textureMapper)
     {
         this.guiManager = guiManager;
         this.guiResourceManager = guiResourceManager;
@@ -79,6 +79,7 @@ public class GuiRenderer : IDisposable
         this.device = device;
         this.resourceManager = resourceManager;
         this.configManager = configManager;
+        this.textureMapper = textureMapper;
     }
 
     public void Dispose()
@@ -219,17 +220,22 @@ public class GuiRenderer : IDisposable
         }
         else
         {
-            // Animated sprite render. Resolve to sprite.
-            var animSpriteId = AnimatedSprite.FromGuiTextureHandle(texId);
-            var animSprite = animatedSpriteManager.AnimatedSprites[animSpriteId];
-            var sprite = animSprite.GetSpriteForTime(systemTime, Orientation.South);
+            // Something else being rendered - what?
+            var textureData = textureMapper.GetTextureDataForTextureId(texId);
+            switch (textureData.SourceType)
+            {
+                case GuiTextureMapper.SourceType.AnimatedSprite:
+                    BindAnimatedSprite(textureData.Id, systemTime, out startX, out startY, out endX, out endY);
+                    break;
 
-            // Resolve sprite to texture atlas offset.
-            var mapElem = atlasMap.MapElements[sprite.Id];
-            startX = mapElem.NormalizedLeftX;
-            startY = mapElem.NormalizedTopY;
-            endX = mapElem.NormalizedRightX;
-            endY = mapElem.NormalizedBottomY;
+                case GuiTextureMapper.SourceType.Spritesheet:
+                default:
+                    startX = textureData.StartX;
+                    startY = textureData.StartY;
+                    endX = textureData.EndX;
+                    endY = textureData.EndY;
+                    break;
+            }
         }
 
         // Update the vertex shader constants with the new offset.
@@ -237,6 +243,31 @@ public class GuiRenderer : IDisposable
         vertexConstants.TextureEnd = new Vector2(endX, endY);
         lastTexture = texId;
         return true;
+    }
+
+    /// <summary>
+    ///     Binds an animated sprite for a draw call.
+    /// </summary>
+    /// <param name="animatedSpriteId">Animated sprite ID.</param>
+    /// <param name="systemTime">System time for the frame being rendered.</param>
+    /// <param name="startX">Top-left X coordinate.</param>
+    /// <param name="startY">Top-left Y coordinate.</param>
+    /// <param name="endX">Bottom-right X coordinate.</param>
+    /// <param name="endY">Bottom-right Y coordinate.</param>
+    private void BindAnimatedSprite(int animatedSpriteId, ulong systemTime, out float startX, out float startY,
+        out float endX,
+        out float endY)
+    {
+        // Resolve animation to the sprite for the current frame.
+        var animSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
+        var sprite = animSprite.GetSpriteForTime(systemTime, Orientation.South);
+
+        // Resolve sprite to texture atlas offset.
+        var mapElem = atlasMap.MapElements[sprite.Id];
+        startX = mapElem.NormalizedLeftX;
+        startY = mapElem.NormalizedTopY;
+        endX = mapElem.NormalizedRightX;
+        endY = mapElem.NormalizedBottomY;
     }
 
     /// <summary>

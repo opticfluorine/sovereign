@@ -8,7 +8,7 @@ AnimatedSprites:
     Faces:
       South:
         SpriteIds:
-          - 0
+          - 1475
 
   # Grass, center
   - Id: 1
@@ -16,7 +16,7 @@ AnimatedSprites:
     Faces:
       South:
         SpriteIds:
-          - 1
+          - 1202
 
   # Light dirt, center
   - Id: 2
@@ -24,7 +24,7 @@ AnimatedSprites:
     Faces:
       South:
         SpriteIds:
-          - 2
+          - 1196
 
   # Dark dirt, center
   - Id: 3
@@ -32,7 +32,7 @@ AnimatedSprites:
     Faces:
       South:
         SpriteIds:
-          - 3
+          - 1199
   
   # Slime, downward facing, walking
   - Id: 4
@@ -40,28 +40,28 @@ AnimatedSprites:
     Faces:
       South:
         SpriteIds:
-          - 5
-          - 6
-          - 5
-          - 4
+          - 4187
+          - 4188
+          - 4187
+          - 4186
       West:
         SpriteIds:
-          - 8
-          - 9
-          - 8
-          - 7
+          - 4190
+          - 4191
+          - 4190
+          - 4189
       North:
         SpriteIds:
-          - 11
-          - 12
-          - 11
-          - 10
+          - 4181
+          - 4182
+          - 4181
+          - 4180
       East:
         SpriteIds:
-          - 14
-          - 15
-          - 14
-          - 13
+          - 4184
+          - 4185
+          - 4184
+          - 4183
   
   # Slime, downward facing, static
   - Id: 5
@@ -69,5 +69,5 @@ AnimatedSprites:
     Faces:
       South:
         SpriteIds:
-          - 5
+          - 4187
   

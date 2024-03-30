@@ -4,6 +4,34 @@
 
 ### March
 
+#### 30 March 2024
+
+* Switch to a new fork of the Veldrid library since the main project isn't producing releases any longer.
+  The new fork includes a bugfix for the Vulkan backend which was causing a dramatic flickering effect in the GUI
+  with certain (Radeon RX 580) hardware (aka my desktop).
+* Make the sprite editor tab look much nicer - the grid showing sprites with definitions now has a better color
+  and a nice alpha blending effect that makes the editor much easier on the eyes.
+* Add support for generating missing sprite definitions for a spritesheet from the sprite editor tab.
+* Generate sprite definitions for all of the default spritesheets.
+
+#### 28 March 2024
+
+* Highlight sprites in the Sprite Editor which already have defined sprites. Also show the corresponding sprite ID
+  when the mouse is hovered over the sprite in the editor.
+
+#### 27 March 2024
+
+* Update the GUI renderer to support rendering images other than just animated sprites. Effectively this
+  lets us render anything we want from the texture atlas into the GUI.
+* Render entire spritesheets into the Sprite Editor window.
+* Remove thread-level performance throttles. This drives up CPU usage in exchange for large performance benefits;
+  on my (not very good) laptop (a 2017-era i7 with a GTX 1050), consistently able to hit 300+ FPS in the renderer
+  and one-way event latencies on the same timescale as a single context switch in the server.
+
+#### 26 March 2024
+
+* Build out the basic framework for the resource editor window.
+
 #### 25 March 2024
 
 * Make screen resolution configurable through the client configuration window. Only resolutions with a
@@ -11,6 +39,12 @@
 * Change the default screen resolution to 1920x1080.
 * Increase the number of tiles displayed on screen. Now an entire world segment fits across the width of the
   display.
+* Made the sprite table mutable in preparation for adding an integrated sprite definition editor. Modification of
+  the sprite table triggers rebuild of the atlas map and the animated sprites. Note that there is not any additional
+  validation or error handling for the case where an animated sprite points to a newly removed sprite. Currently I'm
+  thinking that deletion of sprites won't be supported; the sprite editor will probably be a "Generate" button that
+  automatically generates a full grid of sprites for a selected spritesheet, and a browser to identify a sprite by
+  mouseover.
 
 #### 24 March 2024
 

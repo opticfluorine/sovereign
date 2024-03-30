@@ -29,17 +29,6 @@ namespace Sovereign.EngineCore.Main;
 /// </summary>
 public class EngineBase : IEngineBase
 {
-    /// <summary>
-    ///     If the main loop processes less than this many events in a single pass,
-    ///     the main thread will sleep instead of yielding its timeslice. This reduces
-    ///     CPU utilization during light workloads in exchange for a temporary increase
-    ///     in main loop latency.
-    /// </summary>
-    /// <remarks>
-    ///     This can be set to zero to disable.
-    /// </remarks>
-    private const int ThreadSleepEventLimit = 2;
-
     private readonly EventDescriptions eventDescriptions;
 
     /// <summary>
@@ -121,7 +110,7 @@ public class EngineBase : IEngineBase
             PerformMainLoopActions();
 
             /* Yield to avoid consuming 100% CPU. */
-            Thread.Sleep(eventsProcessed < ThreadSleepEventLimit ? 1 : 0);
+            Thread.Yield();
         }
     }
 

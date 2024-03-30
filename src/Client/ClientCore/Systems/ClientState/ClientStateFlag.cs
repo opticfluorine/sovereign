@@ -36,6 +36,11 @@ public enum ClientStateFlag
     ShowImGuiIdStackTool,
 
     /// <summary>
+    ///     Flag indicating that the Dear ImGui demo window should be displayed.
+    /// </summary>
+    ShowImGuiDemo,
+
+    /// <summary>
     ///     Flag indicating that the in-game menu should be displayed.
     /// </summary>
     ShowInGameMenu,
@@ -53,5 +58,10 @@ public enum ClientStateFlag
     /// <summary>
     ///     Flag indicating that the in-game entity debug window should be displayed.
     /// </summary>
-    ShowEntityDebug
+    ShowEntityDebug,
+
+    /// <summary>
+    ///     Flag indicating that the in-game resource editor window should be displayed.
+    /// </summary>
+    ShowResourceEditor
 }

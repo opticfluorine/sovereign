@@ -18,7 +18,6 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using Sovereign.ClientCore.Rendering.GUI;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
 
@@ -29,13 +28,9 @@ public class CommonGuiInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(Component.For<CommonGuiManager>()
-            .LifestyleSingleton());
-
-        container.Register(Component.For<GuiFontAtlas>()
-            .LifestyleSingleton());
-
-        container.Register(Component.For<GuiExtensions>()
-            .LifestyleSingleton());
+        container.Register(Component.For<CommonGuiManager>().LifestyleSingleton());
+        container.Register(Component.For<GuiFontAtlas>().LifestyleSingleton());
+        container.Register(Component.For<GuiExtensions>().LifestyleSingleton());
+        container.Register(Component.For<GuiTextureMapper>().LifestyleSingleton());
     }
 }

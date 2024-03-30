@@ -40,6 +40,8 @@ public sealed class AtlasMap
         this.spriteManager = spriteManager;
         this.spriteSheetManager = spriteSheetManager;
         this.configManager = configManager;
+
+        spriteManager.OnSpritesChanged += InitializeAtlasMap;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

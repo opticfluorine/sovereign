@@ -89,8 +89,6 @@ public class SpriteSheetManager
             Logger.Info("Loading spritesheets.");
 
             foreach (var spriteSheet in LoadSpriteSheets()) SpriteSheets[spriteSheet.Definition.Filename] = spriteSheet;
-
-            Logger.InfoFormat("Successfully loaded {0} spritesheets.", SpriteSheets.Count());
         }
         catch (Exception e)
         {
@@ -103,6 +101,16 @@ public class SpriteSheetManager
             ErrorHandler.Error(message);
             throw new FatalErrorException(message, e);
         }
+
+        if (SpriteSheets.Count == 0)
+        {
+            const string message = "No spritesheets were found.";
+            Logger.Fatal(message);
+            ErrorHandler.Error(message);
+            throw new FatalErrorException(message);
+        }
+
+        Logger.InfoFormat("Successfully loaded {0} spritesheets.", SpriteSheets.Count);
     }
 
     /// <summary>

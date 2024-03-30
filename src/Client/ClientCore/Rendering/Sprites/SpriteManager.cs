@@ -33,7 +33,7 @@ public sealed class SpriteManager
     /// <summary>
     ///     Name of the sprite definitions file.
     /// </summary>
-    private const string SpriteDefinitionsFile = "SpriteDefinitions.yaml";
+    private const string SpriteDefinitionsFile = "SpriteDefinitions.json";
 
     /// <summary>
     ///     Sprite definitions loader.
@@ -45,11 +45,20 @@ public sealed class SpriteManager
     /// </summary>
     private readonly IResourcePathBuilder resourcePathBuilder;
 
+    private readonly SpriteSheetManager spriteSheetManager;
+
+    /// <summary>
+    ///     Map from spritesheet names to a 2D array of booleans indicating whether a sprite exists for
+    ///     the given row and column.
+    /// </summary>
+    public Dictionary<string, Sprite?[,]> SpriteSheetCoverage = new();
+
     public SpriteManager(SpriteDefinitionsLoader loader,
-        IResourcePathBuilder resourcePathBuilder)
+        IResourcePathBuilder resourcePathBuilder, SpriteSheetManager spriteSheetManager)
     {
         this.loader = loader;
         this.resourcePathBuilder = resourcePathBuilder;
+        this.spriteSheetManager = spriteSheetManager;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -69,8 +78,44 @@ public sealed class SpriteManager
         var definitions = LoadDefinitions();
         Sprites = UnpackSprites(definitions);
 
+        // Initialize the coverage maps for the spritesheets.
+        foreach (var spriteSheetName in spriteSheetManager.SpriteSheets.Keys)
+        {
+            var sheet = spriteSheetManager.SpriteSheets[spriteSheetName];
+            var rows = sheet.Surface.Properties.Height / sheet.Definition.SpriteHeight;
+            var cols = sheet.Surface.Properties.Width / sheet.Definition.SpriteWidth;
+
+            if (!SpriteSheetCoverage.TryGetValue(spriteSheetName, out var coverageMap))
+            {
+                coverageMap = new Sprite?[rows, cols];
+                SpriteSheetCoverage[spriteSheetName] = coverageMap;
+            }
+        }
+
+        UpdateCoverageMaps();
+
         Logger.Info("Loaded " + Sprites.Count + " sprites.");
     }
+
+    /// <summary>
+    ///     Updates and saves the currently loaded sprite definitions to the file.
+    /// </summary>
+    public void UpdateAndSaveSprites()
+    {
+        var definitionsPath = resourcePathBuilder.BuildPathToResource(ResourceType.Sprite,
+            SpriteDefinitionsFile);
+        loader.SaveSpriteDefinitions(definitionsPath, Sprites);
+        Logger.Info("Sprite definitions saved.");
+
+        UpdateCoverageMaps();
+
+        OnSpritesChanged?.Invoke();
+    }
+
+    /// <summary>
+    ///     Event invoked when the sprites have been changed.
+    /// </summary>
+    public event Action? OnSpritesChanged;
 
     /// <summary>
     ///     Loads the sprite definitions.
@@ -107,5 +152,24 @@ public sealed class SpriteManager
         return definitions.Sprites
             .OrderBy(sprite => sprite.Id)
             .ToList();
+    }
+
+    /// <summary>
+    ///     Updates the coverage maps for all spritesheets based on the current sprite table.
+    /// </summary>
+    /// <remarks>
+    ///     As sprites can only be added, not removed, at runtime, this method will only add
+    ///     coverage to the coverage maps. Do not delete sprites at runtime once they are
+    ///     created.
+    /// </remarks>
+    private void UpdateCoverageMaps()
+    {
+        // Sprites can only be added, not removed, at runtime, so we don't need to
+        // reset state between updates.
+        foreach (var sprite in Sprites)
+        {
+            var coverageMap = SpriteSheetCoverage[sprite.SpritesheetName];
+            coverageMap[sprite.Row, sprite.Column] = sprite;
+        }
     }
 }

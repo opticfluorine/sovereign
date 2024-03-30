@@ -98,6 +98,7 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 | Esc        | Open in-game menu                      |
 | Arrow keys | Move player                            |
 | Enter      | Toggle chat                            |
+| `          | Toggle Resource Editor Window          |
 | F2         | Toggle Player Debug Window             |
 | F3         | Toggle Entity Debug Window             |
 | F10        | Toggle Dear ImGui ID Stack Tool        |
