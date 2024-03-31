@@ -38,7 +38,7 @@ public sealed class AnimatedSpriteManager
     /// <summary>
     ///     Animated sprite definitions filename.
     /// </summary>
-    public const string DefinitionsFilename = "AnimatedSpriteDefinitions.yaml";
+    public const string DefinitionsFilename = "AnimatedSpriteDefinitions.json";
 
     /// <summary>
     ///     Animated sprites.
