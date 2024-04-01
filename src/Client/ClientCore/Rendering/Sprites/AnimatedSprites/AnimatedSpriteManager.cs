@@ -17,8 +17,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
@@ -66,8 +69,6 @@ public sealed class AnimatedSpriteManager
         this.loader = loader;
         this.pathBuilder = pathBuilder;
         this.spriteManager = spriteManager;
-
-        spriteManager.OnSpritesChanged += OnSpritesChanged;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -84,6 +85,45 @@ public sealed class AnimatedSpriteManager
         UnpackDefinitions(definitions);
 
         Logger.Info("Loaded " + AnimatedSprites.Count + " animated sprites.");
+    }
+
+    /// <summary>
+    ///     Updates the animated sprite table and saves the definitions to the file.
+    /// </summary>
+    public void UpdateAndSave()
+    {
+        // Notify downstream resources of the updates.
+        OnAnimatedSpritesChanged?.Invoke();
+    }
+
+    /// <summary>
+    ///     Inserts an empty animated sprite at the given position.
+    /// </summary>
+    /// <param name="id">ID.</param>
+    /// <exception cref="IndexOutOfRangeException">Thrown if id less than 0 or greater than AnimatedSprites.Count.</exception>
+    public void InsertNew(int id)
+    {
+        if (id < 0 || id > AnimatedSprites.Count)
+            throw new IndexOutOfRangeException("Bad list index.");
+
+        AnimatedSprites.Insert(id, new AnimatedSprite());
+    }
+
+    /// <summary>
+    ///     Updates an existing animated sprite at the given position.
+    /// </summary>
+    /// <param name="id">ID.</param>
+    /// <param name="newValue">New animated sprite data.</param>
+    public void Update(int id, AnimatedSprite newValue)
+    {
+    }
+
+    /// <summary>
+    ///     Deletes an existing animated sprite at the given position.
+    /// </summary>
+    /// <param name="id">ID.</param>
+    public void Delete(int id)
+    {
     }
 
     /// <summary>
@@ -123,10 +163,42 @@ public sealed class AnimatedSpriteManager
     }
 
     /// <summary>
-    ///     Invoked when the sprite table is updated.
+    ///     Saves the latest animated sprite definitions to the file.
     /// </summary>
-    private void OnSpritesChanged()
+    private void SaveDefinitions()
     {
-        foreach (var animatedSprite in AnimatedSprites) animatedSprite.RebuildFrames();
+        // Generate a new set of definitions from the list of animated sprites.
+        var defs = new AnimatedSpriteDefinitions();
+        for (var i = 0; i < AnimatedSprites.Count; ++i)
+        {
+            var animSprite = AnimatedSprites[i];
+            var def = new AnimatedSpriteDefinitions.AnimatedSpriteDefinition
+            {
+                Id = i,
+                AnimationTimestep = animSprite.FrameTime,
+                Faces = animSprite.Faces.Select(
+                        face => new Tuple<Orientation, AnimatedSpriteDefinitions.AnimatedSpriteFaceDefinition>(face.Key,
+                            new AnimatedSpriteDefinitions.AnimatedSpriteFaceDefinition
+                                { SpriteIds = face.Value.Select(sprite => sprite.Id).ToList() }))
+                    .ToDictionary(t => t.Item1, t => t.Item2)
+            };
+            defs.AnimatedSprites.Add(def);
+        }
+
+        // Save.
+        try
+        {
+            using var stream = new FileStream(DefinitionsFilename, FileMode.Create, FileAccess.Write);
+            JsonSerializer.Serialize(stream, defs);
+        }
+        catch (Exception e)
+        {
+            Logger.Error("Failed to save animated sprite definitions.", e);
+        }
     }
+
+    /// <summary>
+    ///     Event triggered when the animated sprites are updated.
+    /// </summary>
+    public event Action? OnAnimatedSpritesChanged;
 }
