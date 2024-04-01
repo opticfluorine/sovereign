@@ -4,6 +4,17 @@
 
 ### March
 
+#### 31 March 2024
+
+* Disable Vulkan validation temporarily. Since upgrading my Arch Linux install last night, I'm seeing what
+  I think may be a false positive `VUID-VkPresentInfoKHR-pImageIndices-01430` error on the *third* swapchain
+  swap. The first swap presents swapchain image 0 which passes validation. The third swap presents swapchain
+  image 0 yet again, which suddenly triggers an error saying that image 0 does not belong to the swapchain.
+  Debugger shows that the swapchain does in fact change, so this might be a true validation error, but it's
+  new after an Arch update and works fine if validation is disabled. Disabling validation for now.
+* Updated the Vulkan fork to not cause a fatal erorr when a Vulkan validation error occurs, just log it and
+  move on instead.
+
 #### 30 March 2024
 
 * Switch to a new fork of the Veldrid library since the main project isn't producing releases any longer.
