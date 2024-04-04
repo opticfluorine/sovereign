@@ -187,8 +187,10 @@ public class SpriteEditorTab
 
             // If mouse is over a covered sprite, show the sprite ID in a tooltip.
             var relMousePos = ImGui.GetMousePos() - start;
-            if (relMousePos.X >= 0.0f && relMousePos.Y >= 0.0f && relMousePos.X < sheet.Surface.Properties.Width
-                && relMousePos.Y < sheet.Surface.Properties.Height)
+            var windowSize = ImGui.GetWindowSize();
+            if (relMousePos.X >= 0.0f && relMousePos.Y >= 0.0f &&
+                relMousePos.X < Math.Min(sheet.Surface.Properties.Width, windowSize.X)
+                && relMousePos.Y < Math.Min(sheet.Surface.Properties.Height, windowSize.Y))
             {
                 // Mouse is overlapping the spritesheet.
                 var row = (int)Math.Floor(relMousePos.Y / sheet.Definition.SpriteHeight);

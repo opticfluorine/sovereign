@@ -88,15 +88,6 @@ public sealed class AnimatedSpriteManager
     }
 
     /// <summary>
-    ///     Updates the animated sprite table and saves the definitions to the file.
-    /// </summary>
-    public void UpdateAndSave()
-    {
-        // Notify downstream resources of the updates.
-        OnAnimatedSpritesChanged?.Invoke();
-    }
-
-    /// <summary>
     ///     Inserts an empty animated sprite at the given position.
     /// </summary>
     /// <param name="id">ID.</param>
@@ -107,6 +98,8 @@ public sealed class AnimatedSpriteManager
             throw new IndexOutOfRangeException("Bad list index.");
 
         AnimatedSprites.Insert(id, new AnimatedSprite());
+        SaveDefinitions();
+        OnAnimatedSpriteAdded?.Invoke(id);
     }
 
     /// <summary>
@@ -116,14 +109,30 @@ public sealed class AnimatedSpriteManager
     /// <param name="newValue">New animated sprite data.</param>
     public void Update(int id, AnimatedSprite newValue)
     {
+        if (id < 0 || id >= AnimatedSprites.Count)
+            throw new IndexOutOfRangeException("Bad list index.");
+
+        AnimatedSprites[id] = newValue;
+        SaveDefinitions();
     }
 
     /// <summary>
-    ///     Deletes an existing animated sprite at the given position.
+    ///     Removes an existing animated sprite at the given position.
     /// </summary>
     /// <param name="id">ID.</param>
-    public void Delete(int id)
+    /// <remarks>
+    ///     This method does not check for downstream resource dependencies on the
+    ///     deleted animated sprite. Ensure that any downstream dependencies are resolved
+    ///     before deleted an animated sprite.
+    /// </remarks>
+    public void Remove(int id)
     {
+        if (id < 0 || id >= AnimatedSprites.Count)
+            throw new IndexOutOfRangeException("Bad list index.");
+
+        AnimatedSprites.RemoveAt(id);
+        SaveDefinitions();
+        OnAnimatedSpriteRemoved?.Invoke(id);
     }
 
     /// <summary>
@@ -198,7 +207,22 @@ public sealed class AnimatedSpriteManager
     }
 
     /// <summary>
-    ///     Event triggered when the animated sprites are updated.
+    ///     Event triggered when an animated sprite is added.
+    ///     Parameter is the added sprite ID.
     /// </summary>
-    public event Action? OnAnimatedSpritesChanged;
+    /// <remarks>
+    ///     Since the animated sprites are maintained as a sequential list, any animated sprites with
+    ///     IDs greater than or equal to the new sprite's ID are incremented by one.
+    /// </remarks>
+    public event Action<int>? OnAnimatedSpriteAdded;
+
+    /// <summary>
+    ///     Event triggered when an animated sprite is removed.
+    ///     Parameter is the removed sprite ID.
+    /// </summary>
+    /// <remarks>
+    ///     Since the animated sprites are maintained as a sequential list, any animated sprites with IDs
+    ///     greater than the removed sprite's ID are decremented by one.
+    /// </remarks>
+    public event Action<int>? OnAnimatedSpriteRemoved;
 }

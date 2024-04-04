@@ -16,9 +16,6 @@
 
 using System.Numerics;
 using ImGuiNET;
-using Sovereign.ClientCore.Configuration;
-using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
-using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
 
@@ -27,17 +24,10 @@ namespace Sovereign.ClientCore.Rendering.Gui;
 /// </summary>
 public class GuiExtensions
 {
-    private readonly AnimatedSpriteManager animatedSpriteManager;
-    private readonly AtlasMap atlasMap;
-    private readonly ClientConfigurationManager clientConfigurationManager;
     private readonly GuiTextureMapper textureMapper;
 
-    public GuiExtensions(AnimatedSpriteManager animatedSpriteManager, AtlasMap atlasMap,
-        ClientConfigurationManager clientConfigurationManager, GuiTextureMapper textureMapper)
+    public GuiExtensions(GuiTextureMapper textureMapper)
     {
-        this.animatedSpriteManager = animatedSpriteManager;
-        this.atlasMap = atlasMap;
-        this.clientConfigurationManager = clientConfigurationManager;
         this.textureMapper = textureMapper;
     }
 

@@ -1,0 +1,60 @@
+{
+  "TileSprites": [
+    {
+      "Id": 0,
+      "TileContexts": [
+        {
+          "NorthTileSpriteId": -1,
+          "EastTileSpriteId": -1,
+          "SouthTileSpriteId": -1,
+          "WestTileSpriteId": -1,
+          "AnimatedSpriteIds": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "Id": 1,
+      "TileContexts": [
+        {
+          "NorthTileSpriteId": -1,
+          "EastTileSpriteId": -1,
+          "SouthTileSpriteId": -1,
+          "WestTileSpriteId": -1,
+          "AnimatedSpriteIds": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "Id": 2,
+      "TileContexts": [
+        {
+          "NorthTileSpriteId": -1,
+          "EastTileSpriteId": -1,
+          "SouthTileSpriteId": -1,
+          "WestTileSpriteId": -1,
+          "AnimatedSpriteIds": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "Id": 3,
+      "TileContexts": [
+        {
+          "NorthTileSpriteId": -1,
+          "EastTileSpriteId": -1,
+          "SouthTileSpriteId": -1,
+          "WestTileSpriteId": -1,
+          "AnimatedSpriteIds": [
+            3
+          ]
+        }
+      ]
+    }
+  ]
+}

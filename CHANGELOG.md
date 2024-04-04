@@ -2,6 +2,15 @@
 
 ## 2024
 
+### April
+
+#### 3 April 2024
+
+* Add internal support for modifying the animated sprite table at runtime. This raises the possibility
+  that an entity with an `AnimatedSprite` component may end up pointing to a nonexistent animated sprite
+  (in fact that possibility already exists). No warnings will be provided by the client in such a case.
+* Fix issue where sprite editor tooltips appeared outside of the editor window for large spritesheets.
+
 ### March
 
 #### 31 March 2024
