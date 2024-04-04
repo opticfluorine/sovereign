@@ -25,8 +25,18 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 /// </summary>
 public class AnimatedSpriteEditorTab
 {
+    /// <summary>
+    ///     Color for selected rwo in the browser.
+    /// </summary>
+    private const uint SelectionColor = 0xFF773333;
+
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly GuiExtensions guiExtensions;
+
+    /// <summary>
+    ///     Currently selected animated sprite ID.
+    /// </summary>
+    private int selectedId;
 
     public AnimatedSpriteEditorTab(AnimatedSpriteManager animatedSpriteManager, GuiExtensions guiExtensions)
     {
@@ -41,7 +51,7 @@ public class AnimatedSpriteEditorTab
     {
         if (ImGui.BeginTabItem("Animated Sprites"))
         {
-            if (ImGui.BeginTable("animSprOuter", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.Resizable))
+            if (ImGui.BeginTable("animSprOuter", 2, ImGuiTableFlags.SizingFixedFit))
             {
                 ImGui.TableSetupColumn("#browser", ImGuiTableColumnFlags.WidthFixed, 220.0f);
                 ImGui.TableSetupColumn("#editor", ImGuiTableColumnFlags.WidthStretch);
@@ -65,15 +75,25 @@ public class AnimatedSpriteEditorTab
     private void RenderBrowser()
     {
         if (ImGui.BeginTable("animSprBrowser", 2,
-                ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter |
-                ImGuiTableFlags.SizingFixedFit))
+                ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter |
+                ImGuiTableFlags.RowBg))
         {
+            ImGui.TableSetupColumn("ID");
+            ImGui.TableSetupColumn("Animated Sprite");
+            ImGui.TableHeadersRow();
+
             for (var i = 0; i < animatedSpriteManager.AnimatedSprites.Count; ++i)
             {
                 ImGui.TableNextColumn();
-                guiExtensions.AnimatedSprite(i);
+                ImGui.Text($"{i}");
                 ImGui.TableNextColumn();
-                ImGui.Text($"Animated Sprite {i}");
+                if (guiExtensions.AnimatedSpriteButton($"##spriteButton{i}", i)) selectedId = i;
+
+                if (i == selectedId)
+                {
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, SelectionColor);
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, SelectionColor);
+                }
             }
 
             ImGui.EndTable();

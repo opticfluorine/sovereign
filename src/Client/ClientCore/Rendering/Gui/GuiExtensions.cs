@@ -45,6 +45,24 @@ public class GuiExtensions
     }
 
     /// <summary>
+    ///     Renders an animated sprite to the GUI as a clickable button.
+    /// </summary>
+    /// <param name="id">Button ID.</param>
+    /// <param name="animatedSpriteId">Animated sprite ID.</param>
+    /// <returns>true if button clicked, false otherwise.</returns>
+    public bool AnimatedSpriteButton(string id, int animatedSpriteId)
+    {
+        var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId);
+
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+        var result = ImGui.ImageButton(id, texId, new Vector2(texData.Width, texData.Height));
+        ImGui.PopStyleVar();
+
+        return result;
+    }
+
+    /// <summary>
     ///     Renders a full spritesheet to the GUI.
     /// </summary>
     /// <param name="spritesheet">Spritesheet name.</param>
