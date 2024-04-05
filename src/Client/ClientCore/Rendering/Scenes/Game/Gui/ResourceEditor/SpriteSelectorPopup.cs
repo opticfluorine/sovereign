@@ -35,6 +35,11 @@ public class SpriteSelectorPopup
     private readonly SpriteSheetManager spriteSheetManager;
 
     /// <summary>
+    ///     Popup base position.
+    /// </summary>
+    private Vector2 basePos;
+
+    /// <summary>
     ///     Index of currently selected spritesheet.
     /// </summary>
     private int currentSheetIdx;
@@ -48,6 +53,11 @@ public class SpriteSelectorPopup
     ///     Flag indicating user has selected sprite since last Open() call.
     /// </summary>
     private bool isSelected;
+
+    /// <summary>
+    ///     Flag indicating whether the sheet selection combo is open.
+    /// </summary>
+    private bool isSheetComboOpen;
 
     /// <summary>
     ///     Alphabetically-ordered sprite sheets.
@@ -74,6 +84,7 @@ public class SpriteSelectorPopup
     {
         isSelected = false;
         selection = 0;
+        basePos = ImGui.GetMousePos();
 
         ImGui.OpenPopup(PopupName);
     }
@@ -114,7 +125,8 @@ public class SpriteSelectorPopup
         // Combo box for selecting the current spritesheet.
         ImGui.Text("Spritesheet:");
         ImGui.SameLine();
-        if (ImGui.BeginCombo("##spriteSheetCombo", orderedSpriteSheets[currentSheetIdx]))
+        isSheetComboOpen = ImGui.BeginCombo("##spriteSheetCombo", orderedSpriteSheets[currentSheetIdx]);
+        if (isSheetComboOpen)
         {
             for (var i = 0; i < orderedSpriteSheets.Count; ++i)
             {
@@ -134,7 +146,7 @@ public class SpriteSelectorPopup
     private void DrawSpritesheetView()
     {
         // Wrap the view in a single-cell table to get scrollbars for larger spritesheets.
-        if (ImGui.BeginTable("spritesheetView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY))
+        if (ImGui.BeginTable("spriteSelectorView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY))
         {
             ImGui.TableNextColumn();
             var sheetName = orderedSpriteSheets[currentSheetIdx];
@@ -180,15 +192,13 @@ public class SpriteSelectorPopup
                     }
 
                 // If a sprite is clicked, select it and close the popup.
-                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-                {
+                if (!isSheetComboOpen && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                     if (sprite != null)
                     {
                         selection = sprite.Id;
                         isSelected = true;
                         ImGui.CloseCurrentPopup();
                     }
-                }
             }
 
             ImGui.EndTable();

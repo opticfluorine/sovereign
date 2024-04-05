@@ -19,6 +19,7 @@ using System.Linq;
 using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Numerics;
@@ -53,7 +54,20 @@ public class AnimatedSpriteEditorTab
         Orientation.Southeast
     };
 
+    private readonly SpriteManager spriteManager;
+
     private readonly SpriteSelectorPopup spriteSelectorPopup;
+
+    /// <summary>
+    ///     Frame being edited when the sprite selector is open.
+    /// </summary>
+    private int editingFrame;
+
+    /// <summary>
+    ///     Orientation being edited when the sprite selector is open.
+    /// </summary>
+    private Orientation editingOrientation;
+
     private AnimatedSprite? editingSprite;
 
     /// <summary>
@@ -72,11 +86,12 @@ public class AnimatedSpriteEditorTab
     private int selectedId;
 
     public AnimatedSpriteEditorTab(AnimatedSpriteManager animatedSpriteManager, GuiExtensions guiExtensions,
-        SpriteSelectorPopup spriteSelectorPopup)
+        SpriteSelectorPopup spriteSelectorPopup, SpriteManager spriteManager)
     {
         this.animatedSpriteManager = animatedSpriteManager;
         this.guiExtensions = guiExtensions;
         this.spriteSelectorPopup = spriteSelectorPopup;
+        this.spriteManager = spriteManager;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -232,10 +247,16 @@ public class AnimatedSpriteEditorTab
                 {
                     ImGui.TableNextColumn();
                     if (editingSprite.Faces.ContainsKey(orientation) && i < editingSprite.Faces[orientation].Count)
-                        guiExtensions.SpriteButton($"##{orientation}{i}", editingSprite.Faces[orientation][i].Id);
+                        if (guiExtensions.SpriteButton($"##{orientation}{i}", editingSprite.Faces[orientation][i].Id))
+                        {
+                            editingOrientation = orientation;
+                            editingFrame = i;
+                            spriteSelectorPopup.Open();
+                        }
                 }
             }
 
+            HandleSpriteSelector();
             ImGui.EndTable();
         }
 
@@ -275,5 +296,22 @@ public class AnimatedSpriteEditorTab
     {
         inputTimestepMs = animatedSpriteManager.AnimatedSprites[selectedId].FrameTime * UnitConversions.UsToMs;
         editingSprite = new AnimatedSprite(animatedSpriteManager.AnimatedSprites[selectedId]);
+    }
+
+    /// <summary>
+    ///     Renders the sprite selector if open, and processes results when sprite selected.
+    /// </summary>
+    private void HandleSpriteSelector()
+    {
+        if (editingSprite == null)
+        {
+            Logger.Error("HandleSpriteSelector(): editingSprite is null");
+            return;
+        }
+
+        spriteSelectorPopup.Render();
+        if (spriteSelectorPopup.TryGetSelection(out var newSpriteId))
+            // Selection made, update the working record.
+            editingSprite.Faces[editingOrientation][editingFrame] = spriteManager.Sprites[newSpriteId];
     }
 }
