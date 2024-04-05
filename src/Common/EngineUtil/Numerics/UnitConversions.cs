@@ -32,4 +32,14 @@ public static class UnitConversions
     ///     Multiplicative constant from seconds to microseconds.
     /// </summary>
     public const float SToUs = 1.0f / UsToS;
+
+    /// <summary>
+    ///     Multiplicative constant from microseconds to milliseconds.
+    /// </summary>
+    public const float UsToMs = 1e-3f;
+
+    /// <summary>
+    ///     Multiplicative constant from milliseconds to microseconds.
+    /// </summary>
+    public const float MsToUs = 1.0f / UsToMs;
 }
