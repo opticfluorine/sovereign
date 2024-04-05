@@ -14,9 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.Linq;
+using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Numerics;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
@@ -33,7 +37,24 @@ public class AnimatedSpriteEditorTab
 
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly GuiExtensions guiExtensions;
+
+    /// <summary>
+    ///     All orientations in display order.
+    /// </summary>
+    private readonly List<Orientation> orderedOrientations = new()
+    {
+        Orientation.South,
+        Orientation.Southwest,
+        Orientation.West,
+        Orientation.Northwest,
+        Orientation.North,
+        Orientation.Northeast,
+        Orientation.East,
+        Orientation.Southeast
+    };
+
     private readonly SpriteSelectorPopup spriteSelectorPopup;
+    private AnimatedSprite? editingSprite;
 
     /// <summary>
     ///     Initialization flag.
@@ -57,6 +78,8 @@ public class AnimatedSpriteEditorTab
         this.guiExtensions = guiExtensions;
         this.spriteSelectorPopup = spriteSelectorPopup;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Renders the Animated Sprites editor tab.
@@ -131,25 +154,21 @@ public class AnimatedSpriteEditorTab
                 ImGui.TableNextColumn();
                 ImGui.Button("+");
                 if (ImGui.IsItemHovered())
-                {
                     if (ImGui.BeginTooltip())
                     {
                         ImGui.Text("Insert New");
                         ImGui.EndTooltip();
                     }
-                }
 
                 // Remove selected sprite button.
                 ImGui.TableNextColumn();
                 ImGui.Button("-");
                 if (ImGui.IsItemHovered())
-                {
                     if (ImGui.BeginTooltip())
                     {
                         ImGui.Text("Remove Selected");
                         ImGui.EndTooltip();
                     }
-                }
 
                 ImGui.EndTable();
             }
@@ -161,6 +180,12 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     private void RenderEditor()
     {
+        if (editingSprite == null)
+        {
+            Logger.Error("RenderEditor(): editingSprite is null.");
+            return;
+        }
+
         ImGui.Text($"Animated Sprite {selectedId}");
 
         ImGui.Separator();
@@ -170,7 +195,51 @@ public class AnimatedSpriteEditorTab
         ImGui.SetNextItemWidth(120.0f);
         ImGui.InputFloat("ms##timestep", ref inputTimestepMs);
 
-        ImGui.Button("Save");
+        var maxSize = ImGui.GetWindowSize();
+        var maxFrames = editingSprite.Faces.Select(p => p.Value.Count).Max();
+        if (ImGui.BeginTable("frameEdtior", maxFrames + 2,
+                ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
+                maxSize with { Y = maxSize.Y - 134 }))
+        {
+            ImGui.TableSetupColumn("Orientation");
+            ImGui.TableSetupColumn("+/-");
+            for (var i = 0; i < maxFrames; ++i) ImGui.TableSetupColumn($"Frame {i + 1}");
+            ImGui.TableHeadersRow();
+
+            foreach (var orientation in orderedOrientations)
+            {
+                ImGui.TableNextColumn();
+                ImGui.Text(orientation.ToString());
+
+                ImGui.TableNextColumn();
+                ImGui.Button("+");
+                if (ImGui.IsItemHovered())
+                    if (ImGui.BeginTooltip())
+                    {
+                        ImGui.Text($"Add Frame to End ({orientation})");
+                        ImGui.EndTooltip();
+                    }
+
+                ImGui.Button("-");
+                if (ImGui.IsItemHovered())
+                    if (ImGui.BeginTooltip())
+                    {
+                        ImGui.Text($"Remove Frame from End ({orientation})");
+                        ImGui.EndTooltip();
+                    }
+
+                for (var i = 0; i < maxFrames; ++i)
+                {
+                    ImGui.TableNextColumn();
+                    if (editingSprite.Faces.ContainsKey(orientation) && i < editingSprite.Faces[orientation].Count)
+                        guiExtensions.SpriteButton($"##{orientation}{i}", editingSprite.Faces[orientation][i].Id);
+                }
+            }
+
+            ImGui.EndTable();
+        }
+
+        if (ImGui.Button("Save")) SaveState();
         ImGui.SameLine();
         if (ImGui.Button("Cancel")) ResetState();
     }
@@ -186,10 +255,25 @@ public class AnimatedSpriteEditorTab
     }
 
     /// <summary>
+    ///     Saves the currently edited sprite into the active animated sprite table.
+    /// </summary>
+    private void SaveState()
+    {
+        if (editingSprite == null)
+        {
+            Logger.Error("SaveState(): editingSprite is null.");
+            return;
+        }
+
+        animatedSpriteManager.Update(selectedId, editingSprite);
+    }
+
+    /// <summary>
     ///     Resets state to match the currently applied definition of the selected animated sprite.
     /// </summary>
     private void ResetState()
     {
         inputTimestepMs = animatedSpriteManager.AnimatedSprites[selectedId].FrameTime * UnitConversions.UsToMs;
+        editingSprite = new AnimatedSprite(animatedSpriteManager.AnimatedSprites[selectedId]);
     }
 }

@@ -107,12 +107,15 @@ public sealed class AnimatedSpriteManager
     /// </summary>
     /// <param name="id">ID.</param>
     /// <param name="newValue">New animated sprite data.</param>
+    /// <remarks>
+    ///     The new value is copied into the animated sprite table.
+    /// </remarks>
     public void Update(int id, AnimatedSprite newValue)
     {
         if (id < 0 || id >= AnimatedSprites.Count)
             throw new IndexOutOfRangeException("Bad list index.");
 
-        AnimatedSprites[id] = newValue;
+        AnimatedSprites[id] = new AnimatedSprite(newValue);
         SaveDefinitions();
     }
 

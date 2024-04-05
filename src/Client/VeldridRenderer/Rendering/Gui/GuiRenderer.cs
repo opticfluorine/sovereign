@@ -229,6 +229,7 @@ public class GuiRenderer : IDisposable
                     break;
 
                 case GuiTextureMapper.SourceType.Spritesheet:
+                case GuiTextureMapper.SourceType.Sprite:
                 default:
                     startX = textureData.StartX;
                     startY = textureData.StartY;

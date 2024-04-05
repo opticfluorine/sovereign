@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
 using ImGuiNET;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
 
@@ -29,6 +29,37 @@ public class GuiExtensions
     public GuiExtensions(GuiTextureMapper textureMapper)
     {
         this.textureMapper = textureMapper;
+    }
+
+    /// <summary>
+    ///     Renders a sprite to the GUI.
+    /// </summary>
+    /// <param name="spriteId"></param>
+    public void Sprite(int spriteId)
+    {
+        var texId = textureMapper.GetTextureIdForSprite(spriteId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId);
+
+        // Render GUI component.
+        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
+    }
+
+    /// <summary>
+    ///     Renders a static sprite to the GUI as a clickable button.
+    /// </summary>
+    /// <param name="id">Button ID.</param>
+    /// <param name="spriteId">Sprite ID.</param>
+    /// <returns>true if button clicked, false otherwise.</returns>
+    public bool SpriteButton(string id, int spriteId)
+    {
+        var texId = textureMapper.GetTextureIdForSprite(spriteId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId);
+
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+        var result = ImGui.ImageButton(id, texId, new Vector2(texData.Width, texData.Height));
+        ImGui.PopStyleVar();
+
+        return result;
     }
 
     /// <summary>

@@ -66,6 +66,17 @@ public sealed class AnimatedSprite
     }
 
     /// <summary>
+    ///     Copy constructor.
+    /// </summary>
+    /// <param name="other">Animated sprite to copy.</param>
+    public AnimatedSprite(AnimatedSprite other)
+    {
+        FrameTime = other.FrameTime;
+        Faces = new Dictionary<Orientation, List<Sprite>>();
+        foreach (var (key, val) in other.Faces) Faces[key] = new List<Sprite>(val);
+    }
+
+    /// <summary>
     ///     Time to display each frame, in microseconds.
     /// </summary>
     public ulong FrameTime { get; set; } = 1;
