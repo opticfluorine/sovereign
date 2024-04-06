@@ -7,6 +7,8 @@
 #### 6 April 2024
 
 * Finish up the animated sprite editor.
+* Prevent deletion of animated sprites which are used in a tile sprite. Indicate these dependencies to the
+  user through a tooltip that appears when hovering over the disabled remove sprite button.
 
 #### 3 April 2024
 

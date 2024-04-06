@@ -14,14 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
+using System.Text;
 using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
+using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Numerics;
 
@@ -58,6 +62,7 @@ public class AnimatedSpriteEditorTab
     private readonly SpriteManager spriteManager;
 
     private readonly SpriteSelectorPopup spriteSelectorPopup;
+    private readonly TileSpriteManager tileSpriteManager;
 
     /// <summary>
     ///     Frame being edited when the sprite selector is open.
@@ -86,13 +91,19 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     private int selectedId;
 
+    /// <summary>
+    ///     Tile sprites that depend on the currently selected animated sprite.
+    /// </summary>
+    private List<int> tileSpriteDependencies = new();
+
     public AnimatedSpriteEditorTab(AnimatedSpriteManager animatedSpriteManager, GuiExtensions guiExtensions,
-        SpriteSelectorPopup spriteSelectorPopup, SpriteManager spriteManager)
+        SpriteSelectorPopup spriteSelectorPopup, SpriteManager spriteManager, TileSpriteManager tileSpriteManager)
     {
         this.animatedSpriteManager = animatedSpriteManager;
         this.guiExtensions = guiExtensions;
         this.spriteSelectorPopup = spriteSelectorPopup;
         this.spriteManager = spriteManager;
+        this.tileSpriteManager = tileSpriteManager;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -178,17 +189,17 @@ public class AnimatedSpriteEditorTab
 
                 // Remove selected sprite button.
                 ImGui.TableNextColumn();
-                var canRemove = animatedSpriteManager.AnimatedSprites.Count > 1;
+                var canRemove = CanRemoveSprite(out var reason);
                 if (!canRemove) ImGui.BeginDisabled();
                 if (ImGui.Button("-")) RemoveSelectedAnimatedSprite();
-                if (ImGui.IsItemHovered())
+                if (!canRemove) ImGui.EndDisabled();
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
                     if (ImGui.BeginTooltip())
                     {
-                        ImGui.Text("Remove Selected");
+                        ImGui.Text(canRemove ? "Remove Selected" : reason);
                         ImGui.EndTooltip();
                     }
 
-                if (!canRemove) ImGui.EndDisabled();
 
                 ImGui.EndTable();
             }
@@ -281,6 +292,14 @@ public class AnimatedSpriteEditorTab
     {
         selectedId = id;
         ResetState();
+
+        tileSpriteDependencies = tileSpriteManager.TileSprites
+            .SelectMany(ts => ts.TileContexts
+                .SelectMany(ctx => ctx.AnimatedSpriteIds)
+                .Select(animatedSpriteId => Tuple.Create(ts.Id, animatedSpriteId)))
+            .Where(ids => ids.Item2 == selectedId)
+            .Select(ids => ids.Item1)
+            .ToList();
     }
 
     /// <summary>
@@ -378,5 +397,32 @@ public class AnimatedSpriteEditorTab
         animatedSpriteManager.Remove(selectedId);
         if (selectedId >= animatedSpriteManager.AnimatedSprites.Count)
             Select(animatedSpriteManager.AnimatedSprites.Count - 1);
+    }
+
+    /// <summary>
+    ///     Checks whether the selected animated sprite may be removed.
+    /// </summary>
+    /// <param name="reason">Reason the sprite may not be removed. Only valid when returning false.</param>
+    /// <returns></returns>
+    private bool CanRemoveSprite([NotNullWhen(false)] out string? reason)
+    {
+        if (animatedSpriteManager.AnimatedSprites.Count <= 1)
+        {
+            reason = "Cannot remove last animated sprite.";
+            return false;
+        }
+
+        if (tileSpriteDependencies.Count > 0)
+        {
+            var sb = new StringBuilder();
+            sb.Append("Cannot remove with dependencies:");
+            foreach (var tileSpriteId in tileSpriteDependencies) sb.Append($"\nTile Sprite {tileSpriteId}");
+
+            reason = sb.ToString();
+            return false;
+        }
+
+        reason = null;
+        return true;
     }
 }
