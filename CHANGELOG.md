@@ -4,6 +4,10 @@
 
 ### April
 
+#### 6 April 2024
+
+* Finish up the animated sprite editor.
+
 #### 3 April 2024
 
 * Add internal support for modifying the animated sprite table at runtime. This raises the possibility

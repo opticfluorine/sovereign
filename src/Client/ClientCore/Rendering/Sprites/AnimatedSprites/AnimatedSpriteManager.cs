@@ -97,7 +97,9 @@ public sealed class AnimatedSpriteManager
         if (id < 0 || id > AnimatedSprites.Count)
             throw new IndexOutOfRangeException("Bad list index.");
 
-        AnimatedSprites.Insert(id, new AnimatedSprite());
+        var newSprite = new AnimatedSprite();
+        newSprite.Faces[Orientation.South] = new List<Sprite> { spriteManager.Sprites[0] };
+        AnimatedSprites.Insert(id, newSprite);
         SaveDefinitions();
         OnAnimatedSpriteAdded?.Invoke(id);
     }
@@ -200,8 +202,10 @@ public sealed class AnimatedSpriteManager
         // Save.
         try
         {
-            using var stream = new FileStream(DefinitionsFilename, FileMode.Create, FileAccess.Write);
+            var path = pathBuilder.BuildPathToResource(ResourceType.Sprite, DefinitionsFilename);
+            using var stream = new FileStream(path, FileMode.Create, FileAccess.Write);
             JsonSerializer.Serialize(stream, defs);
+            Logger.InfoFormat("Saved {0} animated sprites.", defs.AnimatedSprites.Count);
         }
         catch (Exception e)
         {

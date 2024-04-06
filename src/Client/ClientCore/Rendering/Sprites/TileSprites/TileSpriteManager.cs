@@ -142,8 +142,10 @@ public sealed class TileSpriteManager
 
         try
         {
-            using var stream = new FileStream(TileSpriteDefinitionsFilename, FileMode.Create, FileAccess.Write);
+            var path = pathBuilder.BuildPathToResource(ResourceType.Sprite, TileSpriteDefinitionsFilename);
+            using var stream = new FileStream(path, FileMode.Create, FileAccess.Write);
             JsonSerializer.Serialize(stream, defs);
+            Logger.InfoFormat("Saved {0} tile sprites.", TileSprites.Count);
         }
         catch (Exception e)
         {
@@ -165,10 +167,7 @@ public sealed class TileSpriteManager
         // updates need to be made.
         if (animatedSpriteId == animatedSpriteManager.AnimatedSprites.Count - 1) return;
 
-        foreach (var tileSprite in TileSprites)
-        {
-            tileSprite.OnAnimatedSpriteAdded(animatedSpriteId);
-        }
+        foreach (var tileSprite in TileSprites) tileSprite.OnAnimatedSpriteAdded(animatedSpriteId);
 
         SaveDefinitions();
     }
@@ -192,10 +191,7 @@ public sealed class TileSpriteManager
         // updates need to be made.
         if (animatedSpriteId == animatedSpriteManager.AnimatedSprites.Count) return;
 
-        foreach (var tileSprite in TileSprites)
-        {
-            tileSprite.OnAnimatedSpriteRemoved(animatedSpriteId);
-        }
+        foreach (var tileSprite in TileSprites) tileSprite.OnAnimatedSpriteRemoved(animatedSpriteId);
 
         SaveDefinitions();
     }

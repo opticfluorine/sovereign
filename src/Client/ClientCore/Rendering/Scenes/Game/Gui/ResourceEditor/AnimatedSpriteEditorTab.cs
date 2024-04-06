@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
@@ -136,7 +137,7 @@ public class AnimatedSpriteEditorTab
         var maxSize = ImGui.GetWindowSize();
         if (ImGui.BeginTable("animSprBrowser", 2,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter |
-                ImGuiTableFlags.RowBg, maxSize with { Y = maxSize.Y - 90 }))
+                ImGuiTableFlags.RowBg, new Vector2 { X = 222.0f, Y = maxSize.Y - 90 }))
         {
             ImGui.TableSetupColumn("ID");
             ImGui.TableSetupColumn("Animated Sprite");
@@ -218,7 +219,7 @@ public class AnimatedSpriteEditorTab
         var maxFrames = editingSprite.Faces.Select(p => p.Value.Count).Max();
         if (ImGui.BeginTable("frameEdtior", maxFrames + 2,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
-                maxSize with { Y = maxSize.Y - 134 }))
+                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 134 }))
         {
             ImGui.TableSetupColumn("Orientation");
             ImGui.TableSetupColumn("+/-");
@@ -231,7 +232,7 @@ public class AnimatedSpriteEditorTab
                 ImGui.Text(orientation.ToString());
 
                 ImGui.TableNextColumn();
-                if (ImGui.Button("+")) AppendFrame(orientation);
+                if (ImGui.Button($"+##{orientation}")) AppendFrame(orientation);
                 if (ImGui.IsItemHovered())
                     if (ImGui.BeginTooltip())
                     {
@@ -241,7 +242,7 @@ public class AnimatedSpriteEditorTab
 
                 var hasFrames = editingSprite.Faces.ContainsKey(orientation);
                 if (!hasFrames) ImGui.BeginDisabled();
-                if (ImGui.Button("-")) RemoveFrame(orientation);
+                if (ImGui.Button($"-##{orientation}")) RemoveFrame(orientation);
                 if (!hasFrames) ImGui.EndDisabled();
                 if (ImGui.IsItemHovered())
                     if (ImGui.BeginTooltip())
@@ -253,8 +254,8 @@ public class AnimatedSpriteEditorTab
                 for (var i = 0; i < maxFrames; ++i)
                 {
                     ImGui.TableNextColumn();
-                    if (editingSprite.Faces.ContainsKey(orientation) && i < editingSprite.Faces[orientation].Count)
-                        if (guiExtensions.SpriteButton($"##{orientation}{i}", editingSprite.Faces[orientation][i].Id))
+                    if (editingSprite.Faces.TryGetValue(orientation, out var frames) && i < frames.Count)
+                        if (guiExtensions.SpriteButton($"##{orientation}{i}", frames[i].Id))
                         {
                             editingOrientation = orientation;
                             editingFrame = i;
@@ -366,6 +367,7 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     private void InsertNewAnimatedSprite()
     {
+        animatedSpriteManager.InsertNew(selectedId + 1);
     }
 
     /// <summary>
@@ -373,5 +375,8 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     private void RemoveSelectedAnimatedSprite()
     {
+        animatedSpriteManager.Remove(selectedId);
+        if (selectedId >= animatedSpriteManager.AnimatedSprites.Count)
+            Select(animatedSpriteManager.AnimatedSprites.Count - 1);
     }
 }

@@ -49,6 +49,7 @@ public sealed class AnimatedSprite
 
     public AnimatedSprite()
     {
+        FrameTime = 1;
         Faces = new Dictionary<Orientation, List<Sprite>>();
     }
 
