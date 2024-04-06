@@ -167,6 +167,7 @@ public class SpriteEditorTab
             ImGui.TableNextColumn();
             var sheetName = orderedSpriteSheets[currentSheetIdx];
             guiExtensions.Spritesheet(sheetName);
+            var spriteHovered = ImGui.IsItemHovered();
 
             var drawList = ImGui.GetWindowDrawList();
             var coverageMap = spriteManager.SpriteSheetCoverage[sheetName];
@@ -189,10 +190,7 @@ public class SpriteEditorTab
 
             // If mouse is over a covered sprite, show the sprite ID in a tooltip.
             var relMousePos = ImGui.GetMousePos() - start;
-            var windowSize = ImGui.GetWindowSize();
-            if (relMousePos.X >= 0.0f && relMousePos.Y >= 0.0f &&
-                relMousePos.X < Math.Min(sheet.Surface.Properties.Width, windowSize.X)
-                && relMousePos.Y < Math.Min(sheet.Surface.Properties.Height, windowSize.Y))
+            if (spriteHovered)
             {
                 // Mouse is overlapping the spritesheet.
                 var row = (int)Math.Floor(relMousePos.Y / sheet.Definition.SpriteHeight);

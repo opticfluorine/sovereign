@@ -31,6 +31,12 @@ public class SpriteSelectorPopup
 {
     private const string PopupName = "Select Sprite";
     private readonly GuiExtensions guiExtensions;
+
+    /// <summary>
+    ///     Preferred size of selector if sufficient space is available.
+    /// </summary>
+    private readonly Vector2 preferredSize = new(500.0f, 400.0f);
+
     private readonly SpriteManager spriteManager;
     private readonly SpriteSheetManager spriteSheetManager;
 
@@ -146,11 +152,16 @@ public class SpriteSelectorPopup
     private void DrawSpritesheetView()
     {
         // Wrap the view in a single-cell table to get scrollbars for larger spritesheets.
-        if (ImGui.BeginTable("spriteSelectorView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY))
+        var screenSize = ImGui.GetIO().DisplaySize;
+        var maxSize = new Vector2(screenSize.X - basePos.X - 16, screenSize.Y - basePos.Y - 128);
+        var realSize = new Vector2(Math.Min(preferredSize.X, maxSize.X), Math.Min(preferredSize.Y, maxSize.Y));
+
+        if (ImGui.BeginTable("spriteSelectorView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, realSize))
         {
             ImGui.TableNextColumn();
             var sheetName = orderedSpriteSheets[currentSheetIdx];
             guiExtensions.Spritesheet(sheetName);
+            var spriteHovered = ImGui.IsItemHovered();
 
             var drawList = ImGui.GetWindowDrawList();
             var coverageMap = spriteManager.SpriteSheetCoverage[sheetName];
@@ -173,10 +184,7 @@ public class SpriteSelectorPopup
 
             // If mouse is over a covered sprite, show the sprite ID in a tooltip.
             var relMousePos = ImGui.GetMousePos() - start;
-            var windowSize = ImGui.GetWindowSize();
-            if (relMousePos.X >= 0.0f && relMousePos.Y >= 0.0f &&
-                relMousePos.X < Math.Min(sheet.Surface.Properties.Width, windowSize.X)
-                && relMousePos.Y < Math.Min(sheet.Surface.Properties.Height, windowSize.Y))
+            if (spriteHovered)
             {
                 // Mouse is overlapping the spritesheet.
                 var row = (int)Math.Floor(relMousePos.Y / sheet.Definition.SpriteHeight);
@@ -192,7 +200,7 @@ public class SpriteSelectorPopup
                     }
 
                 // If a sprite is clicked, select it and close the popup.
-                if (!isSheetComboOpen && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                if (spriteHovered && !isSheetComboOpen && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                     if (sprite != null)
                     {
                         selection = sprite.Id;

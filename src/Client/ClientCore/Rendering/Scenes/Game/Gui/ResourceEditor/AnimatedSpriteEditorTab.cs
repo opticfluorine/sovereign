@@ -167,7 +167,7 @@ public class AnimatedSpriteEditorTab
 
                 // Insert new sprite button.
                 ImGui.TableNextColumn();
-                ImGui.Button("+");
+                if (ImGui.Button("+")) InsertNewAnimatedSprite();
                 if (ImGui.IsItemHovered())
                     if (ImGui.BeginTooltip())
                     {
@@ -177,13 +177,17 @@ public class AnimatedSpriteEditorTab
 
                 // Remove selected sprite button.
                 ImGui.TableNextColumn();
-                ImGui.Button("-");
+                var canRemove = animatedSpriteManager.AnimatedSprites.Count > 1;
+                if (!canRemove) ImGui.BeginDisabled();
+                if (ImGui.Button("-")) RemoveSelectedAnimatedSprite();
                 if (ImGui.IsItemHovered())
                     if (ImGui.BeginTooltip())
                     {
                         ImGui.Text("Remove Selected");
                         ImGui.EndTooltip();
                     }
+
+                if (!canRemove) ImGui.EndDisabled();
 
                 ImGui.EndTable();
             }
@@ -227,7 +231,7 @@ public class AnimatedSpriteEditorTab
                 ImGui.Text(orientation.ToString());
 
                 ImGui.TableNextColumn();
-                ImGui.Button("+");
+                if (ImGui.Button("+")) AppendFrame(orientation);
                 if (ImGui.IsItemHovered())
                     if (ImGui.BeginTooltip())
                     {
@@ -235,7 +239,10 @@ public class AnimatedSpriteEditorTab
                         ImGui.EndTooltip();
                     }
 
-                ImGui.Button("-");
+                var hasFrames = editingSprite.Faces.ContainsKey(orientation);
+                if (!hasFrames) ImGui.BeginDisabled();
+                if (ImGui.Button("-")) RemoveFrame(orientation);
+                if (!hasFrames) ImGui.EndDisabled();
                 if (ImGui.IsItemHovered())
                     if (ImGui.BeginTooltip())
                     {
@@ -313,5 +320,58 @@ public class AnimatedSpriteEditorTab
         if (spriteSelectorPopup.TryGetSelection(out var newSpriteId))
             // Selection made, update the working record.
             editingSprite.Faces[editingOrientation][editingFrame] = spriteManager.Sprites[newSpriteId];
+    }
+
+    /// <summary>
+    ///     Appends a new frame to the given orientation of an animated sprite.
+    /// </summary>
+    /// <param name="orientation">Orientation.</param>
+    private void AppendFrame(Orientation orientation)
+    {
+        if (editingSprite == null)
+        {
+            Logger.Error("AppendFrame(): editingSprite is null");
+            return;
+        }
+
+        if (!editingSprite.Faces.TryGetValue(orientation, out var frames))
+        {
+            frames = new List<Sprite>();
+            editingSprite.Faces[orientation] = frames;
+        }
+
+        frames.Add(spriteManager.Sprites[0]);
+    }
+
+    /// <summary>
+    ///     Removes the last frame from the given orientation of an animated sprite.
+    /// </summary>
+    /// <param name="orientation">Orientation.</param>
+    private void RemoveFrame(Orientation orientation)
+    {
+        if (editingSprite == null)
+        {
+            Logger.Error("RemoveFrame(): editingSprite is null");
+            return;
+        }
+
+        if (!editingSprite.Faces.TryGetValue(orientation, out var frames)) return;
+
+        frames.RemoveAt(frames.Count - 1);
+        if (frames.Count == 0) editingSprite.Faces.Remove(orientation);
+    }
+
+    /// <summary>
+    ///     Inserts a new animated sprite after the currently selected sprite.
+    /// </summary>
+    private void InsertNewAnimatedSprite()
+    {
+    }
+
+    /// <summary>
+    ///     Removes the currently selected animated sprite.
+    /// </summary>
+    private void RemoveSelectedAnimatedSprite()
+    {
     }
 }
