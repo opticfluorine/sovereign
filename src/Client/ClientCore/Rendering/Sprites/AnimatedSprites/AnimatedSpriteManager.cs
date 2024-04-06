@@ -17,8 +17,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
@@ -38,7 +41,7 @@ public sealed class AnimatedSpriteManager
     /// <summary>
     ///     Animated sprite definitions filename.
     /// </summary>
-    public const string DefinitionsFilename = "AnimatedSpriteDefinitions.yaml";
+    public const string DefinitionsFilename = "AnimatedSpriteDefinitions.json";
 
     /// <summary>
     ///     Animated sprites.
@@ -66,8 +69,6 @@ public sealed class AnimatedSpriteManager
         this.loader = loader;
         this.pathBuilder = pathBuilder;
         this.spriteManager = spriteManager;
-
-        spriteManager.OnSpritesChanged += OnSpritesChanged;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -84,6 +85,59 @@ public sealed class AnimatedSpriteManager
         UnpackDefinitions(definitions);
 
         Logger.Info("Loaded " + AnimatedSprites.Count + " animated sprites.");
+    }
+
+    /// <summary>
+    ///     Inserts an empty animated sprite at the given position.
+    /// </summary>
+    /// <param name="id">ID.</param>
+    /// <exception cref="IndexOutOfRangeException">Thrown if id less than 0 or greater than AnimatedSprites.Count.</exception>
+    public void InsertNew(int id)
+    {
+        if (id < 0 || id > AnimatedSprites.Count)
+            throw new IndexOutOfRangeException("Bad list index.");
+
+        var newSprite = new AnimatedSprite();
+        newSprite.Faces[Orientation.South] = new List<Sprite> { spriteManager.Sprites[0] };
+        AnimatedSprites.Insert(id, newSprite);
+        SaveDefinitions();
+        OnAnimatedSpriteAdded?.Invoke(id);
+    }
+
+    /// <summary>
+    ///     Updates an existing animated sprite at the given position.
+    /// </summary>
+    /// <param name="id">ID.</param>
+    /// <param name="newValue">New animated sprite data.</param>
+    /// <remarks>
+    ///     The new value is copied into the animated sprite table.
+    /// </remarks>
+    public void Update(int id, AnimatedSprite newValue)
+    {
+        if (id < 0 || id >= AnimatedSprites.Count)
+            throw new IndexOutOfRangeException("Bad list index.");
+
+        AnimatedSprites[id] = new AnimatedSprite(newValue);
+        SaveDefinitions();
+    }
+
+    /// <summary>
+    ///     Removes an existing animated sprite at the given position.
+    /// </summary>
+    /// <param name="id">ID.</param>
+    /// <remarks>
+    ///     This method does not check for downstream resource dependencies on the
+    ///     deleted animated sprite. Ensure that any downstream dependencies are resolved
+    ///     before deleted an animated sprite.
+    /// </remarks>
+    public void Remove(int id)
+    {
+        if (id < 0 || id >= AnimatedSprites.Count)
+            throw new IndexOutOfRangeException("Bad list index.");
+
+        AnimatedSprites.RemoveAt(id);
+        SaveDefinitions();
+        OnAnimatedSpriteRemoved?.Invoke(id);
     }
 
     /// <summary>
@@ -123,10 +177,59 @@ public sealed class AnimatedSpriteManager
     }
 
     /// <summary>
-    ///     Invoked when the sprite table is updated.
+    ///     Saves the latest animated sprite definitions to the file.
     /// </summary>
-    private void OnSpritesChanged()
+    private void SaveDefinitions()
     {
-        foreach (var animatedSprite in AnimatedSprites) animatedSprite.RebuildFrames();
+        // Generate a new set of definitions from the list of animated sprites.
+        var defs = new AnimatedSpriteDefinitions();
+        for (var i = 0; i < AnimatedSprites.Count; ++i)
+        {
+            var animSprite = AnimatedSprites[i];
+            var def = new AnimatedSpriteDefinitions.AnimatedSpriteDefinition
+            {
+                Id = i,
+                AnimationTimestep = animSprite.FrameTime,
+                Faces = animSprite.Faces.Select(
+                        face => new Tuple<Orientation, AnimatedSpriteDefinitions.AnimatedSpriteFaceDefinition>(face.Key,
+                            new AnimatedSpriteDefinitions.AnimatedSpriteFaceDefinition
+                                { SpriteIds = face.Value.Select(sprite => sprite.Id).ToList() }))
+                    .ToDictionary(t => t.Item1, t => t.Item2)
+            };
+            defs.AnimatedSprites.Add(def);
+        }
+
+        // Save.
+        try
+        {
+            var path = pathBuilder.BuildPathToResource(ResourceType.Sprite, DefinitionsFilename);
+            using var stream = new FileStream(path, FileMode.Create, FileAccess.Write);
+            JsonSerializer.Serialize(stream, defs);
+            Logger.InfoFormat("Saved {0} animated sprites.", defs.AnimatedSprites.Count);
+        }
+        catch (Exception e)
+        {
+            Logger.Error("Failed to save animated sprite definitions.", e);
+        }
     }
+
+    /// <summary>
+    ///     Event triggered when an animated sprite is added.
+    ///     Parameter is the added sprite ID.
+    /// </summary>
+    /// <remarks>
+    ///     Since the animated sprites are maintained as a sequential list, any animated sprites with
+    ///     IDs greater than or equal to the new sprite's ID are incremented by one.
+    /// </remarks>
+    public event Action<int>? OnAnimatedSpriteAdded;
+
+    /// <summary>
+    ///     Event triggered when an animated sprite is removed.
+    ///     Parameter is the removed sprite ID.
+    /// </summary>
+    /// <remarks>
+    ///     Since the animated sprites are maintained as a sequential list, any animated sprites with IDs
+    ///     greater than the removed sprite's ID are decremented by one.
+    /// </remarks>
+    public event Action<int>? OnAnimatedSpriteRemoved;
 }

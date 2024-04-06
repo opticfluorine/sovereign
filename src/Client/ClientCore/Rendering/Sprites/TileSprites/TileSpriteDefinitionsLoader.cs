@@ -17,8 +17,7 @@
 
 using System;
 using System.IO;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using System.Text.Json;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 
@@ -27,13 +26,6 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 /// </summary>
 public sealed class TileSpriteDefinitionsLoader
 {
-    /// <summary>
-    ///     YAML deserializer.
-    /// </summary>
-    private readonly IDeserializer deserializer = new DeserializerBuilder()
-        .WithNamingConvention(PascalCaseNamingConvention.Instance)
-        .Build();
-
     /// <summary>
     ///     Definitions validator.
     /// </summary>
@@ -55,13 +47,11 @@ public sealed class TileSpriteDefinitionsLoader
     public TileSpriteDefinitions LoadDefinitions(string filename)
     {
         /* Attempt to load the definitions. */
-        TileSpriteDefinitions definitions;
+        TileSpriteDefinitions? definitions;
         try
         {
-            using (var reader = new StreamReader(filename))
-            {
-                definitions = deserializer.Deserialize<TileSpriteDefinitions>(reader);
-            }
+            using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read);
+            definitions = JsonSerializer.Deserialize<TileSpriteDefinitions>(stream);
         }
         catch (Exception e)
         {
@@ -69,10 +59,11 @@ public sealed class TileSpriteDefinitionsLoader
             throw new TileSpriteDefinitionsException("Failed to load tile sprite definitions.", e);
         }
 
+        if (definitions == null)
+            throw new TileSpriteDefinitionsException("Tile sprite definitions empty or malformed.");
+
         /* Validate the definitions. */
         validator.Validate(definitions);
-
-        /* Postprocess the definitions. */
 
         /* Done. */
         return definitions;

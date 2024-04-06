@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites;
@@ -26,70 +25,102 @@ using Sovereign.ClientCore.Rendering.Sprites;
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 
 /// <summary>
-///     Resource Editor tab for viewing and editing sprite definitions.
+///     Reusable popup window for visually selecting a Sprite.
 /// </summary>
-public class SpriteEditorTab
+public class SpriteSelectorPopup
 {
-    /// <summary>
-    ///     Identifier for popup error message.
-    /// </summary>
-    private const string ErrorPopup = "Error";
-
-    private readonly SpriteDefinitionsGenerator generator;
+    private const string PopupName = "Select Sprite";
     private readonly GuiExtensions guiExtensions;
+
+    /// <summary>
+    ///     Preferred size of selector if sufficient space is available.
+    /// </summary>
+    private readonly Vector2 preferredSize = new(500.0f, 400.0f);
+
     private readonly SpriteManager spriteManager;
     private readonly SpriteSheetManager spriteSheetManager;
 
     /// <summary>
-    ///     Index (into orderedSpriteSheets) of the currently selected spritesheet.
+    ///     Popup base position.
+    /// </summary>
+    private Vector2 basePos;
+
+    /// <summary>
+    ///     Index of currently selected spritesheet.
     /// </summary>
     private int currentSheetIdx;
 
     /// <summary>
-    ///     Exception to report to user, if any.
+    ///     Initialization flag.
     /// </summary>
-    private Exception? exceptionToReport;
+    private bool initialized;
+
+    /// <summary>
+    ///     Flag indicating user has selected sprite since last Open() call.
+    /// </summary>
+    private bool isSelected;
+
+    /// <summary>
+    ///     Flag indicating whether the sheet selection combo is open.
+    /// </summary>
+    private bool isSheetComboOpen;
 
     /// <summary>
     ///     Alphabetically-ordered sprite sheets.
     /// </summary>
     private List<string> orderedSpriteSheets = new();
 
-    public SpriteEditorTab(SpriteSheetManager spriteSheetManager, GuiExtensions guiExtensions,
-        SpriteManager spriteManager, SpriteDefinitionsGenerator generator)
+    /// <summary>
+    ///     Selected sprite.
+    /// </summary>
+    private int selection;
+
+    public SpriteSelectorPopup(SpriteSheetManager spriteSheetManager, GuiExtensions guiExtensions,
+        SpriteManager spriteManager)
     {
         this.spriteSheetManager = spriteSheetManager;
         this.guiExtensions = guiExtensions;
         this.spriteManager = spriteManager;
-        this.generator = generator;
     }
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
+    /// <summary>
+    ///     Opens the selector popup.
+    /// </summary>
+    public void Open()
+    {
+        isSelected = false;
+        selection = 0;
+        basePos = ImGui.GetMousePos();
+
+        ImGui.OpenPopup(PopupName);
+    }
 
     /// <summary>
-    ///     Renders the Sprite Editor tab. Must be called from inside a tab bar.
+    ///     Renders the selector popup if open, otherwise does nothing.
     /// </summary>
     public void Render()
     {
-        // Initialize sprite sheet selector if not yet initialized.
-        if (orderedSpriteSheets.Count == 0) Initialize();
+        if (!initialized) Initialize();
 
-        //
-        if (ImGui.BeginTabItem("Sprites"))
+        if (ImGui.BeginPopup(PopupName))
         {
             DrawTopBar();
             DrawSpritesheetView();
-            ImGui.EndTabItem();
+            ImGui.EndPopup();
         }
     }
 
     /// <summary>
-    ///     Lazy-initializes the editor on first render.
+    ///     Tries to get the latest selection.
     /// </summary>
-    private void Initialize()
+    /// <param name="spriteId">Set to the selected sprite ID if returns true.</param>
+    /// <returns>true if a selection has been made since the last call to Open(); false otherwise.</returns>
+    public bool TryGetSelection(out int spriteId)
     {
-        // Order the spritesheets. They can't be changed after startup, so this only needs to be done once.
-        orderedSpriteSheets = spriteSheetManager.SpriteSheets.Keys.OrderBy(sheetName => sheetName).ToList();
+        spriteId = selection;
+        var result = isSelected;
+        isSelected = false;
+        return result;
     }
 
     /// <summary>
@@ -100,59 +131,18 @@ public class SpriteEditorTab
         // Combo box for selecting the current spritesheet.
         ImGui.Text("Spritesheet:");
         ImGui.SameLine();
-        if (ImGui.BeginCombo("##spriteSheetCombo", orderedSpriteSheets[currentSheetIdx]))
+        isSheetComboOpen = ImGui.BeginCombo("##spriteSheetCombo", orderedSpriteSheets[currentSheetIdx]);
+        if (isSheetComboOpen)
         {
             for (var i = 0; i < orderedSpriteSheets.Count; ++i)
             {
                 var sheetName = orderedSpriteSheets[i];
-                var isSelected = i == currentSheetIdx;
+                var isSheetSelected = i == currentSheetIdx;
                 if (ImGui.Selectable(sheetName, i == currentSheetIdx)) currentSheetIdx = i;
-                if (isSelected) ImGui.SetItemDefaultFocus();
+                if (isSheetSelected) ImGui.SetItemDefaultFocus();
             }
 
             ImGui.EndCombo();
-        }
-
-        // Spritesheet control bar.
-        ImGui.SameLine();
-        if (ImGui.Button("Generate Missing Sprites")) GenerateSprites();
-
-        // Error modal if needed.
-        var open = true;
-        if (ImGui.BeginPopupModal(ErrorPopup, ref open, ImGuiWindowFlags.AlwaysAutoResize))
-        {
-            ImGui.Text("An error occured while generating sprites.");
-            if (exceptionToReport != null)
-            {
-                ImGui.Spacing();
-                ImGui.Text(exceptionToReport.Message);
-            }
-
-            if (ImGui.Button("OK"))
-            {
-                exceptionToReport = null;
-                ImGui.CloseCurrentPopup();
-            }
-
-            ImGui.EndPopup();
-        }
-    }
-
-    /// <summary>
-    ///     Generates a covering set of sprite definitions for the currently selected spritesheet.
-    /// </summary>
-    private void GenerateSprites()
-    {
-        try
-        {
-            generator.GenerateMissingSpritesForSheet(orderedSpriteSheets[currentSheetIdx]);
-            spriteManager.UpdateAndSaveSprites();
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorFormat(e, "Error during sprite generation for {0}.", orderedSpriteSheets[currentSheetIdx]);
-            exceptionToReport = e;
-            ImGui.OpenPopup(ErrorPopup);
         }
     }
 
@@ -162,7 +152,11 @@ public class SpriteEditorTab
     private void DrawSpritesheetView()
     {
         // Wrap the view in a single-cell table to get scrollbars for larger spritesheets.
-        if (ImGui.BeginTable("spritesheetView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY))
+        var screenSize = ImGui.GetIO().DisplaySize;
+        var maxSize = new Vector2(screenSize.X - basePos.X - 16, screenSize.Y - basePos.Y - 128);
+        var realSize = new Vector2(Math.Min(preferredSize.X, maxSize.X), Math.Min(preferredSize.Y, maxSize.Y));
+
+        if (ImGui.BeginTable("spriteSelectorView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, realSize))
         {
             ImGui.TableNextColumn();
             var sheetName = orderedSpriteSheets[currentSheetIdx];
@@ -204,9 +198,28 @@ public class SpriteEditorTab
                         ImGui.Text($"Sprite {sprite.Id}");
                         ImGui.EndTooltip();
                     }
+
+                // If a sprite is clicked, select it and close the popup.
+                if (spriteHovered && !isSheetComboOpen && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                    if (sprite != null)
+                    {
+                        selection = sprite.Id;
+                        isSelected = true;
+                        ImGui.CloseCurrentPopup();
+                    }
             }
 
             ImGui.EndTable();
         }
+    }
+
+    /// <summary>
+    ///     Lazy-initializes the editor on first render.
+    /// </summary>
+    private void Initialize()
+    {
+        // Order the spritesheets. They can't be changed after startup, so this only needs to be done once.
+        orderedSpriteSheets = spriteSheetManager.SpriteSheets.Keys.OrderBy(sheetName => sheetName).ToList();
+        initialized = true;
     }
 }

@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="opticfluorine.Veldrid" Version="4.9.3"/>
+        <PackageReference Include="opticfluorine.Veldrid" Version="4.9.4"/>
     </ItemGroup>
 
 

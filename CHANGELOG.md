@@ -2,7 +2,31 @@
 
 ## 2024
 
+### April
+
+#### 6 April 2024
+
+* Finish up the animated sprite editor.
+
+#### 3 April 2024
+
+* Add internal support for modifying the animated sprite table at runtime. This raises the possibility
+  that an entity with an `AnimatedSprite` component may end up pointing to a nonexistent animated sprite
+  (in fact that possibility already exists). No warnings will be provided by the client in such a case.
+* Fix issue where sprite editor tooltips appeared outside of the editor window for large spritesheets.
+
 ### March
+
+#### 31 March 2024
+
+* Disable Vulkan validation temporarily. Since upgrading my Arch Linux install last night, I'm seeing what
+  I think may be a false positive `VUID-VkPresentInfoKHR-pImageIndices-01430` error on the *third* swapchain
+  swap. The first swap presents swapchain image 0 which passes validation. The third swap presents swapchain
+  image 0 yet again, which suddenly triggers an error saying that image 0 does not belong to the swapchain.
+  Debugger shows that the swapchain does in fact change, so this might be a true validation error, but it's
+  new after an Arch update and works fine if validation is disabled. Disabling validation for now.
+* Updated the Vulkan fork to not cause a fatal erorr when a Vulkan validation error occurs, just log it and
+  move on instead.
 
 #### 30 March 2024
 

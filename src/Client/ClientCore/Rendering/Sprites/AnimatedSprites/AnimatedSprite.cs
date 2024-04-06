@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Sovereign.EngineCore.Components.Types;
 using static Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites.AnimatedSpriteDefinitions;
@@ -48,33 +47,13 @@ public sealed class AnimatedSprite
         { Orientation.West, Orientation.South }
     };
 
-    private readonly AnimatedSpriteDefinition definition;
-    private readonly SpriteManager spriteManager;
-
-    public AnimatedSprite(AnimatedSpriteDefinition definition, SpriteManager spriteManager)
+    public AnimatedSprite()
     {
-        this.definition = definition;
-        this.spriteManager = spriteManager;
-
-        RebuildFrames();
+        FrameTime = 1;
+        Faces = new Dictionary<Orientation, List<Sprite>>();
     }
 
-    /// <summary>
-    ///     Time to display each frame, in microseconds.
-    /// </summary>
-    public ulong FrameTime { get; set; }
-
-    /// <summary>
-    ///     Sprite IDs for each defined orientation.
-    /// </summary>
-    public Dictionary<Orientation, List<Sprite>> Faces { get; set; }
-
-    /// <summary>
-    ///     Rebuilds the frame data if the definition and/or the sprite table is updated.
-    /// </summary>
-    [MemberNotNull("FrameTime")]
-    [MemberNotNull("Faces")]
-    public void RebuildFrames()
+    public AnimatedSprite(AnimatedSpriteDefinition definition, SpriteManager spriteManager)
     {
         FrameTime = definition.AnimationTimestep;
         Faces = definition.Faces
@@ -86,6 +65,27 @@ public sealed class AnimatedSprite
                 pair => pair.Item1,
                 pair => pair.Item2);
     }
+
+    /// <summary>
+    ///     Copy constructor.
+    /// </summary>
+    /// <param name="other">Animated sprite to copy.</param>
+    public AnimatedSprite(AnimatedSprite other)
+    {
+        FrameTime = other.FrameTime;
+        Faces = new Dictionary<Orientation, List<Sprite>>();
+        foreach (var (key, val) in other.Faces) Faces[key] = new List<Sprite>(val);
+    }
+
+    /// <summary>
+    ///     Time to display each frame, in microseconds.
+    /// </summary>
+    public ulong FrameTime { get; set; } = 1;
+
+    /// <summary>
+    ///     Sprite IDs for each defined orientation.
+    /// </summary>
+    public Dictionary<Orientation, List<Sprite>> Faces { get; set; }
 
     /// <summary>
     ///     Gets the sprite for the given system time and orientation.

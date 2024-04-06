@@ -42,7 +42,12 @@ public class GuiTextureMapper
         /// <summary>
         ///     Texture is a full spritesheet.
         /// </summary>
-        Spritesheet
+        Spritesheet,
+
+        /// <summary>
+        ///     Texture is a static sprite.
+        /// </summary>
+        Sprite
     }
 
     /// <summary>
@@ -60,6 +65,11 @@ public class GuiTextureMapper
     private readonly TextureAtlasManager atlasManager;
     private readonly AtlasMap atlasMap;
     private readonly ClientConfigurationManager clientConfigurationManager;
+
+    /// <summary>
+    ///     Map from sprite ID to corresponding textures list entry.
+    /// </summary>
+    private readonly Dictionary<int, int> spriteIndices = new();
 
     /// <summary>
     ///     Map from spritesheet index to corresponding texture list entry.
@@ -82,6 +92,9 @@ public class GuiTextureMapper
         this.animatedSpriteManager = animatedSpriteManager;
         this.atlasMap = atlasMap;
         this.clientConfigurationManager = clientConfigurationManager;
+
+        animatedSpriteManager.OnAnimatedSpriteAdded += OnAnimatedSpriteAdded;
+        animatedSpriteManager.OnAnimatedSpriteRemoved += OnAnimatedSpriteRemoved;
     }
 
     /// <summary>
@@ -135,7 +148,7 @@ public class GuiTextureMapper
     {
         if (!spritesheetIndices.TryGetValue(spritesheet, out var index))
         {
-            // Find normalized coordiantes for spritesheet in the texture atlas.
+            // Find normalized coordinates for spritesheet in the texture atlas.
             var atlas = atlasManager.TextureAtlas;
             if (atlas == null) throw new InvalidOperationException("Texture atlas is null.");
             var (topLeftAbsX, topLeftAbsY) = atlas.SpriteSheetMap[spritesheet];
@@ -159,6 +172,106 @@ public class GuiTextureMapper
         }
 
         return new IntPtr(index + IndexOffset);
+    }
+
+    /// <summary>
+    ///     Gets the ImGui texture ID for a static sprite.
+    /// </summary>
+    /// <param name="spriteId">Sprite ID.</param>
+    /// <returns>ImGui texture ID.</returns>
+    public IntPtr GetTextureIdForSprite(int spriteId)
+    {
+        if (!spriteIndices.TryGetValue(spriteId, out var index))
+        {
+            if (spriteId >= atlasMap.MapElements.Count)
+                throw new IndexOutOfRangeException($"Sprite {spriteId} does not exist.");
+
+            // Add entry to table.
+            var spriteData = atlasMap.MapElements[spriteId];
+            index = textures.Count;
+            textures.Add(new TextureData
+            {
+                SourceType = SourceType.Sprite,
+                StartX = spriteData.NormalizedLeftX,
+                StartY = spriteData.NormalizedTopY,
+                EndX = spriteData.NormalizedRightX,
+                EndY = spriteData.NormalizedBottomY,
+                Width = spriteData.WidthInTiles * clientConfigurationManager.ClientConfiguration.TileWidth,
+                Height = spriteData.HeightInTiles * clientConfigurationManager.ClientConfiguration.TileWidth
+            });
+            spriteIndices[spriteId] = index;
+        }
+
+        return new IntPtr(index + IndexOffset);
+    }
+
+    /// <summary>
+    ///     Updates cached entries when a new animated sprite is created.
+    /// </summary>
+    /// <param name="animatedSpriteId">ID of new animated sprite.</param>
+    private void OnAnimatedSpriteAdded(int animatedSpriteId)
+    {
+        // For new animated sprites, any sprites with id >= animatedSpriteId have their ID incremented.
+        // Smaller IDs are unaffected.
+        var affectedRows = new List<Tuple<int, int>>();
+
+        // First pass, update the IDs in the texture records.
+        foreach (var oldId in animatedSpriteIndices.Keys)
+        {
+            if (oldId < animatedSpriteId) continue;
+
+            var newId = oldId + 1;
+
+            var index = animatedSpriteIndices[oldId];
+            textures[index].Id = newId;
+            affectedRows.Add(Tuple.Create(oldId, index));
+        }
+
+        // Second pass, remove affected rows in the index cache.
+        foreach (var oldRow in affectedRows)
+            animatedSpriteIndices.Remove(oldRow.Item1);
+
+        // Third pass, add new rows for affected IDs in the index cache.
+        foreach (var oldRow in affectedRows)
+        {
+            var newId = oldRow.Item1 + 1;
+            animatedSpriteIndices[newId] = oldRow.Item2;
+        }
+    }
+
+    /// <summary>
+    ///     Updates cached entries when a new animated sprite is removed.
+    /// </summary>
+    /// <param name="animatedSpriteId">ID of removed animated sprite.</param>
+    private void OnAnimatedSpriteRemoved(int animatedSpriteId)
+    {
+        // For removed animated sprites, any sprites with id > animatedSpriteId will be decremented.
+        // Smaller IDs are not affected.
+        // We don't remove the corresponding texture record to avoid a reordering of higher texture IDs.
+        var affectedRows = new List<Tuple<int, int>>();
+
+        // First pass, update the IDs in the records.
+        foreach (var oldId in animatedSpriteIndices.Keys)
+        {
+            if (oldId <= animatedSpriteId) continue;
+
+            var newId = oldId - 1;
+
+            var index = animatedSpriteIndices[oldId];
+            textures[index].Id = newId;
+            affectedRows.Add(Tuple.Create(oldId, index));
+        }
+
+        // Second pass, remove the affected IDs.
+        animatedSpriteIndices.Remove(animatedSpriteId);
+        foreach (var oldRow in affectedRows) animatedSpriteIndices.Remove(oldRow.Item1);
+
+        // Third pass, add new rows for affected IDs to the index cache.
+        foreach (var oldRow in affectedRows)
+        {
+            var newId = oldRow.Item1 - 1;
+            animatedSpriteIndices[newId] = oldRow.Item2;
+        }
     }
 
     /// <summary>

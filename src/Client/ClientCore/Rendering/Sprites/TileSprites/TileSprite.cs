@@ -43,12 +43,12 @@ public sealed class TileSprite
     /// <summary>
     ///     Tile contexts sorted in priority order.
     /// </summary>
-    private readonly IList<TileContext> tileContexts;
+    public readonly List<TileContext> TileContexts;
 
     public TileSprite(TileSpriteRecord definition)
     {
         Id = definition.Id;
-        tileContexts = SortContexts(definition.TileContexts);
+        TileContexts = SortContexts(definition.TileContexts);
     }
 
     /// <summary>
@@ -85,6 +85,51 @@ public sealed class TileSprite
     }
 
     /// <summary>
+    ///     Called when an animated sprite is added resulting in a change in indices.
+    /// </summary>
+    /// <param name="animatedSpriteId">ID of new animated sprite.</param>
+    public void OnAnimatedSpriteAdded(int animatedSpriteId)
+    {
+        // IDs of any animated sprites with old id >= animatedSpriteId are incremented by one.
+        // Update all contexts to match.
+        foreach (var context in TileContexts)
+        {
+            for (var i = 0; i < context.AnimatedSpriteIds.Count; ++i)
+            {
+                var oldId = context.AnimatedSpriteIds[i];
+                if (oldId >= animatedSpriteId)
+                {
+                    context.AnimatedSpriteIds.RemoveAt(i);
+                    context.AnimatedSpriteIds.Insert(i, oldId + 1);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Called when an animated sprite is removed resulting in a change in indices.
+    /// </summary>
+    /// <param name="animatedSpriteId">ID of removed animated sprite.</param>
+    public void OnAnimatedSpriteRemoved(int animatedSpriteId)
+    {
+        // IDs of any aniamted sprites wtih old id > animatedSpriteId are decremented by one.
+        // The removal assumes no tile sprite dependencies, so we will ignore any that exist.
+        // Update affected IDs.
+        foreach (var context in TileContexts)
+        {
+            for (var i = 0; i < context.AnimatedSpriteIds.Count; ++i)
+            {
+                var oldId = context.AnimatedSpriteIds[i];
+                if (oldId > animatedSpriteId)
+                {
+                    context.AnimatedSpriteIds.RemoveAt(i);
+                    context.AnimatedSpriteIds.Insert(i, oldId - 1);
+                }
+            }
+        }
+    }
+
+    /// <summary>
     ///     Resolves the tile context for the given neighboring IDs.
     /// </summary>
     /// <param name="ids">4-tuple of neighboring IDs (north, east, south, west).</param>
@@ -96,7 +141,7 @@ public sealed class TileSprite
     private TileContext ResolveContext(Tuple<int, int, int, int> ids)
     {
         /* Since the contexts are sorted in priority order, iterate until match. */
-        foreach (var context in tileContexts)
+        foreach (var context in TileContexts)
             if (context.IsMatch(ids.Item1, ids.Item2, ids.Item3, ids.Item4))
                 return context;
 
@@ -109,7 +154,7 @@ public sealed class TileSprite
     /// </summary>
     /// <param name="contexts">Tile contexts to be sorted.</param>
     /// <returns>Sorted list of tile contexts.</returns>
-    private IList<TileContext> SortContexts(IEnumerable<TileContext> contexts)
+    private List<TileContext> SortContexts(IEnumerable<TileContext> contexts)
     {
         return contexts.OrderBy(context => context.GetWildcardCount())
             .ThenByDescending(context => context.NorthTileSpriteId)
