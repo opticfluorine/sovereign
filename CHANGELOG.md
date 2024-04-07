@@ -4,6 +4,10 @@
 
 ### April
 
+#### 7 April 2024
+
+* Add `EntityAnimationSystem` for managing the animation phase (e.g. standing, moving) of each entity.
+
 #### 6 April 2024
 
 * Finish up the animated sprite editor.

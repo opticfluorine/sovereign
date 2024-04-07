@@ -33,8 +33,9 @@ Core components are available in both the client and server.
 
 Client components are only available in the client.
 
-| Component | Component Collection Class | Description |
-|-----------|----------------------------|-------------|
+| Component        | Component Collection Class          | Description                                                 |
+|------------------|-------------------------------------|-------------------------------------------------------------|
+| `AnimationPhase` | `AnimationPhaseComponentCollection` | Animation phase for the entity (e.g. static, moving, etc.). |
 
 ## Server Components
 

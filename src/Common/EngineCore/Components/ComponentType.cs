@@ -98,6 +98,11 @@ public enum ComponentType
 
     #region Client
 
+    /// <summary>
+    ///     Animation phase component.
+    /// </summary>
+    AnimationPhase = 0x1000,
+
     #endregion Client
 
     #region Server
