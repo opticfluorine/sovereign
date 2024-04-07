@@ -98,7 +98,8 @@ public sealed class AnimatedSpriteManager
             throw new IndexOutOfRangeException("Bad list index.");
 
         var newSprite = new AnimatedSprite();
-        newSprite.Faces[Orientation.South] = new List<Sprite> { spriteManager.Sprites[0] };
+        newSprite.Phases[AnimationPhase.Default].Frames[Orientation.South] =
+            new List<Sprite> { spriteManager.Sprites[0] };
         AnimatedSprites.Insert(id, newSprite);
         SaveDefinitions();
         OnAnimatedSpriteAdded?.Invoke(id);
@@ -189,12 +190,19 @@ public sealed class AnimatedSpriteManager
             var def = new AnimatedSpriteDefinitions.AnimatedSpriteDefinition
             {
                 Id = i,
-                AnimationTimestep = animSprite.FrameTime,
-                Faces = animSprite.Faces.Select(
-                        face => new Tuple<Orientation, AnimatedSpriteDefinitions.AnimatedSpriteFaceDefinition>(face.Key,
-                            new AnimatedSpriteDefinitions.AnimatedSpriteFaceDefinition
-                                { SpriteIds = face.Value.Select(sprite => sprite.Id).ToList() }))
-                    .ToDictionary(t => t.Item1, t => t.Item2)
+                Phases = animSprite.Phases.Select(
+                    p => Tuple.Create(p.Key,
+                        new AnimatedSpriteDefinitions.AnimatedSpritePhaseDefinition
+                        {
+                            AnimationTimestep = p.Value.FrameTime,
+                            Faces = p.Value.Frames
+                                .Select(f => Tuple.Create(f.Key,
+                                    new AnimatedSpriteDefinitions.AnimatedSpriteFaceDefinition
+                                    {
+                                        SpriteIds = f.Value.Select(sprite => sprite.Id).ToList()
+                                    }))
+                                .ToDictionary(t => t.Item1, t => t.Item2)
+                        })).ToDictionary(t => t.Item1, t => t.Item2)
             };
             defs.AnimatedSprites.Add(def);
         }
