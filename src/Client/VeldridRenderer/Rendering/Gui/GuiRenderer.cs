@@ -256,11 +256,20 @@ public class GuiRenderer : IDisposable
     /// <param name="endX">Bottom-right X coordinate.</param>
     /// <param name="endY">Bottom-right Y coordinate.</param>
     private void BindAnimatedSprite(int animatedSpriteId, ulong systemTime, out float startX, out float startY,
-        out float endX,
-        out float endY)
+        out float endX, out float endY)
     {
         // Resolve animation to the sprite for the current frame.
-        var animSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
+        if (animatedSpriteId >= animatedSpriteManager.AnimatedSprites.Count)
+        {
+            // Animated sprite was removed before rendering, blank the draw.
+            startX = 0.0f;
+            startY = 0.0f;
+            endX = 0.0f;
+            endY = 0.0f;
+            return;
+        }
+
+        var animSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].Phases[AnimationPhase.Default];
         var sprite = animSprite.GetSpriteForTime(systemTime, Orientation.South);
 
         // Resolve sprite to texture atlas offset.

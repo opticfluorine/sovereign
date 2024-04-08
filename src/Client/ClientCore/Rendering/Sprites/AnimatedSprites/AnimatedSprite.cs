@@ -49,21 +49,12 @@ public sealed class AnimatedSprite
 
     public AnimatedSprite()
     {
-        FrameTime = 1;
-        Faces = new Dictionary<Orientation, List<Sprite>>();
+        Phases[AnimationPhase.Default] = new AnimationPhaseData();
     }
 
     public AnimatedSprite(AnimatedSpriteDefinition definition, SpriteManager spriteManager)
     {
-        FrameTime = definition.AnimationTimestep;
-        Faces = definition.Faces
-            .Select(pair => new Tuple<Orientation, List<Sprite>>(pair.Key,
-                pair.Value.SpriteIds
-                    .Select(id => spriteManager.Sprites[id])
-                    .ToList()))
-            .ToDictionary(
-                pair => pair.Item1,
-                pair => pair.Item2);
+        foreach (var phase in definition.Phases) Phases[phase.Key] = new AnimationPhaseData(phase.Value, spriteManager);
     }
 
     /// <summary>
@@ -72,53 +63,76 @@ public sealed class AnimatedSprite
     /// <param name="other">Animated sprite to copy.</param>
     public AnimatedSprite(AnimatedSprite other)
     {
-        FrameTime = other.FrameTime;
-        Faces = new Dictionary<Orientation, List<Sprite>>();
-        foreach (var (key, val) in other.Faces) Faces[key] = new List<Sprite>(val);
+        foreach (var phase in other.Phases) Phases[phase.Key] = new AnimationPhaseData(phase.Value);
     }
 
     /// <summary>
-    ///     Time to display each frame, in microseconds.
+    ///     Map from animation phase, to map from entity orientation to frame list (sprite IDs).
     /// </summary>
-    public ulong FrameTime { get; set; } = 1;
+    public Dictionary<AnimationPhase, AnimationPhaseData> Phases { get; set; } = new();
+
 
     /// <summary>
-    ///     Sprite IDs for each defined orientation.
+    ///     Animation data for a single animation phase.
     /// </summary>
-    public Dictionary<Orientation, List<Sprite>> Faces { get; set; }
-
-    /// <summary>
-    ///     Gets the sprite for the given system time and orientation.
-    /// </summary>
-    /// <param name="systemTime">System time.</param>
-    /// <param name="orientation">Orientation.</param>
-    /// <returns>Sprite for the given system time and orientation.</returns>
-    public Sprite GetSpriteForTime(ulong systemTime, Orientation orientation)
+    public class AnimationPhaseData
     {
-        var sprites = GetSpritesForOrientation(orientation);
-        var spriteFrame = (int)(systemTime / FrameTime) % sprites.Count;
-        return sprites[spriteFrame];
-    }
+        public Dictionary<Orientation, List<Sprite>> Frames = new();
 
-    /// <summary>
-    ///     Gets the sprite list for the given orientation, applying fallback logic if the specified
-    ///     orientation does not have a defined face for this sprite.
-    /// </summary>
-    /// <param name="orientation">Orientation.</param>
-    /// <exception cref="InvalidOperationException">
-    ///     Thrown if no suitable face is found for this sprite.
-    /// </exception>
-    /// <returns></returns>
-    private List<Sprite> GetSpritesForOrientation(Orientation orientation)
-    {
-        // Iterate over the fallback table until we reach an orientation with a face definition.
-        var nextOrientation = orientation;
-        while (!Faces.ContainsKey(nextOrientation) && nextOrientation != DefaultOrientation)
-            nextOrientation = FallbackOrientations[nextOrientation];
+        public AnimationPhaseData(AnimatedSpritePhaseDefinition definition, SpriteManager spriteManager)
+        {
+            FrameTime = definition.AnimationTimestep;
+            foreach (var face in definition.Faces)
+                Frames[face.Key] = face.Value.SpriteIds
+                    .Select(id => spriteManager.Sprites[id])
+                    .ToList();
+        }
 
-        if (!Faces.ContainsKey(nextOrientation))
-            throw new InvalidOperationException("No suitable face found for sprite.");
+        public AnimationPhaseData(AnimationPhaseData other)
+        {
+            FrameTime = other.FrameTime;
+            foreach (var frames in other.Frames) Frames[frames.Key] = new List<Sprite>(frames.Value);
+        }
 
-        return Faces[nextOrientation];
+        public AnimationPhaseData()
+        {
+        }
+
+        public ulong FrameTime { get; set; } = 1;
+
+        /// <summary>
+        ///     Gets the sprite for the given system time and orientation.
+        /// </summary>
+        /// <param name="systemTime">System time.</param>
+        /// <param name="orientation">Orientation.</param>
+        /// <returns>Sprite for the given system time and orientation.</returns>
+        public Sprite GetSpriteForTime(ulong systemTime, Orientation orientation)
+        {
+            var sprites = GetSpritesForOrientation(orientation);
+            var spriteFrame = (int)(systemTime / FrameTime) % sprites.Count;
+            return sprites[spriteFrame];
+        }
+
+        /// <summary>
+        ///     Gets the sprite list for the given orientation, applying fallback logic if the specified
+        ///     orientation does not have a defined face for this sprite.
+        /// </summary>
+        /// <param name="orientation">Orientation.</param>
+        /// <exception cref="InvalidOperationException">
+        ///     Thrown if no suitable face is found for this sprite.
+        /// </exception>
+        /// <returns></returns>
+        private List<Sprite> GetSpritesForOrientation(Orientation orientation)
+        {
+            // Iterate over the fallback table until we reach an orientation with a face definition.
+            var nextOrientation = orientation;
+            while (!Frames.ContainsKey(nextOrientation) && nextOrientation != DefaultOrientation)
+                nextOrientation = FallbackOrientations[nextOrientation];
+
+            if (!Frames.ContainsKey(nextOrientation))
+                throw new InvalidOperationException("No suitable face found for sprite.");
+
+            return Frames[nextOrientation];
+        }
     }
 }

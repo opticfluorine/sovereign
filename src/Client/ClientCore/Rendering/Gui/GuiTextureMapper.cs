@@ -116,9 +116,9 @@ public class GuiTextureMapper
     {
         if (!animatedSpriteIndices.TryGetValue(animatedSpriteId, out var index))
         {
-            // For convenience, select dimensions to match the first south-facing sprite.
+            // For convenience, select dimensions to match the first south-facing sprite in the default phase.
             var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
-            var firstSprite = animatedSprite.GetSpriteForTime(0, Orientation.South);
+            var firstSprite = animatedSprite.Phases[AnimationPhase.Default].GetSpriteForTime(0, Orientation.South);
             var spriteBounds = atlasMap.MapElements[firstSprite.Id];
             var clientConfiguration = clientConfigurationManager.ClientConfiguration;
             var width = spriteBounds.WidthInTiles * clientConfiguration.TileWidth;

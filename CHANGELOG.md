@@ -7,6 +7,8 @@
 #### 7 April 2024
 
 * Add `EntityAnimationSystem` for managing the animation phase (e.g. standing, moving) of each entity.
+* Update the animated sprite format to include the animation phase as part of the animated sprite.
+* Update the animated sprite editor to support animation phases.
 
 #### 6 April 2024
 
