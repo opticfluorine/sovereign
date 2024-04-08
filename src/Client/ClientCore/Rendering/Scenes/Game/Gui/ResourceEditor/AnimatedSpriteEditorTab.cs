@@ -59,10 +59,24 @@ public class AnimatedSpriteEditorTab
         Orientation.Southeast
     };
 
+    /// <summary>
+    ///     All animation phases in display order.
+    /// </summary>
+    private readonly List<AnimationPhase> orderedPhases = new()
+    {
+        AnimationPhase.Default,
+        AnimationPhase.Moving
+    };
+
     private readonly SpriteManager spriteManager;
 
     private readonly SpriteSelectorPopup spriteSelectorPopup;
     private readonly TileSpriteManager tileSpriteManager;
+
+    /// <summary>
+    ///     Current animation phase.
+    /// </summary>
+    private AnimationPhase currentPhase = AnimationPhase.Default;
 
     /// <summary>
     ///     Frame being edited when the sprite selector is open.
@@ -74,6 +88,9 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     private Orientation editingOrientation;
 
+    /// <summary>
+    ///     Animated sprite currently being edited.
+    /// </summary>
     private AnimatedSprite? editingSprite;
 
     /// <summary>
@@ -217,9 +234,43 @@ public class AnimatedSpriteEditorTab
             return;
         }
 
-        ImGui.Text($"Animated Sprite {selectedId}");
+        if (ImGui.BeginTable("Header", 4, ImGuiTableFlags.SizingFixedFit))
+        {
+            ImGui.TableSetupColumn("Label");
+            ImGui.TableSetupColumn("Blank", ImGuiTableColumnFlags.WidthStretch);
+
+            ImGui.TableNextColumn();
+            ImGui.Text($"Animated Sprite {selectedId}");
+
+            ImGui.TableNextColumn();
+            // Blank cell stretches to maintain layout.
+
+            ImGui.TableNextColumn();
+            ImGui.Text("Animation Phase:");
+
+            ImGui.TableNextColumn();
+            var phaseStr = currentPhase.ToString();
+            ImGui.SetNextItemWidth(120.0f);
+            if (ImGui.BeginCombo("##phaseSelect", phaseStr))
+            {
+                foreach (var phase in orderedPhases)
+                    if (ImGui.Selectable(phase.ToString(), phase == currentPhase))
+                        SelectPhase(phase);
+
+                ImGui.EndCombo();
+            }
+
+            ImGui.EndTable();
+        }
 
         ImGui.Separator();
+
+        // Create an empty data set for the animation phase if it doesn't already exist.
+        if (!editingSprite.Phases.TryGetValue(currentPhase, out var phaseData))
+        {
+            phaseData = new AnimatedSprite.AnimationPhaseData();
+            editingSprite.Phases[currentPhase] = phaseData;
+        }
 
         ImGui.Text("Animation Timestep:");
         ImGui.SameLine();
@@ -227,10 +278,12 @@ public class AnimatedSpriteEditorTab
         ImGui.InputFloat("ms##timestep", ref inputTimestepMs);
 
         var maxSize = ImGui.GetWindowSize();
-        var maxFrames = editingSprite.Faces.Select(p => p.Value.Count).Max();
+        var maxFrames = editingSprite.Phases[currentPhase].Frames
+            .Select(frames => frames.Value.Count)
+            .Max();
         if (ImGui.BeginTable("frameEdtior", maxFrames + 2,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
-                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 134 }))
+                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 144 }))
         {
             ImGui.TableSetupColumn("Orientation");
             ImGui.TableSetupColumn("+/-");
@@ -251,21 +304,34 @@ public class AnimatedSpriteEditorTab
                         ImGui.EndTooltip();
                     }
 
-                var hasFrames = editingSprite.Faces.ContainsKey(orientation);
-                if (!hasFrames) ImGui.BeginDisabled();
+                var enabled = CanRemoveFrame(orientation, out var reason);
+                if (!enabled) ImGui.BeginDisabled();
                 if (ImGui.Button($"-##{orientation}")) RemoveFrame(orientation);
-                if (!hasFrames) ImGui.EndDisabled();
-                if (ImGui.IsItemHovered())
-                    if (ImGui.BeginTooltip())
-                    {
-                        ImGui.Text($"Remove Frame from End ({orientation})");
-                        ImGui.EndTooltip();
-                    }
+                if (!enabled)
+                {
+                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                        if (ImGui.BeginTooltip())
+                        {
+                            ImGui.Text(reason);
+                            ImGui.EndTooltip();
+                        }
+
+                    ImGui.EndDisabled();
+                }
+                else
+                {
+                    if (ImGui.IsItemHovered())
+                        if (ImGui.BeginTooltip())
+                        {
+                            ImGui.Text($"Remove Frame from End ({orientation})");
+                            ImGui.EndTooltip();
+                        }
+                }
 
                 for (var i = 0; i < maxFrames; ++i)
                 {
                     ImGui.TableNextColumn();
-                    if (editingSprite.Faces.TryGetValue(orientation, out var frames) && i < frames.Count)
+                    if (phaseData.Frames.TryGetValue(orientation, out var frames) && i < frames.Count)
                         if (guiExtensions.SpriteButton($"##{orientation}{i}", frames[i].Id))
                         {
                             editingOrientation = orientation;
@@ -303,6 +369,29 @@ public class AnimatedSpriteEditorTab
     }
 
     /// <summary>
+    ///     Updates GUI information when an animation phase is selected.
+    /// </summary>
+    /// <param name="animationPhase"></param>
+    private void SelectPhase(AnimationPhase animationPhase)
+    {
+        if (editingSprite == null)
+        {
+            Logger.Error("SelectPhase(): editingSprite is null.");
+            return;
+        }
+
+        currentPhase = animationPhase;
+        if (!editingSprite.Phases.TryGetValue(animationPhase, out var phaseData))
+        {
+            phaseData = new AnimatedSprite.AnimationPhaseData();
+            phaseData.Frames[Orientation.South] = new List<Sprite> { spriteManager.Sprites[0] };
+            editingSprite.Phases[animationPhase] = phaseData;
+        }
+
+        inputTimestepMs = phaseData.FrameTime * UnitConversions.UsToMs;
+    }
+
+    /// <summary>
     ///     Saves the currently edited sprite into the active animated sprite table.
     /// </summary>
     private void SaveState()
@@ -313,6 +402,20 @@ public class AnimatedSpriteEditorTab
             return;
         }
 
+        // Set the frame time into the data.
+        editingSprite.Phases[currentPhase].FrameTime = (ulong)(inputTimestepMs * UnitConversions.MsToUs);
+
+        // Remove any empty phases.
+        var toRemove = new List<AnimationPhase>();
+        foreach (var phase in editingSprite.Phases)
+        {
+            var totalFrames = phase.Value.Frames.Select(p => p.Value.Count).Sum();
+            if (totalFrames == 0) toRemove.Add(phase.Key);
+        }
+
+        foreach (var phase in toRemove)
+            editingSprite.Phases.Remove(phase);
+
         animatedSpriteManager.Update(selectedId, editingSprite);
     }
 
@@ -321,8 +424,9 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     private void ResetState()
     {
-        inputTimestepMs = animatedSpriteManager.AnimatedSprites[selectedId].FrameTime * UnitConversions.UsToMs;
+        currentPhase = AnimationPhase.Default;
         editingSprite = new AnimatedSprite(animatedSpriteManager.AnimatedSprites[selectedId]);
+        inputTimestepMs = editingSprite.Phases[currentPhase].FrameTime;
     }
 
     /// <summary>
@@ -339,7 +443,8 @@ public class AnimatedSpriteEditorTab
         spriteSelectorPopup.Render();
         if (spriteSelectorPopup.TryGetSelection(out var newSpriteId))
             // Selection made, update the working record.
-            editingSprite.Faces[editingOrientation][editingFrame] = spriteManager.Sprites[newSpriteId];
+            editingSprite.Phases[currentPhase].Frames[editingOrientation][editingFrame] =
+                spriteManager.Sprites[newSpriteId];
     }
 
     /// <summary>
@@ -354,10 +459,12 @@ public class AnimatedSpriteEditorTab
             return;
         }
 
-        if (!editingSprite.Faces.TryGetValue(orientation, out var frames))
+        var phaseData = editingSprite.Phases[currentPhase];
+
+        if (!phaseData.Frames.TryGetValue(orientation, out var frames))
         {
             frames = new List<Sprite>();
-            editingSprite.Faces[orientation] = frames;
+            phaseData.Frames[orientation] = frames;
         }
 
         frames.Add(spriteManager.Sprites[0]);
@@ -375,10 +482,13 @@ public class AnimatedSpriteEditorTab
             return;
         }
 
-        if (!editingSprite.Faces.TryGetValue(orientation, out var frames)) return;
+        var phaseData = editingSprite.Phases[currentPhase];
+
+        if (!phaseData.Frames.TryGetValue(orientation, out var frames)) return;
 
         frames.RemoveAt(frames.Count - 1);
-        if (frames.Count == 0) editingSprite.Faces.Remove(orientation);
+        if (frames.Count == 0) phaseData.Frames.Remove(orientation);
+        if (phaseData.Frames.Keys.Count == 0) SelectPhase(AnimationPhase.Default);
     }
 
     /// <summary>
@@ -419,6 +529,58 @@ public class AnimatedSpriteEditorTab
             foreach (var tileSpriteId in tileSpriteDependencies) sb.Append($"\nTile Sprite {tileSpriteId}");
 
             reason = sb.ToString();
+            return false;
+        }
+
+        reason = null;
+        return true;
+    }
+
+    /// <summary>
+    ///     Determines whether a frame can be removed.
+    /// </summary>
+    /// <param name="orientation">Orientation of frame.</param>
+    /// <param name="reason">Reason frame cannot be removed, if any. Only non-null if method returns false.</param>
+    /// <returns>true if OK to remove, false otherwise.</returns>
+    private bool CanRemoveFrame(Orientation orientation, [NotNullWhen(false)] out string? reason)
+    {
+        // A frame can be removed under any of the following conditions:
+        //   - If the frame is the last frame in the phase AND the phase is not Default;
+        //   - If the frame is NOT the last frame in the South orientation
+
+        if (editingSprite == null)
+        {
+            Logger.Error("CanRemoveFrame(): editingSprite is null");
+            reason = "Unknown error.";
+            return false;
+        }
+
+        if (!editingSprite.Phases.ContainsKey(currentPhase) ||
+            editingSprite.Phases[currentPhase].Frames.Keys.Count == 0)
+        {
+            reason = "Phase no longer exists.";
+            return false;
+        }
+
+        var totalFrames = editingSprite.Phases[currentPhase].Frames
+            .Select(frameData => frameData.Value.Count).Sum();
+        var southFrames = editingSprite.Phases[currentPhase].Frames[Orientation.South].Count;
+
+        if (orientation == Orientation.South && southFrames == 1 && currentPhase == AnimationPhase.Default)
+        {
+            reason = "Cannot remove last South sprite for Default phase.";
+            return false;
+        }
+
+        if (orientation == Orientation.South && southFrames == 1 && totalFrames > 1)
+        {
+            reason = "Cannot remove last South sprite while other frames exist.";
+            return false;
+        }
+
+        if (!editingSprite.Phases[currentPhase].Frames.ContainsKey(orientation))
+        {
+            reason = "No frames to remove.";
             return false;
         }
 

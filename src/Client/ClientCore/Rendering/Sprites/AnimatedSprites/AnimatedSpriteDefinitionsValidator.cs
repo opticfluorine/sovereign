@@ -193,7 +193,8 @@ public sealed class AnimatedSpriteDefinitionsValidator
         StringBuilder sb)
     {
         var badSprites = definitions.AnimatedSprites
-            .SelectMany(sprite => sprite.Phases.Select(t => Tuple.Create(sprite.Id, t.Key, t.Value)))
+            .SelectMany(sprite => sprite.Phases
+                .Select(t => Tuple.Create(sprite.Id, t.Key, t.Value)))
             .Where(spriteData => !spriteData.Item3.Faces.ContainsKey(Orientation.South)).ToList();
         var valid = !badSprites.Any();
 
