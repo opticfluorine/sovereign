@@ -36,7 +36,7 @@ public class EngineBase : IEngineBase
     /// </summary>
     private readonly IEventLoop eventLoop;
 
-    private readonly IList<IMainLoopAction> mainLoopActions;
+    private readonly List<IMainLoopAction> mainLoopActions;
 
     /// <summary>
     ///     Time manager.
@@ -60,7 +60,7 @@ public class EngineBase : IEngineBase
         this.eventLoop = eventLoop;
         this.timeManager = timeManager;
         this.worldManager = worldManager;
-        this.mainLoopActions = mainLoopActions;
+        this.mainLoopActions = new List<IMainLoopAction>(mainLoopActions);
         this.eventDescriptions = eventDescriptions;
     }
 

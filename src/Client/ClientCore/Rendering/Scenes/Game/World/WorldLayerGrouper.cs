@@ -89,13 +89,13 @@ public sealed class WorldLayerGrouper
     private void ProcessDrawable(PositionedEntity drawable)
     {
         /* Get the entity velocity, defaulting to zero if not set. */
-        var velocity = velocities.GetComponentForEntity(drawable.EntityId)
-            .OrElseDefault(Vector3.Zero);
+        var velocity = velocities.HasComponentForEntity(drawable.EntityId)
+            ? velocities[drawable.EntityId]
+            : Vector3.Zero;
 
         /* Route the drawable to the correct rendering list. */
-        var material = materials.GetComponentForEntity(drawable.EntityId);
-        if (material.HasValue)
-            AddMaterial(drawable, material.Value, velocity);
+        if (materials.HasComponentForEntity(drawable.EntityId))
+            AddMaterial(drawable, materials[drawable.EntityId], velocity);
         else
             AddAnimatedSprite(drawable, velocity);
     }
@@ -234,9 +234,7 @@ public sealed class WorldLayerGrouper
     /// <returns>Material subtype.</returns>
     private MaterialSubtype GetMaterialSubtype(ulong entityId, int materialId)
     {
-        var modifier = materialModifiers
-            .GetComponentForEntity(entityId)
-            .OrElseDefault(0);
+        var modifier = materialModifiers.HasComponentForEntity(entityId) ? materialModifiers[entityId] : 0;
         return materialManager.Materials[materialId].MaterialSubtypes[modifier];
     }
 

@@ -4,6 +4,11 @@
 
 ### April
 
+#### 10 April 2024
+
+* Fix various memory allocation issues in the core and client. These fixes greatly reduce the number
+  of garbage collections, which in turn greatly improves client performance.
+
 #### 7 April 2024
 
 * Add `EntityAnimationSystem` for managing the animation phase (e.g. standing, moving) of each entity.

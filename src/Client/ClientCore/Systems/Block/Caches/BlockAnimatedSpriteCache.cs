@@ -174,13 +174,13 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         {
             UpdatePositionForBlock(blockId);
 
-            if (!knownPositions.ContainsKey(blockId))
+            if (!knownPositions.TryGetValue(blockId, out var position))
             {
                 Logger.ErrorFormat("No position known for changed block ID {0}.", blockId);
                 continue;
             }
 
-            UpdateCacheForBlock(knownPositions[blockId], true);
+            UpdateCacheForBlock(position, true);
         }
     }
 
@@ -297,15 +297,14 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private int GetTileSpriteIdForBlock(ulong blockId, bool isTopFace)
     {
         /* Get the material information, or return wildcard if not found. */
-        var materialId = materials.GetComponentForEntity(blockId);
-        var modifier = materialModifiers.GetComponentForEntity(blockId);
-        if (!materialId.HasValue || !modifier.HasValue) return TileSprite.Wildcard;
+        if (!materials.HasComponentForEntity(blockId) || !materialModifiers.HasComponentForEntity(blockId))
+            return TileSprite.Wildcard;
 
         /* Retrieve the tile sprite information. */
         try
         {
-            var material = materialManager.Materials[materialId.Value];
-            var subtype = material.MaterialSubtypes[modifier.Value];
+            var material = materialManager.Materials[materials[blockId]];
+            var subtype = material.MaterialSubtypes[materialModifiers[blockId]];
 
             if (isTopFace)
             {

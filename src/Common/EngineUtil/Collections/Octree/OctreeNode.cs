@@ -67,7 +67,7 @@ internal sealed class OctreeNode<T> where T : notnull
     /// <summary>
     ///     Elements contained within the bounds of this node and their positions.
     /// </summary>
-    public IDictionary<T, Vector3> elementPositions = new Dictionary<T, Vector3>();
+    public Dictionary<T, Vector3> elementPositions = new();
 
     /// <summary>
     ///     Parent node.
@@ -110,7 +110,8 @@ internal sealed class OctreeNode<T> where T : notnull
 
         /* Copy properties of child node. */
         octree = childNode.octree;
-        foreach (var elementPosition in childNode.elementPositions) elementPositions.Add(elementPosition);
+        foreach (var elementPosition in childNode.elementPositions)
+            elementPositions.Add(elementPosition.Key, elementPosition.Value);
 
         /* Compute node partitions. */
         partitions = 0.5f * (minPosition + maxPosition);

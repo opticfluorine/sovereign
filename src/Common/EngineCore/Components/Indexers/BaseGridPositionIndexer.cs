@@ -27,11 +27,9 @@ namespace Sovereign.EngineCore.Components.Indexers;
 /// </summary>
 public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
 {
-    private readonly IDictionary<GridPosition, ISet<ulong>> entitiesByPosition
-        = new Dictionary<GridPosition, ISet<ulong>>();
+    private readonly Dictionary<GridPosition, HashSet<ulong>> entitiesByPosition = new();
 
-    private readonly IDictionary<ulong, GridPosition> knownPositions
-        = new Dictionary<ulong, GridPosition>();
+    private readonly Dictionary<ulong, GridPosition> knownPositions = new();
 
     private readonly ILogger logger;
 
@@ -47,7 +45,7 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     /// </summary>
     /// <param name="position">Position to query.</param>
     /// <returns>The set of entities at the position, or null if there are none.</returns>
-    public ISet<ulong>? GetEntitiesAtPosition(GridPosition position)
+    public HashSet<ulong>? GetEntitiesAtPosition(GridPosition position)
     {
         return entitiesByPosition.TryGetValue(position, out var entities)
             ? entities
@@ -88,7 +86,7 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     /// </summary>
     /// <param name="position">Grid position.</param>
     /// <returns>Set.</returns>
-    private ISet<ulong> GetSetForPosition(GridPosition position)
+    private HashSet<ulong> GetSetForPosition(GridPosition position)
     {
         var exists = entitiesByPosition.TryGetValue(position, out var set);
         if (!exists || set == null)
@@ -106,13 +104,12 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     /// <param name="entityId">Entity ID to remove.</param>
     private void RemoveEntity(ulong entityId)
     {
-        if (!knownPositions.ContainsKey(entityId))
+        if (!knownPositions.TryGetValue(entityId, out var gridPos))
         {
             logger.ErrorFormat("Could not find entity {0:X} to remove.", entityId);
             return;
         }
 
-        var gridPos = knownPositions[entityId];
         var set = entitiesByPosition[gridPos];
 
         set.Remove(entityId);

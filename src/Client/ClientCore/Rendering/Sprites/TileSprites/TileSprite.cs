@@ -37,8 +37,7 @@ public sealed class TileSprite
     /// <summary>
     ///     Cache of previously resolved tile contexts.
     /// </summary>
-    private readonly IDictionary<Tuple<int, int, int, int>, TileContext> lookupCache
-        = new ConcurrentDictionary<Tuple<int, int, int, int>, TileContext>();
+    private readonly ConcurrentDictionary<Tuple<int, int, int, int>, TileContext> lookupCache = new();
 
     /// <summary>
     ///     Tile contexts sorted in priority order.
@@ -93,7 +92,6 @@ public sealed class TileSprite
         // IDs of any animated sprites with old id >= animatedSpriteId are incremented by one.
         // Update all contexts to match.
         foreach (var context in TileContexts)
-        {
             for (var i = 0; i < context.AnimatedSpriteIds.Count; ++i)
             {
                 var oldId = context.AnimatedSpriteIds[i];
@@ -103,7 +101,6 @@ public sealed class TileSprite
                     context.AnimatedSpriteIds.Insert(i, oldId + 1);
                 }
             }
-        }
     }
 
     /// <summary>
@@ -116,7 +113,6 @@ public sealed class TileSprite
         // The removal assumes no tile sprite dependencies, so we will ignore any that exist.
         // Update affected IDs.
         foreach (var context in TileContexts)
-        {
             for (var i = 0; i < context.AnimatedSpriteIds.Count; ++i)
             {
                 var oldId = context.AnimatedSpriteIds[i];
@@ -126,7 +122,6 @@ public sealed class TileSprite
                     context.AnimatedSpriteIds.Insert(i, oldId - 1);
                 }
             }
-        }
     }
 
     /// <summary>
