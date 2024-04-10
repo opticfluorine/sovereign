@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -62,22 +61,20 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <summary>
     ///     Read-only empty list to return when no sprites are cached.
     /// </summary>
-    private readonly IList<int> emptyList
-        = new ReadOnlyCollection<int>(new List<int>());
+    private readonly List<int> emptyList
+        = new();
 
     private readonly EntityManager entityManager;
 
     /// <summary>
     ///     Front face animated sprite cache.
     /// </summary>
-    private readonly IDictionary<ulong, IList<int>> frontFaceCache
-        = new ConcurrentDictionary<ulong, IList<int>>();
+    private readonly ConcurrentDictionary<ulong, List<int>> frontFaceCache = new();
 
     /// <summary>
     ///     Internal cache of known current block positions.
     /// </summary>
-    private readonly IDictionary<ulong, GridPosition> knownPositions
-        = new ConcurrentDictionary<ulong, GridPosition>();
+    private readonly ConcurrentDictionary<ulong, GridPosition> knownPositions = new();
 
     private readonly MaterialManager materialManager;
     private readonly MaterialModifierComponentCollection materialModifiers;
@@ -89,8 +86,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <summary>
     ///     Top face animated sprite cache.
     /// </summary>
-    private readonly IDictionary<ulong, IList<int>> topFaceCache
-        = new ConcurrentDictionary<ulong, IList<int>>();
+    private readonly ConcurrentDictionary<ulong, List<int>> topFaceCache = new();
 
     /// <summary>
     ///     Block entity IDs that have been added or modified since the last cache update.
@@ -132,12 +128,12 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-    public IList<int> GetFrontFaceAnimatedSpriteIds(ulong blockId)
+    public List<int> GetFrontFaceAnimatedSpriteIds(ulong blockId)
     {
         return frontFaceCache.TryGetValue(blockId, out var spriteIds) ? spriteIds : emptyList;
     }
 
-    public IList<int> GetTopFaceAnimatedSpriteIds(ulong blockId)
+    public List<int> GetTopFaceAnimatedSpriteIds(ulong blockId)
     {
         return topFaceCache.TryGetValue(blockId, out var spriteIds) ? spriteIds : emptyList;
     }
@@ -206,7 +202,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
             UpdateCacheForBlock(knownPositions[blockId], false);
 
-            knownPositions.Remove(blockId);
+            knownPositions.TryRemove(blockId, out _);
         }
     }
 
@@ -349,8 +345,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="blockId">Block entity ID to remove.</param>
     private void RemoveEntity(ulong blockId)
     {
-        topFaceCache.Remove(blockId);
-        frontFaceCache.Remove(blockId);
+        topFaceCache.TryRemove(blockId, out _);
+        frontFaceCache.TryRemove(blockId, out _);
     }
 
     /// <summary>

@@ -70,7 +70,7 @@ public sealed class TileSprite
     ///     Thrown if no matching tile context is found. This should not typically occur as
     ///     there should always be a default context that matches all ID patterns.
     /// </exception>
-    public IList<int> GetMatchingAnimatedSpriteIds(int idNorth, int idEast,
+    public List<int> GetMatchingAnimatedSpriteIds(int idNorth, int idEast,
         int idSouth, int idWest)
     {
         /* Check if the context is already in the cache. */
