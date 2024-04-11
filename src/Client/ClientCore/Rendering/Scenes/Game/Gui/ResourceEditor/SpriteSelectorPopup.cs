@@ -189,6 +189,8 @@ public class SpriteSelectorPopup
                 // Mouse is overlapping the spritesheet.
                 var row = (int)Math.Floor(relMousePos.Y / sheet.Definition.SpriteHeight);
                 var col = (int)Math.Floor(relMousePos.X / sheet.Definition.SpriteWidth);
+                if (row == rows) row--;
+                if (col == cols) col--;
 
                 var sprite = coverageMap[row, col];
                 if (sprite != null)
