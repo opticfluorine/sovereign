@@ -122,14 +122,14 @@ public class StructBuffer<T> : IEnumerable<T>
     /// </summary>
     /// <typeparam name="T1">Element type of the underlying StructBuffer.</typeparam>
     /// <inheritdoc />
-    public class StructBufferEnumerator<T1> : IEnumerator<T1>
+    public struct StructBufferEnumerator<T1> : IEnumerator<T1>
     {
         /// <summary>
         ///     Struct buffer associated with this enumerator.
         /// </summary>
         private readonly StructBuffer<T1> structBuffer;
 
-        private T1? _current;
+        private T1? current;
 
         /// <summary>
         ///     Current index into the buffer.
@@ -142,26 +142,27 @@ public class StructBuffer<T> : IEnumerable<T>
             currentIndex = -1;
 
             Monitor.Enter(structBuffer);
+            current = default;
         }
 
         public T1 Current
         {
             get
             {
-                if (_current == null) throw new InvalidOperationException("Enumerator is before first element.");
+                if (current == null) throw new InvalidOperationException("Enumerator is before first element.");
 
-                return _current;
+                return current;
             }
-            private set => _current = value;
+            private set => current = value;
         }
 
         object IEnumerator.Current
         {
             get
             {
-                if (_current == null) throw new InvalidOperationException("Enumerator is before first element.");
+                if (current == null) throw new InvalidOperationException("Enumerator is before first element.");
 
-                return _current;
+                return current;
             }
         }
 

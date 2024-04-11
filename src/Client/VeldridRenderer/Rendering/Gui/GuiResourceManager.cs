@@ -125,5 +125,6 @@ public class GuiResourceManager : IDisposable
     {
         GuiVertexBuffer?.EndFrame();
         GuiIndexBuffer?.EndFrame();
+        GuiUniformBuffer?.EndFrame();
     }
 }
