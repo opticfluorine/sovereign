@@ -33,7 +33,7 @@ public class MaterialManager
     /// <summary>
     ///     Filename for the material definitions file.
     /// </summary>
-    public const string MaterialDefinitionsFilename = "MaterialDefinitions.yaml";
+    public const string MaterialDefinitionsFilename = "MaterialDefinitions.json";
 
     private readonly IErrorHandler errorHandler;
 
@@ -117,7 +117,7 @@ public class MaterialManager
             MaterialName = "Air",
             MaterialSubtypes = new List<MaterialSubtype>
             {
-                new MaterialSubtype
+                new()
                 {
                     MaterialModifier = 0,
                     ObscuredTopFaceTileSpriteId = 0,

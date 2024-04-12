@@ -18,8 +18,7 @@
 using System;
 using System.IO;
 using System.Text;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using System.Text.Json;
 
 namespace Sovereign.EngineCore.World.Materials;
 
@@ -28,13 +27,6 @@ namespace Sovereign.EngineCore.World.Materials;
 /// </summary>
 public sealed class MaterialDefinitionsLoader
 {
-    /// <summary>
-    ///     YAML deserializer.
-    /// </summary>
-    private readonly IDeserializer deserializer = new DeserializerBuilder()
-        .WithNamingConvention(PascalCaseNamingConvention.Instance)
-        .Build();
-
     /// <summary>
     ///     Validator.
     /// </summary>
@@ -56,14 +48,11 @@ public sealed class MaterialDefinitionsLoader
     public MaterialDefinitions LoadDefinitions(string filename)
     {
         /* Deserialize. */
-        MaterialDefinitions materialDefinitions;
+        MaterialDefinitions? materialDefinitions;
         try
         {
-            using (var reader = new StreamReader(filename))
-            {
-                /* Read the YAML file. */
-                materialDefinitions = deserializer.Deserialize<MaterialDefinitions>(reader);
-            }
+            using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read);
+            materialDefinitions = JsonSerializer.Deserialize<MaterialDefinitions>(stream);
         }
         catch (Exception e)
         {
@@ -73,6 +62,9 @@ public sealed class MaterialDefinitionsLoader
                 .Append(filename).Append("'.");
             throw new MaterialDefinitionsException(sb.ToString(), e);
         }
+
+        if (materialDefinitions == null)
+            throw new MaterialDefinitionsException("Material definitions missing or corrupt.");
 
         /* Perform additional validation. */
         var isValid = validator.IsValid(materialDefinitions, out var errorMessages);
