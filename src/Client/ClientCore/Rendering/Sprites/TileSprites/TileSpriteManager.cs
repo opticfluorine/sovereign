@@ -85,6 +85,58 @@ public sealed class TileSpriteManager
     }
 
     /// <summary>
+    ///     Inserts a new tile sprite with the given ID. Existing IDs are adjusted as necessary.
+    /// </summary>
+    /// <param name="id">ID of the new tile sprite.</param>
+    public void InsertNew(int id)
+    {
+        if (id < 0 || id > TileSprites.Count)
+            throw new IndexOutOfRangeException("Bad list index.");
+
+        var newSprite = new TileSprite(id);
+        TileSprites.Insert(id, newSprite);
+        for (var i = id + 1; i < TileSprites.Count; ++i)
+        {
+            TileSprites[i].Id++;
+        }
+
+        SaveDefinitions();
+        OnTileSpriteAdded?.Invoke(id);
+    }
+
+    /// <summary>
+    ///     Updates an existing tile sprite in place.
+    /// </summary>
+    /// <param name="newValue">New tile sprite.</param>
+    public void Update(TileSprite newValue)
+    {
+        if (newValue.Id < 0 || newValue.Id >= TileSprites.Count)
+            throw new IndexOutOfRangeException("Bad list index.");
+
+        TileSprites[newValue.Id] = newValue;
+        SaveDefinitions();
+    }
+
+    /// <summary>
+    ///     Removes an existing tile sprite. Existing IDs are adjusted as necessary.
+    /// </summary>
+    /// <param name="id">ID of the tile sprite to remove.</param>
+    public void Remove(int id)
+    {
+        if (id < 0 || id >= TileSprites.Count)
+            throw new IndexOutOfRangeException("Bad list index.");
+
+        for (var i = id + 1; i < TileSprites.Count; ++i)
+        {
+            TileSprites[i].Id--;
+        }
+
+        TileSprites.RemoveAt(id);
+        SaveDefinitions();
+        OnTileSpriteRemoved?.Invoke(id);
+    }
+
+    /// <summary>
     ///     Loads the tile sprite definitions.
     /// </summary>
     /// <returns>Tile sprite definitions.</returns>
@@ -195,4 +247,24 @@ public sealed class TileSpriteManager
 
         SaveDefinitions();
     }
+
+    /// <summary>
+    ///     Event triggered when a tile sprite is added.
+    ///     Parameter is the added sprite ID.
+    /// </summary>
+    /// <remarks>
+    ///     Since the tile sprites are maintained as a sequential list, any tile sprites with
+    ///     IDs greater than or equal to the new sprite's ID are incremented by one.
+    /// </remarks>
+    public event Action<int>? OnTileSpriteAdded;
+
+    /// <summary>
+    ///     Event triggered when a tile sprite is removed.
+    ///     Parameter is the removed sprite ID.
+    /// </summary>
+    /// <remarks>
+    ///     Since the tile sprites are maintained as a sequential list, any tile sprites with IDs
+    ///     greater than the removed sprite's ID are decremented by one.
+    /// </remarks>
+    private event Action<int>? OnTileSpriteRemoved;
 }

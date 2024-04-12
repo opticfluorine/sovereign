@@ -44,6 +44,22 @@ public sealed class TileSprite
     /// </summary>
     public readonly List<TileContext> TileContexts;
 
+    public TileSprite(int id)
+    {
+        Id = id;
+        TileContexts = new List<TileContext>
+        {
+            new()
+            {
+                NorthTileSpriteId = Wildcard,
+                EastTileSpriteId = Wildcard,
+                SouthTileSpriteId = Wildcard,
+                WestTileSpriteId = Wildcard,
+                AnimatedSpriteIds = new List<int> { 0 }
+            }
+        };
+    }
+
     public TileSprite(TileSpriteRecord definition)
     {
         Id = definition.Id;
@@ -53,7 +69,7 @@ public sealed class TileSprite
     /// <summary>
     ///     Tile sprite ID.
     /// </summary>
-    public int Id { get; private set; }
+    public int Id { get; set; }
 
     /// <summary>
     ///     Finds the animated sprites for the tile context that matches
