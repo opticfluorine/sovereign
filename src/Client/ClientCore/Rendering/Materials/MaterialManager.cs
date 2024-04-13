@@ -142,11 +142,35 @@ public class MaterialManager
     }
 
     /// <summary>
+    ///     Saves the current materials to the materials definition file.
+    /// </summary>
+    private void SaveDefinitions()
+    {
+        // Build definitions.
+        var defs = new MaterialDefinitions
+        {
+            Materials = Materials
+        };
+
+        // Save.
+        loader.SaveDefinitions(MaterialDefinitionsFilename, defs);
+    }
+
+    /// <summary>
     ///     Called when a new tile sprite is added.
     /// </summary>
     /// <param name="tileSpriteId">Added tile sprite ID.</param>
     private void OnTileSpriteAdded(int tileSpriteId)
     {
+        foreach (var material in Materials)
+        foreach (var subtype in material.MaterialSubtypes)
+        {
+            if (subtype.SideFaceTileSpriteId >= tileSpriteId) subtype.SideFaceTileSpriteId++;
+            if (subtype.TopFaceTileSpriteId >= tileSpriteId) subtype.TopFaceTileSpriteId++;
+            if (subtype.ObscuredTopFaceTileSpriteId >= tileSpriteId) subtype.ObscuredTopFaceTileSpriteId++;
+        }
+
+        SaveDefinitions();
     }
 
     /// <summary>
@@ -155,5 +179,14 @@ public class MaterialManager
     /// <param name="tileSpriteId">Removed tile sprite ID.</param>
     private void OnTileSpriteRemoved(int tileSpriteId)
     {
+        foreach (var material in Materials)
+        foreach (var subtype in material.MaterialSubtypes)
+        {
+            if (subtype.SideFaceTileSpriteId > tileSpriteId) subtype.SideFaceTileSpriteId--;
+            if (subtype.TopFaceTileSpriteId > tileSpriteId) subtype.TopFaceTileSpriteId--;
+            if (subtype.ObscuredTopFaceTileSpriteId > tileSpriteId) subtype.ObscuredTopFaceTileSpriteId--;
+        }
+
+        SaveDefinitions();
     }
 }

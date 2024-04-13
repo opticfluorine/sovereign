@@ -95,10 +95,7 @@ public sealed class TileSpriteManager
 
         var newSprite = new TileSprite(id);
         TileSprites.Insert(id, newSprite);
-        for (var i = id + 1; i < TileSprites.Count; ++i)
-        {
-            TileSprites[i].Id++;
-        }
+        for (var i = id + 1; i < TileSprites.Count; ++i) TileSprites[i].Id++;
 
         SaveDefinitions();
         OnTileSpriteAdded?.Invoke(id);
@@ -126,10 +123,7 @@ public sealed class TileSpriteManager
         if (id < 0 || id >= TileSprites.Count)
             throw new IndexOutOfRangeException("Bad list index.");
 
-        for (var i = id + 1; i < TileSprites.Count; ++i)
-        {
-            TileSprites[i].Id--;
-        }
+        for (var i = id + 1; i < TileSprites.Count; ++i) TileSprites[i].Id--;
 
         TileSprites.RemoveAt(id);
         SaveDefinitions();
@@ -266,5 +260,5 @@ public sealed class TileSpriteManager
     ///     Since the tile sprites are maintained as a sequential list, any tile sprites with IDs
     ///     greater than the removed sprite's ID are decremented by one.
     /// </remarks>
-    private event Action<int>? OnTileSpriteRemoved;
+    public event Action<int>? OnTileSpriteRemoved;
 }

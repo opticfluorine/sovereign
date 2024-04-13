@@ -78,4 +78,15 @@ public sealed class MaterialDefinitionsLoader
 
         return materialDefinitions;
     }
+
+    /// <summary>
+    ///     Saves a set of material definitions to a file.
+    /// </summary>
+    /// <param name="filename">Filename.</param>
+    /// <param name="definitions">Definitions to save.</param>
+    public void SaveDefinitions(string filename, MaterialDefinitions definitions)
+    {
+        using var stream = new FileStream(filename, FileMode.Create, FileAccess.Write);
+        JsonSerializer.Serialize(stream, definitions);
+    }
 }
