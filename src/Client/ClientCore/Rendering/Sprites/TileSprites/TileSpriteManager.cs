@@ -112,6 +112,7 @@ public sealed class TileSpriteManager
 
         TileSprites[newValue.Id] = newValue;
         SaveDefinitions();
+        OnTileSpriteUpdated?.Invoke(newValue.Id);
     }
 
     /// <summary>
@@ -251,6 +252,12 @@ public sealed class TileSpriteManager
     ///     IDs greater than or equal to the new sprite's ID are incremented by one.
     /// </remarks>
     public event Action<int>? OnTileSpriteAdded;
+
+    /// <summary>
+    ///     Event triggered when a tile sprite is updated.
+    ///     Parameter is the updated sprite ID.
+    /// </summary>
+    public event Action<int>? OnTileSpriteUpdated;
 
     /// <summary>
     ///     Event triggered when a tile sprite is removed.

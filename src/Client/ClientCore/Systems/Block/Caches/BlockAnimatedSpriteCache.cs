@@ -165,6 +165,14 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     }
 
     /// <summary>
+    ///     Refreshes the animated sprite cache.
+    /// </summary>
+    private void RefreshCache()
+    {
+        foreach (var pos in knownPositions.Values) UpdateCacheForBlock(pos, true);
+    }
+
+    /// <summary>
     ///     Updates the cache for any blocks that have changed.
     /// </summary>
     /// <param name="changedSet">Set of changed blocks.</param>
@@ -322,7 +330,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         }
     }
 
-
     /// <summary>
     ///     Updates the known position for the given block.
     /// </summary>
@@ -429,9 +436,23 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         OnComponentModified(entityId, 0);
     }
 
+    /// <summary>
+    ///     Called when a block position is modified.
+    /// </summary>
+    /// <param name="entityId">Block entity ID.</param>
+    /// <param name="componentValue">Not used.</param>
     private void OnPositionModified(ulong entityId, Vector3 componentValue)
     {
         OnComponentModified(entityId, 0);
+    }
+
+    /// <summary>
+    ///     Refreshes the entire cache in the background whenever the tile sprites are updated.
+    /// </summary>
+    /// <param name="id"></param>
+    private void OnTileSpriteChange(int id)
+    {
+        Task.Run(RefreshCache);
     }
 
     /// <summary>
@@ -447,6 +468,9 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         blockPositionEventFilter.OnComponentModified += OnPositionModified;
         entityManager.OnUpdatesStarted += OnStartUpdates;
         entityManager.OnUpdatesComplete += OnEndUpdates;
+        tileSpriteManager.OnTileSpriteAdded += OnTileSpriteChange;
+        tileSpriteManager.OnTileSpriteUpdated += OnTileSpriteChange;
+        tileSpriteManager.OnTileSpriteRemoved += OnTileSpriteChange;
     }
 
     /// <summary>
@@ -462,5 +486,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         blockPositionEventFilter.OnComponentModified -= OnPositionModified;
         entityManager.OnUpdatesStarted -= OnStartUpdates;
         entityManager.OnUpdatesComplete -= OnEndUpdates;
+        tileSpriteManager.OnTileSpriteAdded -= OnTileSpriteChange;
+        tileSpriteManager.OnTileSpriteUpdated -= OnTileSpriteChange;
+        tileSpriteManager.OnTileSpriteRemoved -= OnTileSpriteChange;
     }
 }
