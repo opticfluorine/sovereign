@@ -15,17 +15,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Collections.Generic;
-
-namespace Sovereign.EngineCore.World.Materials;
+namespace Sovereign.ClientCore.Rendering.Materials;
 
 /// <summary>
-///     Contains the definitions of the materials.
+///     Describes a subtype of a material.
 /// </summary>
-public class MaterialDefinitions
+public class MaterialSubtype
 {
     /// <summary>
-    ///     Materials.
+    ///     The material modifier value. Unique within a material.
     /// </summary>
-    public List<Material> Materials { get; set; } = new();
+    public int MaterialModifier { get; set; }
+
+    /// <summary>
+    ///     The ID of the tile sprite used for the top face.
+    /// </summary>
+    public int TopFaceTileSpriteId { get; set; }
+
+    /// <summary>
+    ///     The ID of the tile sprite used for the top face if a face is obscured.
+    /// </summary>
+    public int ObscuredTopFaceTileSpriteId { get; set; }
+
+    /// <summary>
+    ///     The ID of the tile sprite used for the side face.
+    /// </summary>
+    public int SideFaceTileSpriteId { get; set; }
 }

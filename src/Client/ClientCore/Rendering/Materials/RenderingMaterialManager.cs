@@ -21,7 +21,6 @@ using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
-using Sovereign.EngineCore.World.Materials;
 
 namespace Sovereign.ClientCore.Rendering.Materials;
 

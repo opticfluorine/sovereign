@@ -20,7 +20,7 @@ using System.Text;
 using Castle.Core.Logging;
 using Sovereign.EngineUtil.Validation;
 
-namespace Sovereign.EngineCore.World.Materials;
+namespace Sovereign.ClientCore.Rendering.Materials;
 
 /// <summary>
 ///     Input validator for MaterialDefinitions.

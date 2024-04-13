@@ -16,7 +16,6 @@
  */
 
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
-using Sovereign.EngineCore.World.Materials;
 
 namespace Sovereign.ClientCore.Rendering.Materials;
 

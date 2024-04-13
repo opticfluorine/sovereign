@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
-using Sovereign.EngineCore.World.Materials;
 
 namespace Sovereign.ClientCore.Rendering.Materials;
 

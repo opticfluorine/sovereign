@@ -15,22 +15,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.World.Materials;
+using System.Collections.Generic;
 
-namespace Sovereign.EngineCore.World;
+namespace Sovereign.ClientCore.Rendering.Materials;
 
 /// <summary>
-///     Responsible for managing all world-related resources.
+///     Describes a material.
 /// </summary>
-public class WorldManager
+public sealed class Material
 {
     /// <summary>
-    ///     Material manager.
+    ///     Reserved ID value for the "air" block.
     /// </summary>
-    private readonly MaterialManager materialManager;
+    public const int Air = 0;
 
-    public WorldManager(MaterialManager materialManager)
-    {
-        this.materialManager = materialManager;
-    }
+    /// <summary>
+    ///     Material ID. Unique.
+    ///     ID 0 is special and indicates a vacant block (no material/air).
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    ///     Name of the material.
+    /// </summary>
+    public string MaterialName { get; set; } = "";
+
+    /// <summary>
+    ///     Associated material subtypes.
+    /// </summary>
+    public List<MaterialSubtype> MaterialSubtypes { get; set; } = new();
 }

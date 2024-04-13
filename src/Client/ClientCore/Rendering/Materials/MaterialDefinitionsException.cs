@@ -15,33 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Collections.Generic;
+using System;
 
-namespace Sovereign.EngineCore.World.Materials;
+namespace Sovereign.ClientCore.Rendering.Materials;
 
 /// <summary>
-///     Describes a material.
+///     Exception type thrown when an error occurs with material definitions.
 /// </summary>
-public sealed class Material
+public sealed class MaterialDefinitionsException : ApplicationException
 {
-    /// <summary>
-    ///     Reserved ID value for the "air" block.
-    /// </summary>
-    public const int Air = 0;
+    public MaterialDefinitionsException()
+    {
+    }
 
-    /// <summary>
-    ///     Material ID. Unique.
-    ///     ID 0 is special and indicates a vacant block (no material/air).
-    /// </summary>
-    public int Id { get; set; }
+    public MaterialDefinitionsException(string message) : base(message)
+    {
+    }
 
-    /// <summary>
-    ///     Name of the material.
-    /// </summary>
-    public string MaterialName { get; set; } = "";
-
-    /// <summary>
-    ///     Associated material subtypes.
-    /// </summary>
-    public List<MaterialSubtype> MaterialSubtypes { get; set; } = new();
+    public MaterialDefinitionsException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
 }

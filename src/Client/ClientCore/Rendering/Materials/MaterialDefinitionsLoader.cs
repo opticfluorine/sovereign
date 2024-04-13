@@ -20,7 +20,7 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 
-namespace Sovereign.EngineCore.World.Materials;
+namespace Sovereign.ClientCore.Rendering.Materials;
 
 /// <summary>
 ///     Loads materials definitions from a YAML file.
