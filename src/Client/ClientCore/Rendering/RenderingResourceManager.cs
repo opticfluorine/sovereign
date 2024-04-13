@@ -34,8 +34,6 @@ public class RenderingResourceManager
 
     private readonly MaterialManager materialManager;
 
-    private readonly RenderingMaterialManager renderingMaterialManager;
-
     private readonly SpriteManager spriteManager;
 
     private readonly SpriteSheetManager spriteSheetManager;
@@ -50,8 +48,7 @@ public class RenderingResourceManager
         AnimatedSpriteManager animatedSpriteManager,
         SpriteManager spriteManager,
         AtlasMap atlasMap,
-        MaterialManager materialManager,
-        RenderingMaterialManager renderingMaterialManager)
+        MaterialManager materialManager)
     {
         this.spriteSheetManager = spriteSheetManager;
         this.textureAtlasManager = textureAtlasManager;
@@ -60,7 +57,6 @@ public class RenderingResourceManager
         this.spriteManager = spriteManager;
         this.atlasMap = atlasMap;
         this.materialManager = materialManager;
-        this.renderingMaterialManager = renderingMaterialManager;
     }
 
     /// <summary>
@@ -80,7 +76,6 @@ public class RenderingResourceManager
 
         /* Initialize materials. */
         materialManager.InitializeMaterials();
-        renderingMaterialManager.InitializeRenderingMaterials();
     }
 
     /// <summary>

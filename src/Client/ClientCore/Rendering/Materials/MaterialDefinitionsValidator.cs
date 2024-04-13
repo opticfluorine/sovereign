@@ -15,9 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineUtil.Validation;
 
 namespace Sovereign.ClientCore.Rendering.Materials;
@@ -27,6 +29,13 @@ namespace Sovereign.ClientCore.Rendering.Materials;
 /// </summary>
 public sealed class MaterialDefinitionsValidator
 {
+    private readonly TileSpriteManager tileSpriteManager;
+
+    public MaterialDefinitionsValidator(TileSpriteManager tileSpriteManager)
+    {
+        this.tileSpriteManager = tileSpriteManager;
+    }
+
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
@@ -40,7 +49,8 @@ public sealed class MaterialDefinitionsValidator
         var sb = new StringBuilder();
 
         var valid = CheckMaterialModifierUniqueness(materialDefinitions, sb)
-                    && ValidateIds(materialDefinitions, sb);
+                    && ValidateIds(materialDefinitions, sb)
+                    && CheckTileSpriteIds(materialDefinitions.Materials, sb);
 
         errorMessages = sb.ToString().Trim();
         return valid;
@@ -193,5 +203,32 @@ public sealed class MaterialDefinitionsValidator
         foreach (var id in badIds) sb.Append("\nMaterial ").Append(id);
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    ///     Checks that all tile sprite references are valid.
+    /// </summary>
+    /// <param name="materials">Materials to check.</param>
+    /// <param name="sb">StringBuilder for error reporting.</param>
+    /// <returns>true if valid, false otherwise.</returns>
+    private bool CheckTileSpriteIds(List<Material> materials, StringBuilder sb)
+    {
+        var limit = tileSpriteManager.TileSprites.Count;
+        var badIds = materials
+            .Where(material => material.MaterialSubtypes.Any(subtype => subtype.TopFaceTileSpriteId >= limit
+                                                                        || subtype.SideFaceTileSpriteId >= limit
+                                                                        || subtype.ObscuredTopFaceTileSpriteId >=
+                                                                        limit))
+            .Select(material => material.Id)
+            .ToList();
+        var valid = badIds.Count == 0;
+
+        if (!valid)
+        {
+            sb.Append("The following materials reference unknown Tile Sprites:\n\n");
+            foreach (var badId in badIds) sb.Append("Material ").Append(badId).Append('\n');
+        }
+
+        return valid;
     }
 }
