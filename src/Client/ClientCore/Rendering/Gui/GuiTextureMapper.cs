@@ -340,6 +340,9 @@ public class GuiTextureMapper
         }
 
         // Second pass, remove the affected IDs.
+        if (animatedSpriteIndices.TryGetValue(animatedSpriteId, out var discardIndex))
+            reclaimableIndices.Enqueue(discardIndex);
+
         animatedSpriteIndices.Remove(animatedSpriteId);
         foreach (var oldRow in affectedRows) animatedSpriteIndices.Remove(oldRow.Item1);
 
