@@ -94,6 +94,48 @@ public class GuiExtensions
     }
 
     /// <summary>
+    ///     Renders a tile sprite in a given context to the GUI.
+    /// </summary>
+    /// <param name="tileSpriteId">Tile sprite ID.</param>
+    /// <param name="neighborNorthId">North neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborEastId">East neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborSouthId">South neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborWestId">West neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    public void TileSprite(int tileSpriteId, int neighborNorthId, int neighborEastId, int neighborSouthId,
+        int neighborWestId)
+    {
+        var texId = textureMapper.GetTextureIdForTileSprite(tileSpriteId, neighborNorthId, neighborEastId,
+            neighborSouthId, neighborWestId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId);
+
+        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
+    }
+
+    /// <summary>
+    ///     Renders a tile sprite in a given context to the GUI as a clickable button.
+    /// </summary>
+    /// <param name="id">Button ID.</param>
+    /// <param name="tileSpriteId">Tile sprite ID.</param>
+    /// <param name="neighborNorthId">North neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborEastId">East neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborSouthId">South neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborWestId">West neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <returns>true if clicked, false otherwise.</returns>
+    public bool TileSpriteButton(string id, int tileSpriteId, int neighborNorthId, int neighborEastId,
+        int neighborSouthId, int neighborWestId)
+    {
+        var texId = textureMapper.GetTextureIdForTileSprite(tileSpriteId, neighborNorthId, neighborEastId,
+            neighborSouthId, neighborWestId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId);
+
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+        var result = ImGui.ImageButton(id, texId, new Vector2(texData.Width, texData.Height));
+        ImGui.PopStyleVar();
+
+        return result;
+    }
+
+    /// <summary>
     ///     Renders a full spritesheet to the GUI.
     /// </summary>
     /// <param name="spritesheet">Spritesheet name.</param>

@@ -16,10 +16,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
+using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
@@ -47,7 +49,12 @@ public class GuiTextureMapper
         /// <summary>
         ///     Texture is a static sprite.
         /// </summary>
-        Sprite
+        Sprite,
+
+        /// <summary>
+        ///     Texture is multiple overlapping sources.
+        /// </summary>
+        Multiple
     }
 
     /// <summary>
@@ -67,6 +74,11 @@ public class GuiTextureMapper
     private readonly ClientConfigurationManager clientConfigurationManager;
 
     /// <summary>
+    ///     Queue of indices that can be reclaimed for use.
+    /// </summary>
+    private readonly Queue<int> reclaimableIndices = new();
+
+    /// <summary>
     ///     Map from sprite ID to corresponding textures list entry.
     /// </summary>
     private readonly Dictionary<int, int> spriteIndices = new();
@@ -83,18 +95,30 @@ public class GuiTextureMapper
     /// </summary>
     private readonly List<TextureData> textures = new();
 
+    /// <summary>
+    ///     Map from tilesprite ID (and neighbors) to corresponding texture list entry (front face).
+    /// </summary>
+    private readonly Dictionary<Tuple<int, int, int, int, int>, int> tileSpriteIndices = new();
+
+    private readonly TileSpriteManager tileSpriteManager;
+
     public GuiTextureMapper(TextureAtlasManager atlasManager, SpriteSheetManager spriteSheetManager,
         AnimatedSpriteManager animatedSpriteManager, AtlasMap atlasMap,
-        ClientConfigurationManager clientConfigurationManager)
+        ClientConfigurationManager clientConfigurationManager,
+        TileSpriteManager tileSpriteManager)
     {
         this.atlasManager = atlasManager;
         this.spriteSheetManager = spriteSheetManager;
         this.animatedSpriteManager = animatedSpriteManager;
         this.atlasMap = atlasMap;
         this.clientConfigurationManager = clientConfigurationManager;
+        this.tileSpriteManager = tileSpriteManager;
 
         animatedSpriteManager.OnAnimatedSpriteAdded += OnAnimatedSpriteAdded;
         animatedSpriteManager.OnAnimatedSpriteRemoved += OnAnimatedSpriteRemoved;
+        tileSpriteManager.OnTileSpriteAdded += OnTileSpriteChange;
+        tileSpriteManager.OnTileSpriteRemoved += OnTileSpriteChange;
+        tileSpriteManager.OnTileSpriteUpdated += OnTileSpriteChange;
     }
 
     /// <summary>
@@ -125,8 +149,8 @@ public class GuiTextureMapper
             var height = spriteBounds.HeightInTiles * clientConfiguration.TileWidth;
 
             // Add record to table.
-            index = textures.Count;
-            textures.Add(new TextureData
+            index = GetNextTextureId();
+            textures.Insert(index, new TextureData
             {
                 SourceType = SourceType.AnimatedSprite,
                 Id = animatedSpriteId,
@@ -157,8 +181,8 @@ public class GuiTextureMapper
             var bottomRightAbsY = topLeftAbsY + sheetData.Surface.Properties.Height;
 
             // Add entry to table.
-            index = textures.Count;
-            textures.Add(new TextureData
+            index = GetNextTextureId();
+            textures.Insert(index, new TextureData
             {
                 SourceType = SourceType.Spritesheet,
                 StartX = (float)topLeftAbsX / atlas.Width,
@@ -188,8 +212,8 @@ public class GuiTextureMapper
 
             // Add entry to table.
             var spriteData = atlasMap.MapElements[spriteId];
-            index = textures.Count;
-            textures.Add(new TextureData
+            index = GetNextTextureId();
+            textures.Insert(index, new TextureData
             {
                 SourceType = SourceType.Sprite,
                 StartX = spriteData.NormalizedLeftX,
@@ -203,6 +227,59 @@ public class GuiTextureMapper
         }
 
         return new IntPtr(index + IndexOffset);
+    }
+
+    /// <summary>
+    ///     Gets the ImGui texture ID for a tile sprite in a specific context.
+    /// </summary>
+    /// <param name="tileSpriteId">Tile sprite ID.</param>
+    /// <param name="neighborNorthId">North neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborEastId">East neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborSouthId">South neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborWestId">West neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <returns>ImGui texture ID.</returns>
+    /// <exception cref="IndexOutOfRangeException">Thrown if the tile sprite ID is out of range.</exception>
+    public IntPtr GetTextureIdForTileSprite(int tileSpriteId, int neighborNorthId, int neighborEastId,
+        int neighborSouthId, int neighborWestId)
+    {
+        if (!tileSpriteIndices.TryGetValue(
+                Tuple.Create(tileSpriteId, neighborNorthId, neighborEastId, neighborSouthId, neighborWestId),
+                out var index))
+        {
+            if (tileSpriteId >= tileSpriteManager.TileSprites.Count)
+                throw new IndexOutOfRangeException($"Tile sprite {tileSpriteId} does not exist.");
+
+            // Resolve tile sprite through its context to a list of animated sprite layers.
+            var layers = tileSpriteManager.TileSprites[tileSpriteId].GetMatchingAnimatedSpriteIds(neighborNorthId,
+                neighborEastId, neighborSouthId, neighborWestId);
+            if (layers.Count == 0)
+                throw new IndexOutOfRangeException($"Tile sprite {tileSpriteId} contains no layers.");
+
+            // Assume constant sprite size through all layers. Use first layer as source.
+            var firstLayerTexId = GetTextureIdForAnimatedSprite(layers[0]);
+            var firstLayerTexData = GetTextureDataForTextureId(firstLayerTexId);
+
+            // Create texture record.
+            index = GetNextTextureId();
+            textures.Insert(index, new TextureData
+            {
+                SourceType = SourceType.Multiple,
+                Layers = layers.Select(GetTextureIdForAnimatedSprite).ToList(),
+                Width = firstLayerTexData.Width,
+                Height = firstLayerTexData.Height
+            });
+        }
+
+        return new IntPtr(index + IndexOffset);
+    }
+
+    /// <summary>
+    ///     Gets the next available texture ID.
+    /// </summary>
+    /// <returns>Next available texture ID.</returns>
+    private int GetNextTextureId()
+    {
+        return reclaimableIndices.TryDequeue(out var next) ? next : textures.Count;
     }
 
     /// <summary>
@@ -275,6 +352,21 @@ public class GuiTextureMapper
     }
 
     /// <summary>
+    ///     Called when the tile sprites are changed (added, updated, removed).
+    /// </summary>
+    /// <param name="tileSpriteId">Tile sprite ID.</param>
+    public void OnTileSpriteChange(int tileSpriteId)
+    {
+        // Invalidate all tile sprite texture caches, flagging the texture indices to be reclaimed.
+        foreach (var texId in tileSpriteIndices.Values)
+        {
+            reclaimableIndices.Enqueue(texId);
+        }
+
+        tileSpriteIndices.Clear();
+    }
+
+    /// <summary>
     ///     Texture data for GUI rendering.
     /// </summary>
     public class TextureData
@@ -298,6 +390,11 @@ public class GuiTextureMapper
         ///     For ID-based source types, the ID of the underlying resource.
         /// </summary>
         public int Id;
+
+        /// <summary>
+        ///     For SourceType "Multiple", the layers to be drawn.
+        /// </summary>
+        public List<IntPtr>? Layers;
 
         /// <summary>
         ///     Source data type.
