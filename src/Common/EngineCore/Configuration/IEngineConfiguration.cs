@@ -26,4 +26,18 @@ public interface IEngineConfiguration
     ///     Interval between event ticks in us.
     /// </summary>
     ulong EventTickInterval { get; }
+
+    /// <summary>
+    ///     Briefly sleep the executor threads after every this many iterations.
+    ///     Never sleep if set to zero.
+    /// </summary>
+    /// <remarks>
+    ///     This trades power consumption for performance. When set to zero, each executor
+    ///     thread will consume close to 100% of a CPU core. Positive values will occasionally
+    ///     pause the thread, reducing CPU usage but increasing average event latency (and possibly
+    ///     causing secondary negative performance effects from the CPU cache due to additional
+    ///     context switching during the pauses). A value of 1 minimizes CPU consumption; larger values
+    ///     progressively favor performance over CPU consumption.
+    /// </remarks>
+    int ExecutorThreadSleepInterval { get; }
 }

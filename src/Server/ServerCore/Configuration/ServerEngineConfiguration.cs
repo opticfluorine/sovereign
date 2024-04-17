@@ -26,4 +26,5 @@ public sealed class ServerEngineConfiguration : IEngineConfiguration
 {
     /* Events advance every 10 ms. */
     public ulong EventTickInterval => 10000;
+    public int ExecutorThreadSleepInterval => 0;
 }

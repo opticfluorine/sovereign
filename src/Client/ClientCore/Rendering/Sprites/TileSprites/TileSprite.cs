@@ -67,6 +67,18 @@ public sealed class TileSprite
     }
 
     /// <summary>
+    ///     Copy constructor.
+    /// </summary>
+    /// <param name="other">Tile sprite to copy.</param>
+    public TileSprite(TileSprite other)
+    {
+        Id = other.Id;
+        TileContexts = other.TileContexts
+            .Select(context => new TileContext(context))
+            .ToList();
+    }
+
+    /// <summary>
     ///     Tile sprite ID.
     /// </summary>
     public int Id { get; set; }
