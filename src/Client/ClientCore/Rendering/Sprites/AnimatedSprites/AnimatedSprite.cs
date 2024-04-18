@@ -71,6 +71,16 @@ public sealed class AnimatedSprite
     /// </summary>
     public Dictionary<AnimationPhase, AnimationPhaseData> Phases { get; set; } = new();
 
+    /// <summary>
+    ///     Gets the phase data for the corresponding animation phase, falling back to default if the
+    ///     animated sprite does not contain an explicit definition for the given animation phase.
+    /// </summary>
+    /// <param name="phase"></param>
+    /// <returns></returns>
+    public AnimationPhaseData GetPhaseData(AnimationPhase phase)
+    {
+        return Phases.TryGetValue(phase, out var result) ? result : Phases[AnimationPhase.Default];
+    }
 
     /// <summary>
     ///     Animation data for a single animation phase.

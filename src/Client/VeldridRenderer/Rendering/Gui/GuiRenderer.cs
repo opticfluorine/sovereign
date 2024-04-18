@@ -265,7 +265,23 @@ public class GuiRenderer : IDisposable
             switch (textureData.SourceType)
             {
                 case GuiTextureMapper.SourceType.AnimatedSprite:
-                    BindAnimatedSprite(textureData.Id, systemTime, out startX, out startY, out endX, out endY);
+                    BindAnimatedSprite(textureData.Id, textureData.Orientation, textureData.AnimationPhase, systemTime,
+                        out startX, out startY, out endX, out endY);
+                    break;
+
+                case GuiTextureMapper.SourceType.CustomAnimatedSprite:
+                    if (textureData.CustomAnimatedSprite == null)
+                    {
+                        startX = 0.0f;
+                        startY = 0.0f;
+                        endX = 0.0f;
+                        endY = 0.0f;
+                        break;
+                    }
+
+                    BindAnimatedSprite(textureData.CustomAnimatedSprite, textureData.Orientation,
+                        textureData.AnimationPhase, systemTime, out startX, out startY,
+                        out endX, out endY);
                     break;
 
                 case GuiTextureMapper.SourceType.Multiple:
@@ -297,13 +313,16 @@ public class GuiRenderer : IDisposable
     /// <summary>
     ///     Binds an animated sprite for a draw call.
     /// </summary>
-    /// <param name="animatedSpriteId">Animated sprite ID.</param>
+    /// <param name="animatedSpriteId">Animated sprite ID to draw.</param>
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Animation phase.</param>
     /// <param name="systemTime">System time for the frame being rendered.</param>
     /// <param name="startX">Top-left X coordinate.</param>
     /// <param name="startY">Top-left Y coordinate.</param>
     /// <param name="endX">Bottom-right X coordinate.</param>
     /// <param name="endY">Bottom-right Y coordinate.</param>
-    private void BindAnimatedSprite(int animatedSpriteId, ulong systemTime, out float startX, out float startY,
+    private void BindAnimatedSprite(int animatedSpriteId, Orientation orientation, AnimationPhase phase,
+        ulong systemTime, out float startX, out float startY,
         out float endX, out float endY)
     {
         // Resolve animation to the sprite for the current frame.
@@ -317,8 +336,27 @@ public class GuiRenderer : IDisposable
             return;
         }
 
-        var animSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].Phases[AnimationPhase.Default];
-        var sprite = animSprite.GetSpriteForTime(systemTime, Orientation.South);
+        var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
+        BindAnimatedSprite(sprite, orientation, phase, systemTime, out startX, out startY, out endX, out endY);
+    }
+
+    /// <summary>
+    ///     Binds an animated sprite for a draw call.
+    /// </summary>
+    /// <param name="animatedSprite">Animated sprite to draw.</param>
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Animation phase.</param>
+    /// <param name="systemTime">System time for the frame being rendered.</param>
+    /// <param name="startX">Top-left X coordinate.</param>
+    /// <param name="startY">Top-left Y coordinate.</param>
+    /// <param name="endX">Bottom-right X coordinate.</param>
+    /// <param name="endY">Bottom-right Y coordinate.</param>
+    private void BindAnimatedSprite(AnimatedSprite animatedSprite, Orientation orientation, AnimationPhase phase,
+        ulong systemTime, out float startX, out float startY,
+        out float endX, out float endY)
+    {
+        var phaseData = animatedSprite.Phases[phase];
+        var sprite = phaseData.GetSpriteForTime(systemTime, orientation);
 
         // Resolve sprite to texture atlas offset.
         var mapElem = atlasMap.MapElements[sprite.Id];

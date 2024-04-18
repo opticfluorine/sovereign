@@ -15,6 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using ImGuiNET;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
+using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
+using Sovereign.EngineCore.Components.Types;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
@@ -66,12 +69,30 @@ public class GuiExtensions
     ///     Renders an animated sprite to the GUI.
     /// </summary>
     /// <param name="animatedSpriteId">Animated sprite ID.</param>
-    public void AnimatedSprite(int animatedSpriteId)
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Animation phase.</param>
+    public void AnimatedSprite(int animatedSpriteId, Orientation orientation, AnimationPhase phase)
     {
-        var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId);
+        var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId, orientation, phase);
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         // Render GUI component.
+        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
+    }
+
+    /// <summary>
+    ///     Renders an animated sprite to the GUI.
+    /// </summary>
+    /// <param name="customId">Unique identifier for custom animated sprite.</param>
+    /// <param name="customSprite">Custom sprite.</param>
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Animation phase.</param>
+    public void AnimatedSprite(string customId, AnimatedSprite customSprite, Orientation orientation,
+        AnimationPhase phase)
+    {
+        var texId = textureMapper.GetTextureIdForCustomAnimatedSprite(customId, customSprite, orientation, phase);
+        var texData = textureMapper.GetTextureDataForTextureId(texId);
+
         ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
     }
 
@@ -80,10 +101,12 @@ public class GuiExtensions
     /// </summary>
     /// <param name="id">Button ID.</param>
     /// <param name="animatedSpriteId">Animated sprite ID.</param>
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Animation phase.</param>
     /// <returns>true if button clicked, false otherwise.</returns>
-    public bool AnimatedSpriteButton(string id, int animatedSpriteId)
+    public bool AnimatedSpriteButton(string id, int animatedSpriteId, Orientation orientation, AnimationPhase phase)
     {
-        var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId);
+        var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId, orientation, phase);
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
@@ -106,6 +129,25 @@ public class GuiExtensions
     {
         var texId = textureMapper.GetTextureIdForTileSprite(tileSpriteId, neighborNorthId, neighborEastId,
             neighborSouthId, neighborWestId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId);
+
+        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
+    }
+
+    /// <summary>
+    ///     Renders a custom tile sprite in a given context to the GUI.
+    /// </summary>
+    /// <param name="customId">Unique identifier for the custom sprite.</param>
+    /// <param name="customSprite">Custom tile sprite.</param>
+    /// <param name="neighborNorthId">North neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborEastId">East neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborSouthId">South neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborWestId">West neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    public void TileSprite(string customId, TileSprite customSprite, int neighborNorthId, int neighborEastId,
+        int neighborSouthId, int neighborWestId)
+    {
+        var texId = textureMapper.GetTextureIdForCustomTileSprite(customId, customSprite, neighborNorthId,
+            neighborEastId, neighborSouthId, neighborWestId);
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         ImGui.Image(texId, new Vector2(texData.Width, texData.Height));

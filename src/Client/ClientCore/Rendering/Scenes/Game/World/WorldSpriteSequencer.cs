@@ -92,9 +92,7 @@ public sealed class WorldSpriteSequencer
                         ? animationPhases[entityId]
                         : AnimationPhase.Default;
 
-                    if (!animatedSprite.Phases.TryGetValue(animationPhase, out var spriteData))
-                        spriteData = animatedSprite.Phases[AnimationPhase.Default];
-
+                    var spriteData = animatedSprite.GetPhaseData(animationPhase);
                     var sprite = spriteData.GetSpriteForTime(systemTime, positionedAnimatedSprite.Orientation);
 
                     AddVerticesForSprite(sprite, pos, vel, vertexBase, vertexPos);
