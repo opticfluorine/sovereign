@@ -15,11 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Numerics;
 using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 
@@ -174,6 +177,150 @@ public class TileSpriteEditorTab
             ImGui.TableNextColumn();
             ImGui.Text($"Tile Sprite {editingSprite.Id}");
             ImGui.EndTable();
+        }
+
+        ImGui.Separator();
+
+        RenderContextTable();
+
+        if (ImGui.BeginTable("Controls", 4, ImGuiTableFlags.SizingFixedFit))
+        {
+            ImGui.TableSetupColumn("");
+            ImGui.TableSetupColumn("");
+            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+
+            ImGui.TableNextColumn();
+            ImGui.Button("Save");
+
+            ImGui.TableNextColumn();
+            ImGui.Button("Cancel");
+
+            ImGui.TableNextColumn();
+            ImGui.TableNextColumn();
+            ImGui.Button("+");
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.BeginTooltip();
+                ImGui.Text("Add New Tile Context");
+                ImGui.EndTooltip();
+            }
+
+            ImGui.EndTable();
+        }
+    }
+
+    private void RenderContextTable()
+    {
+        if (editingSprite == null)
+        {
+            Logger.Error("RenderContextTable(): editingSprite is null.");
+            return;
+        }
+
+        var maxSize = ImGui.GetWindowSize();
+        var maxLayers = editingSprite.TileContexts
+            .Select(ctx => ctx.AnimatedSpriteIds.Count).Max();
+        if (ImGui.BeginTable("contextTable", maxLayers + 7,
+                ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
+                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 115 }))
+        {
+            ImGui.TableSetupColumn("");
+            ImGui.TableSetupColumn("");
+            ImGui.TableSetupColumn("North");
+            ImGui.TableSetupColumn("East");
+            ImGui.TableSetupColumn("South");
+            ImGui.TableSetupColumn("West");
+            ImGui.TableSetupColumn("+/-");
+            for (var i = 0; i < maxLayers; ++i)
+            {
+                ImGui.TableSetupColumn($"Layer {i + 1}");
+            }
+
+            ImGui.TableSetupScrollFreeze(7, 0);
+            ImGui.TableHeadersRow();
+
+            for (var i = 0; i < editingSprite.TileContexts.Count; ++i)
+            {
+                RenderContextRow(editingSprite.TileContexts[i], i, maxLayers);
+            }
+
+
+            ImGui.EndTable();
+        }
+    }
+
+    private void RenderContextRow(TileContext context, int rowIndex, int maxLayers)
+    {
+        if (editingSprite == null)
+        {
+            Logger.Error("RenderContextRow(): editingSprite is null.");
+            return;
+        }
+
+        ImGui.TableNextColumn();
+        ImGui.Button("-");
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.Text("Remove Tile Context");
+            ImGui.EndTooltip();
+        }
+
+        ImGui.TableNextColumn();
+        guiExtensions.TileSprite($"tsPrevCtx{rowIndex}", editingSprite, context.NorthTileSpriteId,
+            context.EastTileSpriteId, context.SouthTileSpriteId, context.WestTileSpriteId);
+
+        ImGui.TableNextColumn();
+        if (context.NorthTileSpriteId == TileSprite.Wildcard)
+            ImGui.Text("Any");
+        else
+            guiExtensions.TileSpriteButton($"ctx{rowIndex}north", context.NorthTileSpriteId, TileSprite.Wildcard,
+                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
+
+        ImGui.TableNextColumn();
+        if (context.EastTileSpriteId == TileSprite.Wildcard)
+            ImGui.Text("Any");
+        else
+            guiExtensions.TileSpriteButton($"ctx{rowIndex}east", context.EastTileSpriteId, TileSprite.Wildcard,
+                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
+
+        ImGui.TableNextColumn();
+        if (context.SouthTileSpriteId == TileSprite.Wildcard)
+            ImGui.Text("Any");
+        else
+            guiExtensions.TileSpriteButton($"ctx{rowIndex}south", context.SouthTileSpriteId, TileSprite.Wildcard,
+                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
+
+        ImGui.TableNextColumn();
+        if (context.WestTileSpriteId == TileSprite.Wildcard)
+            ImGui.Text("Any");
+        else
+            guiExtensions.TileSpriteButton($"ctx{rowIndex}west", context.WestTileSpriteId, TileSprite.Wildcard,
+                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
+
+        ImGui.TableNextColumn();
+        ImGui.Button("+");
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.Text("Add New Layer to End");
+            ImGui.EndTooltip();
+        }
+
+        ImGui.Button("-");
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.Text("Remove Layer from End");
+            ImGui.EndTooltip();
+        }
+
+        for (var i = 0; i < maxLayers; ++i)
+        {
+            ImGui.TableNextColumn();
+            if (i < context.AnimatedSpriteIds.Count)
+                guiExtensions.AnimatedSpriteButton($"ctx{rowIndex}l{i}", context.AnimatedSpriteIds[i],
+                    Orientation.South, AnimationPhase.Default);
         }
     }
 
