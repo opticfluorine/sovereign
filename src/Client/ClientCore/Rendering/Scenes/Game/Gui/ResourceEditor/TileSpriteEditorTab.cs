@@ -163,6 +163,18 @@ public class TileSpriteEditorTab
 
     private void RenderEditor()
     {
+        if (editingSprite == null)
+        {
+            Logger.Error("RenderEditor(): editingSprite is null.");
+            return;
+        }
+
+        if (ImGui.BeginTable("Header", 1, ImGuiTableFlags.SizingFixedFit))
+        {
+            ImGui.TableNextColumn();
+            ImGui.Text($"Tile Sprite {editingSprite.Id}");
+            ImGui.EndTable();
+        }
     }
 
     private void Select(int tileSpriteId)

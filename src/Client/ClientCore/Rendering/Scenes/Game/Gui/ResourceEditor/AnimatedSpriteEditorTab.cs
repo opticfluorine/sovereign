@@ -353,7 +353,12 @@ public class AnimatedSpriteEditorTab
 
         if (ImGui.Button("Save")) SaveState();
         ImGui.SameLine();
-        if (ImGui.Button("Cancel")) ResetState();
+        if (ImGui.Button("Cancel"))
+        {
+            var phase = currentPhase;
+            ResetState();
+            SelectPhase(phase);
+        }
     }
 
     /// <summary>
