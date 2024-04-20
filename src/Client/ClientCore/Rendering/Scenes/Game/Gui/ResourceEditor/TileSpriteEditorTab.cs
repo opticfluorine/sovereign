@@ -17,9 +17,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
+using System.Text;
 using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components.Types;
@@ -37,6 +39,7 @@ public class TileSpriteEditorTab
     private const uint SelectionColor = 0xFF773333;
 
     private readonly GuiExtensions guiExtensions;
+    private readonly MaterialManager materialManager;
 
     private readonly TileSpriteManager tileSpriteManager;
 
@@ -50,10 +53,12 @@ public class TileSpriteEditorTab
     /// </summary>
     private bool initialized;
 
-    public TileSpriteEditorTab(TileSpriteManager tileSpriteManager, GuiExtensions guiExtensions)
+    public TileSpriteEditorTab(TileSpriteManager tileSpriteManager, GuiExtensions guiExtensions,
+        MaterialManager materialManager)
     {
         this.tileSpriteManager = tileSpriteManager;
         this.guiExtensions = guiExtensions;
+        this.materialManager = materialManager;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -164,6 +169,9 @@ public class TileSpriteEditorTab
         }
     }
 
+    /// <summary>
+    ///     Renders the editor pane.
+    /// </summary>
     private void RenderEditor()
     {
         if (editingSprite == null)
@@ -209,6 +217,9 @@ public class TileSpriteEditorTab
         }
     }
 
+    /// <summary>
+    ///     Renders the table of tile contexts.
+    /// </summary>
     private void RenderContextTable()
     {
         if (editingSprite == null)
@@ -249,6 +260,12 @@ public class TileSpriteEditorTab
         }
     }
 
+    /// <summary>
+    ///     Renders a single tile context for the context table.
+    /// </summary>
+    /// <param name="context">Context to show in row.</param>
+    /// <param name="rowIndex">Zero-based index of the row.</param>
+    /// <param name="maxLayers">Maximum number of layers across all tile contexts for current tile sprite.</param>
     private void RenderContextRow(TileContext context, int rowIndex, int maxLayers)
     {
         if (editingSprite == null)
@@ -269,34 +286,55 @@ public class TileSpriteEditorTab
         ImGui.TableNextColumn();
         guiExtensions.TileSprite($"tsPrevCtx{rowIndex}", editingSprite, context.NorthTileSpriteId,
             context.EastTileSpriteId, context.SouthTileSpriteId, context.WestTileSpriteId);
+        if (ImGui.IsItemHovered()) RenderPreviewTooltip(context, rowIndex);
 
         ImGui.TableNextColumn();
         if (context.NorthTileSpriteId == TileSprite.Wildcard)
-            ImGui.Text("Any");
+        {
+            for (var i = 0; i < 3; ++i) ImGui.Spacing();
+            ImGui.Text(" Any");
+        }
         else
+        {
             guiExtensions.TileSpriteButton($"ctx{rowIndex}north", context.NorthTileSpriteId, TileSprite.Wildcard,
                 TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
+        }
 
         ImGui.TableNextColumn();
         if (context.EastTileSpriteId == TileSprite.Wildcard)
-            ImGui.Text("Any");
+        {
+            for (var i = 0; i < 3; ++i) ImGui.Spacing();
+            ImGui.Text(" Any");
+        }
         else
+        {
             guiExtensions.TileSpriteButton($"ctx{rowIndex}east", context.EastTileSpriteId, TileSprite.Wildcard,
                 TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
+        }
 
         ImGui.TableNextColumn();
         if (context.SouthTileSpriteId == TileSprite.Wildcard)
-            ImGui.Text("Any");
+        {
+            for (var i = 0; i < 3; ++i) ImGui.Spacing();
+            ImGui.Text(" Any");
+        }
         else
+        {
             guiExtensions.TileSpriteButton($"ctx{rowIndex}south", context.SouthTileSpriteId, TileSprite.Wildcard,
                 TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
+        }
 
         ImGui.TableNextColumn();
         if (context.WestTileSpriteId == TileSprite.Wildcard)
-            ImGui.Text("Any");
+        {
+            for (var i = 0; i < 3; ++i) ImGui.Spacing();
+            ImGui.Text(" Any");
+        }
         else
+        {
             guiExtensions.TileSpriteButton($"ctx{rowIndex}west", context.WestTileSpriteId, TileSprite.Wildcard,
                 TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
+        }
 
         ImGui.TableNextColumn();
         ImGui.Button("+");
@@ -324,22 +362,156 @@ public class TileSpriteEditorTab
         }
     }
 
+    /// <summary>
+    ///     Renders a preview tooltip that shows a specific tile sprite context surrounded by its neighbors.
+    /// </summary>
+    /// <param name="context">Tile context.</param>
+    /// <param name="rowIndex">Zero-based row index in the tile context table.</param>
+    private void RenderPreviewTooltip(TileContext context, int rowIndex)
+    {
+        if (editingSprite == null)
+        {
+            Logger.Error("RenderPreviewTooltip(): editingSprite is null.");
+            return;
+        }
+
+        ImGui.BeginTooltip();
+        if (ImGui.BeginTable("tsPrevTbl", 3, ImGuiTableFlags.SizingFixedFit))
+        {
+            // Top row.
+            ImGui.TableNextColumn();
+            ImGui.TableNextColumn();
+            if (context.NorthTileSpriteId != TileSprite.Wildcard)
+                guiExtensions.TileSprite(context.NorthTileSpriteId, TileSprite.Wildcard, TileSprite.Wildcard,
+                    editingSprite.Id, TileSprite.Wildcard);
+            else
+                ImGui.Text(" Any");
+            ImGui.TableNextColumn();
+
+            // Middle row.
+            ImGui.TableNextColumn();
+            if (context.WestTileSpriteId != TileSprite.Wildcard)
+            {
+                guiExtensions.TileSprite(context.WestTileSpriteId, TileSprite.Wildcard, editingSprite.Id,
+                    TileSprite.Wildcard, TileSprite.Wildcard);
+            }
+            else
+            {
+                ImGui.Spacing();
+                ImGui.Spacing();
+                ImGui.Text("Any");
+            }
+
+            ImGui.TableNextColumn();
+            guiExtensions.TileSprite($"tsPrevCtx{rowIndex}", editingSprite, context.NorthTileSpriteId,
+                context.EastTileSpriteId, context.SouthTileSpriteId, context.WestTileSpriteId);
+            ImGui.TableNextColumn();
+            if (context.EastTileSpriteId != TileSprite.Wildcard)
+            {
+                guiExtensions.TileSprite(context.EastTileSpriteId, TileSprite.Wildcard, TileSprite.Wildcard,
+                    TileSprite.Wildcard, editingSprite.Id);
+            }
+            else
+            {
+                ImGui.Spacing();
+                ImGui.Spacing();
+                ImGui.Text("Any");
+            }
+
+            // Bottom row.
+            ImGui.TableNextColumn();
+            ImGui.TableNextColumn();
+            if (context.SouthTileSpriteId != TileSprite.Wildcard)
+                guiExtensions.TileSprite(context.SouthTileSpriteId, editingSprite.Id, TileSprite.Wildcard,
+                    TileSprite.Wildcard, TileSprite.Wildcard);
+            else
+                ImGui.Text(" Any");
+            ImGui.TableNextColumn();
+
+            ImGui.EndTable();
+        }
+
+        ImGui.EndTooltip();
+    }
+
+    /// <summary>
+    ///     Selects a tile sprite for editing.
+    /// </summary>
+    /// <param name="tileSpriteId">ID of tile sprite to edit.</param>
     private void Select(int tileSpriteId)
     {
         editingSprite = new TileSprite(tileSpriteManager.TileSprites[tileSpriteId]);
     }
 
+    /// <summary>
+    ///     Inserts a new tile sprite after the currently selected tile sprite.
+    /// </summary>
     private void InsertNewTileSprite()
     {
+        if (editingSprite == null)
+        {
+            Logger.Error("InsertNewTileSprite(): editingSprite is null.");
+            return;
+        }
+
+        tileSpriteManager.InsertNew(editingSprite.Id + 1);
     }
 
+    /// <summary>
+    ///     Removes the currently selected tile sprite.
+    /// </summary>
     private void RemoveSelectedTileSprite()
     {
+        if (editingSprite == null)
+        {
+            Logger.Error("RemoveSelectedTileSprite(): editingSprite is null.");
+            return;
+        }
+
+        tileSpriteManager.Remove(editingSprite.Id);
+        Select(editingSprite.Id >= tileSpriteManager.TileSprites.Count
+            ? tileSpriteManager.TileSprites.Count - 1
+            : editingSprite.Id);
     }
 
+    /// <summary>
+    ///     Determines whether the currently selected tile sprite can be removed.
+    /// </summary>
+    /// <param name="reason">Reason that the sprite cannot be removed. Only set if the method returns false.</param>
+    /// <returns>true if the tile sprite can be removed, false otherwise.</returns>
     private bool CanRemoveSprite([NotNullWhen(false)] out string? reason)
     {
         reason = null;
+        if (editingSprite == null)
+        {
+            Logger.Error("CanRemoveSprite(): editingSprite is null.");
+            reason = "Internal error.";
+            return false;
+        }
+
+        // Prevent removal of last tile sprite.
+        if (tileSpriteManager.TileSprites.Count <= 1)
+        {
+            reason = "Cannot remove last tile sprite.";
+            return false;
+        }
+
+        // Prevent removal of any tile sprite depended on by one or more materials.
+        var dependentMaterials = materialManager.Materials
+            .Where(material => material.MaterialSubtypes
+                .Any(subtype => subtype.SideFaceTileSpriteId == editingSprite.Id
+                                || subtype.TopFaceTileSpriteId == editingSprite.Id
+                                || subtype.ObscuredTopFaceTileSpriteId == editingSprite.Id))
+            .Select(material => material.Id);
+        if (dependentMaterials.Any())
+        {
+            var sb = new StringBuilder("Cannot remove with dependencies:");
+            foreach (var materialId in dependentMaterials) sb.Append($"\nMaterial {materialId}");
+
+            reason = sb.ToString();
+            return false;
+        }
+
         return true;
     }
 }

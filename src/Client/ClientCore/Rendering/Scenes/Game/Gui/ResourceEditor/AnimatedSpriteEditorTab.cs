@@ -516,8 +516,9 @@ public class AnimatedSpriteEditorTab
     private void RemoveSelectedAnimatedSprite()
     {
         animatedSpriteManager.Remove(selectedId);
-        if (selectedId >= animatedSpriteManager.AnimatedSprites.Count)
-            Select(animatedSpriteManager.AnimatedSprites.Count - 1);
+        Select(selectedId >= animatedSpriteManager.AnimatedSprites.Count
+            ? animatedSpriteManager.AnimatedSprites.Count - 1
+            : selectedId);
     }
 
     /// <summary>

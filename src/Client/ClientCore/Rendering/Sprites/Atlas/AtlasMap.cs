@@ -98,8 +98,8 @@ public sealed class AtlasMap
             NormalizedTopY = tly / atlasHeight,
             NormalizedRightX = brx / atlasWidth,
             NormalizedBottomY = bry / atlasHeight,
-            WidthInTiles = spriteWidth / configManager.ClientConfiguration.TileWidth,
-            HeightInTiles = spriteHeight / configManager.ClientConfiguration.TileWidth
+            WidthInTiles = (float)spriteWidth / configManager.ClientConfiguration.TileWidth,
+            HeightInTiles = (float)spriteHeight / configManager.ClientConfiguration.TileWidth
         });
     }
 }
