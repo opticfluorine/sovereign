@@ -198,10 +198,10 @@ public class TileSpriteEditorTab
             ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
 
             ImGui.TableNextColumn();
-            ImGui.Button("Save");
+            if (ImGui.Button("Save")) SaveState();
 
             ImGui.TableNextColumn();
-            ImGui.Button("Cancel");
+            if (ImGui.Button("Cancel")) ResetState();
 
             ImGui.TableNextColumn();
             ImGui.TableNextColumn();
@@ -242,18 +242,13 @@ public class TileSpriteEditorTab
             ImGui.TableSetupColumn("South");
             ImGui.TableSetupColumn("West");
             ImGui.TableSetupColumn("+/-");
-            for (var i = 0; i < maxLayers; ++i)
-            {
-                ImGui.TableSetupColumn($"Layer {i + 1}");
-            }
+            for (var i = 0; i < maxLayers; ++i) ImGui.TableSetupColumn($"Layer {i + 1}");
 
             ImGui.TableSetupScrollFreeze(7, 0);
             ImGui.TableHeadersRow();
 
             for (var i = 0; i < editingSprite.TileContexts.Count; ++i)
-            {
                 RenderContextRow(editingSprite.TileContexts[i], i, maxLayers);
-            }
 
 
             ImGui.EndTable();
@@ -441,6 +436,34 @@ public class TileSpriteEditorTab
     private void Select(int tileSpriteId)
     {
         editingSprite = new TileSprite(tileSpriteManager.TileSprites[tileSpriteId]);
+    }
+
+    /// <summary>
+    ///     Saves the currently edited sprite into the active tile sprite table.
+    /// </summary>
+    private void SaveState()
+    {
+        if (editingSprite == null)
+        {
+            Logger.Error("SaveState(): editingSprite is null");
+            return;
+        }
+
+        tileSpriteManager.Update(editingSprite);
+    }
+
+    /// <summary>
+    ///     Resets the editor state to the stored version of the currently selected tile sprite.
+    /// </summary>
+    private void ResetState()
+    {
+        if (editingSprite == null)
+        {
+            Logger.Error("ResetState(): editingSprite is null");
+            return;
+        }
+
+        editingSprite = new TileSprite(tileSpriteManager.TileSprites[editingSprite.Id]);
     }
 
     /// <summary>
