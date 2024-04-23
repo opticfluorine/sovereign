@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
 using ImGuiNET;
+using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 
@@ -25,9 +27,18 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 public class AnimatedSpriteSelectorPopup
 {
     private const string PopupName = "Select Animated Sprite";
-    private Vector2 basePos;
+
+    private const int ColumnCount = 5;
+    private readonly AnimatedSpriteManager animatedSpriteManager;
+    private readonly GuiExtensions guiExtensions;
     private bool isSelected;
     private int selection;
+
+    public AnimatedSpriteSelectorPopup(AnimatedSpriteManager animatedSpriteManager, GuiExtensions guiExtensions)
+    {
+        this.animatedSpriteManager = animatedSpriteManager;
+        this.guiExtensions = guiExtensions;
+    }
 
     /// <summary>
     ///     Opens the selector popup.
@@ -36,7 +47,6 @@ public class AnimatedSpriteSelectorPopup
     {
         isSelected = false;
         selection = 0;
-        basePos = ImGui.GetMousePos();
 
         ImGui.OpenPopup(PopupName);
     }
@@ -46,10 +56,33 @@ public class AnimatedSpriteSelectorPopup
     /// </summary>
     public void Render()
     {
-        if (ImGui.BeginPopup(PopupName))
+        if (!ImGui.BeginPopup(PopupName)) return;
+
+        if (ImGui.BeginTable("animSprTbl", ColumnCount,
+                ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingFixedFit))
         {
-            ImGui.EndPopup();
+            for (var i = 0; i < animatedSpriteManager.AnimatedSprites.Count; ++i)
+            {
+                ImGui.TableNextColumn();
+                if (guiExtensions.AnimatedSpriteButton($"btn{i}", i, Orientation.South, AnimationPhase.Default))
+                {
+                    selection = i;
+                    isSelected = true;
+                    ImGui.CloseCurrentPopup();
+                }
+
+                if (ImGui.IsItemHovered())
+                    if (ImGui.BeginTooltip())
+                    {
+                        ImGui.Text($"Animated Sprite {i}");
+                        ImGui.EndTooltip();
+                    }
+            }
+
+            ImGui.EndTable();
         }
+
+        ImGui.EndPopup();
     }
 
     /// <summary>

@@ -26,6 +26,7 @@ public sealed class TileContext
 {
     public TileContext()
     {
+        AnimatedSpriteIds.Add(0);
     }
 
     /// <summary>

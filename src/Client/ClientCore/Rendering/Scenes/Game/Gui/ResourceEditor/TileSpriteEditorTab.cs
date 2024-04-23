@@ -38,10 +38,15 @@ public class TileSpriteEditorTab
     /// </summary>
     private const uint SelectionColor = 0xFF773333;
 
+    private readonly AnimatedSpriteSelectorPopup animatedSpriteSelector;
+
     private readonly GuiExtensions guiExtensions;
     private readonly MaterialManager materialManager;
 
     private readonly TileSpriteManager tileSpriteManager;
+    private int editingCol;
+
+    private int editingRow;
 
     /// <summary>
     ///     Currently edited tile sprite.
@@ -54,11 +59,12 @@ public class TileSpriteEditorTab
     private bool initialized;
 
     public TileSpriteEditorTab(TileSpriteManager tileSpriteManager, GuiExtensions guiExtensions,
-        MaterialManager materialManager)
+        MaterialManager materialManager, AnimatedSpriteSelectorPopup animatedSpriteSelector)
     {
         this.tileSpriteManager = tileSpriteManager;
         this.guiExtensions = guiExtensions;
         this.materialManager = materialManager;
+        this.animatedSpriteSelector = animatedSpriteSelector;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -205,7 +211,7 @@ public class TileSpriteEditorTab
 
             ImGui.TableNextColumn();
             ImGui.TableNextColumn();
-            ImGui.Button("+");
+            if (ImGui.Button("+")) editingSprite.TileContexts.Add(new TileContext());
             if (ImGui.IsItemHovered())
             {
                 ImGui.BeginTooltip();
@@ -250,9 +256,26 @@ public class TileSpriteEditorTab
             for (var i = 0; i < editingSprite.TileContexts.Count; ++i)
                 RenderContextRow(editingSprite.TileContexts[i], i, maxLayers);
 
+            HandleAnimatedSpriteSelector();
 
             ImGui.EndTable();
         }
+    }
+
+    /// <summary>
+    ///     Handles the aniamted sprite selector popup if it is open.
+    /// </summary>
+    private void HandleAnimatedSpriteSelector()
+    {
+        if (editingSprite == null)
+        {
+            Logger.Error("HandleAnimatedSpriteSelector(): editingSprite is null.");
+            return;
+        }
+
+        animatedSpriteSelector.Render();
+        if (animatedSpriteSelector.TryGetSelection(out var selectedId))
+            editingSprite.TileContexts[editingRow].AnimatedSpriteIds[editingCol] = selectedId;
     }
 
     /// <summary>
@@ -269,14 +292,20 @@ public class TileSpriteEditorTab
             return;
         }
 
+        var layers = editingSprite.TileContexts[rowIndex].AnimatedSpriteIds;
+
         ImGui.TableNextColumn();
-        ImGui.Button("-");
-        if (ImGui.IsItemHovered())
+        var canRemoveContext = editingSprite.TileContexts.Count > 1;
+        if (!canRemoveContext) ImGui.BeginDisabled();
+        if (ImGui.Button($"-##context-{rowIndex}")) editingSprite.TileContexts.RemoveAt(rowIndex);
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Remove Tile Context");
+            ImGui.Text(canRemoveContext ? "Remove Tile Context" : "Cannot remove last context");
             ImGui.EndTooltip();
         }
+
+        if (!canRemoveContext) ImGui.EndDisabled();
 
         ImGui.TableNextColumn();
         guiExtensions.TileSprite($"tsPrevCtx{rowIndex}", editingSprite, context.NorthTileSpriteId,
@@ -332,7 +361,9 @@ public class TileSpriteEditorTab
         }
 
         ImGui.TableNextColumn();
-        ImGui.Button("+");
+        if (ImGui.Button($"+##{rowIndex}"))
+            // Add new layer to end of this context.
+            layers.Add(0);
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
@@ -340,20 +371,32 @@ public class TileSpriteEditorTab
             ImGui.EndTooltip();
         }
 
-        ImGui.Button("-");
-        if (ImGui.IsItemHovered())
+        var canRemoveLayer = layers.Count > 1;
+        if (!canRemoveLayer) ImGui.BeginDisabled();
+        if (ImGui.Button($"-##layers-{rowIndex}"))
+            // Remove the last layer of this context.
+            layers.RemoveAt(layers.Count - 1);
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Remove Layer from End");
+            ImGui.Text(canRemoveLayer ? "Remove Layer from End" : "Cannot remove last layer");
             ImGui.EndTooltip();
         }
+
+        if (!canRemoveLayer) ImGui.EndDisabled();
 
         for (var i = 0; i < maxLayers; ++i)
         {
             ImGui.TableNextColumn();
-            if (i < context.AnimatedSpriteIds.Count)
-                guiExtensions.AnimatedSpriteButton($"ctx{rowIndex}l{i}", context.AnimatedSpriteIds[i],
-                    Orientation.South, AnimationPhase.Default);
+            if (i >= context.AnimatedSpriteIds.Count) continue;
+
+            if (guiExtensions.AnimatedSpriteButton($"ctx{rowIndex}l{i}", context.AnimatedSpriteIds[i],
+                    Orientation.South, AnimationPhase.Default))
+            {
+                editingRow = rowIndex;
+                editingCol = i;
+                animatedSpriteSelector.Open();
+            }
         }
     }
 
