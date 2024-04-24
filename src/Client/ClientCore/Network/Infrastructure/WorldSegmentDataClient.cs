@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Castle.Core.Logging;
 using MessagePack;
 using Sovereign.ClientCore.Network.Rest;
+using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components.Indexers;
@@ -33,7 +34,6 @@ using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Block.Events;
 using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.EngineCore.World;
-using Sovereign.EngineCore.World.Materials;
 using Sovereign.NetworkCore.Network;
 
 namespace Sovereign.ClientCore.Network.Infrastructure;

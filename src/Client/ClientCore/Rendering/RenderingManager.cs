@@ -77,11 +77,23 @@ public class RenderingManager : IStartable
 
     public void Start()
     {
-        SelectConfiguration();
-        CreateMainDisplay();
-        InitializeGui();
-        LoadResources();
-        InitializeRenderer();
+        try
+        {
+            SelectConfiguration();
+            CreateMainDisplay();
+            InitializeGui();
+            LoadResources();
+            InitializeRenderer();
+        }
+        catch (FatalErrorException)
+        {
+            Environment.Exit(1);
+        }
+        catch (Exception e)
+        {
+            Logger.Fatal("Unhandled exception in RenderingManager.Start().", e);
+            Environment.Exit(1);
+        }
     }
 
     public void Stop()

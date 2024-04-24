@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.EngineCore.Systems;
@@ -29,6 +30,8 @@ namespace Sovereign.EngineCore.Systems;
 /// </summary>
 public class SystemExecutor
 {
+    private readonly IEngineConfiguration engineConfiguration;
+
     /// <summary>
     ///     Event loop.
     /// </summary>
@@ -39,9 +42,15 @@ public class SystemExecutor
     /// </summary>
     private readonly List<ISystem> systems = new();
 
-    public SystemExecutor(IEventLoop eventLoop)
+    /// <summary>
+    ///     Executor loop iteration count.
+    /// </summary>
+    private uint iterationCount;
+
+    public SystemExecutor(IEventLoop eventLoop, IEngineConfiguration engineConfiguration)
     {
         this.eventLoop = eventLoop;
+        this.engineConfiguration = engineConfiguration;
     }
 
     public ILogger Log { private get; set; } = NullLogger.Instance;
@@ -100,7 +109,17 @@ public class SystemExecutor
                     Log.Error("Unhandled exception in system.", e);
                 }
 
-            Thread.Yield();
+            iterationCount++;
+            if (engineConfiguration.ExecutorThreadSleepInterval > 0 &&
+                iterationCount == engineConfiguration.ExecutorThreadSleepInterval)
+            {
+                iterationCount = 0;
+                Thread.Sleep(1);
+            }
+            else
+            {
+                Thread.Yield();
+            }
         }
     }
 

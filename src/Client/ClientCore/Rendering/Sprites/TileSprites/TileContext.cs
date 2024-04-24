@@ -24,6 +24,24 @@ namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 /// </summary>
 public sealed class TileContext
 {
+    public TileContext()
+    {
+        AnimatedSpriteIds.Add(0);
+    }
+
+    /// <summary>
+    ///     Copy constructor.
+    /// </summary>
+    /// <param name="other">Context to copy.</param>
+    public TileContext(TileContext other)
+    {
+        NorthTileSpriteId = other.NorthTileSpriteId;
+        EastTileSpriteId = other.EastTileSpriteId;
+        SouthTileSpriteId = other.SouthTileSpriteId;
+        WestTileSpriteId = other.WestTileSpriteId;
+        AnimatedSpriteIds = new List<int>(other.AnimatedSpriteIds);
+    }
+
     /// <summary>
     ///     Index of the north tile sprite to match (-1 for wildcard).
     /// </summary>

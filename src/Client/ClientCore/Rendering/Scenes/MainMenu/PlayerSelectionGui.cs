@@ -20,8 +20,10 @@ using System.Threading.Tasks;
 using ImGuiNET;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.ClientCore.Systems.ClientState;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Rest.Data;
@@ -196,7 +198,8 @@ public class PlayerSelectionGui
     private void RenderPlayer(PlayerInfo player)
     {
         ImGui.TableNextColumn();
-        if (player.AnimatedSprite.HasValue) guiExtensions.AnimatedSprite(player.AnimatedSprite.Value);
+        if (player.AnimatedSprite.HasValue)
+            guiExtensions.AnimatedSprite(player.AnimatedSprite.Value, Orientation.South, AnimationPhase.Moving);
 
         ImGui.TableNextColumn();
         ImGui.Text(player.Name);

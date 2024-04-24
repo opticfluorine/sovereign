@@ -17,7 +17,7 @@
 
 using System.Collections.Generic;
 
-namespace Sovereign.EngineCore.World.Materials;
+namespace Sovereign.ClientCore.Rendering.Materials;
 
 /// <summary>
 ///     Describes a material.

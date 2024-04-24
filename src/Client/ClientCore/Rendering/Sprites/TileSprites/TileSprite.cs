@@ -42,7 +42,23 @@ public sealed class TileSprite
     /// <summary>
     ///     Tile contexts sorted in priority order.
     /// </summary>
-    public readonly List<TileContext> TileContexts;
+    public List<TileContext> TileContexts;
+
+    public TileSprite(int id)
+    {
+        Id = id;
+        TileContexts = new List<TileContext>
+        {
+            new()
+            {
+                NorthTileSpriteId = Wildcard,
+                EastTileSpriteId = Wildcard,
+                SouthTileSpriteId = Wildcard,
+                WestTileSpriteId = Wildcard,
+                AnimatedSpriteIds = new List<int> { 0 }
+            }
+        };
+    }
 
     public TileSprite(TileSpriteRecord definition)
     {
@@ -51,9 +67,21 @@ public sealed class TileSprite
     }
 
     /// <summary>
+    ///     Copy constructor.
+    /// </summary>
+    /// <param name="other">Tile sprite to copy.</param>
+    public TileSprite(TileSprite other)
+    {
+        Id = other.Id;
+        TileContexts = other.TileContexts
+            .Select(context => new TileContext(context))
+            .ToList();
+    }
+
+    /// <summary>
     ///     Tile sprite ID.
     /// </summary>
-    public int Id { get; private set; }
+    public int Id { get; set; }
 
     /// <summary>
     ///     Finds the animated sprites for the tile context that matches
@@ -122,6 +150,22 @@ public sealed class TileSprite
                     context.AnimatedSpriteIds.Insert(i, oldId - 1);
                 }
             }
+    }
+
+    /// <summary>
+    ///     Clears the sprite lookup cache.
+    /// </summary>
+    public void ClearCache()
+    {
+        lookupCache.Clear();
+    }
+
+    /// <summary>
+    ///     Re-sorts the tile contexts so that they resolve correctly.
+    /// </summary>
+    public void ReSortContexts()
+    {
+        TileContexts = SortContexts(TileContexts);
     }
 
     /// <summary>

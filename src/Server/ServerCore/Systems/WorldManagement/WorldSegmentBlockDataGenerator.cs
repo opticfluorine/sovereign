@@ -23,7 +23,6 @@ using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.EngineCore.World;
-using Sovereign.EngineCore.World.Materials;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -167,7 +166,7 @@ public sealed class WorldSegmentBlockDataGenerator
 
         // As a special case, if the default block is not air, the air blocks
         // must be created and added to the kept set.
-        if (depthPlane.DefaultBlockType.MaterialId != Material.Air)
+        if (depthPlane.DefaultBlockType.MaterialId != MaterialConstants.Air)
             AddAirBlocks(keptBlocks, depthPlane, baseX, baseY, baseZ);
 
         // Group blocks into data lines.
@@ -219,7 +218,7 @@ public sealed class WorldSegmentBlockDataGenerator
         }
 
         // Now add all of the air blocks.
-        var airType = new BlockMaterialData { MaterialId = Material.Air, ModifierId = 0 };
+        var airType = new BlockMaterialData { MaterialId = MaterialConstants.Air, ModifierId = 0 };
         for (var i = 0; i < config.SegmentLength; ++i)
         for (var j = 0; j < config.SegmentLength; ++j)
             if (!filledPoints[i, j])
@@ -267,7 +266,7 @@ public sealed class WorldSegmentBlockDataGenerator
         /// <summary>
         ///     Running count of material types in this depth plane.
         /// </summary>
-        private readonly Dictionary<BlockMaterialData, int> MaterialCounts = new();
+        private readonly Dictionary<BlockMaterialData, int> materialCounts = new();
 
         private int airBlockCount;
 
@@ -291,7 +290,7 @@ public sealed class WorldSegmentBlockDataGenerator
         ///     Default block type for this depth plane.
         /// </summary>
         public BlockMaterialData DefaultBlockType { get; private set; }
-            = new() { MaterialId = Material.Air, ModifierId = 0 };
+            = new() { MaterialId = MaterialConstants.Air, ModifierId = 0 };
 
         /// <summary>
         ///     Z offset of this depth plane.
@@ -309,11 +308,11 @@ public sealed class WorldSegmentBlockDataGenerator
 
             // Update material counts.
             int count;
-            if (MaterialCounts.TryGetValue(block.BlockType, out count))
+            if (materialCounts.TryGetValue(block.BlockType, out count))
                 count++;
             else
                 count = 1;
-            MaterialCounts[block.BlockType] = count;
+            materialCounts[block.BlockType] = count;
 
             // Update default block if needed.
             if (count > leadingMaterialCount)
@@ -330,7 +329,7 @@ public sealed class WorldSegmentBlockDataGenerator
         {
             // Check for case where air is the most common block type.
             if (airBlockCount > leadingMaterialCount)
-                DefaultBlockType = new BlockMaterialData { MaterialId = Material.Air, ModifierId = 0 };
+                DefaultBlockType = new BlockMaterialData { MaterialId = MaterialConstants.Air, ModifierId = 0 };
         }
     }
 }

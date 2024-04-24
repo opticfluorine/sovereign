@@ -15,23 +15,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-
 namespace Sovereign.ClientCore.Rendering.Materials;
 
 /// <summary>
-///     IoC installer for the rendering side of materials.
+///     Describes a subtype of a material.
 /// </summary>
-public sealed class RenderingMaterialsInstaller : IWindsorInstaller
+public class MaterialSubtype
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
-    {
-        container.Register(Component.For<RenderingMaterialManager>()
-            .LifestyleSingleton());
+    /// <summary>
+    ///     The material modifier value. Unique within a material.
+    /// </summary>
+    public int MaterialModifier { get; set; }
 
-        container.Register(Component.For<RenderingMaterialValidator>()
-            .LifestyleTransient());
-    }
+    /// <summary>
+    ///     The ID of the tile sprite used for the top face.
+    /// </summary>
+    public int TopFaceTileSpriteId { get; set; }
+
+    /// <summary>
+    ///     The ID of the tile sprite used for the top face if a face is obscured.
+    /// </summary>
+    public int ObscuredTopFaceTileSpriteId { get; set; }
+
+    /// <summary>
+    ///     The ID of the tile sprite used for the side face.
+    /// </summary>
+    public int SideFaceTileSpriteId { get; set; }
 }

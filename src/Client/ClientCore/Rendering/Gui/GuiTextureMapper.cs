@@ -16,10 +16,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
+using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
@@ -47,7 +49,17 @@ public class GuiTextureMapper
         /// <summary>
         ///     Texture is a static sprite.
         /// </summary>
-        Sprite
+        Sprite,
+
+        /// <summary>
+        ///     Texture is multiple overlapping sources.
+        /// </summary>
+        Multiple,
+
+        /// <summary>
+        ///     Texture is a custom animated sprite not in the animated sprite table.
+        /// </summary>
+        CustomAnimatedSprite
     }
 
     /// <summary>
@@ -58,13 +70,23 @@ public class GuiTextureMapper
     /// <summary>
     ///     Map from animated sprite ID to corresponding textures list entry.
     /// </summary>
-    private readonly Dictionary<int, int> animatedSpriteIndices = new();
+    private readonly Dictionary<Tuple<int, Orientation, AnimationPhase>, int> animatedSpriteIndices = new();
 
     private readonly AnimatedSpriteManager animatedSpriteManager;
 
     private readonly TextureAtlasManager atlasManager;
     private readonly AtlasMap atlasMap;
     private readonly ClientConfigurationManager clientConfigurationManager;
+
+    /// <summary>
+    ///     Map from custom ID to corresponding texture list entry.
+    /// </summary>
+    private readonly Dictionary<string, int> customIndices = new();
+
+    /// <summary>
+    ///     Queue of indices that can be reclaimed for use.
+    /// </summary>
+    private readonly Queue<int> reclaimableIndices = new();
 
     /// <summary>
     ///     Map from sprite ID to corresponding textures list entry.
@@ -83,18 +105,30 @@ public class GuiTextureMapper
     /// </summary>
     private readonly List<TextureData> textures = new();
 
+    /// <summary>
+    ///     Map from tilesprite ID (and neighbors) to corresponding texture list entry (front face).
+    /// </summary>
+    private readonly Dictionary<Tuple<int, int, int, int, int>, int> tileSpriteIndices = new();
+
+    private readonly TileSpriteManager tileSpriteManager;
+
     public GuiTextureMapper(TextureAtlasManager atlasManager, SpriteSheetManager spriteSheetManager,
         AnimatedSpriteManager animatedSpriteManager, AtlasMap atlasMap,
-        ClientConfigurationManager clientConfigurationManager)
+        ClientConfigurationManager clientConfigurationManager,
+        TileSpriteManager tileSpriteManager)
     {
         this.atlasManager = atlasManager;
         this.spriteSheetManager = spriteSheetManager;
         this.animatedSpriteManager = animatedSpriteManager;
         this.atlasMap = atlasMap;
         this.clientConfigurationManager = clientConfigurationManager;
+        this.tileSpriteManager = tileSpriteManager;
 
         animatedSpriteManager.OnAnimatedSpriteAdded += OnAnimatedSpriteAdded;
         animatedSpriteManager.OnAnimatedSpriteRemoved += OnAnimatedSpriteRemoved;
+        tileSpriteManager.OnTileSpriteAdded += OnTileSpriteChange;
+        tileSpriteManager.OnTileSpriteRemoved += OnTileSpriteChange;
+        tileSpriteManager.OnTileSpriteUpdated += OnTileSpriteChange;
     }
 
     /// <summary>
@@ -111,30 +145,73 @@ public class GuiTextureMapper
     ///     Gets the ImGui texture ID for an animated sprite.
     /// </summary>
     /// <param name="animatedSpriteId">Animated sprite ID.</param>
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Animation phase.</param>
     /// <returns>ImGui texture ID.</returns>
-    public IntPtr GetTextureIdForAnimatedSprite(int animatedSpriteId)
+    public IntPtr GetTextureIdForAnimatedSprite(int animatedSpriteId, Orientation orientation, AnimationPhase phase)
     {
-        if (!animatedSpriteIndices.TryGetValue(animatedSpriteId, out var index))
+        var key = Tuple.Create(animatedSpriteId, orientation, phase);
+        if (!animatedSpriteIndices.TryGetValue(key, out var index))
         {
-            // For convenience, select dimensions to match the first south-facing sprite in the default phase.
+            // For convenience, select dimensions to match the first frame in the animation.
             var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
-            var firstSprite = animatedSprite.Phases[AnimationPhase.Default].GetSpriteForTime(0, Orientation.South);
+            var firstSprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(0, orientation);
             var spriteBounds = atlasMap.MapElements[firstSprite.Id];
             var clientConfiguration = clientConfigurationManager.ClientConfiguration;
             var width = spriteBounds.WidthInTiles * clientConfiguration.TileWidth;
             var height = spriteBounds.HeightInTiles * clientConfiguration.TileWidth;
 
             // Add record to table.
-            index = textures.Count;
-            textures.Add(new TextureData
+            index = GetNextTextureId();
+            textures.Insert(index, new TextureData
             {
                 SourceType = SourceType.AnimatedSprite,
                 Id = animatedSpriteId,
+                Orientation = orientation,
+                AnimationPhase = phase,
                 Width = width,
                 Height = height
             });
-            animatedSpriteIndices[animatedSpriteId] = index;
+            animatedSpriteIndices[key] = index;
         }
+
+        return new IntPtr(index + IndexOffset);
+    }
+
+    /// <summary>
+    ///     Gets the ImGui texture ID for a custom animated sprite that is not in the animated sprite table.
+    /// </summary>
+    /// <param name="customSpriteId">Unique identifier for the custom animated sprite.</param>
+    /// <param name="customSprite">Custom animated sprite.</param>
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Animation phase.</param>
+    /// <returns>ImGui texture ID.</returns>
+    public IntPtr GetTextureIdForCustomAnimatedSprite(string customSpriteId, AnimatedSprite customSprite,
+        Orientation orientation, AnimationPhase phase)
+    {
+        if (!customIndices.TryGetValue(customSpriteId, out var index))
+        {
+            index = GetNextTextureId();
+            textures.Insert(index, new TextureData
+            {
+                SourceType = SourceType.CustomAnimatedSprite
+            });
+            customIndices[customSpriteId] = index;
+        }
+
+        // Update existing record in case any paramters were changed since the last call.
+        var firstSprite = customSprite.GetPhaseData(phase).GetSpriteForTime(0, orientation);
+        var spriteBounds = atlasMap.MapElements[firstSprite.Id];
+        var clientConfiguration = clientConfigurationManager.ClientConfiguration;
+        var width = spriteBounds.WidthInTiles * clientConfiguration.TileWidth;
+        var height = spriteBounds.HeightInTiles * clientConfiguration.TileWidth;
+
+        var texData = textures[index];
+        texData.CustomAnimatedSprite = customSprite;
+        texData.Orientation = orientation;
+        texData.AnimationPhase = phase;
+        texData.Width = width;
+        texData.Height = height;
 
         return new IntPtr(index + IndexOffset);
     }
@@ -157,8 +234,8 @@ public class GuiTextureMapper
             var bottomRightAbsY = topLeftAbsY + sheetData.Surface.Properties.Height;
 
             // Add entry to table.
-            index = textures.Count;
-            textures.Add(new TextureData
+            index = GetNextTextureId();
+            textures.Insert(index, new TextureData
             {
                 SourceType = SourceType.Spritesheet,
                 StartX = (float)topLeftAbsX / atlas.Width,
@@ -188,8 +265,8 @@ public class GuiTextureMapper
 
             // Add entry to table.
             var spriteData = atlasMap.MapElements[spriteId];
-            index = textures.Count;
-            textures.Add(new TextureData
+            index = GetNextTextureId();
+            textures.Insert(index, new TextureData
             {
                 SourceType = SourceType.Sprite,
                 StartX = spriteData.NormalizedLeftX,
@@ -206,6 +283,97 @@ public class GuiTextureMapper
     }
 
     /// <summary>
+    ///     Gets the ImGui texture ID for a tile sprite in a specific context.
+    /// </summary>
+    /// <param name="tileSpriteId">Tile sprite ID.</param>
+    /// <param name="neighborNorthId">North neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborEastId">East neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborSouthId">South neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborWestId">West neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <returns>ImGui texture ID.</returns>
+    /// <exception cref="IndexOutOfRangeException">Thrown if the tile sprite ID is out of range.</exception>
+    public IntPtr GetTextureIdForTileSprite(int tileSpriteId, int neighborNorthId, int neighborEastId,
+        int neighborSouthId, int neighborWestId)
+    {
+        if (!tileSpriteIndices.TryGetValue(
+                Tuple.Create(tileSpriteId, neighborNorthId, neighborEastId, neighborSouthId, neighborWestId),
+                out var index))
+        {
+            if (tileSpriteId >= tileSpriteManager.TileSprites.Count)
+                throw new IndexOutOfRangeException($"Tile sprite {tileSpriteId} does not exist.");
+
+            // Resolve tile sprite through its context to a list of animated sprite layers.
+            var layers = tileSpriteManager.TileSprites[tileSpriteId].GetMatchingAnimatedSpriteIds(neighborNorthId,
+                neighborEastId, neighborSouthId, neighborWestId);
+            if (layers.Count == 0)
+                throw new IndexOutOfRangeException($"Tile sprite {tileSpriteId} contains no layers.");
+
+            // Assume constant sprite size through all layers. Use first layer as source.
+            var firstLayerTexId = GetTextureIdForAnimatedSprite(layers[0], Orientation.South, AnimationPhase.Default);
+            var firstLayerTexData = GetTextureDataForTextureId(firstLayerTexId);
+
+            // Create texture record.
+            index = GetNextTextureId();
+            textures.Insert(index, new TextureData
+            {
+                SourceType = SourceType.Multiple,
+                Layers = layers
+                    .Select(id => GetTextureIdForAnimatedSprite(id, Orientation.South, AnimationPhase.Default))
+                    .ToList(),
+                Width = firstLayerTexData.Width,
+                Height = firstLayerTexData.Height
+            });
+        }
+
+        return new IntPtr(index + IndexOffset);
+    }
+
+    /// <summary>
+    ///     Gets the ImGui texture ID for a custom tile sprite in a specific context.
+    /// </summary>
+    /// <param name="customId">Unique identifier for the custom sprite.</param>
+    /// <param name="customSprite">Custom tile sprite.</param>
+    /// <param name="neighborNorthId">North neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborEastId">East neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborSouthId">South neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="neighborWestId">West neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <returns>ImGui texture ID.</returns>
+    public IntPtr GetTextureIdForCustomTileSprite(string customId, TileSprite customSprite, int neighborNorthId,
+        int neighborEastId, int neighborSouthId, int neighborWestId)
+    {
+        if (!customIndices.TryGetValue(customId, out var index))
+        {
+            index = GetNextTextureId();
+            textures.Insert(index, new TextureData());
+            customIndices[customId] = index;
+        }
+
+        // Update entire record in case there were any changes.
+        var texData = textures[index];
+        texData.SourceType = SourceType.Multiple;
+        texData.Layers ??= new List<IntPtr>();
+        texData.Layers.Clear();
+        texData.Layers.AddRange(
+            customSprite
+                .GetMatchingAnimatedSpriteIds(neighborNorthId, neighborEastId, neighborSouthId, neighborWestId)
+                .Select(id => GetTextureIdForAnimatedSprite(id, Orientation.South, AnimationPhase.Default)));
+        var layerTexData = textures[(int)texData.Layers[0] - IndexOffset];
+        texData.Width = layerTexData.Width;
+        texData.Height = layerTexData.Height;
+
+        return new IntPtr(index + IndexOffset);
+    }
+
+    /// <summary>
+    ///     Gets the next available texture ID.
+    /// </summary>
+    /// <returns>Next available texture ID.</returns>
+    private int GetNextTextureId()
+    {
+        return reclaimableIndices.TryDequeue(out var next) ? next : textures.Count;
+    }
+
+    /// <summary>
     ///     Updates cached entries when a new animated sprite is created.
     /// </summary>
     /// <param name="animatedSpriteId">ID of new animated sprite.</param>
@@ -213,18 +381,19 @@ public class GuiTextureMapper
     {
         // For new animated sprites, any sprites with id >= animatedSpriteId have their ID incremented.
         // Smaller IDs are unaffected.
-        var affectedRows = new List<Tuple<int, int>>();
+        var affectedRows = new List<Tuple<Tuple<int, Orientation, AnimationPhase>, int>>();
 
         // First pass, update the IDs in the texture records.
-        foreach (var oldId in animatedSpriteIndices.Keys)
+        foreach (var key in animatedSpriteIndices.Keys)
         {
+            var oldId = key.Item1;
             if (oldId < animatedSpriteId) continue;
 
             var newId = oldId + 1;
 
-            var index = animatedSpriteIndices[oldId];
+            var index = animatedSpriteIndices[key];
             textures[index].Id = newId;
-            affectedRows.Add(Tuple.Create(oldId, index));
+            affectedRows.Add(Tuple.Create(key, index));
         }
 
         // Second pass, remove affected rows in the index cache.
@@ -234,8 +403,8 @@ public class GuiTextureMapper
         // Third pass, add new rows for affected IDs in the index cache.
         foreach (var oldRow in affectedRows)
         {
-            var newId = oldRow.Item1 + 1;
-            animatedSpriteIndices[newId] = oldRow.Item2;
+            var newKey = Tuple.Create(oldRow.Item1.Item1 + 1, oldRow.Item1.Item2, oldRow.Item1.Item3);
+            animatedSpriteIndices[newKey] = oldRow.Item2;
         }
     }
 
@@ -248,30 +417,57 @@ public class GuiTextureMapper
         // For removed animated sprites, any sprites with id > animatedSpriteId will be decremented.
         // Smaller IDs are not affected.
         // We don't remove the corresponding texture record to avoid a reordering of higher texture IDs.
-        var affectedRows = new List<Tuple<int, int>>();
+        var affectedRows = new List<Tuple<Tuple<int, Orientation, AnimationPhase>, int>>();
+        var rowsToRemove = new List<Tuple<int, Orientation, AnimationPhase>>();
 
         // First pass, update the IDs in the records.
-        foreach (var oldId in animatedSpriteIndices.Keys)
+        foreach (var key in animatedSpriteIndices.Keys)
         {
-            if (oldId <= animatedSpriteId) continue;
+            var oldId = key.Item1;
+            if (oldId < animatedSpriteId) continue;
+            if (oldId == animatedSpriteId)
+            {
+                rowsToRemove.Add(key);
+                continue;
+            }
 
             var newId = oldId - 1;
 
-            var index = animatedSpriteIndices[oldId];
+            var index = animatedSpriteIndices[key];
             textures[index].Id = newId;
-            affectedRows.Add(Tuple.Create(oldId, index));
+            affectedRows.Add(Tuple.Create(key, index));
         }
 
         // Second pass, remove the affected IDs.
-        animatedSpriteIndices.Remove(animatedSpriteId);
+        foreach (var key in rowsToRemove)
+        {
+            reclaimableIndices.Enqueue(animatedSpriteIndices[key]);
+            animatedSpriteIndices.Remove(key);
+        }
+
         foreach (var oldRow in affectedRows) animatedSpriteIndices.Remove(oldRow.Item1);
 
         // Third pass, add new rows for affected IDs to the index cache.
         foreach (var oldRow in affectedRows)
         {
-            var newId = oldRow.Item1 - 1;
-            animatedSpriteIndices[newId] = oldRow.Item2;
+            var newKey = Tuple.Create(oldRow.Item1.Item1 - 1, oldRow.Item1.Item2, oldRow.Item1.Item3);
+            animatedSpriteIndices[newKey] = oldRow.Item2;
         }
+    }
+
+    /// <summary>
+    ///     Called when the tile sprites are changed (added, updated, removed).
+    /// </summary>
+    /// <param name="tileSpriteId">Tile sprite ID.</param>
+    public void OnTileSpriteChange(int tileSpriteId)
+    {
+        // Invalidate all tile sprite texture caches, flagging the texture indices to be reclaimed.
+        foreach (var texId in tileSpriteIndices.Values)
+        {
+            reclaimableIndices.Enqueue(texId);
+        }
+
+        tileSpriteIndices.Clear();
     }
 
     /// <summary>
@@ -279,6 +475,16 @@ public class GuiTextureMapper
     /// </summary>
     public class TextureData
     {
+        /// <summary>
+        ///     For SourceType "AnimatedSprite" and "CustomAnimatedSprite", animation phase.
+        /// </summary>
+        public AnimationPhase AnimationPhase;
+
+        /// <summary>
+        ///     For SourceType "CustomAnimatedSprite", the custom animated sprite to be drawn.
+        /// </summary>
+        public AnimatedSprite? CustomAnimatedSprite;
+
         /// <summary>
         ///     For coordinate-based source types, the normalized top Y coordinate.
         /// </summary>
@@ -298,6 +504,16 @@ public class GuiTextureMapper
         ///     For ID-based source types, the ID of the underlying resource.
         /// </summary>
         public int Id;
+
+        /// <summary>
+        ///     For SourceType "Multiple", the layers to be drawn.
+        /// </summary>
+        public List<IntPtr>? Layers;
+
+        /// <summary>
+        ///     For SourceType "AnimatedSprite" and "CustomAnimatedSprite", orientation.
+        /// </summary>
+        public Orientation Orientation;
 
         /// <summary>
         ///     Source data type.

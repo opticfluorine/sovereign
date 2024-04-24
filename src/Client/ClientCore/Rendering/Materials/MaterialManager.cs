@@ -19,11 +19,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
 
-namespace Sovereign.EngineCore.World.Materials;
+namespace Sovereign.ClientCore.Rendering.Materials;
 
 /// <summary>
 ///     Responsible for managing materials.
@@ -33,7 +34,7 @@ public class MaterialManager
     /// <summary>
     ///     Filename for the material definitions file.
     /// </summary>
-    public const string MaterialDefinitionsFilename = "MaterialDefinitions.yaml";
+    public const string MaterialDefinitionsFilename = "MaterialDefinitions.json";
 
     private readonly IErrorHandler errorHandler;
 
@@ -49,14 +50,20 @@ public class MaterialManager
     /// </summary>
     private readonly IResourcePathBuilder pathBuilder;
 
+    private readonly TileSpriteManager tileSpriteManager;
+
     public MaterialManager(MaterialDefinitionsLoader loader, IResourcePathBuilder pathBuilder,
-        ILogger logger, IErrorHandler errorHandler)
+        ILogger logger, IErrorHandler errorHandler, TileSpriteManager tileSpriteManager)
     {
         /* Set dependencies. */
         this.loader = loader;
         this.pathBuilder = pathBuilder;
         this.logger = logger;
         this.errorHandler = errorHandler;
+        this.tileSpriteManager = tileSpriteManager;
+
+        tileSpriteManager.OnTileSpriteAdded += OnTileSpriteAdded;
+        tileSpriteManager.OnTileSpriteRemoved += OnTileSpriteRemoved;
     }
 
     /// <summary>
@@ -117,7 +124,7 @@ public class MaterialManager
             MaterialName = "Air",
             MaterialSubtypes = new List<MaterialSubtype>
             {
-                new MaterialSubtype
+                new()
                 {
                     MaterialModifier = 0,
                     ObscuredTopFaceTileSpriteId = 0,
@@ -132,5 +139,54 @@ public class MaterialManager
             .Append(airMat)
             .OrderBy(material => material.Id)
             .ToList();
+    }
+
+    /// <summary>
+    ///     Saves the current materials to the materials definition file.
+    /// </summary>
+    private void SaveDefinitions()
+    {
+        // Build definitions.
+        var defs = new MaterialDefinitions
+        {
+            Materials = Materials
+        };
+
+        // Save.
+        loader.SaveDefinitions(MaterialDefinitionsFilename, defs);
+    }
+
+    /// <summary>
+    ///     Called when a new tile sprite is added.
+    /// </summary>
+    /// <param name="tileSpriteId">Added tile sprite ID.</param>
+    private void OnTileSpriteAdded(int tileSpriteId)
+    {
+        foreach (var material in Materials)
+        foreach (var subtype in material.MaterialSubtypes)
+        {
+            if (subtype.SideFaceTileSpriteId >= tileSpriteId) subtype.SideFaceTileSpriteId++;
+            if (subtype.TopFaceTileSpriteId >= tileSpriteId) subtype.TopFaceTileSpriteId++;
+            if (subtype.ObscuredTopFaceTileSpriteId >= tileSpriteId) subtype.ObscuredTopFaceTileSpriteId++;
+        }
+
+        SaveDefinitions();
+    }
+
+    /// <summary>
+    ///     Called when a tile sprite is removed.
+    /// </summary>
+    /// <param name="tileSpriteId">Removed tile sprite ID.</param>
+    private void OnTileSpriteRemoved(int tileSpriteId)
+    {
+        foreach (var material in Materials)
+        foreach (var subtype in material.MaterialSubtypes)
+        {
+            if (subtype.SideFaceTileSpriteId > tileSpriteId) subtype.SideFaceTileSpriteId--;
+            if (subtype.TopFaceTileSpriteId > tileSpriteId) subtype.TopFaceTileSpriteId--;
+            if (subtype.ObscuredTopFaceTileSpriteId > tileSpriteId) subtype.ObscuredTopFaceTileSpriteId--;
+        }
+
+        SaveDefinitions();
     }
 }

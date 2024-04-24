@@ -151,7 +151,6 @@ public class GuiRenderer : IDisposable
         // Execute draw commands.
         var vertexOffset = 0;
         var indexOffset = 0;
-        var constantsUpdated = false;
         var systemTime = systemTimer.GetTime();
         var clipOffset = drawData.DisplayPos;
         for (var i = 0; i < drawData.CmdListsCount; ++i)
@@ -177,16 +176,30 @@ public class GuiRenderer : IDisposable
                     (uint)(maxY - minY));
 
                 // Resource binding for next draw call.
-                if (TryBindTexture(curCmd, systemTime) || !constantsUpdated)
+                if (curCmd.TextureId != GuiFontAtlas.TextureId)
                 {
-                    guiResourceManager.GuiUniformBuffer.Buffer[0] = vertexConstants;
-                    guiResourceManager.GuiUniformBuffer.Update(commandList);
-                    constantsUpdated = true;
+                    var texId = curCmd.GetTexID();
+                    var texData = textureMapper.GetTextureDataForTextureId(texId);
+                    if (texData is { SourceType: GuiTextureMapper.SourceType.Multiple, Layers: not null })
+                    {
+                        foreach (var layerTexId in texData.Layers)
+                        {
+                            DrawTextureLayer(commandList, curCmd, layerTexId, systemTime, indexOffset, listIndexOffset,
+                                vertexOffset);
+                        }
+                    }
+                    else
+                    {
+                        DrawTextureLayer(commandList, curCmd, texId, systemTime, indexOffset, listIndexOffset,
+                            vertexOffset);
+                    }
+                }
+                else
+                {
+                    DrawTextureLayer(commandList, curCmd, curCmd.GetTexID(), systemTime, indexOffset, listIndexOffset,
+                        vertexOffset);
                 }
 
-                // Execute draw call.
-                commandList.DrawIndexed(curCmd.ElemCount, 1,
-                    (uint)(indexOffset + listIndexOffset), vertexOffset, 0);
                 listIndexOffset += (int)curCmd.ElemCount;
             }
 
@@ -198,16 +211,43 @@ public class GuiRenderer : IDisposable
     }
 
     /// <summary>
+    ///     Draws a GUI texture layer.
+    /// </summary>
+    /// <param name="commandList">Active command list.</param>
+    /// <param name="curCmd">Current ImGui draw command.</param>
+    /// <param name="texId">Texture ID for current layer.</param>
+    /// <param name="systemTime">Current frame system time.</param>
+    /// <param name="indexOffset">Overall offset into GUI index buffer.</param>
+    /// <param name="listIndexOffset">Current list relative offset into GUI index buffer.</param>
+    /// <param name="vertexOffset">Overall offset into GUI vertex buffer.</param>
+    private void DrawTextureLayer(CommandList commandList, ImDrawCmdPtr curCmd, IntPtr texId, ulong systemTime,
+        int indexOffset,
+        int listIndexOffset, int vertexOffset)
+    {
+        if (guiResourceManager.GuiUniformBuffer == null)
+            throw new InvalidOperationException("GUI uniform buffer is null.");
+
+        if (TryBindTexture(texId, systemTime))
+        {
+            guiResourceManager.GuiUniformBuffer.Buffer[0] = vertexConstants;
+            guiResourceManager.GuiUniformBuffer.Update(commandList);
+        }
+
+        // Execute draw call.
+        commandList.DrawIndexed(curCmd.ElemCount, 1,
+            (uint)(indexOffset + listIndexOffset), vertexOffset, 0);
+    }
+
+    /// <summary>
     ///     Binds the texture for a draw call.
     /// </summary>
-    /// <param name="curCmd">Current draw command.</param>
+    /// <param name="texId">GUI texture ID of next layer.</param>
     /// <param name="systemTime">Current system time.</param>
     /// <returns>
     ///     true if vertex shader constants were updated, false otherwise.
     /// </returns>
-    private bool TryBindTexture(ImDrawCmdPtr curCmd, ulong systemTime)
+    private bool TryBindTexture(IntPtr texId, ulong systemTime)
     {
-        var texId = curCmd.GetTexID();
         if (texId == IntPtr.Zero || texId == lastTexture) return false;
         if (atlasManager.TextureAtlas == null) throw new InvalidOperationException("Texture atlas is null.");
 
@@ -225,7 +265,31 @@ public class GuiRenderer : IDisposable
             switch (textureData.SourceType)
             {
                 case GuiTextureMapper.SourceType.AnimatedSprite:
-                    BindAnimatedSprite(textureData.Id, systemTime, out startX, out startY, out endX, out endY);
+                    BindAnimatedSprite(textureData.Id, textureData.Orientation, textureData.AnimationPhase, systemTime,
+                        out startX, out startY, out endX, out endY);
+                    break;
+
+                case GuiTextureMapper.SourceType.CustomAnimatedSprite:
+                    if (textureData.CustomAnimatedSprite == null)
+                    {
+                        startX = 0.0f;
+                        startY = 0.0f;
+                        endX = 0.0f;
+                        endY = 0.0f;
+                        break;
+                    }
+
+                    BindAnimatedSprite(textureData.CustomAnimatedSprite, textureData.Orientation,
+                        textureData.AnimationPhase, systemTime, out startX, out startY,
+                        out endX, out endY);
+                    break;
+
+                case GuiTextureMapper.SourceType.Multiple:
+                    // Nested layers are not supported, skip.
+                    startX = 0.0f;
+                    startY = 0.0f;
+                    endX = 0.0f;
+                    endY = 0.0f;
                     break;
 
                 case GuiTextureMapper.SourceType.Spritesheet:
@@ -249,13 +313,16 @@ public class GuiRenderer : IDisposable
     /// <summary>
     ///     Binds an animated sprite for a draw call.
     /// </summary>
-    /// <param name="animatedSpriteId">Animated sprite ID.</param>
+    /// <param name="animatedSpriteId">Animated sprite ID to draw.</param>
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Animation phase.</param>
     /// <param name="systemTime">System time for the frame being rendered.</param>
     /// <param name="startX">Top-left X coordinate.</param>
     /// <param name="startY">Top-left Y coordinate.</param>
     /// <param name="endX">Bottom-right X coordinate.</param>
     /// <param name="endY">Bottom-right Y coordinate.</param>
-    private void BindAnimatedSprite(int animatedSpriteId, ulong systemTime, out float startX, out float startY,
+    private void BindAnimatedSprite(int animatedSpriteId, Orientation orientation, AnimationPhase phase,
+        ulong systemTime, out float startX, out float startY,
         out float endX, out float endY)
     {
         // Resolve animation to the sprite for the current frame.
@@ -269,8 +336,27 @@ public class GuiRenderer : IDisposable
             return;
         }
 
-        var animSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].Phases[AnimationPhase.Default];
-        var sprite = animSprite.GetSpriteForTime(systemTime, Orientation.South);
+        var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
+        BindAnimatedSprite(sprite, orientation, phase, systemTime, out startX, out startY, out endX, out endY);
+    }
+
+    /// <summary>
+    ///     Binds an animated sprite for a draw call.
+    /// </summary>
+    /// <param name="animatedSprite">Animated sprite to draw.</param>
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Animation phase.</param>
+    /// <param name="systemTime">System time for the frame being rendered.</param>
+    /// <param name="startX">Top-left X coordinate.</param>
+    /// <param name="startY">Top-left Y coordinate.</param>
+    /// <param name="endX">Bottom-right X coordinate.</param>
+    /// <param name="endY">Bottom-right Y coordinate.</param>
+    private void BindAnimatedSprite(AnimatedSprite animatedSprite, Orientation orientation, AnimationPhase phase,
+        ulong systemTime, out float startX, out float startY,
+        out float endX, out float endY)
+    {
+        var phaseData = animatedSprite.GetPhaseData(phase);
+        var sprite = phaseData.GetSpriteForTime(systemTime, orientation);
 
         // Resolve sprite to texture atlas offset.
         var mapElem = atlasMap.MapElements[sprite.Id];
@@ -317,7 +403,7 @@ public class GuiRenderer : IDisposable
             var indexOut = (indexBuf.BufferPtr + indexOffset * indexSize).ToPointer();
             var indexBytes = curList.IdxBuffer.Size * indexSize;
 
-            // Copy into the device buffers. This is a redundant copy but we can optimize it away later
+            // Copy into the device buffers. This is a redundant copy, but we can optimize it away later
             // if it's a significant performance impact.
             Buffer.MemoryCopy(vertexIn, vertexOut,
                 vertexSize * (vertexBuf.Length - vertexOffset),

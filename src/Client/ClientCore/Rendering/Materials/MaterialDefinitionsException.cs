@@ -20,19 +20,19 @@ using System;
 namespace Sovereign.ClientCore.Rendering.Materials;
 
 /// <summary>
-///     Exception type thrown if there is an issue with rendering materials.
+///     Exception type thrown when an error occurs with material definitions.
 /// </summary>
-public sealed class RenderingMaterialException : ApplicationException
+public sealed class MaterialDefinitionsException : ApplicationException
 {
-    public RenderingMaterialException()
+    public MaterialDefinitionsException()
     {
     }
 
-    public RenderingMaterialException(string message) : base(message)
+    public MaterialDefinitionsException(string message) : base(message)
     {
     }
 
-    public RenderingMaterialException(string message, Exception innerException) : base(message, innerException)
+    public MaterialDefinitionsException(string message, Exception innerException) : base(message, innerException)
     {
     }
 }

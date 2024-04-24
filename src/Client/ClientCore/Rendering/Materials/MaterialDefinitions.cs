@@ -15,24 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System;
+using System.Collections.Generic;
 
-namespace Sovereign.EngineCore.World.Materials;
+namespace Sovereign.ClientCore.Rendering.Materials;
 
 /// <summary>
-///     Exception type thrown when an error occurs with material definitions.
+///     Contains the definitions of the materials.
 /// </summary>
-public sealed class MaterialDefinitionsException : ApplicationException
+public class MaterialDefinitions
 {
-    public MaterialDefinitionsException()
-    {
-    }
-
-    public MaterialDefinitionsException(string message) : base(message)
-    {
-    }
-
-    public MaterialDefinitionsException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
+    /// <summary>
+    ///     Materials.
+    /// </summary>
+    public List<Material> Materials { get; set; } = new();
 }

@@ -4,6 +4,12 @@
 
 ### April
 
+#### 23 April 2024
+
+* Finish up the tile sprite editor.
+* Fix a variety of bugs that were found while testing the tile sprite editor.
+* Update the animated sprite editor to improve UI/UX.
+
 #### 10 April 2024
 
 * Fix various memory allocation issues in the core and client. These fixes greatly reduce the number

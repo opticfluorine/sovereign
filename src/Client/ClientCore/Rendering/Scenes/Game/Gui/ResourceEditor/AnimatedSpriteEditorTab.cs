@@ -176,7 +176,8 @@ public class AnimatedSpriteEditorTab
                 ImGui.TableNextColumn();
                 ImGui.Text($"{i}");
                 ImGui.TableNextColumn();
-                if (guiExtensions.AnimatedSpriteButton($"##spriteButton{i}", i)) Select(i);
+                if (guiExtensions.AnimatedSpriteButton($"##spriteButton{i}", i, Orientation.South,
+                        AnimationPhase.Default)) Select(i);
 
                 if (i == selectedId)
                 {
@@ -216,7 +217,6 @@ public class AnimatedSpriteEditorTab
                         ImGui.Text(canRemove ? "Remove Selected" : reason);
                         ImGui.EndTooltip();
                     }
-
 
                 ImGui.EndTable();
             }
@@ -276,24 +276,30 @@ public class AnimatedSpriteEditorTab
         ImGui.SameLine();
         ImGui.SetNextItemWidth(120.0f);
         ImGui.InputFloat("ms##timestep", ref inputTimestepMs);
+        editingSprite.Phases[currentPhase].FrameTime = (ulong)(inputTimestepMs * UnitConversions.MsToUs);
 
         var maxSize = ImGui.GetWindowSize();
         var maxFrames = editingSprite.Phases[currentPhase].Frames
             .Select(frames => frames.Value.Count)
             .Max();
-        if (ImGui.BeginTable("frameEdtior", maxFrames + 2,
+        if (ImGui.BeginTable("frameEdtior", maxFrames + 3,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
                 new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 144 }))
         {
             ImGui.TableSetupColumn("Orientation");
+            ImGui.TableSetupColumn("");
             ImGui.TableSetupColumn("+/-");
             for (var i = 0; i < maxFrames; ++i) ImGui.TableSetupColumn($"Frame {i + 1}");
+            ImGui.TableSetupScrollFreeze(3, 1);
             ImGui.TableHeadersRow();
 
             foreach (var orientation in orderedOrientations)
             {
                 ImGui.TableNextColumn();
                 ImGui.Text(orientation.ToString());
+
+                ImGui.TableNextColumn();
+                guiExtensions.AnimatedSprite($"edAnimSpr{orientation}", editingSprite, orientation, currentPhase);
 
                 ImGui.TableNextColumn();
                 if (ImGui.Button($"+##{orientation}")) AppendFrame(orientation);
@@ -347,7 +353,12 @@ public class AnimatedSpriteEditorTab
 
         if (ImGui.Button("Save")) SaveState();
         ImGui.SameLine();
-        if (ImGui.Button("Cancel")) ResetState();
+        if (ImGui.Button("Cancel"))
+        {
+            var phase = currentPhase;
+            ResetState();
+            SelectPhase(phase);
+        }
     }
 
     /// <summary>
@@ -505,8 +516,9 @@ public class AnimatedSpriteEditorTab
     private void RemoveSelectedAnimatedSprite()
     {
         animatedSpriteManager.Remove(selectedId);
-        if (selectedId >= animatedSpriteManager.AnimatedSprites.Count)
-            Select(animatedSpriteManager.AnimatedSprites.Count - 1);
+        Select(selectedId >= animatedSpriteManager.AnimatedSprites.Count
+            ? animatedSpriteManager.AnimatedSprites.Count - 1
+            : selectedId);
     }
 
     /// <summary>

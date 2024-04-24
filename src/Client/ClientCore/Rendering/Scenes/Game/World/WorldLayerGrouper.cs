@@ -18,11 +18,11 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.World.Materials;
 using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
