@@ -42,7 +42,7 @@ public sealed class TileSprite
     /// <summary>
     ///     Tile contexts sorted in priority order.
     /// </summary>
-    public readonly List<TileContext> TileContexts;
+    public List<TileContext> TileContexts;
 
     public TileSprite(int id)
     {
@@ -150,6 +150,14 @@ public sealed class TileSprite
                     context.AnimatedSpriteIds.Insert(i, oldId - 1);
                 }
             }
+    }
+
+    /// <summary>
+    ///     Re-sorts the tile contexts so that they resolve correctly.
+    /// </summary>
+    public void ReSortContexts()
+    {
+        TileContexts = SortContexts(TileContexts);
     }
 
     /// <summary>

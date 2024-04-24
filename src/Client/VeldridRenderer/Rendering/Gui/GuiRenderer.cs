@@ -355,7 +355,7 @@ public class GuiRenderer : IDisposable
         ulong systemTime, out float startX, out float startY,
         out float endX, out float endY)
     {
-        var phaseData = animatedSprite.Phases[phase];
+        var phaseData = animatedSprite.GetPhaseData(phase);
         var sprite = phaseData.GetSpriteForTime(systemTime, orientation);
 
         // Resolve sprite to texture atlas offset.

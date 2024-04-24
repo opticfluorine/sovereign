@@ -290,7 +290,7 @@ public class AnimatedSpriteEditorTab
             ImGui.TableSetupColumn("");
             ImGui.TableSetupColumn("+/-");
             for (var i = 0; i < maxFrames; ++i) ImGui.TableSetupColumn($"Frame {i + 1}");
-            ImGui.TableSetupScrollFreeze(3, 0);
+            ImGui.TableSetupScrollFreeze(3, 1);
             ImGui.TableHeadersRow();
 
             foreach (var orientation in orderedOrientations)
