@@ -153,6 +153,14 @@ public sealed class TileSprite
     }
 
     /// <summary>
+    ///     Clears the sprite lookup cache.
+    /// </summary>
+    public void ClearCache()
+    {
+        lookupCache.Clear();
+    }
+
+    /// <summary>
     ///     Re-sorts the tile contexts so that they resolve correctly.
     /// </summary>
     public void ReSortContexts()

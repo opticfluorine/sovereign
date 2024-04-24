@@ -333,6 +333,8 @@ public class TileSpriteEditorTab
                     row.WestTileSpriteId = selectedId;
                     break;
             }
+
+            editingSprite.ClearCache();
         }
     }
 
