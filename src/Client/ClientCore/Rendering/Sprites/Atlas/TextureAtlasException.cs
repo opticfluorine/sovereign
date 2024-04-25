@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.Atlas;
 
@@ -34,10 +33,6 @@ public class TextureAtlasException : ApplicationException
     }
 
     public TextureAtlasException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
-
-    protected TextureAtlasException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

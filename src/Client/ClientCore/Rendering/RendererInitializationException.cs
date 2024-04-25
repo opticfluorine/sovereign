@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Sovereign.ClientCore.Rendering;
 
@@ -35,10 +34,6 @@ public class RendererInitializationException : ApplicationException
     }
 
     public RendererInitializationException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
-
-    protected RendererInitializationException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

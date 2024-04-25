@@ -50,8 +50,6 @@ public class MaterialManager
     /// </summary>
     private readonly IResourcePathBuilder pathBuilder;
 
-    private readonly TileSpriteManager tileSpriteManager;
-
     public MaterialManager(MaterialDefinitionsLoader loader, IResourcePathBuilder pathBuilder,
         ILogger logger, IErrorHandler errorHandler, TileSpriteManager tileSpriteManager)
     {
@@ -60,7 +58,6 @@ public class MaterialManager
         this.pathBuilder = pathBuilder;
         this.logger = logger;
         this.errorHandler = errorHandler;
-        this.tileSpriteManager = tileSpriteManager;
 
         tileSpriteManager.OnTileSpriteAdded += OnTileSpriteAdded;
         tileSpriteManager.OnTileSpriteRemoved += OnTileSpriteRemoved;
@@ -80,6 +77,59 @@ public class MaterialManager
         UnpackMaterialDefinitions(definitions);
 
         logger.Info("Loaded " + Materials.Count + " materials.");
+    }
+
+    /// <summary>
+    ///     Inserts a new material with the given ID. Existing IDs are adjusted as necessary.
+    /// </summary>
+    /// <param name="id">ID of the new material.</param>
+    public void InsertNew(int id)
+    {
+        if (id == Material.Air)
+            throw new InvalidOperationException("Cannot insert before Air material.");
+
+        Materials.Insert(id, new Material
+        {
+            Id = id,
+            MaterialSubtypes = new List<MaterialSubtype> { new() }
+        });
+        for (var i = id + 1; i < Materials.Count; ++i)
+        {
+            Materials[i].Id++;
+        }
+
+        OnMaterialAdded?.Invoke(id);
+    }
+
+    /// <summary>
+    ///     Updates an existing material in place.
+    /// </summary>
+    /// <param name="material">Updated material.</param>
+    public void Update(Material material)
+    {
+        if (material.Id == Material.Air)
+            throw new InvalidOperationException("Cannot modify Air material.");
+
+        Materials[material.Id] = new Material(material);
+        OnMaterialUpdated?.Invoke(material.Id);
+    }
+
+    /// <summary>
+    ///     Removes an existing material. Existing IDs are adjusted as necessary.
+    /// </summary>
+    /// <param name="id">ID of the material to remove.</param>
+    public void Remove(int id)
+    {
+        if (id == Material.Air)
+            throw new InvalidOperationException("Cannot remove Air material.");
+
+        Materials.RemoveAt(id);
+        for (var i = id; i < Materials.Count; ++i)
+        {
+            Materials[i].Id--;
+        }
+
+        OnMaterialRemoved?.Invoke(id);
     }
 
     /// <summary>
@@ -189,4 +239,30 @@ public class MaterialManager
 
         SaveDefinitions();
     }
+
+    /// <summary>
+    ///     Event triggered when a material is added.
+    ///     Parameter is the added material ID.
+    /// </summary>
+    /// <remarks>
+    ///     Since the materials are maintained as a sequential list, any materials with
+    ///     IDs greater than or equal to the new material's ID are incremented by one.
+    /// </remarks>
+    public event Action<int>? OnMaterialAdded;
+
+    /// <summary>
+    ///     Event triggered when a material is updated.
+    ///     Parameter is the updated material ID.
+    /// </summary>
+    public event Action<int>? OnMaterialUpdated;
+
+    /// <summary>
+    ///     Event triggered when a material is removed.
+    ///     Parameter is the removed material ID.
+    /// </summary>
+    /// <remarks>
+    ///     Since the materials are maintained as a sequential list, any materials with
+    ///     IDs greater than the new material's ID are decremented by one.
+    /// </remarks>
+    public event Action<int>? OnMaterialRemoved;
 }

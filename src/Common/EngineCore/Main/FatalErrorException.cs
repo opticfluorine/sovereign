@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Sovereign.EngineCore.Main;
 
@@ -36,10 +35,6 @@ public class FatalErrorException : ApplicationException
     }
 
     public FatalErrorException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
-
-    protected FatalErrorException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

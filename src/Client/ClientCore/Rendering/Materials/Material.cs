@@ -29,6 +29,17 @@ public sealed class Material
     /// </summary>
     public const int Air = 0;
 
+    public Material()
+    {
+    }
+
+    public Material(Material other)
+    {
+        Id = other.Id;
+        MaterialName = other.MaterialName;
+        MaterialSubtypes = new List<MaterialSubtype>(other.MaterialSubtypes);
+    }
+
     /// <summary>
     ///     Material ID. Unique.
     ///     ID 0 is special and indicates a vacant block (no material/air).

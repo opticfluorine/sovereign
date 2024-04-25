@@ -4,6 +4,16 @@
 
 ### April
 
+#### 24 April 2024
+
+* Tile sprite editor: New tile contexts are added to the top of the list instead of the bottom.
+  This makes sure that the live preview of the tile resolves to the newly added context prior
+  to sorting. Tile sprites would never resolve when added to the end since they would always
+  be preempted by the default tile context.
+* Sprite editor: Fix top bar layout behavior when resizing the resource editor window.
+* All: Migrate to .NET 8. Fixed a few deprecated exception constructors, otherwise it was a very
+  straightforward migration.
+
 #### 23 April 2024
 
 * Finish up the tile sprite editor.
