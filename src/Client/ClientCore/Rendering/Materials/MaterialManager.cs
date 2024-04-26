@@ -199,7 +199,7 @@ public class MaterialManager
         // Build definitions.
         var defs = new MaterialDefinitions
         {
-            Materials = Materials
+            Materials = Materials.Slice(1, Materials.Count - 1)
         };
 
         // Save.
