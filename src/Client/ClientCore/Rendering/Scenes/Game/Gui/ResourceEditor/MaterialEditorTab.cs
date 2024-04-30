@@ -34,17 +34,29 @@ public class MaterialEditorTab
     private const uint SelectionColor = 0xFF773333;
 
     /// <summary>
-    ///     Currently edited material.
+    ///     Maximum material name length.
     /// </summary>
-    private readonly Material editingMaterial = new();
+    private const int MaxNameLen = 32;
 
     private readonly GuiExtensions guiExtensions;
     private readonly MaterialManager materialManager;
+    private readonly TileSpriteSelectorPopup tileSpriteSelector;
 
-    public MaterialEditorTab(MaterialManager materialManager, GuiExtensions guiExtensions)
+    /// <summary>
+    ///     Currently edited material.
+    /// </summary>
+    private Material editingMaterial = new();
+
+    private string editingName = "";
+
+    private bool initialized;
+
+    public MaterialEditorTab(MaterialManager materialManager, GuiExtensions guiExtensions,
+        TileSpriteSelectorPopup tileSpriteSelector)
     {
         this.materialManager = materialManager;
         this.guiExtensions = guiExtensions;
+        this.tileSpriteSelector = tileSpriteSelector;
     }
 
     /// <summary>
@@ -52,6 +64,12 @@ public class MaterialEditorTab
     /// </summary>
     public void Render()
     {
+        if (!initialized)
+        {
+            Select(1);
+            initialized = true;
+        }
+
         if (!ImGui.BeginTabItem("Materials")) return;
 
         if (ImGui.BeginTable("materialOuter", 2, ImGuiTableFlags.SizingFixedFit))
@@ -87,7 +105,7 @@ public class MaterialEditorTab
             ImGui.TableSetupColumn("Name");
             ImGui.TableHeadersRow();
 
-            for (var i = 0; i < materialManager.Materials.Count; ++i)
+            for (var i = 1; i < materialManager.Materials.Count; ++i)
             {
                 var mat = materialManager.Materials[i];
 
@@ -165,23 +183,93 @@ public class MaterialEditorTab
     /// </summary>
     private void RenderEditor()
     {
+        RenderEditorTopBar();
     }
 
+    /// <summary>
+    ///     Renders the top control bar of the editor.
+    /// </summary>
+    private void RenderEditorTopBar()
+    {
+        if (ImGui.BeginTable("Header", 5, ImGuiTableFlags.SizingFixedFit))
+        {
+            ImGui.TableSetupColumn("");
+            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+
+            ImGui.TableNextColumn();
+            ImGui.Text($"Material {editingMaterial.Id}");
+
+            ImGui.TableNextColumn();
+
+            ImGui.TableNextColumn();
+            ImGui.Text("Name:");
+
+            ImGui.TableNextColumn();
+            ImGui.SetNextItemWidth(180.0f);
+            ImGui.InputText("##materialName", ref editingName, MaxNameLen);
+
+            ImGui.TableNextColumn();
+            if (ImGui.Button("Add New Subtype")) editingMaterial.MaterialSubtypes.Add(new MaterialSubtype());
+
+            ImGui.EndTable();
+        }
+
+        ImGui.Separator();
+    }
+
+    /// <summary>
+    ///     Selects the material with the given ID for editing.
+    /// </summary>
+    /// <param name="id">Material ID to edit.</param>
     private void Select(int id)
     {
+        editingMaterial.Id = id;
+        Reset();
     }
 
+    /// <summary>
+    ///     Resets the editing material to the last saved state.
+    /// </summary>
+    private void Reset()
+    {
+        editingMaterial = new Material(materialManager.Materials[editingMaterial.Id]);
+        editingName = editingMaterial.MaterialName;
+    }
+
+    /// <summary>
+    ///     Inserts a new material after the currently selected material.
+    /// </summary>
     private void InsertNewMaterial()
     {
+        materialManager.InsertNew(editingMaterial.Id + 1);
     }
 
+    /// <summary>
+    ///     Removes the currently selected material.
+    /// </summary>
     private void RemoveSelectedMaterial()
     {
+        materialManager.Remove(editingMaterial.Id);
+        Select(editingMaterial.Id >= materialManager.Materials.Count
+            ? materialManager.Materials.Count - 1
+            : editingMaterial.Id);
     }
 
+    /// <summary>
+    ///     Checks whether the currently selected material can be removed.
+    /// </summary>
+    /// <param name="reason">Reason why the material cannot be removed. Only set if method returns false.</param>
+    /// <returns>true if the material can be removed, false otherwise.</returns>
     private bool CanRemoveMaterial([NotNullWhen(false)] out string? reason)
     {
         reason = null;
+
+        if (materialManager.Materials.Count <= 2)
+        {
+            reason = "Cannot remove last material.";
+            return false;
+        }
+
         return true;
     }
 }

@@ -43,7 +43,7 @@ public class ResourceEditorGui
     /// </summary>
     public void Render()
     {
-        ImGui.SetNextWindowSize(new Vector2(900.0f, 500.0f), ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSize(new Vector2(900.0f, 640.0f), ImGuiCond.FirstUseEver);
         if (ImGui.Begin("Resource Editor"))
         {
             if (ImGui.BeginTabBar("ResourceEditorTabs", ImGuiTabBarFlags.None))
