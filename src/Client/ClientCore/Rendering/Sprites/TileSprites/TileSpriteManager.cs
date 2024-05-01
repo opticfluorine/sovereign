@@ -104,7 +104,7 @@ public sealed class TileSpriteManager
     /// <summary>
     ///     Updates an existing tile sprite in place.
     /// </summary>
-    /// <param name="newValue">New tile sprite.</param>
+    /// <param name="newValue">Updated tile sprite.</param>
     public void Update(TileSprite newValue)
     {
         if (newValue.Id < 0 || newValue.Id >= TileSprites.Count)

@@ -447,10 +447,10 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     }
 
     /// <summary>
-    ///     Refreshes the entire cache in the background whenever the tile sprites are updated.
+    ///     Refreshes the entire cache in the background whenever resources are updated.
     /// </summary>
-    /// <param name="id"></param>
-    private void OnTileSpriteChange(int id)
+    /// <param name="id">Unused.</param>
+    private void OnResourceChange(int id)
     {
         Task.Run(RefreshCache);
     }
@@ -468,9 +468,12 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         blockPositionEventFilter.OnComponentModified += OnPositionModified;
         entityManager.OnUpdatesStarted += OnStartUpdates;
         entityManager.OnUpdatesComplete += OnEndUpdates;
-        tileSpriteManager.OnTileSpriteAdded += OnTileSpriteChange;
-        tileSpriteManager.OnTileSpriteUpdated += OnTileSpriteChange;
-        tileSpriteManager.OnTileSpriteRemoved += OnTileSpriteChange;
+        tileSpriteManager.OnTileSpriteAdded += OnResourceChange;
+        tileSpriteManager.OnTileSpriteUpdated += OnResourceChange;
+        tileSpriteManager.OnTileSpriteRemoved += OnResourceChange;
+        materialManager.OnMaterialAdded += OnResourceChange;
+        materialManager.OnMaterialUpdated += OnResourceChange;
+        materialManager.OnMaterialRemoved += OnResourceChange;
     }
 
     /// <summary>
@@ -486,8 +489,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         blockPositionEventFilter.OnComponentModified -= OnPositionModified;
         entityManager.OnUpdatesStarted -= OnStartUpdates;
         entityManager.OnUpdatesComplete -= OnEndUpdates;
-        tileSpriteManager.OnTileSpriteAdded -= OnTileSpriteChange;
-        tileSpriteManager.OnTileSpriteUpdated -= OnTileSpriteChange;
-        tileSpriteManager.OnTileSpriteRemoved -= OnTileSpriteChange;
+        tileSpriteManager.OnTileSpriteAdded -= OnResourceChange;
+        tileSpriteManager.OnTileSpriteUpdated -= OnResourceChange;
+        tileSpriteManager.OnTileSpriteRemoved -= OnResourceChange;
+        materialManager.OnMaterialAdded -= OnResourceChange;
+        materialManager.OnMaterialUpdated -= OnResourceChange;
+        materialManager.OnMaterialRemoved -= OnResourceChange;
     }
 }

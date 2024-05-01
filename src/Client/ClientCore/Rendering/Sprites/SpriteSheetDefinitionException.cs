@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Sovereign.ClientCore.Rendering.Sprites;
 
@@ -34,10 +33,6 @@ public class SpriteSheetDefinitionException : ApplicationException
     }
 
     public SpriteSheetDefinitionException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
-
-    protected SpriteSheetDefinitionException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

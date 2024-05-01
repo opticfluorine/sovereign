@@ -209,7 +209,7 @@ public class TileSpriteEditorTab
 
             ImGui.TableNextColumn();
             ImGui.TableNextColumn();
-            if (ImGui.Button("Add New Context")) editingSprite.TileContexts.Add(new TileContext());
+            if (ImGui.Button("Add New Context")) editingSprite.TileContexts.Insert(0, new TileContext());
 
             ImGui.TableNextColumn();
             if (ImGui.Button("Sort Contexts")) editingSprite.ReSortContexts();
@@ -298,6 +298,8 @@ public class TileSpriteEditorTab
         animatedSpriteSelector.Render();
         if (animatedSpriteSelector.TryGetSelection(out var selectedId))
             editingSprite.TileContexts[editingRow].AnimatedSpriteIds[editingCol] = selectedId;
+
+        editingSprite.ClearCache();
     }
 
     /// <summary>
@@ -360,7 +362,12 @@ public class TileSpriteEditorTab
                                  context.SouthTileSpriteId == TileSprite.Wildcard &&
                                  context.WestTileSpriteId == TileSprite.Wildcard);
         if (!canRemoveContext) ImGui.BeginDisabled();
-        if (ImGui.Button($"-##context-{rowIndex}")) editingSprite.TileContexts.RemoveAt(rowIndex);
+        if (ImGui.Button($"-##context-{rowIndex}"))
+        {
+            editingSprite.TileContexts.RemoveAt(rowIndex);
+            editingSprite.ClearCache();
+        }
+
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
             ImGui.BeginTooltip();
@@ -462,8 +469,12 @@ public class TileSpriteEditorTab
 
         ImGui.TableNextColumn();
         if (ImGui.Button($"+##{rowIndex}"))
+        {
             // Add new layer to end of this context.
             layers.Add(0);
+            editingSprite.ClearCache();
+        }
+
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
@@ -474,8 +485,12 @@ public class TileSpriteEditorTab
         var canRemoveLayer = layers.Count > 1;
         if (!canRemoveLayer) ImGui.BeginDisabled();
         if (ImGui.Button($"-##layers-{rowIndex}"))
+        {
             // Remove the last layer of this context.
             layers.RemoveAt(layers.Count - 1);
+            editingSprite.ClearCache();
+        }
+
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
             ImGui.BeginTooltip();

@@ -37,7 +37,7 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 * In-game chat
 * Integrated tools for game resource configuration (e.g. sprite definitions, material definitions, etc.)
 * Admin roles for users
-* Integrated world editing tools in client
+* Creators' manual for resource editing
 
 ## Getting Started
 

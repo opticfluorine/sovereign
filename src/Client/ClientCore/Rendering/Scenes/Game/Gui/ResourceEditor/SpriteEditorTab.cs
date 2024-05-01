@@ -98,8 +98,15 @@ public class SpriteEditorTab
     private void DrawTopBar()
     {
         // Combo box for selecting the current spritesheet.
+        if (!ImGui.BeginTable("tileTopBar", 3, ImGuiTableFlags.SizingFixedFit)) return;
+
+        ImGui.TableSetupColumn("");
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+
+        ImGui.TableNextColumn();
         ImGui.Text("Spritesheet:");
-        ImGui.SameLine();
+
+        ImGui.TableNextColumn();
         if (ImGui.BeginCombo("##spriteSheetCombo", orderedSpriteSheets[currentSheetIdx]))
         {
             for (var i = 0; i < orderedSpriteSheets.Count; ++i)
@@ -114,8 +121,10 @@ public class SpriteEditorTab
         }
 
         // Spritesheet control bar.
-        ImGui.SameLine();
+        ImGui.TableNextColumn();
         if (ImGui.Button("Generate Missing Sprites")) GenerateSprites();
+
+        ImGui.EndTable();
 
         // Error modal if needed.
         var open = true;
