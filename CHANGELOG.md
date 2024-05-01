@@ -4,6 +4,11 @@
 
 ### April
 
+#### 30 April 2024
+
+* Resource editor: Add support for adding/modifying/removing materials. This is the last client-side
+  rendering resource for now. Next step is to create some documentation for the resource editor.
+
 #### 24 April 2024
 
 * Tile sprite editor: New tile contexts are added to the top of the list instead of the bottom.

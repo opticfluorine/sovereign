@@ -43,11 +43,21 @@ public class MaterialEditorTab
     private readonly TileSpriteSelectorPopup tileSpriteSelector;
 
     /// <summary>
+    ///     Face of subtype currently being edited.
+    /// </summary>
+    private Face editingFace;
+
+    /// <summary>
     ///     Currently edited material.
     /// </summary>
     private Material editingMaterial = new();
 
     private string editingName = "";
+
+    /// <summary>
+    ///     Material modifier of subtype currently being edited.
+    /// </summary>
+    private int editingSubtype;
 
     private bool initialized;
 
@@ -172,7 +182,6 @@ public class MaterialEditorTab
                         ImGui.EndTooltip();
                     }
 
-
                 ImGui.EndTable();
             }
         }
@@ -184,6 +193,8 @@ public class MaterialEditorTab
     private void RenderEditor()
     {
         RenderEditorTopBar();
+        RenderSubtypeTable();
+        RenderEditorControls();
     }
 
     /// <summary>
@@ -209,12 +220,138 @@ public class MaterialEditorTab
             ImGui.InputText("##materialName", ref editingName, MaxNameLen);
 
             ImGui.TableNextColumn();
-            if (ImGui.Button("Add New Subtype")) editingMaterial.MaterialSubtypes.Add(new MaterialSubtype());
+            if (ImGui.Button("Add New Subtype"))
+                editingMaterial.MaterialSubtypes.Add(new MaterialSubtype
+                    { MaterialModifier = editingMaterial.MaterialSubtypes.Count });
 
             ImGui.EndTable();
         }
 
         ImGui.Separator();
+    }
+
+    /// <summary>
+    ///     Renders the material subtype editor table.
+    /// </summary>
+    private void RenderSubtypeTable()
+    {
+        var maxSize = ImGui.GetWindowSize();
+        if (!ImGui.BeginTable("subtypeTable", 5,
+                ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
+                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 121 })) return;
+
+        ImGui.TableSetupColumn("Modifier ID");
+        ImGui.TableSetupColumn("Front Face");
+        ImGui.TableSetupColumn("Top Face");
+        ImGui.TableSetupColumn("Obscured Top Face");
+        ImGui.TableSetupColumn("");
+
+        ImGui.TableSetupScrollFreeze(1, 1);
+        ImGui.TableHeadersRow();
+
+        for (var i = 0; i < editingMaterial.MaterialSubtypes.Count; ++i)
+            RenderSubtypeRow(i);
+
+        HandleTileSpriteSelector();
+
+        ImGui.EndTable();
+    }
+
+    /// <summary>
+    ///     Renders a single table row in the editor.
+    /// </summary>
+    /// <param name="rowIndex">Row index.</param>
+    private void RenderSubtypeRow(int rowIndex)
+    {
+        var subtype = editingMaterial.MaterialSubtypes[rowIndex];
+
+        ImGui.TableNextColumn();
+        ImGui.Text($"{subtype.MaterialModifier}");
+
+        ImGui.TableNextColumn();
+        if (guiExtensions.TileSpriteButton($"##front{rowIndex}", subtype.SideFaceTileSpriteId,
+                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard))
+            OpenFaceEditor(rowIndex, Face.Front);
+
+        ImGui.TableNextColumn();
+        if (guiExtensions.TileSpriteButton($"##top{rowIndex}", subtype.TopFaceTileSpriteId,
+                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard))
+            OpenFaceEditor(rowIndex, Face.Top);
+
+        ImGui.TableNextColumn();
+        if (guiExtensions.TileSpriteButton($"##obsc{rowIndex}", subtype.ObscuredTopFaceTileSpriteId,
+                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard))
+            OpenFaceEditor(rowIndex, Face.ObscuredTop);
+
+        ImGui.TableNextColumn();
+        var canRemove = editingMaterial.MaterialSubtypes.Count > 1;
+        if (!canRemove) ImGui.BeginDisabled();
+        if (ImGui.Button($"-##{rowIndex}")) RemoveSubtype(rowIndex);
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+        {
+            if (ImGui.BeginTooltip())
+            {
+                ImGui.Text(canRemove ? "Remove Subtype" : "Cannot remove last subtype");
+                ImGui.EndTooltip();
+            }
+        }
+
+        if (!canRemove) ImGui.EndDisabled();
+    }
+
+    /// <summary>
+    ///     Handles the tile sprite selector if it is open.
+    /// </summary>
+    private void HandleTileSpriteSelector()
+    {
+        tileSpriteSelector.Render();
+        if (tileSpriteSelector.TryGetSelection(out var selectedId))
+        {
+            var subtype = editingMaterial.MaterialSubtypes[editingSubtype];
+            switch (editingFace)
+            {
+                case Face.Front:
+                    subtype.SideFaceTileSpriteId = selectedId;
+                    break;
+
+                case Face.Top:
+                    subtype.TopFaceTileSpriteId = selectedId;
+                    break;
+
+                case Face.ObscuredTop:
+                    subtype.ObscuredTopFaceTileSpriteId = selectedId;
+                    break;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Opens the editor for the given material face.
+    /// </summary>
+    /// <param name="rowIndex">Material modifier of subtype to edit.</param>
+    /// <param name="face">Face of subtype to edit.</param>
+    private void OpenFaceEditor(int rowIndex, Face face)
+    {
+        editingSubtype = rowIndex;
+        editingFace = face;
+        tileSpriteSelector.Open(false);
+    }
+
+    /// <summary>
+    ///     Renders the bottom control bar of the editor.
+    /// </summary>
+    private void RenderEditorControls()
+    {
+        if (ImGui.BeginTable("Controls", 2, ImGuiTableFlags.SizingFixedFit))
+        {
+            ImGui.TableNextColumn();
+            if (ImGui.Button("Save")) Save();
+
+            ImGui.TableNextColumn();
+            if (ImGui.Button("Cancel")) Reset();
+
+            ImGui.EndTable();
+        }
     }
 
     /// <summary>
@@ -225,6 +362,15 @@ public class MaterialEditorTab
     {
         editingMaterial.Id = id;
         Reset();
+    }
+
+    /// <summary>
+    ///     Saves the currently edited material.
+    /// </summary>
+    private void Save()
+    {
+        editingMaterial.MaterialName = editingName;
+        materialManager.Update(editingMaterial);
     }
 
     /// <summary>
@@ -271,5 +417,23 @@ public class MaterialEditorTab
         }
 
         return true;
+    }
+
+    /// <summary>
+    ///     Removes the subtype at the given row.
+    /// </summary>
+    /// <param name="rowIndex">Row index (material modifier).</param>
+    private void RemoveSubtype(int rowIndex)
+    {
+    }
+
+    /// <summary>
+    ///     Enum for specifying which material face is being edited.
+    /// </summary>
+    private enum Face
+    {
+        Front,
+        Top,
+        ObscuredTop
     }
 }

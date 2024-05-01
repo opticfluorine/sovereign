@@ -99,6 +99,7 @@ public class MaterialManager
         }
 
         OnMaterialAdded?.Invoke(id);
+        SaveDefinitions();
     }
 
     /// <summary>
@@ -112,6 +113,7 @@ public class MaterialManager
 
         Materials[material.Id] = new Material(material);
         OnMaterialUpdated?.Invoke(material.Id);
+        SaveDefinitions();
     }
 
     /// <summary>
@@ -130,6 +132,7 @@ public class MaterialManager
         }
 
         OnMaterialRemoved?.Invoke(id);
+        SaveDefinitions();
     }
 
     /// <summary>
@@ -203,7 +206,10 @@ public class MaterialManager
         };
 
         // Save.
-        loader.SaveDefinitions(MaterialDefinitionsFilename, defs);
+        var filename = pathBuilder.BuildPathToResource(ResourceType.World,
+            MaterialDefinitionsFilename);
+        loader.SaveDefinitions(filename, defs);
+        logger.InfoFormat("Saved {0} materials.", Materials.Count - 1);
     }
 
     /// <summary>
