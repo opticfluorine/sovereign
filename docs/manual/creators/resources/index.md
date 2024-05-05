@@ -95,7 +95,14 @@ game's graphical resources. To open the resource editor, press the backtick ( ` 
 
 ### Adding Tilesheets
 
-TODO
+Adding a tilesheet must be done outside of the engine. To add a new tilesheet, follow these steps:
+
+1. Copy the spritesheet PNG file to the client's `Data/Spritesheet` directory.
+2. Create a YAML file with the same name as the PNG file. For example, if the spritesheet is named
+   `bat.png`, name the new YAML file `bat.yaml`.
+   :::{tip}
+   The easiest way to create the YAML file is to copy an existing YAML file then updating it.
+   :::
 
 ### Sprite Editor
 
