@@ -103,14 +103,103 @@ Adding a tilesheet must be done outside of the engine. To add a new tilesheet, f
    :::{tip}
    The easiest way to create the YAML file is to copy an existing YAML file then updating it.
    :::
+3. Update the information in the YAML file as needed. Make sure that the `Filename` field matches the
+   name of the PNG file for the spritesheet, and make sure that the `SpriteWidth` and `SpriteHeight`
+   fields are set correctly. Finally, make sure that the attribution fields `Author` and `License`
+   are set correctly, especially if you are using third party assets.
+4. Once a tilesheet is added, start the client and generate its sprite definitions using the
+   [Sprite Editor](#sprite-editor).
 
-### Sprite Editor
+### Generating Sprites from Spritesheets
 
 ![Sprite Editor](images/sprite_editor.png)
+
+The **Sprite Editor** allows you to browse the current spritesheets and generate sprite definitions
+from them. The *Spritesheet* combo selector at the top-left allows you to select which
+spritesheet to work with.
+
+:::{tip}
+If you do not see your spritesheet in the drop-down list, this means it probably has not
+been correctly added. Ensure that you have followed all of the steps in
+[Adding Tilesheets](#adding-tilesheets), then restart the engine. If the spritesheet
+still isn't listed, check the client log for any error messages related to the
+spritesheet.
+:::
+
+If sprites have already been generated for a spritesheet, you will see grey boxes around
+each sprite. Hovering over a sprite will display its sprite ID. If any sprites are
+missing (no grey box, no ID when hovering), click the *Generate Missing Sprites* button
+at top-right to automatically generate them.
 
 ### Animated Sprite Editor
 
 ![Animated Sprite Editor](images/animated_sprite_editor.png)
+
+The **Animated Sprite Editor** allows you to create, edit, and delete animated sprites.
+
+#### Animated Sprite Browser
+
+The *animated sprite browser* at the left allows you to browse and select animated
+sprites. The currently selected animated sprite is highlighted. To select an animated
+sprite, click on the image of the sprite (clicking on the space around it or on the
+ID number will not select the animated sprite).
+:::{warning}
+Selecting an animated sprite in the browser, changing to a different tab in the
+resource editor, or closing the resource editor will cause any unsaved changes to be
+lost.
+:::
+The *+* and *-* buttons below the browser allow you to create or delete animated sprites.
+Clicking the *+* button will add a new animated sprite after the currently selected
+animated sprite. Clicking the *-* button will remvoe the currently selected animated
+sprite. If for any reason the animated sprite cannot be deleted (e.g. it is the only
+animated sprite, it is used in a tile sprite, etc.) the *-* button will be disabled and
+the reason will be displayed when the mouse is hovered over the button.)
+:::{warning}
+Deleting animated sprites is only recommended early in development while resources are
+first being loaded. Deleting an animated sprite will change the ID numbers of all later
+animated sprites; however, any `AnimatedSprite` components on entities stored in the
+server will *not* be updated. For this reason it is best to avoid deleting animated
+sprites once you have started developing server-side content.
+:::
+
+#### Animated Sprite Editor
+
+The *animated sprite editor* is displayed to the right of the browser. Changes made
+in the editor are not saved until the *Save* button at the bottom is clicked. To undo
+any changes that have not yet been saved, click the *Cancel* button at the bottom.
+
+At the top-right of the editor is the *Animation Phase* selector. This allows for
+animations to be defined for different animation phases (default, moving, etc.).
+When a new animated sprite is created, the *Default* animation phase is automatically
+created. Other phases are created when they are selected and populated. To remove an
+animation phase, delete all of the animation frames for that phase. Note that the
+Default animation phase may not be deleted, as the renderer will fall back to the
+default phase if the current animation phase is not defined fro an animated sprite.
+
+Each animation phase may have a different timestep between its frames. This value is
+set using the *Animation Timestep* input box at top left.
+
+Each animation phase is built from one or more *orientations* and associated animations.
+The orientation corresponds to the direction an entity is facing when it is rendered.
+Next to each orientation is a live preview of the animation for that orientation. Note
+that live previews are shown even for orientations which have no frames; these
+orientations will fall back to another orientation if they are not defined.
+
+The *+* and *-* buttons to the right of the live preview are used to add a new frame
+to the end of the list or to remove the last frame in the list respectively. Similarly
+to the browser, the *-* button will be disabled if the frame cannot be removed, and the
+reason will be displayed if the mouse is hovered over a tooltip.
+
+The individual frames may be edited by clicking on them. This opens the sprite selector
+popup. To select a sprite, first use the top dropdown to select the spritesheet, then
+click on the corresponding sprite.
+
+:::{tip}
+If nothing happens when you click on a sprite, switch to the Sprite Editor and 
+ensure that the sprite definitions have been generated for that spritesheet.
+See [Generating Sprites from Spritesheets](#generating-sprites-from-spritesheets) for
+more information.
+:::
 
 ### Tile Sprite Edtior
 
