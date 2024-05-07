@@ -1,4 +1,4 @@
-# Resources
+# Client Resources
 
 Sovereign Engine uses four primary resource types defined in the client: **Sprites**,
 **Animated Sprites**, **Tile Sprites**, and **Materials**. These four resource types
@@ -9,9 +9,8 @@ determine the appearance of the game world.
 ### Sprites
 
 **Sprites** are the simplest graphical resource in Sovereign Engine: a sprite is simply a
-static image that can be incorporated into other resources.
-Sprites are created from **spritesheets**, image files that contain a grid of same-sized
-individual graphics.
+static image that can be incorporated into other resources. Sprites are created from 
+**spritesheets**, image files that contain a grid of same-sized individual graphics.
 
 When the Sovereign Engine client starts, it loads all of the spritesheets from the
 `Data/Spritesheet` directory. Each spritesheet is defined by two files: a PNG file which
@@ -88,7 +87,7 @@ weeds, etc.). These subtypes are uniquely numbered by their *material modifier* 
 The materials are tracked in the *material definitions* found in the `Data/World/MaterialDefinitions.json`
 file.
 
-## Editing Resources
+## Resource Editor
 
 Sovereign Engine includes a built-in resource editor in the client for modifying the
 game's graphical resources. To open the resource editor, press the backtick ( ` ) key.
@@ -110,13 +109,13 @@ Adding a tilesheet must be done outside of the engine. To add a new tilesheet, f
 4. Once a tilesheet is added, start the client and generate its sprite definitions using the
    [Sprite Editor](#sprite-editor).
 
-### Generating Sprites from Spritesheets
+### Sprites Tab
 
 ![Sprite Editor](images/sprite_editor.png)
 
-The **Sprite Editor** allows you to browse the current spritesheets and generate sprite definitions
-from them. The *Spritesheet* combo selector at the top-left allows you to select which
-spritesheet to work with.
+The **Sprites** tab in the Resource Editor allows you to browse the current spritesheets 
+and generate sprite definitions from them. The *Spritesheet* combo selector at the top-left 
+allows you to select which spritesheet to work with.
 
 :::{tip}
 If you do not see your spritesheet in the drop-down list, this means it probably has not
@@ -131,11 +130,12 @@ each sprite. Hovering over a sprite will display its sprite ID. If any sprites a
 missing (no grey box, no ID when hovering), click the *Generate Missing Sprites* button
 at top-right to automatically generate them.
 
-### Animated Sprite Editor
+### Animated Sprite Tab
 
 ![Animated Sprite Editor](images/animated_sprite_editor.png)
 
-The **Animated Sprite Editor** allows you to create, edit, and delete animated sprites.
+The **Animated Sprites** tab in the Resource Editor allows you to create, edit, and delete 
+animated sprites.
 
 #### Animated Sprite Browser
 
@@ -201,10 +201,69 @@ See [Generating Sprites from Spritesheets](#generating-sprites-from-spritesheets
 more information.
 :::
 
-### Tile Sprite Edtior
+### Tile Sprites Tab
 
 ![Tile Sprite Editor](images/tile_sprite_editor.png)
 
-### Material Editor
+The **Tile Sprites** tab allows you to create, edit, and delete tile sprites.
+
+#### Tile Sprite Browser
+
+The *tile sprite browser* at the left allows you to browse and select tile
+sprites. The currently selected tile sprite is highlighted. To select a tile
+sprite, click on the image of the sprite (clicking on the space around it or on the
+ID number will not select the tile sprite).
+:::{warning}
+Selecting a tile sprite in the browser, changing to a different tab in the
+resource editor, or closing the resource editor will cause any unsaved changes to be
+lost.
+:::
+The *+* and *-* buttons below the browser allow you to create or delete tile sprites.
+Clicking the *+* button will add a new tile sprite after the currently selected
+tile sprite. Clicking the *-* button will remvoe the currently selected tile
+sprite. If for any reason the tile sprite cannot be deleted (e.g. it is the only
+tile sprite, it is used in a tile sprite, etc.) the *-* button will be disabled and
+the reason will be displayed when the mouse is hovered over the button.
+
+#### Tile Sprite Editor
+
+The *tile sprite editor* is displayed to the right of the browser. Changes made
+in the editor are not saved until the *Save* button at the bottom is clicked. To undo
+any changes that have not yet been saved, click the *Cancel* button at the bottom.
+
+As described in [Tile Sprites](#tile-sprites), tile sprites consist of a list of
+*tile contexts* which specify a list of animated sprites to draw when a specific pattern
+of neighboring tiles (which may include any number of wildcards) is matched. The tile
+sprite editor displays these contexts in rows. The columns of each row are, in order:
+
+* A *-* button that removes the tile context. Note that the default context
+  (all wildcards) may not be removed.
+* A preview of the tile sprite when its pattern is matched. When the preview is hovered,
+  a popup appears showing a larger preview of the tile surrounded by its neighbors.
+  :::{tip}
+  If the preview does not look correct, try clicking the *Sort Contexts* button at
+  top right. Sometimes when the pattern of a tile context is modified, it is in the
+  wrong spot in the list and is incorrectly matched to an earlier entry. Sorting the
+  list resolves this issue. The list is also automatically sorted when the tile sprite
+  is saved.
+  :::
+* Neighboring tiles for the north, east, south, and west directions in order. Clicking
+  on the neighboring tile will open the tile sprite selector allowing for another tile
+  sprite or wildcard to be selected.
+* Controls for adding or removing animated sprite layers to the tile context. Similar
+  to the [Animated Sprite Editor](#animated-sprite-editor), the *+* button adds a new
+  layer to the end while the *-* button removes the last layer. There must always be
+  at least one layer for each tile context.
+* The layers of the tile context in the order in which they will be drawn. Clicking on
+  a layer opens the animated sprite selector allowing for another animated sprite to be
+  selected.
+
+### Materials Tab
 
 ![Material Editor](images/material_editor.png)
+
+The **Materials** tab allows you to create, edit, and delete materials.
+
+#### Materials Browser
+
+#### Materials Editor
