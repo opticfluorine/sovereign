@@ -234,7 +234,8 @@ any changes that have not yet been saved, click the *Cancel* button at the botto
 As described in [Tile Sprites](#tile-sprites), tile sprites consist of a list of
 *tile contexts* which specify a list of animated sprites to draw when a specific pattern
 of neighboring tiles (which may include any number of wildcards) is matched. The tile
-sprite editor displays these contexts in rows. The columns of each row are, in order:
+sprite editor displays these contexts in rows. New rows may be added by clicking the
+*Add New Context* button at top right. The columns of each row are, in order:
 
 * A *-* button that removes the tile context. Note that the default context
   (all wildcards) may not be removed.
@@ -266,4 +267,40 @@ The **Materials** tab allows you to create, edit, and delete materials.
 
 #### Materials Browser
 
+The *material browser* at the left allows you to browse and select tile
+sprites. The currently selected material is highlighted. 
+The three tile sprites shown are the three faces of the sprite: the front face,
+the top face, and the obscured top face. To select a material,
+click on any of the iamges (clicking on the space around it, on the
+ID number, or on the name will not select the material).
+:::{warning}
+Selecting a material in the browser, changing to a different tab in the
+resource editor, or closing the resource editor will cause any unsaved changes to be
+lost.
+:::
+The *+* and *-* buttons below the browser allow you to create or delete materials.
+Clicking the *+* button will add a new material after the currently selected
+material. Clicking the *-* button will remvoe the currently selected tile
+sprite. If for any reason the material cannot be deleted (e.g. it is the only
+material, it is used in a material, etc.) the *-* button will be disabled and
+the reason will be displayed when the mouse is hovered over the button.
+:::{warning}
+Deleting materials is only recommended early in development while resources are
+first being loaded. Deleting a material will change the ID numbers of all later
+materials; however, any `Material` components on entities stored in the
+server will *not* be updated. For this reason it is best to avoid deleting materials
+once you have started developing server-side content.
+:::
+
 #### Materials Editor
+
+The *materials editor* shows the table of material subtypes for the selected material.
+Changes made in the editor are not saved until the *Save* button at the bottom is 
+clicked. To undo any changes that have not yet been saved, click the *Cancel* button at 
+the bottom.
+
+Along the top is the input field for the material name along wih the
+*Add New Subtype* button which adds a new row to the table. Each row of the table shows
+the material modifier ID, the three faces of the material, and a *-* button for
+removing a material subtype. Clicking on any face of the material opens the tile
+sprite selector allowing for another tile sprite to be selected.
