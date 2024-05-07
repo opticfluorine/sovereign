@@ -15,7 +15,7 @@ Sovereign Engine is made available under the GPLv3 license.
 
 ![Screenshot of Sovereign Client v0.1.0 running with test data.](screenshot.png)
 
-## Current Features (v0.2.0)
+## Current Features (v0.3.0)
 
 * Client and server supporting Windows and Linux platforms
 * Login and registration
@@ -29,15 +29,17 @@ Sovereign Engine is made available under the GPLv3 license.
   server, full server-side persistence in a relational database (SQLite currently supported,
   Postgres planned)
 * Integrated debug GUI in client
+* In-game chat
+* Admin roles for users
+* Integrated resource editor for graphical resources
 
 For full details of the latest changes and features, see the [changelog](CHANGELOG.md).
 
-## Upcoming Features (v0.3.0)
+## Upcoming Features (v0.4.0)
 
-* In-game chat
-* Integrated tools for game resource configuration (e.g. sprite definitions, material definitions, etc.)
-* Admin roles for users
-* Creators' manual for resource editing
+* Performance enhancements to distributed ECS with focus on server-side scalability
+* Server-side entity templates with integrated client-side editor
+* Integrated world editor in client
 
 ## Getting Started
 
