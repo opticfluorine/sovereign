@@ -45,7 +45,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           mkdir $GITHUB_WORKSPACE/artifacts
-          pushd Client/SovereignClient/bin/Release/net6.0
+          pushd Client/SovereignClient/bin/Release/net8.0
           pushd linux-x64
           tar zcf $GITHUB_WORKSPACE/artifacts/SovereignClient-$GITHUB_REF_NAME-linux-x64.tar.gz --transform s/publish/SovereignClient-$GITHUB_REF_NAME/ publish/
           popd
@@ -53,7 +53,7 @@ jobs:
           zip -r $GITHUB_WORKSPACE/artifacts/SovereignClient-$GITHUB_REF_NAME-win-x64.zip *
           popd
           popd
-          pushd Server/SovereignServer/bin/Release/net6.0
+          pushd Server/SovereignServer/bin/Release/net8.0
           pushd linux-x64
           tar zcf $GITHUB_WORKSPACE/artifacts/SovereignServer-$GITHUB_REF_NAME-linux-x64.tar.gz --transform s/publish/SovereignServer-$GITHUB_REF_NAME/ publish/
           popd
