@@ -22,6 +22,6 @@ jobs:
       - name: Trigger Documentation Site Publish
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.DOC_PUB_EVENT_PAT }}
           repository: opticfluorine/sovereign-site-docs
           event-type: sovereign_release
