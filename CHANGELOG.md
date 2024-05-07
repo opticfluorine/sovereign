@@ -2,6 +2,12 @@
 
 ## 2024
 
+### May
+
+#### 7 May 2024
+
+* Creators' Manual: Add documentation for resources, resource editor.
+
 ### April
 
 #### 30 April 2024
