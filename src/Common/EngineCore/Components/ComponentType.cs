@@ -94,6 +94,11 @@ public enum ComponentType
     /// </summary>
     Admin = 0x000B,
 
+    /// <summary>
+    ///     Block position component.
+    /// </summary>
+    BlockPosition = 0x0009,
+
     #endregion Common
 
     #region Client

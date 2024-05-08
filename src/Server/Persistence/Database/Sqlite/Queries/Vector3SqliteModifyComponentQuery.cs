@@ -24,7 +24,7 @@ using Sovereign.Persistence.Database.Queries;
 namespace Sovereign.Persistence.Database.Sqlite.Queries;
 
 /// <summary>
-///     Reusable add query for Vector3-typed components.
+///     Reusable modify query for Vector3-typed components.
 /// </summary>
 /// <remarks>
 ///     Do not pass user data to the constructor; it will not be sanitized.

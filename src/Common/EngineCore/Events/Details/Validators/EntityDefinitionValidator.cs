@@ -31,7 +31,8 @@ public class EntityDefinitionValidator
     public bool Validate(EntityDefinition definition)
     {
         return IsNotPositionedChildEntity(definition) &&
-               IsCompleteIfPlayerCharacter(definition);
+               IsCompleteIfPlayerCharacter(definition) &&
+               IsNotDoublePositioned(definition);
     }
 
     /// <summary>
@@ -41,7 +42,8 @@ public class EntityDefinitionValidator
     /// <returns>true if definition is valid for this rule, false otherwise.</returns>
     private bool IsNotPositionedChildEntity(EntityDefinition definition)
     {
-        return definition is not { Position: not null, Parent: not null };
+        return definition is not { Position: not null, Parent: not null }
+               && definition is not { BlockPosition: not null, Parent: not null };
     }
 
     /// <summary>
@@ -58,5 +60,15 @@ public class EntityDefinitionValidator
                    Position: not null,
                    Name: not null
                };
+    }
+
+    /// <summary>
+    ///     Checks that the entity does not have both a position and a block position.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <returns>true if valid for this rule, false otherwise.</returns>
+    private bool IsNotDoublePositioned(EntityDefinition definition)
+    {
+        return definition is not { Position: not null, BlockPosition: not null };
     }
 }

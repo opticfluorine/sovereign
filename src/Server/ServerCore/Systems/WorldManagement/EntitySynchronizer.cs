@@ -34,6 +34,7 @@ public class EntitySynchronizer
 {
     private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly BlockPositionComponentCollection blockPositions;
     private readonly IServerConfigurationManager configManager;
     private readonly WorldManagementInternalController controller;
     private readonly DrawableTagCollection drawables;
@@ -52,7 +53,7 @@ public class EntitySynchronizer
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
         ParentComponentCollection parents, DrawableTagCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations,
-        AdminTagCollection admins)
+        AdminTagCollection admins, BlockPositionComponentCollection blockPositions)
     {
         this.eventSender = eventSender;
         this.configManager = configManager;
@@ -67,6 +68,7 @@ public class EntitySynchronizer
         this.animatedSprites = animatedSprites;
         this.orientations = orientations;
         this.admins = admins;
+        this.blockPositions = blockPositions;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -147,6 +149,9 @@ public class EntitySynchronizer
             def.Orientation = orientations[entityId];
 
         def.Admin = admins.HasTagForEntity(entityId);
+
+        if (blockPositions.HasComponentForEntity(entityId))
+            def.BlockPosition = blockPositions[entityId];
 
         return def;
     }

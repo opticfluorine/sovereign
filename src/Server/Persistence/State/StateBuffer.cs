@@ -20,6 +20,7 @@ using System.Data;
 using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
@@ -54,6 +55,11 @@ public sealed class StateBuffer
     ///     Animated sprite state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<int>> animatedSpriteUpdates = new(BufferSize);
+
+    /// <summary>
+    ///     Block position state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<GridPosition>> blockPositionUpdates = new(BufferSize);
 
     private readonly StructBuffer<StateUpdate<bool>> drawableUpdates = new(BufferSize);
     private readonly IEventSender eventSender;
@@ -219,16 +225,28 @@ public sealed class StateBuffer
     /// <summary>
     ///     Enqueues an orientation update.
     /// </summary>
-    /// <param name="update"></param>
-    /// <exception cref="NotImplementedException"></exception>
+    /// <param name="update">Update.</param>
     public void UpdateOrientation(ref StateUpdate<Orientation> update)
     {
         orientationUpdates.Add(ref update);
     }
 
+    /// <summary>
+    ///     Enqueues an admin tag update.
+    /// </summary>
+    /// <param name="update">Update.</param>
     public void UpdateAdmin(ref StateUpdate<bool> update)
     {
         adminUpdates.Add(ref update);
+    }
+
+    /// <summary>
+    ///     Enqueues a block position update.
+    /// </summary>
+    /// <param name="update">Update.</param>
+    public void UpdateBlockPosition(ref StateUpdate<GridPosition> update)
+    {
+        blockPositionUpdates.Add(ref update);
     }
 
     /// <summary>
@@ -249,6 +267,7 @@ public sealed class StateBuffer
         animatedSpriteUpdates.Clear();
         orientationUpdates.Clear();
         adminUpdates.Clear();
+        blockPositionUpdates.Clear();
     }
 
     /// <summary>
@@ -350,6 +369,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddAdminComponentQuery,
                     persistenceProvider.ModifyAdminComponentQuery,
                     persistenceProvider.RemoveAdminComponentQuery,
+                    transaction);
+
+                // BlockPosition.
+                SynchronizeComponent(blockPositionUpdates,
+                    persistenceProvider.AddBlockPositionComponentQuery,
+                    persistenceProvider.ModifyBlockPositionComponentQuery,
+                    persistenceProvider.RemoveBlockPositionComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

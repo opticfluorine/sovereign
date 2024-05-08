@@ -213,6 +213,23 @@ CREATE TABLE Admin
 );
 
 
+--------------------
+-- Block Position --
+--------------------
+
+CREATE TABLE BlockPosition
+(
+    id INTEGER PRIMARY KEY NOT NULL,
+    x  INTEGER             NOT NULL,
+    y  INTEGER             NOT NULL,
+    z  INTEGER             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+-- Blocks can't overlap, so use a unique index.
+CREATE UNIQUE INDEX BlockPosition_Xyz_Index ON BlockPosition (x, y, z);
+
+
 -- Create views.
 
 --------------------------------------
@@ -248,7 +265,10 @@ SELECT Entity.id                   AS id,
        Drawable.value              AS drawable,
        AnimatedSprite.value        AS animatedSprite,
        Orientation.value           AS orientation,
-       Admin.value                 AS admin
+       Admin.value                 AS admin,
+       BlockPosition.x             AS blockX,
+       BlockPosition.y             AS blockY,
+       BlockPosition.z             AS blockZ
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
@@ -260,7 +280,8 @@ FROM Entity
          LEFT JOIN Drawable ON Drawable.id = Entity.id
          LEFT JOIN AnimatedSprite ON AnimatedSprite.id = Entity.id
          LEFT JOIN Orientation ON Orientation.id = Entity.id
-         LEFT JOIN Admin ON Admin.id = Entity.id;
+         LEFT JOIN Admin ON Admin.id = Entity.id
+         LEFT JOIN BlockPosition ON BlockPosition.id = Entity.id;
 
 
 -- Create stored procedures and functions.
@@ -285,7 +306,10 @@ CREATE FUNCTION EntityDetails(entityId BIGINT)
                 drawable         BOOLEAN,
                 animatedSprite   INTEGER,
                 orientation      INTEGER,
-                admin            BOOLEAN
+                admin            BOOLEAN,
+                blockX           INTEGER,
+                blockY           INTEGER,
+                blockZ           INTEGER
             )
     LANGUAGE SQL
 AS
@@ -317,7 +341,10 @@ CREATE FUNCTION PositionedEntitiesInRange(x_min REAL, y_min REAL, z_min REAL,
                 drawable         BOOLEAN,
                 animatedSprite   INTEGER,
                 orientation      INTEGER,
-                admin            BOOLEAN
+                admin            BOOLEAN,
+                blockX           INTEGER,
+                blockY           INTEGER,
+                blockZ           INTEGER
             )
     LANGUAGE SQL
 AS
@@ -329,7 +356,16 @@ WHERE x >= x_min
   AND y >= y_min
   AND y < y_max
   AND z >= z_min
-  AND z < z_max;
+  AND z < z_max
+UNION ALL
+SELECT *
+FROM EntityWithComponents
+WHERE blockX >= x_min
+  AND blockX < x_max
+  AND blockY >= y_min
+  AND blockY < y_max
+  AND blockZ >= z_min
+  AND blockZ < z_max;
 $$;
 
 --

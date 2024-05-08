@@ -41,10 +41,11 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         ParentComponentCollection parents,
         OrientationComponentCollection orientations,
         AdminTagCollection admins,
+        BlockPositionComponentCollection blockPositions,
         EntityTable entityTable)
         : base(entityId, isLoad, entityManager, positions, velocities, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
-            orientations, admins, entityTable)
+            orientations, admins, blockPositions, entityTable)
     {
     }
 
