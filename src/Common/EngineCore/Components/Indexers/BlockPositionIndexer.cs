@@ -1,6 +1,6 @@
-﻿/*
+/*
  * Sovereign Engine
- * Copyright (c) 2018 opticfluorine
+ * Copyright (c) 2022 opticfluorine
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,24 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Components;
-
-namespace Sovereign.EngineCore.Systems.Block.Components;
+namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
-///     The AboveBlock component tracks the entity ID of the block, if any, directly
-///     above a block.
+///     Indexes block positions in an octree to enable range retrieval of multiple blocks.
 /// </summary>
-public sealed class AboveBlockComponentCollection : BaseComponentCollection<ulong>
+public sealed class BlockPositionIndexer : BasePositionComponentIndexer
 {
-    /// <summary>
-    ///     Initial size of component collection.
-    /// </summary>
-    public const int InitialSize = 65536;
-
-    public AboveBlockComponentCollection(ComponentManager manager)
-        : base(manager, InitialSize, ComponentOperators.UlongOperators,
-            ComponentType.AboveBlock)
+    public BlockPositionIndexer(PositionComponentCollection positions, BlockPositionEventFilter filter)
+        : base(positions, filter)
     {
     }
 }

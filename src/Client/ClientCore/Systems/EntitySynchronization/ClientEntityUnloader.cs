@@ -18,7 +18,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 
 namespace Sovereign.ClientCore.Systems.EntitySynchronization;
 

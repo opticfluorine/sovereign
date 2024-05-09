@@ -1,6 +1,6 @@
-/*
+﻿/*
  * Sovereign Engine
- * Copyright (c) 2022 opticfluorine
+ * Copyright (c) 2018 opticfluorine
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
+using Castle.Core.Logging;
 
-namespace Sovereign.EngineCore.Systems.Block.Components.Indexers;
+namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
-///     Indexes block positions in an octree to enable range retrieval of multiple blocks.
+///     GridPosition indexer for block entities.
 /// </summary>
-public sealed class BlockPositionIndexer : BasePositionComponentIndexer
+public sealed class BlockGridPositionIndexer : BaseGridPositionIndexer
 {
-    public BlockPositionIndexer(PositionComponentCollection positions, BlockPositionEventFilter filter)
-        : base(positions, filter)
+    public BlockGridPositionIndexer(BlockPositionComponentCollection blockPositions, ILogger logger)
+        : base(blockPositions, blockPositions, logger)
     {
     }
 }

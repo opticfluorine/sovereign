@@ -17,16 +17,14 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.World;
 
-namespace Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
+namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
-///     Base class for component indexers that cache the world segment positioning of entities.
+///     Indexes positioned non-block entities by their world segment.
 /// </summary>
-public class BaseWorldSegmentIndexer : BaseComponentIndexer<Vector3>
+public class NonBlockWorldSegmentIndexer : BaseComponentIndexer<Vector3>
 {
     /// <summary>
     ///     Map from world segment index to the set of non-block entities positioned there.
@@ -40,8 +38,8 @@ public class BaseWorldSegmentIndexer : BaseComponentIndexer<Vector3>
 
     private readonly WorldSegmentResolver resolver;
 
-    public BaseWorldSegmentIndexer(PositionComponentCollection positions, IComponentEventSource<Vector3> eventSource,
-        WorldSegmentResolver resolver) : base(positions, eventSource)
+    public NonBlockWorldSegmentIndexer(PositionComponentCollection positions, WorldSegmentResolver resolver)
+        : base(positions, positions)
     {
         this.resolver = resolver;
     }

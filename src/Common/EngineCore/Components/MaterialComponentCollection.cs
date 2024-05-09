@@ -15,9 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Components;
-
-namespace Sovereign.EngineCore.Systems.Block.Components;
+namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     The Material component specifies the material index for a block entity.

@@ -27,8 +27,6 @@ using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.ClientCore.Systems.Block.Caches;

@@ -15,20 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
-using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
+using System.Numerics;
 
-namespace Sovereign.EngineCore.Systems.Block.Components.Indexers;
+namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
-///     GridPosition indexer for block entities.
+///     Component event filter that only accepts position updates for block entities.
 /// </summary>
-public sealed class BlockGridPositionIndexer : BaseGridPositionIndexer
+public sealed class BlockPositionEventFilter : BaseComponentEventFilter<Vector3>
 {
-    public BlockGridPositionIndexer(PositionComponentCollection positions,
-        BlockPositionEventFilter eventFilter, ILogger logger)
-        : base(positions, eventFilter, logger)
+    private readonly MaterialComponentCollection materials;
+
+    public BlockPositionEventFilter(PositionComponentCollection positions,
+        MaterialComponentCollection materials)
+        : base(positions, positions)
     {
+        this.materials = materials;
+    }
+
+    protected override bool ShouldAccept(ulong entityId)
+    {
+        return materials.HasComponentForEntity(entityId, true)
+               || materials.HasPendingComponentForEntity(entityId);
     }
 }

@@ -16,7 +16,6 @@
  */
 
 using System.Collections.Generic;
-using System.Numerics;
 using Castle.Core.Logging;
 
 namespace Sovereign.EngineCore.Components.Indexers;
@@ -25,7 +24,7 @@ namespace Sovereign.EngineCore.Components.Indexers;
 ///     Base class for component indexers that allow lookup by exact integer
 ///     grid coordinates.
 /// </summary>
-public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
+public class BaseGridPositionIndexer : BaseComponentIndexer<GridPosition>
 {
     private readonly Dictionary<GridPosition, HashSet<ulong>> entitiesByPosition = new();
 
@@ -33,8 +32,8 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
 
     private readonly ILogger logger;
 
-    protected BaseGridPositionIndexer(BaseComponentCollection<Vector3> components,
-        IComponentEventSource<Vector3> eventSource, ILogger logger)
+    protected BaseGridPositionIndexer(BaseComponentCollection<GridPosition> components,
+        IComponentEventSource<GridPosition> eventSource, ILogger logger)
         : base(components, eventSource)
     {
         this.logger = logger;
@@ -52,12 +51,12 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
             : null;
     }
 
-    protected override void ComponentAddedCallback(ulong entityId, Vector3 componentValue, bool isLoad)
+    protected override void ComponentAddedCallback(ulong entityId, GridPosition componentValue, bool isLoad)
     {
         AddEntity(entityId, componentValue);
     }
 
-    protected override void ComponentModifiedCallback(ulong entityId, Vector3 componentValue)
+    protected override void ComponentModifiedCallback(ulong entityId, GridPosition componentValue)
     {
         RemoveEntity(entityId);
         AddEntity(entityId, componentValue);
@@ -73,12 +72,11 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<Vector3>
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="position">Position.</param>
-    private void AddEntity(ulong entityId, Vector3 position)
+    private void AddEntity(ulong entityId, GridPosition position)
     {
-        var gridPos = new GridPosition(position);
-        var set = GetSetForPosition(gridPos);
+        var set = GetSetForPosition(position);
         set.Add(entityId);
-        knownPositions[entityId] = gridPos;
+        knownPositions[entityId] = position;
     }
 
     /// <summary>

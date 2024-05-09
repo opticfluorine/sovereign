@@ -20,8 +20,6 @@ using ImGuiNET;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;

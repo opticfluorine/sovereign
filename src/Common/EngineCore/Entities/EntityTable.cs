@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Sovereign.EngineCore.Systems.Block.Components;
+using Sovereign.EngineCore.Components;
 
 namespace Sovereign.EngineCore.Entities;
 

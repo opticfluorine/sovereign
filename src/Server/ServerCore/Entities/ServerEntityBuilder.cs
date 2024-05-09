@@ -18,7 +18,6 @@
 using System;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.ServerCore.Components;
 
 namespace Sovereign.ServerCore.Entities;

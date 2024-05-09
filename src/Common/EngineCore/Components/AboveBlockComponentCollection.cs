@@ -15,24 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Components;
-
-namespace Sovereign.EngineCore.Systems.Block.Components;
+namespace Sovereign.EngineCore.Components;
 
 /// <summary>
-///     The MaterialModifier component specifies the material modifier of a
-///     material block entity.
+///     The AboveBlock component tracks the entity ID of the block, if any, directly
+///     above a block.
 /// </summary>
-public sealed class MaterialModifierComponentCollection : BaseComponentCollection<int>
+public sealed class AboveBlockComponentCollection : BaseComponentCollection<ulong>
 {
     /// <summary>
-    ///     Initial number of components.
+    ///     Initial size of component collection.
     /// </summary>
-    public const int InitialCount = 65536;
+    public const int InitialSize = 65536;
 
-    public MaterialModifierComponentCollection(ComponentManager componentManager)
-        : base(componentManager, InitialCount, ComponentOperators.IntOperators,
-            ComponentType.MaterialModifier)
+    public AboveBlockComponentCollection(ComponentManager manager)
+        : base(manager, InitialSize, ComponentOperators.UlongOperators,
+            ComponentType.AboveBlock)
     {
     }
 }

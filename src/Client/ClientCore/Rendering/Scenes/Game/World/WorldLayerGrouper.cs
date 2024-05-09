@@ -22,7 +22,6 @@ using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
-using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;

@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using MessagePack;
@@ -25,7 +26,6 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Network;
-using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -35,6 +35,8 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public sealed class WorldSegmentBlockDataManager
 {
+    private readonly BlockPositionComponentCollection blockPositions;
+
     /// <summary>
     ///     Set of changed blocks whose segments need to be scheduled for regeneration.
     /// </summary>
@@ -56,7 +58,6 @@ public sealed class WorldSegmentBlockDataManager
 
     private readonly WorldSegmentBlockDataGenerator generator;
 
-    private readonly PositionComponentCollection positions;
     private readonly WorldSegmentResolver resolver;
 
     /// <summary>
@@ -68,12 +69,12 @@ public sealed class WorldSegmentBlockDataManager
         WorldSegmentBlockDataGenerator generator,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
-        PositionComponentCollection positions,
+        BlockPositionComponentCollection blockPositions,
         WorldSegmentResolver resolver,
         EntityManager entityManager)
     {
         this.generator = generator;
-        this.positions = positions;
+        this.blockPositions = blockPositions;
         this.resolver = resolver;
 
         materials.OnComponentAdded += OnBlockAdded;
@@ -118,7 +119,7 @@ public sealed class WorldSegmentBlockDataManager
         if (deletionTasks.TryGetValue(segmentIndex, out var deletionTask))
             // Segment was rapidly unloaded and reloaded.
             // Schedule the reload for after the unload is complete.
-            dataProducers[segmentIndex] = deletionTask.ContinueWith(task => DoAddWorldSegment(segmentIndex));
+            dataProducers[segmentIndex] = deletionTask.ContinueWith(_ => DoAddWorldSegment(segmentIndex));
         else
             // Segment has not yet been loaded or has been fully unloaded.
             // Start a new processing chain from scratch for this segment.
@@ -137,7 +138,7 @@ public sealed class WorldSegmentBlockDataManager
         // Immediately remove the segment from the data set, then schedule it for disposal.
         if (dataProducers.TryRemove(segmentIndex, out var currentTask))
             deletionTasks[segmentIndex] = currentTask.ContinueWith(
-                task => DoRemoveWorldSegment(segmentIndex));
+                _ => DoRemoveWorldSegment(segmentIndex));
         else
             Logger.ErrorFormat("Tried to remove world segemnt data for {0} before it was added.", segmentIndex);
     }
@@ -202,8 +203,8 @@ public sealed class WorldSegmentBlockDataManager
     {
         try
         {
-            var lastPosition = positions.GetComponentWithLookback(entityId);
-            var segmentIndex = resolver.GetWorldSegmentForPosition(lastPosition);
+            var lastPosition = blockPositions.GetComponentWithLookback(entityId);
+            var segmentIndex = resolver.GetWorldSegmentForPosition((Vector3)lastPosition);
             lock (segmentsToRegenerate)
             {
                 segmentsToRegenerate.Add(segmentIndex);

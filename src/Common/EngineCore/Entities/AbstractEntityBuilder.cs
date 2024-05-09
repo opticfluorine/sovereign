@@ -20,7 +20,6 @@ using System.Numerics;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
-using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineUtil.Threading;
 
 namespace Sovereign.EngineCore.Entities;

@@ -15,10 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
 
-namespace Sovereign.EngineCore.Systems.Block.Components.Indexers;
+namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
 ///     Component event filter that only accepts position updates for non-block entities.

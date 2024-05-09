@@ -16,7 +16,6 @@
 
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
