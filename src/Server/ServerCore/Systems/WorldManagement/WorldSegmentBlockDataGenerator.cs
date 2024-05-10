@@ -15,7 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
@@ -30,21 +32,24 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public sealed class WorldSegmentBlockDataGenerator
 {
+    private readonly BlockGridPositionIndexer blockIndexer;
+    private readonly BlockPositionComponentCollection blockPositions;
     private readonly IWorldManagementConfiguration config;
-    private readonly BlockPositionIndexer indexer;
     private readonly MaterialComponentCollection materials;
     private readonly MaterialModifierComponentCollection modifiers;
     private readonly WorldSegmentResolver resolver;
 
-    public WorldSegmentBlockDataGenerator(WorldSegmentResolver resolver, BlockPositionIndexer indexer,
+    public WorldSegmentBlockDataGenerator(WorldSegmentResolver resolver,
         MaterialComponentCollection materials, MaterialModifierComponentCollection modifiers,
-        IWorldManagementConfiguration config)
+        IWorldManagementConfiguration config, BlockGridPositionIndexer blockIndexer,
+        BlockPositionComponentCollection blockPositions)
     {
         this.resolver = resolver;
-        this.indexer = indexer;
         this.materials = materials;
         this.modifiers = modifiers;
         this.config = config;
+        this.blockIndexer = blockIndexer;
+        this.blockPositions = blockPositions;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -57,12 +62,9 @@ public sealed class WorldSegmentBlockDataGenerator
     public WorldSegmentBlockData Create(GridPosition segmentIndex)
     {
         // Retrieve the latest data for the requested world segment.
-        var range = resolver.GetRangeForWorldSegment(segmentIndex);
-        var blocks = new List<PositionedEntity>();
-        using (var lockHandle = indexer.AcquireLock())
-        {
-            indexer.GetEntitiesInRange(lockHandle, range.Item1, range.Item2, blocks);
-        }
+        var blocks = blockIndexer.GetEntitiesAtPosition(segmentIndex) ?? new HashSet<ulong>();
+        var positionedBlocks = blocks
+            .Select(entityId => Tuple.Create(entityId, blockPositions[entityId])).ToList();
 
         Logger.DebugFormat("Segment {0} has {1} blocks.", segmentIndex, blocks.Count);
 
@@ -70,7 +72,7 @@ public sealed class WorldSegmentBlockDataGenerator
         var basePoint = resolver.GetRangeForWorldSegment(segmentIndex).Item1;
         var depthPlanes = new DepthPlane[config.SegmentLength];
         for (var i = 0; i < config.SegmentLength; ++i) depthPlanes[i] = new DepthPlane(config.SegmentLength, i);
-        GroupByDepth(blocks, depthPlanes, (int)basePoint.Z);
+        GroupByDepth(positionedBlocks, depthPlanes, (int)basePoint.Z);
 
         // Initialize a new block summary data object.
         var data = GetEmptyBlockData();
@@ -112,19 +114,19 @@ public sealed class WorldSegmentBlockDataGenerator
     /// <param name="blocks">Blocks in the world segment.</param>
     /// <param name="depthPlanes">Depth planes to populate, indexed by z offset from segment origin.</param>
     /// <param name="baseZ">Z coordinate of segment base point.</param>
-    private void GroupByDepth(List<PositionedEntity> blocks, DepthPlane[] depthPlanes, int baseZ)
+    private void GroupByDepth(List<Tuple<ulong, GridPosition>> blocks, DepthPlane[] depthPlanes, int baseZ)
     {
         // Group blocks by depth.
         foreach (var block in blocks)
         {
-            var offset = (int)block.Position.Z - baseZ;
-            var material = materials[block.EntityId];
-            var modifier = modifiers[block.EntityId];
+            var offset = block.Item2.Z - baseZ;
+            var material = materials[block.Item1];
+            var modifier = modifiers[block.Item1];
 
             var blockData = new BlockData
             {
                 BlockType = new BlockMaterialData { MaterialId = material, ModifierId = modifier },
-                Position = new GridPosition(block.Position)
+                Position = block.Item2
             };
 
             depthPlanes[offset].Add(blockData);
