@@ -59,5 +59,7 @@ public sealed class StateTrackerInstaller : IWindsorInstaller
             .LifestyleSingleton());
 
         container.Register(Component.For<AdminStateTracker>().LifestyleSingleton());
+
+        container.Register(Component.For<BlockPositionStateTracker>().LifestyleSingleton());
     }
 }

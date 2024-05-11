@@ -17,6 +17,7 @@
 
 using System;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Entities;
@@ -60,6 +61,19 @@ public interface IEntityBuilder
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutPositionable();
+
+    /// <summary>
+    ///     Makes the new entity a block with the given grid position.
+    /// </summary>
+    /// <param name="position">Grid position.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder BlockPositionable(GridPosition position);
+
+    /// <summary>
+    ///     Removes block position components if they are currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutBlockPositionable();
 
     /// <summary>
     ///     Makes the new entity drawable.

@@ -39,19 +39,19 @@ public enum ComponentType
     /// <summary>
     ///     Material component.
     /// </summary>
-    /// <seealso cref="Sovereign.EngineCore.Systems.Block.Components.MaterialComponentCollection" />
+    /// <seealso cref="MaterialComponentCollection" />
     Material = 0x0002,
 
     /// <summary>
     ///     Material modifier component.
     /// </summary>
-    /// <seealso cref="Sovereign.EngineCore.Systems.Block.Components.MaterialModifierComponentCollection" />
+    /// <seealso cref="MaterialModifierComponentCollection" />
     MaterialModifier = 0x0003,
 
     /// <summary>
     ///     Above block component.
     /// </summary>
-    /// <seealso cref="Sovereign.EngineCore.Systems.Block.Components.AboveBlockComponentCollection" />
+    /// <seealso cref="AboveBlockComponentCollection" />
     AboveBlock = 0x0004,
 
     /// <summary>
@@ -93,6 +93,11 @@ public enum ComponentType
     ///     Admin tag.
     /// </summary>
     Admin = 0x000B,
+
+    /// <summary>
+    ///     Block position component.
+    /// </summary>
+    BlockPosition = 0x0009,
 
     #endregion Common
 

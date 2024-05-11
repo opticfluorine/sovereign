@@ -14,19 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using Sovereign.EngineCore.Components.Indexers;
 
-namespace Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
+namespace Sovereign.EngineCore.Components;
 
-public class WorldManagementIndexersInstaller : IWindsorInstaller
+/// <summary>
+///     Manages the grid-based positions of block entities.
+/// </summary>
+public class BlockPositionComponentCollection : BaseComponentCollection<GridPosition>
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
+    /// <summary>
+    ///     Initial number of allocated components.
+    /// </summary>
+    private const int BaseSize = 524288;
+
+    public BlockPositionComponentCollection(ComponentManager componentManager)
+        : base(componentManager, BaseSize, ComponentOperators.GridPositionOperators,
+            ComponentType.BlockPosition)
     {
-        container.Register(Component.For<NonBlockWorldSegmentIndexer>()
-            .LifestyleSingleton());
-        container.Register(Component.For<WorldSegmentIndexer>()
-            .LifestyleSingleton());
     }
 }

@@ -31,19 +31,20 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
     /// </summary>
     private const string query =
         @"WITH RECURSIVE EntityTree(id, x, y, z, material, materialModifier, playerCharacter, name, account, 
-                parent, drawable, animatedSprite, orientation, admin)
+                parent, drawable, animatedSprite, orientation, admin, blockX, blockY, blockZ)
 	        AS (
 		        SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
-                        drawable, animatedSprite, orientation, admin
+                        drawable, animatedSprite, orientation, admin, blockX, blockY, blockZ
 			        FROM EntityWithComponents WHERE id = @Id
 		        UNION ALL
             		SELECT ec.id, ec.x, ec.y, ec.z, ec.material, ec.materialModifier, ec.playerCharacter, ec.name, 
-                        ec.account, ec.parent, ec.drawable, ec.animatedSprite, ec.orientation, ec.admin
+                        ec.account, ec.parent, ec.drawable, ec.animatedSprite, ec.orientation, ec.admin,
+                        ec.blockX, ec.blockY, ec.blockZ
 			        FROM EntityWithComponents ec, EntityTree et
         			WHERE ec.parent = et.id
 	        )
             SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable,
-                animatedSprite, orientation, admin FROM EntityTree ORDER BY parent NULLS LAST";
+                animatedSprite, orientation, admin, blockX, blockY, blockZ FROM EntityTree ORDER BY parent NULLS LAST";
 
     private readonly SqliteConnection dbConnection;
 

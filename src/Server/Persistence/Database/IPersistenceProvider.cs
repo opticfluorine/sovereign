@@ -18,6 +18,7 @@
 using System;
 using System.Data;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.Persistence.Database.Queries;
 
@@ -242,6 +243,21 @@ public interface IPersistenceProvider : IDisposable
     ///     IRemoveComponentQuery for Admin tag.
     /// </summary>
     IRemoveComponentQuery RemoveAdminComponentQuery { get; }
+
+    /// <summary>
+    ///     IAddComponentQuery for BlockPosition component.
+    /// </summary>
+    IAddComponentQuery<GridPosition> AddBlockPositionComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for BlockPosition component.
+    /// </summary>
+    IModifyComponentQuery<GridPosition> ModifyBlockPositionComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for BlockPosition component.
+    /// </summary>
+    IRemoveComponentQuery RemoveBlockPositionComponentQuery { get; }
 
     /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.

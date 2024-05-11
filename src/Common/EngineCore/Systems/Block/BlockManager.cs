@@ -16,13 +16,10 @@
  */
 
 using System.Linq;
-using System.Numerics;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Block.Components.Indexers;
 using Sovereign.EngineCore.Systems.Block.Events;
 
 namespace Sovereign.EngineCore.Systems.Block;
@@ -85,7 +82,7 @@ public sealed class BlockManager
         var hasAboveBlock = GetAboveBlock(blockRecord, out var aboveBlock);
 
         var builder = entityFactory.GetBuilder()
-            .Positionable((Vector3)blockRecord.Position)
+            .BlockPositionable(blockRecord.Position)
             .Material(blockRecord.Material, blockRecord.MaterialModifier)
             .Drawable();
 

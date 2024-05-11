@@ -18,7 +18,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 
 namespace Sovereign.ClientCore.Systems.EntitySynchronization;
 
@@ -27,9 +26,10 @@ namespace Sovereign.ClientCore.Systems.EntitySynchronization;
 /// </summary>
 public class ClientEntityUnloader
 {
+    private readonly BlockWorldSegmentIndexer blockSegmentIndexer;
     private readonly EntityManager entityManager;
     private readonly EntityHierarchyIndexer hierarchyIndexer;
-    private readonly WorldSegmentIndexer segmentIndexer;
+    private readonly NonBlockWorldSegmentIndexer nonBlockSegmentIndexer;
 
     /// <summary>
     ///     Set of currently subscribed world segments.
@@ -41,10 +41,12 @@ public class ClientEntityUnloader
     /// </summary>
     private ulong playerEntityId;
 
-    public ClientEntityUnloader(WorldSegmentIndexer segmentIndexer, EntityHierarchyIndexer hierarchyIndexer,
-        EntityManager entityManager)
+    public ClientEntityUnloader(BlockWorldSegmentIndexer blockSegmentIndexer,
+        NonBlockWorldSegmentIndexer nonBlockSegmentIndexer,
+        EntityHierarchyIndexer hierarchyIndexer, EntityManager entityManager)
     {
-        this.segmentIndexer = segmentIndexer;
+        this.blockSegmentIndexer = blockSegmentIndexer;
+        this.nonBlockSegmentIndexer = nonBlockSegmentIndexer;
         this.hierarchyIndexer = hierarchyIndexer;
         this.entityManager = entityManager;
     }
@@ -106,15 +108,25 @@ public class ClientEntityUnloader
         // Get all positioned entities in the segment, excluding the player (which can occur rarely if the
         // client is far behind the server when the unsubscribe event is received).
         // Then join them with any descendants.
-        var entitiesToUnload = segmentIndexer.GetEntitiesInWorldSegment(segmentIndex)
-            .Where(entityId => entityId != playerEntityId)
-            .SelectMany(entityId =>
-            {
-                var descendants = hierarchyIndexer.GetAllDescendants(entityId);
-                descendants.Add(entityId);
-                return descendants;
-            });
+        var entitiesToUnload = blockSegmentIndexer.GetEntitiesInWorldSegment(segmentIndex)
+            .SelectMany(GetDescendantsAndSelf)
+            .Concat(nonBlockSegmentIndexer.GetEntitiesInWorldSegment(segmentIndex)
+                .Where(entityId => entityId != playerEntityId)
+                .SelectMany(GetDescendantsAndSelf)
+            );
         foreach (var entityId in entitiesToUnload) entityManager.UnloadEntity(entityId);
+    }
+
+    /// <summary>
+    ///     Gets the full entity tree for the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>Full entity set.</returns>
+    private HashSet<ulong> GetDescendantsAndSelf(ulong entityId)
+    {
+        var descendants = hierarchyIndexer.GetAllDescendants(entityId);
+        descendants.Add(entityId);
+        return descendants;
     }
 
     /// <summary>

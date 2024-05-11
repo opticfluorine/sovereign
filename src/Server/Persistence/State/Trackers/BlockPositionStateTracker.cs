@@ -15,16 +15,24 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.World;
+using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.Persistence.Entities;
 
-namespace Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
+namespace Sovereign.Persistence.State.Trackers;
 
 /// <summary>
+///     State tracker for the BlockPosition component.
 /// </summary>
-public class WorldSegmentIndexer : BaseWorldSegmentIndexer
+public class BlockPositionStateTracker : BaseStateTracker<GridPosition>
 {
-    public WorldSegmentIndexer(PositionComponentCollection positions, WorldSegmentResolver resolver)
-        : base(positions, positions, resolver)
+    public BlockPositionStateTracker(BlockPositionComponentCollection blockPositions, EntityMapper entityMapper,
+        StateManager stateManager)
+        : base(blockPositions, GridPosition.Zero, entityMapper, stateManager)
     {
+    }
+
+    protected override void OnStateUpdate(ref StateUpdate<GridPosition> update)
+    {
+        stateManager.FrontBuffer.UpdateBlockPosition(ref update);
     }
 }

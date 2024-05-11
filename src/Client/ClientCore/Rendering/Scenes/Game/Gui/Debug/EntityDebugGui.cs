@@ -20,7 +20,6 @@ using System.Numerics;
 using ImGuiNET;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Components;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 
@@ -31,6 +30,7 @@ public class EntityDebugGui
 {
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly BlockPositionComponentCollection blockPositions;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
     private readonly MaterialModifierComponentCollection materialModifiers;
@@ -46,8 +46,9 @@ public class EntityDebugGui
         DrawableTagCollection drawables, MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers, NameComponentCollection names,
         OrientationComponentCollection orientations, ParentComponentCollection parents,
-        PositionComponentCollection positions,
-        VelocityComponentCollection velocities, EntityTable entityTable)
+        PositionComponentCollection positions, VelocityComponentCollection velocities,
+        BlockPositionComponentCollection blockPositions,
+        EntityTable entityTable)
     {
         this.aboveBlocks = aboveBlocks;
         this.animatedSprites = animatedSprites;
@@ -59,6 +60,7 @@ public class EntityDebugGui
         this.parents = parents;
         this.positions = positions;
         this.velocities = velocities;
+        this.blockPositions = blockPositions;
         this.entityTable = entityTable;
     }
 
@@ -87,6 +89,7 @@ public class EntityDebugGui
                 AddComponentRow("Parent:", entityId, parents, x => $"{x:X}");
                 AddComponentRow("Position:", entityId, positions, CleanVec3ToString);
                 AddComponentRow("Velocity:", entityId, velocities, CleanVec3ToString);
+                AddComponentRow("Block Position:", entityId, blockPositions);
                 ImGui.EndTable();
             }
         }

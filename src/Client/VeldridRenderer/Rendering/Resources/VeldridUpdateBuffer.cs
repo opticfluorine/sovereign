@@ -63,6 +63,7 @@ public class VeldridUpdateBuffer<T> : IDisposable
     {
         this.isMultiUpdate = isMultiUpdate;
         Length = sizeInT;
+        UsedLength = Length;
         ElementSize = (uint)Marshal.SizeOf<T>();
         bufferLenBytes = sizeInT * ElementSize;
         currentBuffer = new PinnedBuffer(sizeInT);
@@ -94,6 +95,11 @@ public class VeldridUpdateBuffer<T> : IDisposable
     /// </summary>
     public uint ElementSize { get; }
 
+    /// <summary>
+    ///     Number of T objects currently set in the buffer.
+    /// </summary>
+    public uint UsedLength { get; set; }
+
     public void Dispose()
     {
         DeviceBuffer.Dispose();
@@ -110,7 +116,8 @@ public class VeldridUpdateBuffer<T> : IDisposable
     /// <param name="commandList">Active command list.</param>
     public void Update(CommandList commandList)
     {
-        commandList.UpdateBuffer(DeviceBuffer, 0, currentBuffer.BufferPtr, bufferLenBytes);
+        commandList.UpdateBuffer(DeviceBuffer, 0, currentBuffer.BufferPtr,
+            Math.Min(bufferLenBytes, ElementSize * UsedLength));
         if (isMultiUpdate)
         {
             usedBuffers.Push(currentBuffer);

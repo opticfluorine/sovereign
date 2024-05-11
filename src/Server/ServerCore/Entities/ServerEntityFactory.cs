@@ -17,7 +17,6 @@
 
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.ServerCore.Components;
 
 namespace Sovereign.ServerCore.Entities;
@@ -31,6 +30,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly AccountComponentCollection accounts;
     private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly BlockPositionComponentCollection blockPositions;
     private readonly DrawableTagCollection drawables;
 
     private readonly EntityAssigner entityAssigner;
@@ -60,6 +60,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         AnimatedSpriteComponentCollection animatedSprites,
         OrientationComponentCollection orientations,
         AdminTagCollection admins,
+        BlockPositionComponentCollection blockPositions,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -76,6 +77,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.animatedSprites = animatedSprites;
         this.orientations = orientations;
         this.admins = admins;
+        this.blockPositions = blockPositions;
         this.entityTable = entityTable;
         entityAssigner = entityManager.GetNewAssigner();
     }
@@ -104,6 +106,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             animatedSprites,
             orientations,
             admins,
+            blockPositions,
             entityTable);
     }
 }

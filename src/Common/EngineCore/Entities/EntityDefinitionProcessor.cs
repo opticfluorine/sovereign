@@ -96,6 +96,11 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutAdmin();
 
+        if (definition.BlockPosition.HasValue)
+            builder.BlockPositionable(definition.BlockPosition.Value);
+        else
+            builder.WithoutBlockPositionable();
+
         var entityId = builder.Build();
         Logger.DebugFormat("Processed entity ID {0}.", entityId);
     }

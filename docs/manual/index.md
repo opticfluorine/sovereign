@@ -12,5 +12,6 @@ Sovereign Engine is made available under the GPLv3 license.
 
 ```{toctree}
 creators/index.md
+developers/index.md
 attributions.md
 ```

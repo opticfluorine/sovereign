@@ -18,8 +18,8 @@
 using System;
 using System.Numerics;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
-using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineUtil.Threading;
 
 namespace Sovereign.EngineCore.Entities;
@@ -32,6 +32,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     protected readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AdminTagCollection admins;
     protected readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly BlockPositionComponentCollection blockPositions;
     protected readonly DrawableTagCollection drawables;
 
     protected readonly ulong entityId;
@@ -60,6 +61,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         AnimatedSpriteComponentCollection animatedSprites,
         OrientationComponentCollection orientations,
         AdminTagCollection admins,
+        BlockPositionComponentCollection blockPositions,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -77,6 +79,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         this.orientations = orientations;
         this.entityTable = entityTable;
         this.admins = admins;
+        this.blockPositions = blockPositions;
 
         weakLock = entityManager.UpdateGuard.AcquireWeakLock();
     }
@@ -115,6 +118,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     {
         positions.RemoveComponent(entityId, load);
         velocities.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder BlockPositionable(GridPosition position)
+    {
+        blockPositions.AddOrUpdateComponent(entityId, position, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutBlockPositionable()
+    {
+        blockPositions.RemoveComponent(entityId, load);
         return this;
     }
 

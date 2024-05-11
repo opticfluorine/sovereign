@@ -20,7 +20,7 @@ using System.Numerics;
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
-///     Manages the positions of all positionable entities.
+///     Manages the positions of all non-block positionable entities.
 /// </summary>
 public sealed class PositionComponentCollection : BaseComponentCollection<Vector3>
 {

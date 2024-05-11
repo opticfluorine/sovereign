@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2019 opticfluorine
+ * Copyright (c) 2018 opticfluorine
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,24 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Components;
-using Sovereign.Persistence.Entities;
-
-namespace Sovereign.Persistence.State.Trackers;
+namespace Sovereign.EngineCore.Components;
 
 /// <summary>
-///     Persistence state tracker for MaterialModifier components.
+///     The MaterialModifier component specifies the material modifier of a
+///     material block entity.
 /// </summary>
-public sealed class MaterialModifierStateTracker : BaseStateTracker<int>
+public sealed class MaterialModifierComponentCollection : BaseComponentCollection<int>
 {
-    public MaterialModifierStateTracker(MaterialModifierComponentCollection materialModifiers,
-        EntityMapper entityMapper, StateManager stateManager)
-        : base(materialModifiers, 0, entityMapper, stateManager)
-    {
-    }
+    /// <summary>
+    ///     Initial number of components.
+    /// </summary>
+    public const int InitialCount = 65536;
 
-    protected override void OnStateUpdate(ref StateUpdate<int> update)
+    public MaterialModifierComponentCollection(ComponentManager componentManager)
+        : base(componentManager, InitialCount, ComponentOperators.IntOperators,
+            ComponentType.MaterialModifier)
     {
-        stateManager.FrontBuffer.UpdateMaterialModifier(ref update);
     }
 }

@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Components;
@@ -33,7 +34,7 @@ public static class ComponentOperators
     public static readonly Dictionary<ComponentOperation, Func<int, int, int>>
         IntOperators = new()
         {
-            { ComponentOperation.Set, (a, b) => b },
+            { ComponentOperation.Set, (_, b) => b },
             { ComponentOperation.Add, (a, b) => a + b },
             { ComponentOperation.Multiply, (a, b) => a * b },
             { ComponentOperation.Divide, (a, b) => a / b }
@@ -45,7 +46,7 @@ public static class ComponentOperators
     public static readonly Dictionary<ComponentOperation, Func<ulong, ulong, ulong>>
         UlongOperators = new()
         {
-            { ComponentOperation.Set, (a, b) => b },
+            { ComponentOperation.Set, (_, b) => b },
             { ComponentOperation.Add, (a, b) => a + b },
             { ComponentOperation.Multiply, (a, b) => a * b },
             { ComponentOperation.Divide, (a, b) => a / b }
@@ -57,7 +58,7 @@ public static class ComponentOperators
     public static readonly Dictionary<ComponentOperation, Func<float, float, float>>
         FloatOperators = new()
         {
-            { ComponentOperation.Set, (a, b) => b },
+            { ComponentOperation.Set, (_, b) => b },
             { ComponentOperation.Add, (a, b) => a + b },
             { ComponentOperation.Multiply, (a, b) => a * b },
             { ComponentOperation.Divide, (a, b) => a / b }
@@ -69,8 +70,18 @@ public static class ComponentOperators
     public static readonly Dictionary<ComponentOperation, Func<Vector3, Vector3, Vector3>>
         VectorOperators = new()
         {
-            { ComponentOperation.Set, (a, b) => b },
+            { ComponentOperation.Set, (_, b) => b },
             { ComponentOperation.Add, Vector3.Add }
+        };
+
+    /// <summary>
+    ///     Standard operators for GridPosition-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<GridPosition, GridPosition, GridPosition>>
+        GridPositionOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b },
+            { ComponentOperation.Add, GridPosition.Add }
         };
 
     /// <summary>
@@ -79,7 +90,7 @@ public static class ComponentOperators
     public static readonly Dictionary<ComponentOperation, Func<bool, bool, bool>>
         BoolOperators = new()
         {
-            { ComponentOperation.Set, (a, b) => b }
+            { ComponentOperation.Set, (_, b) => b }
         };
 
     /// <summary>
@@ -88,7 +99,7 @@ public static class ComponentOperators
     public static readonly Dictionary<ComponentOperation, Func<string, string, string>>
         StringOperators = new()
         {
-            { ComponentOperation.Set, (a, b) => b }
+            { ComponentOperation.Set, (_, b) => b }
         };
 
     /// <summary>
@@ -97,7 +108,7 @@ public static class ComponentOperators
     public static readonly Dictionary<ComponentOperation, Func<Guid, Guid, Guid>>
         GuidOperators = new()
         {
-            { ComponentOperation.Set, (a, b) => b }
+            { ComponentOperation.Set, (_, b) => b }
         };
 
     /// <summary>
@@ -106,6 +117,6 @@ public static class ComponentOperators
     public static readonly Dictionary<ComponentOperation, Func<Orientation, Orientation, Orientation>>
         OrientationOperators = new()
         {
-            { ComponentOperation.Set, (a, b) => b }
+            { ComponentOperation.Set, (_, b) => b }
         };
 }

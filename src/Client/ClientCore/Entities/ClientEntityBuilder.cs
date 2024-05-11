@@ -18,7 +18,6 @@
 using System;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Components;
 
 namespace Sovereign.ClientCore.Entities;
 
@@ -41,10 +40,11 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         ParentComponentCollection parents,
         OrientationComponentCollection orientations,
         AdminTagCollection admins,
+        BlockPositionComponentCollection blockPositions,
         EntityTable entityTable)
         : base(entityId, isLoad, entityManager, positions, velocities, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
-            orientations, admins, entityTable)
+            orientations, admins, blockPositions, entityTable)
     {
     }
 

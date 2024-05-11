@@ -19,6 +19,7 @@ using System;
 using System.Data;
 using System.Numerics;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 
@@ -43,6 +44,9 @@ public sealed class EntityProcessor
     private const int IndexAnimatedSprite = 11;
     private const int IndexOrientation = 12;
     private const int IndexAdmin = 13;
+    private const int IndexBlockPosX = 14;
+    private const int IndexBlockPosY = 15;
+    private const int IndexBlockPosZ = 16;
     private readonly IEntityFactory entityFactory;
     private readonly EntityMapper entityMapper;
 
@@ -95,6 +99,7 @@ public sealed class EntityProcessor
         ProcessAnimatedSprite(reader, builder);
         ProcessOrientation(reader, builder);
         ProcessAdmin(reader, builder);
+        ProcessBlockPosition(reader, builder);
 
         /* Complete the entity. */
         builder.Build();
@@ -231,14 +236,27 @@ public sealed class EntityProcessor
     }
 
     /// <summary>
-    ///     Processes the Admin
+    ///     Processes the Admin component.
     /// </summary>
-    /// <param name="reader"></param>
-    /// <param name="builder"></param>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Entity builder.</param>
     private void ProcessAdmin(IDataReader reader, IEntityBuilder builder)
     {
         if (reader.IsDBNull(IndexAdmin)) return;
         if (reader.GetBoolean(IndexAdmin)) builder.Admin();
+    }
+
+    /// <summary>
+    ///     Processes the BlockPosition component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Entity builder.</param>
+    private void ProcessBlockPosition(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexBlockPosX) || reader.IsDBNull(IndexBlockPosY) ||
+            reader.IsDBNull(IndexBlockPosZ)) return;
+
+        builder.BlockPositionable(GetGridPosition(reader, IndexBlockPosX, IndexBlockPosY, IndexBlockPosZ));
     }
 
     /// <summary>
@@ -256,5 +274,22 @@ public sealed class EntityProcessor
         var z = reader.GetFloat(indexZ);
 
         return new Vector3(x, y, z);
+    }
+
+    /// <summary>
+    ///     Extracts a GridPosition from the reader.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="indexX">Index of the x component.</param>
+    /// <param name="indexY">Index of the y component.</param>
+    /// <param name="indexZ">Index of the z component.</param>
+    /// <returns>GridPosition.</returns>
+    private GridPosition GetGridPosition(IDataReader reader, int indexX, int indexY, int indexZ)
+    {
+        var x = reader.GetInt32(indexX);
+        var y = reader.GetInt32(indexY);
+        var z = reader.GetInt32(indexZ);
+
+        return new GridPosition(x, y, z);
     }
 }

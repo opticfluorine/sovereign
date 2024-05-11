@@ -76,10 +76,10 @@ public sealed class GameScene : IScene
     }
 
     public void PopulateBuffers(WorldVertex[] vertexBuffer, uint[] indexBuffer,
-        int[] drawLengths, out int drawCount)
+        int[] drawLengths, out int vertexCount, out int indexCount, out int drawCount)
     {
         worldVertexSequencer.SequenceVertices(vertexBuffer, indexBuffer, drawLengths,
-            out drawCount, timeSinceTick, systemTime);
+            out vertexCount, out indexCount, out drawCount, timeSinceTick, systemTime);
     }
 
     public void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles,

@@ -22,7 +22,6 @@ using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
-using Sovereign.EngineCore.Systems.Block.Components;
 using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
@@ -76,7 +75,7 @@ public sealed class WorldLayerGrouper
     ///     Groups the drawables into their respective layers.
     /// </summary>
     /// <param name="drawables">Unordered list of drawable entities in range.</param>
-    public void GroupDrawables(IList<PositionedEntity> drawables)
+    public void GroupDrawables(List<PositionedEntity> drawables)
     {
         ResetLayers();
         foreach (var drawable in drawables) ProcessDrawable(drawable);
