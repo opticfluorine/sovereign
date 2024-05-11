@@ -61,7 +61,7 @@ public class NonBlockWorldSegmentIndexer : BaseComponentIndexer<Vector3>
         if (!index.ContainsKey(segmentIndex))
             index[segmentIndex] = new HashSet<ulong>();
 
-        return new HashSet<ulong>(index[segmentIndex]);
+        return index[segmentIndex];
     }
 
     /// <summary>

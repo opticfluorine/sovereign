@@ -4,6 +4,20 @@
 
 ### May
 
+#### 11 May 2024
+
+* All: Split the `Position` component into a `Position` component for non-block entities and a `BlockPosition`
+  component for block entities. The `Position` component is affected by velocity, whereas the `BlockPosition`
+  is static. This enables a future optimization of the ECS where the movement system could function by
+  direct iteration over the dynamical `Position` components, thereby taking maximum advantage of the CPU
+  cache. This change will be coming shortly.
+* Server: Update world management classes to use world segment indices instead of octrees for looking up
+  entities in a world segment.
+* Renderer: Pull block entities for rendering from a world segment indexer instead of an octree. This causes a
+  substantial increase in the number of blocks being rendered, so also expanded the vertex and index buffer sizes
+  and allowed for partial copy of the buffers to hardware. This may or may not scale to dense world segments, so
+  additional fine tuning may be required in the future.
+
 #### 7 May 2024
 
 * Creators' Manual: Add documentation for resources, resource editor.
