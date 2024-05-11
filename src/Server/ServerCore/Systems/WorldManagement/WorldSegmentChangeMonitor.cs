@@ -32,13 +32,12 @@ public class WorldSegmentChangeMonitor
     private readonly IEventSender eventSender;
     private readonly WorldManagementInternalController internalController;
 
-    public WorldSegmentChangeMonitor(BlockWorldSegmentIndexer blockIndexer,
+    public WorldSegmentChangeMonitor(
         NonBlockWorldSegmentIndexer nonBlockIndexer, WorldManagementInternalController internalController,
         IEventSender eventSender)
     {
         this.internalController = internalController;
         this.eventSender = eventSender;
-        blockIndexer.OnChangeWorldSegment += OnWorldSegmentChange;
         nonBlockIndexer.OnChangeWorldSegment += OnWorldSegmentChange;
     }
 

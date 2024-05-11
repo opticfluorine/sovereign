@@ -48,8 +48,9 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private const int UpdatedCollectionCount = 4;
 
     private readonly AboveBlockComponentCollection aboveBlocks;
-    private readonly BlockGridPositionIndexer blockGridPositions;
+    private readonly BlockGridPositionIndexer blockIndexer;
     private readonly BlockPositionEventFilter blockPositionEventFilter;
+    private readonly BlockPositionComponentCollection blockPositions;
 
     /// <summary>
     ///     Block set pool.
@@ -59,8 +60,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <summary>
     ///     Read-only empty list to return when no sprites are cached.
     /// </summary>
-    private readonly List<int> emptyList
-        = new();
+    private readonly List<int> emptyList = new();
 
     private readonly EntityManager entityManager;
 
@@ -77,7 +77,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private readonly MaterialManager materialManager;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
-    private readonly PositionComponentCollection positions;
 
     private readonly TileSpriteManager tileSpriteManager;
 
@@ -103,8 +102,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
     public BlockAnimatedSpriteCache(MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
-        PositionComponentCollection positions,
-        BlockGridPositionIndexer blockGridPositions,
+        BlockPositionComponentCollection blockPositions,
+        BlockGridPositionIndexer blockIndexer,
         BlockPositionEventFilter blockPositionEventFilter,
         MaterialManager materialManager,
         AboveBlockComponentCollection aboveBlocks,
@@ -113,8 +112,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     {
         this.materials = materials;
         this.materialModifiers = materialModifiers;
-        this.positions = positions;
-        this.blockGridPositions = blockGridPositions;
+        this.blockPositions = blockPositions;
+        this.blockIndexer = blockIndexer;
         this.blockPositionEventFilter = blockPositionEventFilter;
         this.materialManager = materialManager;
         this.aboveBlocks = aboveBlocks;
@@ -249,7 +248,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private void UpdateCacheAtPosition(GridPosition gridPosition, bool isTopFace)
     {
         /* Confirm that a block is present at the given position. */
-        var blockIds = blockGridPositions.GetEntitiesAtPosition(gridPosition);
+        var blockIds = blockIndexer.GetEntitiesAtPosition(gridPosition);
         if (blockIds == null || blockIds.Count == 0) return;
 
         /* Resolve to the tile sprite level. */
@@ -288,7 +287,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private int GetTileSpriteIdForPosition(GridPosition gridPosition, bool isTopFace)
     {
         /* Get block at position, or return wildcard if not found. */
-        var blockIds = blockGridPositions.GetEntitiesAtPosition(gridPosition);
+        var blockIds = blockIndexer.GetEntitiesAtPosition(gridPosition);
         if (blockIds == null || blockIds.Count == 0) return TileSprite.Wildcard;
 
         return GetTileSpriteIdForBlock(blockIds.First(), isTopFace);
@@ -334,13 +333,13 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="blockId">Block to update.</param>
     private void UpdatePositionForBlock(ulong blockId)
     {
-        if (!positions.HasComponentForEntity(blockId))
+        if (!blockPositions.HasComponentForEntity(blockId))
         {
             Logger.ErrorFormat("Block {0} has no position.", blockId);
             return;
         }
 
-        knownPositions[blockId] = (GridPosition)positions[blockId];
+        knownPositions[blockId] = blockPositions[blockId];
     }
 
     /// <summary>

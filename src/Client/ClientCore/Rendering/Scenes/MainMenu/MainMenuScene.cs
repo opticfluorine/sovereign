@@ -91,8 +91,11 @@ public class MainMenuScene : IScene
     {
     }
 
-    public void PopulateBuffers(WorldVertex[] vertexBuffer, uint[] indexBuffer, int[] drawLengths, out int drawCount)
+    public void PopulateBuffers(WorldVertex[] vertexBuffer, uint[] indexBuffer, int[] drawLengths,
+        out int vertexCount, out int indexCount, out int drawCount)
     {
+        vertexCount = 0;
+        indexCount = 0;
         drawCount = 0;
     }
 

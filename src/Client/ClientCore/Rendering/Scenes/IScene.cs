@@ -58,9 +58,11 @@ public interface IScene
     /// <param name="vertexBuffer">Vertex buffer for update.</param>
     /// <param name="indexBuffer">Index buffer for update.</param>
     /// <param name="drawLengths">Number of vertices to use for each sequential draw.</param>
+    /// <param name="vertexCount">Number of vertices that were added to the buffer.</param>
+    /// <param name="indexCount">Number of indices that were added to the buffer.</param>
     /// <param name="drawCount">Number of draws to perform.</param>
     void PopulateBuffers(WorldVertex[] vertexBuffer, uint[] indexBuffer,
-        int[] drawLengths, out int drawCount);
+        int[] drawLengths, out int vertexCount, out int indexCount, out int drawCount);
 
     /// <summary>
     ///     Populates the world rendering vertex constants buffer, if applicable.

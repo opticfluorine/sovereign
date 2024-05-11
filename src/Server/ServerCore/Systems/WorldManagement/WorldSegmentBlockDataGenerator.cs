@@ -32,7 +32,7 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public sealed class WorldSegmentBlockDataGenerator
 {
-    private readonly BlockGridPositionIndexer blockIndexer;
+    private readonly BlockWorldSegmentIndexer blockIndexer;
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly IWorldManagementConfiguration config;
     private readonly MaterialComponentCollection materials;
@@ -41,7 +41,7 @@ public sealed class WorldSegmentBlockDataGenerator
 
     public WorldSegmentBlockDataGenerator(WorldSegmentResolver resolver,
         MaterialComponentCollection materials, MaterialModifierComponentCollection modifiers,
-        IWorldManagementConfiguration config, BlockGridPositionIndexer blockIndexer,
+        IWorldManagementConfiguration config, BlockWorldSegmentIndexer blockIndexer,
         BlockPositionComponentCollection blockPositions)
     {
         this.resolver = resolver;
@@ -62,7 +62,7 @@ public sealed class WorldSegmentBlockDataGenerator
     public WorldSegmentBlockData Create(GridPosition segmentIndex)
     {
         // Retrieve the latest data for the requested world segment.
-        var blocks = blockIndexer.GetEntitiesAtPosition(segmentIndex) ?? new HashSet<ulong>();
+        var blocks = blockIndexer.GetEntitiesInWorldSegment(segmentIndex);
         var positionedBlocks = blocks
             .Select(entityId => Tuple.Create(entityId, blockPositions[entityId])).ToList();
 
