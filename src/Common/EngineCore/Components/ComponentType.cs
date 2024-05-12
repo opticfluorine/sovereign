@@ -27,7 +27,7 @@ public enum ComponentType
     /// <summary>
     ///     Position component.
     /// </summary>
-    /// <seealso cref="PositionComponentCollection" />
+    /// <seealso cref="KinematicComponentCollection" />
     Position = 0x0000,
 
     /// <summary>

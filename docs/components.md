@@ -21,14 +21,13 @@ Core components are available in both the client and server.
 | `AnimatedSprite`   | `AnimatedSpriteComponentCollection`   | For non-block drawable entities (see `Drawable` component), denotes the animated sprite ID to use for rendering.       |
 | `BlockPosition`    | `BlockPositionComponentCollection`    | Grid-aligned position of a block entity.                                                                               |
 | `Drawable`         | `DrawableTagCollection`               | The existence of this component indicates that the entity should be considered for rendering.                          |
+| `Kinematics`       | `KinematicsComponentCollection`       | For non-block positioned entities, contains the position and velocity of the entity.                                   |
 | `Material`         | `MaterialComponentCollection`         | Indicates that the entity is a block of the given material ID.                                                         |
 | `MaterialModifier` | `MaterialModifierComponentCollection` | For material block entities (see `Material` component), denotes the material modifier of the block.                    |
 | `Name`             | `NameComponentCollection`             | Gives the name of the entity.                                                                                          |
 | `Orientation`      | `OrientationComponentCollection`      | Specifies the directional orientation of the entity.                                                                   |
 | `Parent`           | `ParentComponentCollection`           | Maps an entity to its parent entity.                                                                                   |
 | `PlayerCharacter`  | `PlayerCharacterTagCollection`        | Indicates that an entity is a player character.                                                                        |
-| `Position`         | `PositionComponentCollection`         | Three-dimensional position of a non-block entity.                                                                      |
-| `Velocity`         | `VelocityComponentCollection`         | Three-dimensional velocity of an entity.                                                                               |
 
 ## Client Components
 

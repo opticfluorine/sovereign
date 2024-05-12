@@ -14,27 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Data;
+using Microsoft.Data.Sqlite;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.Persistence.Database.Queries;
 
-namespace Sovereign.EngineCore.Components.Indexers;
+namespace Sovereign.Persistence.Database.Sqlite.Queries;
 
-/// <summary>
-///     Component event filter that only accepts position updates for non-block entities.
-/// </summary>
-public class NonBlockPositionEventFilter : BaseComponentEventFilter<Kinematics>
+public class SqliteModifyPositionComponentQuery : IModifyComponentQuery<Kinematics>
 {
-    private readonly MaterialComponentCollection materials;
+    private readonly Vector3SqliteModifyComponentQuery query;
 
-    public NonBlockPositionEventFilter(KinematicComponentCollection kinematics,
-        MaterialComponentCollection materials)
-        : base(kinematics, kinematics)
+    public SqliteModifyPositionComponentQuery(SqliteConnection dbConnection)
     {
-        this.materials = materials;
+        query = new Vector3SqliteModifyComponentQuery("Position", dbConnection);
     }
 
-    protected override bool ShouldAccept(ulong entityId)
+    public void Modify(ulong entityId, Kinematics value, IDbTransaction transaction)
     {
-        return !(materials.HasComponentForEntity(entityId, true)
-                 || materials.HasPendingComponentForEntity(entityId));
+        query.Modify(entityId, value.Position, transaction);
     }
 }

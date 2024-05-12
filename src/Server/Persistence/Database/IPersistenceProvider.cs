@@ -17,7 +17,6 @@
 
 using System;
 using System.Data;
-using System.Numerics;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.Persistence.Database.Queries;
@@ -82,12 +81,12 @@ public interface IPersistenceProvider : IDisposable
     /// <summary>
     ///     IAddComponentQuery for the Position component.
     /// </summary>
-    IAddComponentQuery<Vector3> AddPositionQuery { get; }
+    IAddComponentQuery<Kinematics> AddPositionQuery { get; }
 
     /// <summary>
     ///     IModifyComponentQuery for the Position component.
     /// </summary>
-    IModifyComponentQuery<Vector3> ModifyPositionQuery { get; }
+    IModifyComponentQuery<Kinematics> ModifyPositionQuery { get; }
 
     /// <summary>
     ///     IRemoveComponentQuery for the Position component.

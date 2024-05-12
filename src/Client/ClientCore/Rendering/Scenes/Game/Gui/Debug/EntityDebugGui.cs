@@ -33,20 +33,19 @@ public class EntityDebugGui
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
+    private readonly KinematicComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
-    private readonly PositionComponentCollection positions;
-    private readonly VelocityComponentCollection velocities;
     private string entityIdInput = "";
 
     public EntityDebugGui(AboveBlockComponentCollection aboveBlocks, AnimatedSpriteComponentCollection animatedSprites,
         DrawableTagCollection drawables, MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers, NameComponentCollection names,
         OrientationComponentCollection orientations, ParentComponentCollection parents,
-        PositionComponentCollection positions, VelocityComponentCollection velocities,
+        KinematicComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
         EntityTable entityTable)
     {
@@ -58,8 +57,7 @@ public class EntityDebugGui
         this.names = names;
         this.orientations = orientations;
         this.parents = parents;
-        this.positions = positions;
-        this.velocities = velocities;
+        this.kinematics = kinematics;
         this.blockPositions = blockPositions;
         this.entityTable = entityTable;
     }
@@ -87,8 +85,8 @@ public class EntityDebugGui
                 AddComponentRow("Name:", entityId, names);
                 AddComponentRow("Orientation:", entityId, orientations);
                 AddComponentRow("Parent:", entityId, parents, x => $"{x:X}");
-                AddComponentRow("Position:", entityId, positions, CleanVec3ToString);
-                AddComponentRow("Velocity:", entityId, velocities, CleanVec3ToString);
+                AddComponentRow("Position:", entityId, kinematics, x => CleanVec3ToString(x.Position));
+                AddComponentRow("Velocity:", entityId, kinematics, x => CleanVec3ToString(x.Velocity));
                 AddComponentRow("Block Position:", entityId, blockPositions);
                 ImGui.EndTable();
             }

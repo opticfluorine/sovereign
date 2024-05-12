@@ -15,22 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
-///     Manages the positions of all non-block positionable entities.
+///     Manages the kinematic data of all non-block positionable entities.
 /// </summary>
-public sealed class PositionComponentCollection : BaseComponentCollection<Vector3>
+public sealed class KinematicComponentCollection : BaseComponentCollection<Kinematics>
 {
     /// <summary>
     ///     Initial number of allocated components.
     /// </summary>
     private const int BaseSize = 65536;
 
-    public PositionComponentCollection(ComponentManager componentManager)
-        : base(componentManager, BaseSize, ComponentOperators.VectorOperators,
+    public KinematicComponentCollection(ComponentManager componentManager)
+        : base(componentManager, BaseSize, ComponentOperators.KinematicsOperators,
             ComponentType.Position)
     {
     }

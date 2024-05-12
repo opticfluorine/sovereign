@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.EngineCore.Components.Indexers;
@@ -24,7 +25,7 @@ namespace Sovereign.EngineCore.Components.Indexers;
 /// <summary>
 ///     Indexes positioned non-block entities by their world segment.
 /// </summary>
-public class NonBlockWorldSegmentIndexer : BaseComponentIndexer<Vector3>
+public class NonBlockWorldSegmentIndexer : BaseComponentIndexer<Kinematics>
 {
     /// <summary>
     ///     Map from world segment index to the set of non-block entities positioned there.
@@ -38,8 +39,8 @@ public class NonBlockWorldSegmentIndexer : BaseComponentIndexer<Vector3>
 
     private readonly WorldSegmentResolver resolver;
 
-    public NonBlockWorldSegmentIndexer(PositionComponentCollection positions, WorldSegmentResolver resolver)
-        : base(positions, positions)
+    public NonBlockWorldSegmentIndexer(KinematicComponentCollection kinematics, WorldSegmentResolver resolver)
+        : base(kinematics, kinematics)
     {
         this.resolver = resolver;
     }
@@ -71,19 +72,19 @@ public class NonBlockWorldSegmentIndexer : BaseComponentIndexer<Vector3>
     /// </summary>
     public event Action<ulong, GridPosition, GridPosition>? OnChangeWorldSegment;
 
-    protected override void ComponentAddedCallback(ulong entityId, Vector3 componentValue, bool isLoad)
+    protected override void ComponentAddedCallback(ulong entityId, Kinematics componentValue, bool isLoad)
     {
-        AddEntity(entityId, componentValue);
+        AddEntity(entityId, componentValue.Position);
     }
 
-    protected override void ComponentModifiedCallback(ulong entityId, Vector3 componentValue)
+    protected override void ComponentModifiedCallback(ulong entityId, Kinematics componentValue)
     {
-        var newSegmentIndex = resolver.GetWorldSegmentForPosition(componentValue);
+        var newSegmentIndex = resolver.GetWorldSegmentForPosition(componentValue.Position);
         var oldSegmentIndex = inverse[entityId];
         if (newSegmentIndex != oldSegmentIndex)
         {
             RemoveEntity(entityId);
-            AddEntity(entityId, componentValue);
+            AddEntity(entityId, componentValue.Position);
             OnChangeWorldSegment?.Invoke(entityId, oldSegmentIndex, newSegmentIndex);
         }
     }

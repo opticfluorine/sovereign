@@ -28,8 +28,7 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
 {
     public ClientEntityBuilder(ulong entityId, bool isLoad,
         EntityManager entityManager,
-        PositionComponentCollection positions,
-        VelocityComponentCollection velocities,
+        KinematicComponentCollection kinematics,
         DrawableTagCollection drawables,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
@@ -42,7 +41,7 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         AdminTagCollection admins,
         BlockPositionComponentCollection blockPositions,
         EntityTable entityTable)
-        : base(entityId, isLoad, entityManager, positions, velocities, materials,
+        : base(entityId, isLoad, entityManager, kinematics, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
             orientations, admins, blockPositions, entityTable)
     {

@@ -17,6 +17,7 @@
 
 using System.Numerics;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
@@ -24,15 +25,16 @@ namespace Sovereign.Persistence.State.Trackers;
 /// <summary>
 ///     State tracker for the Position component.
 /// </summary>
-public sealed class PositionStateTracker : BaseStateTracker<Vector3>
+public sealed class PositionStateTracker : BaseStateTracker<Kinematics>
 {
-    public PositionStateTracker(PositionComponentCollection positions,
+    public PositionStateTracker(KinematicComponentCollection kinematics,
         EntityMapper entityMapper, StateManager stateManager)
-        : base(positions, Vector3.Zero, entityMapper, stateManager)
+        : base(kinematics, new Kinematics { Position = Vector3.Zero, Velocity = Vector3.Zero }, entityMapper,
+            stateManager)
     {
     }
 
-    protected override void OnStateUpdate(ref StateUpdate<Vector3> update)
+    protected override void OnStateUpdate(ref StateUpdate<Kinematics> update)
     {
         stateManager.FrontBuffer.UpdatePosition(ref update);
     }

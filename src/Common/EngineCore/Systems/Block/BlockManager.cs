@@ -34,19 +34,19 @@ public sealed class BlockManager
 
     private readonly IEntityFactory entityFactory;
     private readonly EntityManager entityManager;
-    private readonly PositionComponentCollection positions;
+    private readonly KinematicComponentCollection kinematics;
 
     public BlockManager(IEntityFactory entityFactory,
         EntityManager entityManager,
         BlockGridPositionIndexer blockPositions,
         AboveBlockComponentCollection aboveBlocks,
-        PositionComponentCollection positions)
+        KinematicComponentCollection kinematics)
     {
         this.entityFactory = entityFactory;
         this.entityManager = entityManager;
         this.blockPositions = blockPositions;
         this.aboveBlocks = aboveBlocks;
-        this.positions = positions;
+        this.kinematics = kinematics;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -95,6 +95,7 @@ public sealed class BlockManager
     ///     Update the AboveBlock for block below the current block (if any).
     /// </summary>
     /// <param name="blockRecord">Current block.</param>
+    /// <param name="entityId">Entity ID.</param>
     private void CoverBelowBlock(BlockRecord blockRecord, ulong entityId)
     {
         var pos = blockRecord.Position;
@@ -112,14 +113,14 @@ public sealed class BlockManager
     /// <param name="entityId">Block ID.</param>
     private void UncoverBelowBlock(ulong entityId)
     {
-        var pos = positions.GetComponentForEntity(entityId);
+        var pos = kinematics.GetComponentForEntity(entityId);
         if (!pos.HasValue)
         {
             Logger.ErrorFormat("Block (Entity ID = {0}) has no position.", entityId);
             return;
         }
 
-        var gridPos = (GridPosition)pos.Value;
+        var gridPos = (GridPosition)pos.Value.Position;
         var belowPos = new GridPosition(gridPos.X, gridPos.Y, gridPos.Z - 1);
 
         var belowBlocks = blockPositions.GetEntitiesAtPosition(belowPos);

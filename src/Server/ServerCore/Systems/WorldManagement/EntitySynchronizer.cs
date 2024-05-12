@@ -38,16 +38,16 @@ public class EntitySynchronizer
     private readonly WorldManagementInternalController controller;
     private readonly DrawableTagCollection drawables;
     private readonly IEventSender eventSender;
+    private readonly KinematicComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PlayerCharacterTagCollection playerCharacters;
-    private readonly PositionComponentCollection positions;
 
     public EntitySynchronizer(IEventSender eventSender, IServerConfigurationManager configManager,
-        WorldManagementInternalController controller, PositionComponentCollection positions,
+        WorldManagementInternalController controller, KinematicComponentCollection kinematics,
         MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
         ParentComponentCollection parents, DrawableTagCollection drawables,
@@ -57,7 +57,7 @@ public class EntitySynchronizer
         this.eventSender = eventSender;
         this.configManager = configManager;
         this.controller = controller;
-        this.positions = positions;
+        this.kinematics = kinematics;
         this.materials = materials;
         this.materialModifiers = materialModifiers;
         this.playerCharacters = playerCharacters;
@@ -125,8 +125,8 @@ public class EntitySynchronizer
         var def = new EntityDefinition();
         def.EntityId = entityId;
 
-        if (positions.HasComponentForEntity(entityId))
-            def.Position = positions[entityId];
+        if (kinematics.HasComponentForEntity(entityId))
+            def.Position = kinematics[entityId].Position;
 
         def.Drawable = drawables.HasTagForEntity(entityId);
 

@@ -4,6 +4,12 @@
 
 ### May
 
+#### 12 May 2024
+
+* All: Consolidate the `Position` and `Velocity` components into a single `Kinematics` component.
+  This allows the position and velocity data to be interleaved within the same contiguous block of
+  memory, which sets the stage for CPU cache optimizations for the `Movement` system through the ECS.
+
 #### 11 May 2024
 
 * All: Split the `Position` component into a `Position` component for non-block entities and a `BlockPosition`

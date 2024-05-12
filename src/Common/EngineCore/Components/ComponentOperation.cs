@@ -40,5 +40,15 @@ public enum ComponentOperation
     /// <summary>
     ///     Divides the value of the component by a constant.
     /// </summary>
-    Divide = 3
+    Divide = 3,
+
+    /// <summary>
+    ///     For Kinematics components, sets the velocity part of the component, leaving position unchanged.
+    /// </summary>
+    SetVelocity = 4,
+
+    /// <summary>
+    ///     For Kinematics components, adds the position part of the component, leaving velocity unchanged.
+    /// </summary>
+    AddPosition = 5
 }

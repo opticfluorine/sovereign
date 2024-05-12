@@ -33,6 +33,7 @@ public sealed class WorldLayerGrouper
 {
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly KinematicComponentCollection kinematics;
 
     /// <summary>
     ///     Reusable pool of world layers.
@@ -44,23 +45,22 @@ public sealed class WorldLayerGrouper
 
     private readonly MaterialComponentCollection materials;
     private readonly OrientationComponentCollection orientations;
-    private readonly VelocityComponentCollection velocities;
 
     public WorldLayerGrouper(MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AnimatedSpriteComponentCollection animatedSprites,
         AboveBlockComponentCollection aboveBlocks,
-        VelocityComponentCollection velocities,
         MaterialManager materialManager,
-        OrientationComponentCollection orientations)
+        OrientationComponentCollection orientations,
+        KinematicComponentCollection kinematics)
     {
         this.materials = materials;
         this.materialModifiers = materialModifiers;
         this.animatedSprites = animatedSprites;
         this.aboveBlocks = aboveBlocks;
-        this.velocities = velocities;
         this.materialManager = materialManager;
         this.orientations = orientations;
+        this.kinematics = kinematics;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -88,8 +88,8 @@ public sealed class WorldLayerGrouper
     private void ProcessDrawable(PositionedEntity drawable)
     {
         /* Get the entity velocity, defaulting to zero if not set. */
-        var velocity = velocities.HasComponentForEntity(drawable.EntityId)
-            ? velocities[drawable.EntityId]
+        var velocity = kinematics.HasComponentForEntity(drawable.EntityId)
+            ? kinematics[drawable.EntityId].Velocity
             : Vector3.Zero;
 
         /* Route the drawable to the correct rendering list. */

@@ -26,9 +26,9 @@ namespace Sovereign.ClientCore.Rendering.Components.Indexers;
 public sealed class DrawablePositionComponentIndexer
     : BasePositionComponentIndexer
 {
-    public DrawablePositionComponentIndexer(PositionComponentCollection positionCollection,
+    public DrawablePositionComponentIndexer(KinematicComponentCollection kinematicCollection,
         DrawablePositionEventFilter eventSource)
-        : base(positionCollection, eventSource)
+        : base(kinematicCollection, eventSource)
     {
     }
 }

@@ -15,20 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
 ///     Component event filter that only accepts position updates for block entities.
 /// </summary>
-public sealed class BlockPositionEventFilter : BaseComponentEventFilter<Vector3>
+public sealed class BlockPositionEventFilter : BaseComponentEventFilter<Kinematics>
 {
     private readonly MaterialComponentCollection materials;
 
-    public BlockPositionEventFilter(PositionComponentCollection positions,
+    public BlockPositionEventFilter(KinematicComponentCollection kinematics,
         MaterialComponentCollection materials)
-        : base(positions, positions)
+        : base(kinematics, kinematics)
     {
         this.materials = materials;
     }
