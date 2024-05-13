@@ -94,6 +94,7 @@ public class MovementManager
             pendingChecks[i] = new List<PendingCheck>();
 
         kinematics.OnStartUpdates += OnStartUpdates;
+        kinematics.OnBeginDirectAccess += UpdatePositions;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -150,9 +151,6 @@ public class MovementManager
     /// </summary>
     public void HandleTick()
     {
-        if (lastUpdateSystemTime == 0) lastUpdateSystemTime = systemTimer.GetTime();
-        UpdatePositions();
-
         // Send move events for any newly processed move requests.
         while (pendingMoveEvents.TryDequeue(out var entityId))
         {
@@ -167,19 +165,22 @@ public class MovementManager
     /// <summary>
     ///     Updates all positions at the beginning of a tick.
     /// </summary>
-    private void UpdatePositions()
+    private void UpdatePositions(List<int> modifiedIndices)
     {
+        if (lastUpdateSystemTime == 0) lastUpdateSystemTime = systemTimer.GetTime();
         var currentSystemTime = systemTimer.GetTime();
         var delta = (currentSystemTime - lastUpdateSystemTime) * UnitConversions.UsToS;
-        foreach (var entityId in movingComponents.MovingEntities)
-        {
-            var kinematicData = kinematics.GetComponentForEntity(entityId);
-            if (!kinematicData.HasValue) continue;
 
-            var deltaPosition = delta * kinematicData.Value.Velocity;
-            kinematics.ModifyComponent(entityId, ComponentOperation.AddPosition,
-                new Kinematics { Position = deltaPosition });
-        }
+        var componentList = kinematics.Components;
+        for (var i = 0; i < componentList.Count; ++i)
+            if (componentList[i].Velocity != Vector3.Zero)
+            {
+                componentList[i] = componentList[i] with
+                {
+                    Position = componentList[i].Position + delta * componentList[i].Velocity
+                };
+                modifiedIndices.Add(i);
+            }
 
         lastUpdateSystemTime = currentSystemTime;
     }

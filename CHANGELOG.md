@@ -9,6 +9,12 @@
 * All: Consolidate the `Position` and `Velocity` components into a single `Kinematics` component.
   This allows the position and velocity data to be interleaved within the same contiguous block of
   memory, which sets the stage for CPU cache optimizations for the `Movement` system through the ECS.
+* All: Update the component update process to include a *direct access* phase after pending changes
+  are processed but before component events are fired. During this phase, systems are allowed direct
+  access to the underlying component list to read and modify components. This allows for bulk operations
+  to be performed while leveraging the CPU cache for maximum performance.
+* Movement System: Process entity movement during the Kinematics component direct access phase instead of
+  within the normal system logic during each tick.
 
 #### 11 May 2024
 
