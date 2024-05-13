@@ -38,8 +38,8 @@ public class ChatRouter
 
     private readonly ChatHelpManager helpManager;
     private readonly ServerChatInternalController internalController;
+    private readonly KinematicComponentCollection kinematics;
     private readonly LoggingUtil loggingUtil;
-    private readonly PositionComponentCollection positions;
 
     /// <summary>
     ///     Map from lowercase command to corresponding chat processor.
@@ -49,30 +49,28 @@ public class ChatRouter
     private readonly WorldSegmentResolver resolver;
 
     public ChatRouter(IList<IChatProcessor> processors, ServerChatInternalController internalController,
-        PositionComponentCollection positions, WorldSegmentResolver resolver, LoggingUtil loggingUtil,
+        KinematicComponentCollection kinematics, WorldSegmentResolver resolver, LoggingUtil loggingUtil,
         ChatHelpManager helpManager)
     {
         this.internalController = internalController;
-        this.positions = positions;
+        this.kinematics = kinematics;
         this.resolver = resolver;
         this.loggingUtil = loggingUtil;
         this.helpManager = helpManager;
 
         // Build lookup table.
         foreach (var proc in processors)
+        foreach (var command in proc.MatchingCommands)
         {
-            foreach (var command in proc.MatchingCommands)
+            var lowerCommand = command.Command.ToLower();
+            if (processorsByCommand.TryGetValue(lowerCommand, out var otherProc))
             {
-                var lowerCommand = command.Command.ToLower();
-                if (processorsByCommand.TryGetValue(lowerCommand, out var otherProc))
-                {
-                    Logger.WarnFormat("Command {0} already registered by {1}; {2} will not be used for this command.",
-                        command.Command, otherProc.GetType(), proc.GetType());
-                    continue;
-                }
-
-                processorsByCommand[lowerCommand] = proc;
+                Logger.WarnFormat("Command {0} already registered by {1}; {2} will not be used for this command.",
+                    command.Command, otherProc.GetType(), proc.GetType());
+                continue;
             }
+
+            processorsByCommand[lowerCommand] = proc;
         }
     }
 
@@ -89,17 +87,11 @@ public class ChatRouter
             if (TryTokenizeCommand(details, out var command, out var remainder))
             {
                 if (command.Equals(HelpCommand))
-                {
                     helpManager.SendHelp(details.SenderEntityId);
-                }
                 else if (processorsByCommand.TryGetValue(command, out var processor))
-                {
                     processor.ProcessChat(command, remainder, details.SenderEntityId);
-                }
                 else
-                {
                     internalController.SendSystemMessage("Unrecognized command.", details.SenderEntityId);
-                }
             }
             else
             {
@@ -121,14 +113,14 @@ public class ChatRouter
     private void RouteLocalChat(ChatEventDetails details)
     {
         // Determine local world segment.
-        if (!positions.HasComponentForEntity(details.SenderEntityId))
+        if (!kinematics.HasComponentForEntity(details.SenderEntityId))
         {
             Logger.ErrorFormat("Tried to send local chat for unpositioned entity {0}.", details.SenderEntityId);
             return;
         }
 
         Logger.InfoFormat("{0}: {1}", loggingUtil.FormatEntity(details.SenderEntityId), details.Message);
-        var segmentIndex = resolver.GetWorldSegmentForPosition(positions[details.SenderEntityId]);
+        var segmentIndex = resolver.GetWorldSegmentForPosition(kinematics[details.SenderEntityId].Position);
         internalController.SendLocalChat(details.Message, details.SenderEntityId, segmentIndex);
     }
 

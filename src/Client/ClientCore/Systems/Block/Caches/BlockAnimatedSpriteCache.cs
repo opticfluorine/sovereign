@@ -19,13 +19,13 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineUtil.Collections;
 
@@ -428,7 +428,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="componentValue">Not used.</param>
     /// <param name="isLoad">Not used.</param>
-    private void OnPositionAdded(ulong entityId, Vector3 componentValue, bool isLoad)
+    private void OnPositionAdded(ulong entityId, Kinematics componentValue, bool isLoad)
     {
         OnComponentModified(entityId, 0);
     }
@@ -438,7 +438,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="componentValue">Not used.</param>
-    private void OnPositionModified(ulong entityId, Vector3 componentValue)
+    private void OnPositionModified(ulong entityId, Kinematics componentValue)
     {
         OnComponentModified(entityId, 0);
     }

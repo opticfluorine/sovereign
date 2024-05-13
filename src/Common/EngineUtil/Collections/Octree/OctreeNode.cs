@@ -28,9 +28,12 @@ namespace Sovereign.EngineUtil.Collections.Octree;
 ///     Single node of an octree.
 /// </summary>
 /// <typeparam name="T">Element type.</typeparam>
+/// <typeparam name="TC">Component value type.</typeparam>
 /// This class is intended for use as an internal data structure by Octree.
 [DebuggerDisplay("{minPosition} - {maxPosition}, Count = {elementPositions.Count}")]
-internal sealed class OctreeNode<T> where T : notnull
+internal sealed class OctreeNode<T, TC>
+    where T : notnull
+    where TC : notnull
 {
     /// <summary>
     ///     Threshold for length comparisons.
@@ -40,7 +43,7 @@ internal sealed class OctreeNode<T> where T : notnull
     /// <summary>
     ///     Child nodes indexed by the eight possible combinations of OctreeOctant flags.
     /// </summary>
-    public readonly OctreeNode<T>?[] childNodes = new OctreeNode<T>?[8];
+    public readonly OctreeNode<T, TC>?[] childNodes = new OctreeNode<T, TC>?[8];
 
     /// <summary>
     ///     Maximum position (exclusive) of the node's box.
@@ -52,12 +55,12 @@ internal sealed class OctreeNode<T> where T : notnull
     /// </summary>
     public readonly Vector3 minPosition;
 
-    private readonly Stack<OctreeNode<T>> nodesToVisit = new(16);
+    private readonly Stack<OctreeNode<T, TC>> nodesToVisit = new(16);
 
     /// <summary>
     ///     Octree to which this node belongs.
     /// </summary>
-    private readonly Octree<T> octree;
+    private readonly Octree<T, TC> octree;
 
     /// <summary>
     ///     Partitions between the octants, defined by the planes (xy), (xz), and (yz).
@@ -72,7 +75,7 @@ internal sealed class OctreeNode<T> where T : notnull
     /// <summary>
     ///     Parent node.
     /// </summary>
-    public OctreeNode<T>? parentNode;
+    public OctreeNode<T, TC>? parentNode;
 
     /// <summary>
     ///     Creates a new node of the given octree.
@@ -81,7 +84,7 @@ internal sealed class OctreeNode<T> where T : notnull
     /// <param name="parentNode">Parent node.</param>
     /// <param name="minPosition">Minimum position (inclusive) of the node's box.</param>
     /// <param name="maxPosition">Maximum position (exclusive) of the node's box.</param>
-    public OctreeNode(Octree<T> octree, OctreeNode<T>? parentNode,
+    public OctreeNode(Octree<T, TC> octree, OctreeNode<T, TC>? parentNode,
         Vector3 minPosition, Vector3 maxPosition)
     {
         /* Set fields. */
@@ -99,7 +102,7 @@ internal sealed class OctreeNode<T> where T : notnull
     ///     direction of the given exterior position.
     /// </summary>
     /// <param name="childNode"></param>
-    public OctreeNode(OctreeNode<T> childNode, Vector3 position)
+    public OctreeNode(OctreeNode<T, TC> childNode, Vector3 position)
     {
         /* Determine the direction in which the tree should grow. */
         var childOctant = childNode.GetParentNodeDetails(position, out minPosition, out maxPosition);
@@ -141,7 +144,7 @@ internal sealed class OctreeNode<T> where T : notnull
     /// </summary>
     /// <param name="position">Position.</param>
     /// <returns>Child node.</returns>
-    public OctreeNode<T> GetChildNodeForPosition(Vector3 position)
+    public OctreeNode<T, TC> GetChildNodeForPosition(Vector3 position)
     {
         var octant = GetOctantForPosition(position);
 
@@ -149,7 +152,7 @@ internal sealed class OctreeNode<T> where T : notnull
         if (childNodes[(int)octant] == null)
         {
             GetBoundsOfOctant(octant, out var minPosition, out var maxPosition);
-            childNodes[(int)octant] = new OctreeNode<T>(octree, this, minPosition, maxPosition);
+            childNodes[(int)octant] = new OctreeNode<T, TC>(octree, this, minPosition, maxPosition);
         }
 
         return childNodes[(int)octant]!;
@@ -377,7 +380,7 @@ internal sealed class OctreeNode<T> where T : notnull
             if (childNodes[(int)octant] == null)
             {
                 GetBoundsOfOctant(octant, out var newMinPos, out var newMaxPos);
-                childNodes[(int)octant] = new OctreeNode<T>(octree, this, newMinPos, newMaxPos);
+                childNodes[(int)octant] = new OctreeNode<T, TC>(octree, this, newMinPos, newMaxPos);
             }
 
             /* Distribute the element. */

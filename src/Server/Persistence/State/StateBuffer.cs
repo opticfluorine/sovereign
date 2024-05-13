@@ -17,7 +17,6 @@
 
 using System;
 using System.Data;
-using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
@@ -107,7 +106,7 @@ public sealed class StateBuffer
     /// <summary>
     ///     Position state updates.
     /// </summary>
-    private readonly StructBuffer<StateUpdate<Vector3>> positionUpdates = new(BufferSize);
+    private readonly StructBuffer<StateUpdate<Kinematics>> positionUpdates = new(BufferSize);
 
     /// <summary>
     ///     Removed entity IDs.
@@ -145,7 +144,7 @@ public sealed class StateBuffer
     ///     Queues a position update.
     /// </summary>
     /// <param name="update">State update.</param>
-    public void UpdatePosition(ref StateUpdate<Vector3> update)
+    public void UpdatePosition(ref StateUpdate<Kinematics> update)
     {
         positionUpdates.Add(ref update);
     }

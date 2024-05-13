@@ -15,22 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Numerics;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering.Components.Indexers;
 
 /// <summary>
 ///     Event source that filters position events to exclude non-drawable entities.
 /// </summary>
-public sealed class DrawablePositionEventFilter : BaseComponentEventFilter<Vector3>
+public sealed class DrawablePositionEventFilter : BaseComponentEventFilter<Kinematics>
 {
     private readonly DrawableTagCollection drawableCollection;
 
-    public DrawablePositionEventFilter(PositionComponentCollection positionCollection,
+    public DrawablePositionEventFilter(KinematicComponentCollection kinematicCollection,
         DrawableTagCollection drawableCollection)
-        : base(positionCollection, positionCollection)
+        : base(kinematicCollection, kinematicCollection)
     {
         this.drawableCollection = drawableCollection;
     }

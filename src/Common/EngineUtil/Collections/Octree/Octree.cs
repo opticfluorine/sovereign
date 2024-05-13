@@ -29,7 +29,9 @@ namespace Sovereign.EngineUtil.Collections.Octree;
 ///     distinct objects in three-dimensional space.
 /// </summary>
 /// The Octree class is thread-safe.
-public sealed class Octree<T> where T : notnull
+public sealed class Octree<T, TC>
+    where T : notnull
+    where TC : notnull
 {
     /// <summary>
     ///     Default number of levels to initially generate in the tree.
@@ -59,12 +61,13 @@ public sealed class Octree<T> where T : notnull
     /// <summary>
     ///     Root node of the octree.
     /// </summary>
-    private OctreeNode<T> rootNode;
+    private OctreeNode<T, TC> rootNode;
 
     /// <summary>
     ///     Creates an empty octree.
     /// </summary>
     /// <param name="origin">Center point of the initial tree.</param>
+    /// <param name="positionGetter">Function for retrieving position from component values.</param>
     /// <param name="initialLevels">Number of levels to initially generate in the tree.</param>
     /// <param name="minimumNodeSize">Minimum length of a node.</param>
     public Octree(Vector3 origin,
@@ -79,7 +82,7 @@ public sealed class Octree<T> where T : notnull
         var minPosition = origin - span;
         var maxPosition = origin + span;
 
-        rootNode = new OctreeNode<T>(this, null, minPosition, maxPosition);
+        rootNode = new OctreeNode<T, TC>(this, null, minPosition, maxPosition);
     }
 
     /// <summary>
@@ -87,22 +90,23 @@ public sealed class Octree<T> where T : notnull
     /// </summary>
     /// <param name="origin">Center point of the initial tree.</param>
     /// <param name="initialData">Initial elements to be added to the octree.</param>
+    /// <param name="positionGetter">Getter function for retrieving position from component value.</param>
     /// <param name="initialLevels">Number of levels to initially generate in the tree.</param>
     /// <param name="minimumNodeSize">Minimum length of a node.</param>
     public Octree(Vector3 origin,
-        IDictionary<T, Vector3> initialData,
+        IDictionary<T, TC> initialData,
+        Func<TC, Vector3> positionGetter,
         int initialLevels = DefaultInitialLevels,
         float minimumNodeSize = DefaultMinimumNodeSize) : this(origin, initialLevels, minimumNodeSize)
     {
         /* Shouldn't need to lock yet, but needed to assure Add() below. */
-        using (var octreeLock = AcquireLock())
+        using var octreeLock = AcquireLock();
+
+        /* Add all initial points to the octree. */
+        foreach (var element in initialData.Keys)
         {
-            /* Add all initial points to the octree. */
-            foreach (var element in initialData.Keys)
-            {
-                var position = initialData[element];
-                Add(octreeLock, position, element);
-            }
+            var componentValue = initialData[element];
+            Add(octreeLock, positionGetter.Invoke(componentValue), element);
         }
     }
 
@@ -189,7 +193,7 @@ public sealed class Octree<T> where T : notnull
             currentNode.elementPositions.Remove(element);
 
             /* Descend if needed. */
-            OctreeNode<T>? nextNode = null;
+            OctreeNode<T, TC>? nextNode = null;
             foreach (var childNode in currentNode.childNodes)
             {
                 if (childNode == null) continue;
@@ -214,7 +218,7 @@ public sealed class Octree<T> where T : notnull
         Vector3 maxPosition, IList<TR> buffer, Func<Vector3, T, TR> recordProducer)
     {
         /* Depth-first search of overlapping nodes. */
-        var nodesToSearch = new Stack<OctreeNode<T>>();
+        var nodesToSearch = new Stack<OctreeNode<T, TC>>();
         nodesToSearch.Push(rootNode);
         while (nodesToSearch.Count > 0)
         {
@@ -286,11 +290,11 @@ public sealed class Octree<T> where T : notnull
     /// </summary>
     /// <param name="position">Position for which the leaf node is to be found.</param>
     /// <returns>Leaf node.</returns>
-    private OctreeNode<T> FindLeafNodeForPosition(Vector3 position)
+    private OctreeNode<T, TC> FindLeafNodeForPosition(Vector3 position)
     {
         /* Expand the tree if needed. */
         while (!rootNode.IsPositionInterior(position))
-            rootNode = new OctreeNode<T>(rootNode, position);
+            rootNode = new OctreeNode<T, TC>(rootNode, position);
 
         /* Find/create the leaf node. */
         return DescendToLeafNode(position);
@@ -301,7 +305,7 @@ public sealed class Octree<T> where T : notnull
     /// </summary>
     /// <param name="element">Element.</param>
     /// <returns>Leaf node containing the element, or null if the element is not found.</returns>
-    private OctreeNode<T>? FindNodeForElement(T element)
+    private OctreeNode<T, TC>? FindNodeForElement(T element)
     {
         /* Bail if the element is not present. */
         if (!rootNode.elementPositions.ContainsKey(element)) return null;
@@ -311,7 +315,7 @@ public sealed class Octree<T> where T : notnull
         while (!currentNode.IsLeafNode())
         {
             /* Descend into the node containing the element. */
-            OctreeNode<T>? nextNode = null;
+            OctreeNode<T, TC>? nextNode = null;
             foreach (var childNode in currentNode.childNodes)
                 if (childNode != null && childNode.elementPositions.ContainsKey(element))
                 {
@@ -332,7 +336,7 @@ public sealed class Octree<T> where T : notnull
     /// </summary>
     /// <param name="position">Position.</param>
     /// <returns>Leaf node.</returns>
-    private OctreeNode<T> DescendToLeafNode(Vector3 position)
+    private OctreeNode<T, TC> DescendToLeafNode(Vector3 position)
     {
         /* Drill down to the leaf node. */
         var currentNode = rootNode;
@@ -348,9 +352,9 @@ public sealed class Octree<T> where T : notnull
     /// </summary>
     public sealed class OctreeLock : IDisposable
     {
-        private readonly Octree<T> octree;
+        private readonly Octree<T, TC> octree;
 
-        internal OctreeLock(Octree<T> octree)
+        internal OctreeLock(Octree<T, TC> octree)
         {
             this.octree = octree;
             Monitor.Enter(octree.lockObject);

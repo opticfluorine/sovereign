@@ -33,18 +33,17 @@ public class PlayerDebugGui
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockGridPositionIndexer blocks;
     private readonly DrawableTagCollection drawables;
+    private readonly KinematicComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly PlayerCharacterTagCollection players;
-    private readonly PositionComponentCollection positions;
     private readonly ClientStateServices stateServices;
-    private readonly VelocityComponentCollection velocities;
     private readonly WorldSegmentResolver worldSegmentResolver;
 
     public PlayerDebugGui(ClientStateServices stateServices, NameComponentCollection names,
-        PositionComponentCollection positions, VelocityComponentCollection velocities,
+        KinematicComponentCollection kinematics,
         AnimatedSpriteComponentCollection animatedSprites, WorldSegmentResolver worldSegmentResolver,
         DrawableTagCollection drawables, PlayerCharacterTagCollection players,
         OrientationComponentCollection orientations, BlockGridPositionIndexer blocks,
@@ -53,8 +52,7 @@ public class PlayerDebugGui
     {
         this.stateServices = stateServices;
         this.names = names;
-        this.positions = positions;
-        this.velocities = velocities;
+        this.kinematics = kinematics;
         this.animatedSprites = animatedSprites;
         this.worldSegmentResolver = worldSegmentResolver;
         this.drawables = drawables;
@@ -84,11 +82,11 @@ public class PlayerDebugGui
                 AddComponentRow("Admin:", playerEntityId, admins);
                 AddComponentRow("Drawable:", playerEntityId, drawables);
                 AddComponentRow("AnimatedSprite:", playerEntityId, animatedSprites);
-                AddComponentRow("Position:", playerEntityId, positions, CleanVec3ToString);
-                AddComponentRow("Velocity:", playerEntityId, velocities, CleanVec3ToString);
+                AddComponentRow("Position:", playerEntityId, kinematics, x => CleanVec3ToString(x.Position));
+                AddComponentRow("Velocity:", playerEntityId, kinematics, x => CleanVec3ToString(x.Velocity));
                 AddComponentRow("Orientation:", playerEntityId, orientations);
-                AddComponentRow("World Segment:", playerEntityId, positions,
-                    x => worldSegmentResolver.GetWorldSegmentForPosition(x).ToString());
+                AddComponentRow("World Segment:", playerEntityId, kinematics,
+                    x => worldSegmentResolver.GetWorldSegmentForPosition(x.Position).ToString());
 
                 AddBelowBlockInfo(playerEntityId);
 
@@ -109,9 +107,9 @@ public class PlayerDebugGui
     /// <param name="playerEntityId">Player entity ID.</param>
     private void AddBelowBlockInfo(ulong playerEntityId)
     {
-        if (!positions.HasComponentForEntity(playerEntityId)) return;
+        if (!kinematics.HasComponentForEntity(playerEntityId)) return;
 
-        var blockPos = new GridPosition(positions[playerEntityId]);
+        var blockPos = new GridPosition(kinematics[playerEntityId].Position);
         var blocksBelow = blocks.GetEntitiesAtPosition(blockPos);
         if (blocksBelow is null)
         {

@@ -36,19 +36,17 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly EntityAssigner entityAssigner;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
+    private readonly KinematicComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PlayerCharacterTagCollection playerCharacterTags;
-    private readonly PositionComponentCollection positions;
-    private readonly VelocityComponentCollection velocities;
 
     public ServerEntityFactory(
         EntityManager entityManager,
-        PositionComponentCollection positions,
-        VelocityComponentCollection velocities,
+        KinematicComponentCollection kinematics,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,
@@ -64,8 +62,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
-        this.positions = positions;
-        this.velocities = velocities;
+        this.kinematics = kinematics;
         this.materials = materials;
         this.materialModifiers = materialModifiers;
         this.aboveBlocks = aboveBlocks;
@@ -93,8 +90,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             entityId,
             load,
             entityManager,
-            positions,
-            velocities,
+            kinematics,
             materials,
             materialModifiers,
             aboveBlocks,

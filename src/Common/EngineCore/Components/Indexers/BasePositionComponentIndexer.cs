@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Collections.Octree;
 
 namespace Sovereign.EngineCore.Components.Indexers;
@@ -26,12 +27,12 @@ namespace Sovereign.EngineCore.Components.Indexers;
 ///     Manages a position-based index into a ComponentCollection.
 /// </summary>
 /// Extend this class for each ComponentCollection that requires position indexing.
-public class BasePositionComponentIndexer : BaseComponentIndexer<Vector3>
+public class BasePositionComponentIndexer : BaseComponentIndexer<Kinematics>
 {
     /// <summary>
     ///     Octree providing partitioning to the set of tracked entity IDs.
     /// </summary>
-    private readonly Octree<ulong> octree;
+    private readonly Octree<ulong, Kinematics> octree;
 
     /// <summary>
     ///     Lock acquired while the collection is performing updates.
@@ -43,13 +44,13 @@ public class BasePositionComponentIndexer : BaseComponentIndexer<Vector3>
     /// </summary>
     /// <param name="components">Component collection.</param>
     /// <param name="componentEventSource">Component event source.</param>
-    protected BasePositionComponentIndexer(BaseComponentCollection<Vector3> components,
-        IComponentEventSource<Vector3> componentEventSource)
+    protected BasePositionComponentIndexer(BaseComponentCollection<Kinematics> components,
+        IComponentEventSource<Kinematics> componentEventSource)
         : base(components, componentEventSource)
     {
         /* Create the initial index. */
-        octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin,
-            components.GetAllComponents());
+        octree = new Octree<ulong, Kinematics>(Octree<ulong, Kinematics>.DefaultOrigin,
+            components.GetAllComponents(), kinematics => kinematics.Position);
     }
 
     /// <summary>
@@ -103,16 +104,16 @@ public class BasePositionComponentIndexer : BaseComponentIndexer<Vector3>
         updateLock = AcquireLock();
     }
 
-    protected override void ComponentAddedCallback(ulong entityId, Vector3 position, bool isLoad)
+    protected override void ComponentAddedCallback(ulong entityId, Kinematics kinematics, bool isLoad)
     {
         if (updateLock == null) return;
-        octree.Add(updateLock.octreeLock, position, entityId);
+        octree.Add(updateLock.octreeLock, kinematics.Position, entityId);
     }
 
-    protected override void ComponentModifiedCallback(ulong entityId, Vector3 position)
+    protected override void ComponentModifiedCallback(ulong entityId, Kinematics kinematics)
     {
         if (updateLock == null) return;
-        octree.UpdatePosition(updateLock.octreeLock, entityId, position);
+        octree.UpdatePosition(updateLock.octreeLock, entityId, kinematics.Position);
     }
 
     protected override void ComponentRemovedCallback(ulong entityId, bool isUnload)
@@ -136,14 +137,14 @@ public class BasePositionComponentIndexer : BaseComponentIndexer<Vector3>
         /// <summary>
         ///     Inner lock.
         /// </summary>
-        internal readonly Octree<ulong>.OctreeLock octreeLock;
+        internal readonly Octree<ulong, Kinematics>.OctreeLock octreeLock;
 
         public IndexerLock(BasePositionComponentIndexer indexer)
             : this(indexer.octree.AcquireLock())
         {
         }
 
-        public IndexerLock(Octree<ulong>.OctreeLock octreeLock)
+        public IndexerLock(Octree<ulong, Kinematics>.OctreeLock octreeLock)
         {
             this.octreeLock = octreeLock;
         }

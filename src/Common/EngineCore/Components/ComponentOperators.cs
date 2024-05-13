@@ -119,4 +119,15 @@ public static class ComponentOperators
         {
             { ComponentOperation.Set, (_, b) => b }
         };
+
+    /// <summary>
+    ///     Standard operators for kinematics-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<Kinematics, Kinematics, Kinematics>>
+        KinematicsOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b },
+            { ComponentOperation.SetVelocity, (a, b) => a with { Velocity = b.Velocity } },
+            { ComponentOperation.AddPosition, (a, b) => a with { Position = a.Position + b.Position } }
+        };
 }

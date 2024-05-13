@@ -16,20 +16,21 @@
 
 using System.Collections.Generic;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
 ///     Component indexer that tracks moving components (components with non-zero velocity).
 /// </summary>
-public class MovingComponentIndexer : BaseComponentIndexer<Vector3>
+public class MovingComponentIndexer : BaseComponentIndexer<Kinematics>
 {
     /// <summary>
     ///     Set of moving entities.
     /// </summary>
     private readonly HashSet<ulong> movingEntities = new();
 
-    public MovingComponentIndexer(VelocityComponentCollection velocities) : base(velocities, velocities)
+    public MovingComponentIndexer(KinematicComponentCollection kinematics) : base(kinematics, kinematics)
     {
     }
 
@@ -38,14 +39,14 @@ public class MovingComponentIndexer : BaseComponentIndexer<Vector3>
     /// </summary>
     public IReadOnlySet<ulong> MovingEntities => movingEntities;
 
-    protected override void ComponentAddedCallback(ulong entityId, Vector3 componentValue, bool isLoad)
+    protected override void ComponentAddedCallback(ulong entityId, Kinematics componentValue, bool isLoad)
     {
-        if (!componentValue.Equals(Vector3.Zero)) movingEntities.Add(entityId);
+        if (!componentValue.Position.Equals(Vector3.Zero)) movingEntities.Add(entityId);
     }
 
-    protected override void ComponentModifiedCallback(ulong entityId, Vector3 componentValue)
+    protected override void ComponentModifiedCallback(ulong entityId, Kinematics componentValue)
     {
-        if (!componentValue.Equals(Vector3.Zero)) movingEntities.Add(entityId);
+        if (!componentValue.Position.Equals(Vector3.Zero)) movingEntities.Add(entityId);
     }
 
     protected override void ComponentRemovedCallback(ulong entityId, bool isUnload)

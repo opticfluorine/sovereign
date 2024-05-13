@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,18 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components.Types;
+using System.Numerics;
 
-namespace Sovereign.EngineCore.Components.Indexers;
+namespace Sovereign.EngineCore.Components.Types;
 
 /// <summary>
-///     Component event filter for player position events.
+///     Combined structure for kinematic component data.
 /// </summary>
-public class PlayerPositionEventFilter : PlayerComponentEventFilter<Kinematics>
+public struct Kinematics
 {
-    public PlayerPositionEventFilter(PlayerCharacterTagCollection playerTags,
-        KinematicComponentCollection kinematics)
-        : base(playerTags, kinematics, kinematics)
-    {
-    }
+    /// <summary>
+    ///     Position.
+    /// </summary>
+    public Vector3 Position { get; set; }
+
+    /// <summary>
+    ///     Velocity in tiles per second.
+    /// </summary>
+    public Vector3 Velocity { get; set; }
 }

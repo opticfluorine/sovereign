@@ -17,7 +17,6 @@
 
 using System;
 using System.Data;
-using System.Numerics;
 using System.Text;
 using Castle.Core.Logging;
 using Microsoft.Data.Sqlite;
@@ -113,10 +112,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         RemoveAdminRoleQuery = new SqliteRemoveAdminRoleQuery((SqliteConnection)Connection);
 
         /* Position component. */
-        AddPositionQuery = new Vector3SqliteAddComponentQuery(PositionTableName,
-            (SqliteConnection)Connection);
-        ModifyPositionQuery = new Vector3SqliteModifyComponentQuery(PositionTableName,
-            (SqliteConnection)Connection);
+        AddPositionQuery = new SqliteAddPositionComponentQuery((SqliteConnection)Connection);
+        ModifyPositionQuery = new SqliteModifyPositionComponentQuery((SqliteConnection)Connection);
         RemovePositionQuery = new SqliteRemoveComponentQuery(PositionTableName,
             (SqliteConnection)Connection);
 
@@ -236,8 +233,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddEntityQuery AddEntityQuery { get; }
 
     public IRemoveEntityQuery RemoveEntityQuery { get; }
-    public IAddComponentQuery<Vector3> AddPositionQuery { get; }
-    public IModifyComponentQuery<Vector3> ModifyPositionQuery { get; }
+    public IAddComponentQuery<Kinematics> AddPositionQuery { get; }
+    public IModifyComponentQuery<Kinematics> ModifyPositionQuery { get; }
     public IRemoveComponentQuery RemovePositionQuery { get; }
     public IAddComponentQuery<int> AddMaterialQuery { get; }
     public IModifyComponentQuery<int> ModifyMaterialQuery { get; }

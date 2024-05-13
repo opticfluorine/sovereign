@@ -14,8 +14,4 @@
         <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Systems\Ping\"/>
-    </ItemGroup>
-
 </Project>

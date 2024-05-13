@@ -33,18 +33,16 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly DrawableTagCollection drawables;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
+    private readonly KinematicComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PlayerCharacterTagCollection playerCharacterTags;
-    private readonly PositionComponentCollection positions;
-    private readonly VelocityComponentCollection velocities;
 
     public ClientEntityFactory(EntityManager entityManager,
-        PositionComponentCollection positions,
-        VelocityComponentCollection velocities,
+        KinematicComponentCollection kinematics,
         DrawableTagCollection drawables,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
@@ -59,8 +57,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
-        this.positions = positions;
-        this.velocities = velocities;
+        this.kinematics = kinematics;
         this.drawables = drawables;
         this.materials = materials;
         this.materialModifiers = materialModifiers;
@@ -85,7 +82,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     public IEntityBuilder GetBuilder(ulong entityId, bool isLoad = false)
     {
         return new ClientEntityBuilder(entityId, isLoad,
-            entityManager, positions, velocities, drawables, materials,
+            entityManager, kinematics, drawables, materials,
             materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
             orientations, admins, blockPositions, entityTable);
     }

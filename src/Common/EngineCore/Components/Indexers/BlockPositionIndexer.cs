@@ -22,8 +22,8 @@ namespace Sovereign.EngineCore.Components.Indexers;
 /// </summary>
 public sealed class BlockPositionIndexer : BasePositionComponentIndexer
 {
-    public BlockPositionIndexer(PositionComponentCollection positions, BlockPositionEventFilter filter)
-        : base(positions, filter)
+    public BlockPositionIndexer(KinematicComponentCollection kinematics, BlockPositionEventFilter filter)
+        : base(kinematics, filter)
     {
     }
 }

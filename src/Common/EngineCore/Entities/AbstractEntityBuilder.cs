@@ -37,6 +37,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     protected readonly ulong entityId;
     protected readonly EntityTable entityTable;
+    protected readonly KinematicComponentCollection Kinematics;
     protected readonly bool load;
     protected readonly MaterialModifierComponentCollection materialModifiers;
     protected readonly MaterialComponentCollection materials;
@@ -44,14 +45,12 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     protected readonly OrientationComponentCollection orientations;
     protected readonly ParentComponentCollection parents;
     protected readonly PlayerCharacterTagCollection playerCharacterTags;
-    protected readonly PositionComponentCollection positions;
-    protected readonly VelocityComponentCollection velocities;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
 
     protected AbstractEntityBuilder(ulong entityId, bool load,
-        EntityManager entityManager, PositionComponentCollection positions,
-        VelocityComponentCollection velocities, MaterialComponentCollection materials,
+        EntityManager entityManager, KinematicComponentCollection kinematics,
+        MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,
         PlayerCharacterTagCollection playerCharacterTags,
@@ -66,8 +65,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     {
         this.entityId = entityId;
         this.load = load;
-        this.positions = positions;
-        this.velocities = velocities;
+        Kinematics = kinematics;
         this.materials = materials;
         this.materialModifiers = materialModifiers;
         this.aboveBlocks = aboveBlocks;
@@ -99,8 +97,11 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder Positionable(Vector3 position, Vector3 velocity)
     {
-        positions.AddOrUpdateComponent(entityId, position, load);
-        velocities.AddOrUpdateComponent(entityId, velocity, load);
+        Kinematics.AddOrUpdateComponent(entityId, new Kinematics
+        {
+            Position = position,
+            Velocity = velocity
+        }, load);
         return this;
     }
 
@@ -116,8 +117,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder WithoutPositionable()
     {
-        positions.RemoveComponent(entityId, load);
-        velocities.RemoveComponent(entityId, load);
+        Kinematics.RemoveComponent(entityId, load);
         return this;
     }
 

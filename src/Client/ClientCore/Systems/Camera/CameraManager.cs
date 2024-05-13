@@ -25,14 +25,11 @@ namespace Sovereign.ClientCore.Systems.Camera;
 /// </summary>
 public sealed class CameraManager
 {
-    private readonly PositionComponentCollection positions;
-    private readonly VelocityComponentCollection velocities;
+    private readonly KinematicComponentCollection kinematics;
 
-    public CameraManager(PositionComponentCollection positions,
-        VelocityComponentCollection velocities)
+    public CameraManager(KinematicComponentCollection kinematics)
     {
-        this.positions = positions;
-        this.velocities = velocities;
+        this.kinematics = kinematics;
     }
 
     /// <summary>
@@ -72,12 +69,12 @@ public sealed class CameraManager
         else
         {
             /* Match position and velocity with the target entity. */
-            var targetPos = positions.GetComponentForEntity(TrackingEntityId);
-            var targetVel = velocities.GetComponentForEntity(TrackingEntityId);
-            if (targetPos.HasValue)
-                Position = targetPos.Value;
-            if (targetVel.HasValue)
-                Velocity = targetVel.Value;
+            var targetKinematics = kinematics.GetComponentForEntity(TrackingEntityId);
+            if (targetKinematics.HasValue)
+            {
+                Position = targetKinematics.Value.Position;
+                Velocity = targetKinematics.Value.Velocity;
+            }
         }
     }
 
