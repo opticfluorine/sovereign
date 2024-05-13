@@ -58,6 +58,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// </summary>
     private readonly ConcurrentDictionary<int, ulong> componentToEntityMap = new();
 
+    private readonly List<int> directAccessModifiedIndices = new();
+
     /// <summary>
     ///     Map from entity ID to associated component.
     /// </summary>
@@ -125,6 +127,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private readonly HashSet<ulong> pendingUnloadEvents = new();
 
     /// <summary>
+    ///     When true, allows direct iteration of the components by systems.
+    /// </summary>
+    private bool enableDirectAccess;
+
+    /// <summary>
     ///     Creates a base component collection.
     /// </summary>
     /// <param name="componentManager">Component manager.</param>
@@ -147,6 +154,25 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         /* Register with the component manager. */
         componentManager.RegisterComponentUpdater(this);
         componentManager.RegisterComponentRemover(this);
+    }
+
+    /// <summary>
+    ///     Provides direct access to the underlying component list. Only allowed during the direct access
+    ///     phase of component update processing.
+    /// </summary>
+    /// <remarks>
+    ///     To perform direct iteration of components, subscribe to the OnBeginDirectAccess event and accept the
+    ///     update index list. If you modify any components, append to this list the index at which the modification
+    ///     was made. Indices in this list will be included in the set of component modification events that are fired.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown if accessed outside the direct access phase.</exception>
+    public List<T> Components
+    {
+        get
+        {
+            if (!enableDirectAccess) throw new InvalidOperationException("Direct access not allowed now.");
+            return components;
+        }
     }
 
     public ILogger Log { private get; set; } = NullLogger.Instance;
@@ -176,6 +202,12 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     public event ComponentEventDelegates<T>.ComponentModifiedEventHandler? OnComponentModified;
 
     public event Action? OnEndUpdates;
+
+    /// <summary>
+    ///     Event triggered when the direct access phase of the component update process begins.
+    ///     Parameter is a list of modified component indices to append to.
+    /// </summary>
+    public event Action<List<int>>? OnBeginDirectAccess;
 
     /// <summary>
     ///     Fully removes a component from the collection.
@@ -382,6 +414,15 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     {
         /* Announce that events are being fired. */
         OnStartUpdates?.Invoke();
+
+        // Open the collection to direct iteration by systems for bulk processing.
+        directAccessModifiedIndices.Clear();
+        enableDirectAccess = true;
+        OnBeginDirectAccess?.Invoke(directAccessModifiedIndices);
+        enableDirectAccess = false;
+        foreach (var index in directAccessModifiedIndices)
+            if (componentToEntityMap.TryGetValue(index, out var entityId))
+                pendingModifyEvents.Add(entityId);
 
         /* Fire events. */
         FireAddAndLoadEvents();
