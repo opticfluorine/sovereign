@@ -172,13 +172,10 @@ public class MovementManager
         var delta = (currentSystemTime - lastUpdateSystemTime) * UnitConversions.UsToS;
 
         var componentList = kinematics.Components;
-        for (var i = 0; i < componentList.Count; ++i)
+        for (var i = 0; i < componentList.Length; ++i)
             if (componentList[i].Velocity != Vector3.Zero)
             {
-                componentList[i] = componentList[i] with
-                {
-                    Position = componentList[i].Position + delta * componentList[i].Velocity
-                };
+                componentList[i].Position += delta * componentList[i].Velocity;
                 modifiedIndices.Add(i);
             }
 
