@@ -49,11 +49,6 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private const int OperationBufferSize = 1024;
 
     /// <summary>
-    ///     Underlying component array.
-    /// </summary>
-    private readonly List<T> components;
-
-    /// <summary>
     ///     Map from component buffer index to associated entity ID.
     /// </summary>
     private readonly ConcurrentDictionary<int, ulong> componentToEntityMap = new();
@@ -127,9 +122,24 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private readonly HashSet<ulong> pendingUnloadEvents = new();
 
     /// <summary>
+    ///     Increment to increase backing array size as necessary.
+    /// </summary>
+    private readonly int resizeIncrement;
+
+    /// <summary>
+    ///     Underlying component array.
+    /// </summary>
+    private T[] components;
+
+    /// <summary>
     ///     When true, allows direct iteration of the components by systems.
     /// </summary>
     private bool enableDirectAccess;
+
+    /// <summary>
+    ///     Next unused index, not counting anything in the queue.
+    /// </summary>
+    private int nextIndex;
 
     /// <summary>
     ///     Creates a base component collection.
@@ -143,7 +153,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         ComponentType componentType)
     {
         this.operators = operators;
-        components = new List<T>(initialSize);
+        components = new T[initialSize];
+        resizeIncrement = initialSize;
 
         ComponentType = componentType;
 
@@ -166,7 +177,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     ///     was made. Indices in this list will be included in the set of component modification events that are fired.
     /// </remarks>
     /// <exception cref="InvalidOperationException">Thrown if accessed outside the direct access phase.</exception>
-    public List<T> Components
+    public T[] Components
     {
         get
         {
@@ -204,12 +215,6 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     public event Action? OnEndUpdates;
 
     /// <summary>
-    ///     Event triggered when the direct access phase of the component update process begins.
-    ///     Parameter is a list of modified component indices to append to.
-    /// </summary>
-    public event Action<List<int>>? OnBeginDirectAccess;
-
-    /// <summary>
     ///     Fully removes a component from the collection.
     /// </summary>
     /// <param name="entityId">Entity ID whose component is to be removed.</param>
@@ -245,6 +250,12 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         /* Dispatch events as needed. */
         FireComponentEvents();
     }
+
+    /// <summary>
+    ///     Event triggered when the direct access phase of the component update process begins.
+    ///     Parameter is a list of modified component indices to append to.
+    /// </summary>
+    public event Action<List<int>>? OnBeginDirectAccess;
 
     /// <summary>
     ///     Enqueues the creation of a new component associated with the given entity.
@@ -622,19 +633,25 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// </returns>
     private int AddComponentToBuffer(T componentValue)
     {
+        // Select the next index.
         int index;
         if (indexQueue.Count > 0)
-        {
             /* Reuse a previously deleted component. */
             index = indexQueue.Dequeue();
-            components[index] = componentValue;
-        }
         else
-        {
             /* Append to the next position. */
-            index = components.Count;
-            components.Add(componentValue);
+            index = nextIndex++;
+
+        // If the index is past the end of the backing array, resize.
+        if (index >= components.Length)
+        {
+            var newComponents = new T[components.Length + resizeIncrement];
+            Array.Copy(components, newComponents, components.Length);
+            components = newComponents;
         }
+
+        // Insert the component.
+        components[index] = componentValue;
 
         return index;
     }

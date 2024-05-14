@@ -4,6 +4,11 @@
 
 ### May
 
+#### 13 May 2024
+
+* All: Update `BaseComponentCollection<T>` to be array-backed instead of list-backed. This produced a
+  noticeable performance improvement.
+
 #### 12 May 2024
 
 * All: Consolidate the `Position` and `Velocity` components into a single `Kinematics` component.
