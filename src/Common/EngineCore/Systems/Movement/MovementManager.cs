@@ -165,21 +165,24 @@ public class MovementManager
     /// <summary>
     ///     Updates all positions at the beginning of a tick.
     /// </summary>
-    private void UpdatePositions(List<int> modifiedIndices)
+    private int UpdatePositions(int[] modifiedIndices)
     {
         if (lastUpdateSystemTime == 0) lastUpdateSystemTime = systemTimer.GetTime();
         var currentSystemTime = systemTimer.GetTime();
         var delta = (currentSystemTime - lastUpdateSystemTime) * UnitConversions.UsToS;
 
         var componentList = kinematics.Components;
-        for (var i = 0; i < componentList.Length; ++i)
+        var directMods = 0;
+        for (var i = 0; i < kinematics.ComponentCount; ++i)
             if (componentList[i].Velocity != Vector3.Zero)
             {
-                componentList[i].Position += delta * componentList[i].Velocity;
-                modifiedIndices.Add(i);
+                // Using + instead of += shows a ~ 6.6% speedup with Release builds in EcsBenchmark.
+                componentList[i].Position = componentList[i].Position + delta * componentList[i].Velocity;
+                modifiedIndices[directMods++] = i;
             }
 
         lastUpdateSystemTime = currentSystemTime;
+        return directMods;
     }
 
     /// <summary>

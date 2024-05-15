@@ -53,8 +53,6 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// </summary>
     private readonly ConcurrentDictionary<int, ulong> componentToEntityMap = new();
 
-    private readonly List<int> directAccessModifiedIndices = new();
-
     /// <summary>
     ///     Map from entity ID to associated component.
     /// </summary>
@@ -132,9 +130,34 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private T[] components;
 
     /// <summary>
+    ///     Indices of components modified by a direct access.
+    /// </summary>
+    private int[] directAccessModifiedIndices;
+
+    /// <summary>
     ///     When true, allows direct iteration of the components by systems.
     /// </summary>
     private bool enableDirectAccess;
+
+    /// <summary>
+    ///     Flag indicating the component collection currently has adds.
+    /// </summary>
+    private bool hasAdds;
+
+    /// <summary>
+    ///     Flag indicating the component collection currently has modifications.
+    /// </summary>
+    private bool hasModifications;
+
+    /// <summary>
+    ///     Flag indicating the component collection currently has reclaims.
+    /// </summary>
+    private bool hasReclaims;
+
+    /// <summary>
+    ///     Flag indicating the component collection currently has removes.
+    /// </summary>
+    private bool hasRemoves;
 
     /// <summary>
     ///     Next unused index, not counting anything in the queue.
@@ -154,6 +177,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     {
         this.operators = operators;
         components = new T[initialSize];
+        directAccessModifiedIndices = new int[initialSize];
         resizeIncrement = initialSize;
 
         ComponentType = componentType;
@@ -185,6 +209,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             return components;
         }
     }
+
+    /// <summary>
+    ///     Indicates the number of components that need to be iterated during direct access.
+    /// </summary>
+    public int ComponentCount => nextIndex;
 
     public ILogger Log { private get; set; } = NullLogger.Instance;
 
@@ -234,6 +263,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         {
             pendingRemoves.Add(ref pendingRemove);
         }
+
+        hasRemoves = true;
     }
 
     /// <summary>
@@ -242,10 +273,10 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     public void ApplyComponentUpdates()
     {
         /* Apply all pending operations. */
-        ApplyReclaims();
-        ApplyAdds();
-        ApplyModifications();
-        ApplyRemoves();
+        if (hasReclaims) ApplyReclaims();
+        if (hasAdds) ApplyAdds();
+        if (hasModifications) ApplyModifications();
+        if (hasRemoves) ApplyRemoves();
 
         /* Dispatch events as needed. */
         FireComponentEvents();
@@ -253,9 +284,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
 
     /// <summary>
     ///     Event triggered when the direct access phase of the component update process begins.
-    ///     Parameter is a list of modified component indices to append to.
+    ///     Each component collection should have at most one subscriber to this event.
+    ///     First parameter is an array of modified component indices to append to.
+    ///     Return value is the number of indices added during this call.
     /// </summary>
-    public event Action<List<int>>? OnBeginDirectAccess;
+    public event Func<int[], int>? OnBeginDirectAccess;
 
     /// <summary>
     ///     Enqueues the creation of a new component associated with the given entity.
@@ -292,6 +325,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
                 pendingAdds.Add(ref pendingAdd);
                 pendingAddEntityIds.Add(entityId);
             }
+
+            hasAdds = true;
         }
     }
 
@@ -329,6 +364,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         {
             pendingModifications[operation].Add(ref pendingModify);
         }
+
+        hasModifications = true;
     }
 
     /// <summary>
@@ -427,17 +464,13 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         OnStartUpdates?.Invoke();
 
         // Open the collection to direct iteration by systems for bulk processing.
-        directAccessModifiedIndices.Clear();
         enableDirectAccess = true;
-        OnBeginDirectAccess?.Invoke(directAccessModifiedIndices);
+        var directModCount = OnBeginDirectAccess?.Invoke(directAccessModifiedIndices) ?? 0;
         enableDirectAccess = false;
-        foreach (var index in directAccessModifiedIndices)
-            if (componentToEntityMap.TryGetValue(index, out var entityId))
-                pendingModifyEvents.Add(entityId);
 
         /* Fire events. */
         FireAddAndLoadEvents();
-        FireModificationEvents();
+        FireModificationEvents(directModCount);
         FireRemoveAndUnloadEvents();
 
         /* Announce that events are done being fired. */
@@ -451,6 +484,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     {
         foreach (var entityId in pendingReclaims) ApplyReclaim(entityId);
         pendingReclaims.Clear();
+        hasReclaims = false;
     }
 
     /// <summary>
@@ -471,6 +505,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         /* Reset the buffer. */
         pendingAddEntityIds.Clear();
         pendingAdds.Clear();
+        hasAdds = false;
     }
 
     /// <summary>
@@ -495,6 +530,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             /* Reset the buffer. */
             queue.Clear();
         }
+
+        hasModifications = false;
     }
 
     /// <summary>
@@ -508,6 +545,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
 
         /* Clear the buffer. */
         pendingRemoves.Clear();
+        hasRemoves = false;
     }
 
     /// <summary>
@@ -540,16 +578,26 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <summary>
     ///     Fires events for component modifications.
     /// </summary>
-    private void FireModificationEvents()
+    /// <param name="directModCount">Number of direct modifications.</param>
+    private void FireModificationEvents(int directModCount)
     {
         /* Iterate over entities that have been modified. */
         if (OnComponentModified != null)
+        {
             foreach (var entityId in pendingModifyEvents)
             {
                 /* Notify all listeners. */
                 var value = this[entityId];
                 OnComponentModified.Invoke(entityId, value);
             }
+
+            for (var i = 0; i < directModCount; ++i)
+            {
+                if (!componentToEntityMap.TryGetValue(directAccessModifiedIndices[i], out var entityId)) continue;
+                var value = this[entityId];
+                OnComponentModified.Invoke(entityId, value);
+            }
+        }
 
         /* Reset the pending events. */
         pendingModifyEvents.Clear();
@@ -604,6 +652,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             pendingRemoveEvents.Add(entityId);
 
         pendingReclaims.Add(entityId);
+        hasReclaims = true;
     }
 
     /// <summary>
@@ -648,6 +697,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             var newComponents = new T[components.Length + resizeIncrement];
             Array.Copy(components, newComponents, components.Length);
             components = newComponents;
+            directAccessModifiedIndices = new int[components.Length];
         }
 
         // Insert the component.
