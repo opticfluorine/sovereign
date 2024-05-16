@@ -14,17 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EcsBenchmark;
+using BlockAddBenchmark;
 
-var size = 65536;
+// Size benchmark to measure time required to add blocks for a fully packed world segment.
+var size = 32 * 32 * 32;
 
-Console.WriteLine("=================================");
-Console.WriteLine("ECS Benchmark, Kinematics Updates");
+Console.WriteLine("================================");
+Console.WriteLine("ECS Benchmark, Block Entity Adds");
 Console.WriteLine($"Size: {size}");
-Console.WriteLine("=================================");
+Console.WriteLine("================================");
 Console.WriteLine();
 
-var benchmark = new EcsBenchmarkInstance(size);
+var benchmark = new BlockAddBenchmarkInstance(size);
 var results = benchmark.Run();
 Console.WriteLine($"Measurement Count:            {results.RunCount}");
 Console.WriteLine($"Mean Runtime (us):            {results.MeanRuntimeUs}");

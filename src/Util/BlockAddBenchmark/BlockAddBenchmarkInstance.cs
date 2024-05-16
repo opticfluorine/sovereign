@@ -14,52 +14,42 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
 using Sovereign.ServerCore.Timing;
 
-namespace Sovereign.EcsBenchmark;
+namespace BlockAddBenchmark;
 
-/// <summary>
-///     Simple benchmark for ECS performance that looks at bulk updates of a kinematics component collection.
-/// </summary>
-public class BenchmarkInstance
+public class BlockAddBenchmarkInstance
 {
     /// <summary>
     ///     How many component update cycles to perform in the warmup phase.
     /// </summary>
-    private const int WarmupCycleCount = 1000;
+    private const int WarmupCycleCount = 100;
 
     /// <summary>
     ///     How many component update cycles to perform in the measurement phase.
     /// </summary>
-    private const int MeasuredCycleCount = 500;
+    private const int MeasuredCycleCount = 100;
 
-    private readonly KinematicComponentCollection kinematics;
+    private readonly BlockPositionComponentCollection blockPositions;
+    private readonly MaterialModifierComponentCollection materialModifiers;
+    private readonly MaterialComponentCollection materials;
 
     private readonly List<ulong> runtimesUs = new(MeasuredCycleCount);
+    private readonly int size;
     private readonly ServerSystemTimer timer = new();
 
-    public BenchmarkInstance(int size)
+    public BlockAddBenchmarkInstance(int size)
     {
-        // Stand up a kinematics component collection with the requested number of components.
+        this.size = size;
+
         var entityNotifier = new EntityNotifier();
         var componentManager = new ComponentManager(entityNotifier);
-        kinematics = new KinematicComponentCollection(componentManager);
-
-        for (var i = 0; i < size; ++i)
-        {
-            kinematics.AddComponent((ulong)i, new Kinematics
-            {
-                Position = Vector3.Zero,
-                Velocity = Vector3.One
-            });
-        }
-
-        kinematics.ApplyComponentUpdates();
-        kinematics.OnBeginDirectAccess += OnDirectAccess;
+        blockPositions = new BlockPositionComponentCollection(componentManager);
+        materials = new MaterialComponentCollection(componentManager);
+        materialModifiers = new MaterialModifierComponentCollection(componentManager);
     }
 
     public RuntimeStatistics Run()
@@ -73,7 +63,8 @@ public class BenchmarkInstance
     {
         for (var i = 0; i < WarmupCycleCount; ++i)
         {
-            kinematics.ApplyComponentUpdates();
+            Reset();
+            DoRun();
         }
     }
 
@@ -81,20 +72,43 @@ public class BenchmarkInstance
     {
         runtimesUs.Clear();
 
+        // Force a GC collection before executing the benchmark so that we start from a clean state.
+        GC.Collect();
+
+        if (!GC.TryStartNoGCRegion(1000000)) throw new Exception("Failed to halt GC during benchmark.");
         for (var i = 0; i < MeasuredCycleCount; ++i)
         {
-            // Force a GC collection before executing the benchmark so that we start from a clean state.
-            GC.Collect();
-
             // Run a single timed measurement.
-            if (!GC.TryStartNoGCRegion(1000000)) throw new Exception("Failed to halt GC during benchmark.");
+            Reset();
             var startTimeUs = timer.GetTime();
-            kinematics.ApplyComponentUpdates();
+            DoRun();
             var endTimeUs = timer.GetTime();
-            GC.EndNoGCRegion();
 
             var elapsedUs = endTimeUs - startTimeUs;
             runtimesUs.Add(elapsedUs);
+        }
+
+        GC.EndNoGCRegion();
+    }
+
+    private void Reset()
+    {
+        blockPositions.Clear();
+        materials.Clear();
+        materialModifiers.Clear();
+    }
+
+    private void DoRun()
+    {
+        for (var i = 0; i < size; ++i)
+        {
+            blockPositions.AddComponent((ulong)i, new GridPosition { X = i, Y = 0, Z = 0 });
+            materials.AddComponent((ulong)i, 1);
+            materialModifiers.AddComponent((ulong)i, 0);
+
+            blockPositions.ApplyComponentUpdates();
+            materials.ApplyComponentUpdates();
+            materialModifiers.ApplyComponentUpdates();
         }
     }
 
@@ -107,22 +121,6 @@ public class BenchmarkInstance
             MeanRuntimeUs = (double)runtimesUs.Aggregate((a, b) => a + b) / MeasuredCycleCount,
             RunCount = MeasuredCycleCount
         };
-    }
-
-    private int OnDirectAccess(int[] modifiedIndices)
-    {
-        var componentList = kinematics.Components;
-        var count = kinematics.ComponentCount;
-        var directMods = 0;
-        for (var i = 0; i < count; ++i)
-        {
-            // Don't bother with a timestep for the benchmark, just accumulate the position subcomponent.
-            // The benchmark runs about 6.6% faster in Release using + instead of +=.
-            componentList[i].Position = componentList[i].Position + componentList[i].Velocity;
-            modifiedIndices[directMods++] = i;
-        }
-
-        return directMods;
     }
 
     public class RuntimeStatistics

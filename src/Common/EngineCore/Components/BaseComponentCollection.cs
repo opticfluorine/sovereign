@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Castle.Core.Logging;
@@ -49,14 +48,9 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private const int OperationBufferSize = 1024;
 
     /// <summary>
-    ///     Map from component buffer index to associated entity ID.
-    /// </summary>
-    private readonly ConcurrentDictionary<int, ulong> componentToEntityMap = new();
-
-    /// <summary>
     ///     Map from entity ID to associated component.
     /// </summary>
-    private readonly ConcurrentDictionary<ulong, int> entityToComponentMap = new();
+    private readonly Dictionary<ulong, int> entityToComponentMap = new();
 
     /// <summary>
     ///     Buffer indices ready for reuse.
@@ -130,6 +124,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private T[] components;
 
     /// <summary>
+    ///     Map from component buffer index to associated entity ID.
+    /// </summary>
+    private ulong[] componentToEntityMap;
+
+    /// <summary>
     ///     Indices of components modified by a direct access.
     /// </summary>
     private int[] directAccessModifiedIndices;
@@ -178,6 +177,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         this.operators = operators;
         components = new T[initialSize];
         directAccessModifiedIndices = new int[initialSize];
+        componentToEntityMap = new ulong[initialSize];
         resizeIncrement = initialSize;
 
         ComponentType = componentType;
@@ -259,10 +259,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             EntityId = entityId,
             IsUnload = isUnload
         };
-        lock (pendingRemoves)
-        {
-            pendingRemoves.Add(ref pendingRemove);
-        }
+        pendingRemoves.Add(ref pendingRemove);
 
         hasRemoves = true;
     }
@@ -320,11 +317,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
                 InitialValue = initialValue,
                 IsLoad = isLoad
             };
-            lock (pendingAdds)
-            {
-                pendingAdds.Add(ref pendingAdd);
-                pendingAddEntityIds.Add(entityId);
-            }
+            pendingAdds.Add(ref pendingAdd);
+            pendingAddEntityIds.Add(entityId);
 
             hasAdds = true;
         }
@@ -360,10 +354,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             ComponentOperation = operation,
             Adjustment = adjustment
         };
-        lock (pendingModifications)
-        {
-            pendingModifications[operation].Add(ref pendingModify);
-        }
+        pendingModifications[operation].Add(ref pendingModify);
 
         hasModifications = true;
     }
@@ -456,6 +447,16 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     }
 
     /// <summary>
+    ///     Clears the contents of the component collection.
+    /// </summary>
+    public void Clear()
+    {
+        entityToComponentMap.Clear();
+        indexQueue.Clear();
+        nextIndex = 0;
+    }
+
+    /// <summary>
     ///     Fires all pending component events.
     /// </summary>
     private void FireComponentEvents()
@@ -493,8 +494,9 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private void ApplyAdds()
     {
         /* Iterate over new components. */
-        foreach (var pendingAdd in pendingAdds)
+        for (var i = 0; i < pendingAdds.Count; ++i)
         {
+            ref var pendingAdd = ref pendingAdds[i];
             ApplyAddComponent(pendingAdd.EntityId, pendingAdd.InitialValue);
             if (pendingAdd.IsLoad)
                 pendingLoadEvents.Add(pendingAdd.EntityId);
@@ -519,8 +521,9 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             /* Transform and update all components. */
             var op = operators[operation];
             var queue = pendingModifications[operation];
-            foreach (var pendingModify in queue)
+            for (var i = 0; i < queue.Count; ++i)
             {
+                ref var pendingModify = ref queue[i];
                 var transformed = op(components[pendingModify.ComponentIndex],
                     pendingModify.Adjustment);
                 components[pendingModify.ComponentIndex] = transformed;
@@ -540,8 +543,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private void ApplyRemoves()
     {
         /* Apply operations. */
-        foreach (var pendingRemove in pendingRemoves)
+        for (var i = 0; i < pendingRemoves.Count; ++i)
+        {
+            ref var pendingRemove = ref pendingRemoves[i];
             ApplyRemoveOrUnloadComponent(pendingRemove.EntityId, pendingRemove.IsUnload);
+        }
 
         /* Clear the buffer. */
         pendingRemoves.Clear();
@@ -593,7 +599,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
 
             for (var i = 0; i < directModCount; ++i)
             {
-                if (!componentToEntityMap.TryGetValue(directAccessModifiedIndices[i], out var entityId)) continue;
+                var entityId = componentToEntityMap[directAccessModifiedIndices[i]];
                 var value = this[entityId];
                 OnComponentModified.Invoke(entityId, value);
             }
@@ -697,6 +703,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             var newComponents = new T[components.Length + resizeIncrement];
             Array.Copy(components, newComponents, components.Length);
             components = newComponents;
+
+            var newComponentMap = new ulong[components.Length];
+            Array.Copy(componentToEntityMap, newComponentMap, components.Length);
+            componentToEntityMap = newComponentMap;
+
             directAccessModifiedIndices = new int[components.Length];
         }
 
