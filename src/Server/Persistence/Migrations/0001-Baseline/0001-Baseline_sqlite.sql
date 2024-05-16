@@ -71,7 +71,9 @@ CREATE TABLE Account_Authentication
 
 CREATE TABLE Entity
 (
-    id INTEGER PRIMARY KEY NOT NULL
+    id          INTEGER PRIMARY KEY NOT NULL,
+    template_id INTEGER,
+    FOREIGN KEY (template_id) REFERENCES Entity (id)
 );
 
 
@@ -256,6 +258,7 @@ FROM Account
 
 CREATE VIEW EntityWithComponents AS
 SELECT Entity.id                   AS id,
+       Entity.template_id          AS template_id,
        Position.x                  AS x,
        Position.y                  AS y,
        Position.z                  AS z,
