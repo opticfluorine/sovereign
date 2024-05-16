@@ -47,6 +47,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     protected readonly PlayerCharacterTagCollection playerCharacterTags;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
+    private bool isBlock;
+
+    private ulong templateEntityId;
 
     protected AbstractEntityBuilder(ulong entityId, bool load,
         EntityManager entityManager, KinematicComponentCollection kinematics,
@@ -89,10 +92,16 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public ulong Build()
     {
-        if (!entityTable.Exists(entityId)) entityTable.Add(entityId);
+        if (!entityTable.Exists(entityId)) entityTable.Add(entityId, templateEntityId, isBlock);
         Dispose();
 
         return entityId;
+    }
+
+    public IEntityBuilder Template(ulong templateEntityId)
+    {
+        this.templateEntityId = templateEntityId;
+        return this;
     }
 
     public IEntityBuilder Positionable(Vector3 position, Vector3 velocity)
@@ -124,12 +133,14 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     public IEntityBuilder BlockPositionable(GridPosition position)
     {
         blockPositions.AddOrUpdateComponent(entityId, position, load);
+        isBlock = true;
         return this;
     }
 
     public IEntityBuilder WithoutBlockPositionable()
     {
         blockPositions.RemoveComponent(entityId, load);
+        isBlock = false;
         return this;
     }
 

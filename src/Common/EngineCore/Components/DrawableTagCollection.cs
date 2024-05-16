@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Sovereign.EngineCore.Entities;
+
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
@@ -24,8 +26,8 @@ public sealed class DrawableTagCollection : BaseTagCollection
 {
     private const int BaseSize = 65536;
 
-    public DrawableTagCollection(ComponentManager componentManager)
-        : base(componentManager, BaseSize, ComponentType.Drawable)
+    public DrawableTagCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, BaseSize, ComponentType.Drawable)
     {
     }
 }

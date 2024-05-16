@@ -17,33 +17,41 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Sovereign.EngineCore.Components;
+using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.EngineCore.Entities;
 
+/// <summary>
+///     Tracks top-level information for all in-memory entities.
+/// </summary>
 public class EntityTable
 {
+    private const int InitialPendingBufferSize = 16384;
+
     /// <summary>
     ///     Set of all entities that are currently held in memory.
     /// </summary>
     private readonly HashSet<ulong> entities = new();
 
-    private readonly MaterialComponentCollection materials;
+    /// <summary>
+    ///     Map from entity ID to its template entity ID.
+    /// </summary>
+    private readonly Dictionary<ulong, ulong> entityTemplates = new();
+
+    /// <summary>
+    ///     Set of non-block entities that are currently held in memory.
+    /// </summary>
+    private readonly HashSet<ulong> nonBlockEntities = new();
 
     /// <summary>
     ///     Set of all entities that are enqueued to be added to the table.
     /// </summary>
-    private readonly ConcurrentBag<ulong> pendingAdds = new();
+    private readonly StructBuffer<EntityAdd> pendingAdds = new(InitialPendingBufferSize);
 
     /// <summary>
     ///     Set of all entities that are enqueued to be removed from the table.
     /// </summary>
     private readonly ConcurrentBag<ulong> pendingRemoves = new();
-
-    public EntityTable(MaterialComponentCollection materials)
-    {
-        this.materials = materials;
-    }
 
     /// <summary>
     ///     Checks whether the given entity is current in memory.
@@ -59,10 +67,13 @@ public class EntityTable
     ///     Enqueues an entity to be added to the table.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    public void Add(ulong entityId)
+    /// <param name="templateEntityId">Template entity ID, or 0 for no template.</param>
+    /// <param name="isBlock">If true, indicates the entity is a block entity.</param>
+    public void Add(ulong entityId, ulong templateEntityId, bool isBlock)
     {
         if (Exists(entityId)) return;
-        pendingAdds.Add(entityId);
+        var newAdd = new EntityAdd { EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock };
+        pendingAdds.Add(ref newAdd);
     }
 
     /// <summary>
@@ -81,24 +92,45 @@ public class EntityTable
     public void UpdateAllEntities()
     {
         // Additions.
-        foreach (var entityId in pendingAdds)
+        for (var i = 0; i < pendingAdds.Count; ++i)
         {
+            ref var pendingAdd = ref pendingAdds[i];
+            var entityId = pendingAdd.EntityId;
             entities.Add(entityId);
-            if (!materials.HasComponentForEntity(entityId))
+            if (pendingAdd.TemplateEntityId > 0) entityTemplates[entityId] = pendingAdd.TemplateEntityId;
+
+            if (!pendingAdd.IsBlock)
+            {
+                nonBlockEntities.Add(entityId);
                 OnNonBlockEntityAdded?.Invoke(entityId);
+            }
         }
 
         // Removals.
         foreach (var entityId in pendingRemoves)
         {
             entities.Remove(entityId);
-            if (!materials.GetComponentForEntity(entityId, true).HasValue)
+            if (nonBlockEntities.Contains(entityId))
+            {
+                nonBlockEntities.Remove(entityId);
                 OnNonBlockEntityRemoved?.Invoke(entityId);
+            }
         }
 
         // Reset pending sets.
         pendingAdds.Clear();
         pendingRemoves.Clear();
+    }
+
+    /// <summary>
+    ///     Gets the template entity ID, if any, for the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="templateEntityId">Template entity ID.</param>
+    /// <returns>true if there is a template, false otherwise.</returns>
+    public bool TryGetTemplate(ulong entityId, out ulong templateEntityId)
+    {
+        return entityTemplates.TryGetValue(entityId, out templateEntityId);
     }
 
     /// <summary>
@@ -110,4 +142,25 @@ public class EntityTable
     ///     Event invoked when a non-block entity has been removed.
     /// </summary>
     public event Action<ulong>? OnNonBlockEntityRemoved;
+
+    /// <summary>
+    ///     Contains information for an entity to be added.
+    /// </summary>
+    private struct EntityAdd
+    {
+        /// <summary>
+        ///     Entity ID.
+        /// </summary>
+        public ulong EntityId;
+
+        /// <summary>
+        ///     Entity ID of the template entity, if any, or 0 for no template.
+        /// </summary>
+        public ulong TemplateEntityId;
+
+        /// <summary>
+        ///     Flag indicating whether the new entity is a block entity.
+        /// </summary>
+        public bool IsBlock;
+    }
 }

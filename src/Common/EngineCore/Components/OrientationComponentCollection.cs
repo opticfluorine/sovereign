@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.EngineCore.Components;
 
@@ -25,8 +26,9 @@ public class OrientationComponentCollection : BaseComponentCollection<Orientatio
     /// </summary>
     private const int INITIAL_SIZE = 65536;
 
-    public OrientationComponentCollection(ComponentManager componentManager)
-        : base(componentManager, INITIAL_SIZE, ComponentOperators.OrientationOperators, ComponentType.Orientation)
+    public OrientationComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, INITIAL_SIZE, ComponentOperators.OrientationOperators,
+            ComponentType.Orientation)
     {
     }
 }

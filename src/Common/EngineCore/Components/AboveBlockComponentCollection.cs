@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Sovereign.EngineCore.Entities;
+
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
@@ -28,8 +30,8 @@ public sealed class AboveBlockComponentCollection : BaseComponentCollection<ulon
     /// </summary>
     public const int InitialSize = 65536;
 
-    public AboveBlockComponentCollection(ComponentManager manager)
-        : base(manager, InitialSize, ComponentOperators.UlongOperators,
+    public AboveBlockComponentCollection(EntityTable entityTable, ComponentManager manager)
+        : base(entityTable, manager, InitialSize, ComponentOperators.UlongOperators,
             ComponentType.AboveBlock)
     {
     }

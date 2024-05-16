@@ -34,6 +34,13 @@ public interface IEntityBuilder
     ulong Build();
 
     /// <summary>
+    ///     Assigns a template to the entity.
+    /// </summary>
+    /// <param name="templateEntityId">Template entity ID.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder Template(ulong templateEntityId);
+
+    /// <summary>
     ///     Makes the new entity positionable with the given position and velocity.
     /// </summary>
     /// <param name="position">Position.</param>

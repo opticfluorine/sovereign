@@ -45,11 +45,12 @@ public class BlockAddBenchmarkInstance
     {
         this.size = size;
 
+        var entityTable = new EntityTable();
         var entityNotifier = new EntityNotifier();
         var componentManager = new ComponentManager(entityNotifier);
-        blockPositions = new BlockPositionComponentCollection(componentManager);
-        materials = new MaterialComponentCollection(componentManager);
-        materialModifiers = new MaterialModifierComponentCollection(componentManager);
+        blockPositions = new BlockPositionComponentCollection(entityTable, componentManager);
+        materials = new MaterialComponentCollection(entityTable, componentManager);
+        materialModifiers = new MaterialModifierComponentCollection(entityTable, componentManager);
     }
 
     public RuntimeStatistics Run()

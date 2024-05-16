@@ -16,9 +16,12 @@
  */
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineUtil.Collections;
 using Sovereign.EngineUtil.Monads;
 
@@ -47,6 +50,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// </summary>
     private const int OperationBufferSize = 1024;
 
+    private readonly EntityTable entityTable;
+
     /// <summary>
     ///     Map from entity ID to associated component.
     /// </summary>
@@ -65,7 +70,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <summary>
     ///     Entity IDs of pending adds.
     /// </summary>
-    private readonly HashSet<ulong> pendingAddEntityIds = new();
+    private readonly ConcurrentBag<ulong> pendingAddEntityIds = new();
 
     /// <summary>
     ///     Add events that are pending invocation.
@@ -166,14 +171,16 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <summary>
     ///     Creates a base component collection.
     /// </summary>
+    /// <param name="entityTable">Entity table.</param>
     /// <param name="componentManager">Component manager.</param>
     /// <param name="initialSize">Initial size of the component buffer.</param>
     /// <param name="operators">Dict of component operators for use in updates.</param>
     /// <param name="componentType">Component type.</param>
-    protected BaseComponentCollection(ComponentManager componentManager, int initialSize,
+    protected BaseComponentCollection(EntityTable entityTable, ComponentManager componentManager, int initialSize,
         Dictionary<ComponentOperation, Func<T, T, T>> operators,
         ComponentType componentType)
     {
+        this.entityTable = entityTable;
         this.operators = operators;
         components = new T[initialSize];
         directAccessModifiedIndices = new int[initialSize];
@@ -199,6 +206,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     ///     To perform direct iteration of components, subscribe to the OnBeginDirectAccess event and accept the
     ///     update index list. If you modify any components, append to this list the index at which the modification
     ///     was made. Indices in this list will be included in the set of component modification events that are fired.
+    ///     Note that direct access does not provide access to any templated values.
     /// </remarks>
     /// <exception cref="InvalidOperationException">Thrown if accessed outside the direct access phase.</exception>
     public T[] Components
@@ -250,8 +258,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <param name="isUnload">If true, treat this as an unload rather than a full remove.</param>
     public void RemoveComponent(ulong entityId, bool isUnload = false)
     {
-        /* Ensure that a component is associated. */
-        if (!HasComponentForEntity(entityId)) return;
+        /* Ensure that a component is directly associated. */
+        if (!entityToComponentMap.ContainsKey(entityId)) return;
 
         /* Enqueue the removal. */
         var pendingRemove = new PendingRemove
@@ -301,7 +309,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// </exception>
     public void AddComponent(ulong entityId, T initialValue, bool isLoad = false)
     {
-        if (HasComponentForEntity(entityId))
+        if (entityToComponentMap.ContainsKey(entityId))
         {
             /* Component already exists - enqueue an update. */
             ModifyComponent(entityId, ComponentOperation.Set, initialValue);
@@ -339,8 +347,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     public void ModifyComponent(ulong entityId, ComponentOperation operation, T adjustment)
     {
         /* Ensure that the entity has an associated component. */
-        if (!HasComponentForEntity(entityId)) return;
-        var componentIndex = entityToComponentMap[entityId];
+        if (!entityToComponentMap.TryGetValue(entityId, out var componentIndex)) return;
 
         /* Ensure that the operation is supported by this component. */
         if (!operators.ContainsKey(operation))
@@ -364,11 +371,10 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="newValue">New value.</param>
-    /// <
     /// <param name="isLoad">For adds, whether to treat as a load rather than an add.</param>
     public void AddOrUpdateComponent(ulong entityId, T newValue, bool isLoad = false)
     {
-        if (HasComponentForEntity(entityId))
+        if (entityToComponentMap.ContainsKey(entityId))
             ModifyComponent(entityId, ComponentOperation.Set, newValue);
         else
             AddComponent(entityId, newValue, isLoad);
@@ -382,7 +388,10 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <returns>true if a component is associated, false otherwise.</returns>
     public bool HasComponentForEntity(ulong entityId, bool lookback = false)
     {
-        return entityToComponentMap.ContainsKey(entityId) && (lookback || !pendingReclaims.Contains(entityId));
+        var hasLocal = entityToComponentMap.ContainsKey(entityId) && (lookback || !pendingReclaims.Contains(entityId));
+        return entityTable.TryGetTemplate(entityId, out var templateEntityId)
+            ? hasLocal || HasComponentForEntity(templateEntityId)
+            : hasLocal;
     }
 
     /// <summary>
@@ -415,6 +424,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         if ((lookback || !pendingReclaims.Contains(entityId))
             && entityToComponentMap.TryGetValue(entityId, out var componentId))
             maybe.Value = components[componentId];
+        if (!maybe.HasValue && entityTable.TryGetTemplate(entityId, out var templateEntityId))
+            maybe = GetComponentForEntity(templateEntityId, lookback);
         return maybe;
     }
 
@@ -428,16 +439,23 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     {
         if (entityToComponentMap.TryGetValue(entityId, out var componentId))
             return components[componentId];
+        if (entityTable.TryGetTemplate(entityId, out var templateEntityId) &&
+            entityToComponentMap.TryGetValue(templateEntityId, out var templateComponentId))
+            return components[templateComponentId];
+
         throw new KeyNotFoundException("No component for entity");
     }
 
     /// <summary>
     ///     Creates a dictionary mapping entity IDs to all known components.
     /// </summary>
-    /// This method should be used sparingly - it requires allocation and creation of
-    /// an entire dictionary. It is intended to be used in the initial creation of
-    /// a ComponentIndexer. Consider using GetComponentForEntity() in combination
-    /// with an appropriate ComponentIndexer instead.
+    /// <remarks>
+    ///     This method should be used sparingly - it requires allocation and creation of
+    ///     an entire dictionary. It is intended to be used in the initial creation of
+    ///     a ComponentIndexer. Consider using GetComponentForEntity() in combination
+    ///     with an appropriate ComponentIndexer instead.
+    ///     As with direct access, templated values are ignored by this method.
+    /// </remarks>
     /// <returns>Dictionary mapping entity IDs to all known components.</returns>
     public IDictionary<ulong, T> GetAllComponents()
     {

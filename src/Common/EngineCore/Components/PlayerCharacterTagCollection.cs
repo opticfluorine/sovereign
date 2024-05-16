@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Entities;
+
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
@@ -26,8 +28,8 @@ public class PlayerCharacterTagCollection : BaseTagCollection
     /// </summary>
     private const int InitialSize = 1024;
 
-    public PlayerCharacterTagCollection(ComponentManager componentManager)
-        : base(componentManager, InitialSize, ComponentType.PlayerCharacter)
+    public PlayerCharacterTagCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, InitialSize, ComponentType.PlayerCharacter)
     {
     }
 }

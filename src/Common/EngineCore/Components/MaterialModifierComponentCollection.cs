@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Sovereign.EngineCore.Entities;
+
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
@@ -28,8 +30,8 @@ public sealed class MaterialModifierComponentCollection : BaseComponentCollectio
     /// </summary>
     public const int InitialCount = 65536;
 
-    public MaterialModifierComponentCollection(ComponentManager componentManager)
-        : base(componentManager, InitialCount, ComponentOperators.IntOperators,
+    public MaterialModifierComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, InitialCount, ComponentOperators.IntOperators,
             ComponentType.MaterialModifier)
     {
     }

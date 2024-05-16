@@ -45,18 +45,17 @@ public class EcsBenchmarkInstance
     public EcsBenchmarkInstance(int size)
     {
         // Stand up a kinematics component collection with the requested number of components.
+        var entityTable = new EntityTable();
         var entityNotifier = new EntityNotifier();
         var componentManager = new ComponentManager(entityNotifier);
-        kinematics = new KinematicComponentCollection(componentManager);
+        kinematics = new KinematicComponentCollection(entityTable, componentManager);
 
         for (var i = 0; i < size; ++i)
-        {
             kinematics.AddComponent((ulong)i, new Kinematics
             {
                 Position = Vector3.Zero,
                 Velocity = Vector3.One
             });
-        }
 
         kinematics.ApplyComponentUpdates();
         kinematics.OnBeginDirectAccess += OnDirectAccess;
@@ -71,10 +70,7 @@ public class EcsBenchmarkInstance
 
     private void Warmup()
     {
-        for (var i = 0; i < WarmupCycleCount; ++i)
-        {
-            kinematics.ApplyComponentUpdates();
-        }
+        for (var i = 0; i < WarmupCycleCount; ++i) kinematics.ApplyComponentUpdates();
     }
 
     private void Measurement()
