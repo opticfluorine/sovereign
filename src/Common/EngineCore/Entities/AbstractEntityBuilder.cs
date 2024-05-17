@@ -92,7 +92,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public ulong Build()
     {
-        if (!entityTable.Exists(entityId)) entityTable.Add(entityId, templateEntityId, isBlock);
+        if (!entityTable.Exists(entityId)) entityTable.Add(entityId, templateEntityId, isBlock, load);
         Dispose();
 
         return entityId;

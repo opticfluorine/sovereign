@@ -69,11 +69,13 @@ public class EntityTable
     /// <param name="entityId">Entity ID.</param>
     /// <param name="templateEntityId">Template entity ID, or 0 for no template.</param>
     /// <param name="isBlock">If true, indicates the entity is a block entity.</param>
-    public void Add(ulong entityId, ulong templateEntityId, bool isBlock)
+    /// <param name="isLoad">If true, treat the entity as loaded rather than newly added.</param>
+    public void Add(ulong entityId, ulong templateEntityId, bool isBlock, bool isLoad)
     {
         if (Exists(entityId)) return;
         var newAdd = new EntityAdd { EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock };
         pendingAdds.Add(ref newAdd);
+        if (!isLoad && templateEntityId > 0) OnTemplateSet?.Invoke(entityId, templateEntityId);
     }
 
     /// <summary>
@@ -134,14 +136,37 @@ public class EntityTable
     }
 
     /// <summary>
+    ///     Sets or removes the template ID for the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="templateEntityId">Template entity ID, or 0 for no template.</param>
+    public void SetTemplate(ulong entityId, ulong templateEntityId)
+    {
+        if (templateEntityId > 0)
+            entityTemplates[entityId] = templateEntityId;
+        else
+            entityTemplates.Remove(entityId);
+        OnTemplateSet?.Invoke(entityId, templateEntityId);
+    }
+
+    /// <summary>
     ///     Event invoked when a non-block entity has been added.
+    ///     Parameter is entity ID.
     /// </summary>
     public event Action<ulong>? OnNonBlockEntityAdded;
 
     /// <summary>
     ///     Event invoked when a non-block entity has been removed.
+    ///     Parameter is entity ID.
     /// </summary>
     public event Action<ulong>? OnNonBlockEntityRemoved;
+
+
+    /// <summary>
+    ///     Event invoked when a template is set to an entity.
+    ///     First parameter is entity ID, second parameter is template entity ID.
+    /// </summary>
+    public event Action<ulong, ulong>? OnTemplateSet;
 
     /// <summary>
     ///     Contains information for an entity to be added.

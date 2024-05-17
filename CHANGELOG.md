@@ -4,6 +4,11 @@
 
 ### May
 
+#### 16 May 2024
+
+* All: Add entity templates which allow an entity to inherit a default set of components from a
+  template. Still need to configure the templates to load on startup.
+
 #### 13 May 2024
 
 * All: Update `BaseComponentCollection<T>` to be array-backed instead of list-backed. This produced a

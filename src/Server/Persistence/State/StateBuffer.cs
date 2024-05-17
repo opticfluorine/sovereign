@@ -113,6 +113,11 @@ public sealed class StateBuffer
     /// </summary>
     private readonly StructBuffer<ulong> removedEntities = new(BufferSize);
 
+    /// <summary>
+    ///     Template state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<ulong>> templateUpdates = new(BufferSize);
+
     public StateBuffer(ILogger logger, FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
         PersistenceInternalController internalController)
     {
@@ -138,6 +143,15 @@ public sealed class StateBuffer
     public void RemoveEntity(ulong entityId)
     {
         removedEntities.Add(ref entityId);
+    }
+
+    /// <summary>
+    ///     Queues a template update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateTemplate(ref StateUpdate<ulong> update)
+    {
+        templateUpdates.Add(ref update);
     }
 
     /// <summary>
@@ -255,6 +269,7 @@ public sealed class StateBuffer
     {
         newEntities.Clear();
         removedEntities.Clear();
+        templateUpdates.Clear();
         positionUpdates.Clear();
         materialUpdates.Clear();
         materialModifierUpdates.Clear();
@@ -292,6 +307,9 @@ public sealed class StateBuffer
                 // This ensures that any foreign key relationships between components
                 // and entities are satisfied when the components are updated.
                 SynchronizeAddedEntities(persistenceProvider, transaction);
+
+                // Next process any pending updates to entity templates.
+                SynchronizeTemplates(persistenceProvider.SetTemplateQuery, transaction);
 
                 /* Position. */
                 SynchronizeComponent(positionUpdates,
@@ -391,6 +409,7 @@ public sealed class StateBuffer
         }
     }
 
+
     /// <summary>
     ///     Adds new entities to the database.
     /// </summary>
@@ -413,6 +432,20 @@ public sealed class StateBuffer
     {
         var query = persistenceProvider.RemoveEntityQuery;
         foreach (var entityId in removedEntities) query.RemoveEntityId(entityId, transaction);
+    }
+
+    /// <summary>
+    ///     Synchronizes pending template updates.
+    /// </summary>
+    /// <param name="setTemplateQuery">Set template query.</param>
+    /// <param name="transaction">Transaction.</param>
+    private void SynchronizeTemplates(ISetTemplateQuery setTemplateQuery, IDbTransaction transaction)
+    {
+        for (var i = 0; i < templateUpdates.Count; ++i)
+        {
+            ref var update = ref templateUpdates[i];
+            setTemplateQuery.SetTemplate(update.EntityId, update.Value, transaction);
+        }
     }
 
     /// <summary>

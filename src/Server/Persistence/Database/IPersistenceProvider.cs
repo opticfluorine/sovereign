@@ -79,6 +79,11 @@ public interface IPersistenceProvider : IDisposable
     IRemoveEntityQuery RemoveEntityQuery { get; }
 
     /// <summary>
+    ///     ISetTemplateQuery for this persistence provider.
+    /// </summary>
+    public ISetTemplateQuery SetTemplateQuery { get; }
+
+    /// <summary>
     ///     IAddComponentQuery for the Position component.
     /// </summary>
     IAddComponentQuery<Kinematics> AddPositionQuery { get; }

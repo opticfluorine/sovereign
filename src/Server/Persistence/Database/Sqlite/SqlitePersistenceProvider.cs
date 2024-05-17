@@ -103,6 +103,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         AddEntityQuery = new SqliteAddEntityQuery(Connection);
         RemoveEntityQuery = new SqliteRemoveEntityQuery(Connection);
 
+        SetTemplateQuery = new SqliteSetTemplateQuery((SqliteConnection)Connection);
+
         PlayerExistsQuery = new SqlitePlayerExistsQuery((SqliteConnection)Connection);
         GetAccountForPlayerQuery = new SqliteGetAccountForPlayerQuery((SqliteConnection)Connection);
         ListPlayersQuery = new SqliteListPlayersQuery((SqliteConnection)Connection);
@@ -209,6 +211,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+    public ISetTemplateQuery SetTemplateQuery { get; }
     public IRemoveComponentQuery RemoveAdminComponentQuery { get; }
     public IAddComponentQuery<string> AddNameQuery { get; }
     public IModifyComponentQuery<string> ModifyNameQuery { get; }
