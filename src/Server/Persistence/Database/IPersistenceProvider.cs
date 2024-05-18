@@ -44,6 +44,11 @@ public interface IPersistenceProvider : IDisposable
     INextPersistedIdQuery NextPersistedIdQuery { get; }
 
     /// <summary>
+    ///     IRetrieveAllTemplatesQuery for this persistence provider.
+    /// </summary>
+    IRetrieveAllTemplatesQuery RetrieveAllTemplatesQuery { get; }
+
+    /// <summary>
     ///     IAddAccountQuery for this persistence provider.
     /// </summary>
     IAddAccountQuery AddAccountQuery { get; }

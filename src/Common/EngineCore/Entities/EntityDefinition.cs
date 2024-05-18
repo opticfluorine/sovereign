@@ -93,4 +93,10 @@ public class EntityDefinition
     /// </summary>
     [Key(10)]
     public GridPosition? BlockPosition { get; set; }
+
+    /// <summary>
+    ///     Template entity ID, or 0 if the entity has no template.
+    /// </summary>
+    [Key(11)]
+    public ulong TemplateEntityId { get; set; }
 }

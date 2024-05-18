@@ -54,6 +54,9 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
 
     public override IEntityBuilder Account(Guid accountId)
     {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
         accounts.AddComponent(entityId, accountId, load);
         return this;
     }

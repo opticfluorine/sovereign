@@ -25,8 +25,9 @@ public interface IEntityFactory
     /// <summary>
     ///     Gets an entity builder.
     /// </summary>
+    /// <param name="isNewTemplate">If true, build a new entity template instead of a normal entity.</param>
     /// <returns>Entity builder.</returns>
-    IEntityBuilder GetBuilder();
+    IEntityBuilder GetBuilder(bool isNewTemplate = false);
 
     /// <summary>
     ///     Gets an entity builder for the given entity ID.

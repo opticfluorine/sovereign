@@ -6,4 +6,5 @@ of Sovereign's ECS framework and how to work with it.
 
 :::{toctree}
 adding_components.md
+template_entities.md
 :::

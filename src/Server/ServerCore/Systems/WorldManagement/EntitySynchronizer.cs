@@ -37,6 +37,7 @@ public class EntitySynchronizer
     private readonly IServerConfigurationManager configManager;
     private readonly WorldManagementInternalController controller;
     private readonly DrawableTagCollection drawables;
+    private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
     private readonly KinematicComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
@@ -52,7 +53,8 @@ public class EntitySynchronizer
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
         ParentComponentCollection parents, DrawableTagCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations,
-        AdminTagCollection admins, BlockPositionComponentCollection blockPositions)
+        AdminTagCollection admins, BlockPositionComponentCollection blockPositions,
+        EntityTable entityTable)
     {
         this.eventSender = eventSender;
         this.configManager = configManager;
@@ -68,6 +70,7 @@ public class EntitySynchronizer
         this.orientations = orientations;
         this.admins = admins;
         this.blockPositions = blockPositions;
+        this.entityTable = entityTable;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -124,6 +127,10 @@ public class EntitySynchronizer
     {
         var def = new EntityDefinition();
         def.EntityId = entityId;
+
+        def.TemplateEntityId = entityTable.TryGetTemplate(entityId, out var templateEntityId)
+            ? templateEntityId
+            : 0;
 
         if (kinematics.HasComponentForEntity(entityId))
             def.Position = kinematics[entityId].Position;

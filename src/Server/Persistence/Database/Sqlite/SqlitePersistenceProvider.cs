@@ -92,6 +92,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
 
         MigrationQuery = new SqliteMigrationQuery(Connection);
         NextPersistedIdQuery = new SqliteNextPersistedIdQuery(Connection);
+        RetrieveAllTemplatesQuery = new SqliteRetrieveAllTemplatesQuery((SqliteConnection)Connection);
 
         AddAccountQuery = new SqliteAddAccountQuery(Connection);
         RetrieveAccountQuery = new SqliteRetrieveAccountQuery(Connection);
@@ -221,6 +222,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IMigrationQuery MigrationQuery { get; }
 
     public INextPersistedIdQuery NextPersistedIdQuery { get; }
+
+    public IRetrieveAllTemplatesQuery RetrieveAllTemplatesQuery { get; }
 
     public IAddAccountQuery AddAccountQuery { get; }
 

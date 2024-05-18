@@ -18,6 +18,7 @@
 using System;
 using System.Data;
 using Microsoft.Data.Sqlite;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Database.Queries;
 
 namespace Sovereign.Persistence.Database.Sqlite.Queries;
@@ -33,7 +34,7 @@ public sealed class SqliteNextPersistedIdQuery : INextPersistedIdQuery
     private const string query =
         @"SELECT MAX(id) + 1 FROM (
                 SELECT MAX(id) AS id FROM Entity
-                UNION SELECT 0x7ffeffffffffffff)";
+                UNION SELECT @FirstPersistedId - 1)";
 
     private readonly SqliteConnection dbConnection;
 
@@ -44,11 +45,14 @@ public sealed class SqliteNextPersistedIdQuery : INextPersistedIdQuery
 
     public ulong GetNextPersistedEntityId()
     {
-        using (var cmd = new SqliteCommand(query, dbConnection))
-        {
-            var result = cmd.ExecuteScalar();
-            if (result == null) throw new Exception("Database is in an invalid state.");
-            return (ulong)(long)result;
-        }
+        using var cmd = new SqliteCommand(query, dbConnection);
+
+        var pFirstPersistedId = new SqliteParameter("FirstPersistedId", SqliteType.Integer);
+        pFirstPersistedId.Value = EntityConstants.FirstPersistedEntityId;
+        cmd.Parameters.Add(pFirstPersistedId);
+
+        var result = cmd.ExecuteScalar();
+        if (result == null) throw new Exception("Database is in an invalid state.");
+        return (ulong)(long)result;
     }
 }

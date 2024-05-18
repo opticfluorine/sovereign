@@ -54,6 +54,20 @@ public class EntityTable
     private readonly ConcurrentBag<ulong> pendingRemoves = new();
 
     /// <summary>
+    ///     Next unused template entity ID.
+    /// </summary>
+    public ulong NextTemplateEntityId { get; private set; } = EntityConstants.FirstTemplateEntityId;
+
+    /// <summary>
+    ///     Marks the given template entity ID as used.
+    /// </summary>
+    /// <param name="templateEntityId">Template entity ID.</param>
+    public void TakeTemplateEntityId(ulong templateEntityId)
+    {
+        if (templateEntityId >= NextTemplateEntityId) NextTemplateEntityId = templateEntityId + 1;
+    }
+
+    /// <summary>
     ///     Checks whether the given entity is current in memory.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
