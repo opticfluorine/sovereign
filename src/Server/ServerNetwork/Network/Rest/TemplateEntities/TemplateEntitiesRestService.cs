@@ -16,7 +16,9 @@
 
 using System;
 using System.Threading.Tasks;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Network.Rest;
+using Sovereign.ServerCore.Systems.TemplateEntity;
 using WatsonWebserver;
 
 namespace Sovereign.ServerNetwork.Network.Rest.TemplateEntities;
@@ -34,12 +36,32 @@ public class TemplateEntitiesRestService : AuthenticatedRestService
         this.generator = generator;
     }
 
+    public new ILogger Logger { private get; set; } = NullLogger.Instance;
+
     public override string Path => RestEndpoints.TemplateEntities;
     public override RestPathType PathType => RestPathType.Static;
     public override HttpMethod RequestType => HttpMethod.GET;
 
     protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
     {
-        await ctx.Response.Send();
+        try
+        {
+            var data = await generator.GetLatestTemplateEntityData();
+            ctx.Response.StatusCode = 200;
+            await ctx.Response.Send(data);
+        }
+        catch (Exception e)
+        {
+            Logger.Error("Error when sending template entity data.", e);
+            try
+            {
+                ctx.Response.StatusCode = 500;
+                await ctx.Response.Send();
+            }
+            catch (Exception e2)
+            {
+                Logger.Error("Error when sending error response.", e2);
+            }
+        }
     }
 }

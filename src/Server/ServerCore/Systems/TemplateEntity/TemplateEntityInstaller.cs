@@ -18,9 +18,9 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 
-namespace Sovereign.ServerNetwork.Network.Rest.TemplateEntities;
+namespace Sovereign.ServerCore.Systems.TemplateEntity;
 
-public class TemplateEntitiesRestServiceInstaller : IWindsorInstaller
+public class TemplateEntityInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {

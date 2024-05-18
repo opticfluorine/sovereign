@@ -30,6 +30,8 @@ public class ClientOutboundEventSet : IOutboundEventSet
         EventId.Core_Ping_Pong,
         EventId.Core_Movement_RequestMove,
         EventId.Core_Network_Logout,
-        EventId.Core_Chat_Send
+        EventId.Core_Chat_Send,
+        EventId.Server_TemplateEntity_CreateNew,
+        EventId.Server_TemplateEntity_Update
     };
 }
