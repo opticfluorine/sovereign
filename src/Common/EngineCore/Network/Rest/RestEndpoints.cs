@@ -47,5 +47,8 @@ public sealed class RestEndpoints
     /// </summary>
     public const string Player = "/player";
 
-    public const string PlayerSelect = "/player/select";
+    /// <summary>
+    ///     Relative path to REST endpoint for template entities.
+    /// </summary>
+    public const string TemplateEntities = "/templates";
 }
