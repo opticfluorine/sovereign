@@ -91,6 +91,7 @@ public sealed class ClientNetworkManager : INetworkManager
     private readonly ConcurrentQueue<OutboundEventInfo> outboundEventQueue = new();
 
     private readonly RestClient restClient;
+    private readonly TemplateEntityDataClient templateEntityDataClient;
 
     /// <summary>
     ///     Latest login response.
@@ -100,7 +101,7 @@ public sealed class ClientNetworkManager : INetworkManager
     public ClientNetworkManager(NetworkConnectionManager connectionManager,
         NetworkSerializer networkSerializer, RestClient restClient,
         AuthenticationClient authClient, IEventSender eventSender,
-        ClientNetworkController clientNetworkController)
+        ClientNetworkController clientNetworkController, TemplateEntityDataClient templateEntityDataClient)
     {
         this.connectionManager = connectionManager;
         this.networkSerializer = networkSerializer;
@@ -108,6 +109,7 @@ public sealed class ClientNetworkManager : INetworkManager
         this.authClient = authClient;
         this.eventSender = eventSender;
         this.clientNetworkController = clientNetworkController;
+        this.templateEntityDataClient = templateEntityDataClient;
 
         netListener = new EventBasedNetListener();
         netManager = new NetManager(netListener);
@@ -304,6 +306,10 @@ public sealed class ClientNetworkManager : INetworkManager
         cmd.Port = ConnectionParameters.Port;
 
         commandQueue.Enqueue(cmd);
+
+        // Load the initial set of template entities from the REST server.
+        // Future updates will arrive via the event server connection.
+        templateEntityDataClient.LoadTemplateEntities();
     }
 
     /// <summary>

@@ -4,6 +4,11 @@
 
 ### May
 
+#### 18 May 2024
+
+* All: Automatically load the initial set of template entities when the client first logs into
+  the server.
+
 #### 16 May 2024
 
 * All: Add entity templates which allow an entity to inherit a default set of components from a

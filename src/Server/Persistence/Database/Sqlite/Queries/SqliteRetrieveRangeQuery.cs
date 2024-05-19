@@ -32,7 +32,7 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
     /// </summary>
     private const string Query =
         @"WITH RECURSIVE 
-            EntityTree(id, templateId, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
+            EntityTree(id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
                 drawable, animatedSprite, orientation, admin, blockX, blockY, blockZ)
 	        AS (
 	        	SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
@@ -50,7 +50,7 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
 	        		WHERE ec.parent = et.id 
                       AND ec.playerCharacter IS NULL
 	        ),
-            BlockEntityTree(id, templateId, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
+            BlockEntityTree(id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
                 drawable, animatedSprite, orientation, admin, blockX, blockY, blockZ)
             AS (
                 SELECT id, template_id, NULL, NULL, NULL, material, materialModifier, playerCharacter, name, 
@@ -66,11 +66,11 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                     FROM EntityWithComponents ec, BlockEntityTree et
                     WHERE ec.parent = et.id
             )
-            SELECT id, templateId, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
+            SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
                 drawable, animatedSprite, orientation, admin, blockX, blockY, blockZ 
             FROM EntityTree 
             UNION ALL
-            SELECT id, templateId, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
+            SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
                 drawable, animatedSprite, orientation, admin, blockX, blockY, blockZ
             FROM BlockEntityTree
             ORDER BY parent NULLS LAST";

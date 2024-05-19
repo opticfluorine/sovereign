@@ -28,12 +28,12 @@ public class TemplateEntitySystem : ISystem
 {
     private readonly TemplateEntityDataGenerator dataGenerator;
 
-    public TemplateEntitySystem(MainEventLoop mainEventLoop, EventCommunicator eventCommunicator,
+    public TemplateEntitySystem(IEventLoop eventLoop, EventCommunicator eventCommunicator,
         TemplateEntityDataGenerator dataGenerator)
     {
         this.dataGenerator = dataGenerator;
         EventCommunicator = eventCommunicator;
-        mainEventLoop.RegisterSystem(this);
+        eventLoop.RegisterSystem(this);
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

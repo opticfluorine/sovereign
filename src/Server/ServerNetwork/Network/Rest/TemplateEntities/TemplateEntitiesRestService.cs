@@ -44,10 +44,14 @@ public class TemplateEntitiesRestService : AuthenticatedRestService
 
     protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
     {
+        Logger.InfoFormat("Received template entity data request from account {0}.", accountId);
+
         try
         {
             var data = await generator.GetLatestTemplateEntityData();
             ctx.Response.StatusCode = 200;
+            ctx.Response.ContentType = "application/octet-stream";
+            ctx.Response.ContentLength = data.Length;
             await ctx.Response.Send(data);
         }
         catch (Exception e)

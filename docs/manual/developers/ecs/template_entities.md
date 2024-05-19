@@ -28,10 +28,10 @@ collection of template entities are maintained in server memory at all times. Wh
 changes are made to these templates, those changes are synchronized to the database
 during the standard persistence synchronization process.
 
-The client loads the latest template entities when a player is selected and enters the
-world by requesting a full template table via a REST endpoint on the server. This
-table consists of a LZ4-compressed list of entity definition structures encoded using
-MessagePack. It is parsed and the definitions are processed by 
+The client loads the latest template entities when an account first logs in
+by requesting a full template table via an authenticated REST endpoint on the server. 
+This table consists of a LZ4-compressed list of entity definition structures encoded 
+using MessagePack. It is parsed and the definitions are processed by 
 `EntityDefinitionProcessor` to synchronize the template table in client memory.
 
 ## Template Entity Creation

@@ -31,6 +31,7 @@ public sealed class ClientNetworkInfrastructureInstaller : IWindsorInstaller
         container.Register(Component.For<AuthenticationClient>().LifestyleSingleton());
         container.Register(Component.For<PlayerManagementClient>().LifestyleSingleton());
         container.Register(Component.For<RegistrationClient>().LifestyleSingleton());
+        container.Register(Component.For<TemplateEntityDataClient>().LifestyleSingleton());
         container.Register(Component.For<WorldSegmentDataClient>().LifestyleSingleton());
     }
 }
