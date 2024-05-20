@@ -25,11 +25,9 @@ namespace Sovereign.ClientCore.Entities;
 public class TemplateEntityDataLoader
 {
     private readonly EntityDefinitionProcessor definitionProcessor;
-    private readonly IEntityFactory factory;
 
-    public TemplateEntityDataLoader(IEntityFactory factory, EntityDefinitionProcessor definitionProcessor)
+    public TemplateEntityDataLoader(EntityDefinitionProcessor definitionProcessor)
     {
-        this.factory = factory;
         this.definitionProcessor = definitionProcessor;
     }
 

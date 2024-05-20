@@ -35,6 +35,7 @@ namespace Sovereign.EngineCore.Events;
 [Union(9, typeof(LocalChatEventDetails))]
 [Union(10, typeof(GlobalChatEventDetails))]
 [Union(11, typeof(SystemChatEventDetails))]
+[Union(12, typeof(TemplateEntityDefinitionEventDetails))]
 public interface IEventDetails
 {
 }

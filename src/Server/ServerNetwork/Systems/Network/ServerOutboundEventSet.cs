@@ -32,6 +32,7 @@ public class ServerOutboundEventSet : IOutboundEventSet
         EventId.Core_WorldManagement_Unsubscribe,
         EventId.Client_EntitySynchronization_Sync,
         EventId.Client_EntitySynchronization_Desync,
+        EventId.Client_EntitySynchronization_SyncTemplate,
         EventId.Core_Movement_Move,
         EventId.Core_WorldManagement_EntityLeaveWorldSegment,
         EventId.Core_Chat_Local,

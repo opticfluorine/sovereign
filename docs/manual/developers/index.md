@@ -6,4 +6,5 @@ development.
 :::{toctree}
 ecs/index.md
 systems/index.md
+networking/index.md
 :::

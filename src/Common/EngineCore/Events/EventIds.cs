@@ -293,6 +293,12 @@ public enum EventId
     /// Associated details: EntityDesyncEventDetails
     Client_EntitySynchronization_Desync = 100301,
 
+    /// <summary>
+    ///     Event sent from server to client to synchronize a template entity.
+    /// </summary>
+    /// Associated details: TemplateEntityDefinitionEventDetails
+    Client_EntitySynchronization_SyncTemplate = 100302,
+
     #endregion Client_EntitySynchronization
 
     #region Client_State
@@ -406,7 +412,7 @@ public enum EventId
     /// <summary>
     ///     Requests the TemplateEntity system to create a new template entity with no components.
     /// </summary>
-    /// Associated details: EntityEventDetails
+    /// Associated details: None
     Server_TemplateEntity_CreateNew = 200500,
 
     /// <summary>
