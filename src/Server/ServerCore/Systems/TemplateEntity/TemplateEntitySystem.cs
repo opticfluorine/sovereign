@@ -17,6 +17,9 @@
 using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Logging;
+using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems;
 
 namespace Sovereign.ServerCore.Systems.TemplateEntity;
@@ -27,11 +30,18 @@ namespace Sovereign.ServerCore.Systems.TemplateEntity;
 public class TemplateEntitySystem : ISystem
 {
     private readonly TemplateEntityDataGenerator dataGenerator;
+    private readonly LoggingUtil loggingUtil;
+    private readonly TemplateEntityManager manager;
+    private readonly PlayerRoleCheck roleCheck;
 
     public TemplateEntitySystem(IEventLoop eventLoop, EventCommunicator eventCommunicator,
-        TemplateEntityDataGenerator dataGenerator)
+        TemplateEntityDataGenerator dataGenerator, PlayerRoleCheck roleCheck, LoggingUtil loggingUtil,
+        TemplateEntityManager manager)
     {
         this.dataGenerator = dataGenerator;
+        this.roleCheck = roleCheck;
+        this.loggingUtil = loggingUtil;
+        this.manager = manager;
         EventCommunicator = eventCommunicator;
         eventLoop.RegisterSystem(this);
     }
@@ -42,6 +52,7 @@ public class TemplateEntitySystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
+        EventId.Core_Tick,
         EventId.Server_TemplateEntity_CreateNew,
         EventId.Server_TemplateEntity_Update
     };
@@ -65,20 +76,82 @@ public class TemplateEntitySystem : ISystem
             switch (ev.EventId)
             {
                 case EventId.Server_TemplateEntity_CreateNew:
+                    OnCreateNew(ev.EventDetails);
                     break;
 
                 case EventId.Server_TemplateEntity_Update:
+                    OnUpdate(ev.EventDetails);
+                    break;
+
+                case EventId.Core_Tick:
+                    OnTick();
                     break;
 
                 default:
                     Logger.Error("Unhandled event in TemplateEntitySystem.");
                     break;
             }
-
-            // Processing any event will invalidate the current template entity data for synchronization.
-            dataGenerator.OnTemplatesChanged();
         }
 
         return eventCount;
+    }
+
+    /// <summary>
+    ///     Handles a Tick event by synchronizing any pending changes.
+    /// </summary>
+    private void OnTick()
+    {
+        if (manager.TrySyncPendingTemplates()) dataGenerator.OnTemplatesChanged();
+    }
+
+    /// <summary>
+    ///     Handles a CreateNew event.
+    /// </summary>
+    /// <param name="details">Details.</param>
+    private void OnCreateNew(IEventDetails? details)
+    {
+        if (details is not EntityEventDetails requestDetails)
+        {
+            Logger.Error("Bad details for CreateNew.");
+            return;
+        }
+
+        if (!roleCheck.IsPlayerAdmin(requestDetails.EntityId))
+        {
+            Logger.ErrorFormat("[Security] Attempted CreateNew by non-admin player {0}.",
+                loggingUtil.FormatEntity(requestDetails.EntityId));
+            return;
+        }
+
+        Logger.InfoFormat("New template entity created by player {0}.",
+            loggingUtil.FormatEntity(requestDetails.EntityId));
+        manager.CreateNew();
+    }
+
+    /// <summary>
+    ///     Handles an Update event.
+    /// </summary>
+    /// <param name="details">Details.</param>
+    private void OnUpdate(IEventDetails? details)
+    {
+        if (details is not EntityDefinitionEventDetails requestDetails)
+        {
+            Logger.Error("Bad details for Update.");
+            return;
+        }
+
+        if (!roleCheck.IsPlayerAdmin(requestDetails.PlayerEntityId))
+        {
+            Logger.ErrorFormat("[Security] Attempted Update by non-admin player {0}.",
+                loggingUtil.FormatEntity(requestDetails.PlayerEntityId));
+            return;
+        }
+
+        foreach (var definition in requestDetails.EntityDefinitions)
+        {
+            Logger.InfoFormat("Template entity {0} updated by player {1}.", definition.EntityId,
+                loggingUtil.FormatEntity(requestDetails.PlayerEntityId));
+            manager.UpdateExisting(definition);
+        }
     }
 }

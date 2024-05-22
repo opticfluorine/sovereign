@@ -45,7 +45,9 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
         {
             { EventId.Core_Movement_RequestMove, RequestMoveEventMapper },
             { EventId.Core_Network_Logout, EntityEventMapper },
-            { EventId.Core_Chat_Send, ChatEventMapper }
+            { EventId.Core_Chat_Send, ChatEventMapper },
+            { EventId.Server_TemplateEntity_CreateNew, EntityEventMapper },
+            { EventId.Server_TemplateEntity_Update, EntityDefinitionEventMapper }
         };
     }
 
@@ -93,5 +95,15 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
     private static void ChatEventMapper(IEventDetails details, ulong entityId)
     {
         ((ChatEventDetails)details).SenderEntityId = entityId;
+    }
+
+    /// <summary>
+    ///     Mapper for EntityDefinitionEventMapper events.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    /// <param name="entityId">Player entity ID.</param>
+    private static void EntityDefinitionEventMapper(IEventDetails details, ulong entityId)
+    {
+        ((EntityDefinitionEventDetails)details).PlayerEntityId = entityId;
     }
 }

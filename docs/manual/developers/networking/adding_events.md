@@ -78,3 +78,14 @@ This configuration requires a number of changes:
    sync through a series of events that are broadcast to all connections by the
    server.
    :::
+6. If the event will be sent from client to server, and if the event details must
+   contain the entity ID of the player who sent the event, update
+   `SourceEntityMappingInboundPipelineStage` with a new function that modifies
+   the corresponding event details to contain the entity ID of the sender.
+   :::{warning}
+   Never trust the client to send the correct player entity ID for themselves. A
+   malicious client could send an event with a spoofed entity ID. The
+   `SourceEntityMappingInboundPipelineStage` mitigates this threat by overriding
+   the entity ID in the details with the entity ID associated with the event
+   server connection that received the event.
+   :::

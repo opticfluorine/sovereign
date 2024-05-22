@@ -412,7 +412,7 @@ public enum EventId
     /// <summary>
     ///     Requests the TemplateEntity system to create a new template entity with no components.
     /// </summary>
-    /// Associated details: None
+    /// Associated details: EntityEventDetails
     Server_TemplateEntity_CreateNew = 200500,
 
     /// <summary>

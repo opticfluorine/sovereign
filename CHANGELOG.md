@@ -4,6 +4,11 @@
 
 ### May
 
+#### 22 May 2024
+
+* Server: Add `TemplateEntitySystem` which exposes an event-based API for modifying the
+  template entities from the client (requires admin role).
+
 #### 18 May 2024
 
 * All: Automatically load the initial set of template entities when the client first logs into

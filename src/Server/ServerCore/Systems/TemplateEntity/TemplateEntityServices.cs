@@ -14,19 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using System.Threading.Tasks;
 
 namespace Sovereign.ServerCore.Systems.TemplateEntity;
 
-public class TemplateEntityInstaller : IWindsorInstaller
+/// <summary>
+///     Public read API to the TemplateEntity system.
+/// </summary>
+public class TemplateEntityServices
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
+    private readonly TemplateEntityDataGenerator dataGenerator;
+
+    public TemplateEntityServices(TemplateEntityDataGenerator dataGenerator)
     {
-        container.Register(Component.For<TemplateEntityDataGenerator>().LifestyleSingleton());
-        container.Register(Component.For<TemplateEntityServices>().LifestyleSingleton());
-        container.Register(Component.For<TemplateEntityInternalController>().LifestyleSingleton());
-        container.Register(Component.For<TemplateEntityManager>().LifestyleSingleton());
+        this.dataGenerator = dataGenerator;
+    }
+
+    /// <summary>
+    ///     Gets an asynchronous task that yields the latest TemplateEntityData object
+    ///     in compressed serialized form.
+    /// </summary>
+    /// <returns>Latest TemplateEntityData object in compressed serialized form.</returns>
+    public Task<byte[]> GetLatestTemplateEntityData()
+    {
+        return dataGenerator.GetLatestTemplateEntityData();
     }
 }

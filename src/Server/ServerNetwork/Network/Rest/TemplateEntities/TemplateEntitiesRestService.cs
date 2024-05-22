@@ -28,12 +28,12 @@ namespace Sovereign.ServerNetwork.Network.Rest.TemplateEntities;
 /// </summary>
 public class TemplateEntitiesRestService : AuthenticatedRestService
 {
-    private readonly TemplateEntityDataGenerator generator;
+    private readonly TemplateEntityServices templateEntityServices;
 
-    public TemplateEntitiesRestService(RestAuthenticator authenticator, TemplateEntityDataGenerator generator)
+    public TemplateEntitiesRestService(RestAuthenticator authenticator, TemplateEntityServices templateEntityServices)
         : base(authenticator)
     {
-        this.generator = generator;
+        this.templateEntityServices = templateEntityServices;
     }
 
     public new ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -48,7 +48,7 @@ public class TemplateEntitiesRestService : AuthenticatedRestService
 
         try
         {
-            var data = await generator.GetLatestTemplateEntityData();
+            var data = await templateEntityServices.GetLatestTemplateEntityData();
             ctx.Response.StatusCode = 200;
             ctx.Response.ContentType = "application/octet-stream";
             ctx.Response.ContentLength = data.Length;

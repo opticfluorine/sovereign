@@ -22,13 +22,14 @@ namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
 ///     Event details specifying the definition of a single entity for replication
-///     from server to client.
+///     from server to client. Also used for updating template entities when
+///     sent from client to server.
 /// </summary>
 [MessagePackObject]
 public class EntityDefinitionEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Entity ID of the player to receive this synchronization event.
+    ///     Entity ID of the player sending or receiving this synchronization event.
     /// </summary>
     [IgnoreMember]
     public ulong PlayerEntityId { get; set; }
