@@ -46,6 +46,7 @@ public class InGameKeyboardShortcuts
         shortcutTable[SDL.SDL_Keycode.SDLK_ESCAPE] = () => Toggle(ClientStateFlag.ShowInGameMenu);
         shortcutTable[SDL.SDL_Keycode.SDLK_F2] = () => Toggle(ClientStateFlag.ShowPlayerDebug);
         shortcutTable[SDL.SDL_Keycode.SDLK_F3] = () => Toggle(ClientStateFlag.ShowEntityDebug);
+        shortcutTable[SDL.SDL_Keycode.SDLK_INSERT] = () => Toggle(ClientStateFlag.ShowTemplateEntityEditor);
     }
 
     /// <summary>

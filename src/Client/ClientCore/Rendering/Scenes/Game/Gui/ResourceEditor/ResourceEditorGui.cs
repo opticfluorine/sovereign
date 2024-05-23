@@ -52,6 +52,7 @@ public class ResourceEditorGui
                 animatedSpriteEditorTab.Render();
                 tileSpriteEditorTab.Render();
                 materialEditorTab.Render();
+                ImGui.EndTabBar();
             }
 
             ImGui.End();

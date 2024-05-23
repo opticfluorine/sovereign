@@ -63,5 +63,10 @@ public enum ClientStateFlag
     /// <summary>
     ///     Flag indicating that the in-game resource editor window should be displayed.
     /// </summary>
-    ShowResourceEditor
+    ShowResourceEditor,
+
+    /// <summary>
+    ///     Flag indicating that the in-game template entity editor window should be displayed.
+    /// </summary>
+    ShowTemplateEntityEditor
 }

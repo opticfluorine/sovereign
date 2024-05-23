@@ -95,17 +95,18 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 
 #### Controls
 
-| Key        | Action                                 |
-|------------|----------------------------------------|
-| Esc        | Open in-game menu                      |
-| Arrow keys | Move player                            |
-| Enter      | Toggle chat                            |
-| `          | Toggle Resource Editor Window          |
-| F2         | Toggle Player Debug Window             |
-| F3         | Toggle Entity Debug Window             |
-| F10        | Toggle Dear ImGui ID Stack Tool        |
-| F11        | Toggle Dear ImGui Metrics/Debug Window |
-| F12        | Toggle Dear ImGui Debug Log            |
+| Key        | Action                                                      |
+|------------|-------------------------------------------------------------|
+| Esc        | Open in-game menu                                           |
+| Arrow keys | Move player                                                 |
+| Enter      | Toggle chat                                                 |
+| `          | Toggle Resource Editor Window                               |
+| Insert     | Toggle Template Entity Editor Window (must be admin player) |
+| F2         | Toggle Player Debug Window                                  |
+| F3         | Toggle Entity Debug Window                                  |
+| F10        | Toggle Dear ImGui ID Stack Tool                             |
+| F11        | Toggle Dear ImGui Metrics/Debug Window                      |
+| F12        | Toggle Dear ImGui Debug Log                                 |
 
 #### Chat Commands
 
