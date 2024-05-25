@@ -14,23 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Systems.Network;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Indexers;
 
-namespace Sovereign.ClientCore.Systems.Network;
+namespace Sovereign.ClientCore.Components.Indexers;
 
 /// <summary>
-///     Provides the set of event IDs that the client will forward to the network.
+///     Component filter that selects for block template entities.
 /// </summary>
-public class ClientOutboundEventSet : IOutboundEventSet
+public class BlockTemplateEntityFilter : TemplateEntityComponentFilter<int>
 {
-    public HashSet<EventId> EventIdsToSend { get; } = new()
+    public BlockTemplateEntityFilter(MaterialComponentCollection materials) : base(materials, materials)
     {
-        EventId.Core_Ping_Pong,
-        EventId.Core_Movement_RequestMove,
-        EventId.Core_Network_Logout,
-        EventId.Core_Chat_Send,
-        EventId.Server_TemplateEntity_Update
-    };
+    }
 }

@@ -14,23 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Sovereign.EngineCore.Events;
-using Sovereign.NetworkCore.Systems.Network;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-namespace Sovereign.ClientCore.Systems.Network;
+namespace Sovereign.ClientCore.Components.Indexers;
 
-/// <summary>
-///     Provides the set of event IDs that the client will forward to the network.
-/// </summary>
-public class ClientOutboundEventSet : IOutboundEventSet
+public class ClientComponentIndexerInstaller : IWindsorInstaller
 {
-    public HashSet<EventId> EventIdsToSend { get; } = new()
+    public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        EventId.Core_Ping_Pong,
-        EventId.Core_Movement_RequestMove,
-        EventId.Core_Network_Logout,
-        EventId.Core_Chat_Send,
-        EventId.Server_TemplateEntity_Update
-    };
+        container.Register(Component.For<BlockTemplateEntityFilter>().LifestyleSingleton());
+        container.Register(Component.For<BlockTemplateEntityIndexer>().LifestyleSingleton());
+    }
 }

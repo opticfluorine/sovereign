@@ -53,7 +53,6 @@ public class TemplateEntitySystem : ISystem
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
         EventId.Core_Tick,
-        EventId.Server_TemplateEntity_CreateNew,
         EventId.Server_TemplateEntity_Update
     };
 
@@ -75,10 +74,6 @@ public class TemplateEntitySystem : ISystem
             eventCount++;
             switch (ev.EventId)
             {
-                case EventId.Server_TemplateEntity_CreateNew:
-                    OnCreateNew(ev.EventDetails);
-                    break;
-
                 case EventId.Server_TemplateEntity_Update:
                     OnUpdate(ev.EventDetails);
                     break;
@@ -102,30 +97,6 @@ public class TemplateEntitySystem : ISystem
     private void OnTick()
     {
         if (manager.TrySyncPendingTemplates()) dataGenerator.OnTemplatesChanged();
-    }
-
-    /// <summary>
-    ///     Handles a CreateNew event.
-    /// </summary>
-    /// <param name="details">Details.</param>
-    private void OnCreateNew(IEventDetails? details)
-    {
-        if (details is not EntityEventDetails requestDetails)
-        {
-            Logger.Error("Bad details for CreateNew.");
-            return;
-        }
-
-        if (!roleCheck.IsPlayerAdmin(requestDetails.EntityId))
-        {
-            Logger.ErrorFormat("[Security] Attempted CreateNew by non-admin player {0}.",
-                loggingUtil.FormatEntity(requestDetails.EntityId));
-            return;
-        }
-
-        Logger.InfoFormat("New template entity created by player {0}.",
-            loggingUtil.FormatEntity(requestDetails.EntityId));
-        manager.CreateNew();
     }
 
     /// <summary>

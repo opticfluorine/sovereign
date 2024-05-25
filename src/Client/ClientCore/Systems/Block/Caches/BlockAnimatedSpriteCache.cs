@@ -177,6 +177,10 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     {
         foreach (var blockId in changedSet)
         {
+            // Ignore templates.
+            if (blockId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+                continue;
+
             UpdatePositionForBlock(blockId);
 
             if (!knownPositions.TryGetValue(blockId, out var position))
@@ -197,6 +201,10 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     {
         foreach (var blockId in removedSet)
         {
+            // Ignore templates.
+            if (blockId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+                continue;
+
             RemoveEntity(blockId);
 
             if (!knownPositions.ContainsKey(blockId))

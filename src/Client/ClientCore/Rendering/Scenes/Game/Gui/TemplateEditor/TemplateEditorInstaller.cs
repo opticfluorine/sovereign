@@ -26,5 +26,6 @@ public class TemplateEditorInstaller : IWindsorInstaller
     {
         container.Register(Component.For<TemplateEditorGui>().LifestyleSingleton());
         container.Register(Component.For<BlockTemplateEditorTab>().LifestyleSingleton());
+        container.Register(Component.For<TemplateEditorInternalController>().LifestyleSingleton());
     }
 }

@@ -239,7 +239,17 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <exception cref="KeyNotFoundException">
     ///     Thrown by the getter if no component is associated with the entity ID.
     /// </exception>
-    public T this[ulong entityId] => components[entityToComponentMap[entityId]];
+    public T this[ulong entityId]
+    {
+        get
+        {
+            if (entityToComponentMap.TryGetValue(entityId, out var index)) return components[index];
+            if (entityTable.TryGetTemplate(entityId, out var templateId) &&
+                entityToComponentMap.TryGetValue(templateId, out var templateIndex))
+                return components[templateIndex];
+            throw new KeyNotFoundException($"No component or template component for entity {entityId}.");
+        }
+    }
 
     public event Action? OnStartUpdates;
 

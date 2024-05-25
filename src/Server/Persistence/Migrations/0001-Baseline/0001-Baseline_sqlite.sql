@@ -290,6 +290,56 @@ FROM Entity
          LEFT JOIN BlockPosition ON Entity.id = BlockPosition.id;
 
 
+--------------------------------------
+-- Starter Data - Template Entities --
+--------------------------------------
+
+-- Light dirt block template entity.
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000000);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000000, 'Light Dirt');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000000, 2);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000000, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000000, 1);
+
+-- Dark dirt block template entity.
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000001);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000001, 'Dark Dirt');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000001, 3);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000001, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000001, 1);
+
+----------------------------------
+-- Starter Data - Base Platform --
+----------------------------------
+
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000000, 0x7FFE000000000000);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000000, -1, -1, 0);
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000001, 0x7FFE000000000001);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000001, -1, 0, 0);
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000002, 0x7FFE000000000001);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000002, 0, -1, 0);
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000003, 0x7FFE000000000000);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000003, 0, 0, 0);
+
+
 -- Log the migration.
 INSERT INTO MigrationLog
 VALUES (1, 'Baseline');

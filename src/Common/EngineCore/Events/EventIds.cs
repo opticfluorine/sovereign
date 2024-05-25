@@ -410,16 +410,11 @@ public enum EventId
     #region Server_TemplateEntity
 
     /// <summary>
-    ///     Requests the TemplateEntity system to create a new template entity with no components.
-    /// </summary>
-    /// Associated details: EntityEventDetails
-    Server_TemplateEntity_CreateNew = 200500,
-
-    /// <summary>
-    ///     Requests the TemplateEntity system to update a template entity to match a supplied entity definition.
+    ///     Requests the TemplateEntity system to create or update a template entity to match a supplied entity
+    ///     definition.
     /// </summary>
     /// Associated details: EntityDefinitionEventDetails
-    Server_TemplateEntity_Update = 200501,
+    Server_TemplateEntity_Update = 200500,
 
     #endregion Server_TemplateEntity
 

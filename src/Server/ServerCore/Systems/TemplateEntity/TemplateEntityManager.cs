@@ -45,18 +45,7 @@ public class TemplateEntityManager
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
-    ///     Creates a new template entity with no components and the next available template entity ID.
-    /// </summary>
-    public void CreateNew()
-    {
-        var builder = entityFactory.GetBuilder(true);
-        var templateEntityId = builder.Build();
-
-        pendingSync.Add(templateEntityId);
-    }
-
-    /// <summary>
-    ///     Updates an existing template entity based on an entity definition.
+    ///     Creates or updates a template entity based on an entity definition.
     /// </summary>
     /// <param name="definition">Entity definition.</param>
     public void UpdateExisting(EntityDefinition definition)

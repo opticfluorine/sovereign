@@ -38,7 +38,7 @@ using MessagePack. It is parsed and the definitions are processed by
 
 Template entity creation and modification is done through a request-reply process that
 involves passing entity definitions through the normal entity synchronization methods.
-Special client-to-server events (`CreateNewTemplateEntity`, `UpdateTemplateEntity`)
+Special client-to-server events (`Server_TemplateEntity_Update`)
 make changes to the template entity table on the server. Whenever updates occur on the
 server, they are relayed to all connected clients through the standard entity
 synchronization mechanism. 
@@ -50,10 +50,7 @@ processes.
 sequenceDiagram
     participant Client
     participant Server
-    Client ->> Server: CreateNewTemplateEntity
-    Server ->> Server: Empty template entity created
-    Server ->> Client: EntitySync (New Template)
-    Client ->> Client: Admin modifies template in client
+    Client ->> Client: Admin creates or modifies template in client
     Client ->> Server: UpdateTemplateEntity
     Server ->> Client: EntitySync (Updated Template)
 :::

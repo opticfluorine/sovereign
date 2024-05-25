@@ -46,7 +46,6 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Movement_RequestMove, RequestMoveEventMapper },
             { EventId.Core_Network_Logout, EntityEventMapper },
             { EventId.Core_Chat_Send, ChatEventMapper },
-            { EventId.Server_TemplateEntity_CreateNew, EntityEventMapper },
             { EventId.Server_TemplateEntity_Update, EntityDefinitionEventMapper }
         };
     }

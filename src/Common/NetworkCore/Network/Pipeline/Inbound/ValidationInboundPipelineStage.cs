@@ -61,7 +61,6 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Chat_Local, localChatValidator },
             { EventId.Core_Chat_Global, globalChatValidator },
             { EventId.Core_Chat_System, systemChatValidator },
-            { EventId.Server_TemplateEntity_CreateNew, entityValidator },
             { EventId.Server_TemplateEntity_Update, entityDefinitionValidator }
         };
     }

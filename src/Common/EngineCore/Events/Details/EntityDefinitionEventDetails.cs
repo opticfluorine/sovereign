@@ -21,7 +21,7 @@ using Sovereign.EngineCore.Entities;
 namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Event details specifying the definition of a single entity for replication
+///     Event details specifying the definition of one or more entities for replication
 ///     from server to client. Also used for updating template entities when
 ///     sent from client to server.
 /// </summary>
