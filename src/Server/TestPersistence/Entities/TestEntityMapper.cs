@@ -28,7 +28,7 @@ namespace TestPersistence.Entities;
 /// </summary>
 public class TestEntityMapper
 {
-    private const ulong FirstPersistedId = EntityAssigner.FirstPersistedId;
+    private const ulong FirstPersistedId = EntityConstants.FirstPersistedEntityId;
 
     /// <summary>
     ///     Tests the GetPersistedId(ulong) method with new volatile IDs.
@@ -39,7 +39,9 @@ public class TestEntityMapper
     [Theory]
     [InlineData(0, FirstPersistedId, true)]
     [InlineData(42, FirstPersistedId, true)]
-    [InlineData(FirstPersistedId - 1, FirstPersistedId, true)]
+    [InlineData(EntityConstants.FirstTemplateEntityId - 1, FirstPersistedId, true)]
+    [InlineData(EntityConstants.FirstTemplateEntityId, EntityConstants.FirstTemplateEntityId, true)]
+    [InlineData(EntityConstants.LastTemplateEntityId, EntityConstants.LastTemplateEntityId, true)]
     [InlineData(FirstPersistedId, FirstPersistedId, false)]
     [InlineData(FirstPersistedId + 1, FirstPersistedId + 1, false)]
     public void TestGetPersistedId_New(ulong vol, ulong per, bool expNeedToCreate)

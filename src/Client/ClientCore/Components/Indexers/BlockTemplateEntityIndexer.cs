@@ -29,7 +29,8 @@ public class BlockTemplateEntityIndexer : BaseComponentIndexer<int>
     private readonly HashSet<ulong> blockTemplateEntities = new();
     private bool modified;
 
-    public BlockTemplateEntityIndexer(MaterialComponentCollection materials) : base(materials, materials)
+    public BlockTemplateEntityIndexer(MaterialComponentCollection materials, BlockTemplateEntityFilter filter)
+        : base(materials, filter)
     {
     }
 

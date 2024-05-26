@@ -4,6 +4,16 @@
 
 ### May
 
+#### 26 May 2024
+
+* Client: Add basic GUI for creating and updating block template entities. Right now only creation and
+  selection are supported, editing components has not yet been implemented.
+* Server: Fixed a variety of issues related to template entity synchronization. Most notably, the `EntityMapper`
+  was incorrectly reassigning new template entities a persisted ID, thereby promoting new templates to full
+  entities.
+* Server: Added some default data to the database migration scripts. This obsoletes the debug REST service,
+  which will be removed in an upcoming commit.
+
 #### 22 May 2024
 
 * Server: Add `TemplateEntitySystem` which exposes an event-based API for modifying the

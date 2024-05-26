@@ -49,10 +49,12 @@ public sealed class EntityProcessor
     private const int IndexBlockPosY = IndexBlockPosX + 1;
     private const int IndexBlockPosZ = IndexBlockPosY + 1;
     private readonly IEntityFactory entityFactory;
+    private readonly EntityMapper mapper;
 
-    public EntityProcessor(IEntityFactory entityFactory)
+    public EntityProcessor(IEntityFactory entityFactory, EntityMapper mapper)
     {
         this.entityFactory = entityFactory;
+        this.mapper = mapper;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -84,6 +86,7 @@ public sealed class EntityProcessor
         var entityId = (ulong)reader.GetInt64(IndexId);
 
         /* Start loading the entity. */
+        mapper.MarkEntityAsLoaded(entityId);
         var builder = entityFactory.GetBuilder(entityId, true);
 
         /* Process components. */
