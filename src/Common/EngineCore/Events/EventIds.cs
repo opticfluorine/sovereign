@@ -355,16 +355,6 @@ public enum EventId
 
     #endregion Server_Persistence
 
-    #region Server_Debug
-
-    /// <summary>
-    ///     Event sent to issue a debug command.
-    /// </summary>
-    /// Associated details: DebugCommandEventDetails
-    Server_Debug_Command = 200100,
-
-    #endregion Server_Debug
-
     #region Server_Network
 
     /// <summary>

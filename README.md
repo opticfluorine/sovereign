@@ -45,7 +45,7 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 
 > [!IMPORTANT]
 > Sovereign Engine is in a pre-alpha state and is not ready for production use.
-> The below instructions are provided for users who are interesting in trying out the
+> The below instructions are provided for users who are interested in trying out the
 > current features or using the engine as a starting point for their own development.
 
 ### Install Dependencies
@@ -54,10 +54,6 @@ Sovereign Engine requires the .NET 6 (or later) SDK and SQLite 3.x to be
 installed on your system.
 
 ### Server
-
-> [!WARNING]
-> Ensure that `EnableDebugMode` is set to `false` before exposing the
-> server's REST API to an external network. The debug API is not authenticated.
 
 1. Download the server binaries for your platform, or compile binaries from source (via
    `dotnet build` and `dotnet publish` from the `src` directory after cloning the Git repository).
@@ -71,21 +67,11 @@ installed on your system.
    cd Data
    Get-Content ..\Migrations\Full\Full_sqlite.sql | sqlite3 sovereign.db
    ```
-3. Enable the debug command interface by editing `Data/Configuration/ServerConfiguration.yaml`
-   and changing `EnableDebugMode` to `true`.
-4. Run the server:
+3. Run the server:
    ```bash
    $ ./Sovereign.Server
    ```
-5. If using a new database, generate a test set of initial world data via the debug interface. Using bash:
-   ```bash
-   $ curl -X POST -d'{"Type":"GenerateWorldData"}' http://127.0.0.1:8080/debug
-   ```
-   Using PowerShell:
-   ```powershell
-   Invoke-RestMethod -Uri http://127.0.0.1:8080/debug -Method POST -Body '{"Type": "GenerateWorldData"}'
-   ```
-6. The server is configured by default to grant the Admin role to all new players. Once you have created
+4. The server is configured by default to grant the Admin role to all new players. Once you have created
    an initial player with Admin role, it is strongly recommended to disable this option by editing
    the server configuration file and changing `AdminByDefault` to `false`.
 

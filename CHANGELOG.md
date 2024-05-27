@@ -11,8 +11,10 @@
 * Server: Fixed a variety of issues related to template entity synchronization. Most notably, the `EntityMapper`
   was incorrectly reassigning new template entities a persisted ID, thereby promoting new templates to full
   entities.
-* Server: Added some default data to the database migration scripts. This obsoletes the debug REST service,
-  which will be removed in an upcoming commit.
+* Server: Added some default data to the database migration scripts. This obsoletes the debug rest service
+  and `DebugSystem` which have been removed from the server. Following the earlier removal of
+  `TestContentSystem`, this means that Sovereign is now fully bootstrapped and stands on its own without
+  placeholder debug scaffolds.
 
 #### 22 May 2024
 

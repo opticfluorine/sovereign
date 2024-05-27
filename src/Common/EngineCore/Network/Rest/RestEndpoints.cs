@@ -38,11 +38,6 @@ public sealed class RestEndpoints
     public const string WorldSegment = "/world";
 
     /// <summary>
-    ///     Relative path to REST endpoint for the debug service.
-    /// </summary>
-    public const string Debug = "/debug";
-
-    /// <summary>
     ///     Relative path to REST endpoint for player services.
     /// </summary>
     public const string Player = "/player";
