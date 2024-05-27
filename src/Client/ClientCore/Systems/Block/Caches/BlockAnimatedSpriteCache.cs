@@ -63,6 +63,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private readonly List<int> emptyList = new();
 
     private readonly EntityManager entityManager;
+    private readonly EntityTable entityTable;
 
     /// <summary>
     ///     Front face animated sprite cache.
@@ -77,6 +78,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private readonly MaterialManager materialManager;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
+
+    /// <summary>
+    ///     Block entity IDs whose templates have changed since the last cache update.
+    /// </summary>
+    private readonly HashSet<ulong> templateChanges = new();
 
     private readonly TileSpriteManager tileSpriteManager;
 
@@ -108,7 +114,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         MaterialManager materialManager,
         AboveBlockComponentCollection aboveBlocks,
         TileSpriteManager tileSpriteManager,
-        EntityManager entityManager)
+        EntityManager entityManager, EntityTable entityTable)
     {
         this.materials = materials;
         this.materialModifiers = materialModifiers;
@@ -119,6 +125,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         this.aboveBlocks = aboveBlocks;
         this.tileSpriteManager = tileSpriteManager;
         this.entityManager = entityManager;
+        this.entityTable = entityTable;
 
         RegisterEventHandlers();
     }
@@ -372,6 +379,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
             removedBlocks = blockSetPool.TakeObject();
             changedBlocks.Clear();
             removedBlocks.Clear();
+
+            changedBlocks.UnionWith(templateChanges.Where(entityId =>
+                blockPositions.HasComponentForEntity(entityId) ||
+                blockPositions.HasPendingComponentForEntity(entityId)));
+            templateChanges.Clear();
         }
 
         updateCount++;
@@ -460,6 +472,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         Task.Run(RefreshCache);
     }
 
+    private void OnTemplateChange(ulong entityId, ulong templateEntityId)
+    {
+        templateChanges.Add(entityId);
+    }
+
     /// <summary>
     ///     Registers the event handlers.
     /// </summary>
@@ -479,6 +496,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         materialManager.OnMaterialAdded += OnResourceChange;
         materialManager.OnMaterialUpdated += OnResourceChange;
         materialManager.OnMaterialRemoved += OnResourceChange;
+        entityTable.OnTemplateSet += OnTemplateChange;
     }
 
     /// <summary>
@@ -500,5 +518,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         materialManager.OnMaterialAdded -= OnResourceChange;
         materialManager.OnMaterialUpdated -= OnResourceChange;
         materialManager.OnMaterialRemoved -= OnResourceChange;
+        entityTable.OnTemplateSet -= OnTemplateChange;
     }
 }

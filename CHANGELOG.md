@@ -4,6 +4,16 @@
 
 ### May
 
+#### 27 May 2024
+
+* World Block Data: Send template IDs instead of material/modifier pairs in world segment block data transfers.
+  One consequence of this is that all block entities now require a template entity. This also likely means that the
+  "Air" material can be deprecated and material indices can run from zero, but deferring this change until
+  further analysis is done.
+* Client: Fix issue where template entities were not picked up by `BlockAnimatedSpriteCache` which rendered all
+  block entities unrenderable with the above update.
+* Documentation: Move networking overview to the full manual, update for the above world block data changes.
+
 #### 26 May 2024
 
 * Client: Add basic GUI for creating and updating block template entities. Right now only creation and

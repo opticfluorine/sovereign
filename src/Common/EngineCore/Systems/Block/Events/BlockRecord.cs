@@ -31,24 +31,18 @@ public struct BlockRecord
     public GridPosition Position;
 
     /// <summary>
-    ///     Material ID.
+    ///     Block template entity ID.
     /// </summary>
-    public int Material;
-
-    /// <summary>
-    ///     Material modifier.
-    /// </summary>
-    public int MaterialModifier;
+    public ulong TemplateEntityId;
 
     public override string ToString()
     {
         var sb = new StringBuilder();
-        sb.Append("(")
+        sb.Append('(')
             .Append(Position.X).Append(", ")
             .Append(Position.Y).Append(", ")
             .Append(Position.Z).Append(", ")
-            .Append(Material).Append(", ")
-            .Append(MaterialModifier).Append(")");
+            .Append(TemplateEntityId).Append(')');
         return sb.ToString();
     }
 }
