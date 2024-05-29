@@ -35,4 +35,9 @@ public static class EntityConstants
     ///     Entity ID of the first persisted entity.
     /// </summary>
     public const ulong FirstPersistedEntityId = 0x7fff000000000000;
+
+    /// <summary>
+    ///     Maximum entity name length.
+    /// </summary>
+    public const int MaxNameLength = 32;
 }

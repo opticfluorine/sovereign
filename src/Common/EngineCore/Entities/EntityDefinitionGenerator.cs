@@ -16,9 +16,8 @@
 
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
-using Sovereign.EngineCore.Entities;
 
-namespace Sovereign.ServerCore.Entities;
+namespace Sovereign.EngineCore.Entities;
 
 /// <summary>
 ///     Generates EntityDefinition objects for entities.

@@ -97,6 +97,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private HashSet<ulong> changedBlocks = new();
 
     /// <summary>
+    ///     Flag indicating that all cached entries need to be refreshed (e.g. for a template change).
+    /// </summary>
+    private bool refreshAll;
+
+    /// <summary>
     ///     Block entity IDs that have been removed since the last cache update.
     /// </summary>
     private HashSet<ulong> removedBlocks = new();
@@ -398,6 +403,12 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         if (updateCount >= UpdatedCollectionCount)
         {
             /* Update the cache asynchronously. */
+            if (refreshAll)
+            {
+                changedBlocks.UnionWith(frontFaceCache.Keys);
+                refreshAll = false;
+            }
+
             if (changedBlocks.Count > 0 || removedBlocks.Count > 0)
             {
                 var changedSet = changedBlocks;
@@ -418,7 +429,10 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="isLoad">Not used.</param>
     private void OnComponentAdded(ulong entityId, int componentValue, bool isLoad)
     {
-        changedBlocks.Add(entityId);
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+            refreshAll = true;
+        else
+            changedBlocks.Add(entityId);
     }
 
     /// <summary>

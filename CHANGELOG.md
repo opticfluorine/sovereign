@@ -4,6 +4,10 @@
 
 ### May
 
+#### 28 May 2024
+
+* Client: Allow full editing of block template entities through the client-side editor.
+
 #### 27 May 2024
 
 * World Block Data: Send template IDs instead of material/modifier pairs in world segment block data transfers.

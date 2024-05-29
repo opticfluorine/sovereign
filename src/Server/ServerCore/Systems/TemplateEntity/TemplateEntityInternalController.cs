@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
-using Sovereign.ServerCore.Entities;
 
 namespace Sovereign.ServerCore.Systems.TemplateEntity;
 

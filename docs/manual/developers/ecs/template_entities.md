@@ -58,3 +58,18 @@ sequenceDiagram
 Template entities cannot be deleted once created. This is an intentional choice to
 reduce the risk of deleting a critical template entity that is widely used across
 the game world.
+
+## Template Entity Component Support
+
+Not all components are applicable to template entities. The matrix below provides
+a summary of which components are applicable to which types of template entities.
+Any component not listed is not supported in any template entities.
+
+| Component          | Blocks |
+| ------------------ | ------ |
+| `AnimatedSprite`   |        |
+| `Drawable`         | X      |
+| `Material`         | X      |
+| `MaterialModifier` | X      |
+| `Name`             | X      |
+| `Orientation`      |        |

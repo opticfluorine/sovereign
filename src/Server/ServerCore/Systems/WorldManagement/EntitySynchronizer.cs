@@ -18,9 +18,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.ServerCore.Configuration;
-using Sovereign.ServerCore.Entities;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
