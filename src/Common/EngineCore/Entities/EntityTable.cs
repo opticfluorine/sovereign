@@ -120,6 +120,8 @@ public class EntityTable
                 nonBlockEntities.Add(entityId);
                 OnNonBlockEntityAdded?.Invoke(entityId);
             }
+
+            OnEntityAdded?.Invoke(entityId);
         }
 
         // Removals.
@@ -131,6 +133,8 @@ public class EntityTable
                 nonBlockEntities.Remove(entityId);
                 OnNonBlockEntityRemoved?.Invoke(entityId);
             }
+
+            OnEntityRemoved?.Invoke(entityId);
         }
 
         // Reset pending sets.
@@ -162,6 +166,18 @@ public class EntityTable
             entityTemplates.Remove(entityId);
         OnTemplateSet?.Invoke(entityId, templateEntityId);
     }
+
+    /// <summary>
+    ///     Event invoked when an entity has been added.
+    ///     Parameter is entity ID.
+    /// </summary>
+    public event Action<ulong>? OnEntityAdded;
+
+    /// <summary>
+    ///     Event invoked when an entity has been removed.
+    ///     Parameter is entity ID.
+    /// </summary>
+    public event Action<ulong>? OnEntityRemoved;
 
     /// <summary>
     ///     Event invoked when a non-block entity has been added.
