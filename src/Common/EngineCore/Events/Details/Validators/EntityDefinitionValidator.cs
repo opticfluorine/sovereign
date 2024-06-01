@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Components.Validators;
 using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.EngineCore.Events.Details.Validators;
@@ -23,6 +24,13 @@ namespace Sovereign.EngineCore.Events.Details.Validators;
 /// </summary>
 public class EntityDefinitionValidator
 {
+    private readonly NameComponentValidator nameComponentValidator;
+
+    public EntityDefinitionValidator(NameComponentValidator nameComponentValidator)
+    {
+        this.nameComponentValidator = nameComponentValidator;
+    }
+
     /// <summary>
     ///     Validates a single entity definition.
     /// </summary>
@@ -32,7 +40,24 @@ public class EntityDefinitionValidator
     {
         return IsNotPositionedChildEntity(definition) &&
                IsCompleteIfPlayerCharacter(definition) &&
-               IsNotDoublePositioned(definition);
+               IsNotDoublePositioned(definition) &&
+               AreComponentsValid(definition);
+    }
+
+    /// <summary>
+    ///     Determines if the components are valid.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <returns>true if valid, false otherwise.</returns>
+    private bool AreComponentsValid(EntityDefinition definition)
+    {
+        var valid = definition.TemplateEntityId is 0 or (>= EntityConstants.FirstTemplateEntityId
+            and <= EntityConstants.LastTemplateEntityId);
+
+        if (definition.Name != null)
+            valid = valid && nameComponentValidator.IsValid(definition.Name);
+
+        return valid;
     }
 
     /// <summary>

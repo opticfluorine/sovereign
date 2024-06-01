@@ -63,6 +63,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private readonly List<int> emptyList = new();
 
     private readonly EntityManager entityManager;
+    private readonly EntityTable entityTable;
 
     /// <summary>
     ///     Front face animated sprite cache.
@@ -78,6 +79,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
 
+    /// <summary>
+    ///     Block entity IDs whose templates have changed since the last cache update.
+    /// </summary>
+    private readonly HashSet<ulong> templateChanges = new();
+
     private readonly TileSpriteManager tileSpriteManager;
 
     /// <summary>
@@ -89,6 +95,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     ///     Block entity IDs that have been added or modified since the last cache update.
     /// </summary>
     private HashSet<ulong> changedBlocks = new();
+
+    /// <summary>
+    ///     Flag indicating that all cached entries need to be refreshed (e.g. for a template change).
+    /// </summary>
+    private bool refreshAll;
 
     /// <summary>
     ///     Block entity IDs that have been removed since the last cache update.
@@ -108,7 +119,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         MaterialManager materialManager,
         AboveBlockComponentCollection aboveBlocks,
         TileSpriteManager tileSpriteManager,
-        EntityManager entityManager)
+        EntityManager entityManager, EntityTable entityTable)
     {
         this.materials = materials;
         this.materialModifiers = materialModifiers;
@@ -119,6 +130,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         this.aboveBlocks = aboveBlocks;
         this.tileSpriteManager = tileSpriteManager;
         this.entityManager = entityManager;
+        this.entityTable = entityTable;
 
         RegisterEventHandlers();
     }
@@ -177,6 +189,10 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     {
         foreach (var blockId in changedSet)
         {
+            // Ignore templates.
+            if (blockId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+                continue;
+
             UpdatePositionForBlock(blockId);
 
             if (!knownPositions.TryGetValue(blockId, out var position))
@@ -197,6 +213,10 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     {
         foreach (var blockId in removedSet)
         {
+            // Ignore templates.
+            if (blockId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+                continue;
+
             RemoveEntity(blockId);
 
             if (!knownPositions.ContainsKey(blockId))
@@ -364,6 +384,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
             removedBlocks = blockSetPool.TakeObject();
             changedBlocks.Clear();
             removedBlocks.Clear();
+
+            changedBlocks.UnionWith(templateChanges.Where(entityId =>
+                blockPositions.HasComponentForEntity(entityId) ||
+                blockPositions.HasPendingComponentForEntity(entityId)));
+            templateChanges.Clear();
         }
 
         updateCount++;
@@ -378,6 +403,12 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         if (updateCount >= UpdatedCollectionCount)
         {
             /* Update the cache asynchronously. */
+            if (refreshAll)
+            {
+                changedBlocks.UnionWith(frontFaceCache.Keys);
+                refreshAll = false;
+            }
+
             if (changedBlocks.Count > 0 || removedBlocks.Count > 0)
             {
                 var changedSet = changedBlocks;
@@ -398,7 +429,10 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="isLoad">Not used.</param>
     private void OnComponentAdded(ulong entityId, int componentValue, bool isLoad)
     {
-        changedBlocks.Add(entityId);
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+            refreshAll = true;
+        else
+            changedBlocks.Add(entityId);
     }
 
     /// <summary>
@@ -452,6 +486,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         Task.Run(RefreshCache);
     }
 
+    private void OnTemplateChange(ulong entityId, ulong templateEntityId)
+    {
+        templateChanges.Add(entityId);
+    }
+
     /// <summary>
     ///     Registers the event handlers.
     /// </summary>
@@ -471,6 +510,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         materialManager.OnMaterialAdded += OnResourceChange;
         materialManager.OnMaterialUpdated += OnResourceChange;
         materialManager.OnMaterialRemoved += OnResourceChange;
+        entityTable.OnTemplateSet += OnTemplateChange;
     }
 
     /// <summary>
@@ -492,5 +532,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         materialManager.OnMaterialAdded -= OnResourceChange;
         materialManager.OnMaterialUpdated -= OnResourceChange;
         materialManager.OnMaterialRemoved -= OnResourceChange;
+        entityTable.OnTemplateSet -= OnTemplateChange;
     }
 }

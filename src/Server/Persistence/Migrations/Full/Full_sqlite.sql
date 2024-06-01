@@ -71,7 +71,9 @@ CREATE TABLE Account_Authentication
 
 CREATE TABLE Entity
 (
-    id INTEGER PRIMARY KEY NOT NULL
+    id          INTEGER PRIMARY KEY NOT NULL,
+    template_id INTEGER,
+    FOREIGN KEY (template_id) REFERENCES Entity (id)
 );
 
 
@@ -256,6 +258,7 @@ FROM Account
 
 CREATE VIEW EntityWithComponents AS
 SELECT Entity.id                   AS id,
+       Entity.template_id          AS template_id,
        Position.x                  AS x,
        Position.y                  AS y,
        Position.z                  AS z,
@@ -285,6 +288,89 @@ FROM Entity
          LEFT JOIN Orientation ON Entity.id = Orientation.id
          LEFT JOIN Admin ON Entity.id = Admin.id
          LEFT JOIN BlockPosition ON Entity.id = BlockPosition.id;
+
+
+--------------------------------------
+-- Starter Data - Template Entities --
+--------------------------------------
+
+-- Grass block template entity.
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000000);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000000, 'Grass');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000000, 1);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000000, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000000, 1);
+
+-- Light dirt block template entity.
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000001);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000001, 'Light Dirt');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000001, 2);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000001, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000001, 1);
+
+-- Dark dirt block template entity.
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000002);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000002, 'Dark Dirt');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000002, 3);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000002, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000002, 1);
+
+----------------------------------
+-- Starter Data - Base Platform --
+----------------------------------
+
+-- 3x3 grid of grass blocks centered on the origin at zero depth.
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000000, 0x7FFE000000000000);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000000, -1, -1, 0);
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000001, 0x7FFE000000000000);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000001, -1, 0, 0);
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000002, 0x7FFE000000000000);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000002, 0, -1, 0);
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000003, 0x7FFE000000000000);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000003, 0, 0, 0);
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000004, 0x7FFE000000000000);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000004, 1, 0, 0);
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000005, 0x7FFE000000000000);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000005, 0, 1, 0);
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000006, 0x7FFE000000000000);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000006, 1, 1, 0);
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000007, 0x7FFE000000000000);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000007, -1, 1, 0);
+INSERT INTO Entity (id, template_id)
+VALUES (0x7FFF000000000008, 0x7FFE000000000000);
+INSERT INTO BlockPosition (id, x, y, z)
+VALUES (0x7FFF000000000008, 1, -1, 0);
 
 
 -- Log the migration.

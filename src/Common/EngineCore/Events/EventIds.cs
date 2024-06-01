@@ -293,6 +293,12 @@ public enum EventId
     /// Associated details: EntityDesyncEventDetails
     Client_EntitySynchronization_Desync = 100301,
 
+    /// <summary>
+    ///     Event sent from server to client to synchronize a template entity.
+    /// </summary>
+    /// Associated details: TemplateEntityDefinitionEventDetails
+    Client_EntitySynchronization_SyncTemplate = 100302,
+
     #endregion Client_EntitySynchronization
 
     #region Client_State
@@ -349,16 +355,6 @@ public enum EventId
 
     #endregion Server_Persistence
 
-    #region Server_Debug
-
-    /// <summary>
-    ///     Event sent to issue a debug command.
-    /// </summary>
-    /// Associated details: DebugCommandEventDetails
-    Server_Debug_Command = 200100,
-
-    #endregion Server_Debug
-
     #region Server_Network
 
     /// <summary>
@@ -400,6 +396,17 @@ public enum EventId
     Server_WorldManagement_ResyncPositionedEntity = 200401,
 
     #endregion Server_WorldManagement
+
+    #region Server_TemplateEntity
+
+    /// <summary>
+    ///     Requests the TemplateEntity system to create or update a template entity to match a supplied entity
+    ///     definition.
+    /// </summary>
+    /// Associated details: EntityDefinitionEventDetails
+    Server_TemplateEntity_Update = 200500,
+
+    #endregion Server_TemplateEntity
 
     #endregion Server
 }

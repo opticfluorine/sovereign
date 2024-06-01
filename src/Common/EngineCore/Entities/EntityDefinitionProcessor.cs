@@ -50,6 +50,7 @@ public class EntityDefinitionProcessor
 
         // Build entity.
         var builder = factory.GetBuilder(definition.EntityId);
+        builder.Template(definition.TemplateEntityId);
 
         if (definition.Position.HasValue)
             builder.Positionable(definition.Position.Value);

@@ -39,6 +39,12 @@ The following steps must be performed when adding a new component to Sovereign:
    respectively (with empty methods for out-of-scope builders). You will also need to
    update `ClientEntityFactory` and `ServerEntityFactory` to pass the component
    collection to the newly created builders as needed.
+   :::{tip}
+   Not all components are applicable to template entities. If the new component type
+   is not applicable to template entities, ensure that the `IEntityBuilder`
+   implementations check for `AbstractEntityBuilder`'s `isTemplate` field and avoid
+   adding the component to template entities.
+   :::
 
 ### Replicating Components Over the Network
 

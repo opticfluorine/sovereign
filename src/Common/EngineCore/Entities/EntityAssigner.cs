@@ -35,11 +35,6 @@ public class EntityAssigner
     public const ulong FirstVolatileId = 0;
 
     /// <summary>
-    ///     First persisted entity ID.
-    /// </summary>
-    public const ulong FirstPersistedId = PersistedBlock << 32;
-
-    /// <summary>
     ///     Block ID shifted to the upper dword
     /// </summary>
     private readonly ulong shiftBlock;

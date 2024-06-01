@@ -27,6 +27,7 @@ namespace Sovereign.NetworkCore.Network.Pipeline.Inbound;
 /// </summary>
 public class ValidationInboundPipelineStage : IInboundPipelineStage
 {
+    private readonly TemplateEntityDefinitionEventDetailsValidator templateValidator;
     private readonly Dictionary<EventId, IEventDetailsValidator> validators;
 
     public ValidationInboundPipelineStage(NullEventDetailsValidator nullValidator,
@@ -39,8 +40,10 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         ChatEventDetailsValidator chatValidator,
         LocalChatEventDetailsValidator localChatValidator,
         GlobalChatEventDetailsValidator globalChatValidator,
-        SystemChatEventDetailsValidator systemChatValidator)
+        SystemChatEventDetailsValidator systemChatValidator,
+        TemplateEntityDefinitionEventDetailsValidator templateValidator)
     {
+        this.templateValidator = templateValidator;
         validators = new Dictionary<EventId, IEventDetailsValidator>
         {
             { EventId.Core_Ping_Ping, nullValidator },
@@ -49,6 +52,7 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_WorldManagement_Unsubscribe, worldSegmentSubscriptionValidator },
             { EventId.Client_EntitySynchronization_Sync, entityDefinitionValidator },
             { EventId.Client_EntitySynchronization_Desync, entityDesyncValidator },
+            { EventId.Client_EntitySynchronization_SyncTemplate, templateValidator },
             { EventId.Core_Movement_Move, moveValidator },
             { EventId.Core_Movement_RequestMove, requestMoveValidator },
             { EventId.Core_WorldManagement_EntityLeaveWorldSegment, entityGridPositionValidator },
@@ -56,7 +60,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Chat_Send, chatValidator },
             { EventId.Core_Chat_Local, localChatValidator },
             { EventId.Core_Chat_Global, globalChatValidator },
-            { EventId.Core_Chat_System, systemChatValidator }
+            { EventId.Core_Chat_System, systemChatValidator },
+            { EventId.Server_TemplateEntity_Update, entityDefinitionValidator }
         };
     }
 

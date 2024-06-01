@@ -43,11 +43,6 @@ public sealed class ServerConfiguration
     public NewPlayersRecord NewPlayers { get; set; } = new();
 
     /// <summary>
-    ///     Debug configuration settings.
-    /// </summary>
-    public DebugRecord Debug { get; set; } = new();
-
-    /// <summary>
     ///     Full description of the accounts configuration.
     /// </summary>
     public sealed class AccountsRecord
@@ -186,21 +181,6 @@ public sealed class ServerConfiguration
         ///     Greater values improve throughput at the cost of increased latency due to a higher packet loss rate.
         /// </summary>
         public int EntitySyncBatchSize { get; set; } = 16;
-    }
-
-    /// <summary>
-    ///     Full description of the debug configuration.
-    /// </summary>
-    public sealed class DebugRecord
-    {
-        /// <summary>
-        ///     Whether to enable debug mode.
-        /// </summary>
-        /// <remarks>
-        ///     Debug mode should only ever be enabled for development.
-        ///     It must be disabled for production servers.
-        /// </remarks>
-        public bool EnableDebugMode { get; set; } = false;
     }
 
     /// <summary>

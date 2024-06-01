@@ -32,5 +32,6 @@ public class CommonGuiInstaller : IWindsorInstaller
         container.Register(Component.For<GuiFontAtlas>().LifestyleSingleton());
         container.Register(Component.For<GuiExtensions>().LifestyleSingleton());
         container.Register(Component.For<GuiTextureMapper>().LifestyleSingleton());
+        container.Register(Component.For<GuiComponentEditors>().LifestyleSingleton());
     }
 }

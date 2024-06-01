@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,18 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Events;
-using Sovereign.ServerCore.Systems.Debug;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-namespace Sovereign.ServerCore.Events;
+namespace Sovereign.ClientCore.Components.Indexers;
 
-/// <summary>
-///     Event details for server-side debug commands.
-/// </summary>
-public sealed class DebugCommandEventDetails : IEventDetails
+public class ClientComponentIndexerInstaller : IWindsorInstaller
 {
-    /// <summary>
-    ///     Debug command carried by this event.
-    /// </summary>
-    public DebugCommand Command { get; set; } = new();
+    public void Install(IWindsorContainer container, IConfigurationStore store)
+    {
+        container.Register(Component.For<BlockTemplateEntityFilter>().LifestyleSingleton());
+        container.Register(Component.For<BlockTemplateEntityIndexer>().LifestyleSingleton());
+    }
 }

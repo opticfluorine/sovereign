@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,27 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Events;
-using Sovereign.ServerCore.Events;
+using Sovereign.EngineCore.Entities;
 
-namespace Sovereign.ServerCore.Systems.Debug;
+namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
-///     Controller providing a public API for the debug system.
+///     Component filter that selects for template entities.
 /// </summary>
-public class DebugController
+/// <typeparam name="T"></typeparam>
+public class TemplateEntityComponentFilter<T> : BaseComponentEventFilter<T> where T : notnull
 {
-    /// <summary>
-    ///     Issues a debug command.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="command">Debug command to send.</param>
-    public void SendDebugCommand(IEventSender eventSender, DebugCommand command)
+    public TemplateEntityComponentFilter(BaseComponentCollection<T> components, IComponentEventSource<T> eventSource)
+        : base(components, eventSource)
     {
-        var ev = new Event(EventId.Server_Debug_Command, new DebugCommandEventDetails
-        {
-            Command = command
-        });
-        eventSender.SendEvent(ev);
+    }
+
+    protected override bool ShouldAccept(ulong entityId)
+    {
+        return entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId;
     }
 }

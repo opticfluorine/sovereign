@@ -34,6 +34,7 @@ public sealed class PersistenceSystem : ISystem
 {
     private readonly DatabaseValidator databaseValidator;
     private readonly EntityMapper entityMapper;
+    private readonly EntityProcessor entityProcessor;
     private readonly PersistenceEventHandler eventHandler;
 
     private readonly IEventLoop eventLoop;
@@ -48,6 +49,7 @@ public sealed class PersistenceSystem : ISystem
         EventCommunicator eventCommunicator,
         IEventLoop eventLoop,
         EntityMapper entityMapper,
+        EntityProcessor entityProcessor,
         TrackerManager trackerManager,
         ILogger logger,
         EventDescriptions eventDescriptions)
@@ -59,6 +61,7 @@ public sealed class PersistenceSystem : ISystem
         this.scheduler = scheduler;
         this.eventLoop = eventLoop;
         this.entityMapper = entityMapper;
+        this.entityProcessor = entityProcessor;
         this.trackerManager = trackerManager;
         EventCommunicator = eventCommunicator;
         Logger = logger;
@@ -136,6 +139,27 @@ public sealed class PersistenceSystem : ISystem
         catch (Exception e)
         {
             Logger.Fatal("Error creating entity mapper.", e);
+            throw new FatalErrorException();
+        }
+
+        LoadTemplates();
+    }
+
+    /// <summary>
+    ///     Loads all template entities from the database.
+    /// </summary>
+    private void LoadTemplates()
+    {
+        try
+        {
+            using var reader =
+                providerManager.PersistenceProvider.RetrieveAllTemplatesQuery.RetrieveAllTemplates();
+            var count = entityProcessor.ProcessFromReader(reader.Reader);
+            Logger.InfoFormat("Loaded {0} template entities.", count);
+        }
+        catch (Exception e)
+        {
+            Logger.Fatal("Error loading template entities.", e);
             throw new FatalErrorException();
         }
     }

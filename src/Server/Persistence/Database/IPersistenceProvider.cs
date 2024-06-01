@@ -44,6 +44,11 @@ public interface IPersistenceProvider : IDisposable
     INextPersistedIdQuery NextPersistedIdQuery { get; }
 
     /// <summary>
+    ///     IRetrieveAllTemplatesQuery for this persistence provider.
+    /// </summary>
+    IRetrieveAllTemplatesQuery RetrieveAllTemplatesQuery { get; }
+
+    /// <summary>
     ///     IAddAccountQuery for this persistence provider.
     /// </summary>
     IAddAccountQuery AddAccountQuery { get; }
@@ -77,6 +82,11 @@ public interface IPersistenceProvider : IDisposable
     ///     IRemoveEntityQuery for this persistence provider.
     /// </summary>
     IRemoveEntityQuery RemoveEntityQuery { get; }
+
+    /// <summary>
+    ///     ISetTemplateQuery for this persistence provider.
+    /// </summary>
+    public ISetTemplateQuery SetTemplateQuery { get; }
 
     /// <summary>
     ///     IAddComponentQuery for the Position component.

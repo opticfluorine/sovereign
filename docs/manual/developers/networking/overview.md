@@ -1,4 +1,4 @@
-# Sovereign Engine Networking
+# Networking Overview
 
 The Sovereign Engine networking code is designed as an extension of the event
 mechanism used by both the client and server. The engine communicates over the
@@ -127,7 +127,7 @@ unnecessary performance hits.
 The following connection sequence assumes that the client provides valid login credentials for
 an existing account which is not banned, and generally does not specify behavior on error cases.
 
-```mermaid
+:::mermaid
 sequenceDiagram
     participant Client
     participant RestServer
@@ -211,7 +211,7 @@ sequenceDiagram
     deactivate EventServer
     deactivate Client
     Note left of Client: Player is in game
-```
+:::
 
 ### Authentication
 
@@ -248,9 +248,8 @@ for various aspects of the world state. Taken together in sequence, they allow
 each client to efficiently synchronize the local world state to the server with
 a tolerable level of error.
 
-Local state synchronization is achieved one world segment at a time (see the
-[world structure](world_structure.md) and [persistence](persistence.md) documentation
-for details). Synchronization for a world segment is an ongoing process that starts when
+Local state synchronization is achieved one world segment at a time.
+Synchronization for a world segment is an ongoing process that starts when
 a player character moves into the *update radius* of that world segment. The update
 radius is specified as an integer number of world segment lengths, and the distance from
 a player to a world segment is rounded up to the nearest multiple of the world segment
@@ -276,17 +275,20 @@ the received events to maintain synchronization. Block synchronization depends o
 the coordinates of the blocks - the entity ID of a block entity is never synchronized
 between the server and client.
 
-Note that child entities of block entities are never synchronized to the client; they are
-always treated as hidden to the client. This limitation allows for a higher degree of
-uniformity among the world segment structure, thereby leading to better compression
-of world segment data during synchronization.
+:::{note}
+Block entities are sent from server to client with only their position and template ID.
+Therefore, all blocks must have templates, and any custom component values will not be
+transferred to the server. These can be treated as private to the server by default
+unless another event-based API synchronizes these components to the client on a case-by-case
+basis.
+:::
 
 ### Entity Synchronization
 
 Non-block entities are similarly synchronized between the server and a client whenever
 the player associated with a client is within the update radius of the world segment
 that contains the entity. Refer to the activation rules specified in the
-[persistence documentation](persistence.md) for details on how entities are associated
+persistence documentation for details on how entities are associated
 to specific world segments.
 
 When a player subscribes to a world segment, all non-block entities in that world segment
@@ -304,7 +306,7 @@ the above discussion on primary (idempotent) defining events for additional deta
 
 #### Entity Synchronization Sequence
 
-```mermaid
+:::mermaid
 sequenceDiagram
     participant Client
     participant WorldManagement
@@ -322,4 +324,4 @@ sequenceDiagram
     activate Client
     deactivate Client
     deactivate WorldManagement
-```
+:::

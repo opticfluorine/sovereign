@@ -17,9 +17,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Castle.Core.Logging;
-using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.ServerCore.Configuration;
@@ -31,43 +29,18 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public class EntitySynchronizer
 {
-    private readonly AdminTagCollection admins;
-    private readonly AnimatedSpriteComponentCollection animatedSprites;
-    private readonly BlockPositionComponentCollection blockPositions;
     private readonly IServerConfigurationManager configManager;
     private readonly WorldManagementInternalController controller;
-    private readonly DrawableTagCollection drawables;
+    private readonly EntityDefinitionGenerator definitionGenerator;
     private readonly IEventSender eventSender;
-    private readonly KinematicComponentCollection kinematics;
-    private readonly MaterialModifierComponentCollection materialModifiers;
-    private readonly MaterialComponentCollection materials;
-    private readonly NameComponentCollection names;
-    private readonly OrientationComponentCollection orientations;
-    private readonly ParentComponentCollection parents;
-    private readonly PlayerCharacterTagCollection playerCharacters;
 
     public EntitySynchronizer(IEventSender eventSender, IServerConfigurationManager configManager,
-        WorldManagementInternalController controller, KinematicComponentCollection kinematics,
-        MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
-        PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
-        ParentComponentCollection parents, DrawableTagCollection drawables,
-        AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations,
-        AdminTagCollection admins, BlockPositionComponentCollection blockPositions)
+        WorldManagementInternalController controller, EntityDefinitionGenerator definitionGenerator)
     {
         this.eventSender = eventSender;
         this.configManager = configManager;
         this.controller = controller;
-        this.kinematics = kinematics;
-        this.materials = materials;
-        this.materialModifiers = materialModifiers;
-        this.playerCharacters = playerCharacters;
-        this.names = names;
-        this.parents = parents;
-        this.drawables = drawables;
-        this.animatedSprites = animatedSprites;
-        this.orientations = orientations;
-        this.admins = admins;
-        this.blockPositions = blockPositions;
+        this.definitionGenerator = definitionGenerator;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -93,7 +66,7 @@ public class EntitySynchronizer
         var definitionBatches =
             entities
                 .Chunk(configManager.ServerConfiguration.Network.EntitySyncBatchSize)
-                .Select(batch => batch.Select(GenerateDefinition).ToList());
+                .Select(batch => batch.Select(definitionGenerator.GenerateDefinition).ToList());
 
         // Send each batch to the client as its own event.
         foreach (var batch in definitionBatches)
@@ -113,45 +86,5 @@ public class EntitySynchronizer
     {
         Logger.DebugFormat("Desync {0} for world segment {1}.", rootEntityId, segmentIndex);
         controller.PushDesyncEvent(eventSender, rootEntityId, segmentIndex);
-    }
-
-    /// <summary>
-    ///     Generates an entity definition for a single entity.
-    /// </summary>
-    /// <param name="entityId">Entity ID.</param>
-    /// <returns>Definition.</returns>
-    private EntityDefinition GenerateDefinition(ulong entityId)
-    {
-        var def = new EntityDefinition();
-        def.EntityId = entityId;
-
-        if (kinematics.HasComponentForEntity(entityId))
-            def.Position = kinematics[entityId].Position;
-
-        def.Drawable = drawables.HasTagForEntity(entityId);
-
-        if (animatedSprites.HasComponentForEntity(entityId))
-            def.AnimatedSpriteId = animatedSprites[entityId];
-
-        if (materials.HasComponentForEntity(entityId))
-            def.Material = new MaterialPair(materials[entityId], materialModifiers[entityId]);
-
-        def.PlayerCharacter = playerCharacters.HasTagForEntity(entityId);
-
-        if (names.HasComponentForEntity(entityId))
-            def.Name = names[entityId];
-
-        if (parents.HasComponentForEntity(entityId))
-            def.Parent = parents[entityId];
-
-        if (orientations.HasComponentForEntity(entityId))
-            def.Orientation = orientations[entityId];
-
-        def.Admin = admins.HasTagForEntity(entityId);
-
-        if (blockPositions.HasComponentForEntity(entityId))
-            def.BlockPosition = blockPositions[entityId];
-
-        return def;
     }
 }

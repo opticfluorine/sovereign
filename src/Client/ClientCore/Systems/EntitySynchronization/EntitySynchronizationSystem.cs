@@ -50,6 +50,7 @@ public class EntitySynchronizationSystem : ISystem
     {
         EventId.Client_EntitySynchronization_Sync,
         EventId.Client_EntitySynchronization_Desync,
+        EventId.Client_EntitySynchronization_SyncTemplate,
         EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_Unsubscribe,
         EventId.Client_Network_PlayerEntitySelected,
@@ -93,6 +94,18 @@ public class EntitySynchronizationSystem : ISystem
                     }
 
                     HandleDesync((EntityDesyncEventDetails)ev.EventDetails);
+                    break;
+
+                case EventId.Client_EntitySynchronization_SyncTemplate:
+                {
+                    if (ev.EventDetails is not TemplateEntityDefinitionEventDetails syncDetails)
+                    {
+                        Logger.Error("Received SyncTemplate event without details.");
+                        break;
+                    }
+
+                    HandleSyncTemplate(syncDetails);
+                }
                     break;
 
                 case EventId.Core_WorldManagement_Subscribe:
@@ -195,6 +208,16 @@ public class EntitySynchronizationSystem : ISystem
         Logger.DebugFormat("Processing {0} entity definitions.", details.EntityDefinitions.Count);
         foreach (var definition in details.EntityDefinitions)
             processor.ProcessDefinition(definition);
+    }
+
+    /// <summary>
+    ///     Handles a template entity synchronization update.
+    /// </summary>
+    /// <param name="details">Update details.</param>
+    private void HandleSyncTemplate(TemplateEntityDefinitionEventDetails details)
+    {
+        Logger.DebugFormat("Processing template entity update for entity {0}.", details.Definition.EntityId);
+        processor.ProcessDefinition(details.Definition);
     }
 
     /// <summary>

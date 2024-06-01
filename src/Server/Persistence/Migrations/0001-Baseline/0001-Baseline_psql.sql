@@ -70,7 +70,9 @@ CREATE TABLE Account_Authentication
 
 CREATE TABLE Entity
 (
-    id BIGINT PRIMARY KEY
+    id          BIGINT PRIMARY KEY,
+    template_id BIGINT,
+    FOREIGN KEY (template_id) REFERENCES Entity (id)
 );
 
 
@@ -253,6 +255,7 @@ FROM Account
 
 CREATE VIEW EntityWithComponents AS
 SELECT Entity.id                   AS id,
+       Entity.template_id          AS template_id,
        Position.x                  AS x,
        Position.y                  AS y,
        Position.z                  AS z,
@@ -294,6 +297,7 @@ CREATE FUNCTION EntityDetails(entityId BIGINT)
     RETURNS TABLE
             (
                 id               BIGINT,
+                template_id      BIGINT,
                 pos_x            REAL,
                 pos_y            REAL,
                 pos_z            REAL,
@@ -329,6 +333,7 @@ CREATE FUNCTION PositionedEntitiesInRange(x_min REAL, y_min REAL, z_min REAL,
     RETURNS TABLE
             (
                 entityId         BIGINT,
+                template_id      BIGINT,
                 pos_x            REAL,
                 pos_y            REAL,
                 pos_z            REAL,

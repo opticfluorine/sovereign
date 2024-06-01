@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Sovereign.EngineCore.Entities;
+
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
@@ -27,8 +29,8 @@ public sealed class MaterialComponentCollection : BaseComponentCollection<int>
     /// </summary>
     public const int InitialSize = 65536;
 
-    public MaterialComponentCollection(ComponentManager componentManager)
-        : base(componentManager, InitialSize, ComponentOperators.IntOperators,
+    public MaterialComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, InitialSize, ComponentOperators.IntOperators,
             ComponentType.Material)
     {
     }

@@ -92,6 +92,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
 
         MigrationQuery = new SqliteMigrationQuery(Connection);
         NextPersistedIdQuery = new SqliteNextPersistedIdQuery(Connection);
+        RetrieveAllTemplatesQuery = new SqliteRetrieveAllTemplatesQuery((SqliteConnection)Connection);
 
         AddAccountQuery = new SqliteAddAccountQuery(Connection);
         RetrieveAccountQuery = new SqliteRetrieveAccountQuery(Connection);
@@ -102,6 +103,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
 
         AddEntityQuery = new SqliteAddEntityQuery(Connection);
         RemoveEntityQuery = new SqliteRemoveEntityQuery(Connection);
+
+        SetTemplateQuery = new SqliteSetTemplateQuery((SqliteConnection)Connection);
 
         PlayerExistsQuery = new SqlitePlayerExistsQuery((SqliteConnection)Connection);
         GetAccountForPlayerQuery = new SqliteGetAccountForPlayerQuery((SqliteConnection)Connection);
@@ -209,6 +212,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+    public ISetTemplateQuery SetTemplateQuery { get; }
     public IRemoveComponentQuery RemoveAdminComponentQuery { get; }
     public IAddComponentQuery<string> AddNameQuery { get; }
     public IModifyComponentQuery<string> ModifyNameQuery { get; }
@@ -217,6 +222,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IMigrationQuery MigrationQuery { get; }
 
     public INextPersistedIdQuery NextPersistedIdQuery { get; }
+
+    public IRetrieveAllTemplatesQuery RetrieveAllTemplatesQuery { get; }
 
     public IAddAccountQuery AddAccountQuery { get; }
 

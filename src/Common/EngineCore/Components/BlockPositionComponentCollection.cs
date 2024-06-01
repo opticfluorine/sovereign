@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.EngineCore.Components;
 
@@ -28,8 +29,8 @@ public class BlockPositionComponentCollection : BaseComponentCollection<GridPosi
     /// </summary>
     private const int BaseSize = 524288;
 
-    public BlockPositionComponentCollection(ComponentManager componentManager)
-        : base(componentManager, BaseSize, ComponentOperators.GridPositionOperators,
+    public BlockPositionComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, BaseSize, ComponentOperators.GridPositionOperators,
             ComponentType.BlockPosition)
     {
     }

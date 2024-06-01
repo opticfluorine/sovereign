@@ -187,17 +187,3 @@ NewPlayers:
   # will have admin privileges. It should be set to false before opening the server
   # to the public.
   AdminByDefault: true
-
-
-# -------------------
-# Debug Configuration
-# -------------------
-Debug:
-  
-  # ---------------
-  # EnableDebugMode
-  # ---------------
-  # Whether or not to enable debug mode.
-  # Debug mode should only be enabled for development purposes.
-  # It must be disabled for production use.
-  EnableDebugMode: false

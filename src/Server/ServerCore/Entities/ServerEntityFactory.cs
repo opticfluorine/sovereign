@@ -79,7 +79,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         entityAssigner = entityManager.GetNewAssigner();
     }
 
-    public IEntityBuilder GetBuilder()
+    public IEntityBuilder GetBuilder(bool isNewTemplate = false)
     {
         return GetBuilder(entityAssigner.GetNextId());
     }

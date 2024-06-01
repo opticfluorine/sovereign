@@ -16,7 +16,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
-using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.EngineCore.Components.Validators;
 

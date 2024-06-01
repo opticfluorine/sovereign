@@ -16,6 +16,7 @@
  */
 
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.EngineCore.Components;
 
@@ -29,8 +30,8 @@ public sealed class KinematicComponentCollection : BaseComponentCollection<Kinem
     /// </summary>
     private const int BaseSize = 65536;
 
-    public KinematicComponentCollection(ComponentManager componentManager)
-        : base(componentManager, BaseSize, ComponentOperators.KinematicsOperators,
+    public KinematicComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, BaseSize, ComponentOperators.KinematicsOperators,
             ComponentType.Position)
     {
     }

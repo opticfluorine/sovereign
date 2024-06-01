@@ -26,10 +26,10 @@ public struct Kinematics
     /// <summary>
     ///     Position.
     /// </summary>
-    public Vector3 Position { get; set; }
+    public Vector3 Position;
 
     /// <summary>
     ///     Velocity in tiles per second.
     /// </summary>
-    public Vector3 Velocity { get; set; }
+    public Vector3 Velocity;
 }

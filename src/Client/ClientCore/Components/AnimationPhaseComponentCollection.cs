@@ -16,6 +16,7 @@
 
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.ClientCore.Components;
 
@@ -26,8 +27,8 @@ public class AnimationPhaseComponentCollection : BaseComponentCollection<Animati
 {
     private const int InitialSize = 8192;
 
-    public AnimationPhaseComponentCollection(ComponentManager componentManager)
-        : base(componentManager, InitialSize, ClientComponentOperators.AnimationPhaseOperators,
+    public AnimationPhaseComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, InitialSize, ClientComponentOperators.AnimationPhaseOperators,
             ComponentType.AnimationPhase)
     {
     }

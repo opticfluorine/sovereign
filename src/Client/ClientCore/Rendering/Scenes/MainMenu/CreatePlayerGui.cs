@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 using ImGuiNET;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Systems.ClientState;
-using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Rest.Data;
 

@@ -201,6 +201,9 @@ public sealed class WorldSegmentBlockDataManager
     /// <param name="isUnload">Unused.</param>
     private void ScheduleFromBlock(ulong entityId, bool isUnload)
     {
+        // Ignore template entities.
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId) return;
+
         try
         {
             var lastPosition = blockPositions.GetComponentWithLookback(entityId);

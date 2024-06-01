@@ -22,7 +22,6 @@ using System.Threading.Tasks;
 using Castle.Core.Logging;
 using MessagePack;
 using Sovereign.ClientCore.Network.Rest;
-using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components.Indexers;
@@ -35,6 +34,7 @@ using Sovereign.EngineCore.Systems.Block.Events;
 using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.EngineCore.World;
 using Sovereign.NetworkCore.Network;
+using EntityConstants = Sovereign.EngineCore.Entities.EntityConstants;
 
 namespace Sovereign.ClientCore.Network.Infrastructure;
 
@@ -174,7 +174,7 @@ public sealed class WorldSegmentDataClient
             MessageConfig.CompressedUntrustedMessagePackOptions);
 
         /* Basic top-level validation. */
-        if (segmentData.DefaultMaterialsPerPlane.Length != config.SegmentLength)
+        if (segmentData.DefaultsPerPlane.Length != config.SegmentLength)
             throw new RankException("Bad number of default materials in segment data.");
 
         /* Submit all the blocks we've added. */
@@ -195,21 +195,20 @@ public sealed class WorldSegmentDataClient
     {
         /* Start by processing depth plaens containing non-default blocks. */
         var processed = new bool[config.SegmentLength];
-        var toAdd = new List<BlockRecord>();
         foreach (var plane in segmentData.DataPlanes)
         {
             // Validation.
-            if (plane.OffsetZ < 0 || plane.OffsetZ >= config.SegmentLength)
+            if (plane.OffsetZ >= config.SegmentLength)
                 throw new IndexOutOfRangeException("Bad Z-offset in world segment data plane.");
 
             processed[plane.OffsetZ] = true;
-            ProcessMixedPlane(segmentIndex, plane, segmentData.DefaultMaterialsPerPlane[plane.OffsetZ], blocksToAdd);
+            ProcessMixedPlane(segmentIndex, plane, segmentData.DefaultsPerPlane[plane.OffsetZ], blocksToAdd);
         }
 
         /* Process the remaining all-default planes. */
         for (var i = 0; i < processed.Length; i++)
-            if (!processed[i] && segmentData.DefaultMaterialsPerPlane[i].MaterialId != Material.Air)
-                ProcessDefaultPlane(segmentIndex, i, segmentData.DefaultMaterialsPerPlane[i], blocksToAdd);
+            if (!processed[i] && segmentData.DefaultsPerPlane[i].BlockType != BlockDataType.Air)
+                ProcessDefaultPlane(segmentIndex, i, segmentData.DefaultsPerPlane[i], blocksToAdd);
 
         if (blocksToAdd.Count > 0)
             Logger.DebugFormat("Adding {0} blocks for world segment {1}.", blocksToAdd.Count, segmentIndex);
@@ -222,7 +221,7 @@ public sealed class WorldSegmentDataClient
     /// <param name="offsetZ">Z offset of the plane.</param>
     /// <param name="defaultBlock">Default block type.</param>
     /// <param name="blocksToAdd">List of blocks to add.</param>
-    private void ProcessDefaultPlane(GridPosition segmentIndex, int offsetZ, BlockMaterialData defaultBlock,
+    private void ProcessDefaultPlane(GridPosition segmentIndex, int offsetZ, BlockData defaultBlock,
         IList<BlockRecord> blocksToAdd)
     {
         var basePosition = worldSegmentResolver.GetRangeForWorldSegment(segmentIndex).Item1;
@@ -236,8 +235,7 @@ public sealed class WorldSegmentDataClient
             var block = new BlockRecord
             {
                 Position = new GridPosition(baseX + x, baseY + y, baseZ + offsetZ),
-                Material = defaultBlock.MaterialId,
-                MaterialModifier = defaultBlock.ModifierId
+                TemplateEntityId = defaultBlock.TemplateIdOffset + EntityConstants.FirstTemplateEntityId
             };
             blocksToAdd.Add(block);
         }
@@ -251,7 +249,7 @@ public sealed class WorldSegmentDataClient
     /// <param name="defaultBlock">Default block type.</param>
     /// <param name="blocksToAdd">List of blocks to add.</param>
     private void ProcessMixedPlane(GridPosition segmentIndex, WorldSegmentBlockDataPlane plane,
-        BlockMaterialData defaultBlock, IList<BlockRecord> blocksToAdd)
+        BlockData defaultBlock, IList<BlockRecord> blocksToAdd)
     {
         var basePosition = worldSegmentResolver.GetRangeForWorldSegment(segmentIndex).Item1;
         var baseX = (int)basePosition.X;
@@ -263,13 +261,13 @@ public sealed class WorldSegmentDataClient
         foreach (var line in plane.Lines)
         {
             /* Validate. */
-            if (line.OffsetY < 0 || line.OffsetY >= config.SegmentLength)
+            if (line.OffsetY >= config.SegmentLength)
                 throw new IndexOutOfRangeException("Bad Y-offset in world segment data line.");
 
             foreach (var block in line.BlockData)
             {
                 /* Validate. */
-                if (block.OffsetX < 0 || block.OffsetX >= config.SegmentLength)
+                if (block.OffsetX >= config.SegmentLength)
                     throw new IndexOutOfRangeException("Bad X-offset in world segment data block.");
 
                 var x = baseX + block.OffsetX;
@@ -280,8 +278,7 @@ public sealed class WorldSegmentDataClient
                 var blockRecord = new BlockRecord
                 {
                     Position = new GridPosition(x, y, z),
-                    Material = block.MaterialData.MaterialId,
-                    MaterialModifier = block.MaterialData.ModifierId
+                    TemplateEntityId = block.Data.TemplateIdOffset + EntityConstants.FirstTemplateEntityId
                 };
                 blocksToAdd.Add(blockRecord);
 
@@ -290,7 +287,7 @@ public sealed class WorldSegmentDataClient
         }
 
         /* Fill in the default blocks (unless they are air). */
-        if (defaultBlock.MaterialId != Material.Air)
+        if (defaultBlock.BlockType != BlockDataType.Air)
             for (var i = 0; i < config.SegmentLength; ++i)
             for (var j = 0; j < config.SegmentLength; ++j)
                 if (!nonDefaults[i, j])
@@ -298,8 +295,7 @@ public sealed class WorldSegmentDataClient
                     var blockRecord = new BlockRecord
                     {
                         Position = new GridPosition(baseX + i, baseY + j, baseZ + plane.OffsetZ),
-                        Material = defaultBlock.MaterialId,
-                        MaterialModifier = defaultBlock.ModifierId
+                        TemplateEntityId = defaultBlock.TemplateIdOffset + EntityConstants.FirstTemplateEntityId
                     };
                     blocksToAdd.Add(blockRecord);
                 }

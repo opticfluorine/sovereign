@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,20 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using System.Data;
 
-namespace Sovereign.ServerCore.Systems.Debug;
+namespace Sovereign.Persistence.Database.Queries;
 
 /// <summary>
-///     IoC installer for the debug system.
+///     Query interface for updating an entity's template.
 /// </summary>
-public class DebugSystemInstaller : IWindsorInstaller
+public interface ISetTemplateQuery
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
-    {
-        container.Register(Component.For<DebugEventHandler>().LifestyleSingleton());
-        container.Register(Component.For<DebugController>().LifestyleSingleton());
-    }
+    /// <summary>
+    ///     Sets the template entity ID for the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="templateEntityId">Template entity ID, or 0 for no template.</param>
+    /// <param name="transaction">Database transaction.</param>
+    void SetTemplate(ulong entityId, ulong templateEntityId, IDbTransaction transaction);
 }

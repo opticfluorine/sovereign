@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineUtil.Monads;
@@ -84,7 +83,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             if (evInfo.Event.EventDetails is not LocalChatEventDetails details)
                 return new Maybe<GridPosition>();
             return new Maybe<GridPosition>(details.SegmentIndex);
-        }, ChatConstants.LocalChatWorldSegmentRadius);
+        });
 
         var systemChatMapper = singleConnMapperFactory.Create(evInfo =>
         {
@@ -98,6 +97,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Core_WorldManagement_Unsubscribe] = worldSubEventMapper;
         specificMappers[EventId.Client_EntitySynchronization_Sync] = entityDefMapper;
         specificMappers[EventId.Client_EntitySynchronization_Desync] = desyncMapper;
+        specificMappers[EventId.Client_EntitySynchronization_SyncTemplate] = globalMapper;
         specificMappers[EventId.Core_Movement_Move] = moveMapper;
         specificMappers[EventId.Core_WorldManagement_EntityLeaveWorldSegment] = entityGridMapper;
         specificMappers[EventId.Core_Chat_Local] = localChatMapper;

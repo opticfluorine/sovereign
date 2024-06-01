@@ -14,15 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Configuration;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-/// <summary>
-///     Player-related constants shared by client and server.
-/// </summary>
-public static class EntityConstants
+namespace Sovereign.ServerCore.Systems.TemplateEntity;
+
+public class TemplateEntityInstaller : IWindsorInstaller
 {
-    /// <summary>
-    ///     Maximum entity name length.
-    /// </summary>
-    public const int MaxNameLength = 32;
+    public void Install(IWindsorContainer container, IConfigurationStore store)
+    {
+        container.Register(Component.For<TemplateEntityDataGenerator>().LifestyleSingleton());
+        container.Register(Component.For<TemplateEntityServices>().LifestyleSingleton());
+        container.Register(Component.For<TemplateEntityInternalController>().LifestyleSingleton());
+        container.Register(Component.For<TemplateEntityManager>().LifestyleSingleton());
+    }
 }

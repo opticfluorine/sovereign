@@ -37,6 +37,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     protected readonly ulong entityId;
     protected readonly EntityTable entityTable;
+    protected readonly bool isTemplate;
     protected readonly KinematicComponentCollection Kinematics;
     protected readonly bool load;
     protected readonly MaterialModifierComponentCollection materialModifiers;
@@ -47,6 +48,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     protected readonly PlayerCharacterTagCollection playerCharacterTags;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
+    private bool isBlock;
+
+    private ulong templateEntityId;
 
     protected AbstractEntityBuilder(ulong entityId, bool load,
         EntityManager entityManager, KinematicComponentCollection kinematics,
@@ -79,6 +83,12 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         this.admins = admins;
         this.blockPositions = blockPositions;
 
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+        {
+            entityTable.TakeTemplateEntityId(entityId);
+            isTemplate = true;
+        }
+
         weakLock = entityManager.UpdateGuard.AcquireWeakLock();
     }
 
@@ -89,14 +99,23 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public ulong Build()
     {
-        if (!entityTable.Exists(entityId)) entityTable.Add(entityId);
+        if (!entityTable.Exists(entityId)) entityTable.Add(entityId, templateEntityId, isBlock, load);
         Dispose();
 
         return entityId;
     }
 
+    public IEntityBuilder Template(ulong templateEntityId)
+    {
+        this.templateEntityId = templateEntityId;
+        return this;
+    }
+
     public IEntityBuilder Positionable(Vector3 position, Vector3 velocity)
     {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
         Kinematics.AddOrUpdateComponent(entityId, new Kinematics
         {
             Position = position,
@@ -123,13 +142,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder BlockPositionable(GridPosition position)
     {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
         blockPositions.AddOrUpdateComponent(entityId, position, load);
+        isBlock = true;
         return this;
     }
 
     public IEntityBuilder WithoutBlockPositionable()
     {
         blockPositions.RemoveComponent(entityId, load);
+        isBlock = false;
         return this;
     }
 
@@ -154,6 +178,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder AboveBlock(ulong otherEntityId)
     {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
         aboveBlocks.AddOrUpdateComponent(entityId, otherEntityId, load);
         return this;
     }
@@ -166,6 +193,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder PlayerCharacter()
     {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
         playerCharacterTags.TagEntity(entityId, load);
         return this;
     }
@@ -190,6 +220,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder Parent(ulong parentEntityId)
     {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
         parents.AddOrUpdateComponent(entityId, parentEntityId, load);
         return this;
     }
@@ -242,6 +275,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder Admin()
     {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
         admins.TagEntity(entityId, load);
         return this;
     }

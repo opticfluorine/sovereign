@@ -4,6 +4,47 @@
 
 ### May
 
+#### 28 May 2024
+
+* Client: Allow full editing of block template entities through the client-side editor.
+
+#### 27 May 2024
+
+* World Block Data: Send template IDs instead of material/modifier pairs in world segment block data transfers.
+  One consequence of this is that all block entities now require a template entity. This also likely means that the
+  "Air" material can be deprecated and material indices can run from zero, but deferring this change until
+  further analysis is done.
+* Client: Fix issue where template entities were not picked up by `BlockAnimatedSpriteCache` which rendered all
+  block entities unrenderable with the above update.
+* Documentation: Move networking overview to the full manual, update for the above world block data changes.
+
+#### 26 May 2024
+
+* Client: Add basic GUI for creating and updating block template entities. Right now only creation and
+  selection are supported, editing components has not yet been implemented.
+* Server: Fixed a variety of issues related to template entity synchronization. Most notably, the `EntityMapper`
+  was incorrectly reassigning new template entities a persisted ID, thereby promoting new templates to full
+  entities.
+* Server: Added some default data to the database migration scripts. This obsoletes the debug rest service
+  and `DebugSystem` which have been removed from the server. Following the earlier removal of
+  `TestContentSystem`, this means that Sovereign is now fully bootstrapped and stands on its own without
+  placeholder debug scaffolds.
+
+#### 22 May 2024
+
+* Server: Add `TemplateEntitySystem` which exposes an event-based API for modifying the
+  template entities from the client (requires admin role).
+
+#### 18 May 2024
+
+* All: Automatically load the initial set of template entities when the client first logs into
+  the server.
+
+#### 16 May 2024
+
+* All: Add entity templates which allow an entity to inherit a default set of components from a
+  template. Still need to configure the templates to load on startup.
+
 #### 13 May 2024
 
 * All: Update `BaseComponentCollection<T>` to be array-backed instead of list-backed. This produced a

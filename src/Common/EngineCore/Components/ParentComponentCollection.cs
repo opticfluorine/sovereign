@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Entities;
+
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
@@ -23,8 +25,8 @@ public class ParentComponentCollection : BaseComponentCollection<ulong>
 {
     private const int INITIAL_SIZE = 65536;
 
-    public ParentComponentCollection(ComponentManager componentManager)
-        : base(componentManager, INITIAL_SIZE, ComponentOperators.UlongOperators, ComponentType.Parent)
+    public ParentComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, INITIAL_SIZE, ComponentOperators.UlongOperators, ComponentType.Parent)
     {
     }
 }

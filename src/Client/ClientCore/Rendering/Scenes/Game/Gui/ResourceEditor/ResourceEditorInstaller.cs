@@ -32,5 +32,6 @@ public class ResourceEditorInstaller : IWindsorInstaller
         container.Register(Component.For<SpriteSelectorPopup>().LifestyleSingleton());
         container.Register(Component.For<AnimatedSpriteSelectorPopup>().LifestyleSingleton());
         container.Register(Component.For<TileSpriteSelectorPopup>().LifestyleSingleton());
+        container.Register(Component.For<MaterialSelectorPopup>().LifestyleSingleton());
     }
 }

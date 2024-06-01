@@ -44,5 +44,7 @@ public sealed class EntityInstaller : IWindsorInstaller
 
         container.Register(Component.For<EntityDefinitionProcessor>()
             .LifestyleSingleton());
+
+        container.Register(Component.For<EntityDefinitionGenerator>().LifestyleSingleton());
     }
 }

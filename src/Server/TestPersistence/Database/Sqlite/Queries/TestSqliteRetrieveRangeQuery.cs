@@ -82,9 +82,13 @@ public sealed class TestSqliteRetrieveRangeQuery
             var count = 0;
             while (reader.Reader.Read())
             {
-                count++;
                 var id = (ulong)reader.Reader.GetInt64(0);
+
+                // Ignore prepopulated "default" entities supplied by the test fixture.
+                if (id < baseEntityId) continue;
+
                 Assert.True(id == lowerBoundId || id == inRangeId);
+                count++;
             }
 
             Assert.Equal(2, count);

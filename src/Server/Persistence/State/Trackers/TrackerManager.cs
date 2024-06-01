@@ -25,6 +25,7 @@ public sealed class TrackerManager
 {
     private readonly AdminStateTracker adminStateTracker;
     private readonly BlockPositionStateTracker blockPositionStateTracker;
+    private readonly TemplateStateTracker templateStateTracker;
 
     public TrackerManager(PositionStateTracker positionStateTracker,
         MaterialStateTracker materialStateTracker,
@@ -37,10 +38,12 @@ public sealed class TrackerManager
         AnimatedSpriteStateTracker animatedSpriteStateTracker,
         OrientationStateTracker orientationStateTracker,
         AdminStateTracker adminStateTracker,
-        BlockPositionStateTracker blockPositionStateTracker)
+        BlockPositionStateTracker blockPositionStateTracker,
+        TemplateStateTracker templateStateTracker)
     {
         this.adminStateTracker = adminStateTracker;
         this.blockPositionStateTracker = blockPositionStateTracker;
+        this.templateStateTracker = templateStateTracker;
         OrientationStateTracker = orientationStateTracker;
         PositionStateTracker = positionStateTracker;
         MaterialStateTracker = materialStateTracker;
