@@ -22,6 +22,7 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.World;
+using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.ClientCore.Systems.Perspective;
 
@@ -42,6 +43,12 @@ namespace Sovereign.ClientCore.Systems.Perspective;
 public class PerspectiveLineManager
 {
     private readonly BlockPositionComponentCollection blockPositions;
+
+    /// <summary>
+    ///     Object pool of entity lists to minimize heap churn for vertically moving entities.
+    /// </summary>
+    private readonly ObjectPool<EntityList> entityListPool = new();
+
     private readonly KinematicComponentCollection kinematics;
 
     /// <summary>
@@ -55,6 +62,11 @@ public class PerspectiveLineManager
     private readonly Dictionary<Tuple<int, int>, PerspectiveLine> perspectiveLines = new();
 
     private readonly WorldSegmentResolver resolver;
+
+    /// <summary>
+    ///     Cache of current z position of each tracked entity, used for efficient updates.
+    /// </summary>
+    private readonly Dictionary<ulong, float> zDepthByEntity = new();
 
     public PerspectiveLineManager(KinematicComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
@@ -87,7 +99,7 @@ public class PerspectiveLineManager
                 perspectiveLines[index] = line;
             }
 
-            line.refCount++;
+            line.ReferenceCount++;
         }
     }
 
@@ -107,9 +119,66 @@ public class PerspectiveLineManager
                 continue;
             }
 
-            line.refCount--;
-            if (line.refCount <= 0) perspectiveLines.Remove(index);
+            line.ReferenceCount--;
+            if (line.ReferenceCount <= 0) perspectiveLines.Remove(index);
         }
+    }
+
+    /// <summary>
+    ///     Gets the highest entity, if any, within a z window around a point.
+    /// </summary>
+    /// <param name="point">Point of interest in world coordinates.</param>
+    /// <param name="minZ">Minimum z for search window.</param>
+    /// <param name="maxZ">Maximum z for search window.</param>
+    /// <param name="entityId">Entity ID if found, or defaults to 0 otherwise.</param>
+    /// <returns>true if an entity was found, false otherwise.</returns>
+    public bool TryGetHighestEntityAtPoint(Vector3 point, float minZ, float maxZ, out ulong entityId)
+    {
+        entityId = 0;
+
+        var lineIndex = GetIndexForPosition(point);
+        if (!perspectiveLines.TryGetValue(lineIndex, out var line)) return false;
+        foreach (var entities in line.ZDepths
+                     .GetViewBetween(EntityList.ForComparison(minZ), EntityList.ForComparison(maxZ)).Reverse())
+        {
+            // Eventually need to add overlap checks between entity bounds and the specific point.
+            // For now assume any overlap of the perspective line is sufficient.
+            if (entities.Entities.Count == 1)
+            {
+                entityId = entities.Entities[0].EntityId;
+                return true;
+            }
+
+            // If there are multiple entities at the highest depth, the priority is:
+            //   1. Non-block entities (take first available)
+            //   2. Block top face (will only ever be one at a given z)
+            //   3. Block front face (will only ever be one at a given z)
+            var foundTopFace = false;
+            foreach (var entityInfo in entities.Entities)
+            {
+                switch (entityInfo.EntityType)
+                {
+                    case EntityType.NonBlock:
+                        // Always wins.
+                        entityId = entityInfo.EntityId;
+                        return true;
+
+                    case EntityType.BlockTopFace:
+                        foundTopFace = true;
+                        entityId = entityInfo.EntityId;
+                        break;
+
+                    case EntityType.BlockFrontFace:
+                        if (!foundTopFace) entityId = entityInfo.EntityId;
+                        break;
+                }
+            }
+
+            return true;
+        }
+
+        // If we get here, nothing was found in the window.
+        return false;
     }
 
     /// <summary>
@@ -130,9 +199,12 @@ public class PerspectiveLineManager
     private void AddBlockEntity(ulong entityId, GridPosition blockPosition)
     {
         // Block entities only overlap a single perspective line since they are always positioned
-        // in the same block position lattice as the lines.
-        var index = GetIndexForBlockPosition(blockPosition);
-        AddEntityToLine(entityId, index, blockPosition.Z);
+        // in the same block position lattice as the lines. However, their two faces differ in their y
+        // coordinate and therefore fall on two different perspective lines.
+        var indexTopFace = GetIndexForBlockPosition(blockPosition);
+        var indexFrontFace = GetIndexForBlockPosition(blockPosition with { Y = blockPosition.Y - 1 });
+        AddEntityToLine(entityId, indexTopFace, blockPosition.Z, EntityType.BlockTopFace);
+        AddEntityToLine(entityId, indexFrontFace, blockPosition.Z, EntityType.BlockFrontFace);
     }
 
     /// <summary>
@@ -146,7 +218,86 @@ public class PerspectiveLineManager
         // Entity extents aren't scheduled for inclusion until v0.5.0 however, so for the time
         // being they have point positions and will only intersect a single perspective line.
         var index = GetIndexForPosition(position);
-        AddEntityToLine(entityId, index, position.Z);
+        AddEntityToLine(entityId, index, position.Z, EntityType.NonBlock);
+    }
+
+    /// <summary>
+    ///     Removes an entity from any overlapping perspective lines.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    private void RemoveEntity(ulong entityId)
+    {
+        if (!linesByEntity.TryGetValue(entityId, out var lineIndices)) return;
+        if (!zDepthByEntity.TryGetValue(entityId, out var z))
+        {
+            Logger.ErrorFormat("No cached z value for entity {0}; skipping removal.", entityId);
+            return;
+        }
+
+        foreach (var index in lineIndices)
+        {
+            if (!perspectiveLines.TryGetValue(index, out var line)) continue;
+            if (!line.ZDepths.TryGetValue(EntityList.ForComparison(z), out var list))
+            {
+                Logger.ErrorFormat("Entity {0} not found in perspective line {1} for removal.", entityId, index);
+                continue;
+            }
+
+            list.RemoveEntity(entityId);
+            if (list.Entities.Count == 0)
+            {
+                line.ZDepths.Remove(list);
+                entityListPool.ReturnObject(list);
+            }
+        }
+
+        zDepthByEntity.Remove(entityId);
+        linesByEntity.Remove(entityId);
+    }
+
+    /// <summary>
+    ///     Called when a non-block entity moves.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="position">New position.</param>
+    private void NonBlockEntityMoved(ulong entityId, Vector3 position)
+    {
+        // Get prior state.
+        var newIndex = GetIndexForPosition(position);
+        if (!linesByEntity.TryGetValue(entityId, out var oldLines)
+            || !zDepthByEntity.TryGetValue(entityId, out var oldZ))
+        {
+            Logger.WarnFormat("Moved entity {0} not already tracked, treating as add.");
+            AddNonBlockEntity(entityId, position);
+            return;
+        }
+
+        // Check old perspective lines for continued overlap.
+        foreach (var oldIndex in oldLines)
+        {
+            if (!perspectiveLines.TryGetValue(oldIndex, out var oldLine))
+            {
+                Logger.ErrorFormat("Perspective line {0} is missing.", oldIndex);
+                continue;
+            }
+
+            if (oldIndex.Equals(newIndex) && oldZ != position.Z)
+            {
+                RemoveEntityFromLine(entityId, oldIndex, oldLine, oldZ);
+                AddEntityToLine(entityId, newIndex, position.Z, EntityType.NonBlock);
+            }
+            else if (!oldIndex.Equals(newIndex))
+            {
+                RemoveEntityFromLine(entityId, oldIndex, oldLine, oldZ);
+            }
+        }
+
+        // If the entity is now on a new line of perspective, add it now.
+        var lineIndices = linesByEntity[entityId];
+        if (!lineIndices.Contains(newIndex)) AddEntityToLine(entityId, newIndex, position.Z, EntityType.NonBlock);
+
+        // Update state.
+        zDepthByEntity[entityId] = position.Z;
     }
 
     /// <summary>
@@ -155,7 +306,8 @@ public class PerspectiveLineManager
     /// <param name="entityId">Entity ID.</param>
     /// <param name="lineIndex">Perspective line index.</param>
     /// <param name="z">z position of entity.</param>
-    private void AddEntityToLine(ulong entityId, Tuple<int, int> lineIndex, float z)
+    /// <param name="entityType">Entity type.</param>
+    private void AddEntityToLine(ulong entityId, Tuple<int, int> lineIndex, float z, EntityType entityType)
     {
         if (!perspectiveLines.TryGetValue(lineIndex, out var line))
         {
@@ -166,7 +318,21 @@ public class PerspectiveLineManager
             perspectiveLines[lineIndex] = line;
         }
 
-        line.EntitiesByZ.Add(z, entityId);
+        // Insert the entity into the correct z position on the perspective line.
+        if (!line.ZDepths.TryGetValue(EntityList.ForComparison(z), out var entityList))
+        {
+            entityList = entityListPool.TakeObject();
+            entityList.Z = z;
+            entityList.Entities.Clear();
+            line.ZDepths.Add(entityList);
+        }
+
+        entityList.Entities.Add(new EntityInfo
+        {
+            EntityId = entityId,
+            EntityType = entityType
+        });
+        zDepthByEntity[entityId] = z;
 
         // Keep a record of where this block is for easier removal later.
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices))
@@ -179,20 +345,28 @@ public class PerspectiveLineManager
     }
 
     /// <summary>
-    ///     Removes an entity from any overlapping perspective lines.
+    ///     Removes an entity from the given perspective line.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    private void RemoveEntity(ulong entityId)
+    /// <param name="lineIndex">Line index.</param>
+    /// <param name="line">Perspective line.</param>
+    /// <param name="z">z position of entity.</param>
+    private void RemoveEntityFromLine(ulong entityId, Tuple<int, int> lineIndex, PerspectiveLine line, float z)
     {
-    }
+        if (line.ZDepths.TryGetValue(EntityList.ForComparison(z), out var list))
+        {
+            list.RemoveEntity(entityId);
+            if (list.Entities.Count == 0)
+            {
+                line.ZDepths.Remove(list);
+                entityListPool.ReturnObject(list);
+            }
+        }
 
-    /// <summary>
-    ///     Called when a non-block entity moves.
-    /// </summary>
-    /// <param name="entityId">Entity ID.</param>
-    /// <param name="position">New position.</param>
-    private void NonBlockEntityMoved(ulong entityId, Vector3 position)
-    {
+        if (linesByEntity.TryGetValue(entityId, out var lineIndices))
+        {
+            lineIndices.Remove(lineIndex);
+        }
     }
 
     /// <summary>
@@ -271,18 +445,122 @@ public class PerspectiveLineManager
     }
 
     /// <summary>
+    ///     Entity types that can be found on a perspective line.
+    /// </summary>
+    private enum EntityType
+    {
+        /// <summary>
+        ///     Non-block entity.
+        /// </summary>
+        NonBlock,
+
+        /// <summary>
+        ///     Front face of a block entity.
+        /// </summary>
+        BlockFrontFace,
+
+        /// <summary>
+        ///     Top face of a block entity.
+        /// </summary>
+        BlockTopFace
+    }
+
+    /// <summary>
+    ///     Information regarding an entity on a perspective line.
+    /// </summary>
+    private struct EntityInfo
+    {
+        /// <summary>
+        ///     Entity ID.
+        /// </summary>
+        public ulong EntityId;
+
+        /// <summary>
+        ///     Entity type.
+        /// </summary>
+        public EntityType EntityType;
+    }
+
+    /// <summary>
+    ///     Represents a list of entities at a common z-depth.
+    /// </summary>
+    private class EntityList
+    {
+        /// <summary>
+        ///     Comparer for EntityLists.
+        /// </summary>
+        public static readonly IComparer<EntityList> Comparer =
+            Comparer<EntityList>.Create((a, b) => Comparer<float>.Default.Compare(a.Z, b.Z));
+
+        private static readonly List<EntityInfo> EmptyList = new(0);
+
+        /// <summary>
+        ///     Entities at this z-depth.
+        /// </summary>
+        public readonly List<EntityInfo> Entities;
+
+        /// <summary>
+        ///     Z depth of this entity list.
+        /// </summary>
+        public float Z;
+
+        public EntityList()
+        {
+            Entities = new List<EntityInfo>();
+        }
+
+        /// <summary>
+        ///     Constructs a new empty EntityList for lookups only.
+        /// </summary>
+        /// <param name="z">Z depth.</param>
+        private EntityList(float z)
+        {
+            Z = z;
+            Entities = EmptyList;
+        }
+
+        /// <summary>
+        ///     Convenience method to improve code readability when creating a dummy list as a comparison key.
+        /// </summary>
+        /// <param name="z">Z depth.</param>
+        /// <returns>Dummy list for use as a comparison key.</returns>
+        public static EntityList ForComparison(float z)
+        {
+            return new EntityList(z);
+        }
+
+        /// <summary>
+        ///     Removes all occurrences of an entity in this list.
+        /// </summary>
+        /// <param name="entityId">Entity ID.</param>
+        public void RemoveEntity(ulong entityId)
+        {
+            var toRemove = new List<int>();
+            for (var i = 0; i < Entities.Count; ++i)
+            {
+                if (Entities[i].EntityId == entityId) toRemove.Add(i);
+            }
+
+            for (var i = toRemove.Count - 1; i >= 0; --i)
+            {
+                Entities.RemoveAt(i);
+            }
+        }
+    }
+
+    /// <summary>
     ///     Contains data for a single perspective line.
     /// </summary>
     private class PerspectiveLine
     {
         /// <summary>
-        ///     Entities overlapping this perspective line, sorted by z coordinate.
+        ///     Z values at which entities are located on this perspective line.
         /// </summary>
-        public readonly SortedList<float, ulong> EntitiesByZ = new();
+        public readonly SortedSet<EntityList> ZDepths = new(EntityList.Comparer);
 
         /// <summary>
         ///     Reference count.
         /// </summary>
-        public uint refCount;
+        public uint ReferenceCount;
     }
 }

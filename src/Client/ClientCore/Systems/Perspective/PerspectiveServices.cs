@@ -23,16 +23,23 @@ namespace Sovereign.ClientCore.Systems.Perspective;
 /// </summary>
 public class PerspectiveServices
 {
+    private readonly PerspectiveLineManager lineManager;
+
+    public PerspectiveServices(PerspectiveLineManager lineManager)
+    {
+        this.lineManager = lineManager;
+    }
+
     /// <summary>
+    ///     Gets the highest entity appearing to overlap a position within a given z window.
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="minimumZ"></param>
+    /// <param name="position">Position in world coordinates to overlap.</param>
+    /// <param name="minimumZ">Minimum Z for window.</param>
     /// <param name="maximumZ"></param>
     /// <param name="entityId"></param>
     /// <returns></returns>
     public bool TryGetHighestCoveringEntity(Vector3 position, float minimumZ, float maximumZ, out ulong entityId)
     {
-        entityId = 0;
-        return false;
+        return lineManager.TryGetHighestEntityAtPoint(position, minimumZ, maximumZ, out entityId);
     }
 }

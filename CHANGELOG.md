@@ -2,6 +2,14 @@
 
 ## 2024
 
+### June
+
+#### 4 June 2024
+
+* Client: Add `PerspectiveSystem` for tracking where positioned entities fall relative to lines of perspective
+  into the screen. This will enable multiple algorithms in the client including entity mouseover detection,
+  ceiling hiding, and more efficient rendering of dense world segments.
+
 ### May
 
 #### 28 May 2024
