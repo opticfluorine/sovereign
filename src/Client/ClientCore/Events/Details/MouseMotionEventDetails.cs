@@ -14,16 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.ClientCore.Events.Details;
+using Sovereign.EngineCore.Events;
 
-namespace Sovereign.ClientCore.Systems.Input;
+namespace Sovereign.ClientCore.Events.Details;
 
 /// <summary>
-///     Default input handler that does not perform additional input handling.
+///     Event details for mouse motion events.
 /// </summary>
-public class NullInputHandler : IInputHandler
+public class MouseMotionEventDetails : IEventDetails
 {
-    public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
-    {
-    }
+    /// <summary>
+    ///     Mouse X coordinate relative to window.
+    /// </summary>
+    public int X;
+
+    /// <summary>
+    ///     Mouse Y coordinate relative to window.
+    /// </summary>
+    public int Y;
 }

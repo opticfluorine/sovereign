@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
+using Sovereign.ClientCore.Rendering.Configuration;
 
 namespace Sovereign.ClientCore.Systems.Perspective;
 
@@ -24,10 +25,12 @@ namespace Sovereign.ClientCore.Systems.Perspective;
 public class PerspectiveServices
 {
     private readonly PerspectiveLineManager lineManager;
+    private readonly DisplayViewport viewport;
 
-    public PerspectiveServices(PerspectiveLineManager lineManager)
+    public PerspectiveServices(PerspectiveLineManager lineManager, DisplayViewport viewport)
     {
         this.lineManager = lineManager;
+        this.viewport = viewport;
     }
 
     /// <summary>
@@ -35,11 +38,25 @@ public class PerspectiveServices
     /// </summary>
     /// <param name="position">Position in world coordinates to overlap.</param>
     /// <param name="minimumZ">Minimum Z for window.</param>
-    /// <param name="maximumZ"></param>
-    /// <param name="entityId"></param>
-    /// <returns></returns>
+    /// <param name="maximumZ">Maximum Z for window.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>true if an entity overlapped, false otherwise.</returns>
     public bool TryGetHighestCoveringEntity(Vector3 position, float minimumZ, float maximumZ, out ulong entityId)
     {
         return lineManager.TryGetHighestEntityAtPoint(position, minimumZ, maximumZ, out entityId);
+    }
+
+    /// <summary>
+    ///     Gets the highest entity appearing to overlap a position within a z window with the same
+    ///     height as the current viewport.
+    /// </summary>
+    /// <param name="position">Position in world coordinates to overlap.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>true if an entity overlapped, false otherwise.</returns>
+    public bool TryGetHighestCoveringEntity(Vector3 position, out ulong entityId)
+    {
+        var minZ = position.Z - viewport.HeightInTiles * 0.5f;
+        var maxZ = position.Z + viewport.HeightInTiles * 0.5f;
+        return TryGetHighestCoveringEntity(position, minZ, maxZ, out entityId);
     }
 }

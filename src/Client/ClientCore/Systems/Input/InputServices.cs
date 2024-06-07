@@ -14,16 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.ClientCore.Events.Details;
+using System.Numerics;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
 /// <summary>
-///     Default input handler that does not perform additional input handling.
+///     Public read API for the Input system.
 /// </summary>
-public class NullInputHandler : IInputHandler
+public class InputServices
 {
-    public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
+    private readonly MouseState mouseState;
+
+    public InputServices(MouseState mouseState)
     {
+        this.mouseState = mouseState;
+    }
+
+    /// <summary>
+    ///     Gets the latest known mouse position in screen coordinates (pixels) relative to the window.
+    /// </summary>
+    /// <returns>Mouse position in screen coordinates relative to the window.</returns>
+    /// <remarks>
+    ///     The returned mouse position may not be the true mouse position when the player is interacting
+    ///     with the GUI. The GUI will often intercept mouse events leading to this value becoming stale.
+    /// </remarks>
+    public Vector2 GetMousePosition()
+    {
+        return mouseState.MousePosition;
     }
 }

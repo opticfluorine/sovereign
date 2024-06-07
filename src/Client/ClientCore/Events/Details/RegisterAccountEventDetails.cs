@@ -19,7 +19,7 @@ using Sovereign.ClientCore.Network;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
-namespace Sovereign.ClientCore.Events;
+namespace Sovereign.ClientCore.Events.Details;
 
 /// <summary>
 ///     Event details for a register account event.

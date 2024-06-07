@@ -4,6 +4,13 @@
 
 ### June
 
+#### 6 June 2024
+
+* Input System: Track mouse motion events.
+* Perspective System: Add public API for retrieving the world coordinates (at camera depth) of the current
+  mouse pointer position.
+* Entity Debugger: Add new mouse hover mode that shows components for the entity under the mouse pointer, if any.
+
 #### 4 June 2024
 
 * Client: Add `PerspectiveSystem` for tracking where positioned entities fall relative to lines of perspective

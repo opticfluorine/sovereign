@@ -18,6 +18,8 @@ using System;
 using System.Globalization;
 using System.Numerics;
 using ImGuiNET;
+using Sovereign.ClientCore.Systems.Camera;
+using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 
@@ -31,6 +33,7 @@ public class EntityDebugGui
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly CameraServices cameraServices;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
     private readonly KinematicComponentCollection kinematics;
@@ -39,6 +42,7 @@ public class EntityDebugGui
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
+    private readonly PerspectiveServices perspectiveServices;
     private string entityIdInput = "";
 
     public EntityDebugGui(AboveBlockComponentCollection aboveBlocks, AnimatedSpriteComponentCollection animatedSprites,
@@ -47,7 +51,9 @@ public class EntityDebugGui
         OrientationComponentCollection orientations, ParentComponentCollection parents,
         KinematicComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
-        EntityTable entityTable)
+        EntityTable entityTable,
+        CameraServices cameraServices,
+        PerspectiveServices perspectiveServices)
     {
         this.aboveBlocks = aboveBlocks;
         this.animatedSprites = animatedSprites;
@@ -60,6 +66,8 @@ public class EntityDebugGui
         this.kinematics = kinematics;
         this.blockPositions = blockPositions;
         this.entityTable = entityTable;
+        this.cameraServices = cameraServices;
+        this.perspectiveServices = perspectiveServices;
     }
 
     /// <summary>
@@ -69,31 +77,55 @@ public class EntityDebugGui
     {
         if (!ImGui.Begin("Entity Debug")) return;
 
-        ImGui.InputText("Entity ID", ref entityIdInput, 16, ImGuiInputTextFlags.CharsHexadecimal);
-        ImGui.Separator();
+        if (ImGui.BeginTabBar("entityDebugTabs", ImGuiTabBarFlags.None))
+        {
+            ulong entityId = 0;
+            var valid = false;
 
-        if (ulong.TryParse(entityIdInput, NumberStyles.HexNumber, null, out var entityId))
-        {
-            if (ImGui.BeginTable("entityInfo", 2))
+            if (ImGui.BeginTabItem("By ID"))
             {
-                AddValueRow("In EntityTable:", entityTable.Exists(entityId));
-                AddComponentRow("AboveBlock:", entityId, aboveBlocks, x => $"{x:X}");
-                AddComponentRow("AnimatedSprite:", entityId, animatedSprites);
-                AddComponentRow("Drawable:", entityId, drawables);
-                AddComponentRow("Material:", entityId, materials);
-                AddComponentRow("Material Modifier:", entityId, materialModifiers);
-                AddComponentRow("Name:", entityId, names);
-                AddComponentRow("Orientation:", entityId, orientations);
-                AddComponentRow("Parent:", entityId, parents, x => $"{x:X}");
-                AddComponentRow("Position:", entityId, kinematics, x => CleanVec3ToString(x.Position));
-                AddComponentRow("Velocity:", entityId, kinematics, x => CleanVec3ToString(x.Velocity));
-                AddComponentRow("Block Position:", entityId, blockPositions);
-                ImGui.EndTable();
+                ImGui.InputText("Entity ID", ref entityIdInput, 16, ImGuiInputTextFlags.CharsHexadecimal);
+                valid = ulong.TryParse(entityIdInput, NumberStyles.HexNumber, null, out entityId);
+                ImGui.EndTabItem();
             }
-        }
-        else
-        {
-            ImGui.Text("Entity not found.");
+
+            if (ImGui.BeginTabItem("By Mouse Hover"))
+            {
+                var mousePosWorld = cameraServices.GetMousePositionWorldCoordinates();
+                valid = perspectiveServices.TryGetHighestCoveringEntity(mousePosWorld, out entityId);
+
+                ImGui.Text($"Hovered Position: {mousePosWorld}");
+                if (valid) ImGui.Text($"Hovered Entity ID: {entityId:x16}");
+                else ImGui.TextColored(new Vector4(0.7f), "No entity hovered");
+                ImGui.EndTabItem();
+            }
+
+            ImGui.EndTabBar();
+            ImGui.Separator();
+
+            if (valid)
+            {
+                if (ImGui.BeginTable("entityInfo", 2))
+                {
+                    AddValueRow("In EntityTable:", entityTable.Exists(entityId));
+                    AddComponentRow("AboveBlock:", entityId, aboveBlocks, x => $"{x:X}");
+                    AddComponentRow("AnimatedSprite:", entityId, animatedSprites);
+                    AddComponentRow("Drawable:", entityId, drawables);
+                    AddComponentRow("Material:", entityId, materials);
+                    AddComponentRow("Material Modifier:", entityId, materialModifiers);
+                    AddComponentRow("Name:", entityId, names);
+                    AddComponentRow("Orientation:", entityId, orientations);
+                    AddComponentRow("Parent:", entityId, parents, x => $"{x:X}");
+                    AddComponentRow("Position:", entityId, kinematics, x => CleanVec3ToString(x.Position));
+                    AddComponentRow("Velocity:", entityId, kinematics, x => CleanVec3ToString(x.Velocity));
+                    AddComponentRow("Block Position:", entityId, blockPositions);
+                    ImGui.EndTable();
+                }
+            }
+            else
+            {
+                ImGui.Text("Entity not found.");
+            }
         }
 
         ImGui.End();

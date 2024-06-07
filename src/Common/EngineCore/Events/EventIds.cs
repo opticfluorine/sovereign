@@ -205,10 +205,10 @@ public enum EventId
     Client_Input_KeyUp = 100001,
 
     /// <summary>
-    ///     Event sent to repeat an active movement keypress.
+    ///     Event sent when the mouse is moved.
     /// </summary>
-    /// Associated details: SequenceEventDetails
-    Client_Input_RepeatMove = 100002,
+    /// Associated details: MouseMotionEventDetails
+    Client_Input_MouseMotion = 100002,
 
     #endregion Client_Input
 

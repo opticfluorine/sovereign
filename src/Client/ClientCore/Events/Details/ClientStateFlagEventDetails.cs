@@ -17,15 +17,20 @@
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 
-namespace Sovereign.ClientCore.Events;
+namespace Sovereign.ClientCore.Events.Details;
 
 /// <summary>
-///     Event details related to main menu state.
+///     Event details for updating a client state flag.
 /// </summary>
-public class MainMenuEventDetails : IEventDetails
+public class ClientStateFlagEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Main menu state.
+    ///     Flag to be updated.
     /// </summary>
-    public MainMenuState MainMenuState { get; set; }
+    public ClientStateFlag Flag { get; set; }
+
+    /// <summary>
+    ///     New value for the flag.
+    /// </summary>
+    public bool NewValue { get; set; }
 }

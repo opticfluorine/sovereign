@@ -15,26 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.ClientCore.Network;
 using Sovereign.EngineCore.Events;
+using Sovereign.NetworkCore.Network.Authentication;
 
-namespace Sovereign.ClientCore.Events;
+namespace Sovereign.ClientCore.Events.Details;
 
 /// <summary>
-///     Event details for a connection attempt.
+///     Event details for continuing a connection attempt following authentication.
 /// </summary>
-public sealed class BeginConnectionEventDetails : IEventDetails
+public sealed class ContinueConnectionEventDetails : IEventDetails
 {
-    public BeginConnectionEventDetails(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
+    /// <summary>
+    ///     Creates a new instance of the event details.
+    /// </summary>
+    /// <param name="authenticationResponse">Successful authentication response from the server.</param>
+    public ContinueConnectionEventDetails(AuthenticationResponse authenticationResponse)
     {
-        ConnectionParameters = connectionParameters;
-        LoginParameters = loginParameters;
+        AuthenticationResponse = authenticationResponse;
     }
 
     /// <summary>
-    ///     Connection parameters to be used for the connection.
+    ///     Successful authentication response from the server.
     /// </summary>
-    public ClientConnectionParameters ConnectionParameters { get; private set; }
-
-    public LoginParameters LoginParameters { get; private set; }
+    public AuthenticationResponse AuthenticationResponse { get; private set; }
 }
