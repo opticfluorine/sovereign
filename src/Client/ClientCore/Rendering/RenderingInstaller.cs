@@ -29,19 +29,13 @@ public class RenderingInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        /* RenderingManager. */
-        container.Register(Component.For<RenderingManager>()
-            .LifestyleSingleton()
-            .Start());
-
-        /* IRenderer. */
         container.Register(EngineClasses.EngineAssemblies()
             .BasedOn<IRenderer>()
             .WithServiceDefaultInterfaces()
             .LifestyleSingleton());
 
-        /* RenderingResourceManager. */
-        container.Register(Component.For<RenderingResourceManager>()
-            .LifestyleSingleton());
+        container.Register(Component.For<RenderingManager>().LifestyleSingleton().Start());
+        container.Register(Component.For<RenderingResourceManager>().LifestyleSingleton());
+        container.Register(Component.For<DrawableLookup>().LifestyleSingleton());
     }
 }
