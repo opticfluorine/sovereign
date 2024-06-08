@@ -543,7 +543,7 @@ public class PerspectiveLineManager
 
             for (var i = toRemove.Count - 1; i >= 0; --i)
             {
-                Entities.RemoveAt(i);
+                Entities.RemoveAt(toRemove[i]);
             }
         }
     }

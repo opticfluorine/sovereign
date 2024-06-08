@@ -4,6 +4,11 @@
 
 ### June
 
+#### 8 June 2024
+
+* Perspective System: Fix issue where the incorrect entity was removed from a perspective line
+  during certain movements.
+
 #### 6 June 2024
 
 * Input System: Track mouse motion events.
