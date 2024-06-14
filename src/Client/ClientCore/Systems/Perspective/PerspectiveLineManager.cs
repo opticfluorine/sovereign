@@ -18,11 +18,13 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Rendering;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.World;
 using Sovereign.EngineUtil.Collections;
+using Sovereign.EngineUtil.Ranges;
 
 namespace Sovereign.ClientCore.Systems.Perspective;
 
@@ -43,11 +45,17 @@ namespace Sovereign.ClientCore.Systems.Perspective;
 public class PerspectiveLineManager
 {
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly DrawableLookup drawableLookup;
 
     /// <summary>
     ///     Object pool of entity lists to minimize heap churn for vertically moving entities.
     /// </summary>
     private readonly ObjectPool<EntityList> entityListPool = new();
+
+    /// <summary>
+    ///     Object pool of index lists to minimize heap churn when considering entity overlap.
+    /// </summary>
+    private readonly ObjectPool<List<Tuple<int, int>>> indexListPool = new();
 
     private readonly KinematicComponentCollection kinematics;
 
@@ -70,11 +78,12 @@ public class PerspectiveLineManager
 
     public PerspectiveLineManager(KinematicComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
-        EntityTable entityTable)
+        EntityTable entityTable, DrawableLookup drawableLookup)
     {
         this.kinematics = kinematics;
         this.blockPositions = blockPositions;
         this.resolver = resolver;
+        this.drawableLookup = drawableLookup;
 
         entityTable.OnEntityAdded += AddEntity;
         entityTable.OnEntityRemoved += RemoveEntity;
@@ -90,16 +99,25 @@ public class PerspectiveLineManager
     /// <param name="segmentIndex">Subscribed world segment index.</param>
     public void OnWorldSegmentSubscribe(GridPosition segmentIndex)
     {
-        var indices = GetIndicesForWorldSegment(segmentIndex);
-        foreach (var index in indices)
+        var indices = indexListPool.TakeObject();
+        try
         {
-            if (!perspectiveLines.TryGetValue(index, out var line))
+            GetIndicesForWorldSegment(segmentIndex, indices);
+            foreach (var index in indices)
             {
-                line = new PerspectiveLine();
-                perspectiveLines[index] = line;
-            }
+                if (!perspectiveLines.TryGetValue(index, out var line))
+                {
+                    line = new PerspectiveLine();
+                    perspectiveLines[index] = line;
+                }
 
-            line.ReferenceCount++;
+                line.ReferenceCount++;
+            }
+        }
+        finally
+        {
+            indices.Clear();
+            indexListPool.ReturnObject(indices);
         }
     }
 
@@ -110,17 +128,26 @@ public class PerspectiveLineManager
     /// <param name="segmentIndex">Unsubscribed world segment index.</param>
     public void OnWorldSegmentUnsubscribe(GridPosition segmentIndex)
     {
-        var indices = GetIndicesForWorldSegment(segmentIndex);
-        foreach (var index in indices)
+        var indices = indexListPool.TakeObject();
+        try
         {
-            if (!perspectiveLines.TryGetValue(index, out var line))
+            GetIndicesForWorldSegment(segmentIndex, indices);
+            foreach (var index in indices)
             {
-                Logger.WarnFormat("Perspective line {0} not found for world segment unsubscribe.", index);
-                continue;
-            }
+                if (!perspectiveLines.TryGetValue(index, out var line))
+                {
+                    Logger.WarnFormat("Perspective line {0} not found for world segment unsubscribe.", index);
+                    continue;
+                }
 
-            line.ReferenceCount--;
-            if (line.ReferenceCount <= 0) perspectiveLines.Remove(index);
+                line.ReferenceCount--;
+                if (line.ReferenceCount <= 0) perspectiveLines.Remove(index);
+            }
+        }
+        finally
+        {
+            indices.Clear();
+            indexListPool.ReturnObject(indices);
         }
     }
 
@@ -141,21 +168,18 @@ public class PerspectiveLineManager
         foreach (var entities in line.ZDepths
                      .GetViewBetween(EntityList.ForComparison(minZ), EntityList.ForComparison(maxZ)).Reverse())
         {
-            // Eventually need to add overlap checks between entity bounds and the specific point.
-            // For now assume any overlap of the perspective line is sufficient.
-            if (entities.Entities.Count == 1)
-            {
-                entityId = entities.Entities[0].EntityId;
-                return true;
-            }
-
             // If there are multiple entities at the highest depth, the priority is:
             //   1. Non-block entities (take first available)
             //   2. Block top face (will only ever be one at a given z)
             //   3. Block front face (will only ever be one at a given z)
             var foundTopFace = false;
+            var projectedPoint = new Vector2(point.X, point.Y + point.Z);
+            var foundAny = false;
             foreach (var entityInfo in entities.Entities)
             {
+                if (!EntityOverlapsProjectedPoint(entityInfo.EntityId, entityInfo.EntityType, projectedPoint)) continue;
+
+                foundAny = true;
                 switch (entityInfo.EntityType)
                 {
                     case EntityType.NonBlock:
@@ -174,11 +198,52 @@ public class PerspectiveLineManager
                 }
             }
 
-            return true;
+            if (foundAny) return true;
         }
 
         // If we get here, nothing was found in the window.
         return false;
+    }
+
+    /// <summary>
+    ///     Determines whether the given projected point overlaps the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="entityType">Entity type.</param>
+    /// <param name="projectedPoint">Point projected onto the z=0 plane.</param>
+    /// <returns>true if the projected point overlaps the entity, false otherwise.</returns>
+    private bool EntityOverlapsProjectedPoint(ulong entityId, EntityType entityType, Vector2 projectedPoint)
+    {
+        var entityPosition = Vector2.Zero;
+        var entityExtent = Vector2.One;
+
+        switch (entityType)
+        {
+            case EntityType.NonBlock:
+                var fullPos = kinematics[entityId].Position;
+                entityPosition = new Vector2(fullPos.X, fullPos.Y + fullPos.Z);
+                entityExtent = drawableLookup.GetEntityDrawableSizeWorld(entityId);
+                break;
+
+            case EntityType.BlockTopFace:
+            {
+                var blockPos = blockPositions[entityId];
+                entityPosition = new Vector2(blockPos.X, blockPos.Y + blockPos.Z);
+                break;
+            }
+
+            case EntityType.BlockFrontFace:
+            {
+                var blockPos = blockPositions[entityId];
+                entityPosition = new Vector2(blockPos.X, blockPos.Y + blockPos.Z - 1);
+                break;
+            }
+        }
+
+        var entityRangeMin = entityPosition with { Y = entityPosition.Y - entityExtent.Y };
+        var entityRangeMax = entityRangeMin + entityExtent;
+
+        return RangeUtil.IsPointInRange(entityRangeMin, entityRangeMax, projectedPoint);
     }
 
     /// <summary>
@@ -215,10 +280,20 @@ public class PerspectiveLineManager
     private void AddNonBlockEntity(ulong entityId, Vector3 position)
     {
         // Non-block entities can overlap multiple perspective lines depending on their extent.
-        // Entity extents aren't scheduled for inclusion until v0.5.0 however, so for the time
-        // being they have point positions and will only intersect a single perspective line.
-        var index = GetIndexForPosition(position);
-        AddEntityToLine(entityId, index, position.Z, EntityType.NonBlock);
+        var indices = indexListPool.TakeObject();
+        try
+        {
+            GetNonBlockOverlappingLines(entityId, indices);
+            foreach (var index in indices)
+            {
+                AddEntityToLine(entityId, index, position.Z, EntityType.NonBlock);
+            }
+        }
+        finally
+        {
+            indices.Clear();
+            indexListPool.ReturnObject(indices);
+        }
     }
 
     /// <summary>
@@ -263,7 +338,6 @@ public class PerspectiveLineManager
     private void NonBlockEntityMoved(ulong entityId, Vector3 position)
     {
         // Get prior state.
-        var newIndex = GetIndexForPosition(position);
         if (!linesByEntity.TryGetValue(entityId, out var oldLines)
             || !zDepthByEntity.TryGetValue(entityId, out var oldZ))
         {
@@ -272,32 +346,34 @@ public class PerspectiveLineManager
             return;
         }
 
-        // Check old perspective lines for continued overlap.
-        foreach (var oldIndex in oldLines)
+        var newIndices = indexListPool.TakeObject();
+        try
         {
-            if (!perspectiveLines.TryGetValue(oldIndex, out var oldLine))
+            GetNonBlockOverlappingLines(entityId, newIndices);
+
+            // Remove from old perspective lines, then re-add.
+            foreach (var oldIndex in oldLines)
             {
-                Logger.ErrorFormat("Perspective line {0} is missing.", oldIndex);
-                continue;
+                if (!perspectiveLines.TryGetValue(oldIndex, out var oldLine))
+                {
+                    Logger.ErrorFormat("Perspective line {0} is missing.", oldIndex);
+                    continue;
+                }
+
+                RemoveEntityFromLine(entityId, oldIndex, oldLine, oldZ);
             }
 
-            if (oldIndex.Equals(newIndex) && oldZ != position.Z)
-            {
-                RemoveEntityFromLine(entityId, oldIndex, oldLine, oldZ);
+            foreach (var newIndex in newIndices)
                 AddEntityToLine(entityId, newIndex, position.Z, EntityType.NonBlock);
-            }
-            else if (!oldIndex.Equals(newIndex))
-            {
-                RemoveEntityFromLine(entityId, oldIndex, oldLine, oldZ);
-            }
+
+            // Update state.
+            zDepthByEntity[entityId] = position.Z;
         }
-
-        // If the entity is now on a new line of perspective, add it now.
-        var lineIndices = linesByEntity[entityId];
-        if (!lineIndices.Contains(newIndex)) AddEntityToLine(entityId, newIndex, position.Z, EntityType.NonBlock);
-
-        // Update state.
-        zDepthByEntity[entityId] = position.Z;
+        finally
+        {
+            newIndices.Clear();
+            indexListPool.ReturnObject(newIndices);
+        }
     }
 
     /// <summary>
@@ -373,8 +449,9 @@ public class PerspectiveLineManager
     ///     Gets the perspective line indices that intersect the given world segment.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
+    /// <param name="indices">List of indices to update.</param>
     /// <returns>Intersecting perspective line indices.</returns>
-    private List<Tuple<int, int>> GetIndicesForWorldSegment(GridPosition segmentIndex)
+    private void GetIndicesForWorldSegment(GridPosition segmentIndex, List<Tuple<int, int>> indices)
     {
         var (minPosition, maxPosition) = resolver.GetRangeForWorldSegment(segmentIndex);
         var startX = (int)minPosition.X; // inclusive
@@ -384,14 +461,13 @@ public class PerspectiveLineManager
         var endY = (int)maxPosition.Y; // exclusive
         var endZ = (int)maxPosition.Z; // exclusive
 
-        var indices = new List<Tuple<int, int>>();
-
         // Each perspective line will intersect two faces of the world segment cube.
         // To enumerate the perspective lines that intersect a world segment, we iterate the
         // block positions on the front and bottom face of the world segment, taking care not
         // to double-count the bottom row of the front face/front row of the bottom face
         // (the shared edge between the two faces).
 
+        indices.Clear();
         for (var x = startX; x < endX; x++)
         {
             // Front face: (startX..endX, startY, startZ..endZ)
@@ -406,8 +482,6 @@ public class PerspectiveLineManager
                 indices.Add(GetIndexForBlockPosition(x, y, startZ));
             }
         }
-
-        return indices;
     }
 
     /// <summary>
@@ -440,8 +514,50 @@ public class PerspectiveLineManager
     /// <returns>Perspective line index.</returns>
     private Tuple<int, int> GetIndexForPosition(Vector3 position)
     {
-        return GetIndexForBlockPosition((int)Math.Floor(position.X), (int)Math.Floor(position.Y),
-            (int)Math.Floor(position.Z));
+        return GetIndexForBlockPosition((int)Math.Floor(position.X), (int)Math.Ceiling(position.Y),
+            (int)Math.Ceiling(position.Z));
+    }
+
+    /// <summary>
+    ///     Gets the index of the perspective line that intersects the given projected position on the z=0 plane.
+    /// </summary>
+    /// <param name="projectedPosition">Position projected onto the z=0 plane.</param>
+    /// <returns>Perspective line index.</returns>
+    private Tuple<int, int> GetIndexForProjectedPosition(Vector2 projectedPosition)
+    {
+        return Tuple.Create((int)Math.Floor(projectedPosition.X), (int)Math.Ceiling(projectedPosition.Y));
+    }
+
+    /// <summary>
+    ///     Gets the indices of any perspective lines overlapped by the given non-block entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="indices">Indices list to update.</param>
+    private void GetNonBlockOverlappingLines(ulong entityId, List<Tuple<int, int>> indices)
+    {
+        if (!kinematics.HasComponentForEntity(entityId))
+        {
+            Logger.WarnFormat("No position for entity {0}.", entityId);
+            return;
+        }
+
+        var position = kinematics[entityId].Position;
+        var projectedPosition = new Vector2(position.X, position.Y + position.Z);
+        var entityExtent = drawableLookup.GetEntityDrawableSizeWorld(entityId);
+
+        // Determine line extent along projected x and y axes.
+        var minPosition = projectedPosition with { Y = projectedPosition.Y - entityExtent.Y };
+        var maxPosition = projectedPosition + entityExtent;
+        var minIndices = GetIndexForProjectedPosition(minPosition);
+        var maxIndices = GetIndexForProjectedPosition(maxPosition);
+
+        for (var x = minIndices.Item1; x <= maxIndices.Item1; ++x)
+        {
+            for (var y = minIndices.Item2; y <= maxIndices.Item2; ++y)
+            {
+                indices.Add(Tuple.Create(x, y));
+            }
+        }
     }
 
     /// <summary>

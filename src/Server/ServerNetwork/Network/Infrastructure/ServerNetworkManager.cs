@@ -90,6 +90,12 @@ public sealed class ServerNetworkManager : INetworkManager
 
         /* Create the network manager, but defer startup. */
         netManager = new NetManager(netListener);
+
+#if DEBUG
+        // For debug builds only, max out the disconnect timeout so that the connection survives
+        // hitting a breakpoint.
+        netManager.DisconnectTimeout = int.MaxValue;
+#endif
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

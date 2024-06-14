@@ -4,6 +4,16 @@
 
 ### June
 
+#### 13 June 2024
+
+* Renderer: Fix issue where blocks were being rendered in the wrong position all along. This was revealed by the
+  mouseover entity detection code being "wrong". I adjusted the mouse world position by a constant factor to
+  correct the error but couldn't figure out where in my math I had dropped a one - well, I didn't, and that should
+  have been a clue.
+* Perspective System: Properly handle entity extents and partial overlap of perspective lines.
+* Camera System: Properly center camera on the center of the targeted entity, not on its upper-left corner
+  (the entity's "position").
+
 #### 8 June 2024
 
 * Perspective System: Fix issue where the incorrect entity was removed from a perspective line
