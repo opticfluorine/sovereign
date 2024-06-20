@@ -28,13 +28,9 @@ public sealed class BlockSystemInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(Component.For<BlockEventHandler>()
-            .LifestyleSingleton());
-
-        container.Register(Component.For<BlockController>()
-            .LifestyleSingleton());
-
-        container.Register(Component.For<BlockManager>()
-            .LifestyleSingleton());
+        container.Register(Component.For<BlockEventHandler>().LifestyleSingleton());
+        container.Register(Component.For<BlockController>().LifestyleSingleton());
+        container.Register(Component.For<BlockManager>().LifestyleSingleton());
+        container.Register(Component.For<BlockServices>().LifestyleSingleton());
     }
 }

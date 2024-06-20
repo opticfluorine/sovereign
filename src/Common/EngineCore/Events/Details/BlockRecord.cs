@@ -15,18 +15,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Collections.Generic;
-using Sovereign.EngineCore.Events;
+using System.Text;
+using MessagePack;
+using Sovereign.EngineCore.Components.Indexers;
 
-namespace Sovereign.EngineCore.Systems.Block.Events;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Event details for adding a batch of blocks at once.
+///     Creation record for a single block.
 /// </summary>
-public sealed class BlockAddBatchEventDetails : IEventDetails
+[MessagePackObject]
+public struct BlockRecord
 {
     /// <summary>
-    ///     Blocks to be added.
+    ///     Block position.
     /// </summary>
-    public List<BlockRecord> BlockRecords { get; set; } = new();
+    [Key(0)] public GridPosition Position;
+
+    /// <summary>
+    ///     Block template entity ID.
+    /// </summary>
+    [Key(1)] public ulong TemplateEntityId;
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.Append('(')
+            .Append(Position.X).Append(", ")
+            .Append(Position.Y).Append(", ")
+            .Append(Position.Z).Append(", ")
+            .Append(TemplateEntityId).Append(')');
+        return sb.ToString();
+    }
 }

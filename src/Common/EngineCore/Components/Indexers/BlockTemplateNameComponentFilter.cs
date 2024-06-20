@@ -14,22 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Text.RegularExpressions;
-using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Systems.Block;
 
-namespace Sovereign.EngineCore.Events.Details.Validators;
+namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
-///     Event details validator for ChatEventDetails.
+///     Component filter that only accepts events from the Name component attached to a
+///     block template entity.
 /// </summary>
-public class ChatEventDetailsValidator : IEventDetailsValidator
+public class BlockTemplateNameComponentFilter : BlockTemplateEntityComponentFilter<string>
 {
-    private static readonly Regex ValidRegex = new(@"^[\S ]+$");
-
-    public bool IsValid(IEventDetails? details)
+    public BlockTemplateNameComponentFilter(NameComponentCollection names, BlockServices blockServices)
+        : base(names, names, blockServices)
     {
-        if (details is not ChatEventDetails chatDetails) return false;
-        return chatDetails.Message.Length <= ChatConstants.MaxMessageLengthChars
-               && ValidRegex.IsMatch(chatDetails.Message);
     }
 }

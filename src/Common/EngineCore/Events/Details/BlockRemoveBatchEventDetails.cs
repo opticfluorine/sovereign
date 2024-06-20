@@ -15,17 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Events;
+using System.Collections.Generic;
 
-namespace Sovereign.EngineCore.Systems.Block.Events;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Event details for adding a single block.
+///     Event details for removing a batch of blocks at once.
 /// </summary>
-public sealed class BlockAddEventDetails : IEventDetails
+public sealed class BlockRemoveBatchEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Block to be created.
+    ///     List of block entity IDs to remove.
     /// </summary>
-    public BlockRecord BlockRecord { get; set; }
+    public List<ulong> EntityIds { get; set; } = new();
 }

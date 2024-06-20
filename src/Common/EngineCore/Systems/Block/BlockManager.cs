@@ -20,7 +20,7 @@ using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Events;
+using Sovereign.EngineCore.Events.Details;
 
 namespace Sovereign.EngineCore.Systems.Block;
 

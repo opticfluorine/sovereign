@@ -18,9 +18,9 @@
 using System;
 using System.Collections.Generic;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
-using Sovereign.EngineCore.Systems.Block.Events;
 using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.EngineCore.Systems.Block;
@@ -48,7 +48,7 @@ public class BlockController
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
-    ///     Adds a single block.
+    ///     Adds a single block and sends a subsequent block change notification.
     /// </summary>
     /// <param name="eventSender">Event sender for the calling thread.</param>
     /// <param name="blockRecord">Block to add.</param>
@@ -67,7 +67,7 @@ public class BlockController
     }
 
     /// <summary>
-    ///     Adds multiple blocks at once.
+    ///     Adds multiple blocks at once without sending any block change notifications.
     /// </summary>
     /// <param name="eventSender">Event sender for the calling thread.</param>
     /// <param name="recordProvider">Function that populates the list of blocks to create.</param>
@@ -94,7 +94,7 @@ public class BlockController
     }
 
     /// <summary>
-    ///     Removes the block with the given entity ID.
+    ///     Removes the block with the given entity ID, sending a block removal notification.
     /// </summary>
     /// <param name="eventSender">Event sender for the calling thread.</param>
     /// <param name="blockEntityId">Entity ID of the block to remove.</param>
@@ -109,7 +109,7 @@ public class BlockController
     }
 
     /// <summary>
-    ///     Removes multiple blocks at once.
+    ///     Removes multiple blocks at once without sending block removal notifications.
     /// </summary>
     /// <param name="eventSender">Event sender for the calling thread.</param>
     /// <param name="blockEntityIdProvider">Function that populates the list of entity IDs to remove.</param>
@@ -125,6 +125,21 @@ public class BlockController
         Logger.DebugFormat("Requesting to remove {0} blocks.", removeList.Count);
         var details = new BlockRemoveBatchEventDetails { EntityIds = removeList };
         var ev = new Event(EventId.Core_Block_RemoveBatch, details, eventTime);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Removes the block at the given position, then sends a subsequent block removal notification.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="position">Position.</param>
+    public void RemoveBlockAtPosition(IEventSender eventSender, GridPosition position)
+    {
+        var details = new GridPositionEventDetails
+        {
+            GridPosition = position
+        };
+        var ev = new Event(EventId.Core_Block_RemoveAt, details);
         eventSender.SendEvent(ev);
     }
 

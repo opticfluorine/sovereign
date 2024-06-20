@@ -28,7 +28,7 @@ public class NameComponentValidator
     /// <summary>
     ///     Regular expression for name validation.
     /// </summary>
-    private readonly Regex validNameRegex = new(@"^[\w- ]+$");
+    private readonly Regex validNameRegex = new(@"^[A-Za-z][\w- ]+$");
 
     /// <summary>
     ///     Checks the validity of a given name.

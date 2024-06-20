@@ -14,22 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Text.RegularExpressions;
-using Sovereign.EngineCore.Configuration;
-
 namespace Sovereign.EngineCore.Events.Details.Validators;
 
 /// <summary>
-///     Event details validator for ChatEventDetails.
+///     Event details validator for GridPositionEventDetailsValidator.
 /// </summary>
-public class ChatEventDetailsValidator : IEventDetailsValidator
+public class GridPositionEventDetailsValidator : IEventDetailsValidator
 {
-    private static readonly Regex ValidRegex = new(@"^[\S ]+$");
-
     public bool IsValid(IEventDetails? details)
     {
-        if (details is not ChatEventDetails chatDetails) return false;
-        return chatDetails.Message.Length <= ChatConstants.MaxMessageLengthChars
-               && ValidRegex.IsMatch(chatDetails.Message);
+        return details is GridPositionEventDetails;
     }
 }

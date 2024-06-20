@@ -16,17 +16,16 @@
  */
 
 using System.Collections.Generic;
-using Sovereign.EngineCore.Events;
 
-namespace Sovereign.EngineCore.Systems.Block.Events;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Event details for removing a batch of blocks at once.
+///     Event details for adding a batch of blocks at once.
 /// </summary>
-public sealed class BlockRemoveBatchEventDetails : IEventDetails
+public sealed class BlockAddBatchEventDetails : IEventDetails
 {
     /// <summary>
-    ///     List of block entity IDs to remove.
+    ///     Blocks to be added.
     /// </summary>
-    public List<ulong> EntityIds { get; set; } = new();
+    public List<BlockRecord> BlockRecords { get; set; } = new();
 }
