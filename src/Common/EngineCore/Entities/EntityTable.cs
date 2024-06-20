@@ -87,9 +87,8 @@ public class EntityTable
     public void Add(ulong entityId, ulong templateEntityId, bool isBlock, bool isLoad)
     {
         if (Exists(entityId)) return;
-        var newAdd = new EntityAdd { EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock };
+        var newAdd = new EntityAdd { EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock, IsLoad = isLoad };
         pendingAdds.Add(ref newAdd);
-        if (!isLoad && templateEntityId > 0) OnTemplateSet?.Invoke(entityId, templateEntityId);
     }
 
     /// <summary>
@@ -122,6 +121,8 @@ public class EntityTable
             }
 
             OnEntityAdded?.Invoke(entityId);
+            if (!pendingAdd.IsLoad && pendingAdd.TemplateEntityId > 0) 
+                OnTemplateSet?.Invoke(entityId, pendingAdd.TemplateEntityId);
         }
 
         // Removals.
@@ -217,5 +218,10 @@ public class EntityTable
         ///     Flag indicating whether the new entity is a block entity.
         /// </summary>
         public bool IsBlock;
+
+        /// <summary>
+        ///     Flag indicating whether the new entity is loaded rather than created.
+        /// </summary>
+        public bool IsLoad;
     }
 }
