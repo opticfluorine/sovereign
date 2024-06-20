@@ -41,7 +41,9 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         LocalChatEventDetailsValidator localChatValidator,
         GlobalChatEventDetailsValidator globalChatValidator,
         SystemChatEventDetailsValidator systemChatValidator,
-        TemplateEntityDefinitionEventDetailsValidator templateValidator)
+        TemplateEntityDefinitionEventDetailsValidator templateValidator,
+        BlockAddEventDetailsValidator blockAddValidator,
+        GridPositionEventDetailsValidator gridPositionValidator)
     {
         this.templateValidator = templateValidator;
         validators = new Dictionary<EventId, IEventDetailsValidator>
@@ -61,7 +63,9 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Chat_Local, localChatValidator },
             { EventId.Core_Chat_Global, globalChatValidator },
             { EventId.Core_Chat_System, systemChatValidator },
-            { EventId.Server_TemplateEntity_Update, entityDefinitionValidator }
+            { EventId.Server_TemplateEntity_Update, entityDefinitionValidator },
+            { EventId.Core_Block_ModifyNotice, blockAddValidator },
+            { EventId.Core_Block_RemoveNotice, gridPositionValidator }
         };
     }
 
