@@ -25,7 +25,9 @@ using MessagePack;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
+using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -35,6 +37,7 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public sealed class WorldSegmentBlockDataManager
 {
+    private readonly BlockController blockController;
     private readonly BlockPositionComponentCollection blockPositions;
 
     /// <summary>
@@ -56,6 +59,8 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     private readonly ConcurrentDictionary<GridPosition, Task> deletionTasks = new();
 
+    private readonly IEventSender eventSender;
+
     private readonly WorldSegmentBlockDataGenerator generator;
 
     private readonly WorldSegmentResolver resolver;
@@ -67,26 +72,23 @@ public sealed class WorldSegmentBlockDataManager
 
     public WorldSegmentBlockDataManager(
         WorldSegmentBlockDataGenerator generator,
-        MaterialComponentCollection materials,
-        MaterialModifierComponentCollection materialModifiers,
         BlockPositionComponentCollection blockPositions,
         WorldSegmentResolver resolver,
-        EntityManager entityManager)
+        EntityManager entityManager,
+        EntityTable entityTable,
+        BlockController blockController,
+        IEventSender eventSender)
     {
         this.generator = generator;
         this.blockPositions = blockPositions;
         this.resolver = resolver;
+        this.blockController = blockController;
+        this.eventSender = eventSender;
 
-        materials.OnComponentAdded += OnBlockAdded;
-        materialModifiers.OnComponentAdded += OnBlockAdded;
-        materials.OnComponentModified += OnBlockModified;
-        materialModifiers.OnComponentModified += OnBlockModified;
-        materials.OnComponentRemoved += ScheduleFromBlock;
-        materialModifiers.OnComponentRemoved += ScheduleFromBlock;
-
+        blockPositions.OnComponentRemoved += OnBlockRemoved;
         entityManager.OnUpdatesComplete += OnEndUpdates;
+        entityTable.OnTemplateSet += OnTemplateSet;
     }
-
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -173,29 +175,44 @@ public sealed class WorldSegmentBlockDataManager
     }
 
     /// <summary>
-    ///     Called when a block is added or modified.
+    ///     Called when the template of an entity is changed (excluding entity loads).
     /// </summary>
-    /// <param name="entityId">Block entity ID.</param>
-    /// <param name="newValue">Unused.</param>
-    /// <param name="isLoad">Unused.</param>
-    private void OnBlockAdded(ulong entityId, int newValue, bool isLoad)
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="templateEntityId">New template entity ID.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateEntityId)
     {
-        // The block position may not be committed yet, so enqueue the block for processing after updates finish.
-        changedBlocks.Enqueue(entityId);
-    }
+        // Ignore if not a block entity.
+        if (!blockPositions.HasComponentForEntity(entityId)) return;
 
-    /// <summary>
-    ///     Called when a block is modified.
-    /// </summary>
-    /// <param name="entityId">Block entity ID.</param>
-    /// <param name="newValue">Unused.</param>
-    private void OnBlockModified(ulong entityId, int newValue)
-    {
-        OnBlockAdded(entityId, newValue, false);
+        // Ensure that the bulk data for the affected world segment is updated on next request.
+        changedBlocks.Enqueue(entityId);
+
+        // This is only called if a block is added, not loaded. Therefore, the new block needs to
+        // be advertised to any subscribed clients. Also, given the timing of the OnTemplateSet
+        // event, the block position must already be committed to the ECS.
+        blockController.NotifyBlockChanged(eventSender, blockPositions[entityId], templateEntityId);
     }
 
     /// <summary>
     ///     Called when a block is removed.
+    /// </summary>
+    /// <param name="entityId">Block entity ID.</param>
+    /// <param name="isUnload">Unused.</param>
+    private void OnBlockRemoved(ulong entityId, bool isUnload)
+    {
+        ScheduleFromBlock(entityId, isUnload);
+
+        if (!isUnload)
+        {
+            // This is a true removal of a block, not just unloading it from memory.
+            // Notify any subscribed clients of this update.
+            var blockPosition = blockPositions.GetComponentWithLookback(entityId);
+            blockController.NotifyBlockRemoved(eventSender, blockPosition);
+        }
+    }
+
+    /// <summary>
+    ///     Schedules a regeneration of block data for transfer if needed.
     /// </summary>
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="isUnload">Unused.</param>

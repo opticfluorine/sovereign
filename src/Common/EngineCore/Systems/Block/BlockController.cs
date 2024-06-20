@@ -144,6 +144,38 @@ public class BlockController
     }
 
     /// <summary>
+    ///     Sends a notification of a block change (add or modify, but not load/unload).
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="blockPosition">Block position.</param>
+    /// <param name="templateEntityId">Block template entity ID.</param>
+    public void NotifyBlockChanged(IEventSender eventSender, GridPosition blockPosition, ulong templateEntityId)
+    {
+        var details = new BlockAddEventDetails
+        {
+            BlockRecord = new BlockRecord
+            {
+                Position = blockPosition,
+                TemplateEntityId = templateEntityId
+            }
+        };
+        var ev = new Event(EventId.Core_Block_ModifyNotice, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Sends a notification of a block removal (not unload).
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="blockPosition">Block position.</param>
+    public void NotifyBlockRemoved(IEventSender eventSender, GridPosition blockPosition)
+    {
+        var details = new GridPositionEventDetails { GridPosition = blockPosition };
+        var ev = new Event(EventId.Core_Block_RemoveNotice, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
     ///     Returns an add buffer to the object pool. This should only be called internally.
     /// </summary>
     /// <param name="addBuffer">Buffer to return.</param>
