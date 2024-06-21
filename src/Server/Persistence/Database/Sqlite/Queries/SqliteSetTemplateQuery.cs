@@ -28,12 +28,12 @@ public class SqliteSetTemplateQuery(SqliteConnection connection) : ISetTemplateQ
     {
         using var cmd = new SqliteCommand(Sql, connection, (SqliteTransaction)transaction);
 
-        var pId = new SqliteParameter("Id", SqliteType.Integer);
+        var pId = new SqliteParameter("EntityId", SqliteType.Integer);
         pId.Value = entityId;
         cmd.Parameters.Add(pId);
 
         var pTemplateId = new SqliteParameter("TemplateId", SqliteType.Integer);
-        pId.Value = templateEntityId > 0 ? templateEntityId : null;
+        pTemplateId.Value = templateEntityId > 0 ? templateEntityId : null;
         cmd.Parameters.Add(pTemplateId);
 
         cmd.ExecuteNonQuery();
