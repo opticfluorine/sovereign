@@ -30,13 +30,15 @@ public sealed class BlockEventHandler
     private readonly BlockGridPositionIndexer blockGridPositionIndexer;
     private readonly BlockController controller;
     private readonly BlockManager manager;
+    private readonly BlockNoticeProcessor noticeProcessor;
 
     public BlockEventHandler(BlockController controller, BlockManager manager,
-        BlockGridPositionIndexer blockGridPositionIndexer)
+        BlockGridPositionIndexer blockGridPositionIndexer, BlockNoticeProcessor noticeProcessor)
     {
         this.controller = controller;
         this.manager = manager;
         this.blockGridPositionIndexer = blockGridPositionIndexer;
+        this.noticeProcessor = noticeProcessor;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -130,10 +132,7 @@ public sealed class BlockEventHandler
         var entities = blockGridPositionIndexer.GetEntitiesAtPosition(position);
         if (entities == null) return;
 
-        foreach (var entityId in entities)
-        {
-            manager.RemoveBlock(entityId);
-        }
+        foreach (var entityId in entities) manager.RemoveBlock(entityId);
     }
 
     /// <summary>
@@ -180,8 +179,7 @@ public sealed class BlockEventHandler
     /// <param name="details">Details.</param>
     private void HandleModifyNotice(BlockAddEventDetails details)
     {
-        Logger.DebugFormat("ModifyNotice: {0} => {1}", details.BlockRecord.Position,
-            details.BlockRecord.TemplateEntityId);
+        noticeProcessor.ProcessModifyNotice(details.BlockRecord);
     }
 
     /// <summary>
@@ -190,6 +188,6 @@ public sealed class BlockEventHandler
     /// <param name="details">Details.</param>
     private void HandleRemoveNotice(GridPositionEventDetails details)
     {
-        Logger.DebugFormat("RemoveNotice: {0}", details.GridPosition);
+        noticeProcessor.ProcessRemoveNotice(details.GridPosition);
     }
 }

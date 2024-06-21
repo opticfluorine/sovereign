@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Linq;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 
@@ -52,5 +53,24 @@ public class BlockServices
     public bool BlockExistsAtPosition(GridPosition blockPosition)
     {
         return blockGridPositionIndexer.GetEntitiesAtPosition(blockPosition) != null;
+    }
+
+    /// <summary>
+    ///     Gets the entity ID of the block at the given position if one exists.
+    /// </summary>
+    /// <param name="blockPosition">Block position.</param>
+    /// <param name="entityId">Set to the block entity ID, or 0 if none exists.</param>
+    /// <returns>true if a block exists at the given position, false otherwise.</returns>
+    public bool TryGetBlockAtPosition(GridPosition blockPosition, out ulong entityId)
+    {
+        entityId = 0;
+        var entities = blockGridPositionIndexer.GetEntitiesAtPosition(blockPosition);
+        if (entities != null)
+        {
+            entityId = entities.First();
+            return true;
+        }
+
+        return false;
     }
 }
