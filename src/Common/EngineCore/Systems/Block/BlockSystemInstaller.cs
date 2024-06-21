@@ -32,5 +32,6 @@ public sealed class BlockSystemInstaller : IWindsorInstaller
         container.Register(Component.For<BlockController>().LifestyleSingleton());
         container.Register(Component.For<BlockManager>().LifestyleSingleton());
         container.Register(Component.For<BlockServices>().LifestyleSingleton());
+        container.Register(Component.For<BlockNoticeProcessor>().LifestyleSingleton());
     }
 }

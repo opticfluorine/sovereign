@@ -82,7 +82,36 @@ public sealed class BlockEventHandler
                 }
 
                 HandleRemoveAt(details.GridPosition);
+                break;
+            }
 
+            case EventId.Core_Block_ModifyNotice:
+            {
+                // Ignore local notices since they reflect current local state.
+                if (ev.Local) break;
+
+                if (ev.EventDetails is not BlockAddEventDetails details)
+                {
+                    Logger.Warn("Received ModifyNotice without details.");
+                    break;
+                }
+
+                HandleModifyNotice(details);
+                break;
+            }
+
+            case EventId.Core_Block_RemoveNotice:
+            {
+                // Ignore local notices since they reflect current local state.
+                if (ev.Local) break;
+
+                if (ev.EventDetails is not GridPositionEventDetails details)
+                {
+                    Logger.Warn("Received RemoveNotice without details.");
+                    break;
+                }
+
+                HandleRemoveNotice(details);
                 break;
             }
 
@@ -143,5 +172,24 @@ public sealed class BlockEventHandler
     {
         foreach (var blockEntityId in eventDetails.EntityIds) manager.RemoveBlock(blockEntityId);
         controller.ReturnRemoveBuffer(eventDetails.EntityIds);
+    }
+
+    /// <summary>
+    ///     Handles a block modification notice received over the network.
+    /// </summary>
+    /// <param name="details">Details.</param>
+    private void HandleModifyNotice(BlockAddEventDetails details)
+    {
+        Logger.DebugFormat("ModifyNotice: {0} => {1}", details.BlockRecord.Position,
+            details.BlockRecord.TemplateEntityId);
+    }
+
+    /// <summary>
+    ///     Handles a block removal notice received over the network.
+    /// </summary>
+    /// <param name="details">Details.</param>
+    private void HandleRemoveNotice(GridPositionEventDetails details)
+    {
+        Logger.DebugFormat("RemoveNotice: {0}", details.GridPosition);
     }
 }
