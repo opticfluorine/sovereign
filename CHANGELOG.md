@@ -4,6 +4,26 @@
 
 ### June
 
+#### 21 June 2024
+
+* I haven't been keeping up with commits or the changelog since things have been busy, but here's a sumamry of
+  changes made in the last eight days...
+* World Management: Add support for synchronizing individual block entities from server to client whenever they
+  change. Since the engine only conveys template IDs and positions during bulk transfer, the same limitation was
+  taken for individual block synchronization.
+* Block System: Add client-side support for receiving block updates as described above.
+* Block System: Fix issue where blocks were not being properly uncovered when a block was removed. This happened
+  due to an attempt to find the block position from the `Kinematics` component instead of the `BlockPosition`
+  component - this was missed when the two position components were split apart recently.
+* Chat: Added new admin commands `/addblock` and `/removeblock` for adding and removing single blocks. Useful
+  for testing, as well as for emergency situations where the entire world is deleted and you need one block to
+  start from. (Hopefully nobody ever runs into that, but you never know...)
+* Documentation: Added documentation for admin chat commands.
+* Housekeeping: I'm going back to committing directly to the `main` branch for the time being instead of using
+  pull requests. For the time being, since I'm the only contributor and the features being worked are relatively
+  large, it's less overhead to just work directly with `main`. I'll switch back to the feature branch/pull request
+  workflow once the project is a bit larger.
+
 #### 13 June 2024
 
 * Renderer: Fix issue where blocks were being rendered in the wrong position all along. This was revealed by the

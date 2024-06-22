@@ -30,23 +30,23 @@ namespace Sovereign.EngineCore.Systems.Block;
 public sealed class BlockManager
 {
     private readonly AboveBlockComponentCollection aboveBlocks;
-    private readonly BlockGridPositionIndexer blockPositions;
+    private readonly BlockGridPositionIndexer blockPositionIndexer;
+    private readonly BlockPositionComponentCollection blockPositions;
 
     private readonly IEntityFactory entityFactory;
     private readonly EntityManager entityManager;
-    private readonly KinematicComponentCollection kinematics;
 
     public BlockManager(IEntityFactory entityFactory,
         EntityManager entityManager,
-        BlockGridPositionIndexer blockPositions,
+        BlockGridPositionIndexer blockPositionIndexer,
         AboveBlockComponentCollection aboveBlocks,
-        KinematicComponentCollection kinematics)
+        BlockPositionComponentCollection blockPositions)
     {
         this.entityFactory = entityFactory;
         this.entityManager = entityManager;
-        this.blockPositions = blockPositions;
+        this.blockPositionIndexer = blockPositionIndexer;
         this.aboveBlocks = aboveBlocks;
-        this.kinematics = kinematics;
+        this.blockPositions = blockPositions;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -100,7 +100,7 @@ public sealed class BlockManager
         var pos = blockRecord.Position;
         var belowPos = new GridPosition(pos.X, pos.Y, pos.Z - 1);
 
-        var blocks = blockPositions.GetEntitiesAtPosition(belowPos);
+        var blocks = blockPositionIndexer.GetEntitiesAtPosition(belowPos);
         if (blocks == null) return;
 
         foreach (var belowBlock in blocks) aboveBlocks.AddComponent(belowBlock, entityId);
@@ -112,17 +112,16 @@ public sealed class BlockManager
     /// <param name="entityId">Block ID.</param>
     private void UncoverBelowBlock(ulong entityId)
     {
-        var pos = kinematics.GetComponentForEntity(entityId);
-        if (!pos.HasValue)
+        if (!blockPositions.HasComponentForEntity(entityId))
         {
             Logger.ErrorFormat("Block (Entity ID = {0}) has no position.", entityId);
             return;
         }
 
-        var gridPos = (GridPosition)pos.Value.Position;
-        var belowPos = new GridPosition(gridPos.X, gridPos.Y, gridPos.Z - 1);
+        var gridPos = blockPositions[entityId];
+        var belowPos = gridPos with { Z = gridPos.Z - 1 };
 
-        var belowBlocks = blockPositions.GetEntitiesAtPosition(belowPos);
+        var belowBlocks = blockPositionIndexer.GetEntitiesAtPosition(belowPos);
         if (belowBlocks == null) return;
 
         foreach (var belowBlockId in belowBlocks) aboveBlocks.RemoveComponent(belowBlockId);
@@ -139,7 +138,7 @@ public sealed class BlockManager
         var pos = blockRecord.Position;
         var abovePos = new GridPosition(pos.X, pos.Y, pos.Z + 1);
 
-        var blocks = blockPositions.GetEntitiesAtPosition(abovePos);
+        var blocks = blockPositionIndexer.GetEntitiesAtPosition(abovePos);
         if (blocks != null)
             aboveBlock = blocks.First();
         else

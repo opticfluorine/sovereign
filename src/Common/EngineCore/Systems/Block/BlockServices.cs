@@ -42,7 +42,7 @@ public class BlockServices
     /// <returns>true if the entity is a block, false otherwise.</returns>
     public bool IsEntityBlock(ulong entityId, bool lookback = false)
     {
-        return materials.HasComponentForEntity(entityId, lookback);
+        return materials.HasComponentForEntity(entityId, lookback) || materials.HasPendingComponentForEntity(entityId);
     }
 
     /// <summary>
