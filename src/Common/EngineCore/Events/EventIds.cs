@@ -427,5 +427,23 @@ public enum EventId
 
     #endregion Server_TemplateEntity
 
+    #region Server_WorldEdit
+
+    /// <summary>
+    ///     Requests that a block be set in a position using admin privileges. Sent by the client-side
+    ///     admin world editor.
+    /// </summary>
+    /// Associated details: BlockAddEventDetails
+    Server_WorldEdit_SetBlock = 200600,
+
+    /// <summary>
+    ///     Requests that a block be removed from a position using admin privileges. Sent by the client-side
+    ///     admin world editor.
+    /// </summary>
+    /// Associated details: GridPositionEventDetails
+    Server_WorldEdit_RemoveBlock = 200601,
+
+    #endregion
+
     #endregion Server
 }

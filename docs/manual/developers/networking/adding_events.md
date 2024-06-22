@@ -89,3 +89,14 @@ This configuration requires a number of changes:
    the entity ID in the details with the entity ID associated with the event
    server connection that received the event.
    :::
+7. If the event will be sent from client to server, and if the event should only
+   be accepted from certain players (e.g. an admin-only event), update
+   `PlayerFilterInboundPipelineStage` and add the appropriate filter function for
+   the new event.
+   :::{note}
+   This could also be accomplished by including the entity ID in the event details,
+   following step 6 above, and checking it in the systems. 
+   `PlayerFilterInboundPipelineStage` is the preferred solution as it eliminates
+   duplicate checks across multiple systems and reduces the risk of incorrectly
+   accepting a malicious event when a new system is added that consumes the event.
+   :::

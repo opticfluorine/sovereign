@@ -7,6 +7,10 @@
 #### 22 June 2024
 
 * Update README documentation to match latest.
+* Server Network: Add `PlayerFilterInboundPipelineStage` for applying pipeline-level filters to incoming
+  events based on the sending player. For example, this can allow for events to be restricted to admin players
+  only before the events reach the systems.
+* Documentation: Updated developer guide for new events to cover `PlayerFilterInboundPipelineStage` usage.
 
 #### 21 June 2024
 
