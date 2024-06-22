@@ -1,6 +1,6 @@
 # Sovereign MMORPG Engine - 2D Multiplayer RPG Engine
 
-[Website](https://sovereignengine.com)
+[Website](https://sovereignengine.com) | [Documentation (v0.3.0)](https://docs.sovereignengine.com) | [Discord](https://discord.gg/Mg2jUmePyx)
 
 Sovereign Engine is a 2.5D MMORPG engine with the 2D graphical style of classic RPGs
 together with a 3D voxel-based world. The world is highly dynamic and allows
@@ -96,12 +96,14 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 
 #### Chat Commands
 
-| Command      | Arguments  | Action                                                |
-|--------------|------------|-------------------------------------------------------|
-| /help        |            | List commands and their descriptions.                 |
-| /g           | message    | Broadcasts a message through global chat.             |
-| /addadmin    | playerName | Admin only. Grants admin role to the given player.    |
-| /removeadmin | playerName | Admin only. Revokes admin role from the given player. |
+| Command      | Arguments             | Action                                                |
+|--------------|-----------------------|-------------------------------------------------------|
+| /help        |                       | List commands and their descriptions.                 |
+| /g           | message               | Broadcasts a message through global chat.             |
+| /addadmin    | playerName            | Admin only. Grants admin role to the given player.    |
+| /removeadmin | playerName            | Admin only. Revokes admin role from the given player. |
+| /addblock    | x, y, z, templateName | Admin only. Adds a block at the given position.       |
+| /removeblock | x, y, z               | Admin only. Removes a block at the given position.    |
 
 ## Reporting Issues
 

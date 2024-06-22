@@ -4,9 +4,13 @@
 
 ### June
 
+#### 22 June 2024
+
+* Update README documentation to match latest.
+
 #### 21 June 2024
 
-* I haven't been keeping up with commits or the changelog since things have been busy, but here's a sumamry of
+* I haven't been keeping up with commits or the changelog since things have been busy, but here's a summary of
   changes made in the last eight days...
 * World Management: Add support for synchronizing individual block entities from server to client whenever they
   change. Since the engine only conveys template IDs and positions during bulk transfer, the same limitation was
