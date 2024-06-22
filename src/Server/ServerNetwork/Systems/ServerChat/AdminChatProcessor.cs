@@ -14,14 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Validators;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Player;
+using Sovereign.EngineCore.Systems.Block;
 using Sovereign.Persistence.Players;
 using Sovereign.ServerCore.Systems.ServerChat;
 using Sovereign.ServerCore.Systems.WorldManagement;
@@ -43,7 +47,20 @@ public class AdminChatProcessor : IChatProcessor
     /// </summary>
     private const string RemoveAdmin = "removeadmin";
 
+    /// <summary>
+    ///     Command name for /addblock.
+    /// </summary>
+    private const string AddBlock = "addblock";
+
+    /// <summary>
+    ///     Command name for /removeblock.
+    /// </summary>
+    private const string RemoveBlock = "removeblock";
+
     private readonly AdminTagCollection admins;
+    private readonly BlockController blockController;
+    private readonly BlockServices blockServices;
+    private readonly BlockTemplateNameComponentIndexer blockTemplateNames;
     private readonly IEventSender eventSender;
     private readonly ServerChatInternalController internalController;
     private readonly LoggingUtil loggingUtil;
@@ -58,7 +75,8 @@ public class AdminChatProcessor : IChatProcessor
         PlayerRoleCheck playerRoleCheck, PlayerNameComponentIndexer playerNameIndex,
         NameComponentValidator nameValidator, PersistencePlayerServices persistencePlayerServices,
         LoggingUtil loggingUtil, NameComponentCollection names, WorldManagementController worldManagementController,
-        IEventSender eventSender)
+        IEventSender eventSender, BlockController blockController, BlockServices blockServices,
+        BlockTemplateNameComponentIndexer blockTemplateNames)
     {
         this.admins = admins;
         this.internalController = internalController;
@@ -70,6 +88,9 @@ public class AdminChatProcessor : IChatProcessor
         this.names = names;
         this.worldManagementController = worldManagementController;
         this.eventSender = eventSender;
+        this.blockController = blockController;
+        this.blockServices = blockServices;
+        this.blockTemplateNames = blockTemplateNames;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -77,7 +98,9 @@ public class AdminChatProcessor : IChatProcessor
     public List<ChatCommand> MatchingCommands => new()
     {
         new ChatCommand { Command = AddAdmin, HelpSummary = "", IncludeInHelp = false },
-        new ChatCommand { Command = RemoveAdmin, HelpSummary = "", IncludeInHelp = false }
+        new ChatCommand { Command = RemoveAdmin, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = AddBlock, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = RemoveBlock, HelpSummary = "", IncludeInHelp = false }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)
@@ -99,6 +122,10 @@ public class AdminChatProcessor : IChatProcessor
             OnAddAdmin(message, senderEntityId);
         else if (command == RemoveAdmin)
             OnRemoveAdmin(message, senderEntityId);
+        else if (command == AddBlock)
+            OnAddBlock(message, senderEntityId);
+        else if (command == RemoveBlock)
+            OnRemoveBlock(message, senderEntityId);
     }
 
     /// <summary>
@@ -157,6 +184,7 @@ public class AdminChatProcessor : IChatProcessor
         {
             Logger.WarnFormat("{0} tried to remove own admin role; request denied.", playerName);
             internalController.SendSystemMessage("Cannot remove own admin role.", senderEntityId);
+            return;
         }
 
         // Check if the affected player is online.
@@ -176,5 +204,134 @@ public class AdminChatProcessor : IChatProcessor
         Logger.InfoFormat("Player {0} is no longer admin (or already was not); change made by {1}.", playerName,
             loggingUtil.FormatEntity(senderEntityId));
         internalController.SendSystemMessage($"Player {playerName} is no longer admin.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /addblock command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnAddBlock(string message, ulong senderEntityId)
+    {
+        var args = message.Split(' ', 4, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (args.Length != 4)
+        {
+            Logger.WarnFormat("{0} used /addblock with bad parameters.", loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("Usage: /addblock x y z (template_rel_id | template_name)",
+                senderEntityId);
+            return;
+        }
+
+        // Parse block position.
+        GridPosition blockPosition;
+        try
+        {
+            var x = int.Parse(args[0]);
+            var y = int.Parse(args[1]);
+            var z = int.Parse(args[2]);
+            blockPosition = new GridPosition { X = x, Y = y, Z = z };
+        }
+        catch (Exception)
+        {
+            Logger.WarnFormat("{0} used /addblock with bad coordinates.", loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("x, y, and z must be integers.", senderEntityId);
+            return;
+        }
+
+        // Parse template entity specification.
+        ulong templateEntityId = 0;
+        try
+        {
+            templateEntityId = EntityConstants.FirstTemplateEntityId + ulong.Parse(args[3]);
+            if (templateEntityId is not (>= EntityConstants.FirstTemplateEntityId
+                and <= EntityConstants.LastTemplateEntityId))
+            {
+                Logger.WarnFormat("{0} tried to use a non-template entity as template entity.",
+                    loggingUtil.FormatEntity(senderEntityId));
+                internalController.SendSystemMessage("template_rel_id must correspond to a template entity.",
+                    senderEntityId);
+                return;
+            }
+
+            if (!blockServices.IsEntityBlock(templateEntityId))
+            {
+                Logger.WarnFormat("{0} tried to use a non-block template entity for block creation.",
+                    loggingUtil.FormatEntity(senderEntityId));
+                internalController.SendSystemMessage("template_rel_id must correspond to a template entity.",
+                    senderEntityId);
+                return;
+            }
+        }
+        catch (Exception)
+        {
+            // If argument isn't a ulong, treat it as the name of a block template entity.
+            if (!blockTemplateNames.TryGetByName(args[3], out templateEntityId))
+            {
+                Logger.WarnFormat("{0} tried to add block type '{1}' which was not found.",
+                    loggingUtil.FormatEntity(senderEntityId), args[3]);
+                internalController.SendSystemMessage("Unrecognized block template name.", senderEntityId);
+                return;
+            }
+        }
+
+        // Check for block existence.
+        if (blockServices.BlockExistsAtPosition(blockPosition))
+        {
+            // Block already exists, can't add new.
+            Logger.WarnFormat("{0} tried to add block where one already exists.",
+                loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("Block already exists at requested position.", senderEntityId);
+            return;
+        }
+
+        // Add block.
+        blockController.AddBlock(eventSender, new BlockRecord
+        {
+            Position = blockPosition,
+            TemplateEntityId = templateEntityId
+        });
+    }
+
+    /// <summary>
+    ///     Handles the /removeblock command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnRemoveBlock(string message, ulong senderEntityId)
+    {
+        var args = message.Split(' ', 3);
+        if (args.Length != 3)
+        {
+            Logger.WarnFormat("{0} used /removeblock with bad parameters.", loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("Usage: /removeblock x y z",
+                senderEntityId);
+            return;
+        }
+
+        // Parse block position.
+        GridPosition blockPosition;
+        try
+        {
+            var x = int.Parse(args[0]);
+            var y = int.Parse(args[1]);
+            var z = int.Parse(args[2]);
+            blockPosition = new GridPosition { X = x, Y = y, Z = z };
+        }
+        catch (Exception)
+        {
+            Logger.WarnFormat("{0} used /addblock with bad coordinates.", loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("x, y, and z must be integers.", senderEntityId);
+            return;
+        }
+
+        if (!blockServices.BlockExistsAtPosition(blockPosition))
+        {
+            Logger.WarnFormat("{0} used /removeblock with no block at position.",
+                loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("No block at position.", senderEntityId);
+        }
+
+        // Remove block.
+        blockController.RemoveBlockAtPosition(eventSender, blockPosition);
     }
 }

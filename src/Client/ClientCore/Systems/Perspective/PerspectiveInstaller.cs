@@ -14,23 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.ClientCore.Systems.ClientState;
-using Sovereign.EngineCore.Events;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-namespace Sovereign.ClientCore.Events;
+namespace Sovereign.ClientCore.Systems.Perspective;
 
-/// <summary>
-///     Event details for updating a client state flag.
-/// </summary>
-public class ClientStateFlagEventDetails : IEventDetails
+public class PerspectiveInstaller : IWindsorInstaller
 {
-    /// <summary>
-    ///     Flag to be updated.
-    /// </summary>
-    public ClientStateFlag Flag { get; set; }
-
-    /// <summary>
-    ///     New value for the flag.
-    /// </summary>
-    public bool NewValue { get; set; }
+    public void Install(IWindsorContainer container, IConfigurationStore store)
+    {
+        container.Register(Component.For<PerspectiveLineManager>().LifestyleSingleton());
+        container.Register(Component.For<PerspectiveServices>().LifestyleSingleton());
+    }
 }

@@ -68,6 +68,12 @@ public class EngineBase : IEngineBase
         Startup();
         Logger.Info("EngineBase is started.");
 
+#if DEBUG
+        Logger.Warn("This is a DEBUG build of Sovereign Engine.");
+        Logger.Warn("Debug builds are NOT suitable for production use.");
+        Logger.Warn("Ensure that only Release builds are used in production.");
+#endif
+
         /* Run the engine. */
         RunEngine();
 

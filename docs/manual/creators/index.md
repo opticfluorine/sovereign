@@ -4,4 +4,5 @@ This section contains everything you need to know about creating games using Sov
 
 :::{toctree}
 resources/index.md
+admin/index.md
 :::

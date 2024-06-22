@@ -1,6 +1,6 @@
 ﻿/*
  * Sovereign Engine
- * Copyright (c) 2023 opticfluorine
+ * Copyright (c) 2018 opticfluorine
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,26 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.ClientCore.Network;
-using Sovereign.EngineCore.Events;
+using System.Collections.Generic;
 
-namespace Sovereign.ClientCore.Events;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Event details for a connection attempt.
+///     Event details for adding a batch of blocks at once.
 /// </summary>
-public sealed class BeginConnectionEventDetails : IEventDetails
+public sealed class BlockAddBatchEventDetails : IEventDetails
 {
-    public BeginConnectionEventDetails(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
-    {
-        ConnectionParameters = connectionParameters;
-        LoginParameters = loginParameters;
-    }
-
     /// <summary>
-    ///     Connection parameters to be used for the connection.
+    ///     Blocks to be added.
     /// </summary>
-    public ClientConnectionParameters ConnectionParameters { get; private set; }
-
-    public LoginParameters LoginParameters { get; private set; }
+    public List<BlockRecord> BlockRecords { get; set; } = new();
 }

@@ -37,6 +37,8 @@ public class ServerOutboundEventSet : IOutboundEventSet
         EventId.Core_WorldManagement_EntityLeaveWorldSegment,
         EventId.Core_Chat_Local,
         EventId.Core_Chat_Global,
-        EventId.Core_Chat_System
+        EventId.Core_Chat_System,
+        EventId.Core_Block_ModifyNotice,
+        EventId.Core_Block_RemoveNotice
     };
 }

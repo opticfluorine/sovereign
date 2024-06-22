@@ -28,10 +28,8 @@ public sealed class CameraInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(Component.For<CameraManager>()
-            .LifestyleSingleton());
-
-        container.Register(Component.For<CameraEventHandler>()
-            .LifestyleSingleton());
+        container.Register(Component.For<CameraManager>().LifestyleSingleton());
+        container.Register(Component.For<CameraEventHandler>().LifestyleSingleton());
+        container.Register(Component.For<CameraServices>().LifestyleSingleton());
     }
 }

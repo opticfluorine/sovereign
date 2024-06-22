@@ -87,9 +87,8 @@ public class EntityTable
     public void Add(ulong entityId, ulong templateEntityId, bool isBlock, bool isLoad)
     {
         if (Exists(entityId)) return;
-        var newAdd = new EntityAdd { EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock };
+        var newAdd = new EntityAdd { EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock, IsLoad = isLoad };
         pendingAdds.Add(ref newAdd);
-        if (!isLoad && templateEntityId > 0) OnTemplateSet?.Invoke(entityId, templateEntityId);
     }
 
     /// <summary>
@@ -120,6 +119,10 @@ public class EntityTable
                 nonBlockEntities.Add(entityId);
                 OnNonBlockEntityAdded?.Invoke(entityId);
             }
+
+            OnEntityAdded?.Invoke(entityId);
+            if (!pendingAdd.IsLoad && pendingAdd.TemplateEntityId > 0) 
+                OnTemplateSet?.Invoke(entityId, pendingAdd.TemplateEntityId);
         }
 
         // Removals.
@@ -131,6 +134,8 @@ public class EntityTable
                 nonBlockEntities.Remove(entityId);
                 OnNonBlockEntityRemoved?.Invoke(entityId);
             }
+
+            OnEntityRemoved?.Invoke(entityId);
         }
 
         // Reset pending sets.
@@ -162,6 +167,18 @@ public class EntityTable
             entityTemplates.Remove(entityId);
         OnTemplateSet?.Invoke(entityId, templateEntityId);
     }
+
+    /// <summary>
+    ///     Event invoked when an entity has been added.
+    ///     Parameter is entity ID.
+    /// </summary>
+    public event Action<ulong>? OnEntityAdded;
+
+    /// <summary>
+    ///     Event invoked when an entity has been removed.
+    ///     Parameter is entity ID.
+    /// </summary>
+    public event Action<ulong>? OnEntityRemoved;
 
     /// <summary>
     ///     Event invoked when a non-block entity has been added.
@@ -201,5 +218,10 @@ public class EntityTable
         ///     Flag indicating whether the new entity is a block entity.
         /// </summary>
         public bool IsBlock;
+
+        /// <summary>
+        ///     Flag indicating whether the new entity is loaded rather than created.
+        /// </summary>
+        public bool IsLoad;
     }
 }

@@ -15,34 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Text;
-using Sovereign.EngineCore.Components.Indexers;
+using MessagePack;
 
-namespace Sovereign.EngineCore.Systems.Block.Events;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Creation record for a single block.
+///     Event details for adding a single block.
 /// </summary>
-public struct BlockRecord
+[MessagePackObject]
+public sealed class BlockAddEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Block position.
+    ///     Block to be created.
     /// </summary>
-    public GridPosition Position;
-
-    /// <summary>
-    ///     Block template entity ID.
-    /// </summary>
-    public ulong TemplateEntityId;
-
-    public override string ToString()
-    {
-        var sb = new StringBuilder();
-        sb.Append('(')
-            .Append(Position.X).Append(", ")
-            .Append(Position.Y).Append(", ")
-            .Append(Position.Z).Append(", ")
-            .Append(TemplateEntityId).Append(')');
-        return sb.ToString();
-    }
+    [Key(0)]
+    public BlockRecord BlockRecord { get; set; }
 }

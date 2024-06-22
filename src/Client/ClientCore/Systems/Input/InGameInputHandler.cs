@@ -16,7 +16,7 @@
 
 using Castle.Core.Logging;
 using SDL2;
-using Sovereign.ClientCore.Events;
+using Sovereign.ClientCore.Events.Details;
 
 namespace Sovereign.ClientCore.Systems.Input;
 

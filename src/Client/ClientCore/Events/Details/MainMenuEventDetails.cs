@@ -17,7 +17,7 @@
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 
-namespace Sovereign.ClientCore.Events;
+namespace Sovereign.ClientCore.Events.Details;
 
 /// <summary>
 ///     Event details related to main menu state.

@@ -16,11 +16,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.World;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
@@ -43,7 +45,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         SingleEntityConnectionMapperFactory singleConnMapperFactory,
         EntityWorldSegmentConnectionMapperFactory entityWorldSegmentMapperFactory,
         WorldSegmentConnectionMapperFactory worldSegmentMapperFactory,
-        AccountServices accountServices)
+        AccountServices accountServices, WorldSegmentResolver resolver)
     {
         // Create delegate mappers.
         var worldSubEventMapper = singleConnMapperFactory.Create(evInfo =>
@@ -91,6 +93,18 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             return accountServices.GetConnectionIdForPlayer(details.TargetEntityId);
         });
 
+        var blockAddMapper = worldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not BlockAddEventDetails details) return new Maybe<GridPosition>();
+            return new Maybe<GridPosition>(resolver.GetWorldSegmentForPosition((Vector3)details.BlockRecord.Position));
+        });
+
+        var blockPosMapper = worldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not GridPositionEventDetails details) return new Maybe<GridPosition>();
+            return new Maybe<GridPosition>(resolver.GetWorldSegmentForPosition((Vector3)details.GridPosition));
+        });
+
         // Configure specific connection mappers.
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
@@ -103,6 +117,8 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Core_Chat_Local] = localChatMapper;
         specificMappers[EventId.Core_Chat_Global] = globalMapper;
         specificMappers[EventId.Core_Chat_System] = systemChatMapper;
+        specificMappers[EventId.Core_Block_ModifyNotice] = blockAddMapper;
+        specificMappers[EventId.Core_Block_RemoveNotice] = blockPosMapper;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

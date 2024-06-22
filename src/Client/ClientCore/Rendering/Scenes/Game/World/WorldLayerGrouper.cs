@@ -163,7 +163,7 @@ public sealed class WorldLayerGrouper
     {
         layerFront.FrontFaceTileSprites.Add(new PosVelId
         {
-            Position = drawable.Position,
+            Position = drawable.Position with { Y = drawable.Position.Y - 1.0f },
             Velocity = velocity,
             Id = materialSubtype.SideFaceTileSpriteId,
             EntityId = drawable.EntityId
@@ -185,12 +185,7 @@ public sealed class WorldLayerGrouper
             : materialSubtype.TopFaceTileSpriteId;
         layerTop.TopFaceTileSprites.Add(new PosVelId
         {
-            Position = new Vector3
-            {
-                X = drawable.Position.X,
-                Y = drawable.Position.Y,
-                Z = drawable.Position.Z - 1.0f
-            },
+            Position = drawable.Position,
             Velocity = velocity,
             Id = topFaceId,
             EntityId = drawable.EntityId

@@ -15,17 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using SDL2;
 using Sovereign.EngineCore.Events;
 
-namespace Sovereign.EngineCore.Systems.Block.Events;
+namespace Sovereign.ClientCore.Events.Details;
 
 /// <summary>
-///     Event details for adding a single block.
+///     Event details associated with a keyboard event.
 /// </summary>
-public sealed class BlockAddEventDetails : IEventDetails
+public class KeyEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Block to be created.
+    ///     Key whose state changed.
     /// </summary>
-    public BlockRecord BlockRecord { get; set; }
+    public SDL.SDL_Keycode Key { get; set; }
 }

@@ -18,7 +18,7 @@
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Authentication;
 
-namespace Sovereign.ClientCore.Events;
+namespace Sovereign.ClientCore.Events.Details;
 
 /// <summary>
 ///     Event details for continuing a connection attempt following authentication.

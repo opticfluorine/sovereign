@@ -84,6 +84,25 @@ public enum EventId
     /// Associated details: BlockRemoveBatchEventDetails
     Core_Block_RemoveBatch = 203,
 
+    /// <summary>
+    ///     Removes a block at a given grid position.
+    /// </summary>
+    /// Associated details: GridPositionEventDetails
+    Core_Block_RemoveAt = 204,
+
+    /// <summary>
+    ///     Notification that a single block has been created or modified. Used for server-to-client block
+    ///     synchronization.
+    /// </summary>
+    /// Associated details: BlockAddEventDetails
+    Core_Block_ModifyNotice = 205,
+
+    /// <summary>
+    ///     Notification that a single block has been removed. Used for server-to-client block synchronization.
+    /// </summary>
+    /// Associated details: GridPositionEventDetails
+    Core_Block_RemoveNotice = 206,
+
     #endregion Blocks
 
     #region Performance
@@ -205,10 +224,10 @@ public enum EventId
     Client_Input_KeyUp = 100001,
 
     /// <summary>
-    ///     Event sent to repeat an active movement keypress.
+    ///     Event sent when the mouse is moved.
     /// </summary>
-    /// Associated details: SequenceEventDetails
-    Client_Input_RepeatMove = 100002,
+    /// Associated details: MouseMotionEventDetails
+    Client_Input_MouseMotion = 100002,
 
     #endregion Client_Input
 

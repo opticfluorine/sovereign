@@ -117,6 +117,11 @@ public sealed class ClientNetworkManager : INetworkManager
         netListener.PeerDisconnectedEvent += NetListener_PeerDisconnectedEvent;
         netListener.NetworkReceiveEvent += NetListener_NetworkReceiveEvent;
         netListener.NetworkErrorEvent += NetListener_NetworkErrorEvent;
+
+#if DEBUG
+        // For debug builds only, max out the disconnect timeout so that connections survive a breakpoint.
+        netManager.DisconnectTimeout = int.MaxValue;
+#endif
     }
 
     /// <summary>

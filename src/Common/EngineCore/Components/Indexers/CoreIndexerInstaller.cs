@@ -36,5 +36,7 @@ public class CoreIndexerInstaller : IWindsorInstaller
         container.Register(Component.For<NonBlockPositionEventFilter>().LifestyleSingleton());
         container.Register(Component.For<NonBlockWorldSegmentIndexer>().LifestyleSingleton());
         container.Register(Component.For<BlockWorldSegmentIndexer>().LifestyleSingleton());
+        container.Register(Component.For<BlockTemplateNameComponentFilter>().LifestyleSingleton());
+        container.Register(Component.For<BlockTemplateNameComponentIndexer>().LifestyleSingleton());
     }
 }

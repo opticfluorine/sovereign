@@ -16,7 +16,7 @@
  */
 
 using Castle.Core.Logging;
-using Sovereign.ClientCore.Events;
+using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Network;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;

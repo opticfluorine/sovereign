@@ -16,6 +16,7 @@
  */
 
 using System.Numerics;
+using Sovereign.ClientCore.Rendering;
 using Sovereign.EngineCore.Components;
 
 namespace Sovereign.ClientCore.Systems.Camera;
@@ -25,11 +26,13 @@ namespace Sovereign.ClientCore.Systems.Camera;
 /// </summary>
 public sealed class CameraManager
 {
+    private readonly DrawableLookup drawableLookup;
     private readonly KinematicComponentCollection kinematics;
 
-    public CameraManager(KinematicComponentCollection kinematics)
+    public CameraManager(KinematicComponentCollection kinematics, DrawableLookup drawableLookup)
     {
         this.kinematics = kinematics;
+        this.drawableLookup = drawableLookup;
     }
 
     /// <summary>
@@ -66,15 +69,18 @@ public sealed class CameraManager
             /* Zero the velocity so the camera doesn't drift from interpolation. */
             Velocity = Vector3.Zero;
         }
-        else
+        else if (kinematics.HasComponentForEntity(TrackingEntityId))
         {
             /* Match position and velocity with the target entity. */
-            var targetKinematics = kinematics.GetComponentForEntity(TrackingEntityId);
-            if (targetKinematics.HasValue)
+            var targetKinematics = kinematics[TrackingEntityId];
+            var halfEntityExtent = drawableLookup.GetEntityDrawableSizeWorld(TrackingEntityId) * 0.5f;
+
+            Position = targetKinematics.Position with
             {
-                Position = targetKinematics.Value.Position;
-                Velocity = targetKinematics.Value.Velocity;
-            }
+                X = targetKinematics.Position.X + halfEntityExtent.X,
+                Y = targetKinematics.Position.Y - halfEntityExtent.Y
+            };
+            Velocity = targetKinematics.Velocity;
         }
     }
 

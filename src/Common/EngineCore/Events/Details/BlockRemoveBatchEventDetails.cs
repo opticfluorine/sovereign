@@ -15,18 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using SDL2;
-using Sovereign.EngineCore.Events;
+using System.Collections.Generic;
 
-namespace Sovereign.ClientCore.Events;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Event details associated with a keyboard event.
+///     Event details for removing a batch of blocks at once.
 /// </summary>
-public class KeyEventDetails : IEventDetails
+public sealed class BlockRemoveBatchEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Key whose state changed.
+    ///     List of block entity IDs to remove.
     /// </summary>
-    public SDL.SDL_Keycode Key { get; set; }
+    public List<ulong> EntityIds { get; set; } = new();
 }
