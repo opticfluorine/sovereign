@@ -29,6 +29,7 @@ Client systems are only present in the client.
 | `EntityAnimation`       | `EntityAnimationSystem`       | Responsible for managing entity animation phases.                         |
 | `EntitySynchronization` | `EntitySynchronizationSystem` | Responsible for non-block entity synchronization in the client.           |
 | `Input`                 | `InputSystem`                 | Responsible for responding to user input (keyboard, mouse, gamepad, etc). |
+| `Perspective`           | `PerspectiveSystem`           | Responsible for tracking positioned entities on perspective lines.        |
 
 ## Server Systems
 
@@ -42,4 +43,5 @@ Server systems are only present in the server.
 | `ServerManagement` | `ServerManagementSystem` | Responsible for managing the engine in its server configuration.  |
 | `ServerNetwork`    | `ServerNetworkSystem`    | Responsible for managing server network resources.                |
 | `TemplateEntity`   | `TemplateEntitySystem`   | Responsible for server-side management of template entities.      |
+| `WorldEdit`        | `WorldEditSystem`        | Responsible for server-side world editor processing.              |
 | `WorldManagement`  | `WorldManagementSystem`  | Responsible for managing the in-memory lifecycle of all entities. |

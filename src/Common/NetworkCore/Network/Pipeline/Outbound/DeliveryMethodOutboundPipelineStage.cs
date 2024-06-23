@@ -48,7 +48,9 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Core_Chat_System, DeliveryMethod.Unreliable },
         { EventId.Server_TemplateEntity_Update, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Block_ModifyNotice, DeliveryMethod.ReliableOrdered },
-        { EventId.Core_Block_RemoveNotice, DeliveryMethod.ReliableOrdered }
+        { EventId.Core_Block_RemoveNotice, DeliveryMethod.ReliableOrdered },
+        { EventId.Server_WorldEdit_SetBlock, DeliveryMethod.ReliableUnordered },
+        { EventId.Server_WorldEdit_RemoveBlock, DeliveryMethod.ReliableUnordered }
     };
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

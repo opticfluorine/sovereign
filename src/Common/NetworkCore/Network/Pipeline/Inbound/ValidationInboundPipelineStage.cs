@@ -65,7 +65,9 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Chat_System, systemChatValidator },
             { EventId.Server_TemplateEntity_Update, entityDefinitionValidator },
             { EventId.Core_Block_ModifyNotice, blockAddValidator },
-            { EventId.Core_Block_RemoveNotice, gridPositionValidator }
+            { EventId.Core_Block_RemoveNotice, gridPositionValidator },
+            { EventId.Server_WorldEdit_SetBlock, blockAddValidator },
+            { EventId.Server_WorldEdit_RemoveBlock, gridPositionValidator }
         };
     }
 

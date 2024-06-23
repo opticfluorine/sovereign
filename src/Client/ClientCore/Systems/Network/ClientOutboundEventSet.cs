@@ -31,6 +31,8 @@ public class ClientOutboundEventSet : IOutboundEventSet
         EventId.Core_Movement_RequestMove,
         EventId.Core_Network_Logout,
         EventId.Core_Chat_Send,
-        EventId.Server_TemplateEntity_Update
+        EventId.Server_TemplateEntity_Update,
+        EventId.Server_WorldEdit_SetBlock,
+        EventId.Server_WorldEdit_RemoveBlock
     };
 }
