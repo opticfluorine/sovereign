@@ -19,6 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using SDL2;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Systems.Input;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Events;
@@ -76,6 +77,18 @@ public class SDLEventAdapter : IEventAdapter
                 case SDL.SDL_EventType.SDL_MOUSEMOTION:
                     ev = AdaptSdlMouseMotion(sdlEv);
                     break;
+
+                case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                    ev = AdaptSdlMouseDown(sdlEv);
+                    break;
+
+                case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
+                    ev = AdaptSdlMouseUp(sdlEv);
+                    break;
+
+                case SDL.SDL_EventType.SDL_MOUSEWHEEL:
+                    ev = AdaptSdlMouseWheel(sdlEv);
+                    break;
             }
         }
 
@@ -127,5 +140,63 @@ public class SDLEventAdapter : IEventAdapter
             Y = sdlEv.motion.y
         };
         return new Event(EventId.Client_Input_MouseMotion, details);
+    }
+
+    /// <summary>
+    ///     Adapts a SDL_MOUSEBUTTONDOWN event.
+    /// </summary>
+    /// <param name="sdlEv">SDL event.</param>
+    /// <returns>Internal event.</returns>
+    private Event AdaptSdlMouseDown(SDL.SDL_Event sdlEv)
+    {
+        var details = new MouseButtonEventDetails
+        {
+            Button = MapMouseButton(sdlEv.button.button)
+        };
+        return new Event(EventId.Client_Input_MouseDown, details);
+    }
+
+    /// <summary>
+    ///     Adapts a SDL_MOUSEBUTTONUP event.
+    /// </summary>
+    /// <param name="sdlEv">SDL event.</param>
+    /// <returns>Internal event.</returns>
+    private Event AdaptSdlMouseUp(SDL.SDL_Event sdlEv)
+    {
+        var details = new MouseButtonEventDetails
+        {
+            Button = MapMouseButton(sdlEv.button.button)
+        };
+        return new Event(EventId.Client_Input_MouseUp, details);
+    }
+
+    /// <summary>
+    ///     Adapts a SDL_MOUSEWHEEL event.
+    /// </summary>
+    /// <param name="sdlEv">SDL event.</param>
+    /// <returns>Internal event.</returns>
+    private Event AdaptSdlMouseWheel(SDL.SDL_Event sdlEv)
+    {
+        var details = new MouseWheelEventDetails
+        {
+            ScrollAmount = sdlEv.wheel.preciseY
+        };
+        return new Event(EventId.Client_Input_MouseWheel, details);
+    }
+
+    /// <summary>
+    ///     Maps a SDL mouse button enum to the internal MouseButton enum.
+    /// </summary>
+    /// <param name="button">SDL button.</param>
+    /// <returns>Corresponding MouseButton value.</returns>
+    private MouseButton MapMouseButton(uint button)
+    {
+        return button switch
+        {
+            SDL.SDL_BUTTON_LEFT => MouseButton.Left,
+            SDL.SDL_BUTTON_MIDDLE => MouseButton.Middle,
+            SDL.SDL_BUTTON_RIGHT => MouseButton.Right,
+            _ => MouseButton.Other
+        };
     }
 }

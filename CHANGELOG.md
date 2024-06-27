@@ -4,6 +4,12 @@
 
 ### June
 
+#### 26 June 2024
+
+* Input: Add adapters for more mouse-related SDL events (button up, button down, scrolling).
+* Network: Update Litenetlib to 1.2.0. For some reason Dependabot has not been catching these
+  updates.
+
 #### 22 June 2024
 
 * Update README documentation to match latest.

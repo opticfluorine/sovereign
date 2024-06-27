@@ -14,9 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.ClientCore.Systems.Input;
+using Sovereign.EngineCore.Events;
+
 namespace Sovereign.ClientCore.Events.Details;
 
-public class MouseButtonEventDetails
+/// <summary>
+///     Event details for events related to mouse buttons.
+/// </summary>
+public class MouseButtonEventDetails : IEventDetails
 {
-    
+    /// <summary>
+    ///     Mouse button.
+    /// </summary>
+    public MouseButton Button;
 }

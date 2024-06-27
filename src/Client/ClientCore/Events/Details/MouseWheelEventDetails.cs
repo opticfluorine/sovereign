@@ -14,9 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Events;
+
 namespace Sovereign.ClientCore.Events.Details;
 
-public class MouseWheelEventDetails
+/// <summary>
+///     Event details describing a vertical mouse scrolling event.
+/// </summary>
+public class MouseWheelEventDetails : IEventDetails
 {
-    
+    /// <summary>
+    ///     Amount scrolled. Positive denotes vertical scrolling "up" (away from user), negative denotes
+    ///     vertical scrolling down.
+    /// </summary>
+    public float ScrollAmount;
 }

@@ -229,6 +229,24 @@ public enum EventId
     /// Associated details: MouseMotionEventDetails
     Client_Input_MouseMotion = 100002,
 
+    /// <summary>
+    ///     Event sent when a mouse button is pressed.
+    /// </summary>
+    /// Associated details: MouseButtonEventDetails
+    Client_Input_MouseDown = 100003,
+
+    /// <summary>
+    ///     Event sent when a mouse button is released.
+    /// </summary>
+    /// Associated details: MouseButtonEventDetails
+    Client_Input_MouseUp = 100004,
+
+    /// <summary>
+    ///     Event sent when the mouse wheel is scrolled.
+    /// </summary>
+    /// Associated details: MouseWheelEventDetails
+    Client_Input_MouseWheel = 100005,
+
     #endregion Client_Input
 
     #region Client_Camera
