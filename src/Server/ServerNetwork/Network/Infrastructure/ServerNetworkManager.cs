@@ -199,7 +199,7 @@ public sealed class ServerNetworkManager : INetworkManager
             // Log error.
             var sb = new StringBuilder();
             sb.Append("Error receiving from ")
-                .Append(peer.EndPoint)
+                .Append(peer.Address)
                 .Append(".");
             Logger.Error(sb.ToString(), e);
 
@@ -261,13 +261,13 @@ public sealed class ServerNetworkManager : INetworkManager
             connectionManager.RemoveConnection(peer.Id);
             networkController.ClientDisconnected(eventSender, peer.Id);
             Logger.InfoFormat("Connection closed from {0}.",
-                peer.EndPoint.ToString());
+                peer.Address);
         }
         catch (Exception e)
         {
             var sb = new StringBuilder();
             sb.Append("Error removing closed connection from ")
-                .Append(peer.EndPoint).Append(".");
+                .Append(peer.Address).Append(".");
             Logger.Error(sb.ToString(), e);
         }
     }
