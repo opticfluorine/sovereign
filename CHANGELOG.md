@@ -4,6 +4,10 @@
 
 ### June
 
+#### 28 June 2024
+
+* Input: Export keyboard and mouse state through `InputServices` to be consumed by scene processing code.
+
 #### 26 June 2024
 
 * Input: Add adapters for more mouse-related SDL events (button up, button down, scrolling).

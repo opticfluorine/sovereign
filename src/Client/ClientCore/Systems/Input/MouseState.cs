@@ -30,6 +30,27 @@ public class MouseState
     public Vector2 MousePosition { get; private set; }
 
     /// <summary>
+    ///     If true, indicates the left mouse button is pressed down.
+    /// </summary>
+    public bool IsLeftButtonDown { get; private set; }
+
+    /// <summary>
+    ///     If true, indicates the middle mouse button is pressed down.
+    /// </summary>
+    public bool IsMiddleButtonDown { get; private set; }
+
+    /// <summary>
+    ///     If true, indicates the right mouse button is pressed down.
+    /// </summary>
+    public bool IsRightButtonDown { get; private set; }
+
+    /// <summary>
+    ///     Cumulative amount the mouse wheel has scrolled since start. Positive is scroll up, negative
+    ///     is scroll down.
+    /// </summary>
+    public float TotalScrollAmount { get; private set; }
+
+    /// <summary>
     ///     Updates the mouse position.
     /// </summary>
     /// <param name="x">Mouse x position relative to window.</param>
@@ -37,5 +58,37 @@ public class MouseState
     public void UpdateMousePosition(int x, int y)
     {
         MousePosition = new Vector2(x, y);
+    }
+
+    /// <summary>
+    ///     Updates mouse button state.
+    /// </summary>
+    /// <param name="button">Button.</param>
+    /// <param name="isDown">true if mouse button is down, false if mouse button is up.</param>
+    public void SetButtonState(MouseButton button, bool isDown)
+    {
+        switch (button)
+        {
+            case MouseButton.Left:
+                IsLeftButtonDown = isDown;
+                break;
+
+            case MouseButton.Middle:
+                IsMiddleButtonDown = isDown;
+                break;
+
+            case MouseButton.Right:
+                IsRightButtonDown = isDown;
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Updates the scroll wheel cumulative scroll.
+    /// </summary>
+    /// <param name="amount">Relative amount scrolled (positive is up, negative is down).</param>
+    public void UpdateWheel(float amount)
+    {
+        TotalScrollAmount += amount;
     }
 }

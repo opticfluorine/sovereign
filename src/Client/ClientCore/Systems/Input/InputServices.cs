@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
+using SDL2;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -23,11 +24,13 @@ namespace Sovereign.ClientCore.Systems.Input;
 /// </summary>
 public class InputServices
 {
+    private readonly KeyboardState keyboardState;
     private readonly MouseState mouseState;
 
-    public InputServices(MouseState mouseState)
+    public InputServices(MouseState mouseState, KeyboardState keyboardState)
     {
         this.mouseState = mouseState;
+        this.keyboardState = keyboardState;
     }
 
     /// <summary>
@@ -41,5 +44,40 @@ public class InputServices
     public Vector2 GetMousePosition()
     {
         return mouseState.MousePosition;
+    }
+
+    /// <summary>
+    ///     Gets whether the given mouse button is pressed down.
+    /// </summary>
+    /// <param name="button">Mouse button.</param>
+    /// <returns>true if button is pressed down, false otherwise.</returns>
+    public bool IsMouseButtonDown(MouseButton button)
+    {
+        return button switch
+        {
+            MouseButton.Left => mouseState.IsLeftButtonDown,
+            MouseButton.Middle => mouseState.IsMiddleButtonDown,
+            MouseButton.Right => mouseState.IsRightButtonDown,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    ///     Gets the cumulative change in mouse wheel position since engine startup.
+    /// </summary>
+    /// <returns>Wheel change (positive is scroll up, negative is scroll down).</returns>
+    public float GetCumulativeMouseScroll()
+    {
+        return mouseState.TotalScrollAmount;
+    }
+
+    /// <summary>
+    ///     Gets whether the given keyboard key is pressed down.
+    /// </summary>
+    /// <param name="keycode">Key.</param>
+    /// <returns>true if key is pressed, false otherwise.</returns>
+    public bool IsKeyDown(SDL.SDL_Keycode keycode)
+    {
+        return keyboardState[keycode];
     }
 }

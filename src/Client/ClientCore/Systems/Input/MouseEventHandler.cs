@@ -51,8 +51,44 @@ public class MouseEventHandler
                 }
 
                 HandleMouseMotionEvent(details);
-            }
                 break;
+            }
+
+            case EventId.Client_Input_MouseUp:
+            {
+                if (ev.EventDetails is not MouseButtonEventDetails details)
+                {
+                    Logger.Error("Received MouseUp event without details.");
+                    break;
+                }
+
+                HandleMouseButtonUpEvent(details);
+                break;
+            }
+
+            case EventId.Client_Input_MouseDown:
+            {
+                if (ev.EventDetails is not MouseButtonEventDetails details)
+                {
+                    Logger.Error("Received MouseDown event without details.");
+                    break;
+                }
+
+                HandleMouseButtonDownEvent(details);
+                break;
+            }
+
+            case EventId.Client_Input_MouseWheel:
+            {
+                if (ev.EventDetails is not MouseWheelEventDetails details)
+                {
+                    Logger.Error("Received MouseWheel event without details.");
+                    break;
+                }
+
+                HandleMouseWheelEvent(details);
+                break;
+            }
         }
     }
 
@@ -63,5 +99,32 @@ public class MouseEventHandler
     private void HandleMouseMotionEvent(MouseMotionEventDetails details)
     {
         mouseState.UpdateMousePosition(details.X, details.Y);
+    }
+
+    /// <summary>
+    ///     Handles a mouse button down event.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandleMouseButtonDownEvent(MouseButtonEventDetails details)
+    {
+        mouseState.SetButtonState(details.Button, true);
+    }
+
+    /// <summary>
+    ///     Handles a mouse button up event.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandleMouseButtonUpEvent(MouseButtonEventDetails details)
+    {
+        mouseState.SetButtonState(details.Button, false);
+    }
+
+    /// <summary>
+    ///     Handles a mouse wheel event.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void HandleMouseWheelEvent(MouseWheelEventDetails details)
+    {
+        mouseState.UpdateWheel(details.ScrollAmount);
     }
 }
