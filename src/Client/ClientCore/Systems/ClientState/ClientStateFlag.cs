@@ -68,5 +68,10 @@ public enum ClientStateFlag
     /// <summary>
     ///     Flag indicating that the in-game template entity editor window should be displayed.
     /// </summary>
-    ShowTemplateEntityEditor
+    ShowTemplateEntityEditor,
+
+    /// <summary>
+    ///     Flag indicating that the game is in world edit mode.
+    /// </summary>
+    WorldEditMode
 }

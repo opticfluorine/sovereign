@@ -47,6 +47,10 @@ public class InGameInputHandler : IInputHandler
             case SDL.SDL_Keycode.SDLK_DOWN:
             case SDL.SDL_Keycode.SDLK_LEFT:
             case SDL.SDL_Keycode.SDLK_RIGHT:
+            case SDL.SDL_Keycode.SDLK_w:
+            case SDL.SDL_Keycode.SDLK_a:
+            case SDL.SDL_Keycode.SDLK_s:
+            case SDL.SDL_Keycode.SDLK_d:
                 HandleDirectionKeyEvent(oldState, !isKeyUp);
                 break;
 
@@ -63,9 +67,10 @@ public class InGameInputHandler : IInputHandler
     {
         /* Only update movement if the state has changed. */
         if (oldState != newState)
-            playerInputMovementMapper.UpdateMovement(keyboardState[SDL.SDL_Keycode.SDLK_UP],
-                keyboardState[SDL.SDL_Keycode.SDLK_DOWN],
-                keyboardState[SDL.SDL_Keycode.SDLK_LEFT],
-                keyboardState[SDL.SDL_Keycode.SDLK_RIGHT]);
+            playerInputMovementMapper.UpdateMovement(
+                keyboardState[SDL.SDL_Keycode.SDLK_UP] || keyboardState[SDL.SDL_Keycode.SDLK_w],
+                keyboardState[SDL.SDL_Keycode.SDLK_DOWN] || keyboardState[SDL.SDL_Keycode.SDLK_s],
+                keyboardState[SDL.SDL_Keycode.SDLK_LEFT] || keyboardState[SDL.SDL_Keycode.SDLK_a],
+                keyboardState[SDL.SDL_Keycode.SDLK_RIGHT] || keyboardState[SDL.SDL_Keycode.SDLK_d]);
     }
 }

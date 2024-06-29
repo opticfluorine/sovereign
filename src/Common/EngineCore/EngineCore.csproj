@@ -13,7 +13,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Systems\Block\Events\" />
         <Folder Include="Systems\WorldManagement\Components\Indexers\"/>
     </ItemGroup>
 
