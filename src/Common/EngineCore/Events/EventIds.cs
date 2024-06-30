@@ -247,6 +247,13 @@ public enum EventId
     /// Associated details: MouseWheelEventDetails
     Client_Input_MouseWheel = 100005,
 
+    /// <summary>
+    ///     Event sent by the Input system when the mouse scrolls a full "tick".
+    ///     A value of true indicates a tick up, a value of false indicates a tick down.
+    /// </summary>
+    /// Associated details: BooleanEventDetails
+    Client_Input_MouseWheelTick = 100006,
+
     #endregion Client_Input
 
     #region Client_Camera

@@ -37,6 +37,7 @@ public class InputInstaller : IWindsorInstaller
         container.Register(Component.For<GlobalKeyboardShortcuts>().LifestyleSingleton());
         container.Register(Component.For<InGameKeyboardShortcuts>().LifestyleSingleton());
         container.Register(Component.For<InputServices>().LifestyleSingleton());
+        container.Register(Component.For<InputInternalController>().LifestyleSingleton());
         container.Register(EngineClasses.EngineAssemblies()
             .BasedOn<IInputHandler>()
             .WithServiceSelf()

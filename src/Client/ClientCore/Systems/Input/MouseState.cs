@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Numerics;
+using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -23,6 +25,25 @@ namespace Sovereign.ClientCore.Systems.Input;
 /// </summary>
 public class MouseState
 {
+    /// <summary>
+    ///     Amount of scroll to produce a scroll tick event.
+    /// </summary>
+    private const float ScrollTickThreshold = 1.0f;
+
+    private readonly IEventSender eventSender;
+    private readonly InputInternalController internalController;
+
+    /// <summary>
+    ///     Scroll wheel position for the last scroll tick.
+    /// </summary>
+    private float lastScrollTick;
+
+    public MouseState(InputInternalController internalController, IEventSender eventSender)
+    {
+        this.internalController = internalController;
+        this.eventSender = eventSender;
+    }
+
     /// <summary>
     ///     Latest known mouse position in screen coordinates (pixels) relative to the window.
     ///     May not be the true mouse position if the GUI is intercepting mouse events.
@@ -90,5 +111,16 @@ public class MouseState
     public void UpdateWheel(float amount)
     {
         TotalScrollAmount += amount;
+
+        // Check if tick threshold exceeded in either direction.
+        var delta = TotalScrollAmount - lastScrollTick;
+        while (Math.Abs(delta) > ScrollTickThreshold)
+        {
+            internalController.AnnounceScrollTick(eventSender, delta > 0.0f);
+
+            var step = Math.Sign(delta) * ScrollTickThreshold;
+            lastScrollTick += step;
+            delta -= step;
+        }
     }
 }

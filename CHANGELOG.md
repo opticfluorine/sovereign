@@ -4,6 +4,11 @@
 
 ### June
 
+#### 29 June 2024
+
+* Input: Allow use of WASD keys for movement in addition to the arrow keys.
+* Input: Publish events whenever the mouse wheel is scrolled by a fixed interval.
+
 #### 28 June 2024
 
 * Input: Export keyboard and mouse state through `InputServices` to be consumed by scene processing code.
