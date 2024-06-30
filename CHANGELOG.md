@@ -8,6 +8,8 @@
 
 * Input: Allow use of WASD keys for movement in addition to the arrow keys.
 * Input: Publish events whenever the mouse wheel is scrolled by a fixed interval.
+* ClientWorldEdit: New system for client-side world editing. Currently tracks state and makes changes
+  based on keyboard and mouse inputs.
 
 #### 28 June 2024
 

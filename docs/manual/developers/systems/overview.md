@@ -26,6 +26,7 @@ Client systems are only present in the client.
 | `ClientChat`            | `ClientChatSystem`            | Responsible for managing chat functions in the client.                    |
 | `ClientNetwork`         | `ClientNetworkSystem`         | Responsible for managing the client-side network connection.              |
 | `ClientState`           | `ClientStateSystem`           | Responsible for managing the top-level client state machine.              |
+| `ClientWorldEdit`       | `ClientWorldEditSystem`       | Responsible for managing the client-side world editor.                    |
 | `EntityAnimation`       | `EntityAnimationSystem`       | Responsible for managing entity animation phases.                         |
 | `EntitySynchronization` | `EntitySynchronizationSystem` | Responsible for non-block entity synchronization in the client.           |
 | `Input`                 | `InputSystem`                 | Responsible for responding to user input (keyboard, mouse, gamepad, etc). |
