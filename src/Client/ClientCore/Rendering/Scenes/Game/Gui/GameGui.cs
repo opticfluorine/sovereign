@@ -16,6 +16,7 @@
 
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Player;
 
@@ -33,9 +34,11 @@ public class GameGui
     private readonly PlayerRoleCheck roleCheck;
     private readonly ClientStateServices stateServices;
     private readonly TemplateEditorGui templateEditorGui;
+    private readonly WorldEditorGui worldEditorGui;
 
     public GameGui(ClientStateServices stateServices, PlayerDebugGui playerDebugGui, EntityDebugGui entityDebugGui,
-        InGameMenuGui menuGui, ChatGui chatGui, TemplateEditorGui templateEditorGui, PlayerRoleCheck roleCheck)
+        InGameMenuGui menuGui, ChatGui chatGui, TemplateEditorGui templateEditorGui, PlayerRoleCheck roleCheck,
+        WorldEditorGui worldEditorGui)
     {
         this.stateServices = stateServices;
         this.playerDebugGui = playerDebugGui;
@@ -44,6 +47,7 @@ public class GameGui
         this.chatGui = chatGui;
         this.templateEditorGui = templateEditorGui;
         this.roleCheck = roleCheck;
+        this.worldEditorGui = worldEditorGui;
     }
 
     /// <summary>
@@ -76,5 +80,6 @@ public class GameGui
             !roleCheck.IsPlayerAdmin(playerEntityId)) return;
 
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowTemplateEntityEditor)) templateEditorGui.Render();
+        if (stateServices.GetStateFlagValue(ClientStateFlag.WorldEditMode)) worldEditorGui.Render();
     }
 }

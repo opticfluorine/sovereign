@@ -48,7 +48,7 @@ public class ClientWorldEditState
     /// <summary>
     ///     Selected material.
     /// </summary>
-    public int Material { get; private set; }
+    public int Material { get; private set; } = 1;
 
     /// <summary>
     ///     Selected material modifier.

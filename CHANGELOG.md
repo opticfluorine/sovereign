@@ -2,6 +2,12 @@
 
 ## 2024
 
+### July
+
+#### 12 July 2024
+
+* Client: Add simple GUI for world editor.
+
 ### June
 
 #### 29 June 2024

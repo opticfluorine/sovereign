@@ -14,32 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-/// <summary>
-///     Public read API for the client-side world editor system.
-/// </summary>
-public class ClientWorldEditServices
+namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
+
+public class WorldEditorGuiInstaller : IWindsorInstaller
 {
-    private readonly ClientWorldEditState state;
-
-    public ClientWorldEditServices(ClientWorldEditState state)
+    public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        this.state = state;
+        container.Register(Component.For<WorldEditorGui>().LifestyleSingleton());
     }
-
-    /// <summary>
-    ///     Selected material ID.
-    /// </summary>
-    public int Material => state.Material;
-
-    /// <summary>
-    ///     Selected modifier ID.
-    /// </summary>
-    public int MaterialModifier => state.MaterialModifier;
-
-    /// <summary>
-    ///     Z offset relative to camera to use for world editing.
-    /// </summary>
-    public int ZOffset => state.ZOffset;
 }
