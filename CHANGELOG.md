@@ -4,6 +4,10 @@
 
 ### July
 
+#### 13 July 2024
+
+* Input: Listen for mouse scroll events.
+
 #### 12 July 2024
 
 * Client: Add simple GUI for world editor.

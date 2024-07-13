@@ -16,6 +16,7 @@
 
 using System;
 using System.Numerics;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Systems.Input;
@@ -43,6 +44,8 @@ public class MouseState
         this.internalController = internalController;
         this.eventSender = eventSender;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Latest known mouse position in screen coordinates (pixels) relative to the window.
@@ -114,8 +117,10 @@ public class MouseState
 
         // Check if tick threshold exceeded in either direction.
         var delta = TotalScrollAmount - lastScrollTick;
+        Logger.DebugFormat("Scroll by {0}, total {1}, delta {2}.", amount, TotalScrollAmount, delta);
         while (Math.Abs(delta) > ScrollTickThreshold)
         {
+            Logger.Debug("Scroll tick.");
             internalController.AnnounceScrollTick(eventSender, delta > 0.0f);
 
             var step = Math.Sign(delta) * ScrollTickThreshold;
