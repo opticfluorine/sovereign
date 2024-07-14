@@ -50,7 +50,9 @@ public class ClientWorldEditSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
-        EventId.Client_Input_MouseWheelTick
+        EventId.Client_Input_MouseWheelTick,
+        EventId.Client_WorldEdit_SetMaterial,
+        EventId.Client_WorldEdit_SetZOffset
     };
 
     public int WorkloadEstimate { get; } = 5;
@@ -89,6 +91,30 @@ public class ClientWorldEditSystem : ISystem
                     }
 
                     state.OnScrollTick(details.Value);
+                    break;
+                }
+
+                case EventId.Client_WorldEdit_SetMaterial:
+                {
+                    if (ev.EventDetails is not MaterialPairEventDetails details)
+                    {
+                        Logger.Warn("Received SetMaterial without details.");
+                        break;
+                    }
+
+                    state.SetMaterialData(details.MaterialPair);
+                    break;
+                }
+
+                case EventId.Client_WorldEdit_SetZOffset:
+                {
+                    if (ev.EventDetails is not GenericEventDetails<int> details)
+                    {
+                        Logger.Warn("Received SetZOffset without details.");
+                        break;
+                    }
+
+                    state.SetZOffset(details.Value);
                     break;
                 }
             }

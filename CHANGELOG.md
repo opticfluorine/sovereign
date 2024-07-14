@@ -4,6 +4,11 @@
 
 ### July
 
+#### 14 July 2024
+
+* World Editor: Add editable controls to GUI for users who do not have a mouse scroll wheel (or prefer
+  not to use one).
+
 #### 13 July 2024
 
 * Input: Listen for mouse scroll events.

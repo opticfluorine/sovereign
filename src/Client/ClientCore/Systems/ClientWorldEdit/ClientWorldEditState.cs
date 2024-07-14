@@ -18,6 +18,7 @@ using System;
 using SDL2;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Systems.Input;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 
@@ -26,16 +27,6 @@ namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 /// </summary>
 public class ClientWorldEditState
 {
-    /// <summary>
-    ///     Minimum value of Z offset.
-    /// </summary>
-    private const int MinZOffset = -10;
-
-    /// <summary>
-    ///     Maximum value of Z offset.
-    /// </summary>
-    private const int MaxZOffset = 10;
-
     private readonly InputServices inputServices;
     private readonly MaterialManager materialManager;
 
@@ -73,7 +64,8 @@ public class ClientWorldEditState
         if (ctrlPressed)
         {
             // Z offset scroll.
-            ZOffset = Math.Min(Math.Max(ZOffset + (isScrollUp ? 1 : -1), MinZOffset), MaxZOffset);
+            ZOffset = Math.Min(Math.Max(ZOffset + (isScrollUp ? 1 : -1), ClientWorldEditConstants.MinZOffset),
+                ClientWorldEditConstants.MaxZOffset);
         }
         else
         {
@@ -100,5 +92,24 @@ public class ClientWorldEditState
                 MaterialModifier = newModifier;
             }
         }
+    }
+
+    /// <summary>
+    ///     Sets the material data. Does not perform any validation.
+    /// </summary>
+    /// <param name="materialData">Material data.</param>
+    public void SetMaterialData(MaterialPair materialData)
+    {
+        Material = materialData.MaterialId;
+        MaterialModifier = materialData.MaterialModifier;
+    }
+
+    /// <summary>
+    ///     Sets the Z offset. Does not perform any validation.
+    /// </summary>
+    /// <param name="zOffset">Z-offset.</param>
+    public void SetZOffset(int zOffset)
+    {
+        ZOffset = zOffset;
     }
 }

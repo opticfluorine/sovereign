@@ -95,6 +95,8 @@ public class MaterialSelectorPopup
 
             ImGui.EndTable();
         }
+
+        ImGui.EndPopup();
     }
 
     /// <summary>

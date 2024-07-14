@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,36 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MessagePack;
-
-namespace Sovereign.EngineCore.Components.Types;
+namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 
 /// <summary>
-///     Represents a material identifier as a pair of material ID and
-///     material modifier.
+///     Client-side world editor constants.
 /// </summary>
-[MessagePackObject]
-public class MaterialPair
+public static class ClientWorldEditConstants
 {
-    public MaterialPair()
-    {
-    }
-
-    public MaterialPair(int materialId, int materialModifier)
-    {
-        MaterialId = materialId;
-        MaterialModifier = materialModifier;
-    }
+    /// <summary>
+    ///     Minimum value of Z offset.
+    /// </summary>
+    public const int MinZOffset = -10;
 
     /// <summary>
-    ///     Material ID.
+    ///     Maximum value of Z offset.
     /// </summary>
-    [Key(0)]
-    public int MaterialId { get; set; }
-
-    /// <summary>
-    ///     Material modifier.
-    /// </summary>
-    [Key(1)]
-    public int MaterialModifier { get; set; }
+    public const int MaxZOffset = 10;
 }

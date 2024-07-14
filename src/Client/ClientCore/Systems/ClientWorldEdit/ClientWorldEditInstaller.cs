@@ -26,5 +26,6 @@ public class ClientWorldEditInstaller : IWindsorInstaller
     {
         container.Register(Component.For<ClientWorldEditState>().LifestyleSingleton());
         container.Register(Component.For<ClientWorldEditServices>().LifestyleSingleton());
+        container.Register(Component.For<ClientWorldEditController>().LifestyleSingleton());
     }
 }
