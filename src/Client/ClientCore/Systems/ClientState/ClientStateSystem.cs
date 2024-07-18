@@ -17,6 +17,7 @@
 using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Events.Details;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
@@ -28,6 +29,7 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 /// </summary>
 public class ClientStateSystem : ISystem
 {
+    private readonly EntityManager entityManager;
     private readonly IEventLoop eventLoop;
     private readonly ClientStateFlagManager flagManager;
     private readonly MainMenuStateMachine mainMenuStateMachine;
@@ -38,7 +40,7 @@ public class ClientStateSystem : ISystem
     public ClientStateSystem(IEventLoop eventLoop, EventCommunicator eventCommunicator,
         WorldEntryDetector worldEntryDetector, ClientStateFlagManager flagManager,
         PlayerStateManager playerStateManager, ClientStateMachine stateMachine,
-        MainMenuStateMachine mainMenuStateMachine)
+        MainMenuStateMachine mainMenuStateMachine, EntityManager entityManager)
     {
         this.eventLoop = eventLoop;
         this.worldEntryDetector = worldEntryDetector;
@@ -46,6 +48,7 @@ public class ClientStateSystem : ISystem
         this.playerStateManager = playerStateManager;
         this.stateMachine = stateMachine;
         this.mainMenuStateMachine = mainMenuStateMachine;
+        this.entityManager = entityManager;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
@@ -170,5 +173,9 @@ public class ClientStateSystem : ISystem
         playerStateManager.PlayerLogout();
         stateMachine.TryTransition(MainClientState.MainMenu);
         flagManager.ResetFlags();
+
+        // Unload entities. If we're just going back to player selection, we want to keep the template
+        // entities since the connection is surviving. Otherwise, we want to clear out everything.
+        entityManager.UnloadAll(mainMenuStateMachine.State == MainMenuState.PlayerSelection);
     }
 }

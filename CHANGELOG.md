@@ -7,6 +7,7 @@
 #### 17 July 2024
 
 * World Editor: Allow drawing blocks with left mouse button, erasing with right mouse button.
+* Client: Unload entities whenever the player logs out.
 
 #### 14 July 2024
 

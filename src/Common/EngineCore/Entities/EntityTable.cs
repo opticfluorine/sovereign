@@ -54,6 +54,11 @@ public class EntityTable
     private readonly ConcurrentBag<ulong> pendingRemoves = new();
 
     /// <summary>
+    ///     Set of all currently loaded entity IDs, including template entity IDs.
+    /// </summary>
+    public IReadOnlySet<ulong> EntityIds => entities;
+
+    /// <summary>
     ///     Next unused template entity ID.
     /// </summary>
     public ulong NextTemplateEntityId { get; private set; } = EntityConstants.FirstTemplateEntityId;
@@ -87,7 +92,8 @@ public class EntityTable
     public void Add(ulong entityId, ulong templateEntityId, bool isBlock, bool isLoad)
     {
         if (Exists(entityId)) return;
-        var newAdd = new EntityAdd { EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock, IsLoad = isLoad };
+        var newAdd = new EntityAdd
+            { EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock, IsLoad = isLoad };
         pendingAdds.Add(ref newAdd);
     }
 
@@ -121,7 +127,7 @@ public class EntityTable
             }
 
             OnEntityAdded?.Invoke(entityId);
-            if (!pendingAdd.IsLoad && pendingAdd.TemplateEntityId > 0) 
+            if (!pendingAdd.IsLoad && pendingAdd.TemplateEntityId > 0)
                 OnTemplateSet?.Invoke(entityId, pendingAdd.TemplateEntityId);
         }
 

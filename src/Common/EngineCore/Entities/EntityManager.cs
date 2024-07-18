@@ -123,6 +123,22 @@ public class EntityManager
     }
 
     /// <summary>
+    ///     Unloads all entities.
+    /// </summary>
+    /// <param name="excludeTemplates">If true, does not unload template entities.</param>
+    public void UnloadAll(bool excludeTemplates)
+    {
+        foreach (var entityId in entityTable.EntityIds)
+        {
+            if (excludeTemplates &&
+                entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+                continue;
+
+            UnloadEntity(entityId);
+        }
+    }
+
+    /// <summary>
     ///     Event triggered when a round of entity/component updates are started.
     /// </summary>
     public event Action? OnUpdatesStarted;
