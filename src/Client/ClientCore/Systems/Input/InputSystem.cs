@@ -66,6 +66,8 @@ public class InputSystem : ISystem, IDisposable
             EventId.Client_Input_KeyDown,
             EventId.Client_Input_MouseMotion,
             EventId.Client_Input_MouseWheel,
+            EventId.Client_Input_MouseUp,
+            EventId.Client_Input_MouseDown,
             EventId.Client_Network_PlayerEntitySelected,
             EventId.Core_Tick
         };
@@ -96,6 +98,8 @@ public class InputSystem : ISystem, IDisposable
 
                 // Route mouse events appropriately.
                 case EventId.Client_Input_MouseMotion:
+                case EventId.Client_Input_MouseUp:
+                case EventId.Client_Input_MouseDown:
                 case EventId.Client_Input_MouseWheel:
                     mouseEventHandler.HandleMouseEvent(ev);
                     break;

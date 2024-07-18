@@ -223,7 +223,7 @@ public sealed class CommonGuiManager : IDisposable
                     io.AddMouseButtonEvent(button, ev.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN);
                 }
             }
-                shouldDispatch = !io.WantCaptureKeyboard;
+                shouldDispatch = !io.WantCaptureMouse;
                 break;
 
             case SDL.SDL_EventType.SDL_TEXTINPUT:

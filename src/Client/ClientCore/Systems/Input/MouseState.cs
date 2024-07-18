@@ -94,14 +94,17 @@ public class MouseState
         switch (button)
         {
             case MouseButton.Left:
+                Logger.DebugFormat("Left button down = {0}.", isDown);
                 IsLeftButtonDown = isDown;
                 break;
 
             case MouseButton.Middle:
+                Logger.DebugFormat("Middle button down = {0}.", isDown);
                 IsMiddleButtonDown = isDown;
                 break;
 
             case MouseButton.Right:
+                Logger.DebugFormat("Right button down = {0}.", isDown);
                 IsRightButtonDown = isDown;
                 break;
         }

@@ -18,9 +18,10 @@ using System.Numerics;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
-using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.ClientCore.Systems.ClientWorldEdit;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
@@ -39,19 +40,11 @@ public class WorldEditorGui
     private readonly Vector4 helpTextColor = new(0.7f, 0.7f, 0.7f, 1.0f);
 
     private readonly MaterialManager materialManager;
-    private readonly MaterialSelectorPopup materialSelectorPopup;
+    private readonly MaterialModifierComponentCollection materialModifiers;
+    private readonly MaterialComponentCollection materials;
+    private readonly NameComponentCollection names;
     private readonly ClientWorldEditController worldEditController;
     private readonly ClientWorldEditServices worldEditServices;
-
-    /// <summary>
-    ///     Backing buffer for modifier input field.
-    /// </summary>
-    private int modifierBuffer;
-
-    /// <summary>
-    ///     Change flag for modifier.
-    /// </summary>
-    private bool modifierChangeInProgress;
 
     /// <summary>
     ///     Backing buffer for Z offset input field.
@@ -64,15 +57,18 @@ public class WorldEditorGui
     private bool zOffsetChangeInProgress;
 
     public WorldEditorGui(ClientWorldEditServices worldEditServices, MaterialManager materialManager,
-        GuiExtensions guiExtensions, MaterialSelectorPopup materialSelectorPopup, IEventSender eventSender,
-        ClientWorldEditController worldEditController)
+        GuiExtensions guiExtensions, IEventSender eventSender,
+        ClientWorldEditController worldEditController, NameComponentCollection names,
+        MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers)
     {
         this.worldEditServices = worldEditServices;
         this.materialManager = materialManager;
         this.guiExtensions = guiExtensions;
-        this.materialSelectorPopup = materialSelectorPopup;
         this.eventSender = eventSender;
         this.worldEditController = worldEditController;
+        this.names = names;
+        this.materials = materials;
+        this.materialModifiers = materialModifiers;
     }
 
     /// <summary>
@@ -80,10 +76,10 @@ public class WorldEditorGui
     /// </summary>
     public void Render()
     {
-        ImGui.SetNextWindowSize(new Vector2(300.0f, 150.0f), ImGuiCond.Appearing);
+        ImGui.SetNextWindowSize(new Vector2(300.0f, 160.0f));
         if (!ImGui.Begin("World Editor", ImGuiWindowFlags.NoResize)) return;
 
-        RenderMaterialControl();
+        RenderBlockTemplateControl();
         RenderZOffsetControl();
         RenderHelp();
 
@@ -93,51 +89,30 @@ public class WorldEditorGui
     /// <summary>
     ///     Renders the material/material modifier selection control.
     /// </summary>
-    private void RenderMaterialControl()
+    private void RenderBlockTemplateControl()
     {
-        // Sync inputs with any backend changes.
-        if (modifierBuffer == worldEditServices.MaterialModifier)
-            modifierChangeInProgress = false;
-        else if (!modifierChangeInProgress)
-            modifierBuffer = worldEditServices.MaterialModifier;
-
         if (!ImGui.BeginTable("WorldEditMaterial", 2, ImGuiTableFlags.SizingStretchProp)) return;
         ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed);
 
-        var material = materialManager.Materials[worldEditServices.Material];
-        var tile = material.MaterialSubtypes[worldEditServices.MaterialModifier];
+        var templateName = names.HasComponentForEntity(worldEditServices.BlockTemplateId)
+            ? names[worldEditServices.BlockTemplateId]
+            : "[no name]";
+        var templateMaterialId = materials[worldEditServices.BlockTemplateId];
+        var templateMaterialModifier = materialModifiers[worldEditServices.BlockTemplateId];
+
+        var material = materialManager.Materials[templateMaterialId];
+        var tile = material.MaterialSubtypes[templateMaterialModifier];
 
         ImGui.TableNextColumn();
-        var needToOpenSelector = guiExtensions.TileSpriteButton("#material", tile.TopFaceTileSpriteId,
+        guiExtensions.TileSprite(tile.TopFaceTileSpriteId,
             TileSprite.Wildcard,
             TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
 
         ImGui.TableNextColumn();
-        ImGui.Text($"{material.MaterialName} (Material {worldEditServices.Material})");
-
-        ImGui.Text("Modifier:");
-        ImGui.SameLine();
-        ImGui.InputInt("##mod", ref modifierBuffer);
-        if (modifierBuffer != worldEditServices.MaterialModifier)
-        {
-            // New value entered by user, validate.
-            if (modifierBuffer < 0 || modifierBuffer >= material.MaterialSubtypes.Count)
-            {
-                modifierBuffer = worldEditServices.MaterialModifier;
-            }
-            else
-            {
-                modifierChangeInProgress = true;
-                worldEditController.SetSelectedMaterial(eventSender, worldEditServices.Material, modifierBuffer);
-            }
-        }
+        var relId = worldEditServices.BlockTemplateId - EntityConstants.FirstTemplateEntityId;
+        ImGui.Text($"{templateName} (Block Template {relId})");
 
         ImGui.EndTable();
-
-        if (needToOpenSelector) materialSelectorPopup.Open();
-        materialSelectorPopup.Render();
-        if (materialSelectorPopup.TryGetSelection(out var newMaterialId))
-            worldEditController.SetSelectedMaterial(eventSender, newMaterialId, worldEditServices.MaterialModifier);
     }
 
     /// <summary>
@@ -154,6 +129,7 @@ public class WorldEditorGui
         ImGui.Separator();
         ImGui.Text("Z Offset:");
         ImGui.SameLine();
+        ImGui.SetNextItemWidth(120.0f);
         ImGui.InputInt("##zoff", ref zOffsetBuffer);
 
         // Validate and update state if needed.
@@ -175,7 +151,7 @@ public class WorldEditorGui
     private void RenderHelp()
     {
         ImGui.Separator();
-        ImGui.TextColored(helpTextColor, "Scroll to change material.");
+        ImGui.TextColored(helpTextColor, "Scroll to change block template.");
         ImGui.TextColored(helpTextColor, "Ctrl+Scroll to change Z offset.");
     }
 }

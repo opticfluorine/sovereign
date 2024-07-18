@@ -4,6 +4,10 @@
 
 ### July
 
+#### 17 July 2024
+
+* World Editor: Allow drawing blocks with left mouse button, erasing with right mouse button.
+
 #### 14 July 2024
 
 * World Editor: Add editable controls to GUI for users who do not have a mouse scroll wheel (or prefer

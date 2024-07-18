@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
@@ -25,22 +24,6 @@ namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 /// </summary>
 public class ClientWorldEditController
 {
-    /// <summary>
-    ///     Sets the selected material for the world editor.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="materialId">Material ID.</param>
-    /// <param name="materialModifier">Material modifier.</param>
-    public void SetSelectedMaterial(IEventSender eventSender, int materialId, int materialModifier)
-    {
-        var details = new MaterialPairEventDetails
-        {
-            MaterialPair = new MaterialPair(materialId, materialModifier)
-        };
-        var ev = new Event(EventId.Client_WorldEdit_SetMaterial, details);
-        eventSender.SendEvent(ev);
-    }
-
     /// <summary>
     ///     Sets the selected Z-offset for the world editor.
     /// </summary>

@@ -75,7 +75,7 @@ public struct GridPosition : IEquatable<GridPosition>
     public GridPosition(Vector3 position)
     {
         X = (int)Math.Floor(position.X);
-        Y = (int)Math.Floor(position.Y);
+        Y = (int)Math.Ceiling(position.Y);
         Z = (int)Math.Floor(position.Z);
     }
 

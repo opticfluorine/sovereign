@@ -16,9 +16,10 @@
 
 using System;
 using SDL2;
+using Sovereign.ClientCore.Components.Indexers;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Systems.Input;
-using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 
@@ -27,24 +28,35 @@ namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 /// </summary>
 public class ClientWorldEditState
 {
+    private readonly BlockTemplateEntityIndexer blockTemplateIndexer;
     private readonly InputServices inputServices;
     private readonly MaterialManager materialManager;
 
-    public ClientWorldEditState(InputServices inputServices, MaterialManager materialManager)
+    private ulong blockTemplateId;
+
+    public ClientWorldEditState(InputServices inputServices, MaterialManager materialManager,
+        BlockTemplateEntityIndexer blockTemplateIndexer)
     {
         this.inputServices = inputServices;
         this.materialManager = materialManager;
+        this.blockTemplateIndexer = blockTemplateIndexer;
     }
 
     /// <summary>
-    ///     Selected material.
+    ///     Selected block template.
     /// </summary>
-    public int Material { get; private set; } = 1;
+    public ulong BlockTemplateId
+    {
+        get
+        {
+            // Lazy load of first block template entity ID.
+            if (blockTemplateId < EntityConstants.FirstTemplateEntityId)
+                blockTemplateId = blockTemplateIndexer.First;
 
-    /// <summary>
-    ///     Selected material modifier.
-    /// </summary>
-    public int MaterialModifier { get; private set; }
+            return blockTemplateId;
+        }
+        set => blockTemplateId = value;
+    }
 
     /// <summary>
     ///     Selected Z offset for editing relative to camera.
@@ -69,39 +81,13 @@ public class ClientWorldEditState
         }
         else
         {
-            // Material/modifier scroll.
-            var newModifier = MaterialModifier + (isScrollUp ? 1 : -1);
-            if (newModifier >= materialManager.Materials[Material].MaterialSubtypes.Count)
-            {
-                if (Material < materialManager.Materials.Count - 1)
-                {
-                    Material++;
-                    MaterialModifier = 0;
-                }
-            }
-            else if (newModifier < 0)
-            {
-                if (Material > 1)
-                {
-                    Material--;
-                    MaterialModifier = materialManager.Materials[Material].MaterialSubtypes.Count - 1;
-                }
-            }
-            else
-            {
-                MaterialModifier = newModifier;
-            }
-        }
-    }
+            // Template entity ID scroll.
+            if (!(isScrollUp
+                    ? blockTemplateIndexer.TryGetNextLarger(BlockTemplateId, out var next)
+                    : blockTemplateIndexer.TryGetNextSmaller(BlockTemplateId, out next))) return;
 
-    /// <summary>
-    ///     Sets the material data. Does not perform any validation.
-    /// </summary>
-    /// <param name="materialData">Material data.</param>
-    public void SetMaterialData(MaterialPair materialData)
-    {
-        Material = materialData.MaterialId;
-        MaterialModifier = materialData.MaterialModifier;
+            BlockTemplateId = next;
+        }
     }
 
     /// <summary>

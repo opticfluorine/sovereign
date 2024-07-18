@@ -29,14 +29,9 @@ public class ClientWorldEditServices
     }
 
     /// <summary>
-    ///     Selected material ID.
+    ///     Block template entity ID to use for world editing.
     /// </summary>
-    public int Material => state.Material;
-
-    /// <summary>
-    ///     Selected modifier ID.
-    /// </summary>
-    public int MaterialModifier => state.MaterialModifier;
+    public ulong BlockTemplateId => state.BlockTemplateId;
 
     /// <summary>
     ///     Z offset relative to camera to use for world editing.

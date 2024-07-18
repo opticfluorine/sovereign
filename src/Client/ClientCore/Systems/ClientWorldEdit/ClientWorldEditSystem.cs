@@ -30,15 +30,17 @@ namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 public class ClientWorldEditSystem : ISystem
 {
     private readonly ClientStateServices clientStateServices;
+    private readonly ClientWorldEditInputHandler inputHandler;
     private readonly PlayerRoleCheck roleCheck;
     private readonly ClientWorldEditState state;
 
     public ClientWorldEditSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, PlayerRoleCheck roleCheck,
-        ClientStateServices clientStateServices, ClientWorldEditState state)
+        ClientStateServices clientStateServices, ClientWorldEditState state, ClientWorldEditInputHandler inputHandler)
     {
         this.roleCheck = roleCheck;
         this.clientStateServices = clientStateServices;
         this.state = state;
+        this.inputHandler = inputHandler;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
@@ -51,7 +53,7 @@ public class ClientWorldEditSystem : ISystem
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
         EventId.Client_Input_MouseWheelTick,
-        EventId.Client_WorldEdit_SetMaterial,
+        EventId.Core_Tick,
         EventId.Client_WorldEdit_SetZOffset
     };
 
@@ -94,18 +96,6 @@ public class ClientWorldEditSystem : ISystem
                     break;
                 }
 
-                case EventId.Client_WorldEdit_SetMaterial:
-                {
-                    if (ev.EventDetails is not MaterialPairEventDetails details)
-                    {
-                        Logger.Warn("Received SetMaterial without details.");
-                        break;
-                    }
-
-                    state.SetMaterialData(details.MaterialPair);
-                    break;
-                }
-
                 case EventId.Client_WorldEdit_SetZOffset:
                 {
                     if (ev.EventDetails is not GenericEventDetails<int> details)
@@ -117,6 +107,10 @@ public class ClientWorldEditSystem : ISystem
                     state.SetZOffset(details.Value);
                     break;
                 }
+
+                case EventId.Core_Tick:
+                    inputHandler.OnTick();
+                    break;
             }
         }
 

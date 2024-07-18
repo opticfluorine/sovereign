@@ -16,8 +16,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.ClientCore.Components.Indexers;
 
@@ -26,7 +28,7 @@ namespace Sovereign.ClientCore.Components.Indexers;
 /// </summary>
 public class BlockTemplateEntityIndexer : BaseComponentIndexer<int>
 {
-    private readonly HashSet<ulong> blockTemplateEntities = new();
+    private readonly SortedSet<ulong> blockTemplateEntities = new();
     private bool modified;
 
     public BlockTemplateEntityIndexer(MaterialComponentCollection materials, BlockTemplateEntityFilter filter)
@@ -38,6 +40,53 @@ public class BlockTemplateEntityIndexer : BaseComponentIndexer<int>
     ///     Set of all block template entities currently in memory.
     /// </summary>
     public IReadOnlySet<ulong> BlockTemplateEntities => blockTemplateEntities;
+
+    /// <summary>
+    ///     Smallest block template entity ID.
+    /// </summary>
+    public ulong First => blockTemplateEntities.First();
+
+    /// <summary>
+    ///     Gets the next larger block template entity ID, if any.
+    /// </summary>
+    /// <param name="templateEntityId">Current block template entity ID.</param>
+    /// <param name="nextTemplateEntityId">Next greater block template entity ID.</param>
+    /// <returns>true if a larger block template entity ID was found, false otherwise.</returns>
+    public bool TryGetNextLarger(ulong templateEntityId, out ulong nextTemplateEntityId)
+    {
+        try
+        {
+            nextTemplateEntityId = blockTemplateEntities
+                .GetViewBetween(templateEntityId + 1, EntityConstants.LastTemplateEntityId).First();
+            return true;
+        }
+        catch (Exception)
+        {
+            nextTemplateEntityId = 0;
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///     Gets the next smaller block template entity ID, if any.
+    /// </summary>
+    /// <param name="templateEntityId">Current block template entity ID.</param>
+    /// <param name="nextTemplateEntityId">Next block template entity ID.</param>
+    /// <returns>true if a smaller block template entity ID was found, false otherwise.</returns>
+    public bool TryGetNextSmaller(ulong templateEntityId, out ulong nextTemplateEntityId)
+    {
+        try
+        {
+            nextTemplateEntityId = blockTemplateEntities
+                .GetViewBetween(EntityConstants.FirstTemplateEntityId, templateEntityId - 1).Reverse().First();
+            return true;
+        }
+        catch (Exception)
+        {
+            nextTemplateEntityId = 0;
+            return false;
+        }
+    }
 
     protected override void ComponentAddedCallback(ulong entityId, int componentValue, bool isLoad)
     {

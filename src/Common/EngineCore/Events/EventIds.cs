@@ -370,16 +370,10 @@ public enum EventId
     #region Client_WorldEdit
 
     /// <summary>
-    ///     Event sent to update the selected material for world editing.
-    /// </summary>
-    /// Associated details: MaterialPairEventDetails
-    Client_WorldEdit_SetMaterial = 10500,
-
-    /// <summary>
     ///     Event sent to update the Z-offset for world editing.
     /// </summary>
     /// Associated details: GenericEventDetails(int)
-    Client_WorldEdit_SetZOffset = 10501,
+    Client_WorldEdit_SetZOffset = 10500,
 
     #endregion
 
