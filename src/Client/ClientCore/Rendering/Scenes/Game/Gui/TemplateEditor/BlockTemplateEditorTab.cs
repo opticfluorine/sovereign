@@ -141,7 +141,7 @@ public class BlockTemplateEditorTab
                 var templateEntityId = sortedTemplateEntityIds[i];
                 var name = names.HasComponentForEntity(templateEntityId)
                     ? names[templateEntityId]
-                    : $"Block {templateEntityId}";
+                    : $"Block {templateEntityId - EntityConstants.FirstTemplateEntityId}";
                 var materialId = materials[templateEntityId];
                 var materialModifier = materialModifiers[templateEntityId];
                 var mat = materialManager.Materials[materialId];
