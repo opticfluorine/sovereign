@@ -4,6 +4,18 @@
 
 ### July
 
+#### 27 July 2024
+
+* Auto-updater: Start adding an auto-updater for client side resources.
+  Added a command line utility for generating auto-updater support files.
+  Also defined the format of the index file that will drive the
+  auto-updater.
+
+#### 26 July 2024
+
+* Client: Added some new spritesheets for grass and dirt blocks. I've been
+  spending some time reading up on pixel art and trying to make my own.
+
 #### 17 July 2024
 
 * World Editor: Allow drawing blocks with left mouse button, erasing with right mouse button.
