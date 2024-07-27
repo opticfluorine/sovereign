@@ -1,0 +1,18 @@
+﻿# Spritesheet definition for grass_and_dirt.png
+#
+# grass_and_dirt.png is an original spritesheet created
+# for Sovereign Engine by opticfluorine. It is released
+# under the Creative Commons Attribution-ShareAlike 4.0
+# license.
+#
+
+---
+
+# Spritesheet definition
+Filename: grass_and_dirt.png
+SpriteWidth: 32
+SpriteHeight: 32
+
+# Rights metadata
+Author: opticfluorine
+License: CC BY-SA 4.0
