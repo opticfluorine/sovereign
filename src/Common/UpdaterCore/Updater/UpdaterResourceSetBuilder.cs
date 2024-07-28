@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Security.Cryptography;
-using System.Text;
+using System.Text.RegularExpressions;
 using Sovereign.EngineCore.Resources;
 
 namespace Sovereign.UpdaterCore.Updater;
@@ -23,7 +23,7 @@ namespace Sovereign.UpdaterCore.Updater;
 /// <summary>
 ///     Builds UpdaterResourceSet objects that can be published to an update server.
 /// </summary>
-public class UpdaterResourceSetBuilder
+public partial class UpdaterResourceSetBuilder
 {
     /// <summary>
     ///     Builds an UpdaterResourceSet object using all resources found from the given path builder.
@@ -36,6 +36,8 @@ public class UpdaterResourceSetBuilder
         resourceSet.ReleaseId = Guid.NewGuid();
 
         AddSprites(resourceSet, pathBuilder);
+        AddSpritesheet(resourceSet, pathBuilder);
+        AddWorld(resourceSet, pathBuilder);
 
         return resourceSet;
     }
@@ -47,8 +49,7 @@ public class UpdaterResourceSetBuilder
     /// <param name="pathBuilder">Path builder.</param>
     private void AddSprites(UpdaterResourceSet resourceSet, IResourcePathBuilder pathBuilder)
     {
-        var baseDir = pathBuilder.GetBaseDirectoryForResource(ResourceType.Sprite);
-        
+        AddFiles(resourceSet, pathBuilder, ResourceType.Sprite, f => IsJsonRegex().IsMatch(f));
     }
 
     /// <summary>
@@ -58,6 +59,8 @@ public class UpdaterResourceSetBuilder
     /// <param name="pathBuilder">Path builder.</param>
     private void AddSpritesheet(UpdaterResourceSet resourceSet, IResourcePathBuilder pathBuilder)
     {
+        AddFiles(resourceSet, pathBuilder, ResourceType.Spritesheet,
+            f => IsPngRegex().IsMatch(f) || IsYamlRegex().IsMatch(f));
     }
 
     /// <summary>
@@ -67,6 +70,7 @@ public class UpdaterResourceSetBuilder
     /// <param name="pathBuilder">Path builder.</param>
     private void AddWorld(UpdaterResourceSet resourceSet, IResourcePathBuilder pathBuilder)
     {
+        AddFiles(resourceSet, pathBuilder, ResourceType.World, f => IsJsonRegex().IsMatch(f));
     }
 
     /// <summary>
@@ -122,4 +126,25 @@ public class UpdaterResourceSetBuilder
         using var fs = File.Open(fullPath, FileMode.Open, FileAccess.Read);
         return Convert.ToHexString(SHA512.Create().ComputeHash(fs));
     }
+
+    /// <summary>
+    ///     Generated regex that matches .png filenames.
+    /// </summary>
+    /// <returns>Regex.</returns>
+    [GeneratedRegex(@".+\.png$")]
+    private static partial Regex IsPngRegex();
+
+    /// <summary>
+    ///     Generated regex that matches .yaml filenames.
+    /// </summary>
+    /// <returns>Regex.</returns>
+    [GeneratedRegex(@".+\.yaml$")]
+    private static partial Regex IsYamlRegex();
+
+    /// <summary>
+    ///     Generated regex that matches .json filenames.
+    /// </summary>
+    /// <returns>Regex.</returns>
+    [GeneratedRegex(@".+\.json$")]
+    private static partial Regex IsJsonRegex();
 }

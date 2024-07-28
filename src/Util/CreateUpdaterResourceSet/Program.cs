@@ -19,7 +19,8 @@ using CreateUpdaterResourceSet;
 using Sovereign.EngineCore.Network;
 using Sovereign.UpdaterCore.Updater;
 
-const string outputFilename = "index.json";
+const string indexFilename = "index.json";
+const string releaseFilename = "release.json";
 
 try
 {
@@ -43,8 +44,14 @@ try
     
     // Generate index.json
     var resourceSet = builder.Build(pathBuilder);
-    using var fs = File.Open(outputFilename, FileMode.OpenOrCreate, FileAccess.Write);
-    JsonSerializer.Serialize(fs, resourceSet, MessageConfig.JsonOptions);
+    var indexPath = Path.Combine(basePath, indexFilename);
+    using var indexFs = File.Open(indexPath, FileMode.OpenOrCreate, FileAccess.Write);
+    JsonSerializer.Serialize(indexFs, resourceSet, MessageConfig.JsonOptions);
+    
+    // Generate release.json
+    var release = new UpdaterRelease() { ReleaseId = resourceSet.ReleaseId };
+    using var releaseFs = File.Open(releaseFilename, FileMode.OpenOrCreate, FileAccess.Write);
+    JsonSerializer.Serialize(releaseFs, release, MessageConfig.JsonOptions);
 
     return 0;
 }

@@ -19,6 +19,17 @@ using Sovereign.EngineCore.Resources;
 namespace Sovereign.UpdaterCore.Updater;
 
 /// <summary>
+///     Describes a release specification for the auto-updater.
+/// </summary>
+public class UpdaterRelease
+{
+    /// <summary>
+    ///     Unique release ID. Used to avoid server-side cache conflicts between releases.
+    /// </summary>
+    public Guid ReleaseId { get; set; }
+}
+
+/// <summary>
 ///     Describes a set of game resources that can be automatically updated.
 /// </summary>
 public class UpdaterResourceSet
@@ -27,7 +38,7 @@ public class UpdaterResourceSet
     ///     Unique release ID. Used to avoid server-side cache conflicts between releases.
     /// </summary>
     public Guid ReleaseId { get; set; }
-
+    
     /// <summary>
     ///     List of updateable resources.
     /// </summary>
