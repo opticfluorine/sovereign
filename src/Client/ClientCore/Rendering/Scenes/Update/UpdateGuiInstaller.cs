@@ -14,25 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Systems.ClientState;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-/// <summary>
-///     Enumeration of states in the top-level client state machine.
-/// </summary>
-public enum MainClientState
+namespace Sovereign.ClientCore.Rendering.Scenes.Update;
+
+public class UpdateGuiInstaller : IWindsorInstaller
 {
-    /// <summary>
-    ///     Autoupdater - the initial state of the client at startup.
-    /// </summary>
-    Update,
-
-    /// <summary>
-    ///     Main menu - entered after autoupdater completes (or is skipped).
-    /// </summary>
-    MainMenu,
-
-    /// <summary>
-    ///     In-game - entered after player selection.
-    /// </summary>
-    InGame
+    public void Install(IWindsorContainer container, IConfigurationStore store)
+    {
+        container.Register(Component.For<UpdaterGui>().LifestyleSingleton());
+    }
 }

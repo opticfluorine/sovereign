@@ -14,25 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Systems.ClientState;
+using System.Security.Cryptography;
+
+namespace Sovereign.UpdaterCore.Updater;
 
 /// <summary>
-///     Enumeration of states in the top-level client state machine.
+///     Generates resource hashes for the updater.
 /// </summary>
-public enum MainClientState
+public class UpdaterHash
 {
     /// <summary>
-    ///     Autoupdater - the initial state of the client at startup.
+    ///     Hashes a file.
     /// </summary>
-    Update,
-
-    /// <summary>
-    ///     Main menu - entered after autoupdater completes (or is skipped).
-    /// </summary>
-    MainMenu,
-
-    /// <summary>
-    ///     In-game - entered after player selection.
-    /// </summary>
-    InGame
+    /// <param name="fullPath">Full path to file.</param>
+    /// <returns>Hash encoded as a hex string.</returns>
+    public string Hash(string fullPath)
+    {
+        using var fs = File.Open(fullPath, FileMode.Open, FileAccess.Read);
+        return Convert.ToHexString(SHA512.Create().ComputeHash(fs));
+    }
 }

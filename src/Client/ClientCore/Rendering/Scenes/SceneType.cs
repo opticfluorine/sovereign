@@ -30,5 +30,10 @@ public enum SceneType
     /// <summary>
     ///     In-game scene.
     /// </summary>
-    Game
+    Game,
+
+    /// <summary>
+    ///     Autoupdater scene.
+    /// </summary>
+    Update
 }

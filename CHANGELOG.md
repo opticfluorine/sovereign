@@ -4,6 +4,13 @@
 
 ### July
 
+#### 30 July 2024
+
+* Auto-updater: Implement backend for updater client. Begin adding a
+  new Update scene for handling the updater at startup. This currently
+  breaks the client startup, so use an older commit/build if you are looking
+  to try out the engine.
+
 #### 27 July 2024
 
 * Auto-updater: Start adding an auto-updater for client side resources.

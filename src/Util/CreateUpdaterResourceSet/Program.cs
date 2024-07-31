@@ -40,16 +40,17 @@ try
 
     // Set up resource discovery
     var pathBuilder = new UtilResourcePathBuilder(basePath);
-    var builder = new UpdaterResourceSetBuilder();
-    
+    var updaterHash = new UpdaterHash();
+    var builder = new UpdaterResourceSetBuilder(updaterHash);
+
     // Generate index.json
     var resourceSet = builder.Build(pathBuilder);
     var indexPath = Path.Combine(basePath, indexFilename);
     using var indexFs = File.Open(indexPath, FileMode.OpenOrCreate, FileAccess.Write);
     JsonSerializer.Serialize(indexFs, resourceSet, MessageConfig.JsonOptions);
-    
+
     // Generate release.json
-    var release = new UpdaterRelease() { ReleaseId = resourceSet.ReleaseId };
+    var release = new UpdaterRelease { ReleaseId = resourceSet.ReleaseId };
     using var releaseFs = File.Open(releaseFilename, FileMode.OpenOrCreate, FileAccess.Write);
     JsonSerializer.Serialize(releaseFs, release, MessageConfig.JsonOptions);
 

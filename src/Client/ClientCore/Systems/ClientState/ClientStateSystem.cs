@@ -29,6 +29,7 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 /// </summary>
 public class ClientStateSystem : ISystem
 {
+    private readonly AutoUpdaterEndDetector autoUpdaterEndDetector;
     private readonly EntityManager entityManager;
     private readonly IEventLoop eventLoop;
     private readonly ClientStateFlagManager flagManager;
@@ -40,7 +41,8 @@ public class ClientStateSystem : ISystem
     public ClientStateSystem(IEventLoop eventLoop, EventCommunicator eventCommunicator,
         WorldEntryDetector worldEntryDetector, ClientStateFlagManager flagManager,
         PlayerStateManager playerStateManager, ClientStateMachine stateMachine,
-        MainMenuStateMachine mainMenuStateMachine, EntityManager entityManager)
+        MainMenuStateMachine mainMenuStateMachine, EntityManager entityManager,
+        AutoUpdaterEndDetector autoUpdaterEndDetector)
     {
         this.eventLoop = eventLoop;
         this.worldEntryDetector = worldEntryDetector;
@@ -49,6 +51,7 @@ public class ClientStateSystem : ISystem
         this.stateMachine = stateMachine;
         this.mainMenuStateMachine = mainMenuStateMachine;
         this.entityManager = entityManager;
+        this.autoUpdaterEndDetector = autoUpdaterEndDetector;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
@@ -67,7 +70,8 @@ public class ClientStateSystem : ISystem
         EventId.Client_State_SetFlag,
         EventId.Core_Network_Logout,
         EventId.Client_State_SetMainMenuState,
-        EventId.Client_Network_ConnectionLost
+        EventId.Client_Network_ConnectionLost,
+        EventId.Core_Tick
     };
 
     public int WorkloadEstimate => 10;
@@ -88,6 +92,10 @@ public class ClientStateSystem : ISystem
             processed++;
             switch (ev.EventId)
             {
+                case EventId.Core_Tick:
+                    if (stateMachine.State == MainClientState.Update) autoUpdaterEndDetector.OnTick();
+                    break;
+
                 case EventId.Client_Network_BeginConnection:
                     worldEntryDetector.OnLogin();
                     break;

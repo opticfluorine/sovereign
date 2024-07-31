@@ -24,7 +24,7 @@ public class ClientStateMachine
     /// <summary>
     ///     Current client state.
     /// </summary>
-    public MainClientState State { get; private set; } = MainClientState.MainMenu;
+    public MainClientState State { get; private set; } = MainClientState.Update;
 
     /// <summary>
     ///     Attempts a state transition.
@@ -35,6 +35,7 @@ public class ClientStateMachine
     {
         var valid = (State, desiredState) switch
         {
+            (MainClientState.Update, MainClientState.MainMenu) => true,
             (MainClientState.MainMenu, MainClientState.InGame) => true,
             (MainClientState.InGame, MainClientState.MainMenu) => true,
             _ => false

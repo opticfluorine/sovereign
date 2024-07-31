@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using Sovereign.EngineCore.Resources;
 
@@ -25,6 +24,13 @@ namespace Sovereign.UpdaterCore.Updater;
 /// </summary>
 public partial class UpdaterResourceSetBuilder
 {
+    private readonly UpdaterHash updaterHash;
+
+    public UpdaterResourceSetBuilder(UpdaterHash updaterHash)
+    {
+        this.updaterHash = updaterHash;
+    }
+
     /// <summary>
     ///     Builds an UpdaterResourceSet object using all resources found from the given path builder.
     /// </summary>
@@ -105,26 +111,15 @@ public partial class UpdaterResourceSetBuilder
     {
         // Computer SHA512 hash of file.
         var fullPath = pathBuilder.BuildPathToResource(resourceType, filename);
-        var hash = HashFile(fullPath);
-        
+        var hash = updaterHash.Hash(fullPath);
+
         // Record file.
-        resourceSet.Resources.Add(new UpdaterResource()
+        resourceSet.Resources.Add(new UpdaterResource
         {
             Filename = filename,
             ResourceType = resourceType,
             Hash = hash
         });
-    }
-
-    /// <summary>
-    ///     Hashes a file.
-    /// </summary>
-    /// <param name="fullPath">Full path to file.</param>
-    /// <returns>Hash encoded as a hex string.</returns>
-    private string HashFile(string fullPath)
-    {
-        using var fs = File.Open(fullPath, FileMode.Open, FileAccess.Read);
-        return Convert.ToHexString(SHA512.Create().ComputeHash(fs));
     }
 
     /// <summary>

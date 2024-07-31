@@ -1,91 +1,67 @@
-# --------------------
-# ConnectionParameters
-# --------------------
+#
+# Sovereign Engine Client Configuration
+#
+
+#############################################
+# Configuration settings for the autoupdater.
+AutoUpdater:
+  # The URL of the update server to be used.
+  UpdateServerUrl: https://update.sovereignengine.com
+  
+  # Whether to automatically fetch updates when the client is started.
+  UpdateOnStartup: true
+  
+  # Whether to prompt the user before beginning automatic updates.
+  PromptForUpdate: true
+
+
+########################
 # Connection parameters.
 ConnectionParameters:
-  # ----
-  # Host
-  # ----
   # Server host.
   Host: 127.0.0.1
   
-  # ----
-  # Port
-  # ----
   # Server port.
   Port: 12820
   
-  # --------
-  # RestHost
-  # --------
   # REST server host.
   RestHost: 127.0.0.1
   
-  # --------
-  # RestPort
-  # --------
   # REST server port.
   RestPort: 8080
   
-  # -------
-  # RestTls
-  # -------
   # Whether to use TLS encryption for REST server connections.
   # For security reasons, this should always be true for production servers.
   RestTls: false
 
 
-# -------
-# Display
-# -------
+###################
 # Display settings.
 Display:
-  # ---------------
-  # ResolutionWidth
-  # ---------------
   # Game window width in pixels.
   ResolutionWidth: 1920
   
-  # ----------------
-  # ResolutionHeight
-  # ----------------
   # Game window height in pixels.
   ResolutionHeight: 1080
   
-  # -------------
-  # UiScaleFactor
-  # -------------
   # Scaling factor for the user interface elements.
   UiScaleFactor: 1.0
   
-  # ------------
-  # MaxFramerate
-  # ------------
   # Maximum framerate (in frames per second).
   MaxFramerate: 120
 
-  # ----------
-  # Fullscreen
-  # ----------
   # Whether to run in fullscreen mode.
   Fullscreen: false
 
 
-# ---------
-# TileWidth
-# ---------
+###################
+# General settings.
+
 # Width of each tile in pixels.
 TileWidth: 32
 
-# -------------------
-# RenderSearchSpacerX
-# -------------------
 # Extra tiles to search for renderable entities along the x axis.
 RenderSearchSpacerX: 4.0
 
-# -------------------
-# RenderSearchSpacerY
-# -------------------
 # Extra tiles to search for renderable entities along the y axis.
 RenderSearchSpacerY: 8.0
-

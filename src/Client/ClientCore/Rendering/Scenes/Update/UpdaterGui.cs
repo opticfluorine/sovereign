@@ -14,25 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Systems.ClientState;
+using ImGuiNET;
+
+namespace Sovereign.ClientCore.Rendering.Scenes.Update;
 
 /// <summary>
-///     Enumeration of states in the top-level client state machine.
+///     Main GUI display for the autoupdater.
 /// </summary>
-public enum MainClientState
+public class UpdaterGui
 {
     /// <summary>
-    ///     Autoupdater - the initial state of the client at startup.
+    ///     Renders the autoupdater GUI.
     /// </summary>
-    Update,
+    public void Render()
+    {
+        if (!ImGui.Begin("Update")) return;
 
-    /// <summary>
-    ///     Main menu - entered after autoupdater completes (or is skipped).
-    /// </summary>
-    MainMenu,
-
-    /// <summary>
-    ///     In-game - entered after player selection.
-    /// </summary>
-    InGame
+        ImGui.End();
+    }
 }

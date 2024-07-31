@@ -54,33 +54,59 @@ public sealed class ClientConfiguration
     public DisplayConfiguration Display { get; set; } = new();
 
     /// <summary>
-    ///     Data type for display configuration.
+    ///     Autoupdater settings.
     /// </summary>
-    public struct DisplayConfiguration
-    {
-        /// <summary>
-        ///     Game window width in pixels.
-        /// </summary>
-        public int ResolutionWidth { get; set; }
+    public AutoUpdaterConfiguration AutoUpdater { get; set; } = new();
+}
 
-        /// <summary>
-        ///     Game window height in pixels.
-        /// </summary>
-        public int ResolutionHeight { get; set; }
+/// <summary>
+///     Data type for display configuration.
+/// </summary>
+public class DisplayConfiguration
+{
+    /// <summary>
+    ///     Game window width in pixels.
+    /// </summary>
+    public int ResolutionWidth { get; set; }
 
-        /// <summary>
-        ///     User interface scale factor.
-        /// </summary>
-        public float UiScaleFactor { get; set; }
+    /// <summary>
+    ///     Game window height in pixels.
+    /// </summary>
+    public int ResolutionHeight { get; set; }
 
-        /// <summary>
-        ///     Fullscreen flag.
-        /// </summary>
-        public bool Fullscreen { get; set; }
+    /// <summary>
+    ///     User interface scale factor.
+    /// </summary>
+    public float UiScaleFactor { get; set; }
 
-        /// <summary>
-        ///     Maximum framerate.
-        /// </summary>
-        public int MaxFramerate { get; set; }
-    }
+    /// <summary>
+    ///     Fullscreen flag.
+    /// </summary>
+    public bool Fullscreen { get; set; }
+
+    /// <summary>
+    ///     Maximum framerate.
+    /// </summary>
+    public int MaxFramerate { get; set; }
+}
+
+/// <summary>
+///     Configuration settings for the autoupdater.
+/// </summary>
+public class AutoUpdaterConfiguration
+{
+    /// <summary>
+    ///     URL of the update server to use.
+    /// </summary>
+    public string UpdateServerUrl { get; set; } = "";
+
+    /// <summary>
+    ///     Whether to run the auto-updater when the client is started.
+    /// </summary>
+    public bool UpdateOnStartup { get; set; }
+
+    /// <summary>
+    ///     If true, prompt the user before beginning the update process.
+    /// </summary>
+    public bool PromptForUpdate { get; set; }
 }
