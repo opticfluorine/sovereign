@@ -58,10 +58,10 @@ public class UpdaterResource
     /// <summary>
     ///     Resource filename.
     /// </summary>
-    public string Filename { get; set; }
+    public string Filename { get; set; } = "";
 
     /// <summary>
     ///     SHA512 hash of the file.
     /// </summary>
-    public string Hash { get; set; }
+    public string Hash { get; set; } = "";
 }

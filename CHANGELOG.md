@@ -9,7 +9,9 @@
 * Auto-updater: Implement backend for updater client. Begin adding a
   new Update scene for handling the updater at startup. This currently
   breaks the client startup, so use an older commit/build if you are looking
-  to try out the engine.
+  to try out the engine. Also added the frontend GUI for monitoring updater
+  progress. Still need to late-load the updated resources when the transition
+  to the `MainMenu` state occurs instead of at startup.
 
 #### 27 July 2024
 

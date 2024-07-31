@@ -36,6 +36,16 @@ namespace Sovereign.ClientCore.Updater;
 public enum AutoUpdaterState
 {
     /// <summary>
+    ///     Autoupdater has not yet started.
+    /// </summary>
+    NotStarted,
+    
+    /// <summary>
+    ///     Autoupdater is waiting to start.
+    /// </summary>
+    Pending,
+    
+    /// <summary>
     ///     Autoupdater is retrieving the release.json file.
     /// </summary>
     GetRelease,
@@ -49,11 +59,6 @@ public enum AutoUpdaterState
     ///     Autoupdater is retrieving client-side resource files.
     /// </summary>
     GetFile,
-
-    /// <summary>
-    ///     Autoupdater is waiting to start.
-    /// </summary>
-    Pending,
 
     /// <summary>
     ///     Autoupdater has completed.
@@ -123,7 +128,7 @@ public partial class AutoUpdater
     /// <summary>
     ///     Current autoupdater state.
     /// </summary>
-    public AutoUpdaterState State { get; private set; } = AutoUpdaterState.Pending;
+    public AutoUpdaterState State { get; private set; } = AutoUpdaterState.NotStarted;
 
     /// <summary>
     ///     Name of file currently being retrieved.
