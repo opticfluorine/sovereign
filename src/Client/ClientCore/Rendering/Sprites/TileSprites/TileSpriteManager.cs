@@ -169,6 +169,7 @@ public sealed class TileSpriteManager
     /// <param name="definitions">Tile sprite definitions.</param>
     private void UnpackDefinitions(TileSpriteDefinitions definitions)
     {
+        TileSprites.Clear();
         foreach (var definition in definitions.TileSprites.OrderBy(tile => tile.Id))
             TileSprites.Add(new TileSprite(definition));
     }

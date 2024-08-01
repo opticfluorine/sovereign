@@ -79,6 +79,7 @@ public sealed class SpriteManager
         Sprites = UnpackSprites(definitions);
 
         // Initialize the coverage maps for the spritesheets.
+        SpriteSheetCoverage.Clear();
         foreach (var spriteSheetName in spriteSheetManager.SpriteSheets.Keys)
         {
             var sheet = spriteSheetManager.SpriteSheets[spriteSheetName];

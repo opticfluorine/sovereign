@@ -53,6 +53,11 @@ public class RenderingManager : IStartable
     /// </summary>
     private IDisplayMode? selectedDisplayMode;
 
+    /// <summary>
+    ///     Flag indicating whether a resource reload is required.
+    /// </summary>
+    private bool resourceReloadRequired;
+
     public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
         DisplayModeSelector displayModeSelector, IRenderer renderer,
         RenderingResourceManager resourceManager, ClientConfigurationManager configManager,
@@ -123,8 +128,22 @@ public class RenderingManager : IStartable
     /// </summary>
     public void Render()
     {
+        if (resourceReloadRequired)
+        {
+            LoadResources();
+            resourceReloadRequired = false;
+        }
+        
         guiManager.NewFrame();
         renderer.Render();
+    }
+
+    /// <summary>
+    ///     Requests that rendering resources be reloaded before the next frame is drawn.
+    /// </summary>
+    public void RequestResourceReload()
+    {
+        resourceReloadRequired = true;
     }
 
     /// <summary>
@@ -211,7 +230,7 @@ public class RenderingManager : IStartable
     }
 
     /// <summary>
-    ///     Loads resources used by rendering.
+    ///     Loads (or reloads) resources used by rendering.
     /// </summary>
     private void LoadResources()
     {

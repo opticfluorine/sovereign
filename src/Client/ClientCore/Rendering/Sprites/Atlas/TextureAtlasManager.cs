@@ -76,6 +76,7 @@ public class TextureAtlasManager
 
         try
         {
+            TextureAtlas?.Dispose();
             TextureAtlas = new TextureAtlas(spriteSheetManager.SpriteSheets.Values,
                 fontAtlas, mainDisplay.DisplayMode.DisplayFormat);
         }

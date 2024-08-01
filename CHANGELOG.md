@@ -4,6 +4,12 @@
 
 ### July
 
+#### 31 July 2024
+
+* Client: Allow for reloading of client-side resources after the initial load.
+  Still need to recreate the GPU-side resources in the renderer as well.
+* Client: Trigger resource reload when exiting the `Update` state.
+
 #### 30 July 2024
 
 * Auto-updater: Implement backend for updater client. Begin adding a

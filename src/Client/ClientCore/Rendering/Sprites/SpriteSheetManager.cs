@@ -88,6 +88,7 @@ public class SpriteSheetManager
         {
             Logger.Info("Loading spritesheets.");
 
+            SpriteSheets.Clear();
             foreach (var spriteSheet in LoadSpriteSheets()) SpriteSheets[spriteSheet.Definition.Filename] = spriteSheet;
         }
         catch (Exception e)

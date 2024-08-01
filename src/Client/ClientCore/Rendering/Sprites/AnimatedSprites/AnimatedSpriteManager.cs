@@ -173,6 +173,7 @@ public sealed class AnimatedSpriteManager
     /// <param name="definitions">Definitions to unpack.</param>
     private void UnpackDefinitions(AnimatedSpriteDefinitions definitions)
     {
+        AnimatedSprites.Clear();
         foreach (var def in definitions.AnimatedSprites.OrderBy(def => def.Id))
             AnimatedSprites.Add(new AnimatedSprite(def, spriteManager));
     }

@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using Sovereign.ClientCore.Rendering;
+
 namespace Sovereign.ClientCore.Systems.ClientState;
 
 /// <summary>
@@ -21,10 +25,23 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 /// </summary>
 public class ClientStateMachine
 {
+    private readonly RenderingManager renderingManager;
+
     /// <summary>
     ///     Current client state.
     /// </summary>
     public MainClientState State { get; private set; } = MainClientState.Update;
+
+    private readonly Dictionary<MainClientState, Action> stateExitHandlers;
+
+    public ClientStateMachine(RenderingManager renderingManager)
+    {
+        this.renderingManager = renderingManager;
+        stateExitHandlers = new Dictionary<MainClientState, Action>()
+        {
+            { MainClientState.Update, OnExitUpdate }
+        };
+    }
 
     /// <summary>
     ///     Attempts a state transition.
@@ -40,7 +57,23 @@ public class ClientStateMachine
             (MainClientState.InGame, MainClientState.MainMenu) => true,
             _ => false
         };
-        if (valid) State = desiredState;
+        if (valid)
+        {
+            var priorState = State;
+
+            if (stateExitHandlers.TryGetValue(priorState, out var handler))
+                handler.Invoke();
+            
+            State = desiredState;
+        }
         return valid;
+    }
+
+    /// <summary>
+    ///     Called when the Update state is about to exit.
+    /// </summary>
+    private void OnExitUpdate()
+    {
+        renderingManager.RequestResourceReload();
     }
 }
