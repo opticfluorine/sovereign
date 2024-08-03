@@ -104,6 +104,11 @@ public class VeldridRenderer : IRenderer
         }
     }
 
+    public void ReloadResources()
+    {
+        resourceManager.ReloadTextures();
+    }
+
     public void Render()
     {
         if (device.Device == null)

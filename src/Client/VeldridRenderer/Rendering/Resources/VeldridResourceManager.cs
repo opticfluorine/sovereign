@@ -83,6 +83,17 @@ public class VeldridResourceManager : IDisposable
     }
 
     /// <summary>
+    ///     Reloads textures.
+    /// </summary>
+    public void ReloadTextures()
+    {
+        Logger.Info("Reloading textures.");
+        
+        AtlasTexture?.Dispose();
+        CreateAtlasTexture();
+    }
+
+    /// <summary>
     ///     Creates the Veldrid texture for the full texture atlas.
     /// </summary>
     private void CreateAtlasTexture()

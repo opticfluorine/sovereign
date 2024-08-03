@@ -2,6 +2,16 @@
 
 ## 2024
 
+### August
+
+#### 03 August 2024
+
+* Renderer: Reload device-side textures whenever the host-side resources are
+  reloaded (i.e. after transitioning out of the Update state).
+* Auto-updater: Completely skip the `Update` state when the configuration file
+  is set to skip updates on startup; this avoids a redundant reload of resources
+  in this case.
+
 ### July
 
 #### 31 July 2024

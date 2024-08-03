@@ -45,8 +45,7 @@ public class AutoUpdaterEndDetector
         // Sanity check.
         if (stateMachine.State != MainClientState.Update) return;
 
-        if (!configManager.ClientConfiguration.AutoUpdater.UpdateOnStartup ||
-            autoUpdater.State == AutoUpdaterState.Complete)
+        if (autoUpdater.State == AutoUpdaterState.Complete)
             stateMachine.TryTransition(MainClientState.MainMenu);
     }
 }

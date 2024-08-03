@@ -131,6 +131,7 @@ public class RenderingManager : IStartable
         if (resourceReloadRequired)
         {
             LoadResources();
+            renderer.ReloadResources();
             resourceReloadRequired = false;
         }
         

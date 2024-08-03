@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering;
 
 namespace Sovereign.ClientCore.Systems.ClientState;
@@ -30,17 +31,21 @@ public class ClientStateMachine
     /// <summary>
     ///     Current client state.
     /// </summary>
-    public MainClientState State { get; private set; } = MainClientState.Update;
+    public MainClientState State { get; private set; }
 
     private readonly Dictionary<MainClientState, Action> stateExitHandlers;
 
-    public ClientStateMachine(RenderingManager renderingManager)
+    public ClientStateMachine(RenderingManager renderingManager, ClientConfigurationManager configManager)
     {
         this.renderingManager = renderingManager;
         stateExitHandlers = new Dictionary<MainClientState, Action>()
         {
             { MainClientState.Update, OnExitUpdate }
         };
+
+        State = configManager.ClientConfiguration.AutoUpdater.UpdateOnStartup
+            ? MainClientState.Update
+            : MainClientState.MainMenu;
     }
 
     /// <summary>
