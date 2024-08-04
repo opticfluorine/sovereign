@@ -56,6 +56,18 @@ public class ClientStateServices
     }
 
     /// <summary>
+    ///     Checks the value of a flag and clears it if currently set.
+    /// </summary>
+    /// <param name="flag">Flag.</param>
+    /// <returns>Flag state.</returns>
+    public bool CheckAndClearFlagValue(ClientStateFlag flag)
+    {
+        var set = flagManager.GetStateFlagValue(flag);
+        if (set) flagManager.SetStateFlagValue(flag, false);
+        return set;
+    }
+
+    /// <summary>
     ///     Gets the entity ID of the currently selected player, if any.
     /// </summary>
     /// <param name="playerEntityId">Player entity ID, only valid if method returns true.</param>

@@ -123,6 +123,7 @@ public partial class AutoUpdater
             CheckCertificateRevocationList = true
         };
         client = new HttpClient(handler);
+        client.DefaultRequestHeaders.Add("User-Agent", "Sovereign Engine");
     }
 
     /// <summary>
@@ -181,7 +182,7 @@ public partial class AutoUpdater
             var releaseJsonUri = new Uri(baseUri, ReleaseJsonUri);
             var releaseJson = await client.GetFromJsonAsync<UpdaterRelease>(releaseJsonUri)
                               ?? throw new Exception("No update releases found.");
-            var releaseBaseUri = new Uri(baseUri, releaseJson.ReleaseId.ToString());
+            var releaseBaseUri = new Uri(baseUri, $"{releaseJson.ReleaseId}/");
 
             // Update everything in the latest release.
             await UpdateReleaseAsync(releaseBaseUri);
@@ -209,12 +210,12 @@ public partial class AutoUpdater
         var indexUri = new Uri(releaseBaseUri, IndexJsonUri);
         var indexJson = await client.GetFromJsonAsync<UpdaterResourceSet>(indexUri)
                         ?? throw new Exception("No release index found.");
+        Logger.DebugFormat("index.json contains {0} resources.", indexJson.Resources.Count);
 
         // Silently exclude any disallowed file types.
         var allowedResources = indexJson.Resources
             .Where(res => allowedResourceTypes.Contains(res.ResourceType))
-            .Where(res => AllowedFilenamesRegex().IsMatch(
-                resourcePathBuilder.BuildPathToResource(res.ResourceType, res.Filename)))
+            .Where(res => AllowedFilenamesRegex().IsMatch($"{res.ResourceType}/{res.Filename}"))
             .ToList();
         foreach (var badResource in indexJson.Resources.Except(allowedResources))
         {
@@ -275,7 +276,7 @@ public partial class AutoUpdater
             throw new Exception("New file has incorrect hash.");
 
         // Update the local file now that the download is verified.
-        File.Move(tempFilePath, localPath);
+        File.Move(tempFilePath, localPath, true);
     }
 
     /// <summary>
@@ -297,6 +298,6 @@ public partial class AutoUpdater
     ///     Regex that matches allowed resource filenames.
     /// </summary>
     /// <returns></returns>
-    [GeneratedRegex(@"^[A-Za-z0-9_\-]+/[A-Za-z0-9_\-]+\.(png|json|yaml)$")]
+    [GeneratedRegex(@"^[A-Za-z0-9_\-]+/[A-Za-z0-9_\-]+\.(?:png|json|yaml|txt)$")]
     private static partial Regex AllowedFilenamesRegex();
 }

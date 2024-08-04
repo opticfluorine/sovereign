@@ -23,6 +23,7 @@ using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 
@@ -37,6 +38,7 @@ public class RenderingManager : IStartable
     private readonly ClientConfigurationManager configManager;
     private readonly DisplayModeSelector displayModeSelector;
     private readonly CommonGuiManager guiManager;
+    private readonly ClientStateServices stateServices;
 
     private readonly MainDisplay mainDisplay;
     private readonly IRenderer renderer;
@@ -53,15 +55,10 @@ public class RenderingManager : IStartable
     /// </summary>
     private IDisplayMode? selectedDisplayMode;
 
-    /// <summary>
-    ///     Flag indicating whether a resource reload is required.
-    /// </summary>
-    private bool resourceReloadRequired;
-
     public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
         DisplayModeSelector displayModeSelector, IRenderer renderer,
         RenderingResourceManager resourceManager, ClientConfigurationManager configManager,
-        SDLEventAdapter sdlEventAdapter, CommonGuiManager guiManager)
+        SDLEventAdapter sdlEventAdapter, CommonGuiManager guiManager, ClientStateServices stateServices)
     {
         this.mainDisplay = mainDisplay;
         this.adapterSelector = adapterSelector;
@@ -71,6 +68,7 @@ public class RenderingManager : IStartable
         this.configManager = configManager;
         this.sdlEventAdapter = sdlEventAdapter;
         this.guiManager = guiManager;
+        this.stateServices = stateServices;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -128,23 +126,14 @@ public class RenderingManager : IStartable
     /// </summary>
     public void Render()
     {
-        if (resourceReloadRequired)
+        if (stateServices.CheckAndClearFlagValue(ClientStateFlag.ReloadClientResources))
         {
             LoadResources();
             renderer.ReloadResources();
-            resourceReloadRequired = false;
         }
         
         guiManager.NewFrame();
         renderer.Render();
-    }
-
-    /// <summary>
-    ///     Requests that rendering resources be reloaded before the next frame is drawn.
-    /// </summary>
-    public void RequestResourceReload()
-    {
-        resourceReloadRequired = true;
     }
 
     /// <summary>

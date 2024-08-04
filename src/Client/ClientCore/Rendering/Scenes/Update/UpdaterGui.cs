@@ -149,6 +149,7 @@ public class UpdaterGui
     private void RenderError()
     {
         ImGui.Text("An error occurred during update.");
+        ImGui.Text($"File: {autoUpdater.CurrentFile}");
         ImGui.Text(autoUpdater.Error);
         
         if (ImGui.Button("Retry")) autoUpdater.UpdateInBackground();

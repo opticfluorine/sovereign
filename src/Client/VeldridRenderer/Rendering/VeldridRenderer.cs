@@ -22,6 +22,7 @@ using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Scenes;
 using Sovereign.VeldridRenderer.Rendering.Gui;
 using Sovereign.VeldridRenderer.Rendering.Resources;
+using Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 using Veldrid;
 
 namespace Sovereign.VeldridRenderer.Rendering;
@@ -48,6 +49,8 @@ public class VeldridRenderer : IRenderer
     /// </summary>
     private readonly VeldridSceneConsumer sceneConsumer;
 
+    private readonly WorldRenderer worldRenderer;
+
     /// <summary>
     ///     Scene manager.
     /// </summary>
@@ -59,12 +62,13 @@ public class VeldridRenderer : IRenderer
     private bool isDisposed;
 
     public VeldridRenderer(VeldridDevice device, VeldridResourceManager resourceManager,
-        SceneManager sceneManager, VeldridSceneConsumer sceneConsumer, GuiRenderer guiRenderer)
+        SceneManager sceneManager, VeldridSceneConsumer sceneConsumer, WorldRenderer worldRenderer, GuiRenderer guiRenderer)
     {
         this.device = device;
         this.resourceManager = resourceManager;
         this.sceneManager = sceneManager;
         this.sceneConsumer = sceneConsumer;
+        this.worldRenderer = worldRenderer;
         this.guiRenderer = guiRenderer;
     }
 
@@ -107,6 +111,8 @@ public class VeldridRenderer : IRenderer
     public void ReloadResources()
     {
         resourceManager.ReloadTextures();
+        worldRenderer.ReloadResources();
+        guiRenderer.ReloadResources();
     }
 
     public void Render()

@@ -11,6 +11,9 @@
 * Auto-updater: Completely skip the `Update` state when the configuration file
   is set to skip updates on startup; this avoids a redundant reload of resources
   in this case.
+* Client: Remove most default resources from the Git repository, instead retrieving them
+  from the main update server when the client is first run. This will greatly reduce the
+  amount of Git LFS transfers from cloning the repository.
 
 ### July
 

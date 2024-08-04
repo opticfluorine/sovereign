@@ -26,7 +26,7 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 /// </summary>
 public class ClientStateMachine
 {
-    private readonly RenderingManager renderingManager;
+    private readonly ClientStateFlagManager flagManager;
 
     /// <summary>
     ///     Current client state.
@@ -35,9 +35,9 @@ public class ClientStateMachine
 
     private readonly Dictionary<MainClientState, Action> stateExitHandlers;
 
-    public ClientStateMachine(RenderingManager renderingManager, ClientConfigurationManager configManager)
+    public ClientStateMachine(ClientConfigurationManager configManager, ClientStateFlagManager flagManager)
     {
-        this.renderingManager = renderingManager;
+        this.flagManager = flagManager;
         stateExitHandlers = new Dictionary<MainClientState, Action>()
         {
             { MainClientState.Update, OnExitUpdate }
@@ -79,6 +79,6 @@ public class ClientStateMachine
     /// </summary>
     private void OnExitUpdate()
     {
-        renderingManager.RequestResourceReload();
+        flagManager.SetStateFlagValue(ClientStateFlag.ReloadClientResources, true);   
     }
 }

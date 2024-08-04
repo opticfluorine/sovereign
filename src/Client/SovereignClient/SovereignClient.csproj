@@ -40,7 +40,7 @@
     <Target Name="CopyAfterBuild" AfterTargets="AfterBuild">
         <Message Text="RuntimeIdentifier=$(RuntimeIdentifier)"/>
         <ItemGroup>
-            <DataFiles Include="Data/**/*"/>
+            <DataFiles Include="Data/**/*" Exclude="Data/Configuration/ClientConfiguration.yaml"/>
             <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"/>

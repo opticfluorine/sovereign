@@ -119,6 +119,18 @@ public class GuiRenderer : IDisposable
     }
 
     /// <summary>
+    ///     Handles the reloading of resources.
+    /// </summary>
+    public void ReloadResources()
+    {
+        // Recreate the resource set to use the newest textures.
+        CreateResourceSet();
+        
+        // Reset the last-used texture to invalidate the cached vertex shader constants.
+        lastTexture = IntPtr.Zero;
+    }
+
+    /// <summary>
     ///     Ends the current frame after all rendering is complete.
     /// </summary>
     public void EndFrame()
@@ -435,6 +447,8 @@ public class GuiRenderer : IDisposable
             throw new InvalidOperationException("Vertex uniform buffer not ready.");
         if (resourceManager.AtlasTexture == null)
             throw new InvalidOperationException("Texture atlas not ready.");
+        
+        resourceSet?.Dispose();
 
         var resLayoutDesc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
             GameResourceManager.RES_SHADER_CONSTANTS,
