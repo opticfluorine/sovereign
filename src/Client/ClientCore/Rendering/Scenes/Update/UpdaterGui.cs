@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Numerics;
 using ImGuiNET;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Updater;
@@ -27,6 +28,13 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Update;
 /// </summary>
 public class UpdaterGui
 {
+    private const float PreUpdateWindowWidth = 240.0f;
+    private const float PreUpdateWindowHeight = 100.0f;
+    private const float InUpdateWindowWidth = 360.0f;
+    private const float InUpdateWindowHeight = 140.0f;
+    private const float InUpdateProgressWidth = 280.0f;
+    private const float InUpdateProgressHeight = 24.0f;
+    private const float InUpdateProgressGap = 0.5f * (InUpdateWindowWidth - InUpdateProgressWidth);
     private readonly AutoUpdater autoUpdater;
     private readonly ClientConfigurationManager configurationManager;
     private readonly CoreController coreController;
@@ -47,6 +55,16 @@ public class UpdaterGui
     public void Render()
     {
         if (!configurationManager.ClientConfiguration.AutoUpdater.UpdateOnStartup) return;
+
+        var windowSize = autoUpdater.State == AutoUpdaterState.NotStarted
+            ? new Vector2(PreUpdateWindowWidth, PreUpdateWindowHeight)
+            : new Vector2(InUpdateWindowWidth, InUpdateWindowHeight);
+
+        var io = ImGui.GetIO();
+        ImGui.SetNextWindowSize(windowSize, ImGuiCond.Always);
+        ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
+        ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
+
         if (!ImGui.Begin("Update")) return;
 
         switch (autoUpdater.State)
@@ -54,27 +72,27 @@ public class UpdaterGui
             case AutoUpdaterState.NotStarted:
                 RenderNotStarted();
                 break;
-            
+
             case AutoUpdaterState.Pending:
                 RenderPending();
                 break;
-            
+
             case AutoUpdaterState.GetRelease:
                 RenderGetRelease();
                 break;
-            
+
             case AutoUpdaterState.GetIndex:
                 RenderGetIndex();
                 break;
-            
+
             case AutoUpdaterState.GetFile:
                 RenderGetFile();
                 break;
-            
+
             case AutoUpdaterState.Complete:
                 RenderComplete();
                 break;
-            
+
             case AutoUpdaterState.Error:
                 RenderError();
                 break;
@@ -90,11 +108,25 @@ public class UpdaterGui
     {
         if (configurationManager.ClientConfiguration.AutoUpdater.PromptForUpdate)
         {
-            ImGui.Text("Check for updates?");
-            
-            if (ImGui.Button("Yes")) autoUpdater.UpdateInBackground();
-            ImGui.SameLine();
-            if (ImGui.Button("No")) autoUpdater.SkipUpdates();
+            if (ImGui.BeginTable("updateLayoutTable", 3, ImGuiTableFlags.SizingStretchSame))
+            {
+                ImGui.TableSetupColumn("");
+                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed);
+
+                ImGui.TableNextColumn();
+                ImGui.TableNextColumn();
+                ImGui.Text("Check for updates?");
+                ImGui.TableNextColumn();
+
+                ImGui.TableNextColumn();
+                ImGui.TableNextColumn();
+                if (ImGui.Button("Yes")) autoUpdater.UpdateInBackground();
+                ImGui.SameLine();
+                if (ImGui.Button("No")) autoUpdater.SkipUpdates();
+                ImGui.TableNextColumn();
+
+                ImGui.EndTable();
+            }
         }
         else
         {
@@ -132,7 +164,12 @@ public class UpdaterGui
     private void RenderGetFile()
     {
         ImGui.Text($"Updating {autoUpdater.CurrentFile}...");
-        ImGui.ProgressBar(autoUpdater.PercentComplete * 0.01f);
+
+        ImGui.Spacing();
+        ImGui.Spacing();
+
+        ImGui.SetCursorPosX(InUpdateProgressGap);
+        ImGui.ProgressBar(autoUpdater.PercentComplete, new Vector2(InUpdateProgressWidth, InUpdateProgressHeight));
     }
 
     /// <summary>
@@ -151,7 +188,7 @@ public class UpdaterGui
         ImGui.Text("An error occurred during update.");
         ImGui.Text($"File: {autoUpdater.CurrentFile}");
         ImGui.Text(autoUpdater.Error);
-        
+
         if (ImGui.Button("Retry")) autoUpdater.UpdateInBackground();
         ImGui.SameLine();
         if (ImGui.Button("Exit")) coreController.Quit(eventSender);

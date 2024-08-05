@@ -4,6 +4,12 @@
 
 ### August
 
+#### 05 August 2024
+
+* Auto-updater: Clean up the user interfaces and make them look nice enough
+  for an initial prototype. Still should probably change the color of the
+  progress bar.
+
 #### 03 August 2024
 
 * Renderer: Reload device-side textures whenever the host-side resources are

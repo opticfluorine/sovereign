@@ -39,12 +39,12 @@ public enum AutoUpdaterState
     ///     Autoupdater has not yet started.
     /// </summary>
     NotStarted,
-    
+
     /// <summary>
     ///     Autoupdater is waiting to start.
     /// </summary>
     Pending,
-    
+
     /// <summary>
     ///     Autoupdater is retrieving the release.json file.
     /// </summary>
@@ -187,7 +187,7 @@ public partial class AutoUpdater
             // Update everything in the latest release.
             await UpdateReleaseAsync(releaseBaseUri);
 
-            PercentComplete = 100.0f;
+            PercentComplete = 1.0f;
             State = AutoUpdaterState.Complete;
         }
         catch (Exception e)
@@ -228,7 +228,7 @@ public partial class AutoUpdater
                 resourcePathBuilder.BuildPathToResource(res.ResourceType, res.Filename),
                 res.Hash))
             .ToList();
-        var progressStep = 100.0f / resourcesToUpdate.Count;
+        var progressStep = 1.0f / resourcesToUpdate.Count;
 
         // Update all resources in release.
         foreach (var resource in resourcesToUpdate)
