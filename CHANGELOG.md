@@ -7,8 +7,7 @@
 #### 05 August 2024
 
 * Auto-updater: Clean up the user interfaces and make them look nice enough
-  for an initial prototype. Still should probably change the color of the
-  progress bar.
+  for an initial prototype.
 
 #### 03 August 2024
 

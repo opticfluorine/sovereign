@@ -100,6 +100,7 @@ public sealed class CommonGuiManager : IDisposable
         context = ImGui.CreateContext();
         ImGui.StyleColorsDark();
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
+        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, new Vector4(0.16f, 0.29f, 0.48f, 1.00f));
 
         // Configure input settings.
         var io = ImGui.GetIO();
