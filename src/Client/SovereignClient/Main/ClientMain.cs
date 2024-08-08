@@ -29,6 +29,7 @@ public class ClientMain
     private static void Main()
     {
         /* Initialize SDL. */
+        SDL.SDL_SetHint("SDL_WINDOWS_DPI_AWARENESS", "permonitorv2");
         var err = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
         if (err < 0)
         {

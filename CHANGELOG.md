@@ -10,6 +10,7 @@
   from a spritesheet. This eliminates a lot of tedious manual creation of static
   animated sprites for materials, items, etc. that only have a single phase,
   orientation, and frame.
+* Client: Fix DPI scaling on Windows.
 
 #### 05 August 2024
 
