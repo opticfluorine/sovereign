@@ -4,6 +4,13 @@
 
 ### August
 
+#### 07 August 2024
+
+* Resource Editor: Add new tool for generating static animated sprites directly
+  from a spritesheet. This eliminates a lot of tedious manual creation of static
+  animated sprites for materials, items, etc. that only have a single phase,
+  orientation, and frame.
+
 #### 05 August 2024
 
 * Auto-updater: Clean up the user interfaces and make them look nice enough

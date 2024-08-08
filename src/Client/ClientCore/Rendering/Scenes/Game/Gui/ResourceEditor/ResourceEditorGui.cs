@@ -44,8 +44,14 @@ public class ResourceEditorGui
     public void Render()
     {
         ImGui.SetNextWindowSize(new Vector2(900.0f, 640.0f), ImGuiCond.FirstUseEver);
-        if (ImGui.Begin("Resource Editor"))
+        if (ImGui.Begin("Resource Editor", ImGuiWindowFlags.MenuBar))
         {
+            if (ImGui.BeginMenuBar())
+            {
+                animatedSpriteEditorTab.MenuBar();
+                ImGui.EndMenuBar();
+            }
+
             if (ImGui.BeginTabBar("ResourceEditorTabs", ImGuiTabBarFlags.None))
             {
                 spriteEditorTab.Render();

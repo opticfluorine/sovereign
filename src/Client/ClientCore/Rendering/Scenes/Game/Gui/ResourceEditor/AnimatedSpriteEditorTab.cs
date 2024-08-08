@@ -41,7 +41,9 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     private const uint SelectionColor = 0xFF773333;
 
+
     private readonly AnimatedSpriteManager animatedSpriteManager;
+    private readonly GenerateAnimatedSpritesPopup generateAnimatedSpritesPopup;
     private readonly GuiExtensions guiExtensions;
 
     /// <summary>
@@ -72,6 +74,11 @@ public class AnimatedSpriteEditorTab
 
     private readonly SpriteSelectorPopup spriteSelectorPopup;
     private readonly TileSpriteManager tileSpriteManager;
+
+    /// <summary>
+    ///     Flag indicating whether the tab is active.
+    /// </summary>
+    private bool active;
 
     /// <summary>
     ///     Current animation phase.
@@ -114,16 +121,34 @@ public class AnimatedSpriteEditorTab
     private List<int> tileSpriteDependencies = new();
 
     public AnimatedSpriteEditorTab(AnimatedSpriteManager animatedSpriteManager, GuiExtensions guiExtensions,
-        SpriteSelectorPopup spriteSelectorPopup, SpriteManager spriteManager, TileSpriteManager tileSpriteManager)
+        SpriteSelectorPopup spriteSelectorPopup, SpriteManager spriteManager, TileSpriteManager tileSpriteManager,
+        GenerateAnimatedSpritesPopup generateAnimatedSpritesPopup)
     {
         this.animatedSpriteManager = animatedSpriteManager;
         this.guiExtensions = guiExtensions;
         this.spriteSelectorPopup = spriteSelectorPopup;
         this.spriteManager = spriteManager;
         this.tileSpriteManager = tileSpriteManager;
+        this.generateAnimatedSpritesPopup = generateAnimatedSpritesPopup;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
+
+    /// <summary>
+    ///     Renders the menu bar for the animated sprite editor tab.
+    /// </summary>
+    public void MenuBar()
+    {
+        var openGenAnimSprites = false;
+        if (active && ImGui.BeginMenu("Animated Sprite Tools"))
+        {
+            openGenAnimSprites = ImGui.MenuItem("Generate from Spritesheet...");
+            ImGui.EndMenu();
+        }
+
+        if (openGenAnimSprites) generateAnimatedSpritesPopup.Open();
+        generateAnimatedSpritesPopup.Render();
+    }
 
     /// <summary>
     ///     Renders the Animated Sprites editor tab.
@@ -136,7 +161,8 @@ public class AnimatedSpriteEditorTab
             initialized = true;
         }
 
-        if (ImGui.BeginTabItem("Animated Sprites"))
+        active = ImGui.BeginTabItem("Animated Sprites");
+        if (active)
         {
             if (ImGui.BeginTable("animSprOuter", 2, ImGuiTableFlags.SizingFixedFit))
             {
@@ -154,6 +180,12 @@ public class AnimatedSpriteEditorTab
 
             ImGui.EndTabItem();
         }
+    }
+
+    /// <summary>
+    /// </summary>
+    private void DoGenerateFromSheetPopup()
+    {
     }
 
     /// <summary>
