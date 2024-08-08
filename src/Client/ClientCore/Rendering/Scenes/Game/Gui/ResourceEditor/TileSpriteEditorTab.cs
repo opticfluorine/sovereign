@@ -118,7 +118,7 @@ public class TileSpriteEditorTab
         var maxSize = ImGui.GetWindowSize();
         if (ImGui.BeginTable("tileSprBrowser", 2,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter |
-                ImGuiTableFlags.RowBg, new Vector2 { X = 222.0f, Y = maxSize.Y - 90 }))
+                ImGuiTableFlags.RowBg, new Vector2 { X = 222.0f, Y = maxSize.Y - 125 }))
         {
             ImGui.TableSetupColumn("ID");
             ImGui.TableSetupColumn("Tile Sprite");
@@ -236,7 +236,7 @@ public class TileSpriteEditorTab
             .Select(ctx => ctx.AnimatedSpriteIds.Count).Max();
         if (ImGui.BeginTable("contextTable", maxLayers + 8,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
-                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 121 }))
+                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 156 }))
         {
             ImGui.TableSetupColumn(""); // Discard button
             ImGui.TableSetupColumn(""); // Preview

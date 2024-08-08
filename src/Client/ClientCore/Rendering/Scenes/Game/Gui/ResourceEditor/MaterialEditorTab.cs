@@ -108,7 +108,7 @@ public class MaterialEditorTab
         var maxSize = ImGui.GetWindowSize();
         if (ImGui.BeginTable("materialBrowser", 3,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter |
-                ImGuiTableFlags.RowBg, new Vector2 { X = 254.0f, Y = maxSize.Y - 90 }))
+                ImGuiTableFlags.RowBg, new Vector2 { X = 254.0f, Y = maxSize.Y - 125 }))
         {
             ImGui.TableSetupColumn("ID");
             ImGui.TableSetupColumn("Material");
@@ -238,7 +238,7 @@ public class MaterialEditorTab
         var maxSize = ImGui.GetWindowSize();
         if (!ImGui.BeginTable("subtypeTable", 5,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
-                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 121 })) return;
+                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 156 })) return;
 
         ImGui.TableSetupColumn("Modifier ID");
         ImGui.TableSetupColumn("Front Face");
