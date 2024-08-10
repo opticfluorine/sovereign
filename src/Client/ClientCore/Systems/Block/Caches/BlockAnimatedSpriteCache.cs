@@ -239,11 +239,15 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private void UpdateCacheForBlock(GridPosition gridPosition, bool updateSelf)
     {
         /* Identify neighbors. */
+        var below = gridPosition - GridPosition.OneZ;
         var north = gridPosition + GridPosition.OneY;
         var south = gridPosition - GridPosition.OneY;
         var east = gridPosition + GridPosition.OneX;
         var west = gridPosition - GridPosition.OneX;
-        var below = gridPosition - GridPosition.OneZ;
+        var northEast = north + GridPosition.OneX;
+        var southEast = south + GridPosition.OneX;
+        var southWest = south - GridPosition.OneX;
+        var northWest = north - GridPosition.OneX;
 
         /* Update cache. */
         var isTopFace = true;
@@ -253,6 +257,10 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
             UpdateCacheAtPosition(south, isTopFace);
             UpdateCacheAtPosition(east, isTopFace);
             UpdateCacheAtPosition(west, isTopFace);
+            UpdateCacheAtPosition(northEast, isTopFace);
+            UpdateCacheAtPosition(southEast, isTopFace);
+            UpdateCacheAtPosition(southWest, isTopFace);
+            UpdateCacheAtPosition(northWest, isTopFace);
             if (isTopFace) UpdateCacheAtPosition(below, true);
             if (updateSelf) UpdateCacheAtPosition(gridPosition, isTopFace);
 
