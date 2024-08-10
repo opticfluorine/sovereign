@@ -30,7 +30,7 @@ public class TileSpriteSelectorPopup
     private const int ColumnCount = 5;
     private readonly GuiExtensions guiExtensions;
     private readonly TileSpriteManager tileSpriteManager;
-    private bool allowWildcard;
+    private bool allowSpecial;
     private bool isSelected;
     private int selection;
 
@@ -49,7 +49,7 @@ public class TileSpriteSelectorPopup
     {
         isSelected = false;
         selection = 0;
-        allowWildcard = allowAny;
+        allowSpecial = allowAny;
 
         ImGui.OpenPopup(PopupName);
     }
@@ -64,12 +64,20 @@ public class TileSpriteSelectorPopup
         if (ImGui.BeginTable("tileSprTbl", ColumnCount,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingFixedFit))
         {
-            if (allowWildcard)
+            if (allowSpecial)
             {
                 ImGui.TableNextColumn();
                 if (ImGui.Button("Any"))
                 {
                     selection = TileSprite.Wildcard;
+                    isSelected = true;
+                    ImGui.CloseCurrentPopup();
+                }
+
+                ImGui.TableNextColumn();
+                if (ImGui.Button("Empty"))
+                {
+                    selection = TileSprite.Empty;
                     isSelected = true;
                     ImGui.CloseCurrentPopup();
                 }

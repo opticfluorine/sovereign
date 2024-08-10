@@ -11,6 +11,8 @@
   or along the wall if dealing with the side face). Previously tile sprites were
   always resolved in the xy plane, which is not the desired behavior for walls (which
   should be resolved in the xz plane instead).
+* Tile Sprites: Allow matching tile contexts against empty neighbors (e.g. matching
+  a block face that does not have a neighboring block).
 
 #### 09 August 2024
 

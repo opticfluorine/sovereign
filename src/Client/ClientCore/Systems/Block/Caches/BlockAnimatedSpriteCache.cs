@@ -338,9 +338,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <returns>Resolved tile sprite ID, or TileSprite.Wildcard if no valid block.</returns>
     private int GetTileSpriteIdForPosition(GridPosition gridPosition, bool isTopFace)
     {
-        /* Get block at position, or return wildcard if not found. */
         var blockIds = blockIndexer.GetEntitiesAtPosition(gridPosition);
-        if (blockIds == null || blockIds.Count == 0) return TileSprite.Wildcard;
+        if (blockIds == null || blockIds.Count == 0) return TileSprite.Empty;
 
         return GetTileSpriteIdForBlock(blockIds.First(), isTopFace);
     }
@@ -353,9 +352,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <returns>Resolved tile sprite ID.</returns>
     private int GetTileSpriteIdForBlock(ulong blockId, bool isTopFace)
     {
-        /* Get the material information, or return wildcard if not found. */
         if (!materials.HasComponentForEntity(blockId) || !materialModifiers.HasComponentForEntity(blockId))
-            return TileSprite.Wildcard;
+            return TileSprite.Empty;
 
         /* Retrieve the tile sprite information. */
         try

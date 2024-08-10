@@ -34,6 +34,11 @@ public sealed class TileSprite
     public const int Wildcard = -1;
 
     /// <summary>
+    ///     Indicates that there is no neighboring tile sprite.
+    /// </summary>
+    public const int Empty = -2;
+
+    /// <summary>
     ///     Cache of previously resolved tile contexts.
     /// </summary>
     private readonly ConcurrentDictionary<TileContextKey, TileContext> lookupCache = new();
