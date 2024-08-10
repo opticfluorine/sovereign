@@ -238,21 +238,29 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="updateSelf">Whether to update the cache entry for the block itself.</param>
     private void UpdateCacheForBlock(GridPosition gridPosition, bool updateSelf)
     {
-        /* Identify neighbors. */
-        var below = gridPosition - GridPosition.OneZ;
-        var north = gridPosition + GridPosition.OneY;
-        var south = gridPosition - GridPosition.OneY;
-        var east = gridPosition + GridPosition.OneX;
-        var west = gridPosition - GridPosition.OneX;
-        var northEast = north + GridPosition.OneX;
-        var southEast = south + GridPosition.OneX;
-        var southWest = south - GridPosition.OneX;
-        var northWest = north - GridPosition.OneX;
 
         /* Update cache. */
         var isTopFace = true;
         for (var i = 0; i < 2; ++i)
         {
+            // Determine the orientation of the world-space plane on which the tile sprites are positioned.
+            // This ensures that matching is done across the same surface (e.g. walls with walls, floors with
+            // floors).
+            var basisEast = GridPosition.OneX;
+            var basisNorth = isTopFace ? GridPosition.OneY : GridPosition.OneZ;
+            
+            /* Identify neighbors. */
+            var below = gridPosition - GridPosition.OneZ;
+            var north = gridPosition + basisNorth;
+            var south = gridPosition - basisNorth;
+            var east = gridPosition + basisEast;
+            var west = gridPosition - basisEast;
+            var northEast = north + basisEast;
+            var southEast = south + basisEast;
+            var southWest = south - basisEast;
+            var northWest = north - basisEast;
+            
+            // Update cache for all neighbors in the plane.
             UpdateCacheAtPosition(north, isTopFace);
             UpdateCacheAtPosition(south, isTopFace);
             UpdateCacheAtPosition(east, isTopFace);
@@ -285,16 +293,22 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         if (centerId == -1)
             // Block isn't ready yet, return at a later pass.
             return;
+        
+        // Determine the orientation of the world-space plane on which the tile sprites are positioned.
+        // This ensures that matching is done across the same surface (e.g. walls with walls, floors with
+        // floors).
+        var basisEast = GridPosition.OneX;
+        var basisNorth = isTopFace ? GridPosition.OneY : GridPosition.OneZ;
 
         /* Resolve neighbors to the tile sprite level. */
-        var north = gridPosition + GridPosition.OneY;
-        var south = gridPosition - GridPosition.OneY;
-        var east = gridPosition + GridPosition.OneX;
-        var west = gridPosition - GridPosition.OneX;
-        var northEast = north + GridPosition.OneX;
-        var southEast = south + GridPosition.OneX;
-        var southWest = south - GridPosition.OneX;
-        var northWest = north - GridPosition.OneX;
+        var north = gridPosition + basisNorth;
+        var south = gridPosition - basisNorth;
+        var east = gridPosition + basisEast;
+        var west = gridPosition - basisEast;
+        var northEast = north + basisEast;
+        var southEast = south + basisEast;
+        var southWest = south - basisEast;
+        var northWest = north - basisEast;
 
         var northId = GetTileSpriteIdForPosition(north, isTopFace);
         var southId = GetTileSpriteIdForPosition(south, isTopFace);

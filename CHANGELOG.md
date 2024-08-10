@@ -4,6 +4,14 @@
 
 ### August
 
+#### 10 August 2024
+
+* Tile Sprites: Resolve tile contexts based on neighbors in the same plane as the
+  central tile sprite (e.g. along the ground if dealing with the top face of a block,
+  or along the wall if dealing with the side face). Previously tile sprites were
+  always resolved in the xy plane, which is not the desired behavior for walls (which
+  should be resolved in the xz plane instead).
+
 #### 09 August 2024
 
 * Client: Fix build on Windows so that the console window doesn't appear when
