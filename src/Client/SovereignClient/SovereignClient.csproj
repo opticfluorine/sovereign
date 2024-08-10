@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>WinExe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
         <AssemblyName>Sovereign.Client</AssemblyName>
         <RootNamespace>Sovereign.SovereignClient</RootNamespace>
@@ -43,7 +43,8 @@
             <DataFiles Include="Data/**/*" Exclude="Data/Configuration/ClientConfiguration.yaml"/>
             <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
-        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"/>
+        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"
+              Condition="%(Filename)!='' AND (!Exists('$(OutDir)Data/%(RecursiveDir)%(Filename)%(Extension)'))"/>
         <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(OutDir)"/>
     </Target>
 

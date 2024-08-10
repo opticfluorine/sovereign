@@ -162,8 +162,7 @@ public class GuiTextureMapper
             var height = spriteBounds.HeightInTiles * clientConfiguration.TileWidth;
 
             // Add record to table.
-            index = GetNextTextureId();
-            textures.Insert(index, new TextureData
+            index = AddTextureData(new TextureData
             {
                 SourceType = SourceType.AnimatedSprite,
                 Id = animatedSpriteId,
@@ -191,8 +190,7 @@ public class GuiTextureMapper
     {
         if (!customIndices.TryGetValue(customSpriteId, out var index))
         {
-            index = GetNextTextureId();
-            textures.Insert(index, new TextureData
+            index = AddTextureData(new TextureData
             {
                 SourceType = SourceType.CustomAnimatedSprite
             });
@@ -234,8 +232,7 @@ public class GuiTextureMapper
             var bottomRightAbsY = topLeftAbsY + sheetData.Surface.Properties.Height;
 
             // Add entry to table.
-            index = GetNextTextureId();
-            textures.Insert(index, new TextureData
+            index = AddTextureData(new TextureData
             {
                 SourceType = SourceType.Spritesheet,
                 StartX = (float)topLeftAbsX / atlas.Width,
@@ -265,8 +262,7 @@ public class GuiTextureMapper
 
             // Add entry to table.
             var spriteData = atlasMap.MapElements[spriteId];
-            index = GetNextTextureId();
-            textures.Insert(index, new TextureData
+            index = AddTextureData(new TextureData
             {
                 SourceType = SourceType.Sprite,
                 StartX = spriteData.NormalizedLeftX,
@@ -313,8 +309,7 @@ public class GuiTextureMapper
             var firstLayerTexData = GetTextureDataForTextureId(firstLayerTexId);
 
             // Create texture record.
-            index = GetNextTextureId();
-            textures.Insert(index, new TextureData
+            index = AddTextureData(new TextureData
             {
                 SourceType = SourceType.Multiple,
                 Layers = layers
@@ -343,8 +338,7 @@ public class GuiTextureMapper
     {
         if (!customIndices.TryGetValue(customId, out var index))
         {
-            index = GetNextTextureId();
-            textures.Insert(index, new TextureData());
+            index = AddTextureData(new TextureData());
             customIndices[customId] = index;
         }
 
@@ -371,6 +365,22 @@ public class GuiTextureMapper
     private int GetNextTextureId()
     {
         return reclaimableIndices.TryDequeue(out var next) ? next : textures.Count;
+    }
+
+    /// <summary>
+    ///     Adds the given texture data to the next available position in the list.
+    /// </summary>
+    /// <param name="textureData">Texture data.</param>
+    /// <returns>Index into texture data list where the data resides.</returns>
+    private int AddTextureData(TextureData textureData)
+    {
+        var index = GetNextTextureId();
+        if (index >= textures.Count)
+            textures.Insert(index, textureData);
+        else
+            textures[index] = textureData;
+
+        return index;
     }
 
     /// <summary>

@@ -183,12 +183,6 @@ public class AnimatedSpriteEditorTab
     }
 
     /// <summary>
-    /// </summary>
-    private void DoGenerateFromSheetPopup()
-    {
-    }
-
-    /// <summary>
     ///     Renders the animated sprite browser that allows the user to select an animated sprite for editing.
     /// </summary>
     private void RenderBrowser()

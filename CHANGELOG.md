@@ -4,6 +4,18 @@
 
 ### August
 
+#### 09 August 2024
+
+* Client: Fix build on Windows so that the console window doesn't appear when
+  running the client.
+* Client: Fix build so that files under `Data/` directory are only copied to the build
+  output directory if they do not already exist. This avoids the issue where `dotnet build`
+  overwrites resource JSON files that were modified by the Resource Editor during a
+  previous run.
+* Resource Editor: Fix bug where removing existing resources would lead to incorrect
+  graphics being rendered in the GUI (the lookup table used for GUI rendering was
+  corrupted by incorrect reuse of a reclaimed entry in the table).
+
 #### 07 August 2024
 
 * Resource Editor: Add new tool for generating static animated sprites directly
