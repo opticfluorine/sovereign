@@ -126,17 +126,14 @@ public class MaterialEditorTab
                 // Material column
                 ImGui.TableNextColumn();
                 if (guiExtensions.TileSpriteButton($"##matButtonFront{i}", mat.MaterialSubtypes[0].SideFaceTileSpriteId,
-                        TileSprite.Wildcard, TileSprite.Wildcard,
-                        TileSprite.Wildcard, TileSprite.Wildcard)) Select(i);
+                        TileContextKey.AllWildcards)) Select(i);
                 ImGui.SameLine();
                 if (guiExtensions.TileSpriteButton($"##matButtonTop{i}", mat.MaterialSubtypes[0].TopFaceTileSpriteId,
-                        TileSprite.Wildcard, TileSprite.Wildcard,
-                        TileSprite.Wildcard, TileSprite.Wildcard)) Select(i);
+                        TileContextKey.AllWildcards)) Select(i);
                 ImGui.SameLine();
                 if (guiExtensions.TileSpriteButton($"##matButtonObsc{i}",
                         mat.MaterialSubtypes[0].ObscuredTopFaceTileSpriteId,
-                        TileSprite.Wildcard, TileSprite.Wildcard,
-                        TileSprite.Wildcard, TileSprite.Wildcard)) Select(i);
+                        TileContextKey.AllWildcards)) Select(i);
 
                 // Name column.
                 ImGui.TableNextColumn();
@@ -270,17 +267,17 @@ public class MaterialEditorTab
 
         ImGui.TableNextColumn();
         if (guiExtensions.TileSpriteButton($"##front{rowIndex}", subtype.SideFaceTileSpriteId,
-                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard))
+                TileContextKey.AllWildcards))
             OpenFaceEditor(rowIndex, Face.Front);
 
         ImGui.TableNextColumn();
         if (guiExtensions.TileSpriteButton($"##top{rowIndex}", subtype.TopFaceTileSpriteId,
-                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard))
+                TileContextKey.AllWildcards))
             OpenFaceEditor(rowIndex, Face.Top);
 
         ImGui.TableNextColumn();
         if (guiExtensions.TileSpriteButton($"##obsc{rowIndex}", subtype.ObscuredTopFaceTileSpriteId,
-                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard))
+                TileContextKey.AllWildcards))
             OpenFaceEditor(rowIndex, Face.ObscuredTop);
 
         ImGui.TableNextColumn();
@@ -425,6 +422,7 @@ public class MaterialEditorTab
     /// <param name="rowIndex">Row index (material modifier).</param>
     private void RemoveSubtype(int rowIndex)
     {
+        editingMaterial.MaterialSubtypes.RemoveAt(rowIndex);
     }
 
     /// <summary>

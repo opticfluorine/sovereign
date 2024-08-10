@@ -150,18 +150,15 @@ public class BlockTemplateEditorTab
                 ImGui.TableNextColumn();
                 if (guiExtensions.TileSpriteButton($"##matButtonFront{i}",
                         mat.MaterialSubtypes[materialModifier].SideFaceTileSpriteId,
-                        TileSprite.Wildcard, TileSprite.Wildcard,
-                        TileSprite.Wildcard, TileSprite.Wildcard)) Select(i);
+                        TileContextKey.AllWildcards)) Select(i);
                 ImGui.SameLine();
                 if (guiExtensions.TileSpriteButton($"##matButtonTop{i}",
                         mat.MaterialSubtypes[materialModifier].TopFaceTileSpriteId,
-                        TileSprite.Wildcard, TileSprite.Wildcard,
-                        TileSprite.Wildcard, TileSprite.Wildcard)) Select(i);
+                        TileContextKey.AllWildcards)) Select(i);
                 ImGui.SameLine();
                 if (guiExtensions.TileSpriteButton($"##matButtonObsc{i}",
                         mat.MaterialSubtypes[materialModifier].ObscuredTopFaceTileSpriteId,
-                        TileSprite.Wildcard, TileSprite.Wildcard,
-                        TileSprite.Wildcard, TileSprite.Wildcard)) Select(i);
+                        TileContextKey.AllWildcards)) Select(i);
 
                 // Name column.
                 ImGui.TableNextColumn();

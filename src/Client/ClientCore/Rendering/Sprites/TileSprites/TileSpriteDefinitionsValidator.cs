@@ -241,9 +241,6 @@ public sealed class TileSpriteDefinitionsValidator
     /// <returns>true if default, false otherwise.</returns>
     private bool IsDefaultContext(TileContext context)
     {
-        return context.NorthTileSpriteId == TileSprite.Wildcard
-               && context.EastTileSpriteId == TileSprite.Wildcard
-               && context.SouthTileSpriteId == TileSprite.Wildcard
-               && context.WestTileSpriteId == TileSprite.Wildcard;
+        return context.TileContextKey.Equals(TileContextKey.AllWildcards);
     }
 }

@@ -78,8 +78,7 @@ public class TileSpriteSelectorPopup
             for (var i = 0; i < tileSpriteManager.TileSprites.Count; ++i)
             {
                 ImGui.TableNextColumn();
-                if (guiExtensions.TileSpriteButton($"btn{i}", i, TileSprite.Wildcard, TileSprite.Wildcard,
-                        TileSprite.Wildcard, TileSprite.Wildcard))
+                if (guiExtensions.TileSpriteButton($"btn{i}", i, TileContextKey.AllWildcards))
                 {
                     selection = i;
                     isSelected = true;

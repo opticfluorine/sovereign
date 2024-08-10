@@ -120,15 +120,10 @@ public class GuiExtensions
     ///     Renders a tile sprite in a given context to the GUI.
     /// </summary>
     /// <param name="tileSpriteId">Tile sprite ID.</param>
-    /// <param name="neighborNorthId">North neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborEastId">East neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborSouthId">South neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborWestId">West neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    public void TileSprite(int tileSpriteId, int neighborNorthId, int neighborEastId, int neighborSouthId,
-        int neighborWestId)
+    /// <param name="contextKey">Tile context key.</param>
+    public void TileSprite(int tileSpriteId, TileContextKey contextKey)
     {
-        var texId = textureMapper.GetTextureIdForTileSprite(tileSpriteId, neighborNorthId, neighborEastId,
-            neighborSouthId, neighborWestId);
+        var texId = textureMapper.GetTextureIdForTileSprite(tileSpriteId, contextKey);
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
@@ -139,15 +134,10 @@ public class GuiExtensions
     /// </summary>
     /// <param name="customId">Unique identifier for the custom sprite.</param>
     /// <param name="customSprite">Custom tile sprite.</param>
-    /// <param name="neighborNorthId">North neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborEastId">East neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborSouthId">South neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborWestId">West neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    public void TileSprite(string customId, TileSprite customSprite, int neighborNorthId, int neighborEastId,
-        int neighborSouthId, int neighborWestId)
+    /// <param name="contextKey">Tile context key.</param>
+    public void TileSprite(string customId, TileSprite customSprite, TileContextKey contextKey)
     {
-        var texId = textureMapper.GetTextureIdForCustomTileSprite(customId, customSprite, neighborNorthId,
-            neighborEastId, neighborSouthId, neighborWestId);
+        var texId = textureMapper.GetTextureIdForCustomTileSprite(customId, customSprite, contextKey);
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
@@ -158,16 +148,11 @@ public class GuiExtensions
     /// </summary>
     /// <param name="id">Button ID.</param>
     /// <param name="tileSpriteId">Tile sprite ID.</param>
-    /// <param name="neighborNorthId">North neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborEastId">East neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborSouthId">South neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborWestId">West neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="contextKey">Tile context key.</param>
     /// <returns>true if clicked, false otherwise.</returns>
-    public bool TileSpriteButton(string id, int tileSpriteId, int neighborNorthId, int neighborEastId,
-        int neighborSouthId, int neighborWestId)
+    public bool TileSpriteButton(string id, int tileSpriteId, TileContextKey contextKey)
     {
-        var texId = textureMapper.GetTextureIdForTileSprite(tileSpriteId, neighborNorthId, neighborEastId,
-            neighborSouthId, neighborWestId);
+        var texId = textureMapper.GetTextureIdForTileSprite(tileSpriteId, contextKey);
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);

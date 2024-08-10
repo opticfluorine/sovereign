@@ -130,8 +130,7 @@ public class TileSpriteEditorTab
                 ImGui.Text($"{i}");
                 ImGui.TableNextColumn();
                 if (guiExtensions.TileSpriteButton($"##spriteButton{i}", i,
-                        TileSprite.Wildcard, TileSprite.Wildcard,
-                        TileSprite.Wildcard, TileSprite.Wildcard)) Select(i);
+                        TileContextKey.AllWildcards)) Select(i);
 
                 if (i == editingSprite.Id)
                 {
@@ -234,21 +233,25 @@ public class TileSpriteEditorTab
         var maxSize = ImGui.GetWindowSize();
         var maxLayers = editingSprite.TileContexts
             .Select(ctx => ctx.AnimatedSpriteIds.Count).Max();
-        if (ImGui.BeginTable("contextTable", maxLayers + 8,
+        if (ImGui.BeginTable("contextTable", maxLayers + 12,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
                 new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 156 }))
         {
             ImGui.TableSetupColumn(""); // Discard button
             ImGui.TableSetupColumn(""); // Preview
             ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 16.0f); // Spacer
-            ImGui.TableSetupColumn("North");
-            ImGui.TableSetupColumn("East");
-            ImGui.TableSetupColumn("South");
-            ImGui.TableSetupColumn("West");
+            ImGui.TableSetupColumn("N");
+            ImGui.TableSetupColumn("NE");
+            ImGui.TableSetupColumn("E");
+            ImGui.TableSetupColumn("SE");
+            ImGui.TableSetupColumn("S");
+            ImGui.TableSetupColumn("SW");
+            ImGui.TableSetupColumn("W");
+            ImGui.TableSetupColumn("NW");
             ImGui.TableSetupColumn("+/-");
             for (var i = 0; i < maxLayers; ++i) ImGui.TableSetupColumn($"Layer {i + 1}");
 
-            ImGui.TableSetupScrollFreeze(7, 1);
+            ImGui.TableSetupScrollFreeze(11, 1);
             ImGui.TableHeadersRow();
 
             for (var i = 0; i < editingSprite.TileContexts.Count; ++i)
@@ -323,16 +326,32 @@ public class TileSpriteEditorTab
                     row.NorthTileSpriteId = selectedId;
                     break;
 
+                case Orientation.Northeast:
+                    row.NortheastTileSpriteId = selectedId;
+                    break;
+
                 case Orientation.East:
                     row.EastTileSpriteId = selectedId;
+                    break;
+
+                case Orientation.Southeast:
+                    row.SoutheastTileSpriteId = selectedId;
                     break;
 
                 case Orientation.South:
                     row.SouthTileSpriteId = selectedId;
                     break;
 
+                case Orientation.Southwest:
+                    row.SouthwestTileSpriteId = selectedId;
+                    break;
+
                 case Orientation.West:
                     row.WestTileSpriteId = selectedId;
+                    break;
+
+                case Orientation.Northwest:
+                    row.NorthwestTileSpriteId = selectedId;
                     break;
             }
 
@@ -360,7 +379,11 @@ public class TileSpriteEditorTab
         var canRemoveContext = !(context.NorthTileSpriteId == TileSprite.Wildcard &&
                                  context.EastTileSpriteId == TileSprite.Wildcard &&
                                  context.SouthTileSpriteId == TileSprite.Wildcard &&
-                                 context.WestTileSpriteId == TileSprite.Wildcard);
+                                 context.WestTileSpriteId == TileSprite.Wildcard &&
+                                 context.NortheastTileSpriteId == TileSprite.Wildcard &&
+                                 context.SoutheastTileSpriteId == TileSprite.Wildcard &&
+                                 context.SouthwestTileSpriteId == TileSprite.Wildcard &&
+                                 context.NorthwestTileSpriteId == TileSprite.Wildcard);
         if (!canRemoveContext) ImGui.BeginDisabled();
         if (ImGui.Button($"-##context-{rowIndex}"))
         {
@@ -378,94 +401,33 @@ public class TileSpriteEditorTab
         if (!canRemoveContext) ImGui.EndDisabled();
 
         ImGui.TableNextColumn();
-        guiExtensions.TileSprite($"tsPrevCtx{rowIndex}", editingSprite, context.NorthTileSpriteId,
-            context.EastTileSpriteId, context.SouthTileSpriteId, context.WestTileSpriteId);
+        guiExtensions.TileSprite($"tsPrevCtx{rowIndex}", editingSprite, context.TileContextKey);
         if (ImGui.IsItemHovered()) RenderPreviewTooltip(context, rowIndex);
         ImGui.TableNextColumn();
 
-        // North neighbor.
         ImGui.TableNextColumn();
-        bool clicked;
-        if (context.NorthTileSpriteId == TileSprite.Wildcard)
-        {
-            for (var i = 0; i < 3; ++i) ImGui.Spacing();
-            clicked = ImGui.Button($"Any##{rowIndex}north");
-        }
-        else
-        {
-            clicked = guiExtensions.TileSpriteButton($"ctx{rowIndex}north", context.NorthTileSpriteId,
-                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
-        }
+        NeighborButton(context, rowIndex, Orientation.North);
 
-        if (clicked)
-        {
-            editingNeighbor = Orientation.North;
-            editingRow = rowIndex;
-            tileSpriteSelector.Open(true);
-        }
-
-        // East neighbor.
         ImGui.TableNextColumn();
-        if (context.EastTileSpriteId == TileSprite.Wildcard)
-        {
-            for (var i = 0; i < 3; ++i) ImGui.Spacing();
-            clicked = ImGui.Button($"Any##{rowIndex}east");
-        }
-        else
-        {
-            clicked = guiExtensions.TileSpriteButton($"ctx{rowIndex}east", context.EastTileSpriteId,
-                TileSprite.Wildcard,
-                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
-        }
+        NeighborButton(context, rowIndex, Orientation.Northeast);
 
-        if (clicked)
-        {
-            editingNeighbor = Orientation.East;
-            editingRow = rowIndex;
-            tileSpriteSelector.Open(true);
-        }
-
-        // South neighbor.
         ImGui.TableNextColumn();
-        if (context.SouthTileSpriteId == TileSprite.Wildcard)
-        {
-            for (var i = 0; i < 3; ++i) ImGui.Spacing();
-            clicked = ImGui.Button($"Any##{rowIndex}south");
-        }
-        else
-        {
-            clicked = guiExtensions.TileSpriteButton($"ctx{rowIndex}south", context.SouthTileSpriteId,
-                TileSprite.Wildcard,
-                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
-        }
+        NeighborButton(context, rowIndex, Orientation.East);
 
-        if (clicked)
-        {
-            editingNeighbor = Orientation.South;
-            editingRow = rowIndex;
-            tileSpriteSelector.Open(true);
-        }
-
-        // West neighbor.
         ImGui.TableNextColumn();
-        if (context.WestTileSpriteId == TileSprite.Wildcard)
-        {
-            for (var i = 0; i < 3; ++i) ImGui.Spacing();
-            clicked = ImGui.Button($"Any##{rowIndex}west");
-        }
-        else
-        {
-            clicked = guiExtensions.TileSpriteButton($"ctx{rowIndex}west", context.WestTileSpriteId,
-                TileSprite.Wildcard,
-                TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
-        }
+        NeighborButton(context, rowIndex, Orientation.Southeast);
 
-        if (clicked)
-        {
-            editingNeighbor = Orientation.West;
-            editingRow = rowIndex;
-            tileSpriteSelector.Open(true);
-        }
+        ImGui.TableNextColumn();
+        NeighborButton(context, rowIndex, Orientation.South);
+
+        ImGui.TableNextColumn();
+        NeighborButton(context, rowIndex, Orientation.Southwest);
+
+        ImGui.TableNextColumn();
+        NeighborButton(context, rowIndex, Orientation.West);
+
+        ImGui.TableNextColumn();
+        NeighborButton(context, rowIndex, Orientation.Northwest);
 
         ImGui.TableNextColumn();
         if (ImGui.Button($"+##{rowIndex}"))
@@ -516,6 +478,35 @@ public class TileSpriteEditorTab
     }
 
     /// <summary>
+    ///     Adds a button for a neighbor tile sprite.
+    /// </summary>
+    /// <param name="context">Tile context.</param>
+    /// <param name="rowIndex">Row index of the tile context.</param>
+    /// <param name="orientation">Direction of neighboring tile sprite.</param>
+    private void NeighborButton(TileContext context, int rowIndex, Orientation orientation)
+    {
+        bool clicked;
+        var neighborId = context.GetNeighborTileSpriteId(orientation);
+        if (neighborId == TileSprite.Wildcard)
+        {
+            for (var i = 0; i < 3; ++i) ImGui.Spacing();
+            clicked = ImGui.Button($"Any##{rowIndex}{orientation}");
+        }
+        else
+        {
+            clicked = guiExtensions.TileSpriteButton($"ctx{rowIndex}{orientation}",
+                neighborId, TileContextKey.AllWildcards);
+        }
+
+        if (clicked)
+        {
+            editingNeighbor = orientation;
+            editingRow = rowIndex;
+            tileSpriteSelector.Open(true);
+        }
+    }
+
+    /// <summary>
     ///     Renders a preview tooltip that shows a specific tile sprite context surrounded by its neighbors.
     /// </summary>
     /// <param name="context">Tile context.</param>
@@ -533,20 +524,52 @@ public class TileSpriteEditorTab
         {
             // Top row.
             ImGui.TableNextColumn();
+            if (context.NorthwestTileSpriteId != TileSprite.Wildcard)
+            {
+                var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
+                    editingSprite.Id, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
+                    TileSprite.Wildcard);
+                guiExtensions.TileSprite(context.NorthwestTileSpriteId, key);
+            }
+            else
+            {
+                ImGui.Text(" Any");
+            }
+
             ImGui.TableNextColumn();
             if (context.NorthTileSpriteId != TileSprite.Wildcard)
-                guiExtensions.TileSprite(context.NorthTileSpriteId, TileSprite.Wildcard, TileSprite.Wildcard,
-                    editingSprite.Id, TileSprite.Wildcard);
+            {
+                var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
+                    TileSprite.Wildcard, editingSprite.Id, TileSprite.Wildcard, TileSprite.Wildcard,
+                    TileSprite.Wildcard);
+                guiExtensions.TileSprite(context.NorthTileSpriteId, key);
+            }
             else
+            {
                 ImGui.Text(" Any");
+            }
+
             ImGui.TableNextColumn();
+            if (context.NortheastTileSpriteId != TileSprite.Wildcard)
+            {
+                var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
+                    TileSprite.Wildcard, TileSprite.Wildcard, editingSprite.Id, TileSprite.Wildcard,
+                    TileSprite.Wildcard);
+                guiExtensions.TileSprite(context.NortheastTileSpriteId, key);
+            }
+            else
+            {
+                ImGui.Text(" Any");
+            }
 
             // Middle row.
             ImGui.TableNextColumn();
             if (context.WestTileSpriteId != TileSprite.Wildcard)
             {
-                guiExtensions.TileSprite(context.WestTileSpriteId, TileSprite.Wildcard, editingSprite.Id,
-                    TileSprite.Wildcard, TileSprite.Wildcard);
+                var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, editingSprite.Id,
+                    TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
+                    TileSprite.Wildcard);
+                guiExtensions.TileSprite(context.WestTileSpriteId, key);
             }
             else
             {
@@ -556,13 +579,15 @@ public class TileSpriteEditorTab
             }
 
             ImGui.TableNextColumn();
-            guiExtensions.TileSprite($"tsPrevCtx{rowIndex}", editingSprite, context.NorthTileSpriteId,
-                context.EastTileSpriteId, context.SouthTileSpriteId, context.WestTileSpriteId);
+            guiExtensions.TileSprite($"tsPrevCtx{rowIndex}", editingSprite, context.TileContextKey);
+
             ImGui.TableNextColumn();
             if (context.EastTileSpriteId != TileSprite.Wildcard)
             {
-                guiExtensions.TileSprite(context.EastTileSpriteId, TileSprite.Wildcard, TileSprite.Wildcard,
-                    TileSprite.Wildcard, editingSprite.Id);
+                var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
+                    TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, editingSprite.Id,
+                    TileSprite.Wildcard);
+                guiExtensions.TileSprite(context.EastTileSpriteId, key);
             }
             else
             {
@@ -573,13 +598,43 @@ public class TileSpriteEditorTab
 
             // Bottom row.
             ImGui.TableNextColumn();
+            if (context.SouthwestTileSpriteId != TileSprite.Wildcard)
+            {
+                var key = new TileContextKey(TileSprite.Wildcard, editingSprite.Id, TileSprite.Wildcard,
+                    TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
+                    TileSprite.Wildcard);
+                guiExtensions.TileSprite(context.SouthwestTileSpriteId, key);
+            }
+            else
+            {
+                ImGui.Text(" Any");
+            }
+
             ImGui.TableNextColumn();
             if (context.SouthTileSpriteId != TileSprite.Wildcard)
-                guiExtensions.TileSprite(context.SouthTileSpriteId, editingSprite.Id, TileSprite.Wildcard,
-                    TileSprite.Wildcard, TileSprite.Wildcard);
+            {
+                var key = new TileContextKey(editingSprite.Id, TileSprite.Wildcard, TileSprite.Wildcard,
+                    TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
+                    TileSprite.Wildcard);
+                guiExtensions.TileSprite(context.SouthTileSpriteId, key);
+            }
             else
+            {
                 ImGui.Text(" Any");
+            }
+
             ImGui.TableNextColumn();
+            if (context.SoutheastTileSpriteId != TileSprite.Wildcard)
+            {
+                var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
+                    TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
+                    editingSprite.Id);
+                guiExtensions.TileSprite(context.SoutheastTileSpriteId, key);
+            }
+            else
+            {
+                ImGui.Text(" Any");
+            }
 
             ImGui.EndTable();
         }

@@ -283,15 +283,25 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         var south = gridPosition - GridPosition.OneY;
         var east = gridPosition + GridPosition.OneX;
         var west = gridPosition - GridPosition.OneX;
+        var northEast = north + GridPosition.OneX;
+        var southEast = south + GridPosition.OneX;
+        var southWest = south - GridPosition.OneX;
+        var northWest = north - GridPosition.OneX;
+
         var northId = GetTileSpriteIdForPosition(north, isTopFace);
         var southId = GetTileSpriteIdForPosition(south, isTopFace);
         var eastId = GetTileSpriteIdForPosition(east, isTopFace);
         var westId = GetTileSpriteIdForPosition(west, isTopFace);
+        var northEastId = GetTileSpriteIdForPosition(northEast, isTopFace);
+        var southEastId = GetTileSpriteIdForPosition(southEast, isTopFace);
+        var southWestId = GetTileSpriteIdForPosition(southWest, isTopFace);
+        var northWestId = GetTileSpriteIdForPosition(northWest, isTopFace);
 
         /* Resolve tile sprite to animated sprites. */
         var tileSprite = tileSpriteManager.TileSprites[centerId];
-        var resolvedSprites = tileSprite.GetMatchingAnimatedSpriteIds(northId, eastId,
-            southId, westId);
+        var contextKey = new TileContextKey(northId, northEastId, eastId, southEastId, southId, southWestId, westId,
+            northWestId);
+        var resolvedSprites = tileSprite.GetMatchingAnimatedSpriteIds(contextKey);
 
         /* Retrieve and populate cache. */
         var dict = isTopFace ? topFaceCache : frontFaceCache;

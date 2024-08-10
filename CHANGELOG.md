@@ -15,6 +15,7 @@
 * Resource Editor: Fix bug where removing existing resources would lead to incorrect
   graphics being rendered in the GUI (the lookup table used for GUI rendering was
   corrupted by incorrect reuse of a reclaimed entry in the table).
+* Tile Sprites: Expand tile contexts to include diagonal directions.
 
 #### 07 August 2024
 

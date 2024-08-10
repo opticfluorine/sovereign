@@ -108,7 +108,7 @@ public class GuiTextureMapper
     /// <summary>
     ///     Map from tilesprite ID (and neighbors) to corresponding texture list entry (front face).
     /// </summary>
-    private readonly Dictionary<Tuple<int, int, int, int, int>, int> tileSpriteIndices = new();
+    private readonly Dictionary<Tuple<int, TileContextKey>, int> tileSpriteIndices = new();
 
     private readonly TileSpriteManager tileSpriteManager;
 
@@ -282,25 +282,18 @@ public class GuiTextureMapper
     ///     Gets the ImGui texture ID for a tile sprite in a specific context.
     /// </summary>
     /// <param name="tileSpriteId">Tile sprite ID.</param>
-    /// <param name="neighborNorthId">North neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborEastId">East neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborSouthId">South neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborWestId">West neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="contextKey">Tile context key.</param>
     /// <returns>ImGui texture ID.</returns>
     /// <exception cref="IndexOutOfRangeException">Thrown if the tile sprite ID is out of range.</exception>
-    public IntPtr GetTextureIdForTileSprite(int tileSpriteId, int neighborNorthId, int neighborEastId,
-        int neighborSouthId, int neighborWestId)
+    public IntPtr GetTextureIdForTileSprite(int tileSpriteId, TileContextKey contextKey)
     {
-        if (!tileSpriteIndices.TryGetValue(
-                Tuple.Create(tileSpriteId, neighborNorthId, neighborEastId, neighborSouthId, neighborWestId),
-                out var index))
+        if (!tileSpriteIndices.TryGetValue(Tuple.Create(tileSpriteId, contextKey), out var index))
         {
             if (tileSpriteId >= tileSpriteManager.TileSprites.Count)
                 throw new IndexOutOfRangeException($"Tile sprite {tileSpriteId} does not exist.");
 
             // Resolve tile sprite through its context to a list of animated sprite layers.
-            var layers = tileSpriteManager.TileSprites[tileSpriteId].GetMatchingAnimatedSpriteIds(neighborNorthId,
-                neighborEastId, neighborSouthId, neighborWestId);
+            var layers = tileSpriteManager.TileSprites[tileSpriteId].GetMatchingAnimatedSpriteIds(contextKey);
             if (layers.Count == 0)
                 throw new IndexOutOfRangeException($"Tile sprite {tileSpriteId} contains no layers.");
 
@@ -328,13 +321,9 @@ public class GuiTextureMapper
     /// </summary>
     /// <param name="customId">Unique identifier for the custom sprite.</param>
     /// <param name="customSprite">Custom tile sprite.</param>
-    /// <param name="neighborNorthId">North neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborEastId">East neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborSouthId">South neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
-    /// <param name="neighborWestId">West neighbor tile sprite ID, or TileSprite.Wildcard if none.</param>
+    /// <param name="contextKey">Tile sprite context key.</param>
     /// <returns>ImGui texture ID.</returns>
-    public IntPtr GetTextureIdForCustomTileSprite(string customId, TileSprite customSprite, int neighborNorthId,
-        int neighborEastId, int neighborSouthId, int neighborWestId)
+    public IntPtr GetTextureIdForCustomTileSprite(string customId, TileSprite customSprite, TileContextKey contextKey)
     {
         if (!customIndices.TryGetValue(customId, out var index))
         {
@@ -349,7 +338,7 @@ public class GuiTextureMapper
         texData.Layers.Clear();
         texData.Layers.AddRange(
             customSprite
-                .GetMatchingAnimatedSpriteIds(neighborNorthId, neighborEastId, neighborSouthId, neighborWestId)
+                .GetMatchingAnimatedSpriteIds(contextKey)
                 .Select(id => GetTextureIdForAnimatedSprite(id, Orientation.South, AnimationPhase.Default)));
         var layerTexData = textures[(int)texData.Layers[0] - IndexOffset];
         texData.Width = layerTexData.Width;

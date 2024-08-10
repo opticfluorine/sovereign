@@ -91,19 +91,13 @@ public class GuiComponentEditors
 
         ImGui.TableNextColumn();
         var needToOpenPopup = guiExtensions.TileSpriteButton("##matButtonFront",
-            mat.MaterialSubtypes[modifier].SideFaceTileSpriteId,
-            TileSprite.Wildcard, TileSprite.Wildcard,
-            TileSprite.Wildcard, TileSprite.Wildcard);
+            mat.MaterialSubtypes[modifier].SideFaceTileSpriteId, TileContextKey.AllWildcards);
         ImGui.SameLine();
         needToOpenPopup = needToOpenPopup || guiExtensions.TileSpriteButton("##matButtonTop",
-            mat.MaterialSubtypes[modifier].TopFaceTileSpriteId,
-            TileSprite.Wildcard, TileSprite.Wildcard,
-            TileSprite.Wildcard, TileSprite.Wildcard);
+            mat.MaterialSubtypes[modifier].TopFaceTileSpriteId, TileContextKey.AllWildcards);
         ImGui.SameLine();
         needToOpenPopup = needToOpenPopup || guiExtensions.TileSpriteButton("##matButtonObsc",
-            mat.MaterialSubtypes[modifier].ObscuredTopFaceTileSpriteId,
-            TileSprite.Wildcard, TileSprite.Wildcard,
-            TileSprite.Wildcard, TileSprite.Wildcard);
+            mat.MaterialSubtypes[modifier].ObscuredTopFaceTileSpriteId, TileContextKey.AllWildcards);
 
         if (needToOpenPopup) materialSelectorPopup.Open();
         materialSelectorPopup.Render();

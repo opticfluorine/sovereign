@@ -104,9 +104,7 @@ public class WorldEditorGui
         var tile = material.MaterialSubtypes[templateMaterialModifier];
 
         ImGui.TableNextColumn();
-        guiExtensions.TileSprite(tile.TopFaceTileSpriteId,
-            TileSprite.Wildcard,
-            TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard);
+        guiExtensions.TileSprite(tile.TopFaceTileSpriteId, TileContextKey.AllWildcards);
 
         ImGui.TableNextColumn();
         var relId = worldEditServices.BlockTemplateId - EntityConstants.FirstTemplateEntityId;

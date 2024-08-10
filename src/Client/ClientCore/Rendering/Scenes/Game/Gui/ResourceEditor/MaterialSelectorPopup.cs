@@ -76,17 +76,14 @@ public class MaterialSelectorPopup
                 // Material column
                 ImGui.TableNextColumn();
                 if (guiExtensions.TileSpriteButton($"##matButtonFront{i}", mat.MaterialSubtypes[0].SideFaceTileSpriteId,
-                        TileSprite.Wildcard, TileSprite.Wildcard,
-                        TileSprite.Wildcard, TileSprite.Wildcard)) Select(i);
+                        TileContextKey.AllWildcards)) Select(i);
                 ImGui.SameLine();
                 if (guiExtensions.TileSpriteButton($"##matButtonTop{i}", mat.MaterialSubtypes[0].TopFaceTileSpriteId,
-                        TileSprite.Wildcard, TileSprite.Wildcard,
-                        TileSprite.Wildcard, TileSprite.Wildcard)) Select(i);
+                        TileContextKey.AllWildcards)) Select(i);
                 ImGui.SameLine();
                 if (guiExtensions.TileSpriteButton($"##matButtonObsc{i}",
                         mat.MaterialSubtypes[0].ObscuredTopFaceTileSpriteId,
-                        TileSprite.Wildcard, TileSprite.Wildcard,
-                        TileSprite.Wildcard, TileSprite.Wildcard)) Select(i);
+                        TileContextKey.AllWildcards)) Select(i);
 
                 // Name column.
                 ImGui.TableNextColumn();

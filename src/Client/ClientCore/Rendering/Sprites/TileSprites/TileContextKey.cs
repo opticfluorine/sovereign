@@ -32,6 +32,13 @@ public readonly struct TileContextKey : IEquatable<TileContextKey>
     public readonly int WestId;
     public readonly int NorthwestId;
 
+    /// <summary>
+    ///     Context key containing all wildcards.
+    /// </summary>
+    public static readonly TileContextKey AllWildcards = new(TileSprite.Wildcard, TileSprite.Wildcard,
+        TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
+        TileSprite.Wildcard);
+
     public bool Equals(TileContextKey other)
     {
         return NorthId == other.NorthId && NortheastId == other.NortheastId && EastId == other.EastId &&
