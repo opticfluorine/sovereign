@@ -68,6 +68,10 @@ public class RenderingMainLoopAction : IMainLoopAction
             {
                 renderingManager.Render();
             }
+            catch (FatalErrorException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 Logger.Error("Exception thrown during rendering.", e);
