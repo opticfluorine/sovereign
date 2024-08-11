@@ -237,6 +237,20 @@ CREATE TABLE BlockPosition
 CREATE UNIQUE INDEX BlockPosition_Xyz_Index ON BlockPosition (x, y, z);
 
 
+------------------------------
+-- World Segment Block Data --
+------------------------------
+
+CREATE TABLE WorldSegmentBlockData
+(
+    x INTEGER NOT NULL,
+    y INTEGER NOT NULL,
+    z INTEGER NOT NULL,
+    data BLOB NOT NULL,
+    PRIMARY KEY (x, y, z)
+);
+
+
 --------------------------------------
 -- Account With Authentication View --
 --------------------------------------
@@ -329,49 +343,6 @@ INSERT INTO MaterialModifier (id, modifier)
 VALUES (0x7FFE000000000002, 0);
 INSERT INTO Drawable (id, value)
 VALUES (0x7FFE000000000002, 1);
-
-----------------------------------
--- Starter Data - Base Platform --
-----------------------------------
-
--- 3x3 grid of grass blocks centered on the origin at zero depth.
-INSERT INTO Entity (id, template_id)
-VALUES (0x7FFF000000000000, 0x7FFE000000000000);
-INSERT INTO BlockPosition (id, x, y, z)
-VALUES (0x7FFF000000000000, -1, -1, 0);
-INSERT INTO Entity (id, template_id)
-VALUES (0x7FFF000000000001, 0x7FFE000000000000);
-INSERT INTO BlockPosition (id, x, y, z)
-VALUES (0x7FFF000000000001, -1, 0, 0);
-INSERT INTO Entity (id, template_id)
-VALUES (0x7FFF000000000002, 0x7FFE000000000000);
-INSERT INTO BlockPosition (id, x, y, z)
-VALUES (0x7FFF000000000002, 0, -1, 0);
-INSERT INTO Entity (id, template_id)
-VALUES (0x7FFF000000000003, 0x7FFE000000000000);
-INSERT INTO BlockPosition (id, x, y, z)
-VALUES (0x7FFF000000000003, 0, 0, 0);
-INSERT INTO Entity (id, template_id)
-VALUES (0x7FFF000000000004, 0x7FFE000000000000);
-INSERT INTO BlockPosition (id, x, y, z)
-VALUES (0x7FFF000000000004, 1, 0, 0);
-INSERT INTO Entity (id, template_id)
-VALUES (0x7FFF000000000005, 0x7FFE000000000000);
-INSERT INTO BlockPosition (id, x, y, z)
-VALUES (0x7FFF000000000005, 0, 1, 0);
-INSERT INTO Entity (id, template_id)
-VALUES (0x7FFF000000000006, 0x7FFE000000000000);
-INSERT INTO BlockPosition (id, x, y, z)
-VALUES (0x7FFF000000000006, 1, 1, 0);
-INSERT INTO Entity (id, template_id)
-VALUES (0x7FFF000000000007, 0x7FFE000000000000);
-INSERT INTO BlockPosition (id, x, y, z)
-VALUES (0x7FFF000000000007, -1, 1, 0);
-INSERT INTO Entity (id, template_id)
-VALUES (0x7FFF000000000008, 0x7FFE000000000000);
-INSERT INTO BlockPosition (id, x, y, z)
-VALUES (0x7FFF000000000008, 1, -1, 0);
-
 
 -- Log the migration.
 INSERT INTO MigrationLog
