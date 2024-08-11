@@ -14,9 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Systems.WorldManagement;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -63,7 +65,7 @@ public class WorldManagementServices
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
     /// <returns>Background task yielding block data.</returns>
-    public Task<byte[]?>? GetWorldSegmentBlockData(GridPosition segmentIndex)
+    public Task<Tuple<WorldSegmentBlockData, byte[]>>? GetWorldSegmentBlockData(GridPosition segmentIndex)
     {
         return dataManager.GetWorldSegmentBlockData(segmentIndex);
     }

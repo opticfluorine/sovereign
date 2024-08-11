@@ -28,6 +28,7 @@ using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Systems.Block;
+using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -51,7 +52,7 @@ public sealed class WorldSegmentBlockDataManager
     ///     Updates are made via continuations of the tasks.
     ///     This allows the REST endpoint to await any segment data.
     /// </summary>
-    private readonly ConcurrentDictionary<GridPosition, Task<byte[]?>> dataProducers = new();
+    private readonly ConcurrentDictionary<GridPosition, Task<Tuple<WorldSegmentBlockData, byte[]>>> compressedDataProducers = new();
 
     /// <summary>
     ///     Deletion tasks. The presence of a deletion task in this map indicates
@@ -97,7 +98,7 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
     /// <returns>Summary block data, or null if no summary block data is available.</returns>
-    public Task<byte[]?>? GetWorldSegmentBlockData(GridPosition segmentIndex)
+    public Task<Tuple<WorldSegmentBlockData, byte[]>>? GetWorldSegmentBlockData(GridPosition segmentIndex)
     {
         // If the segment is scheduled for regeneration, kick off the lazy load now that it's been requested.
         lock (segmentsToRegenerate)
@@ -109,7 +110,7 @@ public sealed class WorldSegmentBlockDataManager
             }
         }
 
-        return dataProducers.TryGetValue(segmentIndex, out var data) ? data : null;
+        return compressedDataProducers.TryGetValue(segmentIndex, out var data) ? data : null;
     }
 
     /// <summary>
@@ -121,11 +122,11 @@ public sealed class WorldSegmentBlockDataManager
         if (deletionTasks.TryGetValue(segmentIndex, out var deletionTask))
             // Segment was rapidly unloaded and reloaded.
             // Schedule the reload for after the unload is complete.
-            dataProducers[segmentIndex] = deletionTask.ContinueWith(_ => DoAddWorldSegment(segmentIndex));
+            compressedDataProducers[segmentIndex] = deletionTask.ContinueWith(_ => DoAddWorldSegment(segmentIndex));
         else
             // Segment has not yet been loaded or has been fully unloaded.
             // Start a new processing chain from scratch for this segment.
-            dataProducers[segmentIndex] = Task.Factory.StartNew(() => DoAddWorldSegment(segmentIndex));
+            compressedDataProducers[segmentIndex] = Task.Factory.StartNew(() => DoAddWorldSegment(segmentIndex));
     }
 
     /// <summary>
@@ -138,29 +139,30 @@ public sealed class WorldSegmentBlockDataManager
         if (deletionTasks.ContainsKey(segmentIndex)) return;
 
         // Immediately remove the segment from the data set, then schedule it for disposal.
-        if (dataProducers.TryRemove(segmentIndex, out var currentTask))
+        if (compressedDataProducers.TryRemove(segmentIndex, out var currentTask))
             deletionTasks[segmentIndex] = currentTask.ContinueWith(
                 _ => DoRemoveWorldSegment(segmentIndex));
         else
             Logger.ErrorFormat("Tried to remove world segemnt data for {0} before it was added.", segmentIndex);
     }
-
+    
     /// <summary>
     ///     Blocking call that adds a world segment to the data set.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
-    private byte[]? DoAddWorldSegment(GridPosition segmentIndex)
+    private Tuple<WorldSegmentBlockData, byte[]> DoAddWorldSegment(GridPosition segmentIndex)
     {
         try
         {
             Logger.DebugFormat("Adding summary block data for world segment {0}.", segmentIndex);
             var blockData = generator.Create(segmentIndex);
-            return MessagePackSerializer.Serialize(blockData, MessageConfig.CompressedUntrustedMessagePackOptions);
+            var bytes = MessagePackSerializer.Serialize(blockData, MessageConfig.CompressedUntrustedMessagePackOptions);
+            return Tuple.Create(blockData, bytes);
         }
         catch (Exception e)
         {
             Logger.ErrorFormat(e, "Error adding summary block data for world segment {0}.", segmentIndex);
-            return null;
+            return Tuple.Create(new WorldSegmentBlockData(), Array.Empty<byte>());
         }
     }
 

@@ -75,7 +75,8 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
             {
                 // Get the latest version of the block data and encode it for transfer.
                 var blockData = await dataTask;
-                if (blockData == null)
+                var blockDataBytes = blockData.Item2;
+                if (blockDataBytes.Length == 0)
                 {
                     // Segment data was processed but is empty.     
                     Logger.ErrorFormat("Got empty block data for world segment {0}.", segmentIndex);
@@ -85,8 +86,8 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
                 }
 
                 ctx.Response.ContentType = "application/octet-stream";
-                ctx.Response.ContentLength = blockData.Length;
-                await ctx.Response.Send(blockData);
+                ctx.Response.ContentLength = blockDataBytes.Length;
+                await ctx.Response.Send(blockDataBytes);
             }
             else
             {
