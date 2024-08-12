@@ -209,6 +209,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             new GridPositionSqliteModifyComponentQuery(BlockPositionTableName, (SqliteConnection)Connection);
         RemoveBlockPositionComponentQuery =
             new SqliteRemoveComponentQuery(BlockPositionTableName, (SqliteConnection)Connection);
+
+        SetWorldSegmentBlockDataQuery = new SqliteSetWorldSegmentBlockDataQuery((SqliteConnection)Connection);
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -278,6 +280,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<GridPosition> AddBlockPositionComponentQuery { get; }
     public IModifyComponentQuery<GridPosition> ModifyBlockPositionComponentQuery { get; }
     public IRemoveComponentQuery RemoveBlockPositionComponentQuery { get; }
+    public ISetWorldSegmentBlockDataQuery SetWorldSegmentBlockDataQuery { get; }
 
     public void Dispose()
     {

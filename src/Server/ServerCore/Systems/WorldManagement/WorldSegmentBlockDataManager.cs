@@ -71,6 +71,11 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     private readonly HashSet<GridPosition> segmentsToRegenerate = new();
 
+    /// <summary>
+    ///     Set of world segments that need to be updated in the database.
+    /// </summary>
+    private readonly HashSet<GridPosition> segmentsToPersist = new();
+
     public WorldSegmentBlockDataManager(
         WorldSegmentBlockDataGenerator generator,
         BlockPositionComponentCollection blockPositions,
@@ -144,6 +149,22 @@ public sealed class WorldSegmentBlockDataManager
                 _ => DoRemoveWorldSegment(segmentIndex));
         else
             Logger.ErrorFormat("Tried to remove world segemnt data for {0} before it was added.", segmentIndex);
+    }
+
+    /// <summary>
+    ///     Gets the list of world segments that need to be persisted to the database, then
+    ///     clears the set so that the next call only returns the segments modified after the
+    ///     current call.
+    /// </summary>
+    /// <returns>List of world segment indices that need to be persisted.</returns>
+    public List<GridPosition> GetAndClearSegmentsToPersist()
+    {
+        lock (segmentsToPersist)
+        {
+            var list = new List<GridPosition>(segmentsToPersist);
+            segmentsToPersist.Clear();
+            return list;
+        }
     }
     
     /// <summary>
@@ -230,6 +251,11 @@ public sealed class WorldSegmentBlockDataManager
             lock (segmentsToRegenerate)
             {
                 segmentsToRegenerate.Add(segmentIndex);
+            }
+
+            lock (segmentsToPersist)
+            {
+                segmentsToPersist.Add(segmentIndex);
             }
         }
         catch (Exception e)

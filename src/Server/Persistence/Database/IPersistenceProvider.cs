@@ -297,4 +297,9 @@ public interface IPersistenceProvider : IDisposable
     ///     IRemoveAdminRoleQuery for this persistence provider.
     /// </summary>
     IRemoveAdminRoleQuery RemoveAdminRoleQuery { get; }
+
+    /// <summary>
+    ///     ISetWorldSegmentBlockDataQuery for this persistence provider.
+    /// </summary>
+    ISetWorldSegmentBlockDataQuery SetWorldSegmentBlockDataQuery { get; }
 }

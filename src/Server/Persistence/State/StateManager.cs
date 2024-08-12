@@ -45,10 +45,11 @@ public sealed class StateManager : IDisposable
         PersistenceProviderManager persistenceProviderManager,
         ILogger logger, FatalErrorHandler fatalErrorHandler,
         EntityNotifier entityNotifier, EntityMapper entityMapper,
-        IEventSender eventSender, PersistenceInternalController internalController)
+        IEventSender eventSender, PersistenceInternalController internalController,
+        WorldSegmentPersister worldSegmentPersister)
     {
-        FrontBuffer = new StateBuffer(logger, fatalErrorHandler, eventSender, internalController);
-        backBuffer = new StateBuffer(logger, fatalErrorHandler, eventSender, internalController);
+        FrontBuffer = new StateBuffer(logger, fatalErrorHandler, eventSender, internalController, worldSegmentPersister);
+        backBuffer = new StateBuffer(logger, fatalErrorHandler, eventSender, internalController, worldSegmentPersister);
 
         this.entityManager = entityManager;
         this.persistenceProviderManager = persistenceProviderManager;

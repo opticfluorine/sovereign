@@ -69,4 +69,13 @@ public class WorldManagementServices
     {
         return dataManager.GetWorldSegmentBlockData(segmentIndex);
     }
+
+    /// <summary>
+    ///     Gets and clears the list of world segments that need to be persisted to the database.
+    /// </summary>
+    /// <returns>List of world segment indices to be persisted.</returns>
+    public List<GridPosition> GetAndClearSegmentsToPersist()
+    {
+        return dataManager.GetAndClearSegmentsToPersist();
+    }
 }

@@ -65,6 +65,7 @@ public sealed class StateBuffer
 
     private readonly FatalErrorHandler fatalErrorHandler;
     private readonly PersistenceInternalController internalController;
+    private readonly WorldSegmentPersister worldSegmentPersister;
 
     private readonly ILogger logger;
 
@@ -119,12 +120,13 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<ulong>> templateUpdates = new(BufferSize);
 
     public StateBuffer(ILogger logger, FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
-        PersistenceInternalController internalController)
+        PersistenceInternalController internalController, WorldSegmentPersister worldSegmentPersister)
     {
         this.logger = logger;
         this.fatalErrorHandler = fatalErrorHandler;
         this.eventSender = eventSender;
         this.internalController = internalController;
+        this.worldSegmentPersister = worldSegmentPersister;
     }
 
     /// <summary>
@@ -397,6 +399,8 @@ public sealed class StateBuffer
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);
 
+                worldSegmentPersister.SynchronizeWorldSegments(persistenceProvider, transaction);
+                
                 transaction.Commit();
             }
 
