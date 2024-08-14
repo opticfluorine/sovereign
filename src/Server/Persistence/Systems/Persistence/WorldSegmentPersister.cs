@@ -18,7 +18,6 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using MessagePack;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Systems.WorldManagement;
@@ -32,11 +31,42 @@ namespace Sovereign.Persistence.Systems.Persistence;
 /// </summary>
 public class WorldSegmentPersister
 {
+    /// <summary>
+    ///     Size in bytes of buffer to hold the loaded world segment block data.
+    /// </summary>
+    private const int BufferSize = 1048576;
+
+    /// <summary>
+    ///     Buffer used to hold the loaded world segment block data.
+    /// </summary>
+    private readonly byte[] blockDataBuffer = new byte[BufferSize];
+
+    private readonly WorldSegmentBlockDataLoader loader;
+
     private readonly WorldManagementServices worldManagementServices;
 
-    public WorldSegmentPersister(WorldManagementServices worldManagementServices)
+    public WorldSegmentPersister(WorldManagementServices worldManagementServices, WorldSegmentBlockDataLoader loader)
     {
         this.worldManagementServices = worldManagementServices;
+        this.loader = loader;
+    }
+
+    /// <summary>
+    ///     Loads the world segment block data for the given world segment from the database.
+    /// </summary>
+    /// <param name="provider">Persistence provider.</param>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <remarks>
+    ///     This method is not thread-safe. It should only be called from the executor thread of
+    ///     the PersistenceSystem.
+    /// </remarks>
+    public void LoadWorldSegmentBlockData(IPersistenceProvider provider, GridPosition segmentIndex)
+    {
+        if (!provider.GetWorldSegmentBlockDataQuery.TryGetWorldSegmentBlockData(segmentIndex, blockDataBuffer)) return;
+
+        var blockData = MessageConfig.DeserializeMsgPack<WorldSegmentBlockData>(blockDataBuffer)
+                        ?? throw new Exception($"Persisted block data for world segment {segmentIndex} is invalid.");
+        loader.Load(segmentIndex, blockData);
     }
 
     /// <summary>
@@ -70,7 +100,7 @@ public class WorldSegmentPersister
     /// <param name="data">Data.</param>
     /// <param name="provider">Persistence provider.</param>
     /// <param name="transaction">Database transaction.</param>
-    private void SyncSingleData(GridPosition segmentIndex, WorldSegmentBlockData data, IPersistenceProvider provider, 
+    private void SyncSingleData(GridPosition segmentIndex, WorldSegmentBlockData data, IPersistenceProvider provider,
         IDbTransaction transaction)
     {
         var serializedData = MessageConfig.SerializeMsgPack(data);

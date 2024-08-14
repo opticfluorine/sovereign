@@ -33,10 +33,10 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
     private const string Query =
         @"WITH RECURSIVE 
             EntityTree(id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
-                drawable, animatedSprite, orientation, admin, blockX, blockY, blockZ)
+                drawable, animatedSprite, orientation, admin)
 	        AS (
 	        	SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
-                        drawable, animatedSprite, orientation, admin, NULL, NULL, NULL
+                        drawable, animatedSprite, orientation, admin 
 	        		FROM EntityWithComponents
 	        		WHERE x >= @X1 AND x < @X2
 	        		  AND y >= @Y1 AND y < @Y2
@@ -44,35 +44,14 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
 	        		  AND playerCharacter IS NULL
 	        	UNION ALL
 	        	SELECT ec.id, ec.template_id, NULL, NULL, NULL, ec.material, ec.materialModifier, ec.playerCharacter, 
-                        ec.name, ec.account, ec.parent, ec.drawable, ec.animatedSprite, ec.orientation, ec.admin,
-                        NULL, NULL, NULL
+                        ec.name, ec.account, ec.parent, ec.drawable, ec.animatedSprite, ec.orientation, ec.admin
 	        		FROM EntityWithComponents ec, EntityTree et
 	        		WHERE ec.parent = et.id 
                       AND ec.playerCharacter IS NULL
-	        ),
-            BlockEntityTree(id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
-                drawable, animatedSprite, orientation, admin, blockX, blockY, blockZ)
-            AS (
-                SELECT id, template_id, NULL, NULL, NULL, material, materialModifier, playerCharacter, name, 
-                        account, parent, drawable, animatedSprite, orientation, admin, blockX, blockY, blockZ
-                    FROM EntityWithComponents
-                    WHERE blockX >= @X1 AND blockX < @X2
-                      AND blockY >= @Y1 AND blockY < @Y2
-                      AND blockZ >= @Z1 AND blockZ < @Z2
-                UNION ALL
-                SELECT ec.id, ec.template_id, NULL, NULL, NULL, ec.material, ec.materialModifier, ec.playerCharacter,
-                        ec.name, ec.account, ec.parent, ec.drawable, ec.animatedSprite, ec.orientation, ec.admin,
-                        ec.blockX, ec.blockY, ec.blockZ
-                    FROM EntityWithComponents ec, BlockEntityTree et
-                    WHERE ec.parent = et.id
-            )
+	        )
             SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
-                drawable, animatedSprite, orientation, admin, blockX, blockY, blockZ 
+                drawable, animatedSprite, orientation, admin
             FROM EntityTree 
-            UNION ALL
-            SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
-                drawable, animatedSprite, orientation, admin, blockX, blockY, blockZ
-            FROM BlockEntityTree
             ORDER BY parent NULLS LAST";
 
     private readonly SqliteConnection dbConnection;

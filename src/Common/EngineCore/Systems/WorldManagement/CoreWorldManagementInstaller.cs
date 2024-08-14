@@ -14,25 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.Persistence.Entities;
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
 
-namespace Sovereign.Persistence.State.Trackers;
+namespace Sovereign.EngineCore.Systems.WorldManagement;
 
-/// <summary>
-///     State tracker for the BlockPosition component.
-/// </summary>
-public class BlockPositionStateTracker : BaseStateTracker<GridPosition>
+public class CoreWorldManagementInstaller : IWindsorInstaller
 {
-    public BlockPositionStateTracker(BlockPositionComponentCollection blockPositions, EntityMapper entityMapper,
-        StateManager stateManager)
-        : base(blockPositions, GridPosition.Zero, entityMapper, stateManager)
+    public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-    }
-
-    protected override void OnStateUpdate(ref StateUpdate<GridPosition> update)
-    {
-        stateManager.FrontBuffer.UpdateBlockPosition(ref update);
+        container.Register(Component.For<WorldSegmentBlockDataLoader>().LifestyleSingleton());
     }
 }

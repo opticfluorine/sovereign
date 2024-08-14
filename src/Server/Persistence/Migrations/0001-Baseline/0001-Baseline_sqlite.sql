@@ -1,5 +1,3 @@
--- noinspection SqlNoDataSourceInspectionForFile
-
 --
 -- Sovereign Engine
 -- Copyright (c) 2019 opticfluorine
@@ -220,33 +218,16 @@ CREATE TABLE Admin
 );
 
 
---------------------
--- Block Position --
---------------------
-
-CREATE TABLE BlockPosition
-(
-    id INTEGER PRIMARY KEY NOT NULL,
-    x  INTEGER             NOT NULL,
-    y  INTEGER             NOT NULL,
-    z  INTEGER             NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
-
--- Blocks can't overlap, so use a unique index.
-CREATE UNIQUE INDEX BlockPosition_Xyz_Index ON BlockPosition (x, y, z);
-
-
 ------------------------------
 -- World Segment Block Data --
 ------------------------------
 
 CREATE TABLE WorldSegmentBlockData
 (
-    x INTEGER NOT NULL,
-    y INTEGER NOT NULL,
-    z INTEGER NOT NULL,
-    data BLOB NOT NULL,
+    x    INTEGER NOT NULL,
+    y    INTEGER NOT NULL,
+    z    INTEGER NOT NULL,
+    data BLOB    NOT NULL,
     PRIMARY KEY (x, y, z)
 );
 
@@ -285,10 +266,7 @@ SELECT Entity.id                   AS id,
        Drawable.value              AS drawable,
        AnimatedSprite.value        AS animatedSprite,
        Orientation.value           AS orientation,
-       Admin.value                 AS admin,
-       BlockPosition.x             AS blockX,
-       BlockPosition.y             AS blockY,
-       BlockPosition.z             AS blockZ
+       Admin.value                 AS admin
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
@@ -300,8 +278,7 @@ FROM Entity
          LEFT JOIN Drawable ON Entity.id = Drawable.id
          LEFT JOIN AnimatedSprite ON Entity.id = AnimatedSprite.id
          LEFT JOIN Orientation ON Entity.id = Orientation.id
-         LEFT JOIN Admin ON Entity.id = Admin.id
-         LEFT JOIN BlockPosition ON Entity.id = BlockPosition.id;
+         LEFT JOIN Admin ON Entity.id = Admin.id;
 
 
 --------------------------------------

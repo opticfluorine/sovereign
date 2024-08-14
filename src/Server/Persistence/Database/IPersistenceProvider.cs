@@ -17,7 +17,6 @@
 
 using System;
 using System.Data;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.Persistence.Database.Queries;
 
@@ -254,21 +253,6 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveAdminComponentQuery { get; }
 
     /// <summary>
-    ///     IAddComponentQuery for BlockPosition component.
-    /// </summary>
-    IAddComponentQuery<GridPosition> AddBlockPositionComponentQuery { get; }
-
-    /// <summary>
-    ///     IModifyComponentQuery for BlockPosition component.
-    /// </summary>
-    IModifyComponentQuery<GridPosition> ModifyBlockPositionComponentQuery { get; }
-
-    /// <summary>
-    ///     IRemoveComponentQuery for BlockPosition component.
-    /// </summary>
-    IRemoveComponentQuery RemoveBlockPositionComponentQuery { get; }
-
-    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }
@@ -297,6 +281,11 @@ public interface IPersistenceProvider : IDisposable
     ///     IRemoveAdminRoleQuery for this persistence provider.
     /// </summary>
     IRemoveAdminRoleQuery RemoveAdminRoleQuery { get; }
+
+    /// <summary>
+    ///     IGetWorldSegmentBlockDataQuery for this persistence provider.
+    /// </summary>
+    IGetWorldSegmentBlockDataQuery GetWorldSegmentBlockDataQuery { get; }
 
     /// <summary>
     ///     ISetWorldSegmentBlockDataQuery for this persistence provider.

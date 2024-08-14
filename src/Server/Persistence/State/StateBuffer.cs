@@ -19,7 +19,6 @@ using System;
 using System.Data;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
@@ -56,17 +55,13 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<int>> animatedSpriteUpdates = new(BufferSize);
 
     /// <summary>
-    ///     Block position state updates.
+    ///     Drawable state updates.
     /// </summary>
-    private readonly StructBuffer<StateUpdate<GridPosition>> blockPositionUpdates = new(BufferSize);
-
     private readonly StructBuffer<StateUpdate<bool>> drawableUpdates = new(BufferSize);
-    private readonly IEventSender eventSender;
 
+    private readonly IEventSender eventSender;
     private readonly FatalErrorHandler fatalErrorHandler;
     private readonly PersistenceInternalController internalController;
-    private readonly WorldSegmentPersister worldSegmentPersister;
-
     private readonly ILogger logger;
 
     /// <summary>
@@ -118,6 +113,8 @@ public sealed class StateBuffer
     ///     Template state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<ulong>> templateUpdates = new(BufferSize);
+
+    private readonly WorldSegmentPersister worldSegmentPersister;
 
     public StateBuffer(ILogger logger, FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
         PersistenceInternalController internalController, WorldSegmentPersister worldSegmentPersister)
@@ -256,15 +253,6 @@ public sealed class StateBuffer
     }
 
     /// <summary>
-    ///     Enqueues a block position update.
-    /// </summary>
-    /// <param name="update">Update.</param>
-    public void UpdateBlockPosition(ref StateUpdate<GridPosition> update)
-    {
-        blockPositionUpdates.Add(ref update);
-    }
-
-    /// <summary>
     ///     Resets the buffer.
     /// </summary>
     public void Reset()
@@ -283,7 +271,6 @@ public sealed class StateBuffer
         animatedSpriteUpdates.Clear();
         orientationUpdates.Clear();
         adminUpdates.Clear();
-        blockPositionUpdates.Clear();
     }
 
     /// <summary>
@@ -303,7 +290,7 @@ public sealed class StateBuffer
     {
         try
         {
-            using (var transaction = persistenceProvider.Connection!.BeginTransaction())
+            using (var transaction = persistenceProvider.Connection.BeginTransaction())
             {
                 // Synchronize the entities first before the components.
                 // This ensures that any foreign key relationships between components
@@ -315,23 +302,23 @@ public sealed class StateBuffer
 
                 /* Position. */
                 SynchronizeComponent(positionUpdates,
-                    persistenceProvider.AddPositionQuery!,
-                    persistenceProvider.ModifyPositionQuery!,
-                    persistenceProvider.RemovePositionQuery!,
+                    persistenceProvider.AddPositionQuery,
+                    persistenceProvider.ModifyPositionQuery,
+                    persistenceProvider.RemovePositionQuery,
                     transaction);
 
                 /* Material. */
                 SynchronizeComponent(materialUpdates,
-                    persistenceProvider.AddMaterialQuery!,
-                    persistenceProvider.ModifyMaterialQuery!,
-                    persistenceProvider.RemoveMaterialQuery!,
+                    persistenceProvider.AddMaterialQuery,
+                    persistenceProvider.ModifyMaterialQuery,
+                    persistenceProvider.RemoveMaterialQuery,
                     transaction);
 
                 /* MaterialModifier. */
                 SynchronizeComponent(materialModifierUpdates,
-                    persistenceProvider.AddMaterialModifierQuery!,
-                    persistenceProvider.ModifyMaterialModifierQuery!,
-                    persistenceProvider.RemoveMaterialModifierQuery!,
+                    persistenceProvider.AddMaterialModifierQuery,
+                    persistenceProvider.ModifyMaterialModifierQuery,
+                    persistenceProvider.RemoveMaterialModifierQuery,
                     transaction);
 
                 /* PlayerCharacter. */
@@ -390,17 +377,10 @@ public sealed class StateBuffer
                     persistenceProvider.RemoveAdminComponentQuery,
                     transaction);
 
-                // BlockPosition.
-                SynchronizeComponent(blockPositionUpdates,
-                    persistenceProvider.AddBlockPositionComponentQuery,
-                    persistenceProvider.ModifyBlockPositionComponentQuery,
-                    persistenceProvider.RemoveBlockPositionComponentQuery,
-                    transaction);
-
                 SynchronizeRemovedEntities(persistenceProvider, transaction);
 
                 worldSegmentPersister.SynchronizeWorldSegments(persistenceProvider, transaction);
-                
+
                 transaction.Commit();
             }
 
