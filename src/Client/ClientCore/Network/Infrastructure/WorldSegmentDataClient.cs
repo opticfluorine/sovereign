@@ -138,6 +138,11 @@ public sealed class WorldSegmentDataClient
                         Logger.WarnFormat("Server is not ready to serve segment data for {0}.", segmentIndex);
                         break;
 
+                    case HttpStatusCode.Forbidden:
+                        // Server reports the player is not currently subscribed - delay and try again.
+                        Logger.WarnFormat("Server denied access to segment data for {0}.", segmentIndex);
+                        break;
+
                     default:
                         // Other unknown error - log, try again.
                         Logger.ErrorFormat("Unexpected response code {0} retrieving segment data for {1}.",

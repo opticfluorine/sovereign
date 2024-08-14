@@ -52,7 +52,8 @@ public sealed class WorldSegmentBlockDataManager
     ///     Updates are made via continuations of the tasks.
     ///     This allows the REST endpoint to await any segment data.
     /// </summary>
-    private readonly ConcurrentDictionary<GridPosition, Task<Tuple<WorldSegmentBlockData, byte[]>>> compressedDataProducers = new();
+    private readonly ConcurrentDictionary<GridPosition, Task<Tuple<WorldSegmentBlockData, byte[]>>>
+        compressedDataProducers = new();
 
     /// <summary>
     ///     Deletion tasks. The presence of a deletion task in this map indicates
@@ -67,14 +68,14 @@ public sealed class WorldSegmentBlockDataManager
     private readonly WorldSegmentResolver resolver;
 
     /// <summary>
-    ///     Set of world segments to schedule for regeneration.
-    /// </summary>
-    private readonly HashSet<GridPosition> segmentsToRegenerate = new();
-
-    /// <summary>
     ///     Set of world segments that need to be updated in the database.
     /// </summary>
     private readonly HashSet<GridPosition> segmentsToPersist = new();
+
+    /// <summary>
+    ///     Set of world segments to schedule for regeneration.
+    /// </summary>
+    private readonly HashSet<GridPosition> segmentsToRegenerate = new();
 
     public WorldSegmentBlockDataManager(
         WorldSegmentBlockDataGenerator generator,
@@ -103,7 +104,7 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
     /// <returns>Summary block data, or null if no summary block data is available.</returns>
-    public Task<Tuple<WorldSegmentBlockData, byte[]>>? GetWorldSegmentBlockData(GridPosition segmentIndex)
+    public Task<Tuple<WorldSegmentBlockData, byte[]>> GetWorldSegmentBlockData(GridPosition segmentIndex)
     {
         // If the segment is scheduled for regeneration, kick off the lazy load now that it's been requested.
         lock (segmentsToRegenerate)
@@ -115,7 +116,14 @@ public sealed class WorldSegmentBlockDataManager
             }
         }
 
-        return compressedDataProducers.TryGetValue(segmentIndex, out var data) ? data : null;
+        if (!compressedDataProducers.TryGetValue(segmentIndex, out var data))
+        {
+            // If nothing is present, initialize a new record.
+            AddWorldSegment(segmentIndex);
+            data = compressedDataProducers[segmentIndex];
+        }
+
+        return data;
     }
 
     /// <summary>
@@ -166,7 +174,7 @@ public sealed class WorldSegmentBlockDataManager
             return list;
         }
     }
-    
+
     /// <summary>
     ///     Blocking call that adds a world segment to the data set.
     /// </summary>

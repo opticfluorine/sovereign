@@ -17,6 +17,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Systems.WorldManagement;
@@ -30,13 +31,15 @@ namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment;
 /// </summary>
 public sealed class WorldSegmentRestService : AuthenticatedRestService
 {
+    private readonly AccountServices accountServices;
     private readonly WorldManagementServices worldManagementServices;
 
     public WorldSegmentRestService(RestAuthenticator authenticator,
-        WorldManagementServices worldManagementServices)
+        WorldManagementServices worldManagementServices, AccountServices accountServices)
         : base(authenticator)
     {
         this.worldManagementServices = worldManagementServices;
+        this.accountServices = accountServices;
     }
 
     public override string Path => RestEndpoints.WorldSegment + "/{x}/{y}/{z}";
@@ -53,26 +56,26 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
             && int.TryParse(ctx.Request.Url.Parameters["y"], out y)
             && int.TryParse(ctx.Request.Url.Parameters["z"], out z))
         {
-            // Successful parse, try to fulfill the request.
-            // At some point we should also check that the segment is in range for the
-            // user that requested it, we don't want to be leaking data for the other
-            // side of the world.
+            // Successful parse, try to fulfill the request if the player is subscribed.
             var segmentIndex = new GridPosition(x, y, z);
+            var canAccess = accountServices.TryGetPlayerForAccount(accountId, out var playerEntityId)
+                            && worldManagementServices.IsPlayerSubscribedToWorldSegment(segmentIndex, playerEntityId);
 
-            // First check whether the world segment has been fully loaded.
-            // If not, tell the client to try again later.
-            if (!worldManagementServices.IsWorldSegmentLoaded(segmentIndex))
+            if (canAccess)
             {
-                Logger.DebugFormat("Delaying response for segment {0} while load in progress.", segmentIndex);
-                ctx.Response.StatusCode = 503;
-                await ctx.Response.Send();
-                return;
-            }
+                // First check whether the world segment has been fully loaded.
+                // If not, tell the client to try again later.
+                if (!worldManagementServices.IsWorldSegmentLoaded(segmentIndex))
+                {
+                    Logger.DebugFormat("Delaying response for segment {0} while load in progress.", segmentIndex);
+                    ctx.Response.StatusCode = 503;
+                    await ctx.Response.Send();
+                    return;
+                }
 
-            // Get the data and send it over.
-            var dataTask = worldManagementServices.GetWorldSegmentBlockData(segmentIndex);
-            if (dataTask != null)
-            {
+                // Get the data and send it over.
+                var dataTask = worldManagementServices.GetWorldSegmentBlockData(segmentIndex);
+
                 // Get the latest version of the block data and encode it for transfer.
                 var blockData = await dataTask;
                 var blockDataBytes = blockData.Item2;
@@ -91,8 +94,8 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
             }
             else
             {
-                // Segment is not loaded by server at this time.
-                ctx.Response.StatusCode = 503;
+                // User isn't subscribed to this world segment, deny access.
+                ctx.Response.StatusCode = 403;
                 await ctx.Response.Send();
             }
         }

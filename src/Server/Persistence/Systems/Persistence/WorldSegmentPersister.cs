@@ -78,8 +78,7 @@ public class WorldSegmentPersister
     {
         var segmentIndices = worldManagementServices.GetAndClearSegmentsToPersist();
         var dataTasks = segmentIndices
-            .Select(index => Tuple.Create(index, worldManagementServices.GetWorldSegmentBlockData(index) ??
-                                                 throw new Exception($"Null data task for segment index {index}.")))
+            .Select(index => Tuple.Create(index, worldManagementServices.GetWorldSegmentBlockData(index)))
             .ToList();
         var tasks = dataTasks.Select(task => task.Item2).ToArray();
 

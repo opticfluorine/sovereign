@@ -51,6 +51,17 @@ public class WorldManagementServices
     }
 
     /// <summary>
+    ///     Checks whether the given player is currently subscribed to the given world segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <returns></returns>
+    public bool IsPlayerSubscribedToWorldSegment(GridPosition segmentIndex, ulong playerEntityId)
+    {
+        return GetPlayersSubscribedToWorldSegment(segmentIndex).Contains(playerEntityId);
+    }
+
+    /// <summary>
     ///     Checks whether the given world segment is fully loaded.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
@@ -65,7 +76,7 @@ public class WorldManagementServices
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
     /// <returns>Background task yielding block data.</returns>
-    public Task<Tuple<WorldSegmentBlockData, byte[]>>? GetWorldSegmentBlockData(GridPosition segmentIndex)
+    public Task<Tuple<WorldSegmentBlockData, byte[]>> GetWorldSegmentBlockData(GridPosition segmentIndex)
     {
         return dataManager.GetWorldSegmentBlockData(segmentIndex);
     }
