@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Threading;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 
@@ -40,6 +41,11 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PlayerCharacterTagCollection playerCharacterTags;
+
+    /// <summary>
+    ///     Next available block entity ID.
+    /// </summary>
+    private ulong nextBlockId = EntityConstants.FirstBlockEntityId;
 
     public ClientEntityFactory(EntityManager entityManager,
         KinematicComponentCollection kinematics,
@@ -74,9 +80,14 @@ public sealed class ClientEntityFactory : IEntityFactory
         assigner = entityManager.GetNewAssigner();
     }
 
-    public IEntityBuilder GetBuilder(bool isNewTemplate = false)
+    public IEntityBuilder GetBuilder(EntityType entityType)
     {
-        return GetBuilder(assigner.GetNextId());
+        return entityType switch
+        {
+            EntityType.Block => GetBuilder(Interlocked.Increment(ref nextBlockId)),
+            EntityType.Template => GetBuilder(entityTable.TakeNextTemplateEntityId()),
+            _ => GetBuilder(assigner.GetNextId())
+        };
     }
 
     public IEntityBuilder GetBuilder(ulong entityId, bool isLoad = false)

@@ -25,16 +25,6 @@ namespace Sovereign.EngineCore.Entities;
 public class EntityAssigner
 {
     /// <summary>
-    ///     First block ID (upper 32 bits) for persisted entity IDs.
-    /// </summary>
-    public const ulong PersistedBlock = 0x7FFF0000;
-
-    /// <summary>
-    ///     First volatile entity ID.
-    /// </summary>
-    public const ulong FirstVolatileId = 0;
-
-    /// <summary>
     ///     Block ID shifted to the upper dword
     /// </summary>
     private readonly ulong shiftBlock;
@@ -43,7 +33,7 @@ public class EntityAssigner
     ///     Counter for the local segment of the id.
     /// </summary>
     private ulong localIdCounter;
-
+    
     /// <summary>
     ///     Creates an assigner for the given block.
     /// </summary>

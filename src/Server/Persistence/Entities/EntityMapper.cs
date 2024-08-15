@@ -83,7 +83,9 @@ public sealed class EntityMapper
         if (!initialized) throw new InvalidOperationException("Not initialized");
 
         needToCreate = false;
-        if (volatileEntityId >= EntityConstants.FirstPersistedEntityId) return volatileEntityId;
+        if (volatileEntityId is >= EntityConstants.FirstPersistedEntityId 
+            or (>= EntityConstants.FirstBlockEntityId and <= EntityConstants.LastBlockEntityId)) 
+            return volatileEntityId;
 
         if (volatileToPersisted.TryGetValue(volatileEntityId, out var id)) return id;
 

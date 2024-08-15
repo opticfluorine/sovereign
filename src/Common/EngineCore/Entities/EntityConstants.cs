@@ -37,6 +37,16 @@ public static class EntityConstants
     public const ulong FirstPersistedEntityId = 0x7fff000000000000;
 
     /// <summary>
+    ///     Entity ID of the first block entity.
+    /// </summary>
+    public const ulong FirstBlockEntityId = 0x6fff000000000000;
+
+    /// <summary>
+    ///     Entity ID of the last block entity.
+    /// </summary>
+    public const ulong LastBlockEntityId = 0x6fffffffffffffff;
+
+    /// <summary>
     ///     Maximum entity name length.
     /// </summary>
     public const int MaxNameLength = 32;

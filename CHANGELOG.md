@@ -4,6 +4,19 @@
 
 ### August
 
+#### 14 August 2024
+
+* Persistence: Store block data in a sparse tree format per world segment instead
+  of as individual block entities. This should give a very significant reduction
+  in storage space for the database, particularly for dense uniform world segments
+  (e.g. underground world segments). The format used is the same as is already used
+  for transferring block data between server and client, but without the additional
+  LZ4 compression applied.
+* Block Entities: Assign a special range of volatile entity IDs to block entities
+  since they are no longer persisted with their IDs. This prevents any block entity
+  data from being written to the database except for in the space-efficient tree
+  structure described above.
+
 #### 10 August 2024
 
 * Tile Sprites: Resolve tile contexts based on neighbors in the same plane as the
