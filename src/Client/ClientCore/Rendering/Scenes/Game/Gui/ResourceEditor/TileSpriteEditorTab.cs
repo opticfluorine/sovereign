@@ -529,103 +529,71 @@ public class TileSpriteEditorTab
         {
             // Top row.
             ImGui.TableNextColumn();
-            if (context.NorthwestTileSpriteId != TileSprite.Wildcard)
+            if (context.NorthwestTileSpriteId >= 0)
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     editingSprite.Id, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard);
                 guiExtensions.TileSprite(context.NorthwestTileSpriteId, key);
             }
-            else
-            {
-                ImGui.Text(" Any");
-            }
 
             ImGui.TableNextColumn();
-            if (context.NorthTileSpriteId != TileSprite.Wildcard)
+            if (context.NorthTileSpriteId >= 0)
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard, editingSprite.Id, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard);
                 guiExtensions.TileSprite(context.NorthTileSpriteId, key);
             }
-            else
-            {
-                ImGui.Text(" Any");
-            }
 
             ImGui.TableNextColumn();
-            if (context.NortheastTileSpriteId != TileSprite.Wildcard)
+            if (context.NortheastTileSpriteId >= 0)
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard, TileSprite.Wildcard, editingSprite.Id, TileSprite.Wildcard,
                     TileSprite.Wildcard);
                 guiExtensions.TileSprite(context.NortheastTileSpriteId, key);
             }
-            else
-            {
-                ImGui.Text(" Any");
-            }
 
             // Middle row.
             ImGui.TableNextColumn();
-            if (context.WestTileSpriteId != TileSprite.Wildcard)
+            if (context.WestTileSpriteId >= 0)
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, editingSprite.Id,
                     TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard);
                 guiExtensions.TileSprite(context.WestTileSpriteId, key);
             }
-            else
-            {
-                ImGui.Spacing();
-                ImGui.Spacing();
-                ImGui.Text("Any");
-            }
 
             ImGui.TableNextColumn();
             guiExtensions.TileSprite($"tsPrevCtx{rowIndex}", editingSprite, context.TileContextKey);
 
             ImGui.TableNextColumn();
-            if (context.EastTileSpriteId != TileSprite.Wildcard)
+            if (context.EastTileSpriteId >= 0)
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, editingSprite.Id,
                     TileSprite.Wildcard);
                 guiExtensions.TileSprite(context.EastTileSpriteId, key);
             }
-            else
-            {
-                ImGui.Spacing();
-                ImGui.Spacing();
-                ImGui.Text("Any");
-            }
 
             // Bottom row.
             ImGui.TableNextColumn();
-            if (context.SouthwestTileSpriteId != TileSprite.Wildcard)
+            if (context.SouthwestTileSpriteId >= 0)
             {
                 var key = new TileContextKey(TileSprite.Wildcard, editingSprite.Id, TileSprite.Wildcard,
                     TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard);
                 guiExtensions.TileSprite(context.SouthwestTileSpriteId, key);
             }
-            else
-            {
-                ImGui.Text(" Any");
-            }
 
             ImGui.TableNextColumn();
-            if (context.SouthTileSpriteId != TileSprite.Wildcard)
+            if (context.SouthTileSpriteId >= 0)
             {
                 var key = new TileContextKey(editingSprite.Id, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard);
                 guiExtensions.TileSprite(context.SouthTileSpriteId, key);
-            }
-            else
-            {
-                ImGui.Text(" Any");
             }
 
             ImGui.TableNextColumn();
@@ -635,10 +603,6 @@ public class TileSpriteEditorTab
                     TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     editingSprite.Id);
                 guiExtensions.TileSprite(context.SoutheastTileSpriteId, key);
-            }
-            else
-            {
-                ImGui.Text(" Any");
             }
 
             ImGui.EndTable();
