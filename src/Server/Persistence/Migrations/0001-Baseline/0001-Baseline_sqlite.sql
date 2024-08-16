@@ -297,30 +297,6 @@ VALUES (0x7FFE000000000000, 0);
 INSERT INTO Drawable (id, value)
 VALUES (0x7FFE000000000000, 1);
 
--- Light dirt block template entity.
-INSERT INTO Entity (id)
-VALUES (0x7FFE000000000001);
-INSERT INTO Name (id, value)
-VALUES (0x7FFE000000000001, 'Light Dirt');
-INSERT INTO Material (id, material)
-VALUES (0x7FFE000000000001, 2);
-INSERT INTO MaterialModifier (id, modifier)
-VALUES (0x7FFE000000000001, 0);
-INSERT INTO Drawable (id, value)
-VALUES (0x7FFE000000000001, 1);
-
--- Dark dirt block template entity.
-INSERT INTO Entity (id)
-VALUES (0x7FFE000000000002);
-INSERT INTO Name (id, value)
-VALUES (0x7FFE000000000002, 'Dark Dirt');
-INSERT INTO Material (id, material)
-VALUES (0x7FFE000000000002, 3);
-INSERT INTO MaterialModifier (id, modifier)
-VALUES (0x7FFE000000000002, 0);
-INSERT INTO Drawable (id, value)
-VALUES (0x7FFE000000000002, 1);
-
 -- Log the migration.
 INSERT INTO MigrationLog
 VALUES (1, 'Baseline');

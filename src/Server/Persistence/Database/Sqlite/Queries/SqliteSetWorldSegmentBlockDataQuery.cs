@@ -26,12 +26,12 @@ namespace Sovereign.Persistence.Database.Sqlite.Queries;
 /// </summary>
 public class SqliteSetWorldSegmentBlockDataQuery(SqliteConnection connection) : ISetWorldSegmentBlockDataQuery
 {
-    private const string query = 
+    private const string query =
         @"INSERT INTO WorldSegmentBlockData (x, y, z, data)
           VALUES(@X, @Y, @Z, @Data)
-          ON CONFLICT
+          ON CONFLICT DO
           UPDATE SET data = @Data WHERE x = @X AND y = @Y AND z = @Z";
-    
+
     public void SetWorldSegmentBlockData(GridPosition segmentIndex, byte[] data, IDbTransaction transaction)
     {
         using var cmd = new SqliteCommand(query, connection, (SqliteTransaction)transaction);

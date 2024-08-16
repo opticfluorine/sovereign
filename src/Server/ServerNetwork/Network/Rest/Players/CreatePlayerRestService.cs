@@ -173,7 +173,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
                     .PlayerCharacter()
                     .Positionable(Vector3.Zero) // TODO Configurable start position
                     .Drawable()
-                    .AnimatedSprite(20); // TODO Configurable appearance
+                    .AnimatedSprite(42); // TODO Configurable appearance
 
                 if (configManager.ServerConfiguration.NewPlayers.AdminByDefault)
                 {

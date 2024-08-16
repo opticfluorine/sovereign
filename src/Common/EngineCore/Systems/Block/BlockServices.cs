@@ -65,7 +65,7 @@ public class BlockServices
     {
         entityId = 0;
         var entities = blockGridPositionIndexer.GetEntitiesAtPosition(blockPosition);
-        if (entities != null)
+        if (entities is { Count: > 0 })
         {
             entityId = entities.First();
             return true;

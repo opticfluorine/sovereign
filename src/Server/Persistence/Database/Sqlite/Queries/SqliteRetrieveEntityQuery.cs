@@ -43,7 +43,7 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
         			WHERE ec.parent = et.id
 	        )
             SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable,
-                animatedSprite, orientation, admin, FROM EntityTree ORDER BY parent NULLS LAST";
+                animatedSprite, orientation, admin FROM EntityTree ORDER BY parent NULLS LAST";
 
     private readonly SqliteConnection dbConnection;
 

@@ -18,9 +18,11 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Systems.WorldManagement;
+using Sovereign.EngineUtil.Collections;
 using Sovereign.Persistence.Database;
 using Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -36,10 +38,7 @@ public class WorldSegmentPersister
     /// </summary>
     private const int BufferSize = 1048576;
 
-    /// <summary>
-    ///     Buffer used to hold the loaded world segment block data.
-    /// </summary>
-    private readonly byte[] blockDataBuffer = new byte[BufferSize];
+    private readonly ObjectPool<PersistenceBuffer> bufferPool = new();
 
     private readonly WorldSegmentBlockDataLoader loader;
 
@@ -50,6 +49,8 @@ public class WorldSegmentPersister
         this.worldManagementServices = worldManagementServices;
         this.loader = loader;
     }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Loads the world segment block data for the given world segment from the database.
@@ -62,10 +63,24 @@ public class WorldSegmentPersister
     /// </remarks>
     public void LoadWorldSegmentBlockData(IPersistenceProvider provider, GridPosition segmentIndex)
     {
-        if (!provider.GetWorldSegmentBlockDataQuery.TryGetWorldSegmentBlockData(segmentIndex, blockDataBuffer)) return;
+        Logger.DebugFormat("Get block data for {0} from DB.", segmentIndex);
+        var blockDataBuffer = bufferPool.TakeObject();
+        WorldSegmentBlockData? blockData = null;
+        try
+        {
+            if (!provider.GetWorldSegmentBlockDataQuery.TryGetWorldSegmentBlockData(segmentIndex,
+                    blockDataBuffer.Buffer))
+                return;
 
-        var blockData = MessageConfig.DeserializeMsgPack<WorldSegmentBlockData>(blockDataBuffer)
-                        ?? throw new Exception($"Persisted block data for world segment {segmentIndex} is invalid.");
+            blockData = MessageConfig.DeserializeMsgPack<WorldSegmentBlockData>(blockDataBuffer.Buffer)
+                        ?? throw new Exception(
+                            $"Persisted block data for world segment {segmentIndex} is invalid.");
+        }
+        finally
+        {
+            bufferPool.ReturnObject(blockDataBuffer);
+        }
+
         loader.Load(segmentIndex, blockData);
     }
 
@@ -104,5 +119,13 @@ public class WorldSegmentPersister
     {
         var serializedData = MessageConfig.SerializeMsgPack(data);
         provider.SetWorldSegmentBlockDataQuery.SetWorldSegmentBlockData(segmentIndex, serializedData, transaction);
+    }
+
+    /// <summary>
+    ///     Persistence buffer type.
+    /// </summary>
+    private class PersistenceBuffer
+    {
+        public readonly byte[] Buffer = new byte[BufferSize];
     }
 }

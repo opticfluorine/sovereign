@@ -32,15 +32,15 @@ public class SqliteGetWorldSegmentBlockDataQuery(SqliteConnection connection) : 
     {
         using var cmd = new SqliteCommand(query, connection);
 
-        var pX = new SqliteParameter("x", SqliteType.Integer);
+        var pX = new SqliteParameter("X", SqliteType.Integer);
         pX.Value = segmentIndex.X;
         cmd.Parameters.Add(pX);
 
-        var pY = new SqliteParameter("y", SqliteType.Integer);
+        var pY = new SqliteParameter("Y", SqliteType.Integer);
         pY.Value = segmentIndex.Y;
         cmd.Parameters.Add(pY);
 
-        var pZ = new SqliteParameter("z", SqliteType.Integer);
+        var pZ = new SqliteParameter("Z", SqliteType.Integer);
         pZ.Value = segmentIndex.Z;
         cmd.Parameters.Add(pZ);
 
