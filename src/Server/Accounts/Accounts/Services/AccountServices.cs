@@ -162,6 +162,17 @@ public sealed class AccountServices
     }
 
     /// <summary>
+    ///     Gets the player (if any) being used by the given account.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <param name="playerEntityId">Player entity ID. Only valid if the method returns true.</param>
+    /// <returns>true if a player was found, false otherwise.</returns>
+    public bool TryGetPlayerForAccount(Guid accountId, out ulong playerEntityId)
+    {
+        return loginTracker.TryGetPlayerForAccountId(accountId, out playerEntityId);
+    }
+
+    /// <summary>
     ///     Gets the player entity ID associated with a network connection.
     /// </summary>
     /// <param name="connectionId">Connection ID.</param>

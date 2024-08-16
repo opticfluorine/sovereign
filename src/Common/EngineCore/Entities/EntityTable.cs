@@ -28,6 +28,8 @@ public class EntityTable
 {
     private const int InitialPendingBufferSize = 16384;
 
+    private object templateLockHandle = new();
+
     /// <summary>
     ///     Set of all entities that are currently held in memory.
     /// </summary>
@@ -69,7 +71,22 @@ public class EntityTable
     /// <param name="templateEntityId">Template entity ID.</param>
     public void TakeTemplateEntityId(ulong templateEntityId)
     {
-        if (templateEntityId >= NextTemplateEntityId) NextTemplateEntityId = templateEntityId + 1;
+        lock (templateLockHandle)
+        {
+            if (templateEntityId >= NextTemplateEntityId) NextTemplateEntityId = templateEntityId + 1;
+        }
+    }
+
+    /// <summary>
+    ///     Takes the next available entity ID.
+    /// </summary>
+    /// <returns>Template entity ID.</returns>
+    public ulong TakeNextTemplateEntityId()
+    {
+        lock (templateLockHandle)
+        {
+            return NextTemplateEntityId++;
+        }
     }
 
     /// <summary>

@@ -292,7 +292,7 @@ public class BlockTemplateEditorTab
         // and the template will appear in the editor on the following tick.
         var emptyDef = new EntityDefinition
         {
-            EntityId = entityTable.NextTemplateEntityId,
+            EntityId = entityTable.TakeNextTemplateEntityId(),
             Material = new MaterialPair(1, 0)
         };
         SaveDefinition(emptyDef);

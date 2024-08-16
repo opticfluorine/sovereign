@@ -45,9 +45,6 @@ public sealed class EntityProcessor
     private const int IndexAnimatedSprite = IndexDrawable + 1;
     private const int IndexOrientation = IndexAnimatedSprite + 1;
     private const int IndexAdmin = IndexOrientation + 1;
-    private const int IndexBlockPosX = IndexAdmin + 1;
-    private const int IndexBlockPosY = IndexBlockPosX + 1;
-    private const int IndexBlockPosZ = IndexBlockPosY + 1;
     private readonly IEntityFactory entityFactory;
     private readonly EntityMapper mapper;
 
@@ -101,7 +98,6 @@ public sealed class EntityProcessor
         ProcessAnimatedSprite(reader, builder);
         ProcessOrientation(reader, builder);
         ProcessAdmin(reader, builder);
-        ProcessBlockPosition(reader, builder);
 
         /* Complete the entity. */
         builder.Build();
@@ -258,19 +254,6 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexAdmin)) return;
         if (reader.GetBoolean(IndexAdmin)) builder.Admin();
-    }
-
-    /// <summary>
-    ///     Processes the BlockPosition component.
-    /// </summary>
-    /// <param name="reader">Reader.</param>
-    /// <param name="builder">Entity builder.</param>
-    private void ProcessBlockPosition(IDataReader reader, IEntityBuilder builder)
-    {
-        if (reader.IsDBNull(IndexBlockPosX) || reader.IsDBNull(IndexBlockPosY) ||
-            reader.IsDBNull(IndexBlockPosZ)) return;
-
-        builder.BlockPositionable(GetGridPosition(reader, IndexBlockPosX, IndexBlockPosY, IndexBlockPosZ));
     }
 
     /// <summary>

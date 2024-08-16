@@ -35,17 +35,20 @@ public sealed class PersistenceRangeRetriever
     private readonly EntityProcessor entityProcessor;
     private readonly IEventSender eventSender;
     private readonly PersistenceProviderManager providerManager;
+    private readonly WorldSegmentPersister worldSegmentPersister;
     private readonly WorldSegmentResolver worldSegmentResolver;
 
     public PersistenceRangeRetriever(EntityProcessor entityProcessor,
         PersistenceProviderManager providerManager,
         WorldSegmentResolver worldSegmentResolver,
-        IEventSender eventSender)
+        IEventSender eventSender,
+        WorldSegmentPersister worldSegmentPersister)
     {
         this.entityProcessor = entityProcessor;
         this.providerManager = providerManager;
         this.worldSegmentResolver = worldSegmentResolver;
         this.eventSender = eventSender;
+        this.worldSegmentPersister = worldSegmentPersister;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -83,7 +86,10 @@ public sealed class PersistenceRangeRetriever
         var (minPos, maxPos) = worldSegmentResolver.GetRangeForWorldSegment(segmentIndex);
         try
         {
-            /* Execute query. */
+            // Retrieve and load the block data for the segment.
+            worldSegmentPersister.LoadWorldSegmentBlockData(providerManager.PersistenceProvider, segmentIndex);
+
+            // Retrieve the non-block entities in the segment.
             var query = providerManager.PersistenceProvider.RetrieveRangeQuery;
             using (var reader = query.RetrieveEntitiesInRange(minPos, maxPos))
             {

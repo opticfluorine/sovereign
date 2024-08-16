@@ -20,7 +20,6 @@ using System.Data;
 using System.Text;
 using Castle.Core.Logging;
 using Microsoft.Data.Sqlite;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Main;
 using Sovereign.Persistence.Configuration;
@@ -74,8 +73,6 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const SqliteType AdminParamType = SqliteType.Integer;
     private const string AdminTableName = "Admin";
     private const string AdminParamName = "value";
-
-    private const string BlockPositionTableName = "BlockPosition";
 
     private readonly IPersistenceConfiguration configuration;
 
@@ -202,13 +199,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             AdminParamName, AdminParamType, (SqliteConnection)Connection);
         RemoveAdminComponentQuery = new SqliteRemoveComponentQuery(AdminTableName, (SqliteConnection)Connection);
 
-        // BlockPosition component.
-        AddBlockPositionComponentQuery =
-            new GridPositionSqliteAddComponentQuery(BlockPositionTableName, (SqliteConnection)Connection);
-        ModifyBlockPositionComponentQuery =
-            new GridPositionSqliteModifyComponentQuery(BlockPositionTableName, (SqliteConnection)Connection);
-        RemoveBlockPositionComponentQuery =
-            new SqliteRemoveComponentQuery(BlockPositionTableName, (SqliteConnection)Connection);
+        GetWorldSegmentBlockDataQuery = new SqliteGetWorldSegmentBlockDataQuery((SqliteConnection)Connection);
+        SetWorldSegmentBlockDataQuery = new SqliteSetWorldSegmentBlockDataQuery((SqliteConnection)Connection);
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -275,9 +267,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IDeletePlayerQuery DeletePlayerQuery { get; }
     public IAddAdminRoleQuery AddAdminRoleQuery { get; }
     public IRemoveAdminRoleQuery RemoveAdminRoleQuery { get; }
-    public IAddComponentQuery<GridPosition> AddBlockPositionComponentQuery { get; }
-    public IModifyComponentQuery<GridPosition> ModifyBlockPositionComponentQuery { get; }
-    public IRemoveComponentQuery RemoveBlockPositionComponentQuery { get; }
+    public IGetWorldSegmentBlockDataQuery GetWorldSegmentBlockDataQuery { get; }
+    public ISetWorldSegmentBlockDataQuery SetWorldSegmentBlockDataQuery { get; }
 
     public void Dispose()
     {

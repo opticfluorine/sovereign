@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
 using Sovereign.EngineCore.World;
@@ -29,12 +30,12 @@ public class BlockWorldSegmentIndexer : BaseComponentIndexer<GridPosition>
     /// <summary>
     ///     Map from world segment index to the set of non-block entities positioned there.
     /// </summary>
-    private readonly Dictionary<GridPosition, HashSet<ulong>> index = new();
+    private readonly ConcurrentDictionary<GridPosition, HashSet<ulong>> index = new();
 
     /// <summary>
     ///     Inverse map to index.
     /// </summary>
-    private readonly Dictionary<ulong, GridPosition> inverse = new();
+    private readonly ConcurrentDictionary<ulong, GridPosition> inverse = new();
 
     private readonly WorldSegmentResolver resolver;
 

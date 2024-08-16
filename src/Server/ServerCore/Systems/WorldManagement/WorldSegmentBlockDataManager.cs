@@ -52,7 +52,8 @@ public sealed class WorldSegmentBlockDataManager
     ///     Updates are made via continuations of the tasks.
     ///     This allows the REST endpoint to await any segment data.
     /// </summary>
-    private readonly ConcurrentDictionary<GridPosition, Task<Tuple<WorldSegmentBlockData, byte[]>>> compressedDataProducers = new();
+    private readonly ConcurrentDictionary<GridPosition, Task<Tuple<WorldSegmentBlockData, byte[]>>>
+        compressedDataProducers = new();
 
     /// <summary>
     ///     Deletion tasks. The presence of a deletion task in this map indicates
@@ -65,6 +66,11 @@ public sealed class WorldSegmentBlockDataManager
     private readonly WorldSegmentBlockDataGenerator generator;
 
     private readonly WorldSegmentResolver resolver;
+
+    /// <summary>
+    ///     Set of world segments that need to be updated in the database.
+    /// </summary>
+    private readonly HashSet<GridPosition> segmentsToPersist = new();
 
     /// <summary>
     ///     Set of world segments to schedule for regeneration.
@@ -98,7 +104,7 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
     /// <returns>Summary block data, or null if no summary block data is available.</returns>
-    public Task<Tuple<WorldSegmentBlockData, byte[]>>? GetWorldSegmentBlockData(GridPosition segmentIndex)
+    public Task<Tuple<WorldSegmentBlockData, byte[]>> GetWorldSegmentBlockData(GridPosition segmentIndex)
     {
         // If the segment is scheduled for regeneration, kick off the lazy load now that it's been requested.
         lock (segmentsToRegenerate)
@@ -110,7 +116,14 @@ public sealed class WorldSegmentBlockDataManager
             }
         }
 
-        return compressedDataProducers.TryGetValue(segmentIndex, out var data) ? data : null;
+        if (!compressedDataProducers.TryGetValue(segmentIndex, out var data))
+        {
+            // If nothing is present, initialize a new record.
+            AddWorldSegment(segmentIndex);
+            data = compressedDataProducers[segmentIndex];
+        }
+
+        return data;
     }
 
     /// <summary>
@@ -145,7 +158,23 @@ public sealed class WorldSegmentBlockDataManager
         else
             Logger.ErrorFormat("Tried to remove world segemnt data for {0} before it was added.", segmentIndex);
     }
-    
+
+    /// <summary>
+    ///     Gets the list of world segments that need to be persisted to the database, then
+    ///     clears the set so that the next call only returns the segments modified after the
+    ///     current call.
+    /// </summary>
+    /// <returns>List of world segment indices that need to be persisted.</returns>
+    public List<GridPosition> GetAndClearSegmentsToPersist()
+    {
+        lock (segmentsToPersist)
+        {
+            var list = new List<GridPosition>(segmentsToPersist);
+            segmentsToPersist.Clear();
+            return list;
+        }
+    }
+
     /// <summary>
     ///     Blocking call that adds a world segment to the data set.
     /// </summary>
@@ -230,6 +259,11 @@ public sealed class WorldSegmentBlockDataManager
             lock (segmentsToRegenerate)
             {
                 segmentsToRegenerate.Add(segmentIndex);
+            }
+
+            lock (segmentsToPersist)
+            {
+                segmentsToPersist.Add(segmentIndex);
             }
         }
         catch (Exception e)

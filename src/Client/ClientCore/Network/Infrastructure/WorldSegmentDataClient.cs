@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,14 +26,12 @@ using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.EngineCore.World;
 using Sovereign.NetworkCore.Network;
-using EntityConstants = Sovereign.EngineCore.Entities.EntityConstants;
 
 namespace Sovereign.ClientCore.Network.Infrastructure;
 
@@ -61,6 +58,7 @@ public sealed class WorldSegmentDataClient
     private readonly BlockController blockController;
     private readonly IWorldManagementConfiguration config;
     private readonly IEventSender eventSender;
+    private readonly WorldSegmentBlockDataLoader loader;
     private readonly ClientNetworkController networkController;
     private readonly RestClient restClient;
     private readonly ClientStateController stateController;
@@ -72,7 +70,8 @@ public sealed class WorldSegmentDataClient
         BlockController blockController,
         RestClient restClient,
         ClientNetworkController networkController,
-        ClientStateController stateController)
+        ClientStateController stateController,
+        WorldSegmentBlockDataLoader loader)
     {
         this.eventSender = eventSender;
         this.worldSegmentResolver = worldSegmentResolver;
@@ -80,6 +79,7 @@ public sealed class WorldSegmentDataClient
         this.restClient = restClient;
         this.networkController = networkController;
         this.stateController = stateController;
+        this.loader = loader;
         this.config = config;
     }
 
@@ -138,6 +138,11 @@ public sealed class WorldSegmentDataClient
                         Logger.WarnFormat("Server is not ready to serve segment data for {0}.", segmentIndex);
                         break;
 
+                    case HttpStatusCode.Forbidden:
+                        // Server reports the player is not currently subscribed - delay and try again.
+                        Logger.WarnFormat("Server denied access to segment data for {0}.", segmentIndex);
+                        break;
+
                     default:
                         // Other unknown error - log, try again.
                         Logger.ErrorFormat("Unexpected response code {0} retrieving segment data for {1}.",
@@ -173,131 +178,7 @@ public sealed class WorldSegmentDataClient
         var segmentData = MessagePackSerializer.Deserialize<WorldSegmentBlockData>(segmentBytes,
             MessageConfig.CompressedUntrustedMessagePackOptions);
 
-        /* Basic top-level validation. */
-        if (segmentData.DefaultsPerPlane.Length != config.SegmentLength)
-            throw new RankException("Bad number of default materials in segment data.");
-
-        /* Submit all the blocks we've added. */
-        blockController.AddBlocks(eventSender,
-            blocksToAdd => CreateBlocksToAdd(segmentIndex, segmentData, blocksToAdd));
+        loader.Load(segmentIndex, segmentData);
         stateController.WorldSegmentLoaded(eventSender, segmentIndex);
-    }
-
-    /// <summary>
-    ///     Creates block records from segment data and adds them to the given list.
-    /// </summary>
-    /// <param name="segmentIndex">Segment index.</param>
-    /// <param name="segmentData">Segment data.</param>
-    /// <param name="blocksToAdd">Running list of blocks to add.</param>
-    /// <exception cref="IndexOutOfRangeException">Thrown if a depth plane has a bad Z offset.</exception>
-    private void CreateBlocksToAdd(GridPosition segmentIndex, WorldSegmentBlockData segmentData,
-        IList<BlockRecord> blocksToAdd)
-    {
-        /* Start by processing depth plaens containing non-default blocks. */
-        var processed = new bool[config.SegmentLength];
-        foreach (var plane in segmentData.DataPlanes)
-        {
-            // Validation.
-            if (plane.OffsetZ >= config.SegmentLength)
-                throw new IndexOutOfRangeException("Bad Z-offset in world segment data plane.");
-
-            processed[plane.OffsetZ] = true;
-            ProcessMixedPlane(segmentIndex, plane, segmentData.DefaultsPerPlane[plane.OffsetZ], blocksToAdd);
-        }
-
-        /* Process the remaining all-default planes. */
-        for (var i = 0; i < processed.Length; i++)
-            if (!processed[i] && segmentData.DefaultsPerPlane[i].BlockType != BlockDataType.Air)
-                ProcessDefaultPlane(segmentIndex, i, segmentData.DefaultsPerPlane[i], blocksToAdd);
-
-        if (blocksToAdd.Count > 0)
-            Logger.DebugFormat("Adding {0} blocks for world segment {1}.", blocksToAdd.Count, segmentIndex);
-    }
-
-    /// <summary>
-    ///     Processes a plane containing only default blocks.
-    /// </summary>
-    /// <param name="segmentIndex">Segment index.</param>
-    /// <param name="offsetZ">Z offset of the plane.</param>
-    /// <param name="defaultBlock">Default block type.</param>
-    /// <param name="blocksToAdd">List of blocks to add.</param>
-    private void ProcessDefaultPlane(GridPosition segmentIndex, int offsetZ, BlockData defaultBlock,
-        IList<BlockRecord> blocksToAdd)
-    {
-        var basePosition = worldSegmentResolver.GetRangeForWorldSegment(segmentIndex).Item1;
-        var baseX = (int)basePosition.X;
-        var baseY = (int)basePosition.Y;
-        var baseZ = (int)basePosition.Z;
-
-        for (var x = 0; x < config.SegmentLength; x++)
-        for (var y = 0; y < config.SegmentLength; y++)
-        {
-            var block = new BlockRecord
-            {
-                Position = new GridPosition(baseX + x, baseY + y, baseZ + offsetZ),
-                TemplateEntityId = defaultBlock.TemplateIdOffset + EntityConstants.FirstTemplateEntityId
-            };
-            blocksToAdd.Add(block);
-        }
-    }
-
-    /// <summary>
-    ///     Processes a plane containing non-default blocks.
-    /// </summary>
-    /// <param name="segmentIndex">Segment index.</param>
-    /// <param name="plane">Depth plane to process.</param>
-    /// <param name="defaultBlock">Default block type.</param>
-    /// <param name="blocksToAdd">List of blocks to add.</param>
-    private void ProcessMixedPlane(GridPosition segmentIndex, WorldSegmentBlockDataPlane plane,
-        BlockData defaultBlock, IList<BlockRecord> blocksToAdd)
-    {
-        var basePosition = worldSegmentResolver.GetRangeForWorldSegment(segmentIndex).Item1;
-        var baseX = (int)basePosition.X;
-        var baseY = (int)basePosition.Y;
-        var baseZ = (int)basePosition.Z;
-
-        /* Process the non-default blocks. */
-        var nonDefaults = new bool[config.SegmentLength, config.SegmentLength];
-        foreach (var line in plane.Lines)
-        {
-            /* Validate. */
-            if (line.OffsetY >= config.SegmentLength)
-                throw new IndexOutOfRangeException("Bad Y-offset in world segment data line.");
-
-            foreach (var block in line.BlockData)
-            {
-                /* Validate. */
-                if (block.OffsetX >= config.SegmentLength)
-                    throw new IndexOutOfRangeException("Bad X-offset in world segment data block.");
-
-                var x = baseX + block.OffsetX;
-                var y = baseY + line.OffsetY;
-                var z = baseZ + plane.OffsetZ;
-
-                /* Add the block. */
-                var blockRecord = new BlockRecord
-                {
-                    Position = new GridPosition(x, y, z),
-                    TemplateEntityId = block.Data.TemplateIdOffset + EntityConstants.FirstTemplateEntityId
-                };
-                blocksToAdd.Add(blockRecord);
-
-                nonDefaults[block.OffsetX, line.OffsetY] = true;
-            }
-        }
-
-        /* Fill in the default blocks (unless they are air). */
-        if (defaultBlock.BlockType != BlockDataType.Air)
-            for (var i = 0; i < config.SegmentLength; ++i)
-            for (var j = 0; j < config.SegmentLength; ++j)
-                if (!nonDefaults[i, j])
-                {
-                    var blockRecord = new BlockRecord
-                    {
-                        Position = new GridPosition(baseX + i, baseY + j, baseZ + plane.OffsetZ),
-                        TemplateEntityId = defaultBlock.TemplateIdOffset + EntityConstants.FirstTemplateEntityId
-                    };
-                    blocksToAdd.Add(blockRecord);
-                }
     }
 }

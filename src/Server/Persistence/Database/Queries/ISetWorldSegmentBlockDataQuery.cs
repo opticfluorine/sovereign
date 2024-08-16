@@ -14,25 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components;
+using System.Data;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.Persistence.Entities;
 
-namespace Sovereign.Persistence.State.Trackers;
+namespace Sovereign.Persistence.Database.Queries;
 
 /// <summary>
-///     State tracker for the BlockPosition component.
+///     Interface for adding or modifying world segment block data in the database.
 /// </summary>
-public class BlockPositionStateTracker : BaseStateTracker<GridPosition>
+public interface ISetWorldSegmentBlockDataQuery
 {
-    public BlockPositionStateTracker(BlockPositionComponentCollection blockPositions, EntityMapper entityMapper,
-        StateManager stateManager)
-        : base(blockPositions, GridPosition.Zero, entityMapper, stateManager)
-    {
-    }
-
-    protected override void OnStateUpdate(ref StateUpdate<GridPosition> update)
-    {
-        stateManager.FrontBuffer.UpdateBlockPosition(ref update);
-    }
+    /// <summary>
+    ///     Adds or updates the world segment block data for the given world segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <param name="data">Uncompressed serialized block data created from WorldSegmentBlockData.</param>
+    /// <param name="transaction">Transaction.</param>
+    void SetWorldSegmentBlockData(GridPosition segmentIndex, byte[] data, IDbTransaction transaction);
 }

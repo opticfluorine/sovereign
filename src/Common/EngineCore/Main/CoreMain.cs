@@ -52,13 +52,8 @@ public class CoreMain
             LogEarlyError("Unhandled exception while running engine.", e, iocContainer);
         }
 
-        /* Shut down the IoC container */
-        if (iocContainer != null) ShutdownIoC(iocContainer);
-    }
-
-    private void ShutdownIoC(IWindsorContainer iocContainer)
-    {
-        if (iocContainer != null) iocContainer.Dispose();
+        iocContainer?.Dispose();
+        Environment.Exit(0);
     }
 
     /// <summary>
