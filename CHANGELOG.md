@@ -4,6 +4,18 @@
 
 ### August
 
+#### 18 August 2024
+
+* Client: Properly refresh tile sprite resolutions when block entities are added
+  or deleted.
+
+#### 17 August 2024
+
+* Renderer: Fix issue where the orthographic projection to 3:4 perspective was
+  applying depth in the wrong direction. Looks like this may have been introduced
+  while changing screen space coordinate systems during the Vulkan/Veldrid port,
+  and never detected because all testing was done with z=0 until now.
+
 #### 14 August 2024
 
 * Persistence: Store block data in a sparse tree format per world segment instead

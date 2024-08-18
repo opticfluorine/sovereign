@@ -31,8 +31,6 @@ public class CoreIndexerInstaller : IWindsorInstaller
         container.Register(Component.For<PlayerNameEventFilter>().LifestyleSingleton());
         container.Register(Component.For<PlayerNameComponentIndexer>().LifestyleSingleton());
         container.Register(Component.For<BlockGridPositionIndexer>().LifestyleSingleton());
-        container.Register(Component.For<BlockPositionEventFilter>().LifestyleSingleton());
-        container.Register(Component.For<BlockPositionIndexer>().LifestyleSingleton());
         container.Register(Component.For<NonBlockPositionEventFilter>().LifestyleSingleton());
         container.Register(Component.For<NonBlockWorldSegmentIndexer>().LifestyleSingleton());
         container.Register(Component.For<BlockWorldSegmentIndexer>().LifestyleSingleton());

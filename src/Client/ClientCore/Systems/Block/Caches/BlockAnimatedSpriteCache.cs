@@ -25,7 +25,6 @@ using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineUtil.Collections;
 
@@ -49,7 +48,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly BlockGridPositionIndexer blockIndexer;
-    private readonly BlockPositionEventFilter blockPositionEventFilter;
     private readonly BlockPositionComponentCollection blockPositions;
 
     /// <summary>
@@ -115,7 +113,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         MaterialModifierComponentCollection materialModifiers,
         BlockPositionComponentCollection blockPositions,
         BlockGridPositionIndexer blockIndexer,
-        BlockPositionEventFilter blockPositionEventFilter,
         MaterialManager materialManager,
         AboveBlockComponentCollection aboveBlocks,
         TileSpriteManager tileSpriteManager,
@@ -125,7 +122,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         this.materialModifiers = materialModifiers;
         this.blockPositions = blockPositions;
         this.blockIndexer = blockIndexer;
-        this.blockPositionEventFilter = blockPositionEventFilter;
         this.materialManager = materialManager;
         this.aboveBlocks = aboveBlocks;
         this.tileSpriteManager = tileSpriteManager;
@@ -492,7 +488,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="componentValue">Not used.</param>
     /// <param name="isLoad">Not used.</param>
-    private void OnPositionAdded(ulong entityId, Kinematics componentValue, bool isLoad)
+    private void OnPositionAdded(ulong entityId, GridPosition componentValue, bool isLoad)
     {
         OnComponentModified(entityId, 0);
     }
@@ -502,9 +498,19 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="componentValue">Not used.</param>
-    private void OnPositionModified(ulong entityId, Kinematics componentValue)
+    private void OnPositionModified(ulong entityId, GridPosition componentValue)
     {
         OnComponentModified(entityId, 0);
+    }
+
+    /// <summary>
+    ///     Called when a block position is removed.
+    /// </summary>
+    /// <param name="entityId">Block entity ID.</param>
+    /// <param name="isUnload">Not used.</param>
+    private void OnPositionRemoved(ulong entityId, bool isUnload)
+    {
+        OnComponentRemoved(entityId, isUnload);
     }
 
     /// <summary>
@@ -530,8 +536,9 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         materials.OnComponentModified += OnComponentModified;
         materials.OnComponentRemoved += OnComponentRemoved;
         materialModifiers.OnComponentModified += OnComponentModified;
-        blockPositionEventFilter.OnComponentAdded += OnPositionAdded;
-        blockPositionEventFilter.OnComponentModified += OnPositionModified;
+        blockPositions.OnComponentAdded += OnPositionAdded;
+        blockPositions.OnComponentModified += OnPositionModified;
+        blockPositions.OnComponentRemoved += OnPositionRemoved;
         entityManager.OnUpdatesStarted += OnStartUpdates;
         entityManager.OnUpdatesComplete += OnEndUpdates;
         tileSpriteManager.OnTileSpriteAdded += OnResourceChange;
@@ -552,9 +559,9 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         materials.OnComponentModified -= OnComponentModified;
         materials.OnComponentRemoved -= OnComponentRemoved;
         materialModifiers.OnComponentModified -= OnComponentModified;
-        blockPositionEventFilter.OnComponentAdded -= OnPositionAdded;
-        blockPositionEventFilter.OnComponentModified -= OnPositionModified;
-        entityManager.OnUpdatesStarted -= OnStartUpdates;
+        blockPositions.OnComponentAdded -= OnPositionAdded;
+        blockPositions.OnComponentModified -= OnPositionModified;
+        blockPositions.OnComponentRemoved -= OnPositionRemoved;
         entityManager.OnUpdatesComplete -= OnEndUpdates;
         tileSpriteManager.OnTileSpriteAdded -= OnResourceChange;
         tileSpriteManager.OnTileSpriteUpdated -= OnResourceChange;
