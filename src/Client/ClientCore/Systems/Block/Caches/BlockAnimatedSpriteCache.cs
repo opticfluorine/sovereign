@@ -290,7 +290,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         /* Resolve to the tile sprite level. */
         var blockId = blockIds.First();
         var centerId = GetTileSpriteIdForBlock(blockId, isTopFace);
-        if (centerId == -1)
+        if (centerId < 0)
             // Block isn't ready yet, return at a later pass.
             return;
         
