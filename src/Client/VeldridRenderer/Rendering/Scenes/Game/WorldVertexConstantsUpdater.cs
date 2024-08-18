@@ -65,7 +65,7 @@ public class WorldVertexConstantsUpdater
         // Note that for Vulkan, the Y axis is inverted.
         mat.M12 = 0.0f;
         mat.M22 = -invHalfHeight;
-        mat.M32 = invHalfHeight;
+        mat.M32 = -invHalfHeight;
         mat.M42 = -invHalfHeight * (cameraPos.Z - cameraPos.Y);
 
         mat.M13 = 0.0f;
