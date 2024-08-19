@@ -21,6 +21,7 @@ using System.Security.Cryptography;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
+using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.NetworkCore.Network.Infrastructure;
 
@@ -29,16 +30,13 @@ namespace Sovereign.NetworkCore.Network.Infrastructure;
 /// </summary>
 public sealed class NetworkSerializer
 {
-    public const int HMAC_SIZE_BYTES = 256 / 8;
+    public const int HmacSizeBytes = 256 / 8;
 
-    public const int MAX_PAYLOAD_SIZE = 1200;
+    public const int MaxPayloadSize = 1200;
 
-    private readonly EventDescriptions eventDescriptions;
+    private readonly ObjectPool<BufferPair> bufferPool = new();
 
-    public NetworkSerializer(EventDescriptions eventDescriptions)
-    {
-        this.eventDescriptions = eventDescriptions;
-    }
+    private readonly ObjectPool<HMACSHA256> hmacPool = new();
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -64,24 +62,34 @@ public sealed class NetworkSerializer
     public Event DeserializeEvent(NetworkConnection connection, byte[] packetData)
     {
         /* Validate packet size. */
-        if (packetData.Length > MAX_PAYLOAD_SIZE + HMAC_SIZE_BYTES)
+        if (packetData.Length > MaxPayloadSize + HmacSizeBytes)
             // Packet too large.
             throw new PacketSizeException("Packet of length " + packetData.Length
                                                               + " is too large.");
 
         /* Unpack the raw data. */
-        var payloadSize = packetData.Length - HMAC_SIZE_BYTES;
+        var payloadSize = packetData.Length - HmacSizeBytes;
         if (payloadSize < 1)
             /* Packet does not contain a payload. */
             throw new MalformedPacketException("No payload.");
-        var hmacSpan = new Span<byte>(packetData, 0, HMAC_SIZE_BYTES);
-        var payloadSpan = new Span<byte>(packetData, HMAC_SIZE_BYTES, payloadSize);
+        var bufferPair = bufferPool.TakeObject();
+        try
+        {
+            Array.Copy(packetData, bufferPair.HmacPart, HmacSizeBytes);
+            Array.Fill(bufferPair.PayloadPart, (byte)0);
+            Array.Copy(packetData, HmacSizeBytes, bufferPair.PayloadPart, 0, payloadSize);
 
-        /* Verify the HMAC. */
-        if (!VerifyHmac(hmacSpan, payloadSpan, connection)) throw new BadHmacException("HMAC mismatch.");
+            /* Verify the HMAC. */
+            if (!VerifyHmac(bufferPair.HmacPart, bufferPair.PayloadPart, payloadSize, connection))
+                throw new BadHmacException("HMAC mismatch.");
 
-        /* Deserialize the payload. */
-        return DeserializePayload(payloadSpan, connection);
+            /* Deserialize the payload. */
+            return DeserializePayload(bufferPair.PayloadPart, connection);
+        }
+        finally
+        {
+            bufferPool.ReturnObject(bufferPair);
+        }
     }
 
     /// <summary>
@@ -105,8 +113,8 @@ public sealed class NetworkSerializer
         var payload = SerializeEvent(ev, connection);
 
         // Assemble the packet.
-        var packet = new byte[payload.Length + HMAC_SIZE_BYTES];
-        AssemblePacket(packet, payload, connection);
+        var packet = new byte[payload.Length + HmacSizeBytes];
+        AssemblePacket(packet, payload, payload.Length, connection);
         return packet;
     }
 
@@ -115,12 +123,12 @@ public sealed class NetworkSerializer
     /// </summary>
     /// <param name="packet">Buffer to hold the packet.</param>
     /// <param name="payload">Serialized payload.</param>
+    /// <param name="payloadLength">Length of payload in bytes.</param>
     /// <param name="connection">Connection.</param>
-    private void AssemblePacket(byte[] packet, byte[] payload, NetworkConnection connection)
+    private void AssemblePacket(byte[] packet, byte[] payload, int payloadLength, NetworkConnection connection)
     {
         // Compute the HMAC digest for the packet.
-        var srcPayloadSpan = new Span<byte>(payload);
-        var hmac = ComputeHmac(srcPayloadSpan, connection);
+        var hmac = ComputeHmac(payload, payloadLength, connection);
         Array.Copy(hmac, 0, packet, 0, hmac.Length);
 
         // Fill the rest of the packet.
@@ -145,7 +153,7 @@ public sealed class NetworkSerializer
         var payloadBytes = MessageConfig.SerializeMsgPack(payload);
 
         // Verify payload size.
-        if (payloadBytes.Length > MAX_PAYLOAD_SIZE) throw new PacketSizeException("Serialized packet size too large.");
+        if (payloadBytes.Length > MaxPayloadSize) throw new PacketSizeException("Serialized packet size too large.");
 
         return payloadBytes;
     }
@@ -153,7 +161,8 @@ public sealed class NetworkSerializer
     /// <summary>
     ///     Deserializes a payload into the corresponding event.
     /// </summary>
-    /// <param name="payloadSpan"></param>
+    /// <param name="payloadBytes">Payload.</param>
+    /// <param name="connection">Connection.</param>
     /// <returns></returns>
     /// <exception cref="MalformedPacketException">
     ///     Thrown if the payload cannot be deserialized.
@@ -161,7 +170,7 @@ public sealed class NetworkSerializer
     /// <exception cref="BadNonceException">
     ///     Thrown if a received nonce is reused.
     /// </exception>
-    private Event DeserializePayload(Span<byte> payloadSpan, NetworkConnection connection)
+    private Event DeserializePayload(byte[] payloadBytes, NetworkConnection connection)
     {
         // Packet payloads are deserialized in two passes.
         // First the payload is deserialized into a NetworkPayload object.
@@ -171,7 +180,7 @@ public sealed class NetworkSerializer
         NetworkPayload payload;
         try
         {
-            payload = MessageConfig.DeserializeMsgPack<NetworkPayload>(payloadSpan.ToArray());
+            payload = MessageConfig.DeserializeMsgPack<NetworkPayload>(payloadBytes);
         }
         catch (Exception e)
         {
@@ -193,13 +202,14 @@ public sealed class NetworkSerializer
     ///     Checks the HMAC digest of the packet.
     /// </summary>
     /// <param name="hmacSpan">HMAC digest included in the packet.</param>
-    /// <param name="payloadSpan">Packet payload.</param>
+    /// <param name="payloadBytes">Packet payload.</param>
+    /// <param name="payloadLength">Length of payload in bytes.</param>
     /// <param name="connection">Associated connection.</param>
     /// <returns>true if the HMAC is valid, false otherwise.</returns>
-    private bool VerifyHmac(Span<byte> hmacSpan, Span<byte> payloadSpan, NetworkConnection connection)
+    private bool VerifyHmac(byte[] hmacSpan, byte[] payloadBytes, int payloadLength, NetworkConnection connection)
     {
         /* Compute the HMAC for the payload. */
-        var hmac = ComputeHmac(payloadSpan, connection);
+        var hmac = ComputeHmac(payloadBytes, payloadLength, connection);
         if (hmac.Length != hmacSpan.Length)
         {
             Logger.Error("HMAC size mismatch.");
@@ -218,16 +228,39 @@ public sealed class NetworkSerializer
     /// <summary>
     ///     Computes the HMAC digest of a packet.
     /// </summary>
-    /// <param name="payloadSpan">Packet payload.</param>
+    /// <param name="payloadBytes">Packet payload.</param>
+    /// <param name="payloadLength">Length of payload in bytes.</param>
     /// <param name="connection">Associated connection.</param>
     /// <returns></returns>
-    private byte[] ComputeHmac(Span<byte> payloadSpan, NetworkConnection connection)
+    private byte[] ComputeHmac(byte[] payloadBytes, int payloadLength, NetworkConnection connection)
     {
-        using (var hmac = new HMACSHA256(connection.Key))
+        var hmac = hmacPool.TakeObject();
+        try
         {
+            hmac.Key = connection.Key;
             hmac.Initialize();
-            return hmac.ComputeHash(payloadSpan.ToArray());
+            return hmac.ComputeHash(payloadBytes, 0, payloadLength);
         }
+        finally
+        {
+            hmacPool.ReturnObject(hmac);
+        }
+    }
+
+    /// <summary>
+    ///     Reusable pair of network buffers.
+    /// </summary>
+    private class BufferPair
+    {
+        /// <summary>
+        ///     HMAC byte buffer.
+        /// </summary>
+        public readonly byte[] HmacPart = new byte[HmacSizeBytes];
+
+        /// <summary>
+        ///     Payload byte buffer.
+        /// </summary>
+        public readonly byte[] PayloadPart = new byte[MaxPayloadSize];
     }
 }
 

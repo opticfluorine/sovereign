@@ -38,6 +38,8 @@ public sealed class NetworkConnection : IDisposable
     /// </summary>
     private readonly HashSet<uint> receivedNonces = new();
 
+    private readonly NetDataWriter writer = new();
+
     /// <summary>
     ///     Next available outbound nonce.
     /// </summary>
@@ -106,7 +108,7 @@ public sealed class NetworkConnection : IDisposable
         var bytes = serializer.SerializeEvent(this, ev);
 
         // Send event.
-        var writer = new NetDataWriter();
+        writer.Reset();
         writer.Put(bytes);
         peer.Send(writer, deliveryMethod);
     }

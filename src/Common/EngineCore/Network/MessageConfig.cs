@@ -34,7 +34,7 @@ public sealed class MessageConfig
         VectorResolver.Instance,
         StandardResolver.Instance
     );
-    
+
     /// <summary>
     ///     MessagePack options for untruested and compressed messages.
     /// </summary>
@@ -47,7 +47,7 @@ public sealed class MessageConfig
     /// <summary>
     ///     MessagePack options for untrusted messages without compression.
     /// </summary>
-    public static MessagePackSerializerOptions UntrustedMessagePackOptions =>
+    public static readonly MessagePackSerializerOptions UntrustedMessagePackOptions =
         MessagePackSerializerOptions
             .Standard
             .WithSecurity(MessagePackSecurity.UntrustedData)
