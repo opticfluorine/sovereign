@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.IO;
 using Sovereign.EngineCore.Resources;
 
@@ -32,7 +33,11 @@ public class ClientResourcePathBuilder : IResourcePathBuilder
 
     public string BuildPathToResource(ResourceType resourceType, string resourceFilename)
     {
-        return Path.Combine(GetBaseDirectoryForResource(resourceType), resourceFilename);
+        var path = Path.Combine(GetBaseDirectoryForResource(resourceType), resourceFilename);
+        if (Path.GetRelativePath(ResourceRoot, path).StartsWith('.'))
+            throw new ArgumentException("File is not in resource directory.", "resourceFilename");
+
+        return path;
     }
 
     public string GetBaseDirectoryForResource(ResourceType resourceType)

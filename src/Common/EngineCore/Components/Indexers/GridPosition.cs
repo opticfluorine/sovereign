@@ -29,6 +29,8 @@ namespace Sovereign.EngineCore.Components.Indexers;
 [MessagePackObject]
 public struct GridPosition : IEquatable<GridPosition>
 {
+    public static readonly GridPosition Zero = new(0, 0, 0);
+
     public static readonly GridPosition OneX = new(1, 0, 0);
 
     public static readonly GridPosition OneY = new(0, 1, 0);
@@ -72,9 +74,9 @@ public struct GridPosition : IEquatable<GridPosition>
     /// <param name="position">Floating position.</param>
     public GridPosition(Vector3 position)
     {
-        X = (int)position.X;
-        Y = (int)position.Y;
-        Z = (int)position.Z;
+        X = (int)Math.Floor(position.X);
+        Y = (int)Math.Ceiling(position.Y);
+        Z = (int)Math.Floor(position.Z);
     }
 
     public static explicit operator Vector3(GridPosition gridPosition)
@@ -105,6 +107,17 @@ public struct GridPosition : IEquatable<GridPosition>
             Y = left.Y - right.Y,
             Z = left.Z - right.Z
         };
+    }
+
+    /// <summary>
+    ///     Adds two grid positions.
+    /// </summary>
+    /// <param name="a">First grid position.</param>
+    /// <param name="b">Second grid position.</param>
+    /// <returns>Sum of a and b.</returns>
+    public static GridPosition Add(GridPosition a, GridPosition b)
+    {
+        return new GridPosition(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
     }
 
     public override string ToString()

@@ -16,6 +16,7 @@
  */
 
 using System.Numerics;
+using Sovereign.ClientCore.Rendering;
 using Sovereign.EngineCore.Components;
 
 namespace Sovereign.ClientCore.Systems.Camera;
@@ -25,14 +26,13 @@ namespace Sovereign.ClientCore.Systems.Camera;
 /// </summary>
 public sealed class CameraManager
 {
-    private readonly PositionComponentCollection positions;
-    private readonly VelocityComponentCollection velocities;
+    private readonly DrawableLookup drawableLookup;
+    private readonly KinematicComponentCollection kinematics;
 
-    public CameraManager(PositionComponentCollection positions,
-        VelocityComponentCollection velocities)
+    public CameraManager(KinematicComponentCollection kinematics, DrawableLookup drawableLookup)
     {
-        this.positions = positions;
-        this.velocities = velocities;
+        this.kinematics = kinematics;
+        this.drawableLookup = drawableLookup;
     }
 
     /// <summary>
@@ -69,15 +69,18 @@ public sealed class CameraManager
             /* Zero the velocity so the camera doesn't drift from interpolation. */
             Velocity = Vector3.Zero;
         }
-        else
+        else if (kinematics.HasComponentForEntity(TrackingEntityId))
         {
             /* Match position and velocity with the target entity. */
-            var targetPos = positions.GetComponentForEntity(TrackingEntityId);
-            var targetVel = velocities.GetComponentForEntity(TrackingEntityId);
-            if (targetPos.HasValue)
-                Position = targetPos.Value;
-            if (targetVel.HasValue)
-                Velocity = targetVel.Value;
+            var targetKinematics = kinematics[TrackingEntityId];
+            var halfEntityExtent = drawableLookup.GetEntityDrawableSizeWorld(TrackingEntityId) * 0.5f;
+
+            Position = targetKinematics.Position with
+            {
+                X = targetKinematics.Position.X + halfEntityExtent.X,
+                Y = targetKinematics.Position.Y - halfEntityExtent.Y
+            };
+            Velocity = targetKinematics.Velocity;
         }
     }
 

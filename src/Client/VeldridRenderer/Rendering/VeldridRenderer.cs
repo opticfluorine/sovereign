@@ -20,7 +20,9 @@ using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Scenes;
+using Sovereign.VeldridRenderer.Rendering.Gui;
 using Sovereign.VeldridRenderer.Rendering.Resources;
+using Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 using Veldrid;
 
 namespace Sovereign.VeldridRenderer.Rendering;
@@ -35,6 +37,8 @@ public class VeldridRenderer : IRenderer
     /// </summary>
     private readonly VeldridDevice device;
 
+    private readonly GuiRenderer guiRenderer;
+
     /// <summary>
     ///     Veldrid resource manager.
     /// </summary>
@@ -44,6 +48,8 @@ public class VeldridRenderer : IRenderer
     ///     Scene consumer.
     /// </summary>
     private readonly VeldridSceneConsumer sceneConsumer;
+
+    private readonly WorldRenderer worldRenderer;
 
     /// <summary>
     ///     Scene manager.
@@ -56,12 +62,14 @@ public class VeldridRenderer : IRenderer
     private bool isDisposed;
 
     public VeldridRenderer(VeldridDevice device, VeldridResourceManager resourceManager,
-        SceneManager sceneManager, VeldridSceneConsumer sceneConsumer)
+        SceneManager sceneManager, VeldridSceneConsumer sceneConsumer, WorldRenderer worldRenderer, GuiRenderer guiRenderer)
     {
         this.device = device;
         this.resourceManager = resourceManager;
         this.sceneManager = sceneManager;
         this.sceneConsumer = sceneConsumer;
+        this.worldRenderer = worldRenderer;
+        this.guiRenderer = guiRenderer;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -78,6 +86,9 @@ public class VeldridRenderer : IRenderer
 
             /* Initialize all scenes. */
             sceneConsumer.Initialize();
+
+            // Initialize additional rendering layers.
+            guiRenderer.Initialize();
         }
         catch (Exception e)
         {
@@ -89,11 +100,19 @@ public class VeldridRenderer : IRenderer
     {
         if (!isDisposed)
         {
+            guiRenderer.Dispose();
             sceneConsumer.Dispose();
             resourceManager.Dispose();
             device.Dispose();
             isDisposed = true;
         }
+    }
+
+    public void ReloadResources()
+    {
+        resourceManager.ReloadTextures();
+        worldRenderer.ReloadResources();
+        guiRenderer.ReloadResources();
     }
 
     public void Render()
@@ -103,10 +122,10 @@ public class VeldridRenderer : IRenderer
         if (resourceManager.CommandList == null)
             throw new InvalidOperationException("Command list not ready.");
 
+        var commandList = resourceManager.CommandList;
         try
         {
             /* Prepare for rendering. */
-            var commandList = resourceManager.CommandList;
             commandList.Begin();
             commandList.SetFramebuffer(device.Device.SwapchainFramebuffer);
             commandList.ClearColorTarget(0, RgbaFloat.Black);
@@ -117,15 +136,19 @@ public class VeldridRenderer : IRenderer
             sceneConsumer.ConsumeScene(scene);
             scene.EndScene();
 
-            /* Render and present the next frame. */
-            commandList.End();
-            device.Device.SubmitCommands(commandList);
-            device.Device.WaitForIdle();
-            device.Device.SwapBuffers();
+            // GUI rendering from Dear ImGui.
+            guiRenderer.RenderGui(commandList);
         }
         catch (Exception e)
         {
             Logger.Error("Error during rendering.", e);
         }
+
+        /* Render and present the next frame. */
+        commandList.End();
+        device.Device.SubmitCommands(commandList);
+        device.Device.WaitForIdle();
+        device.Device.SwapBuffers();
+        guiRenderer.EndFrame();
     }
 }

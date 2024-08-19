@@ -50,6 +50,7 @@ public class EntityDefinitionProcessor
 
         // Build entity.
         var builder = factory.GetBuilder(definition.EntityId);
+        builder.Template(definition.TemplateEntityId);
 
         if (definition.Position.HasValue)
             builder.Positionable(definition.Position.Value);
@@ -90,6 +91,16 @@ public class EntityDefinitionProcessor
             builder.Orientation(definition.Orientation.Value);
         else
             builder.WithoutOrientation();
+
+        if (definition.Admin)
+            builder.Admin();
+        else
+            builder.WithoutAdmin();
+
+        if (definition.BlockPosition.HasValue)
+            builder.BlockPositionable(definition.BlockPosition.Value);
+        else
+            builder.WithoutBlockPositionable();
 
         var entityId = builder.Build();
         Logger.DebugFormat("Processed entity ID {0}.", entityId);

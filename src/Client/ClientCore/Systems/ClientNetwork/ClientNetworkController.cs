@@ -15,11 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.ClientCore.Events;
+using Castle.Core.Logging;
+using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Network;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
-using Sovereign.NetworkCore.Network.Rest.Data;
 
 namespace Sovereign.ClientCore.Systems.ClientNetwork;
 
@@ -28,6 +29,15 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork;
 /// </summary>
 public sealed class ClientNetworkController
 {
+    private readonly ClientStateServices stateServices;
+
+    public ClientNetworkController(ClientStateServices stateServices)
+    {
+        this.stateServices = stateServices;
+    }
+
+    public ILogger Logger { private get; set; } = NullLogger.Instance;
+
     /// <summary>
     ///     Sends an event announcing that the connection has been lost.
     /// </summary>
@@ -49,6 +59,36 @@ public sealed class ClientNetworkController
     {
         var ev = new Event(EventId.Client_Network_BeginConnection,
             new BeginConnectionEventDetails(connectionParameters, loginParameters));
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Sends an event commanding the system to end its connection to the server.
+    /// </summary>
+    /// <param name="eventSender"></param>
+    public void EndConnection(IEventSender eventSender)
+    {
+        var ev = new Event(EventId.Client_Network_EndConnection);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Logs out to player selection.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    public void LogoutPlayer(IEventSender eventSender)
+    {
+        if (!stateServices.TryGetSelectedPlayer(out var playerEntityId))
+        {
+            Logger.Error("No player is selected.");
+            return;
+        }
+
+        var details = new EntityEventDetails
+        {
+            EntityId = playerEntityId
+        };
+        var ev = new Event(EventId.Core_Network_Logout, details);
         eventSender.SendEvent(ev);
     }
 
@@ -83,42 +123,6 @@ public sealed class ClientNetworkController
     public void Connected(IEventSender eventSender)
     {
         var ev = new Event(EventId.Client_Network_Connected);
-        eventSender.SendEvent(ev);
-    }
-
-    /// <summary>
-    ///     Sends an event commanding an account registration.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="request">Registration request.</param>
-    /// <param name="connectionParameters">Connection parameters.</param>
-    public void RegisterAccount(IEventSender eventSender, RegistrationRequest request,
-        ClientConnectionParameters connectionParameters)
-    {
-        var ev = new Event(EventId.Client_Network_RegisterAccount,
-            new RegisterAccountEventDetails(request, connectionParameters));
-        eventSender.SendEvent(ev);
-    }
-
-    /// <summary>
-    ///     Sends an event announcing a successful registration.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    public void RegistrationSucceeded(IEventSender eventSender)
-    {
-        var ev = new Event(EventId.Client_Network_RegisterSuccess);
-        eventSender.SendEvent(ev);
-    }
-
-    /// <summary>
-    ///     Sends an event announcing a failed registration.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="error">Error message.</param>
-    public void RegistrationFailed(IEventSender eventSender, string error)
-    {
-        var ev = new Event(EventId.Client_Network_RegisterFailed,
-            new ErrorEventDetails(error));
         eventSender.SendEvent(ev);
     }
 }

@@ -18,18 +18,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Block.Components.Indexers;
-using Sovereign.EngineCore.World.Materials;
 using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.ClientCore.Systems.Block.Caches;
@@ -51,8 +47,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private const int UpdatedCollectionCount = 4;
 
     private readonly AboveBlockComponentCollection aboveBlocks;
-    private readonly BlockGridPositionIndexer blockGridPositions;
-    private readonly BlockPositionEventFilter blockPositionEventFilter;
+    private readonly BlockGridPositionIndexer blockIndexer;
+    private readonly BlockPositionComponentCollection blockPositions;
 
     /// <summary>
     ///     Block set pool.
@@ -62,40 +58,46 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <summary>
     ///     Read-only empty list to return when no sprites are cached.
     /// </summary>
-    private readonly IList<int> emptyList
-        = new ReadOnlyCollection<int>(new List<int>());
+    private readonly List<int> emptyList = new();
 
     private readonly EntityManager entityManager;
+    private readonly EntityTable entityTable;
 
     /// <summary>
     ///     Front face animated sprite cache.
     /// </summary>
-    private readonly IDictionary<ulong, IList<int>> frontFaceCache
-        = new ConcurrentDictionary<ulong, IList<int>>();
+    private readonly ConcurrentDictionary<ulong, List<int>> frontFaceCache = new();
 
     /// <summary>
     ///     Internal cache of known current block positions.
     /// </summary>
-    private readonly IDictionary<ulong, GridPosition> knownPositions
-        = new ConcurrentDictionary<ulong, GridPosition>();
+    private readonly ConcurrentDictionary<ulong, GridPosition> knownPositions = new();
 
     private readonly MaterialManager materialManager;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
-    private readonly PositionComponentCollection positions;
+
+    /// <summary>
+    ///     Block entity IDs whose templates have changed since the last cache update.
+    /// </summary>
+    private readonly HashSet<ulong> templateChanges = new();
 
     private readonly TileSpriteManager tileSpriteManager;
 
     /// <summary>
     ///     Top face animated sprite cache.
     /// </summary>
-    private readonly IDictionary<ulong, IList<int>> topFaceCache
-        = new ConcurrentDictionary<ulong, IList<int>>();
+    private readonly ConcurrentDictionary<ulong, List<int>> topFaceCache = new();
 
     /// <summary>
     ///     Block entity IDs that have been added or modified since the last cache update.
     /// </summary>
     private HashSet<ulong> changedBlocks = new();
+
+    /// <summary>
+    ///     Flag indicating that all cached entries need to be refreshed (e.g. for a template change).
+    /// </summary>
+    private bool refreshAll;
 
     /// <summary>
     ///     Block entity IDs that have been removed since the last cache update.
@@ -109,35 +111,34 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
     public BlockAnimatedSpriteCache(MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
-        PositionComponentCollection positions,
-        BlockGridPositionIndexer blockGridPositions,
-        BlockPositionEventFilter blockPositionEventFilter,
+        BlockPositionComponentCollection blockPositions,
+        BlockGridPositionIndexer blockIndexer,
         MaterialManager materialManager,
         AboveBlockComponentCollection aboveBlocks,
         TileSpriteManager tileSpriteManager,
-        EntityManager entityManager)
+        EntityManager entityManager, EntityTable entityTable)
     {
         this.materials = materials;
         this.materialModifiers = materialModifiers;
-        this.positions = positions;
-        this.blockGridPositions = blockGridPositions;
-        this.blockPositionEventFilter = blockPositionEventFilter;
+        this.blockPositions = blockPositions;
+        this.blockIndexer = blockIndexer;
         this.materialManager = materialManager;
         this.aboveBlocks = aboveBlocks;
         this.tileSpriteManager = tileSpriteManager;
         this.entityManager = entityManager;
+        this.entityTable = entityTable;
 
         RegisterEventHandlers();
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-    public IList<int> GetFrontFaceAnimatedSpriteIds(ulong blockId)
+    public List<int> GetFrontFaceAnimatedSpriteIds(ulong blockId)
     {
         return frontFaceCache.TryGetValue(blockId, out var spriteIds) ? spriteIds : emptyList;
     }
 
-    public IList<int> GetTopFaceAnimatedSpriteIds(ulong blockId)
+    public List<int> GetTopFaceAnimatedSpriteIds(ulong blockId)
     {
         return topFaceCache.TryGetValue(blockId, out var spriteIds) ? spriteIds : emptyList;
     }
@@ -169,6 +170,14 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     }
 
     /// <summary>
+    ///     Refreshes the animated sprite cache.
+    /// </summary>
+    private void RefreshCache()
+    {
+        foreach (var pos in knownPositions.Values) UpdateCacheForBlock(pos, true);
+    }
+
+    /// <summary>
     ///     Updates the cache for any blocks that have changed.
     /// </summary>
     /// <param name="changedSet">Set of changed blocks.</param>
@@ -176,15 +185,19 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     {
         foreach (var blockId in changedSet)
         {
+            // Ignore templates.
+            if (blockId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+                continue;
+
             UpdatePositionForBlock(blockId);
 
-            if (!knownPositions.ContainsKey(blockId))
+            if (!knownPositions.TryGetValue(blockId, out var position))
             {
                 Logger.ErrorFormat("No position known for changed block ID {0}.", blockId);
                 continue;
             }
 
-            UpdateCacheForBlock(knownPositions[blockId], true);
+            UpdateCacheForBlock(position, true);
         }
     }
 
@@ -196,6 +209,10 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     {
         foreach (var blockId in removedSet)
         {
+            // Ignore templates.
+            if (blockId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+                continue;
+
             RemoveEntity(blockId);
 
             if (!knownPositions.ContainsKey(blockId))
@@ -206,7 +223,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
             UpdateCacheForBlock(knownPositions[blockId], false);
 
-            knownPositions.Remove(blockId);
+            knownPositions.TryRemove(blockId, out _);
         }
     }
 
@@ -217,21 +234,37 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="updateSelf">Whether to update the cache entry for the block itself.</param>
     private void UpdateCacheForBlock(GridPosition gridPosition, bool updateSelf)
     {
-        /* Identify neighbors. */
-        var north = gridPosition + GridPosition.OneY;
-        var south = gridPosition - GridPosition.OneY;
-        var east = gridPosition + GridPosition.OneX;
-        var west = gridPosition - GridPosition.OneX;
-        var below = gridPosition - GridPosition.OneZ;
 
         /* Update cache. */
         var isTopFace = true;
         for (var i = 0; i < 2; ++i)
         {
+            // Determine the orientation of the world-space plane on which the tile sprites are positioned.
+            // This ensures that matching is done across the same surface (e.g. walls with walls, floors with
+            // floors).
+            var basisEast = GridPosition.OneX;
+            var basisNorth = isTopFace ? GridPosition.OneY : GridPosition.OneZ;
+            
+            /* Identify neighbors. */
+            var below = gridPosition - GridPosition.OneZ;
+            var north = gridPosition + basisNorth;
+            var south = gridPosition - basisNorth;
+            var east = gridPosition + basisEast;
+            var west = gridPosition - basisEast;
+            var northEast = north + basisEast;
+            var southEast = south + basisEast;
+            var southWest = south - basisEast;
+            var northWest = north - basisEast;
+            
+            // Update cache for all neighbors in the plane.
             UpdateCacheAtPosition(north, isTopFace);
             UpdateCacheAtPosition(south, isTopFace);
             UpdateCacheAtPosition(east, isTopFace);
             UpdateCacheAtPosition(west, isTopFace);
+            UpdateCacheAtPosition(northEast, isTopFace);
+            UpdateCacheAtPosition(southEast, isTopFace);
+            UpdateCacheAtPosition(southWest, isTopFace);
+            UpdateCacheAtPosition(northWest, isTopFace);
             if (isTopFace) UpdateCacheAtPosition(below, true);
             if (updateSelf) UpdateCacheAtPosition(gridPosition, isTopFace);
 
@@ -247,30 +280,46 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private void UpdateCacheAtPosition(GridPosition gridPosition, bool isTopFace)
     {
         /* Confirm that a block is present at the given position. */
-        var blockIds = blockGridPositions.GetEntitiesAtPosition(gridPosition);
+        var blockIds = blockIndexer.GetEntitiesAtPosition(gridPosition);
         if (blockIds == null || blockIds.Count == 0) return;
 
         /* Resolve to the tile sprite level. */
         var blockId = blockIds.First();
         var centerId = GetTileSpriteIdForBlock(blockId, isTopFace);
-        if (centerId == -1)
+        if (centerId < 0)
             // Block isn't ready yet, return at a later pass.
             return;
+        
+        // Determine the orientation of the world-space plane on which the tile sprites are positioned.
+        // This ensures that matching is done across the same surface (e.g. walls with walls, floors with
+        // floors).
+        var basisEast = GridPosition.OneX;
+        var basisNorth = isTopFace ? GridPosition.OneY : GridPosition.OneZ;
 
         /* Resolve neighbors to the tile sprite level. */
-        var north = gridPosition + GridPosition.OneY;
-        var south = gridPosition - GridPosition.OneY;
-        var east = gridPosition + GridPosition.OneX;
-        var west = gridPosition - GridPosition.OneX;
+        var north = gridPosition + basisNorth;
+        var south = gridPosition - basisNorth;
+        var east = gridPosition + basisEast;
+        var west = gridPosition - basisEast;
+        var northEast = north + basisEast;
+        var southEast = south + basisEast;
+        var southWest = south - basisEast;
+        var northWest = north - basisEast;
+
         var northId = GetTileSpriteIdForPosition(north, isTopFace);
         var southId = GetTileSpriteIdForPosition(south, isTopFace);
         var eastId = GetTileSpriteIdForPosition(east, isTopFace);
         var westId = GetTileSpriteIdForPosition(west, isTopFace);
+        var northEastId = GetTileSpriteIdForPosition(northEast, isTopFace);
+        var southEastId = GetTileSpriteIdForPosition(southEast, isTopFace);
+        var southWestId = GetTileSpriteIdForPosition(southWest, isTopFace);
+        var northWestId = GetTileSpriteIdForPosition(northWest, isTopFace);
 
         /* Resolve tile sprite to animated sprites. */
         var tileSprite = tileSpriteManager.TileSprites[centerId];
-        var resolvedSprites = tileSprite.GetMatchingAnimatedSpriteIds(northId, eastId,
-            southId, westId);
+        var contextKey = new TileContextKey(northId, northEastId, eastId, southEastId, southId, southWestId, westId,
+            northWestId);
+        var resolvedSprites = tileSprite.GetMatchingAnimatedSpriteIds(contextKey);
 
         /* Retrieve and populate cache. */
         var dict = isTopFace ? topFaceCache : frontFaceCache;
@@ -285,9 +334,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <returns>Resolved tile sprite ID, or TileSprite.Wildcard if no valid block.</returns>
     private int GetTileSpriteIdForPosition(GridPosition gridPosition, bool isTopFace)
     {
-        /* Get block at position, or return wildcard if not found. */
-        var blockIds = blockGridPositions.GetEntitiesAtPosition(gridPosition);
-        if (blockIds == null || blockIds.Count == 0) return TileSprite.Wildcard;
+        var blockIds = blockIndexer.GetEntitiesAtPosition(gridPosition);
+        if (blockIds == null || blockIds.Count == 0) return TileSprite.Empty;
 
         return GetTileSpriteIdForBlock(blockIds.First(), isTopFace);
     }
@@ -300,16 +348,14 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <returns>Resolved tile sprite ID.</returns>
     private int GetTileSpriteIdForBlock(ulong blockId, bool isTopFace)
     {
-        /* Get the material information, or return wildcard if not found. */
-        var materialId = materials.GetComponentForEntity(blockId);
-        var modifier = materialModifiers.GetComponentForEntity(blockId);
-        if (!materialId.HasValue || !modifier.HasValue) return TileSprite.Wildcard;
+        if (!materials.HasComponentForEntity(blockId) || !materialModifiers.HasComponentForEntity(blockId))
+            return TileSprite.Empty;
 
         /* Retrieve the tile sprite information. */
         try
         {
-            var material = materialManager.Materials[materialId.Value];
-            var subtype = material.MaterialSubtypes[modifier.Value];
+            var material = materialManager.Materials[materials[blockId]];
+            var subtype = material.MaterialSubtypes[materialModifiers[blockId]];
 
             if (isTopFace)
             {
@@ -327,20 +373,19 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         }
     }
 
-
     /// <summary>
     ///     Updates the known position for the given block.
     /// </summary>
     /// <param name="blockId">Block to update.</param>
     private void UpdatePositionForBlock(ulong blockId)
     {
-        if (!positions.HasComponentForEntity(blockId))
+        if (!blockPositions.HasComponentForEntity(blockId))
         {
             Logger.ErrorFormat("Block {0} has no position.", blockId);
             return;
         }
 
-        knownPositions[blockId] = (GridPosition)positions[blockId];
+        knownPositions[blockId] = blockPositions[blockId];
     }
 
     /// <summary>
@@ -349,8 +394,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="blockId">Block entity ID to remove.</param>
     private void RemoveEntity(ulong blockId)
     {
-        topFaceCache.Remove(blockId);
-        frontFaceCache.Remove(blockId);
+        topFaceCache.TryRemove(blockId, out _);
+        frontFaceCache.TryRemove(blockId, out _);
     }
 
     /// <summary>
@@ -365,6 +410,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
             removedBlocks = blockSetPool.TakeObject();
             changedBlocks.Clear();
             removedBlocks.Clear();
+
+            changedBlocks.UnionWith(templateChanges.Where(entityId =>
+                blockPositions.HasComponentForEntity(entityId) ||
+                blockPositions.HasPendingComponentForEntity(entityId)));
+            templateChanges.Clear();
         }
 
         updateCount++;
@@ -379,6 +429,12 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         if (updateCount >= UpdatedCollectionCount)
         {
             /* Update the cache asynchronously. */
+            if (refreshAll)
+            {
+                changedBlocks.UnionWith(frontFaceCache.Keys);
+                refreshAll = false;
+            }
+
             if (changedBlocks.Count > 0 || removedBlocks.Count > 0)
             {
                 var changedSet = changedBlocks;
@@ -399,7 +455,10 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="isLoad">Not used.</param>
     private void OnComponentAdded(ulong entityId, int componentValue, bool isLoad)
     {
-        changedBlocks.Add(entityId);
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+            refreshAll = true;
+        else
+            changedBlocks.Add(entityId);
     }
 
     /// <summary>
@@ -429,14 +488,43 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="componentValue">Not used.</param>
     /// <param name="isLoad">Not used.</param>
-    private void OnPositionAdded(ulong entityId, Vector3 componentValue, bool isLoad)
+    private void OnPositionAdded(ulong entityId, GridPosition componentValue, bool isLoad)
     {
         OnComponentModified(entityId, 0);
     }
 
-    private void OnPositionModified(ulong entityId, Vector3 componentValue)
+    /// <summary>
+    ///     Called when a block position is modified.
+    /// </summary>
+    /// <param name="entityId">Block entity ID.</param>
+    /// <param name="componentValue">Not used.</param>
+    private void OnPositionModified(ulong entityId, GridPosition componentValue)
     {
         OnComponentModified(entityId, 0);
+    }
+
+    /// <summary>
+    ///     Called when a block position is removed.
+    /// </summary>
+    /// <param name="entityId">Block entity ID.</param>
+    /// <param name="isUnload">Not used.</param>
+    private void OnPositionRemoved(ulong entityId, bool isUnload)
+    {
+        OnComponentRemoved(entityId, isUnload);
+    }
+
+    /// <summary>
+    ///     Refreshes the entire cache in the background whenever resources are updated.
+    /// </summary>
+    /// <param name="id">Unused.</param>
+    private void OnResourceChange(int id)
+    {
+        Task.Run(RefreshCache);
+    }
+
+    private void OnTemplateChange(ulong entityId, ulong templateEntityId)
+    {
+        templateChanges.Add(entityId);
     }
 
     /// <summary>
@@ -448,10 +536,18 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         materials.OnComponentModified += OnComponentModified;
         materials.OnComponentRemoved += OnComponentRemoved;
         materialModifiers.OnComponentModified += OnComponentModified;
-        blockPositionEventFilter.OnComponentAdded += OnPositionAdded;
-        blockPositionEventFilter.OnComponentModified += OnPositionModified;
+        blockPositions.OnComponentAdded += OnPositionAdded;
+        blockPositions.OnComponentModified += OnPositionModified;
+        blockPositions.OnComponentRemoved += OnPositionRemoved;
         entityManager.OnUpdatesStarted += OnStartUpdates;
         entityManager.OnUpdatesComplete += OnEndUpdates;
+        tileSpriteManager.OnTileSpriteAdded += OnResourceChange;
+        tileSpriteManager.OnTileSpriteUpdated += OnResourceChange;
+        tileSpriteManager.OnTileSpriteRemoved += OnResourceChange;
+        materialManager.OnMaterialAdded += OnResourceChange;
+        materialManager.OnMaterialUpdated += OnResourceChange;
+        materialManager.OnMaterialRemoved += OnResourceChange;
+        entityTable.OnTemplateSet += OnTemplateChange;
     }
 
     /// <summary>
@@ -463,9 +559,16 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         materials.OnComponentModified -= OnComponentModified;
         materials.OnComponentRemoved -= OnComponentRemoved;
         materialModifiers.OnComponentModified -= OnComponentModified;
-        blockPositionEventFilter.OnComponentAdded -= OnPositionAdded;
-        blockPositionEventFilter.OnComponentModified -= OnPositionModified;
-        entityManager.OnUpdatesStarted -= OnStartUpdates;
+        blockPositions.OnComponentAdded -= OnPositionAdded;
+        blockPositions.OnComponentModified -= OnPositionModified;
+        blockPositions.OnComponentRemoved -= OnPositionRemoved;
         entityManager.OnUpdatesComplete -= OnEndUpdates;
+        tileSpriteManager.OnTileSpriteAdded -= OnResourceChange;
+        tileSpriteManager.OnTileSpriteUpdated -= OnResourceChange;
+        tileSpriteManager.OnTileSpriteRemoved -= OnResourceChange;
+        materialManager.OnMaterialAdded -= OnResourceChange;
+        materialManager.OnMaterialUpdated -= OnResourceChange;
+        materialManager.OnMaterialRemoved -= OnResourceChange;
+        entityTable.OnTemplateSet -= OnTemplateChange;
     }
 }

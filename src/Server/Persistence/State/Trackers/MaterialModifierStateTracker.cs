@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Systems.Block.Components;
+using Sovereign.EngineCore.Components;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;

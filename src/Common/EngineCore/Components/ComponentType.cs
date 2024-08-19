@@ -15,8 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.EngineCore.Systems.Player.Components;
-
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
@@ -29,7 +27,7 @@ public enum ComponentType
     /// <summary>
     ///     Position component.
     /// </summary>
-    /// <seealso cref="PositionComponentCollection" />
+    /// <seealso cref="KinematicComponentCollection" />
     Position = 0x0000,
 
     /// <summary>
@@ -41,19 +39,19 @@ public enum ComponentType
     /// <summary>
     ///     Material component.
     /// </summary>
-    /// <seealso cref="Sovereign.EngineCore.Systems.Block.Components.MaterialComponentCollection" />
+    /// <seealso cref="MaterialComponentCollection" />
     Material = 0x0002,
 
     /// <summary>
     ///     Material modifier component.
     /// </summary>
-    /// <seealso cref="Sovereign.EngineCore.Systems.Block.Components.MaterialModifierComponentCollection" />
+    /// <seealso cref="MaterialModifierComponentCollection" />
     MaterialModifier = 0x0003,
 
     /// <summary>
     ///     Above block component.
     /// </summary>
-    /// <seealso cref="Sovereign.EngineCore.Systems.Block.Components.AboveBlockComponentCollection" />
+    /// <seealso cref="AboveBlockComponentCollection" />
     AboveBlock = 0x0004,
 
     /// <summary>
@@ -91,9 +89,24 @@ public enum ComponentType
     /// </summary>
     Orientation = 0x000A,
 
+    /// <summary>
+    ///     Admin tag.
+    /// </summary>
+    Admin = 0x000B,
+
+    /// <summary>
+    ///     Block position component.
+    /// </summary>
+    BlockPosition = 0x0009,
+
     #endregion Common
 
     #region Client
+
+    /// <summary>
+    ///     Animation phase component.
+    /// </summary>
+    AnimationPhase = 0x1000,
 
     #endregion Client
 

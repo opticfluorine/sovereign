@@ -30,20 +30,20 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
     ///     SQL query to execute.
     /// </summary>
     private const string query =
-        @"WITH RECURSIVE EntityTree(id, x, y, z, material, materialModifier, playerCharacter, name, account, 
-                parent, drawable, animatedSprite, orientation)
+        @"WITH RECURSIVE EntityTree(id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, 
+                parent, drawable, animatedSprite, orientation, admin)
 	        AS (
-		        SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
-                        drawable, animatedSprite, orientation
+		        SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
+                        drawable, animatedSprite, orientation, admin
 			        FROM EntityWithComponents WHERE id = @Id
 		        UNION ALL
-            		SELECT ec.id, ec.x, ec.y, ec.z, ec.material, ec.materialModifier, ec.playerCharacter, ec.name, 
-                        ec.account, ec.parent, ec.drawable, ec.animatedSprite, ec.orientation
+            		SELECT ec.id, ec.template_id, ec.x, ec.y, ec.z, ec.material, ec.materialModifier, ec.playerCharacter,
+                        ec.name, ec.account, ec.parent, ec.drawable, ec.animatedSprite, ec.orientation, ec.admin
 			        FROM EntityWithComponents ec, EntityTree et
         			WHERE ec.parent = et.id
 	        )
-            SELECT id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable,
-                animatedSprite, orientation FROM EntityTree ORDER BY parent NULLS LAST";
+            SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable,
+                animatedSprite, orientation, admin FROM EntityTree ORDER BY parent NULLS LAST";
 
     private readonly SqliteConnection dbConnection;
 

@@ -16,7 +16,6 @@
 
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Systems.WorldManagement.Components.Indexers;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -33,12 +32,13 @@ public class WorldSegmentChangeMonitor
     private readonly IEventSender eventSender;
     private readonly WorldManagementInternalController internalController;
 
-    public WorldSegmentChangeMonitor(WorldSegmentIndexer indexer, WorldManagementInternalController internalController,
+    public WorldSegmentChangeMonitor(
+        NonBlockWorldSegmentIndexer nonBlockIndexer, WorldManagementInternalController internalController,
         IEventSender eventSender)
     {
         this.internalController = internalController;
         this.eventSender = eventSender;
-        indexer.OnChangeWorldSegment += OnWorldSegmentChange;
+        nonBlockIndexer.OnChangeWorldSegment += OnWorldSegmentChange;
     }
 
     /// <summary>

@@ -16,6 +16,7 @@
 
 using System;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.ServerCore.Components;
 
@@ -29,8 +30,8 @@ public class AccountComponentCollection : BaseComponentCollection<Guid>
     /// </summary>
     private const int InitialSize = 512;
 
-    public AccountComponentCollection(ComponentManager componentManager) : base(
-        componentManager, InitialSize, ComponentOperators.GuidOperators, ComponentType.Account)
+    public AccountComponentCollection(EntityTable entityTable, ComponentManager componentManager) : base(
+        entityTable, componentManager, InitialSize, ComponentOperators.GuidOperators, ComponentType.Account)
     {
     }
 }

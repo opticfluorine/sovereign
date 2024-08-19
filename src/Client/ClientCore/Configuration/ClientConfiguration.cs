@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Sovereign.ClientCore.Network;
+
 namespace Sovereign.ClientCore.Configuration;
 
 /// <summary>
@@ -24,15 +26,87 @@ namespace Sovereign.ClientCore.Configuration;
 ///     In the future, the values of IClientConfiguration will be loaded at
 ///     runtime from a file.
 /// </remarks>
-public sealed class ClientConfiguration : IClientConfiguration
+public sealed class ClientConfiguration
 {
-    public int TileWidth => 32;
+    /// <summary>
+    ///     Width of a tile in pixels.
+    /// </summary>
+    public int TileWidth { get; set; } = 32;
 
-    public float RenderSearchSpacerX => 4.0f;
+    /// <summary>
+    ///     Extra tiles to search for renderable entities along the x axis.
+    /// </summary>
+    public float RenderSearchSpacerX { get; set; } = 4.0f;
 
-    public float RenderSearchSpacerY => 8.0f;
+    /// <summary>
+    ///     Extra tiles to search for renderable entities along the y axis.
+    /// </summary>
+    public float RenderSearchSpacerY { get; set; } = 8.0f;
 
-    public int MaxFramerate => 120;
+    /// <summary>
+    ///     Connection parameters.
+    /// </summary>
+    public ClientConnectionParameters ConnectionParameters { get; set; } = new();
 
-    public bool Fullscreen => false;
+    /// <summary>
+    ///     Display settings.
+    /// </summary>
+    public DisplayConfiguration Display { get; set; } = new();
+
+    /// <summary>
+    ///     Autoupdater settings.
+    /// </summary>
+    public AutoUpdaterConfiguration AutoUpdater { get; set; } = new();
+}
+
+/// <summary>
+///     Data type for display configuration.
+/// </summary>
+public class DisplayConfiguration
+{
+    /// <summary>
+    ///     Game window width in pixels.
+    /// </summary>
+    public int ResolutionWidth { get; set; }
+
+    /// <summary>
+    ///     Game window height in pixels.
+    /// </summary>
+    public int ResolutionHeight { get; set; }
+
+    /// <summary>
+    ///     User interface scale factor.
+    /// </summary>
+    public float UiScaleFactor { get; set; }
+
+    /// <summary>
+    ///     Fullscreen flag.
+    /// </summary>
+    public bool Fullscreen { get; set; }
+
+    /// <summary>
+    ///     Maximum framerate.
+    /// </summary>
+    public int MaxFramerate { get; set; }
+}
+
+/// <summary>
+///     Configuration settings for the autoupdater.
+/// </summary>
+public class AutoUpdaterConfiguration
+{
+    /// <summary>
+    ///     URL of the update server to use.
+    /// </summary>
+    public string UpdateServerUrl { get; set; } = "";
+
+    /// <summary>
+    ///     Whether to run the auto-updater when the client is started.
+    /// </summary>
+    public bool UpdateOnStartup { get; set; }
+
+    /// <summary>
+    ///     If true, prompt the user before beginning the update process.
+    /// </summary>
+    public bool PromptForUpdate { get; set; }
 }

@@ -16,10 +16,10 @@
  */
 
 using System.Numerics;
-using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 using Sovereign.ClientCore.Rendering.Scenes.Game.World;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Timing;
@@ -32,9 +32,9 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game;
 /// </summary>
 public sealed class GameScene : IScene
 {
-    private readonly GameSceneCamera camera;
+    private readonly RenderCamera camera;
     private readonly IEngineConfiguration engineConfiguration;
-    private readonly MainDisplay mainDisplay;
+    private readonly GameGui gameGui;
     private readonly ISystemTimer systemTimer;
     private readonly DisplayViewport viewport;
     private readonly WorldVertexSequencer worldVertexSequencer;
@@ -51,15 +51,15 @@ public sealed class GameScene : IScene
     private float timeSinceTick;
 
     public GameScene(ISystemTimer systemTimer, IEngineConfiguration engineConfiguration,
-        GameSceneCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
-        WorldVertexSequencer worldVertexSequencer)
+        RenderCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
+        WorldVertexSequencer worldVertexSequencer, GameGui gameGui)
     {
         this.systemTimer = systemTimer;
         this.engineConfiguration = engineConfiguration;
         this.camera = camera;
         this.viewport = viewport;
-        this.mainDisplay = mainDisplay;
         this.worldVertexSequencer = worldVertexSequencer;
+        this.gameGui = gameGui;
     }
 
     public SceneType SceneType => SceneType.Game;
@@ -76,10 +76,10 @@ public sealed class GameScene : IScene
     }
 
     public void PopulateBuffers(WorldVertex[] vertexBuffer, uint[] indexBuffer,
-        int[] drawLengths, out int drawCount)
+        int[] drawLengths, out int vertexCount, out int indexCount, out int drawCount)
     {
         worldVertexSequencer.SequenceVertices(vertexBuffer, indexBuffer, drawLengths,
-            out drawCount, timeSinceTick, systemTime);
+            out vertexCount, out indexCount, out drawCount, timeSinceTick, systemTime);
     }
 
     public void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles,
@@ -91,9 +91,9 @@ public sealed class GameScene : IScene
         timeSinceTick = this.timeSinceTick;
     }
 
-    public void PopulateGuiBuffers(ImDrawVert[] vertexBuffer, ushort[] indexBuffer)
+    public void UpdateGui()
     {
-        // TODO
+        gameGui.Render();
     }
 
     /// <summary>

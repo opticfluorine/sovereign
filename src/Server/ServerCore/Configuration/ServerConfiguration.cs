@@ -38,9 +38,9 @@ public sealed class ServerConfiguration
     public NetworkRecord Network { get; set; } = new();
 
     /// <summary>
-    ///     Debug configuration settings.
+    ///     New player configuration settings.
     /// </summary>
-    public DebugRecord Debug { get; set; } = new();
+    public NewPlayersRecord NewPlayers { get; set; } = new();
 
     /// <summary>
     ///     Full description of the accounts configuration.
@@ -184,17 +184,13 @@ public sealed class ServerConfiguration
     }
 
     /// <summary>
-    ///     Full description of the debug configuration.
+    ///     Full description of the new players configuration.
     /// </summary>
-    public sealed class DebugRecord
+    public sealed class NewPlayersRecord
     {
         /// <summary>
-        ///     Whether to enable debug mode.
+        ///     Whether to grant the admin role to new players by default.
         /// </summary>
-        /// <remarks>
-        ///     Debug mode should only ever be enabled for development.
-        ///     It must be disabled for production servers.
-        /// </remarks>
-        public bool EnableDebugMode { get; set; } = false;
+        public bool AdminByDefault { get; set; } = false;
     }
 }

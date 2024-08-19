@@ -35,7 +35,7 @@ public class TestOctree
     public void TestCreateEmptyOctree()
     {
         /* Create empty octree. */
-        var octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin);
+        var octree = new Octree<ulong, Vector3>(Octree<ulong, Vector3>.DefaultOrigin);
 
         /* Assert that the resulting octree is empty. */
         Assert.Equal(0, octree.Count);
@@ -52,7 +52,7 @@ public class TestOctree
         {
             [0] = new(1.0f, 0.0f, 0.0f)
         };
-        var octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin, data);
+        var octree = new Octree<ulong, Vector3>(Octree<ulong, Vector3>.DefaultOrigin, data, x => x);
 
         /* Assert that the resulting octree contains one item. */
         Assert.Equal(1, octree.Count);
@@ -70,7 +70,7 @@ public class TestOctree
         {
             [0] = new(1.0f, 0.0f, 0.0f)
         };
-        var octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin, data);
+        var octree = new Octree<ulong, Vector3>(Octree<ulong, Vector3>.DefaultOrigin, data, x => x);
 
         /* Query a range that matches nothing. */
         var minRange = new Vector3(1.2f, 0.0f, 0.0f);
@@ -98,7 +98,7 @@ public class TestOctree
             [0] = new(1.0f, 0.0f, 0.0f),
             [1] = new(1.6f, 0.2f, 0.8f)
         };
-        var octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin, data);
+        var octree = new Octree<ulong, Vector3>(Octree<ulong, Vector3>.DefaultOrigin, data, x => x);
 
         /* Query a range that matches nothing. */
         var minRange = new Vector3(1.2f, 0.0f, 0.0f);
@@ -128,7 +128,7 @@ public class TestOctree
         {
             [0] = new(4.0f, 4.0f, 4.0f)
         };
-        var octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin, data);
+        var octree = new Octree<ulong, Vector3>(Octree<ulong, Vector3>.DefaultOrigin, data, x => x);
 
         /* Add the second element. */
         var secondPosition = secondElementScaleFactor * data[0];
@@ -163,7 +163,7 @@ public class TestOctree
             [1] = new(2.1f, 2.1f, 2.1f),
             [2] = new(3.1f, 3.1f, 3.1f)
         };
-        var octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin, data);
+        var octree = new Octree<ulong, Vector3>(Octree<ulong, Vector3>.DefaultOrigin, data, x => x);
 
         /* Move the second element into the same bin as the first. */
         var newSecondPos = new Vector3(1.2f, 1.2f, 1.2f);
@@ -199,7 +199,7 @@ public class TestOctree
             [0] = new(1.0f, 1.0f, 1.0f),
             [1] = new(1.0f, 1.0f, 1.0f)
         };
-        var octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin, data);
+        var octree = new Octree<ulong, Vector3>(Octree<ulong, Vector3>.DefaultOrigin, data, x => x);
 
         /* Remove the first element from the octree. */
         using (var octreeLock = octree.AcquireLock())
@@ -240,7 +240,7 @@ public class TestOctree
         {
             [firstId] = firstPoint
         };
-        var octree = new Octree<ulong>(Octree<ulong>.DefaultOrigin, data);
+        var octree = new Octree<ulong, Vector3>(Octree<ulong, Vector3>.DefaultOrigin, data, x => x);
 
         // Force the octree to expand.
         var delta = new Vector3(deltaX, deltaY, deltaZ);

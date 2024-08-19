@@ -17,7 +17,6 @@
 
 using System;
 using System.Data;
-using System.Numerics;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.Persistence.Database.Queries;
 
@@ -42,6 +41,11 @@ public interface IPersistenceProvider : IDisposable
     ///     INextPersistedIdQuery for this persistence provider.
     /// </summary>
     INextPersistedIdQuery NextPersistedIdQuery { get; }
+
+    /// <summary>
+    ///     IRetrieveAllTemplatesQuery for this persistence provider.
+    /// </summary>
+    IRetrieveAllTemplatesQuery RetrieveAllTemplatesQuery { get; }
 
     /// <summary>
     ///     IAddAccountQuery for this persistence provider.
@@ -79,14 +83,19 @@ public interface IPersistenceProvider : IDisposable
     IRemoveEntityQuery RemoveEntityQuery { get; }
 
     /// <summary>
+    ///     ISetTemplateQuery for this persistence provider.
+    /// </summary>
+    public ISetTemplateQuery SetTemplateQuery { get; }
+
+    /// <summary>
     ///     IAddComponentQuery for the Position component.
     /// </summary>
-    IAddComponentQuery<Vector3> AddPositionQuery { get; }
+    IAddComponentQuery<Kinematics> AddPositionQuery { get; }
 
     /// <summary>
     ///     IModifyComponentQuery for the Position component.
     /// </summary>
-    IModifyComponentQuery<Vector3> ModifyPositionQuery { get; }
+    IModifyComponentQuery<Kinematics> ModifyPositionQuery { get; }
 
     /// <summary>
     ///     IRemoveComponentQuery for the Position component.
@@ -229,6 +238,21 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveOrientationComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for Admin tag.
+    /// </summary>
+    IAddComponentQuery<bool> AddAdminComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for Admin tag.
+    /// </summary>
+    IModifyComponentQuery<bool> ModifyAdminComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for Admin tag.
+    /// </summary>
+    IRemoveComponentQuery RemoveAdminComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }
@@ -242,4 +266,29 @@ public interface IPersistenceProvider : IDisposable
     ///     IListPlayersQuery for this persistence provider.
     /// </summary>
     IListPlayersQuery ListPlayersQuery { get; }
+
+    /// <summary>
+    ///     IDeletePlayerQuery for this persistence provider.
+    /// </summary>
+    IDeletePlayerQuery DeletePlayerQuery { get; }
+
+    /// <summary>
+    ///     IAddAdminRoleQuery for this persistence provider.
+    /// </summary>
+    IAddAdminRoleQuery AddAdminRoleQuery { get; }
+
+    /// <summary>
+    ///     IRemoveAdminRoleQuery for this persistence provider.
+    /// </summary>
+    IRemoveAdminRoleQuery RemoveAdminRoleQuery { get; }
+
+    /// <summary>
+    ///     IGetWorldSegmentBlockDataQuery for this persistence provider.
+    /// </summary>
+    IGetWorldSegmentBlockDataQuery GetWorldSegmentBlockDataQuery { get; }
+
+    /// <summary>
+    ///     ISetWorldSegmentBlockDataQuery for this persistence provider.
+    /// </summary>
+    ISetWorldSegmentBlockDataQuery SetWorldSegmentBlockDataQuery { get; }
 }

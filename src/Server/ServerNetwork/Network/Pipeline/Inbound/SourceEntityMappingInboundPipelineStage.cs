@@ -43,7 +43,10 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
 
         mappers = new Dictionary<EventId, Action<IEventDetails, ulong>>
         {
-            { EventId.Core_Movement_RequestMove, RequestMoveEventMapper }
+            { EventId.Core_Movement_RequestMove, RequestMoveEventMapper },
+            { EventId.Core_Network_Logout, EntityEventMapper },
+            { EventId.Core_Chat_Send, ChatEventMapper },
+            { EventId.Server_TemplateEntity_Update, EntityDefinitionEventMapper }
         };
     }
 
@@ -71,5 +74,35 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
     private static void RequestMoveEventMapper(IEventDetails details, ulong entityId)
     {
         ((RequestMoveEventDetails)details).EntityId = entityId;
+    }
+
+    /// <summary>
+    ///     Mapper for EntityEventDetails events.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    /// <param name="entityId">Player entity ID.</param>
+    private static void EntityEventMapper(IEventDetails details, ulong entityId)
+    {
+        ((EntityEventDetails)details).EntityId = entityId;
+    }
+
+    /// <summary>
+    ///     Mapper for ChatEventDetails events.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    /// <param name="entityId">Player entity ID.</param>
+    private static void ChatEventMapper(IEventDetails details, ulong entityId)
+    {
+        ((ChatEventDetails)details).SenderEntityId = entityId;
+    }
+
+    /// <summary>
+    ///     Mapper for EntityDefinitionEventMapper events.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    /// <param name="entityId">Player entity ID.</param>
+    private static void EntityDefinitionEventMapper(IEventDetails details, ulong entityId)
+    {
+        ((EntityDefinitionEventDetails)details).PlayerEntityId = entityId;
     }
 }

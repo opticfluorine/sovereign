@@ -17,7 +17,7 @@
 
 using System;
 using System.Collections.Generic;
-using Sovereign.ClientCore.Events;
+using Sovereign.ClientCore.Events.Details;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
@@ -42,12 +42,9 @@ public sealed class ClientNetworkSystem : ISystem, IDisposable
 
         eventDescriptions.RegisterNullEvent(EventId.Client_Network_Connected);
         eventDescriptions.RegisterNullEvent(EventId.Client_Network_ConnectionLost);
-        eventDescriptions.RegisterNullEvent(EventId.Client_Network_RegisterSuccess);
         eventDescriptions.RegisterEvent<BeginConnectionEventDetails>(EventId.Client_Network_BeginConnection);
         eventDescriptions.RegisterEvent<ErrorEventDetails>(EventId.Client_Network_ConnectionAttemptFailed);
         eventDescriptions.RegisterEvent<ErrorEventDetails>(EventId.Client_Network_LoginFailed);
-        eventDescriptions.RegisterEvent<RegisterAccountEventDetails>(EventId.Client_Network_RegisterAccount);
-        eventDescriptions.RegisterEvent<ErrorEventDetails>(EventId.Client_Network_RegisterFailed);
 
         eventLoop.RegisterSystem(this);
     }
@@ -63,9 +60,10 @@ public sealed class ClientNetworkSystem : ISystem, IDisposable
     {
         EventId.Client_Network_ConnectionLost,
         EventId.Client_Network_BeginConnection,
-        EventId.Client_Network_RegisterAccount,
         EventId.Core_WorldManagement_Subscribe,
-        EventId.Core_WorldManagement_Unsubscribe
+        EventId.Core_WorldManagement_Unsubscribe,
+        EventId.Client_Network_EndConnection,
+        EventId.Core_Network_Logout
     };
 
     public int WorkloadEstimate => 20;

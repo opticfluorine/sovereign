@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Entities;
+
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
@@ -23,8 +25,8 @@ public class NameComponentCollection : BaseComponentCollection<string>
 {
     private const int InitialSize = 4096;
 
-    public NameComponentCollection(ComponentManager componentManager)
-        : base(componentManager, InitialSize, ComponentOperators.StringOperators, ComponentType.Name)
+    public NameComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, InitialSize, ComponentOperators.StringOperators, ComponentType.Name)
     {
     }
 }

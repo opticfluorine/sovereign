@@ -15,10 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Threading;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Player.Components;
 
 namespace Sovereign.ClientCore.Entities;
 
@@ -28,23 +27,28 @@ namespace Sovereign.ClientCore.Entities;
 public sealed class ClientEntityFactory : IEntityFactory
 {
     private readonly AboveBlockComponentCollection aboveBlocks;
+    private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly EntityAssigner assigner;
+    private readonly BlockPositionComponentCollection blockPositions;
     private readonly DrawableTagCollection drawables;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
+    private readonly KinematicComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PlayerCharacterTagCollection playerCharacterTags;
-    private readonly PositionComponentCollection positions;
-    private readonly VelocityComponentCollection velocities;
+
+    /// <summary>
+    ///     Next available block entity ID.
+    /// </summary>
+    private ulong nextBlockId = EntityConstants.FirstBlockEntityId;
 
     public ClientEntityFactory(EntityManager entityManager,
-        PositionComponentCollection positions,
-        VelocityComponentCollection velocities,
+        KinematicComponentCollection kinematics,
         DrawableTagCollection drawables,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
@@ -54,11 +58,12 @@ public sealed class ClientEntityFactory : IEntityFactory
         NameComponentCollection names,
         ParentComponentCollection parents,
         OrientationComponentCollection orientations,
+        AdminTagCollection admins,
+        BlockPositionComponentCollection blockPositions,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
-        this.positions = positions;
-        this.velocities = velocities;
+        this.kinematics = kinematics;
         this.drawables = drawables;
         this.materials = materials;
         this.materialModifiers = materialModifiers;
@@ -68,21 +73,28 @@ public sealed class ClientEntityFactory : IEntityFactory
         this.names = names;
         this.parents = parents;
         this.orientations = orientations;
+        this.admins = admins;
+        this.blockPositions = blockPositions;
         this.entityTable = entityTable;
 
         assigner = entityManager.GetNewAssigner();
     }
 
-    public IEntityBuilder GetBuilder()
+    public IEntityBuilder GetBuilder(EntityType entityType)
     {
-        return GetBuilder(assigner.GetNextId());
+        return entityType switch
+        {
+            EntityType.Block => GetBuilder(Interlocked.Increment(ref nextBlockId)),
+            EntityType.Template => GetBuilder(entityTable.TakeNextTemplateEntityId()),
+            _ => GetBuilder(assigner.GetNextId())
+        };
     }
 
     public IEntityBuilder GetBuilder(ulong entityId, bool isLoad = false)
     {
         return new ClientEntityBuilder(entityId, isLoad,
-            entityManager, positions, velocities, drawables, materials,
+            entityManager, kinematics, drawables, materials,
             materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
-            orientations, entityTable);
+            orientations, admins, blockPositions, entityTable);
     }
 }

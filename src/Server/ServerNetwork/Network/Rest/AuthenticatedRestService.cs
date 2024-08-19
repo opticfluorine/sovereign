@@ -17,7 +17,7 @@
 using System;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
-using WatsonWebserver;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest;
 
@@ -39,7 +39,7 @@ public abstract class AuthenticatedRestService : IRestService
     public abstract RestPathType PathType { get; }
     public abstract HttpMethod RequestType { get; }
 
-    public async Task OnRequest(HttpContext ctx)
+    public async Task OnRequest(HttpContextBase ctx)
     {
         switch (authenticator.Authenticate(ctx, out var accountId))
         {
@@ -68,5 +68,5 @@ public abstract class AuthenticatedRestService : IRestService
     /// <param name="ctx">HTTP context.</param>
     /// <param name="accountId">Authenticated account ID associated with the request.</param>
     /// <returns>Task for further processing of the response.</returns>
-    protected abstract Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId);
+    protected abstract Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId);
 }

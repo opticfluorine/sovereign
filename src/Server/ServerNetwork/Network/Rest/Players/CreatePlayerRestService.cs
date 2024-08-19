@@ -27,7 +27,8 @@ using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Players;
-using WatsonWebserver;
+using Sovereign.ServerCore.Configuration;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
 
@@ -42,6 +43,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
     private const int MaxRequestLength = 1024;
 
     private readonly AccountsController accountsController;
+    private readonly IServerConfigurationManager configManager;
 
     /// <summary>
     ///     Object used as a lock to avoid name duplication due to a race condition.
@@ -61,7 +63,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
     public CreatePlayerRestService(RestAuthenticator authenticator, IEntityFactory entityFactory,
         CreatePlayerRequestValidator requestValidator, PersistencePlayerServices playerServices,
-        AccountsController accountsController, IEventSender eventSender)
+        AccountsController accountsController, IEventSender eventSender, IServerConfigurationManager configManager)
         : base(authenticator)
     {
         this.entityFactory = entityFactory;
@@ -69,13 +71,14 @@ public class CreatePlayerRestService : AuthenticatedRestService
         this.playerServices = playerServices;
         this.accountsController = accountsController;
         this.eventSender = eventSender;
+        this.configManager = configManager;
     }
 
     public override string Path => RestEndpoints.Player;
     public override RestPathType PathType => RestPathType.Static;
     public override HttpMethod RequestType => HttpMethod.POST;
 
-    protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
+    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
     {
         try
         {
@@ -124,7 +127,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
     /// <param name="status">Response status code.</param>
     /// <param name="result">Human-readable string describing the result.</param>
     /// <param name="playerId">Entity ID of newly created player. Only relevant for successful requests.</param>
-    private async Task SendResponse(HttpContext ctx, int status, string result, ulong playerId = 0)
+    private async Task SendResponse(HttpContextBase ctx, int status, string result, ulong playerId = 0)
     {
         ctx.Response.StatusCode = status;
 
@@ -164,14 +167,22 @@ public class CreatePlayerRestService : AuthenticatedRestService
                 !playerServices.IsPlayerNameTaken(request.PlayerName))
             {
                 // Name is available and wasn't created recently - let's take it.
-                playerEntityId = entityFactory.GetBuilder()
+                var builder = entityFactory.GetBuilder()
                     .Account(accountId)
                     .Name(request.PlayerName)
                     .PlayerCharacter()
                     .Positionable(Vector3.Zero) // TODO Configurable start position
                     .Drawable()
-                    .AnimatedSprite(4) // TODO Configurable appearance
-                    .Build();
+                    .AnimatedSprite(42); // TODO Configurable appearance
+
+                if (configManager.ServerConfiguration.NewPlayers.AdminByDefault)
+                {
+                    Logger.WarnFormat("Player {0} defaulting to admin; edit server configuration if unintended.",
+                        request.PlayerName);
+                    builder.Admin();
+                }
+
+                playerEntityId = builder.Build();
 
                 recentNames.Add(request.PlayerName);
                 result = true;

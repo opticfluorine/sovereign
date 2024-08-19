@@ -57,12 +57,25 @@ public sealed class EntityMapper
     }
 
     /// <summary>
+    ///     Notifies the mapper that the given entity has been loaded in order to ensure that
+    ///     the entity is not recreated in certain special cases (template entities).
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    public void MarkEntityAsLoaded(ulong entityId)
+    {
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+        {
+            // Map entity to itself so that it won't be recreated.
+            volatileToPersisted[entityId] = entityId;
+        }
+    }
+
+    /// <summary>
     ///     Gets the persisted entity ID for the given volatile entity ID.
     /// </summary>
     /// <param name="volatileEntityId">Volatile entity ID.</param>
     /// <param name="needToCreate">
-    ///     Set to true if the entity ID needs to
-    ///     be added to the database.
+    ///     Set to true if the entity ID needs to be added to the database.
     /// </param>
     /// <returns>Persisted entity ID.</returns>
     public ulong GetPersistedId(ulong volatileEntityId, out bool needToCreate)
@@ -70,9 +83,11 @@ public sealed class EntityMapper
         if (!initialized) throw new InvalidOperationException("Not initialized");
 
         needToCreate = false;
-        if (volatileEntityId >= EntityAssigner.FirstPersistedId) return volatileEntityId;
+        if (volatileEntityId is >= EntityConstants.FirstPersistedEntityId 
+            or (>= EntityConstants.FirstBlockEntityId and <= EntityConstants.LastBlockEntityId)) 
+            return volatileEntityId;
 
-        if (volatileToPersisted.ContainsKey(volatileEntityId)) return volatileToPersisted[volatileEntityId];
+        if (volatileToPersisted.TryGetValue(volatileEntityId, out var id)) return id;
 
         needToCreate = true;
         return GetNewPersistedId(volatileEntityId);
@@ -120,9 +135,18 @@ public sealed class EntityMapper
         }
     }
 
+    /// <summary>
+    ///     Gets a new persisted ID for the given volatile ID.
+    /// </summary>
+    /// <param name="volatileEntityId">Volatile entity ID.</param>
+    /// <returns>Persisted entity ID.</returns>
     private ulong GetNewPersistedId(ulong volatileEntityId)
     {
-        var persistedEntityId = NextPersistedId++;
+        // Avoid transforming newly added template entity IDs.
+        var isTemplate =
+            volatileEntityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId;
+        var persistedEntityId = isTemplate ? volatileEntityId : NextPersistedId++;
+
         volatileToPersisted[volatileEntityId] = persistedEntityId;
         persistedToVolatile[persistedEntityId] = volatileEntityId;
 

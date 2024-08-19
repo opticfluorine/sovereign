@@ -48,5 +48,7 @@ public sealed class PersistenceInstaller : IWindsorInstaller
 
         container.Register(Component.For<PersistenceInternalController>()
             .LifestyleSingleton());
+
+        container.Register(Component.For<WorldSegmentPersister>().LifestyleSingleton());
     }
 }

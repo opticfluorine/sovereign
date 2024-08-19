@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <AssemblyName>Sovereign.Persistence</AssemblyName>
         <RootNamespace>Sovereign.Persistence</RootNamespace>
         <Nullable>enable</Nullable>
@@ -10,7 +10,6 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.13"/>
-        <PackageReference Include="Npgsql" Version="7.0.4"/>
     </ItemGroup>
 
     <ItemGroup>

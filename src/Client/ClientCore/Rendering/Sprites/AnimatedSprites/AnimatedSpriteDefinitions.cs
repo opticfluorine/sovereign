@@ -41,13 +41,21 @@ public sealed class AnimatedSpriteDefinitions
         public int Id { get; set; }
 
         /// <summary>
+        ///     Sprite IDs for each frame.
+        /// </summary>
+        public Dictionary<AnimationPhase, AnimatedSpritePhaseDefinition> Phases { get; set; } = new();
+    }
+
+    /// <summary>
+    ///     Defines a single phase of an animated sprite.
+    /// </summary>
+    public sealed class AnimatedSpritePhaseDefinition
+    {
+        /// <summary>
         ///     Length of time to display each frame, in microseconds.
         /// </summary>
         public ulong AnimationTimestep { get; set; }
 
-        /// <summary>
-        ///     Sprite IDs for each frame.
-        /// </summary>
         public Dictionary<Orientation, AnimatedSpriteFaceDefinition> Faces { get; set; } = new();
     }
 

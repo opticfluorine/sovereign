@@ -30,4 +30,9 @@ public class PlayerInfo
     ///     Player character name.
     /// </summary>
     public string? Name { get; set; }
+
+    /// <summary>
+    ///     Animated sprite for the player character.
+    /// </summary>
+    public int? AnimatedSprite { get; set; }
 }

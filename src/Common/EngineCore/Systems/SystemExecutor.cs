@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.EngineCore.Systems;
@@ -29,12 +30,7 @@ namespace Sovereign.EngineCore.Systems;
 /// </summary>
 public class SystemExecutor
 {
-    /// <summary>
-    ///     An executor thread will sleep if it processes less than this number
-    ///     of events in a single pass. This reduces system load under light
-    ///     conditions in exchange for a temporary increase in event latency.
-    /// </summary>
-    private const int ThreadYieldEventLimit = 1;
+    private readonly IEngineConfiguration engineConfiguration;
 
     /// <summary>
     ///     Event loop.
@@ -46,9 +42,15 @@ public class SystemExecutor
     /// </summary>
     private readonly List<ISystem> systems = new();
 
-    public SystemExecutor(IEventLoop eventLoop)
+    /// <summary>
+    ///     Executor loop iteration count.
+    /// </summary>
+    private uint iterationCount;
+
+    public SystemExecutor(IEventLoop eventLoop, IEngineConfiguration engineConfiguration)
     {
         this.eventLoop = eventLoop;
+        this.engineConfiguration = engineConfiguration;
     }
 
     public ILogger Log { private get; set; } = NullLogger.Instance;
@@ -96,26 +98,28 @@ public class SystemExecutor
     {
         while (!eventLoop.Terminated)
         {
-            // Keep track of events processed for later load balancing.
-            var eventsProcessed = 0;
-
             // Execute all systems.
             foreach (var system in systems)
                 try
                 {
-                    eventsProcessed += system.ExecuteOnce();
+                    system.ExecuteOnce();
                 }
                 catch (Exception e)
                 {
                     Log.Error("Unhandled exception in system.", e);
                 }
 
-            // Check if this thread's workload is light.
-            if (eventsProcessed < ThreadYieldEventLimit)
-                // This thread's current workload is light, so yield the thread
-                // to the OS. This reduces our utilization in exchange for a
-                // temporary increase in event latency on this thread.
+            iterationCount++;
+            if (engineConfiguration.ExecutorThreadSleepInterval > 0 &&
+                iterationCount == engineConfiguration.ExecutorThreadSleepInterval)
+            {
+                iterationCount = 0;
                 Thread.Sleep(1);
+            }
+            else
+            {
+                Thread.Yield();
+            }
         }
     }
 

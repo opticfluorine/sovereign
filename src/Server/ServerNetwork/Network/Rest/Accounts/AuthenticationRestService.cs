@@ -28,7 +28,7 @@ using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.ServerNetwork.Configuration;
 using Sovereign.ServerNetwork.Network.Rest;
-using WatsonWebserver;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Authentication;
 
@@ -92,7 +92,7 @@ public sealed class AuthenticationRestService : IRestService
 
     public HttpMethod RequestType => HttpMethod.POST;
 
-    public async Task OnRequest(HttpContext ctx)
+    public async Task OnRequest(HttpContextBase ctx)
     {
         try
         {
@@ -159,7 +159,7 @@ public sealed class AuthenticationRestService : IRestService
         }
     }
 
-    private async Task SendResponse(HttpContext ctx,
+    private async Task SendResponse(HttpContextBase ctx,
         int status, string result, string id = "", string apiKey = "",
         string secret = "", string host = "",
         ushort port = 0)

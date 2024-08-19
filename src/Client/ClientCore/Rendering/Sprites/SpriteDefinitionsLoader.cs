@@ -16,9 +16,9 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using System.Text.Json;
 
 namespace Sovereign.ClientCore.Rendering.Sprites;
 
@@ -27,13 +27,6 @@ namespace Sovereign.ClientCore.Rendering.Sprites;
 /// </summary>
 public sealed class SpriteDefinitionsLoader
 {
-    /// <summary>
-    ///     YAML deserializer.
-    /// </summary>
-    private readonly IDeserializer deserializer = new DeserializerBuilder()
-        .WithNamingConvention(PascalCaseNamingConvention.Instance)
-        .Build();
-
     /// <summary>
     ///     Sprite definitions validator.
     /// </summary>
@@ -55,21 +48,44 @@ public sealed class SpriteDefinitionsLoader
     public SpriteDefinitions LoadSpriteDefinitions(string filename)
     {
         /* Load definitions. */
-        SpriteDefinitions definitions;
+        SpriteDefinitions? definitions;
         try
         {
-            using (var reader = new StreamReader(filename))
-            {
-                definitions = deserializer.Deserialize<SpriteDefinitions>(reader);
-            }
+            using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read);
+            definitions = JsonSerializer.Deserialize<SpriteDefinitions>(stream);
         }
         catch (Exception e)
         {
             throw new SpriteDefinitionsException("Failed to read sprite definitions.", e);
         }
 
+        if (definitions == null) throw new SpriteDefinitionsException("No sprite definitions found.");
+
         validator.Validate(definitions);
 
         return definitions;
+    }
+
+    /// <summary>
+    ///     Saves the sprite definitions to the given file.
+    /// </summary>
+    /// <param name="filename">Filename.</param>
+    /// <param name="sprites">List of sprites.</param>
+    /// <exception cref="SpriteDefinitionsException">Thrown if an error occurs. Details in inner exception.</exception>
+    public void SaveSpriteDefinitions(string filename, List<Sprite> sprites)
+    {
+        // Pack definitions.
+        var defs = new SpriteDefinitions { Sprites = sprites };
+
+        // Serialize to JSON.
+        try
+        {
+            using var stream = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write);
+            JsonSerializer.Serialize(stream, defs);
+        }
+        catch (Exception e)
+        {
+            throw new SpriteDefinitionsException("Failed to write sprite definitions.", e);
+        }
     }
 }

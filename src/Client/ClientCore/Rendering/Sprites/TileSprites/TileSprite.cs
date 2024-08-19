@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,69 +34,158 @@ public sealed class TileSprite
     public const int Wildcard = -1;
 
     /// <summary>
+    ///     Indicates that there is no neighboring tile sprite.
+    /// </summary>
+    public const int Empty = -2;
+
+    /// <summary>
     ///     Cache of previously resolved tile contexts.
     /// </summary>
-    private readonly IDictionary<Tuple<int, int, int, int>, TileContext> lookupCache
-        = new ConcurrentDictionary<Tuple<int, int, int, int>, TileContext>();
+    private readonly ConcurrentDictionary<TileContextKey, TileContext> lookupCache = new();
 
     /// <summary>
     ///     Tile contexts sorted in priority order.
     /// </summary>
-    private readonly IList<TileContext> tileContexts;
+    public List<TileContext> TileContexts;
+
+    public TileSprite(int id)
+    {
+        Id = id;
+        TileContexts = new List<TileContext>
+        {
+            new()
+            {
+                NorthTileSpriteId = Wildcard,
+                EastTileSpriteId = Wildcard,
+                SouthTileSpriteId = Wildcard,
+                WestTileSpriteId = Wildcard,
+                NortheastTileSpriteId = Wildcard,
+                SoutheastTileSpriteId = Wildcard,
+                SouthwestTileSpriteId = Wildcard,
+                NorthwestTileSpriteId = Wildcard,
+                AnimatedSpriteIds = new List<int> { 0 }
+            }
+        };
+    }
 
     public TileSprite(TileSpriteRecord definition)
     {
         Id = definition.Id;
-        tileContexts = SortContexts(definition.TileContexts);
+        TileContexts = SortContexts(definition.TileContexts);
+    }
+
+    /// <summary>
+    ///     Copy constructor.
+    /// </summary>
+    /// <param name="other">Tile sprite to copy.</param>
+    public TileSprite(TileSprite other)
+    {
+        Id = other.Id;
+        TileContexts = other.TileContexts
+            .Select(context => new TileContext(context))
+            .ToList();
     }
 
     /// <summary>
     ///     Tile sprite ID.
     /// </summary>
-    public int Id { get; private set; }
+    public int Id { get; set; }
 
     /// <summary>
     ///     Finds the animated sprites for the tile context that matches
     ///     the given bordering tiles.
     /// </summary>
     /// This method should only be called from the rendering thread.
-    /// <param name="idNorth">ID of the north tile sprite.</param>
-    /// <param name="idEast">ID of the east tile sprite.</param>
-    /// <param name="idSouth">ID of the south tile sprite.</param>
-    /// <param name="idWest">ID of the west tile sprite.</param>
+    /// <param name="contextKey">Tile context key.</param>
     /// <returns>Matching tile context.</returns>
     /// <exception cref="KeyNotFoundException">
     ///     Thrown if no matching tile context is found. This should not typically occur as
     ///     there should always be a default context that matches all ID patterns.
     /// </exception>
-    public IList<int> GetMatchingAnimatedSpriteIds(int idNorth, int idEast,
-        int idSouth, int idWest)
+    public List<int> GetMatchingAnimatedSpriteIds(TileContextKey contextKey)
     {
         /* Check if the context is already in the cache. */
-        var ids = new Tuple<int, int, int, int>(idNorth, idEast, idSouth, idWest);
-        if (lookupCache.TryGetValue(ids, out var cachedValues))
+        if (lookupCache.TryGetValue(contextKey, out var cachedValues))
             return cachedValues.AnimatedSpriteIds;
 
         /* Context not found in cache - resolve. */
-        var context = ResolveContext(ids);
-        lookupCache[ids] = context;
+        var context = ResolveContext(contextKey);
+        lookupCache[contextKey] = context;
         return context.AnimatedSpriteIds;
+    }
+
+    /// <summary>
+    ///     Called when an animated sprite is added resulting in a change in indices.
+    /// </summary>
+    /// <param name="animatedSpriteId">ID of new animated sprite.</param>
+    public void OnAnimatedSpriteAdded(int animatedSpriteId)
+    {
+        // IDs of any animated sprites with old id >= animatedSpriteId are incremented by one.
+        // Update all contexts to match.
+        foreach (var context in TileContexts)
+            for (var i = 0; i < context.AnimatedSpriteIds.Count; ++i)
+            {
+                var oldId = context.AnimatedSpriteIds[i];
+                if (oldId >= animatedSpriteId)
+                {
+                    context.AnimatedSpriteIds.RemoveAt(i);
+                    context.AnimatedSpriteIds.Insert(i, oldId + 1);
+                }
+            }
+    }
+
+    /// <summary>
+    ///     Called when an animated sprite is removed resulting in a change in indices.
+    /// </summary>
+    /// <param name="animatedSpriteId">ID of removed animated sprite.</param>
+    public void OnAnimatedSpriteRemoved(int animatedSpriteId)
+    {
+        // IDs of any aniamted sprites wtih old id > animatedSpriteId are decremented by one.
+        // The removal assumes no tile sprite dependencies, so we will ignore any that exist.
+        // Update affected IDs.
+        foreach (var context in TileContexts)
+            for (var i = 0; i < context.AnimatedSpriteIds.Count; ++i)
+            {
+                var oldId = context.AnimatedSpriteIds[i];
+                if (oldId > animatedSpriteId)
+                {
+                    context.AnimatedSpriteIds.RemoveAt(i);
+                    context.AnimatedSpriteIds.Insert(i, oldId - 1);
+                }
+            }
+    }
+
+    /// <summary>
+    ///     Clears the sprite lookup cache.
+    /// </summary>
+    public void ClearCache()
+    {
+        lookupCache.Clear();
+    }
+
+    /// <summary>
+    ///     Re-sorts the tile contexts so that they resolve correctly.
+    /// </summary>
+    public void ReSortContexts()
+    {
+        TileContexts = SortContexts(TileContexts);
     }
 
     /// <summary>
     ///     Resolves the tile context for the given neighboring IDs.
     /// </summary>
-    /// <param name="ids">4-tuple of neighboring IDs (north, east, south, west).</param>
+    /// <param name="key">Context key.</param>
     /// <returns>Resolved tile context.</returns>
     /// <exception cref="KeyNotFoundException">
     ///     Thrown if no matching tile context is found. This should not typically occur as
     ///     there should always be a default context that matches all ID patterns.
     /// </exception>
-    private TileContext ResolveContext(Tuple<int, int, int, int> ids)
+    private TileContext ResolveContext(TileContextKey key)
     {
         /* Since the contexts are sorted in priority order, iterate until match. */
-        foreach (var context in tileContexts)
-            if (context.IsMatch(ids.Item1, ids.Item2, ids.Item3, ids.Item4))
+        foreach (var context in TileContexts)
+            if (context.IsMatch(key.NorthId, key.NortheastId, key.EastId, key.SoutheastId,
+                    key.SouthId, key.SouthwestId, key.WestId, key.NorthwestId))
                 return context;
 
         /* We should at least match the default context, so throw an exception. */
@@ -109,7 +197,7 @@ public sealed class TileSprite
     /// </summary>
     /// <param name="contexts">Tile contexts to be sorted.</param>
     /// <returns>Sorted list of tile contexts.</returns>
-    private IList<TileContext> SortContexts(IEnumerable<TileContext> contexts)
+    private List<TileContext> SortContexts(IEnumerable<TileContext> contexts)
     {
         return contexts.OrderBy(context => context.GetWildcardCount())
             .ThenByDescending(context => context.NorthTileSpriteId)

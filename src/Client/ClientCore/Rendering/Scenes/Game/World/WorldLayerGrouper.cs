@@ -18,11 +18,10 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
-using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.World.Materials;
 using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
@@ -34,6 +33,7 @@ public sealed class WorldLayerGrouper
 {
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly KinematicComponentCollection kinematics;
 
     /// <summary>
     ///     Reusable pool of world layers.
@@ -45,23 +45,22 @@ public sealed class WorldLayerGrouper
 
     private readonly MaterialComponentCollection materials;
     private readonly OrientationComponentCollection orientations;
-    private readonly VelocityComponentCollection velocities;
 
     public WorldLayerGrouper(MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AnimatedSpriteComponentCollection animatedSprites,
         AboveBlockComponentCollection aboveBlocks,
-        VelocityComponentCollection velocities,
         MaterialManager materialManager,
-        OrientationComponentCollection orientations)
+        OrientationComponentCollection orientations,
+        KinematicComponentCollection kinematics)
     {
         this.materials = materials;
         this.materialModifiers = materialModifiers;
         this.animatedSprites = animatedSprites;
         this.aboveBlocks = aboveBlocks;
-        this.velocities = velocities;
         this.materialManager = materialManager;
         this.orientations = orientations;
+        this.kinematics = kinematics;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -76,7 +75,7 @@ public sealed class WorldLayerGrouper
     ///     Groups the drawables into their respective layers.
     /// </summary>
     /// <param name="drawables">Unordered list of drawable entities in range.</param>
-    public void GroupDrawables(IList<PositionedEntity> drawables)
+    public void GroupDrawables(List<PositionedEntity> drawables)
     {
         ResetLayers();
         foreach (var drawable in drawables) ProcessDrawable(drawable);
@@ -89,13 +88,13 @@ public sealed class WorldLayerGrouper
     private void ProcessDrawable(PositionedEntity drawable)
     {
         /* Get the entity velocity, defaulting to zero if not set. */
-        var velocity = velocities.GetComponentForEntity(drawable.EntityId)
-            .OrElseDefault(Vector3.Zero);
+        var velocity = kinematics.HasComponentForEntity(drawable.EntityId)
+            ? kinematics[drawable.EntityId].Velocity
+            : Vector3.Zero;
 
         /* Route the drawable to the correct rendering list. */
-        var material = materials.GetComponentForEntity(drawable.EntityId);
-        if (material.HasValue)
-            AddMaterial(drawable, material.Value, velocity);
+        if (materials.HasComponentForEntity(drawable.EntityId))
+            AddMaterial(drawable, materials[drawable.EntityId], velocity);
         else
             AddAnimatedSprite(drawable, velocity);
     }
@@ -164,7 +163,7 @@ public sealed class WorldLayerGrouper
     {
         layerFront.FrontFaceTileSprites.Add(new PosVelId
         {
-            Position = drawable.Position,
+            Position = drawable.Position with { Y = drawable.Position.Y - 1.0f },
             Velocity = velocity,
             Id = materialSubtype.SideFaceTileSpriteId,
             EntityId = drawable.EntityId
@@ -186,12 +185,7 @@ public sealed class WorldLayerGrouper
             : materialSubtype.TopFaceTileSpriteId;
         layerTop.TopFaceTileSprites.Add(new PosVelId
         {
-            Position = new Vector3
-            {
-                X = drawable.Position.X,
-                Y = drawable.Position.Y,
-                Z = drawable.Position.Z - 1.0f
-            },
+            Position = drawable.Position,
             Velocity = velocity,
             Id = topFaceId,
             EntityId = drawable.EntityId
@@ -234,9 +228,7 @@ public sealed class WorldLayerGrouper
     /// <returns>Material subtype.</returns>
     private MaterialSubtype GetMaterialSubtype(ulong entityId, int materialId)
     {
-        var modifier = materialModifiers
-            .GetComponentForEntity(entityId)
-            .OrElseDefault(0);
+        var modifier = materialModifiers.HasComponentForEntity(entityId) ? materialModifiers[entityId] : 0;
         return materialManager.Materials[materialId].MaterialSubtypes[modifier];
     }
 

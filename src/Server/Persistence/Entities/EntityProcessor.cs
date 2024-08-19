@@ -19,6 +19,7 @@ using System;
 using System.Data;
 using System.Numerics;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 
@@ -30,26 +31,27 @@ namespace Sovereign.Persistence.Entities;
 public sealed class EntityProcessor
 {
     private const int IndexId = 0;
-    private const int IndexPosX = 1;
-    private const int IndexPosY = 2;
-    private const int IndexPosZ = 3;
-    private const int IndexMaterial = 4;
-    private const int IndexMaterialModifier = 5;
-    private const int IndexPlayerCharacter = 6;
-    private const int IndexName = 7;
-    private const int IndexAccount = 8;
-    private const int IndexParent = 9;
-    private const int IndexDrawable = 10;
-    private const int IndexAnimatedSprite = 11;
-    private const int IndexOrientation = 12;
+    private const int IndexTemplateId = IndexId + 1;
+    private const int IndexPosX = IndexTemplateId + 1;
+    private const int IndexPosY = IndexPosX + 1;
+    private const int IndexPosZ = IndexPosY + 1;
+    private const int IndexMaterial = IndexPosZ + 1;
+    private const int IndexMaterialModifier = IndexMaterial + 1;
+    private const int IndexPlayerCharacter = IndexMaterialModifier + 1;
+    private const int IndexName = IndexPlayerCharacter + 1;
+    private const int IndexAccount = IndexName + 1;
+    private const int IndexParent = IndexAccount + 1;
+    private const int IndexDrawable = IndexParent + 1;
+    private const int IndexAnimatedSprite = IndexDrawable + 1;
+    private const int IndexOrientation = IndexAnimatedSprite + 1;
+    private const int IndexAdmin = IndexOrientation + 1;
     private readonly IEntityFactory entityFactory;
-    private readonly EntityMapper entityMapper;
+    private readonly EntityMapper mapper;
 
-    public EntityProcessor(EntityMapper entityMapper,
-        IEntityFactory entityFactory)
+    public EntityProcessor(IEntityFactory entityFactory, EntityMapper mapper)
     {
-        this.entityMapper = entityMapper;
         this.entityFactory = entityFactory;
+        this.mapper = mapper;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -81,9 +83,11 @@ public sealed class EntityProcessor
         var entityId = (ulong)reader.GetInt64(IndexId);
 
         /* Start loading the entity. */
+        mapper.MarkEntityAsLoaded(entityId);
         var builder = entityFactory.GetBuilder(entityId, true);
 
         /* Process components. */
+        ProcessTemplate(reader, builder);
         ProcessPosition(reader, builder);
         ProcessMaterial(reader, builder);
         ProcessPlayerCharacter(reader, builder);
@@ -93,9 +97,22 @@ public sealed class EntityProcessor
         ProcessDrawable(reader, builder);
         ProcessAnimatedSprite(reader, builder);
         ProcessOrientation(reader, builder);
+        ProcessAdmin(reader, builder);
 
         /* Complete the entity. */
         builder.Build();
+    }
+
+    /// <summary>
+    ///     Process the entity template data, if any, from the reader.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessTemplate(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexTemplateId)) return;
+
+        builder.Template((ulong)reader.GetInt64(IndexTemplateId));
     }
 
     /// <summary>
@@ -229,6 +246,17 @@ public sealed class EntityProcessor
     }
 
     /// <summary>
+    ///     Processes the Admin component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Entity builder.</param>
+    private void ProcessAdmin(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexAdmin)) return;
+        if (reader.GetBoolean(IndexAdmin)) builder.Admin();
+    }
+
+    /// <summary>
     ///     Extracts a Vector3 from the reader.
     /// </summary>
     /// <param name="reader">Reader.</param>
@@ -243,5 +271,22 @@ public sealed class EntityProcessor
         var z = reader.GetFloat(indexZ);
 
         return new Vector3(x, y, z);
+    }
+
+    /// <summary>
+    ///     Extracts a GridPosition from the reader.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="indexX">Index of the x component.</param>
+    /// <param name="indexY">Index of the y component.</param>
+    /// <param name="indexZ">Index of the z component.</param>
+    /// <returns>GridPosition.</returns>
+    private GridPosition GetGridPosition(IDataReader reader, int indexX, int indexY, int indexZ)
+    {
+        var x = reader.GetInt32(indexX);
+        var y = reader.GetInt32(indexY);
+        var z = reader.GetInt32(indexZ);
+
+        return new GridPosition(x, y, z);
     }
 }

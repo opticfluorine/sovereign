@@ -25,7 +25,7 @@ using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
-using WatsonWebserver;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Accounts;
 
@@ -75,7 +75,7 @@ public sealed class AccountRegistrationRestService : IRestService
 
     public HttpMethod RequestType => HttpMethod.POST;
 
-    public async Task OnRequest(HttpContext ctx)
+    public async Task OnRequest(HttpContextBase ctx)
     {
         try
         {
@@ -146,7 +146,7 @@ public sealed class AccountRegistrationRestService : IRestService
     /// <param name="status">HTTP status code.</param>
     /// <param name="result">Result string.</param>
     /// <returns>HTTP response.</returns>
-    private async Task SendResponse(HttpContext ctx, int status, string result)
+    private async Task SendResponse(HttpContextBase ctx, int status, string result)
     {
         var responseData = new RegistrationResponse
         {

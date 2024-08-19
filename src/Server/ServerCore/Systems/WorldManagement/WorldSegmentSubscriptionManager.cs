@@ -16,15 +16,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Systems.Block.Components.Indexers;
-using Sovereign.EngineCore.Systems.Player.Components.Indexers;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -58,6 +56,7 @@ public class WorldSegmentSubscriptionManager
     private readonly IEventSender eventSender;
     private readonly EntityHierarchyIndexer hierarchyIndexer;
     private readonly WorldManagementInternalController internalController;
+    private readonly KinematicComponentCollection kinematics;
     private readonly NonBlockPositionEventFilter nonBlockPositionEventFilter;
 
     /// <summary>
@@ -71,7 +70,6 @@ public class WorldSegmentSubscriptionManager
     private readonly Dictionary<GridPosition, HashSet<ulong>> playersByWorldSegments = new();
 
     private readonly PlayerPositionEventFilter positionEventFilter;
-    private readonly PositionComponentCollection positions;
 
     private readonly WorldSegmentResolver resolver;
 
@@ -90,7 +88,7 @@ public class WorldSegmentSubscriptionManager
         WorldSegmentResolver resolver, IWorldManagementConfiguration worldConfig,
         WorldSegmentActivationManager activationManager,
         IEventSender eventSender, WorldManagementInternalController internalController,
-        WorldSegmentSynchronizationManager syncManager, PositionComponentCollection positions,
+        WorldSegmentSynchronizationManager syncManager, KinematicComponentCollection kinematics,
         EntitySynchronizer synchronizer, EntityHierarchyIndexer hierarchyIndexer,
         EntityTable entityTable, NonBlockPositionEventFilter nonBlockPositionEventFilter)
     {
@@ -101,7 +99,7 @@ public class WorldSegmentSubscriptionManager
         this.eventSender = eventSender;
         this.internalController = internalController;
         this.syncManager = syncManager;
-        this.positions = positions;
+        this.kinematics = kinematics;
         this.synchronizer = synchronizer;
         this.hierarchyIndexer = hierarchyIndexer;
         this.entityTable = entityTable;
@@ -133,6 +131,30 @@ public class WorldSegmentSubscriptionManager
     }
 
     /// <summary>
+    ///     Called when an entity moves into a new world segment. This synchronizes the entity to all
+    ///     subscribers of the new world segment in case any subscribers do not yet know of the entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    public void OnEntityChangeSegment(ulong entityId)
+    {
+        // Treat this entity as if it were newly added to the world segment that it just entered,
+        // as this will trigger all of the necessary synchronization logic.
+        OnNonBlockEntityAdded(entityId);
+    }
+
+    /// <summary>
+    ///     Called when the WorldManagement system receives a request to resynchronize the given
+    ///     positioned entity with any subscribers.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    public void OnResyncRequest(ulong entityId)
+    {
+        // Treat this entity as if it were newly added to the world segment that it just entered,
+        // as this will trigger all of the necessary synchronization logic.
+        OnNonBlockEntityAdded(entityId);
+    }
+
+    /// <summary>
     ///     Called when a player is unloaded.
     /// </summary>
     /// <param name="entityId">Player entity ID.</param>
@@ -158,11 +180,11 @@ public class WorldSegmentSubscriptionManager
     ///     Called when a player position is updated.
     /// </summary>
     /// <param name="entityId">Player entity ID.</param>
-    /// <param name="position">New position.</param>
-    private void OnPlayerMoved(ulong entityId, Vector3 position)
+    /// <param name="kinematicsData">New kinematics.</param>
+    private void OnPlayerMoved(ulong entityId, Kinematics kinematicsData)
     {
         // Check if the player moved to a different world segment.
-        var center = resolver.GetWorldSegmentForPosition(position);
+        var center = resolver.GetWorldSegmentForPosition(kinematicsData.Position);
         if (currentWorldSegments[entityId] != center)
         {
             // Moved.
@@ -175,12 +197,12 @@ public class WorldSegmentSubscriptionManager
     ///     Called when a player entity is created/loaded.
     /// </summary>
     /// <param name="entityId">Player entity ID.</param>
-    /// <param name="position">New position.</param>
+    /// <param name="kinematicsData">New kinematics.</param>
     /// <param name="isLoad">Unused.</param>
-    private void OnPlayerAdded(ulong entityId, Vector3 position, bool isLoad)
+    private void OnPlayerAdded(ulong entityId, Kinematics kinematicsData, bool isLoad)
     {
         subscriptions[entityId] = new HashSet<GridPosition>();
-        var center = resolver.GetWorldSegmentForPosition(position);
+        var center = resolver.GetWorldSegmentForPosition(kinematicsData.Position);
         currentWorldSegments[entityId] = center;
         DoUpdateLogic(entityId, center);
     }
@@ -287,10 +309,10 @@ public class WorldSegmentSubscriptionManager
     private void OnNonBlockEntityAdded(ulong entityId)
     {
         // Skip if not a positioned entity.
-        if (!positions.HasComponentForEntity(entityId)) return;
+        if (!kinematics.HasComponentForEntity(entityId)) return;
 
         // Skip if there are no subscribers to the relevant world segment.
-        var segmentIndex = resolver.GetWorldSegmentForPosition(positions[entityId]);
+        var segmentIndex = resolver.GetWorldSegmentForPosition(kinematics[entityId].Position);
         var playerEntityIds = GetSubscribersForWorldSegment(segmentIndex);
         if (playerEntityIds.Count == 0) return;
 
@@ -321,8 +343,8 @@ public class WorldSegmentSubscriptionManager
     private void OnNonBlockPositionRemoved(ulong entityId, bool isUnload)
     {
         // Grab the last known world segment and cache it for eventual desync.
-        var pos = positions.GetComponentWithLookback(entityId);
-        var segmentIndex = resolver.GetWorldSegmentForPosition(pos);
+        var kinematicsData = kinematics.GetComponentWithLookback(entityId);
+        var segmentIndex = resolver.GetWorldSegmentForPosition(kinematicsData.Position);
         pendingDesyncs[entityId] = segmentIndex;
     }
 }

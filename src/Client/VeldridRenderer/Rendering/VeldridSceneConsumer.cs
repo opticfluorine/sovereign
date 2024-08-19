@@ -16,7 +16,10 @@
  */
 
 using System;
+using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Scenes;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 
 namespace Sovereign.VeldridRenderer.Rendering;
@@ -27,15 +30,20 @@ namespace Sovereign.VeldridRenderer.Rendering;
 public class VeldridSceneConsumer : ISceneConsumer, IDisposable
 {
     private readonly GameSceneConsumer gameSceneConsumer;
+    private readonly ResourceEditorGui resourceEditorGui;
+    private readonly ClientStateServices stateServices;
 
     /// <summary>
     ///     Dispose flag.
     /// </summary>
     private bool isDisposed;
 
-    public VeldridSceneConsumer(GameSceneConsumer gameSceneConsumer)
+    public VeldridSceneConsumer(GameSceneConsumer gameSceneConsumer, ClientStateServices stateServices,
+        ResourceEditorGui resourceEditorGui)
     {
         this.gameSceneConsumer = gameSceneConsumer;
+        this.stateServices = stateServices;
+        this.resourceEditorGui = resourceEditorGui;
     }
 
     public void Dispose()
@@ -49,12 +57,28 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
 
     public void ConsumeScene(IScene scene)
     {
-        /* Dispatch. */
+        /* Dispatch to scene-specific consumers. */
         switch (scene.SceneType)
         {
             case SceneType.Game:
                 gameSceneConsumer.ConsumeScene(scene);
                 break;
+        }
+
+        // General processing.
+        if (scene.RenderGui)
+        {
+            // Global debug menus.
+            if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiMetrics)) ImGui.ShowMetricsWindow();
+            if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiDebugLog)) ImGui.ShowDebugLogWindow();
+            if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiIdStackTool)) ImGui.ShowIDStackToolWindow();
+            if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiDemo)) ImGui.ShowDemoWindow();
+
+            // Client resource editors.
+            if (stateServices.GetStateFlagValue(ClientStateFlag.ShowResourceEditor)) resourceEditorGui.Render();
+
+            // State specific updates.
+            scene.UpdateGui();
         }
     }
 

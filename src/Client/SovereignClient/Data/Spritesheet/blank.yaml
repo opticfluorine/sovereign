@@ -1,0 +1,15 @@
+﻿# Spritesheet definition for blank.png
+#
+# blank.png is a single fully transparent sprite.
+#
+
+---
+
+# Spritesheet definition
+Filename: blank.png
+SpriteWidth: 32
+SpriteHeight: 32
+
+# Rights metadata
+Author: opticfluorine
+License: CC BY-SA 4.0

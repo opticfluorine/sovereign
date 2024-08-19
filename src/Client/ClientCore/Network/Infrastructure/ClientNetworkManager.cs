@@ -91,6 +91,7 @@ public sealed class ClientNetworkManager : INetworkManager
     private readonly ConcurrentQueue<OutboundEventInfo> outboundEventQueue = new();
 
     private readonly RestClient restClient;
+    private readonly TemplateEntityDataClient templateEntityDataClient;
 
     /// <summary>
     ///     Latest login response.
@@ -100,7 +101,7 @@ public sealed class ClientNetworkManager : INetworkManager
     public ClientNetworkManager(NetworkConnectionManager connectionManager,
         NetworkSerializer networkSerializer, RestClient restClient,
         AuthenticationClient authClient, IEventSender eventSender,
-        ClientNetworkController clientNetworkController)
+        ClientNetworkController clientNetworkController, TemplateEntityDataClient templateEntityDataClient)
     {
         this.connectionManager = connectionManager;
         this.networkSerializer = networkSerializer;
@@ -108,6 +109,7 @@ public sealed class ClientNetworkManager : INetworkManager
         this.authClient = authClient;
         this.eventSender = eventSender;
         this.clientNetworkController = clientNetworkController;
+        this.templateEntityDataClient = templateEntityDataClient;
 
         netListener = new EventBasedNetListener();
         netManager = new NetManager(netListener);
@@ -115,6 +117,11 @@ public sealed class ClientNetworkManager : INetworkManager
         netListener.PeerDisconnectedEvent += NetListener_PeerDisconnectedEvent;
         netListener.NetworkReceiveEvent += NetListener_NetworkReceiveEvent;
         netListener.NetworkErrorEvent += NetListener_NetworkErrorEvent;
+
+#if DEBUG
+        // For debug builds only, max out the disconnect timeout so that connections survive a breakpoint.
+        netManager.DisconnectTimeout = int.MaxValue;
+#endif
     }
 
     /// <summary>
@@ -132,13 +139,13 @@ public sealed class ClientNetworkManager : INetworkManager
     /// <summary>
     ///     Client state.
     /// </summary>
-    internal NetworkClientState ClientState { get; private set; }
+    public NetworkClientState ClientState { get; private set; }
         = NetworkClientState.Disconnected;
 
     /// <summary>
     ///     Last network error message.
     /// </summary>
-    internal string ErrorMessage { get; private set; } = "";
+    public string ErrorMessage { get; private set; } = "";
 
     public event OnNetworkReceive? OnNetworkReceive;
 
@@ -192,7 +199,7 @@ public sealed class ClientNetworkManager : INetworkManager
     /// </exception>
     internal void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
     {
-        if (ClientState != NetworkClientState.Disconnected)
+        if (ClientState != NetworkClientState.Disconnected && ClientState != NetworkClientState.Failed)
             throw new InvalidOperationException("Client is not disconnected.");
 
         ConnectionParameters = connectionParameters;
@@ -211,16 +218,25 @@ public sealed class ClientNetworkManager : INetworkManager
             {
                 // Special failure case.
                 Logger.Error("Login failed with unhandled exception; connection stopped.", task.Exception);
+                ClientState = NetworkClientState.Failed;
+                if (task.Exception != null) ErrorMessage = task.Exception.Message;
                 clientNetworkController.LoginFailed(eventSender, "Unhandled exception occurred during login.");
             }
             else
             {
-                if (task.Result.HasValue)
+                if (task.Result.HasFirst)
+                {
                     // Authentication succeeded, proceed with connection.
-                    ContinueConnection(task.Result.Value);
+                    ContinueConnection(task.Result.First);
+                }
                 else
+                {
                     // Authentication failed.
                     clientNetworkController.LoginFailed(eventSender, "Login failed.");
+                    restClient.Disconnect();
+                    ClientState = NetworkClientState.Failed;
+                    ErrorMessage = task.Result.Second;
+                }
             }
         });
     }
@@ -295,6 +311,10 @@ public sealed class ClientNetworkManager : INetworkManager
         cmd.Port = ConnectionParameters.Port;
 
         commandQueue.Enqueue(cmd);
+
+        // Load the initial set of template entities from the REST server.
+        // Future updates will arrive via the event server connection.
+        templateEntityDataClient.LoadTemplateEntities();
     }
 
     /// <summary>
@@ -367,8 +387,8 @@ public sealed class ClientNetworkManager : INetworkManager
     private void HandleEndCommand()
     {
         // If already disconnected, silently fail.
-        if (ClientState != NetworkClientState.Connecting ||
-            ClientState != NetworkClientState.Connected)
+        if (ClientState == NetworkClientState.Disconnected ||
+            ClientState == NetworkClientState.Failed)
             return;
 
         // Disconnect.
@@ -452,6 +472,7 @@ public sealed class ClientNetworkManager : INetworkManager
         // Notify any systems that care that the connection has been lost.
         // This will route back to here and gracefully clean up the connection.
         Logger.InfoFormat("Connection lost: {0}", disconnectInfo.Reason);
-        clientNetworkController.DeclareConnectionLost(eventSender);
+        if (disconnectInfo.Reason != DisconnectReason.DisconnectPeerCalled)
+            clientNetworkController.DeclareConnectionLost(eventSender);
     }
 }

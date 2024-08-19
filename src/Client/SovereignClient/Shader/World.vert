@@ -22,6 +22,7 @@ layout(location = 1) in vec3 vVelocity;
 layout(location = 2) in vec2 vTexCoord;
 
 layout(location = 0) out vec2 vTexCoordOut;
+layout(location = 1) out vec4 vColor;
 
 layout(binding = 0) uniform ShaderConstants
 {
@@ -43,4 +44,7 @@ void main()
     
     // Forward the texture coordinate for the vertex.
     vTexCoordOut = vTexCoord;
+    
+    // Do not transform the color further in the fragment shader.
+    vColor = vec4(1, 1, 1, 1);
 }

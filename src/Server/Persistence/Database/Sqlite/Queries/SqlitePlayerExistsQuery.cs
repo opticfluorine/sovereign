@@ -25,7 +25,8 @@ public class SqlitePlayerExistsQuery : IPlayerExistsQuery
     ///     SQL query to execute
     /// </summary>
     private const string query =
-        @"SELECT EXISTS(SELECT 1 FROM Name INNER JOIN PlayerCharacter PC ON Name.id = PC.id WHERE Name.value = @Name)";
+        @"SELECT EXISTS(SELECT 1 FROM Name INNER JOIN PlayerCharacter PC ON Name.id = PC.id 
+            WHERE Name.value = @Name AND PC.deleted = FALSE)";
 
     private readonly SqliteConnection dbConnection;
 

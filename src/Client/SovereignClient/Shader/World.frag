@@ -18,13 +18,14 @@
 #version 450
 
 layout(location = 0) in vec2 texCoord;
+layout(location = 1) in vec4 color;
 
-layout(location = 0) out vec4 color;
+layout(location = 0) out vec4 colorOut;
 
 layout(set = 0, binding = 1) uniform texture2D g_textureAtlas;
 layout(set = 0, binding = 2) uniform sampler g_textureAtlasSampler;
 
 void main()
 {
-    color = texture(sampler2D(g_textureAtlas, g_textureAtlasSampler), texCoord);
+    colorOut = color * texture(sampler2D(g_textureAtlas, g_textureAtlasSampler), texCoord);
 }

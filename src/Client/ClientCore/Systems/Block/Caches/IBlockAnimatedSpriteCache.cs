@@ -29,12 +29,12 @@ public interface IBlockAnimatedSpriteCache
     /// </summary>
     /// <param name="blockId">Block entity ID.</param>
     /// <returns>Front face animated sprite IDs.</returns>
-    IList<int> GetFrontFaceAnimatedSpriteIds(ulong blockId);
+    List<int> GetFrontFaceAnimatedSpriteIds(ulong blockId);
 
     /// <summary>
     ///     Gets the top face animated sprite IDs for the given block.
     /// </summary>
     /// <param name="blockId">Block entity ID.</param>
     /// <returns>Top face animated sprite IDs.</returns>
-    IList<int> GetTopFaceAnimatedSpriteIds(ulong blockId);
+    List<int> GetTopFaceAnimatedSpriteIds(ulong blockId);
 }

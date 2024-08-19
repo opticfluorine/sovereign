@@ -90,6 +90,12 @@ public sealed class ServerNetworkManager : INetworkManager
 
         /* Create the network manager, but defer startup. */
         netManager = new NetManager(netListener);
+
+#if DEBUG
+        // For debug builds only, max out the disconnect timeout so that the connection survives
+        // hitting a breakpoint.
+        netManager.DisconnectTimeout = int.MaxValue;
+#endif
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -193,7 +199,7 @@ public sealed class ServerNetworkManager : INetworkManager
             // Log error.
             var sb = new StringBuilder();
             sb.Append("Error receiving from ")
-                .Append(peer.EndPoint)
+                .Append(peer.Address)
                 .Append(".");
             Logger.Error(sb.ToString(), e);
 
@@ -255,13 +261,13 @@ public sealed class ServerNetworkManager : INetworkManager
             connectionManager.RemoveConnection(peer.Id);
             networkController.ClientDisconnected(eventSender, peer.Id);
             Logger.InfoFormat("Connection closed from {0}.",
-                peer.EndPoint.ToString());
+                peer.Address);
         }
         catch (Exception e)
         {
             var sb = new StringBuilder();
             sb.Append("Error removing closed connection from ")
-                .Append(peer.EndPoint).Append(".");
+                .Append(peer.Address).Append(".");
             Logger.Error(sb.ToString(), e);
         }
     }

@@ -15,15 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
-using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Block.Components.Indexers;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.EngineCore.World;
-using Sovereign.EngineCore.World.Materials;
+using EntityConstants = Sovereign.EngineCore.Entities.EntityConstants;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -32,21 +34,21 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public sealed class WorldSegmentBlockDataGenerator
 {
+    private readonly BlockWorldSegmentIndexer blockIndexer;
+    private readonly BlockPositionComponentCollection blockPositions;
     private readonly IWorldManagementConfiguration config;
-    private readonly BlockPositionIndexer indexer;
-    private readonly MaterialComponentCollection materials;
-    private readonly MaterialModifierComponentCollection modifiers;
+    private readonly EntityTable entityTable;
     private readonly WorldSegmentResolver resolver;
 
-    public WorldSegmentBlockDataGenerator(WorldSegmentResolver resolver, BlockPositionIndexer indexer,
-        MaterialComponentCollection materials, MaterialModifierComponentCollection modifiers,
-        IWorldManagementConfiguration config)
+    public WorldSegmentBlockDataGenerator(WorldSegmentResolver resolver, EntityTable entityTable,
+        IWorldManagementConfiguration config, BlockWorldSegmentIndexer blockIndexer,
+        BlockPositionComponentCollection blockPositions)
     {
         this.resolver = resolver;
-        this.indexer = indexer;
-        this.materials = materials;
-        this.modifiers = modifiers;
+        this.entityTable = entityTable;
         this.config = config;
+        this.blockIndexer = blockIndexer;
+        this.blockPositions = blockPositions;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -59,12 +61,9 @@ public sealed class WorldSegmentBlockDataGenerator
     public WorldSegmentBlockData Create(GridPosition segmentIndex)
     {
         // Retrieve the latest data for the requested world segment.
-        var range = resolver.GetRangeForWorldSegment(segmentIndex);
-        var blocks = new List<PositionedEntity>();
-        using (var lockHandle = indexer.AcquireLock())
-        {
-            indexer.GetEntitiesInRange(lockHandle, range.Item1, range.Item2, blocks);
-        }
+        var blocks = blockIndexer.GetEntitiesInWorldSegment(segmentIndex);
+        var positionedBlocks = blocks
+            .Select(entityId => Tuple.Create(entityId, blockPositions[entityId])).ToList();
 
         Logger.DebugFormat("Segment {0} has {1} blocks.", segmentIndex, blocks.Count);
 
@@ -72,7 +71,7 @@ public sealed class WorldSegmentBlockDataGenerator
         var basePoint = resolver.GetRangeForWorldSegment(segmentIndex).Item1;
         var depthPlanes = new DepthPlane[config.SegmentLength];
         for (var i = 0; i < config.SegmentLength; ++i) depthPlanes[i] = new DepthPlane(config.SegmentLength, i);
-        GroupByDepth(blocks, depthPlanes, (int)basePoint.Z);
+        GroupByDepth(positionedBlocks, depthPlanes, (int)basePoint.Z);
 
         // Initialize a new block summary data object.
         var data = GetEmptyBlockData();
@@ -81,7 +80,7 @@ public sealed class WorldSegmentBlockDataGenerator
         for (var i = 0; i < config.SegmentLength; ++i)
         {
             // Update defaults.
-            data.DefaultMaterialsPerPlane[i] = depthPlanes[i].DefaultBlockType;
+            data.DefaultsPerPlane[i] = depthPlanes[i].DefaultBlockType;
 
             // Add the layer if it contains non-default blocks.
             if (TryConvertDepthPlane(depthPlanes[i],
@@ -101,7 +100,7 @@ public sealed class WorldSegmentBlockDataGenerator
     private WorldSegmentBlockData GetEmptyBlockData()
     {
         var data = new WorldSegmentBlockData();
-        data.DefaultMaterialsPerPlane = new BlockMaterialData[config.SegmentLength];
+        data.DefaultsPerPlane = new EngineCore.Systems.WorldManagement.BlockData[config.SegmentLength];
         data.DataPlanes = new List<WorldSegmentBlockDataPlane>();
 
         return data;
@@ -114,19 +113,26 @@ public sealed class WorldSegmentBlockDataGenerator
     /// <param name="blocks">Blocks in the world segment.</param>
     /// <param name="depthPlanes">Depth planes to populate, indexed by z offset from segment origin.</param>
     /// <param name="baseZ">Z coordinate of segment base point.</param>
-    private void GroupByDepth(List<PositionedEntity> blocks, DepthPlane[] depthPlanes, int baseZ)
+    private void GroupByDepth(List<Tuple<ulong, GridPosition>> blocks, DepthPlane[] depthPlanes, int baseZ)
     {
         // Group blocks by depth.
         foreach (var block in blocks)
         {
-            var offset = (int)block.Position.Z - baseZ;
-            var material = materials[block.EntityId];
-            var modifier = modifiers[block.EntityId];
+            var offset = block.Item2.Z - baseZ;
+            if (!entityTable.TryGetTemplate(block.Item1, out var templateEntityId))
+            {
+                Logger.WarnFormat("No template for block ID {0}, skipping.", block.Item1);
+                continue;
+            }
 
             var blockData = new BlockData
             {
-                BlockType = new BlockMaterialData { MaterialId = material, ModifierId = modifier },
-                Position = new GridPosition(block.Position)
+                Data = new EngineCore.Systems.WorldManagement.BlockData
+                {
+                    BlockType = BlockDataType.Template,
+                    TemplateIdOffset = templateEntityId - EntityConstants.FirstTemplateEntityId
+                },
+                Position = block.Item2
             };
 
             depthPlanes[offset].Add(blockData);
@@ -162,12 +168,12 @@ public sealed class WorldSegmentBlockDataGenerator
         // Filter to exclude default blocks.
         var keptBlocks = new List<BlockData>();
         foreach (var block in depthPlane.Blocks)
-            if (!block.BlockType.Equals(depthPlane.DefaultBlockType))
+            if (!block.Data.Equals(depthPlane.DefaultBlockType))
                 keptBlocks.Add(block);
 
         // As a special case, if the default block is not air, the air blocks
         // must be created and added to the kept set.
-        if (depthPlane.DefaultBlockType.MaterialId != Material.Air)
+        if (depthPlane.DefaultBlockType.BlockType != BlockDataType.Air)
             AddAirBlocks(keptBlocks, depthPlane, baseX, baseY, baseZ);
 
         // Group blocks into data lines.
@@ -177,7 +183,7 @@ public sealed class WorldSegmentBlockDataGenerator
             var positionedBlock = new LinePositionedBlockData
             {
                 OffsetX = (byte)(block.Position.X - baseX),
-                MaterialData = block.BlockType
+                Data = block.Data
             };
 
             var offsetY = block.Position.Y - baseY;
@@ -219,14 +225,15 @@ public sealed class WorldSegmentBlockDataGenerator
         }
 
         // Now add all of the air blocks.
-        var airType = new BlockMaterialData { MaterialId = Material.Air, ModifierId = 0 };
+        var airType = new EngineCore.Systems.WorldManagement.BlockData
+            { BlockType = BlockDataType.Air };
         for (var i = 0; i < config.SegmentLength; ++i)
         for (var j = 0; j < config.SegmentLength; ++j)
             if (!filledPoints[i, j])
             {
                 var block = new BlockData
                 {
-                    BlockType = airType,
+                    Data = airType,
                     Position = new GridPosition
                     {
                         X = baseX + i,
@@ -246,7 +253,7 @@ public sealed class WorldSegmentBlockDataGenerator
         /// <summary>
         ///     Block type.
         /// </summary>
-        public BlockMaterialData BlockType = new();
+        public EngineCore.Systems.WorldManagement.BlockData Data = new();
 
         /// <summary>
         ///     Block position.
@@ -267,7 +274,7 @@ public sealed class WorldSegmentBlockDataGenerator
         /// <summary>
         ///     Running count of material types in this depth plane.
         /// </summary>
-        private readonly Dictionary<BlockMaterialData, int> MaterialCounts = new();
+        private readonly Dictionary<EngineCore.Systems.WorldManagement.BlockData, int> materialCounts = new();
 
         private int airBlockCount;
 
@@ -290,8 +297,8 @@ public sealed class WorldSegmentBlockDataGenerator
         /// <summary>
         ///     Default block type for this depth plane.
         /// </summary>
-        public BlockMaterialData DefaultBlockType { get; private set; }
-            = new() { MaterialId = Material.Air, ModifierId = 0 };
+        public EngineCore.Systems.WorldManagement.BlockData DefaultBlockType { get; private set; }
+            = new() { BlockType = BlockDataType.Air };
 
         /// <summary>
         ///     Z offset of this depth plane.
@@ -309,17 +316,17 @@ public sealed class WorldSegmentBlockDataGenerator
 
             // Update material counts.
             int count;
-            if (MaterialCounts.TryGetValue(block.BlockType, out count))
+            if (materialCounts.TryGetValue(block.Data, out count))
                 count++;
             else
                 count = 1;
-            MaterialCounts[block.BlockType] = count;
+            materialCounts[block.Data] = count;
 
             // Update default block if needed.
             if (count > leadingMaterialCount)
             {
                 leadingMaterialCount = count;
-                DefaultBlockType = block.BlockType;
+                DefaultBlockType = block.Data;
             }
         }
 
@@ -330,7 +337,8 @@ public sealed class WorldSegmentBlockDataGenerator
         {
             // Check for case where air is the most common block type.
             if (airBlockCount > leadingMaterialCount)
-                DefaultBlockType = new BlockMaterialData { MaterialId = Material.Air, ModifierId = 0 };
+                DefaultBlockType = new EngineCore.Systems.WorldManagement.BlockData
+                    { BlockType = BlockDataType.Air };
         }
     }
 }

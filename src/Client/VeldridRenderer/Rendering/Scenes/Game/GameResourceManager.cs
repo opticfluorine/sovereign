@@ -35,12 +35,12 @@ public class GameResourceManager : IDisposable
     /// <summary>
     ///     Maximum number of vertices in the vertex buffer.
     /// </summary>
-    public const int MaximumVertices = 16384;
+    public const int MaximumVertices = 262144;
 
     /// <summary>
     ///     Maximum number of indices in the index buffer.
     /// </summary>
-    public const int MaximumIndices = 24576;
+    public const int MaximumIndices = 262144;
 
     /// <summary>
     ///     Resource name for the shader constants uniform buffer.

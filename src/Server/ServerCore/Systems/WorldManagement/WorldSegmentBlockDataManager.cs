@@ -18,14 +18,17 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using MessagePack;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
-using Sovereign.EngineCore.Systems.Block.Components;
+using Sovereign.EngineCore.Systems.Block;
+using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -35,6 +38,9 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public sealed class WorldSegmentBlockDataManager
 {
+    private readonly BlockController blockController;
+    private readonly BlockPositionComponentCollection blockPositions;
+
     /// <summary>
     ///     Set of changed blocks whose segments need to be scheduled for regeneration.
     /// </summary>
@@ -46,7 +52,8 @@ public sealed class WorldSegmentBlockDataManager
     ///     Updates are made via continuations of the tasks.
     ///     This allows the REST endpoint to await any segment data.
     /// </summary>
-    private readonly ConcurrentDictionary<GridPosition, Task<byte[]?>> dataProducers = new();
+    private readonly ConcurrentDictionary<GridPosition, Task<Tuple<WorldSegmentBlockData, byte[]>>>
+        compressedDataProducers = new();
 
     /// <summary>
     ///     Deletion tasks. The presence of a deletion task in this map indicates
@@ -54,10 +61,16 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     private readonly ConcurrentDictionary<GridPosition, Task> deletionTasks = new();
 
+    private readonly IEventSender eventSender;
+
     private readonly WorldSegmentBlockDataGenerator generator;
 
-    private readonly PositionComponentCollection positions;
     private readonly WorldSegmentResolver resolver;
+
+    /// <summary>
+    ///     Set of world segments that need to be updated in the database.
+    /// </summary>
+    private readonly HashSet<GridPosition> segmentsToPersist = new();
 
     /// <summary>
     ///     Set of world segments to schedule for regeneration.
@@ -66,26 +79,23 @@ public sealed class WorldSegmentBlockDataManager
 
     public WorldSegmentBlockDataManager(
         WorldSegmentBlockDataGenerator generator,
-        MaterialComponentCollection materials,
-        MaterialModifierComponentCollection materialModifiers,
-        PositionComponentCollection positions,
+        BlockPositionComponentCollection blockPositions,
         WorldSegmentResolver resolver,
-        EntityManager entityManager)
+        EntityManager entityManager,
+        EntityTable entityTable,
+        BlockController blockController,
+        IEventSender eventSender)
     {
         this.generator = generator;
-        this.positions = positions;
+        this.blockPositions = blockPositions;
         this.resolver = resolver;
+        this.blockController = blockController;
+        this.eventSender = eventSender;
 
-        materials.OnComponentAdded += OnBlockAdded;
-        materialModifiers.OnComponentAdded += OnBlockAdded;
-        materials.OnComponentModified += OnBlockModified;
-        materialModifiers.OnComponentModified += OnBlockModified;
-        materials.OnComponentRemoved += ScheduleFromBlock;
-        materialModifiers.OnComponentRemoved += ScheduleFromBlock;
-
+        blockPositions.OnComponentRemoved += OnBlockRemoved;
         entityManager.OnUpdatesComplete += OnEndUpdates;
+        entityTable.OnTemplateSet += OnTemplateSet;
     }
-
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -94,7 +104,7 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
     /// <returns>Summary block data, or null if no summary block data is available.</returns>
-    public Task<byte[]?>? GetWorldSegmentBlockData(GridPosition segmentIndex)
+    public Task<Tuple<WorldSegmentBlockData, byte[]>> GetWorldSegmentBlockData(GridPosition segmentIndex)
     {
         // If the segment is scheduled for regeneration, kick off the lazy load now that it's been requested.
         lock (segmentsToRegenerate)
@@ -106,7 +116,14 @@ public sealed class WorldSegmentBlockDataManager
             }
         }
 
-        return dataProducers.TryGetValue(segmentIndex, out var data) ? data : null;
+        if (!compressedDataProducers.TryGetValue(segmentIndex, out var data))
+        {
+            // If nothing is present, initialize a new record.
+            AddWorldSegment(segmentIndex);
+            data = compressedDataProducers[segmentIndex];
+        }
+
+        return data;
     }
 
     /// <summary>
@@ -118,11 +135,11 @@ public sealed class WorldSegmentBlockDataManager
         if (deletionTasks.TryGetValue(segmentIndex, out var deletionTask))
             // Segment was rapidly unloaded and reloaded.
             // Schedule the reload for after the unload is complete.
-            dataProducers[segmentIndex] = deletionTask.ContinueWith(task => DoAddWorldSegment(segmentIndex));
+            compressedDataProducers[segmentIndex] = deletionTask.ContinueWith(_ => DoAddWorldSegment(segmentIndex));
         else
             // Segment has not yet been loaded or has been fully unloaded.
             // Start a new processing chain from scratch for this segment.
-            dataProducers[segmentIndex] = Task.Factory.StartNew(() => DoAddWorldSegment(segmentIndex));
+            compressedDataProducers[segmentIndex] = Task.Factory.StartNew(() => DoAddWorldSegment(segmentIndex));
     }
 
     /// <summary>
@@ -135,29 +152,46 @@ public sealed class WorldSegmentBlockDataManager
         if (deletionTasks.ContainsKey(segmentIndex)) return;
 
         // Immediately remove the segment from the data set, then schedule it for disposal.
-        if (dataProducers.TryRemove(segmentIndex, out var currentTask))
+        if (compressedDataProducers.TryRemove(segmentIndex, out var currentTask))
             deletionTasks[segmentIndex] = currentTask.ContinueWith(
-                task => DoRemoveWorldSegment(segmentIndex));
+                _ => DoRemoveWorldSegment(segmentIndex));
         else
             Logger.ErrorFormat("Tried to remove world segemnt data for {0} before it was added.", segmentIndex);
+    }
+
+    /// <summary>
+    ///     Gets the list of world segments that need to be persisted to the database, then
+    ///     clears the set so that the next call only returns the segments modified after the
+    ///     current call.
+    /// </summary>
+    /// <returns>List of world segment indices that need to be persisted.</returns>
+    public List<GridPosition> GetAndClearSegmentsToPersist()
+    {
+        lock (segmentsToPersist)
+        {
+            var list = new List<GridPosition>(segmentsToPersist);
+            segmentsToPersist.Clear();
+            return list;
+        }
     }
 
     /// <summary>
     ///     Blocking call that adds a world segment to the data set.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
-    private byte[]? DoAddWorldSegment(GridPosition segmentIndex)
+    private Tuple<WorldSegmentBlockData, byte[]> DoAddWorldSegment(GridPosition segmentIndex)
     {
         try
         {
             Logger.DebugFormat("Adding summary block data for world segment {0}.", segmentIndex);
             var blockData = generator.Create(segmentIndex);
-            return MessagePackSerializer.Serialize(blockData, MessageConfig.CompressedUntrustedMessagePackOptions);
+            var bytes = MessagePackSerializer.Serialize(blockData, MessageConfig.CompressedUntrustedMessagePackOptions);
+            return Tuple.Create(blockData, bytes);
         }
         catch (Exception e)
         {
             Logger.ErrorFormat(e, "Error adding summary block data for world segment {0}.", segmentIndex);
-            return null;
+            return Tuple.Create(new WorldSegmentBlockData(), Array.Empty<byte>());
         }
     }
 
@@ -172,25 +206,22 @@ public sealed class WorldSegmentBlockDataManager
     }
 
     /// <summary>
-    ///     Called when a block is added or modified.
+    ///     Called when the template of an entity is changed (excluding entity loads).
     /// </summary>
-    /// <param name="entityId">Block entity ID.</param>
-    /// <param name="newValue">Unused.</param>
-    /// <param name="isLoad">Unused.</param>
-    private void OnBlockAdded(ulong entityId, int newValue, bool isLoad)
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="templateEntityId">New template entity ID.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateEntityId)
     {
-        // The block position may not be committed yet, so enqueue the block for processing after updates finish.
-        changedBlocks.Enqueue(entityId);
-    }
+        // Ignore if not a block entity.
+        if (!blockPositions.HasComponentForEntity(entityId)) return;
 
-    /// <summary>
-    ///     Called when a block is modified.
-    /// </summary>
-    /// <param name="entityId">Block entity ID.</param>
-    /// <param name="newValue">Unused.</param>
-    private void OnBlockModified(ulong entityId, int newValue)
-    {
-        OnBlockAdded(entityId, newValue, false);
+        // Ensure that the bulk data for the affected world segment is updated on next request.
+        changedBlocks.Enqueue(entityId);
+
+        // This is only called if a block is added, not loaded. Therefore, the new block needs to
+        // be advertised to any subscribed clients. Also, given the timing of the OnTemplateSet
+        // event, the block position must already be committed to the ECS.
+        blockController.NotifyBlockChanged(eventSender, blockPositions[entityId], templateEntityId);
     }
 
     /// <summary>
@@ -198,15 +229,41 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="isUnload">Unused.</param>
+    private void OnBlockRemoved(ulong entityId, bool isUnload)
+    {
+        ScheduleFromBlock(entityId, isUnload);
+
+        if (!isUnload)
+        {
+            // This is a true removal of a block, not just unloading it from memory.
+            // Notify any subscribed clients of this update.
+            var blockPosition = blockPositions.GetComponentWithLookback(entityId);
+            blockController.NotifyBlockRemoved(eventSender, blockPosition);
+        }
+    }
+
+    /// <summary>
+    ///     Schedules a regeneration of block data for transfer if needed.
+    /// </summary>
+    /// <param name="entityId">Block entity ID.</param>
+    /// <param name="isUnload">Unused.</param>
     private void ScheduleFromBlock(ulong entityId, bool isUnload)
     {
+        // Ignore template entities.
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId) return;
+
         try
         {
-            var lastPosition = positions.GetComponentWithLookback(entityId);
-            var segmentIndex = resolver.GetWorldSegmentForPosition(lastPosition);
+            var lastPosition = blockPositions.GetComponentWithLookback(entityId);
+            var segmentIndex = resolver.GetWorldSegmentForPosition((Vector3)lastPosition);
             lock (segmentsToRegenerate)
             {
                 segmentsToRegenerate.Add(segmentIndex);
+            }
+
+            lock (segmentsToPersist)
+            {
+                segmentsToPersist.Add(segmentIndex);
             }
         }
         catch (Exception e)

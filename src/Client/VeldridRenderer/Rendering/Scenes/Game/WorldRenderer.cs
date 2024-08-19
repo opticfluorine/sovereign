@@ -80,6 +80,15 @@ public class WorldRenderer : IDisposable
     }
 
     /// <summary>
+    ///     Handles the reloading of device-side resources.
+    /// </summary>
+    public void ReloadResources()
+    {
+        // Recreate the resource set to use the latest textures.
+        CreateResourceSet();
+    }
+
+    /// <summary>
     ///     Renders the game world.
     /// </summary>
     /// <param name="commandList">Active command list.</param>
@@ -121,6 +130,8 @@ public class WorldRenderer : IDisposable
             throw new InvalidOperationException("Vertex uniform buffer not ready.");
         if (resMgr.AtlasTexture == null)
             throw new InvalidOperationException("Texture atlas not ready.");
+        
+        resourceSet?.Dispose();
 
         var resLayoutDesc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
             GameResourceManager.RES_SHADER_CONSTANTS,

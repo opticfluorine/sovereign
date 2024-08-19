@@ -37,8 +37,8 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
     private readonly AccountServices accountServices;
     private readonly NetworkConnectionManager connectionManager;
     private readonly Func<OutboundEventInfo, Maybe<ulong>> entitySelector;
+    private readonly KinematicComponentCollection kinematics;
     private readonly ILogger logger;
-    private readonly PositionComponentCollection positions;
     private readonly WorldSegmentResolver resolver;
     private readonly WorldManagementServices worldManagementServices;
 
@@ -47,7 +47,7 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
     /// </summary>
     /// <param name="entitySelector">Function that gets the associated entity for the event.</param>
     internal EntityWorldSegmentConnectionMapper(
-        PositionComponentCollection positions,
+        KinematicComponentCollection kinematics,
         WorldSegmentResolver resolver,
         WorldManagementServices worldManagementServices,
         NetworkConnectionManager connectionManager,
@@ -55,7 +55,7 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
         ILogger logger,
         Func<OutboundEventInfo, Maybe<ulong>> entitySelector)
     {
-        this.positions = positions;
+        this.kinematics = kinematics;
         this.resolver = resolver;
         this.worldManagementServices = worldManagementServices;
         this.connectionManager = connectionManager;
@@ -75,13 +75,13 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
             return;
         }
 
-        if (!positions.HasComponentForEntity(entityId.Value))
+        if (!kinematics.HasComponentForEntity(entityId.Value))
         {
             logger.ErrorFormat("Can't broadcast to world segment for non-positioned entity {0}.", entityId);
             return;
         }
 
-        var segmentIndex = resolver.GetWorldSegmentForPosition(positions[entityId.Value]);
+        var segmentIndex = resolver.GetWorldSegmentForPosition(kinematics[entityId.Value].Position);
 
         // Send the event to each player subscribed to the same world segment.
         var subscribedPlayers = worldManagementServices.GetPlayersSubscribedToWorldSegment(segmentIndex);

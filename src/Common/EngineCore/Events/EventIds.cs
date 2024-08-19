@@ -84,6 +84,25 @@ public enum EventId
     /// Associated details: BlockRemoveBatchEventDetails
     Core_Block_RemoveBatch = 203,
 
+    /// <summary>
+    ///     Removes a block at a given grid position.
+    /// </summary>
+    /// Associated details: GridPositionEventDetails
+    Core_Block_RemoveAt = 204,
+
+    /// <summary>
+    ///     Notification that a single block has been created or modified. Used for server-to-client block
+    ///     synchronization.
+    /// </summary>
+    /// Associated details: BlockAddEventDetails
+    Core_Block_ModifyNotice = 205,
+
+    /// <summary>
+    ///     Notification that a single block has been removed. Used for server-to-client block synchronization.
+    /// </summary>
+    /// Associated details: GridPositionEventDetails
+    Core_Block_RemoveNotice = 206,
+
     #endregion Blocks
 
     #region Performance
@@ -148,6 +167,44 @@ public enum EventId
 
     #endregion WorldManagement
 
+    #region Network
+
+    /// <summary>
+    ///     Sent from client to server to log out of the current player and return to player selection.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Core_Network_Logout = 700,
+
+    #endregion Network
+
+    #region Chat
+
+    /// <summary>
+    ///     Sent from client to server to send a chat message.
+    /// </summary>
+    /// Associated details: ChatEventDetails
+    Core_Chat_Send = 800,
+
+    /// <summary>
+    ///     Sent from server to client to deliver a local chat message.
+    /// </summary>
+    /// Associated details: LocalChatEventDetails
+    Core_Chat_Local = 801,
+
+    /// <summary>
+    ///     Sent from server to client to deliver a global chat message.
+    /// </summary>
+    /// Associated details: ChatEventDetails
+    Core_Chat_Global = 802,
+
+    /// <summary>
+    ///     Sent from server to client to deliver a system message.
+    /// </summary>
+    /// Associated details: SystemChatEventDetails
+    Core_Chat_System = 803,
+
+    #endregion Chat
+
     #endregion Core
 
     #region Client
@@ -167,10 +224,35 @@ public enum EventId
     Client_Input_KeyUp = 100001,
 
     /// <summary>
-    ///     Event sent to repeat an active movement keypress.
+    ///     Event sent when the mouse is moved.
     /// </summary>
-    /// Associated details: SequenceEventDetails
-    Client_Input_RepeatMove = 100002,
+    /// Associated details: MouseMotionEventDetails
+    Client_Input_MouseMotion = 100002,
+
+    /// <summary>
+    ///     Event sent when a mouse button is pressed.
+    /// </summary>
+    /// Associated details: MouseButtonEventDetails
+    Client_Input_MouseDown = 100003,
+
+    /// <summary>
+    ///     Event sent when a mouse button is released.
+    /// </summary>
+    /// Associated details: MouseButtonEventDetails
+    Client_Input_MouseUp = 100004,
+
+    /// <summary>
+    ///     Event sent when the mouse wheel is scrolled.
+    /// </summary>
+    /// Associated details: MouseWheelEventDetails
+    Client_Input_MouseWheel = 100005,
+
+    /// <summary>
+    ///     Event sent by the Input system when the mouse scrolls a full "tick".
+    ///     A value of true indicates a tick up, a value of false indicates a tick down.
+    /// </summary>
+    /// Associated details: BooleanEventDetails
+    Client_Input_MouseWheelTick = 100006,
 
     #endregion Client_Input
 
@@ -224,28 +306,16 @@ public enum EventId
     Client_Network_Connected = 100204,
 
     /// <summary>
-    ///     Event sent to command ClientNetworkSystem to register a new account.
-    /// </summary>
-    /// Associated details: RegisterAccountEventDetails
-    Client_Network_RegisterAccount = 100205,
-
-    /// <summary>
-    ///     Event sent to announce a successful account registration.
-    /// </summary>
-    /// Associated details: None
-    Client_Network_RegisterSuccess = 100206,
-
-    /// <summary>
-    ///     Event sent to announce a failed account registration.
-    /// </summary>
-    /// Associated details: ErrorEventDetails
-    Client_Network_RegisterFailed = 100207,
-
-    /// <summary>
     ///     Event sent to set the entity ID corresponding to the logged in player.
     /// </summary>
     /// Associated details: EntityEventDetails
-    Client_Network_PlayerEntitySelected = 100208,
+    Client_Network_PlayerEntitySelected = 100205,
+
+    /// <summary>
+    ///     Event sent to disconnect from the server if connected.
+    /// </summary>
+    /// Associated details: None
+    Client_Network_EndConnection = 100206,
 
     #endregion Client_Network
 
@@ -267,7 +337,45 @@ public enum EventId
     /// Associated details: EntityDesyncEventDetails
     Client_EntitySynchronization_Desync = 100301,
 
+    /// <summary>
+    ///     Event sent from server to client to synchronize a template entity.
+    /// </summary>
+    /// Associated details: TemplateEntityDefinitionEventDetails
+    Client_EntitySynchronization_SyncTemplate = 100302,
+
     #endregion Client_EntitySynchronization
+
+    #region Client_State
+
+    /// <summary>
+    ///     Event sent when the client has loaded a world segment from the server.
+    /// </summary>
+    /// Associated details: WorldSegmentEventDetails
+    Client_State_WorldSegmentLoaded = 100400,
+
+    /// <summary>
+    ///     Event sent to update the state of an individual client state flag.
+    /// </summary>
+    /// Associated details: ClientStateFlagEventDetails
+    Client_State_SetFlag = 100401,
+
+    /// <summary>
+    ///     Event sent to update the main menu state.
+    /// </summary>
+    /// Associated details: MainMenuStateEventDetails
+    Client_State_SetMainMenuState = 100402,
+
+    #endregion Client_State
+
+    #region Client_WorldEdit
+
+    /// <summary>
+    ///     Event sent to update the Z-offset for world editing.
+    /// </summary>
+    /// Associated details: GenericEventDetails(int)
+    Client_WorldEdit_SetZOffset = 10500,
+
+    #endregion
 
     #endregion Client
 
@@ -301,16 +409,6 @@ public enum EventId
 
     #endregion Server_Persistence
 
-    #region Server_Debug
-
-    /// <summary>
-    ///     Event sent to issue a debug command.
-    /// </summary>
-    /// Associated details: DebugCommandEventDetails
-    Server_Debug_Command = 200100,
-
-    #endregion Server_Debug
-
     #region Server_Network
 
     /// <summary>
@@ -337,7 +435,7 @@ public enum EventId
 
     #endregion Server_Accounts
 
-    #region WorldManagement
+    #region Server_WorldManagement
 
     /// <summary>
     ///     Signals that the entities of a world segment have been loaded.
@@ -345,7 +443,42 @@ public enum EventId
     /// Asssociated details: WorldSegmentEventDetails
     Server_WorldManagement_WorldSegmentLoaded = 200400,
 
-    #endregion WorldManagement
+    /// <summary>
+    ///     Requests the WorldManagement system to resynchronize a positioned entity with subscribers.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Server_WorldManagement_ResyncPositionedEntity = 200401,
+
+    #endregion Server_WorldManagement
+
+    #region Server_TemplateEntity
+
+    /// <summary>
+    ///     Requests the TemplateEntity system to create or update a template entity to match a supplied entity
+    ///     definition.
+    /// </summary>
+    /// Associated details: EntityDefinitionEventDetails
+    Server_TemplateEntity_Update = 200500,
+
+    #endregion Server_TemplateEntity
+
+    #region Server_WorldEdit
+
+    /// <summary>
+    ///     Requests that a block be set in a position using admin privileges. Sent by the client-side
+    ///     admin world editor.
+    /// </summary>
+    /// Associated details: BlockAddEventDetails
+    Server_WorldEdit_SetBlock = 200600,
+
+    /// <summary>
+    ///     Requests that a block be removed from a position using admin privileges. Sent by the client-side
+    ///     admin world editor.
+    /// </summary>
+    /// Associated details: GridPositionEventDetails
+    Server_WorldEdit_RemoveBlock = 200601,
+
+    #endregion
 
     #endregion Server
 }

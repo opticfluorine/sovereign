@@ -18,9 +18,8 @@
 using System;
 using System.Numerics;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
-using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.EngineUtil.Threading;
 
 namespace Sovereign.EngineCore.Entities;
@@ -31,11 +30,15 @@ namespace Sovereign.EngineCore.Entities;
 public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 {
     protected readonly AboveBlockComponentCollection aboveBlocks;
+    private readonly AdminTagCollection admins;
     protected readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly BlockPositionComponentCollection blockPositions;
     protected readonly DrawableTagCollection drawables;
 
     protected readonly ulong entityId;
     protected readonly EntityTable entityTable;
+    protected readonly bool isTemplate;
+    protected readonly KinematicComponentCollection Kinematics;
     protected readonly bool load;
     protected readonly MaterialModifierComponentCollection materialModifiers;
     protected readonly MaterialComponentCollection materials;
@@ -43,14 +46,15 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     protected readonly OrientationComponentCollection orientations;
     protected readonly ParentComponentCollection parents;
     protected readonly PlayerCharacterTagCollection playerCharacterTags;
-    protected readonly PositionComponentCollection positions;
-    protected readonly VelocityComponentCollection velocities;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
+    private bool isBlock;
+
+    private ulong templateEntityId;
 
     protected AbstractEntityBuilder(ulong entityId, bool load,
-        EntityManager entityManager, PositionComponentCollection positions,
-        VelocityComponentCollection velocities, MaterialComponentCollection materials,
+        EntityManager entityManager, KinematicComponentCollection kinematics,
+        MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,
         PlayerCharacterTagCollection playerCharacterTags,
@@ -59,12 +63,13 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         DrawableTagCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites,
         OrientationComponentCollection orientations,
+        AdminTagCollection admins,
+        BlockPositionComponentCollection blockPositions,
         EntityTable entityTable)
     {
         this.entityId = entityId;
         this.load = load;
-        this.positions = positions;
-        this.velocities = velocities;
+        Kinematics = kinematics;
         this.materials = materials;
         this.materialModifiers = materialModifiers;
         this.aboveBlocks = aboveBlocks;
@@ -75,6 +80,14 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         this.animatedSprites = animatedSprites;
         this.orientations = orientations;
         this.entityTable = entityTable;
+        this.admins = admins;
+        this.blockPositions = blockPositions;
+
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
+        {
+            entityTable.TakeTemplateEntityId(entityId);
+            isTemplate = true;
+        }
 
         weakLock = entityManager.UpdateGuard.AcquireWeakLock();
     }
@@ -86,16 +99,28 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public ulong Build()
     {
-        if (!entityTable.Exists(entityId)) entityTable.Add(entityId);
+        if (!entityTable.Exists(entityId)) entityTable.Add(entityId, templateEntityId, isBlock, load);
         Dispose();
 
         return entityId;
     }
 
+    public IEntityBuilder Template(ulong templateEntityId)
+    {
+        this.templateEntityId = templateEntityId;
+        return this;
+    }
+
     public IEntityBuilder Positionable(Vector3 position, Vector3 velocity)
     {
-        positions.AddOrUpdateComponent(entityId, position, load);
-        velocities.AddOrUpdateComponent(entityId, velocity, load);
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
+        Kinematics.AddOrUpdateComponent(entityId, new Kinematics
+        {
+            Position = position,
+            Velocity = velocity
+        }, load);
         return this;
     }
 
@@ -111,8 +136,24 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder WithoutPositionable()
     {
-        positions.RemoveComponent(entityId, load);
-        velocities.RemoveComponent(entityId, load);
+        Kinematics.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder BlockPositionable(GridPosition position)
+    {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
+        blockPositions.AddOrUpdateComponent(entityId, position, load);
+        isBlock = true;
+        return this;
+    }
+
+    public IEntityBuilder WithoutBlockPositionable()
+    {
+        blockPositions.RemoveComponent(entityId, load);
+        isBlock = false;
         return this;
     }
 
@@ -137,6 +178,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder AboveBlock(ulong otherEntityId)
     {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
         aboveBlocks.AddOrUpdateComponent(entityId, otherEntityId, load);
         return this;
     }
@@ -149,6 +193,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder PlayerCharacter()
     {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
         playerCharacterTags.TagEntity(entityId, load);
         return this;
     }
@@ -173,6 +220,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public IEntityBuilder Parent(ulong parentEntityId)
     {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
         parents.AddOrUpdateComponent(entityId, parentEntityId, load);
         return this;
     }
@@ -222,4 +272,19 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     public abstract IEntityBuilder Account(Guid accountId);
 
     public abstract IEntityBuilder WithoutAccount();
+
+    public IEntityBuilder Admin()
+    {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
+        admins.TagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutAdmin()
+    {
+        admins.UntagEntity(entityId, load);
+        return this;
+    }
 }

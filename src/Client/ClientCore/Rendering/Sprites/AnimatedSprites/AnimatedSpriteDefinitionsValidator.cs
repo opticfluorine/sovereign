@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,7 +52,8 @@ public sealed class AnimatedSpriteDefinitionsValidator
         var valid = ValidateIds(definitions, sb)
                     && ValidateNonzeroAnimationTimestep(definitions, sb)
                     && ValidateSpriteIds(definitions, sb)
-                    && ValidateDefaultFaces(definitions, sb);
+                    && ValidateDefaultFaces(definitions, sb)
+                    && ValidateDefaultPhase(definitions, sb);
         if (!valid) throw new AnimatedSpriteDefinitionsException(sb.ToString().Trim());
     }
 
@@ -105,7 +107,8 @@ public sealed class AnimatedSpriteDefinitionsValidator
     {
         /* Validate. */
         var badSprites = definitions.AnimatedSprites
-            .Where(sprite => sprite.AnimationTimestep == 0);
+            .SelectMany(sprite => sprite.Phases.Select(t => Tuple.Create(sprite.Id, t.Key, t.Value)))
+            .Where(sprite => sprite.Item3.AnimationTimestep == 0).ToList();
         var valid = badSprites.Count() == 0;
 
         /* Output error message if necessary. */
@@ -113,7 +116,8 @@ public sealed class AnimatedSpriteDefinitionsValidator
         {
             sb.Append("All animated sprites must have positive animation timesteps.\n"
                       + "The following animated sprites have zero-valued animation timesteps:\n\n");
-            foreach (var sprite in badSprites) sb.Append("Animated Sprite ").Append(sprite.Id).Append("\n");
+            foreach (var sprite in badSprites)
+                sb.Append($"Animated Sprite {sprite.Item1}");
         }
 
         return valid;
@@ -129,16 +133,42 @@ public sealed class AnimatedSpriteDefinitionsValidator
         StringBuilder sb)
     {
         var badSprites = definitions.AnimatedSprites
-            .Where(sprite => sprite.Faces.Values.Any(face => HasInvalidSpriteIds(face.SpriteIds)));
+            .SelectMany(sprite => sprite.Phases.Select(t => Tuple.Create(sprite.Id, t.Key, t.Value)))
+            .Where(sprite => sprite.Item3.Faces.Values.Any(face => HasInvalidSpriteIds(face.SpriteIds))).ToList();
         var valid = !badSprites.Any();
 
         if (!valid)
         {
             sb.Append("The following animated sprites reference unknown sprites:\n\n");
-            foreach (var sprite in badSprites) sb.Append("Animated Sprite ").Append(sprite.Id).Append("\n");
+            foreach (var sprite in badSprites)
+                sb.Append($"Animated Sprite {sprite.Item1} [{sprite.Item2}]\n");
         }
 
         return valid;
+    }
+
+    /// <summary>
+    ///     Validates a potential landing zone.
+    /// </summary>
+    /// <param name="definitions">Animated srite definiions.</param>
+    /// <param name="sb"></param>
+    /// <returns></returns>
+    private bool ValidateDefaultPhase(AnimatedSpriteDefinitions definitions,
+        StringBuilder sb)
+    {
+        var badSprites = definitions.AnimatedSprites
+            .Where(definition => !definition.Phases.ContainsKey(AnimationPhase.Default)).ToList();
+        var valid = !badSprites.Any();
+
+        if (!valid)
+        {
+            sb.Append("The following animated sprites lack a Default phase:`");
+            foreach (var sprite in badSprites) sb.Append($"Animated Sprite {sprite.Id}\n");
+
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -163,13 +193,16 @@ public sealed class AnimatedSpriteDefinitionsValidator
         StringBuilder sb)
     {
         var badSprites = definitions.AnimatedSprites
-            .Where(sprite => !sprite.Faces.ContainsKey(Orientation.South));
+            .SelectMany(sprite => sprite.Phases
+                .Select(t => Tuple.Create(sprite.Id, t.Key, t.Value)))
+            .Where(spriteData => !spriteData.Item3.Faces.ContainsKey(Orientation.South)).ToList();
         var valid = !badSprites.Any();
 
         if (!valid)
         {
             sb.Append("The following animated sprites lack a default South face:\n\n");
-            foreach (var sprite in badSprites) sb.Append("Animated Sprite ").Append(sprite.Id).Append("\n");
+            foreach (var sprite in badSprites)
+                sb.Append($"Animated Sprite {sprite.Item1} [{sprite.Item2}]\n");
         }
 
         return valid;

@@ -2,6 +2,524 @@
 
 ## 2024
 
+### August
+
+#### 18 August 2024
+
+* Client: Properly refresh tile sprite resolutions when block entities are added
+  or deleted.
+
+#### 17 August 2024
+
+* Renderer: Fix issue where the orthographic projection to 3:4 perspective was
+  applying depth in the wrong direction. Looks like this may have been introduced
+  while changing screen space coordinate systems during the Vulkan/Veldrid port,
+  and never detected because all testing was done with z=0 until now.
+
+#### 14 August 2024
+
+* Persistence: Store block data in a sparse tree format per world segment instead
+  of as individual block entities. This should give a very significant reduction
+  in storage space for the database, particularly for dense uniform world segments
+  (e.g. underground world segments). The format used is the same as is already used
+  for transferring block data between server and client, but without the additional
+  LZ4 compression applied.
+* Block Entities: Assign a special range of volatile entity IDs to block entities
+  since they are no longer persisted with their IDs. This prevents any block entity
+  data from being written to the database except for in the space-efficient tree
+  structure described above.
+
+#### 10 August 2024
+
+* Tile Sprites: Resolve tile contexts based on neighbors in the same plane as the
+  central tile sprite (e.g. along the ground if dealing with the top face of a block,
+  or along the wall if dealing with the side face). Previously tile sprites were
+  always resolved in the xy plane, which is not the desired behavior for walls (which
+  should be resolved in the xz plane instead).
+* Tile Sprites: Allow matching tile contexts against empty neighbors (e.g. matching
+  a block face that does not have a neighboring block).
+
+#### 09 August 2024
+
+* Client: Fix build on Windows so that the console window doesn't appear when
+  running the client.
+* Client: Fix build so that files under `Data/` directory are only copied to the build
+  output directory if they do not already exist. This avoids the issue where `dotnet build`
+  overwrites resource JSON files that were modified by the Resource Editor during a
+  previous run.
+* Resource Editor: Fix bug where removing existing resources would lead to incorrect
+  graphics being rendered in the GUI (the lookup table used for GUI rendering was
+  corrupted by incorrect reuse of a reclaimed entry in the table).
+* Tile Sprites: Expand tile contexts to include diagonal directions.
+
+#### 07 August 2024
+
+* Resource Editor: Add new tool for generating static animated sprites directly
+  from a spritesheet. This eliminates a lot of tedious manual creation of static
+  animated sprites for materials, items, etc. that only have a single phase,
+  orientation, and frame.
+* Client: Fix DPI scaling on Windows.
+
+#### 05 August 2024
+
+* Auto-updater: Clean up the user interfaces and make them look nice enough
+  for an initial prototype.
+
+#### 03 August 2024
+
+* Renderer: Reload device-side textures whenever the host-side resources are
+  reloaded (i.e. after transitioning out of the Update state).
+* Auto-updater: Completely skip the `Update` state when the configuration file
+  is set to skip updates on startup; this avoids a redundant reload of resources
+  in this case.
+* Client: Remove most default resources from the Git repository, instead retrieving them
+  from the main update server when the client is first run. This will greatly reduce the
+  amount of Git LFS transfers from cloning the repository.
+
+### July
+
+#### 31 July 2024
+
+* Client: Allow for reloading of client-side resources after the initial load.
+  Still need to recreate the GPU-side resources in the renderer as well.
+* Client: Trigger resource reload when exiting the `Update` state.
+
+#### 30 July 2024
+
+* Auto-updater: Implement backend for updater client. Begin adding a
+  new Update scene for handling the updater at startup. This currently
+  breaks the client startup, so use an older commit/build if you are looking
+  to try out the engine. Also added the frontend GUI for monitoring updater
+  progress. Still need to late-load the updated resources when the transition
+  to the `MainMenu` state occurs instead of at startup.
+
+#### 27 July 2024
+
+* Auto-updater: Start adding an auto-updater for client side resources.
+  Added a command line utility for generating auto-updater support files.
+  Also defined the format of the index file that will drive the
+  auto-updater.
+
+#### 26 July 2024
+
+* Client: Added some new spritesheets for grass and dirt blocks. I've been
+  spending some time reading up on pixel art and trying to make my own.
+
+#### 17 July 2024
+
+* World Editor: Allow drawing blocks with left mouse button, erasing with right mouse button.
+* Client: Unload entities whenever the player logs out.
+
+#### 14 July 2024
+
+* World Editor: Add editable controls to GUI for users who do not have a mouse scroll wheel (or prefer
+  not to use one).
+
+#### 13 July 2024
+
+* Input: Listen for mouse scroll events.
+
+#### 12 July 2024
+
+* Client: Add simple GUI for world editor.
+
+### June
+
+#### 29 June 2024
+
+* Input: Allow use of WASD keys for movement in addition to the arrow keys.
+* Input: Publish events whenever the mouse wheel is scrolled by a fixed interval.
+* ClientWorldEdit: New system for client-side world editing. Currently tracks state and makes changes
+  based on keyboard and mouse inputs.
+
+#### 28 June 2024
+
+* Input: Export keyboard and mouse state through `InputServices` to be consumed by scene processing code.
+
+#### 26 June 2024
+
+* Input: Add adapters for more mouse-related SDL events (button up, button down, scrolling).
+* Network: Update Litenetlib to 1.2.0. For some reason Dependabot has not been catching these
+  updates.
+
+#### 22 June 2024
+
+* Update README documentation to match latest.
+* Server Network: Add `PlayerFilterInboundPipelineStage` for applying pipeline-level filters to incoming
+  events based on the sending player. For example, this can allow for events to be restricted to admin players
+  only before the events reach the systems.
+* Documentation: Updated developer guide for new events to cover `PlayerFilterInboundPipelineStage` usage.
+* Server: Add new `WorldEdit` system for handling server-side processing of events generated by the client's
+  world editor. For now there are two world editing events: `SetBlock` and `RemoveBlock`. World editing events
+  are only accepted from connections which are linked to players with the admin role.
+
+#### 21 June 2024
+
+* I haven't been keeping up with commits or the changelog since things have been busy, but here's a summary of
+  changes made in the last eight days...
+* World Management: Add support for synchronizing individual block entities from server to client whenever they
+  change. Since the engine only conveys template IDs and positions during bulk transfer, the same limitation was
+  taken for individual block synchronization.
+* Block System: Add client-side support for receiving block updates as described above.
+* Block System: Fix issue where blocks were not being properly uncovered when a block was removed. This happened
+  due to an attempt to find the block position from the `Kinematics` component instead of the `BlockPosition`
+  component - this was missed when the two position components were split apart recently.
+* Chat: Added new admin commands `/addblock` and `/removeblock` for adding and removing single blocks. Useful
+  for testing, as well as for emergency situations where the entire world is deleted and you need one block to
+  start from. (Hopefully nobody ever runs into that, but you never know...)
+* Documentation: Added documentation for admin chat commands.
+* Housekeeping: I'm going back to committing directly to the `main` branch for the time being instead of using
+  pull requests. For the time being, since I'm the only contributor and the features being worked are relatively
+  large, it's less overhead to just work directly with `main`. I'll switch back to the feature branch/pull request
+  workflow once the project is a bit larger.
+
+#### 13 June 2024
+
+* Renderer: Fix issue where blocks were being rendered in the wrong position all along. This was revealed by the
+  mouseover entity detection code being "wrong". I adjusted the mouse world position by a constant factor to
+  correct the error but couldn't figure out where in my math I had dropped a one - well, I didn't, and that should
+  have been a clue.
+* Perspective System: Properly handle entity extents and partial overlap of perspective lines.
+* Camera System: Properly center camera on the center of the targeted entity, not on its upper-left corner
+  (the entity's "position").
+
+#### 8 June 2024
+
+* Perspective System: Fix issue where the incorrect entity was removed from a perspective line
+  during certain movements.
+
+#### 6 June 2024
+
+* Input System: Track mouse motion events.
+* Perspective System: Add public API for retrieving the world coordinates (at camera depth) of the current
+  mouse pointer position.
+* Entity Debugger: Add new mouse hover mode that shows components for the entity under the mouse pointer, if any.
+
+#### 4 June 2024
+
+* Client: Add `PerspectiveSystem` for tracking where positioned entities fall relative to lines of perspective
+  into the screen. This will enable multiple algorithms in the client including entity mouseover detection,
+  ceiling hiding, and more efficient rendering of dense world segments.
+
+### May
+
+#### 28 May 2024
+
+* Client: Allow full editing of block template entities through the client-side editor.
+
+#### 27 May 2024
+
+* World Block Data: Send template IDs instead of material/modifier pairs in world segment block data transfers.
+  One consequence of this is that all block entities now require a template entity. This also likely means that the
+  "Air" material can be deprecated and material indices can run from zero, but deferring this change until
+  further analysis is done.
+* Client: Fix issue where template entities were not picked up by `BlockAnimatedSpriteCache` which rendered all
+  block entities unrenderable with the above update.
+* Documentation: Move networking overview to the full manual, update for the above world block data changes.
+
+#### 26 May 2024
+
+* Client: Add basic GUI for creating and updating block template entities. Right now only creation and
+  selection are supported, editing components has not yet been implemented.
+* Server: Fixed a variety of issues related to template entity synchronization. Most notably, the `EntityMapper`
+  was incorrectly reassigning new template entities a persisted ID, thereby promoting new templates to full
+  entities.
+* Server: Added some default data to the database migration scripts. This obsoletes the debug rest service
+  and `DebugSystem` which have been removed from the server. Following the earlier removal of
+  `TestContentSystem`, this means that Sovereign is now fully bootstrapped and stands on its own without
+  placeholder debug scaffolds.
+
+#### 22 May 2024
+
+* Server: Add `TemplateEntitySystem` which exposes an event-based API for modifying the
+  template entities from the client (requires admin role).
+
+#### 18 May 2024
+
+* All: Automatically load the initial set of template entities when the client first logs into
+  the server.
+
+#### 16 May 2024
+
+* All: Add entity templates which allow an entity to inherit a default set of components from a
+  template. Still need to configure the templates to load on startup.
+
+#### 13 May 2024
+
+* All: Update `BaseComponentCollection<T>` to be array-backed instead of list-backed. This produced a
+  noticeable performance improvement.
+
+#### 12 May 2024
+
+* All: Consolidate the `Position` and `Velocity` components into a single `Kinematics` component.
+  This allows the position and velocity data to be interleaved within the same contiguous block of
+  memory, which sets the stage for CPU cache optimizations for the `Movement` system through the ECS.
+* All: Update the component update process to include a *direct access* phase after pending changes
+  are processed but before component events are fired. During this phase, systems are allowed direct
+  access to the underlying component list to read and modify components. This allows for bulk operations
+  to be performed while leveraging the CPU cache for maximum performance.
+* Movement System: Process entity movement during the Kinematics component direct access phase instead of
+  within the normal system logic during each tick.
+
+#### 11 May 2024
+
+* All: Split the `Position` component into a `Position` component for non-block entities and a `BlockPosition`
+  component for block entities. The `Position` component is affected by velocity, whereas the `BlockPosition`
+  is static. This enables a future optimization of the ECS where the movement system could function by
+  direct iteration over the dynamical `Position` components, thereby taking maximum advantage of the CPU
+  cache. This change will be coming shortly.
+* Server: Update world management classes to use world segment indices instead of octrees for looking up
+  entities in a world segment.
+* Renderer: Pull block entities for rendering from a world segment indexer instead of an octree. This causes a
+  substantial increase in the number of blocks being rendered, so also expanded the vertex and index buffer sizes
+  and allowed for partial copy of the buffers to hardware. This may or may not scale to dense world segments, so
+  additional fine tuning may be required in the future.
+
+#### 7 May 2024
+
+* Creators' Manual: Add documentation for resources, resource editor.
+
+### April
+
+#### 30 April 2024
+
+* Resource editor: Add support for adding/modifying/removing materials. This is the last client-side
+  rendering resource for now. Next step is to create some documentation for the resource editor.
+
+#### 24 April 2024
+
+* Tile sprite editor: New tile contexts are added to the top of the list instead of the bottom.
+  This makes sure that the live preview of the tile resolves to the newly added context prior
+  to sorting. Tile sprites would never resolve when added to the end since they would always
+  be preempted by the default tile context.
+* Sprite editor: Fix top bar layout behavior when resizing the resource editor window.
+* All: Migrate to .NET 8. Fixed a few deprecated exception constructors, otherwise it was a very
+  straightforward migration.
+
+#### 23 April 2024
+
+* Finish up the tile sprite editor.
+* Fix a variety of bugs that were found while testing the tile sprite editor.
+* Update the animated sprite editor to improve UI/UX.
+
+#### 10 April 2024
+
+* Fix various memory allocation issues in the core and client. These fixes greatly reduce the number
+  of garbage collections, which in turn greatly improves client performance.
+
+#### 7 April 2024
+
+* Add `EntityAnimationSystem` for managing the animation phase (e.g. standing, moving) of each entity.
+* Update the animated sprite format to include the animation phase as part of the animated sprite.
+* Update the animated sprite editor to support animation phases.
+
+#### 6 April 2024
+
+* Finish up the animated sprite editor.
+* Prevent deletion of animated sprites which are used in a tile sprite. Indicate these dependencies to the
+  user through a tooltip that appears when hovering over the disabled remove sprite button.
+
+#### 3 April 2024
+
+* Add internal support for modifying the animated sprite table at runtime. This raises the possibility
+  that an entity with an `AnimatedSprite` component may end up pointing to a nonexistent animated sprite
+  (in fact that possibility already exists). No warnings will be provided by the client in such a case.
+* Fix issue where sprite editor tooltips appeared outside of the editor window for large spritesheets.
+
+### March
+
+#### 31 March 2024
+
+* Disable Vulkan validation temporarily. Since upgrading my Arch Linux install last night, I'm seeing what
+  I think may be a false positive `VUID-VkPresentInfoKHR-pImageIndices-01430` error on the *third* swapchain
+  swap. The first swap presents swapchain image 0 which passes validation. The third swap presents swapchain
+  image 0 yet again, which suddenly triggers an error saying that image 0 does not belong to the swapchain.
+  Debugger shows that the swapchain does in fact change, so this might be a true validation error, but it's
+  new after an Arch update and works fine if validation is disabled. Disabling validation for now.
+* Updated the Vulkan fork to not cause a fatal erorr when a Vulkan validation error occurs, just log it and
+  move on instead.
+
+#### 30 March 2024
+
+* Switch to a new fork of the Veldrid library since the main project isn't producing releases any longer.
+  The new fork includes a bugfix for the Vulkan backend which was causing a dramatic flickering effect in the GUI
+  with certain (Radeon RX 580) hardware (aka my desktop).
+* Make the sprite editor tab look much nicer - the grid showing sprites with definitions now has a better color
+  and a nice alpha blending effect that makes the editor much easier on the eyes.
+* Add support for generating missing sprite definitions for a spritesheet from the sprite editor tab.
+* Generate sprite definitions for all of the default spritesheets.
+
+#### 28 March 2024
+
+* Highlight sprites in the Sprite Editor which already have defined sprites. Also show the corresponding sprite ID
+  when the mouse is hovered over the sprite in the editor.
+
+#### 27 March 2024
+
+* Update the GUI renderer to support rendering images other than just animated sprites. Effectively this
+  lets us render anything we want from the texture atlas into the GUI.
+* Render entire spritesheets into the Sprite Editor window.
+* Remove thread-level performance throttles. This drives up CPU usage in exchange for large performance benefits;
+  on my (not very good) laptop (a 2017-era i7 with a GTX 1050), consistently able to hit 300+ FPS in the renderer
+  and one-way event latencies on the same timescale as a single context switch in the server.
+
+#### 26 March 2024
+
+* Build out the basic framework for the resource editor window.
+
+#### 25 March 2024
+
+* Make screen resolution configurable through the client configuration window. Only resolutions with a
+  16:9 aspect ratio are supported.
+* Change the default screen resolution to 1920x1080.
+* Increase the number of tiles displayed on screen. Now an entire world segment fits across the width of the
+  display.
+* Made the sprite table mutable in preparation for adding an integrated sprite definition editor. Modification of
+  the sprite table triggers rebuild of the atlas map and the animated sprites. Note that there is not any additional
+  validation or error handling for the case where an animated sprite points to a newly removed sprite. Currently I'm
+  thinking that deletion of sprites won't be supported; the sprite editor will probably be a "Generate" button that
+  automatically generates a full grid of sprites for a selected spritesheet, and a browser to identify a sprite by
+  mouseover.
+
+#### 24 March 2024
+
+* Fix issue where player selection GUI did not look nice when long player names were in use.
+* Fix issue where player creation GUI had a name input box that was way too small.
+* Fix issue where a connection lost error message would be incorrectly displayed when the player logs out
+  from the player selection GUI.
+
+#### 23 March 2024
+
+* Add new commands `/addadmin` and `/removeadmin` for granting and revoking the admin role to players.
+* Fix issue where the client did not log out automatically when the connection is lost.
+* Fix issue where client state was not fully reset after logout or connection loss.
+* Fix issue where chat history was not cleared from the client after a logout.
+* Add server-side API to resynchronize entity trees on demand in cases where a change was made directly instead
+  of through a repeated event sequence (e.g. adding or removing admin roles for an online player).
+
+#### 19 March 2024
+
+* Add `Admin` tag to denote a player as an admin. Admin roles are granted at the player level rather than
+  the account level for simplicity.
+* Add option to server config file to create new players as admins by default. This is enabled in the default
+  configuration file so that the first player created on a new server will have admin privileges; it should then
+  be disabled for obvious reasons.
+
+#### 18 March 2024
+
+* Add `/help` command to list other chat commands.
+* Lock chat window scroll to bottom if the chat window is already scrolled to the bottom, this way new
+  chat messages automatically scroll into view. On the other hand, the lock is released if the chat window
+  is scrolled up, so it's possible to look back at earlier chat messages without a constant annoying
+  automatic scroll.
+* Improve startup GUIs to set default focus, accept Enter key to process forms.
+
+#### 17 March 2024
+
+* Add chat routing to server with command processing support.
+* Add a new "system chat" event for delivery of system messages from server to single client.
+* Add support for local and global chat. Chat is mostly implemented now, still need to test. I also want to
+  add a `/help` command that provides a list of all known commands.
+
+#### 16 March 2024
+
+* Add chat-related events along with proper network routing for these events.
+* Add a client-side `ClientChatSystem` for managing chat functions in the client.
+* Send chat messages to server from the chat window.
+
+#### 11 March 2024
+
+* Add chat window that can be opened in-game by pressing Enter. It doesn't currently do anything.
+
+#### 10 March 2024
+
+* Fix issues with missing runtime dependencies in the Windows build of the client.
+
+#### 8 March 2024
+
+* **Feature freeze for release v0.2.0.**
+* Update GitHub Actions workflow to fix various issues that came up in v0.1.0.
+
+#### 7 March 2024
+
+* Add a basic entity debug window (toggle via F3 key) for examining entities and components at runtime.
+* Fix issue where position caches were not unloading correctly in response to remove/unload events due to
+  filtered components being removed before the position component is removed/unloaded.
+* Add developer documentation for keeping track of common types of difficult-to-debug issues that arise
+  during development (such as the component filtering issues with remove/unload).
+* Remove `TestContentSystem` as it is no longer needed now that the startup GUIs are developed.
+* Add support for deleting player characters.
+
+#### 6 March 2024
+
+* Add player debug window to the in-game scene, toggled via the F2 key, for viewing local player data
+  at runtime.
+* Fix issue in `WorldSegmentResolver` where negative segments had an off-by-one error in their resolution
+  from position coordinates due to an arithmetic error in the direction of rounding.
+
+#### 5 March 2024
+
+* Add keyboard binding processing to the various client states. Initially these are hardcoded and only mapped
+  to various debug windows from Dear ImGui, along with the in-game menu via the Escape key.
+* Allow players to log out but keep their account logged in, returning to the player selection screen.
+* Unload all entities from the client upon logout or disconnect. Also clear all world segment subscriptions.
+
+#### 3 March 2024
+
+* Fix issue where client did not properly disconnect due to a logic error.
+* Start testing the various startup GUIs through player creation and selection.
+
+### February
+
+#### 26 February 2024
+
+* Implement the registration GUI.
+* Remove the event-based client API for registration, instead having the GUI use the async method from
+  `RegistrationClient` directly.
+* Implement the login GUI.
+* Wire up "Exit" button on the startup screen to exit the client.
+
+#### 23 February 2024
+
+* Add `ClientStateSystem` for managing the top-level client state (main menu, in-game, etc.).
+* Update `SceneManager` to select the renderer scene based on the current client state.
+* Create a main menu scene for displaying the startup GUIs covering login, registration, etc. Start implementing
+  these GUIs.
+* Disable the automatic registration/login/etc actions in `TestContentSystem`. These behaviors are transitioning
+  to being driven by the `MainMenuScene` and its GUI classes. Once implementation is done, it should be possible
+  to entirely remove `TestContentSystem`.
+
+#### 22 February 2024
+
+* Load client configuration from file instead of hardcoding the values.
+* Move client connection settings to the configuration file.
+
+#### 21 February 2024
+
+* Successfully integrated Dear ImGui with the renderer - now the client can have GUIs. Still need
+  to do some additional testing, reskinning, etc. So far so good.
+* Increase GUI vertex and index buffer sizes - they were filling up with rounded windows.
+* Fix handling of SDL2 text input events.
+
+#### 18 February 2024
+
+* More work on Dear ImGui integration. Refactor the current GUI rendering code into a separate
+  `GuiRenderer` class that coordinates everything
+
+#### 14 February 2024
+
+* Continue work on Dear ImGui integration by adding a GUI rendering pipeline to the Veldrid renderer.
+  There's still some work to be done with resource binding and texture loading.
+
+#### 13 February 2024
+
+* Start integrating Dear ImGui into the renderer.
+
+#### 12 February 2024
+
+* Update Dear ImGui to v1.90.1.1.
+* Update `CommonGuiManager` to mirror latest Dear ImGui SDL2 backend source.
+
 ### January
 
 #### 31 January 2024

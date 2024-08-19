@@ -18,8 +18,6 @@
 using System;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Player.Components;
 using Sovereign.ServerCore.Components;
 
 namespace Sovereign.ServerCore.Entities;
@@ -33,8 +31,7 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
 
     public ServerEntityBuilder(ulong entityId, bool load,
         EntityManager entityManager,
-        PositionComponentCollection positions,
-        VelocityComponentCollection velocities,
+        KinematicComponentCollection kinematics,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,
@@ -45,16 +42,21 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         DrawableTagCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites,
         OrientationComponentCollection orientations,
+        AdminTagCollection admins,
+        BlockPositionComponentCollection blockPositions,
         EntityTable entityTable)
-        : base(entityId, load, entityManager, positions, velocities, materials,
+        : base(entityId, load, entityManager, kinematics, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents,
-            drawables, animatedSprites, orientations, entityTable)
+            drawables, animatedSprites, orientations, admins, blockPositions, entityTable)
     {
         this.accounts = accounts;
     }
 
     public override IEntityBuilder Account(Guid accountId)
     {
+        // Disallowed for template entities.
+        if (isTemplate) return this;
+
         accounts.AddComponent(entityId, accountId, load);
         return this;
     }

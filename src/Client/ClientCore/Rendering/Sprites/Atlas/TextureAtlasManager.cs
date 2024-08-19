@@ -19,7 +19,7 @@ using System;
 using System.Text;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Display;
-using Sovereign.ClientCore.Rendering.GUI;
+using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 
@@ -76,6 +76,7 @@ public class TextureAtlasManager
 
         try
         {
+            TextureAtlas?.Dispose();
             TextureAtlas = new TextureAtlas(spriteSheetManager.SpriteSheets.Values,
                 fontAtlas, mainDisplay.DisplayMode.DisplayFormat);
         }

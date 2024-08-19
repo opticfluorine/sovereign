@@ -31,6 +31,8 @@ public sealed class SceneInstaller : IWindsorInstaller
     {
         container.Register(Component.For<SceneManager>()
             .LifestyleSingleton());
+        container.Register(Component.For<RenderCamera>()
+            .LifestyleSingleton());
 
         container.Register(EngineClasses.EngineAssemblies()
             .BasedOn<IScene>()

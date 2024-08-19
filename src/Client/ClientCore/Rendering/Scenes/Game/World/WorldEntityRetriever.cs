@@ -16,12 +16,15 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Components.Indexers;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Systems.Camera;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.World;
 using Sovereign.EngineUtil.Numerics;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
@@ -31,8 +34,10 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 /// </summary>
 public sealed class WorldEntityRetriever
 {
+    private readonly BlockWorldSegmentIndexer blockIndexer;
+    private readonly BlockPositionComponentCollection blockPositions;
     private readonly CameraManager camera;
-    private readonly IClientConfiguration clientConfiguration;
+    private readonly ClientConfigurationManager configManager;
     private readonly DrawablePositionComponentIndexer drawableIndexer;
 
     /// <summary>
@@ -45,15 +50,23 @@ public sealed class WorldEntityRetriever
     /// </summary>
     private readonly float halfY;
 
+    private readonly List<GridPosition> renderedWorldSegments = new();
+    private readonly WorldSegmentResolver resolver;
+
     private readonly DisplayViewport viewport;
 
     public WorldEntityRetriever(DrawablePositionComponentIndexer drawableIndexer,
-        CameraManager camera, DisplayViewport viewport, IClientConfiguration clientConfiguration)
+        CameraManager camera, DisplayViewport viewport, ClientConfigurationManager configManager,
+        WorldSegmentResolver resolver, BlockWorldSegmentIndexer blockIndexer,
+        BlockPositionComponentCollection blockPositions)
     {
         this.drawableIndexer = drawableIndexer;
         this.camera = camera;
         this.viewport = viewport;
-        this.clientConfiguration = clientConfiguration;
+        this.configManager = configManager;
+        this.resolver = resolver;
+        this.blockIndexer = blockIndexer;
+        this.blockPositions = blockPositions;
 
         halfX = viewport.WidthInTiles * 0.5f;
         halfY = viewport.HeightInTiles * 0.5f;
@@ -64,13 +77,24 @@ public sealed class WorldEntityRetriever
     /// </summary>
     /// <param name="entityBuffer">Drawable entity buffer.</param>
     /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
-    public void RetrieveEntities(IList<PositionedEntity> entityBuffer, float timeSinceTick)
+    public void RetrieveEntities(List<PositionedEntity> entityBuffer, float timeSinceTick)
     {
+        // Non-block entities.
         DetermineExtents(out var minExtent, out var maxExtent, timeSinceTick);
         using (var indexLock = drawableIndexer.AcquireLock())
         {
             drawableIndexer.GetEntitiesInRange(indexLock, minExtent, maxExtent, entityBuffer);
         }
+
+        // Block entities.
+        SelectWorldSegments(minExtent, maxExtent);
+        entityBuffer.AddRange(renderedWorldSegments
+            .SelectMany(segmentIndex => blockIndexer.GetEntitiesInWorldSegment(segmentIndex))
+            .Select(entityId => new PositionedEntity
+            {
+                EntityId = entityId,
+                Position = (Vector3)blockPositions[entityId]
+            }));
     }
 
     /// <summary>
@@ -85,6 +109,7 @@ public sealed class WorldEntityRetriever
         /* Interpolate the camera position */
         var centerPos = camera.Position.InterpolateByTime(camera.Velocity, timeSinceTick);
 
+        var clientConfiguration = configManager.ClientConfiguration;
         var minX = centerPos.X - halfX - clientConfiguration.RenderSearchSpacerX;
         var maxX = centerPos.X + halfX + clientConfiguration.RenderSearchSpacerX;
 
@@ -97,5 +122,28 @@ public sealed class WorldEntityRetriever
 
         minExtent = new Vector3(minX, minY, minZ);
         maxExtent = new Vector3(maxX, maxY, maxZ);
+    }
+
+    /// <summary>
+    ///     Identifies the world segments that need to be considered for rendering.
+    /// </summary>
+    /// <param name="minExtent">Minimum extent of rendering.</param>
+    /// <param name="maxExtent">Maximum extent of rendering.</param>
+    private void SelectWorldSegments(Vector3 minExtent, Vector3 maxExtent)
+    {
+        var startSegment = resolver.GetWorldSegmentForPosition(minExtent);
+        var endSegment = resolver.GetWorldSegmentForPosition(maxExtent);
+
+        renderedWorldSegments.Clear();
+        for (var x = startSegment.X; x <= endSegment.X; ++x)
+        {
+            for (var y = startSegment.Y; y <= endSegment.Y; ++y)
+            {
+                for (var z = startSegment.Z; z <= endSegment.Z; ++z)
+                {
+                    renderedWorldSegments.Add(new GridPosition(x, y, z));
+                }
+            }
+        }
     }
 }

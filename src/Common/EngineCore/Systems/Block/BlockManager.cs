@@ -16,14 +16,11 @@
  */
 
 using System.Linq;
-using System.Numerics;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Block.Components.Indexers;
-using Sovereign.EngineCore.Systems.Block.Events;
+using Sovereign.EngineCore.Events.Details;
 
 namespace Sovereign.EngineCore.Systems.Block;
 
@@ -33,23 +30,23 @@ namespace Sovereign.EngineCore.Systems.Block;
 public sealed class BlockManager
 {
     private readonly AboveBlockComponentCollection aboveBlocks;
-    private readonly BlockGridPositionIndexer blockPositions;
+    private readonly BlockGridPositionIndexer blockPositionIndexer;
+    private readonly BlockPositionComponentCollection blockPositions;
 
     private readonly IEntityFactory entityFactory;
     private readonly EntityManager entityManager;
-    private readonly PositionComponentCollection positions;
 
     public BlockManager(IEntityFactory entityFactory,
         EntityManager entityManager,
-        BlockGridPositionIndexer blockPositions,
+        BlockGridPositionIndexer blockPositionIndexer,
         AboveBlockComponentCollection aboveBlocks,
-        PositionComponentCollection positions)
+        BlockPositionComponentCollection blockPositions)
     {
         this.entityFactory = entityFactory;
         this.entityManager = entityManager;
-        this.blockPositions = blockPositions;
+        this.blockPositionIndexer = blockPositionIndexer;
         this.aboveBlocks = aboveBlocks;
-        this.positions = positions;
+        this.blockPositions = blockPositions;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -84,10 +81,9 @@ public sealed class BlockManager
     {
         var hasAboveBlock = GetAboveBlock(blockRecord, out var aboveBlock);
 
-        var builder = entityFactory.GetBuilder()
-            .Positionable((Vector3)blockRecord.Position)
-            .Material(blockRecord.Material, blockRecord.MaterialModifier)
-            .Drawable();
+        var builder = entityFactory.GetBuilder(EntityType.Block)
+            .BlockPositionable(blockRecord.Position)
+            .Template(blockRecord.TemplateEntityId);
 
         if (hasAboveBlock) builder.AboveBlock(aboveBlock);
 
@@ -98,12 +94,13 @@ public sealed class BlockManager
     ///     Update the AboveBlock for block below the current block (if any).
     /// </summary>
     /// <param name="blockRecord">Current block.</param>
+    /// <param name="entityId">Entity ID.</param>
     private void CoverBelowBlock(BlockRecord blockRecord, ulong entityId)
     {
         var pos = blockRecord.Position;
         var belowPos = new GridPosition(pos.X, pos.Y, pos.Z - 1);
 
-        var blocks = blockPositions.GetEntitiesAtPosition(belowPos);
+        var blocks = blockPositionIndexer.GetEntitiesAtPosition(belowPos);
         if (blocks == null) return;
 
         foreach (var belowBlock in blocks) aboveBlocks.AddComponent(belowBlock, entityId);
@@ -115,17 +112,16 @@ public sealed class BlockManager
     /// <param name="entityId">Block ID.</param>
     private void UncoverBelowBlock(ulong entityId)
     {
-        var pos = positions.GetComponentForEntity(entityId);
-        if (!pos.HasValue)
+        if (!blockPositions.HasComponentForEntity(entityId))
         {
             Logger.ErrorFormat("Block (Entity ID = {0}) has no position.", entityId);
             return;
         }
 
-        var gridPos = (GridPosition)pos.Value;
-        var belowPos = new GridPosition(gridPos.X, gridPos.Y, gridPos.Z - 1);
+        var gridPos = blockPositions[entityId];
+        var belowPos = gridPos with { Z = gridPos.Z - 1 };
 
-        var belowBlocks = blockPositions.GetEntitiesAtPosition(belowPos);
+        var belowBlocks = blockPositionIndexer.GetEntitiesAtPosition(belowPos);
         if (belowBlocks == null) return;
 
         foreach (var belowBlockId in belowBlocks) aboveBlocks.RemoveComponent(belowBlockId);
@@ -142,7 +138,7 @@ public sealed class BlockManager
         var pos = blockRecord.Position;
         var abovePos = new GridPosition(pos.X, pos.Y, pos.Z + 1);
 
-        var blocks = blockPositions.GetEntitiesAtPosition(abovePos);
+        var blocks = blockPositionIndexer.GetEntitiesAtPosition(abovePos);
         if (blocks != null)
             aboveBlock = blocks.First();
         else

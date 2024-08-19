@@ -23,6 +23,7 @@ using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 
@@ -34,9 +35,10 @@ namespace Sovereign.ClientCore.Rendering;
 public class RenderingManager : IStartable
 {
     private readonly AdapterSelector adapterSelector;
-    private readonly IClientConfiguration clientConfiguration;
+    private readonly ClientConfigurationManager configManager;
     private readonly DisplayModeSelector displayModeSelector;
     private readonly CommonGuiManager guiManager;
+    private readonly ClientStateServices stateServices;
 
     private readonly MainDisplay mainDisplay;
     private readonly IRenderer renderer;
@@ -55,17 +57,18 @@ public class RenderingManager : IStartable
 
     public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
         DisplayModeSelector displayModeSelector, IRenderer renderer,
-        RenderingResourceManager resourceManager, IClientConfiguration clientConfiguration,
-        SDLEventAdapter sdlEventAdapter, CommonGuiManager guiManager)
+        RenderingResourceManager resourceManager, ClientConfigurationManager configManager,
+        SDLEventAdapter sdlEventAdapter, CommonGuiManager guiManager, ClientStateServices stateServices)
     {
         this.mainDisplay = mainDisplay;
         this.adapterSelector = adapterSelector;
         this.displayModeSelector = displayModeSelector;
         this.renderer = renderer;
         this.resourceManager = resourceManager;
-        this.clientConfiguration = clientConfiguration;
+        this.configManager = configManager;
         this.sdlEventAdapter = sdlEventAdapter;
         this.guiManager = guiManager;
+        this.stateServices = stateServices;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -77,11 +80,23 @@ public class RenderingManager : IStartable
 
     public void Start()
     {
-        SelectConfiguration();
-        CreateMainDisplay();
-        InitializeGUI();
-        LoadResources();
-        InitializeRenderer();
+        try
+        {
+            SelectConfiguration();
+            CreateMainDisplay();
+            InitializeGui();
+            LoadResources();
+            InitializeRenderer();
+        }
+        catch (FatalErrorException)
+        {
+            Environment.Exit(1);
+        }
+        catch (Exception e)
+        {
+            Logger.Fatal("Unhandled exception in RenderingManager.Start().", e);
+            Environment.Exit(1);
+        }
     }
 
     public void Stop()
@@ -111,6 +126,13 @@ public class RenderingManager : IStartable
     /// </summary>
     public void Render()
     {
+        if (stateServices.CheckAndClearFlagValue(ClientStateFlag.ReloadClientResources))
+        {
+            LoadResources();
+            renderer.ReloadResources();
+        }
+        
+        guiManager.NewFrame();
         renderer.Render();
     }
 
@@ -130,7 +152,7 @@ public class RenderingManager : IStartable
         try
         {
             /* Create the main window. */
-            mainDisplay.Show(selectedDisplayMode, clientConfiguration.Fullscreen);
+            mainDisplay.Show(selectedDisplayMode, configManager.ClientConfiguration.Display.Fullscreen);
         }
         catch (Exception e)
         {
@@ -172,7 +194,7 @@ public class RenderingManager : IStartable
     /// <summary>
     ///     Initializes the GUI.
     /// </summary>
-    private void InitializeGUI()
+    private void InitializeGui()
     {
         try
         {
@@ -198,7 +220,7 @@ public class RenderingManager : IStartable
     }
 
     /// <summary>
-    ///     Loads resources used by rendering.
+    ///     Loads (or reloads) resources used by rendering.
     /// </summary>
     private void LoadResources()
     {

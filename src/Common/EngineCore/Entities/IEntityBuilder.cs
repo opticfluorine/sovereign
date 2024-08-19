@@ -17,6 +17,7 @@
 
 using System;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Entities;
@@ -31,6 +32,13 @@ public interface IEntityBuilder
     /// </summary>
     /// <returns>Entity ID.</returns>
     ulong Build();
+
+    /// <summary>
+    ///     Assigns a template to the entity.
+    /// </summary>
+    /// <param name="templateEntityId">Template entity ID.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder Template(ulong templateEntityId);
 
     /// <summary>
     ///     Makes the new entity positionable with the given position and velocity.
@@ -60,6 +68,19 @@ public interface IEntityBuilder
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutPositionable();
+
+    /// <summary>
+    ///     Makes the new entity a block with the given grid position.
+    /// </summary>
+    /// <param name="position">Grid position.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder BlockPositionable(GridPosition position);
+
+    /// <summary>
+    ///     Removes block position components if they are currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutBlockPositionable();
 
     /// <summary>
     ///     Makes the new entity drawable.
@@ -185,4 +206,16 @@ public interface IEntityBuilder
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutOrientation();
+
+    /// <summary>
+    ///     Tags the entity as an admin.
+    /// </summary>
+    /// <returns></returns>
+    IEntityBuilder Admin();
+
+    /// <summary>
+    ///     Untags the entity as an admin.
+    /// </summary>
+    /// <returns></returns>
+    IEntityBuilder WithoutAdmin();
 }

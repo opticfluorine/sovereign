@@ -28,18 +28,20 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas;
 public sealed class AtlasMap
 {
     private readonly TextureAtlasManager atlasManager;
-    private readonly IClientConfiguration clientConfiguration;
+    private readonly ClientConfigurationManager configManager;
     private readonly SpriteManager spriteManager;
     private readonly SpriteSheetManager spriteSheetManager;
 
     public AtlasMap(TextureAtlasManager atlasManager, SpriteManager spriteManager,
         SpriteSheetManager spriteSheetManager,
-        IClientConfiguration clientConfiguration)
+        ClientConfigurationManager configManager)
     {
         this.atlasManager = atlasManager;
         this.spriteManager = spriteManager;
         this.spriteSheetManager = spriteSheetManager;
-        this.clientConfiguration = clientConfiguration;
+        this.configManager = configManager;
+
+        spriteManager.OnSpritesChanged += InitializeAtlasMap;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -96,8 +98,8 @@ public sealed class AtlasMap
             NormalizedTopY = tly / atlasHeight,
             NormalizedRightX = brx / atlasWidth,
             NormalizedBottomY = bry / atlasHeight,
-            WidthInTiles = spriteWidth / clientConfiguration.TileWidth,
-            HeightInTiles = spriteHeight / clientConfiguration.TileWidth
+            WidthInTiles = (float)spriteWidth / configManager.ClientConfiguration.TileWidth,
+            HeightInTiles = (float)spriteHeight / configManager.ClientConfiguration.TileWidth
         });
     }
 }

@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Entities;
+
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
@@ -34,8 +36,9 @@ public class BaseTagCollection : BaseComponentCollection<bool>
     /// <param name="componentManager">Component manager, typically supplied by dependency injection.</param>
     /// <param name="initialSize">Initial size of the tag collection.</param>
     /// <param name="componentType">Component type for the tag.</param>
-    protected BaseTagCollection(ComponentManager componentManager, int initialSize, ComponentType componentType)
-        : base(componentManager, initialSize, ComponentOperators.BoolOperators, componentType)
+    protected BaseTagCollection(EntityTable entityTable, ComponentManager componentManager, int initialSize,
+        ComponentType componentType)
+        : base(entityTable, componentManager, initialSize, ComponentOperators.BoolOperators, componentType)
     {
     }
 
@@ -43,10 +46,11 @@ public class BaseTagCollection : BaseComponentCollection<bool>
     ///     Determines whether the given entity is tagged.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
+    /// <param name="lookback">If true, consider newly removed tags that were removed in the same tick.</param>
     /// <returns>true if tagged, false otherwise.</returns>
-    public bool HasTagForEntity(ulong entityId)
+    public bool HasTagForEntity(ulong entityId, bool lookback = false)
     {
-        return HasComponentForEntity(entityId) && this[entityId];
+        return HasComponentForEntity(entityId, lookback) && this[entityId];
     }
 
     /// <summary>

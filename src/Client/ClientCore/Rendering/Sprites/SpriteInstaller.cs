@@ -59,5 +59,7 @@ public class SpriteInstaller : IWindsorInstaller
         /* SpriteDefinitionsValidator. */
         container.Register(Component.For<SpriteDefinitionsValidator>()
             .LifestyleSingleton());
+
+        container.Register(Component.For<SpriteDefinitionsGenerator>().LifestyleSingleton());
     }
 }

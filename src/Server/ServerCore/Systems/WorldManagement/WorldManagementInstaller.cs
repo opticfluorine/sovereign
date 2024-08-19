@@ -60,5 +60,7 @@ public sealed class WorldManagementInstaller : IWindsorInstaller
 
         container.Register(Component.For<WorldSegmentChangeMonitor>()
             .LifestyleSingleton());
+
+        container.Register(Component.For<WorldManagementController>().LifestyleSingleton());
     }
 }

@@ -35,6 +35,8 @@ public class MovementManager
 {
     private readonly IEventSender eventSender;
     private readonly MovementInternalController internalController;
+
+    private readonly KinematicComponentCollection kinematics;
     private readonly MovingComponentIndexer movingComponents;
     private readonly OrientationComponentCollection orientations;
 
@@ -54,15 +56,12 @@ public class MovementManager
     /// </summary>
     private readonly Queue<RequestMoveEventDetails> pendingRequests = new();
 
-    private readonly PositionComponentCollection positions;
-
     /// <summary>
     ///     Map from entity ID to sequence counts.
     /// </summary>
     private readonly Dictionary<ulong, byte> sequenceCountsByEntity = new();
 
     private readonly ISystemTimer systemTimer;
-    private readonly VelocityComponentCollection velocities;
 
     /// <summary>
     ///     Flag indicating whether the pending check table has been updated for the current tick.
@@ -80,13 +79,12 @@ public class MovementManager
     /// </summary>
     private ulong lastUpdateSystemTime;
 
-    public MovementManager(MovingComponentIndexer movingComponents, PositionComponentCollection positions,
-        VelocityComponentCollection velocities, ISystemTimer systemTimer, MovementInternalController internalController,
+    public MovementManager(MovingComponentIndexer movingComponents, KinematicComponentCollection kinematics,
+        ISystemTimer systemTimer, MovementInternalController internalController,
         IEventSender eventSender, OrientationComponentCollection orientations)
     {
         this.movingComponents = movingComponents;
-        this.positions = positions;
-        this.velocities = velocities;
+        this.kinematics = kinematics;
         this.systemTimer = systemTimer;
         this.internalController = internalController;
         this.eventSender = eventSender;
@@ -95,7 +93,8 @@ public class MovementManager
         for (var i = 0; i < pendingChecks.Length; ++i)
             pendingChecks[i] = new List<PendingCheck>();
 
-        velocities.OnStartUpdates += OnStartUpdates;
+        kinematics.OnStartUpdates += OnStartUpdates;
+        kinematics.OnBeginDirectAccess += UpdatePositions;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -116,7 +115,8 @@ public class MovementManager
 
         // Set velocity and update records.
         var velocity = details.RelativeVelocity * MovementConfiguration.DefaultBaseVelocity;
-        velocities.ModifyComponent(details.EntityId, ComponentOperation.Set, velocity);
+        kinematics.ModifyComponent(details.EntityId, ComponentOperation.SetVelocity,
+            new Kinematics { Velocity = velocity });
         sequenceCountsByEntity[details.EntityId] = details.Sequence;
         pendingMoveEvents.Enqueue(details.EntityId);
 
@@ -138,8 +138,11 @@ public class MovementManager
     public void HandleAuthoritativeMove(MoveEventDetails details)
     {
         // Set position and velocity.
-        positions.ModifyComponent(details.EntityId, ComponentOperation.Set, details.Position);
-        velocities.ModifyComponent(details.EntityId, ComponentOperation.Set, details.Velocity);
+        kinematics.ModifyComponent(details.EntityId, ComponentOperation.Set, new Kinematics
+        {
+            Position = details.Position,
+            Velocity = details.Velocity
+        });
         SetOrientation(details.EntityId, details.Velocity);
     }
 
@@ -148,13 +151,13 @@ public class MovementManager
     /// </summary>
     public void HandleTick()
     {
-        if (lastUpdateSystemTime == 0) lastUpdateSystemTime = systemTimer.GetTime();
-        UpdatePositions();
-
         // Send move events for any newly processed move requests.
         while (pendingMoveEvents.TryDequeue(out var entityId))
-            internalController.Move(eventSender, entityId, positions[entityId], velocities[entityId],
+        {
+            var kinematicData = kinematics[entityId];
+            internalController.Move(eventSender, entityId, kinematicData.Position, kinematicData.Velocity,
                 sequenceCountsByEntity[entityId]);
+        }
 
         ProcessChecks();
     }
@@ -162,20 +165,24 @@ public class MovementManager
     /// <summary>
     ///     Updates all positions at the beginning of a tick.
     /// </summary>
-    private void UpdatePositions()
+    private int UpdatePositions(int[] modifiedIndices)
     {
+        if (lastUpdateSystemTime == 0) lastUpdateSystemTime = systemTimer.GetTime();
         var currentSystemTime = systemTimer.GetTime();
         var delta = (currentSystemTime - lastUpdateSystemTime) * UnitConversions.UsToS;
-        foreach (var entityId in movingComponents.MovingEntities)
-        {
-            var velocity = velocities.GetComponentForEntity(entityId);
-            if (!velocity.HasValue) continue;
 
-            var deltaPosition = delta * velocity.Value;
-            positions.ModifyComponent(entityId, ComponentOperation.Add, deltaPosition);
-        }
+        var componentList = kinematics.Components;
+        var directMods = 0;
+        for (var i = 0; i < kinematics.ComponentCount; ++i)
+            if (componentList[i].Velocity != Vector3.Zero)
+            {
+                // Using + instead of += shows a ~ 6.6% speedup with Release builds in EcsBenchmark.
+                componentList[i].Position = componentList[i].Position + delta * componentList[i].Velocity;
+                modifiedIndices[directMods++] = i;
+            }
 
         lastUpdateSystemTime = currentSystemTime;
+        return directMods;
     }
 
     /// <summary>
@@ -194,8 +201,9 @@ public class MovementManager
 
             // Check is current and no newer move request has been received.
             // Stop movement and send a move event.
-            velocities.ModifyComponent(check.EntityId, ComponentOperation.Set, Vector3.Zero);
-            internalController.Move(eventSender, check.EntityId, positions[check.EntityId],
+            kinematics.ModifyComponent(check.EntityId, ComponentOperation.SetVelocity,
+                new Kinematics { Velocity = Vector3.Zero });
+            internalController.Move(eventSender, check.EntityId, kinematics[check.EntityId].Position,
                 Vector3.Zero, check.SequenceCount);
         }
 

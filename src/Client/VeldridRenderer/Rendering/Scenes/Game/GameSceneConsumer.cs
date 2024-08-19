@@ -67,7 +67,9 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
         scene.PopulateBuffers(gameResManager.VertexBuffer.Buffer,
             gameResManager.IndexBuffer.Buffer,
             gameResManager.DrawBuffer,
-            out var drawCount);
+            out var vertexCount, out var indexCount, out var drawCount);
+        gameResManager.VertexBuffer.UsedLength = (uint)vertexCount;
+        gameResManager.IndexBuffer.UsedLength = (uint)indexCount;
         gameResManager.DrawCount = drawCount;
         worldVcUpdater.Update(scene);
 

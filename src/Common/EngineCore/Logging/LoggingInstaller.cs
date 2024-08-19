@@ -36,15 +36,13 @@ public class LoggingInstaller : IWindsorInstaller
 
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        /* Configure log4net. */
         container.AddFacility<LoggingFacility>(f => f.LogUsing<Log4netFactory>()
             .WithConfig(CONFIG_FILE));
-
-        /* IErrorHandler. */
         container.Register(EngineClasses.EngineAssemblies()
             .BasedOn<IErrorHandler>()
             .WithServiceDefaultInterfaces()
             .Unless(handlerType => handlerType.Equals(typeof(NullErrorHandler)))
             .LifestyleSingleton());
+        container.Register(Component.For<LoggingUtil>().LifestyleSingleton());
     }
 }

@@ -28,6 +28,7 @@ public class EntitySynchronizationSystem : ISystem
     private readonly IEventLoop eventLoop;
     private readonly EntityDefinitionProcessor processor;
     private readonly ClientEntityUnloader unloader;
+    private ulong playerEntityId;
 
     public EntitySynchronizationSystem(EventCommunicator eventCommunicator,
         IEventLoop eventLoop, EntityDefinitionProcessor processor,
@@ -49,10 +50,12 @@ public class EntitySynchronizationSystem : ISystem
     {
         EventId.Client_EntitySynchronization_Sync,
         EventId.Client_EntitySynchronization_Desync,
+        EventId.Client_EntitySynchronization_SyncTemplate,
         EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_Unsubscribe,
         EventId.Client_Network_PlayerEntitySelected,
-        EventId.Core_WorldManagement_EntityLeaveWorldSegment
+        EventId.Core_WorldManagement_EntityLeaveWorldSegment,
+        EventId.Core_Network_Logout
     };
 
     public int WorkloadEstimate => 50;
@@ -91,6 +94,18 @@ public class EntitySynchronizationSystem : ISystem
                     }
 
                     HandleDesync((EntityDesyncEventDetails)ev.EventDetails);
+                    break;
+
+                case EventId.Client_EntitySynchronization_SyncTemplate:
+                {
+                    if (ev.EventDetails is not TemplateEntityDefinitionEventDetails syncDetails)
+                    {
+                        Logger.Error("Received SyncTemplate event without details.");
+                        break;
+                    }
+
+                    HandleSyncTemplate(syncDetails);
+                }
                     break;
 
                 case EventId.Core_WorldManagement_Subscribe:
@@ -132,10 +147,19 @@ public class EntitySynchronizationSystem : ISystem
 
                     HandleChangeWorldSegment((EntityChangeWorldSegmentEventDetails)ev.EventDetails);
                     break;
+
+                case EventId.Core_Network_Logout:
+                    OnLogout();
+                    break;
             }
         }
 
         return eventsProcessed;
+    }
+
+    private void OnLogout()
+    {
+        unloader.UnsubscribeAll();
     }
 
     private void HandleSubscribe(WorldSegmentSubscriptionEventDetails details)
@@ -158,6 +182,9 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Event details.</param>
     private void HandleChangeWorldSegment(EntityChangeWorldSegmentEventDetails details)
     {
+        if (details.EntityId == playerEntityId)
+            Logger.DebugFormat("Player entered world segment {0}.", details.NewSegmentIndex);
+
         unloader.OnEntityChangeWorldSegment(details.EntityId,
             details.NewSegmentIndex);
     }
@@ -168,6 +195,7 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Event details.</param>
     private void HandlePlayerSelect(EntityEventDetails details)
     {
+        playerEntityId = details.EntityId;
         unloader.SetPlayer(details.EntityId);
     }
 
@@ -180,6 +208,16 @@ public class EntitySynchronizationSystem : ISystem
         Logger.DebugFormat("Processing {0} entity definitions.", details.EntityDefinitions.Count);
         foreach (var definition in details.EntityDefinitions)
             processor.ProcessDefinition(definition);
+    }
+
+    /// <summary>
+    ///     Handles a template entity synchronization update.
+    /// </summary>
+    /// <param name="details">Update details.</param>
+    private void HandleSyncTemplate(TemplateEntityDefinitionEventDetails details)
+    {
+        Logger.DebugFormat("Processing template entity update for entity {0}.", details.Definition.EntityId);
+        processor.ProcessDefinition(details.Definition);
     }
 
     /// <summary>

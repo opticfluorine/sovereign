@@ -18,8 +18,6 @@
 using System;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Systems.Block.Components;
-using Sovereign.EngineCore.Systems.Player.Components;
 
 namespace Sovereign.ClientCore.Entities;
 
@@ -30,8 +28,7 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
 {
     public ClientEntityBuilder(ulong entityId, bool isLoad,
         EntityManager entityManager,
-        PositionComponentCollection positions,
-        VelocityComponentCollection velocities,
+        KinematicComponentCollection kinematics,
         DrawableTagCollection drawables,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
@@ -41,10 +38,12 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         NameComponentCollection names,
         ParentComponentCollection parents,
         OrientationComponentCollection orientations,
+        AdminTagCollection admins,
+        BlockPositionComponentCollection blockPositions,
         EntityTable entityTable)
-        : base(entityId, isLoad, entityManager, positions, velocities, materials,
+        : base(entityId, isLoad, entityManager, kinematics, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
-            orientations, entityTable)
+            orientations, admins, blockPositions, entityTable)
     {
     }
 

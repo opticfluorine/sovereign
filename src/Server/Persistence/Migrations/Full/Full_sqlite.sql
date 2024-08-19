@@ -69,7 +69,9 @@ CREATE TABLE Account_Authentication
 
 CREATE TABLE Entity
 (
-    id INTEGER PRIMARY KEY NOT NULL
+    id          INTEGER PRIMARY KEY NOT NULL,
+    template_id INTEGER,
+    FOREIGN KEY (template_id) REFERENCES Entity (id)
 );
 
 
@@ -120,8 +122,9 @@ CREATE INDEX Position_Xyz_Index ON Position (x, y, z);
 
 CREATE TABLE PlayerCharacter
 (
-    id    INTEGER PRIMARY KEY NOT NULL,
-    value BOOLEAN             NOT NULL,
+    id      INTEGER PRIMARY KEY NOT NULL,
+    value   BOOLEAN             NOT NULL,
+    deleted BOOLEAN             NOT NULL DEFAULT FALSE,
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
@@ -136,6 +139,9 @@ CREATE TABLE Name
     value TEXT                NOT NULL,
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
+
+-- Index name for faster searches.
+CREATE INDEX Name_Index ON Name (value);
 
 
 -----------------------
@@ -200,6 +206,31 @@ CREATE TABLE Orientation
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
+------------------
+-- Drawable Tag --
+------------------
+
+CREATE TABLE Admin
+(
+    id    INTEGER PRIMARY KEY NOT NULL,
+    value BOOLEAN             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+
+------------------------------
+-- World Segment Block Data --
+------------------------------
+
+CREATE TABLE WorldSegmentBlockData
+(
+    x    INTEGER NOT NULL,
+    y    INTEGER NOT NULL,
+    z    INTEGER NOT NULL,
+    data BLOB    NOT NULL,
+    PRIMARY KEY (x, y, z)
+);
+
 
 --------------------------------------
 -- Account With Authentication View --
@@ -222,6 +253,7 @@ FROM Account
 
 CREATE VIEW EntityWithComponents AS
 SELECT Entity.id                   AS id,
+       Entity.template_id          AS template_id,
        Position.x                  AS x,
        Position.y                  AS y,
        Position.z                  AS z,
@@ -233,7 +265,8 @@ SELECT Entity.id                   AS id,
        Parent.parent_id            AS parent,
        Drawable.value              AS drawable,
        AnimatedSprite.value        AS animatedSprite,
-       Orientation.value           AS orientation
+       Orientation.value           AS orientation,
+       Admin.value                 AS admin
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
@@ -244,8 +277,39 @@ FROM Entity
          LEFT JOIN Parent ON Entity.id = Parent.id
          LEFT JOIN Drawable ON Entity.id = Drawable.id
          LEFT JOIN AnimatedSprite ON Entity.id = AnimatedSprite.id
-         LEFT JOIN Orientation ON Entity.id = Orientation.id;
+         LEFT JOIN Orientation ON Entity.id = Orientation.id
+         LEFT JOIN Admin ON Entity.id = Admin.id;
 
+
+--------------------------------------
+-- Starter Data - Template Entities --
+--------------------------------------
+
+-- Grass block template entity.
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000000);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000000, 'Grass');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000000, 1);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000000, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000000, 1);
+
+-- Initial block data at origin.
+INSERT INTO WorldSegmentBlockData
+VALUES (0, 0, 0,
+        X'92dc0020920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100920100919200929200929200920000920192000092019292019200009200920000');
+INSERT INTO WorldSegmentBlockData
+VALUES (-1, 0, 0,
+        X'92dc002092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010091920092920091921f920000920191921f920000');
+INSERT INTO WorldSegmentBlockData
+VALUES (-1, -1, 0,
+        X'92dc002092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010091920091921f91921f920000');
+INSERT INTO WorldSegmentBlockData
+VALUES (0, -1, 0,
+        X'92dc002092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010091920091921f9292009200009201920000');
 
 -- Log the migration.
 INSERT INTO MigrationLog

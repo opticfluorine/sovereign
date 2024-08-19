@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <AssemblyName>Sovereign.ServerCore</AssemblyName>
         <RootNamespace>Sovereign.ServerCore</RootNamespace>
         <Nullable>enable</Nullable>
@@ -12,10 +12,6 @@
         <ProjectReference Include="..\..\Common\EngineCore\EngineCore.csproj"/>
         <ProjectReference Include="..\..\Common\EngineUtil\EngineUtil.csproj"/>
         <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Systems\Ping\"/>
     </ItemGroup>
 
 </Project>

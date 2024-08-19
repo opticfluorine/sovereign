@@ -31,8 +31,7 @@ public sealed class WorldVertexSequencer
     /// </summary>
     public const int DefaultDrawableListSize = 4096;
 
-    private readonly IList<PositionedEntity> drawables
-        = new List<PositionedEntity>(DefaultDrawableListSize);
+    private readonly List<PositionedEntity> drawables = new(DefaultDrawableListSize);
 
     private readonly WorldEntityRetriever entityRetriever;
 
@@ -54,16 +53,18 @@ public sealed class WorldVertexSequencer
     /// <param name="vertexBuffer">Vertex buffer.</param>
     /// <param name="indexBuffer">Index buffer.</param>
     /// <param name="drawLengths">Draw lengths for each layer.</param>
+    /// <param name="vertexCount">Number of vertices that were added to the buffer.</param>
+    /// <param name="indexCount">Number of indices that were added to the buffer.</param>
     /// <param name="drawCount">Number of layers to draw one at a time.</param>
     /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
     /// <param name="systemTime">System time of the current frame.</param>
     public void SequenceVertices(WorldVertex[] vertexBuffer,
         uint[] indexBuffer, int[] drawLengths,
-        out int drawCount, float timeSinceTick, ulong systemTime)
+        out int vertexCount, out int indexCount, out int drawCount, float timeSinceTick, ulong systemTime)
     {
         RetrieveEntities(timeSinceTick);
         GroupLayers(out drawCount);
-        PrepareLayers(vertexBuffer, indexBuffer, drawLengths, systemTime);
+        PrepareLayers(vertexBuffer, indexBuffer, drawLengths, systemTime, out vertexCount, out indexCount);
     }
 
     /// <summary>
@@ -93,16 +94,18 @@ public sealed class WorldVertexSequencer
     /// <param name="indexBuffer">Index buffer.</param>
     /// <param name="drawLengths">Draw lengths for each layer.</param>
     /// <param name="systemTime">System time of the current frame.</param>
+    /// <param name="vertexCount">Number of vertices that were added to the buffer.</param>
+    /// <param name="indexCount">Number of indices that were added to the buffer.</param>
     private void PrepareLayers(WorldVertex[] vertexBuffer, uint[] indexBuffer,
-        int[] drawLengths, ulong systemTime)
+        int[] drawLengths, ulong systemTime, out int vertexCount, out int indexCount)
     {
-        var bufferOffset = 0;
-        var indexBufferOffset = 0;
+        vertexCount = 0;
+        indexCount = 0;
         var layerIndex = 0;
         foreach (var layer in grouper.Layers.Values)
         {
             AddLayerToVertexBuffer(layer, vertexBuffer,
-                indexBuffer, bufferOffset, indexBufferOffset, systemTime,
+                indexBuffer, vertexCount, indexCount, systemTime,
                 out var blockVerticesAdded,
                 out var blockIndicesAdded,
                 out var spriteVerticesAdded,
@@ -110,8 +113,8 @@ public sealed class WorldVertexSequencer
             drawLengths[2 * layerIndex] = blockIndicesAdded;
             drawLengths[2 * layerIndex + 1] = spriteIndicesAdded;
 
-            bufferOffset += blockVerticesAdded + spriteVerticesAdded;
-            indexBufferOffset += blockIndicesAdded + spriteIndicesAdded;
+            vertexCount += blockVerticesAdded + spriteVerticesAdded;
+            indexCount += blockIndicesAdded + spriteIndicesAdded;
             layerIndex++;
         }
     }

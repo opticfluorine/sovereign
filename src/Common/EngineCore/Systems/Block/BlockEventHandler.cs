@@ -16,9 +16,9 @@
  */
 
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
-using Sovereign.EngineCore.Systems.Block.Events;
 
 namespace Sovereign.EngineCore.Systems.Block;
 
@@ -27,13 +27,18 @@ namespace Sovereign.EngineCore.Systems.Block;
 /// </summary>
 public sealed class BlockEventHandler
 {
+    private readonly BlockGridPositionIndexer blockGridPositionIndexer;
     private readonly BlockController controller;
     private readonly BlockManager manager;
+    private readonly BlockNoticeProcessor noticeProcessor;
 
-    public BlockEventHandler(BlockController controller, BlockManager manager)
+    public BlockEventHandler(BlockController controller, BlockManager manager,
+        BlockGridPositionIndexer blockGridPositionIndexer, BlockNoticeProcessor noticeProcessor)
     {
         this.controller = controller;
         this.manager = manager;
+        this.blockGridPositionIndexer = blockGridPositionIndexer;
+        this.noticeProcessor = noticeProcessor;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -70,10 +75,64 @@ public sealed class BlockEventHandler
                 HandleRemoveBatch(removeBatchDetails);
                 break;
 
+            case EventId.Core_Block_RemoveAt:
+            {
+                if (ev.EventDetails is not GridPositionEventDetails details)
+                {
+                    Logger.Warn("Received RemoveAt event without details.");
+                    break;
+                }
+
+                HandleRemoveAt(details.GridPosition);
+                break;
+            }
+
+            case EventId.Core_Block_ModifyNotice:
+            {
+                // Ignore local notices since they reflect current local state.
+                if (ev.Local) break;
+
+                if (ev.EventDetails is not BlockAddEventDetails details)
+                {
+                    Logger.Warn("Received ModifyNotice without details.");
+                    break;
+                }
+
+                HandleModifyNotice(details);
+                break;
+            }
+
+            case EventId.Core_Block_RemoveNotice:
+            {
+                // Ignore local notices since they reflect current local state.
+                if (ev.Local) break;
+
+                if (ev.EventDetails is not GridPositionEventDetails details)
+                {
+                    Logger.Warn("Received RemoveNotice without details.");
+                    break;
+                }
+
+                HandleRemoveNotice(details);
+                break;
+            }
+
             default:
                 Logger.WarnFormat("Unexpected event ID {0}", ev.EventId);
                 break;
         }
+    }
+
+    /// <summary>
+    ///     Handles a remove-at-position event.
+    /// </summary>
+    /// <param name="position"></param>
+    private void HandleRemoveAt(GridPosition position)
+    {
+        var entities = blockGridPositionIndexer.GetEntitiesAtPosition(position);
+        if (entities == null) return;
+
+        foreach (var entityId in entities) manager.RemoveBlock(entityId);
     }
 
     /// <summary>
@@ -112,5 +171,23 @@ public sealed class BlockEventHandler
     {
         foreach (var blockEntityId in eventDetails.EntityIds) manager.RemoveBlock(blockEntityId);
         controller.ReturnRemoveBuffer(eventDetails.EntityIds);
+    }
+
+    /// <summary>
+    ///     Handles a block modification notice received over the network.
+    /// </summary>
+    /// <param name="details">Details.</param>
+    private void HandleModifyNotice(BlockAddEventDetails details)
+    {
+        noticeProcessor.ProcessModifyNotice(details.BlockRecord);
+    }
+
+    /// <summary>
+    ///     Handles a block removal notice received over the network.
+    /// </summary>
+    /// <param name="details">Details.</param>
+    private void HandleRemoveNotice(GridPositionEventDetails details)
+    {
+        noticeProcessor.ProcessRemoveNotice(details.GridPosition);
     }
 }

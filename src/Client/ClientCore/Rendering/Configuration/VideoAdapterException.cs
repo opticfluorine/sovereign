@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Sovereign.ClientCore.Rendering.Configuration;
 
@@ -35,12 +34,6 @@ public class VideoAdapterException : ApplicationException
     }
 
     public VideoAdapterException(string message, Exception inner) : base(message, inner)
-    {
-    }
-
-    protected VideoAdapterException(
-        SerializationInfo info,
-        StreamingContext context) : base(info, context)
     {
     }
 }

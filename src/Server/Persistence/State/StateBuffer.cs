@@ -17,7 +17,6 @@
 
 using System;
 using System.Data;
-using System.Numerics;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Types;
@@ -46,16 +45,23 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<Guid>> accountUpdates = new(BufferSize);
 
     /// <summary>
+    ///     Admin state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<bool>> adminUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Animated sprite state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<int>> animatedSpriteUpdates = new(BufferSize);
 
+    /// <summary>
+    ///     Drawable state updates.
+    /// </summary>
     private readonly StructBuffer<StateUpdate<bool>> drawableUpdates = new(BufferSize);
-    private readonly IEventSender eventSender;
 
+    private readonly IEventSender eventSender;
     private readonly FatalErrorHandler fatalErrorHandler;
     private readonly PersistenceInternalController internalController;
-
     private readonly ILogger logger;
 
     /// <summary>
@@ -96,20 +102,28 @@ public sealed class StateBuffer
     /// <summary>
     ///     Position state updates.
     /// </summary>
-    private readonly StructBuffer<StateUpdate<Vector3>> positionUpdates = new(BufferSize);
+    private readonly StructBuffer<StateUpdate<Kinematics>> positionUpdates = new(BufferSize);
 
     /// <summary>
     ///     Removed entity IDs.
     /// </summary>
     private readonly StructBuffer<ulong> removedEntities = new(BufferSize);
 
+    /// <summary>
+    ///     Template state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<ulong>> templateUpdates = new(BufferSize);
+
+    private readonly WorldSegmentPersister worldSegmentPersister;
+
     public StateBuffer(ILogger logger, FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
-        PersistenceInternalController internalController)
+        PersistenceInternalController internalController, WorldSegmentPersister worldSegmentPersister)
     {
         this.logger = logger;
         this.fatalErrorHandler = fatalErrorHandler;
         this.eventSender = eventSender;
         this.internalController = internalController;
+        this.worldSegmentPersister = worldSegmentPersister;
     }
 
     /// <summary>
@@ -131,10 +145,19 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Queues a template update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateTemplate(ref StateUpdate<ulong> update)
+    {
+        templateUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Queues a position update.
     /// </summary>
     /// <param name="update">State update.</param>
-    public void UpdatePosition(ref StateUpdate<Vector3> update)
+    public void UpdatePosition(ref StateUpdate<Kinematics> update)
     {
         positionUpdates.Add(ref update);
     }
@@ -214,11 +237,19 @@ public sealed class StateBuffer
     /// <summary>
     ///     Enqueues an orientation update.
     /// </summary>
-    /// <param name="update"></param>
-    /// <exception cref="NotImplementedException"></exception>
+    /// <param name="update">Update.</param>
     public void UpdateOrientation(ref StateUpdate<Orientation> update)
     {
         orientationUpdates.Add(ref update);
+    }
+
+    /// <summary>
+    ///     Enqueues an admin tag update.
+    /// </summary>
+    /// <param name="update">Update.</param>
+    public void UpdateAdmin(ref StateUpdate<bool> update)
+    {
+        adminUpdates.Add(ref update);
     }
 
     /// <summary>
@@ -228,6 +259,7 @@ public sealed class StateBuffer
     {
         newEntities.Clear();
         removedEntities.Clear();
+        templateUpdates.Clear();
         positionUpdates.Clear();
         materialUpdates.Clear();
         materialModifierUpdates.Clear();
@@ -238,6 +270,7 @@ public sealed class StateBuffer
         drawableUpdates.Clear();
         animatedSpriteUpdates.Clear();
         orientationUpdates.Clear();
+        adminUpdates.Clear();
     }
 
     /// <summary>
@@ -257,32 +290,35 @@ public sealed class StateBuffer
     {
         try
         {
-            using (var transaction = persistenceProvider.Connection!.BeginTransaction())
+            using (var transaction = persistenceProvider.Connection.BeginTransaction())
             {
                 // Synchronize the entities first before the components.
                 // This ensures that any foreign key relationships between components
                 // and entities are satisfied when the components are updated.
                 SynchronizeAddedEntities(persistenceProvider, transaction);
 
+                // Next process any pending updates to entity templates.
+                SynchronizeTemplates(persistenceProvider.SetTemplateQuery, transaction);
+
                 /* Position. */
                 SynchronizeComponent(positionUpdates,
-                    persistenceProvider.AddPositionQuery!,
-                    persistenceProvider.ModifyPositionQuery!,
-                    persistenceProvider.RemovePositionQuery!,
+                    persistenceProvider.AddPositionQuery,
+                    persistenceProvider.ModifyPositionQuery,
+                    persistenceProvider.RemovePositionQuery,
                     transaction);
 
                 /* Material. */
                 SynchronizeComponent(materialUpdates,
-                    persistenceProvider.AddMaterialQuery!,
-                    persistenceProvider.ModifyMaterialQuery!,
-                    persistenceProvider.RemoveMaterialQuery!,
+                    persistenceProvider.AddMaterialQuery,
+                    persistenceProvider.ModifyMaterialQuery,
+                    persistenceProvider.RemoveMaterialQuery,
                     transaction);
 
                 /* MaterialModifier. */
                 SynchronizeComponent(materialModifierUpdates,
-                    persistenceProvider.AddMaterialModifierQuery!,
-                    persistenceProvider.ModifyMaterialModifierQuery!,
-                    persistenceProvider.RemoveMaterialModifierQuery!,
+                    persistenceProvider.AddMaterialModifierQuery,
+                    persistenceProvider.ModifyMaterialModifierQuery,
+                    persistenceProvider.RemoveMaterialModifierQuery,
                     transaction);
 
                 /* PlayerCharacter. */
@@ -334,7 +370,16 @@ public sealed class StateBuffer
                     persistenceProvider.RemoveOrientationComponentQuery,
                     transaction);
 
+                // Admin.
+                SynchronizeComponent(adminUpdates,
+                    persistenceProvider.AddAdminComponentQuery,
+                    persistenceProvider.ModifyAdminComponentQuery,
+                    persistenceProvider.RemoveAdminComponentQuery,
+                    transaction);
+
                 SynchronizeRemovedEntities(persistenceProvider, transaction);
+
+                worldSegmentPersister.SynchronizeWorldSegments(persistenceProvider, transaction);
 
                 transaction.Commit();
             }
@@ -347,6 +392,7 @@ public sealed class StateBuffer
             fatalErrorHandler.FatalError();
         }
     }
+
 
     /// <summary>
     ///     Adds new entities to the database.
@@ -370,6 +416,20 @@ public sealed class StateBuffer
     {
         var query = persistenceProvider.RemoveEntityQuery;
         foreach (var entityId in removedEntities) query.RemoveEntityId(entityId, transaction);
+    }
+
+    /// <summary>
+    ///     Synchronizes pending template updates.
+    /// </summary>
+    /// <param name="setTemplateQuery">Set template query.</param>
+    /// <param name="transaction">Transaction.</param>
+    private void SynchronizeTemplates(ISetTemplateQuery setTemplateQuery, IDbTransaction transaction)
+    {
+        for (var i = 0; i < templateUpdates.Count; ++i)
+        {
+            ref var update = ref templateUpdates[i];
+            setTemplateQuery.SetTemplate(update.EntityId, update.Value, transaction);
+        }
     }
 
     /// <summary>

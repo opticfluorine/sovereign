@@ -1,33 +1,63 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
         <AssemblyName>Sovereign.Client</AssemblyName>
         <RootNamespace>Sovereign.SovereignClient</RootNamespace>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
+    <Choose>
+        <When Condition=" '$(RuntimeIdentifier)' == '' ">
+            <PropertyGroup>
+                <ContribSet>win-x64</ContribSet>
+            </PropertyGroup>
+        </When>
+        <Otherwise>
+            <PropertyGroup>
+                <ContribSet>$(RuntimeIdentifier)</ContribSet>
+            </PropertyGroup>
+        </Otherwise>
+    </Choose>
+
     <ItemGroup>
         <ProjectReference Include="..\ClientCore\ClientCore.csproj"/>
         <ProjectReference Include="..\VeldridRenderer\VeldridRenderer.csproj"/>
     </ItemGroup>
 
-    <Target Name="CopyDataAfterBuild" AfterTargets="AfterBuild">
+    <ItemGroup>
+        <None Update="Data\Configuration\ClientConfiguration.yaml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Contrib\win-x64\"/>
+    </ItemGroup>
+
+    <Target Name="CopyAfterBuild" AfterTargets="AfterBuild">
+        <Message Text="RuntimeIdentifier=$(RuntimeIdentifier)"/>
         <ItemGroup>
-            <DataFiles Include="Data/**/*"/>
+            <DataFiles Include="Data/**/*" Exclude="Data/Configuration/ClientConfiguration.yaml"/>
+            <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
-        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"/>
+        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"
+              Condition="%(Filename)!='' AND (!Exists('$(OutDir)Data/%(RecursiveDir)%(Filename)%(Extension)'))"/>
+        <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(OutDir)"/>
     </Target>
 
     <Target Name="CopyAfterPublish" AfterTargets="Publish">
+        <Message Text="RuntimeIdentifier=$(RuntimeIdentifier)"/>
         <ItemGroup>
             <DataFiles Include="$(OutDir)Data/**/*"/>
             <LicenseFile Include="$(SolutionDir)../LICENSE"/>
+            <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(PublishDir)Data/%(RecursiveDir)"/>
         <Copy SourceFiles="$(LicenseFile)" DestinationFolder="@(PublishDir)"/>
+        <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(PublishDir)"/>
     </Target>
 
     <Target Name="CompileShaders" BeforeTargets="Build">

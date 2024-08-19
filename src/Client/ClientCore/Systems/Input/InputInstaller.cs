@@ -18,6 +18,7 @@
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
+using Sovereign.EngineUtil.IoC;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -28,11 +29,18 @@ public class InputInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(Component.For<KeyboardEventHandler>()
-            .LifestyleSingleton());
-        container.Register(Component.For<KeyboardState>()
-            .LifestyleSingleton());
-        container.Register(Component.For<PlayerInputMovementMapper>()
+        container.Register(Component.For<KeyboardEventHandler>().LifestyleSingleton());
+        container.Register(Component.For<KeyboardState>().LifestyleSingleton());
+        container.Register(Component.For<MouseEventHandler>().LifestyleSingleton());
+        container.Register(Component.For<MouseState>().LifestyleSingleton());
+        container.Register(Component.For<PlayerInputMovementMapper>().LifestyleSingleton());
+        container.Register(Component.For<GlobalKeyboardShortcuts>().LifestyleSingleton());
+        container.Register(Component.For<InGameKeyboardShortcuts>().LifestyleSingleton());
+        container.Register(Component.For<InputServices>().LifestyleSingleton());
+        container.Register(Component.For<InputInternalController>().LifestyleSingleton());
+        container.Register(EngineClasses.EngineAssemblies()
+            .BasedOn<IInputHandler>()
+            .WithServiceSelf()
             .LifestyleSingleton());
     }
 }

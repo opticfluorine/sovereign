@@ -22,32 +22,47 @@ using MessagePack;
 namespace Sovereign.EngineCore.Systems.WorldManagement;
 
 /// <summary>
+///     Enumeration of possible block data types in world segment block data.
+/// </summary>
+public enum BlockDataType
+{
+    /// <summary>
+    ///     Block is a positioned block entity described by a block template entity.
+    /// </summary>
+    Template,
+
+    /// <summary>
+    ///     Block is empty/air.
+    /// </summary>
+    Air
+}
+
+/// <summary>
 ///     Encodes material and modifier IDs in a tuple.
 ///     First member is material ID, second is modifier ID.
 /// </summary>
 [MessagePackObject]
-public sealed class BlockMaterialData
+public sealed class BlockData
 {
     /// <summary>
-    ///     Material ID.
+    ///     Block data type.
     /// </summary>
-    [Key(0)] public int MaterialId;
+    [Key(0)] public BlockDataType BlockType;
 
     /// <summary>
-    ///     Material modifier ID.
+    ///     Template entity ID offset. Adding this to EntityConstants.FirstTemplateEntityId gives the
+    ///     template entity ID.
     /// </summary>
-    [Key(1)] public int ModifierId;
+    [Key(1)] public ulong TemplateIdOffset;
 
     public override bool Equals(object? obj)
     {
-        return obj is BlockMaterialData data &&
-               MaterialId == data.MaterialId &&
-               ModifierId == data.ModifierId;
+        return obj is BlockData data && BlockType == data.BlockType && TemplateIdOffset == data.TemplateIdOffset;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(MaterialId, ModifierId);
+        return HashCode.Combine(BlockType, TemplateIdOffset);
     }
 }
 
@@ -60,7 +75,7 @@ public sealed class LinePositionedBlockData
     /// <summary>
     ///     Block material data.
     /// </summary>
-    [Key(1)] public BlockMaterialData MaterialData = new();
+    [Key(1)] public BlockData Data = new();
 
     /// <summary>
     ///     X offset from segment origin.
@@ -114,14 +129,14 @@ public sealed class WorldSegmentBlockData
 {
     /// <summary>
     ///     Depth planes containing non-default blocks within this world segment.
-    ///     The absence of a plane indicates that it is entirely comprised of the
+    ///     The absence of a plane indicates that it is entirely composed of the
     ///     default block for that plane.
     /// </summary>
     [Key(1)] public List<WorldSegmentBlockDataPlane> DataPlanes = new();
 
     /// <summary>
-    ///     Default materials for unspecified blocks in each depth plane,
+    ///     Default data for unspecified blocks in each depth plane,
     ///     indexed by z offset from segment origin.
     /// </summary>
-    [Key(0)] public BlockMaterialData[] DefaultMaterialsPerPlane = Array.Empty<BlockMaterialData>();
+    [Key(0)] public BlockData[] DefaultsPerPlane = Array.Empty<BlockData>();
 }

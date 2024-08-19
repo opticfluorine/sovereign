@@ -37,9 +37,20 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Core_WorldManagement_Unsubscribe, DeliveryMethod.ReliableUnordered },
         { EventId.Client_EntitySynchronization_Sync, DeliveryMethod.ReliableUnordered },
         { EventId.Client_EntitySynchronization_Desync, DeliveryMethod.ReliableUnordered },
+        { EventId.Client_EntitySynchronization_SyncTemplate, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Movement_Move, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Movement_RequestMove, DeliveryMethod.ReliableUnordered },
-        { EventId.Core_WorldManagement_EntityLeaveWorldSegment, DeliveryMethod.ReliableUnordered }
+        { EventId.Core_WorldManagement_EntityLeaveWorldSegment, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Network_Logout, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Chat_Send, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Chat_Local, DeliveryMethod.Unreliable },
+        { EventId.Core_Chat_Global, DeliveryMethod.Unreliable },
+        { EventId.Core_Chat_System, DeliveryMethod.Unreliable },
+        { EventId.Server_TemplateEntity_Update, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Block_ModifyNotice, DeliveryMethod.ReliableOrdered },
+        { EventId.Core_Block_RemoveNotice, DeliveryMethod.ReliableOrdered },
+        { EventId.Server_WorldEdit_SetBlock, DeliveryMethod.ReliableUnordered },
+        { EventId.Server_WorldEdit_RemoveBlock, DeliveryMethod.ReliableUnordered }
     };
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;

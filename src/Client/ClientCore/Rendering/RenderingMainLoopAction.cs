@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.EngineCore.Main;
@@ -43,12 +44,12 @@ public class RenderingMainLoopAction : IMainLoopAction
     private ulong lastFrameTime;
 
     public RenderingMainLoopAction(RenderingManager renderingManager,
-        ISystemTimer systemTimer, IClientConfiguration clientConfiguration)
+        ISystemTimer systemTimer, ClientConfigurationManager configManager)
     {
         this.renderingManager = renderingManager;
         this.systemTimer = systemTimer;
 
-        minimumTimeDelta = Units.SystemTime.Second / (ulong)clientConfiguration.MaxFramerate;
+        minimumTimeDelta = Units.SystemTime.Second / (ulong)configManager.ClientConfiguration.Display.MaxFramerate;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -63,7 +64,19 @@ public class RenderingMainLoopAction : IMainLoopAction
         var delta = currentTime - lastFrameTime;
         if (delta >= minimumTimeDelta)
         {
-            renderingManager.Render();
+            try
+            {
+                renderingManager.Render();
+            }
+            catch (FatalErrorException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Exception thrown during rendering.", e);
+            }
+
             lastFrameTime = currentTime;
         }
     }

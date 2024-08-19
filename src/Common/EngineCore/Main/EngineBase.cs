@@ -20,7 +20,6 @@ using System.Threading;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Timing;
-using Sovereign.EngineCore.World;
 
 namespace Sovereign.EngineCore.Main;
 
@@ -29,17 +28,6 @@ namespace Sovereign.EngineCore.Main;
 /// </summary>
 public class EngineBase : IEngineBase
 {
-    /// <summary>
-    ///     If the main loop processes less than this many events in a single pass,
-    ///     the main thread will sleep instead of yielding its timeslice. This reduces
-    ///     CPU utilization during light workloads in exchange for a temporary increase
-    ///     in main loop latency.
-    /// </summary>
-    /// <remarks>
-    ///     This can be set to zero to disable.
-    /// </remarks>
-    private const int ThreadSleepEventLimit = 2;
-
     private readonly EventDescriptions eventDescriptions;
 
     /// <summary>
@@ -47,7 +35,7 @@ public class EngineBase : IEngineBase
     /// </summary>
     private readonly IEventLoop eventLoop;
 
-    private readonly IList<IMainLoopAction> mainLoopActions;
+    private readonly List<IMainLoopAction> mainLoopActions;
 
     /// <summary>
     ///     Time manager.
@@ -55,23 +43,16 @@ public class EngineBase : IEngineBase
     private readonly TimeManager timeManager;
 
     /// <summary>
-    ///     World manager.
-    /// </summary>
-    private readonly WorldManager worldManager;
-
-    /// <summary>
     ///     Main loop cycle count.
     /// </summary>
     private ulong cycleCount;
 
-    public EngineBase(IEventLoop eventLoop, TimeManager timeManager,
-        WorldManager worldManager, IList<IMainLoopAction> mainLoopActions,
+    public EngineBase(IEventLoop eventLoop, TimeManager timeManager, IList<IMainLoopAction> mainLoopActions,
         ConsoleEventAdapter eventAdapter, EventDescriptions eventDescriptions)
     {
         this.eventLoop = eventLoop;
         this.timeManager = timeManager;
-        this.worldManager = worldManager;
-        this.mainLoopActions = mainLoopActions;
+        this.mainLoopActions = new List<IMainLoopAction>(mainLoopActions);
         this.eventDescriptions = eventDescriptions;
     }
 
@@ -86,6 +67,12 @@ public class EngineBase : IEngineBase
         Logger.Info("EngineBase is starting.");
         Startup();
         Logger.Info("EngineBase is started.");
+
+#if DEBUG
+        Logger.Warn("This is a DEBUG build of Sovereign Engine.");
+        Logger.Warn("Debug builds are NOT suitable for production use.");
+        Logger.Warn("Ensure that only Release builds are used in production.");
+#endif
 
         /* Run the engine. */
         RunEngine();
@@ -121,7 +108,7 @@ public class EngineBase : IEngineBase
             PerformMainLoopActions();
 
             /* Yield to avoid consuming 100% CPU. */
-            Thread.Sleep(eventsProcessed < ThreadSleepEventLimit ? 1 : 0);
+            Thread.Yield();
         }
     }
 

@@ -51,7 +51,6 @@ public sealed class TileSpriteDefinitionsValidator
                     && ValidateNoEmptyTileContexts(tileSpriteDefinitions, sb)
                     && ValidateTileContextIdRanges(tileSpriteDefinitions, sb)
                     && ValidateDefaultContextPresent(tileSpriteDefinitions, sb)
-                    && ValidateNoDuplicateContexts(tileSpriteDefinitions, sb)
                     && ValidateAnimatedSpritesExist(tileSpriteDefinitions, sb);
         if (!valid) throw new TileSpriteDefinitionsException(sb.ToString().Trim());
     }
@@ -178,29 +177,6 @@ public sealed class TileSpriteDefinitionsValidator
     }
 
     /// <summary>
-    ///     Checks that there are no duplicate tile contexts within the same tile sprite.
-    /// </summary>
-    /// <param name="definitions">Definitions to validate.</param>
-    /// <param name="sb">StringBuilder for error reporting.</param>
-    /// <returns>true if valid, false otherwise.</returns>
-    private bool ValidateNoDuplicateContexts(TileSpriteDefinitions definitions,
-        StringBuilder sb)
-    {
-        var badTiles = definitions.TileSprites
-            .Where(HasDuplicateContexts);
-        var valid = badTiles.Count() == 0;
-
-        if (!valid)
-        {
-            sb.Append("Tile sprites may not contain duplicate tile contexts.\n"
-                      + "The following tile sprites contain duplicate tile contexts:\n\n");
-            foreach (var tile in badTiles) sb.Append("Tile Sprite ").Append(tile.Id).Append("\n");
-        }
-
-        return valid;
-    }
-
-    /// <summary>
     ///     Checks that all animated sprite references are valid.
     /// </summary>
     /// <param name="definitions">Definitions to validate.</param>
@@ -211,12 +187,10 @@ public sealed class TileSpriteDefinitionsValidator
     {
         var badIds = definitions.TileSprites
             .Where(sprite => sprite.TileContexts
-                .Where(context => context.AnimatedSpriteIds
-                    .Where(id => id >= animatedSpriteManager.AnimatedSprites.Count)
-                    .Count() > 0)
-                .Count() > 0)
+                .Any(context => context.AnimatedSpriteIds
+                    .Any(id => id >= animatedSpriteManager.AnimatedSprites.Count)))
             .Select(sprite => sprite.Id);
-        var valid = badIds.Count() == 0;
+        var valid = !badIds.Any();
 
         if (!valid)
         {
@@ -236,7 +210,7 @@ public sealed class TileSpriteDefinitionsValidator
     {
         var contexts = tile.TileContexts;
         for (var i = 0; i < contexts.Count - 1; ++i)
-        for (var j = i; j < contexts.Count; ++j)
+        for (var j = i + 1; j < contexts.Count; ++j)
             if (contexts[i].NorthTileSpriteId == contexts[j].NorthTileSpriteId
                 && contexts[i].EastTileSpriteId == contexts[j].EastTileSpriteId
                 && contexts[i].SouthTileSpriteId == contexts[j].SouthTileSpriteId
@@ -253,10 +227,14 @@ public sealed class TileSpriteDefinitionsValidator
     /// <returns>true if out of range, false otherwise.</returns>
     private bool TileContextHasOutOfRangeIds(TileContext context)
     {
-        return context.NorthTileSpriteId < TileSprite.Wildcard
-               || context.EastTileSpriteId < TileSprite.Wildcard
-               || context.SouthTileSpriteId < TileSprite.Wildcard
-               || context.WestTileSpriteId < TileSprite.Wildcard;
+        return context.NorthTileSpriteId < TileSprite.Empty
+               || context.EastTileSpriteId < TileSprite.Empty
+               || context.SouthTileSpriteId < TileSprite.Empty
+               || context.WestTileSpriteId < TileSprite.Empty
+               || context.NortheastTileSpriteId < TileSprite.Empty
+               || context.SoutheastTileSpriteId < TileSprite.Empty
+               || context.SouthwestTileSpriteId < TileSprite.Empty
+               || context.NorthwestTileSpriteId < TileSprite.Empty;
     }
 
     /// <summary>
@@ -267,9 +245,6 @@ public sealed class TileSpriteDefinitionsValidator
     /// <returns>true if default, false otherwise.</returns>
     private bool IsDefaultContext(TileContext context)
     {
-        return context.NorthTileSpriteId == TileSprite.Wildcard
-               && context.EastTileSpriteId == TileSprite.Wildcard
-               && context.SouthTileSpriteId == TileSprite.Wildcard
-               && context.WestTileSpriteId == TileSprite.Wildcard;
+        return context.TileContextKey.Equals(TileContextKey.AllWildcards);
     }
 }

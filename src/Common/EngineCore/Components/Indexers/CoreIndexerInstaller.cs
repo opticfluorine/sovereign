@@ -24,11 +24,17 @@ public class CoreIndexerInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(Component.For<EntityHierarchyIndexer>()
-            .LifestyleSingleton());
-        container.Register(Component.For<PositionComponentIndexer>()
-            .LifestyleSingleton());
-        container.Register(Component.For<MovingComponentIndexer>()
-            .LifestyleSingleton());
+        container.Register(Component.For<EntityHierarchyIndexer>().LifestyleSingleton());
+        container.Register(Component.For<PositionComponentIndexer>().LifestyleSingleton());
+        container.Register(Component.For<MovingComponentIndexer>().LifestyleSingleton());
+        container.Register(Component.For<PlayerPositionEventFilter>().LifestyleSingleton());
+        container.Register(Component.For<PlayerNameEventFilter>().LifestyleSingleton());
+        container.Register(Component.For<PlayerNameComponentIndexer>().LifestyleSingleton());
+        container.Register(Component.For<BlockGridPositionIndexer>().LifestyleSingleton());
+        container.Register(Component.For<NonBlockPositionEventFilter>().LifestyleSingleton());
+        container.Register(Component.For<NonBlockWorldSegmentIndexer>().LifestyleSingleton());
+        container.Register(Component.For<BlockWorldSegmentIndexer>().LifestyleSingleton());
+        container.Register(Component.For<BlockTemplateNameComponentFilter>().LifestyleSingleton());
+        container.Register(Component.For<BlockTemplateNameComponentIndexer>().LifestyleSingleton());
     }
 }

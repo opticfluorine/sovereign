@@ -16,7 +16,6 @@
  */
 
 using System.Numerics;
-using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 
 namespace Sovereign.ClientCore.Rendering.Scenes;
@@ -59,9 +58,11 @@ public interface IScene
     /// <param name="vertexBuffer">Vertex buffer for update.</param>
     /// <param name="indexBuffer">Index buffer for update.</param>
     /// <param name="drawLengths">Number of vertices to use for each sequential draw.</param>
+    /// <param name="vertexCount">Number of vertices that were added to the buffer.</param>
+    /// <param name="indexCount">Number of indices that were added to the buffer.</param>
     /// <param name="drawCount">Number of draws to perform.</param>
     void PopulateBuffers(WorldVertex[] vertexBuffer, uint[] indexBuffer,
-        int[] drawLengths, out int drawCount);
+        int[] drawLengths, out int vertexCount, out int indexCount, out int drawCount);
 
     /// <summary>
     ///     Populates the world rendering vertex constants buffer, if applicable.
@@ -74,12 +75,10 @@ public interface IScene
         out Vector3 cameraPos, out float timeSinceTick);
 
     /// <summary>
-    ///     Populates the various buffers used for GUI rendering.
+    ///     Called to update the GUI for the scene.
     /// </summary>
-    /// <param name="vertexBuffer">Vertex buffer to be populated.</param>
-    /// <param name="indexBuffer">Index buffer to be populated.</param>
     /// <remarks>
-    ///     This method will only be called if RenderGui is true.
+    ///     This method will only be called if the RenderGui property is true.
     /// </remarks>
-    void PopulateGuiBuffers(ImDrawVert[] vertexBuffer, ushort[] indexBuffer);
+    void UpdateGui();
 }

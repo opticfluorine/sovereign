@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Sovereign.EngineUtil.Monads;
 
@@ -113,12 +112,6 @@ public struct Maybe<T> where T : notnull
         }
 
         public NoValueException(string message, Exception inner) : base(message, inner)
-        {
-        }
-
-        protected NoValueException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
         {
         }
     }

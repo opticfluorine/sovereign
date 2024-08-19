@@ -33,18 +33,18 @@ public class EntityWorldSegmentConnectionMapperFactory
 {
     private readonly AccountServices accountServices;
     private readonly NetworkConnectionManager connectionManager;
-    private readonly PositionComponentCollection positions;
+    private readonly KinematicComponentCollection kinematics;
     private readonly WorldSegmentResolver resolver;
     private readonly WorldManagementServices worldManagementServices;
 
     public EntityWorldSegmentConnectionMapperFactory(
-        PositionComponentCollection positions,
+        KinematicComponentCollection kinematics,
         WorldSegmentResolver resolver,
         WorldManagementServices worldManagementServices,
         NetworkConnectionManager connectionManager,
         AccountServices accountServices)
     {
-        this.positions = positions;
+        this.kinematics = kinematics;
         this.resolver = resolver;
         this.worldManagementServices = worldManagementServices;
         this.connectionManager = connectionManager;
@@ -62,7 +62,7 @@ public class EntityWorldSegmentConnectionMapperFactory
         Func<OutboundEventInfo, Maybe<ulong>> entitySelector)
     {
         return new EntityWorldSegmentConnectionMapper(
-            positions, resolver, worldManagementServices, connectionManager,
+            kinematics, resolver, worldManagementServices, connectionManager,
             accountServices, Logger, entitySelector);
     }
 }

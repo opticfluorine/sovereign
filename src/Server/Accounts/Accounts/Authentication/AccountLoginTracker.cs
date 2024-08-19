@@ -182,6 +182,17 @@ public sealed class AccountLoginTracker
     }
 
     /// <summary>
+    ///     Gets the player entity ID that the given account is currently using, if any.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <param name="playerEntityId">Player entity ID, if any. Only valid if the method returns true.</param>
+    /// <returns>true if found, false otherwise.</returns>
+    public bool TryGetPlayerForAccountId(Guid accountId, out ulong playerEntityId)
+    {
+        return accountIdsToPlayerEntityIds.TryGetValue(accountId, out playerEntityId);
+    }
+
+    /// <summary>
     ///     Associates a logged in account to its event server connection.
     /// </summary>
     /// <param name="accountId">Account ID.</param>
@@ -206,8 +217,7 @@ public sealed class AccountLoginTracker
         if (connectionsToAccounts.TryGetValue(connectionId, out var accountId))
         {
             // Log the player out if already logged in.
-            if (accountIdsToPlayerEntityIds.TryGetValue(accountId, out var entityId))
-                LogoutPlayer(entityId);
+            if (accountIdsToPlayerEntityIds.TryGetValue(accountId, out var entityId)) LogoutPlayer(entityId);
 
             // Log the account out.
             LogoutAccount(accountId);
@@ -282,5 +292,14 @@ public sealed class AccountLoginTracker
         accountIdsToApiKeys.Remove(accountId);
         accountIdsToPlayerEntityIds.Remove(accountId);
         accountLoginStates.Remove(accountId);
+    }
+
+    /// <summary>
+    ///     Called when a player logs out to player selection.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    public void Logout(ulong playerEntityId)
+    {
+        LogoutPlayer(playerEntityId);
     }
 }

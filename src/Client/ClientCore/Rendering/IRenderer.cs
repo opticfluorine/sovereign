@@ -39,6 +39,11 @@ public interface IRenderer
     void Cleanup();
 
     /// <summary>
+    ///     Reloads device-side resources (e.g. textures) that are currently loaded.
+    /// </summary>
+    void ReloadResources();
+
+    /// <summary>
     ///     Renders the next frame.
     /// </summary>
     void Render();

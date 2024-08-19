@@ -60,7 +60,7 @@ public class PersistencePlayerServices
     /// </remarks>
     public bool ValidatePlayerAccountPair(ulong playerEntityId, Guid accountId)
     {
-        return provider.GetAccountForPlayerQuery!.TryGetAccountForPlayer(playerEntityId, out var foundAccountId)
+        return provider.GetAccountForPlayerQuery.TryGetAccountForPlayer(playerEntityId, out var foundAccountId)
                && foundAccountId.Equals(accountId);
     }
 
@@ -74,6 +74,44 @@ public class PersistencePlayerServices
     /// </returns>
     public List<PlayerInfo> GetPlayersForAccount(Guid accountId)
     {
-        return provider.ListPlayersQuery!.ListPlayersForAccount(accountId);
+        return provider.ListPlayersQuery.ListPlayersForAccount(accountId);
+    }
+
+    /// <summary>
+    ///     Logically deletes the given player character.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    public void DeletePlayer(ulong playerEntityId)
+    {
+        provider.DeletePlayerQuery.DeletePlayer(playerEntityId);
+    }
+
+    /// <summary>
+    ///     Tries to add the admin role to a player in the database.
+    /// </summary>
+    /// <param name="playerName">Player name.</param>
+    /// <returns>true if the player exists and is now an admin, false otherwise.</returns>
+    /// <remarks>
+    ///     This method assumes that the player is not currently online. If the player is online,
+    ///     the admin role should be granted through AdminTagCollection instead.
+    /// </remarks>
+    public bool TryAddAdminForPlayer(string playerName)
+    {
+        return provider.AddAdminRoleQuery.TryAddAdminRole(playerName);
+    }
+
+    /// <summary>
+    ///     Removes the admin role from a player in the database.
+    /// </summary>
+    /// <param name="playerName">Player name.</param>
+    /// <remarks>
+    ///     This method assumes that the player is not currently online. If the player is online,
+    ///     the admin role should be granted through AdminTagCollection instead.
+    ///     If the player does not exist, this method fails silently as the end result is that the
+    ///     given (nonexistent) player does not have the admin role.
+    /// </remarks>
+    public void RemoveAdminForPlayer(string playerName)
+    {
+        provider.RemoveAdminRoleQuery.RemoveAdminRole(playerName);
     }
 }

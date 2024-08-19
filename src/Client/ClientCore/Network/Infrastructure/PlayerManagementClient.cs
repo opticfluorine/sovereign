@@ -238,4 +238,72 @@ public class PlayerManagementClient
 
         return result;
     }
+
+    /// <summary>
+    ///     Deletes a player character.
+    /// </summary>
+    /// <param name="playerEntityId">PLayer entity ID.</param>
+    /// <returns>Response or error string.</returns>
+    public async Task<Option<DeletePlayerResponse, string>> DeletePlayerAsync(ulong playerEntityId)
+    {
+        var result = new Option<DeletePlayerResponse, string>("Unexpected error occurred.");
+
+        try
+        {
+            // REST client needs to be connected and authenticated in order to
+            // access player management APIs.
+            if (!restClient.Connected)
+            {
+                Logger.Error("Cannot manage players while disconnected from server.");
+                result = new Option<DeletePlayerResponse, string>("Not connected.");
+                return result;
+            }
+
+            // Send the request.
+            var playerUrl = new StringBuilder(RestEndpoints.Player).Append("/").Append(playerEntityId).ToString();
+            var httpResponse = await restClient.Delete(playerUrl);
+            if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
+            {
+                Logger.ErrorFormat("DeletePlayer response length {0} is too long.",
+                    httpResponse.Content.Headers.ContentLength);
+                result = new Option<DeletePlayerResponse, string>("Response too long.");
+                return result;
+            }
+
+            var response = await httpResponse.Content.ReadFromJsonAsync<DeletePlayerResponse>();
+            if (response == null)
+            {
+                var msg = "Null response received from server.";
+                Logger.Error(msg);
+                return new Option<DeletePlayerResponse, string>(msg);
+            }
+
+            if (httpResponse.StatusCode == HttpStatusCode.OK)
+            {
+                // Success
+                Logger.InfoFormat("Deleted player ID {0}.", playerEntityId);
+                result = new Option<DeletePlayerResponse, string>(response);
+            }
+            else
+            {
+                // Failed
+                if (response.Result != null)
+                {
+                    Logger.ErrorFormat("Failed to delete player {0}: {1}", playerEntityId, response.Result);
+                    result = new Option<DeletePlayerResponse, string>(response.Result);
+                }
+                else
+                {
+                    Logger.ErrorFormat("Failed to delete player {0}: Unknown error", playerEntityId);
+                    result = new Option<DeletePlayerResponse, string>("Unknown error.");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.Error("Exception thrown during player management.", e);
+        }
+
+        return result;
+    }
 }

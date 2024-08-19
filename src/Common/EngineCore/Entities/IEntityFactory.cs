@@ -25,8 +25,9 @@ public interface IEntityFactory
     /// <summary>
     ///     Gets an entity builder.
     /// </summary>
+    /// <param name="entityType">Entity type.</param>
     /// <returns>Entity builder.</returns>
-    IEntityBuilder GetBuilder();
+    IEntityBuilder GetBuilder(EntityType entityType = EntityType.Standard);
 
     /// <summary>
     ///     Gets an entity builder for the given entity ID.

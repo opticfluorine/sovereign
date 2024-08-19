@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Sovereign.ClientCore.Rendering;
 
@@ -34,10 +33,6 @@ public class SurfaceException : ApplicationException
     }
 
     public SurfaceException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
-
-    protected SurfaceException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

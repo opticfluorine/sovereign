@@ -18,6 +18,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
+using Sovereign.ClientCore.Components;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -34,13 +35,15 @@ public sealed class WorldSpriteSequencer
     private const int IndicesPerSprite = 6;
 
     private readonly AnimatedSpriteManager animatedSpriteManager;
+    private readonly AnimationPhaseComponentCollection animationPhases;
     private readonly AtlasMap atlasMap;
 
     public WorldSpriteSequencer(AnimatedSpriteManager animatedSpriteManager,
-        AtlasMap atlasMap)
+        AtlasMap atlasMap, AnimationPhaseComponentCollection animationPhases)
     {
         this.animatedSpriteManager = animatedSpriteManager;
         this.atlasMap = atlasMap;
+        this.animationPhases = animationPhases;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -82,8 +85,15 @@ public sealed class WorldSpriteSequencer
                     var pos = positionedAnimatedSprite.Position;
                     var vel = positionedAnimatedSprite.Velocity;
                     var animId = positionedAnimatedSprite.Id;
+                    var entityId = positionedAnimatedSprite.EntityId;
                     var animatedSprite = animatedSpriteManager.AnimatedSprites[animId];
-                    var sprite = animatedSprite.GetSpriteForTime(systemTime, positionedAnimatedSprite.Orientation);
+
+                    var animationPhase = animationPhases.HasComponentForEntity(entityId)
+                        ? animationPhases[entityId]
+                        : AnimationPhase.Default;
+
+                    var spriteData = animatedSprite.GetPhaseData(animationPhase);
+                    var sprite = spriteData.GetSpriteForTime(systemTime, positionedAnimatedSprite.Orientation);
 
                     AddVerticesForSprite(sprite, pos, vel, vertexBase, vertexPos);
                     AddIndicesForSprite(indexBase, indexPos, (uint)vertexPos);

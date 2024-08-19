@@ -18,7 +18,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace Sovereign.EngineUtil.Collections;
 
@@ -55,6 +54,12 @@ public class StructBuffer<T> : IEnumerable<T>
     }
 
     /// <summary>
+    ///     Reference indexer to the underlying buffer entries.
+    /// </summary>
+    /// <param name="index">Index.</param>
+    public ref T this[int index] => ref list[index];
+
+    /// <summary>
     ///     Buffer capacity.
     /// </summary>
     public int Capacity => list.Length;
@@ -66,7 +71,10 @@ public class StructBuffer<T> : IEnumerable<T>
 
     public IEnumerator<T> GetEnumerator()
     {
-        return new StructBufferEnumerator<T>(this);
+        for (var i = 0; i < Count; ++i)
+        {
+            yield return list[i];
+        }
     }
 
     /// <summary>
@@ -75,7 +83,7 @@ public class StructBuffer<T> : IEnumerable<T>
     /// <returns></returns>
     IEnumerator IEnumerable.GetEnumerator()
     {
-        throw new NotImplementedException();
+        return GetEnumerator();
     }
 
     /// <summary>
@@ -115,72 +123,5 @@ public class StructBuffer<T> : IEnumerable<T>
     public override string ToString()
     {
         return "Count = " + Count;
-    }
-
-    /// <summary>
-    ///     Generic enumerator for StructBuffer.
-    /// </summary>
-    /// <typeparam name="T1">Element type of the underlying StructBuffer.</typeparam>
-    /// <inheritdoc />
-    public class StructBufferEnumerator<T1> : IEnumerator<T1>
-    {
-        /// <summary>
-        ///     Struct buffer associated with this enumerator.
-        /// </summary>
-        private readonly StructBuffer<T1> structBuffer;
-
-        private T1? _current;
-
-        /// <summary>
-        ///     Current index into the buffer.
-        /// </summary>
-        private int currentIndex;
-
-        public StructBufferEnumerator(StructBuffer<T1> structBuffer)
-        {
-            this.structBuffer = structBuffer;
-            currentIndex = -1;
-
-            Monitor.Enter(structBuffer);
-        }
-
-        public T1 Current
-        {
-            get
-            {
-                if (_current == null) throw new InvalidOperationException("Enumerator is before first element.");
-
-                return _current;
-            }
-            private set => _current = value;
-        }
-
-        object IEnumerator.Current
-        {
-            get
-            {
-                if (_current == null) throw new InvalidOperationException("Enumerator is before first element.");
-
-                return _current;
-            }
-        }
-
-        public void Dispose()
-        {
-            Monitor.Exit(structBuffer);
-        }
-
-        public bool MoveNext()
-        {
-            currentIndex++;
-            if (currentIndex >= structBuffer.Count) return false;
-            Current = structBuffer.list[currentIndex];
-            return true;
-        }
-
-        public void Reset()
-        {
-            currentIndex = 0;
-        }
     }
 }

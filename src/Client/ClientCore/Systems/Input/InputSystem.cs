@@ -32,16 +32,19 @@ public class InputSystem : ISystem, IDisposable
     private readonly IEventLoop eventLoop;
 
     private readonly KeyboardEventHandler keyboardEventHandler;
+    private readonly MouseEventHandler mouseEventHandler;
     private readonly PlayerInputMovementMapper movementMapper;
 
     public InputSystem(KeyboardEventHandler keyboardEventHandler,
-        IEventLoop eventLoop, EventCommunicator eventCommunicator, PlayerInputMovementMapper movementMapper)
+        IEventLoop eventLoop, EventCommunicator eventCommunicator, PlayerInputMovementMapper movementMapper,
+        MouseEventHandler mouseEventHandler)
     {
         /* Dependency injection. */
         this.keyboardEventHandler = keyboardEventHandler;
         this.eventLoop = eventLoop;
         EventCommunicator = eventCommunicator;
         this.movementMapper = movementMapper;
+        this.mouseEventHandler = mouseEventHandler;
 
         /* Register system. */
         eventLoop.RegisterSystem(this);
@@ -61,6 +64,10 @@ public class InputSystem : ISystem, IDisposable
         {
             EventId.Client_Input_KeyUp,
             EventId.Client_Input_KeyDown,
+            EventId.Client_Input_MouseMotion,
+            EventId.Client_Input_MouseWheel,
+            EventId.Client_Input_MouseUp,
+            EventId.Client_Input_MouseDown,
             EventId.Client_Network_PlayerEntitySelected,
             EventId.Core_Tick
         };
@@ -87,6 +94,14 @@ public class InputSystem : ISystem, IDisposable
                 case EventId.Client_Input_KeyUp:
                 case EventId.Client_Input_KeyDown:
                     keyboardEventHandler.HandleEvent(ev);
+                    break;
+
+                // Route mouse events appropriately.
+                case EventId.Client_Input_MouseMotion:
+                case EventId.Client_Input_MouseUp:
+                case EventId.Client_Input_MouseDown:
+                case EventId.Client_Input_MouseWheel:
+                    mouseEventHandler.HandleMouseEvent(ev);
                     break;
 
                 case EventId.Core_Tick:

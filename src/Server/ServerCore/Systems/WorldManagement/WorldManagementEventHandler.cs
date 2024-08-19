@@ -28,15 +28,18 @@ public sealed class WorldManagementEventHandler
 {
     private readonly WorldSegmentActivationManager activationManager;
     private readonly WorldSegmentBlockDataManager blockDataManager;
+    private readonly WorldSegmentSubscriptionManager subscriptionManager;
     private readonly WorldSegmentSynchronizationManager syncManager;
 
     public WorldManagementEventHandler(WorldSegmentActivationManager activationManager,
         WorldSegmentSynchronizationManager syncManager,
-        WorldSegmentBlockDataManager blockDataManager)
+        WorldSegmentBlockDataManager blockDataManager,
+        WorldSegmentSubscriptionManager subscriptionManager)
     {
         this.activationManager = activationManager;
         this.syncManager = syncManager;
         this.blockDataManager = blockDataManager;
+        this.subscriptionManager = subscriptionManager;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -60,6 +63,30 @@ public sealed class WorldManagementEventHandler
                 activationManager.OnWorldSegmentLoaded(details.SegmentIndex);
                 syncManager.OnWorldSegmentLoaded(details.SegmentIndex);
                 blockDataManager.AddWorldSegment(details.SegmentIndex);
+            }
+                break;
+
+            case EventId.Core_WorldManagement_EntityLeaveWorldSegment:
+            {
+                if (ev.EventDetails is not EntityChangeWorldSegmentEventDetails details)
+                {
+                    Logger.Error("Received EntityLeaveWorldSegment without details.");
+                    break;
+                }
+
+                subscriptionManager.OnEntityChangeSegment(details.EntityId);
+            }
+                break;
+
+            case EventId.Server_WorldManagement_ResyncPositionedEntity:
+            {
+                if (ev.EventDetails is not EntityEventDetails details)
+                {
+                    Logger.Error("Received ResyncPositionedEntity without details.");
+                    break;
+                }
+
+                subscriptionManager.OnResyncRequest(details.EntityId);
             }
                 break;
 

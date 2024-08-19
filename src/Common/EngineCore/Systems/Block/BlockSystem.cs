@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
-using Sovereign.EngineCore.Systems.Block.Events;
 
 namespace Sovereign.EngineCore.Systems.Block;
 
@@ -64,7 +63,10 @@ public sealed class BlockSystem : ISystem, IDisposable
         EventId.Core_Block_Add,
         EventId.Core_Block_AddBatch,
         EventId.Core_Block_Remove,
-        EventId.Core_Block_RemoveBatch
+        EventId.Core_Block_RemoveBatch,
+        EventId.Core_Block_RemoveAt,
+        EventId.Core_Block_ModifyNotice,
+        EventId.Core_Block_RemoveNotice
     };
 
     public int WorkloadEstimate => 50;

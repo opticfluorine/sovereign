@@ -17,8 +17,7 @@
 
 using System;
 using System.IO;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using System.Text.Json;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 
@@ -27,13 +26,6 @@ namespace Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 /// </summary>
 public sealed class AnimatedSpriteDefinitionsLoader
 {
-    /// <summary>
-    ///     YAML deserializer.
-    /// </summary>
-    private readonly IDeserializer deserializer = new DeserializerBuilder()
-        .WithNamingConvention(PascalCaseNamingConvention.Instance)
-        .Build();
-
     /// <summary>
     ///     Definitions validator.
     /// </summary>
@@ -55,13 +47,11 @@ public sealed class AnimatedSpriteDefinitionsLoader
     public AnimatedSpriteDefinitions LoadDefinitions(string filename)
     {
         /* Load definitions. */
-        AnimatedSpriteDefinitions definitions;
+        AnimatedSpriteDefinitions? definitions;
         try
         {
-            using (var reader = new StreamReader(filename))
-            {
-                definitions = deserializer.Deserialize<AnimatedSpriteDefinitions>(reader);
-            }
+            using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read);
+            definitions = JsonSerializer.Deserialize<AnimatedSpriteDefinitions>(stream);
         }
         catch (Exception e)
         {
@@ -70,6 +60,7 @@ public sealed class AnimatedSpriteDefinitionsLoader
         }
 
         /* Validate. */
+        if (definitions == null) throw new Exception("Animated sprite definitions are malformed.");
         validator.Validate(definitions);
 
         return definitions;

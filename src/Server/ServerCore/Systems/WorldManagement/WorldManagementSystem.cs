@@ -52,7 +52,9 @@ public sealed class WorldManagementSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
-        EventId.Server_WorldManagement_WorldSegmentLoaded
+        EventId.Server_WorldManagement_WorldSegmentLoaded,
+        EventId.Core_WorldManagement_EntityLeaveWorldSegment,
+        EventId.Server_WorldManagement_ResyncPositionedEntity
     };
 
     public int WorkloadEstimate => 80;
