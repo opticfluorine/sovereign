@@ -23,6 +23,7 @@ using Castle.Core.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.ServerNetwork.Configuration;
 using WatsonWebserver;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest;
 
@@ -47,7 +48,7 @@ public sealed class RestServer : IDisposable
     /// <summary>
     ///     Embedded web server.
     /// </summary>
-    private readonly Lazy<Server> restServer;
+    private readonly Lazy<Webserver> restServer;
 
     public RestServer(IServerNetworkConfiguration networkConfiguration,
         ICollection<IRestService> restServices,
@@ -57,10 +58,10 @@ public sealed class RestServer : IDisposable
         this.restServices = restServices;
         this.fatalErrorHandler = fatalErrorHandler;
 
-        restServer = new Lazy<Server>(() =>
+        restServer = new Lazy<Webserver>(() =>
         {
-            return new Server(networkConfiguration.RestHostname,
-                networkConfiguration.RestPort, false, OnUnmappedRequest);
+            return new Webserver(new WebserverSettings(networkConfiguration.RestHostname,
+                networkConfiguration.RestPort, false), OnUnmappedRequest);
         });
     }
 
@@ -87,12 +88,12 @@ public sealed class RestServer : IDisposable
                 switch (service.PathType)
                 {
                     case RestPathType.Static:
-                        restServer.Value.Routes.Static.Add(service.RequestType,
+                        restServer.Value.Routes.PreAuthentication.Static.Add(service.RequestType,
                             service.Path, service.OnRequest);
                         break;
 
                     case RestPathType.Parameter:
-                        restServer.Value.Routes.Parameter.Add(service.RequestType,
+                        restServer.Value.Routes.PreAuthentication.Parameter.Add(service.RequestType,
                             service.Path, service.OnRequest);
                         break;
 
@@ -117,7 +118,7 @@ public sealed class RestServer : IDisposable
     /// </summary>
     /// <param name="ctx">HTTP context.</param>
     /// <returns>Task for sending response.</returns>
-    private async Task OnUnmappedRequest(HttpContext ctx)
+    private async Task OnUnmappedRequest(HttpContextBase ctx)
     {
         Logger.DebugFormat("REST server returned 404 for {0} request at {1} from {2}.",
             ctx.Request.Method.ToString(), ctx.Request.Url.Full, ctx.Request.Source.IpAddress);

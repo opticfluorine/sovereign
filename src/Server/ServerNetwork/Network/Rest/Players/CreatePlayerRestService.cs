@@ -28,7 +28,7 @@ using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Players;
 using Sovereign.ServerCore.Configuration;
-using WatsonWebserver;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
 
@@ -78,7 +78,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
     public override RestPathType PathType => RestPathType.Static;
     public override HttpMethod RequestType => HttpMethod.POST;
 
-    protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
+    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
     {
         try
         {
@@ -127,7 +127,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
     /// <param name="status">Response status code.</param>
     /// <param name="result">Human-readable string describing the result.</param>
     /// <param name="playerId">Entity ID of newly created player. Only relevant for successful requests.</param>
-    private async Task SendResponse(HttpContext ctx, int status, string result, ulong playerId = 0)
+    private async Task SendResponse(HttpContextBase ctx, int status, string result, ulong playerId = 0)
     {
         ctx.Response.StatusCode = status;
 

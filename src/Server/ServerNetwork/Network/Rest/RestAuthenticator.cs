@@ -19,6 +19,7 @@ using System.Text;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.EngineUtil.Monads;
 using WatsonWebserver;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest;
 
@@ -40,7 +41,7 @@ public class RestAuthenticator
     /// <param name="ctx">Request context.</param>
     /// <param name="accountId">Authenticated account ID, if authentication was successful.</param>
     /// <returns>Authentication result.</returns>
-    public RestAuthenticationResult Authenticate(HttpContext ctx, out Maybe<Guid> accountId)
+    public RestAuthenticationResult Authenticate(HttpContextBase ctx, out Maybe<Guid> accountId)
     {
         accountId = new Maybe<Guid>();
 
@@ -79,7 +80,7 @@ public class RestAuthenticator
     ///     Configures an HTTP response for an unauthorized request.
     /// </summary>
     /// <param name="response">Response to configure.</param>
-    public void SetupUnauthorizedResponse(HttpResponse response)
+    public void SetupUnauthorizedResponse(HttpResponseBase response)
     {
         response.StatusCode = 401;
         response.Headers.Add("WWW-Authenticate", "Basic realm=\"Sovereign REST API\", charset=\"UTF-8\"");

@@ -15,7 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Watson" Version="5.1.1"/>
+        <PackageReference Include="Watson" Version="6.1.9"/>
     </ItemGroup>
 
     <ItemGroup>
