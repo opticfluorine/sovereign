@@ -21,7 +21,7 @@ using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Systems.WorldManagement;
-using WatsonWebserver;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment;
 
@@ -48,7 +48,7 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
 
     public override HttpMethod RequestType => HttpMethod.GET;
 
-    protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
+    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
     {
         // Parse parameters.
         int x, y, z;

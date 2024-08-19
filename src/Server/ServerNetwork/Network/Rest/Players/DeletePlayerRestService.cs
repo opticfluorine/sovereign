@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Players;
-using WatsonWebserver;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
 
@@ -46,7 +46,7 @@ public class DeletePlayerRestService : AuthenticatedRestService
     public override RestPathType PathType => RestPathType.Parameter;
     public override HttpMethod RequestType => HttpMethod.DELETE;
 
-    protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
+    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
     {
         try
         {
@@ -114,7 +114,7 @@ public class DeletePlayerRestService : AuthenticatedRestService
     /// <param name="ctx">HTTP context.</param>
     /// <param name="status">Response status code.</param>
     /// <param name="result">Human-readable result string.</param>
-    private async Task SendResponse(HttpContext ctx, int status, string result)
+    private async Task SendResponse(HttpContextBase ctx, int status, string result)
     {
         ctx.Response.StatusCode = status;
 

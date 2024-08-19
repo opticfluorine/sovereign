@@ -17,6 +17,7 @@
 
 using System.Threading.Tasks;
 using WatsonWebserver;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest;
 
@@ -45,5 +46,5 @@ public interface IRestService
     /// </summary>
     /// <param name="ctx">HTTP context.</param>
     /// <returns>Task for asynchronously sending response.</returns>
-    Task OnRequest(HttpContext ctx);
+    Task OnRequest(HttpContextBase ctx);
 }

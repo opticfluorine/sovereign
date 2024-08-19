@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Players;
-using WatsonWebserver;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
 
@@ -42,7 +42,7 @@ public class ListPlayersRestService : AuthenticatedRestService
     public override RestPathType PathType => RestPathType.Static;
     public override HttpMethod RequestType => HttpMethod.GET;
 
-    protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
+    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
     {
         Logger.DebugFormat("ListPlayers requested for account ID {0}.", accountId);
         try

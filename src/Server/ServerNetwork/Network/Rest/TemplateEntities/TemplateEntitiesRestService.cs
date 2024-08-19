@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Systems.TemplateEntity;
-using WatsonWebserver;
+using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.TemplateEntities;
 
@@ -42,7 +42,7 @@ public class TemplateEntitiesRestService : AuthenticatedRestService
     public override RestPathType PathType => RestPathType.Static;
     public override HttpMethod RequestType => HttpMethod.GET;
 
-    protected override async Task OnAuthenticatedRequest(HttpContext ctx, Guid accountId)
+    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
     {
         Logger.InfoFormat("Received template entity data request from account {0}.", accountId);
 
