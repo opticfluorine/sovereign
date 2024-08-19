@@ -130,6 +130,10 @@ public class AnimatedSpriteEditorTab
         this.spriteManager = spriteManager;
         this.tileSpriteManager = tileSpriteManager;
         this.generateAnimatedSpritesPopup = generateAnimatedSpritesPopup;
+
+        tileSpriteManager.OnTileSpriteAdded += RefreshDependencies;
+        tileSpriteManager.OnTileSpriteUpdated += RefreshDependencies;
+        tileSpriteManager.OnTileSpriteRemoved += RefreshDependencies;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -624,5 +628,14 @@ public class AnimatedSpriteEditorTab
 
         reason = null;
         return true;
+    }
+
+    /// <summary>
+    ///     Refreshes the dependency list in response to a change in dependent resources.
+    /// </summary>
+    /// <param name="_">Unused.</param>
+    private void RefreshDependencies(int _)
+    {
+        Select(selectedId);
     }
 }
