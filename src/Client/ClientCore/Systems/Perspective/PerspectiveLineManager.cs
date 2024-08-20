@@ -44,30 +44,31 @@ namespace Sovereign.ClientCore.Systems.Perspective;
 /// </remarks>
 public class PerspectiveLineManager
 {
+    private static readonly List<int> ToRemove = new();
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly DrawableLookup drawableLookup;
 
     /// <summary>
     ///     Object pool of entity lists to minimize heap churn for vertically moving entities.
     /// </summary>
-    private readonly ObjectPool<EntityList> entityListPool = new();
+    private readonly ObjectPool<List<EntityInfo>> entityListPool = new();
 
     /// <summary>
     ///     Object pool of index lists to minimize heap churn when considering entity overlap.
     /// </summary>
-    private readonly ObjectPool<List<Tuple<int, int>>> indexListPool = new();
+    private readonly ObjectPool<List<PerspectiveLineKey>> indexListPool = new();
 
     private readonly KinematicComponentCollection kinematics;
 
     /// <summary>
     ///     Map from entity ID to set of overlapping perspective line indices.
     /// </summary>
-    private readonly Dictionary<ulong, HashSet<Tuple<int, int>>> linesByEntity = new();
+    private readonly Dictionary<ulong, HashSet<PerspectiveLineKey>> linesByEntity = new();
 
     /// <summary>
     ///     Active perspective lines indexed by their z-intercept (x, y) coordinates.
     /// </summary>
-    private readonly Dictionary<Tuple<int, int>, PerspectiveLine> perspectiveLines = new();
+    private readonly Dictionary<PerspectiveLineKey, PerspectiveLine> perspectiveLines = new();
 
     private readonly WorldSegmentResolver resolver;
 
@@ -284,10 +285,7 @@ public class PerspectiveLineManager
         try
         {
             GetNonBlockOverlappingLines(entityId, indices);
-            foreach (var index in indices)
-            {
-                AddEntityToLine(entityId, index, position.Z, EntityType.NonBlock);
-            }
+            foreach (var index in indices) AddEntityToLine(entityId, index, position.Z, EntityType.NonBlock);
         }
         finally
         {
@@ -322,7 +320,7 @@ public class PerspectiveLineManager
             if (list.Entities.Count == 0)
             {
                 line.ZDepths.Remove(list);
-                entityListPool.ReturnObject(list);
+                entityListPool.ReturnObject(list.Entities);
             }
         }
 
@@ -383,7 +381,7 @@ public class PerspectiveLineManager
     /// <param name="lineIndex">Perspective line index.</param>
     /// <param name="z">z position of entity.</param>
     /// <param name="entityType">Entity type.</param>
-    private void AddEntityToLine(ulong entityId, Tuple<int, int> lineIndex, float z, EntityType entityType)
+    private void AddEntityToLine(ulong entityId, PerspectiveLineKey lineIndex, float z, EntityType entityType)
     {
         if (!perspectiveLines.TryGetValue(lineIndex, out var line))
         {
@@ -397,8 +395,7 @@ public class PerspectiveLineManager
         // Insert the entity into the correct z position on the perspective line.
         if (!line.ZDepths.TryGetValue(EntityList.ForComparison(z), out var entityList))
         {
-            entityList = entityListPool.TakeObject();
-            entityList.Z = z;
+            entityList = new EntityList(z, entityListPool.TakeObject());
             entityList.Entities.Clear();
             line.ZDepths.Add(entityList);
         }
@@ -413,7 +410,7 @@ public class PerspectiveLineManager
         // Keep a record of where this block is for easier removal later.
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices))
         {
-            lineIndices = new HashSet<Tuple<int, int>>();
+            lineIndices = new HashSet<PerspectiveLineKey>();
             linesByEntity[entityId] = lineIndices;
         }
 
@@ -427,7 +424,7 @@ public class PerspectiveLineManager
     /// <param name="lineIndex">Line index.</param>
     /// <param name="line">Perspective line.</param>
     /// <param name="z">z position of entity.</param>
-    private void RemoveEntityFromLine(ulong entityId, Tuple<int, int> lineIndex, PerspectiveLine line, float z)
+    private void RemoveEntityFromLine(ulong entityId, PerspectiveLineKey lineIndex, PerspectiveLine line, float z)
     {
         if (line.ZDepths.TryGetValue(EntityList.ForComparison(z), out var list))
         {
@@ -435,14 +432,11 @@ public class PerspectiveLineManager
             if (list.Entities.Count == 0)
             {
                 line.ZDepths.Remove(list);
-                entityListPool.ReturnObject(list);
+                entityListPool.ReturnObject(list.Entities);
             }
         }
 
-        if (linesByEntity.TryGetValue(entityId, out var lineIndices))
-        {
-            lineIndices.Remove(lineIndex);
-        }
+        if (linesByEntity.TryGetValue(entityId, out var lineIndices)) lineIndices.Remove(lineIndex);
     }
 
     /// <summary>
@@ -451,7 +445,7 @@ public class PerspectiveLineManager
     /// <param name="segmentIndex">World segment index.</param>
     /// <param name="indices">List of indices to update.</param>
     /// <returns>Intersecting perspective line indices.</returns>
-    private void GetIndicesForWorldSegment(GridPosition segmentIndex, List<Tuple<int, int>> indices)
+    private void GetIndicesForWorldSegment(GridPosition segmentIndex, List<PerspectiveLineKey> indices)
     {
         var (minPosition, maxPosition) = resolver.GetRangeForWorldSegment(segmentIndex);
         var startX = (int)minPosition.X; // inclusive
@@ -471,16 +465,10 @@ public class PerspectiveLineManager
         for (var x = startX; x < endX; x++)
         {
             // Front face: (startX..endX, startY, startZ..endZ)
-            for (var z = startZ; z < endZ; z++)
-            {
-                indices.Add(GetIndexForBlockPosition(x, startY, z));
-            }
+            for (var z = startZ; z < endZ; z++) indices.Add(GetIndexForBlockPosition(x, startY, z));
 
             // Bottom face (excluding edge with front face): (startX..endX, startY+1..endY, startZ)
-            for (var y = startY + 1; y < endY; y++)
-            {
-                indices.Add(GetIndexForBlockPosition(x, y, startZ));
-            }
+            for (var y = startY + 1; y < endY; y++) indices.Add(GetIndexForBlockPosition(x, y, startZ));
         }
     }
 
@@ -491,10 +479,10 @@ public class PerspectiveLineManager
     /// <param name="y">Y coordinate.</param>
     /// <param name="z">Z coordinate.</param>
     /// <returns>Perspective line index.</returns>
-    private Tuple<int, int> GetIndexForBlockPosition(int x, int y, int z)
+    private PerspectiveLineKey GetIndexForBlockPosition(int x, int y, int z)
     {
         // Perspective lines have constant x and (y + z), so at the z-intercept this becomes...
-        return Tuple.Create(x, y + z);
+        return new PerspectiveLineKey(x, y + z);
     }
 
     /// <summary>
@@ -502,7 +490,7 @@ public class PerspectiveLineManager
     /// </summary>
     /// <param name="blockPosition">Block position.</param>
     /// <returns>Perspective line index.</returns>
-    private Tuple<int, int> GetIndexForBlockPosition(GridPosition blockPosition)
+    private PerspectiveLineKey GetIndexForBlockPosition(GridPosition blockPosition)
     {
         return GetIndexForBlockPosition(blockPosition.X, blockPosition.Y, blockPosition.Z);
     }
@@ -512,7 +500,7 @@ public class PerspectiveLineManager
     /// </summary>
     /// <param name="position">Position.</param>
     /// <returns>Perspective line index.</returns>
-    private Tuple<int, int> GetIndexForPosition(Vector3 position)
+    private PerspectiveLineKey GetIndexForPosition(Vector3 position)
     {
         return GetIndexForBlockPosition((int)Math.Floor(position.X), (int)Math.Ceiling(position.Y),
             (int)Math.Ceiling(position.Z));
@@ -533,7 +521,7 @@ public class PerspectiveLineManager
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="indices">Indices list to update.</param>
-    private void GetNonBlockOverlappingLines(ulong entityId, List<Tuple<int, int>> indices)
+    private void GetNonBlockOverlappingLines(ulong entityId, List<PerspectiveLineKey> indices)
     {
         if (!kinematics.HasComponentForEntity(entityId))
         {
@@ -552,12 +540,8 @@ public class PerspectiveLineManager
         var maxIndices = GetIndexForProjectedPosition(maxPosition);
 
         for (var x = minIndices.Item1; x <= maxIndices.Item1; ++x)
-        {
-            for (var y = minIndices.Item2; y <= maxIndices.Item2; ++y)
-            {
-                indices.Add(Tuple.Create(x, y));
-            }
-        }
+        for (var y = minIndices.Item2; y <= maxIndices.Item2; ++y)
+            indices.Add(new PerspectiveLineKey(x, y));
     }
 
     /// <summary>
@@ -600,39 +584,32 @@ public class PerspectiveLineManager
     /// <summary>
     ///     Represents a list of entities at a common z-depth.
     /// </summary>
-    private class EntityList
+    private readonly struct EntityList(float z, List<EntityInfo> entities)
     {
         /// <summary>
         ///     Comparer for EntityLists.
         /// </summary>
         public static readonly IComparer<EntityList> Comparer =
-            Comparer<EntityList>.Create((a, b) => Comparer<float>.Default.Compare(a.Z, b.Z));
+            Comparer<EntityList>.Create((a, b) => Comparer<float>.Default.Compare(a.z, b.z));
 
         private static readonly List<EntityInfo> EmptyList = new(0);
 
         /// <summary>
         ///     Entities at this z-depth.
         /// </summary>
-        public readonly List<EntityInfo> Entities;
+        public readonly List<EntityInfo> Entities = entities;
 
         /// <summary>
         ///     Z depth of this entity list.
         /// </summary>
-        public float Z;
-
-        public EntityList()
-        {
-            Entities = new List<EntityInfo>();
-        }
+        private readonly float z = z;
 
         /// <summary>
         ///     Constructs a new empty EntityList for lookups only.
         /// </summary>
         /// <param name="z">Z depth.</param>
-        private EntityList(float z)
+        private EntityList(float z) : this(z, EmptyList)
         {
-            Z = z;
-            Entities = EmptyList;
         }
 
         /// <summary>
@@ -651,16 +628,12 @@ public class PerspectiveLineManager
         /// <param name="entityId">Entity ID.</param>
         public void RemoveEntity(ulong entityId)
         {
-            var toRemove = new List<int>();
+            ToRemove.Clear();
             for (var i = 0; i < Entities.Count; ++i)
-            {
-                if (Entities[i].EntityId == entityId) toRemove.Add(i);
-            }
+                if (Entities[i].EntityId == entityId)
+                    ToRemove.Add(i);
 
-            for (var i = toRemove.Count - 1; i >= 0; --i)
-            {
-                Entities.RemoveAt(toRemove[i]);
-            }
+            for (var i = ToRemove.Count - 1; i >= 0; --i) Entities.RemoveAt(ToRemove[i]);
         }
     }
 
@@ -678,5 +651,38 @@ public class PerspectiveLineManager
         ///     Reference count.
         /// </summary>
         public uint ReferenceCount;
+    }
+
+    /// <summary>
+    ///     Perspective line index.
+    /// </summary>
+    /// <param name="x">X coordinate.</param>
+    /// <param name="yz">Y+Z invariant.</param>
+    private readonly struct PerspectiveLineKey(int x, int yz)
+    {
+        public bool Equals(PerspectiveLineKey other)
+        {
+            return X == other.X && Yz == other.Yz;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is PerspectiveLineKey other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Yz);
+        }
+
+        /// <summary>
+        ///     X coordinate of line.
+        /// </summary>
+        public readonly int X = x;
+
+        /// <summary>
+        ///     (Y+Z) invariant of line.
+        /// </summary>
+        public readonly int Yz = yz;
     }
 }

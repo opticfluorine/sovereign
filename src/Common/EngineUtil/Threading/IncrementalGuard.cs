@@ -86,7 +86,16 @@ public sealed class IncrementalGuard
     private void TakeStrongLock()
     {
         Monitor.Enter(innerLock);
-        SpinWait.SpinUntil(() => weakLockCount == 0);
+        SpinWait.SpinUntil(CanTakeStrongLock);
+    }
+
+    /// <summary>
+    ///     Checks whether the strong lock can be taken.
+    /// </summary>
+    /// <returns>true if it can be taken, false otherwise.</returns>
+    private bool CanTakeStrongLock()
+    {
+        return weakLockCount == 0;
     }
 
     /// <summary>
