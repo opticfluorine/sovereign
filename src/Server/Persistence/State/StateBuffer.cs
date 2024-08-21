@@ -17,7 +17,6 @@
 
 using System;
 using System.Data;
-using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
@@ -279,7 +278,7 @@ public sealed class StateBuffer
     /// <param name="persistenceProvider">Persistence provider.</param>
     public void Synchronize(IPersistenceProvider persistenceProvider)
     {
-        Task.Run(() => DoSynchronize(persistenceProvider));
+        DoSynchronize(persistenceProvider);
     }
 
     /// <summary>

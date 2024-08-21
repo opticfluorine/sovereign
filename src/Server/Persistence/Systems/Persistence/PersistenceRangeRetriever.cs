@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
@@ -61,20 +60,16 @@ public sealed class PersistenceRangeRetriever
     {
         Logger.DebugFormat("Retrieve world segment {0}.", segmentIndex);
 
-        // Retrieve, then send a completion event.
-        Task.Factory.StartNew(() =>
-        {
-            // Retrieve world segment.
-            DoRetrieve(segmentIndex);
+        // Retrieve world segment.
+        DoRetrieve(segmentIndex);
 
-            // Signal completion.
-            // Sync the event to the next tick to ensure that the loaded entities
-            // and components have been fully processed.
-            var details = new WorldSegmentEventDetails { SegmentIndex = segmentIndex };
-            var ev = new Event(EventId.Server_WorldManagement_WorldSegmentLoaded, details);
-            ev.SyncToTick = true;
-            eventSender.SendEvent(ev);
-        });
+        // Signal completion.
+        // Sync the event to the next tick to ensure that the loaded entities
+        // and components have been fully processed.
+        var details = new WorldSegmentEventDetails { SegmentIndex = segmentIndex };
+        var ev = new Event(EventId.Server_WorldManagement_WorldSegmentLoaded, details);
+        ev.SyncToTick = true;
+        eventSender.SendEvent(ev);
     }
 
     /// <summary>

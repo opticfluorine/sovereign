@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.Persistence.Database;
@@ -54,8 +53,7 @@ public sealed class PersistenceEntityRetriever
     {
         Logger.DebugFormat("Retrieve entity tree for entity ID {0}.", entityId);
 
-        /* Asynchronously retrieve the entity using a worker thread. */
-        Task.Run(() => DoRetrieve(entityId));
+        DoRetrieve(entityId);
     }
 
     /// <summary>

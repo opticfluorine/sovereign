@@ -4,6 +4,12 @@
 
 ### August
 
+#### 20 August 2024
+
+* Persistence: Consolidate all queries to a single thread (the Executor thread responsible for
+  the `PersistenceSystem`). This resolves an issue (primarily with Windows builds) where the SQLite
+  persistence backend was not thread-safe, leading to data load issues.
+
 #### 18 August 2024
 
 * Client: Properly refresh tile sprite resolutions when block entities are added
