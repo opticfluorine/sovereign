@@ -44,11 +44,14 @@ public class SqliteGetWorldSegmentBlockDataQuery(SqliteConnection connection) : 
         pZ.Value = segmentIndex.Z;
         cmd.Parameters.Add(pZ);
 
-        using var reader = cmd.ExecuteReader();
-        if (!reader.HasRows) return false;
+        using (var reader = cmd.ExecuteReader())
+        {
+            if (!reader.HasRows) return false;
 
-        reader.Read();
-        reader.GetBytes(0, 0, buffer, 0, buffer.Length);
+            reader.Read();
+            reader.GetBytes(0, 0, buffer, 0, buffer.Length);
+        }
+
         return true;
     }
 }
