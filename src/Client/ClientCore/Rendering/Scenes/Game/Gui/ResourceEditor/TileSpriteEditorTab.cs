@@ -597,7 +597,7 @@ public class TileSpriteEditorTab
             }
 
             ImGui.TableNextColumn();
-            if (context.SoutheastTileSpriteId != TileSprite.Wildcard)
+            if (context.SoutheastTileSpriteId >= 0)
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
