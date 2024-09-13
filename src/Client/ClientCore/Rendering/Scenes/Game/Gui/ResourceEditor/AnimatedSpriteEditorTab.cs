@@ -306,7 +306,8 @@ public class AnimatedSpriteEditorTab
         ImGui.SameLine();
         ImGui.SetNextItemWidth(120.0f);
         ImGui.InputFloat("ms##timestep", ref inputTimestepMs);
-        editingSprite.Phases[currentPhase].FrameTime = (ulong)(inputTimestepMs * UnitConversions.MsToUs);
+        if (inputTimestepMs > 0)
+            editingSprite.Phases[currentPhase].FrameTime = (ulong)(inputTimestepMs * UnitConversions.MsToUs);
 
         var maxSize = ImGui.GetWindowSize();
         var maxFrames = editingSprite.Phases[currentPhase].Frames
