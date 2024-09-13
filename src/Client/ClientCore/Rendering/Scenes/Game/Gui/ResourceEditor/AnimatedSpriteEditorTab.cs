@@ -468,7 +468,7 @@ public class AnimatedSpriteEditorTab
     {
         currentPhase = AnimationPhase.Default;
         editingSprite = new AnimatedSprite(animatedSpriteManager.AnimatedSprites[selectedId]);
-        inputTimestepMs = editingSprite.Phases[currentPhase].FrameTime;
+        inputTimestepMs = editingSprite.Phases[currentPhase].FrameTime * UnitConversions.UsToMs;
     }
 
     /// <summary>
