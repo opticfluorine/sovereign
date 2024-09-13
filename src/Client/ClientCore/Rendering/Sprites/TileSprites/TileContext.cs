@@ -51,43 +51,42 @@ public sealed class TileContext
     /// <summary>
     ///     Index of the north tile sprite to match (-1 for wildcard).
     /// </summary>
-    public int NorthTileSpriteId { get; set; }
+    public int NorthTileSpriteId { get; set; } = TileSprite.Wildcard;
 
     /// <summary>
     ///     Index of the east tile sprite to match (-1 for wildcard).
     /// </summary>
-    public int EastTileSpriteId { get; set; }
+    public int EastTileSpriteId { get; set; } = TileSprite.Wildcard;
 
     /// <summary>
     ///     Index of the south tile sprite to match (-1 for wildcard).
     /// </summary>
-    public int SouthTileSpriteId { get; set; }
-
+    public int SouthTileSpriteId { get; set; } = TileSprite.Wildcard;
 
     /// <summary>
     ///     Index of the west tile sprite to match (-1 for wildcard).
     /// </summary>
-    public int WestTileSpriteId { get; set; }
+    public int WestTileSpriteId { get; set; } = TileSprite.Wildcard;
 
     /// <summary>
     ///     Index of the northeast tile sprite to match.
     /// </summary>
-    public int NortheastTileSpriteId { get; set; }
+    public int NortheastTileSpriteId { get; set; } = TileSprite.Wildcard;
 
     /// <summary>
     ///     Index of the southeast tile sprite to match.
     /// </summary>
-    public int SoutheastTileSpriteId { get; set; }
+    public int SoutheastTileSpriteId { get; set; } = TileSprite.Wildcard;
 
     /// <summary>
     ///     Index of the southwest tile sprite to match.
     /// </summary>
-    public int SouthwestTileSpriteId { get; set; }
+    public int SouthwestTileSpriteId { get; set; } = TileSprite.Wildcard;
 
     /// <summary>
     ///     Index of the northwest tile sprite to match.
     /// </summary>
-    public int NorthwestTileSpriteId { get; set; }
+    public int NorthwestTileSpriteId { get; set; } = TileSprite.Wildcard;
 
     /// <summary>
     ///     List of animated sprite IDs to be drawn in order if the context matches.
