@@ -349,9 +349,13 @@ public sealed class ClientNetworkManager : INetworkManager
         try
         {
             // Resolve host.
-            var resolvedHost = Dns.GetHostEntry(host);
-            if (resolvedHost.AddressList.Count() == 0) throw new ArgumentException("Host could not be resolved.");
-            var addr = resolvedHost.AddressList[0];
+            IPAddress? addr;
+            if (!IPAddress.TryParse(host, out addr))
+            {
+                var resolvedHost = Dns.GetHostEntry(host);
+                if (resolvedHost.AddressList.Count() == 0) throw new ArgumentException("Host could not be resolved.");
+                addr = resolvedHost.AddressList[0];
+            }
 
             // Grab HMAC key (shared secret) from the login response.
             if (loginResponse == null || loginResponse.SharedSecret == null || loginResponse.UserId == null)
