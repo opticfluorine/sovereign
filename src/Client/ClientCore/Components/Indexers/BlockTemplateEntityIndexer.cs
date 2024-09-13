@@ -57,8 +57,9 @@ public class BlockTemplateEntityIndexer : BaseComponentIndexer<int>
         try
         {
             nextTemplateEntityId = blockTemplateEntities
-                .GetViewBetween(templateEntityId + 1, EntityConstants.LastTemplateEntityId).First();
-            return true;
+                .GetViewBetween(templateEntityId + 1, EntityConstants.LastTemplateEntityId)
+                .FirstOrDefault((ulong)0);
+            return nextTemplateEntityId > 0;
         }
         catch (Exception)
         {
@@ -75,17 +76,15 @@ public class BlockTemplateEntityIndexer : BaseComponentIndexer<int>
     /// <returns>true if a smaller block template entity ID was found, false otherwise.</returns>
     public bool TryGetNextSmaller(ulong templateEntityId, out ulong nextTemplateEntityId)
     {
-        try
-        {
-            nextTemplateEntityId = blockTemplateEntities
-                .GetViewBetween(EntityConstants.FirstTemplateEntityId, templateEntityId - 1).Reverse().First();
-            return true;
-        }
-        catch (Exception)
+        if (templateEntityId == EntityConstants.FirstTemplateEntityId)
         {
             nextTemplateEntityId = 0;
             return false;
         }
+
+        nextTemplateEntityId = blockTemplateEntities
+            .GetViewBetween(EntityConstants.FirstTemplateEntityId, templateEntityId - 1).Reverse().First();
+        return true;
     }
 
     protected override void ComponentAddedCallback(ulong entityId, int componentValue, bool isLoad)
