@@ -376,14 +376,7 @@ public class TileSpriteEditorTab
         var layers = context.AnimatedSpriteIds;
 
         ImGui.TableNextColumn();
-        var canRemoveContext = !(context.NorthTileSpriteId == TileSprite.Wildcard &&
-                                 context.EastTileSpriteId == TileSprite.Wildcard &&
-                                 context.SouthTileSpriteId == TileSprite.Wildcard &&
-                                 context.WestTileSpriteId == TileSprite.Wildcard &&
-                                 context.NortheastTileSpriteId == TileSprite.Wildcard &&
-                                 context.SoutheastTileSpriteId == TileSprite.Wildcard &&
-                                 context.SouthwestTileSpriteId == TileSprite.Wildcard &&
-                                 context.NorthwestTileSpriteId == TileSprite.Wildcard);
+        var canRemoveContext = rowIndex < editingSprite.TileContexts.Count - 1;
         if (!canRemoveContext) ImGui.BeginDisabled();
         if (ImGui.Button($"-##context-{rowIndex}"))
         {
