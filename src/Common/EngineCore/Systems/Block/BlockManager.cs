@@ -139,11 +139,12 @@ public sealed class BlockManager
         var abovePos = new GridPosition(pos.X, pos.Y, pos.Z + 1);
 
         var blocks = blockPositionIndexer.GetEntitiesAtPosition(abovePos);
-        if (blocks != null)
-            aboveBlock = blocks.First();
+        var hasAbove = blocks != null && blocks.Count > 0;
+        if (hasAbove)
+            aboveBlock = blocks!.First();
         else
             aboveBlock = 0;
 
-        return blocks != null;
+        return hasAbove;
     }
 }
