@@ -27,6 +27,11 @@ namespace Sovereign.ClientCore.Rendering.Gui;
 /// </summary>
 public class GuiExtensions
 {
+    /// <summary>
+    ///     Scale factor to apply to displayed sprites.
+    /// </summary>
+    public const float SpriteScaleFactor = 1.5f;
+
     private readonly GuiTextureMapper textureMapper;
 
     public GuiExtensions(GuiTextureMapper textureMapper)
@@ -44,7 +49,7 @@ public class GuiExtensions
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         // Render GUI component.
-        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
+        ImGui.Image(texId, GetSpriteDimensions(texData));
     }
 
     /// <summary>
@@ -59,7 +64,7 @@ public class GuiExtensions
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
-        var result = ImGui.ImageButton(id, texId, new Vector2(texData.Width, texData.Height));
+        var result = ImGui.ImageButton(id, texId, GetSpriteDimensions(texData));
         ImGui.PopStyleVar();
 
         return result;
@@ -77,7 +82,7 @@ public class GuiExtensions
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         // Render GUI component.
-        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
+        ImGui.Image(texId, GetSpriteDimensions(texData));
     }
 
     /// <summary>
@@ -93,7 +98,7 @@ public class GuiExtensions
         var texId = textureMapper.GetTextureIdForCustomAnimatedSprite(customId, customSprite, orientation, phase);
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
-        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
+        ImGui.Image(texId, GetSpriteDimensions(texData));
     }
 
     /// <summary>
@@ -110,7 +115,7 @@ public class GuiExtensions
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
-        var result = ImGui.ImageButton(id, texId, new Vector2(texData.Width, texData.Height));
+        var result = ImGui.ImageButton(id, texId, GetSpriteDimensions(texData));
         ImGui.PopStyleVar();
 
         return result;
@@ -126,7 +131,7 @@ public class GuiExtensions
         var texId = textureMapper.GetTextureIdForTileSprite(tileSpriteId, contextKey);
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
-        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
+        ImGui.Image(texId, GetSpriteDimensions(texData));
     }
 
     /// <summary>
@@ -140,7 +145,7 @@ public class GuiExtensions
         var texId = textureMapper.GetTextureIdForCustomTileSprite(customId, customSprite, contextKey);
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
-        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
+        ImGui.Image(texId, GetSpriteDimensions(texData));
     }
 
     /// <summary>
@@ -156,7 +161,7 @@ public class GuiExtensions
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
-        var result = ImGui.ImageButton(id, texId, new Vector2(texData.Width, texData.Height));
+        var result = ImGui.ImageButton(id, texId, GetSpriteDimensions(texData));
         ImGui.PopStyleVar();
 
         return result;
@@ -172,6 +177,16 @@ public class GuiExtensions
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         // Render GUI component.
-        ImGui.Image(texId, new Vector2(texData.Width, texData.Height));
+        ImGui.Image(texId, GetSpriteDimensions(texData));
+    }
+
+    /// <summary>
+    ///     Gets scaled sprite dimensions for display.
+    /// </summary>
+    /// <param name="texData">Texture data.</param>
+    /// <returns></returns>
+    private Vector2 GetSpriteDimensions(GuiTextureMapper.TextureData texData)
+    {
+        return new Vector2(SpriteScaleFactor * texData.Width, SpriteScaleFactor * texData.Height);
     }
 }

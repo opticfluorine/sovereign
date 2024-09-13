@@ -191,9 +191,10 @@ public class SpriteEditorTab
                 if (coverageMap[i, j] != null)
                 {
                     // Sprite exists, draw a box around it.
-                    var minPos = start + new Vector2(j * sheet.Definition.SpriteWidth,
+                    var minPos = start + GuiExtensions.SpriteScaleFactor * new Vector2(j * sheet.Definition.SpriteWidth,
                         i * sheet.Definition.SpriteHeight);
-                    var maxPos = minPos + new Vector2(sheet.Definition.SpriteWidth, sheet.Definition.SpriteHeight);
+                    var maxPos = minPos + GuiExtensions.SpriteScaleFactor *
+                        new Vector2(sheet.Definition.SpriteWidth, sheet.Definition.SpriteHeight);
                     drawList.AddRect(minPos, maxPos, 0x7FFFFFFF);
                 }
 
@@ -202,8 +203,12 @@ public class SpriteEditorTab
             if (spriteHovered)
             {
                 // Mouse is overlapping the spritesheet.
-                var row = (int)Math.Floor(relMousePos.Y / sheet.Definition.SpriteHeight);
-                var col = (int)Math.Floor(relMousePos.X / sheet.Definition.SpriteWidth);
+                var row = (int)Math.Floor(relMousePos.Y /
+                                          (sheet.Definition.SpriteHeight * GuiExtensions.SpriteScaleFactor));
+                var col = (int)Math.Floor(relMousePos.X /
+                                          (sheet.Definition.SpriteWidth * GuiExtensions.SpriteScaleFactor));
+                if (row == rows) row--;
+                if (col == cols) col--;
 
                 var sprite = coverageMap[row, col];
                 if (sprite != null)
