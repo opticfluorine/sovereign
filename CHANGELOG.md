@@ -2,7 +2,38 @@
 
 ## 2024
 
+#### 13 September 2024
+
+* Default Resources: Created an initial set of sprite/animated sprite/tile sprite/material
+  definitions to accompany the "programmer art" (see yesterday's update). Tile sprite
+  definitions in particular are finicky for bordered sprites and there are almost certainly
+  gaps in coverage, so these will be addressed in future updates as more issues appear. What
+  I'm learning from working with these tile sprites is that you want to define the patterns
+  as specifically as possible (few wildcards), then for bordered sprites also have a set of
+  fallback definitions with lots of wildcards to sweep up the edge cases. Sometimes I regret
+  not simply using a bitmask-based tiling system, but this is more flexible and will (hopefully)
+  be worth it in the long run.
+
+#### 12 September 2024
+
+* Default Resources: Spent the last few weeks on some "programmer art" for a small default set
+  of tile sprites/block materials. These can be found in the accompanying `sovereign-resources`
+  repository and via the auto-updater through the main update server.
+* Block System: Fix bug where block creation would occasionally fail due to unexpected behavior
+  from the covered block check.
+* GUI: Add support for scaling up the display of graphical resources in the GUI to improve
+  visibility. Scaled up the GUI resources to approximately match the size in the world renderer.
+* Client World Editor: Fix a quiet bug where scrolling past the ends of the block templates was
+  handled by catching an exception and responding appropriately. This doesn't play nice with
+  enabling a breakpoint on all exceptions thrown, which I like to do when testing the client
+  prior to a release.
+
 ### August
+
+#### 21 August 2024
+
+* Tile Sprites: Fix issue where the client would crash when trying to show a
+  preview of a tile sprite in the editor.
 
 #### 20 August 2024
 
