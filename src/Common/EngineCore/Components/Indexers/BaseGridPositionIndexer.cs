@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Castle.Core.Logging;
 
 namespace Sovereign.EngineCore.Components.Indexers;
@@ -26,9 +26,9 @@ namespace Sovereign.EngineCore.Components.Indexers;
 /// </summary>
 public class BaseGridPositionIndexer : BaseComponentIndexer<GridPosition>
 {
-    private readonly Dictionary<GridPosition, HashSet<ulong>> entitiesByPosition = new();
+    private readonly ConcurrentDictionary<GridPosition, ConcurrentDictionary<ulong, byte>> entitiesByPosition = new();
 
-    private readonly Dictionary<ulong, GridPosition> knownPositions = new();
+    private readonly ConcurrentDictionary<ulong, GridPosition> knownPositions = new();
 
     private readonly ILogger logger;
 
@@ -44,7 +44,7 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<GridPosition>
     /// </summary>
     /// <param name="position">Position to query.</param>
     /// <returns>The set of entities at the position, or null if there are none.</returns>
-    public HashSet<ulong>? GetEntitiesAtPosition(GridPosition position)
+    public ConcurrentDictionary<ulong, byte>? GetEntitiesAtPosition(GridPosition position)
     {
         return entitiesByPosition.TryGetValue(position, out var entities)
             ? entities
@@ -75,7 +75,7 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<GridPosition>
     private void AddEntity(ulong entityId, GridPosition position)
     {
         var set = GetSetForPosition(position);
-        set.Add(entityId);
+        set.TryAdd(entityId, 0);
         knownPositions[entityId] = position;
     }
 
@@ -84,12 +84,12 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<GridPosition>
     /// </summary>
     /// <param name="position">Grid position.</param>
     /// <returns>Set.</returns>
-    private HashSet<ulong> GetSetForPosition(GridPosition position)
+    private ConcurrentDictionary<ulong, byte> GetSetForPosition(GridPosition position)
     {
         var exists = entitiesByPosition.TryGetValue(position, out var set);
         if (!exists || set == null)
         {
-            set = new HashSet<ulong>();
+            set = new ConcurrentDictionary<ulong, byte>();
             entitiesByPosition[position] = set;
         }
 
@@ -110,7 +110,7 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<GridPosition>
 
         var set = entitiesByPosition[gridPos];
 
-        set.Remove(entityId);
-        knownPositions.Remove(entityId);
+        set.TryRemove(entityId, out _);
+        knownPositions.TryRemove(entityId, out _);
     }
 }

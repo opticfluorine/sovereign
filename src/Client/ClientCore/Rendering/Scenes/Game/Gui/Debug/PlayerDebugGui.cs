@@ -117,7 +117,7 @@ public class PlayerDebugGui
             return;
         }
 
-        foreach (var block in blocksBelow)
+        foreach (var block in blocksBelow.Keys)
         {
             AddValueRow("Below Block ID:", $"{block:X}");
             AddComponentRow("Below Block Material:", block, materials);

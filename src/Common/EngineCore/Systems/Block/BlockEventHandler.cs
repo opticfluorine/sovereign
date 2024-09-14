@@ -132,7 +132,7 @@ public sealed class BlockEventHandler
         var entities = blockGridPositionIndexer.GetEntitiesAtPosition(position);
         if (entities == null) return;
 
-        foreach (var entityId in entities) manager.RemoveBlock(entityId);
+        foreach (var entityId in entities.Keys) manager.RemoveBlock(entityId);
     }
 
     /// <summary>

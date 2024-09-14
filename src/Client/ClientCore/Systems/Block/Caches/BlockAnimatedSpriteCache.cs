@@ -234,7 +234,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="updateSelf">Whether to update the cache entry for the block itself.</param>
     private void UpdateCacheForBlock(GridPosition gridPosition, bool updateSelf)
     {
-
         /* Update cache. */
         var isTopFace = true;
         for (var i = 0; i < 2; ++i)
@@ -244,7 +243,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
             // floors).
             var basisEast = GridPosition.OneX;
             var basisNorth = isTopFace ? GridPosition.OneY : GridPosition.OneZ;
-            
+
             /* Identify neighbors. */
             var below = gridPosition - GridPosition.OneZ;
             var north = gridPosition + basisNorth;
@@ -255,7 +254,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
             var southEast = south + basisEast;
             var southWest = south - basisEast;
             var northWest = north - basisEast;
-            
+
             // Update cache for all neighbors in the plane.
             UpdateCacheAtPosition(north, isTopFace);
             UpdateCacheAtPosition(south, isTopFace);
@@ -284,12 +283,12 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         if (blockIds == null || blockIds.Count == 0) return;
 
         /* Resolve to the tile sprite level. */
-        var blockId = blockIds.First();
+        var blockId = blockIds.Keys.First();
         var centerId = GetTileSpriteIdForBlock(blockId, isTopFace);
         if (centerId < 0)
             // Block isn't ready yet, return at a later pass.
             return;
-        
+
         // Determine the orientation of the world-space plane on which the tile sprites are positioned.
         // This ensures that matching is done across the same surface (e.g. walls with walls, floors with
         // floors).
@@ -337,7 +336,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         var blockIds = blockIndexer.GetEntitiesAtPosition(gridPosition);
         if (blockIds == null || blockIds.Count == 0) return TileSprite.Empty;
 
-        return GetTileSpriteIdForBlock(blockIds.First(), isTopFace);
+        return GetTileSpriteIdForBlock(blockIds.Keys.First(), isTopFace);
     }
 
     /// <summary>

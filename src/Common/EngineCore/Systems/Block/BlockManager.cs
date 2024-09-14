@@ -103,7 +103,7 @@ public sealed class BlockManager
         var blocks = blockPositionIndexer.GetEntitiesAtPosition(belowPos);
         if (blocks == null) return;
 
-        foreach (var belowBlock in blocks) aboveBlocks.AddComponent(belowBlock, entityId);
+        foreach (var belowBlock in blocks.Keys) aboveBlocks.AddComponent(belowBlock, entityId);
     }
 
     /// <summary>
@@ -124,7 +124,7 @@ public sealed class BlockManager
         var belowBlocks = blockPositionIndexer.GetEntitiesAtPosition(belowPos);
         if (belowBlocks == null) return;
 
-        foreach (var belowBlockId in belowBlocks) aboveBlocks.RemoveComponent(belowBlockId);
+        foreach (var belowBlockId in belowBlocks.Keys) aboveBlocks.RemoveComponent(belowBlockId);
     }
 
     /// <summary>
@@ -141,7 +141,7 @@ public sealed class BlockManager
         var blocks = blockPositionIndexer.GetEntitiesAtPosition(abovePos);
         var hasAbove = blocks != null && blocks.Count > 0;
         if (hasAbove)
-            aboveBlock = blocks!.First();
+            aboveBlock = blocks!.Keys.First();
         else
             aboveBlock = 0;
 
