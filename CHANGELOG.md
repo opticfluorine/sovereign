@@ -2,6 +2,11 @@
 
 ## 2024
 
+#### 14 September 2024
+
+* Block Template Entity Editor: Default new block template entities to have the Drawable
+  tag since almost all block types will be drawable.
+
 #### 13 September 2024
 
 * Default Resources: Created an initial set of sprite/animated sprite/tile sprite/material

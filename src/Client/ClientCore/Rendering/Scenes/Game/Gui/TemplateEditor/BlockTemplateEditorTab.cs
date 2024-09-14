@@ -293,7 +293,8 @@ public class BlockTemplateEditorTab
         var emptyDef = new EntityDefinition
         {
             EntityId = entityTable.TakeNextTemplateEntityId(),
-            Material = new MaterialPair(1, 0)
+            Material = new MaterialPair(1, 0),
+            Drawable = true
         };
         SaveDefinition(emptyDef);
     }
