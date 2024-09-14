@@ -27,3 +27,27 @@ the Admin role, then press the `Ins` key. The Template Entity Editor should be d
 They can be created and modified through the Template Entity Editor using the *Blocks* tab.
 
 ![Block Template Editor](images/block_template_editor.png)
+
+The left-hand side of the editor displays a list of all Block Template Entities known to the server.
+New Block Template Entities may be created by clicking the *+* button below the list; this will
+create a new Block Template Entity on the server with default values.
+
+Block Template Entities may be opened for editing by clicking them in the left-hand list. The actively
+selected Block Template Entity is highlighted in the list, and its editable properties are displayed
+in drop-down categories to the right. The following components may be modified for a Block Template
+Entity:
+
+| Component         | Purpose                                               | Default Value         |
+| ----------------- | ----------------------------------------------------- | --------------------- |
+| Name              | Name for the Block Template Entity. Should be unique. | *(blank)*             |
+| Drawable          | Whether the block can be drawn. Usually true.         | Checked               |
+| Material/Modifier | Material and modifier for the block.                  | Material 1/Modifier 0 |
+
+Clicking the *Save* button at the bottom of the editor will send the updated values to the server, and
+the updated Block Template Entity will be sent to all connected clients. Clicking the *Cancel* button
+will revert any local changes; the selected Block Template Entity will then match the definition from
+the server.
+
+Block Template Entities may not be deleted. This is by design to prevent blocks from referencing a
+template that no longer exists. If a template is no longer needed, the recommended best practice is
+to deprecate the template by changing its Name component to an appropriate value (e.g. *Deprecated*).

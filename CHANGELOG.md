@@ -6,6 +6,7 @@
 
 * Block Template Entity Editor: Default new block template entities to have the Drawable
   tag since almost all block types will be drawable.
+* Documentation: Add documentation for Block Template Entity Editor.
 
 #### 13 September 2024
 
