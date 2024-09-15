@@ -80,7 +80,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <summary>
     ///     Block entity IDs whose templates have changed since the last cache update.
     /// </summary>
-    private readonly HashSet<ulong> templateChanges = new();
+    private readonly ConcurrentDictionary<ulong, byte> templateChanges = new();
 
     private readonly TileSpriteManager tileSpriteManager;
 
@@ -410,7 +410,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
             changedBlocks.Clear();
             removedBlocks.Clear();
 
-            changedBlocks.UnionWith(templateChanges.Where(entityId =>
+            changedBlocks.UnionWith(templateChanges.Keys.Where(entityId =>
                 blockPositions.HasComponentForEntity(entityId) ||
                 blockPositions.HasPendingComponentForEntity(entityId)));
             templateChanges.Clear();
@@ -523,7 +523,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
     private void OnTemplateChange(ulong entityId, ulong templateEntityId)
     {
-        templateChanges.Add(entityId);
+        templateChanges.TryAdd(entityId, 0);
     }
 
     /// <summary>
