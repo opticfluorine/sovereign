@@ -76,7 +76,7 @@ public class WorldEditorGui
     /// </summary>
     public void Render()
     {
-        ImGui.SetNextWindowSize(new Vector2(300.0f, 160.0f));
+        ImGui.SetNextWindowSize(new Vector2(300.0f, 170.0f));
         if (!ImGui.Begin("World Editor", ImGuiWindowFlags.NoResize)) return;
 
         RenderBlockTemplateControl();
