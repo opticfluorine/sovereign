@@ -11,6 +11,7 @@ Entity-Component-System (ECS) framework.
 Sovereign Engine is made available under the GPLv3 license.
 
 ```{toctree}
+:maxdepth: 2
 creators/index.md
 developers/index.md
 attributions.md
