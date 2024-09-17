@@ -248,7 +248,7 @@ sprite editor displays these contexts in rows. New rows may be added by clicking
   list resolves this issue. The list is also automatically sorted when the tile sprite
   is saved.
   :::
-* Neighboring tiles for the north, east, south, and west directions in order. Clicking
+* Neighboring tiles in eight directions beginning with north and proceeding clockwise. Clicking
   on the neighboring tile will open the tile sprite selector allowing for another tile
   sprite or wildcard to be selected.
 * Controls for adding or removing animated sprite layers to the tile context. Similar
