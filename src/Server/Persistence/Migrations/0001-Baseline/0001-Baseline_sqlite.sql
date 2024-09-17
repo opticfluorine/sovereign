@@ -297,6 +297,78 @@ VALUES (0x7FFE000000000000, 0);
 INSERT INTO Drawable (id, value)
 VALUES (0x7FFE000000000000, 1);
 
+-- Water block template entity.
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000001);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000001, 'Water');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000001, 2);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000001, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000001, 1);
+
+-- GrassRock block template entity (currently unused).
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000002);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000002, 'GrassRock');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000002, 1);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000002, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000002, 1);
+
+-- Dirt block template entity.
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000003);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000003, 'Dirt');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000003, 3);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000003, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000003, 1);
+
+-- Sand block template entity.
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000004);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000004, 'Sand');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000004, 4);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000004, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000004, 1);
+
+-- Rock block template entity.
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000005);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000005, 'Rock');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000005, 5);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000005, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000005, 1);
+
+-- Cobblestone block template entity.
+INSERT INTO Entity (id)
+VALUES (0x7FFE000000000006);
+INSERT INTO Name (id, value)
+VALUES (0x7FFE000000000006, 'Cobblestone');
+INSERT INTO Material (id, material)
+VALUES (0x7FFE000000000006, 6);
+INSERT INTO MaterialModifier (id, modifier)
+VALUES (0x7FFE000000000006, 0);
+INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000006, 1);
+
 -- Initial block data at origin.
 INSERT INTO WorldSegmentBlockData
 VALUES (0, 0, 0,
