@@ -42,20 +42,20 @@ public sealed class WorldLayer
     /// <summary>
     ///     Tile sprites forming the floor of this layer.
     /// </summary>
-    public IList<PosVelId> TopFaceTileSprites { get; }
-        = new List<PosVelId>(InitialTileSpriteCount);
+    public List<PosVelId> TopFaceTileSprites { get; }
+        = new(InitialTileSpriteCount);
 
     /// <summary>
     ///     Front face tile sprites of blocks in the next higher layer.
     /// </summary>
-    public IList<PosVelId> FrontFaceTileSprites { get; }
-        = new List<PosVelId>(InitialTileSpriteCount);
+    public List<PosVelId> FrontFaceTileSprites { get; }
+        = new(InitialTileSpriteCount);
 
     /// <summary>
     ///     Animated sprites to additionally be drawn in this layer.
     /// </summary>
-    public IList<PosVelId> AnimatedSprites { get; }
-        = new List<PosVelId>(InitialAnimatedSpriteCount);
+    public List<PosVelId> AnimatedSprites { get; }
+        = new(InitialAnimatedSpriteCount);
 
     /// <summary>
     ///     Resets the layer.

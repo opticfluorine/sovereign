@@ -59,7 +59,7 @@ public sealed class WorldSpriteSequencer
     /// <param name="systemTime">System time of this frame.</param>
     /// <param name="verticesAdded">Number of vertices sequenced by this call.</param>
     /// <param name="indicesAdded">Number of indices sequenced by this call.</param>
-    public unsafe void SequenceAnimatedSprites(IList<PosVelId> animatedSprites,
+    public unsafe void SequenceAnimatedSprites(List<PosVelId> animatedSprites,
         WorldVertex[] vertexBuffer, uint[] indexBuffer,
         int bufferOffset, int indexBufferOffset, ulong systemTime,
         out int verticesAdded, out int indicesAdded)

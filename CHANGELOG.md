@@ -2,6 +2,12 @@
 
 ## 2024
 
+#### 16 September 2024
+
+* Renderer: Reduce memory allocations in renderer critical path to ease GC pressure
+  at high framerates.
+* Documentation: Finish updates to documentation for the upcoming v0.4.0 release.
+
 #### 14 September 2024
 
 * Block Template Entity Editor: Default new block template entities to have the Drawable

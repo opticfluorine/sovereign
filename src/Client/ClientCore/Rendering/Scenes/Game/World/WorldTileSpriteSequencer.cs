@@ -69,8 +69,8 @@ public sealed class WorldTileSpriteSequencer
     /// <param name="animatedSprites">Animated sprites to render.</param>
     /// <param name="tileSprites">Tile sprites to transform.</param>
     /// <param name="isTopFace">Whether the tile sprites are top faces of blocks.</param>
-    public void SequenceTileSprites(IList<PosVelId> animatedSprites,
-        IList<PosVelId> tileSprites, bool isTopFace)
+    public void SequenceTileSprites(List<PosVelId> animatedSprites,
+        List<PosVelId> tileSprites, bool isTopFace)
     {
         foreach (var tileSpriteInfo in tileSprites)
         {
