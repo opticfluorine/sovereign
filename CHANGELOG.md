@@ -4,9 +4,10 @@
 
 #### 16 September 2024
 
+* **Release v0.4.0**
 * Renderer: Reduce memory allocations in renderer critical path to ease GC pressure
   at high framerates.
-* Documentation: Finish updates to documentation for the upcoming v0.4.0 release.
+* Documentation: Finish updates to documentation for the v0.4.0 release.
 
 #### 14 September 2024
 

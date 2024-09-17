@@ -13,9 +13,9 @@ extend through its distributed Entity-Component-System (ECS) framework.
 
 Sovereign Engine is made available under the GPLv3 license.
 
-![Screenshot of Sovereign Client v0.1.0 running with test data.](screenshot.png)
+![Screenshot of Sovereign Engine v0.4.0.](https://update.sovereignengine.com/screenshots/Sovereign_v0.4.0.png)
 
-## Current Features (v0.3.0)
+## Current Features (v0.4.0)
 
 * Client and server supporting Windows and Linux platforms
 * Login and registration
@@ -31,15 +31,16 @@ Sovereign Engine is made available under the GPLv3 license.
 * Integrated debug GUI in client
 * In-game chat
 * Admin roles for users
-* Integrated resource editor for graphical resources
+* Integrated editor for world map, server-side data, and graphical resources
+* Default graphical resources included with client
 
 For full details of the latest changes and features, see the [changelog](CHANGELOG.md).
 
-## Upcoming Features (v0.4.0)
+## Upcoming Features (v0.5.0)
 
-* Performance enhancements to distributed ECS with focus on server-side scalability
-* Server-side entity templates with integrated client-side editor
-* Integrated world editor in client
+* Improved renderer with more flexibility to support advanced effects
+* Lighting and shadows
+* Procedural world generation
 
 ## Getting Started
 
@@ -50,7 +51,7 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 
 ### Install Dependencies
 
-Sovereign Engine requires the .NET 6 (or later) SDK and SQLite 3.x to be
+Sovereign Engine requires the .NET 8 (or later) SDK and SQLite 3.x to be
 installed on your system.
 
 ### Server
@@ -88,6 +89,7 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 | Enter      | Toggle chat                                                 |
 | `          | Toggle Resource Editor Window                               |
 | Insert     | Toggle Template Entity Editor Window (must be admin player) |
+| Del        | Toggle World Editor Window (must be admin player)           |
 | F2         | Toggle Player Debug Window                                  |
 | F3         | Toggle Entity Debug Window                                  |
 | F10        | Toggle Dear ImGui ID Stack Tool                             |
