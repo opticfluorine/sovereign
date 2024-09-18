@@ -399,9 +399,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     public bool HasComponentForEntity(ulong entityId, bool lookback = false)
     {
         var hasLocal = entityToComponentMap.ContainsKey(entityId) && (lookback || !pendingReclaims.Contains(entityId));
-        return entityTable.TryGetTemplate(entityId, out var templateEntityId)
-            ? hasLocal || HasComponentForEntity(templateEntityId)
-            : hasLocal;
+        return hasLocal || (entityTable.TryGetTemplate(entityId, out var templateEntityId) &&
+                            HasComponentForEntity(templateEntityId));
     }
 
     /// <summary>

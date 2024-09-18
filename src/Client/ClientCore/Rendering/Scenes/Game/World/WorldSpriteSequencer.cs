@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
@@ -52,60 +53,52 @@ public sealed class WorldSpriteSequencer
     ///     Sequences animated sprites into the buffers.
     /// </summary>
     /// <param name="animatedSprites">Animated sprites to sequence.</param>
-    /// <param name="vertexBuffer">Vertex buffer.</param>
-    /// <param name="indexBuffer">Index buffer.</param>
-    /// <param name="bufferOffset">Offset into the vertex buffer.</param>
-    /// <param name="indexBufferOffset">Offset into the index buffer.</param>
+    /// <param name="renderPlan">Rendering plan to populate.</param>
     /// <param name="systemTime">System time of this frame.</param>
-    /// <param name="verticesAdded">Number of vertices sequenced by this call.</param>
-    /// <param name="indicesAdded">Number of indices sequenced by this call.</param>
-    public unsafe void SequenceAnimatedSprites(List<PosVelId> animatedSprites,
-        WorldVertex[] vertexBuffer, uint[] indexBuffer,
-        int bufferOffset, int indexBufferOffset, ulong systemTime,
-        out int verticesAdded, out int indicesAdded)
+    public void SequenceAnimatedSprites(List<PosVelId> animatedSprites, RenderPlan renderPlan, ulong systemTime,
+        out uint baseIndex, out uint indexCount)
     {
-        var vertexPos = bufferOffset;
-        var indexPos = indexBufferOffset;
+        baseIndex = 0;
+        indexCount = 0;
 
-        if (!CanBuffersHoldSprites(animatedSprites.Count,
-                vertexBuffer.Length, indexBuffer.Length,
-                bufferOffset, indexBufferOffset))
+        if (!renderPlan.TryAddVertices(animatedSprites.Count * VerticesPerSprite, out var vertices, out var baseVertex))
         {
-            verticesAdded = indicesAdded = 0;
+            Logger.Error("Render plan vertex buffer too small for update.");
+            return;
+        }
+
+        if (!renderPlan.TryAddIndices(animatedSprites.Count * IndicesPerSprite, out var indices, out baseIndex))
+        {
+            Logger.Error("Render plan index buffer too small for update.");
             return;
         }
 
         /* Update buffers directly. */
-        fixed (WorldVertex* vertexBase = vertexBuffer)
+        var spriteCount = 0;
+        foreach (var positionedAnimatedSprite in animatedSprites)
         {
-            fixed (uint* indexBase = indexBuffer)
-            {
-                foreach (var positionedAnimatedSprite in animatedSprites)
-                {
-                    var pos = positionedAnimatedSprite.Position;
-                    var vel = positionedAnimatedSprite.Velocity;
-                    var animId = positionedAnimatedSprite.Id;
-                    var entityId = positionedAnimatedSprite.EntityId;
-                    var animatedSprite = animatedSpriteManager.AnimatedSprites[animId];
+            var pos = positionedAnimatedSprite.Position;
+            var vel = positionedAnimatedSprite.Velocity;
+            var animId = positionedAnimatedSprite.Id;
+            var entityId = positionedAnimatedSprite.EntityId;
+            var animatedSprite = animatedSpriteManager.AnimatedSprites[animId];
 
-                    var animationPhase = animationPhases.HasComponentForEntity(entityId)
-                        ? animationPhases[entityId]
-                        : AnimationPhase.Default;
+            var animationPhase = animationPhases.HasComponentForEntity(entityId)
+                ? animationPhases[entityId]
+                : AnimationPhase.Default;
 
-                    var spriteData = animatedSprite.GetPhaseData(animationPhase);
-                    var sprite = spriteData.GetSpriteForTime(systemTime, positionedAnimatedSprite.Orientation);
+            var spriteData = animatedSprite.GetPhaseData(animationPhase);
+            var sprite = spriteData.GetSpriteForTime(systemTime, positionedAnimatedSprite.Orientation);
 
-                    AddVerticesForSprite(sprite, pos, vel, vertexBase, vertexPos);
-                    AddIndicesForSprite(indexBase, indexPos, (uint)vertexPos);
+            AddVerticesForSprite(sprite, pos, vel,
+                vertices.Slice(spriteCount * VerticesPerSprite, VerticesPerSprite));
+            AddIndicesForSprite(indices.Slice(spriteCount * IndicesPerSprite, IndicesPerSprite),
+                (uint)(baseVertex + spriteCount * VerticesPerSprite));
 
-                    vertexPos += VerticesPerSprite;
-                    indexPos += IndicesPerSprite;
-                }
-            }
+            spriteCount++;
         }
 
-        verticesAdded = vertexPos - bufferOffset;
-        indicesAdded = indexPos - indexBufferOffset;
+        indexCount = (uint)spriteCount * IndicesPerSprite;
     }
 
     /// <summary>
@@ -117,105 +110,81 @@ public sealed class WorldSpriteSequencer
     /// <param name="sprite">Sprite to sequence.</param>
     /// <param name="position">Position of entity.</param>
     /// <param name="velocity">Velocity of entity.</param>
-    /// <param name="vertexBase">Pointer to beginning of vertex buffer.</param>
-    /// <param name="vertexPos">Position of the first vertex to add.</param>
-    private unsafe void AddVerticesForSprite(Sprite sprite, Vector3 position,
-        Vector3 velocity, WorldVertex* vertexBase, int vertexPos)
+    /// <param name="vertices">Span containing vertices for the single sprite.</param>
+    private void AddVerticesForSprite(Sprite sprite, Vector3 position,
+        Vector3 velocity, Span<WorldVertex> vertices)
     {
         /* Retrieve sprite information. */
         var spriteInfo = atlasMap.MapElements[sprite.Id];
 
         /* Top left. */
-        var vertex = vertexBase + vertexPos;
-        vertex->PosX = position.X;
-        vertex->PosY = position.Y;
-        vertex->PosZ = position.Z;
-        vertex->VelX = velocity.X;
-        vertex->VelY = velocity.Y;
-        vertex->VelZ = velocity.Z;
-        vertex->TexX = spriteInfo.NormalizedLeftX;
-        vertex->TexY = spriteInfo.NormalizedTopY;
+        vertices[0] = new WorldVertex
+        {
+            PosX = position.X,
+            PosY = position.Y,
+            PosZ = position.Z,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedLeftX,
+            TexY = spriteInfo.NormalizedTopY
+        };
 
         /* Top right. */
-        vertex++;
-        vertex->PosX = position.X + spriteInfo.WidthInTiles;
-        vertex->PosY = position.Y;
-        vertex->PosZ = position.Z;
-        vertex->VelX = velocity.X;
-        vertex->VelY = velocity.Y;
-        vertex->VelZ = velocity.Z;
-        vertex->TexX = spriteInfo.NormalizedRightX;
-        vertex->TexY = spriteInfo.NormalizedTopY;
+        vertices[1] = new WorldVertex
+        {
+            PosX = position.X + spriteInfo.WidthInTiles,
+            PosY = position.Y,
+            PosZ = position.Z,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedRightX,
+            TexY = spriteInfo.NormalizedTopY
+        };
 
         /* Bottom right. */
-        vertex++;
-        vertex->PosX = position.X + spriteInfo.WidthInTiles;
-        vertex->PosY = position.Y - spriteInfo.HeightInTiles;
-        vertex->PosZ = position.Z;
-        vertex->VelX = velocity.X;
-        vertex->VelY = velocity.Y;
-        vertex->VelZ = velocity.Z;
-        vertex->TexX = spriteInfo.NormalizedRightX;
-        vertex->TexY = spriteInfo.NormalizedBottomY;
+        vertices[2] = new WorldVertex
+        {
+            PosX = position.X + spriteInfo.WidthInTiles,
+            PosY = position.Y - spriteInfo.HeightInTiles,
+            PosZ = position.Z,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedRightX,
+            TexY = spriteInfo.NormalizedBottomY
+        };
 
         /* Bottom left. */
-        vertex++;
-        vertex->PosX = position.X;
-        vertex->PosY = position.Y - spriteInfo.HeightInTiles;
-        vertex->PosZ = position.Z;
-        vertex->VelX = velocity.X;
-        vertex->VelY = velocity.Y;
-        vertex->VelZ = velocity.Z;
-        vertex->TexX = spriteInfo.NormalizedLeftX;
-        vertex->TexY = spriteInfo.NormalizedBottomY;
+        vertices[3] = new WorldVertex
+        {
+            PosX = position.X,
+            PosY = position.Y - spriteInfo.HeightInTiles,
+            PosZ = position.Z,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedLeftX,
+            TexY = spriteInfo.NormalizedBottomY
+        };
     }
 
     /// <summary>
     ///     Adds the six indices for the two triangles that compose a sprite.
     /// </summary>
-    /// <param name="indexBase">Pointer to index buffer to populate.</param>
-    /// <param name="indexPos">Position for the first index.</param>
+    /// <param name="indices">Span containing indices for the single sprite.</param>
     /// <param name="vertexPos">Position of the first vertex.</param>
-    private unsafe void AddIndicesForSprite(uint* indexBase, int indexPos, uint vertexPos)
+    private void AddIndicesForSprite(Span<uint> indices, uint vertexPos)
     {
-        var index = indexBase + indexPos;
-
         /* Upper left triangle. */
-        *index = vertexPos;
-        *(index + 1) = vertexPos + 1;
-        *(index + 2) = vertexPos + 3;
+        indices[0] = vertexPos;
+        indices[1] = vertexPos + 1;
+        indices[2] = vertexPos + 3;
 
         /* Lower right triangle. */
-        *(index + 3) = vertexPos + 1;
-        *(index + 4) = vertexPos + 2;
-        *(index + 5) = vertexPos + 3;
-    }
-
-    /// <summary>
-    ///     Determines if the buffers can hold the given number of additional sprites.
-    /// </summary>
-    /// <param name="count">Number of sprites to sequence.</param>
-    /// <param name="vertexBufLen">Length of the vertex buffer.</param>
-    /// <param name="indexBufLen">Length of the index buffer.</param>
-    /// <param name="bufferOffset">Offset into vertex buffer.</param>
-    /// <param name="indexBufferOffset">Offset into index buffer.</param>
-    /// <returns>true if the buffers are large enough, false otherwise.</returns>
-    private bool CanBuffersHoldSprites(int count, int vertexBufLen, int indexBufLen,
-        int bufferOffset, int indexBufferOffset)
-    {
-        var newVertices = VerticesPerSprite * count;
-        var newIndices = IndicesPerSprite * count;
-
-        var vertexOverflow = bufferOffset + newVertices - vertexBufLen;
-        if (vertexOverflow > 0)
-            Logger.ErrorFormat("Layer would add {0} vertices, overflowing by {1}.",
-                newVertices, vertexOverflow);
-
-        var indexOverflow = indexBufferOffset + newIndices - indexBufLen;
-        if (indexOverflow > 0)
-            Logger.ErrorFormat("Layer would add {0} indices, overflowing by {1}.",
-                newIndices, indexOverflow);
-
-        return vertexOverflow <= 0 && indexOverflow <= 0;
+        indices[3] = vertexPos + 1;
+        indices[4] = vertexPos + 2;
+        indices[5] = vertexPos + 3;
     }
 }

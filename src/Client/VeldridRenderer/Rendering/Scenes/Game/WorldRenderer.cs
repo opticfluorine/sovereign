@@ -16,6 +16,7 @@
  */
 
 using System;
+using Sovereign.ClientCore.Rendering;
 using Sovereign.VeldridRenderer.Rendering.Resources;
 using Veldrid;
 
@@ -92,7 +93,8 @@ public class WorldRenderer : IDisposable
     ///     Renders the game world.
     /// </summary>
     /// <param name="commandList">Active command list.</param>
-    public void Render(CommandList commandList)
+    /// <param name="renderPlan">Render plan.</param>
+    public void Render(CommandList commandList, RenderPlan renderPlan)
     {
         if (gameResMgr.VertexBuffer == null || gameResMgr.IndexBuffer == null)
             throw new InvalidOperationException("Buffers not ready.");
@@ -108,12 +110,16 @@ public class WorldRenderer : IDisposable
             IndexFormat.UInt32);
 
         // Execute draw commands from the buffer.
-        uint offset = 0;
-        for (var i = 0; i < gameResMgr.DrawCount; ++i)
+        var commands = renderPlan.GetCommands();
+        for (var i = 0; i < commands.Length; ++i)
         {
-            var drawSize = gameResMgr.DrawBuffer[i];
-            commandList.DrawIndexed((uint)drawSize, 1, offset, 0, 0);
-            offset += (uint)drawSize;
+            var command = commands[i];
+            switch (command.RenderCommandType)
+            {
+                case RenderCommandType.DrawSprites:
+                    commandList.DrawIndexed(command.IndexCount, 1, command.BaseIndex, 0, 0);
+                    break;
+            }
         }
 
         commandList.PopDebugGroup();
@@ -130,7 +136,7 @@ public class WorldRenderer : IDisposable
             throw new InvalidOperationException("Vertex uniform buffer not ready.");
         if (resMgr.AtlasTexture == null)
             throw new InvalidOperationException("Texture atlas not ready.");
-        
+
         resourceSet?.Dispose();
 
         var resLayoutDesc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(

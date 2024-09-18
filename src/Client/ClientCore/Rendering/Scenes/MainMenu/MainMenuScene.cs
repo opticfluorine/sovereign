@@ -16,7 +16,6 @@
 
 using System.Numerics;
 using Sovereign.ClientCore.Rendering.Configuration;
-using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
@@ -91,12 +90,8 @@ public class MainMenuScene : IScene
     {
     }
 
-    public void PopulateBuffers(WorldVertex[] vertexBuffer, uint[] indexBuffer, int[] drawLengths,
-        out int vertexCount, out int indexCount, out int drawCount)
+    public void BuildRenderPlan(RenderPlan renderPlan)
     {
-        vertexCount = 0;
-        indexCount = 0;
-        drawCount = 0;
     }
 
     public void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles, out Vector3 cameraPos,

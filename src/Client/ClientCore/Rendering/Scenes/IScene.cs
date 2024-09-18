@@ -16,7 +16,6 @@
  */
 
 using System.Numerics;
-using Sovereign.ClientCore.Rendering.Resources.Buffers;
 
 namespace Sovereign.ClientCore.Rendering.Scenes;
 
@@ -55,14 +54,8 @@ public interface IScene
     /// 
     /// The maximum number of elements in each buffer is defined by the low-level renderer
     /// and may be determined from the length of the arrays.
-    /// <param name="vertexBuffer">Vertex buffer for update.</param>
-    /// <param name="indexBuffer">Index buffer for update.</param>
-    /// <param name="drawLengths">Number of vertices to use for each sequential draw.</param>
-    /// <param name="vertexCount">Number of vertices that were added to the buffer.</param>
-    /// <param name="indexCount">Number of indices that were added to the buffer.</param>
-    /// <param name="drawCount">Number of draws to perform.</param>
-    void PopulateBuffers(WorldVertex[] vertexBuffer, uint[] indexBuffer,
-        int[] drawLengths, out int vertexCount, out int indexCount, out int drawCount);
+    /// <param name="renderPlan">Render plan to populate.</param>
+    void BuildRenderPlan(RenderPlan renderPlan);
 
     /// <summary>
     ///     Populates the world rendering vertex constants buffer, if applicable.

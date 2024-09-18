@@ -58,19 +58,19 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
 
     public void ConsumeScene(IScene scene)
     {
-        if (gameResManager.VertexBuffer == null || gameResManager.IndexBuffer == null)
+        if (gameResManager.VertexBuffer == null || gameResManager.IndexBuffer == null ||
+            gameResManager.RenderPlan == null)
             throw new InvalidOperationException("Buffers not ready.");
         if (resManager.CommandList == null)
             throw new InvalidOperationException("Command list not ready.");
 
         /* General processing. */
-        scene.PopulateBuffers(gameResManager.VertexBuffer.Buffer,
-            gameResManager.IndexBuffer.Buffer,
-            gameResManager.DrawBuffer,
-            out var vertexCount, out var indexCount, out var drawCount);
-        gameResManager.VertexBuffer.UsedLength = (uint)vertexCount;
-        gameResManager.IndexBuffer.UsedLength = (uint)indexCount;
-        gameResManager.DrawCount = drawCount;
+        var renderPlan = gameResManager.RenderPlan;
+        renderPlan.Reset();
+        scene.BuildRenderPlan(renderPlan);
+
+        gameResManager.VertexBuffer.UsedLength = (uint)renderPlan.VertexCount;
+        gameResManager.IndexBuffer.UsedLength = (uint)renderPlan.IndexCount;
         worldVcUpdater.Update(scene);
 
         /* Post updates to buffers. */
@@ -78,7 +78,7 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
         gameResManager.UpdateBuffers(commandList);
 
         /* Render. */
-        renderer.Render(commandList);
+        renderer.Render(commandList, renderPlan);
     }
 
     /// <summary>

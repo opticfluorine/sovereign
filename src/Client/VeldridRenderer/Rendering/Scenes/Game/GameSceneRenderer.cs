@@ -16,6 +16,7 @@
  */
 
 using System;
+using Sovereign.ClientCore.Rendering;
 using Veldrid;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
@@ -48,8 +49,9 @@ public class GameSceneRenderer : IDisposable
     ///     Renders the game scene.
     /// </summary>
     /// <param name="commandList">Active command list.</param>
-    public void Render(CommandList commandList)
+    /// <param name="renderPlan">Render plan.</param>
+    public void Render(CommandList commandList, RenderPlan renderPlan)
     {
-        worldRenderer.Render(commandList);
+        worldRenderer.Render(commandList, renderPlan);
     }
 }

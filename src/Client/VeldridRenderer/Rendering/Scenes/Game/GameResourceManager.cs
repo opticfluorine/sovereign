@@ -16,6 +16,7 @@
  */
 
 using System;
+using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.VeldridRenderer.Rendering.Resources;
 using Veldrid;
@@ -86,6 +87,11 @@ public class GameResourceManager : IDisposable
     public VeldridUpdateBuffer<WorldVertexShaderConstants>? VertexUniformBuffer { get; private set; }
 
     /// <summary>
+    ///     Render plan for the game scene.
+    /// </summary>
+    public RenderPlan? RenderPlan { get; private set; }
+
+    /// <summary>
     ///     Number of elements to use in each draw.
     /// </summary>
     public int[] DrawBuffer { get; private set; }
@@ -132,6 +138,8 @@ public class GameResourceManager : IDisposable
 
         VertexUniformBuffer = new VeldridUpdateBuffer<WorldVertexShaderConstants>(device,
             BufferUsage.UniformBuffer, 1);
+
+        RenderPlan = new RenderPlan(VertexBuffer.Buffer, IndexBuffer.Buffer, MaximumDraws);
 
         /* Load resources. */
         LoadWorldShaders();

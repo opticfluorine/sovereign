@@ -2,6 +2,13 @@
 
 ## 2024
 
+#### 17 September 2024
+
+* Renderer: Refactored to use an extensible `RenderPlan` class instead of the
+  previous handful of arrays that were passed around to be populated. This will
+  make it significantly easier to extend the renderer's behavior, such as with
+  lighting and shadows as planned for the upcoming v0.5.0 release.
+
 #### 16 September 2024
 
 * **Release v0.4.0**

@@ -18,7 +18,6 @@
 using System.Numerics;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
-using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 using Sovereign.ClientCore.Rendering.Scenes.Game.World;
 using Sovereign.EngineCore.Configuration;
@@ -75,11 +74,9 @@ public sealed class GameScene : IScene
     {
     }
 
-    public void PopulateBuffers(WorldVertex[] vertexBuffer, uint[] indexBuffer,
-        int[] drawLengths, out int vertexCount, out int indexCount, out int drawCount)
+    public void BuildRenderPlan(RenderPlan renderPlan)
     {
-        worldVertexSequencer.SequenceVertices(vertexBuffer, indexBuffer, drawLengths,
-            out vertexCount, out indexCount, out drawCount, timeSinceTick, systemTime);
+        worldVertexSequencer.SequenceVertices(renderPlan, timeSinceTick, systemTime);
     }
 
     public void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles,

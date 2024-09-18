@@ -17,7 +17,6 @@
 
 using System.Collections.Generic;
 using Castle.Core.Logging;
-using Sovereign.ClientCore.Rendering.Resources.Buffers;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 
@@ -47,31 +46,27 @@ public sealed class WorldLayerVertexSequencer
     ///     Adds a single layer to the vertex buffer.
     /// </summary>
     /// <param name="layer">Layer to be added.</param>
-    /// <param name="vertexBuffer">Vertex buffer to populate.</param>
-    /// <param name="indexBuffer">Index buffer to populate.</param>
-    /// <param name="bufferOffset">Offset into the vertex buffer.</param>
-    /// <param name="indexBufferOffset">Offset into the index buffer.</param>
+    /// <param name="renderPlan">Rendering plan to populate.</param>
     /// <param name="systemTime">System time of the current frame.</param>
-    /// <param name="verticesAdded">Number of vertices added to the buffer.</param>
-    /// <param name="indicesAdded">Number of indices added to the buffer.</param>
-    public void AddLayer(WorldLayer layer, WorldVertex[] vertexBuffer,
-        uint[] indexBuffer, int bufferOffset, int indexBufferOffset, ulong systemTime,
-        out int blockVerticesAdded, out int blockIndicesAdded, out int spriteVerticesAdded, out int spriteIndicesAdded)
+    public void AddLayer(WorldLayer layer, RenderPlan renderPlan, ulong systemTime)
     {
         /* Sequence the tile sprites into the buffers. */
         sequencedSprites.Clear();
         tileSpriteSequencer.SequenceTileSprites(sequencedSprites, layer.TopFaceTileSprites, true);
         tileSpriteSequencer.SequenceTileSprites(sequencedSprites, layer.FrontFaceTileSprites, false);
 
-        spriteSequencer.SequenceAnimatedSprites(sequencedSprites,
-            vertexBuffer, indexBuffer,
-            bufferOffset, indexBufferOffset, systemTime,
-            out blockVerticesAdded, out blockIndicesAdded);
+        spriteSequencer.SequenceAnimatedSprites(sequencedSprites, renderPlan, systemTime, out var tileBaseIndex,
+            out var tileIndexCount);
 
         /* Sequence the remaining animated sprites into the buffers. */
-        spriteSequencer.SequenceAnimatedSprites(layer.AnimatedSprites,
-            vertexBuffer, indexBuffer,
-            bufferOffset + blockVerticesAdded, indexBufferOffset + blockIndicesAdded,
-            systemTime, out spriteVerticesAdded, out spriteIndicesAdded);
+        spriteSequencer.SequenceAnimatedSprites(layer.AnimatedSprites, renderPlan, systemTime, out var spriteBaseIndex,
+            out var spriteIndexCount);
+
+        // Schedule sprite draw commands into the render plan.
+        if (!renderPlan.TryDrawSprites(tileBaseIndex, tileIndexCount) ||
+            !renderPlan.TryDrawSprites(spriteBaseIndex, spriteIndexCount))
+        {
+            Logger.Error("Not enough room in command list to add draw commands.");
+        }
     }
 }
