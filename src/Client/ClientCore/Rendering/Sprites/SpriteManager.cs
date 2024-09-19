@@ -170,7 +170,24 @@ public sealed class SpriteManager
         foreach (var sprite in Sprites)
         {
             var coverageMap = SpriteSheetCoverage[sprite.SpritesheetName];
+            var isNew = coverageMap[sprite.Row, sprite.Column] is null;
             coverageMap[sprite.Row, sprite.Column] = sprite;
+
+            if (isNew)
+            {
+                // Sprite is newly added, do any post-processing needed.
+                CheckOpacity(sprite);
+            }
         }
+    }
+
+    /// <summary>
+    ///     Updates the opacity flag of the given sprite.
+    /// </summary>
+    /// <param name="sprite">Sprite.</param>
+    private void CheckOpacity(Sprite sprite)
+    {
+        var spriteSheet = spriteSheetManager.SpriteSheets[sprite.SpritesheetName];
+        sprite.Opaque = spriteSheet.CheckOpacity(sprite.Row, sprite.Column);
     }
 }

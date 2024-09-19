@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Text.Json.Serialization;
+
 namespace Sovereign.ClientCore.Rendering.Sprites;
 
 /// <summary>
@@ -41,4 +43,10 @@ public sealed class Sprite
     ///     Column containing the sprite.
     /// </summary>
     public int Column { get; set; }
+
+    /// <summary>
+    ///     Flag indicating that the sprite is opaque (i.e. has no transparency).
+    /// </summary>
+    [JsonIgnore]
+    public bool Opaque { get; set; }
 }

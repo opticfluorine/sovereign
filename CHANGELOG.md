@@ -2,6 +2,12 @@
 
 ## 2024
 
+#### 18 September 2024
+
+* Sprites: Automatically detect opaque sprites on load and flag them as
+  such. This will be used for renderer optimizations (no need to draw any
+  sprites that are completely covered by an opaque sprite).
+
 #### 17 September 2024
 
 * Renderer: Refactored to use an extensible `RenderPlan` class instead of the
