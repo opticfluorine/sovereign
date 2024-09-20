@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Materials;
+using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
@@ -72,31 +74,47 @@ public sealed class WorldLayerGrouper
         = new();
 
     /// <summary>
-    ///     Groups the drawables into their respective layers.
+    ///     Clears the layers and returns them to the pool for reuse.
     /// </summary>
-    /// <param name="drawables">Unordered list of drawable entities in range.</param>
-    public void GroupDrawables(List<PositionedEntity> drawables)
+    public void ResetLayers()
     {
-        ResetLayers();
-        foreach (var drawable in drawables) ProcessDrawable(drawable);
+        foreach (var layer in Layers.Values)
+        {
+            layer.Reset();
+            layerPool.ReturnObject(layer);
+        }
+
+        Layers.Clear();
     }
 
     /// <summary>
-    ///     Processes a single drawable.
+    ///     Adds sprites to the appropriate layer while grouping them by entity type.
     /// </summary>
-    /// <param name="drawable">Drawable to process.</param>
-    private void ProcessDrawable(PositionedEntity drawable)
+    /// <param name="entityType">Entity type.</param>
+    /// <param name="position">Entity position.</param>
+    /// <param name="velocity">Entity velocity.</param>
+    /// <param name="spriteIds">Sprite IDs to add.</param>
+    public void AddSprites(EntityType entityType, Vector3 position, Vector3 velocity, List<int> spriteIds)
     {
-        /* Get the entity velocity, defaulting to zero if not set. */
-        var velocity = kinematics.HasComponentForEntity(drawable.EntityId)
-            ? kinematics[drawable.EntityId].Velocity
-            : Vector3.Zero;
+        var zFloor = (int)Math.Floor(position.Z);
+        var layer = SelectLayer(zFloor);
+        var collection = entityType switch
+        {
+            EntityType.NonBlock => layer.AnimatedSprites,
+            EntityType.BlockTopFace => layer.TopFaceTileSprites,
+            EntityType.BlockFrontFace => layer.FrontFaceTileSprites,
+            _ => layer.AnimatedSprites
+        };
 
-        /* Route the drawable to the correct rendering list. */
-        if (materials.HasComponentForEntity(drawable.EntityId))
-            AddMaterial(drawable, materials[drawable.EntityId], velocity);
-        else
-            AddAnimatedSprite(drawable, velocity);
+        foreach (var spriteId in spriteIds)
+        {
+            collection.Add(new PosVelId
+            {
+                Position = position,
+                Velocity = velocity,
+                Id = spriteId
+            });
+        }
     }
 
     /// <summary>
@@ -230,19 +248,5 @@ public sealed class WorldLayerGrouper
     {
         var modifier = materialModifiers.HasComponentForEntity(entityId) ? materialModifiers[entityId] : 0;
         return materialManager.Materials[materialId].MaterialSubtypes[modifier];
-    }
-
-    /// <summary>
-    ///     Clears the layers and returns them to the pool for reuse.
-    /// </summary>
-    private void ResetLayers()
-    {
-        foreach (var layer in Layers.Values)
-        {
-            layer.Reset();
-            layerPool.ReturnObject(layer);
-        }
-
-        Layers.Clear();
     }
 }

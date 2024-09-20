@@ -71,9 +71,9 @@ public class SpriteSheet : IDisposable
             _ => 0xFF000000
         };
 
-        for (var x = column * Definition.SpriteWidth; x < (column + 1) * Definition.SpriteWidth; ++x)
+        for (var y = row * Definition.SpriteHeight; y < (row + 1) * Definition.SpriteHeight; ++y)
         {
-            for (var y = row * Definition.SpriteHeight; y < (row + 1) * Definition.SpriteHeight; ++y)
+            for (var x = column * Definition.SpriteWidth; x < (column + 1) * Definition.SpriteWidth; ++x)
             {
                 var byteOffset = y * Surface.Properties.Pitch + x * Surface.Properties.BytesPerPixel;
                 var pixelValue = (uint)Marshal.ReadInt32(sheetPixelData, (int)byteOffset);

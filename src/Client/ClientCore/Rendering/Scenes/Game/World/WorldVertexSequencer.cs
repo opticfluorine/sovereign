@@ -55,7 +55,6 @@ public sealed class WorldVertexSequencer
     public void SequenceVertices(RenderPlan renderPlan, float timeSinceTick, ulong systemTime)
     {
         RetrieveEntities(timeSinceTick);
-        GroupLayers();
         PrepareLayers(renderPlan, systemTime);
     }
 
@@ -67,14 +66,6 @@ public sealed class WorldVertexSequencer
     {
         drawables.Clear();
         entityRetriever.RetrieveEntities(drawables, timeSinceTick);
-    }
-
-    /// <summary>
-    ///     Groups the layers by their z positions.
-    /// </summary>
-    private void GroupLayers()
-    {
-        grouper.GroupDrawables(drawables);
     }
 
     /// <summary>

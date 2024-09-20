@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.EngineCore.Components.Indexers;
 
 namespace Sovereign.ClientCore.Systems.Perspective;
 
@@ -58,5 +60,17 @@ public class PerspectiveServices
         var minZ = position.Z - viewport.HeightInTiles * 0.5f;
         var maxZ = position.Z + viewport.HeightInTiles * 0.5f;
         return TryGetHighestCoveringEntity(position, minZ, maxZ, out entityId);
+    }
+
+    /// <summary>
+    ///     Gets the perspective line (if any) on which the given block position sits.
+    /// </summary>
+    /// <param name="blockPosition">Block position on the perspective line.</param>
+    /// <param name="perspectiveLine">Perspective line if one is found.</param>
+    /// <returns>true if a perspective line was found, false otherwise.</returns>
+    public bool TryGetPerspectiveLine(GridPosition blockPosition,
+        [NotNullWhen(true)] out PerspectiveLine? perspectiveLine)
+    {
+        return lineManager.TryGetPerspectiveLine(blockPosition, out perspectiveLine);
     }
 }

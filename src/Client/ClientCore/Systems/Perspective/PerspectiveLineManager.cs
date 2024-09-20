@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering;
@@ -44,7 +45,6 @@ namespace Sovereign.ClientCore.Systems.Perspective;
 /// </remarks>
 public class PerspectiveLineManager
 {
-    private static readonly List<int> ToRemove = new();
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly DrawableLookup drawableLookup;
 
@@ -150,6 +150,19 @@ public class PerspectiveLineManager
             indices.Clear();
             indexListPool.ReturnObject(indices);
         }
+    }
+
+    /// <summary>
+    ///     Gets the perspective line, if any, that intersects the given block position.
+    /// </summary>
+    /// <param name="blockPosition">Block position.</param>
+    /// <param name="perspectiveLine"></param>
+    /// <returns></returns>
+    public bool TryGetPerspectiveLine(GridPosition blockPosition,
+        [NotNullWhen(true)] out PerspectiveLine? perspectiveLine)
+    {
+        var lineIndex = GetIndexForBlockPosition(blockPosition);
+        return perspectiveLines.TryGetValue(lineIndex, out perspectiveLine);
     }
 
     /// <summary>
@@ -544,121 +557,13 @@ public class PerspectiveLineManager
             indices.Add(new PerspectiveLineKey(x, y));
     }
 
-    /// <summary>
-    ///     Entity types that can be found on a perspective line.
-    /// </summary>
-    private enum EntityType
-    {
-        /// <summary>
-        ///     Non-block entity.
-        /// </summary>
-        NonBlock,
-
-        /// <summary>
-        ///     Front face of a block entity.
-        /// </summary>
-        BlockFrontFace,
-
-        /// <summary>
-        ///     Top face of a block entity.
-        /// </summary>
-        BlockTopFace
-    }
-
-    /// <summary>
-    ///     Information regarding an entity on a perspective line.
-    /// </summary>
-    private struct EntityInfo
-    {
-        /// <summary>
-        ///     Entity ID.
-        /// </summary>
-        public ulong EntityId;
-
-        /// <summary>
-        ///     Entity type.
-        /// </summary>
-        public EntityType EntityType;
-    }
-
-    /// <summary>
-    ///     Represents a list of entities at a common z-depth.
-    /// </summary>
-    private readonly struct EntityList(float z, List<EntityInfo> entities)
-    {
-        /// <summary>
-        ///     Comparer for EntityLists.
-        /// </summary>
-        public static readonly IComparer<EntityList> Comparer =
-            Comparer<EntityList>.Create((a, b) => Comparer<float>.Default.Compare(a.z, b.z));
-
-        private static readonly List<EntityInfo> EmptyList = new(0);
-
-        /// <summary>
-        ///     Entities at this z-depth.
-        /// </summary>
-        public readonly List<EntityInfo> Entities = entities;
-
-        /// <summary>
-        ///     Z depth of this entity list.
-        /// </summary>
-        private readonly float z = z;
-
-        /// <summary>
-        ///     Constructs a new empty EntityList for lookups only.
-        /// </summary>
-        /// <param name="z">Z depth.</param>
-        private EntityList(float z) : this(z, EmptyList)
-        {
-        }
-
-        /// <summary>
-        ///     Convenience method to improve code readability when creating a dummy list as a comparison key.
-        /// </summary>
-        /// <param name="z">Z depth.</param>
-        /// <returns>Dummy list for use as a comparison key.</returns>
-        public static EntityList ForComparison(float z)
-        {
-            return new EntityList(z);
-        }
-
-        /// <summary>
-        ///     Removes all occurrences of an entity in this list.
-        /// </summary>
-        /// <param name="entityId">Entity ID.</param>
-        public void RemoveEntity(ulong entityId)
-        {
-            ToRemove.Clear();
-            for (var i = 0; i < Entities.Count; ++i)
-                if (Entities[i].EntityId == entityId)
-                    ToRemove.Add(i);
-
-            for (var i = ToRemove.Count - 1; i >= 0; --i) Entities.RemoveAt(ToRemove[i]);
-        }
-    }
-
-    /// <summary>
-    ///     Contains data for a single perspective line.
-    /// </summary>
-    private class PerspectiveLine
-    {
-        /// <summary>
-        ///     Z values at which entities are located on this perspective line.
-        /// </summary>
-        public readonly SortedSet<EntityList> ZDepths = new(EntityList.Comparer);
-
-        /// <summary>
-        ///     Reference count.
-        /// </summary>
-        public uint ReferenceCount;
-    }
 
     /// <summary>
     ///     Perspective line index.
     /// </summary>
     /// <param name="x">X coordinate.</param>
     /// <param name="yz">Y+Z invariant.</param>
-    private readonly struct PerspectiveLineKey(int x, int yz)
+    private readonly struct PerspectiveLineKey(int x, int yz) : IEquatable<PerspectiveLineKey>
     {
         public bool Equals(PerspectiveLineKey other)
         {
@@ -684,5 +589,15 @@ public class PerspectiveLineManager
         ///     (Y+Z) invariant of line.
         /// </summary>
         public readonly int Yz = yz;
+
+        public static bool operator ==(PerspectiveLineKey left, PerspectiveLineKey right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(PerspectiveLineKey left, PerspectiveLineKey right)
+        {
+            return !left.Equals(right);
+        }
     }
 }
