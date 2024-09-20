@@ -15,9 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Collections.Generic;
-using Sovereign.EngineCore.Components.Indexers;
-
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 
 /// <summary>
@@ -29,8 +26,6 @@ public sealed class WorldVertexSequencer
     ///     Default size of the drawable buffer.
     /// </summary>
     public const int DefaultDrawableListSize = 4096;
-
-    private readonly List<PositionedEntity> drawables = new(DefaultDrawableListSize);
 
     private readonly WorldEntityRetriever entityRetriever;
 
@@ -65,8 +60,7 @@ public sealed class WorldVertexSequencer
     /// <param name="systemTime">System time of the current frame.</param>
     private void RetrieveEntities(float timeSinceTick, ulong systemTime)
     {
-        drawables.Clear();
-        entityRetriever.RetrieveEntities(drawables, timeSinceTick, systemTime);
+        entityRetriever.RetrieveEntities(timeSinceTick, systemTime);
     }
 
     /// <summary>

@@ -16,11 +16,12 @@
  */
 
 using System;
-using System.Collections.Generic;
+using System.Numerics;
 using Sovereign.ClientCore.Components;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
+using Sovereign.ClientCore.Systems.Block.Caches;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
@@ -35,10 +36,10 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 /// </summary>
 public sealed class WorldEntityRetriever
 {
-    private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly BlockAnimatedSpriteCache blockSpriteCache;
     private readonly CameraManager camera;
     private readonly ClientConfigurationManager configManager;
     private readonly DrawableTagCollection drawableTags;
@@ -64,9 +65,10 @@ public sealed class WorldEntityRetriever
         ClientConfigurationManager configManager, PerspectiveServices perspectiveServices,
         WorldLayerGrouper grouper, KinematicComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
-        AboveBlockComponentCollection aboveBlocks, AnimatedSpriteComponentCollection animatedSprites,
+        AnimatedSpriteComponentCollection animatedSprites,
         DrawableTagCollection drawableTags, AnimatedSpriteManager animatedSpriteManager,
-        OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases)
+        OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases,
+        BlockAnimatedSpriteCache blockSpriteCache)
     {
         this.camera = camera;
         this.configManager = configManager;
@@ -74,12 +76,12 @@ public sealed class WorldEntityRetriever
         this.grouper = grouper;
         this.kinematics = kinematics;
         this.blockPositions = blockPositions;
-        this.aboveBlocks = aboveBlocks;
         this.animatedSprites = animatedSprites;
         this.drawableTags = drawableTags;
         this.animatedSpriteManager = animatedSpriteManager;
         this.orientations = orientations;
         this.phases = phases;
+        this.blockSpriteCache = blockSpriteCache;
 
         halfX = viewport.WidthInTiles * 0.5f;
         halfY = viewport.HeightInTiles * 0.5f;
@@ -88,9 +90,9 @@ public sealed class WorldEntityRetriever
     /// <summary>
     ///     Retrieves the drawable entities for world rendering.
     /// </summary>
-    /// <param name="entityBuffer">Drawable entity buffer.</param>
     /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
-    public void RetrieveEntities(List<PositionedEntity> entityBuffer, float timeSinceTick, ulong systemTime)
+    /// <param name="systemTime">System time of current frame.</param>
+    public void RetrieveEntities(float timeSinceTick, ulong systemTime)
     {
         grouper.ResetLayers();
 
@@ -109,20 +111,19 @@ public sealed class WorldEntityRetriever
             if (!perspectiveServices.TryGetPerspectiveLine(intersectingPos, out var line))
                 continue;
 
-            ProcessPerspectiveLine(entityBuffer, line, intersectingPos, zMin, zMax, systemTime);
+            ProcessPerspectiveLine(line, zMin, zMax, systemTime);
         }
     }
 
     /// <summary>
     ///     Processes a single perspective line.
     /// </summary>
-    /// <param name="entityBuffer"></param>
-    /// <param name="perspectiveLine"></param>
-    /// <param name="intersectingPos"></param>
-    /// <param name="zMin"></param>
-    /// <param name="zMax"></param>
-    private void ProcessPerspectiveLine(List<PositionedEntity> entityBuffer, PerspectiveLine perspectiveLine,
-        GridPosition intersectingPos, EntityList zMin, EntityList zMax, ulong systemTime)
+    /// <param name="perspectiveLine">Perspective line.</param>
+    /// <param name="zMin">Minimum of Z extent for rendering.</param>
+    /// <param name="zMax">Maximum of Z extent for rendering.</param>
+    /// <param name="systemTime">System time of current frame.</param>
+    private void ProcessPerspectiveLine(PerspectiveLine perspectiveLine, EntityList zMin, EntityList zMax,
+        ulong systemTime)
     {
         var foundOpaqueBlock = false;
         var searchSet = perspectiveLine.ZDepths.GetViewBetween(zMin, zMax).Reverse();
@@ -149,11 +150,11 @@ public sealed class WorldEntityRetriever
                         break;
 
                     case EntityType.BlockTopFace:
-                        if (!foundOpaqueBlock) ProcessBlockTopFace(entity.EntityId, out opaqueThisDepth);
+                        if (!foundOpaqueBlock) ProcessBlockTopFace(entity.EntityId, systemTime, out opaqueThisDepth);
                         break;
 
                     case EntityType.BlockFrontFace:
-                        if (!foundOpaqueBlock) ProcessBlockFrontFace(entity.EntityId, out opaqueThisDepth);
+                        if (!foundOpaqueBlock) ProcessBlockFrontFace(entity.EntityId, systemTime, out opaqueThisDepth);
                         break;
                 }
 
@@ -184,17 +185,40 @@ public sealed class WorldEntityRetriever
     /// <summary>
     ///     Processes the front face of a block on a perspective line.
     /// </summary>
-    private void ProcessBlockFrontFace(ulong entityId, out bool isOpaque)
+    private void ProcessBlockFrontFace(ulong entityId, ulong systemTime, out bool isOpaque)
     {
         isOpaque = false;
+        if (!drawableTags.HasTagForEntity(entityId)) return;
+
+        var blockPosition = blockPositions[entityId];
+        var facePosition = (Vector3)(blockPosition with { Y = blockPosition.Y - 1 });
+        var animatedSpriteIds = blockSpriteCache.GetFrontFaceAnimatedSpriteIds(entityId);
+        foreach (var animatedSpriteId in animatedSpriteIds)
+        {
+            var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)
+                .GetSpriteForTime(systemTime, Orientation.South);
+            grouper.AddSprite(EntityType.BlockFrontFace, facePosition, Vector3.Zero, sprite);
+            isOpaque = isOpaque || sprite.Opaque;
+        }
     }
 
     /// <summary>
     ///     Processes the top face of a block on a perspective line.
     /// </summary>
-    private void ProcessBlockTopFace(ulong entityId, out bool isOpaque)
+    private void ProcessBlockTopFace(ulong entityId, ulong systemTime, out bool isOpaque)
     {
         isOpaque = false;
+        if (!drawableTags.HasTagForEntity(entityId)) return;
+
+        var blockPosition = (Vector3)blockPositions[entityId];
+        var animatedSpriteIds = blockSpriteCache.GetFrontFaceAnimatedSpriteIds(entityId);
+        foreach (var animatedSpriteId in animatedSpriteIds)
+        {
+            var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)
+                .GetSpriteForTime(systemTime, Orientation.South);
+            grouper.AddSprite(EntityType.BlockTopFace, blockPosition, Vector3.Zero, sprite);
+            isOpaque = isOpaque || sprite.Opaque;
+        }
     }
 
     /// <summary>
