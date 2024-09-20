@@ -17,11 +17,15 @@
 
 using System;
 using System.Collections.Generic;
+using Sovereign.ClientCore.Components;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Perspective;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Numerics;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
@@ -31,8 +35,13 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 /// </summary>
 public sealed class WorldEntityRetriever
 {
+    private readonly AboveBlockComponentCollection aboveBlocks;
+    private readonly AnimatedSpriteManager animatedSpriteManager;
+    private readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly BlockPositionComponentCollection blockPositions;
     private readonly CameraManager camera;
     private readonly ClientConfigurationManager configManager;
+    private readonly DrawableTagCollection drawableTags;
     private readonly WorldLayerGrouper grouper;
 
     /// <summary>
@@ -45,16 +54,32 @@ public sealed class WorldEntityRetriever
     /// </summary>
     private readonly float halfY;
 
+    private readonly KinematicComponentCollection kinematics;
+    private readonly OrientationComponentCollection orientations;
+
     private readonly PerspectiveServices perspectiveServices;
+    private readonly AnimationPhaseComponentCollection phases;
 
     public WorldEntityRetriever(CameraManager camera, DisplayViewport viewport,
         ClientConfigurationManager configManager, PerspectiveServices perspectiveServices,
-        WorldLayerGrouper grouper)
+        WorldLayerGrouper grouper, KinematicComponentCollection kinematics,
+        BlockPositionComponentCollection blockPositions,
+        AboveBlockComponentCollection aboveBlocks, AnimatedSpriteComponentCollection animatedSprites,
+        DrawableTagCollection drawableTags, AnimatedSpriteManager animatedSpriteManager,
+        OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases)
     {
         this.camera = camera;
         this.configManager = configManager;
         this.perspectiveServices = perspectiveServices;
         this.grouper = grouper;
+        this.kinematics = kinematics;
+        this.blockPositions = blockPositions;
+        this.aboveBlocks = aboveBlocks;
+        this.animatedSprites = animatedSprites;
+        this.drawableTags = drawableTags;
+        this.animatedSpriteManager = animatedSpriteManager;
+        this.orientations = orientations;
+        this.phases = phases;
 
         halfX = viewport.WidthInTiles * 0.5f;
         halfY = viewport.HeightInTiles * 0.5f;
@@ -65,7 +90,7 @@ public sealed class WorldEntityRetriever
     /// </summary>
     /// <param name="entityBuffer">Drawable entity buffer.</param>
     /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
-    public void RetrieveEntities(List<PositionedEntity> entityBuffer, float timeSinceTick)
+    public void RetrieveEntities(List<PositionedEntity> entityBuffer, float timeSinceTick, ulong systemTime)
     {
         grouper.ResetLayers();
 
@@ -78,15 +103,13 @@ public sealed class WorldEntityRetriever
             (float)Math.Floor(minExtent.Z + halfY + clientConfiguration.RenderSearchSpacerY));
 
         for (var x = minExtent.X; x <= maxExtent.X; ++x)
+        for (var y = minExtent.Y; y <= maxExtent.Y; ++y)
         {
-            for (var y = minExtent.Y; y <= maxExtent.Y; ++y)
-            {
-                var intersectingPos = new GridPosition(x, y, minExtent.Z);
-                if (!perspectiveServices.TryGetPerspectiveLine(intersectingPos, out var line))
-                    continue;
+            var intersectingPos = new GridPosition(x, y, minExtent.Z);
+            if (!perspectiveServices.TryGetPerspectiveLine(intersectingPos, out var line))
+                continue;
 
-                ProcessPerspectiveLine(entityBuffer, line, intersectingPos, zMin, zMax);
-            }
+            ProcessPerspectiveLine(entityBuffer, line, intersectingPos, zMin, zMax, systemTime);
         }
     }
 
@@ -99,15 +122,16 @@ public sealed class WorldEntityRetriever
     /// <param name="zMin"></param>
     /// <param name="zMax"></param>
     private void ProcessPerspectiveLine(List<PositionedEntity> entityBuffer, PerspectiveLine perspectiveLine,
-        GridPosition intersectingPos, EntityList zMin, EntityList zMax)
+        GridPosition intersectingPos, EntityList zMin, EntityList zMax, ulong systemTime)
     {
         var foundOpaqueBlock = false;
         var searchSet = perspectiveLine.ZDepths.GetViewBetween(zMin, zMax).Reverse();
         foreach (var zSet in searchSet)
         {
+            grouper.SelectZDepth(zSet.Z);
+
             var opaqueThisDepth = foundOpaqueBlock;
             foreach (var entity in zSet.Entities)
-            {
                 // We make a few optimizations here based on the idea that opaque sprites will obscure anything
                 // drawn below them. Blocks drawn on a perspective line perfectly overlap, so we only need to draw
                 // blocks to the depth of the first encountered opaque sprite (if any).
@@ -121,7 +145,7 @@ public sealed class WorldEntityRetriever
                 switch (entity.EntityType)
                 {
                     case EntityType.NonBlock:
-                        ProcessSprite(entity.EntityId);
+                        if (entity.OriginOnLine) ProcessSprite(entity.EntityId, systemTime);
                         break;
 
                     case EntityType.BlockTopFace:
@@ -132,7 +156,6 @@ public sealed class WorldEntityRetriever
                         if (!foundOpaqueBlock) ProcessBlockFrontFace(entity.EntityId, out opaqueThisDepth);
                         break;
                 }
-            }
 
             // Opaque blocking is updated at the end of each z-depth since a front face and top face
             // can both appear at the same z-depth, but the order in which they appear in zSet is
@@ -144,8 +167,18 @@ public sealed class WorldEntityRetriever
     /// <summary>
     ///     Processes an animated sprite on a perspective line.
     /// </summary>
-    private void ProcessSprite(ulong entityId)
+    private void ProcessSprite(ulong entityId, ulong systemTime)
     {
+        if (!drawableTags.HasTagForEntity(entityId)) return;
+
+        var entityKinematics = kinematics[entityId];
+        var animatedSpriteId = animatedSprites[entityId];
+        var orientation = orientations.HasComponentForEntity(entityId) ? orientations[entityId] : Orientation.South;
+        var phase = phases.HasComponentForEntity(entityId) ? phases[entityId] : AnimationPhase.Default;
+
+        var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
+        var sprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(systemTime, orientation);
+        grouper.AddSprite(EntityType.NonBlock, entityKinematics.Position, entityKinematics.Velocity, sprite);
     }
 
     /// <summary>

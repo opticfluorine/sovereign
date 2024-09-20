@@ -282,8 +282,9 @@ public class PerspectiveLineManager
         // coordinate and therefore fall on two different perspective lines.
         var indexTopFace = GetIndexForBlockPosition(blockPosition);
         var indexFrontFace = GetIndexForBlockPosition(blockPosition with { Y = blockPosition.Y - 1 });
-        AddEntityToLine(entityId, indexTopFace, blockPosition.Z, EntityType.BlockTopFace);
-        AddEntityToLine(entityId, indexFrontFace, blockPosition.Z, EntityType.BlockFrontFace);
+        AddEntityToLine(entityId, indexTopFace, blockPosition.Z, EntityType.BlockTopFace, indexTopFace.OriginFlag);
+        AddEntityToLine(entityId, indexFrontFace, blockPosition.Z, EntityType.BlockFrontFace,
+            indexFrontFace.OriginFlag);
     }
 
     /// <summary>
@@ -298,7 +299,8 @@ public class PerspectiveLineManager
         try
         {
             GetNonBlockOverlappingLines(entityId, indices);
-            foreach (var index in indices) AddEntityToLine(entityId, index, position.Z, EntityType.NonBlock);
+            foreach (var index in indices)
+                AddEntityToLine(entityId, index, position.Z, EntityType.NonBlock, index.OriginFlag);
         }
         finally
         {
@@ -375,7 +377,7 @@ public class PerspectiveLineManager
             }
 
             foreach (var newIndex in newIndices)
-                AddEntityToLine(entityId, newIndex, position.Z, EntityType.NonBlock);
+                AddEntityToLine(entityId, newIndex, position.Z, EntityType.NonBlock, newIndex.OriginFlag);
 
             // Update state.
             zDepthByEntity[entityId] = position.Z;
@@ -394,7 +396,9 @@ public class PerspectiveLineManager
     /// <param name="lineIndex">Perspective line index.</param>
     /// <param name="z">z position of entity.</param>
     /// <param name="entityType">Entity type.</param>
-    private void AddEntityToLine(ulong entityId, PerspectiveLineKey lineIndex, float z, EntityType entityType)
+    /// <param name="originOnLine">Whether the sprite origin is on this perspective line.</param>
+    private void AddEntityToLine(ulong entityId, PerspectiveLineKey lineIndex, float z, EntityType entityType,
+        bool originOnLine)
     {
         if (!perspectiveLines.TryGetValue(lineIndex, out var line))
         {
@@ -416,7 +420,8 @@ public class PerspectiveLineManager
         entityList.Entities.Add(new EntityInfo
         {
             EntityId = entityId,
-            EntityType = entityType
+            EntityType = entityType,
+            OriginOnLine = originOnLine
         });
         zDepthByEntity[entityId] = z;
 
@@ -544,6 +549,8 @@ public class PerspectiveLineManager
 
         var position = kinematics[entityId].Position;
         var projectedPosition = new Vector2(position.X, position.Y + position.Z);
+        var originX = (int)Math.Floor(projectedPosition.X);
+        var originY = (int)Math.Ceiling(projectedPosition.Y);
         var entityExtent = drawableLookup.GetEntityDrawableSizeWorld(entityId);
 
         // Determine line extent along projected x and y axes.
@@ -554,16 +561,15 @@ public class PerspectiveLineManager
 
         for (var x = minIndices.Item1; x <= maxIndices.Item1; ++x)
         for (var y = minIndices.Item2; y <= maxIndices.Item2; ++y)
-            indices.Add(new PerspectiveLineKey(x, y));
+            indices.Add(new PerspectiveLineKey(x, y, x == originX && y == originY));
     }
-
 
     /// <summary>
     ///     Perspective line index.
     /// </summary>
     /// <param name="x">X coordinate.</param>
     /// <param name="yz">Y+Z invariant.</param>
-    private readonly struct PerspectiveLineKey(int x, int yz) : IEquatable<PerspectiveLineKey>
+    private readonly struct PerspectiveLineKey(int x, int yz, bool originFlag = false) : IEquatable<PerspectiveLineKey>
     {
         public bool Equals(PerspectiveLineKey other)
         {
@@ -589,6 +595,11 @@ public class PerspectiveLineManager
         ///     (Y+Z) invariant of line.
         /// </summary>
         public readonly int Yz = yz;
+
+        /// <summary>
+        ///     Flag used internally to indicate that a perspective line contains the sprite origin.
+        /// </summary>
+        public readonly bool OriginFlag = originFlag;
 
         public static bool operator ==(PerspectiveLineKey left, PerspectiveLineKey right)
         {

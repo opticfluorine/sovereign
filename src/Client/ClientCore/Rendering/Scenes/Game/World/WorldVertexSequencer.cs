@@ -54,7 +54,7 @@ public sealed class WorldVertexSequencer
     /// <param name="systemTime">System time of the current frame.</param>
     public void SequenceVertices(RenderPlan renderPlan, float timeSinceTick, ulong systemTime)
     {
-        RetrieveEntities(timeSinceTick);
+        RetrieveEntities(timeSinceTick, systemTime);
         PrepareLayers(renderPlan, systemTime);
     }
 
@@ -62,10 +62,11 @@ public sealed class WorldVertexSequencer
     ///     Retrieves the drawable entities in range.
     /// </summary>
     /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
-    private void RetrieveEntities(float timeSinceTick)
+    /// <param name="systemTime">System time of the current frame.</param>
+    private void RetrieveEntities(float timeSinceTick, ulong systemTime)
     {
         drawables.Clear();
-        entityRetriever.RetrieveEntities(drawables, timeSinceTick);
+        entityRetriever.RetrieveEntities(drawables, timeSinceTick, systemTime);
     }
 
     /// <summary>
@@ -75,10 +76,7 @@ public sealed class WorldVertexSequencer
     /// <param name="systemTime">System time of the current frame.</param>
     private void PrepareLayers(RenderPlan renderPlan, ulong systemTime)
     {
-        foreach (var layer in grouper.Layers.Values)
-        {
-            AddLayerToVertexBuffer(layer, renderPlan, systemTime);
-        }
+        foreach (var layer in grouper.Layers.Values) AddLayerToVertexBuffer(layer, renderPlan, systemTime);
     }
 
     /// <summary>

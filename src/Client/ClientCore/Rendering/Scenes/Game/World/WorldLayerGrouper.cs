@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Materials;
+using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
@@ -47,6 +48,8 @@ public sealed class WorldLayerGrouper
 
     private readonly MaterialComponentCollection materials;
     private readonly OrientationComponentCollection orientations;
+
+    private WorldLayer? activeLayer;
 
     public WorldLayerGrouper(MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
@@ -88,33 +91,46 @@ public sealed class WorldLayerGrouper
     }
 
     /// <summary>
+    ///     Selects the Z depth used for any following calls to AddSprites.
+    /// </summary>
+    /// <param name="z">Z depth.</param>
+    public void SelectZDepth(float z)
+    {
+        var zFloor = (int)Math.Floor(z);
+        if (activeLayer != null && activeLayer.ZFloor == zFloor) return;
+
+        activeLayer = SelectLayer(zFloor);
+    }
+
+    /// <summary>
     ///     Adds sprites to the appropriate layer while grouping them by entity type.
     /// </summary>
     /// <param name="entityType">Entity type.</param>
     /// <param name="position">Entity position.</param>
     /// <param name="velocity">Entity velocity.</param>
-    /// <param name="spriteIds">Sprite IDs to add.</param>
-    public void AddSprites(EntityType entityType, Vector3 position, Vector3 velocity, List<int> spriteIds)
+    /// <param name="sprite">Sprite.</param>
+    public void AddSprite(EntityType entityType, Vector3 position, Vector3 velocity, Sprite sprite)
     {
-        var zFloor = (int)Math.Floor(position.Z);
-        var layer = SelectLayer(zFloor);
+        if (activeLayer is null)
+        {
+            Logger.Error("No active layer.");
+            return;
+        }
+
         var collection = entityType switch
         {
-            EntityType.NonBlock => layer.AnimatedSprites,
-            EntityType.BlockTopFace => layer.TopFaceTileSprites,
-            EntityType.BlockFrontFace => layer.FrontFaceTileSprites,
-            _ => layer.AnimatedSprites
+            EntityType.NonBlock => activeLayer.AnimatedSprites,
+            EntityType.BlockTopFace => activeLayer.TopFaceTileSprites,
+            EntityType.BlockFrontFace => activeLayer.FrontFaceTileSprites,
+            _ => activeLayer.AnimatedSprites
         };
 
-        foreach (var spriteId in spriteIds)
+        collection.Add(new PosVelId
         {
-            collection.Add(new PosVelId
-            {
-                Position = position,
-                Velocity = velocity,
-                Id = spriteId
-            });
-        }
+            Position = position,
+            Velocity = velocity,
+            Id = sprite.Id
+        });
     }
 
     /// <summary>

@@ -53,6 +53,11 @@ public struct EntityInfo
     ///     Entity type.
     /// </summary>
     public EntityType EntityType;
+
+    /// <summary>
+    ///     Flag indicating whether the sprite's origin is on the perspective line.
+    /// </summary>
+    public bool OriginOnLine;
 }
 
 /// <summary>
@@ -64,7 +69,7 @@ public readonly struct EntityList(float z, List<EntityInfo> entities)
     ///     Comparer for EntityLists.
     /// </summary>
     public static readonly IComparer<EntityList> Comparer =
-        Comparer<EntityList>.Create((a, b) => Comparer<float>.Default.Compare(a.z, b.z));
+        Comparer<EntityList>.Create((a, b) => Comparer<float>.Default.Compare(a.Z, b.Z));
 
     private static readonly List<EntityInfo> EmptyList = new(0);
 
@@ -76,7 +81,7 @@ public readonly struct EntityList(float z, List<EntityInfo> entities)
     /// <summary>
     ///     Z depth of this entity list.
     /// </summary>
-    private readonly float z = z;
+    public readonly float Z = z;
 
     private static readonly List<int> ToRemove = new();
 
