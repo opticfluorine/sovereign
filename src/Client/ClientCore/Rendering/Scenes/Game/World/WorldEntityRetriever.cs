@@ -39,7 +39,7 @@ public sealed class WorldEntityRetriever
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
-    private readonly BlockAnimatedSpriteCache blockSpriteCache;
+    private readonly IBlockAnimatedSpriteCache blockSpriteCache;
     private readonly CameraManager camera;
     private readonly ClientConfigurationManager configManager;
     private readonly DrawableTagCollection drawableTags;
@@ -68,7 +68,7 @@ public sealed class WorldEntityRetriever
         AnimatedSpriteComponentCollection animatedSprites,
         DrawableTagCollection drawableTags, AnimatedSpriteManager animatedSpriteManager,
         OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases,
-        BlockAnimatedSpriteCache blockSpriteCache)
+        IBlockAnimatedSpriteCache blockSpriteCache)
     {
         this.camera = camera;
         this.configManager = configManager;
@@ -126,37 +126,62 @@ public sealed class WorldEntityRetriever
         ulong systemTime)
     {
         var foundOpaqueBlock = false;
-        var searchSet = perspectiveLine.ZDepths.GetViewBetween(zMin, zMax).Reverse();
-        foreach (var zSet in searchSet)
+        using var enumerator = perspectiveLine.ReverseZDepths.GetEnumerator();
+        while (enumerator.MoveNext())
         {
+            var zSet = enumerator.Current;
+            if (zSet.Z > zMax.Z) continue;
+            if (zSet.Z < zMin.Z) break;
+
             grouper.SelectZDepth(zSet.Z);
 
             var opaqueThisDepth = foundOpaqueBlock;
+            var frontFaceId = ulong.MaxValue;
+            var topFaceId = ulong.MaxValue;
+
+            // We make a few optimizations here based on the idea that opaque sprites will obscure anything
+            // drawn below them. Blocks drawn on a perspective line perfectly overlap, so we only need to draw
+            // blocks to the depth of the first encountered opaque sprite (if any).
+            //
+            // On the other hand, sprites may not be perfectly overlapped by an obscuring block sprite, and they
+            // may not fully overlap any other sprites or block sprites below them. Accordingly, we draw all
+            // animated sprites on the line regardless of if they may be obscured. To avoid multiple draws of the
+            // same sprite, we only draw animated sprites for which the top-left corner of the sprite is on the
+            // perspective line.
+
+            // First pass, pull out the block faces so they can be ordered and checked appropriately.
             foreach (var entity in zSet.Entities)
-                // We make a few optimizations here based on the idea that opaque sprites will obscure anything
-                // drawn below them. Blocks drawn on a perspective line perfectly overlap, so we only need to draw
-                // blocks to the depth of the first encountered opaque sprite (if any).
-                //
-                // On the other hand, sprites may not be perfectly overlapped by an obscuring block sprite, and they
-                // may not fully overlap any other sprites or block sprites below them. Accordingly, we draw all
-                // animated sprites on the line regardless of if they may be obscured. To avoid multiple draws of the
-                // same sprite, we only draw animated sprites for which the top-left corner of the sprite is on the
-                // perspective line.
-                //
+            {
                 switch (entity.EntityType)
                 {
-                    case EntityType.NonBlock:
-                        if (entity.OriginOnLine) ProcessSprite(entity.EntityId, systemTime);
+                    case EntityType.BlockFrontFace:
+                        frontFaceId = entity.EntityId;
                         break;
 
                     case EntityType.BlockTopFace:
-                        if (!foundOpaqueBlock) ProcessBlockTopFace(entity.EntityId, systemTime, out opaqueThisDepth);
-                        break;
-
-                    case EntityType.BlockFrontFace:
-                        if (!foundOpaqueBlock) ProcessBlockFrontFace(entity.EntityId, systemTime, out opaqueThisDepth);
+                        topFaceId = entity.EntityId;
                         break;
                 }
+            }
+
+            // Between passes, handle the faces.
+            if (!foundOpaqueBlock && topFaceId < ulong.MaxValue)
+            {
+                ProcessBlockTopFace(topFaceId, systemTime, out opaqueThisDepth);
+            }
+
+            if (!foundOpaqueBlock && !opaqueThisDepth && frontFaceId < ulong.MaxValue)
+            {
+                ProcessBlockFrontFace(frontFaceId, systemTime, out opaqueThisDepth);
+            }
+
+            // Second pass, sending entities to the layer grouper.
+            foreach (var entity in zSet.Entities)
+            {
+                // Skip block faces since they were already handled above.
+                if (entity.EntityType != EntityType.NonBlock) continue;
+                if (entity.OriginOnLine) ProcessSprite(entity.EntityId, systemTime);
+            }
 
             // Opaque blocking is updated at the end of each z-depth since a front face and top face
             // can both appear at the same z-depth, but the order in which they appear in zSet is
@@ -211,7 +236,7 @@ public sealed class WorldEntityRetriever
         if (!drawableTags.HasTagForEntity(entityId)) return;
 
         var blockPosition = (Vector3)blockPositions[entityId];
-        var animatedSpriteIds = blockSpriteCache.GetFrontFaceAnimatedSpriteIds(entityId);
+        var animatedSpriteIds = blockSpriteCache.GetTopFaceAnimatedSpriteIds(entityId);
         foreach (var animatedSpriteId in animatedSpriteIds)
         {
             var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)

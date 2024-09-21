@@ -19,10 +19,8 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Castle.Core.Logging;
-using Sovereign.ClientCore.Components;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.ClientCore.Rendering.Sprites;
-using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
@@ -34,40 +32,39 @@ public sealed class WorldSpriteSequencer
 {
     private const int VerticesPerSprite = 4;
     private const int IndicesPerSprite = 6;
-
-    private readonly AnimatedSpriteManager animatedSpriteManager;
-    private readonly AnimationPhaseComponentCollection animationPhases;
     private readonly AtlasMap atlasMap;
 
-    public WorldSpriteSequencer(AnimatedSpriteManager animatedSpriteManager,
-        AtlasMap atlasMap, AnimationPhaseComponentCollection animationPhases)
+    private readonly SpriteManager spriteManager;
+
+    public WorldSpriteSequencer(AtlasMap atlasMap, SpriteManager spriteManager)
     {
-        this.animatedSpriteManager = animatedSpriteManager;
         this.atlasMap = atlasMap;
-        this.animationPhases = animationPhases;
+        this.spriteManager = spriteManager;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
-    ///     Sequences animated sprites into the buffers.
+    ///     Sequences sprites into the buffers.
     /// </summary>
-    /// <param name="animatedSprites">Animated sprites to sequence.</param>
+    /// <param name="sprites">Sprites to sequence.</param>
     /// <param name="renderPlan">Rendering plan to populate.</param>
     /// <param name="systemTime">System time of this frame.</param>
-    public void SequenceAnimatedSprites(List<PosVelId> animatedSprites, RenderPlan renderPlan, ulong systemTime,
+    /// <param name="baseIndex">First index corresponding to the sequenced sprites.</param>
+    /// <param name="indexCount">Number of indices added for these sprites.</param>
+    public void SequenceSprites(List<PosVelId> sprites, RenderPlan renderPlan, ulong systemTime,
         out uint baseIndex, out uint indexCount)
     {
         baseIndex = 0;
         indexCount = 0;
 
-        if (!renderPlan.TryAddVertices(animatedSprites.Count * VerticesPerSprite, out var vertices, out var baseVertex))
+        if (!renderPlan.TryAddVertices(sprites.Count * VerticesPerSprite, out var vertices, out var baseVertex))
         {
             Logger.Error("Render plan vertex buffer too small for update.");
             return;
         }
 
-        if (!renderPlan.TryAddIndices(animatedSprites.Count * IndicesPerSprite, out var indices, out baseIndex))
+        if (!renderPlan.TryAddIndices(sprites.Count * IndicesPerSprite, out var indices, out baseIndex))
         {
             Logger.Error("Render plan index buffer too small for update.");
             return;
@@ -75,20 +72,12 @@ public sealed class WorldSpriteSequencer
 
         /* Update buffers directly. */
         var spriteCount = 0;
-        foreach (var positionedAnimatedSprite in animatedSprites)
+        foreach (var positionedAnimatedSprite in sprites)
         {
             var pos = positionedAnimatedSprite.Position;
             var vel = positionedAnimatedSprite.Velocity;
-            var animId = positionedAnimatedSprite.Id;
-            var entityId = positionedAnimatedSprite.EntityId;
-            var animatedSprite = animatedSpriteManager.AnimatedSprites[animId];
-
-            var animationPhase = animationPhases.HasComponentForEntity(entityId)
-                ? animationPhases[entityId]
-                : AnimationPhase.Default;
-
-            var spriteData = animatedSprite.GetPhaseData(animationPhase);
-            var sprite = spriteData.GetSpriteForTime(systemTime, positionedAnimatedSprite.Orientation);
+            var spriteId = positionedAnimatedSprite.Id;
+            var sprite = spriteManager.Sprites[spriteId];
 
             AddVerticesForSprite(sprite, pos, vel,
                 vertices.Slice(spriteCount * VerticesPerSprite, VerticesPerSprite));

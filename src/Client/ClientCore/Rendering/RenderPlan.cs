@@ -27,7 +27,17 @@ public enum RenderCommandType
     /// <summary>
     ///     Draw sprites.
     /// </summary>
-    DrawSprites
+    DrawSprites,
+
+    /// <summary>
+    ///     Push a debug group onto the stack.
+    /// </summary>
+    PushDebug,
+
+    /// <summary>
+    ///     Pop a debug group from the stack.
+    /// </summary>
+    PopDebug
 }
 
 /// <summary>
@@ -49,6 +59,11 @@ public struct RenderCommand
     ///     Number of indices to use for actions that consume an index buffer.
     /// </summary>
     public uint IndexCount;
+
+    /// <summary>
+    ///     Debug group name (for PushDebugGroup commands only).
+    /// </summary>
+    public string? DebugGroupName;
 }
 
 /// <summary>
@@ -60,11 +75,6 @@ public class RenderPlan
     ///     Index buffer being planned.
     /// </summary>
     private readonly uint[] indexBuffer;
-
-    /// <summary>
-    ///     Rendering commands to be executed for this plan.
-    /// </summary>
-    private readonly RenderCommand[] renderCommands;
 
     /// <summary>
     ///     Vertex buffer being planned.
@@ -80,6 +90,11 @@ public class RenderPlan
     ///     Number of indices in the index buffer.
     /// </summary>
     private int indexCount;
+
+    /// <summary>
+    ///     Rendering commands to be executed for this plan.
+    /// </summary>
+    private RenderCommand[] renderCommands;
 
     /// <summary>
     ///     Number of vertices in the vertex buffer.
@@ -158,14 +173,16 @@ public class RenderPlan
     }
 
     /// <summary>
-    ///     Tries to add a DrawSprites command to the plan.
+    ///     Adds a DrawSprites command to the plan.
     /// </summary>
     /// <param name="drawBaseIndex">Base index.</param>
     /// <param name="drawIndexCount">Index count.</param>
-    /// <returns>true if successful, false otherwise.</returns>
-    public bool TryDrawSprites(uint drawBaseIndex, uint drawIndexCount)
+    public void DrawSprites(uint drawBaseIndex, uint drawIndexCount)
     {
-        if (commandCount == renderCommands.Length) return false;
+        if (commandCount == renderCommands.Length) ExpandCommandList();
+
+        // Skip zero-length draw commands.
+        if (drawIndexCount == 0) return;
 
         renderCommands[commandCount] = new RenderCommand
         {
@@ -174,7 +191,36 @@ public class RenderPlan
             IndexCount = drawIndexCount
         };
         commandCount++;
-        return true;
+    }
+
+    /// <summary>
+    ///     Pushes a new debug group onto the stack for subsequent calls.
+    /// </summary>
+    /// <param name="groupName">Debug group name.</param>
+    public void PushDebugGroup(string groupName)
+    {
+        if (commandCount == renderCommands.Length) ExpandCommandList();
+
+        renderCommands[commandCount] = new RenderCommand
+        {
+            RenderCommandType = RenderCommandType.PushDebug,
+            DebugGroupName = groupName
+        };
+        commandCount++;
+    }
+
+    /// <summary>
+    ///     Pops a debug group from the stack for subsequent calls.
+    /// </summary>
+    public void PopDebugGroup()
+    {
+        if (commandCount == renderCommands.Length) ExpandCommandList();
+
+        renderCommands[commandCount] = new RenderCommand
+        {
+            RenderCommandType = RenderCommandType.PopDebug
+        };
+        commandCount++;
     }
 
     /// <summary>
@@ -184,5 +230,15 @@ public class RenderPlan
     public ReadOnlySpan<RenderCommand> GetCommands()
     {
         return new ReadOnlySpan<RenderCommand>(renderCommands, 0, commandCount);
+    }
+
+    /// <summary>
+    ///     Grows the command array.
+    /// </summary>
+    private void ExpandCommandList()
+    {
+        var newCommands = new RenderCommand[2 * renderCommands.Length];
+        Array.Copy(renderCommands, newCommands, renderCommands.Length);
+        renderCommands = newCommands;
     }
 }

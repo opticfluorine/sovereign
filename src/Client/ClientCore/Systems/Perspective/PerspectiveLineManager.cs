@@ -73,9 +73,9 @@ public class PerspectiveLineManager
     private readonly WorldSegmentResolver resolver;
 
     /// <summary>
-    ///     Cache of current z position of each tracked entity, used for efficient updates.
+    ///     Cache of current z floor of each tracked entity, used for efficient updates.
     /// </summary>
-    private readonly Dictionary<ulong, float> zDepthByEntity = new();
+    private readonly Dictionary<ulong, int> zFloorByEntity = new();
 
     public PerspectiveLineManager(KinematicComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
@@ -179,17 +179,16 @@ public class PerspectiveLineManager
 
         var lineIndex = GetIndexForPosition(point);
         if (!perspectiveLines.TryGetValue(lineIndex, out var line)) return false;
-        foreach (var entities in line.ZDepths
-                     .GetViewBetween(EntityList.ForComparison(minZ), EntityList.ForComparison(maxZ)).Reverse())
+        foreach (var zSet in line.ZFloors)
         {
             // If there are multiple entities at the highest depth, the priority is:
             //   1. Non-block entities (take first available)
-            //   2. Block top face (will only ever be one at a given z)
-            //   3. Block front face (will only ever be one at a given z)
+            //   2. Block top face (will only ever be one at a given z floor)
+            //   3. Block front face (will only ever be one at a given z floor)
             var foundTopFace = false;
             var projectedPoint = new Vector2(point.X, point.Y + point.Z);
             var foundAny = false;
-            foreach (var entityInfo in entities.Entities)
+            foreach (var entityInfo in zSet.Entities)
             {
                 if (!EntityOverlapsProjectedPoint(entityInfo.EntityId, entityInfo.EntityType, projectedPoint)) continue;
 
@@ -316,7 +315,7 @@ public class PerspectiveLineManager
     private void RemoveEntity(ulong entityId)
     {
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices)) return;
-        if (!zDepthByEntity.TryGetValue(entityId, out var z))
+        if (!zFloorByEntity.TryGetValue(entityId, out var zFloor))
         {
             Logger.ErrorFormat("No cached z value for entity {0}; skipping removal.", entityId);
             return;
@@ -325,7 +324,7 @@ public class PerspectiveLineManager
         foreach (var index in lineIndices)
         {
             if (!perspectiveLines.TryGetValue(index, out var line)) continue;
-            if (!line.ZDepths.TryGetValue(EntityList.ForComparison(z), out var list))
+            if (!line.TryGetListForZFloor(zFloor, out var list))
             {
                 Logger.ErrorFormat("Entity {0} not found in perspective line {1} for removal.", entityId, index);
                 continue;
@@ -339,7 +338,7 @@ public class PerspectiveLineManager
             }
         }
 
-        zDepthByEntity.Remove(entityId);
+        zFloorByEntity.Remove(entityId);
         linesByEntity.Remove(entityId);
     }
 
@@ -352,7 +351,7 @@ public class PerspectiveLineManager
     {
         // Get prior state.
         if (!linesByEntity.TryGetValue(entityId, out var oldLines)
-            || !zDepthByEntity.TryGetValue(entityId, out var oldZ))
+            || !zFloorByEntity.TryGetValue(entityId, out var oldZ))
         {
             Logger.WarnFormat("Moved entity {0} not already tracked, treating as add.");
             AddNonBlockEntity(entityId, position);
@@ -380,7 +379,7 @@ public class PerspectiveLineManager
                 AddEntityToLine(entityId, newIndex, position.Z, EntityType.NonBlock, newIndex.OriginFlag);
 
             // Update state.
-            zDepthByEntity[entityId] = position.Z;
+            zFloorByEntity[entityId] = position.Z;
         }
         finally
         {
@@ -423,7 +422,7 @@ public class PerspectiveLineManager
             EntityType = entityType,
             OriginOnLine = originOnLine
         });
-        zDepthByEntity[entityId] = z;
+        zFloorByEntity[entityId] = z;
 
         // Keep a record of where this block is for easier removal later.
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices))

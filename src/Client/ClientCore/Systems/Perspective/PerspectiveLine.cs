@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Sovereign.ClientCore.Systems.Perspective;
 
@@ -63,44 +64,44 @@ public struct EntityInfo
 /// <summary>
 ///     Represents a list of entities at a common z-depth.
 /// </summary>
-public readonly struct EntityList(float z, List<EntityInfo> entities)
+public class EntityList(int z, List<EntityInfo> entities)
 {
     /// <summary>
     ///     Comparer for EntityLists.
     /// </summary>
     public static readonly IComparer<EntityList> Comparer =
-        Comparer<EntityList>.Create((a, b) => Comparer<float>.Default.Compare(a.Z, b.Z));
+        Comparer<EntityList>.Create((a, b) => Comparer<float>.Default.Compare(a.ZFloor, b.ZFloor));
 
     private static readonly List<EntityInfo> EmptyList = new(0);
 
     /// <summary>
-    ///     Entities at this z-depth.
+    ///     Entities at this z-floor sorted in descending order.
     /// </summary>
     public readonly List<EntityInfo> Entities = entities;
 
     /// <summary>
-    ///     Z depth of this entity list.
+    ///     Z floor of this entity list.
     /// </summary>
-    public readonly float Z = z;
+    public readonly int ZFloor = z;
 
     private static readonly List<int> ToRemove = new();
 
     /// <summary>
     ///     Constructs a new empty EntityList for lookups only.
     /// </summary>
-    /// <param name="z">Z depth.</param>
-    private EntityList(float z) : this(z, EmptyList)
+    /// <param name="zFloor">Z floor.</param>
+    private EntityList(int zFloor) : this(zFloor, EmptyList)
     {
     }
 
     /// <summary>
     ///     Convenience method to improve code readability when creating a dummy list as a comparison key.
     /// </summary>
-    /// <param name="z">Z depth.</param>
+    /// <param name="zFloor">Z floor.</param>
     /// <returns>Dummy list for use as a comparison key.</returns>
-    public static EntityList ForComparison(float z)
+    public static EntityList ForComparison(int zFloor)
     {
-        return new EntityList(z);
+        return new EntityList(zFloor);
     }
 
     /// <summary>
@@ -124,12 +125,31 @@ public readonly struct EntityList(float z, List<EntityInfo> entities)
 public class PerspectiveLine
 {
     /// <summary>
-    ///     Z values at which entities are located on this perspective line.
+    ///     Ordered (descending) list of entities on this line at each non-empty Z floor.
     /// </summary>
-    public readonly SortedSet<EntityList> ZDepths = new(EntityList.Comparer);
+    public readonly List<EntityList> ZFloors = new();
 
     /// <summary>
     ///     Reference count.
     /// </summary>
     public uint ReferenceCount;
+
+    /// <summary>
+    ///     Gets the entity list for the given Z floor, if any.
+    /// </summary>
+    /// <param name="zFloor">Z floor.</param>
+    /// <param name="zSet">Corresponding Z set, or null if not found.</param>
+    /// <returns>true if found, false otherwise.</returns>
+    public bool TryGetListForZFloor(int zFloor, [NotNullWhen(true)] out EntityList? zSet)
+    {
+        var index = ZFloors.BinarySearch(EntityList.ForComparison(zFloor), EntityList.Comparer);
+        if (index < 0)
+        {
+            zSet = null;
+            return false;
+        }
+
+        zSet = ZFloors[index];
+        return true;
+    }
 }

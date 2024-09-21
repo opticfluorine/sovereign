@@ -119,6 +119,14 @@ public class WorldRenderer : IDisposable
                 case RenderCommandType.DrawSprites:
                     commandList.DrawIndexed(command.IndexCount, 1, command.BaseIndex, 0, 0);
                     break;
+
+                case RenderCommandType.PushDebug:
+                    commandList.PushDebugGroup(command.DebugGroupName!);
+                    break;
+
+                case RenderCommandType.PopDebug:
+                    commandList.PopDebugGroup();
+                    break;
             }
         }
 

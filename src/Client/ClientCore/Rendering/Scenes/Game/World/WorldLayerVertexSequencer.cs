@@ -31,13 +31,10 @@ public sealed class WorldLayerVertexSequencer
     private readonly List<PosVelId> sequencedSprites = new();
 
     private readonly WorldSpriteSequencer spriteSequencer;
-    private readonly WorldTileSpriteSequencer tileSpriteSequencer;
 
-    public WorldLayerVertexSequencer(WorldSpriteSequencer spriteSequencer,
-        WorldTileSpriteSequencer tileSpriteSequencer)
+    public WorldLayerVertexSequencer(WorldSpriteSequencer spriteSequencer)
     {
         this.spriteSequencer = spriteSequencer;
-        this.tileSpriteSequencer = tileSpriteSequencer;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -50,23 +47,27 @@ public sealed class WorldLayerVertexSequencer
     /// <param name="systemTime">System time of the current frame.</param>
     public void AddLayer(WorldLayer layer, RenderPlan renderPlan, ulong systemTime)
     {
-        /* Sequence the tile sprites into the buffers. */
-        sequencedSprites.Clear();
-        tileSpriteSequencer.SequenceTileSprites(sequencedSprites, layer.TopFaceTileSprites, true);
-        tileSpriteSequencer.SequenceTileSprites(sequencedSprites, layer.FrontFaceTileSprites, false);
-
-        spriteSequencer.SequenceAnimatedSprites(sequencedSprites, renderPlan, systemTime, out var tileBaseIndex,
-            out var tileIndexCount);
-
-        /* Sequence the remaining animated sprites into the buffers. */
-        spriteSequencer.SequenceAnimatedSprites(layer.AnimatedSprites, renderPlan, systemTime, out var spriteBaseIndex,
+        spriteSequencer.SequenceSprites(layer.FrontFaceTileSprites, renderPlan, systemTime, out var frontBaseIndex,
+            out var frontIndexCount);
+        spriteSequencer.SequenceSprites(layer.TopFaceTileSprites, renderPlan, systemTime, out var topBaseIndex,
+            out var topIndexCount);
+        spriteSequencer.SequenceSprites(layer.AnimatedSprites, renderPlan, systemTime, out var spriteBaseIndex,
             out var spriteIndexCount);
 
-        // Schedule sprite draw commands into the render plan.
-        if (!renderPlan.TryDrawSprites(tileBaseIndex, tileIndexCount) ||
-            !renderPlan.TryDrawSprites(spriteBaseIndex, spriteIndexCount))
-        {
-            Logger.Error("Not enough room in command list to add draw commands.");
-        }
+        renderPlan.PushDebugGroup($"Layer {layer.ZFloor}");
+
+        renderPlan.PushDebugGroup("Block Front Faces");
+        renderPlan.DrawSprites(frontBaseIndex, frontIndexCount);
+        renderPlan.PopDebugGroup();
+
+        renderPlan.PushDebugGroup("Block Top Faces");
+        renderPlan.DrawSprites(topBaseIndex, topIndexCount);
+        renderPlan.PopDebugGroup();
+
+        renderPlan.PushDebugGroup("Animated Sprites");
+        renderPlan.DrawSprites(spriteBaseIndex, spriteIndexCount);
+        renderPlan.PopDebugGroup();
+
+        renderPlan.PopDebugGroup();
     }
 }
