@@ -100,9 +100,9 @@ public sealed class WorldEntityRetriever
 
         var clientConfiguration = configManager.ClientConfiguration;
         var zMin = EntityList.ForComparison(
-            (float)Math.Floor(minExtent.Z - halfY - clientConfiguration.RenderSearchSpacerY));
+            (int)Math.Floor(minExtent.Z - halfY - clientConfiguration.RenderSearchSpacerY));
         var zMax = EntityList.ForComparison(
-            (float)Math.Floor(minExtent.Z + halfY + clientConfiguration.RenderSearchSpacerY));
+            (int)Math.Floor(minExtent.Z + halfY + clientConfiguration.RenderSearchSpacerY));
 
         for (var x = minExtent.X; x <= maxExtent.X; ++x)
         for (var y = minExtent.Y; y <= maxExtent.Y; ++y)
@@ -126,14 +126,13 @@ public sealed class WorldEntityRetriever
         ulong systemTime)
     {
         var foundOpaqueBlock = false;
-        using var enumerator = perspectiveLine.ReverseZDepths.GetEnumerator();
-        while (enumerator.MoveNext())
+        for (var i = 0; i < perspectiveLine.ZFloors.Count; ++i)
         {
-            var zSet = enumerator.Current;
-            if (zSet.Z > zMax.Z) continue;
-            if (zSet.Z < zMin.Z) break;
+            var zSet = perspectiveLine.ZFloors[i];
+            if (zSet.ZFloor > zMax.ZFloor) continue;
+            if (zSet.ZFloor < zMin.ZFloor) break;
 
-            grouper.SelectZDepth(zSet.Z);
+            grouper.SelectZDepth(zSet.ZFloor);
 
             var opaqueThisDepth = foundOpaqueBlock;
             var frontFaceId = ulong.MaxValue;
@@ -150,8 +149,9 @@ public sealed class WorldEntityRetriever
             // perspective line.
 
             // First pass, pull out the block faces so they can be ordered and checked appropriately.
-            foreach (var entity in zSet.Entities)
+            for (var j = zSet.Entities.Count - 1; j >= 0; j--)
             {
+                var entity = zSet.Entities[j];
                 switch (entity.EntityType)
                 {
                     case EntityType.BlockFrontFace:
@@ -162,23 +162,22 @@ public sealed class WorldEntityRetriever
                         topFaceId = entity.EntityId;
                         break;
                 }
+
+                if (frontFaceId < ulong.MaxValue && topFaceId < ulong.MaxValue) break;
             }
 
             // Between passes, handle the faces.
             if (!foundOpaqueBlock && topFaceId < ulong.MaxValue)
-            {
                 ProcessBlockTopFace(topFaceId, systemTime, out opaqueThisDepth);
-            }
 
             if (!foundOpaqueBlock && !opaqueThisDepth && frontFaceId < ulong.MaxValue)
-            {
                 ProcessBlockFrontFace(frontFaceId, systemTime, out opaqueThisDepth);
-            }
 
             // Second pass, sending entities to the layer grouper.
-            foreach (var entity in zSet.Entities)
+            for (var j = zSet.Entities.Count - 1; j >= 0; j--)
             {
                 // Skip block faces since they were already handled above.
+                var entity = zSet.Entities[j];
                 if (entity.EntityType != EntityType.NonBlock) continue;
                 if (entity.OriginOnLine) ProcessSprite(entity.EntityId, systemTime);
             }

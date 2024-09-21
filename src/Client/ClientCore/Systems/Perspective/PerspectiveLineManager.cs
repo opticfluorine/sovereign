@@ -333,7 +333,7 @@ public class PerspectiveLineManager
             list.RemoveEntity(entityId);
             if (list.Entities.Count == 0)
             {
-                line.ZDepths.Remove(list);
+                line.RemoveZFloor(zFloor);
                 entityListPool.ReturnObject(list.Entities);
             }
         }
@@ -351,7 +351,7 @@ public class PerspectiveLineManager
     {
         // Get prior state.
         if (!linesByEntity.TryGetValue(entityId, out var oldLines)
-            || !zFloorByEntity.TryGetValue(entityId, out var oldZ))
+            || !zFloorByEntity.TryGetValue(entityId, out var oldZFloor))
         {
             Logger.WarnFormat("Moved entity {0} not already tracked, treating as add.");
             AddNonBlockEntity(entityId, position);
@@ -372,14 +372,14 @@ public class PerspectiveLineManager
                     continue;
                 }
 
-                RemoveEntityFromLine(entityId, oldIndex, oldLine, oldZ);
+                RemoveEntityFromLine(entityId, oldIndex, oldLine, oldZFloor);
             }
 
             foreach (var newIndex in newIndices)
                 AddEntityToLine(entityId, newIndex, position.Z, EntityType.NonBlock, newIndex.OriginFlag);
 
             // Update state.
-            zFloorByEntity[entityId] = position.Z;
+            zFloorByEntity[entityId] = (int)Math.Floor(position.Z);
         }
         finally
         {
@@ -409,20 +409,22 @@ public class PerspectiveLineManager
         }
 
         // Insert the entity into the correct z position on the perspective line.
-        if (!line.ZDepths.TryGetValue(EntityList.ForComparison(z), out var entityList))
+        var zFloor = (int)Math.Floor(z);
+        if (!line.TryGetListForZFloor(zFloor, out var entityList))
         {
-            entityList = new EntityList(z, entityListPool.TakeObject());
+            entityList = new EntityList(zFloor, entityListPool.TakeObject());
             entityList.Entities.Clear();
-            line.ZDepths.Add(entityList);
+            line.AddZFloor(zFloor, entityList);
         }
 
-        entityList.Entities.Add(new EntityInfo
+        entityList.AddEntity(new EntityInfo
         {
             EntityId = entityId,
             EntityType = entityType,
-            OriginOnLine = originOnLine
+            OriginOnLine = originOnLine,
+            Z = z
         });
-        zFloorByEntity[entityId] = z;
+        zFloorByEntity[entityId] = zFloor;
 
         // Keep a record of where this block is for easier removal later.
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices))
@@ -443,12 +445,13 @@ public class PerspectiveLineManager
     /// <param name="z">z position of entity.</param>
     private void RemoveEntityFromLine(ulong entityId, PerspectiveLineKey lineIndex, PerspectiveLine line, float z)
     {
-        if (line.ZDepths.TryGetValue(EntityList.ForComparison(z), out var list))
+        var zFloor = (int)Math.Floor(z);
+        if (line.TryGetListForZFloor(zFloor, out var list))
         {
             list.RemoveEntity(entityId);
             if (list.Entities.Count == 0)
             {
-                line.ZDepths.Remove(list);
+                line.RemoveZFloor(zFloor);
                 entityListPool.ReturnObject(list.Entities);
             }
         }

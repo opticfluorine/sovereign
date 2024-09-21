@@ -56,6 +56,11 @@ public struct EntityInfo
     public EntityType EntityType;
 
     /// <summary>
+    ///     Z coordinate.
+    /// </summary>
+    public float Z;
+
+    /// <summary>
     ///     Flag indicating whether the sprite's origin is on the perspective line.
     /// </summary>
     public bool OriginOnLine;
@@ -69,10 +74,16 @@ public class EntityList(int z, List<EntityInfo> entities)
     /// <summary>
     ///     Comparer for EntityLists.
     /// </summary>
+    /// <remarks>
+    ///     The order of the comparison is reversed since the Z floors are sorted in descending
+    ///     order within a perspective line.
+    /// </remarks>
     public static readonly IComparer<EntityList> Comparer =
-        Comparer<EntityList>.Create((a, b) => Comparer<float>.Default.Compare(a.ZFloor, b.ZFloor));
+        Comparer<EntityList>.Create((a, b) => Comparer<float>.Default.Compare(b.ZFloor, a.ZFloor));
 
     private static readonly List<EntityInfo> EmptyList = new(0);
+
+    private static readonly List<int> ToRemove = new();
 
     /// <summary>
     ///     Entities at this z-floor sorted in descending order.
@@ -83,8 +94,6 @@ public class EntityList(int z, List<EntityInfo> entities)
     ///     Z floor of this entity list.
     /// </summary>
     public readonly int ZFloor = z;
-
-    private static readonly List<int> ToRemove = new();
 
     /// <summary>
     ///     Constructs a new empty EntityList for lookups only.
@@ -102,6 +111,25 @@ public class EntityList(int z, List<EntityInfo> entities)
     public static EntityList ForComparison(int zFloor)
     {
         return new EntityList(zFloor);
+    }
+
+    /// <summary>
+    ///     Adds an entity to the list.
+    /// </summary>
+    /// <param name="entityInfo">Entity info.</param>
+    public void AddEntity(EntityInfo entityInfo)
+    {
+        // Find position to insert.
+        // This will generally be a short list, so directly iterate instead of binary search here.
+        var index = 0;
+        for (var i = 0; i < Entities.Count; ++i)
+            if (Entities[i].Z < entityInfo.Z)
+            {
+                index = i;
+                break;
+            }
+
+        Entities.Insert(index, entityInfo);
     }
 
     /// <summary>
@@ -151,5 +179,30 @@ public class PerspectiveLine
 
         zSet = ZFloors[index];
         return true;
+    }
+
+    /// <summary>
+    ///     Adds an EntityList at the given z floor.
+    /// </summary>
+    /// <param name="zFloor">Z floor.</param>
+    /// <param name="zSet">EntityList to add.</param>
+    public void AddZFloor(int zFloor, EntityList zSet)
+    {
+        var index = ~ZFloors.BinarySearch(EntityList.ForComparison(zFloor), EntityList.Comparer);
+        if (index < 0) return;
+
+        ZFloors.Insert(index, zSet);
+    }
+
+    /// <summary>
+    ///     Removes the given z floor from the line.
+    /// </summary>
+    /// <param name="zFloor">z floor to remove.</param>
+    public void RemoveZFloor(int zFloor)
+    {
+        var index = ZFloors.BinarySearch(EntityList.ForComparison(zFloor), EntityList.Comparer);
+        if (index < 0) return;
+
+        ZFloors.RemoveAt(index);
     }
 }
