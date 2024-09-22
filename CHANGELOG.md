@@ -2,6 +2,30 @@
 
 ## 2024
 
+#### 21 September 2024
+
+* Persistence: Properly treat world segment block data as *loaded* rather
+  than *added*. This was causing an issue where the server was issuing a
+  large number of redundant block update events whenever a segment was loaded.
+* World Management: Send the world segment loaded event after block data is
+  processed rather than after the binary blob is pulled from the database.
+  Also send this event in the client as well.
+* Player selection: Delay transition from the main menu to in-game state
+  until the initial set of block data is fully loaded. Also include a short
+  delay once ready to allow the tile sprite cache to catch up. This gives a
+  smoother transition where the visible part of the world is fully loaded
+  and processed when it first appears.
+* Renderer: Rewrite the world renderer to pull entities from the perspective
+  lines. Avoid drawing tile sprites that would be totally obscured by other
+  tile sprites higher on the same perspective line. This drastically reduces
+  the rendering workload.
+* Perspective: Replace the use of `SortedSet<T>` with sorted `List<T>` divided
+  into buckets. This trades a small amount of added complexity in updating the
+  perspective lines in exchange for much higher performance when the perspective
+  lines are repeatedly iterated in the renderer. The compute performance of
+  `SortedSet<T>` was fine; however, rapid iteration over the set causes very high
+  GC pressure that causes stuttering.
+
 #### 18 September 2024
 
 * Sprites: Automatically detect opaque sprites on load and flag them as

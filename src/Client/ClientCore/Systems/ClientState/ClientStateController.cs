@@ -15,9 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.ClientCore.Events.Details;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
 
 namespace Sovereign.ClientCore.Systems.ClientState;
 
@@ -26,21 +24,6 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 /// </summary>
 public class ClientStateController
 {
-    /// <summary>
-    ///     Informs the state system that the given world segment has been loaded.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="segmentIndex">World segment index.</param>
-    public void WorldSegmentLoaded(IEventSender eventSender, GridPosition segmentIndex)
-    {
-        var details = new WorldSegmentEventDetails
-        {
-            SegmentIndex = segmentIndex
-        };
-        var ev = new Event(EventId.Client_State_WorldSegmentLoaded, details);
-        eventSender.SendEvent(ev);
-    }
-
     /// <summary>
     ///     Sets a state flag.
     /// </summary>

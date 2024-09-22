@@ -31,7 +31,6 @@ public class ClientStateSystem : ISystem
 {
     private readonly AutoUpdaterEndDetector autoUpdaterEndDetector;
     private readonly EntityManager entityManager;
-    private readonly IEventLoop eventLoop;
     private readonly ClientStateFlagManager flagManager;
     private readonly MainMenuStateMachine mainMenuStateMachine;
     private readonly PlayerStateManager playerStateManager;
@@ -44,7 +43,6 @@ public class ClientStateSystem : ISystem
         MainMenuStateMachine mainMenuStateMachine, EntityManager entityManager,
         AutoUpdaterEndDetector autoUpdaterEndDetector)
     {
-        this.eventLoop = eventLoop;
         this.worldEntryDetector = worldEntryDetector;
         this.flagManager = flagManager;
         this.playerStateManager = playerStateManager;
@@ -66,7 +64,7 @@ public class ClientStateSystem : ISystem
         EventId.Client_Network_BeginConnection,
         EventId.Client_Network_PlayerEntitySelected,
         EventId.Core_WorldManagement_Subscribe,
-        EventId.Client_State_WorldSegmentLoaded,
+        EventId.Core_WorldManagement_WorldSegmentLoaded,
         EventId.Client_State_SetFlag,
         EventId.Core_Network_Logout,
         EventId.Client_State_SetMainMenuState,
@@ -94,6 +92,7 @@ public class ClientStateSystem : ISystem
             {
                 case EventId.Core_Tick:
                     if (stateMachine.State == MainClientState.Update) autoUpdaterEndDetector.OnTick();
+                    else if (stateMachine.State == MainClientState.MainMenu) worldEntryDetector.OnTick();
                     break;
 
                 case EventId.Client_Network_BeginConnection:
@@ -125,7 +124,7 @@ public class ClientStateSystem : ISystem
                     worldEntryDetector.OnSegmentSubscribe();
                     break;
 
-                case EventId.Client_State_WorldSegmentLoaded:
+                case EventId.Core_WorldManagement_WorldSegmentLoaded:
                     worldEntryDetector.OnSegmentLoaded();
                     break;
 

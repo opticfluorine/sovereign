@@ -354,22 +354,16 @@ public enum EventId
     #region Client_State
 
     /// <summary>
-    ///     Event sent when the client has loaded a world segment from the server.
-    /// </summary>
-    /// Associated details: WorldSegmentEventDetails
-    Client_State_WorldSegmentLoaded = 100400,
-
-    /// <summary>
     ///     Event sent to update the state of an individual client state flag.
     /// </summary>
     /// Associated details: ClientStateFlagEventDetails
-    Client_State_SetFlag = 100401,
+    Client_State_SetFlag = 100400,
 
     /// <summary>
     ///     Event sent to update the main menu state.
     /// </summary>
     /// Associated details: MainMenuStateEventDetails
-    Client_State_SetMainMenuState = 100402,
+    Client_State_SetMainMenuState = 100401,
 
     #endregion Client_State
 

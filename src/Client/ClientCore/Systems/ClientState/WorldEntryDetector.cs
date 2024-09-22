@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Castle.Core.Logging;
+using Sovereign.EngineCore.Timing;
+using Sovereign.EngineUtil.Numerics;
 
 namespace Sovereign.ClientCore.Systems.ClientState;
 
@@ -33,17 +35,28 @@ public class WorldEntryDetector
     /// <summary>
     ///     Minimum subscribe count before declaring a detection.
     /// </summary>
-    private const int MinSubscribeCount = 3;
+    private const int MinSubscribeCount = 27;
+
+    /// <summary>
+    ///     Amount of time to delay after detection before triggering transition.
+    ///     The delay is used to provide a "smoother" transition with less graphical artifacts
+    ///     caused by late loading (e.g. the tiling engine warming up).
+    /// </summary>
+    private const ulong TransitionDelay = (ulong)(1.0f * UnitConversions.SToUs);
 
     private readonly ClientStateMachine stateMachine;
+    private readonly ISystemTimer systemTimer;
+    private bool isEntryScheduled;
 
     private bool isPlayerSelected;
     private int loadCount;
+    private ulong scheduledTransitionTime;
     private int subscribeCount;
 
-    public WorldEntryDetector(ClientStateMachine stateMachine)
+    public WorldEntryDetector(ClientStateMachine stateMachine, ISystemTimer systemTimer)
     {
         this.stateMachine = stateMachine;
+        this.systemTimer = systemTimer;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -57,6 +70,8 @@ public class WorldEntryDetector
         isPlayerSelected = false;
         subscribeCount = 0;
         loadCount = 0;
+        isEntryScheduled = false;
+        scheduledTransitionTime = 0;
     }
 
     /// <summary>
@@ -66,6 +81,19 @@ public class WorldEntryDetector
     {
         isPlayerSelected = true;
         CheckForDetection();
+    }
+
+    /// <summary>
+    ///     Called for each tick during the main menu state.
+    /// </summary>
+    public void OnTick()
+    {
+        if (!isEntryScheduled || systemTimer.GetTime() < scheduledTransitionTime) return;
+
+        isEntryScheduled = false;
+        scheduledTransitionTime = 0;
+        if (!stateMachine.TryTransition(MainClientState.InGame))
+            Logger.Error("Unexpectedly failed to transition to in-game state.");
     }
 
     /// <summary>
@@ -98,9 +126,7 @@ public class WorldEntryDetector
 
         // Detection.
         Logger.Info("Sufficient world data loaded, transitioning to in-game.");
-        if (!stateMachine.TryTransition(MainClientState.InGame))
-        {
-            Logger.Error("Unexpectedly failed to transition to in-game state.");
-        }
+        scheduledTransitionTime = systemTimer.GetTime() + TransitionDelay;
+        isEntryScheduled = true;
     }
 }

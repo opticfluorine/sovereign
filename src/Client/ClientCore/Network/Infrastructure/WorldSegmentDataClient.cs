@@ -22,15 +22,11 @@ using Castle.Core.Logging;
 using MessagePack;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Systems.ClientNetwork;
-using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
-using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.WorldManagement;
-using Sovereign.EngineCore.World;
 using Sovereign.NetworkCore.Network;
 
 namespace Sovereign.ClientCore.Network.Infrastructure;
@@ -55,32 +51,20 @@ public sealed class WorldSegmentDataClient
     /// </summary>
     private const long MaxResponseLength = 128 * 1024;
 
-    private readonly BlockController blockController;
-    private readonly IWorldManagementConfiguration config;
     private readonly IEventSender eventSender;
     private readonly WorldSegmentBlockDataLoader loader;
     private readonly ClientNetworkController networkController;
     private readonly RestClient restClient;
-    private readonly ClientStateController stateController;
-    private readonly WorldSegmentResolver worldSegmentResolver;
 
     public WorldSegmentDataClient(IEventSender eventSender,
-        WorldSegmentResolver worldSegmentResolver,
-        IWorldManagementConfiguration config,
-        BlockController blockController,
         RestClient restClient,
         ClientNetworkController networkController,
-        ClientStateController stateController,
         WorldSegmentBlockDataLoader loader)
     {
         this.eventSender = eventSender;
-        this.worldSegmentResolver = worldSegmentResolver;
-        this.blockController = blockController;
         this.restClient = restClient;
         this.networkController = networkController;
-        this.stateController = stateController;
         this.loader = loader;
-        this.config = config;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -179,6 +163,5 @@ public sealed class WorldSegmentDataClient
             MessageConfig.CompressedUntrustedMessagePackOptions);
 
         loader.Load(segmentIndex, segmentData);
-        stateController.WorldSegmentLoaded(eventSender, segmentIndex);
     }
 }
