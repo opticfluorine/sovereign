@@ -60,8 +60,9 @@ public class WorldSegmentBlockDataLoader
             throw new RankException("Bad number of default materials in segment data.");
 
         // Load and create block entities.
-        blockController.AddBlocks(eventSender,
-            blocksToAdd => CreateBlocksToAdd(segmentIndex, segmentData, blocksToAdd));
+        blockController.AddBlocksForWorldSegment(eventSender,
+            blocksToAdd => CreateBlocksToAdd(segmentIndex, segmentData, blocksToAdd),
+            segmentIndex);
     }
 
     /// <summary>

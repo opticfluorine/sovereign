@@ -25,5 +25,6 @@ public class CoreWorldManagementInstaller : IWindsorInstaller
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
         container.Register(Component.For<WorldSegmentBlockDataLoader>().LifestyleSingleton());
+        container.Register(Component.For<CoreWorldManagementController>().LifestyleSingleton());
     }
 }

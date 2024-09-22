@@ -52,7 +52,7 @@ public sealed class WorldManagementEventHandler
     {
         switch (ev.EventId)
         {
-            case EventId.Server_WorldManagement_WorldSegmentLoaded:
+            case EventId.Core_WorldManagement_WorldSegmentLoaded:
             {
                 if (ev.EventDetails is not WorldSegmentEventDetails details)
                 {

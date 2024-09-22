@@ -53,7 +53,7 @@ public class BlockNoticeProcessor
             entityTable.SetTemplate(entityId, blockRecord.TemplateEntityId);
         else
             // Block is new, create it.
-            blockManager.AddBlock(blockRecord);
+            blockManager.AddBlock(blockRecord, false);
     }
 
     /// <summary>

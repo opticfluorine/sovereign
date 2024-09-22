@@ -55,9 +55,10 @@ public sealed class BlockManager
     ///     Adds a new block entity.
     /// </summary>
     /// <param name="blockRecord">Block to be added.</param>
-    public void AddBlock(BlockRecord blockRecord)
+    /// <param name="isLoad">If true, treat as load instead of add.</param>
+    public void AddBlock(BlockRecord blockRecord, bool isLoad)
     {
-        var blockId = CreateBlockForRecord(blockRecord);
+        var blockId = CreateBlockForRecord(blockRecord, isLoad);
         CoverBelowBlock(blockRecord, blockId);
     }
 
@@ -76,12 +77,13 @@ public sealed class BlockManager
     ///     Creates the block described by the given record.
     /// </summary>
     /// <param name="blockRecord">Block record.</param>
+    /// <param name="isLoad">If true, treat as load instead of add.</param>
     /// <returns>Entity ID of the new block.</returns>
-    private ulong CreateBlockForRecord(BlockRecord blockRecord)
+    private ulong CreateBlockForRecord(BlockRecord blockRecord, bool isLoad)
     {
         var hasAboveBlock = GetAboveBlock(blockRecord, out var aboveBlock);
 
-        var builder = entityFactory.GetBuilder(EntityType.Block)
+        var builder = entityFactory.GetBuilder(EntityType.Block, isLoad)
             .BlockPositionable(blockRecord.Position)
             .Template(blockRecord.TemplateEntityId);
 

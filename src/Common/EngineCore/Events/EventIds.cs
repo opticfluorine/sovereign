@@ -165,6 +165,12 @@ public enum EventId
     /// Associated details: EntityChangeWorldSegmentEventDetails
     Core_WorldManagement_EntityLeaveWorldSegment = 602,
 
+    /// <summary>
+    ///     Signals that the entities of a world segment have been loaded.
+    /// </summary>
+    /// Asssociated details: WorldSegmentEventDetails
+    Core_WorldManagement_WorldSegmentLoaded = 603,
+
     #endregion WorldManagement
 
     #region Network
@@ -436,12 +442,6 @@ public enum EventId
     #endregion Server_Accounts
 
     #region Server_WorldManagement
-
-    /// <summary>
-    ///     Signals that the entities of a world segment have been loaded.
-    /// </summary>
-    /// Asssociated details: WorldSegmentEventDetails
-    Server_WorldManagement_WorldSegmentLoaded = 200400,
 
     /// <summary>
     ///     Requests the WorldManagement system to resynchronize a positioned entity with subscribers.

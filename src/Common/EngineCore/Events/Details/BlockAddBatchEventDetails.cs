@@ -16,6 +16,7 @@
  */
 
 using System.Collections.Generic;
+using Sovereign.EngineCore.Components.Indexers;
 
 namespace Sovereign.EngineCore.Events.Details;
 
@@ -27,5 +28,21 @@ public sealed class BlockAddBatchEventDetails : IEventDetails
     /// <summary>
     ///     Blocks to be added.
     /// </summary>
-    public List<BlockRecord> BlockRecords { get; set; } = new();
+    public List<BlockRecord> BlockRecords = new();
+
+    /// <summary>
+    ///     If true, indicates the blocks are being loaded rather than created.
+    /// </summary>
+    public bool IsLoad;
+
+    /// <summary>
+    ///     If true, indicates this is the data for a full world segment and the
+    ///     corresponding load event should be published after processing.
+    /// </summary>
+    public bool IsWorldSegment;
+
+    /// <summary>
+    ///     World segment index for this data. Only set if IsWorldSegment is true.
+    /// </summary>
+    public GridPosition SegmentIndex = GridPosition.Zero;
 }

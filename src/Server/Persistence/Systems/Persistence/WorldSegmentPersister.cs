@@ -20,6 +20,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.EngineUtil.Collections;
@@ -39,15 +40,20 @@ public class WorldSegmentPersister
     private const int BufferSize = 1048576;
 
     private readonly ObjectPool<PersistenceBuffer> bufferPool = new();
+    private readonly CoreWorldManagementController coreWorldManagementController;
+    private readonly IEventSender eventSender;
 
     private readonly WorldSegmentBlockDataLoader loader;
 
     private readonly WorldManagementServices worldManagementServices;
 
-    public WorldSegmentPersister(WorldManagementServices worldManagementServices, WorldSegmentBlockDataLoader loader)
+    public WorldSegmentPersister(WorldManagementServices worldManagementServices, WorldSegmentBlockDataLoader loader,
+        IEventSender eventSender, CoreWorldManagementController coreWorldManagementController)
     {
         this.worldManagementServices = worldManagementServices;
         this.loader = loader;
+        this.eventSender = eventSender;
+        this.coreWorldManagementController = coreWorldManagementController;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -70,7 +76,11 @@ public class WorldSegmentPersister
         {
             if (!provider.GetWorldSegmentBlockDataQuery.TryGetWorldSegmentBlockData(segmentIndex,
                     blockDataBuffer.Buffer))
+            {
+                // This is a new segment with no persisted data, so declare it loaded.
+                coreWorldManagementController.AnnounceWorldSegmentLoaded(eventSender, segmentIndex);
                 return;
+            }
 
             blockData = MessageConfig.DeserializeMsgPack<WorldSegmentBlockData>(blockDataBuffer.Buffer)
                         ?? throw new Exception(

@@ -19,6 +19,7 @@ using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Systems.WorldManagement;
 
 namespace Sovereign.EngineCore.Systems.Block;
 
@@ -29,16 +30,21 @@ public sealed class BlockEventHandler
 {
     private readonly BlockGridPositionIndexer blockGridPositionIndexer;
     private readonly BlockController controller;
+    private readonly CoreWorldManagementController coreWorldManagementController;
+    private readonly IEventSender eventSender;
     private readonly BlockManager manager;
     private readonly BlockNoticeProcessor noticeProcessor;
 
     public BlockEventHandler(BlockController controller, BlockManager manager,
-        BlockGridPositionIndexer blockGridPositionIndexer, BlockNoticeProcessor noticeProcessor)
+        BlockGridPositionIndexer blockGridPositionIndexer, BlockNoticeProcessor noticeProcessor,
+        IEventSender eventSender, CoreWorldManagementController coreWorldManagementController)
     {
         this.controller = controller;
         this.manager = manager;
         this.blockGridPositionIndexer = blockGridPositionIndexer;
         this.noticeProcessor = noticeProcessor;
+        this.eventSender = eventSender;
+        this.coreWorldManagementController = coreWorldManagementController;
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -141,7 +147,7 @@ public sealed class BlockEventHandler
     /// <param name="eventDetails">Event details.</param>
     private void HandleAdd(BlockAddEventDetails eventDetails)
     {
-        manager.AddBlock(eventDetails.BlockRecord);
+        manager.AddBlock(eventDetails.BlockRecord, false);
     }
 
     /// <summary>
@@ -150,8 +156,13 @@ public sealed class BlockEventHandler
     /// <param name="eventDetails">Event details.</param>
     private void HandleAddBatch(BlockAddBatchEventDetails eventDetails)
     {
-        foreach (var block in eventDetails.BlockRecords) manager.AddBlock(block);
+        // Process blocks.
+        foreach (var block in eventDetails.BlockRecords) manager.AddBlock(block, eventDetails.IsLoad);
         controller.ReturnAddBuffer(eventDetails.BlockRecords);
+
+        // Announce world segment load if needed.
+        if (eventDetails.IsWorldSegment)
+            coreWorldManagementController.AnnounceWorldSegmentLoaded(eventSender, eventDetails.SegmentIndex);
     }
 
     /// <summary>

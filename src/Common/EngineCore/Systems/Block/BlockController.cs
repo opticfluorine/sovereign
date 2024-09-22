@@ -67,30 +67,30 @@ public class BlockController
     }
 
     /// <summary>
-    ///     Adds multiple blocks at once without sending any block change notifications.
+    ///     Loads a set of blocks as the contents of a world segment, then announces the segment load
+    ///     upon completion.
     /// </summary>
     /// <param name="eventSender">Event sender for the calling thread.</param>
     /// <param name="recordProvider">Function that populates the list of blocks to create.</param>
-    /// <param name="eventTime">System time to dispatch event, in microseconds.</param>
-    public void AddBlocks(IEventSender eventSender, Action<IList<BlockRecord>> recordProvider,
-        ulong eventTime = Event.Immediate)
+    /// <param name="segmentIndex">World segment index.</param>
+    public void AddBlocksForWorldSegment(IEventSender eventSender, Action<IList<BlockRecord>> recordProvider,
+        GridPosition segmentIndex)
     {
         /* Populate the add records. */
         var recordList = batchAddPool.TakeObject();
         recordList.Clear();
         recordProvider(recordList);
 
-        /* Send the event if there are any blocks to create. */
-        if (recordList.Count > 0)
+        Logger.DebugFormat("Requesting to add {0} blocks.", recordList.Count);
+        var details = new BlockAddBatchEventDetails
         {
-            Logger.DebugFormat("Requesting to add {0} blocks.", recordList.Count);
-            var details = new BlockAddBatchEventDetails
-            {
-                BlockRecords = recordList
-            };
-            var ev = new Event(EventId.Core_Block_AddBatch, details, eventTime);
-            eventSender.SendEvent(ev);
-        }
+            BlockRecords = recordList,
+            IsLoad = true,
+            IsWorldSegment = true,
+            SegmentIndex = segmentIndex
+        };
+        var ev = new Event(EventId.Core_Block_AddBatch, details);
+        eventSender.SendEvent(ev);
     }
 
     /// <summary>

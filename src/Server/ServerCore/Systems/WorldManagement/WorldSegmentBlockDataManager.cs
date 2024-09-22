@@ -132,6 +132,10 @@ public sealed class WorldSegmentBlockDataManager
     /// <param name="segmentIndex">World segment index.</param>
     public void AddWorldSegment(GridPosition segmentIndex)
     {
+        if (compressedDataProducers.TryGetValue(segmentIndex, out var task))
+            // Segment was already loaded, possibly due to activation of a new world segment
+            // not yet in the database.
+            compressedDataProducers[segmentIndex] = task.ContinueWith(_ => DoAddWorldSegment(segmentIndex));
         if (deletionTasks.TryGetValue(segmentIndex, out var deletionTask))
             // Segment was rapidly unloaded and reloaded.
             // Schedule the reload for after the unload is complete.

@@ -18,8 +18,6 @@
 using System;
 using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.World;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
@@ -32,7 +30,6 @@ namespace Sovereign.Persistence.Systems.Persistence;
 public sealed class PersistenceRangeRetriever
 {
     private readonly EntityProcessor entityProcessor;
-    private readonly IEventSender eventSender;
     private readonly PersistenceProviderManager providerManager;
     private readonly WorldSegmentPersister worldSegmentPersister;
     private readonly WorldSegmentResolver worldSegmentResolver;
@@ -40,13 +37,11 @@ public sealed class PersistenceRangeRetriever
     public PersistenceRangeRetriever(EntityProcessor entityProcessor,
         PersistenceProviderManager providerManager,
         WorldSegmentResolver worldSegmentResolver,
-        IEventSender eventSender,
         WorldSegmentPersister worldSegmentPersister)
     {
         this.entityProcessor = entityProcessor;
         this.providerManager = providerManager;
         this.worldSegmentResolver = worldSegmentResolver;
-        this.eventSender = eventSender;
         this.worldSegmentPersister = worldSegmentPersister;
     }
 
@@ -62,14 +57,6 @@ public sealed class PersistenceRangeRetriever
 
         // Retrieve world segment.
         DoRetrieve(segmentIndex);
-
-        // Signal completion.
-        // Sync the event to the next tick to ensure that the loaded entities
-        // and components have been fully processed.
-        var details = new WorldSegmentEventDetails { SegmentIndex = segmentIndex };
-        var ev = new Event(EventId.Server_WorldManagement_WorldSegmentLoaded, details);
-        ev.SyncToTick = true;
-        eventSender.SendEvent(ev);
     }
 
     /// <summary>

@@ -82,13 +82,13 @@ public sealed class ServerEntityFactory : IEntityFactory
         entityAssigner = entityManager.GetNewAssigner();
     }
 
-    public IEntityBuilder GetBuilder(EntityType entityType)
+    public IEntityBuilder GetBuilder(EntityType entityType, bool load = false)
     {
         return entityType switch
         {
-            EntityType.Block => GetBuilder(Interlocked.Increment(ref nextBlockEntityId)),
-            EntityType.Template => GetBuilder(entityTable.TakeNextTemplateEntityId()),
-            _ => GetBuilder(entityAssigner.GetNextId())
+            EntityType.Block => GetBuilder(Interlocked.Increment(ref nextBlockEntityId), load),
+            EntityType.Template => GetBuilder(entityTable.TakeNextTemplateEntityId(), load),
+            _ => GetBuilder(entityAssigner.GetNextId(), load)
         };
     }
 
