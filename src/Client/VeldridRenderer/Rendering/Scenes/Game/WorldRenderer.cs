@@ -148,15 +148,15 @@ public class WorldRenderer : IDisposable
         resourceSet?.Dispose();
 
         var resLayoutDesc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
-            GameResourceManager.RES_SHADER_CONSTANTS,
+            GameResourceManager.ResShaderConstants,
             ResourceKind.UniformBuffer,
             ShaderStages.Vertex
         ), new ResourceLayoutElementDescription(
-            GameResourceManager.RES_TEXTURE_ATLAS,
+            GameResourceManager.ResTextureAtlas,
             ResourceKind.TextureReadOnly,
             ShaderStages.Fragment
         ), new ResourceLayoutElementDescription(
-            GameResourceManager.RES_TEXTURE_ATLAS_SAMPLER,
+            GameResourceManager.ResTextureAtlasSampler,
             ResourceKind.Sampler,
             ShaderStages.Fragment
         ));

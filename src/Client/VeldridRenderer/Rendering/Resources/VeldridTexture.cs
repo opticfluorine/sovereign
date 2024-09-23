@@ -23,6 +23,14 @@ using Veldrid;
 
 namespace Sovereign.VeldridRenderer.Rendering.Resources;
 
+public enum TexturePurpose
+{
+    /// <summary>
+    ///     Texture is intended to hold a depth buffer only.
+    /// </summary>
+    DepthBuffer
+}
+
 /// <summary>
 ///     Wrapper class for Veldrid 2D textures intended for color sampling.
 /// </summary>
@@ -38,12 +46,35 @@ public class VeldridTexture : IDisposable
             { DisplayFormat.B8G8R8A8_UNorm, PixelFormat.B8_G8_R8_A8_UNorm }
         };
 
+    /// <summary>
+    ///     Creates a new texture from an existing surface.
+    /// </summary>
+    /// <param name="device">Device.</param>
+    /// <param name="surface">Source surface.</param>
     public VeldridTexture(VeldridDevice device, Surface surface)
     {
         if (device.Device == null)
             throw new InvalidOperationException("Device not ready.");
 
         Texture = CreateTexture(device, surface);
+
+        var desc = new TextureViewDescription(Texture);
+        TextureView = device.Device.ResourceFactory.CreateTextureView(desc);
+    }
+
+    /// <summary>
+    ///     Creates a new empty 2D texture for the given purpose.
+    /// </summary>
+    /// <param name="device">Device.</param>
+    /// <param name="width">Width.</param>
+    /// <param name="height">Height.</param>
+    /// <param name="purpose">Intended purpose.</param>
+    public VeldridTexture(VeldridDevice device, uint width, uint height, TexturePurpose purpose)
+    {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+
+        Texture = CreateTexture(device, width, height, purpose);
 
         var desc = new TextureViewDescription(Texture);
         TextureView = device.Device.ResourceFactory.CreateTextureView(desc);
@@ -65,6 +96,12 @@ public class VeldridTexture : IDisposable
         Texture.Dispose();
     }
 
+    /// <summary>
+    ///     Creates a texture containing pixel data from an existing surface.
+    /// </summary>
+    /// <param name="device">Device.</param>
+    /// <param name="surface">Source surface.</param>
+    /// <returns>Texture.</returns>
     private Texture CreateTexture(VeldridDevice device, Surface surface)
     {
         if (device.Device == null)
@@ -86,5 +123,33 @@ public class VeldridTexture : IDisposable
             0, 0);
 
         return texture;
+    }
+
+    /// <summary>
+    ///     Creates a writeable 2D texture.
+    /// </summary>
+    /// <param name="device">Device.</param>
+    /// <param name="width">Texture width.</param>
+    /// <param name="height">Texture height.</param>
+    /// <param name="purpose">Intended purpose of texture.</param>
+    /// <returns>Texture.</returns>
+    private Texture CreateTexture(VeldridDevice device, uint width, uint height, TexturePurpose purpose)
+    {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+
+        var format = purpose switch
+        {
+            TexturePurpose.DepthBuffer => PixelFormat.R32_Float,
+            _ => PixelFormat.B8_G8_R8_A8_UNorm
+        };
+        var usage = purpose switch
+        {
+            TexturePurpose.DepthBuffer => TextureUsage.DepthStencil | TextureUsage.Sampled,
+            _ => TextureUsage.Storage | TextureUsage.Sampled
+        };
+        var desc = TextureDescription.Texture2D(width, height, 1, 1, format, usage);
+
+        return device.Device.ResourceFactory.CreateTexture(desc);
     }
 }

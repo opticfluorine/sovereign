@@ -125,7 +125,7 @@ public class GuiRenderer : IDisposable
     {
         // Recreate the resource set to use the newest textures.
         CreateResourceSet();
-        
+
         // Reset the last-used texture to invalidate the cached vertex shader constants.
         lastTexture = IntPtr.Zero;
     }
@@ -193,18 +193,12 @@ public class GuiRenderer : IDisposable
                     var texId = curCmd.GetTexID();
                     var texData = textureMapper.GetTextureDataForTextureId(texId);
                     if (texData is { SourceType: GuiTextureMapper.SourceType.Multiple, Layers: not null })
-                    {
                         foreach (var layerTexId in texData.Layers)
-                        {
                             DrawTextureLayer(commandList, curCmd, layerTexId, systemTime, indexOffset, listIndexOffset,
                                 vertexOffset);
-                        }
-                    }
                     else
-                    {
                         DrawTextureLayer(commandList, curCmd, texId, systemTime, indexOffset, listIndexOffset,
                             vertexOffset);
-                    }
                 }
                 else
                 {
@@ -447,19 +441,19 @@ public class GuiRenderer : IDisposable
             throw new InvalidOperationException("Vertex uniform buffer not ready.");
         if (resourceManager.AtlasTexture == null)
             throw new InvalidOperationException("Texture atlas not ready.");
-        
+
         resourceSet?.Dispose();
 
         var resLayoutDesc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
-            GameResourceManager.RES_SHADER_CONSTANTS,
+            GameResourceManager.ResShaderConstants,
             ResourceKind.UniformBuffer,
             ShaderStages.Vertex
         ), new ResourceLayoutElementDescription(
-            GameResourceManager.RES_TEXTURE_ATLAS,
+            GameResourceManager.ResTextureAtlas,
             ResourceKind.TextureReadOnly,
             ShaderStages.Fragment
         ), new ResourceLayoutElementDescription(
-            GameResourceManager.RES_TEXTURE_ATLAS_SAMPLER,
+            GameResourceManager.ResTextureAtlasSampler,
             ResourceKind.Sampler,
             ShaderStages.Fragment
         ));

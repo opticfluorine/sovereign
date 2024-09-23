@@ -46,17 +46,17 @@ public class GameResourceManager : IDisposable
     /// <summary>
     ///     Resource name for the shader constants uniform buffer.
     /// </summary>
-    public static string RES_SHADER_CONSTANTS = "ShaderConstants";
+    public const string ResShaderConstants = "ShaderConstants";
 
     /// <summary>
     ///     Resource name for the texture atlas.
     /// </summary>
-    public static string RES_TEXTURE_ATLAS = "g_textureAtlas";
+    public const string ResTextureAtlas = "g_textureAtlas";
 
     /// <summary>
     ///     Resource name for the texture atlas sampler.
     /// </summary>
-    public static string RES_TEXTURE_ATLAS_SAMPLER = "g_textureAtlasSampler";
+    public const string ResTextureAtlasSampler = "g_textureAtlasSampler";
 
     private readonly VeldridDevice device;
 
@@ -68,7 +68,6 @@ public class GameResourceManager : IDisposable
     public GameResourceManager(VeldridDevice device)
     {
         this.device = device;
-        DrawBuffer = new int[MaximumDraws];
     }
 
     /// <summary>
@@ -92,11 +91,6 @@ public class GameResourceManager : IDisposable
     public RenderPlan? RenderPlan { get; private set; }
 
     /// <summary>
-    ///     Number of elements to use in each draw.
-    /// </summary>
-    public int[] DrawBuffer { get; private set; }
-
-    /// <summary>
     ///     Number of draws to be performed.
     /// </summary>
     public int DrawCount { get; set; }
@@ -111,10 +105,16 @@ public class GameResourceManager : IDisposable
     /// </summary>
     public Shader? WorldFragmentShader { get; private set; }
 
+    public Shader? WorldShadowMapVertexShader { get; }
+
+    public Shader? WorldShadowMapFragmentShader { get; }
+
     public void Dispose()
     {
         if (!isDisposed)
         {
+            WorldShadowMapFragmentShader?.Dispose();
+            WorldShadowMapVertexShader?.Dispose();
             WorldFragmentShader?.Dispose();
             WorldVertexShader?.Dispose();
             VertexUniformBuffer?.Dispose();

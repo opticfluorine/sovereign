@@ -63,6 +63,15 @@ public class WorldPipeline : IDisposable
         );
 
         Pipeline = device.Device.ResourceFactory.CreateGraphicsPipeline(pipelineDesc);
+
+        var shadowMapPipeLineDesc = new GraphicsPipelineDescription(
+            BlendStateDescription.Empty,
+            DepthStencilStateDescription.DepthOnlyLessEqual,
+            CreateRasterizerState(),
+            PrimitiveTopology.TriangleList,
+            CreateShaderSet(), // TODO
+            CreateResourceLayout(), // TODO
+            device.Device.SwapchainFramebuffer.OutputDescription); // TODO
     }
 
     /// <summary>
@@ -126,15 +135,15 @@ public class WorldPipeline : IDisposable
             throw new InvalidOperationException("Device not ready.");
 
         var desc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
-            GameResourceManager.RES_SHADER_CONSTANTS,
+            GameResourceManager.ResShaderConstants,
             ResourceKind.UniformBuffer,
             ShaderStages.Vertex
         ), new ResourceLayoutElementDescription(
-            GameResourceManager.RES_TEXTURE_ATLAS,
+            GameResourceManager.ResTextureAtlas,
             ResourceKind.TextureReadOnly,
             ShaderStages.Fragment
         ), new ResourceLayoutElementDescription(
-            GameResourceManager.RES_TEXTURE_ATLAS_SAMPLER,
+            GameResourceManager.ResTextureAtlasSampler,
             ResourceKind.Sampler,
             ShaderStages.Fragment
         ));
