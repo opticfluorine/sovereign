@@ -49,6 +49,7 @@ public sealed class WorldLayerGrouper
     /// </summary>
     public void ResetLayers()
     {
+        activeLayer = null;
         foreach (var layer in Layers.Values)
         {
             layer.Reset();

@@ -2,6 +2,13 @@
 
 ## 2024
 
+#### 22 September 2024
+
+* Renderer: Fix bug when rendering a single depth layer only where the
+  layer grouper would begin to build the rendering plan in a layer object
+  that is no longer active, leading to a blank render plan and large
+  memory leaks.
+
 #### 21 September 2024
 
 * Persistence: Properly treat world segment block data as *loaded* rather
