@@ -39,9 +39,15 @@ public class WorldPipeline : IDisposable
     /// </summary>
     public Pipeline? Pipeline { get; private set; }
 
+    /// <summary>
+    ///     Veldrid pipeline for block shadow map rendering.
+    /// </summary>
+    public Pipeline? BlockShadowPipeline { get; private set; }
+
     public void Dispose()
     {
         Pipeline?.Dispose();
+        BlockShadowPipeline?.Dispose();
     }
 
     /// <summary>
@@ -51,6 +57,8 @@ public class WorldPipeline : IDisposable
     {
         if (device.Device == null)
             throw new InvalidOperationException("Device not ready.");
+        if (gameResMgr.ShadowMapFramebuffer == null)
+            throw new InvalidOperationException("Shadow map framebuffer not ready.");
 
         var pipelineDesc = new GraphicsPipelineDescription(
             BlendStateDescription.SingleAlphaBlend,
@@ -64,14 +72,16 @@ public class WorldPipeline : IDisposable
 
         Pipeline = device.Device.ResourceFactory.CreateGraphicsPipeline(pipelineDesc);
 
-        var shadowMapPipeLineDesc = new GraphicsPipelineDescription(
+        var shadowMapPipelineDesc = new GraphicsPipelineDescription(
             BlendStateDescription.Empty,
             DepthStencilStateDescription.DepthOnlyLessEqual,
             CreateRasterizerState(),
             PrimitiveTopology.TriangleList,
-            CreateShaderSet(), // TODO
-            CreateResourceLayout(), // TODO
-            device.Device.SwapchainFramebuffer.OutputDescription); // TODO
+            CreateBlockShadowShaderSet(),
+            CreateBlockShadowResourceLayout(),
+            gameResMgr.ShadowMapFramebuffer.OutputDescription);
+
+        BlockShadowPipeline = device.Device.ResourceFactory.CreateGraphicsPipeline(shadowMapPipelineDesc);
     }
 
     /// <summary>
@@ -126,6 +136,43 @@ public class WorldPipeline : IDisposable
     }
 
     /// <summary>
+    ///     Creates the block shadow mapping shader set.
+    /// </summary>
+    /// <returns>Block shadow mapping shader set.</returns>
+    private ShaderSetDescription CreateBlockShadowShaderSet()
+    {
+        // Describe the vertex format.
+        if (gameResMgr.VertexBuffer == null)
+            throw new InvalidOperationException("Vertex buffer not ready.");
+
+        var vertexDesc = new VertexLayoutDescription(
+            gameResMgr.VertexBuffer.ElementSize,
+            new VertexElementDescription(
+                "vPosition",
+                VertexElementFormat.Float3,
+                VertexElementSemantic.Position
+            ), new VertexElementDescription(
+                "vVelocity",
+                VertexElementFormat.Float3,
+                VertexElementSemantic.Position
+            ), new VertexElementDescription(
+                "vTexCoord",
+                VertexElementFormat.Float2,
+                VertexElementSemantic.TextureCoordinate
+            ));
+
+        // Create the shader set.
+        return new ShaderSetDescription(
+            new[] { vertexDesc },
+            new[]
+            {
+                gameResMgr.BlockShadowVertexShader,
+                gameResMgr.BlockShadowFragmentShader
+            }
+        );
+    }
+
+    /// <summary>
     ///     Creates the resource layout for the world rendering pipeline.
     /// </summary>
     /// <returns>Resource layout for the world rendering pipeline.</returns>
@@ -146,6 +193,23 @@ public class WorldPipeline : IDisposable
             GameResourceManager.ResTextureAtlasSampler,
             ResourceKind.Sampler,
             ShaderStages.Fragment
+        ));
+        return device.Device.ResourceFactory.CreateResourceLayout(desc);
+    }
+
+    /// <summary>
+    ///     Creates the resource layout for the block shadow map rendering.
+    /// </summary>
+    /// <returns>Resource layout for the block shadow map rendering.</returns>
+    private ResourceLayout CreateBlockShadowResourceLayout()
+    {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+
+        var desc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
+            GameResourceManager.ResShaderConstants,
+            ResourceKind.UniformBuffer,
+            ShaderStages.Vertex
         ));
         return device.Device.ResourceFactory.CreateResourceLayout(desc);
     }

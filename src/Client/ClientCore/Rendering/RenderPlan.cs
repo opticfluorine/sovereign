@@ -30,6 +30,11 @@ public enum RenderCommandType
     DrawSprites,
 
     /// <summary>
+    ///     Draw the block shadow map to its texture.
+    /// </summary>
+    DrawBlockShadowMap,
+
+    /// <summary>
     ///     Push a debug group onto the stack.
     /// </summary>
     PushDebug,
@@ -226,6 +231,20 @@ public class RenderPlan
             RenderCommandType = RenderCommandType.DrawSprites,
             BaseIndex = drawBaseIndex,
             IndexCount = drawIndexCount
+        };
+        commandCount++;
+    }
+
+    /// <summary>
+    ///     Adds a DrawBlockShadowMap command to the plan.
+    /// </summary>
+    public void DrawBlockShadowMap()
+    {
+        if (commandCount == renderCommands.Length) ExpandCommandList();
+
+        renderCommands[commandCount] = new RenderCommand
+        {
+            RenderCommandType = RenderCommandType.DrawBlockShadowMap
         };
         commandCount++;
     }

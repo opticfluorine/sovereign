@@ -71,6 +71,11 @@ public class GameResourceManager : IDisposable
     }
 
     /// <summary>
+    ///     Framebuffer for rendering the shadow map.
+    /// </summary>
+    public Framebuffer? ShadowMapFramebuffer { get; private set; }
+
+    /// <summary>
     ///     Updateable vertex buffer.
     /// </summary>
     public VeldridUpdateBuffer<WorldVertex>? VertexBuffer { get; private set; }
@@ -91,6 +96,11 @@ public class GameResourceManager : IDisposable
     public VeldridUpdateBuffer<WorldVertexShaderConstants>? VertexUniformBuffer { get; private set; }
 
     /// <summary>
+    ///     Uniform buffer for the block shadow map vertex shader.
+    /// </summary>
+    public VeldridUpdateBuffer<BlockShadowShaderConstants>? BlockShadowVertexUniformBuffer { get; private set; }
+
+    /// <summary>
     ///     Render plan for the game scene.
     /// </summary>
     public RenderPlan? RenderPlan { get; private set; }
@@ -105,19 +115,33 @@ public class GameResourceManager : IDisposable
     /// </summary>
     public Shader? WorldFragmentShader { get; private set; }
 
-    public Shader? WorldShadowMapVertexShader { get; }
+    /// <summary>
+    ///     Vertex shader for block shadow map rendering.
+    /// </summary>
+    public Shader? BlockShadowVertexShader { get; private set; }
 
-    public Shader? WorldShadowMapFragmentShader { get; }
+    /// <summary>
+    ///     Fragment shader for block shadow map rendering.
+    /// </summary>
+    public Shader? BlockShadowFragmentShader { get; private set; }
+
+    /// <summary>
+    ///     Veldrid texture used for holding the shadow map for each frame.
+    /// </summary>
+    public VeldridTexture? ShadowMapTexture { get; private set; }
 
     public void Dispose()
     {
         if (!isDisposed)
         {
-            WorldShadowMapFragmentShader?.Dispose();
-            WorldShadowMapVertexShader?.Dispose();
+            ShadowMapFramebuffer?.Dispose();
+            ShadowMapTexture?.Dispose();
+            BlockShadowFragmentShader?.Dispose();
+            BlockShadowVertexShader?.Dispose();
             WorldFragmentShader?.Dispose();
             WorldVertexShader?.Dispose();
             VertexUniformBuffer?.Dispose();
+            BlockShadowVertexUniformBuffer?.Dispose();
             SpriteIndexBuffer?.Dispose();
             SolidIndexBuffer?.Dispose();
             VertexBuffer?.Dispose();
@@ -130,22 +154,20 @@ public class GameResourceManager : IDisposable
     /// </summary>
     public void Initialize()
     {
-        /* Create buffers. */
         VertexBuffer = new VeldridUpdateBuffer<WorldVertex>(device,
             BufferUsage.VertexBuffer, MaximumVertices);
-
         SpriteIndexBuffer = new VeldridUpdateBuffer<uint>(device,
             BufferUsage.IndexBuffer, MaximumIndices);
-
         SolidIndexBuffer = new VeldridUpdateBuffer<uint>(device, BufferUsage.IndexBuffer, MaximumIndices);
-
         VertexUniformBuffer = new VeldridUpdateBuffer<WorldVertexShaderConstants>(device,
+            BufferUsage.UniformBuffer, 1);
+        BlockShadowVertexUniformBuffer = new VeldridUpdateBuffer<BlockShadowShaderConstants>(device,
             BufferUsage.UniformBuffer, 1);
 
         RenderPlan = new RenderPlan(VertexBuffer.Buffer, SpriteIndexBuffer.Buffer, SolidIndexBuffer.Buffer,
             MaximumDraws);
 
-        /* Load resources. */
+        CreateDynamicTextures();
         LoadWorldShaders();
     }
 
@@ -161,6 +183,23 @@ public class GameResourceManager : IDisposable
     }
 
     /// <summary>
+    ///     Creates the dynamic textures to support rendering.
+    /// </summary>
+    private void CreateDynamicTextures()
+    {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+        if (device.DisplayMode == null)
+            throw new InvalidOperationException("Display mode not ready.");
+
+        ShadowMapTexture = new VeldridTexture(device, (uint)device.DisplayMode.Width, (uint)device.DisplayMode.Height,
+            TexturePurpose.DepthBuffer);
+
+        var framebufferDesc = new FramebufferDescription(ShadowMapTexture.Texture, []);
+        ShadowMapFramebuffer = device.Device.ResourceFactory.CreateFramebuffer(framebufferDesc);
+    }
+
+    /// <summary>
     ///     Loads shaders.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if the device has not yet been created.</exception>
@@ -172,6 +211,8 @@ public class GameResourceManager : IDisposable
         // Load shader bytes.
         var vertexShaderBytes = device.LoadShaderBytes("World.vert.spv");
         var fragmentShaderBytes = device.LoadShaderBytes("World.frag.spv");
+        var bsVertexShaderBytes = device.LoadShaderBytes("BlockShadow.vert.spv");
+        var bsFragmentShaderBytes = device.LoadShaderBytes("BlockShadow.frag.spv");
 
         // World vertex shader.
         var vertexDesc = new ShaderDescription(ShaderStages.Vertex,
@@ -182,5 +223,15 @@ public class GameResourceManager : IDisposable
         var fragmentDesc = new ShaderDescription(ShaderStages.Fragment,
             fragmentShaderBytes, "main", true); // TODO control debug flag from config
         WorldFragmentShader = device.Device.ResourceFactory.CreateShader(fragmentDesc);
+
+        // Block shadow vertex shader.
+        var bsVertexDesc = new ShaderDescription(ShaderStages.Vertex,
+            bsVertexShaderBytes, "main", true);
+        BlockShadowVertexShader = device.Device.ResourceFactory.CreateShader(bsVertexDesc);
+
+        // Block shadow fragment shader.
+        var bsFragmentDesc = new ShaderDescription(ShaderStages.Fragment,
+            bsFragmentShaderBytes, "main", true);
+        BlockShadowFragmentShader = device.Device.ResourceFactory.CreateShader(bsFragmentDesc);
     }
 }

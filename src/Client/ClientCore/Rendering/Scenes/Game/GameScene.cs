@@ -76,6 +76,12 @@ public sealed class GameScene : IScene
 
     public void BuildRenderPlan(RenderPlan renderPlan)
     {
+        // Start by scheduling the shadow map render pass.
+        renderPlan.PushDebugGroup("Shadow Map");
+        renderPlan.DrawBlockShadowMap();
+        renderPlan.PopDebugGroup();
+
+        // Fill the buffers and generate sprite draw commands along the way.
         worldVertexSequencer.SequenceVertices(renderPlan, timeSinceTick, systemTime);
     }
 

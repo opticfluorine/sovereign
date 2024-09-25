@@ -50,10 +50,6 @@ public class VeldridResourceManager : IDisposable
     /// </summary>
     public VeldridTexture? AtlasTexture { get; private set; }
 
-    /// <summary>
-    ///     Veldrid texture used for holding the shadow map for each frame.
-    /// </summary>
-    public VeldridTexture? ShadowMapTexture { get; private set; }
 
     /// <summary>
     ///     Veldrid command list used for rendering.
@@ -65,7 +61,6 @@ public class VeldridResourceManager : IDisposable
     /// </summary>
     public void Dispose()
     {
-        ShadowMapTexture?.Dispose();
         AtlasTexture?.Dispose();
         CommandList?.Dispose();
     }
@@ -97,7 +92,6 @@ public class VeldridResourceManager : IDisposable
 
         AtlasTexture?.Dispose();
         CreateAtlasTexture();
-        CreateDynamicTextures();
     }
 
     /// <summary>
@@ -109,17 +103,5 @@ public class VeldridResourceManager : IDisposable
             throw new InvalidOperationException("Tried to create Vulkan texture atlas without data.");
         AtlasTexture = new VeldridTexture(device,
             atlasManager.TextureAtlas.AtlasSurface);
-    }
-
-    /// <summary>
-    ///     Creates the dynamic textures to support rendering.
-    /// </summary>
-    private void CreateDynamicTextures()
-    {
-        if (device.DisplayMode == null)
-            throw new InvalidOperationException("Display mode not ready.");
-
-        ShadowMapTexture = new VeldridTexture(device, (uint)device.DisplayMode.Width, (uint)device.DisplayMode.Height,
-            TexturePurpose.DepthBuffer);
     }
 }
