@@ -71,10 +71,12 @@ public struct RenderCommand
 /// </summary>
 public class RenderPlan
 {
+    private readonly uint[] solidIndexBuffer;
+
     /// <summary>
     ///     Index buffer being planned.
     /// </summary>
-    private readonly uint[] indexBuffer;
+    private readonly uint[] spriteIndexBuffer;
 
     /// <summary>
     ///     Vertex buffer being planned.
@@ -87,24 +89,31 @@ public class RenderPlan
     private int commandCount;
 
     /// <summary>
-    ///     Number of indices in the index buffer.
-    /// </summary>
-    private int indexCount;
-
-    /// <summary>
     ///     Rendering commands to be executed for this plan.
     /// </summary>
     private RenderCommand[] renderCommands;
+
+    /// <summary>
+    ///     Number of indices in the solid geometry index buffer.
+    /// </summary>
+    private int solidIndexCount;
+
+    /// <summary>
+    ///     Number of indices in the sprite index buffer.
+    /// </summary>
+    private int spriteIndexCount;
 
     /// <summary>
     ///     Number of vertices in the vertex buffer.
     /// </summary>
     private int vertexCount;
 
-    public RenderPlan(WorldVertex[] vertexBuffer, uint[] indexBuffer, int commandListSize)
+    public RenderPlan(WorldVertex[] vertexBuffer, uint[] spriteIndexBuffer, uint[] solidIndexBuffer,
+        int commandListSize)
     {
         this.vertexBuffer = vertexBuffer;
-        this.indexBuffer = indexBuffer;
+        this.spriteIndexBuffer = spriteIndexBuffer;
+        this.solidIndexBuffer = solidIndexBuffer;
         renderCommands = new RenderCommand[commandListSize];
     }
 
@@ -114,9 +123,14 @@ public class RenderPlan
     public int VertexCount => vertexCount;
 
     /// <summary>
-    ///     Index count.
+    ///     Sprite index count.
     /// </summary>
-    public int IndexCount => indexCount;
+    public int SpriteIndexCount => spriteIndexCount;
+
+    /// <summary>
+    ///     Solid geometry index count.
+    /// </summary>
+    public int SolidIndexCount => solidIndexCount;
 
     /// <summary>
     ///     Resets the render plan for a new frame.
@@ -124,7 +138,8 @@ public class RenderPlan
     public void Reset()
     {
         vertexCount = 0;
-        indexCount = 0;
+        spriteIndexCount = 0;
+        solidIndexCount = 0;
         commandCount = 0;
     }
 
@@ -157,18 +172,40 @@ public class RenderPlan
     /// <param name="indices">Block of indices to populate.</param>
     /// <param name="baseIndex">Index to first index in the block.</param>
     /// <returns>true if successful, false otherwise.</returns>
-    public bool TryAddIndices(int count, out Span<uint> indices, out uint baseIndex)
+    public bool TryAddSpriteIndices(int count, out Span<uint> indices, out uint baseIndex)
     {
-        if (indexCount + count > indexBuffer.Length)
+        if (spriteIndexCount + count > spriteIndexBuffer.Length)
         {
             indices = new Span<uint>();
             baseIndex = 0;
             return false;
         }
 
-        indices = new Span<uint>(indexBuffer, indexCount, count);
-        baseIndex = (uint)indexCount;
-        indexCount += count;
+        indices = new Span<uint>(spriteIndexBuffer, spriteIndexCount, count);
+        baseIndex = (uint)spriteIndexCount;
+        spriteIndexCount += count;
+        return true;
+    }
+
+    /// <summary>
+    ///     Tries to reserve a contiguous block of solid geometry indices in the plan if space is available.
+    /// </summary>
+    /// <param name="count">Number of contiguous indices to reserve.</param>
+    /// <param name="indices">Block of indices to populate.</param>
+    /// <param name="baseIndex">Index to first index in the block.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    public bool TryAddSolidIndices(int count, out Span<uint> indices, out uint baseIndex)
+    {
+        if (solidIndexCount + count > solidIndexBuffer.Length)
+        {
+            indices = new Span<uint>();
+            baseIndex = 0;
+            return false;
+        }
+
+        indices = new Span<uint>(solidIndexBuffer, solidIndexCount, count);
+        baseIndex = (uint)solidIndexCount;
+        solidIndexCount += count;
         return true;
     }
 

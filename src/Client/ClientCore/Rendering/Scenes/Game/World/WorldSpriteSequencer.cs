@@ -64,7 +64,7 @@ public sealed class WorldSpriteSequencer
             return;
         }
 
-        if (!renderPlan.TryAddIndices(sprites.Count * IndicesPerSprite, out var indices, out baseIndex))
+        if (!renderPlan.TryAddSpriteIndices(sprites.Count * IndicesPerSprite, out var indices, out baseIndex))
         {
             Logger.Error("Render plan index buffer too small for update.");
             return;

@@ -96,7 +96,7 @@ public class WorldRenderer : IDisposable
     /// <param name="renderPlan">Render plan.</param>
     public void Render(CommandList commandList, RenderPlan renderPlan)
     {
-        if (gameResMgr.VertexBuffer == null || gameResMgr.IndexBuffer == null)
+        if (gameResMgr.VertexBuffer == null || gameResMgr.SpriteIndexBuffer == null)
             throw new InvalidOperationException("Buffers not ready.");
 
         commandList.PushDebugGroup("WorldRenderer.Render");
@@ -106,7 +106,7 @@ public class WorldRenderer : IDisposable
         commandList.SetPipeline(pipeline.Pipeline);
         commandList.SetGraphicsResourceSet(0, resourceSet);
         commandList.SetVertexBuffer(0, gameResMgr.VertexBuffer.DeviceBuffer);
-        commandList.SetIndexBuffer(gameResMgr.IndexBuffer.DeviceBuffer,
+        commandList.SetIndexBuffer(gameResMgr.SpriteIndexBuffer.DeviceBuffer,
             IndexFormat.UInt32);
 
         // Execute draw commands from the buffer.

@@ -58,7 +58,7 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
 
     public void ConsumeScene(IScene scene)
     {
-        if (gameResManager.VertexBuffer == null || gameResManager.IndexBuffer == null ||
+        if (gameResManager.VertexBuffer == null || gameResManager.SpriteIndexBuffer == null ||
             gameResManager.RenderPlan == null)
             throw new InvalidOperationException("Buffers not ready.");
         if (resManager.CommandList == null)
@@ -70,7 +70,7 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
         scene.BuildRenderPlan(renderPlan);
 
         gameResManager.VertexBuffer.UsedLength = (uint)renderPlan.VertexCount;
-        gameResManager.IndexBuffer.UsedLength = (uint)renderPlan.IndexCount;
+        gameResManager.SpriteIndexBuffer.UsedLength = (uint)renderPlan.SpriteIndexCount;
         worldVcUpdater.Update(scene);
 
         /* Post updates to buffers. */

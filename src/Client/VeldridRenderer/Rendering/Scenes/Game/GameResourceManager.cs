@@ -39,7 +39,7 @@ public class GameResourceManager : IDisposable
     public const int MaximumVertices = 262144;
 
     /// <summary>
-    ///     Maximum number of indices in the index buffer.
+    ///     Maximum number of indices in each index buffer.
     /// </summary>
     public const int MaximumIndices = 262144;
 
@@ -76,9 +76,14 @@ public class GameResourceManager : IDisposable
     public VeldridUpdateBuffer<WorldVertex>? VertexBuffer { get; private set; }
 
     /// <summary>
-    ///     Index buffer into the vertex buffer.
+    ///     Index buffer for rendering sprites (animated and tile).
     /// </summary>
-    public VeldridUpdateBuffer<uint>? IndexBuffer { get; private set; }
+    public VeldridUpdateBuffer<uint>? SpriteIndexBuffer { get; private set; }
+
+    /// <summary>
+    ///     Index buffer for rendering solid geometry from blocks.
+    /// </summary>
+    public VeldridUpdateBuffer<uint>? SolidIndexBuffer { get; private set; }
 
     /// <summary>
     ///     Uniform buffer for the vertex shader.
@@ -89,11 +94,6 @@ public class GameResourceManager : IDisposable
     ///     Render plan for the game scene.
     /// </summary>
     public RenderPlan? RenderPlan { get; private set; }
-
-    /// <summary>
-    ///     Number of draws to be performed.
-    /// </summary>
-    public int DrawCount { get; set; }
 
     /// <summary>
     ///     Vertex shader for game world rendering.
@@ -118,7 +118,8 @@ public class GameResourceManager : IDisposable
             WorldFragmentShader?.Dispose();
             WorldVertexShader?.Dispose();
             VertexUniformBuffer?.Dispose();
-            IndexBuffer?.Dispose();
+            SpriteIndexBuffer?.Dispose();
+            SolidIndexBuffer?.Dispose();
             VertexBuffer?.Dispose();
             isDisposed = true;
         }
@@ -133,13 +134,16 @@ public class GameResourceManager : IDisposable
         VertexBuffer = new VeldridUpdateBuffer<WorldVertex>(device,
             BufferUsage.VertexBuffer, MaximumVertices);
 
-        IndexBuffer = new VeldridUpdateBuffer<uint>(device,
+        SpriteIndexBuffer = new VeldridUpdateBuffer<uint>(device,
             BufferUsage.IndexBuffer, MaximumIndices);
+
+        SolidIndexBuffer = new VeldridUpdateBuffer<uint>(device, BufferUsage.IndexBuffer, MaximumIndices);
 
         VertexUniformBuffer = new VeldridUpdateBuffer<WorldVertexShaderConstants>(device,
             BufferUsage.UniformBuffer, 1);
 
-        RenderPlan = new RenderPlan(VertexBuffer.Buffer, IndexBuffer.Buffer, MaximumDraws);
+        RenderPlan = new RenderPlan(VertexBuffer.Buffer, SpriteIndexBuffer.Buffer, SolidIndexBuffer.Buffer,
+            MaximumDraws);
 
         /* Load resources. */
         LoadWorldShaders();
@@ -152,7 +156,7 @@ public class GameResourceManager : IDisposable
     public void UpdateBuffers(CommandList commandList)
     {
         VertexBuffer?.Update(commandList);
-        IndexBuffer?.Update(commandList);
+        SpriteIndexBuffer?.Update(commandList);
         VertexUniformBuffer?.Update(commandList);
     }
 
