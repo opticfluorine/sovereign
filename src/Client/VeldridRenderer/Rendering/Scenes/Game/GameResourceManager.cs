@@ -58,6 +58,16 @@ public class GameResourceManager : IDisposable
     /// </summary>
     public const string ResTextureAtlasSampler = "g_textureAtlasSampler";
 
+    /// <summary>
+    ///     Resource name for the shadow map texture.
+    /// </summary>
+    public const string ResShadowMapTexture = "g_shadowMap";
+
+    /// <summary>
+    ///     Resource name for the shadow map texture sampler.
+    /// </summary>
+    public const string ResShadowMapTextureSampler = "g_shadowMapSampler";
+
     private readonly VeldridDevice device;
 
     /// <summary>

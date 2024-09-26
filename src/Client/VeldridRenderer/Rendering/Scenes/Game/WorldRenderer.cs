@@ -186,6 +186,10 @@ public class WorldRenderer : IDisposable
             throw new InvalidOperationException("Vertex uniform buffer not ready.");
         if (resMgr.AtlasTexture == null)
             throw new InvalidOperationException("Texture atlas not ready.");
+        if (gameResMgr.ShadowMapTexture == null)
+            throw new InvalidOperationException("Shadow map texture not ready.");
+        if (gameResMgr.FragmentUniformBuffer == null)
+            throw new InvalidOperationException("Fragment uniform buffer not ready.");
 
         resourceSet?.Dispose();
 
@@ -201,6 +205,18 @@ public class WorldRenderer : IDisposable
             GameResourceManager.ResTextureAtlasSampler,
             ResourceKind.Sampler,
             ShaderStages.Fragment
+        ), new ResourceLayoutElementDescription(
+            GameResourceManager.ResShadowMapTexture,
+            ResourceKind.TextureReadOnly,
+            ShaderStages.Fragment
+        ), new ResourceLayoutElementDescription(
+            GameResourceManager.ResShadowMapTextureSampler,
+            ResourceKind.Sampler,
+            ShaderStages.Fragment
+        ), new ResourceLayoutElementDescription(
+            GameResourceManager.ResShaderConstants,
+            ResourceKind.UniformBuffer,
+            ShaderStages.Fragment
         ));
         var resLayout = device.Device.ResourceFactory.CreateResourceLayout(resLayoutDesc);
 
@@ -208,7 +224,10 @@ public class WorldRenderer : IDisposable
             resLayout,
             gameResMgr.VertexUniformBuffer.DeviceBuffer,
             resMgr.AtlasTexture.TextureView,
-            device.Device.PointSampler
+            device.Device.PointSampler,
+            gameResMgr.ShadowMapTexture.TextureView,
+            device.Device.PointSampler,
+            gameResMgr.FragmentUniformBuffer.DeviceBuffer
         );
         resourceSet = device.Device.ResourceFactory.CreateResourceSet(resSetDesc);
     }
@@ -234,7 +253,7 @@ public class WorldRenderer : IDisposable
 
         var resSetDesc = new ResourceSetDescription(
             resLayout,
-            gameResMgr.BlockShadowVertexUniformBuffer!.DeviceBuffer
+            gameResMgr.BlockShadowVertexUniformBuffer.DeviceBuffer
         );
         blockShadowResourceSet = device.Device.ResourceFactory.CreateResourceSet(resSetDesc);
     }
