@@ -32,6 +32,11 @@ public struct WorldVertexShaderConstants
     public Matrix4x4 WorldViewTransform;
 
     /// <summary>
+    ///     Shadow map world/view transformation matrix.
+    /// </summary>
+    public Matrix4x4 ShadowWorldViewTransform;
+
+    /// <summary>
     ///     Time since the last tick, in seconds.
     /// </summary>
     public float TimeSinceTick;

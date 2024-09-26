@@ -64,8 +64,16 @@ public interface IScene
     /// <param name="heightInTiles">Height of the display in tiles.</param>
     /// <param name="cameraPos">Camera position.</param>
     /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
+    /// <param name="globalLightAngleRad">Displacement angle of the global light source in radians.</param>
     void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles,
-        out Vector3 cameraPos, out float timeSinceTick);
+        out Vector3 cameraPos, out float timeSinceTick, out float globalLightAngleRad);
+
+    /// <summary>
+    ///     Populates the world rendering fragment constants buffer, if applicable.
+    /// </summary>
+    /// <param name="ambientLightColor">Ambient light color (e.g. shadows, areas without lighting).</param>
+    /// <param name="globalLightColor">Global light color (e.g. sun, moon when outdoors).</param>
+    void PopulateWorldFragmentConstants(out Vector4 ambientLightColor, out Vector4 globalLightColor);
 
     /// <summary>
     ///     Called to update the GUI for the scene.

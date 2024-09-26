@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Numerics;
 using Sovereign.ClientCore.Rendering.Scenes;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
@@ -38,44 +39,62 @@ public class WorldVertexConstantsUpdater
     /// <param name="scene">Active scene.</param>
     public void Update(IScene scene)
     {
-        if (gameResourceManager.VertexUniformBuffer == null)
-            throw new InvalidOperationException("Vertex uniform buffer not ready.");
+        if (gameResourceManager.VertexUniformBuffer == null
+            || gameResourceManager.BlockShadowVertexUniformBuffer == null)
+            throw new InvalidOperationException("Vertex uniform buffers not ready.");
 
         /* Retrieve the needed constants. */
         scene.PopulateWorldVertexConstants(out var widthInTiles,
             out var heightInTiles,
             out var cameraPos,
-            out var timeSinceTick);
+            out var timeSinceTick,
+            out var globalLightAngleRad);
         var invHalfWidth = 2.0f / widthInTiles;
         var invHalfHeight = 2.0f / heightInTiles;
 
-        /* Update constant buffer. */
+        /* Update constant buffers. */
         var buf = gameResourceManager.VertexUniformBuffer.Buffer;
+        var shadowBuf = gameResourceManager.BlockShadowVertexUniformBuffer.Buffer;
         buf[0].TimeSinceTick = timeSinceTick;
 
+        // Calculate camera rotation matrix for the global light source.
+        // Note that we reverse the indices to match the column-major layout expected by Vulkan.
+        var rotMat = Matrix4x4.Identity;
+        var sinTheta = (float)Math.Sin(globalLightAngleRad);
+        var cosTheta = (float)Math.Cos(globalLightAngleRad);
+        rotMat.M11 = cosTheta;
+        rotMat.M21 = -sinTheta;
+        rotMat.M12 = sinTheta;
+        rotMat.M22 = cosTheta;
+
         /* Calculate world-view transform matrix. */
-        ref var mat = ref buf[0].WorldViewTransform;
+        ref var projMat = ref buf[0].WorldViewTransform;
 
         // Note that we reverse the indices to match the column-major layout expected by Vulkan.
-        mat.M11 = invHalfWidth;
-        mat.M21 = 0.0f;
-        mat.M31 = 0.0f;
-        mat.M41 = -invHalfWidth * cameraPos.X;
+        projMat.M11 = invHalfWidth;
+        projMat.M21 = 0.0f;
+        projMat.M31 = 0.0f;
+        projMat.M41 = -invHalfWidth * cameraPos.X;
 
         // Note that for Vulkan, the Y axis is inverted.
-        mat.M12 = 0.0f;
-        mat.M22 = -invHalfHeight;
-        mat.M32 = -invHalfHeight;
-        mat.M42 = -invHalfHeight * (cameraPos.Z - cameraPos.Y);
+        projMat.M12 = 0.0f;
+        projMat.M22 = -invHalfHeight;
+        projMat.M32 = -invHalfHeight;
+        projMat.M42 = -invHalfHeight * (cameraPos.Z - cameraPos.Y);
 
-        mat.M13 = 0.0f;
-        mat.M23 = 0.0f;
-        mat.M33 = 0.0f;
-        mat.M43 = 0.0f;
+        projMat.M13 = 0.0f;
+        projMat.M23 = 0.0f;
+        projMat.M33 = 0.0f;
+        projMat.M43 = 0.0f;
 
-        mat.M14 = 0.0f;
-        mat.M24 = 0.0f;
-        mat.M34 = 0.0f;
-        mat.M44 = 1.0f;
+        projMat.M14 = 0.0f;
+        projMat.M24 = 0.0f;
+        projMat.M34 = 0.0f;
+        projMat.M44 = 1.0f;
+
+        // Calculate the shadow map transform matrix.
+        // The transform operates to the right, so the rotation needs to be the rightmost operator.
+        buf[0].ShadowWorldViewTransform = projMat * rotMat;
+        shadowBuf[0].WorldViewTransform = buf[0].ShadowWorldViewTransform;
     }
 }

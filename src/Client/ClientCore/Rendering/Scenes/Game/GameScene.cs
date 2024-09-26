@@ -86,12 +86,19 @@ public sealed class GameScene : IScene
     }
 
     public void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles,
-        out Vector3 cameraPos, out float timeSinceTick)
+        out Vector3 cameraPos, out float timeSinceTick, out float globalLightAngleRad)
     {
         widthInTiles = viewport.WidthInTiles;
         heightInTiles = viewport.HeightInTiles;
         cameraPos = camera.Aim(this.timeSinceTick);
         timeSinceTick = this.timeSinceTick;
+        globalLightAngleRad = 0.1f;
+    }
+
+    public void PopulateWorldFragmentConstants(out Vector4 ambientLightColor, out Vector4 globalLightColor)
+    {
+        ambientLightColor = new Vector4(0.3f, 0.3f, 0.3f, 1.0f);
+        globalLightColor = Vector4.One;
     }
 
     public void UpdateGui()

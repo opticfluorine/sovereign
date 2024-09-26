@@ -29,6 +29,7 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
     private readonly GameResourceManager gameResManager;
     private readonly GameSceneRenderer renderer;
     private readonly VeldridResourceManager resManager;
+    private readonly WorldFragmentConstantsUpdater worldFcUpdater;
     private readonly WorldVertexConstantsUpdater worldVcUpdater;
 
     /// <summary>
@@ -38,12 +39,13 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
 
     public GameSceneConsumer(GameResourceManager gameResManager,
         VeldridResourceManager resManager, GameSceneRenderer renderer,
-        WorldVertexConstantsUpdater worldVcUpdater)
+        WorldVertexConstantsUpdater worldVcUpdater, WorldFragmentConstantsUpdater worldFcUpdater)
     {
         this.resManager = resManager;
         this.gameResManager = gameResManager;
         this.renderer = renderer;
         this.worldVcUpdater = worldVcUpdater;
+        this.worldFcUpdater = worldFcUpdater;
     }
 
     public void Dispose()
@@ -59,7 +61,7 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
     public void ConsumeScene(IScene scene)
     {
         if (gameResManager.VertexBuffer == null || gameResManager.SpriteIndexBuffer == null ||
-            gameResManager.RenderPlan == null)
+            gameResManager.SolidIndexBuffer == null || gameResManager.RenderPlan == null)
             throw new InvalidOperationException("Buffers not ready.");
         if (resManager.CommandList == null)
             throw new InvalidOperationException("Command list not ready.");
@@ -71,7 +73,9 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
 
         gameResManager.VertexBuffer.UsedLength = (uint)renderPlan.VertexCount;
         gameResManager.SpriteIndexBuffer.UsedLength = (uint)renderPlan.SpriteIndexCount;
+        gameResManager.SolidIndexBuffer.UsedLength = (uint)renderPlan.SolidIndexCount;
         worldVcUpdater.Update(scene);
+        worldFcUpdater.Update(scene);
 
         /* Post updates to buffers. */
         var commandList = resManager.CommandList;

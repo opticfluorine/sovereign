@@ -91,9 +91,14 @@ public class GameResourceManager : IDisposable
     public VeldridUpdateBuffer<uint>? SolidIndexBuffer { get; private set; }
 
     /// <summary>
-    ///     Uniform buffer for the vertex shader.
+    ///     Uniform buffer for the world vertex shader.
     /// </summary>
     public VeldridUpdateBuffer<WorldVertexShaderConstants>? VertexUniformBuffer { get; private set; }
+
+    /// <summary>
+    ///     Uniform buffer for the world fragment shader.
+    /// </summary>
+    public VeldridUpdateBuffer<WorldFragmentShaderConstants>? FragmentUniformBuffer { get; private set; }
 
     /// <summary>
     ///     Uniform buffer for the block shadow map vertex shader.
@@ -141,6 +146,7 @@ public class GameResourceManager : IDisposable
             WorldFragmentShader?.Dispose();
             WorldVertexShader?.Dispose();
             VertexUniformBuffer?.Dispose();
+            FragmentUniformBuffer?.Dispose();
             BlockShadowVertexUniformBuffer?.Dispose();
             SpriteIndexBuffer?.Dispose();
             SolidIndexBuffer?.Dispose();
@@ -161,6 +167,8 @@ public class GameResourceManager : IDisposable
         SolidIndexBuffer = new VeldridUpdateBuffer<uint>(device, BufferUsage.IndexBuffer, MaximumIndices);
         VertexUniformBuffer = new VeldridUpdateBuffer<WorldVertexShaderConstants>(device,
             BufferUsage.UniformBuffer, 1);
+        FragmentUniformBuffer =
+            new VeldridUpdateBuffer<WorldFragmentShaderConstants>(device, BufferUsage.UniformBuffer, 1);
         BlockShadowVertexUniformBuffer = new VeldridUpdateBuffer<BlockShadowShaderConstants>(device,
             BufferUsage.UniformBuffer, 1);
 
@@ -179,7 +187,10 @@ public class GameResourceManager : IDisposable
     {
         VertexBuffer?.Update(commandList);
         SpriteIndexBuffer?.Update(commandList);
+        SolidIndexBuffer?.Update(commandList);
         VertexUniformBuffer?.Update(commandList);
+        FragmentUniformBuffer?.Update(commandList);
+        BlockShadowVertexUniformBuffer?.Update(commandList);
     }
 
     /// <summary>
@@ -195,7 +206,7 @@ public class GameResourceManager : IDisposable
         ShadowMapTexture = new VeldridTexture(device, (uint)device.DisplayMode.Width, (uint)device.DisplayMode.Height,
             TexturePurpose.DepthBuffer);
 
-        var framebufferDesc = new FramebufferDescription(ShadowMapTexture.Texture, []);
+        var framebufferDesc = new FramebufferDescription(ShadowMapTexture.Texture);
         ShadowMapFramebuffer = device.Device.ResourceFactory.CreateFramebuffer(framebufferDesc);
     }
 
