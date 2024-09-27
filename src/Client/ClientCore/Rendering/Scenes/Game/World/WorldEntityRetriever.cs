@@ -173,6 +173,9 @@ public sealed class WorldEntityRetriever
             if (!foundOpaqueBlock && !opaqueThisDepth && frontFaceId < ulong.MaxValue)
                 ProcessBlockFrontFace(frontFaceId, systemTime, out opaqueThisDepth);
 
+            // If a top face was found, mark the block for solid geometry rendering.
+            if (topFaceId < ulong.MaxValue) ProcessSolidBlock(topFaceId);
+
             // Second pass, sending entities to the layer grouper.
             for (var j = zSet.Entities.Count - 1; j >= 0; j--)
             {
@@ -243,6 +246,18 @@ public sealed class WorldEntityRetriever
             grouper.AddSprite(EntityType.BlockTopFace, blockPosition, Vector3.Zero, sprite);
             isOpaque = isOpaque || sprite.Opaque;
         }
+    }
+
+    /// <summary>
+    ///     Processes a block for solid geometry rendering.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    private void ProcessSolidBlock(ulong entityId)
+    {
+        if (!drawableTags.HasTagForEntity(entityId)) return;
+
+        var blockPosition = (Vector3)blockPositions[entityId];
+        grouper.AddSolidBlock(blockPosition);
     }
 
     /// <summary>

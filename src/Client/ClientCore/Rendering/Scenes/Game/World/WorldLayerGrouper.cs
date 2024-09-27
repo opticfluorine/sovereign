@@ -36,6 +36,11 @@ public sealed class WorldLayerGrouper
 
     private WorldLayer? activeLayer;
 
+    /// <summary>
+    ///     Blocks to render in the solid geometry.
+    /// </summary>
+    public List<Vector3> SolidBlocks = new();
+
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
@@ -57,6 +62,7 @@ public sealed class WorldLayerGrouper
         }
 
         Layers.Clear();
+        SolidBlocks.Clear();
     }
 
     /// <summary>
@@ -99,6 +105,15 @@ public sealed class WorldLayerGrouper
             Velocity = velocity,
             Id = sprite.Id
         });
+    }
+
+    /// <summary>
+    ///     Adds a block for solid geometry rendering.
+    /// </summary>
+    /// <param name="position">Block position.</param>
+    public void AddSolidBlock(Vector3 position)
+    {
+        SolidBlocks.Add(position);
     }
 
     /// <summary>

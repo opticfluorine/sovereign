@@ -93,7 +93,7 @@ public class WorldPipeline : IDisposable
         return new RasterizerStateDescription(
             FaceCullMode.None,
             PolygonFillMode.Solid,
-            FrontFace.Clockwise,
+            FrontFace.CounterClockwise,
             false,
             false);
     }
@@ -105,9 +105,9 @@ public class WorldPipeline : IDisposable
     private RasterizerStateDescription CreateBlockShadowRasterizerState()
     {
         return new RasterizerStateDescription(
-            FaceCullMode.Back,
+            FaceCullMode.None,
             PolygonFillMode.Solid,
-            FrontFace.Clockwise,
+            FrontFace.CounterClockwise,
             false,
             false);
     }
