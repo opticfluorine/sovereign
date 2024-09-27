@@ -103,7 +103,7 @@ public class GuiResourceManager : IDisposable
             throw new InvalidOperationException("Tried to create shaders without device.");
 
         var vertexShaderBytes = device.LoadShaderBytes("Gui.vert.spv");
-        var fragmentShaderBytes = device.LoadShaderBytes("World.frag.spv");
+        var fragmentShaderBytes = device.LoadShaderBytes("Gui.frag.spv");
 
         var vertexDesc = new ShaderDescription(ShaderStages.Vertex,
             vertexShaderBytes, "main", true);

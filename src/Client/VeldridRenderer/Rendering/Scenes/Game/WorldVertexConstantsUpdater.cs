@@ -67,7 +67,7 @@ public class WorldVertexConstantsUpdater
         rotMat.M21 = -sinTheta;
         rotMat.M12 = sinTheta;
         rotMat.M22 = cosTheta;
-
+        
         /* Calculate world-view transform matrix. */
         ref var projMat = ref buf[0].WorldViewTransform;
 

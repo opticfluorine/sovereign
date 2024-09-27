@@ -213,7 +213,8 @@ public class GameResourceManager : IDisposable
         if (device.DisplayMode == null)
             throw new InvalidOperationException("Display mode not ready.");
 
-        ShadowMapTexture = new VeldridTexture(device, (uint)device.DisplayMode.Width, (uint)device.DisplayMode.Height,
+        ShadowMapTexture = new VeldridTexture(device, (uint)device.DisplayMode.Width / 2,
+            (uint)device.DisplayMode.Height / 2,
             TexturePurpose.DepthBuffer);
 
         var framebufferDesc = new FramebufferDescription(ShadowMapTexture.Texture);
