@@ -17,12 +17,13 @@
 
 #version 450
 
-layout (location = 0) in vec3 vPosition;
-layout (location = 1) in vec3 vVelocity;
-layout (location = 2) in vec2 vTexCoord;
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 velocity;
+layout (location = 2) in vec2 texCoord;
 
-layout (location = 0) out vec2 vTexCoordOut;
-layout (location = 1) out vec4 vColor;
+layout (location = 0) out vec2 texCoordOut;
+layout (location = 1) out vec4 color;
+layout (location = 2) out vec4 shadowPosition;
 
 layout (binding = 0) uniform ShaderConstants
 {
@@ -38,14 +39,16 @@ void main()
 {
     // Interpolate the position within the current game tick.
     // This assumes no acceleration is present.
-    vec3 interpolated = vPosition + shaderConstants.g_timeSinceTick * vVelocity;
+    vec3 interpolated = position + shaderConstants.g_timeSinceTick * velocity;
 
     // Embed the position in a vec4 and apply the 2D perspective transform.
-    gl_Position = shaderConstants.g_transform * vec4(interpolated, 1.0);
+    vec4 position4 = vec4(interpolated, 1.0);
+    gl_Position = shaderConstants.g_transform * position4;
+    shadowPosition = shaderConstants.g_shadowMapTransform * position4;
 
     // Forward the texture coordinate for the vertex.
-    vTexCoordOut = vTexCoord;
+    texCoordOut = texCoord;
 
     // Do not transform the color further in the fragment shader.
-    vColor = vec4(1, 1, 1, 1);
+    color = vec4(1, 1, 1, 1);
 }

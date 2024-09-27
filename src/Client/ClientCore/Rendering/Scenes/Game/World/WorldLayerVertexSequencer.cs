@@ -104,7 +104,7 @@ public sealed class WorldLayerVertexSequencer
             var blockIndices = indices.Slice(i * SolidIndicesPerBlock, SolidIndicesPerBlock);
 
             AddVerticesForBlock(basePos, blockVertices);
-            AddIndicesForBlock(baseIndex, blockIndices);
+            AddIndicesForBlock(baseIndex + (uint)i * SolidVerticesPerBlock, blockIndices);
         }
     }
 

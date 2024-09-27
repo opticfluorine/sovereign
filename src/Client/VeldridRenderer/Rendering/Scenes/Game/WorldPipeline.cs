@@ -74,8 +74,8 @@ public class WorldPipeline : IDisposable
 
         var shadowMapPipelineDesc = new GraphicsPipelineDescription(
             BlendStateDescription.Empty,
-            DepthStencilStateDescription.DepthOnlyLessEqual,
-            CreateRasterizerState(),
+            DepthStencilStateDescription.DepthOnlyGreaterEqual,
+            CreateBlockShadowRasterizerState(),
             PrimitiveTopology.TriangleList,
             CreateBlockShadowShaderSet(),
             CreateBlockShadowResourceLayout(),
@@ -92,6 +92,20 @@ public class WorldPipeline : IDisposable
     {
         return new RasterizerStateDescription(
             FaceCullMode.None,
+            PolygonFillMode.Solid,
+            FrontFace.Clockwise,
+            false,
+            false);
+    }
+
+    /// <summary>
+    ///     Creates the rasterizer state for the shadow map.
+    /// </summary>
+    /// <returns>Rasterizer state.</returns>
+    private RasterizerStateDescription CreateBlockShadowRasterizerState()
+    {
+        return new RasterizerStateDescription(
+            FaceCullMode.Back,
             PolygonFillMode.Solid,
             FrontFace.Clockwise,
             false,
@@ -192,6 +206,18 @@ public class WorldPipeline : IDisposable
         ), new ResourceLayoutElementDescription(
             GameResourceManager.ResTextureAtlasSampler,
             ResourceKind.Sampler,
+            ShaderStages.Fragment
+        ), new ResourceLayoutElementDescription(
+            GameResourceManager.ResShadowMapTexture,
+            ResourceKind.TextureReadOnly,
+            ShaderStages.Fragment
+        ), new ResourceLayoutElementDescription(
+            GameResourceManager.ResShadowMapTextureSampler,
+            ResourceKind.Sampler,
+            ShaderStages.Fragment
+        ), new ResourceLayoutElementDescription(
+            GameResourceManager.ResShaderConstants,
+            ResourceKind.UniformBuffer,
             ShaderStages.Fragment
         ));
         return device.Device.ResourceFactory.CreateResourceLayout(desc);

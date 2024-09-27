@@ -51,6 +51,7 @@ public class WorldVertexConstantsUpdater
             out var globalLightAngleRad);
         var invHalfWidth = 2.0f / widthInTiles;
         var invHalfHeight = 2.0f / heightInTiles;
+        var invHeight = 1.0f / heightInTiles;
 
         /* Update constant buffers. */
         var buf = gameResourceManager.VertexUniformBuffer.Buffer;
@@ -82,10 +83,11 @@ public class WorldVertexConstantsUpdater
         projMat.M32 = -invHalfHeight;
         projMat.M42 = -invHalfHeight * (cameraPos.Z - cameraPos.Y);
 
+        // Clamp the visible portion of the z axis to [0, 1].
         projMat.M13 = 0.0f;
         projMat.M23 = 0.0f;
-        projMat.M33 = 0.0f;
-        projMat.M43 = 0.0f;
+        projMat.M33 = invHeight;
+        projMat.M43 = cameraPos.Z * invHeight + 0.5f;
 
         projMat.M14 = 0.0f;
         projMat.M24 = 0.0f;
