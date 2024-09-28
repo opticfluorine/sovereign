@@ -43,6 +43,10 @@ public class GameResourceManager : IDisposable
     /// </summary>
     public const int MaximumIndices = 262144;
 
+    public const int ShadowMapWidth = 2048;
+
+    public const int ShadowMapHeight = 2048;
+
     /// <summary>
     ///     Resource name for the shader constants uniform buffer.
     /// </summary>
@@ -213,9 +217,8 @@ public class GameResourceManager : IDisposable
         if (device.DisplayMode == null)
             throw new InvalidOperationException("Display mode not ready.");
 
-        ShadowMapTexture = new VeldridTexture(device, (uint)device.DisplayMode.Width / 2,
-            (uint)device.DisplayMode.Height / 2,
-            TexturePurpose.DepthBuffer);
+        ShadowMapTexture = new VeldridTexture(device, ShadowMapWidth,
+            ShadowMapHeight, TexturePurpose.DepthBuffer);
 
         var framebufferDesc = new FramebufferDescription(ShadowMapTexture.Texture);
         ShadowMapFramebuffer = device.Device.ResourceFactory.CreateFramebuffer(framebufferDesc);

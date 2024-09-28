@@ -51,6 +51,7 @@ public class WorldVertexConstantsUpdater
             out var globalLightAngleRad);
         var invHalfWidth = 2.0f / widthInTiles;
         var invHalfHeight = 2.0f / heightInTiles;
+        var invWidth = 1.0f / widthInTiles;
         var invHeight = 1.0f / heightInTiles;
 
         /* Update constant buffers. */
@@ -67,7 +68,7 @@ public class WorldVertexConstantsUpdater
         rotMat.M21 = -sinTheta;
         rotMat.M12 = sinTheta;
         rotMat.M22 = cosTheta;
-        
+
         /* Calculate world-view transform matrix. */
         ref var projMat = ref buf[0].WorldViewTransform;
 
@@ -95,8 +96,37 @@ public class WorldVertexConstantsUpdater
         projMat.M44 = 1.0f;
 
         // Calculate the shadow map transform matrix.
-        // The transform operates to the right, so the rotation needs to be the rightmost operator.
-        buf[0].ShadowWorldViewTransform = projMat * rotMat;
-        shadowBuf[0].WorldViewTransform = buf[0].ShadowWorldViewTransform;
+        var shadowProjMat = Matrix4x4.Identity;
+        shadowProjMat.M11 = invWidth;
+        shadowProjMat.M21 = 0.0f;
+        shadowProjMat.M31 = 0.0f;
+        shadowProjMat.M41 = -invWidth * cameraPos.X;
+
+        shadowProjMat.M12 = 0.0f;
+        shadowProjMat.M22 = -invHeight;
+        shadowProjMat.M32 = -invHeight;
+        shadowProjMat.M42 = -invHeight * (cameraPos.Z - cameraPos.Y);
+
+        shadowProjMat.M13 = 0.0f;
+        shadowProjMat.M23 = 0.0f;
+        shadowProjMat.M33 = invHeight;
+        shadowProjMat.M43 = cameraPos.Z * invHeight + 0.5f;
+
+        shadowProjMat.M14 = 0.0f;
+        shadowProjMat.M24 = 0.0f;
+        shadowProjMat.M34 = 0.0f;
+        shadowProjMat.M44 = 1.0f;
+
+        // NDC coordinates are [-1,1], while normalized texture coordinates are [0,1].
+        // Need to shift in the world vertex shader when sampling the shadow map.
+        var projToTexMat = Matrix4x4.Identity;
+        projToTexMat.M11 = 0.5f;
+        projToTexMat.M41 = 0.5f;
+        projToTexMat.M22 = 0.5f;
+        projToTexMat.M42 = 0.5f;
+
+        // Matrices are transposed here, so treat as if acting to the left.
+        shadowBuf[0].WorldViewTransform = rotMat * shadowProjMat;
+        buf[0].ShadowWorldViewTransform = shadowBuf[0].WorldViewTransform * projToTexMat;
     }
 }

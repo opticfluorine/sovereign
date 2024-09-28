@@ -26,6 +26,22 @@ using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 
 /// <summary>
+///     Specifies the plane on which a sprite lies.
+/// </summary>
+public enum SpritePlane
+{
+    /// <summary>
+    ///     Sprite lies in the XY plane.
+    /// </summary>
+    XY,
+
+    /// <summary>
+    ///     Sprite lies in the XZ plane.
+    /// </summary>
+    XZ
+}
+
+/// <summary>
 ///     Responsible for sequencing animated sprites into the buffers.
 /// </summary>
 public sealed class WorldSpriteSequencer
@@ -49,10 +65,10 @@ public sealed class WorldSpriteSequencer
     /// </summary>
     /// <param name="sprites">Sprites to sequence.</param>
     /// <param name="renderPlan">Rendering plan to populate.</param>
-    /// <param name="systemTime">System time of this frame.</param>
+    /// <param name="spritePlane">Sprite plane.</param>
     /// <param name="baseIndex">First index corresponding to the sequenced sprites.</param>
     /// <param name="indexCount">Number of indices added for these sprites.</param>
-    public void SequenceSprites(List<PosVelId> sprites, RenderPlan renderPlan, ulong systemTime,
+    public void SequenceSprites(List<PosVelId> sprites, RenderPlan renderPlan, SpritePlane spritePlane,
         out uint baseIndex, out uint indexCount)
     {
         baseIndex = 0;
@@ -79,8 +95,19 @@ public sealed class WorldSpriteSequencer
             var spriteId = positionedAnimatedSprite.Id;
             var sprite = spriteManager.Sprites[spriteId];
 
-            AddVerticesForSprite(sprite, pos, vel,
-                vertices.Slice(spriteCount * VerticesPerSprite, VerticesPerSprite));
+            switch (spritePlane)
+            {
+                case SpritePlane.XY:
+                    AddVerticesForSpriteXY(sprite, pos, vel,
+                        vertices.Slice(spriteCount * VerticesPerSprite, VerticesPerSprite));
+                    break;
+
+                case SpritePlane.XZ:
+                    AddVerticesForSpriteXZ(sprite, pos, vel,
+                        vertices.Slice(spriteCount * VerticesPerSprite, VerticesPerSprite));
+                    break;
+            }
+
             AddIndicesForSprite(indices.Slice(spriteCount * IndicesPerSprite, IndicesPerSprite),
                 (uint)(baseVertex + spriteCount * VerticesPerSprite));
 
@@ -91,7 +118,7 @@ public sealed class WorldSpriteSequencer
     }
 
     /// <summary>
-    ///     Adds the four vertices for the given sprite.
+    ///     Adds the four vertices for the given sprite in the XY plane.
     /// </summary>
     /// <remarks>
     ///     Vertices are generated clockwise from top-left.
@@ -100,7 +127,7 @@ public sealed class WorldSpriteSequencer
     /// <param name="position">Position of entity.</param>
     /// <param name="velocity">Velocity of entity.</param>
     /// <param name="vertices">Span containing vertices for the single sprite.</param>
-    private void AddVerticesForSprite(Sprite sprite, Vector3 position,
+    private void AddVerticesForSpriteXY(Sprite sprite, Vector3 position,
         Vector3 velocity, Span<WorldVertex> vertices)
     {
         /* Retrieve sprite information. */
@@ -151,6 +178,75 @@ public sealed class WorldSpriteSequencer
             PosX = position.X,
             PosY = position.Y - spriteInfo.HeightInTiles,
             PosZ = position.Z,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedLeftX,
+            TexY = spriteInfo.NormalizedBottomY
+        };
+    }
+
+    /// <summary>
+    ///     Adds the four vertices for the given sprite in the XZ plane.
+    /// </summary>
+    /// <remarks>
+    ///     Vertices are generated clockwise from top-left.
+    /// </remarks>
+    /// <param name="sprite">Sprite to sequence.</param>
+    /// <param name="position">Position of entity.</param>
+    /// <param name="velocity">Velocity of entity.</param>
+    /// <param name="vertices">Span containing vertices for the single sprite.</param>
+    private void AddVerticesForSpriteXZ(Sprite sprite, Vector3 position,
+        Vector3 velocity, Span<WorldVertex> vertices)
+    {
+        /* Retrieve sprite information. */
+        var spriteInfo = atlasMap.MapElements[sprite.Id];
+
+        /* Top left. */
+        vertices[0] = new WorldVertex
+        {
+            PosX = position.X,
+            PosY = position.Y,
+            PosZ = position.Z,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedLeftX,
+            TexY = spriteInfo.NormalizedTopY
+        };
+
+        /* Top right. */
+        vertices[1] = new WorldVertex
+        {
+            PosX = position.X + spriteInfo.WidthInTiles,
+            PosY = position.Y,
+            PosZ = position.Z,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedRightX,
+            TexY = spriteInfo.NormalizedTopY
+        };
+
+        /* Bottom right. */
+        vertices[2] = new WorldVertex
+        {
+            PosX = position.X + spriteInfo.WidthInTiles,
+            PosY = position.Y,
+            PosZ = position.Z - spriteInfo.HeightInTiles,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedRightX,
+            TexY = spriteInfo.NormalizedBottomY
+        };
+
+        /* Bottom left. */
+        vertices[3] = new WorldVertex
+        {
+            PosX = position.X,
+            PosY = position.Y,
+            PosZ = position.Z - spriteInfo.HeightInTiles,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,

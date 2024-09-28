@@ -38,6 +38,11 @@ public class WorldRenderer : IDisposable
     private ResourceSet? blockShadowResourceSet;
 
     /// <summary>
+    ///     Viewport used for block shadow map rendering.
+    /// </summary>
+    private Viewport blockShadowViewport;
+
+    /// <summary>
     ///     Current configuration state for the rendering pipeline.
     /// </summary>
     private PipelineConfiguration pipelineConfiguration = PipelineConfiguration.None;
@@ -90,6 +95,9 @@ public class WorldRenderer : IDisposable
             0.0f,
             1.0f
         );
+
+        blockShadowViewport = new Viewport(0.0f, 0.0f, GameResourceManager.ShadowMapWidth,
+            GameResourceManager.ShadowMapHeight, 0.0f, 1.0f);
     }
 
     /// <summary>
@@ -114,7 +122,6 @@ public class WorldRenderer : IDisposable
         commandList.PushDebugGroup("WorldRenderer.Render");
 
         // Set pipeline and bind resources.
-        commandList.SetViewport(0, viewport);
         commandList.SetVertexBuffer(0, gameResMgr.VertexBuffer.DeviceBuffer);
         pipelineConfiguration = PipelineConfiguration.None;
 
@@ -154,6 +161,7 @@ public class WorldRenderer : IDisposable
     /// </summary>
     private void ConfigureSpritesPipeline(CommandList commandList)
     {
+        commandList.SetViewport(0, viewport);
         commandList.SetPipeline(pipeline.Pipeline);
         commandList.SetIndexBuffer(gameResMgr.SpriteIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
         commandList.SetGraphicsResourceSet(0, resourceSet);
@@ -167,6 +175,7 @@ public class WorldRenderer : IDisposable
     /// </summary>
     private void ConfigureShadowMapPipeline(CommandList commandList)
     {
+        commandList.SetViewport(0, blockShadowViewport);
         commandList.SetPipeline(pipeline.BlockShadowPipeline);
         commandList.SetIndexBuffer(gameResMgr.SolidIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
         commandList.SetGraphicsResourceSet(0, blockShadowResourceSet);
