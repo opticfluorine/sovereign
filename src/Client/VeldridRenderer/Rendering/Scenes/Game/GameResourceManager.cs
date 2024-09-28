@@ -43,9 +43,15 @@ public class GameResourceManager : IDisposable
     /// </summary>
     public const int MaximumIndices = 262144;
 
-    public const int ShadowMapWidth = 2048;
+    /// <summary>
+    ///     Shadow map texture width.
+    /// </summary>
+    public const int ShadowMapWidth = 1536;
 
-    public const int ShadowMapHeight = 2048;
+    /// <summary>
+    ///     Shadow map texture height.
+    /// </summary>
+    public const int ShadowMapHeight = 1536;
 
     /// <summary>
     ///     Resource name for the shader constants uniform buffer.

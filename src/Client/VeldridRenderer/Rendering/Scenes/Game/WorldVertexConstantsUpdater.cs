@@ -71,12 +71,15 @@ public class WorldVertexConstantsUpdater
         rotMat.M22 = cosTheta;
 
         var rotMatPhi = Matrix4x4.Identity;
-        var sinPhi = (float)Math.Sin(globalLightPhiRad);
-        var cosPhi = (float)Math.Cos(globalLightPhiRad);
-        rotMat.M22 = cosPhi;
-        rotMat.M23 = -sinPhi;
-        rotMat.M32 = sinPhi;
-        rotMat.M33 = cosPhi;
+        if (globalLightPhiRad != 0.0f)
+        {
+            var sinPhi = (float)Math.Sin(globalLightPhiRad);
+            var cosPhi = (float)Math.Cos(globalLightPhiRad);
+            rotMatPhi.M22 = cosPhi;
+            rotMatPhi.M23 = -sinPhi;
+            rotMatPhi.M32 = sinPhi;
+            rotMatPhi.M33 = cosPhi;
+        }
 
         /* Calculate world-view transform matrix. */
         ref var projMat = ref buf[0].WorldViewTransform;

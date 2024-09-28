@@ -40,7 +40,7 @@ void main()
     float shadowDepth = texture(sampler2D(g_shadowMap, g_shadowMapSampler), shadowTexCoord).r;
 
     // Determine base lighting color from ambient and global lights.
-    vec4 baseColor = shadowPosition.z >= shadowDepth ? g_shaderConstants.globalLightColor
+    vec4 baseColor = shadowPosition.z >= shadowDepth - 0.01f ? g_shaderConstants.globalLightColor
     : g_shaderConstants.ambientLightColor;
 
     // Blend everything to a final color.
