@@ -48,7 +48,8 @@ public class WorldVertexConstantsUpdater
             out var heightInTiles,
             out var cameraPos,
             out var timeSinceTick,
-            out var globalLightAngleRad);
+            out var globalLightThetaRad,
+            out var globalLightPhiRad);
         var invHalfWidth = 2.0f / widthInTiles;
         var invHalfHeight = 2.0f / heightInTiles;
         var invWidth = 1.0f / widthInTiles;
@@ -62,12 +63,20 @@ public class WorldVertexConstantsUpdater
         // Calculate camera rotation matrix for the global light source.
         // Note that we reverse the indices to match the column-major layout expected by Vulkan.
         var rotMat = Matrix4x4.Identity;
-        var sinTheta = (float)Math.Sin(globalLightAngleRad);
-        var cosTheta = (float)Math.Cos(globalLightAngleRad);
+        var sinTheta = (float)Math.Sin(globalLightThetaRad);
+        var cosTheta = (float)Math.Cos(globalLightThetaRad);
         rotMat.M11 = cosTheta;
         rotMat.M21 = -sinTheta;
         rotMat.M12 = sinTheta;
         rotMat.M22 = cosTheta;
+
+        var rotMatPhi = Matrix4x4.Identity;
+        var sinPhi = (float)Math.Sin(globalLightPhiRad);
+        var cosPhi = (float)Math.Cos(globalLightPhiRad);
+        rotMat.M22 = cosPhi;
+        rotMat.M23 = -sinPhi;
+        rotMat.M32 = sinPhi;
+        rotMat.M33 = cosPhi;
 
         /* Calculate world-view transform matrix. */
         ref var projMat = ref buf[0].WorldViewTransform;
@@ -126,7 +135,7 @@ public class WorldVertexConstantsUpdater
         projToTexMat.M42 = 0.5f;
 
         // Matrices are transposed here, so treat as if acting to the left.
-        shadowBuf[0].WorldViewTransform = rotMat * shadowProjMat;
+        shadowBuf[0].WorldViewTransform = rotMat * rotMatPhi * shadowProjMat;
         buf[0].ShadowWorldViewTransform = shadowBuf[0].WorldViewTransform * projToTexMat;
     }
 }

@@ -64,9 +64,11 @@ public interface IScene
     /// <param name="heightInTiles">Height of the display in tiles.</param>
     /// <param name="cameraPos">Camera position.</param>
     /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
-    /// <param name="globalLightAngleRad">Displacement angle of the global light source in radians.</param>
+    /// <param name="globalLightThetaRad">XY displacement angle of the global light source in radians.</param>
+    /// <param name="globalLightPhiRad">YZ displacement angle of the global light source in radians.</param>
     void PopulateWorldVertexConstants(out float widthInTiles, out float heightInTiles,
-        out Vector3 cameraPos, out float timeSinceTick, out float globalLightAngleRad);
+        out Vector3 cameraPos, out float timeSinceTick, out float globalLightThetaRad,
+        out float globalLightPhiRad);
 
     /// <summary>
     ///     Populates the world rendering fragment constants buffer, if applicable.
