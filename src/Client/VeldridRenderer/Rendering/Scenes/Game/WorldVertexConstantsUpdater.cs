@@ -52,8 +52,9 @@ public class WorldVertexConstantsUpdater
             out var globalLightPhiRad);
         var invHalfWidth = 2.0f / widthInTiles;
         var invHalfHeight = 2.0f / heightInTiles;
-        var invWidth = 1.0f / widthInTiles;
         var invHeight = 1.0f / heightInTiles;
+        var invWidthShadow = 1.6f / widthInTiles;
+        var invHeightShadow = 1.6f / heightInTiles;
 
         /* Update constant buffers. */
         var buf = gameResourceManager.VertexUniformBuffer.Buffer;
@@ -109,20 +110,20 @@ public class WorldVertexConstantsUpdater
 
         // Calculate the shadow map transform matrix.
         var shadowProjMat = Matrix4x4.Identity;
-        shadowProjMat.M11 = invWidth;
+        shadowProjMat.M11 = invWidthShadow;
         shadowProjMat.M21 = 0.0f;
         shadowProjMat.M31 = 0.0f;
-        shadowProjMat.M41 = -invWidth * cameraPos.X;
+        shadowProjMat.M41 = -invWidthShadow * cameraPos.X;
 
         shadowProjMat.M12 = 0.0f;
-        shadowProjMat.M22 = -invHeight;
-        shadowProjMat.M32 = -invHeight;
-        shadowProjMat.M42 = -invHeight * (cameraPos.Z - cameraPos.Y);
+        shadowProjMat.M22 = -invHeightShadow;
+        shadowProjMat.M32 = -invHeightShadow;
+        shadowProjMat.M42 = -invHeightShadow * (cameraPos.Z - cameraPos.Y);
 
         shadowProjMat.M13 = 0.0f;
         shadowProjMat.M23 = 0.0f;
-        shadowProjMat.M33 = invHeight;
-        shadowProjMat.M43 = cameraPos.Z * invHeight + 0.5f;
+        shadowProjMat.M33 = invHeightShadow;
+        shadowProjMat.M43 = cameraPos.Z * invHeightShadow + 0.5f;
 
         shadowProjMat.M14 = 0.0f;
         shadowProjMat.M24 = 0.0f;
