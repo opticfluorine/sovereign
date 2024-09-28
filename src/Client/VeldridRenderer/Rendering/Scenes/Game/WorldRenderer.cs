@@ -140,6 +140,7 @@ public class WorldRenderer : IDisposable
                 case RenderCommandType.DrawBlockShadowMap:
                     if (pipelineConfiguration != PipelineConfiguration.ShadowMap)
                         ConfigureShadowMapPipeline(commandList);
+                    commandList.ClearDepthStencil(0.0f);
                     commandList.DrawIndexed((uint)renderPlan.SolidIndexCount);
                     break;
 
