@@ -2,6 +2,20 @@
 
 ## 2024
 
+#### 28 September 2024
+
+* Renderer: Fix issue where texture coordinates were off-center, resulting in
+  occasional graphical errors where lines would appear at the boundaries
+  between blocks.
+
+#### 27 September 2024
+
+* Renderer: Add global lighting and block shadows. One of the advantages of
+  modeling the world as a 3D grid of blocks is that we can calculate full
+  3D lighting and shadow effects. This update adds world lighting from a
+  distant source (e.g. sun, moon) at variable angle and with variable color.
+  Future updates will also add point sources of light.
+
 #### 22 September 2024
 
 * Renderer: Fix bug when rendering a single depth layer only where the
