@@ -27,61 +27,46 @@ public enum ComponentType
     /// <summary>
     ///     Position component.
     /// </summary>
-    /// <seealso cref="KinematicComponentCollection" />
-    Position = 0x0000,
-
-    /// <summary>
-    ///     Velocity component.
-    /// </summary>
-    /// <seealso cref="VelocityComponentCollection" />
-    Velocity = 0x0001,
+    Kinematic = 0x0000,
 
     /// <summary>
     ///     Material component.
     /// </summary>
-    /// <seealso cref="MaterialComponentCollection" />
     Material = 0x0002,
 
     /// <summary>
     ///     Material modifier component.
     /// </summary>
-    /// <seealso cref="MaterialModifierComponentCollection" />
     MaterialModifier = 0x0003,
 
     /// <summary>
     ///     Above block component.
     /// </summary>
-    /// <seealso cref="AboveBlockComponentCollection" />
     AboveBlock = 0x0004,
 
     /// <summary>
     ///     Tag indicating that an entity is a player character.
     /// </summary>
-    /// <seealso cref="PlayerCharacterTagCollection" />
     PlayerCharacter = 0x0005,
 
     /// <summary>
     ///     Component giving an entity its name.
     /// </summary>
-    /// <seealso cref="Sovereign.EngineCore.Components.NameComponentCollection" />
     Name = 0x0006,
 
     /// <summary>
     ///     Component mapping an entity to its parent entity.
     /// </summary>
-    /// <seealso cref="Sovereign.EngineCore.Components.ParentComponentCollection" />
     Parent = 0x0007,
 
     /// <summary>
     ///     Animated sprite component.
     /// </summary>
-    /// <seealso cref="Sovereign.ClientCore.Rendering.Components.AnimatedSpriteComponentCollection" />
     AnimatedSprite = 0x0008,
 
     /// <summary>
     ///     Drawable component.
     /// </summary>
-    /// <seealso cref="Sovereign.ClientCore.Rendering.Components.DrawableComponentCollection" />
     Drawable = 0x0009,
 
     /// <summary>
@@ -97,7 +82,12 @@ public enum ComponentType
     /// <summary>
     ///     Block position component.
     /// </summary>
-    BlockPosition = 0x0009,
+    BlockPosition = 0x000C,
+
+    /// <summary>
+    ///     CastBlockShadows tag.
+    /// </summary>
+    CastBlockShadows = 0x000D,
 
     #endregion Common
 

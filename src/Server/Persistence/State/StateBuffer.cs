@@ -54,6 +54,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<int>> animatedSpriteUpdates = new(BufferSize);
 
     /// <summary>
+    ///     CastBlockShadows state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<bool>> castBlockShadowsUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Drawable state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<bool>> drawableUpdates = new(BufferSize);
@@ -251,6 +256,11 @@ public sealed class StateBuffer
         adminUpdates.Add(ref update);
     }
 
+    public void UpdateCastBlockShadows(ref StateUpdate<bool> update)
+    {
+        castBlockShadowsUpdates.Add(ref update);
+    }
+
     /// <summary>
     ///     Resets the buffer.
     /// </summary>
@@ -270,6 +280,7 @@ public sealed class StateBuffer
         animatedSpriteUpdates.Clear();
         orientationUpdates.Clear();
         adminUpdates.Clear();
+        castBlockShadowsUpdates.Clear();
     }
 
     /// <summary>
@@ -374,6 +385,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddAdminComponentQuery,
                     persistenceProvider.ModifyAdminComponentQuery,
                     persistenceProvider.RemoveAdminComponentQuery,
+                    transaction);
+
+                // CastBlockShadows.
+                SynchronizeComponent(castBlockShadowsUpdates,
+                    persistenceProvider.AddCastBlockShadowsComponentQuery,
+                    persistenceProvider.ModifyCastBlockShadowsComponentQuery,
+                    persistenceProvider.RemoveCastBlockShadowsComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

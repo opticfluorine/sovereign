@@ -32,6 +32,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly DrawableTagCollection drawables;
 
     private readonly EntityAssigner entityAssigner;
@@ -62,6 +63,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         OrientationComponentCollection orientations,
         AdminTagCollection admins,
         BlockPositionComponentCollection blockPositions,
+        CastBlockShadowsTagCollection castBlockShadows,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -78,6 +80,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.orientations = orientations;
         this.admins = admins;
         this.blockPositions = blockPositions;
+        this.castBlockShadows = castBlockShadows;
         this.entityTable = entityTable;
         entityAssigner = entityManager.GetNewAssigner();
     }
@@ -111,6 +114,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             orientations,
             admins,
             blockPositions,
+            castBlockShadows,
             entityTable);
     }
 }

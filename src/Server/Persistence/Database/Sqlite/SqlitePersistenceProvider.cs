@@ -74,6 +74,10 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const string AdminTableName = "Admin";
     private const string AdminParamName = "value";
 
+    private const SqliteType CastBlockShadowsParamType = SqliteType.Integer;
+    private const string CastBlockShadowsTableName = "CastBlockShadows";
+    private const string CastBlockShadowsParamName = "value";
+
     private readonly IPersistenceConfiguration configuration;
 
     public SqlitePersistenceProvider(IPersistenceConfiguration configuration)
@@ -201,6 +205,14 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
 
         GetWorldSegmentBlockDataQuery = new SqliteGetWorldSegmentBlockDataQuery((SqliteConnection)Connection);
         SetWorldSegmentBlockDataQuery = new SqliteSetWorldSegmentBlockDataQuery((SqliteConnection)Connection);
+
+        // CastBlockShadows component.
+        AddCastBlockShadowsComponentQuery = new SimpleSqliteAddComponentQuery<bool>(CastBlockShadowsTableName,
+            CastBlockShadowsParamName, CastBlockShadowsParamType, (SqliteConnection)Connection);
+        ModifyCastBlockShadowsComponentQuery = new SimpleSqliteModifyComponentQuery<bool>(CastBlockShadowsTableName,
+            CastBlockShadowsParamName, CastBlockShadowsParamType, (SqliteConnection)Connection);
+        RemoveCastBlockShadowsComponentQuery = new SqliteRemoveComponentQuery(CastBlockShadowsTableName,
+            (SqliteConnection)Connection);
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -261,6 +273,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IRemoveComponentQuery RemoveOrientationComponentQuery { get; }
     public IAddComponentQuery<bool> AddAdminComponentQuery { get; }
     public IModifyComponentQuery<bool> ModifyAdminComponentQuery { get; }
+    public IAddComponentQuery<bool> AddCastBlockShadowsComponentQuery { get; }
+    public IModifyComponentQuery<bool> ModifyCastBlockShadowsComponentQuery { get; }
+    public IRemoveComponentQuery RemoveCastBlockShadowsComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

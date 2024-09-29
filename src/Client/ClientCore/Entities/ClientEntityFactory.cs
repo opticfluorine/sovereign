@@ -31,6 +31,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly EntityAssigner assigner;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly DrawableTagCollection drawables;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
@@ -60,6 +61,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         OrientationComponentCollection orientations,
         AdminTagCollection admins,
         BlockPositionComponentCollection blockPositions,
+        CastBlockShadowsTagCollection castBlockShadows,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -75,6 +77,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         this.orientations = orientations;
         this.admins = admins;
         this.blockPositions = blockPositions;
+        this.castBlockShadows = castBlockShadows;
         this.entityTable = entityTable;
 
         assigner = entityManager.GetNewAssigner();
@@ -95,6 +98,6 @@ public sealed class ClientEntityFactory : IEntityFactory
         return new ClientEntityBuilder(entityId, isLoad,
             entityManager, kinematics, drawables, materials,
             materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
-            orientations, admins, blockPositions, entityTable);
+            orientations, admins, blockPositions, castBlockShadows, entityTable);
     }
 }

@@ -27,6 +27,7 @@ public class EntityDefinitionGenerator
     private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
     private readonly KinematicComponentCollection kinematics;
@@ -44,6 +45,7 @@ public class EntityDefinitionGenerator
         ParentComponentCollection parents, DrawableTagCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations,
         AdminTagCollection admins, BlockPositionComponentCollection blockPositions,
+        CastBlockShadowsTagCollection castBlockShadows,
         EntityTable entityTable)
     {
         this.kinematics = kinematics;
@@ -57,6 +59,7 @@ public class EntityDefinitionGenerator
         this.orientations = orientations;
         this.admins = admins;
         this.blockPositions = blockPositions;
+        this.castBlockShadows = castBlockShadows;
         this.entityTable = entityTable;
     }
 
@@ -100,6 +103,8 @@ public class EntityDefinitionGenerator
 
         if (blockPositions.HasComponentForEntity(entityId))
             def.BlockPosition = blockPositions[entityId];
+
+        def.CastBlockShadows = castBlockShadows.HasTagForEntity(entityId);
 
         return def;
     }

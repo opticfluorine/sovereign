@@ -83,7 +83,7 @@ public class EntityDefinition
     public Orientation? Orientation { get; set; }
 
     /// <summary>
-    ///     Set to two if player is an admin, false otherwise.
+    ///     Set to true if player is an admin, false otherwise.
     /// </summary>
     [Key(9)]
     public bool Admin { get; set; }
@@ -99,4 +99,10 @@ public class EntityDefinition
     /// </summary>
     [Key(11)]
     public ulong TemplateEntityId { get; set; }
+
+    /// <summary>
+    ///     Set to true if the entity casts block shadows, false otherwise.
+    /// </summary>
+    [Key(12)]
+    public bool CastBlockShadows { get; set; }
 }

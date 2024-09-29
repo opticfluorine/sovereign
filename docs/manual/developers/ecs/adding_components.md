@@ -57,12 +57,13 @@ of entity synchronization. This may be done through the following steps:
 
 1. Add a new nullable property to the end of `EntityDefinition` for the component
    value. Ensure that the `Key` attribute is correctly set to ensure that the
-   field is properly serialized and deserialized.
+   field is properly serialized and deserialized. Note that tag properties are
+   not nullable in this struct.
 2. If necessary, update `EntityDefinitionValidator` with any validation logic
    required for the new component.
 3. Update `EntityDefinitionProcessor` to call the appropriate `IEntityBuilder`
    methods based on the value of the new property you added to `EntityDefinition`.
-4. Updated `EntitySynchronizer` to set the new property you added to
+4. Update `EntityDefinitionGenerator` to set the new property you added to
    `EntityDefinition` as needed.
 
 ### Displaying Component Values in Entity Debugger
@@ -79,6 +80,33 @@ the client:
    for the new component.
 2. If the component applies to player characters, update `PlayerDebugGui.Render()`
    to add a new call to `AddComponentRow` for the new component.
+
+### Adding Components to Template Entity Editor
+
+:::{note}
+This section applies only to common-scoped components.
+:::
+
+#### Block Template Editor
+
+For common-scoped components which apply to blocks and are persisted, the Block
+Template Editor should be updated to allow editing of the component in block templates.
+To do this, make the following changes in the client:
+
+1. In the `BlockTemplateEditorTab` class, add a private field of the same type as the
+   component value. Name the field `input{ComponentName}` where `{ComponentName}` is the
+   name of the component. This field will store the value of the component while it is
+   being edited.
+2. In the `BlockTemplateEditorTab.RenderComponentTable()` method, determine if the component
+   belongs to one of the existing categories (under a `ImGui.CollapsingHeader` call). If not,
+   create a new category where the component editor will live along with a table to hold
+   the fields belonging to the category. Follow the existing examples.
+3. In the category, add a row for editing the component. Follow the existing examples.
+   Use the field you added in step 1 as the `ref` argument to the input field.
+4. In the `InsertNew()` method, set the default value for the component in new templates
+   if desired.
+5. In the `Save()` method, update the corresponding field in the `selectedDefinition` struct.
+6. In the `Select(int)` method, update the input field from the `selectedDefinition` struct.
 
 ### Persisting Components in Database
 
@@ -110,7 +138,8 @@ Persisting a component in the database requires several changes:
    `DoSynchronize(IPersistenceProvider)` method to call `SynchronizeComponent` with
    the newly added `StructBuffer` and add/modify/delete queries.
 6. Update `SqliteRetrieveEntityQuery` and `SqliteRetrieveRangeQuery` to retrieve
-   the new component when fetching entities from the database.
+   the new component when fetching entities from the database. For components which
+   may be held by template entities, also update `SqliteRetrieveAllTemplatesQuery`.
 7. Update `EntityProcessor` to process the new component from the 
    `EntityWithComponents` by adding a new `ProcessX(IDataReader, IEntityBuilder)`
    method (where `X` is the component name) and calling it from the

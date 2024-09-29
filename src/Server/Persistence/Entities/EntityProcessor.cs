@@ -19,7 +19,6 @@ using System;
 using System.Data;
 using System.Numerics;
 using Castle.Core.Logging;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 
@@ -45,6 +44,7 @@ public sealed class EntityProcessor
     private const int IndexAnimatedSprite = IndexDrawable + 1;
     private const int IndexOrientation = IndexAnimatedSprite + 1;
     private const int IndexAdmin = IndexOrientation + 1;
+    private const int IndexCastBlockShadows = IndexAdmin + 1;
     private readonly IEntityFactory entityFactory;
     private readonly EntityMapper mapper;
 
@@ -98,6 +98,7 @@ public sealed class EntityProcessor
         ProcessAnimatedSprite(reader, builder);
         ProcessOrientation(reader, builder);
         ProcessAdmin(reader, builder);
+        ProcessCastBlockShadows(reader, builder);
 
         /* Complete the entity. */
         builder.Build();
@@ -257,6 +258,17 @@ public sealed class EntityProcessor
     }
 
     /// <summary>
+    ///     Processes the CastBlockShadows component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Entity builder.</param>
+    private void ProcessCastBlockShadows(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexCastBlockShadows)) return;
+        if (reader.GetBoolean(IndexCastBlockShadows)) builder.CastBlockShadows();
+    }
+
+    /// <summary>
     ///     Extracts a Vector3 from the reader.
     /// </summary>
     /// <param name="reader">Reader.</param>
@@ -271,22 +283,5 @@ public sealed class EntityProcessor
         var z = reader.GetFloat(indexZ);
 
         return new Vector3(x, y, z);
-    }
-
-    /// <summary>
-    ///     Extracts a GridPosition from the reader.
-    /// </summary>
-    /// <param name="reader">Reader.</param>
-    /// <param name="indexX">Index of the x component.</param>
-    /// <param name="indexY">Index of the y component.</param>
-    /// <param name="indexZ">Index of the z component.</param>
-    /// <returns>GridPosition.</returns>
-    private GridPosition GetGridPosition(IDataReader reader, int indexX, int indexY, int indexZ)
-    {
-        var x = reader.GetInt32(indexX);
-        var y = reader.GetInt32(indexY);
-        var z = reader.GetInt32(indexZ);
-
-        return new GridPosition(x, y, z);
     }
 }

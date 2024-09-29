@@ -2,6 +2,13 @@
 
 ## 2024
 
+#### 29 September 2024
+
+* Add new `CastBlockShadows` tag to block template entities to indicate that
+  a block should be included as part of the solid geometry when calculating
+  shadows. This defaults to `true` for all new block template entities. Note
+  that the value is currently ignored by the renderer.
+
 #### 28 September 2024
 
 * Renderer: Fix issue where texture coordinates were off-center, resulting in

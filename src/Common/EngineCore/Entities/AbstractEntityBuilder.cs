@@ -33,6 +33,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     private readonly AdminTagCollection admins;
     protected readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly CastBlockShadowsTagCollection castBlockShadows;
     protected readonly DrawableTagCollection drawables;
 
     protected readonly ulong entityId;
@@ -65,6 +66,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         OrientationComponentCollection orientations,
         AdminTagCollection admins,
         BlockPositionComponentCollection blockPositions,
+        CastBlockShadowsTagCollection castBlockShadows,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -82,6 +84,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         this.entityTable = entityTable;
         this.admins = admins;
         this.blockPositions = blockPositions;
+        this.castBlockShadows = castBlockShadows;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -285,6 +288,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     public IEntityBuilder WithoutAdmin()
     {
         admins.UntagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder CastBlockShadows()
+    {
+        castBlockShadows.TagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutCastBlockShadows()
+    {
+        castBlockShadows.UntagEntity(entityId, load);
         return this;
     }
 }

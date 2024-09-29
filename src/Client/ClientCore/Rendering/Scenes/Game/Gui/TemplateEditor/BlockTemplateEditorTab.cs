@@ -58,6 +58,7 @@ public class BlockTemplateEditorTab
     private readonly NameComponentValidator nameComponentValidator;
     private readonly NameComponentCollection names;
     private bool initialized;
+    private bool inputCastBlockShadows;
     private bool inputDrawable;
     private int inputMaterial;
     private int inputMaterialModifier;
@@ -241,6 +242,11 @@ public class BlockTemplateEditorTab
                 ImGui.TableNextColumn();
                 ImGui.Checkbox("##drawable", ref inputDrawable);
 
+                ImGui.TableNextColumn();
+                ImGui.Text("Cast Block Shadows:");
+                ImGui.TableNextColumn();
+                ImGui.Checkbox("##castBlockShadows", ref inputCastBlockShadows);
+
                 ImGui.EndTable();
             }
 
@@ -294,7 +300,8 @@ public class BlockTemplateEditorTab
         {
             EntityId = entityTable.TakeNextTemplateEntityId(),
             Material = new MaterialPair(1, 0),
-            Drawable = true
+            Drawable = true,
+            CastBlockShadows = true
         };
         SaveDefinition(emptyDef);
     }
@@ -339,6 +346,7 @@ public class BlockTemplateEditorTab
         selectedDefinition.Name = inputName.Length > 0 ? inputName : null;
         selectedDefinition.Drawable = inputDrawable;
         selectedDefinition.Material = new MaterialPair(inputMaterial, inputMaterialModifier);
+        selectedDefinition.CastBlockShadows = inputCastBlockShadows;
         SaveDefinition(selectedDefinition);
     }
 
@@ -372,6 +380,7 @@ public class BlockTemplateEditorTab
             selectedDefinition = definitionGenerator.GenerateDefinition(selectedEntityId);
             inputName = selectedDefinition.Name ?? "";
             inputDrawable = selectedDefinition.Drawable;
+            inputCastBlockShadows = selectedDefinition.CastBlockShadows;
             if (selectedDefinition.Material != null)
             {
                 inputMaterial = selectedDefinition.Material.MaterialId;

@@ -206,11 +206,23 @@ CREATE TABLE Orientation
     FOREIGN KEY (id) REFERENCES Entity (id)
 );
 
-------------------
--- Drawable Tag --
-------------------
+---------------
+-- Admin Tag --
+---------------
 
 CREATE TABLE Admin
+(
+    id    INTEGER PRIMARY KEY NOT NULL,
+    value BOOLEAN             NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+
+----------------------
+-- CastBlockShadows --
+----------------------
+
+CREATE TABLE CastBlockShadows
 (
     id    INTEGER PRIMARY KEY NOT NULL,
     value BOOLEAN             NOT NULL,
@@ -266,7 +278,8 @@ SELECT Entity.id                   AS id,
        Drawable.value              AS drawable,
        AnimatedSprite.value        AS animatedSprite,
        Orientation.value           AS orientation,
-       Admin.value                 AS admin
+       Admin.value                 AS admin,
+       CastBlockShadows.value      AS castBlockShadows
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
@@ -278,7 +291,8 @@ FROM Entity
          LEFT JOIN Drawable ON Entity.id = Drawable.id
          LEFT JOIN AnimatedSprite ON Entity.id = AnimatedSprite.id
          LEFT JOIN Orientation ON Entity.id = Orientation.id
-         LEFT JOIN Admin ON Entity.id = Admin.id;
+         LEFT JOIN Admin ON Entity.id = Admin.id
+         LEFT JOIN CastBlockShadows ON Entity.id = CastBlockShadows.id;
 
 
 --------------------------------------
@@ -295,6 +309,8 @@ VALUES (0x7FFE000000000000, 1);
 INSERT INTO MaterialModifier (id, modifier)
 VALUES (0x7FFE000000000000, 0);
 INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000000, 1);
+INSERT INTO CastBlockShadows (id, value)
 VALUES (0x7FFE000000000000, 1);
 
 -- Water block template entity.
@@ -320,6 +336,8 @@ INSERT INTO MaterialModifier (id, modifier)
 VALUES (0x7FFE000000000002, 0);
 INSERT INTO Drawable (id, value)
 VALUES (0x7FFE000000000002, 1);
+INSERT INTO CastBlockShadows (id, value)
+VALUES (0x7FFE000000000002, 1);
 
 -- Dirt block template entity.
 INSERT INTO Entity (id)
@@ -331,6 +349,8 @@ VALUES (0x7FFE000000000003, 3);
 INSERT INTO MaterialModifier (id, modifier)
 VALUES (0x7FFE000000000003, 0);
 INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000003, 1);
+INSERT INTO CastBlockShadows (id, value)
 VALUES (0x7FFE000000000003, 1);
 
 -- Sand block template entity.
@@ -344,6 +364,8 @@ INSERT INTO MaterialModifier (id, modifier)
 VALUES (0x7FFE000000000004, 0);
 INSERT INTO Drawable (id, value)
 VALUES (0x7FFE000000000004, 1);
+INSERT INTO CastBlockShadows (id, value)
+VALUES (0x7FFE000000000004, 1);
 
 -- Rock block template entity.
 INSERT INTO Entity (id)
@@ -356,6 +378,8 @@ INSERT INTO MaterialModifier (id, modifier)
 VALUES (0x7FFE000000000005, 0);
 INSERT INTO Drawable (id, value)
 VALUES (0x7FFE000000000005, 1);
+INSERT INTO CastBlockShadows (id, value)
+VALUES (0x7FFE000000000005, 1);
 
 -- Cobblestone block template entity.
 INSERT INTO Entity (id)
@@ -367,6 +391,8 @@ VALUES (0x7FFE000000000006, 6);
 INSERT INTO MaterialModifier (id, modifier)
 VALUES (0x7FFE000000000006, 0);
 INSERT INTO Drawable (id, value)
+VALUES (0x7FFE000000000006, 1);
+INSERT INTO CastBlockShadows (id, value)
 VALUES (0x7FFE000000000006, 1);
 
 -- Initial block data at origin.

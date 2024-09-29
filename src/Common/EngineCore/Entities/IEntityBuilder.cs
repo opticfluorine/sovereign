@@ -210,12 +210,24 @@ public interface IEntityBuilder
     /// <summary>
     ///     Tags the entity as an admin.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Builder.</returns>
     IEntityBuilder Admin();
 
     /// <summary>
     ///     Untags the entity as an admin.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Builder.</returns>
     IEntityBuilder WithoutAdmin();
+
+    /// <summary>
+    ///     Tags the entity as casting block shadows.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder CastBlockShadows();
+
+    /// <summary>
+    ///     Untags the entity as casting block shadows.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutCastBlockShadows();
 }

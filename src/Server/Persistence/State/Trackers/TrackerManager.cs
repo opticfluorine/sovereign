@@ -24,6 +24,7 @@ namespace Sovereign.Persistence.State.Trackers;
 public sealed class TrackerManager
 {
     private readonly AdminStateTracker adminStateTracker;
+    private readonly CastBlockShadowsStateTracker castBlockShadowsStateTracker;
     private readonly TemplateStateTracker templateStateTracker;
 
     public TrackerManager(PositionStateTracker positionStateTracker,
@@ -37,10 +38,12 @@ public sealed class TrackerManager
         AnimatedSpriteStateTracker animatedSpriteStateTracker,
         OrientationStateTracker orientationStateTracker,
         AdminStateTracker adminStateTracker,
-        TemplateStateTracker templateStateTracker)
+        TemplateStateTracker templateStateTracker,
+        CastBlockShadowsStateTracker castBlockShadowsStateTracker)
     {
         this.adminStateTracker = adminStateTracker;
         this.templateStateTracker = templateStateTracker;
+        this.castBlockShadowsStateTracker = castBlockShadowsStateTracker;
         OrientationStateTracker = orientationStateTracker;
         PositionStateTracker = positionStateTracker;
         MaterialStateTracker = materialStateTracker;

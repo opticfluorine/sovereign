@@ -253,6 +253,21 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveAdminComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for CastBlockShadows tag.
+    /// </summary>
+    IAddComponentQuery<bool> AddCastBlockShadowsComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for CastBlockShadows tag.
+    /// </summary>
+    IModifyComponentQuery<bool> ModifyCastBlockShadowsComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for CastBlockShadows tag.
+    /// </summary>
+    IRemoveComponentQuery RemoveCastBlockShadowsComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }

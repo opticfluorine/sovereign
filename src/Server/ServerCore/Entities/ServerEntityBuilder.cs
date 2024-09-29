@@ -44,10 +44,11 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         OrientationComponentCollection orientations,
         AdminTagCollection admins,
         BlockPositionComponentCollection blockPositions,
+        CastBlockShadowsTagCollection castBlockShadows,
         EntityTable entityTable)
         : base(entityId, load, entityManager, kinematics, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents,
-            drawables, animatedSprites, orientations, admins, blockPositions, entityTable)
+            drawables, animatedSprites, orientations, admins, blockPositions, castBlockShadows, entityTable)
     {
         this.accounts = accounts;
     }

@@ -102,6 +102,11 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutBlockPositionable();
 
+        if (definition.CastBlockShadows)
+            builder.CastBlockShadows();
+        else
+            builder.WithoutCastBlockShadows();
+
         var entityId = builder.Build();
         Logger.DebugFormat("Processed entity ID {0}.", entityId);
     }

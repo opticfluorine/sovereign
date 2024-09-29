@@ -32,7 +32,7 @@ public sealed class KinematicComponentCollection : BaseComponentCollection<Kinem
 
     public KinematicComponentCollection(EntityTable entityTable, ComponentManager componentManager)
         : base(entityTable, componentManager, BaseSize, ComponentOperators.KinematicsOperators,
-            ComponentType.Position)
+            ComponentType.Kinematic)
     {
     }
 }

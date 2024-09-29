@@ -34,6 +34,7 @@ public class EntityDebugGui
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly CameraServices cameraServices;
+    private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
     private readonly KinematicComponentCollection kinematics;
@@ -51,6 +52,7 @@ public class EntityDebugGui
         OrientationComponentCollection orientations, ParentComponentCollection parents,
         KinematicComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
+        CastBlockShadowsTagCollection castBlockShadows,
         EntityTable entityTable,
         CameraServices cameraServices,
         PerspectiveServices perspectiveServices)
@@ -65,6 +67,7 @@ public class EntityDebugGui
         this.parents = parents;
         this.kinematics = kinematics;
         this.blockPositions = blockPositions;
+        this.castBlockShadows = castBlockShadows;
         this.entityTable = entityTable;
         this.cameraServices = cameraServices;
         this.perspectiveServices = perspectiveServices;
@@ -119,6 +122,7 @@ public class EntityDebugGui
                     AddComponentRow("Position:", entityId, kinematics, x => CleanVec3ToString(x.Position));
                     AddComponentRow("Velocity:", entityId, kinematics, x => CleanVec3ToString(x.Velocity));
                     AddComponentRow("Block Position:", entityId, blockPositions);
+                    AddComponentRow("Cast Block Shadows:", entityId, castBlockShadows);
                     ImGui.EndTable();
                 }
             }
