@@ -6,8 +6,7 @@
 
 * Add new `CastBlockShadows` tag to block template entities to indicate that
   a block should be included as part of the solid geometry when calculating
-  shadows. This defaults to `true` for all new block template entities. Note
-  that the value is currently ignored by the renderer.
+  shadows. This defaults to `true` for all new block template entities.
 
 #### 28 September 2024
 

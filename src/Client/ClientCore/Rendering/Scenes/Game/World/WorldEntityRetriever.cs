@@ -41,6 +41,7 @@ public sealed class WorldEntityRetriever
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly IBlockAnimatedSpriteCache blockSpriteCache;
     private readonly CameraManager camera;
+    private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly ClientConfigurationManager configManager;
     private readonly DrawableTagCollection drawableTags;
     private readonly WorldLayerGrouper grouper;
@@ -68,7 +69,7 @@ public sealed class WorldEntityRetriever
         AnimatedSpriteComponentCollection animatedSprites,
         DrawableTagCollection drawableTags, AnimatedSpriteManager animatedSpriteManager,
         OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases,
-        IBlockAnimatedSpriteCache blockSpriteCache)
+        IBlockAnimatedSpriteCache blockSpriteCache, CastBlockShadowsTagCollection castBlockShadows)
     {
         this.camera = camera;
         this.configManager = configManager;
@@ -82,6 +83,7 @@ public sealed class WorldEntityRetriever
         this.orientations = orientations;
         this.phases = phases;
         this.blockSpriteCache = blockSpriteCache;
+        this.castBlockShadows = castBlockShadows;
 
         halfX = viewport.WidthInTiles * 0.5f;
         halfY = viewport.HeightInTiles * 0.5f;
@@ -254,7 +256,7 @@ public sealed class WorldEntityRetriever
     /// <param name="entityId">Entity ID.</param>
     private void ProcessSolidBlock(ulong entityId)
     {
-        if (!drawableTags.HasTagForEntity(entityId)) return;
+        if (!drawableTags.HasTagForEntity(entityId) || !castBlockShadows.HasTagForEntity(entityId)) return;
 
         var blockPosition = (Vector3)blockPositions[entityId];
         grouper.AddSolidBlock(blockPosition);
