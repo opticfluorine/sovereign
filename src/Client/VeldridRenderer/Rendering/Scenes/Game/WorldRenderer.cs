@@ -236,7 +236,7 @@ public class WorldRenderer : IDisposable
             resMgr.AtlasTexture.TextureView,
             device.Device.PointSampler,
             gameResMgr.ShadowMapTexture.TextureView,
-            device.Device.PointSampler,
+            device.Device.LinearSampler,
             gameResMgr.FragmentUniformBuffer.DeviceBuffer
         );
         resourceSet = device.Device.ResourceFactory.CreateResourceSet(resSetDesc);
