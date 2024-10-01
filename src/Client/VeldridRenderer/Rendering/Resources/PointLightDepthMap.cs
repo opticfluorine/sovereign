@@ -25,41 +25,14 @@ namespace Sovereign.VeldridRenderer.Rendering.Resources;
 public class PointLightDepthMap : IDisposable
 {
     /// <summary>
-    ///     Identifies the octants of the point light source.
-    /// </summary>
-    [Flags]
-    public enum Octant
-    {
-        /// <summary>
-        ///     Indicates an octant with x > center.
-        /// </summary>
-        PositiveX = 1,
-
-        /// <summary>
-        ///     Indicates an octant with y > center.
-        /// </summary>
-        PositiveY = 2,
-
-        /// <summary>
-        ///     Indicates an octant with z > center.
-        /// </summary>
-        PositiveZ = 4
-    }
-
-    /// <summary>
     ///     Dimension of each texture.
     /// </summary>
-    private const int TextureSize = 128;
-
-    /// <summary>
-    ///     Number of layers in the texture (one per octant).
-    /// </summary>
-    private const int LayerCount = 8;
+    private const int TextureSize = 256;
 
     /// <summary>
     ///     Framebuffers for rendering to the textures. Indexed by octant.
     /// </summary>
-    public readonly Framebuffer[] Framebuffers;
+    public readonly Framebuffer Framebuffer;
 
     /// <summary>
     ///     Backing array texture.
@@ -73,20 +46,16 @@ public class PointLightDepthMap : IDisposable
 
     public PointLightDepthMap(VeldridDevice device)
     {
-        var textureDesc = TextureDescription.Texture2D(TextureSize, TextureSize, 1, LayerCount, PixelFormat.R32_Float,
+        var textureDesc = TextureDescription.Texture2D(TextureSize, TextureSize, 1, 1, PixelFormat.R32_Float,
             TextureUsage.DepthStencil | TextureUsage.Sampled);
         Texture = device.Device!.ResourceFactory.CreateTexture(textureDesc);
 
-        Framebuffers = new Framebuffer[LayerCount];
-        for (var i = 0; i < LayerCount; ++i)
+        var depthAttachmentDesc = new FramebufferAttachmentDescription(Texture, 0);
+        var fbDesc = new FramebufferDescription
         {
-            var depthAttachmentDesc = new FramebufferAttachmentDescription(Texture, (uint)i);
-            var fbDesc = new FramebufferDescription
-            {
-                DepthTarget = depthAttachmentDesc
-            };
-            Framebuffers[i] = device.Device!.ResourceFactory.CreateFramebuffer(fbDesc);
-        }
+            DepthTarget = depthAttachmentDesc
+        };
+        Framebuffer = device.Device!.ResourceFactory.CreateFramebuffer(fbDesc);
 
         var texViewDesc = new TextureViewDescription(Texture);
         TextureView = device.Device!.ResourceFactory.CreateTextureView(texViewDesc);
@@ -94,7 +63,7 @@ public class PointLightDepthMap : IDisposable
 
     public void Dispose()
     {
-        for (var i = 0; i < LayerCount; ++i) Framebuffers[i].Dispose();
+        Framebuffer.Dispose();
         TextureView.Dispose();
         Texture.Dispose();
     }
