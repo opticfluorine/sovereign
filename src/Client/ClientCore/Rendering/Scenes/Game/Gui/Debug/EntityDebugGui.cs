@@ -44,6 +44,7 @@ public class EntityDebugGui
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PerspectiveServices perspectiveServices;
+    private readonly PointLightSourceComponentCollection pointLightSources;
     private string entityIdInput = "";
 
     public EntityDebugGui(AboveBlockComponentCollection aboveBlocks, AnimatedSpriteComponentCollection animatedSprites,
@@ -55,7 +56,8 @@ public class EntityDebugGui
         CastBlockShadowsTagCollection castBlockShadows,
         EntityTable entityTable,
         CameraServices cameraServices,
-        PerspectiveServices perspectiveServices)
+        PerspectiveServices perspectiveServices,
+        PointLightSourceComponentCollection pointLightSources)
     {
         this.aboveBlocks = aboveBlocks;
         this.animatedSprites = animatedSprites;
@@ -71,6 +73,7 @@ public class EntityDebugGui
         this.entityTable = entityTable;
         this.cameraServices = cameraServices;
         this.perspectiveServices = perspectiveServices;
+        this.pointLightSources = pointLightSources;
     }
 
     /// <summary>
@@ -123,6 +126,14 @@ public class EntityDebugGui
                     AddComponentRow("Velocity:", entityId, kinematics, x => CleanVec3ToString(x.Velocity));
                     AddComponentRow("Block Position:", entityId, blockPositions);
                     AddComponentRow("Cast Block Shadows:", entityId, castBlockShadows);
+                    AddCompoundRows("Point Light Source:", entityId, pointLightSources,
+                        pls =>
+                        {
+                            AddValueRow("PLS Radius:", pls.Radius);
+                            AddValueRow("PLS Intensity:", pls.Intensity);
+                            AddValueRow("PLS Color:", CleanVec3ToString(pls.Color));
+                            AddValueRow("PLS Pos Offset:", CleanVec3ToString(pls.PositionOffset));
+                        });
                     ImGui.EndTable();
                 }
             }
@@ -182,6 +193,26 @@ public class EntityDebugGui
             ImGui.Text(transform(components[entityId]));
         else
             ImGui.Text("[No Data]");
+    }
+
+    /// <summary>
+    ///     Adds one or more component-backed data rows according to a condition, invoking the
+    ///     specified callback to add the remaining rows if the condition is true.
+    /// </summary>
+    /// <param name="label">Label.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="components">Backing component collection.</param>
+    /// <param name="callbackIfFound">Callback to call if the component is present.</param>
+    private void AddCompoundRows<T>(string label, ulong entityId, BaseComponentCollection<T> components,
+        Action<T> callbackIfFound)
+        where T : notnull
+    {
+        ImGui.TableNextColumn();
+        ImGui.Text(label);
+        ImGui.TableNextColumn();
+        var hasComponent = components.HasComponentForEntity(entityId);
+        ImGui.Text(hasComponent ? "Yes" : "No");
+        if (hasComponent) callbackIfFound.Invoke(components[entityId]);
     }
 
     /// <summary>

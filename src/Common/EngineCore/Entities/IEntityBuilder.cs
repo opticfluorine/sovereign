@@ -230,4 +230,17 @@ public interface IEntityBuilder
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutCastBlockShadows();
+
+    /// <summary>
+    ///     Adds a PointLightSource component to the entity.
+    /// </summary>
+    /// <param name="pointLight">Point light source details.</param>
+    /// <returns>Builder.</returns>
+    IEntityBuilder PointLightSource(PointLight pointLight);
+
+    /// <summary>
+    ///     Removes the PointLightSource component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutPointLightSource();
 }

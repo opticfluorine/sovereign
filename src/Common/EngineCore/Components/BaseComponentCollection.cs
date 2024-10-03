@@ -484,6 +484,44 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     }
 
     /// <summary>
+    ///     Gets the component value (if any) for the entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="value">Component value. Only meaningful if this method returns true.</param>
+    /// <returns>true if a component was found, false otherwise.</returns>
+    public bool TryGetValue(ulong entityId, out T value)
+    {
+        var hasValue = HasComponentForEntity(entityId);
+        value = hasValue ? this[entityId] : default!;
+        return hasValue;
+    }
+
+    /// <summary>
+    ///     Attempts to find the "nearest" component value to the given entity by traversing its hierarchy
+    ///     upward, taking the first direct or templated value encountered (if any).
+    /// </summary>
+    /// <param name="entityId">Entity ID at which to begin search.</param>
+    /// <param name="parentCollection">Component collection mapping entities to their parent entities.</param>
+    /// <param name="nearestValue">Nearest component value. Only meaningful if this method returns true.</param>
+    /// <returns>true if a component value was found, false otherwise.</returns>
+    public bool TryFindNearest(ulong entityId, BaseComponentCollection<ulong> parentCollection, out T nearestValue)
+    {
+        var current = entityId;
+        do
+        {
+            if (HasComponentForEntity(current))
+            {
+                nearestValue = this[current];
+                return true;
+            }
+        } while (parentCollection.TryGetValue(current, out current));
+
+        // If we get here, we didn't find anything in the hierarchy.
+        nearestValue = default!;
+        return false;
+    }
+
+    /// <summary>
     ///     Fires all pending component events.
     /// </summary>
     private void FireComponentEvents()

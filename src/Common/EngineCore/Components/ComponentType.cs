@@ -89,6 +89,11 @@ public enum ComponentType
     /// </summary>
     CastBlockShadows = 0x000D,
 
+    /// <summary>
+    ///     PointLightSource component.
+    /// </summary>
+    PointLightSource = 0x000E,
+
     #endregion Common
 
     #region Client

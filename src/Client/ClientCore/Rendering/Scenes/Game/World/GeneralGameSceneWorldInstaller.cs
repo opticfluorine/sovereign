@@ -42,5 +42,7 @@ public sealed class GeneralGameSceneWorldInstaller : IWindsorInstaller
 
         container.Register(Component.For<WorldSpriteSequencer>()
             .LifestyleSingleton());
+
+        container.Register(Component.For<LightSourceTable>().LifestyleSingleton());
     }
 }

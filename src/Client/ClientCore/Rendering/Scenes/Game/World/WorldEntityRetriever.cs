@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using Sovereign.ClientCore.Components;
 using Sovereign.ClientCore.Configuration;
@@ -57,6 +58,9 @@ public sealed class WorldEntityRetriever
     private readonly float halfY;
 
     private readonly KinematicComponentCollection kinematics;
+
+    private readonly List<PositionedLight> lights = new();
+    private readonly LightSourceTable lightSourceTable;
     private readonly OrientationComponentCollection orientations;
 
     private readonly PerspectiveServices perspectiveServices;
@@ -69,7 +73,8 @@ public sealed class WorldEntityRetriever
         AnimatedSpriteComponentCollection animatedSprites,
         DrawableTagCollection drawableTags, AnimatedSpriteManager animatedSpriteManager,
         OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases,
-        IBlockAnimatedSpriteCache blockSpriteCache, CastBlockShadowsTagCollection castBlockShadows)
+        IBlockAnimatedSpriteCache blockSpriteCache, CastBlockShadowsTagCollection castBlockShadows,
+        LightSourceTable lightSourceTable)
     {
         this.camera = camera;
         this.configManager = configManager;
@@ -84,6 +89,7 @@ public sealed class WorldEntityRetriever
         this.phases = phases;
         this.blockSpriteCache = blockSpriteCache;
         this.castBlockShadows = castBlockShadows;
+        this.lightSourceTable = lightSourceTable;
 
         halfX = viewport.WidthInTiles * 0.5f;
         halfY = viewport.HeightInTiles * 0.5f;
@@ -99,6 +105,11 @@ public sealed class WorldEntityRetriever
         grouper.ResetLayers();
 
         DetermineExtents(out var minExtent, out var maxExtent, timeSinceTick);
+
+        // Identify light sources. This must be done at this point so that blocks can be flagged
+        // for inclusion in the per-light shadow maps appropriately.
+        lights.Clear();
+        lightSourceTable.GetLightsInRange((Vector3)minExtent, (Vector3)maxExtent, timeSinceTick, lights);
 
         var clientConfiguration = configManager.ClientConfiguration;
         var zMin = EntityList.ForComparison(

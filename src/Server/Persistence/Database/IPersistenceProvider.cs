@@ -85,7 +85,7 @@ public interface IPersistenceProvider : IDisposable
     /// <summary>
     ///     ISetTemplateQuery for this persistence provider.
     /// </summary>
-    public ISetTemplateQuery SetTemplateQuery { get; }
+    ISetTemplateQuery SetTemplateQuery { get; }
 
     /// <summary>
     ///     IAddComponentQuery for the Position component.
@@ -266,6 +266,21 @@ public interface IPersistenceProvider : IDisposable
     ///     IRemoveComponentQuery for CastBlockShadows tag.
     /// </summary>
     IRemoveComponentQuery RemoveCastBlockShadowsComponentQuery { get; }
+
+    /// <summary>
+    ///     IAddComponentQuery for PointLightSource component.
+    /// </summary>
+    IAddComponentQuery<PointLight> AddPointLightSourceComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQUery for PointLightSource component.
+    /// </summary>
+    IModifyComponentQuery<PointLight> ModifyPointLightSourceComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for PointLightSource component.
+    /// </summary>
+    IRemoveComponentQuery RemovePointLightSourceComponentQuery { get; }
 
     /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.

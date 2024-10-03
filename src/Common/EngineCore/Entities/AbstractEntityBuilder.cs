@@ -47,6 +47,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     protected readonly OrientationComponentCollection orientations;
     protected readonly ParentComponentCollection parents;
     protected readonly PlayerCharacterTagCollection playerCharacterTags;
+    private readonly PointLightSourceComponentCollection pointLightSources;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
     private bool isBlock;
@@ -67,6 +68,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         AdminTagCollection admins,
         BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows,
+        PointLightSourceComponentCollection pointLightSources,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -85,6 +87,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         this.admins = admins;
         this.blockPositions = blockPositions;
         this.castBlockShadows = castBlockShadows;
+        this.pointLightSources = pointLightSources;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -300,6 +303,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     public IEntityBuilder WithoutCastBlockShadows()
     {
         castBlockShadows.UntagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder PointLightSource(PointLight pointLight)
+    {
+        pointLightSources.AddComponent(entityId, pointLight, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutPointLightSource()
+    {
+        pointLightSources.RemoveComponent(entityId, load);
         return this;
     }
 }

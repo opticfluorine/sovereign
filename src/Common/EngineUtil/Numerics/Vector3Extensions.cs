@@ -84,4 +84,14 @@ public static class Vector3Extensions
     {
         return position + t * velocity;
     }
+
+    /// <summary>
+    ///     Checks whether all components in the vector are finite.
+    /// </summary>
+    /// <param name="v">This vector.</param>
+    /// <returns>true if all components are finite; false otherwise.</returns>
+    public static bool IsFinite(this Vector3 v)
+    {
+        return float.IsFinite(v.X) && float.IsFinite(v.Y) && float.IsFinite(v.Z);
+    }
 }

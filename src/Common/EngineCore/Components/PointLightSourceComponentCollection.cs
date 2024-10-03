@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,17 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 
-namespace Sovereign.EngineCore.Components.Validators;
+namespace Sovereign.EngineCore.Components;
 
-public class ComponentValidatorInstaller : IWindsorInstaller
+/// <summary>
+///     PointLightSource component collection.
+/// </summary>
+public class PointLightSourceComponentCollection : BaseComponentCollection<PointLight>
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
+    private const int InitialSize = 2048;
+
+    public PointLightSourceComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, InitialSize,
+            ComponentOperators.PointLightOperators, ComponentType.PointLightSource)
     {
-        container.Register(Component.For<NameComponentValidator>().LifestyleSingleton());
-        container.Register(Component.For<PointLightComponentValidator>().LifestyleSingleton());
     }
 }

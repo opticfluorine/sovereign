@@ -45,6 +45,14 @@ public sealed class EntityProcessor
     private const int IndexOrientation = IndexAnimatedSprite + 1;
     private const int IndexAdmin = IndexOrientation + 1;
     private const int IndexCastBlockShadows = IndexAdmin + 1;
+    private const int IndexPlsRadius = IndexCastBlockShadows + 1;
+    private const int IndexPlsIntensity = IndexPlsRadius + 1;
+    private const int IndexPlsColorR = IndexPlsIntensity + 1;
+    private const int IndexPlsColorG = IndexPlsColorR + 1;
+    private const int IndexPlsColorB = IndexPlsColorG + 1;
+    private const int IndexPlsPosX = IndexPlsColorB + 1;
+    private const int IndexPlsPosY = IndexPlsPosX + 1;
+    private const int IndexPlsPosZ = IndexPlsPosY + 1;
     private readonly IEntityFactory entityFactory;
     private readonly EntityMapper mapper;
 
@@ -99,6 +107,7 @@ public sealed class EntityProcessor
         ProcessOrientation(reader, builder);
         ProcessAdmin(reader, builder);
         ProcessCastBlockShadows(reader, builder);
+        ProcessPointLightSource(reader, builder);
 
         /* Complete the entity. */
         builder.Build();
@@ -266,6 +275,23 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexCastBlockShadows)) return;
         if (reader.GetBoolean(IndexCastBlockShadows)) builder.CastBlockShadows();
+    }
+
+    /// <summary>
+    ///     Processes the PointLightSource component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessPointLightSource(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexPlsRadius)) return;
+        builder.PointLightSource(new PointLight
+        {
+            Radius = reader.GetFloat(IndexPlsRadius),
+            Intensity = reader.GetFloat(IndexPlsIntensity),
+            Color = GetVector3(reader, IndexPlsColorR, IndexPlsColorG, IndexPlsColorB),
+            PositionOffset = GetVector3(reader, IndexPlsPosX, IndexPlsPosY, IndexPlsPosZ)
+        });
     }
 
     /// <summary>

@@ -45,6 +45,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PlayerCharacterTagCollection playerCharacterTags;
+    private readonly PointLightSourceComponentCollection pointLightSources;
 
     private ulong nextBlockEntityId = EntityConstants.FirstBlockEntityId;
 
@@ -64,6 +65,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         AdminTagCollection admins,
         BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows,
+        PointLightSourceComponentCollection pointLightSources,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -81,6 +83,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.admins = admins;
         this.blockPositions = blockPositions;
         this.castBlockShadows = castBlockShadows;
+        this.pointLightSources = pointLightSources;
         this.entityTable = entityTable;
         entityAssigner = entityManager.GetNewAssigner();
     }
@@ -115,6 +118,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             admins,
             blockPositions,
             castBlockShadows,
+            pointLightSources,
             entityTable);
     }
 }

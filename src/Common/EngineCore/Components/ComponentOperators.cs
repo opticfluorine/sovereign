@@ -130,4 +130,13 @@ public static class ComponentOperators
             { ComponentOperation.SetVelocity, (a, b) => a with { Velocity = b.Velocity } },
             { ComponentOperation.AddPosition, (a, b) => a with { Position = a.Position + b.Position } }
         };
+
+    /// <summary>
+    ///     Standard operators for PointLight-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<PointLight, PointLight, PointLight>>
+        PointLightOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
+        };
 }

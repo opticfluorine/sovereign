@@ -104,6 +104,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<bool>> playerCharacterUpdates = new(BufferSize);
 
     /// <summary>
+    ///     Point light source updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<PointLight>> pointLightSourceUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Position state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<Kinematics>> positionUpdates = new(BufferSize);
@@ -256,9 +261,22 @@ public sealed class StateBuffer
         adminUpdates.Add(ref update);
     }
 
+    /// <summary>
+    ///     Enqueues an update to the cast block shadows tag.
+    /// </summary>
+    /// <param name="update">Update.</param>
     public void UpdateCastBlockShadows(ref StateUpdate<bool> update)
     {
         castBlockShadowsUpdates.Add(ref update);
+    }
+
+    /// <summary>
+    ///     Enqueues an update to a point light source.
+    /// </summary>
+    /// <param name="update">Update.</param>
+    public void UpdatePointLightSource(ref StateUpdate<PointLight> update)
+    {
+        pointLightSourceUpdates.Add(ref update);
     }
 
     /// <summary>
@@ -281,6 +299,7 @@ public sealed class StateBuffer
         orientationUpdates.Clear();
         adminUpdates.Clear();
         castBlockShadowsUpdates.Clear();
+        pointLightSourceUpdates.Clear();
     }
 
     /// <summary>
@@ -392,6 +411,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddCastBlockShadowsComponentQuery,
                     persistenceProvider.ModifyCastBlockShadowsComponentQuery,
                     persistenceProvider.RemoveCastBlockShadowsComponentQuery,
+                    transaction);
+
+                // PointLightSource.
+                SynchronizeComponent(pointLightSourceUpdates,
+                    persistenceProvider.AddPointLightSourceComponentQuery,
+                    persistenceProvider.ModifyPointLightSourceComponentQuery,
+                    persistenceProvider.RemovePointLightSourceComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

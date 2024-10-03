@@ -105,4 +105,10 @@ public class EntityDefinition
     /// </summary>
     [Key(12)]
     public bool CastBlockShadows { get; set; }
+
+    /// <summary>
+    ///     Point light source, or null if the entity has no point light source.
+    /// </summary>
+    [Key(13)]
+    public PointLight? PointLightSource { get; set; }
 }

@@ -25,6 +25,7 @@ public sealed class TrackerManager
 {
     private readonly AdminStateTracker adminStateTracker;
     private readonly CastBlockShadowsStateTracker castBlockShadowsStateTracker;
+    private readonly PointLightSourceStateTracker pointLightSourceStateTracker;
     private readonly TemplateStateTracker templateStateTracker;
 
     public TrackerManager(PositionStateTracker positionStateTracker,
@@ -39,11 +40,13 @@ public sealed class TrackerManager
         OrientationStateTracker orientationStateTracker,
         AdminStateTracker adminStateTracker,
         TemplateStateTracker templateStateTracker,
-        CastBlockShadowsStateTracker castBlockShadowsStateTracker)
+        CastBlockShadowsStateTracker castBlockShadowsStateTracker,
+        PointLightSourceStateTracker pointLightSourceStateTracker)
     {
         this.adminStateTracker = adminStateTracker;
         this.templateStateTracker = templateStateTracker;
         this.castBlockShadowsStateTracker = castBlockShadowsStateTracker;
+        this.pointLightSourceStateTracker = pointLightSourceStateTracker;
         OrientationStateTracker = orientationStateTracker;
         PositionStateTracker = positionStateTracker;
         MaterialStateTracker = materialStateTracker;

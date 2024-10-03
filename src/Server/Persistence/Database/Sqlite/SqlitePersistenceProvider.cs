@@ -78,6 +78,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const string CastBlockShadowsTableName = "CastBlockShadows";
     private const string CastBlockShadowsParamName = "value";
 
+    private const string PointLightSourceTableName = "PointLightSource";
+
     private readonly IPersistenceConfiguration configuration;
 
     public SqlitePersistenceProvider(IPersistenceConfiguration configuration)
@@ -213,6 +215,13 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             CastBlockShadowsParamName, CastBlockShadowsParamType, (SqliteConnection)Connection);
         RemoveCastBlockShadowsComponentQuery = new SqliteRemoveComponentQuery(CastBlockShadowsTableName,
             (SqliteConnection)Connection);
+
+        // PointLightSource component.
+        var pointLightSourceQuery = new SqliteAddModifyPointLightSourceComponentQuery((SqliteConnection)Connection);
+        AddPointLightSourceComponentQuery = pointLightSourceQuery;
+        ModifyPointLightSourceComponentQuery = pointLightSourceQuery;
+        RemovePointLightSourceComponentQuery =
+            new SqliteRemoveComponentQuery(PointLightSourceTableName, (SqliteConnection)Connection);
     }
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
@@ -284,6 +293,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IRemoveAdminRoleQuery RemoveAdminRoleQuery { get; }
     public IGetWorldSegmentBlockDataQuery GetWorldSegmentBlockDataQuery { get; }
     public ISetWorldSegmentBlockDataQuery SetWorldSegmentBlockDataQuery { get; }
+    public IAddComponentQuery<PointLight> AddPointLightSourceComponentQuery { get; }
+    public IModifyComponentQuery<PointLight> ModifyPointLightSourceComponentQuery { get; }
+    public IRemoveComponentQuery RemovePointLightSourceComponentQuery { get; }
 
     public void Dispose()
     {

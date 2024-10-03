@@ -107,6 +107,11 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutCastBlockShadows();
 
+        if (definition.PointLightSource.HasValue)
+            builder.PointLightSource(definition.PointLightSource.Value);
+        else
+            builder.WithoutPointLightSource();
+
         var entityId = builder.Build();
         Logger.DebugFormat("Processed entity ID {0}.", entityId);
     }
