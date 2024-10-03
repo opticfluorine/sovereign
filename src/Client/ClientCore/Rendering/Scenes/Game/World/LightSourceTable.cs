@@ -26,8 +26,13 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 /// <summary>
 ///     Summarizes information about a point light source required for rendering.
 /// </summary>
-public readonly struct PositionedLight(Vector3 position, PointLight details)
+public readonly struct PositionedLight(int index, Vector3 position, PointLight details)
 {
+    /// <summary>
+    ///     Light index for this frame.
+    /// </summary>
+    public readonly int Index = index;
+
     /// <summary>
     ///     Light position.
     /// </summary>
@@ -73,6 +78,7 @@ public class LightSourceTable
     public void GetLightsInRange(Vector3 minExtent, Vector3 maxExtent, float timeSinceTick,
         List<PositionedLight> lights)
     {
+        var nextIndex = 0;
         foreach (var lightEntityId in knownSources)
         {
             if (!kinematics.TryFindNearest(lightEntityId, parents, out var posVel))
@@ -103,7 +109,7 @@ public class LightSourceTable
             if (!RangeUtil.IsPointInRange(adjMinExtent, adjMaxExtent, lightCenter)) continue;
 
             // If we get here, we need to include the light when rendering.
-            lights.Add(new PositionedLight(lightCenter, details));
+            lights.Add(new PositionedLight(nextIndex++, lightCenter, details));
         }
     }
 

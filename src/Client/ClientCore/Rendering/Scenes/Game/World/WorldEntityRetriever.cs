@@ -106,16 +106,18 @@ public sealed class WorldEntityRetriever
 
         DetermineExtents(out var minExtent, out var maxExtent, timeSinceTick);
 
-        // Identify light sources. This must be done at this point so that blocks can be flagged
-        // for inclusion in the per-light shadow maps appropriately.
-        lights.Clear();
-        lightSourceTable.GetLightsInRange((Vector3)minExtent, (Vector3)maxExtent, timeSinceTick, lights);
-
         var clientConfiguration = configManager.ClientConfiguration;
         var zMin = EntityList.ForComparison(
             (int)Math.Floor(minExtent.Z - halfY - clientConfiguration.RenderSearchSpacerY));
         var zMax = EntityList.ForComparison(
             (int)Math.Floor(minExtent.Z + halfY + clientConfiguration.RenderSearchSpacerY));
+
+        // Identify light sources. This must be done at this point so that blocks can be flagged
+        // for inclusion in the per-light shadow maps appropriately.
+        lights.Clear();
+        var searchSpaceMin = new Vector3(minExtent.X, minExtent.Y, zMin.ZFloor);
+        var searchSpaceMax = new Vector3(maxExtent.X, maxExtent.Y, zMax.ZFloor);
+        lightSourceTable.GetLightsInRange(searchSpaceMin, searchSpaceMax, timeSinceTick, lights);
 
         for (var x = minExtent.X; x <= maxExtent.X; ++x)
         for (var y = minExtent.Y; y <= maxExtent.Y; ++y)
@@ -268,9 +270,21 @@ public sealed class WorldEntityRetriever
     private void ProcessSolidBlock(ulong entityId)
     {
         if (!drawableTags.HasTagForEntity(entityId) || !castBlockShadows.HasTagForEntity(entityId)) return;
-
         var blockPosition = (Vector3)blockPositions[entityId];
+
+        // Global lighting.
         grouper.AddSolidBlock(blockPosition);
+
+        // Check individual lights to see if this block is in range.
+        foreach (var light in lights)
+        {
+            // Check whether in range.
+            var displacement = blockPosition - light.Position;
+            if (displacement.LengthSquared() > light.Details.Radius * light.Details.Radius) continue;
+
+            // Block is in range, tag it for local lighting calculations.
+            grouper.AddSolidBlockForLight(light.Index, blockPosition);
+        }
     }
 
     /// <summary>
