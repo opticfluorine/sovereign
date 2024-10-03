@@ -44,7 +44,7 @@ public sealed class WorldLayerGrouper
     /// <summary>
     ///     Blocks to render in the solid geometry for point lights, indexed by the per-frame light index.
     /// </summary>
-    public List<List<Vector3>> SolidBlocksPerLight = new();
+    public List<List<uint>> SolidBlocksPerLight = new();
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
@@ -126,11 +126,11 @@ public sealed class WorldLayerGrouper
     ///     Adds a block for solid geometry rendering for the given point light source.
     /// </summary>
     /// <param name="lightIndex">Per-frame light index.</param>
-    /// <param name="position">Block position.</param>
-    public void AddSolidBlockForLight(int lightIndex, Vector3 position)
+    /// <param name="solidBlockIndex">Index of the solid block being added.</param>
+    public void AddSolidBlockForLight(int lightIndex, uint solidBlockIndex)
     {
-        while (SolidBlocksPerLight.Count <= lightIndex) SolidBlocksPerLight.Add(new List<Vector3>());
-        SolidBlocksPerLight[lightIndex].Add(position);
+        while (SolidBlocksPerLight.Count <= lightIndex) SolidBlocksPerLight.Add(new List<uint>());
+        SolidBlocksPerLight[lightIndex].Add(solidBlockIndex);
     }
 
     /// <summary>

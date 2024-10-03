@@ -16,6 +16,7 @@
 
 using System;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering;
 
@@ -30,9 +31,9 @@ public enum RenderCommandType
     DrawSprites,
 
     /// <summary>
-    ///     Draw the block shadow map to its texture.
+    ///     Draw the global block shadow map to its texture.
     /// </summary>
-    DrawBlockShadowMap,
+    DrawGlobalShadowMap,
 
     /// <summary>
     ///     Push a debug group onto the stack.
@@ -72,10 +73,36 @@ public struct RenderCommand
 }
 
 /// <summary>
+///     Details of a rendered light.
+/// </summary>
+public struct RenderLight
+{
+    /// <summary>
+    ///     First index in the solid geometry index buffer to use for this light's shadow map.
+    /// </summary>
+    public uint BaseIndex;
+
+    /// <summary>
+    ///     Number of indices from the solid geometry index buffer to use for this light's shadow map.
+    /// </summary>
+    public uint IndexCount;
+
+    /// <summary>
+    ///     Details of the point light source.
+    /// </summary>
+    public PointLight Details;
+}
+
+/// <summary>
 ///     Manages the plan for rendering a frame.
 /// </summary>
 public class RenderPlan
 {
+    /// <summary>
+    ///     Initial size of point light list.
+    /// </summary>
+    private const int InitialLightSize = 128;
+
     private readonly uint[] solidIndexBuffer;
 
     /// <summary>
@@ -92,6 +119,21 @@ public class RenderPlan
     ///     Number of rendering commands in the plan.
     /// </summary>
     private int commandCount;
+
+    /// <summary>
+    ///     Number of point lights to include in rendering.
+    /// </summary>
+    private int lightCount;
+
+    /// <summary>
+    ///     Point lights to include in rendering.
+    /// </summary>
+    private RenderLight[] lights;
+
+    /// <summary>
+    ///     Running total of used solid geometry indices already allocated to point lights.
+    /// </summary>
+    private uint pointLightSolidIndexCount;
 
     /// <summary>
     ///     Rendering commands to be executed for this plan.
@@ -113,6 +155,11 @@ public class RenderPlan
     /// </summary>
     private int vertexCount;
 
+    /// <summary>
+    ///     Number of indices at the beginning of the solid geometry index buffer to use for world rendering.
+    /// </summary>
+    private uint worldSolidIndexCount;
+
     public RenderPlan(WorldVertex[] vertexBuffer, uint[] spriteIndexBuffer, uint[] solidIndexBuffer,
         int commandListSize)
     {
@@ -120,6 +167,7 @@ public class RenderPlan
         this.spriteIndexBuffer = spriteIndexBuffer;
         this.solidIndexBuffer = solidIndexBuffer;
         renderCommands = new RenderCommand[commandListSize];
+        lights = new RenderLight[InitialLightSize];
     }
 
     /// <summary>
@@ -138,6 +186,11 @@ public class RenderPlan
     public int SolidIndexCount => solidIndexCount;
 
     /// <summary>
+    ///     Number of solid geometry indices used for world shadow map.
+    /// </summary>
+    public uint GlobalSolidIndexCount => worldSolidIndexCount;
+
+    /// <summary>
     ///     Resets the render plan for a new frame.
     /// </summary>
     public void Reset()
@@ -146,6 +199,9 @@ public class RenderPlan
         spriteIndexCount = 0;
         solidIndexCount = 0;
         commandCount = 0;
+        worldSolidIndexCount = 0;
+        lightCount = 0;
+        pointLightSolidIndexCount = 0;
     }
 
     /// <summary>
@@ -244,7 +300,7 @@ public class RenderPlan
 
         renderCommands[commandCount] = new RenderCommand
         {
-            RenderCommandType = RenderCommandType.DrawBlockShadowMap
+            RenderCommandType = RenderCommandType.DrawGlobalShadowMap
         };
         commandCount++;
     }
@@ -277,6 +333,38 @@ public class RenderPlan
             RenderCommandType = RenderCommandType.PopDebug
         };
         commandCount++;
+    }
+
+    /// <summary>
+    ///     Sets the number of solid indices to use for the global shadowmap.
+    /// </summary>
+    /// <param name="count">Index count.</param>
+    public void SetWorldSolidIndexCount(uint count)
+    {
+        worldSolidIndexCount = count;
+    }
+
+    /// <summary>
+    ///     Adds a point light source to the render plan data.
+    /// </summary>
+    /// <param name="indexCount">Solid geometry indices used by this point light source.</param>
+    /// <param name="details">Light source details.</param>
+    public void AddLight(int indexCount, PointLight details)
+    {
+        if (lightCount == lights.Length)
+        {
+            var newLights = new RenderLight[lights.Length + InitialLightSize];
+            Array.Copy(lights, newLights, lights.Length);
+            lights = newLights;
+        }
+
+        lights[lightCount++] = new RenderLight
+        {
+            BaseIndex = worldSolidIndexCount + pointLightSolidIndexCount,
+            IndexCount = (uint)indexCount,
+            Details = details
+        };
+        pointLightSolidIndexCount += (uint)indexCount;
     }
 
     /// <summary>

@@ -108,6 +108,10 @@ public sealed class WorldVertexSequencer
     /// <param name="renderPlan">Render plan.</param>
     private void AddBlockGeometry(RenderPlan renderPlan)
     {
+        // Prepare resource layout in render plan.
+        GenerateLightingPlan(renderPlan, out var totalIndexCount);
+
+        // Allocate resources within the render plan.
         var blocks = grouper.SolidBlocks;
         if (!renderPlan.TryAddVertices(SolidVerticesPerBlock * blocks.Count, out var vertices, out var baseIndex))
         {
@@ -115,7 +119,7 @@ public sealed class WorldVertexSequencer
             return;
         }
 
-        if (!renderPlan.TryAddSolidIndices(SolidIndicesPerBlock * blocks.Count, out var indices,
+        if (!renderPlan.TryAddSolidIndices((int)totalIndexCount, out var indices,
                 out var _))
             Logger.Error("Not enough room in solid index buffer for solid geometry.");
 
@@ -127,6 +131,38 @@ public sealed class WorldVertexSequencer
 
             AddVerticesForBlock(basePos, blockVertices);
             AddIndicesForBlock(baseIndex + (uint)i * SolidVerticesPerBlock, blockIndices);
+        }
+
+        // Point lighting.
+        foreach (var light in entityRetriever.Lights)
+        {
+            if (grouper.SolidBlocksPerLight.Count <= light.Index) continue;
+            var blockBaseIndices = grouper.SolidBlocksPerLight[light.Index];
+            for (var i = 0; i < blockBaseIndices.Count; ++i)
+            {
+                var blockBaseIndex = blockBaseIndices[i];
+                var blockIndices = indices.Slice(blocks.Count + i * SolidIndicesPerBlock, SolidIndicesPerBlock);
+                AddIndicesForBlock(baseIndex + blockBaseIndex * SolidVerticesPerBlock, blockIndices);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Generates a lighting resource plan for the render plan.
+    /// </summary>
+    /// <param name="renderPlan">Render plan.</param>
+    private void GenerateLightingPlan(RenderPlan renderPlan, out uint totalSolidIndexCount)
+    {
+        totalSolidIndexCount = (uint)grouper.SolidBlocks.Count * SolidIndicesPerBlock;
+        renderPlan.SetWorldSolidIndexCount(totalSolidIndexCount);
+        foreach (var light in entityRetriever.Lights)
+        {
+            if (grouper.SolidBlocksPerLight.Count <= light.Index ||
+                grouper.SolidBlocksPerLight[light.Index].Count == 0) continue;
+
+            var indexCount = grouper.SolidBlocksPerLight[light.Index].Count * SolidIndicesPerBlock;
+            renderPlan.AddLight(indexCount, light.Details);
+            totalSolidIndexCount += (uint)indexCount;
         }
     }
 

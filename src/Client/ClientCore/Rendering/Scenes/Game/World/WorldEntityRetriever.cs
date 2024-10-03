@@ -59,12 +59,17 @@ public sealed class WorldEntityRetriever
 
     private readonly KinematicComponentCollection kinematics;
 
-    private readonly List<PositionedLight> lights = new();
+    public readonly List<PositionedLight> Lights = new();
     private readonly LightSourceTable lightSourceTable;
     private readonly OrientationComponentCollection orientations;
 
     private readonly PerspectiveServices perspectiveServices;
     private readonly AnimationPhaseComponentCollection phases;
+
+    /// <summary>
+    ///     Number of solid blocks added so far in a frame.
+    /// </summary>
+    private uint solidBlockIndex;
 
     public WorldEntityRetriever(CameraManager camera, DisplayViewport viewport,
         ClientConfigurationManager configManager, PerspectiveServices perspectiveServices,
@@ -103,6 +108,7 @@ public sealed class WorldEntityRetriever
     public void RetrieveEntities(float timeSinceTick, ulong systemTime)
     {
         grouper.ResetLayers();
+        solidBlockIndex = 0;
 
         DetermineExtents(out var minExtent, out var maxExtent, timeSinceTick);
 
@@ -114,10 +120,10 @@ public sealed class WorldEntityRetriever
 
         // Identify light sources. This must be done at this point so that blocks can be flagged
         // for inclusion in the per-light shadow maps appropriately.
-        lights.Clear();
+        Lights.Clear();
         var searchSpaceMin = new Vector3(minExtent.X, minExtent.Y, zMin.ZFloor);
         var searchSpaceMax = new Vector3(maxExtent.X, maxExtent.Y, zMax.ZFloor);
-        lightSourceTable.GetLightsInRange(searchSpaceMin, searchSpaceMax, timeSinceTick, lights);
+        lightSourceTable.GetLightsInRange(searchSpaceMin, searchSpaceMax, timeSinceTick, Lights);
 
         for (var x = minExtent.X; x <= maxExtent.X; ++x)
         for (var y = minExtent.Y; y <= maxExtent.Y; ++y)
@@ -276,15 +282,17 @@ public sealed class WorldEntityRetriever
         grouper.AddSolidBlock(blockPosition);
 
         // Check individual lights to see if this block is in range.
-        foreach (var light in lights)
+        foreach (var light in Lights)
         {
             // Check whether in range.
             var displacement = blockPosition - light.Position;
             if (displacement.LengthSquared() > light.Details.Radius * light.Details.Radius) continue;
 
             // Block is in range, tag it for local lighting calculations.
-            grouper.AddSolidBlockForLight(light.Index, blockPosition);
+            grouper.AddSolidBlockForLight(light.Index, solidBlockIndex);
         }
+
+        solidBlockIndex++;
     }
 
     /// <summary>

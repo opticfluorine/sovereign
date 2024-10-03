@@ -137,11 +137,11 @@ public class WorldRenderer : IDisposable
                     commandList.DrawIndexed(command.IndexCount, 1, command.BaseIndex, 0, 0);
                     break;
 
-                case RenderCommandType.DrawBlockShadowMap:
+                case RenderCommandType.DrawGlobalShadowMap:
                     if (pipelineConfiguration != PipelineConfiguration.ShadowMap)
                         ConfigureShadowMapPipeline(commandList);
                     commandList.ClearDepthStencil(0.0f);
-                    commandList.DrawIndexed((uint)renderPlan.SolidIndexCount);
+                    commandList.DrawIndexed(renderPlan.GlobalSolidIndexCount);
                     break;
 
                 case RenderCommandType.PushDebug:
