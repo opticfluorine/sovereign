@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.VeldridRenderer.Rendering.Resources;
@@ -155,10 +156,16 @@ public class GameResourceManager : IDisposable
     /// </summary>
     public VeldridTexture? ShadowMapTexture { get; private set; }
 
+    /// <summary>
+    ///     Depth map texture sets for the point light sources.
+    /// </summary>
+    public List<PointLightDepthMap> PointLightDepthMaps { get; } = new();
+
     public void Dispose()
     {
         if (!isDisposed)
         {
+            foreach (var depthMap in PointLightDepthMaps) depthMap.Dispose();
             ShadowMapFramebuffer?.Dispose();
             ShadowMapTexture?.Dispose();
             BlockShadowFragmentShader?.Dispose();
@@ -211,6 +218,16 @@ public class GameResourceManager : IDisposable
         VertexUniformBuffer?.Update(commandList);
         FragmentUniformBuffer?.Update(commandList);
         BlockShadowVertexUniformBuffer?.Update(commandList);
+    }
+
+    /// <summary>
+    ///     Ensures that resources are ready to handle at least the given number of point light sources.
+    /// </summary>
+    /// <param name="lightCount">Point light source count.</param>
+    public void PreparePointLights(int lightCount)
+    {
+        while (PointLightDepthMaps.Count < lightCount)
+            PointLightDepthMaps.Add(new PointLightDepthMap(device));
     }
 
     /// <summary>

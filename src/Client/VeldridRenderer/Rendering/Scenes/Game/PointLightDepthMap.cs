@@ -17,7 +17,7 @@
 using System;
 using Veldrid;
 
-namespace Sovereign.VeldridRenderer.Rendering.Resources;
+namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 
 /// <summary>
 ///     Specialized texture for a point light source.

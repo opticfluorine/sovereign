@@ -36,6 +36,11 @@ public enum RenderCommandType
     DrawGlobalShadowMap,
 
     /// <summary>
+    ///     Draw the shadow maps for point light sources.
+    /// </summary>
+    DrawPointLightShadowMaps,
+
+    /// <summary>
     ///     Push a debug group onto the stack.
     /// </summary>
     PushDebug,
@@ -191,6 +196,11 @@ public class RenderPlan
     public uint GlobalSolidIndexCount => worldSolidIndexCount;
 
     /// <summary>
+    ///     Number of point light sources in the render plan.
+    /// </summary>
+    public int LightCount => lightCount;
+
+    /// <summary>
     ///     Resets the render plan for a new frame.
     /// </summary>
     public void Reset()
@@ -301,6 +311,20 @@ public class RenderPlan
         renderCommands[commandCount] = new RenderCommand
         {
             RenderCommandType = RenderCommandType.DrawGlobalShadowMap
+        };
+        commandCount++;
+    }
+
+    /// <summary>
+    ///     Adds a DrawPointLightShadowMaps command to the plan.
+    /// </summary>
+    public void DrawPointLightShadowMaps()
+    {
+        if (commandCount == renderCommands.Length) ExpandCommandList();
+
+        renderCommands[commandCount] = new RenderCommand
+        {
+            RenderCommandType = RenderCommandType.DrawPointLightShadowMaps
         };
         commandCount++;
     }

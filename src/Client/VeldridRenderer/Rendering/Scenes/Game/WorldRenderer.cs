@@ -144,6 +144,10 @@ public class WorldRenderer : IDisposable
                     commandList.DrawIndexed(renderPlan.GlobalSolidIndexCount);
                     break;
 
+                case RenderCommandType.DrawPointLightShadowMaps:
+                    gameResMgr.PreparePointLights(renderPlan.LightCount);
+                    break;
+
                 case RenderCommandType.PushDebug:
                     commandList.PushDebugGroup(command.DebugGroupName!);
                     break;

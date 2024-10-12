@@ -38,5 +38,6 @@ public class GameSceneInstaller : IWindsorInstaller
         container.Register(Component.For<WorldVertexConstantsUpdater>()
             .LifestyleSingleton());
         container.Register(Component.For<WorldFragmentConstantsUpdater>().LifestyleSingleton());
+        container.Register(Component.For<LightingShaderConstantsUpdater>().LifestyleSingleton());
     }
 }
