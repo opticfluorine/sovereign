@@ -26,6 +26,8 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 public class WorldPointLightDepthMapRenderer
 {
     private readonly VeldridDevice device;
+
+    private readonly uint[] dynamicOffset = new uint[1];
     private readonly GameResourceManager gameResMgr;
     private readonly LightingShaderConstantsUpdater lightingShaderConstantsUpdater;
 
@@ -44,12 +46,15 @@ public class WorldPointLightDepthMapRenderer
     /// </summary>
     private readonly Lazy<ResourceSet> resourceSet;
 
+    private readonly WorldPipeline worldPipeline;
+
     public WorldPointLightDepthMapRenderer(GameResourceManager gameResMgr, VeldridDevice device,
-        LightingShaderConstantsUpdater lightingShaderConstantsUpdater)
+        LightingShaderConstantsUpdater lightingShaderConstantsUpdater, WorldPipeline worldPipeline)
     {
         this.gameResMgr = gameResMgr;
         this.device = device;
         this.lightingShaderConstantsUpdater = lightingShaderConstantsUpdater;
+        this.worldPipeline = worldPipeline;
 
         resourceLayout = new Lazy<ResourceLayout>(() =>
         {
@@ -85,7 +90,8 @@ public class WorldPointLightDepthMapRenderer
                 ResourceBindingModel = ResourceBindingModel.Default,
                 ResourceLayouts = [resourceLayout.Value],
                 Outputs = new OutputDescription(new OutputAttachmentDescription(PixelFormat.R32_Float)),
-                ShaderSet = new ShaderSetDescription()
+                ShaderSet = new ShaderSetDescription([worldPipeline.GetVertexDescription()],
+                    [gameResMgr.WorldVertexShader, gameResMgr.WorldFragmentShader])
             };
             return device.Device!.ResourceFactory.CreateGraphicsPipeline(desc);
         });
@@ -98,10 +104,26 @@ public class WorldPointLightDepthMapRenderer
     /// <param name="renderPlan">Render plan.</param>
     public void Render(CommandList commandList, RenderPlan renderPlan)
     {
-        // Load light information into the buffers.
         gameResMgr.PreparePointLights(renderPlan.LightCount);
         lightingShaderConstantsUpdater.UpdateConstats(renderPlan);
 
-        // Render depth maps for point lights.
+        commandList.SetPipeline(pipeline.Value);
+        commandList.SetIndexBuffer(gameResMgr.SolidIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
+
+        for (var i = 0; i < renderPlan.LightCount; ++i)
+        {
+            var depthMap = gameResMgr.PointLightDepthMaps[i];
+            var light = renderPlan.Lights[i];
+
+            dynamicOffset[0] = (uint)i;
+            commandList.SetGraphicsResourceSet(0, resourceSet.Value, dynamicOffset);
+
+            for (var j = 0; j < PointLightDepthMap.LayerCount; ++j)
+            {
+                commandList.SetFramebuffer(depthMap.Framebuffers[j]);
+                commandList.ClearDepthStencil(1.0f);
+                commandList.DrawIndexed(light.IndexCount, 1, light.BaseIndex, 0, 0);
+            }
+        }
     }
 }

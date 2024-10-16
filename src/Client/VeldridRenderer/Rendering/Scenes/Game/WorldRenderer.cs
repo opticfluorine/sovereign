@@ -30,6 +30,7 @@ public class WorldRenderer : IDisposable
     private readonly VeldridDevice device;
     private readonly GameResourceManager gameResMgr;
     private readonly WorldPipeline pipeline;
+    private readonly WorldPointLightDepthMapRenderer pointLightDepthMapRenderer;
     private readonly VeldridResourceManager resMgr;
 
     /// <summary>
@@ -58,12 +59,14 @@ public class WorldRenderer : IDisposable
     private Viewport viewport;
 
     public WorldRenderer(VeldridDevice device, WorldPipeline pipeline,
-        VeldridResourceManager resMgr, GameResourceManager gameResMgr)
+        VeldridResourceManager resMgr, GameResourceManager gameResMgr,
+        WorldPointLightDepthMapRenderer pointLightDepthMapRenderer)
     {
         this.device = device;
         this.pipeline = pipeline;
         this.resMgr = resMgr;
         this.gameResMgr = gameResMgr;
+        this.pointLightDepthMapRenderer = pointLightDepthMapRenderer;
     }
 
     public void Dispose()
@@ -145,6 +148,7 @@ public class WorldRenderer : IDisposable
                     break;
 
                 case RenderCommandType.DrawPointLightShadowMaps:
+                    pointLightDepthMapRenderer.Render(commandList, renderPlan);
                     break;
 
                 case RenderCommandType.PushDebug:

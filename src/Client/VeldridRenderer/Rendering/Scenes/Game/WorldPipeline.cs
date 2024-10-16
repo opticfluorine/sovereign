@@ -85,6 +85,29 @@ public class WorldPipeline : IDisposable
     }
 
     /// <summary>
+    ///     Gets the vertex description shared by various world rendering pipelines.
+    /// </summary>
+    /// <returns>Vertex description.</returns>
+    public VertexLayoutDescription GetVertexDescription()
+    {
+        return new VertexLayoutDescription(
+            gameResMgr.VertexBuffer!.ElementSize,
+            new VertexElementDescription(
+                "vPosition",
+                VertexElementFormat.Float3,
+                VertexElementSemantic.Position
+            ), new VertexElementDescription(
+                "vVelocity",
+                VertexElementFormat.Float3,
+                VertexElementSemantic.Position
+            ), new VertexElementDescription(
+                "vTexCoord",
+                VertexElementFormat.Float2,
+                VertexElementSemantic.TextureCoordinate
+            ));
+    }
+
+    /// <summary>
     ///     Creates the rasterizer state for the world rendering pipeline.
     /// </summary>
     /// <returns>Rasterizer state.</returns>
@@ -122,21 +145,7 @@ public class WorldPipeline : IDisposable
         if (gameResMgr.VertexBuffer == null)
             throw new InvalidOperationException("Vertex buffer not ready.");
 
-        var vertexDesc = new VertexLayoutDescription(
-            gameResMgr.VertexBuffer.ElementSize,
-            new VertexElementDescription(
-                "vPosition",
-                VertexElementFormat.Float3,
-                VertexElementSemantic.Position
-            ), new VertexElementDescription(
-                "vVelocity",
-                VertexElementFormat.Float3,
-                VertexElementSemantic.Position
-            ), new VertexElementDescription(
-                "vTexCoord",
-                VertexElementFormat.Float2,
-                VertexElementSemantic.TextureCoordinate
-            ));
+        var vertexDesc = GetVertexDescription();
 
         // Create the shader set.
         return new ShaderSetDescription(
