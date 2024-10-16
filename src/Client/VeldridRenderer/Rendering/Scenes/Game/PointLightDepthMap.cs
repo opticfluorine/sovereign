@@ -42,7 +42,7 @@ public class PointLightDepthMap : IDisposable
     /// <summary>
     ///     Number of layers in the texture.
     /// </summary>
-    private const uint LayerCount = 2;
+    public const uint LayerCount = 2;
 
     /// <summary>
     ///     Framebuffers for rendering to the textures. Indexed by octant.

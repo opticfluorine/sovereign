@@ -55,6 +55,11 @@ public class GameResourceManager : IDisposable
     public const int ShadowMapHeight = 1024;
 
     /// <summary>
+    ///     Initial size of point light related buffers.
+    /// </summary>
+    public const int InitialLightBufferSize = 128;
+
+    /// <summary>
     ///     Resource name for the shader constants uniform buffer.
     /// </summary>
     public const string ResShaderConstants = "ShaderConstants";
@@ -89,6 +94,30 @@ public class GameResourceManager : IDisposable
     public GameResourceManager(VeldridDevice device)
     {
         this.device = device;
+
+        PointLightDepthMapVertexShader = new Lazy<Shader>(() =>
+        {
+            var desc = new ShaderDescription
+            {
+                Stage = ShaderStages.Vertex,
+                ShaderBytes = device.LoadShaderBytes("PointLightDepthMap.vert.spv"),
+                EntryPoint = "main",
+                Debug = true
+            };
+            return device.Device!.ResourceFactory.CreateShader(desc);
+        });
+
+        PointLightDepthMapFragmentShader = new Lazy<Shader>(() =>
+        {
+            var desc = new ShaderDescription
+            {
+                Stage = ShaderStages.Fragment,
+                ShaderBytes = device.LoadShaderBytes("PointLightDepthMap.frag.spv"),
+                EntryPoint = "main",
+                Debug = true
+            };
+            return device.Device!.ResourceFactory.CreateShader(desc);
+        });
     }
 
     /// <summary>
@@ -152,6 +181,16 @@ public class GameResourceManager : IDisposable
     public Shader? BlockShadowFragmentShader { get; private set; }
 
     /// <summary>
+    ///     Vertex shader for point light depth maps.
+    /// </summary>
+    public Lazy<Shader> PointLightDepthMapVertexShader { get; }
+
+    /// <summary>
+    ///     Fragment shader for point light depth maps.
+    /// </summary>
+    public Lazy<Shader> PointLightDepthMapFragmentShader { get; }
+
+    /// <summary>
     ///     Veldrid texture used for holding the shadow map for each frame.
     /// </summary>
     public VeldridTexture? ShadowMapTexture { get; private set; }
@@ -161,11 +200,16 @@ public class GameResourceManager : IDisposable
     /// </summary>
     public List<PointLightDepthMap> PointLightDepthMaps { get; } = new();
 
+    public VeldridUpdateBuffer<PointLightDepthMapShaderConstants>? PointLightDepthMapUniformBuffer { get; private set; }
+
     public void Dispose()
     {
         if (!isDisposed)
         {
             foreach (var depthMap in PointLightDepthMaps) depthMap.Dispose();
+            if (PointLightDepthMapVertexShader.IsValueCreated) PointLightDepthMapVertexShader.Value.Dispose();
+            if (PointLightDepthMapFragmentShader.IsValueCreated) PointLightDepthMapFragmentShader.Value.Dispose();
+            PointLightDepthMapUniformBuffer?.Dispose();
             ShadowMapFramebuffer?.Dispose();
             ShadowMapTexture?.Dispose();
             BlockShadowFragmentShader?.Dispose();
@@ -198,6 +242,8 @@ public class GameResourceManager : IDisposable
             new VeldridUpdateBuffer<WorldFragmentShaderConstants>(device, BufferUsage.UniformBuffer, 1);
         BlockShadowVertexUniformBuffer = new VeldridUpdateBuffer<BlockShadowShaderConstants>(device,
             BufferUsage.UniformBuffer, 1);
+        PointLightDepthMapUniformBuffer = new VeldridUpdateBuffer<PointLightDepthMapShaderConstants>(device,
+            BufferUsage.UniformBuffer | BufferUsage.Dynamic, InitialLightBufferSize);
 
         RenderPlan = new RenderPlan(VertexBuffer.Buffer, SpriteIndexBuffer.Buffer, SolidIndexBuffer.Buffer,
             MaximumDraws);
@@ -228,6 +274,14 @@ public class GameResourceManager : IDisposable
     {
         while (PointLightDepthMaps.Count < lightCount)
             PointLightDepthMaps.Add(new PointLightDepthMap(device));
+
+        if (PointLightDepthMapUniformBuffer!.Length < lightCount)
+        {
+            var newSize = (lightCount / InitialLightBufferSize + 1) * InitialLightBufferSize;
+            PointLightDepthMapUniformBuffer?.Dispose();
+            PointLightDepthMapUniformBuffer = new VeldridUpdateBuffer<PointLightDepthMapShaderConstants>(device,
+                BufferUsage.UniformBuffer | BufferUsage.Dynamic, (uint)newSize);
+        }
     }
 
     /// <summary>

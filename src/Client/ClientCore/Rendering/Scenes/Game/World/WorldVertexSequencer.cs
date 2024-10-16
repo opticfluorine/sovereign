@@ -161,7 +161,7 @@ public sealed class WorldVertexSequencer
                 grouper.SolidBlocksPerLight[light.Index].Count == 0) continue;
 
             var indexCount = grouper.SolidBlocksPerLight[light.Index].Count * SolidIndicesPerBlock;
-            renderPlan.AddLight(indexCount, light.Details);
+            renderPlan.AddLight(indexCount, light);
             totalSolidIndexCount += (uint)indexCount;
         }
     }

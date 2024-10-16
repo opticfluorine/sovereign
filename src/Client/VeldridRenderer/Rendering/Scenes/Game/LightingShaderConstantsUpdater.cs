@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.ClientCore.Rendering;
+
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 
 /// <summary>
@@ -21,4 +23,34 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 /// </summary>
 public class LightingShaderConstantsUpdater
 {
+    private readonly GameResourceManager gameResMgr;
+
+    public LightingShaderConstantsUpdater(GameResourceManager gameResMgr)
+    {
+        this.gameResMgr = gameResMgr;
+    }
+
+    /// <summary>
+    ///     Updates shader constants for point lighting based on the given render plan.
+    /// </summary>
+    /// <param name="renderPlan">Render plan.</param>
+    public void UpdateConstats(RenderPlan renderPlan)
+    {
+        for (var i = 0; i < renderPlan.LightCount; ++i)
+        {
+            UpdateDepthMapConstants(ref gameResMgr.PointLightDepthMapUniformBuffer!.Buffer[i],
+                ref renderPlan.Lights[i]);
+        }
+    }
+
+    /// <summary>
+    ///     Updates shader constants for point light depth map.
+    /// </summary>
+    /// <param name="constants">Shader constants to update.</param>
+    /// <param name="light">Point light.</param>
+    private void UpdateDepthMapConstants(ref PointLightDepthMapShaderConstants constants, ref RenderLight light)
+    {
+        constants.LightPosition = light.Light.Position;
+        constants.RadiusSquared = light.Light.Details.Radius * light.Light.Details.Radius;
+    }
 }

@@ -25,19 +25,14 @@ public class GameSceneInstaller : IWindsorInstaller
 {
     public void Install(IWindsorContainer container, IConfigurationStore store)
     {
-        container.Register(Component.For<GameSceneRenderer>()
-            .LifestyleSingleton());
-        container.Register(Component.For<GameSceneConsumer>()
-            .LifestyleSingleton());
-        container.Register(Component.For<GameResourceManager>()
-            .LifestyleSingleton());
-        container.Register(Component.For<WorldRenderer>()
-            .LifestyleSingleton());
-        container.Register(Component.For<WorldPipeline>()
-            .LifestyleSingleton());
-        container.Register(Component.For<WorldVertexConstantsUpdater>()
-            .LifestyleSingleton());
+        container.Register(Component.For<GameSceneRenderer>().LifestyleSingleton());
+        container.Register(Component.For<GameSceneConsumer>().LifestyleSingleton());
+        container.Register(Component.For<GameResourceManager>().LifestyleSingleton());
+        container.Register(Component.For<WorldRenderer>().LifestyleSingleton());
+        container.Register(Component.For<WorldPipeline>().LifestyleSingleton());
+        container.Register(Component.For<WorldVertexConstantsUpdater>().LifestyleSingleton());
         container.Register(Component.For<WorldFragmentConstantsUpdater>().LifestyleSingleton());
         container.Register(Component.For<LightingShaderConstantsUpdater>().LifestyleSingleton());
+        container.Register(Component.For<WorldPointLightDepthMapRenderer>().LifestyleSingleton());
     }
 }

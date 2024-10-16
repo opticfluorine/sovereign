@@ -16,7 +16,7 @@
 
 using System;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
-using Sovereign.EngineCore.Components.Types;
+using Sovereign.ClientCore.Rendering.Scenes.Game.World;
 
 namespace Sovereign.ClientCore.Rendering;
 
@@ -95,7 +95,7 @@ public struct RenderLight
     /// <summary>
     ///     Details of the point light source.
     /// </summary>
-    public PointLight Details;
+    public PositionedLight Light;
 }
 
 /// <summary>
@@ -133,7 +133,7 @@ public class RenderPlan
     /// <summary>
     ///     Point lights to include in rendering.
     /// </summary>
-    private RenderLight[] lights;
+    public RenderLight[] Lights;
 
     /// <summary>
     ///     Running total of used solid geometry indices already allocated to point lights.
@@ -172,7 +172,7 @@ public class RenderPlan
         this.spriteIndexBuffer = spriteIndexBuffer;
         this.solidIndexBuffer = solidIndexBuffer;
         renderCommands = new RenderCommand[commandListSize];
-        lights = new RenderLight[InitialLightSize];
+        Lights = new RenderLight[InitialLightSize];
     }
 
     /// <summary>
@@ -372,21 +372,21 @@ public class RenderPlan
     ///     Adds a point light source to the render plan data.
     /// </summary>
     /// <param name="indexCount">Solid geometry indices used by this point light source.</param>
-    /// <param name="details">Light source details.</param>
-    public void AddLight(int indexCount, PointLight details)
+    /// <param name="light">Light source details.</param>
+    public void AddLight(int indexCount, PositionedLight light)
     {
-        if (lightCount == lights.Length)
+        if (lightCount == Lights.Length)
         {
-            var newLights = new RenderLight[lights.Length + InitialLightSize];
-            Array.Copy(lights, newLights, lights.Length);
-            lights = newLights;
+            var newLights = new RenderLight[Lights.Length + InitialLightSize];
+            Array.Copy(Lights, newLights, Lights.Length);
+            Lights = newLights;
         }
 
-        lights[lightCount++] = new RenderLight
+        Lights[lightCount++] = new RenderLight
         {
             BaseIndex = worldSolidIndexCount + pointLightSolidIndexCount,
             IndexCount = (uint)indexCount,
-            Details = details
+            Light = light
         };
         pointLightSolidIndexCount += (uint)indexCount;
     }

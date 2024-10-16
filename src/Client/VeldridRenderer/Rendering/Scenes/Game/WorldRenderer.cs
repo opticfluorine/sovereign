@@ -145,7 +145,6 @@ public class WorldRenderer : IDisposable
                     break;
 
                 case RenderCommandType.DrawPointLightShadowMaps:
-                    gameResMgr.PreparePointLights(renderPlan.LightCount);
                     break;
 
                 case RenderCommandType.PushDebug:
@@ -160,6 +159,7 @@ public class WorldRenderer : IDisposable
 
         commandList.PopDebugGroup();
     }
+
 
     /// <summary>
     ///     Configures the rendering pipeline to draw sprites.
