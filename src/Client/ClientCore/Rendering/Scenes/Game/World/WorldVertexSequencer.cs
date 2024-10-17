@@ -134,15 +134,16 @@ public sealed class WorldVertexSequencer
         }
 
         // Point lighting.
+        var offset = 0;
         foreach (var light in entityRetriever.Lights)
         {
             if (grouper.SolidBlocksPerLight.Count <= light.Index) continue;
             var blockBaseIndices = grouper.SolidBlocksPerLight[light.Index];
-            for (var i = 0; i < blockBaseIndices.Count; ++i)
+            foreach (var blockBaseIndex in blockBaseIndices)
             {
-                var blockBaseIndex = blockBaseIndices[i];
-                var blockIndices = indices.Slice(blocks.Count + i * SolidIndicesPerBlock, SolidIndicesPerBlock);
+                var blockIndices = indices.Slice((blocks.Count + offset) * SolidIndicesPerBlock, SolidIndicesPerBlock);
                 AddIndicesForBlock(baseIndex + blockBaseIndex * SolidVerticesPerBlock, blockIndices);
+                offset++;
             }
         }
     }

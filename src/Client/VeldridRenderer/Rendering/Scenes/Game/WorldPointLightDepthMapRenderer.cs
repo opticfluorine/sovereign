@@ -104,7 +104,7 @@ public class WorldPointLightDepthMapRenderer
     /// </summary>
     /// <param name="commandList">Command list.</param>
     /// <param name="renderPlan">Render plan.</param>
-    public unsafe void Render(CommandList commandList, RenderPlan renderPlan)
+    public void Render(CommandList commandList, RenderPlan renderPlan)
     {
         gameResMgr.PreparePointLights(renderPlan.LightCount);
         lightingShaderConstantsUpdater.UpdateConstants(renderPlan);
@@ -119,7 +119,9 @@ public class WorldPointLightDepthMapRenderer
 
             for (var j = 0; j < PointLightDepthMap.LayerCount; ++j)
             {
-                dynamicOffset[0] = (uint)((2 * i + j) * sizeof(PointLightDepthMapShaderConstants));
+                // Need to fix the alignment of the dynamic uniform buffer.
+                //dynamicOffset[0] = (uint)((2 * i + j) * sizeof(PointLightDepthMapShaderConstants));
+                dynamicOffset[0] = 0;
                 commandList.PushDebugGroup("Point Light Depth Map");
                 commandList.SetGraphicsResourceSet(0, resourceSet.Value, dynamicOffset);
                 commandList.SetFramebuffer(depthMap.Framebuffers[j]);
