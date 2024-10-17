@@ -69,10 +69,7 @@ public class PointLightDepthMap : IDisposable
         for (var i = 0; i < LayerCount; ++i)
         {
             var depthAttachmentDesc = new FramebufferAttachmentDescription(Texture, (uint)i);
-            var fbDesc = new FramebufferDescription
-            {
-                DepthTarget = depthAttachmentDesc
-            };
+            var fbDesc = new FramebufferDescription(depthAttachmentDesc, []);
             Framebuffers[i] = device.Device!.ResourceFactory.CreateFramebuffer(fbDesc);
         }
 

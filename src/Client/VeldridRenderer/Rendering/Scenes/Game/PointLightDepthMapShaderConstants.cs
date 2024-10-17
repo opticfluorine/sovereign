@@ -31,12 +31,17 @@ public struct PointLightDepthMapShaderConstants
     public Vector3 LightPosition;
 
     /// <summary>
-    ///     Square of the light's radius.
+    ///     Radius of the light in world units.
     /// </summary>
-    public float RadiusSquared;
+    public float Radius;
+
+    /// <summary>
+    ///     Z orientation of the current hemisphere. +1 for positive z, -1 for negative z.
+    /// </summary>
+    public int LookDirectionZ;
 
     /// <summary>
     ///     Reserved.
     /// </summary>
-    public Vector3 Reserved;
+    public Vector2 Reserved;
 }

@@ -60,7 +60,7 @@ public class WorldPointLightDepthMapRenderer
         {
             var layoutDesc = new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("ShaderConstants", ResourceKind.UniformBuffer,
-                    ShaderStages.Vertex | ShaderStages.Fragment)
+                    ShaderStages.Vertex | ShaderStages.Fragment, ResourceLayoutElementOptions.DynamicBinding)
             );
             return device.Device!.ResourceFactory.CreateResourceLayout(layoutDesc);
         });
@@ -91,7 +91,9 @@ public class WorldPointLightDepthMapRenderer
                 ResourceLayouts = [resourceLayout.Value],
                 Outputs = new OutputDescription(new OutputAttachmentDescription(PixelFormat.R32_Float)),
                 ShaderSet = new ShaderSetDescription([worldPipeline.GetVertexDescription()],
-                    [gameResMgr.WorldVertexShader, gameResMgr.WorldFragmentShader])
+                [
+                    gameResMgr.PointLightDepthMapVertexShader.Value, gameResMgr.PointLightDepthMapFragmentShader.Value
+                ])
             };
             return device.Device!.ResourceFactory.CreateGraphicsPipeline(desc);
         });
@@ -102,10 +104,10 @@ public class WorldPointLightDepthMapRenderer
     /// </summary>
     /// <param name="commandList">Command list.</param>
     /// <param name="renderPlan">Render plan.</param>
-    public void Render(CommandList commandList, RenderPlan renderPlan)
+    public unsafe void Render(CommandList commandList, RenderPlan renderPlan)
     {
         gameResMgr.PreparePointLights(renderPlan.LightCount);
-        lightingShaderConstantsUpdater.UpdateConstats(renderPlan);
+        lightingShaderConstantsUpdater.UpdateConstants(renderPlan);
 
         commandList.SetPipeline(pipeline.Value);
         commandList.SetIndexBuffer(gameResMgr.SolidIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
@@ -115,14 +117,15 @@ public class WorldPointLightDepthMapRenderer
             var depthMap = gameResMgr.PointLightDepthMaps[i];
             var light = renderPlan.Lights[i];
 
-            dynamicOffset[0] = (uint)i;
-            commandList.SetGraphicsResourceSet(0, resourceSet.Value, dynamicOffset);
-
             for (var j = 0; j < PointLightDepthMap.LayerCount; ++j)
             {
+                dynamicOffset[0] = (uint)((2 * i + j) * sizeof(PointLightDepthMapShaderConstants));
+                commandList.PushDebugGroup("Point Light Depth Map");
+                commandList.SetGraphicsResourceSet(0, resourceSet.Value, dynamicOffset);
                 commandList.SetFramebuffer(depthMap.Framebuffers[j]);
                 commandList.ClearDepthStencil(1.0f);
                 commandList.DrawIndexed(light.IndexCount, 1, light.BaseIndex, 0, 0);
+                commandList.PopDebugGroup();
             }
         }
     }

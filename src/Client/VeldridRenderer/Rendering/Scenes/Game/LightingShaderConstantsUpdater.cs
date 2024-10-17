@@ -34,12 +34,14 @@ public class LightingShaderConstantsUpdater
     ///     Updates shader constants for point lighting based on the given render plan.
     /// </summary>
     /// <param name="renderPlan">Render plan.</param>
-    public void UpdateConstats(RenderPlan renderPlan)
+    public void UpdateConstants(RenderPlan renderPlan)
     {
         for (var i = 0; i < renderPlan.LightCount; ++i)
         {
-            UpdateDepthMapConstants(ref gameResMgr.PointLightDepthMapUniformBuffer!.Buffer[i],
-                ref renderPlan.Lights[i]);
+            UpdateDepthMapConstants(ref gameResMgr.PointLightDepthMapUniformBuffer!.Buffer[2 * i],
+                ref renderPlan.Lights[i], 1);
+            UpdateDepthMapConstants(ref gameResMgr.PointLightDepthMapUniformBuffer!.Buffer[2 * i + 1],
+                ref renderPlan.Lights[i], -1);
         }
     }
 
@@ -48,9 +50,12 @@ public class LightingShaderConstantsUpdater
     /// </summary>
     /// <param name="constants">Shader constants to update.</param>
     /// <param name="light">Point light.</param>
-    private void UpdateDepthMapConstants(ref PointLightDepthMapShaderConstants constants, ref RenderLight light)
+    /// <param name="lookDirectionZ">Orientation of hemisphere along z axis (+1 or -1).</param>
+    private void UpdateDepthMapConstants(ref PointLightDepthMapShaderConstants constants, ref RenderLight light,
+        int lookDirectionZ)
     {
         constants.LightPosition = light.Light.Position;
-        constants.RadiusSquared = light.Light.Details.Radius * light.Light.Details.Radius;
+        constants.Radius = light.Light.Details.Radius;
+        constants.LookDirectionZ = lookDirectionZ;
     }
 }
