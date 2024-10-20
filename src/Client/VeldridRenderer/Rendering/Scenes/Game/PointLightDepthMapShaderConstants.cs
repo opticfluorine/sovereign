@@ -36,12 +36,7 @@ public struct PointLightDepthMapShaderConstants
     public float Radius;
 
     /// <summary>
-    ///     Z orientation of the current hemisphere. +1 for positive z, -1 for negative z.
+    ///     Transformation matrix for the light camera.
     /// </summary>
-    public int LookDirectionZ;
-
-    /// <summary>
-    ///     Reserved.
-    /// </summary>
-    public Vector2 Reserved;
+    public Matrix4x4 Transform;
 }

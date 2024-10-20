@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Numerics;
 using Sovereign.ClientCore.Rendering;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
@@ -23,6 +24,49 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 /// </summary>
 public class LightingShaderConstantsUpdater
 {
+    /// <summary>
+    ///     Transformation matrices that rotate the camera to give the correct orientation
+    ///     for each face of the cubemap.
+    /// </summary>
+    private static readonly Matrix4x4[] RotationMatrices =
+    {
+        // +X (0)
+        new(0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f),
+
+        // -X (1)
+        new(0.0f, 0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f),
+
+        // +Y (2)
+        new(1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f),
+
+        // -Y (3)
+        new(1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f),
+
+        // +Z (4)
+        new(1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f),
+
+        // -Z (5)
+        new(-1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, -1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f)
+    };
+
     private readonly GameResourceManager gameResMgr;
 
     public LightingShaderConstantsUpdater(GameResourceManager gameResMgr)
@@ -38,24 +82,38 @@ public class LightingShaderConstantsUpdater
     {
         for (var i = 0; i < renderPlan.LightCount; ++i)
         {
-            UpdateDepthMapConstants(ref gameResMgr.PointLightDepthMapUniformBuffer!.Buffer[2 * i],
-                ref renderPlan.Lights[i], 1);
-            UpdateDepthMapConstants(ref gameResMgr.PointLightDepthMapUniformBuffer!.Buffer[2 * i + 1],
-                ref renderPlan.Lights[i], -1);
+            UpdateConstantsForLight(i, ref renderPlan.Lights[i]);
         }
     }
 
     /// <summary>
-    ///     Updates shader constants for point light depth map.
+    ///     Updates the transformation matrices for each cube face for the given light.
     /// </summary>
-    /// <param name="constants">Shader constants to update.</param>
-    /// <param name="light">Point light.</param>
-    /// <param name="lookDirectionZ">Orientation of hemisphere along z axis (+1 or -1).</param>
-    private void UpdateDepthMapConstants(ref PointLightDepthMapShaderConstants constants, ref RenderLight light,
-        int lookDirectionZ)
+    /// <param name="index">Light index.</param>
+    /// <param name="light">Light.</param>
+    private void UpdateConstantsForLight(int index, ref RenderLight light)
     {
-        constants.LightPosition = light.Light.Position;
-        constants.Radius = light.Light.Details.Radius;
-        constants.LookDirectionZ = lookDirectionZ;
+        // World-projection matrix shared by all cube faces.
+        var invRadius = 1.0f / light.Light.Details.Radius;
+        var worldProjection = new Matrix4x4(
+            invRadius, 0.0f, 0.0f, 0.0f,
+            0.0f, -invRadius, 0.0f, 0.0f,
+            0.0f, 0.0f, invRadius, 1.0f,
+            0.0f, 0.0f, 0.0f, 0.0f
+        );
+
+        // Camera translation matrix shared by all cube faces.
+        var cameraTranslation = new Matrix4x4(
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            -light.Light.Position.X, -light.Light.Position.Y, -light.Light.Position.Z, 1.0f
+        );
+
+        // Update for each face.
+        for (var i = 0; i < 6; ++i)
+        {
+            var fullTransform = cameraTranslation * RotationMatrices[i] * worldProjection;
+        }
     }
 }

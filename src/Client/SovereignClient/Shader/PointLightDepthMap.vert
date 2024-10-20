@@ -27,35 +27,10 @@ layout (binding = 0) uniform ShaderConstants
 {
     vec3 g_lightPosition;  // Light position in world coordinates.
     float g_lightRadius;   // Light radius in world coordinates.
-    int g_lookDirectionZ;  // Direction along z axis in which current hemisphere is oriented.
-    vec2 g_reserved;       // Unused.
+    mat4 g_transform;      // Transformation matrix.
 };
 
-const float minL2 = 0.01;
-
 void main() {
-    // Find the z-normalized basis vector which is parallel to the vector
-    // from the light to the vertex. The (x,y) coordinates of this vector
-    // characterize a line extending from the light source to its radius.
-    // This is a nonlinear mapping of the triangle onto a sphere of unit
-    // radius centered on the light source; however, the perspective-correct
-    // interpolation will effectively ignore the depth information, instead
-    // (correctly) interpolating over a set of rays from the light which vary
-    // in density (but all of which intersect the triangle).
-    //
-    // The depth will be restored in the fragment shader from the above
-    // distance output. Here, a value of depth is chosen where the sign reflects
-    // which hemisphere the vertex belongs to, thereby ensuring that only vertices
-    // that lie within the current hemisphere will lie in the clip volume.
-
     distanceFromLight = position - g_lightPosition;
-
-    vec3 r2 = distanceFromLight * distanceFromLight;
-    float l2 = r2.x + r2.y + r2.z;
-    vec3 norm = l2 >= minL2 ? normalize(distanceFromLight) : vec3(0.0f, 0.0f, 1.0f);
-    vec2 ray = norm.xy / norm.z;
-
-    float z = g_lookDirectionZ * distanceFromLight.z / g_lightRadius;
-
-    gl_Position = vec4(ray, z, 1.0f);
+    gl_Position = g_transform * position;
 }

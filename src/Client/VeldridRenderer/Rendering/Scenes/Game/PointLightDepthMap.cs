@@ -42,7 +42,7 @@ public class PointLightDepthMap : IDisposable
     /// <summary>
     ///     Number of layers in the texture.
     /// </summary>
-    public const uint LayerCount = 2;
+    public const uint LayerCount = 6;
 
     /// <summary>
     ///     Framebuffers for rendering to the textures. Indexed by octant.
@@ -62,7 +62,7 @@ public class PointLightDepthMap : IDisposable
     public PointLightDepthMap(VeldridDevice device)
     {
         var textureDesc = TextureDescription.Texture2D(TextureSize, TextureSize, 1, LayerCount, PixelFormat.R32_Float,
-            TextureUsage.DepthStencil | TextureUsage.Sampled);
+            TextureUsage.DepthStencil | TextureUsage.Sampled | TextureUsage.Cubemap);
         Texture = device.Device!.ResourceFactory.CreateTexture(textureDesc);
 
         Framebuffers = new Framebuffer[LayerCount];

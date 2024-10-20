@@ -22,11 +22,11 @@ layout (location = 0) in vec3 distanceFromLight;
 layout (binding = 0) uniform ShaderConstants
 {
     vec3 g_lightPosition;
-    float g_lightRadiusSq;
-    vec3 g_reserved;
-} shaderConstants;
+    float g_lightRadius;
+    mat4 g_transform;
+};
 
 void main() {
     vec3 r2 = distanceFromLight * distanceFromLight;
-    gl_FragDepth = (r2.x + r2.y + r2.z) / shaderConstants.g_lightRadiusSq;
+    gl_FragDepth = (r2.x + r2.y + r2.z) / (g_lightRadius * g_lightRadius);
 }
