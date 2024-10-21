@@ -28,14 +28,12 @@ public class DynamicUniformBuffer<T> : IDisposable where T : struct
     private readonly uint alignment;
     private readonly byte[] buffer;
     private readonly IntPtr bufferBase;
-    private readonly DeviceBuffer deviceBuffer;
-    private readonly int sizeInT;
     private GCHandle gcHandle;
 
     public DynamicUniformBuffer(VeldridDevice device, int sizeInT)
     {
         // Compute alignments and allocate memory.
-        this.sizeInT = sizeInT;
+        Length = sizeInT;
         var tSize = (uint)Marshal.SizeOf<T>();
         var minAlignment = device.Device!.UniformBufferMinOffsetAlignment;
         alignment = (tSize / minAlignment + 1) * minAlignment;
@@ -47,26 +45,36 @@ public class DynamicUniformBuffer<T> : IDisposable where T : struct
         // Allocate device buffer.
         var desc = new BufferDescription((uint)buffer.Length,
             BufferUsage.Dynamic | BufferUsage.StructuredBufferReadOnly);
-        deviceBuffer = device.Device!.ResourceFactory.CreateBuffer(desc);
+        DeviceBuffer = device.Device!.ResourceFactory.CreateBuffer(desc);
     }
+
+    /// <summary>
+    ///     Device buffer.
+    /// </summary>
+    public DeviceBuffer DeviceBuffer { get; }
+
+    /// <summary>
+    ///     Length of the buffer.
+    /// </summary>
+    public int Length { get; }
 
     public T this[int i]
     {
         get
         {
-            if (i < 0 || i >= sizeInT) throw new IndexOutOfRangeException();
+            if (i < 0 || i >= Length) throw new IndexOutOfRangeException();
             return Marshal.PtrToStructure<T>(bufferBase + (IntPtr)(i * alignment));
         }
         set
         {
-            if (i < 0 || i >= sizeInT) throw new IndexOutOfRangeException();
+            if (i < 0 || i >= Length) throw new IndexOutOfRangeException();
             Marshal.StructureToPtr(value, bufferBase + (IntPtr)(i * alignment), false);
         }
     }
 
     public void Dispose()
     {
-        deviceBuffer.Dispose();
+        DeviceBuffer.Dispose();
         gcHandle.Free();
     }
 
@@ -78,7 +86,7 @@ public class DynamicUniformBuffer<T> : IDisposable where T : struct
     /// <exception cref="IndexOutOfRangeException">Thrown if position is out of bounds.</exception>
     public uint GetOffset(int i)
     {
-        if (i < 0 || i > sizeInT) throw new IndexOutOfRangeException();
+        if (i < 0 || i > Length) throw new IndexOutOfRangeException();
         return (uint)i * alignment;
     }
 
@@ -88,6 +96,6 @@ public class DynamicUniformBuffer<T> : IDisposable where T : struct
     /// <param name="commandList">Command list.</param>
     public void Update(CommandList commandList)
     {
-        commandList.UpdateBuffer(deviceBuffer, 0, buffer);
+        commandList.UpdateBuffer(DeviceBuffer, 0, buffer);
     }
 }

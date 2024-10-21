@@ -19,11 +19,10 @@
 
 layout (location = 0) in vec3 distanceFromLight;
 
-layout (binding = 0) uniform ShaderConstants
+layout (binding = 0) uniform PointLightShaderConstants
 {
     vec3 g_lightPosition;
     float g_lightRadius;
-    mat4 g_transform;
 };
 
 void main() {

@@ -23,10 +23,14 @@ layout (location = 2) in vec2 texCoord;
 
 layout (location = 0) out vec3 distanceFromLight;
 
-layout (binding = 0) uniform ShaderConstants
+layout (binding = 0) uniform PointLightShaderConstants
 {
     vec3 g_lightPosition;  // Light position in world coordinates.
     float g_lightRadius;   // Light radius in world coordinates.
+};
+
+layout (binding = 1) uniform PointLightDepthMapShaderConstants
+{
     mat4 g_transform;      // Transformation matrix.
 };
 

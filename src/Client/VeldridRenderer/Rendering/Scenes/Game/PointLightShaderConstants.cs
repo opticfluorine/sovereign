@@ -20,13 +20,18 @@ using System.Runtime.InteropServices;
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 
 /// <summary>
-///     Shader constants structure for point light depth maps.
+///     Shader constants for multiple point light related operations.
 /// </summary>
 [StructLayout(LayoutKind.Sequential, Pack = 4)]
-public struct PointLightDepthMapShaderConstants
+public struct PointLightShaderConstants
 {
     /// <summary>
-    ///     Transformation matrix for the light camera.
+    ///     Light center position in world coordinates.
     /// </summary>
-    public Matrix4x4 Transform;
+    public Vector3 LightPosition;
+
+    /// <summary>
+    ///     Radius of the light in world units.
+    /// </summary>
+    public float Radius;
 }

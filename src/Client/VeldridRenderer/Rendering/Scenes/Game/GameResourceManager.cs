@@ -200,7 +200,15 @@ public class GameResourceManager : IDisposable
     /// </summary>
     public List<PointLightDepthMap> PointLightDepthMaps { get; } = new();
 
-    public VeldridUpdateBuffer<PointLightDepthMapShaderConstants>? PointLightDepthMapUniformBuffer { get; private set; }
+    /// <summary>
+    ///     Structured buffer of point light constants.
+    /// </summary>
+    public DynamicUniformBuffer<PointLightShaderConstants>? PointLightBuffer { get; private set; }
+
+    /// <summary>
+    ///     Structured buffer of point light depth map constants.
+    /// </summary>
+    public DynamicUniformBuffer<PointLightDepthMapShaderConstants>? PointLightDepthMapBuffer { get; private set; }
 
     public void Dispose()
     {
@@ -209,7 +217,8 @@ public class GameResourceManager : IDisposable
             foreach (var depthMap in PointLightDepthMaps) depthMap.Dispose();
             if (PointLightDepthMapVertexShader.IsValueCreated) PointLightDepthMapVertexShader.Value.Dispose();
             if (PointLightDepthMapFragmentShader.IsValueCreated) PointLightDepthMapFragmentShader.Value.Dispose();
-            PointLightDepthMapUniformBuffer?.Dispose();
+            PointLightBuffer?.Dispose();
+            PointLightDepthMapBuffer?.Dispose();
             ShadowMapFramebuffer?.Dispose();
             ShadowMapTexture?.Dispose();
             BlockShadowFragmentShader?.Dispose();
@@ -242,8 +251,10 @@ public class GameResourceManager : IDisposable
             new VeldridUpdateBuffer<WorldFragmentShaderConstants>(device, BufferUsage.UniformBuffer, 1);
         BlockShadowVertexUniformBuffer = new VeldridUpdateBuffer<BlockShadowShaderConstants>(device,
             BufferUsage.UniformBuffer, 1);
-        PointLightDepthMapUniformBuffer = new VeldridUpdateBuffer<PointLightDepthMapShaderConstants>(device,
-            BufferUsage.UniformBuffer | BufferUsage.Dynamic, InitialLightBufferSize * 2);
+        PointLightBuffer = new DynamicUniformBuffer<PointLightShaderConstants>(device, InitialLightBufferSize);
+        PointLightDepthMapBuffer =
+            new DynamicUniformBuffer<PointLightDepthMapShaderConstants>(device,
+                (int)PointLightDepthMap.LayerCount * InitialLightBufferSize);
 
         RenderPlan = new RenderPlan(VertexBuffer.Buffer, SpriteIndexBuffer.Buffer, SolidIndexBuffer.Buffer,
             MaximumDraws);
@@ -264,7 +275,8 @@ public class GameResourceManager : IDisposable
         VertexUniformBuffer?.Update(commandList);
         FragmentUniformBuffer?.Update(commandList);
         BlockShadowVertexUniformBuffer?.Update(commandList);
-        PointLightDepthMapUniformBuffer?.Update(commandList);
+        PointLightBuffer?.Update(commandList);
+        PointLightDepthMapBuffer?.Update(commandList);
     }
 
     /// <summary>
@@ -276,13 +288,17 @@ public class GameResourceManager : IDisposable
         while (PointLightDepthMaps.Count < lightCount)
             PointLightDepthMaps.Add(new PointLightDepthMap(device));
 
-        if (PointLightDepthMapUniformBuffer!.Length < lightCount)
+        if (PointLightBuffer!.Length < lightCount)
         {
             var increment = InitialLightBufferSize * 2;
             var newSize = (lightCount / increment + 1) * increment;
-            PointLightDepthMapUniformBuffer?.Dispose();
-            PointLightDepthMapUniformBuffer = new VeldridUpdateBuffer<PointLightDepthMapShaderConstants>(device,
-                BufferUsage.UniformBuffer | BufferUsage.Dynamic, (uint)newSize);
+            PointLightBuffer.Dispose();
+            PointLightBuffer = new DynamicUniformBuffer<PointLightShaderConstants>(device, newSize);
+
+            var newSizeDepthMap = PointLightDepthMap.LayerCount * newSize;
+            PointLightDepthMapBuffer!.Dispose();
+            PointLightDepthMapBuffer =
+                new DynamicUniformBuffer<PointLightDepthMapShaderConstants>(device, (int)newSizeDepthMap);
         }
     }
 

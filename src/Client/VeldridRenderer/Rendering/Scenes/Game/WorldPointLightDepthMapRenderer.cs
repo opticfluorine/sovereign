@@ -25,8 +25,6 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 /// </summary>
 public class WorldPointLightDepthMapRenderer
 {
-    private readonly VeldridDevice device;
-
     private readonly uint[] dynamicOffset = new uint[1];
     private readonly GameResourceManager gameResMgr;
     private readonly LightingShaderConstantsUpdater lightingShaderConstantsUpdater;
@@ -37,30 +35,25 @@ public class WorldPointLightDepthMapRenderer
     private readonly Lazy<Pipeline> pipeline;
 
     /// <summary>
-    ///     Resource layout shared by all depth maps.
-    /// </summary>
-    private readonly Lazy<ResourceLayout> resourceLayout;
-
-    /// <summary>
     ///     Resource set shared by all depth maps.
     /// </summary>
     private readonly Lazy<ResourceSet> resourceSet;
-
-    private readonly WorldPipeline worldPipeline;
 
     public WorldPointLightDepthMapRenderer(GameResourceManager gameResMgr, VeldridDevice device,
         LightingShaderConstantsUpdater lightingShaderConstantsUpdater, WorldPipeline worldPipeline)
     {
         this.gameResMgr = gameResMgr;
-        this.device = device;
         this.lightingShaderConstantsUpdater = lightingShaderConstantsUpdater;
-        this.worldPipeline = worldPipeline;
 
-        resourceLayout = new Lazy<ResourceLayout>(() =>
+        Lazy<ResourceLayout> resourceLayout = new(() =>
         {
             var layoutDesc = new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("ShaderConstants", ResourceKind.UniformBuffer,
-                    ShaderStages.Vertex | ShaderStages.Fragment, ResourceLayoutElementOptions.DynamicBinding)
+                new ResourceLayoutElementDescription(nameof(PointLightShaderConstants),
+                    ResourceKind.StructuredBufferReadOnly,
+                    ShaderStages.Vertex | ShaderStages.Fragment, ResourceLayoutElementOptions.DynamicBinding),
+                new ResourceLayoutElementDescription(nameof(PointLightDepthMapShaderConstants),
+                    ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex,
+                    ResourceLayoutElementOptions.DynamicBinding)
             );
             return device.Device!.ResourceFactory.CreateResourceLayout(layoutDesc);
         });
@@ -68,7 +61,8 @@ public class WorldPointLightDepthMapRenderer
         resourceSet = new Lazy<ResourceSet>(() =>
         {
             var desc = new ResourceSetDescription(resourceLayout.Value,
-                gameResMgr.PointLightDepthMapUniformBuffer!.DeviceBuffer);
+                gameResMgr.PointLightBuffer!.DeviceBuffer,
+                gameResMgr.PointLightDepthMapBuffer!.DeviceBuffer);
             return device.Device!.ResourceFactory.CreateResourceSet(desc);
         });
 
