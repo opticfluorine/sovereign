@@ -80,10 +80,7 @@ public class LightingShaderConstantsUpdater
     /// <param name="renderPlan">Render plan.</param>
     public void UpdateConstants(RenderPlan renderPlan)
     {
-        for (var i = 0; i < renderPlan.LightCount; ++i)
-        {
-            UpdateConstantsForLight(i, ref renderPlan.Lights[i]);
-        }
+        for (var i = 0; i < renderPlan.LightCount; ++i) UpdateConstantsForLight(i, ref renderPlan.Lights[i]);
     }
 
     /// <summary>
@@ -93,6 +90,12 @@ public class LightingShaderConstantsUpdater
     /// <param name="light">Light.</param>
     private void UpdateConstantsForLight(int index, ref RenderLight light)
     {
+        gameResMgr.PointLightBuffer![index] = new PointLightShaderConstants
+        {
+            LightPosition = light.Light.Position,
+            Radius = light.Light.Details.Radius
+        };
+
         // World-projection matrix shared by all cube faces.
         var invRadius = 1.0f / light.Light.Details.Radius;
         var worldProjection = new Matrix4x4(
@@ -111,9 +114,11 @@ public class LightingShaderConstantsUpdater
         );
 
         // Update for each face.
-        for (var i = 0; i < 6; ++i)
-        {
-            var fullTransform = cameraTranslation * RotationMatrices[i] * worldProjection;
-        }
+        for (var i = 0; i < PointLightDepthMap.LayerCount; ++i)
+            gameResMgr.PointLightDepthMapBuffer![(int)PointLightDepthMap.LayerCount * index + i] =
+                new PointLightDepthMapShaderConstants
+                {
+                    Transform = cameraTranslation * RotationMatrices[i] * worldProjection
+                };
     }
 }

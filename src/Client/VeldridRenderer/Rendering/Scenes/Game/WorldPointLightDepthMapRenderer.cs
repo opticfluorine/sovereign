@@ -25,7 +25,7 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 /// </summary>
 public class WorldPointLightDepthMapRenderer
 {
-    private readonly uint[] dynamicOffset = new uint[1];
+    private readonly uint[] dynamicOffsets = new uint[2];
     private readonly GameResourceManager gameResMgr;
     private readonly LightingShaderConstantsUpdater lightingShaderConstantsUpdater;
 
@@ -113,11 +113,11 @@ public class WorldPointLightDepthMapRenderer
 
             for (var j = 0; j < PointLightDepthMap.LayerCount; ++j)
             {
-                // Need to fix the alignment of the dynamic uniform buffer.
-                //dynamicOffset[0] = (uint)((2 * i + j) * sizeof(PointLightDepthMapShaderConstants));
-                dynamicOffset[0] = 0;
+                dynamicOffsets[0] = gameResMgr.PointLightBuffer!.GetOffset(i);
+                dynamicOffsets[1] =
+                    gameResMgr.PointLightDepthMapBuffer!.GetOffset(i * (int)PointLightDepthMap.LayerCount + j);
                 commandList.PushDebugGroup("Point Light Depth Map");
-                commandList.SetGraphicsResourceSet(0, resourceSet.Value, dynamicOffset);
+                commandList.SetGraphicsResourceSet(0, resourceSet.Value, dynamicOffsets);
                 commandList.SetFramebuffer(depthMap.Framebuffers[j]);
                 commandList.ClearDepthStencil(1.0f);
                 commandList.DrawIndexed(light.IndexCount, 1, light.BaseIndex, 0, 0);
