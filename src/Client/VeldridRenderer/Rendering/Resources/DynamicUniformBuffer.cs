@@ -44,7 +44,7 @@ public class DynamicUniformBuffer<T> : IDisposable where T : struct
 
         // Allocate device buffer.
         var desc = new BufferDescription((uint)buffer.Length,
-            BufferUsage.Dynamic | BufferUsage.StructuredBufferReadOnly);
+            BufferUsage.Dynamic | BufferUsage.StructuredBufferReadOnly, alignment);
         DeviceBuffer = device.Device!.ResourceFactory.CreateBuffer(desc);
     }
 

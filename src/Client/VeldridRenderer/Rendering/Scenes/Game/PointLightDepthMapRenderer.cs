@@ -23,7 +23,7 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 /// <summary>
 ///     Sub-renderer responsible for drawing the point light depth maps.
 /// </summary>
-public class WorldPointLightDepthMapRenderer
+public class PointLightDepthMapRenderer
 {
     private readonly uint[] dynamicOffsets = new uint[2];
     private readonly GameResourceManager gameResMgr;
@@ -39,7 +39,7 @@ public class WorldPointLightDepthMapRenderer
     /// </summary>
     private readonly Lazy<ResourceSet> resourceSet;
 
-    public WorldPointLightDepthMapRenderer(GameResourceManager gameResMgr, VeldridDevice device,
+    public PointLightDepthMapRenderer(GameResourceManager gameResMgr, VeldridDevice device,
         LightingShaderConstantsUpdater lightingShaderConstantsUpdater, WorldPipeline worldPipeline)
     {
         this.gameResMgr = gameResMgr;

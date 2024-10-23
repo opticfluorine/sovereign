@@ -30,7 +30,7 @@ public class WorldRenderer : IDisposable
     private readonly VeldridDevice device;
     private readonly GameResourceManager gameResMgr;
     private readonly WorldPipeline pipeline;
-    private readonly WorldPointLightDepthMapRenderer pointLightDepthMapRenderer;
+    private readonly PointLightDepthMapRenderer pointLightDepthMapRenderer;
     private readonly VeldridResourceManager resMgr;
 
     /// <summary>
@@ -60,7 +60,7 @@ public class WorldRenderer : IDisposable
 
     public WorldRenderer(VeldridDevice device, WorldPipeline pipeline,
         VeldridResourceManager resMgr, GameResourceManager gameResMgr,
-        WorldPointLightDepthMapRenderer pointLightDepthMapRenderer)
+        PointLightDepthMapRenderer pointLightDepthMapRenderer)
     {
         this.device = device;
         this.pipeline = pipeline;

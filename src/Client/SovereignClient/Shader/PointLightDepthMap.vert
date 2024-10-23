@@ -36,5 +36,5 @@ layout (binding = 1) uniform PointLightDepthMapShaderConstants
 
 void main() {
     distanceFromLight = position - g_lightPosition;
-    gl_Position = g_transform * position;
+    gl_Position = g_transform * vec4(position, 1.0f);
 }

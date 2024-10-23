@@ -118,6 +118,9 @@ public class GameResourceManager : IDisposable
             };
             return device.Device!.ResourceFactory.CreateShader(desc);
         });
+
+        FullPointLightMap = new Lazy<VeldridTexture>(() => new VeldridTexture(device, (uint)device.DisplayMode!.Width,
+            (uint)device.DisplayMode!.Height, TexturePurpose.RenderTexture));
     }
 
     /// <summary>
@@ -199,6 +202,11 @@ public class GameResourceManager : IDisposable
     ///     Depth map texture sets for the point light sources.
     /// </summary>
     public List<PointLightDepthMap> PointLightDepthMaps { get; } = new();
+
+    /// <summary>
+    ///     Dynamic texture to hold per-layer point light maps.
+    /// </summary>
+    public Lazy<VeldridTexture> FullPointLightMap { get; }
 
     /// <summary>
     ///     Structured buffer of point light constants.

@@ -28,7 +28,13 @@ public enum TexturePurpose
     /// <summary>
     ///     Texture is intended to hold a depth buffer only.
     /// </summary>
-    DepthBuffer
+    DepthBuffer,
+
+    /// <summary>
+    ///     Texture is intended to hold color information, used as a render target,
+    ///     and used for sampling.
+    /// </summary>
+    RenderTexture
 }
 
 /// <summary>
@@ -140,11 +146,13 @@ public class VeldridTexture : IDisposable
 
         var format = purpose switch
         {
+            TexturePurpose.RenderTexture => device.Device!.SwapchainFramebuffer.ColorTargets[0].Target.Format,
             TexturePurpose.DepthBuffer => PixelFormat.R32_Float,
             _ => PixelFormat.B8_G8_R8_A8_UNorm
         };
         var usage = purpose switch
         {
+            TexturePurpose.RenderTexture => TextureUsage.Sampled | TextureUsage.RenderTarget,
             TexturePurpose.DepthBuffer => TextureUsage.DepthStencil | TextureUsage.Sampled,
             _ => TextureUsage.Storage | TextureUsage.Sampled
         };
