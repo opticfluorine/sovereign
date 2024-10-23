@@ -17,7 +17,11 @@
 
 #version 450
 
-layout (location = 0) in vec3 distanceFromLight;
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 velocity;
+layout (location = 2) in vec3 texCoord;
+
+layout (location = 0) out vec3 distanceToLight;
 
 layout (binding = 0) uniform PointLightShaderConstants
 {
@@ -25,7 +29,16 @@ layout (binding = 0) uniform PointLightShaderConstants
     float g_lightRadius;
 };
 
+layout (binding = 1) uniform WorldVertexShaderConstants
+{
+    mat4 g_transform;
+    mat4 g_shadowMapTransform;
+    float g_timeSinceTick;
+    vec3 g_reserved;
+};
+
 void main() {
-    float d2 = dot(distanceFromLight, distanceFromLight);
-    gl_FragDepth = d2 / (g_lightRadius * g_lightRadius);
+    vec3 interpolated = position + g_timeSinceTick * velocity;
+    distanceToLight = interpolated - g_lightPosition;
+    gl_Position = g_transform * vec4(interpolated, 1.0f);
 }
