@@ -26,12 +26,27 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 public struct PointLightShaderConstants
 {
     /// <summary>
+    ///     Model-view-projection matrix for light map.
+    /// </summary>
+    public Matrix4x4 LightTransform;
+
+    /// <summary>
     ///     Light center position in world coordinates.
     /// </summary>
     public Vector3 LightPosition;
 
     /// <summary>
+    ///     Light color.
+    /// </summary>
+    public Vector3 LightColor;
+
+    /// <summary>
     ///     Radius of the light in world units.
     /// </summary>
     public float Radius;
+
+    /// <summary>
+    ///     Light intensity.
+    /// </summary>
+    public float Intensity;
 }

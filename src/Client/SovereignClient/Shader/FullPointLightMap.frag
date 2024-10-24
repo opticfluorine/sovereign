@@ -17,11 +17,7 @@
 
 #version 450
 
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 velocity;
-layout (location = 2) in vec3 texCoord;
-
-layout (location = 0) out vec3 distanceFromLight;
+layout (location = 0) in vec3 distanceFromLight;
 
 layout (binding = 0) uniform PointLightShaderConstants
 {
@@ -32,8 +28,10 @@ layout (binding = 0) uniform PointLightShaderConstants
     float g_lightIntensity; // Light intensity.
 };
 
+const float r2_limit = 0.01f;  // cutoff point for small distances
+
 void main() {
-    vec3 interpolated = position + g_timeSinceTick * velocity;
-    distanceFromLight = position - g_lightPosition;
-    gl_Position = g_lightTransform * vec4(position, 1.0f);
+    float radius2 = g_lightRadius * g_lightRadius;
+    float normR2 = dot(distanceFromLight, distanceFromLight) / radius2;
+    float invr2 = 1.0f / max(normR2, r2_limit);
 }
