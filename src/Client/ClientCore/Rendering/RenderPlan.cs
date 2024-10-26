@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Numerics;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.ClientCore.Rendering.Scenes.Game.World;
 
@@ -199,6 +200,11 @@ public class RenderPlan
     ///     Number of point light sources in the render plan.
     /// </summary>
     public int LightCount => lightCount;
+
+    /// <summary>
+    ///     Camera position in world coordinates.
+    /// </summary>
+    public Vector3 CameraPosition { get; set; }
 
     /// <summary>
     ///     Resets the render plan for a new frame.

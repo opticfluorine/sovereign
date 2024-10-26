@@ -19,6 +19,8 @@
 
 layout (location = 0) in vec3 distanceFromLight;
 
+layout (location = 0) out vec4 colorOut;
+
 layout (binding = 0) uniform PointLightShaderConstants
 {
     mat4 g_lightTransform;  // Model-view-projection matrix for light map.
@@ -28,10 +30,21 @@ layout (binding = 0) uniform PointLightShaderConstants
     float g_lightIntensity; // Light intensity.
 };
 
+layout (binding = 1) uniform textureCube g_depthMap; // Depth map (cubemap).
+layout (binding = 2) uniform sampler g_sampler;      // Depth map sampler.
+
 const float r2_limit = 0.01f;  // cutoff point for small distances
+const float invr2_limit = 1.0f / r2_limit;  // inverse of r2_limit
 
 void main() {
+    // Compute inverse-square scaling function for light intensity.
     float radius2 = g_lightRadius * g_lightRadius;
     float normR2 = dot(distanceFromLight, distanceFromLight) / radius2;
-    float invr2 = 1.0f / max(normR2, r2_limit);
+    float scale = clamp(invr2_limit / max(normR2, r2_limit) - r2_limit,
+                        0.0f, 1.0f);
+
+    // Check depth map for this light and fragment.
+    float d = texture(samplerCubeShadow(g_depthMap, g_sampler), vec4(distanceFromLight, normR2));
+
+    colorOut = vec4(d * scale * g_lightIntensity * g_lightColor, 1.0f);
 }

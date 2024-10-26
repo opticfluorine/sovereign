@@ -39,6 +39,11 @@ public sealed class GameScene : IScene
     private readonly WorldVertexSequencer worldVertexSequencer;
 
     /// <summary>
+    ///     Camera position for frame.
+    /// </summary>
+    private Vector3 cameraPos = Vector3.Zero;
+
+    /// <summary>
     ///     System time of the current frame, in microseconds.
     /// </summary>
     private ulong systemTime;
@@ -68,6 +73,7 @@ public sealed class GameScene : IScene
     public void BeginScene()
     {
         ComputeTimes();
+        cameraPos = camera.Aim(timeSinceTick);
     }
 
     public void EndScene()
@@ -76,6 +82,9 @@ public sealed class GameScene : IScene
 
     public void BuildRenderPlan(RenderPlan renderPlan)
     {
+        // Global scene configuration.
+        renderPlan.CameraPosition = cameraPos;
+
         // Start by scheduling the shadow map render pass.
         renderPlan.PushDebugGroup("Shadow Maps");
         renderPlan.DrawBlockShadowMap();
@@ -91,7 +100,7 @@ public sealed class GameScene : IScene
     {
         widthInTiles = viewport.WidthInTiles;
         heightInTiles = viewport.HeightInTiles;
-        cameraPos = camera.Aim(this.timeSinceTick);
+        cameraPos = this.cameraPos;
         timeSinceTick = this.timeSinceTick;
         globalLightThetaRad = 0.2f;
         globalLightPhiRad = 0.02f;

@@ -119,6 +119,22 @@ public class GameResourceManager : IDisposable
             return device.Device!.ResourceFactory.CreateShader(desc);
         });
 
+        FullPointLightMapVertexShader = new Lazy<Shader>(() =>
+        {
+            var desc = new ShaderDescription(ShaderStages.Vertex,
+                device.LoadShaderBytes("FullPointLightMap.vert.spv"),
+                "main", true);
+            return device.Device!.ResourceFactory.CreateShader(desc);
+        });
+
+        FullPointLightMapFragmentShader = new Lazy<Shader>(() =>
+        {
+            var desc = new ShaderDescription(ShaderStages.Fragment,
+                device.LoadShaderBytes("FullPointLightMap.frag.spv"),
+                "main", true);
+            return device.Device!.ResourceFactory.CreateShader(desc);
+        });
+
         FullPointLightMap = new Lazy<VeldridTexture>(() => new VeldridTexture(device, (uint)device.DisplayMode!.Width,
             (uint)device.DisplayMode!.Height, TexturePurpose.RenderTexture));
     }
@@ -194,6 +210,16 @@ public class GameResourceManager : IDisposable
     public Lazy<Shader> PointLightDepthMapFragmentShader { get; }
 
     /// <summary>
+    ///     Vertex shader for the full point light map.
+    /// </summary>
+    public Lazy<Shader> FullPointLightMapVertexShader { get; }
+
+    /// <summary>
+    ///     Fragment shader for the full point light map.
+    /// </summary>
+    public Lazy<Shader> FullPointLightMapFragmentShader { get; }
+
+    /// <summary>
     ///     Veldrid texture used for holding the shadow map for each frame.
     /// </summary>
     public VeldridTexture? ShadowMapTexture { get; private set; }
@@ -225,6 +251,9 @@ public class GameResourceManager : IDisposable
             foreach (var depthMap in PointLightDepthMaps) depthMap.Dispose();
             if (PointLightDepthMapVertexShader.IsValueCreated) PointLightDepthMapVertexShader.Value.Dispose();
             if (PointLightDepthMapFragmentShader.IsValueCreated) PointLightDepthMapFragmentShader.Value.Dispose();
+            if (FullPointLightMapVertexShader.IsValueCreated) FullPointLightMapVertexShader.Value.Dispose();
+            if (FullPointLightMapFragmentShader.IsValueCreated) FullPointLightMapFragmentShader.Value.Dispose();
+            if (FullPointLightMap.IsValueCreated) FullPointLightMap.Value.Dispose();
             PointLightBuffer?.Dispose();
             PointLightDepthMapBuffer?.Dispose();
             ShadowMapFramebuffer?.Dispose();

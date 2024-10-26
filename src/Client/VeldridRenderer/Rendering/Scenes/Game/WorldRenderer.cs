@@ -28,6 +28,7 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 public class WorldRenderer : IDisposable
 {
     private readonly VeldridDevice device;
+    private readonly FullPointLightMapRenderer fullPointLightMapRenderer;
     private readonly GameResourceManager gameResMgr;
     private readonly WorldPipeline pipeline;
     private readonly PointLightDepthMapRenderer pointLightDepthMapRenderer;
@@ -44,11 +45,6 @@ public class WorldRenderer : IDisposable
     private Viewport blockShadowViewport;
 
     /// <summary>
-    ///     Current configuration state for the rendering pipeline.
-    /// </summary>
-    private PipelineConfiguration pipelineConfiguration = PipelineConfiguration.None;
-
-    /// <summary>
     ///     Bindable resource set used by the world renderer.
     /// </summary>
     private ResourceSet? resourceSet;
@@ -60,13 +56,14 @@ public class WorldRenderer : IDisposable
 
     public WorldRenderer(VeldridDevice device, WorldPipeline pipeline,
         VeldridResourceManager resMgr, GameResourceManager gameResMgr,
-        PointLightDepthMapRenderer pointLightDepthMapRenderer)
+        PointLightDepthMapRenderer pointLightDepthMapRenderer, FullPointLightMapRenderer fullPointLightMapRenderer)
     {
         this.device = device;
         this.pipeline = pipeline;
         this.resMgr = resMgr;
         this.gameResMgr = gameResMgr;
         this.pointLightDepthMapRenderer = pointLightDepthMapRenderer;
+        this.fullPointLightMapRenderer = fullPointLightMapRenderer;
     }
 
     public void Dispose()
@@ -126,7 +123,6 @@ public class WorldRenderer : IDisposable
 
         // Set pipeline and bind resources.
         commandList.SetVertexBuffer(0, gameResMgr.VertexBuffer.DeviceBuffer);
-        pipelineConfiguration = PipelineConfiguration.None;
 
         // Execute draw commands from the buffer.
         var commands = renderPlan.GetCommands();
@@ -136,13 +132,11 @@ public class WorldRenderer : IDisposable
             switch (command.RenderCommandType)
             {
                 case RenderCommandType.DrawSprites:
-                    if (pipelineConfiguration != PipelineConfiguration.Sprites) ConfigureSpritesPipeline(commandList);
-                    commandList.DrawIndexed(command.IndexCount, 1, command.BaseIndex, 0, 0);
+                    DrawSprites(commandList, command, renderPlan);
                     break;
 
                 case RenderCommandType.DrawGlobalShadowMap:
-                    if (pipelineConfiguration != PipelineConfiguration.ShadowMap)
-                        ConfigureShadowMapPipeline(commandList);
+                    ConfigureShadowMapPipeline(commandList);
                     commandList.ClearDepthStencil(0.0f);
                     commandList.DrawIndexed(renderPlan.GlobalSolidIndexCount);
                     break;
@@ -164,6 +158,21 @@ public class WorldRenderer : IDisposable
         commandList.PopDebugGroup();
     }
 
+    /// <summary>
+    ///     Draws a layer of sprites.
+    /// </summary>
+    /// <param name="commandList">Command list.</param>
+    /// <param name="command">Current draw command.</param>
+    /// <param name="renderPlan">Render plan.</param>
+    private void DrawSprites(CommandList commandList, RenderCommand command, RenderPlan renderPlan)
+    {
+        // Do early render passes for per-layer lighting, shadows, etc.
+        fullPointLightMapRenderer.Render(commandList, renderPlan);
+
+        // Final render pass for layer.
+        ConfigureSpritesPipeline(commandList);
+        commandList.DrawIndexed(command.IndexCount, 1, command.BaseIndex, 0, 0);
+    }
 
     /// <summary>
     ///     Configures the rendering pipeline to draw sprites.
@@ -175,8 +184,6 @@ public class WorldRenderer : IDisposable
         commandList.SetIndexBuffer(gameResMgr.SpriteIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
         commandList.SetGraphicsResourceSet(0, resourceSet);
         commandList.SetFramebuffer(device.Device!.SwapchainFramebuffer);
-
-        pipelineConfiguration = PipelineConfiguration.Sprites;
     }
 
     /// <summary>
@@ -189,8 +196,6 @@ public class WorldRenderer : IDisposable
         commandList.SetIndexBuffer(gameResMgr.SolidIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
         commandList.SetGraphicsResourceSet(0, blockShadowResourceSet);
         commandList.SetFramebuffer(gameResMgr.ShadowMapFramebuffer);
-
-        pipelineConfiguration = PipelineConfiguration.ShadowMap;
     }
 
     /// <summary>
@@ -274,26 +279,5 @@ public class WorldRenderer : IDisposable
             gameResMgr.BlockShadowVertexUniformBuffer.DeviceBuffer
         );
         blockShadowResourceSet = device.Device.ResourceFactory.CreateResourceSet(resSetDesc);
-    }
-
-    /// <summary>
-    ///     Render pipeline configuration states.
-    /// </summary>
-    private enum PipelineConfiguration
-    {
-        /// <summary>
-        ///     Not configured.
-        /// </summary>
-        None,
-
-        /// <summary>
-        ///     Pipeline is currently configured for sprite rendering.
-        /// </summary>
-        Sprites,
-
-        /// <summary>
-        ///     Pipeline is currently configured for shadow map rendering.
-        /// </summary>
-        ShadowMap
     }
 }

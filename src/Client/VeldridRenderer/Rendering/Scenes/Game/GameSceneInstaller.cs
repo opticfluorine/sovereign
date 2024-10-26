@@ -34,5 +34,6 @@ public class GameSceneInstaller : IWindsorInstaller
         container.Register(Component.For<WorldFragmentConstantsUpdater>().LifestyleSingleton());
         container.Register(Component.For<LightingShaderConstantsUpdater>().LifestyleSingleton());
         container.Register(Component.For<PointLightDepthMapRenderer>().LifestyleSingleton());
+        container.Register(Component.For<FullPointLightMapRenderer>().LifestyleSingleton());
     }
 }

@@ -34,11 +34,12 @@ public class FullPointLightMapRenderer : IDisposable
     private readonly GameResourceManager gameResMgr;
     private readonly uint[] offsets = new uint[1];
     private readonly Lazy<Pipeline> pipeline;
-    private readonly Lazy<ResourceSet> resourceSet;
-    private readonly List<Viewport> viewports = new();
+    private readonly Lazy<ResourceLayout> resourceLayout;
+    private readonly List<ResourceSet> resourceSets = new();
+    private readonly Lazy<Sampler> shadowSampler;
 
     public FullPointLightMapRenderer(VeldridDevice device, GameResourceManager gameResMgr,
-        DisplayViewport displayViewport)
+        DisplayViewport displayViewport, WorldPipeline worldPipeline)
     {
         this.device = device;
         this.gameResMgr = gameResMgr;
@@ -50,34 +51,41 @@ public class FullPointLightMapRenderer : IDisposable
             return device.Device!.ResourceFactory.CreateFramebuffer(desc);
         });
 
-        Lazy<ResourceLayout> resourceLayout = new(() =>
+        shadowSampler = new Lazy<Sampler>(() =>
+        {
+            var desc = new SamplerDescription(SamplerAddressMode.Clamp, SamplerAddressMode.Clamp,
+                SamplerAddressMode.Clamp,
+                SamplerFilter.MinLinear_MagLinear_MipLinear, ComparisonKind.LessEqual, 0, 1, 1,
+                0, SamplerBorderColor.OpaqueBlack);
+            return device.Device!.ResourceFactory.CreateSampler(desc);
+        });
+
+        resourceLayout = new Lazy<ResourceLayout>(() =>
         {
             var desc = new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription(nameof(PointLightShaderConstants),
                     ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex | ShaderStages.Fragment,
                     ResourceLayoutElementOptions.DynamicBinding),
-                new ResourceLayoutElementDescription(nameof(PointLightDepthMap), ResourceKind.TextureReadOnly,
-                    ShaderStages.Fragment)
+                new ResourceLayoutElementDescription("g_depthMap", ResourceKind.TextureReadOnly,
+                    ShaderStages.Fragment),
+                new ResourceLayoutElementDescription("g_sampler", ResourceKind.Sampler, ShaderStages.Fragment)
             );
             return device.Device!.ResourceFactory.CreateResourceLayout(desc);
-        });
-
-        resourceSet = new Lazy<ResourceSet>(() =>
-        {
-            var desc = new ResourceSetDescription(resourceLayout.Value,
-                gameResMgr.PointLightBuffer!.DeviceBuffer);
-            return device.Device!.ResourceFactory.CreateResourceSet(desc);
         });
 
         pipeline = new Lazy<Pipeline>(() =>
         {
             var desc = new GraphicsPipelineDescription(
-                BlendStateDescription.SingleAdditiveBlend,
+                new BlendStateDescription(RgbaFloat.Clear, false,
+                    new BlendAttachmentDescription(true,
+                        BlendFactor.One, BlendFactor.One, BlendFunction.Add, BlendFactor.One, BlendFactor.One,
+                        BlendFunction.Add)),
                 DepthStencilStateDescription.Disabled,
                 new RasterizerStateDescription(FaceCullMode.None, PolygonFillMode.Solid, FrontFace.Clockwise, false,
                     false),
                 PrimitiveTopology.TriangleList,
-                new ShaderSetDescription([], []),
+                new ShaderSetDescription([worldPipeline.GetVertexDescription()],
+                    [gameResMgr.FullPointLightMapVertexShader.Value, gameResMgr.FullPointLightMapFragmentShader.Value]),
                 resourceLayout.Value,
                 framebuffer.Value.OutputDescription);
             return device.Device!.ResourceFactory.CreateGraphicsPipeline(desc);
@@ -86,6 +94,11 @@ public class FullPointLightMapRenderer : IDisposable
 
     public void Dispose()
     {
+        foreach (var resourceSet in resourceSets) resourceSet.Dispose();
+        if (pipeline.IsValueCreated) pipeline.Value.Dispose();
+        if (resourceLayout.IsValueCreated) resourceLayout.Value.Dispose();
+        if (framebuffer.IsValueCreated) framebuffer.Value.Dispose();
+        if (shadowSampler.IsValueCreated) shadowSampler.Value.Dispose();
     }
 
     /// <summary>
@@ -93,8 +106,7 @@ public class FullPointLightMapRenderer : IDisposable
     /// </summary>
     /// <param name="commandList">Command list.</param>
     /// <param name="renderPlan">Render plan.</param>
-    /// <param name="cameraPos">Camera position.</param>
-    public void Render(CommandList commandList, RenderPlan renderPlan, Vector3 cameraPos)
+    public void Render(CommandList commandList, RenderPlan renderPlan)
     {
         commandList.SetFramebuffer(framebuffer.Value);
         commandList.SetPipeline(pipeline.Value);
@@ -104,9 +116,18 @@ public class FullPointLightMapRenderer : IDisposable
         {
             var light = renderPlan.Lights[i];
 
+            if (resourceSets.Count <= i)
+            {
+                var desc = new ResourceSetDescription(resourceLayout.Value,
+                    gameResMgr.PointLightBuffer!.DeviceBuffer,
+                    gameResMgr.PointLightDepthMaps[i].Texture,
+                    shadowSampler.Value);
+                resourceSets.Add(device.Device!.ResourceFactory.CreateResourceSet(desc));
+            }
+
             offsets[0] = gameResMgr.PointLightBuffer!.GetOffset(i);
-            commandList.SetGraphicsResourceSet(0, resourceSet.Value, offsets);
-            UpdateViewport(commandList, light, cameraPos);
+            commandList.SetGraphicsResourceSet(0, resourceSets[i], offsets);
+            UpdateViewport(commandList, light, renderPlan.CameraPosition);
         }
     }
 
