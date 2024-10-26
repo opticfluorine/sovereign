@@ -106,8 +106,10 @@ public class FullPointLightMapRenderer : IDisposable
     /// </summary>
     /// <param name="commandList">Command list.</param>
     /// <param name="renderPlan">Render plan.</param>
-    public void Render(CommandList commandList, RenderPlan renderPlan)
+    public void Render(CommandList commandList, RenderPlan renderPlan, RenderCommand command)
     {
+        commandList.PushDebugGroup("Light Map");
+
         commandList.SetFramebuffer(framebuffer.Value);
         commandList.SetPipeline(pipeline.Value);
         commandList.ClearColorTarget(0, RgbaFloat.Clear);
@@ -128,6 +130,10 @@ public class FullPointLightMapRenderer : IDisposable
             offsets[0] = gameResMgr.PointLightBuffer!.GetOffset(i);
             commandList.SetGraphicsResourceSet(0, resourceSets[i], offsets);
             UpdateViewport(commandList, light, renderPlan.CameraPosition);
+
+            commandList.DrawIndexed(command.IndexCount, 1, command.BaseIndex, 0, 0);
+
+            commandList.PopDebugGroup();
         }
     }
 

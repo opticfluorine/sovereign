@@ -167,7 +167,7 @@ public class WorldRenderer : IDisposable
     private void DrawSprites(CommandList commandList, RenderCommand command, RenderPlan renderPlan)
     {
         // Do early render passes for per-layer lighting, shadows, etc.
-        fullPointLightMapRenderer.Render(commandList, renderPlan);
+        fullPointLightMapRenderer.Render(commandList, renderPlan, command);
 
         // Final render pass for layer.
         ConfigureSpritesPipeline(commandList);
