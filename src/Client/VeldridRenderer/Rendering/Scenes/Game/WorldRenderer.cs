@@ -136,9 +136,7 @@ public class WorldRenderer : IDisposable
                     break;
 
                 case RenderCommandType.DrawGlobalShadowMap:
-                    ConfigureShadowMapPipeline(commandList);
-                    commandList.ClearDepthStencil(0.0f);
-                    commandList.DrawIndexed(renderPlan.GlobalSolidIndexCount);
+                    DrawGlobalShadowMap(commandList, renderPlan);
                     break;
 
                 case RenderCommandType.DrawPointLightShadowMaps:
@@ -159,6 +157,21 @@ public class WorldRenderer : IDisposable
     }
 
     /// <summary>
+    ///     Draws the global shadow map.
+    /// </summary>
+    /// <param name="commandList">Command list.</param>
+    /// <param name="renderPlan">Render plan.</param>
+    private void DrawGlobalShadowMap(CommandList commandList, RenderPlan renderPlan)
+    {
+        ConfigureShadowMapPipeline(commandList);
+        commandList.ClearDepthStencil(0.0f);
+        commandList.DrawIndexed(renderPlan.GlobalSolidIndexCount);
+
+        // Restore index buffer state when done.
+        commandList.SetIndexBuffer(gameResMgr.SpriteIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
+    }
+
+    /// <summary>
     ///     Draws a layer of sprites.
     /// </summary>
     /// <param name="commandList">Command list.</param>
@@ -170,8 +183,10 @@ public class WorldRenderer : IDisposable
         fullPointLightMapRenderer.Render(commandList, renderPlan, command);
 
         // Final render pass for layer.
+        commandList.PushDebugGroup("Sprites");
         ConfigureSpritesPipeline(commandList);
         commandList.DrawIndexed(command.IndexCount, 1, command.BaseIndex, 0, 0);
+        commandList.PopDebugGroup();
     }
 
     /// <summary>

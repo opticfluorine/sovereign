@@ -36,14 +36,14 @@ public struct PointLightShaderConstants
     public Vector3 LightPosition;
 
     /// <summary>
-    ///     Light color.
-    /// </summary>
-    public Vector3 LightColor;
-
-    /// <summary>
     ///     Radius of the light in world units.
     /// </summary>
     public float Radius;
+
+    /// <summary>
+    ///     Light color.
+    /// </summary>
+    public Vector3 LightColor;
 
     /// <summary>
     ///     Light intensity.

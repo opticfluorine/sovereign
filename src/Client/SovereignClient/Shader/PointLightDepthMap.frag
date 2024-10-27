@@ -21,8 +21,11 @@ layout (location = 0) in vec3 distanceFromLight;
 
 layout (binding = 0) uniform PointLightShaderConstants
 {
-    vec3 g_lightPosition;
-    float g_lightRadius;
+    mat4 g_lightTransform;  // Model-view-projection matrix for light map.
+    vec3 g_lightPosition;   // Light position in world coordinates.
+    float g_lightRadius;    // Light radius in world coordinates.
+    vec3 g_lightColor;      // Light color.
+    float g_lightIntensity; // Light intensity.
 };
 
 void main() {
