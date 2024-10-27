@@ -61,7 +61,7 @@ public class PointLightDepthMap : IDisposable
 
     public PointLightDepthMap(VeldridDevice device)
     {
-        var textureDesc = TextureDescription.Texture2D(TextureSize, TextureSize, 1, LayerCount, PixelFormat.R32_Float,
+        var textureDesc = TextureDescription.Texture2D(TextureSize, TextureSize, 1, 1, PixelFormat.R32_Float,
             TextureUsage.DepthStencil | TextureUsage.Sampled | TextureUsage.Cubemap);
         Texture = device.Device!.ResourceFactory.CreateTexture(textureDesc);
 

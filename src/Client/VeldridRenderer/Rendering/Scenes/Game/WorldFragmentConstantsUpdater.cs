@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Numerics;
 using Sovereign.ClientCore.Rendering.Scenes;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
@@ -24,11 +25,13 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 /// </summary>
 public class WorldFragmentConstantsUpdater
 {
+    private readonly VeldridDevice device;
     private readonly GameResourceManager gameResMgr;
 
-    public WorldFragmentConstantsUpdater(GameResourceManager gameResMgr)
+    public WorldFragmentConstantsUpdater(GameResourceManager gameResMgr, VeldridDevice device)
     {
         this.gameResMgr = gameResMgr;
+        this.device = device;
     }
 
     /// <summary>
@@ -45,5 +48,7 @@ public class WorldFragmentConstantsUpdater
         var buf = gameResMgr.FragmentUniformBuffer.Buffer;
         buf[0].AmbientLightColor = ambientLightColor;
         buf[0].GlobalLightColor = globalLightColor;
+        buf[0].ViewportSize = new Vector2(device.Device!.SwapchainFramebuffer.Width,
+            device.Device!.SwapchainFramebuffer.Height);
     }
 }

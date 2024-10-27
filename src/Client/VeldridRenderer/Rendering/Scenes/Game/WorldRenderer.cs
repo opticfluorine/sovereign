@@ -232,30 +232,37 @@ public class WorldRenderer : IDisposable
         resourceSet?.Dispose();
 
         var resLayoutDesc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
-            GameResourceManager.ResShaderConstants,
-            ResourceKind.UniformBuffer,
-            ShaderStages.Vertex
-        ), new ResourceLayoutElementDescription(
-            GameResourceManager.ResTextureAtlas,
-            ResourceKind.TextureReadOnly,
-            ShaderStages.Fragment
-        ), new ResourceLayoutElementDescription(
-            GameResourceManager.ResTextureAtlasSampler,
-            ResourceKind.Sampler,
-            ShaderStages.Fragment
-        ), new ResourceLayoutElementDescription(
-            GameResourceManager.ResShadowMapTexture,
-            ResourceKind.TextureReadOnly,
-            ShaderStages.Fragment
-        ), new ResourceLayoutElementDescription(
-            GameResourceManager.ResShadowMapTextureSampler,
-            ResourceKind.Sampler,
-            ShaderStages.Fragment
-        ), new ResourceLayoutElementDescription(
-            GameResourceManager.ResShaderConstants,
-            ResourceKind.UniformBuffer,
-            ShaderStages.Fragment
-        ));
+                GameResourceManager.ResShaderConstants,
+                ResourceKind.UniformBuffer,
+                ShaderStages.Vertex),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResTextureAtlas,
+                ResourceKind.TextureReadOnly,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResTextureAtlasSampler,
+                ResourceKind.Sampler,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResShadowMapTexture,
+                ResourceKind.TextureReadOnly,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResShadowMapTextureSampler,
+                ResourceKind.Sampler,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResLightMapTexture,
+                ResourceKind.TextureReadOnly,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResLightMapTextureSampler,
+                ResourceKind.Sampler,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResShaderConstants,
+                ResourceKind.UniformBuffer,
+                ShaderStages.Fragment));
         var resLayout = device.Device.ResourceFactory.CreateResourceLayout(resLayoutDesc);
 
         var resSetDesc = new ResourceSetDescription(
@@ -264,6 +271,8 @@ public class WorldRenderer : IDisposable
             resMgr.AtlasTexture.TextureView,
             device.Device.PointSampler,
             gameResMgr.ShadowMapTexture.TextureView,
+            device.Device.LinearSampler,
+            gameResMgr.FullPointLightMap.Value.TextureView,
             device.Device.LinearSampler,
             gameResMgr.FragmentUniformBuffer.DeviceBuffer
         );

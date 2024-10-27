@@ -204,31 +204,39 @@ public class WorldPipeline : IDisposable
         if (device.Device == null)
             throw new InvalidOperationException("Device not ready.");
 
-        var desc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
-            GameResourceManager.ResShaderConstants,
-            ResourceKind.UniformBuffer,
-            ShaderStages.Vertex
-        ), new ResourceLayoutElementDescription(
-            GameResourceManager.ResTextureAtlas,
-            ResourceKind.TextureReadOnly,
-            ShaderStages.Fragment
-        ), new ResourceLayoutElementDescription(
-            GameResourceManager.ResTextureAtlasSampler,
-            ResourceKind.Sampler,
-            ShaderStages.Fragment
-        ), new ResourceLayoutElementDescription(
-            GameResourceManager.ResShadowMapTexture,
-            ResourceKind.TextureReadOnly,
-            ShaderStages.Fragment
-        ), new ResourceLayoutElementDescription(
-            GameResourceManager.ResShadowMapTextureSampler,
-            ResourceKind.Sampler,
-            ShaderStages.Fragment
-        ), new ResourceLayoutElementDescription(
-            GameResourceManager.ResShaderConstants,
-            ResourceKind.UniformBuffer,
-            ShaderStages.Fragment
-        ));
+        var desc = new ResourceLayoutDescription(
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResShaderConstants,
+                ResourceKind.UniformBuffer,
+                ShaderStages.Vertex),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResTextureAtlas,
+                ResourceKind.TextureReadOnly,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResTextureAtlasSampler,
+                ResourceKind.Sampler,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResShadowMapTexture,
+                ResourceKind.TextureReadOnly,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResShadowMapTextureSampler,
+                ResourceKind.Sampler,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResLightMapTexture,
+                ResourceKind.TextureReadOnly,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResLightMapTextureSampler,
+                ResourceKind.Sampler,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResShaderConstants,
+                ResourceKind.UniformBuffer,
+                ShaderStages.Fragment));
         return device.Device.ResourceFactory.CreateResourceLayout(desc);
     }
 

@@ -84,6 +84,16 @@ public class GameResourceManager : IDisposable
     /// </summary>
     public const string ResShadowMapTextureSampler = "g_shadowMapSampler";
 
+    /// <summary>
+    ///     Resource name for the light map.
+    /// </summary>
+    public const string ResLightMapTexture = "g_lightMap";
+
+    /// <summary>
+    ///     Resource name for the light map sampler.
+    /// </summary>
+    public const string ResLightMapTextureSampler = "g_lightMapSampler";
+
     private readonly VeldridDevice device;
 
     /// <summary>

@@ -34,4 +34,14 @@ public struct WorldFragmentShaderConstants
     ///     Global light color (e.g. sun, moon).
     /// </summary>
     public Vector4 GlobalLightColor;
+
+    /// <summary>
+    ///     Viewport size in pixels.
+    /// </summary>
+    public Vector2 ViewportSize;
+
+    /// <summary>
+    ///     Unused.
+    /// </summary>
+    public Vector2 Unused;
 }

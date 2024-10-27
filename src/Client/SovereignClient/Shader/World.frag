@@ -20,6 +20,7 @@
 layout (location = 0) in vec2 texCoord;
 layout (location = 1) in vec4 color;
 layout (location = 2) in vec4 shadowPosition;
+layout (origin_upper_left) in vec4 gl_FragCoord;
 
 layout (location = 0) out vec4 colorOut;
 
@@ -27,11 +28,15 @@ layout (set = 0, binding = 1) uniform texture2D g_textureAtlas;
 layout (set = 0, binding = 2) uniform sampler g_textureAtlasSampler;
 layout (set = 0, binding = 3) uniform texture2D g_shadowMap;
 layout (set = 0, binding = 4) uniform sampler g_shadowMapSampler;
-layout (set = 0, binding = 5) uniform ShaderConstants
+layout (set = 0, binding = 5) uniform texture2D g_lightMap;
+layout (set = 0, binding = 6) uniform sampler g_lightMapSampler;
+layout (set = 0, binding = 7) uniform ShaderConstants
 {
-    vec4 ambientLightColor; /* ambient light color; appears in shadows */
-    vec4 globalLightColor;  /* global light color (e.g. sun, moon) */
-} g_shaderConstants;
+    vec4 g_ambientLightColor; /* ambient light color; appears in shadows */
+    vec4 g_globalLightColor;  /* global light color (e.g. sun, moon) */
+    vec2 g_viewportSize;      /* viewport size in pixels */
+    vec2 g_unused;            /* unused */
+};
 
 void main()
 {
@@ -40,9 +45,11 @@ void main()
     float shadowDepth = texture(sampler2D(g_shadowMap, g_shadowMapSampler), shadowTexCoord).r;
 
     // Determine base lighting color from ambient and global lights.
-    vec4 baseColor = shadowPosition.z >= shadowDepth - 0.01f ? g_shaderConstants.globalLightColor
-    : g_shaderConstants.ambientLightColor;
+    vec2 lightMapCoord = gl_FragCoord.xy / g_viewportSize;
+    vec4 pointColor = texture(sampler2D(g_lightMap, g_lightMapSampler), lightMapCoord);
+    vec4 baseColor = shadowPosition.z >= shadowDepth - 0.01f ? g_globalLightColor : g_ambientLightColor;
+    vec4 fullColor = color * (baseColor + pointColor);
 
     // Blend everything to a final color.
-    colorOut = baseColor * color * texture(sampler2D(g_textureAtlas, g_textureAtlasSampler), texCoord);
+    colorOut = fullColor * texture(sampler2D(g_textureAtlas, g_textureAtlasSampler), texCoord);
 }

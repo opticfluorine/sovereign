@@ -34,6 +34,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Content Update="Data\Shader\*"/>
+        <UpToDateCheckInput Include="@(Content);@(None)"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <Folder Include="Contrib\win-x64\"/>
     </ItemGroup>
 
