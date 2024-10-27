@@ -306,6 +306,7 @@ public class GameResourceManager : IDisposable
     /// <param name="commandList">Active command list.</param>
     public void UpdateBuffers(CommandList commandList)
     {
+        commandList.PushDebugGroup("Buffer Updates");
         VertexBuffer?.Update(commandList);
         SpriteIndexBuffer?.Update(commandList);
         SolidIndexBuffer?.Update(commandList);
@@ -314,6 +315,7 @@ public class GameResourceManager : IDisposable
         BlockShadowVertexUniformBuffer?.Update(commandList);
         PointLightBuffer?.Update(commandList);
         PointLightDepthMapBuffer?.Update(commandList);
+        commandList.PopDebugGroup();
     }
 
     /// <summary>

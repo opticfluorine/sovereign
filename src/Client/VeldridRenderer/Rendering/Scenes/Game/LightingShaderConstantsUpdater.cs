@@ -92,7 +92,7 @@ public class LightingShaderConstantsUpdater
     {
         ref var light = ref renderPlan.Lights[index];
         var radius = light.Light.Details.Radius;
-        var cameraPos = renderPlan.CameraPosition;
+        var pos = light.Light.Position;
         gameResMgr.PointLightBuffer![index] = new PointLightShaderConstants
         {
             LightPosition = light.Light.Position,
@@ -103,7 +103,7 @@ public class LightingShaderConstantsUpdater
                 1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, -1.0f, 0.0f, 0.0f,
                 0.0f, -1.0f, 0.5f * (1.0f + radius), 0.0f,
-                -cameraPos.X, cameraPos.Y + cameraPos.Z, 0.5f * (1.0f - cameraPos.Z), radius)
+                -pos.X, pos.Y + pos.Z, 0.5f * (1.0f - pos.Z), radius)
         };
 
         // World-projection matrix shared by all cube faces.
