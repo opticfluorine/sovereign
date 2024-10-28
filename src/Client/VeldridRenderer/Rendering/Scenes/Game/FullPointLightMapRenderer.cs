@@ -151,11 +151,17 @@ public class FullPointLightMapRenderer : IDisposable
         var lightRelativePos = light.Light.Position - cameraPos;
         var radius = light.Light.Details.Radius;
         var tileWidth = configManager.ClientConfiguration.TileWidth;
-        var width = 2.0f * radius * tileWidth;
-        var x = 2.0f * (lightRelativePos.X - radius) / displayViewport.WidthInTiles * tileWidth +
-                0.5f * device.DisplayMode!.Width;
-        var y = 2.0f * (lightRelativePos.Y - radius) / displayViewport.HeightInTiles * tileWidth +
-                0.5f * device.DisplayMode!.Height;
+        var scaleX = (float)device.DisplayMode!.Width / displayViewport.Width;
+        var scaleY = (float)device.DisplayMode!.Height / displayViewport.Height;
+
+        var width = 2.0f * radius * tileWidth * scaleX;
+        var height = 2.0f * radius * tileWidth * scaleY;
+
+        var lightX = lightRelativePos.X * tileWidth * scaleX + 0.5f * device.DisplayMode!.Width;
+        var lightY = lightRelativePos.Y * tileWidth * scaleY + 0.5f * device.DisplayMode!.Height;
+
+        var x = lightX - radius * tileWidth * scaleX;
+        var y = lightY - radius * tileWidth * scaleY;
 
         commandList.SetViewport(0, new Viewport(x, y, width, width, 0.0f, 1.0f));
     }
