@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Veldrid;
@@ -28,6 +29,7 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 /// </summary>
 public class FullPointLightMapRenderer : IDisposable
 {
+    private readonly ClientConfigurationManager configManager;
     private readonly VeldridDevice device;
     private readonly DisplayViewport displayViewport;
     private readonly Lazy<Framebuffer> framebuffer;
@@ -39,11 +41,12 @@ public class FullPointLightMapRenderer : IDisposable
     private readonly Lazy<Sampler> shadowSampler;
 
     public FullPointLightMapRenderer(VeldridDevice device, GameResourceManager gameResMgr,
-        DisplayViewport displayViewport, WorldPipeline worldPipeline)
+        DisplayViewport displayViewport, WorldPipeline worldPipeline, ClientConfigurationManager configManager)
     {
         this.device = device;
         this.gameResMgr = gameResMgr;
         this.displayViewport = displayViewport;
+        this.configManager = configManager;
 
         framebuffer = new Lazy<Framebuffer>(() =>
         {
@@ -146,12 +149,14 @@ public class FullPointLightMapRenderer : IDisposable
     private void UpdateViewport(CommandList commandList, RenderLight light, Vector3 cameraPos)
     {
         var lightRelativePos = light.Light.Position - cameraPos;
-        var halfRadius = 0.5f * light.Light.Details.Radius;
-        var x = ((lightRelativePos.X - halfRadius) / displayViewport.WidthInTiles + 0.5f) * device.DisplayMode!.Width;
-        var y = ((lightRelativePos.Y - halfRadius) / displayViewport.HeightInTiles + 0.5f) * device.DisplayMode!.Height;
-        var width = light.Light.Details.Radius / displayViewport.WidthInTiles * device.DisplayMode!.Width;
-        var height = light.Light.Details.Radius / displayViewport.HeightInTiles * device.DisplayMode!.Height;
+        var radius = light.Light.Details.Radius;
+        var tileWidth = configManager.ClientConfiguration.TileWidth;
+        var width = 2.0f * radius * tileWidth;
+        var x = 2.0f * (lightRelativePos.X - radius) / displayViewport.WidthInTiles * tileWidth +
+                0.5f * device.DisplayMode!.Width;
+        var y = 2.0f * (lightRelativePos.Y - radius) / displayViewport.HeightInTiles * tileWidth +
+                0.5f * device.DisplayMode!.Height;
 
-        commandList.SetViewport(0, new Viewport(x, y, width, height, 0.0f, 1.0f));
+        commandList.SetViewport(0, new Viewport(x, y, width, width, 0.0f, 1.0f));
     }
 }
