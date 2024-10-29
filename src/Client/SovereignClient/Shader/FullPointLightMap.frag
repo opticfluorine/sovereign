@@ -36,6 +36,8 @@ layout (binding = 2) uniform sampler g_sampler;      // Depth map sampler.
 const float r2_limit = 0.01f;  // cutoff point for small distances
 const float invr2_limit = 1.0f / r2_limit;  // inverse of r2_limit
 
+const float depthBias = 0.99f;
+
 void main() {
     // Compute inverse-square scaling function for light intensity.
     float radius2 = g_lightRadius * g_lightRadius;
@@ -44,7 +46,7 @@ void main() {
                         0.0f, 1.0f);
 
     // Check depth map for this light and fragment.
-    float d = texture(samplerCubeShadow(g_depthMap, g_sampler), vec4(distanceFromLight, normR2));
+    float d = texture(samplerCubeShadow(g_depthMap, g_sampler), vec4(distanceFromLight, depthBias * normR2));
 
     colorOut = vec4(d * scale * g_lightIntensity * g_lightColor, 1.0f);
 }

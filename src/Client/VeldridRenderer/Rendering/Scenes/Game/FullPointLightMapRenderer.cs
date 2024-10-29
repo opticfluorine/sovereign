@@ -163,6 +163,6 @@ public class FullPointLightMapRenderer : IDisposable
         var x = lightX - radius * tileWidth * scaleX;
         var y = lightY - radius * tileWidth * scaleY;
 
-        commandList.SetViewport(0, new Viewport(x, y, width, width, 0.0f, 1.0f));
+        commandList.SetViewport(0, new Viewport(x, y, width, height, 0.0f, 1.0f));
     }
 }
