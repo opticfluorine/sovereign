@@ -43,8 +43,7 @@ public class DynamicUniformBuffer<T> : IDisposable where T : struct
         bufferBase = gcHandle.AddrOfPinnedObject();
 
         // Allocate device buffer.
-        var desc = new BufferDescription((uint)buffer.Length,
-            BufferUsage.Dynamic | BufferUsage.StructuredBufferReadOnly, alignment);
+        var desc = new BufferDescription((uint)buffer.Length, BufferUsage.Dynamic | BufferUsage.UniformBuffer);
         DeviceBuffer = device.Device!.ResourceFactory.CreateBuffer(desc);
     }
 

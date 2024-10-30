@@ -49,10 +49,10 @@ public class PointLightDepthMapRenderer
         {
             var layoutDesc = new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription(nameof(PointLightShaderConstants),
-                    ResourceKind.StructuredBufferReadOnly,
+                    ResourceKind.UniformBuffer,
                     ShaderStages.Vertex | ShaderStages.Fragment, ResourceLayoutElementOptions.DynamicBinding),
                 new ResourceLayoutElementDescription(nameof(PointLightDepthMapShaderConstants),
-                    ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex,
+                    ResourceKind.UniformBuffer, ShaderStages.Vertex,
                     ResourceLayoutElementOptions.DynamicBinding)
             );
             return device.Device!.ResourceFactory.CreateResourceLayout(layoutDesc);

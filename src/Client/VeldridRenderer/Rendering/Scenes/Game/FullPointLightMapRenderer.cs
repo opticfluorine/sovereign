@@ -67,7 +67,7 @@ public class FullPointLightMapRenderer : IDisposable
         {
             var desc = new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription(nameof(PointLightShaderConstants),
-                    ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex | ShaderStages.Fragment,
+                    ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment,
                     ResourceLayoutElementOptions.DynamicBinding),
                 new ResourceLayoutElementDescription("g_depthMap", ResourceKind.TextureReadOnly,
                     ShaderStages.Fragment),
