@@ -93,17 +93,21 @@ public class WorldPipeline : IDisposable
         return new VertexLayoutDescription(
             gameResMgr.VertexBuffer!.ElementSize,
             new VertexElementDescription(
-                "vPosition",
+                "position",
                 VertexElementFormat.Float3,
                 VertexElementSemantic.Position
             ), new VertexElementDescription(
-                "vVelocity",
+                "velocity",
                 VertexElementFormat.Float3,
                 VertexElementSemantic.Position
             ), new VertexElementDescription(
-                "vTexCoord",
+                "texCoord",
                 VertexElementFormat.Float2,
                 VertexElementSemantic.TextureCoordinate
+            ), new VertexElementDescription(
+                "lightFactor",
+                VertexElementFormat.Float1,
+                VertexElementSemantic.Color
             ));
     }
 

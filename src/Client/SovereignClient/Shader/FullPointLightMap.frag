@@ -52,6 +52,5 @@ void main() {
     //float d = texture(samplerCubeShadow(g_depthMap, g_sampler), vec4(distanceFromLight, depthBias * normR2));
     float d = 1.0f;
 
-    //colorOut = vec4(d * scale * g_lightIntensity * g_lightColor, 1.0f);
-    colorOut = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    colorOut = vec4(d * scale * g_lightIntensity * g_lightColor, 1.0f);
 }

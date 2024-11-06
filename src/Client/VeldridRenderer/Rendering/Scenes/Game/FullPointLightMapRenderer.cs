@@ -69,6 +69,8 @@ public class FullPointLightMapRenderer : IDisposable
                 new ResourceLayoutElementDescription(nameof(PointLightShaderConstants),
                     ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment,
                     ResourceLayoutElementOptions.DynamicBinding),
+                new ResourceLayoutElementDescription(nameof(WorldVertexShaderConstants), ResourceKind.UniformBuffer,
+                    ShaderStages.Vertex),
                 new ResourceLayoutElementDescription("g_depthMap", ResourceKind.TextureReadOnly,
                     ShaderStages.Fragment),
                 new ResourceLayoutElementDescription("g_sampler", ResourceKind.Sampler, ShaderStages.Fragment)
@@ -125,6 +127,7 @@ public class FullPointLightMapRenderer : IDisposable
             {
                 var desc = new ResourceSetDescription(resourceLayout.Value,
                     gameResMgr.PointLightBuffer!.DeviceBuffer,
+                    gameResMgr.VertexUniformBuffer!.DeviceBuffer,
                     gameResMgr.PointLightDepthMaps[i].Texture,
                     shadowSampler.Value);
                 resourceSets.Add(device.Device!.ResourceFactory.CreateResourceSet(desc));

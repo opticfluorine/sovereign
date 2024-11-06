@@ -118,7 +118,7 @@ public class GuiResourceManager : IDisposable
         GuiIndexBuffer = new VeldridUpdateBuffer<ushort>(device,
             BufferUsage.IndexBuffer | BufferUsage.Dynamic, GuiIndexBufferSize);
         GuiUniformBuffer = new VeldridUpdateBuffer<GuiVertexShaderConstants>(device,
-            BufferUsage.Dynamic | BufferUsage.UniformBuffer, GuiUniformBufferSize, true);
+            BufferUsage.UniformBuffer, GuiUniformBufferSize, true);
     }
 
     public void EndFrame()

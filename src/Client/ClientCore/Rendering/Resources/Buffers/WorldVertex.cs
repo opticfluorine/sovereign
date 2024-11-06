@@ -35,4 +35,6 @@ public struct WorldVertex
 
     [FieldOffset(6 * sizeof(float))] public float TexX;
     [FieldOffset(7 * sizeof(float))] public float TexY;
+
+    [FieldOffset(8 * sizeof(float))] public float LightFactor;
 }

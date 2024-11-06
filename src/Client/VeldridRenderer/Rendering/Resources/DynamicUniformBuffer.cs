@@ -36,14 +36,15 @@ public class DynamicUniformBuffer<T> : IDisposable where T : struct
         Length = sizeInT;
         var tSize = (uint)Marshal.SizeOf<T>();
         var minAlignment = device.Device!.UniformBufferMinOffsetAlignment;
-        alignment = (tSize / minAlignment + 1) * minAlignment;
+        alignment = (tSize + minAlignment - 1) & ~(minAlignment - 1);
 
         buffer = new byte[sizeInT * alignment];
         gcHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
         bufferBase = gcHandle.AddrOfPinnedObject();
 
         // Allocate device buffer.
-        var desc = new BufferDescription((uint)buffer.Length, BufferUsage.Dynamic | BufferUsage.UniformBuffer);
+        var desc = new BufferDescription((uint)buffer.Length, BufferUsage.Dynamic | BufferUsage.UniformBuffer,
+            alignment);
         DeviceBuffer = device.Device!.ResourceFactory.CreateBuffer(desc);
     }
 
