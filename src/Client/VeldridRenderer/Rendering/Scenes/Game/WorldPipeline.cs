@@ -172,25 +172,9 @@ public class WorldPipeline : IDisposable
         if (gameResMgr.VertexBuffer == null)
             throw new InvalidOperationException("Vertex buffer not ready.");
 
-        var vertexDesc = new VertexLayoutDescription(
-            gameResMgr.VertexBuffer.ElementSize,
-            new VertexElementDescription(
-                "vPosition",
-                VertexElementFormat.Float3,
-                VertexElementSemantic.Position
-            ), new VertexElementDescription(
-                "vVelocity",
-                VertexElementFormat.Float3,
-                VertexElementSemantic.Position
-            ), new VertexElementDescription(
-                "vTexCoord",
-                VertexElementFormat.Float2,
-                VertexElementSemantic.TextureCoordinate
-            ));
-
         // Create the shader set.
         return new ShaderSetDescription(
-            new[] { vertexDesc },
+            new[] { GetVertexDescription() },
             new[]
             {
                 gameResMgr.BlockShadowVertexShader,

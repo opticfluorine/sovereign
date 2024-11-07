@@ -18,6 +18,7 @@
 #version 450
 
 layout (location = 0) in vec3 distanceFromLight;
+layout (location = 1) flat in float lightFactor;
 
 layout (location = 0) out vec4 colorOut;
 
@@ -52,5 +53,5 @@ void main() {
     //float d = texture(samplerCubeShadow(g_depthMap, g_sampler), vec4(distanceFromLight, depthBias * normR2));
     float d = 1.0f;
 
-    colorOut = vec4(d * scale * g_lightIntensity * g_lightColor, 1.0f);
+    colorOut = lightFactor * vec4(d * scale * g_lightIntensity * g_lightColor, 1.0f);
 }

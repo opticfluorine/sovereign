@@ -227,7 +227,7 @@ public sealed class WorldEntityRetriever
 
         var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
         var sprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(systemTime, orientation);
-        grouper.AddSprite(EntityType.NonBlock, entityKinematics.Position, entityKinematics.Velocity, sprite);
+        grouper.AddSprite(EntityType.NonBlock, entityKinematics.Position, entityKinematics.Velocity, sprite, 1.0f);
     }
 
     /// <summary>
@@ -241,12 +241,15 @@ public sealed class WorldEntityRetriever
         var blockPosition = blockPositions[entityId];
         var facePosition = (Vector3)(blockPosition with { Y = blockPosition.Y - 1 });
         var animatedSpriteIds = blockSpriteCache.GetFrontFaceAnimatedSpriteIds(entityId);
+        var firstLayer = true;
         foreach (var animatedSpriteId in animatedSpriteIds)
         {
             var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)
                 .GetSpriteForTime(systemTime, Orientation.South);
-            grouper.AddSprite(EntityType.BlockFrontFace, facePosition, Vector3.Zero, sprite);
+            grouper.AddSprite(EntityType.BlockFrontFace, facePosition, Vector3.Zero, sprite,
+                firstLayer ? 1.0f : 0.0f);
             isOpaque = isOpaque || sprite.Opaque;
+            firstLayer = false;
         }
     }
 
@@ -260,12 +263,15 @@ public sealed class WorldEntityRetriever
 
         var blockPosition = (Vector3)blockPositions[entityId];
         var animatedSpriteIds = blockSpriteCache.GetTopFaceAnimatedSpriteIds(entityId);
+        var firstLayer = true;
         foreach (var animatedSpriteId in animatedSpriteIds)
         {
             var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)
                 .GetSpriteForTime(systemTime, Orientation.South);
-            grouper.AddSprite(EntityType.BlockTopFace, blockPosition, Vector3.Zero, sprite);
+            grouper.AddSprite(EntityType.BlockTopFace, blockPosition, Vector3.Zero, sprite,
+                firstLayer ? 1.0f : 0.0f);
             isOpaque = isOpaque || sprite.Opaque;
+            firstLayer = false;
         }
     }
 

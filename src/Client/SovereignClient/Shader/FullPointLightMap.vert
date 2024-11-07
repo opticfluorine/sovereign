@@ -20,8 +20,10 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 velocity;
 layout (location = 2) in vec3 texCoord;
+layout (location = 3) in float lightFactor;
 
 layout (location = 0) out vec3 distanceFromLight;
+layout (location = 1) out float lightFactor_out;
 
 layout (binding = 0) uniform PointLightShaderConstants
 {
@@ -45,5 +47,6 @@ layout (binding = 1) uniform WorldVertexShaderConstants
 void main() {
     vec3 interpolated = position + g_timeSinceTick * velocity;
     distanceFromLight = g_lightPosition - interpolated;
+    lightFactor_out = lightFactor;
     gl_Position = g_lightTransform * vec4(position, 1.0f);
 }
