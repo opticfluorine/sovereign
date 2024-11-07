@@ -48,7 +48,7 @@ void main()
     vec2 lightMapCoord = gl_FragCoord.xy / g_viewportSize;
     vec4 pointColor = texture(sampler2D(g_lightMap, g_lightMapSampler), lightMapCoord);
     vec4 baseColor = shadowPosition.z >= shadowDepth - 0.01f ? g_globalLightColor : g_ambientLightColor;
-    vec4 fullColor = color * (baseColor + pointColor);
+    vec4 fullColor = color * clamp(baseColor + pointColor, 0.0f, 1.0f);
 
     // Blend everything to a final color.
     colorOut = fullColor * texture(sampler2D(g_textureAtlas, g_textureAtlasSampler), texCoord);

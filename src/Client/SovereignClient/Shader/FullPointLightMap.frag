@@ -34,7 +34,7 @@ layout (binding = 0) uniform PointLightShaderConstants
 layout (binding = 1) uniform textureCube g_depthMap; // Depth map (cubemap).
 layout (binding = 2) uniform sampler g_sampler;      // Depth map sampler.
 
-const float r2_limit = 0.01f;  // cutoff point for small distances
+const float r2_limit = 0.001f;  // cutoff point for small distances
 const float invr2_limit = 1.0f / r2_limit;  // inverse of r2_limit
 
 // Light curve coefficients.

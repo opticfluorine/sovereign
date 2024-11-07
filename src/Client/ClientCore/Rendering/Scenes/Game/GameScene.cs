@@ -108,9 +108,9 @@ public sealed class GameScene : IScene
 
     public void PopulateWorldFragmentConstants(out Vector4 ambientLightColor, out Vector4 globalLightColor)
     {
-        ambientLightColor = new Vector4(0.3f, 0.3f, 0.3f, 1.0f);
+        ambientLightColor = new Vector4(0.2f, 0.2f, 0.2f, 1.0f);
         //globalLightColor = Vector4.One;
-        globalLightColor = new Vector4(0.5f, 0.5f, 0.5f, 1.0f);
+        globalLightColor = new Vector4(0.3f, 0.3f, 0.3f, 1.0f);
     }
 
     public void UpdateGui()
