@@ -31,27 +31,23 @@ layout (binding = 0) uniform PointLightShaderConstants
     float g_lightIntensity; // Light intensity.
 };
 
-layout (binding = 1) uniform textureCube g_depthMap; // Depth map (cubemap).
-layout (binding = 2) uniform sampler g_sampler;      // Depth map sampler.
+layout (binding = 2) uniform textureCube g_depthMap; // Depth map (cubemap).
+layout (binding = 3) uniform sampler g_sampler;      // Depth map sampler.
 
 const float r2_limit = 0.001f;  // cutoff point for small distances
-const float invr2_limit = 1.0f / r2_limit;  // inverse of r2_limit
-
-// Light curve coefficients.
-const float a = -1.0f / (1.0f - invr2_limit);
-const float b = 1.0f + invr2_limit / (1.0f - invr2_limit);
-
-const float depthBias = 0.98f;
+const float depthBias = 0.98f;  // depth bias for shadow map sampling
 
 void main() {
-    // Compute inverse-square scaling function for light intensity.
+    // Use a smoothstep instead of inverse-square because it looks better visually
+    // (despite being less physically accurate).
     float radius2 = g_lightRadius * g_lightRadius;
-    float normR2 = dot(distanceFromLight, distanceFromLight) / radius2;
-    float scale = clamp(a / max(normR2, r2_limit) + b, 0.0f, 1.0f);
+    float r2 = dot(distanceFromLight, distanceFromLight);
+    float normR2 = r2 / radius2;
+    float scale = smoothstep(radius2, 0.0f, r2);
 
     // Check depth map for this light and fragment.
-    //float d = texture(samplerCubeShadow(g_depthMap, g_sampler), vec4(distanceFromLight, depthBias * normR2));
-    float d = 1.0f;
+    float d = texture(samplerCubeShadow(g_depthMap, g_sampler),
+                      vec4(distanceFromLight, depthBias * normR2));
 
     colorOut = lightFactor * vec4(d * scale * g_lightIntensity * g_lightColor, 1.0f);
 }

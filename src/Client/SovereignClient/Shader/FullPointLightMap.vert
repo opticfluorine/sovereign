@@ -46,7 +46,7 @@ layout (binding = 1) uniform WorldVertexShaderConstants
 
 void main() {
     vec3 interpolated = position + g_timeSinceTick * velocity;
-    distanceFromLight = g_lightPosition - interpolated;
+    distanceFromLight = interpolated - g_lightPosition;
     lightFactor_out = lightFactor;
     gl_Position = g_lightTransform * vec4(position, 1.0f);
 }
