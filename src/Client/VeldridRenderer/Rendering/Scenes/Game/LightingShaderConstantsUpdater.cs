@@ -45,13 +45,13 @@ public class LightingShaderConstantsUpdater
         // +Y (2)
         new(1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f),
 
         // -Y (3)
         new(1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, -1.0f, 0.0f,
-            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f),
 
         // +Z (4)

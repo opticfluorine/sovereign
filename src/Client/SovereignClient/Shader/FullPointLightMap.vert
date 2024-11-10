@@ -44,9 +44,13 @@ layout (binding = 1) uniform WorldVertexShaderConstants
     float g_reserved2;
 };
 
+// Additive position bias used to avoid sampling self-shadows
+// in the shadow maps.
+const vec3 positionBias = vec3(0.00f, 0.00f, 0.01f);
+
 void main() {
-    vec3 interpolated = position + g_timeSinceTick * velocity;
+    vec3 interpolated = position + positionBias + g_timeSinceTick * velocity;
     distanceFromLight = interpolated - g_lightPosition;
     lightFactor_out = lightFactor;
-    gl_Position = g_lightTransform * vec4(position, 1.0f);
+    gl_Position = g_lightTransform * vec4(interpolated, 1.0f);
 }
