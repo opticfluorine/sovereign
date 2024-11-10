@@ -32,13 +32,13 @@ public class LightingShaderConstantsUpdater
     {
         // +X (0)
         new(0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
             -1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f),
 
         // -X (1)
         new(0.0f, 0.0f, -1.0f, 0.0f,
-            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f),
 
@@ -56,13 +56,13 @@ public class LightingShaderConstantsUpdater
 
         // +Z (4)
         new(1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f),
 
         // -Z (5)
         new(-1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, -1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f)
     };
