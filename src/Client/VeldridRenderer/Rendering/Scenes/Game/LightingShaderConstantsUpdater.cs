@@ -111,7 +111,7 @@ public class LightingShaderConstantsUpdater
         var worldProjection = new Matrix4x4(
             invRadius, 0.0f, 0.0f, 0.0f,
             0.0f, -invRadius, 0.0f, 0.0f,
-            0.0f, 0.0f, invRadius, 1.0f,
+            0.0f, 0.0f, invRadius, invRadius,
             0.0f, 0.0f, 0.0f, 0.0f
         );
 
