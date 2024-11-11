@@ -161,7 +161,7 @@ public class FullPointLightMapRenderer : IDisposable
         var height = 2.0f * radius * tileWidth * scaleY;
 
         var lightX = lightRelativePos.X * tileWidth * scaleX + 0.5f * device.DisplayMode!.Width;
-        var lightY = lightRelativePos.Y * tileWidth * scaleY + 0.5f * device.DisplayMode!.Height;
+        var lightY = -lightRelativePos.Y * tileWidth * scaleY + 0.5f * device.DisplayMode!.Height;
 
         var x = lightX - radius * tileWidth * scaleX;
         var y = lightY - radius * tileWidth * scaleY;
