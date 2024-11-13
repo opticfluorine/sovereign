@@ -53,7 +53,9 @@ public class PointLightDepthMapRenderer
                     ShaderStages.Vertex | ShaderStages.Fragment, ResourceLayoutElementOptions.DynamicBinding),
                 new ResourceLayoutElementDescription(nameof(PointLightDepthMapShaderConstants),
                     ResourceKind.UniformBuffer, ShaderStages.Vertex,
-                    ResourceLayoutElementOptions.DynamicBinding)
+                    ResourceLayoutElementOptions.DynamicBinding),
+                new ResourceLayoutElementDescription(nameof(WorldVertexShaderConstants),
+                    ResourceKind.UniformBuffer, ShaderStages.Vertex)
             );
             return device.Device!.ResourceFactory.CreateResourceLayout(layoutDesc);
         });
@@ -62,7 +64,8 @@ public class PointLightDepthMapRenderer
         {
             var desc = new ResourceSetDescription(resourceLayout.Value,
                 gameResMgr.PointLightBuffer!.DeviceBuffer,
-                gameResMgr.PointLightDepthMapBuffer!.DeviceBuffer);
+                gameResMgr.PointLightDepthMapBuffer!.DeviceBuffer,
+                gameResMgr.VertexUniformBuffer!.DeviceBuffer);
             return device.Device!.ResourceFactory.CreateResourceSet(desc);
         });
 
@@ -75,7 +78,7 @@ public class PointLightDepthMapRenderer
                 PrimitiveTopology = PrimitiveTopology.TriangleList,
                 RasterizerState = new RasterizerStateDescription
                 {
-                    CullMode = FaceCullMode.Back,
+                    CullMode = FaceCullMode.None,
                     DepthClipEnabled = false,
                     FillMode = PolygonFillMode.Solid,
                     FrontFace = FrontFace.CounterClockwise,

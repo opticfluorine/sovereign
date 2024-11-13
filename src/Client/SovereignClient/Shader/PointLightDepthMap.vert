@@ -38,7 +38,18 @@ layout (binding = 1) uniform PointLightDepthMapShaderConstants
     mat4 g_transform;      // Transformation matrix for depth map.
 };
 
+layout (binding = 2) uniform WorldVertexShaderConstants
+{
+    mat4 g_worldTransform;
+    mat4 g_shadowMapTransform;
+    float g_timeSinceTick;
+    float g_reserved0;
+    float g_reserved1;
+    float g_reserved2;
+};
+
 void main() {
-    distanceFromLight = position - g_lightPosition;
+    vec3 interpolated = position + g_timeSinceTick * velocity;
+    distanceFromLight = interpolated - g_lightPosition;
     gl_Position = g_transform * vec4(position, 1.0f);
 }

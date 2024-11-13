@@ -30,16 +30,6 @@ public class PointLightDepthMap : IDisposable
     private const int TextureSize = 256;
 
     /// <summary>
-    ///     Layer index for the positive-z hemisphere.
-    /// </summary>
-    public const int PosZFramebufferLayer = 0;
-
-    /// <summary>
-    ///     Layer index for the negative-z hemisphere.
-    /// </summary>
-    public const int NegZFramebufferLayer = 1;
-
-    /// <summary>
     ///     Number of layers in the texture.
     /// </summary>
     public const uint LayerCount = 6;
