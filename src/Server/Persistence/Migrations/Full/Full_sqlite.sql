@@ -230,6 +230,25 @@ CREATE TABLE CastBlockShadows
 );
 
 
+----------------------
+-- PointLightSource --
+----------------------
+
+CREATE TABLE PointLightSource
+(
+    id        INTEGER PRIMARY KEY NOT NULL,
+    radius    FLOAT               NOT NULL,
+    intensity FLOAT               NOT NULL,
+    color_r   FLOAT               NOT NULL,
+    color_g   FLOAT               NOT NULL,
+    color_b   FLOAT               NOT NULL,
+    pos_x     FLOAT               NOT NULL,
+    pos_y     FLOAT               NOT NULL,
+    pos_z     FLOAT               NOT NULL,
+    FOREIGN KEY (id) REFERENCES Entity (id)
+);
+
+
 ------------------------------
 -- World Segment Block Data --
 ------------------------------
@@ -279,7 +298,15 @@ SELECT Entity.id                   AS id,
        AnimatedSprite.value        AS animatedSprite,
        Orientation.value           AS orientation,
        Admin.value                 AS admin,
-       CastBlockShadows.value      AS castBlockShadows
+       CastBlockShadows.value      AS castBlockShadows,
+       PLS.radius                  AS plsRadius,
+       PLS.intensity               AS plsIntensity,
+       PLS.color_r                 AS plsColorR,
+       PLS.color_g                 AS plsColorG,
+       PLS.color_b                 AS plsColorB,
+       PLS.pos_x                   AS plsPosX,
+       PLS.pos_y                   AS plsPosY,
+       PLS.pos_z                   AS plsPosZ
 FROM Entity
          LEFT JOIN Position ON Position.id = Entity.id
          LEFT JOIN Material ON Material.id = Entity.id
@@ -292,7 +319,8 @@ FROM Entity
          LEFT JOIN AnimatedSprite ON Entity.id = AnimatedSprite.id
          LEFT JOIN Orientation ON Entity.id = Orientation.id
          LEFT JOIN Admin ON Entity.id = Admin.id
-         LEFT JOIN CastBlockShadows ON Entity.id = CastBlockShadows.id;
+         LEFT JOIN CastBlockShadows ON Entity.id = CastBlockShadows.id
+         LEFT JOIN PointLightSource PLS on Entity.id = PLS.id;
 
 
 --------------------------------------
