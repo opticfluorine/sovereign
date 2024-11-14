@@ -95,7 +95,7 @@ public class WorldVertexConstantsUpdater
         projMat.M12 = 0.0f;
         projMat.M22 = -invHalfHeight;
         projMat.M32 = -invHalfHeight;
-        projMat.M42 = -invHalfHeight * (cameraPos.Z - cameraPos.Y);
+        projMat.M42 = invHalfHeight * (cameraPos.Z + cameraPos.Y);
 
         // Clamp the visible portion of the z axis to [0, 1].
         projMat.M13 = 0.0f;

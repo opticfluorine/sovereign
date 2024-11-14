@@ -80,6 +80,7 @@ public class LightingShaderConstantsUpdater
     /// <param name="renderPlan">Render plan.</param>
     public void UpdateConstants(RenderPlan renderPlan)
     {
+        // Update buffers on host.
         for (var i = 0; i < renderPlan.LightCount; ++i) UpdateConstantsForLight(i, renderPlan);
     }
 

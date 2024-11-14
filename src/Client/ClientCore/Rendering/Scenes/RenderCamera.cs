@@ -41,6 +41,7 @@ public sealed class RenderCamera
     /// <param name="timeSinceTick">Time elapsed from the start of the current tick.</param>
     public Vector3 Aim(float timeSinceTick)
     {
+        cameraManager.UpdateCamera();
         var pos = cameraManager.Position;
         var vel = cameraManager.Velocity;
 

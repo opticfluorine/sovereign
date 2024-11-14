@@ -63,10 +63,6 @@ public sealed class CameraEventHandler
                 HandleDetachEvent();
                 break;
 
-            case EventId.Core_Tick:
-                manager.UpdateCamera();
-                break;
-
             case EventId.Client_Network_PlayerEntitySelected:
                 if (ev.EventDetails == null)
                 {

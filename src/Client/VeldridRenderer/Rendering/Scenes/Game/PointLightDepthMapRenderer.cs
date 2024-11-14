@@ -27,7 +27,6 @@ public class PointLightDepthMapRenderer
 {
     private readonly uint[] dynamicOffsets = new uint[2];
     private readonly GameResourceManager gameResMgr;
-    private readonly LightingShaderConstantsUpdater lightingShaderConstantsUpdater;
 
     /// <summary>
     ///     Pipeline shared by all depth maps.
@@ -39,11 +38,9 @@ public class PointLightDepthMapRenderer
     /// </summary>
     private readonly Lazy<ResourceSet> resourceSet;
 
-    public PointLightDepthMapRenderer(GameResourceManager gameResMgr, VeldridDevice device,
-        LightingShaderConstantsUpdater lightingShaderConstantsUpdater, WorldPipeline worldPipeline)
+    public PointLightDepthMapRenderer(GameResourceManager gameResMgr, VeldridDevice device, WorldPipeline worldPipeline)
     {
         this.gameResMgr = gameResMgr;
-        this.lightingShaderConstantsUpdater = lightingShaderConstantsUpdater;
 
         Lazy<ResourceLayout> resourceLayout = new(() =>
         {
@@ -103,9 +100,6 @@ public class PointLightDepthMapRenderer
     /// <param name="renderPlan">Render plan.</param>
     public void Render(CommandList commandList, RenderPlan renderPlan)
     {
-        gameResMgr.PreparePointLights(renderPlan.LightCount);
-        lightingShaderConstantsUpdater.UpdateConstants(renderPlan);
-
         commandList.SetPipeline(pipeline.Value);
         commandList.SetIndexBuffer(gameResMgr.SolidIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
 

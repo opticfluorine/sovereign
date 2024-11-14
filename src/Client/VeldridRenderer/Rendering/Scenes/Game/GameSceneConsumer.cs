@@ -27,6 +27,7 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 public class GameSceneConsumer : ISceneConsumer, IDisposable
 {
     private readonly GameResourceManager gameResManager;
+    private readonly LightingShaderConstantsUpdater lightingUpdater;
     private readonly GameSceneRenderer renderer;
     private readonly VeldridResourceManager resManager;
     private readonly WorldFragmentConstantsUpdater worldFcUpdater;
@@ -39,13 +40,15 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
 
     public GameSceneConsumer(GameResourceManager gameResManager,
         VeldridResourceManager resManager, GameSceneRenderer renderer,
-        WorldVertexConstantsUpdater worldVcUpdater, WorldFragmentConstantsUpdater worldFcUpdater)
+        WorldVertexConstantsUpdater worldVcUpdater, WorldFragmentConstantsUpdater worldFcUpdater,
+        LightingShaderConstantsUpdater lightingUpdater)
     {
         this.resManager = resManager;
         this.gameResManager = gameResManager;
         this.renderer = renderer;
         this.worldVcUpdater = worldVcUpdater;
         this.worldFcUpdater = worldFcUpdater;
+        this.lightingUpdater = lightingUpdater;
     }
 
     public void Dispose()
@@ -76,6 +79,8 @@ public class GameSceneConsumer : ISceneConsumer, IDisposable
         gameResManager.SolidIndexBuffer.UsedLength = (uint)renderPlan.SolidIndexCount;
         worldVcUpdater.Update(scene);
         worldFcUpdater.Update(scene);
+        gameResManager.PreparePointLights(renderPlan.LightCount);
+        lightingUpdater.UpdateConstants(renderPlan);
 
         /* Post updates to buffers. */
         var commandList = resManager.CommandList;
