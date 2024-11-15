@@ -2,6 +2,31 @@
 
 ## 2024
 
+### November
+
+#### 14 November 2024
+
+* Optimization: Move checks for the `Drawable` tag out of the renderer's main loop and into
+  the (much less frequent) perspective line updates. This gives a ~ 10% speedup in generation
+  of the per-frame render plan.
+* Fix issue where the global shadow map was zoomed in too much, leading to errors in shadows
+  in the bottom-left of the viewport.
+
+#### 13 November 2024
+
+* Fixed a series of bugs in the renderer that were delaying certain effects by a delay.
+  Specifically, the camera position was lagging its target by one tick, and the center position
+  of each point light was lagging by one frame.
+
+### October
+
+#### 31 October 2024
+
+* Didn't keep up with the changelog during October, was busy with various things but
+  did some work on point lighting and shadows.
+
+### September
+
 #### 29 September 2024
 
 * Add new `CastBlockShadows` tag to block template entities to indicate that

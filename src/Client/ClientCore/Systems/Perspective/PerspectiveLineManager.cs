@@ -47,6 +47,7 @@ public class PerspectiveLineManager
 {
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly DrawableLookup drawableLookup;
+    private readonly DrawableTagCollection drawables;
 
     /// <summary>
     ///     Object pool of entity lists to minimize heap churn for vertically moving entities.
@@ -79,12 +80,13 @@ public class PerspectiveLineManager
 
     public PerspectiveLineManager(KinematicComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
-        EntityTable entityTable, DrawableLookup drawableLookup)
+        EntityTable entityTable, DrawableLookup drawableLookup, DrawableTagCollection drawables)
     {
         this.kinematics = kinematics;
         this.blockPositions = blockPositions;
         this.resolver = resolver;
         this.drawableLookup = drawableLookup;
+        this.drawables = drawables;
 
         entityTable.OnEntityAdded += AddEntity;
         entityTable.OnEntityRemoved += RemoveEntity;
@@ -265,6 +267,8 @@ public class PerspectiveLineManager
     /// <param name="entityId"></param>
     private void AddEntity(ulong entityId)
     {
+        if (!drawables.HasTagForEntity(entityId)) return;
+
         if (blockPositions.HasComponentForEntity(entityId)) AddBlockEntity(entityId, blockPositions[entityId]);
         else if (kinematics.HasComponentForEntity(entityId)) AddNonBlockEntity(entityId, kinematics[entityId].Position);
     }
@@ -314,6 +318,8 @@ public class PerspectiveLineManager
     /// <param name="entityId">Entity ID.</param>
     private void RemoveEntity(ulong entityId)
     {
+        if (!drawables.HasTagForEntity(entityId, true)) return;
+
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices)) return;
         if (!zFloorByEntity.TryGetValue(entityId, out var zFloor))
         {

@@ -44,7 +44,6 @@ public sealed class WorldEntityRetriever
     private readonly CameraManager camera;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly ClientConfigurationManager configManager;
-    private readonly DrawableTagCollection drawableTags;
     private readonly WorldLayerGrouper grouper;
 
     /// <summary>
@@ -76,7 +75,7 @@ public sealed class WorldEntityRetriever
         WorldLayerGrouper grouper, KinematicComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
         AnimatedSpriteComponentCollection animatedSprites,
-        DrawableTagCollection drawableTags, AnimatedSpriteManager animatedSpriteManager,
+        AnimatedSpriteManager animatedSpriteManager,
         OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases,
         IBlockAnimatedSpriteCache blockSpriteCache, CastBlockShadowsTagCollection castBlockShadows,
         LightSourceTable lightSourceTable)
@@ -88,7 +87,6 @@ public sealed class WorldEntityRetriever
         this.kinematics = kinematics;
         this.blockPositions = blockPositions;
         this.animatedSprites = animatedSprites;
-        this.drawableTags = drawableTags;
         this.animatedSpriteManager = animatedSpriteManager;
         this.orientations = orientations;
         this.phases = phases;
@@ -218,8 +216,6 @@ public sealed class WorldEntityRetriever
     /// </summary>
     private void ProcessSprite(ulong entityId, ulong systemTime)
     {
-        if (!drawableTags.HasTagForEntity(entityId)) return;
-
         var entityKinematics = kinematics[entityId];
         var animatedSpriteId = animatedSprites[entityId];
         var orientation = orientations.HasComponentForEntity(entityId) ? orientations[entityId] : Orientation.South;
@@ -236,7 +232,6 @@ public sealed class WorldEntityRetriever
     private void ProcessBlockFrontFace(ulong entityId, ulong systemTime, out bool isOpaque)
     {
         isOpaque = false;
-        if (!drawableTags.HasTagForEntity(entityId)) return;
 
         var blockPosition = blockPositions[entityId];
         var facePosition = (Vector3)(blockPosition with { Y = blockPosition.Y - 1 });
@@ -259,7 +254,6 @@ public sealed class WorldEntityRetriever
     private void ProcessBlockTopFace(ulong entityId, ulong systemTime, out bool isOpaque)
     {
         isOpaque = false;
-        if (!drawableTags.HasTagForEntity(entityId)) return;
 
         var blockPosition = (Vector3)blockPositions[entityId];
         var animatedSpriteIds = blockSpriteCache.GetTopFaceAnimatedSpriteIds(entityId);
@@ -281,7 +275,7 @@ public sealed class WorldEntityRetriever
     /// <param name="entityId">Entity ID.</param>
     private void ProcessSolidBlock(ulong entityId)
     {
-        if (!drawableTags.HasTagForEntity(entityId) || !castBlockShadows.HasTagForEntity(entityId)) return;
+        if (!castBlockShadows.HasTagForEntity(entityId)) return;
         var blockPosition = (Vector3)blockPositions[entityId];
 
         // Global lighting.
