@@ -53,8 +53,8 @@ public class WorldVertexConstantsUpdater
         var invHalfWidth = 2.0f / widthInTiles;
         var invHalfHeight = 2.0f / heightInTiles;
         var invHeight = 1.0f / heightInTiles;
-        var invWidthShadow = 1.6f / widthInTiles;
-        var invHeightShadow = 1.6f / heightInTiles;
+        var invWidthShadow = 1.4f / widthInTiles;
+        var invHeightShadow = 1.4f / heightInTiles;
 
         /* Update constant buffers. */
         var buf = gameResourceManager.VertexUniformBuffer.Buffer;
