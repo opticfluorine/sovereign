@@ -107,6 +107,11 @@ public static partial class LuaBindings
     [LibraryImport(LibName)]
     public static partial void lua_settop(IntPtr luaState, int idx);
 
+    public static void lua_pop(IntPtr luaState, int n)
+    {
+        lua_settop(luaState, -n - 1);
+    }
+
     [LibraryImport(LibName)]
     public static partial void lua_pushvalue(IntPtr luaState, int idx);
 
@@ -211,6 +216,11 @@ public static partial class LuaBindings
 
     [LibraryImport(LibName)]
     public static partial void lua_pushcclosure(IntPtr luaState, LuaCFunction fn, int n);
+
+    public static void lua_pushcfunction(IntPtr luaState, LuaCFunction fn)
+    {
+        lua_pushcclosure(luaState, fn, 0);
+    }
 
     [LibraryImport(LibName)]
     public static partial void lua_pushboolean(IntPtr luaState, [MarshalAs(UnmanagedType.Bool)] bool b);
@@ -334,7 +344,7 @@ public static partial class LuaBindings
     }
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial void luaL_checkstack(IntPtr luaState, int sz, string msg);
+    public static partial void luaL_checkstack(IntPtr luaState, int sz, string? msg);
 
     public static LuaResult luaL_dofile(IntPtr luaState, string filename)
     {
@@ -350,4 +360,7 @@ public static partial class LuaBindings
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
     public static partial void luaL_typeerror(IntPtr luaState, int arg, string tname);
+
+    [LibraryImport(LibName)]
+    public static partial void luaL_openlibs(IntPtr luaState);
 }
