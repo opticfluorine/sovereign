@@ -29,6 +29,12 @@ public static partial class LuaBindings
 {
     public delegate int LuaCFunction(IntPtr luaState);
 
+    public delegate int LuaKFunction(IntPtr luaState, int status, IntPtr ctx);
+
+    public delegate string LuaReader(IntPtr luaState, IntPtr ud, ref long sz);
+
+    public delegate int LuaWriter(IntPtr luaState, IntPtr p, long sz, IntPtr ud);
+
     public enum LuaArithOp
     {
         Add = 0,
@@ -77,6 +83,8 @@ public static partial class LuaBindings
         UserData = 7,
         Thread = 8
     }
+
+    public const int LUA_MULTRET = -1;
 
     private const string LibName = "lua5.4";
 
@@ -255,4 +263,91 @@ public static partial class LuaBindings
     //
     // Set Functions (Stack -> Lua)
     //
+
+    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
+    public static partial void lua_setglobal(IntPtr luaState, string name);
+
+    [LibraryImport(LibName)]
+    public static partial void lua_settable(IntPtr luaState, int idx);
+
+    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
+    public static partial void lua_setfield(IntPtr luaState, int idx, string k);
+
+    [LibraryImport(LibName)]
+    public static partial void lua_seti(IntPtr luaState, int idx, int n);
+
+    [LibraryImport(LibName)]
+    public static partial void lua_rawset(IntPtr luaState, int idx);
+
+    [LibraryImport(LibName)]
+    public static partial void lua_rawseti(IntPtr luaState, int idx, int n);
+
+    [LibraryImport(LibName)]
+    public static partial void lua_rawsetp(IntPtr luaState, int idex, IntPtr p);
+
+    [LibraryImport(LibName)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool lua_setmetatable(IntPtr luaState, int objindex);
+
+    [LibraryImport(LibName)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool lua_setiuservalue(IntPtr luaState, int idx, int n);
+
+    //
+    // Load and Call Functions
+    //
+
+    [LibraryImport(LibName)]
+    public static partial void lua_callk(IntPtr luaState, int nargs, int nresults, IntPtr ctx, LuaKFunction? k);
+
+    public static void lua_call(IntPtr luaState, int nargs, int nresults)
+    {
+        lua_callk(luaState, nargs, nresults, IntPtr.Zero, null);
+    }
+
+    [LibraryImport(LibName)]
+    public static partial LuaResult lua_pcallk(IntPtr luaState, int nargs, int nresults, int errfunc, IntPtr ctx,
+        LuaKFunction? k);
+
+    public static LuaResult lua_pcall(IntPtr luaState, int nargs, int nresults, int errfunc)
+    {
+        return lua_pcallk(luaState, nargs, nresults, errfunc, IntPtr.Zero, null);
+    }
+
+    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
+    public static partial LuaResult lua_load(IntPtr luaState, LuaReader reader, IntPtr dt, string chunkname,
+        string mode);
+
+    [LibraryImport(LibName)]
+    public static partial LuaResult lua_dump(IntPtr luaState, LuaWriter writer, IntPtr data,
+        [MarshalAs(UnmanagedType.Bool)] bool strip);
+
+    [LibraryImport(LibName)]
+    public static partial int lua_next(IntPtr luaState, int index);
+
+    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
+    public static partial LuaResult luaL_loadfilex(IntPtr luaState, string filename, string? mode);
+
+    public static LuaResult luaL_loadfile(IntPtr luaState, string filename)
+    {
+        return luaL_loadfilex(luaState, filename, null);
+    }
+
+    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
+    public static partial void luaL_checkstack(IntPtr luaState, int sz, string msg);
+
+    public static LuaResult luaL_dofile(IntPtr luaState, string filename)
+    {
+        var result = luaL_loadfile(luaState, filename);
+        return result == LuaResult.Ok ? lua_pcall(luaState, 0, LUA_MULTRET, 0) : result;
+    }
+
+    [LibraryImport(LibName)]
+    public static partial int lua_error(IntPtr luaState);
+
+    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
+    public static partial void luaL_argerror(IntPtr luaState, int arg, string extramsg);
+
+    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
+    public static partial void luaL_typeerror(IntPtr luaState, int arg, string tname);
 }
