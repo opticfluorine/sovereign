@@ -10,6 +10,19 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
+    <Choose>
+        <When Condition=" '$(RuntimeIdentifier)' == '' ">
+            <PropertyGroup>
+                <ContribSet>win-x64</ContribSet>
+            </PropertyGroup>
+        </When>
+        <Otherwise>
+            <PropertyGroup>
+                <ContribSet>$(RuntimeIdentifier)</ContribSet>
+            </PropertyGroup>
+        </Otherwise>
+    </Choose>
+
     <ItemGroup>
         <None Remove="Data\Logging.xml"/>
     </ItemGroup>
@@ -20,13 +33,22 @@
         </Content>
     </ItemGroup>
 
+    <Target Name="CopyAfterBuild" AfterTargets="AfterBuild">
+        <ItemGroup>
+            <LibFiles Include="Contrib/$(ContribSet)/*"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(OutDir)"/>
+    </Target>
+
     <Target Name="CopyAfterPublish" AfterTargets="Publish">
         <ItemGroup>
             <MigrationFiles Include="$(SolutionDir)Server/Persistence/Migrations/**/*"/>
             <LicenseFile Include="$(SolutionDir)../LICENSE"/>
+            <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
         <Copy SourceFiles="@(MigrationFiles)" DestinationFolder="$(PublishDir)Migrations/%(RecursiveDir)"/>
         <Copy SourceFiles="@(LicenseFile)" DestinationFolder="$(PublishDir)"/>
+        <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(PublishDir)"/>
     </Target>
 
     <ItemGroup>

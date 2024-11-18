@@ -43,7 +43,6 @@
     </ItemGroup>
 
     <Target Name="CopyAfterBuild" AfterTargets="AfterBuild">
-        <Message Text="RuntimeIdentifier=$(RuntimeIdentifier)"/>
         <ItemGroup>
             <DataFiles Include="Data/**/*" Exclude="Data/Configuration/ClientConfiguration.yaml"/>
             <LibFiles Include="Contrib/$(ContribSet)/*"/>
@@ -71,7 +70,7 @@
             <GlslFiles Include="Shader/*.vert;Shader/*.frag"/>
         </ItemGroup>
         <MakeDir Directories="$(OutDir)Data/Shader"/>
-        <Exec Command="glslc @(GlslFiles) -g -O -o $(OutDir)Data/Shader/%(Filename)%(Extension).spv" Outputs="$(OutDir)Data/Shader/%(Filename)%(Extension).spv"/>
+        <Exec Command="glslc @(GlslFiles) -g -o $(OutDir)Data/Shader/%(Filename)%(Extension).spv" Outputs="$(OutDir)Data/Shader/%(Filename)%(Extension).spv"/>
     </Target>
 
 </Project>
