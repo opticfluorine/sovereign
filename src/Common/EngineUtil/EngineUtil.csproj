@@ -16,6 +16,7 @@
         <PackageReference Include="Castle.Windsor" Version="6.0.0"/>
         <PackageReference Include="MessagePack" Version="2.5.187"/>
         <PackageReference Include="System.Numerics.Vectors" Version="4.5.0"/>
+        <PackageReference Include="System.Text.Json" Version="9.0.0"/>
         <PackageReference Include="YamlDotNet" Version="13.1.1"/>
     </ItemGroup>
 
