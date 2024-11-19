@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <AssemblyName>Sovereign.VeldridRenderer</AssemblyName>
         <RootNamespace>Sovereign.VeldridRenderer</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="opticfluorine.Veldrid" Version="4.9.5"/>
+        <PackageReference Include="opticfluorine.Veldrid" Version="4.9.6"/>
     </ItemGroup>
 
 
