@@ -19,16 +19,44 @@ using static Sovereign.Scripting.Lua.LuaBindings;
 namespace Sovereign.Scripting.Lua;
 
 /// <summary>
+///     Exception type thrown when Lua errors are encountered.
+/// </summary>
+public class LuaException : Exception
+{
+    public LuaException()
+    {
+    }
+
+    public LuaException(string? message) : base(message)
+    {
+    }
+
+    public LuaException(string? message, Exception? innerException) : base(message, innerException)
+    {
+    }
+}
+
+/// <summary>
 ///     Execution host for a Lua script.
 /// </summary>
 public class LuaHost : IDisposable
 {
+    private const int QuickLookupSizeHint = 32;
+
+    private readonly int quickLookupStackPosition;
     private string library = "";
+    private uint nextQuickLookupIndex = 1;
 
     public LuaHost()
     {
+        // Create basic Lua environment.
         LuaState = luaL_newstate();
         luaL_openlibs(LuaState);
+
+        // Create the Quick Lookup table for fast C#-to-Lua callback access.
+        // No need to push it to global state - it will permanently live on the stack for fast access.
+        lua_createtable(LuaState, QuickLookupSizeHint, 0);
+        quickLookupStackPosition = lua_gettop(LuaState);
     }
 
     /// <summary>
@@ -79,5 +107,44 @@ public class LuaHost : IDisposable
     {
         library = "";
         lua_pop(LuaState, 1);
+    }
+
+    /// <summary>
+    ///     Pops the function from the top of the Lua stack and adds it to the quick
+    ///     lookup table.
+    /// </summary>
+    /// <returns>Quick lookup index for later retrieval.</returns>
+    public uint AddQuickLookupFunction()
+    {
+        lua_seti(LuaState, quickLookupStackPosition, (int)nextQuickLookupIndex);
+        return nextQuickLookupIndex++;
+    }
+
+    /// <summary>
+    ///     Calls the Lua function at the given position of the quick lookup table.
+    /// </summary>
+    /// <param name="index">Index.</param>
+    /// <param name="par">Parameters.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if index is out of range.</exception>
+    /// <exception cref="LuaException">Thrown if the quick lookup table is corrupt.</exception>
+    public void CallQuickLookupFunction<TParams, TResult>(uint index, TParams par)
+    {
+        if (index < 1 || index >= nextQuickLookupIndex) throw new ArgumentOutOfRangeException("index");
+
+        luaL_checkstack(LuaState, 1, null); // TODO space for args/results
+
+        var ftype = lua_geti(LuaState, quickLookupStackPosition, (int)index);
+        if (ftype != LuaType.Function) throw new LuaException("Quick lookup table has non-function value.");
+
+        // TODO handle args
+
+        var result = lua_pcall(LuaState, 0, 0, 0);
+        if (result != LuaResult.Ok)
+        {
+            // TODO handle error
+            throw new LuaException("Error while calling function.");
+        }
+
+        // TODO handle results
     }
 }

@@ -156,17 +156,32 @@ public static partial class LuaBindings
     public static partial string lua_typename(IntPtr luaState, LuaType tp);
 
     [LibraryImport(LibName)]
-    public static partial float lua_tonumberx(IntPtr luaState, int idx, ref int isnum);
+    public static partial float lua_tonumberx(IntPtr luaState, int idx, IntPtr isnum);
+
+    public static float lua_tonumber(IntPtr luaState, int idx)
+    {
+        return lua_tonumberx(luaState, idx, IntPtr.Zero);
+    }
 
     [LibraryImport(LibName)]
-    public static partial int lua_tointegerx(IntPtr luaState, int idx, ref int isnum);
+    public static partial long lua_tointegerx(IntPtr luaState, int idx, IntPtr isnum);
+
+    public static long lua_tointeger(IntPtr luaState, int idx)
+    {
+        return lua_tointegerx(luaState, idx, IntPtr.Zero);
+    }
 
     [LibraryImport(LibName)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool lua_toboolean(IntPtr luaState, int idx);
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial string lua_tolstring(IntPtr luaState, int idx, ref long len);
+    public static partial string lua_tolstring(IntPtr luaState, int idx, IntPtr len);
+
+    public static string lua_tostring(IntPtr luaState, int idx)
+    {
+        return lua_tolstring(luaState, idx, IntPtr.Zero);
+    }
 
     [LibraryImport(LibName)]
     public static partial uint lua_rawlen(IntPtr luaState, int idx);
@@ -206,7 +221,7 @@ public static partial class LuaBindings
     public static partial void lua_pushnumber(IntPtr luaState, float n);
 
     [LibraryImport(LibName)]
-    public static partial void lua_pushinteger(IntPtr luaState, int n);
+    public static partial void lua_pushinteger(IntPtr luaState, long n);
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
     public static partial IntPtr lua_pushlstring(IntPtr luaState, string s, long len);
