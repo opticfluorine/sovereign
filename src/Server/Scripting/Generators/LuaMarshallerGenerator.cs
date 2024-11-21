@@ -231,6 +231,41 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
             ");
 
         // Classes and structs.
+        foreach (var record in models)
+        {
+            sb.Append($@"
+                public static void Marshal(IntPtr luaState, {record.Name} value, bool checkStack = true)
+                {{
+                    if (checkStack) luaL_checkstack(luaState, {record.DataModels.List.Count}, null);
+            ");
+
+            foreach (var dataModel in record.DataModels.List)
+                sb.Append($@"
+                    Marshal(luaState, value.{dataModel.Name}, false);
+                ");
+
+            sb.Append($@"
+                }}
+
+                public static void Unmarshal(IntPtr luaState, out {record.Name} value)
+                {{
+                    var tmp = new {record.Name}();
+            ");
+
+            foreach (var dataModel in record.DataModels.List)
+                sb.Append($@"
+                    {{
+                        Unmarshal(luaState, out {dataModel.NativeType} tval);
+                        tmp.{dataModel.Name} = tval;
+                    }}
+                ");
+
+            sb.Append(@"
+                value = tmp;
+            }
+
+            ");
+        }
 
         // End.
         sb.Append(@"
