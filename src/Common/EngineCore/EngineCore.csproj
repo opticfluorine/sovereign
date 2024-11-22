@@ -10,6 +10,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\EngineUtil\EngineUtil.csproj"/>
+        <ProjectReference Include="..\Scripting\Scripting.csproj"/>
+        <ProjectReference Include="..\ScriptingGenerators\ScriptingGenerators.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
 </Project>

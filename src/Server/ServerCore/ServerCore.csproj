@@ -12,6 +12,10 @@
         <ProjectReference Include="..\..\Common\EngineCore\EngineCore.csproj"/>
         <ProjectReference Include="..\..\Common\EngineUtil\EngineUtil.csproj"/>
         <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj"/>
+        <ProjectReference Include="..\..\Common\Scripting\Scripting.csproj"/>
+        <ProjectReference Include="..\..\Common\ScriptingGenerators\ScriptingGenerators.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
 </Project>

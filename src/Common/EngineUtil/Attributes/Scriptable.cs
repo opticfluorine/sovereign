@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.Scripting.Attributes;
+using System;
+
+namespace Sovereign.EngineUtil.Attributes;
 
 /// <summary>
 ///     Attribute used to indicate that a type may be passed to and from Lua scripts.

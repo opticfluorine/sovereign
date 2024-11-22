@@ -16,6 +16,7 @@
  */
 
 using MessagePack;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Events.Details;
 
@@ -24,11 +25,13 @@ namespace Sovereign.EngineCore.Events.Details;
 ///     than the ID of the affected entity.
 /// </summary>
 [MessagePackObject]
+[Scriptable]
 public class EntityEventDetails : IEventDetails
 {
     /// <summary>
     ///     ID of the affected entity.
     /// </summary>
     [Key(0)]
+    [ScriptableOrder(0)]
     public ulong EntityId { get; set; }
 }

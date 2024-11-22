@@ -19,24 +19,6 @@ using static Sovereign.Scripting.Lua.LuaBindings;
 namespace Sovereign.Scripting.Lua;
 
 /// <summary>
-///     Exception type thrown when Lua errors are encountered.
-/// </summary>
-public class LuaException : Exception
-{
-    public LuaException()
-    {
-    }
-
-    public LuaException(string? message) : base(message)
-    {
-    }
-
-    public LuaException(string? message, Exception? innerException) : base(message, innerException)
-    {
-    }
-}
-
-/// <summary>
 ///     Execution host for a Lua script.
 /// </summary>
 public class LuaHost : IDisposable

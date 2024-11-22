@@ -16,26 +16,31 @@
 
 using System;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.ServerCore.Events;
 
 /// <summary>
 ///     Event details for player selection events.
 /// </summary>
+[Scriptable]
 public class SelectPlayerEventDetails : IEventDetails
 {
     /// <summary>
     ///     Account ID.
     /// </summary>
+    [ScriptableOrder(0)]
     public Guid AccountId { get; set; }
 
     /// <summary>
     ///     Player character entity ID.
     /// </summary>
+    [ScriptableOrder(1)]
     public ulong PlayerCharacterEntityId { get; set; }
 
     /// <summary>
     ///     Flag indicating whether the player character is new (true = new).
     /// </summary>
+    [ScriptableOrder(2)]
     public bool NewPlayer { get; set; }
 }

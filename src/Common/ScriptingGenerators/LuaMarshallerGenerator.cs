@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Sovereign.Scripting.Attributes;
-using Sovereign.Scripting.Lua;
-using Exception = System.Exception;
 
-namespace Sovereign.Scripting.Generators;
+namespace Sovereign.ScriptingGenerators;
 
 /// <summary>
 ///     Generates code for marshalling and unmarshalling objects between C# and Lua.
@@ -30,13 +30,14 @@ namespace Sovereign.Scripting.Generators;
 [Generator]
 public class LuaMarshallerGenerator : IIncrementalGenerator
 {
+    private const string ScriptableName = "Sovereign.EngineUtil.Attributes.Scriptable";
+    private const string ScriptableOrderName = "Sovereign.EngineUtil.Attributes.ScriptableOrder";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // First define an incremental pipeline that transforms every [Scriptable] class into a model
-        // with an ordered list of its [ScriptableOrder] fields and properties.
         var pipeline = context.SyntaxProvider
-            .ForAttributeWithMetadataName(typeof(Scriptable).FullName!,
-                static (syntaxNode, cToken) =>
+            .ForAttributeWithMetadataName(ScriptableName,
+                static (syntaxNode, _) =>
                     syntaxNode is ClassDeclarationSyntax || syntaxNode is StructDeclarationSyntax,
                 static (context, cToken) =>
                 {
@@ -71,10 +72,12 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                         DataModels = new ValueEquatableList<DataModel>(allToMarshall)
                     };
                 })
-            .Collect();
+            .Collect()
+            .Combine(context.CompilationProvider);
 
         // Register an incremental source generator fed by this pipeline.
-        context.RegisterSourceOutput(pipeline, GenerateSource);
+        context.RegisterSourceOutput(pipeline,
+            static (context, data) => GenerateSource(context, data.Left, data.Right));
     }
 
     /// <summary>
@@ -82,7 +85,9 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
     /// </summary>
     /// <param name="context">Context.</param>
     /// <param name="models">Models.</param>
-    private static void GenerateSource(SourceProductionContext context, ImmutableArray<Model> models)
+    /// <param name="compilation">Compilation.</param>
+    private static void GenerateSource(SourceProductionContext context, ImmutableArray<Model> models,
+        Compilation compilation)
     {
         var sb = new StringBuilder();
 
@@ -91,9 +96,11 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
 
         // Preamble, class definition, marshallers for base types.
         sb.Append($@"
-            using static {typeof(LuaBindings).FullName ?? throw new Exception()};
+            using System;
+            using Sovereign.Scripting.Lua;
+            using static Sovereign.Scripting.Lua.LuaBindings;
 
-            namespace Sovereign.Scripting.Lua;
+            namespace {compilation.AssemblyName}.Lua;
 
             /// <summary>
             ///     Marshals C# types to and from the Lua stack.
@@ -252,13 +259,16 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     var tmp = new {record.Name}();
             ");
 
-            foreach (var dataModel in record.DataModels.List)
+            for (var i = record.DataModels.List.Count - 1; i >= 0; --i)
+            {
+                var dataModel = record.DataModels.List[i];
                 sb.Append($@"
                     {{
                         Unmarshal(luaState, out {dataModel.NativeType} tval);
                         tmp.{dataModel.Name} = tval;
                     }}
                 ");
+            }
 
             sb.Append(@"
                 value = tmp;
@@ -286,7 +296,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
         return symbol
             .GetAttributes()
             .Any(attr => attr.AttributeClass != null &&
-                         attr.AttributeClass.Name.Equals(typeof(ScriptableOrder).FullName));
+                         attr.AttributeClass.Name.Equals(ScriptableOrderName));
     }
 
     /// <summary>
@@ -300,7 +310,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
         return symbol
             .GetAttributes()
             .Where(attr => attr.AttributeClass != null &&
-                           attr.AttributeClass.Name.Equals(typeof(ScriptableOrder).FullName))
+                           attr.AttributeClass.Name.Equals(ScriptableOrderName))
             .Select(attr =>
                 (uint)(attr.ConstructorArguments.First().Value ?? throw new Exception("Unexpected null index.")))
             .First();
@@ -339,20 +349,20 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
     /// <summary>
     ///     Top-level model which captures the semantics of a single [Scriptable] class or struct.
     /// </summary>
-    private readonly record struct Model
+    private record struct Model
     {
-        public required string Name { get; init; }
-        public required ValueEquatableList<DataModel> DataModels { get; init; }
+        public string Name { get; set; }
+        public ValueEquatableList<DataModel> DataModels { get; set; }
     }
 
     /// <summary>
     ///     Field/property-level model which captures the semantics of a single [ScriptableOrder] field or property.
     /// </summary>
-    private readonly record struct DataModel
+    private record struct DataModel
     {
-        public required string Name { get; init; }
-        public required string NativeType { get; init; }
-        public required uint Index { get; init; }
+        public string Name { get; set; }
+        public string NativeType { get; set; }
+        public uint Index { get; set; }
     }
 
     /// <summary>

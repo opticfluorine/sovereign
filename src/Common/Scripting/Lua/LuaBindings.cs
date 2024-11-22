@@ -149,6 +149,11 @@ public static partial class LuaBindings
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool lua_isuserdata(IntPtr luaState, int idx);
 
+    public static bool lua_isboolean(IntPtr luaState, int idx)
+    {
+        return lua_type(luaState, idx) == LuaType.Boolean;
+    }
+
     [LibraryImport(LibName)]
     public static partial LuaType lua_type(IntPtr luaState, int idx);
 
