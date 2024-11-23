@@ -61,7 +61,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
                         LibraryName = GetLibraryName(clsSymbol),
                         LibraryClass = GetClassForLibrary(clsSymbol),
                         LibraryShortClass = clsSymbol.Name,
-                        LibraryNamespace = clsSymbol.ContainingNamespace.Name
+                        LibraryNamespace = GetFullNamespace(clsSymbol.ContainingNamespace)
                     };
                 })
             .Combine(
@@ -87,13 +87,13 @@ public class LuaLibraryGenerator : IIncrementalGenerator
                                 LibraryClass = GetClassForFunction(function),
                                 ParameterModels = new ValueEquatableList<ParameterModel>(parameters.ToList()),
                                 ReturnTypeName =
-                                    $"{function.ReturnType.ContainingNamespace.Name}.{function.ReturnType.Name}",
+                                    $"{GetFullNamespace(function.ReturnType.ContainingNamespace)}.{function.ReturnType.Name}",
                                 ReturnTypeMarshallerClass = GetMarshallerClass(returnType)
                             };
                         })
                     .Collect()
             )
-            .Select(static (details, cToken) =>
+            .Select(static (details, _) =>
             {
                 // Filter down the set of functions to only those that are part of the current library.
                 var matches = details.Right
@@ -117,6 +117,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
         return new ParameterModel
         {
             Name = param.Name,
+            TypeName = $"{GetFullNamespace(typeSymbol.ContainingNamespace)}.{typeSymbol.Name}",
             MarshallerClass = GetMarshallerClass(typeSymbol)
         };
     }
@@ -210,9 +211,9 @@ public class LuaLibraryGenerator : IIncrementalGenerator
 
             class {libraryModel.LibraryShortClass}LuaLibrary
             {{
-                private {libraryModel.LibraryClass} _nativeLibrary;
+                private {libraryModel.LibraryShortClass} _nativeLibrary;
 
-                public {libraryModel.LibraryShortClass}LuaLibrary({libraryModel.LibraryClass} nativeLibrary)
+                public {libraryModel.LibraryShortClass}LuaLibrary({libraryModel.LibraryShortClass} nativeLibrary)
                 {{
                     _nativeLibrary = nativeLibrary;
                 }}
@@ -234,14 +235,13 @@ public class LuaLibraryGenerator : IIncrementalGenerator
         {
             sb.Append($@"
                 public int {function.MethodName}_Lua(IntPtr luaState)
-                {{
-            ");
+                {{");
 
             foreach (var param in function.ParameterModels.List)
                 sb.Append($@"
-                    {param.MarshallerClass}.Unmarshal(luaState, out var {param.Name});");
+                    {param.MarshallerClass}.Unmarshal(luaState, out {param.TypeName} {param.Name});");
 
-            var capture = function.ReturnTypeName == "void" ? "" : "var result = ";
+            var capture = function.ReturnTypeName == "System.Void" ? "" : "var result = ";
 
             sb.Append($@"
                     {capture}_nativeLibrary.{function.MethodName}(");
@@ -255,8 +255,9 @@ public class LuaLibraryGenerator : IIncrementalGenerator
 
             sb.Append(");");
 
-            if (function.ReturnTypeName != "void")
+            if (function.ReturnTypeName != "System.Void")
                 sb.Append($@"
+                    // return type = {function.ReturnTypeName}
                     {function.ReturnTypeMarshallerClass}.Marshal(luaState, result);");
 
             sb.Append(@"
@@ -269,6 +270,31 @@ public class LuaLibraryGenerator : IIncrementalGenerator
             }");
 
         context.AddSource($"{libraryModel.LibraryShortClass}LuaLibrary.g.cs", sb.ToString());
+    }
+
+    /// <summary>
+    ///     Gets the fully qualified name of the given namespace.
+    /// </summary>
+    /// <param name="namespaceSymbol">Namespace symbol.</param>
+    /// <returns>Fully qualified name of namespace.</returns>
+    private static string GetFullNamespace(INamespaceSymbol namespaceSymbol)
+    {
+        var namespaceStack = new Stack<string>();
+        var current = namespaceSymbol;
+        while (current != null)
+        {
+            namespaceStack.Push(current.Name);
+            current = current.ContainingNamespace;
+        }
+
+        var sb = new StringBuilder();
+        while (namespaceStack.Count > 0)
+        {
+            if (sb.Length > 0) sb.Append(".");
+            sb.Append(namespaceStack.Pop());
+        }
+
+        return sb.ToString();
     }
 
     /// <summary>
@@ -298,6 +324,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
     private record struct ParameterModel
     {
         public string Name { get; set; }
+        public string TypeName { get; set; }
         public string MarshallerClass { get; set; }
     }
 }
