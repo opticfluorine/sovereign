@@ -254,7 +254,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                 public static void Marshal(IntPtr luaState, Guid value, bool checkStack = true)
                 {{
                     if (checkStack) luaL_checkstack(luaState, 1, null);
-                    Marshal(luaState, Guid.ToString(), false);
+                    Marshal(luaState, value.ToString(), false);
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out Guid value)
