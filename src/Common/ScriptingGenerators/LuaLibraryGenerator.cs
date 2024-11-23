@@ -34,18 +34,18 @@ public class LuaLibraryGenerator : IIncrementalGenerator
     private const string ScriptableLibraryName = "ScriptableLibrary";
     private const string ScriptableFunctionFullName = "Sovereign.EngineUtil.Attributes.ScriptableFunction";
     private const string ScriptableFunctionName = "ScriptableFunction";
-    private const string DefaultMarshaller = "Sovereign.EngineUtil.LuaMarshaller";
+    private const string DefaultMarshaller = "Sovereign.EngineCore.Lua.LuaMarshaller";
 
     private static readonly List<string> predefinedTypes =
     [
-        "long", "ulong", "int", "uint", "short", "ushort", "byte", "float", "bool", "string",
-        "System.Numerics.Vector3", "System.Guid"
+        "System.Int64", "System.UInt64", "System.Int32", "System.UInt32", "System.Int16", "System.UInt16",
+        "System.Byte", "System.Single", "System.Boolean", "System.String", "System.Numerics.Vector3", "System.Guid"
     ];
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // This pipeline generates a series of input values, one per generated library,
-        // each containing the library information, its functions, and the compilation information.
+        // each containing the library information and its functions.
 
         // Start by gathering all the [ScriptableLibrary] classes.
         var pipeline = context.SyntaxProvider
@@ -60,7 +60,8 @@ public class LuaLibraryGenerator : IIncrementalGenerator
                     {
                         LibraryName = GetLibraryName(clsSymbol),
                         LibraryClass = GetClassForLibrary(clsSymbol),
-                        LibraryShortClass = clsSymbol.Name
+                        LibraryShortClass = clsSymbol.Name,
+                        LibraryNamespace = clsSymbol.ContainingNamespace.Name
                     };
                 })
             .Combine(
@@ -76,11 +77,18 @@ public class LuaLibraryGenerator : IIncrementalGenerator
                             var parameters = function.Parameters
                                 .Select(GetParameterModel);
 
+                            if (function.ReturnType is not INamedTypeSymbol returnType)
+                                throw new Exception("return type has no name");
+
                             return new FunctionModel
                             {
                                 FunctionName = GetFunctionName(function),
+                                MethodName = function.Name,
                                 LibraryClass = GetClassForFunction(function),
-                                ParameterModels = new ValueEquatableList<ParameterModel>(parameters.ToList())
+                                ParameterModels = new ValueEquatableList<ParameterModel>(parameters.ToList()),
+                                ReturnTypeName =
+                                    $"{function.ReturnType.ContainingNamespace.Name}.{function.ReturnType.Name}",
+                                ReturnTypeMarshallerClass = GetMarshallerClass(returnType)
                             };
                         })
                     .Collect()
@@ -91,12 +99,10 @@ public class LuaLibraryGenerator : IIncrementalGenerator
                 var matches = details.Right
                     .Where(f => f.LibraryClass == details.Left.LibraryClass);
                 return (details.Left, matches.ToImmutableArray());
-            })
-            // Finally combine with compilation details.
-            .Combine(context.CompilationProvider);
+            });
 
         context.RegisterSourceOutput(pipeline,
-            static (context, details) => GenerateSource(context, details.Left.Left, details.Left.Item2, details.Right));
+            static (context, details) => GenerateSource(context, details.Left, details.Item2));
     }
 
     /// <summary>
@@ -125,10 +131,10 @@ public class LuaLibraryGenerator : IIncrementalGenerator
         // Screen out fundamental types with no namespaces.
         if (typeSymbol.ContainingNamespace == null) return DefaultMarshaller;
 
-        var fullTypeName = $"{typeSymbol.ContainingNamespace}.{typeSymbol.Name}";
+        var fullTypeName = $"{typeSymbol.ContainingNamespace.Name}.{typeSymbol.Name}";
         if (predefinedTypes.Contains(fullTypeName)) return DefaultMarshaller;
 
-        return $"{typeSymbol.ContainingAssembly}.LuaMarshaller";
+        return $"{typeSymbol.ContainingAssembly.Name}.Lua.LuaMarshaller";
     }
 
     /// <summary>
@@ -191,11 +197,76 @@ public class LuaLibraryGenerator : IIncrementalGenerator
     /// <param name="context">Context.</param>
     /// <param name="libraryModel">Library model.</param>
     /// <param name="functionModels">Function models belonging to the library.</param>
-    /// <param name="compilation">Compilation details.</param>
     private static void GenerateSource(SourceProductionContext context, LibraryModel libraryModel,
-        ImmutableArray<FunctionModel> functionModels, Compilation compilation)
+        ImmutableArray<FunctionModel> functionModels)
     {
         var sb = new StringBuilder();
+
+        sb.Append($@"
+            using System;
+            using Sovereign.Scripting.Lua;
+
+            namespace {libraryModel.LibraryNamespace};
+
+            class {libraryModel.LibraryShortClass}LuaLibrary
+            {{
+                private {libraryModel.LibraryClass} _nativeLibrary;
+
+                public {libraryModel.LibraryShortClass}LuaLibrary({libraryModel.LibraryClass} nativeLibrary)
+                {{
+                    _nativeLibrary = nativeLibrary;
+                }}
+
+                public void Install(LuaHost luaHost)
+                {{
+                    luaHost.StartLibrary(""{libraryModel.LibraryName}"");");
+
+        foreach (var function in functionModels)
+            sb.Append($@"
+                    luaHost.AddLibraryFunction(""{function.FunctionName}"", {function.MethodName}_Lua);");
+
+        sb.Append(@"
+                    luaHost.EndLibrary();
+                }
+        ");
+
+        foreach (var function in functionModels)
+        {
+            sb.Append($@"
+                public int {function.MethodName}_Lua(IntPtr luaState)
+                {{
+            ");
+
+            foreach (var param in function.ParameterModels.List)
+                sb.Append($@"
+                    {param.MarshallerClass}.Unmarshal(luaState, out var {param.Name});");
+
+            var capture = function.ReturnTypeName == "void" ? "" : "var result = ";
+
+            sb.Append($@"
+                    {capture}_nativeLibrary.{function.MethodName}(");
+
+            for (var i = 0; i < function.ParameterModels.List.Count; ++i)
+            {
+                var param = function.ParameterModels.List[i];
+                var delim = i < function.ParameterModels.List.Count - 1 ? ", " : "";
+                sb.Append($"{param.Name}{delim}");
+            }
+
+            sb.Append(");");
+
+            if (function.ReturnTypeName != "void")
+                sb.Append($@"
+                    {function.ReturnTypeMarshallerClass}.Marshal(luaState, result);");
+
+            sb.Append(@"
+                    return 0;
+                }
+            ");
+        }
+
+        sb.Append(@"
+            }");
 
         context.AddSource($"{libraryModel.LibraryShortClass}LuaLibrary.g.cs", sb.ToString());
     }
@@ -208,6 +279,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
         public string LibraryName { get; set; }
         public string LibraryClass { get; set; }
         public string LibraryShortClass { get; set; }
+        public string LibraryNamespace { get; set; }
     }
 
     /// <summary>
@@ -216,6 +288,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
     private record struct FunctionModel
     {
         public string FunctionName { get; set; }
+        public string MethodName { get; set; }
         public string LibraryClass { get; set; }
         public string ReturnTypeName { get; set; }
         public string ReturnTypeMarshallerClass { get; set; }
