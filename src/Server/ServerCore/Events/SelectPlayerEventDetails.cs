@@ -29,7 +29,6 @@ public class SelectPlayerEventDetails : IEventDetails
     /// <summary>
     ///     Account ID.
     /// </summary>
-    [ScriptableOrder(0)]
     public Guid AccountId { get; set; }
 
     /// <summary>

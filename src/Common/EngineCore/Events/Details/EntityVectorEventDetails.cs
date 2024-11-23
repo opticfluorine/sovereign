@@ -17,6 +17,7 @@
 
 using System.Numerics;
 using MessagePack;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Events.Details;
 
@@ -24,17 +25,20 @@ namespace Sovereign.EngineCore.Events.Details;
 ///     Reusable event details for events with an entity ID and a Vector3.
 /// </summary>
 [MessagePackObject]
+[Scriptable]
 public sealed class EntityVectorEventDetails : IEventDetails
 {
     /// <summary>
     ///     Entity ID.
     /// </summary>
     [Key(0)]
+    [ScriptableOrder(0)]
     public ulong EntityId { get; set; }
 
     /// <summary>
     ///     Position.
     /// </summary>
     [Key(1)]
+    [ScriptableOrder(1)]
     public Vector3 Vector { get; set; }
 }

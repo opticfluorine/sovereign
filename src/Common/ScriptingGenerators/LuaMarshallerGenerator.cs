@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -31,7 +30,7 @@ namespace Sovereign.ScriptingGenerators;
 public class LuaMarshallerGenerator : IIncrementalGenerator
 {
     private const string ScriptableName = "Sovereign.EngineUtil.Attributes.Scriptable";
-    private const string ScriptableOrderName = "Sovereign.EngineUtil.Attributes.ScriptableOrder";
+    private const string ScriptableOrderName = "ScriptableOrder";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -97,6 +96,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
         // Preamble, class definition, marshallers for base types.
         sb.Append($@"
             using System;
+            using System.Numerics;
             using Sovereign.Scripting.Lua;
             using static Sovereign.Scripting.Lua.LuaBindings;
 
@@ -235,6 +235,34 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
+                public static void Marshal(IntPtr luaState, Vector3 value, bool checkStack = true)
+                {{
+                    if (checkStack) luaL_checkstack(luaState, 3, null);
+                    Marshal(luaState, value.X, false);
+                    Marshal(luaState, value.Y, false);
+                    Marshal(luaState, value.Z, false);
+                }}
+
+                public static void Unmarshal(IntPtr luaState, out Vector3 value)
+                {{
+                    value = new Vector3();
+                    Unmarshal(luaState, out value.Z);
+                    Unmarshal(luaState, out value.Y);
+                    Unmarshal(luaState, out value.X);
+                }}
+
+                public static void Marshal(IntPtr luaState, Guid value, bool checkStack = true)
+                {{
+                    if (checkStack) luaL_checkstack(luaState, 1, null);
+                    Marshal(luaState, Guid.ToString(), false);
+                }}
+
+                public static void Unmarshal(IntPtr luaState, out Guid value)
+                {{
+                    Unmarshal(luaState, out string guidString);
+                    value = new Guid(guidString);
+                }}
+
             ");
 
         // Classes and structs.
@@ -271,8 +299,8 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
             }
 
             sb.Append(@"
-                value = tmp;
-            }
+                    value = tmp;
+                }
 
             ");
         }
@@ -363,44 +391,5 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
         public string Name { get; set; }
         public string NativeType { get; set; }
         public uint Index { get; set; }
-    }
-
-    /// <summary>
-    ///     Value-equatable wrapper around a generic List.
-    /// </summary>
-    /// <typeparam name="T">Element type.</typeparam>
-    private readonly struct ValueEquatableList<T> : IEquatable<ValueEquatableList<T>>
-    {
-        public List<T> List { get; }
-
-        public ValueEquatableList(List<T> list)
-        {
-            List = list;
-        }
-
-        public bool Equals(ValueEquatableList<T> other)
-        {
-            return List.SequenceEqual(other.List);
-        }
-
-        public override bool Equals(object? obj)
-        {
-            return obj is ValueEquatableList<T> other && Equals(other);
-        }
-
-        public override int GetHashCode()
-        {
-            return List.GetHashCode();
-        }
-
-        public static bool operator ==(ValueEquatableList<T> left, ValueEquatableList<T> right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(ValueEquatableList<T> left, ValueEquatableList<T> right)
-        {
-            return !left.Equals(right);
-        }
     }
 }

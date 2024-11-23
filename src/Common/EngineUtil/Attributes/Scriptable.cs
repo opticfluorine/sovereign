@@ -46,3 +46,30 @@ public class ScriptableOrder : Attribute
     /// </summary>
     public uint Index { get; }
 }
+
+/// <summary>
+///     Designates a class as being intended for export to Lua as a library.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+public class ScriptableLibrary : Attribute
+{
+    public ScriptableLibrary(string name)
+    {
+        Name = name;
+    }
+
+    public string Name { get; }
+}
+
+/// <summary>
+///     Designates a method in a [ScriptableLibrary] class as a target for export to Lua.
+/// </summary>
+public class ScriptableFunction : Attribute
+{
+    public ScriptableFunction(string name)
+    {
+        Name = name;
+    }
+
+    public string Name { get; }
+}
