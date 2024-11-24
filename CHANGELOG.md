@@ -4,6 +4,12 @@
 
 ### November
 
+#### 23 November 2024
+
+* Scripting: Made additional progress on Lua scripting backend for the server. Added some source
+  generators to automatically create bindings between interface provider classes in the systems
+  and the Lua scripting backend.
+
 #### 14 November 2024
 
 * Optimization: Move checks for the `Drawable` tag out of the renderer's main loop and into

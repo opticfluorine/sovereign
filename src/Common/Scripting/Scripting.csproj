@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0-3.final"/>
+        <ProjectReference Include="..\EngineUtil\EngineUtil.csproj"/>
     </ItemGroup>
 
 </Project>

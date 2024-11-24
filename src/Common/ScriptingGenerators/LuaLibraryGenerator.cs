@@ -209,7 +209,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
 
             namespace {libraryModel.LibraryNamespace};
 
-            class {libraryModel.LibraryShortClass}LuaLibrary
+            class {libraryModel.LibraryShortClass}LuaLibrary : ILuaLibrary
             {{
                 private {libraryModel.LibraryShortClass} _nativeLibrary;
 
