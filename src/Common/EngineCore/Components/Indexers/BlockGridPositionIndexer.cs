@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
@@ -24,7 +24,8 @@ namespace Sovereign.EngineCore.Components.Indexers;
 /// </summary>
 public sealed class BlockGridPositionIndexer : BaseGridPositionIndexer
 {
-    public BlockGridPositionIndexer(BlockPositionComponentCollection blockPositions, ILogger logger)
+    public BlockGridPositionIndexer(BlockPositionComponentCollection blockPositions,
+        ILogger<BlockGridPositionIndexer> logger)
         : base(blockPositions, blockPositions, logger)
     {
     }

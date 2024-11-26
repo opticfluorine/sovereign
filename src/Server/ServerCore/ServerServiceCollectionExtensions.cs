@@ -18,8 +18,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Logging;
+using Sovereign.EngineCore.Resources;
+using Sovereign.EngineCore.Timing;
 using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Entities;
+using Sovereign.ServerCore.Logging;
+using Sovereign.ServerCore.Resources;
+using Sovereign.ServerCore.Timing;
 
 namespace Sovereign.ServerCore;
 
@@ -39,5 +45,8 @@ public static class ServerServiceCollectionExtensions
     {
         services.TryAddSingleton<IEntityFactory, ServerEntityFactory>();
         services.TryAddSingleton<IEngineConfiguration, ServerEngineConfiguration>();
+        services.TryAddSingleton<IErrorHandler, ServerErrorHandler>();
+        services.TryAddSingleton<IResourcePathBuilder, ServerResourcePathBuilder>();
+        services.TryAddSingleton<ISystemTimer, ServerSystemTimer>();
     }
 }

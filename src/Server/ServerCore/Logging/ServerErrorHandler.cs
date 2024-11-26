@@ -15,23 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using Sovereign.EngineCore.Logging;
 
-namespace Sovereign.EngineCore.Systems.Block;
+namespace Sovereign.ServerCore.Logging;
 
 /// <summary>
-///     IoC installer for the block system.
+///     Server-side error handler (no-op).
 /// </summary>
-public sealed class BlockSystemInstaller : IWindsorInstaller
+public class ServerErrorHandler : IErrorHandler
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
+    public void Error(string message)
     {
-        container.Register(Component.For<BlockEventHandler>().LifestyleSingleton());
-        container.Register(Component.For<BlockController>().LifestyleSingleton());
-        container.Register(Component.For<BlockManager>().LifestyleSingleton());
-        container.Register(Component.For<BlockServices>().LifestyleSingleton());
-        container.Register(Component.For<BlockNoticeProcessor>().LifestyleSingleton());
     }
 }

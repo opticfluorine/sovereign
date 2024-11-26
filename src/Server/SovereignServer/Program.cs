@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Sovereign.EngineCore;
@@ -23,7 +24,11 @@ using Sovereign.ServerCore;
 var builder = Host.CreateApplicationBuilder(args);
 
 // Configure logging.
-builder.Logging.AddSerilog();
+_ = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+builder.Services.AddLogging(
+    loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
 
 // Configure Sovereign Engine.
 builder.Services

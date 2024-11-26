@@ -16,7 +16,7 @@
  */
 
 using System.Collections.Concurrent;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
@@ -104,7 +104,7 @@ public class BaseGridPositionIndexer : BaseComponentIndexer<GridPosition>
     {
         if (!knownPositions.TryGetValue(entityId, out var gridPos))
         {
-            logger.ErrorFormat("Could not find entity {0:X} to remove.", entityId);
+            logger.LogError("Could not find entity {0:X} to remove.", entityId);
             return;
         }
 

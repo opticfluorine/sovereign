@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Logging;
 
 namespace Sovereign.EngineCore.Components.Indexers;
@@ -25,6 +25,7 @@ namespace Sovereign.EngineCore.Components.Indexers;
 /// </summary>
 public class BlockTemplateNameComponentIndexer : BaseComponentIndexer<string>
 {
+    private readonly ILogger<BlockTemplateNameComponentIndexer> logger;
     private readonly LoggingUtil loggingUtil;
 
     /// <summary>
@@ -38,13 +39,12 @@ public class BlockTemplateNameComponentIndexer : BaseComponentIndexer<string>
     private readonly Dictionary<ulong, string> reverseMap = new();
 
     public BlockTemplateNameComponentIndexer(NameComponentCollection names, BlockTemplateNameComponentFilter filter,
-        LoggingUtil loggingUtil)
+        LoggingUtil loggingUtil, ILogger<BlockTemplateNameComponentIndexer> logger)
         : base(names, filter)
     {
         this.loggingUtil = loggingUtil;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Tries to get the block template entity with the given entity, if any. A case-insensitive
@@ -64,7 +64,7 @@ public class BlockTemplateNameComponentIndexer : BaseComponentIndexer<string>
         var lowerName = componentValue.ToLower();
         if (namedBlocks.TryGetValue(lowerName, out var otherEntityId))
         {
-            Logger.WarnFormat("Entity {0} conflicts with entity {1}; it will not be searchable by name.",
+            logger.LogWarning("Entity {0} conflicts with entity {1}; it will not be searchable by name.",
                 componentValue, loggingUtil.FormatEntity(entityId));
             return;
         }

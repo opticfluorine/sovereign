@@ -16,16 +16,38 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Sovereign.ClientCore.Configuration;
+using Sovereign.ClientCore.Entities;
 using Sovereign.ClientCore.Events;
+using Sovereign.ClientCore.Logging;
+using Sovereign.ClientCore.Rendering;
+using Sovereign.ClientCore.Resources;
+using Sovereign.ClientCore.Timing;
+using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Logging;
+using Sovereign.EngineCore.Main;
+using Sovereign.EngineCore.Resources;
+using Sovereign.EngineCore.Timing;
 
 namespace Sovereign.ClientCore;
 
+/// <summary>
+///     Manages service registration for Sovereign.ClientCore.
+/// </summary>
 public static class ClientServiceCollectionExtensions
 {
+    /// <summary>
+    ///     Adds Sovereign.ClientCore classes to the service collection.
+    /// </summary>
+    /// <param name="services">Service collection.</param>
+    /// <returns>Service collection.</returns>
     public static IServiceCollection AddSovereignClient(this IServiceCollection services)
     {
+        AddClientImplementations(services);
         AddEvents(services);
+        AddMain(services);
 
         return services;
     }
@@ -33,5 +55,19 @@ public static class ClientServiceCollectionExtensions
     private static void AddEvents(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IEventAdapter, SDLEventAdapter>());
+    }
+
+    private static void AddClientImplementations(IServiceCollection services)
+    {
+        services.TryAddSingleton<IErrorHandler, ErrorHandler>();
+        services.TryAddSingleton<IEntityFactory, ClientEntityFactory>();
+        services.TryAddSingleton<IEngineConfiguration, ClientEngineConfiguration>();
+        services.TryAddSingleton<IResourcePathBuilder, ClientResourcePathBuilder>();
+        services.TryAddSingleton<ISystemTimer, SDLSystemTimer>();
+    }
+
+    private static void AddMain(IServiceCollection services)
+    {
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IMainLoopAction, RenderingMainLoopAction>());
     }
 }

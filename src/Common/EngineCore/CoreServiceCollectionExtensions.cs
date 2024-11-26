@@ -23,7 +23,17 @@ using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details.Validators;
+using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
+using Sovereign.EngineCore.Performance;
+using Sovereign.EngineCore.Player;
+using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Systems.Block;
+using Sovereign.EngineCore.Systems.Movement;
+using Sovereign.EngineCore.Systems.Performance;
+using Sovereign.EngineCore.Systems.WorldManagement;
+using Sovereign.EngineCore.Timing;
+using Sovereign.EngineCore.World;
 
 namespace Sovereign.EngineCore;
 
@@ -46,6 +56,13 @@ public static class CoreServiceCollectionExtensions
         AddEntities(services);
         AddEvents(services);
         AddEventValidators(services);
+        AddLogging(services);
+        AddMain(services);
+        AddPerformance(services);
+        AddPlayer(services);
+        AddSystems(services);
+        AddTiming(services);
+        AddWorld(services);
 
         return services;
     }
@@ -147,5 +164,78 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<SystemChatEventDetailsValidator>();
         services.TryAddSingleton<TemplateEntityDefinitionEventDetailsValidator>();
         services.TryAddSingleton<WorldSegmentSubscriptionEventDetailsValidator>();
+    }
+
+    private static void AddLogging(IServiceCollection services)
+    {
+        services.TryAddSingleton<LoggingUtil>();
+    }
+
+    private static void AddMain(IServiceCollection services)
+    {
+        services.TryAddTransient<FatalErrorHandler>();
+        services.TryAddSingleton<CoreController>();
+    }
+
+    private static void AddPerformance(IServiceCollection services)
+    {
+        services.TryAddSingleton<EventLatencyPerformanceMonitor>();
+    }
+
+    private static void AddPlayer(IServiceCollection services)
+    {
+        services.TryAddSingleton<PlayerRoleCheck>();
+    }
+
+    private static void AddSystems(IServiceCollection services)
+    {
+        services.TryAddSingleton<SystemManager>();
+        services.TryAddTransient<SystemExecutor>();
+
+        AddBlockSystem(services);
+        AddMovementSystem(services);
+        AddPerformanceSystem(services);
+        AddWorldManagementSystem(services);
+    }
+
+    private static void AddBlockSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<BlockEventHandler>();
+        services.TryAddSingleton<BlockController>();
+        services.TryAddSingleton<BlockManager>();
+        services.TryAddSingleton<BlockServices>();
+        services.TryAddSingleton<BlockNoticeProcessor>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, BlockSystem>());
+    }
+
+    private static void AddMovementSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<MovementEventHandler>();
+        services.TryAddSingleton<MovementController>();
+        services.TryAddSingleton<MovementManager>();
+        services.TryAddSingleton<MovementInternalController>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, MovementSystem>());
+    }
+
+    private static void AddPerformanceSystem(IServiceCollection services)
+    {
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PerformanceSystem>());
+    }
+
+    private static void AddWorldManagementSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<WorldSegmentBlockDataLoader>();
+        services.TryAddSingleton<CoreWorldManagementController>();
+    }
+
+    private static void AddTiming(IServiceCollection services)
+    {
+        services.TryAddSingleton<TimeManager>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ITimedAction, EventTimedAction>());
+    }
+
+    private static void AddWorld(IServiceCollection services)
+    {
+        services.TryAddSingleton<WorldSegmentResolver>();
     }
 }
