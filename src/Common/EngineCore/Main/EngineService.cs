@@ -17,7 +17,9 @@
 
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Castle.Core.Logging;
+using Microsoft.Extensions.Hosting;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Timing;
 
@@ -26,7 +28,7 @@ namespace Sovereign.EngineCore.Main;
 /// <summary>
 ///     Runs the engine.
 /// </summary>
-public class EngineBase : IEngineBase
+public class EngineService : BackgroundService
 {
     private readonly EventDescriptions eventDescriptions;
 
@@ -47,7 +49,7 @@ public class EngineBase : IEngineBase
     /// </summary>
     private ulong cycleCount;
 
-    public EngineBase(IEventLoop eventLoop, TimeManager timeManager, IList<IMainLoopAction> mainLoopActions,
+    public EngineService(IEventLoop eventLoop, TimeManager timeManager, IList<IMainLoopAction> mainLoopActions,
         ConsoleEventAdapter eventAdapter, EventDescriptions eventDescriptions)
     {
         this.eventLoop = eventLoop;
@@ -58,7 +60,16 @@ public class EngineBase : IEngineBase
 
     public ILogger Logger { private get; set; } = NullLogger.Instance;
 
-    public void Run()
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await Task.Run(() => Run(stoppingToken));
+    }
+
+    /// <summary>
+    ///     Runs the engine.
+    /// </summary>
+    /// <param name="stoppingToken">Cancellation token.</param>
+    private void Run(CancellationToken stoppingToken)
     {
         /* Output diagnostic info. */
         LogDiagnostics();
@@ -75,7 +86,7 @@ public class EngineBase : IEngineBase
 #endif
 
         /* Run the engine. */
-        RunEngine();
+        RunEngine(stoppingToken);
 
         /* Stop the engine. */
         Logger.Info("EngineBase is stopping.");
@@ -93,10 +104,11 @@ public class EngineBase : IEngineBase
     /// <summary>
     ///     Runs the engine.
     /// </summary>
-    private void RunEngine()
+    /// <param name="stoppingToken">Cancellation token.</param>
+    private void RunEngine(CancellationToken stoppingToken)
     {
         /* Enter the main loop. */
-        while (!eventLoop.Terminated)
+        while (!eventLoop.Terminated && !stoppingToken.IsCancellationRequested)
         {
             /* Process any timed actions on the main thread. */
             timeManager.AdvanceTime();

@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2023 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,17 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Sovereign.ClientCore.Events;
+using Sovereign.EngineCore.Events;
 
-namespace Sovereign.EngineCore.Components.Validators;
+namespace Sovereign.ClientCore;
 
-public class ComponentValidatorInstaller : IWindsorInstaller
+public static class ClientServiceCollectionExtensions
 {
-    public void Install(IWindsorContainer container, IConfigurationStore store)
+    public static IServiceCollection AddSovereignClient(this IServiceCollection services)
     {
-        container.Register(Component.For<NameComponentValidator>().LifestyleSingleton());
-        container.Register(Component.For<PointLightComponentValidator>().LifestyleSingleton());
+        AddEvents(services);
+
+        return services;
+    }
+
+    private static void AddEvents(IServiceCollection services)
+    {
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IEventAdapter, SDLEventAdapter>());
     }
 }

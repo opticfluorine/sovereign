@@ -10,11 +10,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Castle.Core" Version="5.1.1"/>
-        <PackageReference Include="Castle.Core-log4net" Version="5.1.1"/>
-        <PackageReference Include="Castle.LoggingFacility" Version="6.0.0"/>
-        <PackageReference Include="Castle.Windsor" Version="6.0.0"/>
         <PackageReference Include="MessagePack" Version="2.5.187"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0"/>
+        <PackageReference Include="Serilog" Version="4.1.0"/>
+        <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.1-dev-10410"/>
+        <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.4"/>
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0"/>
         <PackageReference Include="System.Numerics.Vectors" Version="4.5.0"/>
         <PackageReference Include="System.Text.Json" Version="9.0.0"/>
         <PackageReference Include="YamlDotNet" Version="13.1.1"/>
