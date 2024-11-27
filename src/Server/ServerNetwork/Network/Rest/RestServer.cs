@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.ServerNetwork.Configuration;
 using WatsonWebserver;
@@ -41,6 +42,7 @@ public sealed class RestServer : IDisposable
         };
 
     private readonly FatalErrorHandler fatalErrorHandler;
+    private readonly ILogger<RestServer> logger;
     private readonly IServerNetworkConfiguration networkConfiguration;
 
     /// <summary>
@@ -48,15 +50,17 @@ public sealed class RestServer : IDisposable
     /// </summary>
     private readonly Lazy<Webserver> restServer;
 
-    private readonly ICollection<IRestService> restServices;
+    private readonly IEnumerable<IRestService> restServices;
 
     public RestServer(IServerNetworkConfiguration networkConfiguration,
-        ICollection<IRestService> restServices,
-        FatalErrorHandler fatalErrorHandler)
+        IEnumerable<IRestService> restServices,
+        FatalErrorHandler fatalErrorHandler,
+        ILogger<RestServer> logger)
     {
         this.networkConfiguration = networkConfiguration;
         this.restServices = restServices;
         this.fatalErrorHandler = fatalErrorHandler;
+        this.logger = logger;
 
         restServer = new Lazy<Webserver>(() =>
         {
@@ -64,8 +68,6 @@ public sealed class RestServer : IDisposable
                 networkConfiguration.RestPort), OnUnmappedRequest);
         });
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void Dispose()
     {
@@ -102,13 +104,13 @@ public sealed class RestServer : IDisposable
                         break;
                 }
 
-            logger.LogInformation("Started REST server on {0}:{1}.",
+            logger.LogInformation("Started REST server on {Host}:{Port}.",
                 networkConfiguration.RestHostname,
                 networkConfiguration.RestPort);
         }
         catch (Exception e)
         {
-            logger.LogCritical("Failed to create REST server.", e);
+            logger.LogCritical(e, "Failed to create REST server.");
             fatalErrorHandler.FatalError();
         }
     }
@@ -120,7 +122,7 @@ public sealed class RestServer : IDisposable
     /// <returns>Task for sending response.</returns>
     private async Task OnUnmappedRequest(HttpContextBase ctx)
     {
-        logger.LogDebug("REST server returned 404 for {0} request at {1} from {2}.",
+        logger.LogDebug("REST server returned 404 for {Method} request at {Url} from {Ip}.",
             ctx.Request.Method.ToString(), ctx.Request.Url.Full, ctx.Request.Source.IpAddress);
 
         ctx.Response.StatusCode = 404;

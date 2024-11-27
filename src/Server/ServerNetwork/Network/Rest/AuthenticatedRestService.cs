@@ -16,6 +16,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest;
@@ -26,13 +27,13 @@ namespace Sovereign.ServerNetwork.Network.Rest;
 public abstract class AuthenticatedRestService : IRestService
 {
     private readonly RestAuthenticator authenticator;
+    protected readonly ILogger logger;
 
-    public AuthenticatedRestService(RestAuthenticator authenticator)
+    public AuthenticatedRestService(RestAuthenticator authenticator, ILogger logger)
     {
         this.authenticator = authenticator;
+        this.logger = logger;
     }
-
-    public ILogger Logger { protected get; set; } = NullLogger.Instance;
 
     public abstract string Path { get; }
     public abstract RestPathType PathType { get; }
@@ -53,7 +54,7 @@ public abstract class AuthenticatedRestService : IRestService
 
             case RestAuthenticationResult.Denied:
             default:
-                logger.LogInformation("403 Forbidden - {0} for {1}", ctx.Request.Source.IpAddress,
+                logger.LogInformation("403 Forbidden - {Ip} for {Url}", ctx.Request.Source.IpAddress,
                     ctx.Request.Url.Full);
                 ctx.Response.StatusCode = 403;
                 await ctx.Response.Send();

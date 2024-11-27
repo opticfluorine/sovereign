@@ -17,6 +17,7 @@
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.Accounts.Systems.Accounts;
 using Sovereign.EngineCore.Events;
@@ -36,19 +37,18 @@ public class SelectPlayerRestService : AuthenticatedRestService
     /// <summary>
     ///     Maximum request length, in bytes.
     /// </summary>
-    private const int MAX_REQUEST_LENGTH = 0;
+    private const int MaxRequestLength = 0;
 
     private readonly AccountsController accountsController;
     private readonly AccountServices accountServices;
     private readonly IEventSender eventSender;
     private readonly PersistenceProviderManager persistenceProviderManager;
-
     private readonly PersistencePlayerServices playerServices;
 
     public SelectPlayerRestService(RestAuthenticator authenticator, PersistencePlayerServices playerServices,
         AccountsController accountsController, IEventSender eventSender, AccountServices accountServices,
-        PersistenceProviderManager persistenceProviderManager) :
-        base(authenticator)
+        PersistenceProviderManager persistenceProviderManager, ILogger<SelectPlayerRestService> logger) :
+        base(authenticator, logger)
     {
         this.playerServices = playerServices;
         this.accountsController = accountsController;
@@ -66,7 +66,7 @@ public class SelectPlayerRestService : AuthenticatedRestService
         try
         {
             // Safety check.
-            if (ctx.Request.ContentLength > MAX_REQUEST_LENGTH)
+            if (ctx.Request.ContentLength > MaxRequestLength)
             {
                 await SendResponse(ctx, 413, "Request too large.");
                 return;
@@ -123,14 +123,14 @@ public class SelectPlayerRestService : AuthenticatedRestService
         }
         catch (Exception e)
         {
-            logger.LogError("Error handling select player request.", e);
+            logger.LogError(e, "Error handling select player request.");
             try
             {
                 await SendResponse(ctx, 500, "Error processing request.");
             }
             catch (Exception e2)
             {
-                logger.LogError("Error sending error response.", e2);
+                logger.LogError(e2, "Error sending error response.");
             }
         }
     }

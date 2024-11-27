@@ -17,6 +17,7 @@
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Players;
@@ -36,8 +37,9 @@ public class DeletePlayerRestService : AuthenticatedRestService
 
     private readonly PersistencePlayerServices playerServices;
 
-    public DeletePlayerRestService(RestAuthenticator authenticator, PersistencePlayerServices playerServices) :
-        base(authenticator)
+    public DeletePlayerRestService(RestAuthenticator authenticator, PersistencePlayerServices playerServices,
+        ILogger<DeletePlayerRestService> logger) :
+        base(authenticator, logger)
     {
         this.playerServices = playerServices;
     }
@@ -96,14 +98,14 @@ public class DeletePlayerRestService : AuthenticatedRestService
         }
         catch (Exception e)
         {
-            logger.LogError("Error handling delete player request.", e);
+            logger.LogError(e, "Error handling delete player request.");
             try
             {
                 await SendResponse(ctx, 500, "Error processing request.");
             }
             catch (Exception e2)
             {
-                logger.LogError("Error sending error response.", e2);
+                logger.LogError(e2, "Error sending error response.");
             }
         }
     }

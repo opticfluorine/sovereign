@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
@@ -29,14 +29,14 @@ namespace Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
 public class SingleEntityConnectionMapperFactory
 {
     private readonly NetworkConnectionManager connectionManager;
+    private readonly ILogger<SingleEntityConnectionMapperFactory> logger;
 
-    public SingleEntityConnectionMapperFactory(
-        NetworkConnectionManager connectionManager)
+    public SingleEntityConnectionMapperFactory(NetworkConnectionManager connectionManager,
+        ILogger<SingleEntityConnectionMapperFactory> logger)
     {
         this.connectionManager = connectionManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Creates a connection mapper.
@@ -45,6 +45,6 @@ public class SingleEntityConnectionMapperFactory
     /// <returns>Connection mapper.</returns>
     public SingleEntityConnectionMapper Create(Func<OutboundEventInfo, Maybe<int>> mapper)
     {
-        return new SingleEntityConnectionMapper(connectionManager, Logger, mapper);
+        return new SingleEntityConnectionMapper(connectionManager, logger, mapper);
     }
 }

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.World;
@@ -34,6 +34,7 @@ public class EntityWorldSegmentConnectionMapperFactory
     private readonly AccountServices accountServices;
     private readonly NetworkConnectionManager connectionManager;
     private readonly KinematicComponentCollection kinematics;
+    private readonly ILogger<EntityWorldSegmentConnectionMapperFactory> logger;
     private readonly WorldSegmentResolver resolver;
     private readonly WorldManagementServices worldManagementServices;
 
@@ -42,16 +43,16 @@ public class EntityWorldSegmentConnectionMapperFactory
         WorldSegmentResolver resolver,
         WorldManagementServices worldManagementServices,
         NetworkConnectionManager connectionManager,
-        AccountServices accountServices)
+        AccountServices accountServices,
+        ILogger<EntityWorldSegmentConnectionMapperFactory> logger)
     {
         this.kinematics = kinematics;
         this.resolver = resolver;
         this.worldManagementServices = worldManagementServices;
         this.connectionManager = connectionManager;
         this.accountServices = accountServices;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Creates an entity-based world segment resolver.
@@ -63,6 +64,6 @@ public class EntityWorldSegmentConnectionMapperFactory
     {
         return new EntityWorldSegmentConnectionMapper(
             kinematics, resolver, worldManagementServices, connectionManager,
-            accountServices, Logger, entitySelector);
+            accountServices, logger, entitySelector);
     }
 }

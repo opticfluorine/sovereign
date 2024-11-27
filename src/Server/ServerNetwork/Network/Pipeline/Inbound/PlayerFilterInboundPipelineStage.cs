@@ -16,12 +16,14 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Player;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerNetwork.Network.Pipeline.Inbound;
 
@@ -32,17 +34,19 @@ namespace Sovereign.ServerNetwork.Network.Pipeline.Inbound;
 public class PlayerFilterInboundPipelineStage : IInboundPipelineStage
 {
     private readonly AccountServices accountServices;
+    private readonly ILogger<PlayerFilterInboundPipelineStage> logger;
     private readonly LoggingUtil loggingUtil;
 
     private readonly Dictionary<EventId, Func<ulong, bool>> mappers;
     private readonly PlayerRoleCheck roleCheck;
 
     public PlayerFilterInboundPipelineStage(AccountServices accountServices, PlayerRoleCheck roleCheck,
-        LoggingUtil loggingUtil)
+        LoggingUtil loggingUtil, ILogger<PlayerFilterInboundPipelineStage> logger)
     {
         this.accountServices = accountServices;
         this.roleCheck = roleCheck;
         this.loggingUtil = loggingUtil;
+        this.logger = logger;
 
         mappers = new Dictionary<EventId, Func<ulong, bool>>
         {
@@ -50,8 +54,6 @@ public class PlayerFilterInboundPipelineStage : IInboundPipelineStage
             { EventId.Server_WorldEdit_RemoveBlock, RequireAdmin }
         };
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public int Priority => 50;
     public IInboundPipelineStage? NextStage { get; set; }
@@ -76,7 +78,7 @@ public class PlayerFilterInboundPipelineStage : IInboundPipelineStage
     {
         if (!roleCheck.IsPlayerAdmin(playerEntityId))
         {
-            logger.LogWarning("Admin-only event rejected for non-admin player {0}.",
+            logger.LogWarning("Admin-only event rejected for non-admin player {Name}.",
                 loggingUtil.FormatEntity(playerEntityId));
             return false;
         }

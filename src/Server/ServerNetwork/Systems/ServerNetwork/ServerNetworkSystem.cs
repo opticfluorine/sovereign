@@ -15,32 +15,35 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.ServerCore.Events;
 using Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
-namespace Sovereign.ServerNetwork.Network.ServerNetwork;
+namespace Sovereign.ServerNetwork.Systems.ServerNetwork;
 
 /// <summary>
 ///     Responsible for managing network resources at the server.
 /// </summary>
 public class ServerNetworkSystem : ISystem
 {
+    private readonly ILogger<ServerNetworkSystem> logger;
     private readonly INetworkManager networkManager;
     private readonly RegionalConnectionMapCache regionalConnectionMapCache;
 
     public ServerNetworkSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop,
-        INetworkManager networkManager, RegionalConnectionMapCache regionalConnectionMapCache)
+        INetworkManager networkManager, RegionalConnectionMapCache regionalConnectionMapCache,
+        ILogger<ServerNetworkSystem> logger)
     {
         this.networkManager = networkManager;
         this.regionalConnectionMapCache = regionalConnectionMapCache;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 

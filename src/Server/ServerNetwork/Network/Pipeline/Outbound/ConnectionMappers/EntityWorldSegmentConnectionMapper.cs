@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.World;
@@ -70,14 +70,14 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
         var entityId = entitySelector.Invoke(evInfo);
         if (!entityId.HasValue)
         {
-            logger.ErrorFormat("Could not retrieve entity ID from event details for event type {0}.",
+            logger.LogError("Could not retrieve entity ID from event details for event type {Id}.",
                 evInfo.Event.EventId);
             return;
         }
 
         if (!kinematics.HasComponentForEntity(entityId.Value))
         {
-            logger.ErrorFormat("Can't broadcast to world segment for non-positioned entity {0}.", entityId);
+            logger.LogError("Can't broadcast to world segment for non-positioned entity {Id}.", entityId);
             return;
         }
 

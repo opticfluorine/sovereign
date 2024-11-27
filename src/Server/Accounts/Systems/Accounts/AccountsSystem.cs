@@ -16,11 +16,13 @@
  */
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 using Sovereign.ServerCore.Events;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.Accounts.Systems.Accounts;
 
@@ -31,9 +33,10 @@ public sealed class AccountsSystem : ISystem
     /// <summary>
     ///     Number of ticks between subsequent limiter purges.
     /// </summary>
-    private const int TICKS_BETWEEN_PURGES = 30;
+    private const int TicksBetweenPurges = 30;
 
     private readonly AuthenticationAttemptLimiter attemptLimiter;
+    private readonly ILogger<AccountsSystem> logger;
 
     private readonly AccountLoginTracker loginTracker;
 
@@ -48,17 +51,17 @@ public sealed class AccountsSystem : ISystem
         EventCommunicator eventCommunicator,
         AuthenticationAttemptLimiter attemptLimiter,
         SharedSecretManager sharedSecretManager,
-        AccountLoginTracker loginTracker)
+        AccountLoginTracker loginTracker,
+        ILogger<AccountsSystem> logger)
     {
         this.attemptLimiter = attemptLimiter;
         this.sharedSecretManager = sharedSecretManager;
         this.loginTracker = loginTracker;
+        this.logger = logger;
 
         EventCommunicator = eventCommunicator;
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 
@@ -161,7 +164,7 @@ public sealed class AccountsSystem : ISystem
     {
         // TODO Switch to a time-based purge with a delayed event instead of tick polling.
         ticksSincePurge++;
-        if (ticksSincePurge > TICKS_BETWEEN_PURGES)
+        if (ticksSincePurge > TicksBetweenPurges)
         {
             attemptLimiter.PurgeExpiredRecords();
             sharedSecretManager.PurgeOldSecrets();

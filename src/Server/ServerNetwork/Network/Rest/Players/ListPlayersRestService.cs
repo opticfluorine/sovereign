@@ -18,6 +18,7 @@ using System;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Players;
@@ -32,8 +33,9 @@ public class ListPlayersRestService : AuthenticatedRestService
 {
     private readonly PersistencePlayerServices playerServices;
 
-    public ListPlayersRestService(RestAuthenticator authenticator, PersistencePlayerServices playerServices) :
-        base(authenticator)
+    public ListPlayersRestService(RestAuthenticator authenticator, PersistencePlayerServices playerServices,
+        ILogger<ListPlayersRestService> logger) :
+        base(authenticator, logger)
     {
         this.playerServices = playerServices;
     }
@@ -55,7 +57,7 @@ public class ListPlayersRestService : AuthenticatedRestService
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception while handling ListPlayers for account ID {0}.", accountId);
+            logger.LogError(e, "Exception while handling ListPlayers for account ID {Id}.", accountId);
             try
             {
                 ctx.Response.StatusCode = 500;
@@ -63,7 +65,7 @@ public class ListPlayersRestService : AuthenticatedRestService
             }
             catch (Exception e2)
             {
-                logger.LogError(e2, "Exception while sending error 500 during ListPlayers for account ID {0}.",
+                logger.LogError(e2, "Exception while sending error 500 during ListPlayers for account ID {Id}.",
                     accountId);
             }
         }

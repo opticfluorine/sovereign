@@ -15,10 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
 using Sovereign.ServerNetwork.Network.ServerNetwork;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerNetwork.Network.Pipeline.Inbound;
 
@@ -43,16 +45,17 @@ public class ServerAllowedEventsInboundPipelineStage : IInboundPipelineStage
     };
 
     private readonly IEventSender eventSender;
+    private readonly ILogger<ServerAllowedEventsInboundPipelineStage> logger;
 
     private readonly ServerNetworkController networkController;
 
-    public ServerAllowedEventsInboundPipelineStage(IEventSender eventSender, ServerNetworkController networkController)
+    public ServerAllowedEventsInboundPipelineStage(IEventSender eventSender, ServerNetworkController networkController,
+        ILogger<ServerAllowedEventsInboundPipelineStage> logger)
     {
         this.eventSender = eventSender;
         this.networkController = networkController;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public int Priority => int.MinValue; // always first stage
     public IInboundPipelineStage? NextStage { get; set; }
@@ -67,7 +70,7 @@ public class ServerAllowedEventsInboundPipelineStage : IInboundPipelineStage
         else
         {
             // Event type is not permitted, log warning and drop the event.
-            logger.LogWarning("Rejecting network event with ID {0} not found on allowlist.", ev.EventId);
+            logger.LogWarning("Rejecting network event with ID {Id} not found on allowlist.", ev.EventId);
 
             // This is a breach of protocol and could be a security issue, so forcibly disconnect the client.
             networkController.Disconnect(eventSender, ev.FromConnectionId);

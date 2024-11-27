@@ -16,6 +16,7 @@
  */
 
 using System;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Registration;
 using Sovereign.EngineUtil.Monads;
@@ -29,6 +30,7 @@ public sealed class AccountServices
 {
     private readonly AccountAuthenticator authenticator;
     private readonly AuthenticationAttemptLimiter limiter;
+    private readonly ILogger<AccountServices> logger;
     private readonly LoginHandoffTracker loginHandoffTracker;
     private readonly AccountLoginTracker loginTracker;
     private readonly RegistrationController registrationController;
@@ -41,7 +43,8 @@ public sealed class AccountServices
         RegistrationValidator registrationValidator,
         RegistrationController registrationController,
         SharedSecretManager sharedSecretManager,
-        LoginHandoffTracker loginHandoffTracker)
+        LoginHandoffTracker loginHandoffTracker,
+        ILogger<AccountServices> logger)
     {
         this.authenticator = authenticator;
         this.limiter = limiter;
@@ -50,9 +53,8 @@ public sealed class AccountServices
         this.registrationController = registrationController;
         this.sharedSecretManager = sharedSecretManager;
         this.loginHandoffTracker = loginHandoffTracker;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Attempts to authenticate the account with the given username and password.
@@ -74,7 +76,7 @@ public sealed class AccountServices
             if (limiter.IsAccountLoginDisabled(username))
             {
                 // Too many login attempts.
-                logger.LogInformation("Rejected login for {0}: too many failed attempts.", username);
+                logger.LogInformation("Rejected login for {Username}: too many failed attempts.", username);
                 return AuthenticationResult.TooManyAttempts;
             }
 
@@ -84,7 +86,7 @@ public sealed class AccountServices
             {
                 // Bad password, log and reject.
                 limiter.RegisterFailedAttempt(username);
-                logger.LogInformation("Rejected login for {0}: authentication failure.", username);
+                logger.LogInformation("Rejected login for {Username}: authentication failure.", username);
                 return AuthenticationResult.Failed;
             }
 
@@ -92,7 +94,7 @@ public sealed class AccountServices
             if (loginTracker.GetLoginState(id) != AccountLoginState.NotLoggedIn)
             {
                 // Already logged in, log and reject.
-                logger.LogInformation("Rejected login for {0}: already logged in.", username);
+                logger.LogInformation("Rejected login for {Username}: already logged in.", username);
                 return AuthenticationResult.AlreadyLoggedIn;
             }
 
@@ -102,7 +104,7 @@ public sealed class AccountServices
             secret = sharedSecretManager.AddSecret(id);
             guid = id;
 
-            logger.LogInformation("Login successful for {0}.", username);
+            logger.LogInformation("Login successful for {Username}.", username);
 
             return AuthenticationResult.Successful;
         }
@@ -135,13 +137,13 @@ public sealed class AccountServices
                 // fault.
                 return RegistrationResult.UsernameTaken;
 
-            logger.LogInformation("New account registered for {0}.", username);
+            logger.LogInformation("New account registered for {Username}.", username);
 
             return RegistrationResult.Successful;
         }
         catch (Exception e)
         {
-            logger.LogError("Error handling registration request.", e);
+            logger.LogError(e, "Error handling registration request.");
             return RegistrationResult.UnknownFailure;
         }
     }

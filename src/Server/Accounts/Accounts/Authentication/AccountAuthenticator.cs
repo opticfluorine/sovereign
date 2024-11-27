@@ -17,6 +17,7 @@
 
 using System;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Sodium;
 using Sovereign.Persistence.Accounts;
 
@@ -27,14 +28,15 @@ namespace Sovereign.Accounts.Accounts.Authentication;
 /// </summary>
 public sealed class AccountAuthenticator
 {
+    private readonly ILogger<AccountAuthenticator> logger;
     private readonly PersistenceAccountServices persistenceAccountServices;
 
-    public AccountAuthenticator(PersistenceAccountServices persistenceAccountServices)
+    public AccountAuthenticator(PersistenceAccountServices persistenceAccountServices,
+        ILogger<AccountAuthenticator> logger)
     {
         this.persistenceAccountServices = persistenceAccountServices;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Attempts to authenticate the given credentials.
@@ -52,7 +54,7 @@ public sealed class AccountAuthenticator
             if (!account.HasValue)
             {
                 // Account does not exist.
-                logger.LogDebug("Username \"" + username + "\" not known; rejecting.");
+                logger.LogDebug("Username \"{Username}\" not known; rejecting.", username);
                 id = Guid.Empty;
                 return false;
             }
@@ -63,8 +65,7 @@ public sealed class AccountAuthenticator
         }
         catch (Exception e)
         {
-            logger.LogError("Error while authenticating account with username \""
-                            + username + "\"; rejecting.", e);
+            logger.LogError(e, "Error while authenticating account with username \"{Username}\"; rejecting.", username);
             id = Guid.Empty;
             return false;
         }
@@ -89,8 +90,7 @@ public sealed class AccountAuthenticator
         if (trialHash.Length != account.Hash.Length)
         {
             // Hash sizes differ.
-            logger.LogError("Hash sizes for user {0} differ ({1} vs {2}); rejecting.",
-                account.Username, trialHash.Length, account.Hash.Length);
+            logger.LogError("Hash sizes for user {Username} differ; rejecting.", account.Username);
             return false;
         }
 

@@ -16,6 +16,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Systems.TemplateEntity;
 using WatsonWebserver.Core;
@@ -29,13 +30,12 @@ public class TemplateEntitiesRestService : AuthenticatedRestService
 {
     private readonly TemplateEntityServices templateEntityServices;
 
-    public TemplateEntitiesRestService(RestAuthenticator authenticator, TemplateEntityServices templateEntityServices)
-        : base(authenticator)
+    public TemplateEntitiesRestService(RestAuthenticator authenticator, TemplateEntityServices templateEntityServices,
+        ILogger<TemplateEntitiesRestService> logger)
+        : base(authenticator, logger)
     {
         this.templateEntityServices = templateEntityServices;
     }
-
-    public new ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public override string Path => RestEndpoints.TemplateEntities;
     public override RestPathType PathType => RestPathType.Static;
@@ -55,7 +55,7 @@ public class TemplateEntitiesRestService : AuthenticatedRestService
         }
         catch (Exception e)
         {
-            logger.LogError("Error when sending template entity data.", e);
+            logger.LogError(e, "Error when sending template entity data.");
             try
             {
                 ctx.Response.StatusCode = 500;
@@ -63,7 +63,7 @@ public class TemplateEntitiesRestService : AuthenticatedRestService
             }
             catch (Exception e2)
             {
-                logger.LogError("Error when sending error response.", e2);
+                logger.LogError(e2, "Error when sending error response.");
             }
         }
     }

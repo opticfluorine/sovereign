@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
@@ -39,6 +40,7 @@ public sealed class AccountRegistrationRestService : IRestService
     private const int MaxRequestLength = 1024;
 
     private readonly AccountServices accountServices;
+    private readonly ILogger<AccountRegistrationRestService> logger;
 
     private readonly IDictionary<RegistrationResult, int> resultToStatus
         = new Dictionary<RegistrationResult, int>
@@ -61,12 +63,12 @@ public sealed class AccountRegistrationRestService : IRestService
             { RegistrationResult.UnknownFailure, "An unknown error occurred." }
         };
 
-    public AccountRegistrationRestService(AccountServices accountServices)
+    public AccountRegistrationRestService(AccountServices accountServices,
+        ILogger<AccountRegistrationRestService> logger)
     {
         this.accountServices = accountServices;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public string Path => RestEndpoints.AccountRegistration;
 
@@ -121,19 +123,19 @@ public sealed class AccountRegistrationRestService : IRestService
             }
             catch (Exception e)
             {
-                logger.LogError("Error sending malformed request response.", e);
+                logger.LogError(e, "Error sending malformed request response.");
             }
         }
         catch (Exception e)
         {
-            logger.LogError("Error processing registration request.", e);
+            logger.LogError(e, "Error processing registration request.");
             try
             {
                 await SendResponse(ctx, 500, "Error processing registration request.");
             }
             catch (Exception e2)
             {
-                logger.LogError("Error sending error response.", e2);
+                logger.LogError(e2, "Error sending error response.");
             }
         }
     }

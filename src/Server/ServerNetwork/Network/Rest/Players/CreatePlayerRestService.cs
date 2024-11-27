@@ -20,6 +20,7 @@ using System.Numerics;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Systems.Accounts;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
@@ -63,8 +64,9 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
     public CreatePlayerRestService(RestAuthenticator authenticator, IEntityFactory entityFactory,
         CreatePlayerRequestValidator requestValidator, PersistencePlayerServices playerServices,
-        AccountsController accountsController, IEventSender eventSender, IServerConfigurationManager configManager)
-        : base(authenticator)
+        AccountsController accountsController, IEventSender eventSender, IServerConfigurationManager configManager,
+        ILogger<CreatePlayerRestService> logger)
+        : base(authenticator, logger)
     {
         this.entityFactory = entityFactory;
         this.requestValidator = requestValidator;
@@ -108,14 +110,14 @@ public class CreatePlayerRestService : AuthenticatedRestService
         }
         catch (Exception e)
         {
-            logger.LogError("Error handling create player request.", e);
+            logger.LogError(e, "Error handling create player request.");
             try
             {
                 await SendResponse(ctx, 500, "Error processing request.");
             }
             catch (Exception e2)
             {
-                logger.LogError("Error sending error response.", e2);
+                logger.LogError(e2, "Error sending error response.");
             }
         }
     }
@@ -177,7 +179,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
                 if (configManager.ServerConfiguration.NewPlayers.AdminByDefault)
                 {
-                    logger.LogWarning("Player {0} defaulting to admin; edit server configuration if unintended.",
+                    logger.LogWarning("Player {Name} defaulting to admin; edit server configuration if unintended.",
                         request.PlayerName);
                     builder.Admin();
                 }

@@ -16,16 +16,27 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Sovereign.EngineCore.Systems;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.NetworkCore.Systems.Network;
 using Sovereign.ServerCore.Systems.ServerChat;
+using Sovereign.ServerNetwork.Configuration;
+using Sovereign.ServerNetwork.Network.Connections;
 using Sovereign.ServerNetwork.Network.Infrastructure;
 using Sovereign.ServerNetwork.Network.Pipeline.Inbound;
 using Sovereign.ServerNetwork.Network.Pipeline.Outbound;
+using Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
+using Sovereign.ServerNetwork.Network.Rest;
+using Sovereign.ServerNetwork.Network.Rest.Accounts;
+using Sovereign.ServerNetwork.Network.Rest.Players;
+using Sovereign.ServerNetwork.Network.Rest.TemplateEntities;
+using Sovereign.ServerNetwork.Network.Rest.WorldSegment;
+using Sovereign.ServerNetwork.Network.ServerNetwork;
 using Sovereign.ServerNetwork.Systems.Network;
 using Sovereign.ServerNetwork.Systems.ServerChat;
+using Sovereign.ServerNetwork.Systems.ServerNetwork;
 
 namespace Sovereign.ServerNetwork;
 
@@ -36,6 +47,11 @@ public static class ServerNetworkServiceCollectionExtensions
         AddServerImplementations(services);
         AddInboundPipeline(services);
         AddChat(services);
+        AddConfiguration(services);
+        AddConnections(services);
+        AddConnectionMappers(services);
+        AddRest(services);
+        AddServerNetworkSystem(services);
 
         return services;
     }
@@ -61,5 +77,48 @@ public static class ServerNetworkServiceCollectionExtensions
     private static void AddChat(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, AdminChatProcessor>());
+    }
+
+    private static void AddConfiguration(IServiceCollection services)
+    {
+        services.TryAddSingleton<IServerNetworkConfiguration, ServerNetworkConfiguration>();
+    }
+
+    private static void AddConnections(IServiceCollection services)
+    {
+        services.TryAddSingleton<NewConnectionProcessor>();
+    }
+
+    private static void AddConnectionMappers(IServiceCollection services)
+    {
+        services.TryAddSingleton<GlobalConnectionMapper>();
+        services.TryAddSingleton<SingleEntityConnectionMapperFactory>();
+        services.TryAddSingleton<EntityWorldSegmentConnectionMapperFactory>();
+        services.TryAddSingleton<WorldSegmentConnectionMapperFactory>();
+        services.TryAddSingleton<RegionalConnectionMapCache>();
+    }
+
+    private static void AddRest(IServiceCollection services)
+    {
+        services.TryAddSingleton<RestServer>();
+        services.TryAddSingleton<RestAuthenticator>();
+
+        services.TryAddSingleton<CreatePlayerRequestValidator>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, AccountRegistrationRestService>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, AuthenticationRestService>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, CreatePlayerRestService>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, DeletePlayerRestService>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, ListPlayersRestService>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, SelectPlayerRestService>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, TemplateEntitiesRestService>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, WorldSegmentRestService>());
+    }
+
+    private static void AddServerNetworkSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<ServerNetworkController>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ServerNetworkSystem>());
     }
 }

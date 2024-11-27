@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Validators;
@@ -62,6 +63,7 @@ public class AdminChatProcessor : IChatProcessor
     private readonly BlockTemplateNameComponentIndexer blockTemplateNames;
     private readonly IEventSender eventSender;
     private readonly ServerChatInternalController internalController;
+    private readonly ILogger<AdminChatProcessor> logger;
     private readonly LoggingUtil loggingUtil;
     private readonly NameComponentCollection names;
     private readonly NameComponentValidator nameValidator;
@@ -75,7 +77,7 @@ public class AdminChatProcessor : IChatProcessor
         NameComponentValidator nameValidator, PersistencePlayerServices persistencePlayerServices,
         LoggingUtil loggingUtil, NameComponentCollection names, WorldManagementController worldManagementController,
         IEventSender eventSender, BlockController blockController, BlockServices blockServices,
-        BlockTemplateNameComponentIndexer blockTemplateNames)
+        BlockTemplateNameComponentIndexer blockTemplateNames, ILogger<AdminChatProcessor> logger)
     {
         this.admins = admins;
         this.internalController = internalController;
@@ -90,9 +92,8 @@ public class AdminChatProcessor : IChatProcessor
         this.blockController = blockController;
         this.blockServices = blockServices;
         this.blockTemplateNames = blockTemplateNames;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public List<ChatCommand> MatchingCommands => new()
     {
@@ -107,15 +108,15 @@ public class AdminChatProcessor : IChatProcessor
         // Must be an admin to use admin commands.
         if (!playerRoleCheck.IsPlayerAdmin(senderEntityId))
         {
-            logger.LogWarning("{0} attempted to use admin command {1} while not admin.",
+            logger.LogWarning("{Player} attempted to use admin command {Command} while not admin.",
                 loggingUtil.FormatEntity(senderEntityId), command);
             internalController.SendSystemMessage("Only admins may use this command.", senderEntityId);
             return;
         }
 
         // Record admin commands in log for audit.
-        logger.LogInformation("ADMIN COMMAND: {0}: /{1} {2}", loggingUtil.FormatEntity(senderEntityId), command,
-            message);
+        logger.LogInformation("ADMIN COMMAND: {Player}: /{Command} {Message}", loggingUtil.FormatEntity(senderEntityId),
+            command, message);
 
         // Admin role verified, dispatch to specific handlers.
         if (command == AddAdmin)
@@ -154,12 +155,12 @@ public class AdminChatProcessor : IChatProcessor
         else if (!persistencePlayerServices.TryAddAdminForPlayer(playerName))
         {
             // Player doesn't exist.
-            logger.LogError("Cannot make player {0} admin: player does not exist.", playerName);
+            logger.LogError("Cannot make player {Name} admin: player does not exist.", playerName);
             internalController.SendSystemMessage("Player does not exist.", senderEntityId);
             return;
         }
 
-        logger.LogInformation("Player {0} is now admin; change made by {1}.", playerName,
+        logger.LogInformation("Player {Name} is now admin; change made by {Admin}.", playerName,
             loggingUtil.FormatEntity(senderEntityId));
         internalController.SendSystemMessage($"Player {playerName} is now admin.", senderEntityId);
     }
@@ -182,7 +183,7 @@ public class AdminChatProcessor : IChatProcessor
         // Do not allow players to remove their own admin role.
         if (playerName == names[senderEntityId])
         {
-            logger.LogWarning("{0} tried to remove own admin role; request denied.", playerName);
+            logger.LogWarning("{Player} tried to remove own admin role; request denied.", playerName);
             internalController.SendSystemMessage("Cannot remove own admin role.", senderEntityId);
             return;
         }
@@ -201,8 +202,8 @@ public class AdminChatProcessor : IChatProcessor
             persistencePlayerServices.RemoveAdminForPlayer(playerName);
         }
 
-        logger.LogInformation("Player {0} is no longer admin (or already was not); change made by {1}.", playerName,
-            loggingUtil.FormatEntity(senderEntityId));
+        logger.LogInformation("Player {Player} is no longer admin (or already was not); change made by {Admin}.",
+            playerName, loggingUtil.FormatEntity(senderEntityId));
         internalController.SendSystemMessage($"Player {playerName} is no longer admin.", senderEntityId);
     }
 
@@ -216,7 +217,7 @@ public class AdminChatProcessor : IChatProcessor
         var args = message.Split(' ', 4, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         if (args.Length != 4)
         {
-            logger.LogWarning("{0} used /addblock with bad parameters.", loggingUtil.FormatEntity(senderEntityId));
+            logger.LogWarning("{Player} used /addblock with bad parameters.", loggingUtil.FormatEntity(senderEntityId));
             internalController.SendSystemMessage("Usage: /addblock x y z (template_rel_id | template_name)",
                 senderEntityId);
             return;
@@ -233,7 +234,8 @@ public class AdminChatProcessor : IChatProcessor
         }
         catch (Exception)
         {
-            logger.LogWarning("{0} used /addblock with bad coordinates.", loggingUtil.FormatEntity(senderEntityId));
+            logger.LogWarning("{Player} used /addblock with bad coordinates.",
+                loggingUtil.FormatEntity(senderEntityId));
             internalController.SendSystemMessage("x, y, and z must be integers.", senderEntityId);
             return;
         }
@@ -246,7 +248,7 @@ public class AdminChatProcessor : IChatProcessor
             if (templateEntityId is not (>= EntityConstants.FirstTemplateEntityId
                 and <= EntityConstants.LastTemplateEntityId))
             {
-                logger.LogWarning("{0} tried to use a non-template entity as template entity.",
+                logger.LogWarning("{Player} tried to use a non-template entity as template entity.",
                     loggingUtil.FormatEntity(senderEntityId));
                 internalController.SendSystemMessage("template_rel_id must correspond to a template entity.",
                     senderEntityId);
@@ -255,7 +257,7 @@ public class AdminChatProcessor : IChatProcessor
 
             if (!blockServices.IsEntityBlock(templateEntityId))
             {
-                logger.LogWarning("{0} tried to use a non-block template entity for block creation.",
+                logger.LogWarning("{Player} tried to use a non-block template entity for block creation.",
                     loggingUtil.FormatEntity(senderEntityId));
                 internalController.SendSystemMessage("template_rel_id must correspond to a template entity.",
                     senderEntityId);
@@ -267,7 +269,7 @@ public class AdminChatProcessor : IChatProcessor
             // If argument isn't a ulong, treat it as the name of a block template entity.
             if (!blockTemplateNames.TryGetByName(args[3], out templateEntityId))
             {
-                logger.LogWarning("{0} tried to add block type '{1}' which was not found.",
+                logger.LogWarning("{Player} tried to add block type '{Type}' which was not found.",
                     loggingUtil.FormatEntity(senderEntityId), args[3]);
                 internalController.SendSystemMessage("Unrecognized block template name.", senderEntityId);
                 return;
@@ -278,7 +280,7 @@ public class AdminChatProcessor : IChatProcessor
         if (blockServices.BlockExistsAtPosition(blockPosition))
         {
             // Block already exists, can't add new.
-            logger.LogWarning("{0} tried to add block where one already exists.",
+            logger.LogWarning("{Player} tried to add block where one already exists.",
                 loggingUtil.FormatEntity(senderEntityId));
             internalController.SendSystemMessage("Block already exists at requested position.", senderEntityId);
             return;
@@ -302,7 +304,8 @@ public class AdminChatProcessor : IChatProcessor
         var args = message.Split(' ', 3);
         if (args.Length != 3)
         {
-            logger.LogWarning("{0} used /removeblock with bad parameters.", loggingUtil.FormatEntity(senderEntityId));
+            logger.LogWarning("{Player} used /removeblock with bad parameters.",
+                loggingUtil.FormatEntity(senderEntityId));
             internalController.SendSystemMessage("Usage: /removeblock x y z",
                 senderEntityId);
             return;
@@ -319,14 +322,15 @@ public class AdminChatProcessor : IChatProcessor
         }
         catch (Exception)
         {
-            logger.LogWarning("{0} used /addblock with bad coordinates.", loggingUtil.FormatEntity(senderEntityId));
+            logger.LogWarning("{Player} used /addblock with bad coordinates.",
+                loggingUtil.FormatEntity(senderEntityId));
             internalController.SendSystemMessage("x, y, and z must be integers.", senderEntityId);
             return;
         }
 
         if (!blockServices.BlockExistsAtPosition(blockPosition))
         {
-            logger.LogWarning("{0} used /removeblock with no block at position.",
+            logger.LogWarning("{Player} used /removeblock with no block at position.",
                 loggingUtil.FormatEntity(senderEntityId));
             internalController.SendSystemMessage("No block at position.", senderEntityId);
         }

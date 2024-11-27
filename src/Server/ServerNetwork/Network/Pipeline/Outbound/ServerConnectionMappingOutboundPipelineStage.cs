@@ -17,14 +17,15 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.World;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerNetwork.Network.Pipeline.Outbound;
 
@@ -33,6 +34,8 @@ namespace Sovereign.ServerNetwork.Network.Pipeline.Outbound;
 /// </summary>
 public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOutboundPipelineStage
 {
+    private readonly ILogger<ServerConnectionMappingOutboundPipelineStage> logger;
+
     /// <summary>
     ///     Map of outbound events to specialized connection mappers.
     /// </summary>
@@ -44,8 +47,10 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         SingleEntityConnectionMapperFactory singleConnMapperFactory,
         EntityWorldSegmentConnectionMapperFactory entityWorldSegmentMapperFactory,
         WorldSegmentConnectionMapperFactory worldSegmentMapperFactory,
-        AccountServices accountServices, WorldSegmentResolver resolver)
+        AccountServices accountServices, WorldSegmentResolver resolver,
+        ILogger<ServerConnectionMappingOutboundPipelineStage> logger)
     {
+        this.logger = logger;
         // Create delegate mappers.
         var worldSubEventMapper = singleConnMapperFactory.Create(evInfo =>
         {
@@ -120,8 +125,6 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Core_Block_RemoveNotice] = blockPosMapper;
     }
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
-
     public void Process(OutboundEventInfo evInfo)
     {
         // Dispatch to the correct mapping strategy.
@@ -129,7 +132,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             mapper.Process(evInfo);
         else
             // No mapper found for this event type.
-            logger.LogError("No connection mapper available for event ID {0}.", evInfo.Event.EventId);
+            logger.LogError("No connection mapper available for event ID {Id}.", evInfo.Event.EventId);
     }
 
     public IOutboundPipelineStage NextStage

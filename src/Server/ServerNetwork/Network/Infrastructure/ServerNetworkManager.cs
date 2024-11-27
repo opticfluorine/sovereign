@@ -21,6 +21,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using LiteNetLib;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network;
 using Sovereign.NetworkCore.Network.Infrastructure;
@@ -40,6 +41,7 @@ public sealed class ServerNetworkManager : INetworkManager
     private readonly IServerNetworkConfiguration config;
     private readonly NetworkConnectionManager connectionManager;
     private readonly IEventSender eventSender;
+    private readonly ILogger<ServerNetworkManager> logger;
 
     /// <summary>
     ///     Backing LiteNetLib NetListener.
@@ -69,7 +71,8 @@ public sealed class ServerNetworkManager : INetworkManager
         RestServer restServer,
         NewConnectionProcessor newConnectionProcessor,
         ServerNetworkController networkController,
-        IEventSender eventSender)
+        IEventSender eventSender,
+        ILogger<ServerNetworkManager> logger)
     {
         /* Dependency injection. */
         this.config = config;
@@ -79,6 +82,7 @@ public sealed class ServerNetworkManager : INetworkManager
         this.newConnectionProcessor = newConnectionProcessor;
         this.networkController = networkController;
         this.eventSender = eventSender;
+        this.logger = logger;
 
         /* Connect the network event plumbing. */
         netListener = new EventBasedNetListener();
@@ -96,8 +100,6 @@ public sealed class ServerNetworkManager : INetworkManager
         netManager.DisconnectTimeout = int.MaxValue;
 #endif
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public event OnNetworkReceive? OnNetworkReceive;
 
@@ -147,7 +149,7 @@ public sealed class ServerNetworkManager : INetworkManager
             }
             catch (Exception e)
             {
-                logger.LogError("Failed to send event to client.", e);
+                logger.LogError(e, "Failed to send event to client.");
             }
 
         // Handle incoming messages, connections, etc.
@@ -195,14 +197,7 @@ public sealed class ServerNetworkManager : INetworkManager
         }
         catch (Exception e)
         {
-            // Log error.
-            var sb = new StringBuilder();
-            sb.Append("Error receiving from ")
-                .Append(peer.Address)
-                .Append(".");
-            logger.LogError(sb.ToString(), e);
-
-            // Terminate connection.
+            logger.LogError(e, "Error receiving from {Address}.", peer.Address);
             CloseConnection(peer);
         }
         finally
@@ -219,13 +214,7 @@ public sealed class ServerNetworkManager : INetworkManager
     {
         try
         {
-            var sb = new StringBuilder();
-            sb.Append("New connection request from ")
-                .Append(request.RemoteEndPoint)
-                .Append(".");
-            logger.LogInformation(sb.ToString());
-
-            // Hand off to detailed request processing.
+            logger.LogInformation("New connection request from {Ip}.", request.RemoteEndPoint);
             newConnectionProcessor.ProcessConnectionRequest(request);
         }
         catch (Exception e)
@@ -245,7 +234,7 @@ public sealed class ServerNetworkManager : INetworkManager
     /// <param name="socketError">Error.</param>
     private void NetListener_NetworkErrorEvent(IPEndPoint endPoint, SocketError socketError)
     {
-        logger.LogError("Network error from {0}: {1}.",
+        logger.LogError("Network error from {Ip}: {Error}.",
             endPoint.ToString(), socketError.ToString());
     }
 
@@ -259,15 +248,11 @@ public sealed class ServerNetworkManager : INetworkManager
         {
             connectionManager.RemoveConnection(peer.Id);
             networkController.ClientDisconnected(eventSender, peer.Id);
-            logger.LogInformation("Connection closed from {0}.",
-                peer.Address);
+            logger.LogInformation("Connection closed from {Ip}.", peer.Address);
         }
         catch (Exception e)
         {
-            var sb = new StringBuilder();
-            sb.Append("Error removing closed connection from ")
-                .Append(peer.Address).Append(".");
-            logger.LogError(sb.ToString(), e);
+            logger.LogError(e, "Error removing closed connection from {Ip}.", peer.Address);
         }
     }
 }

@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sodium;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
@@ -67,6 +68,7 @@ public sealed class AccountLoginTracker
     private readonly EntityManager entityManager;
 
     private readonly EntityHierarchyIndexer hierarchyIndexer;
+    private readonly ILogger<AccountLoginTracker> logger;
 
     /// <summary>
     ///     Set of players that are currently in cooldown until the next persistence sync completes.
@@ -79,14 +81,13 @@ public sealed class AccountLoginTracker
     private readonly Dictionary<ulong, int> playersToConnections = new();
 
     public AccountLoginTracker(AccountComponentCollection accounts, EntityHierarchyIndexer hierarchyIndexer,
-        EntityManager entityManager)
+        EntityManager entityManager, ILogger<AccountLoginTracker> logger)
     {
         this.accounts = accounts;
         this.hierarchyIndexer = hierarchyIndexer;
         this.entityManager = entityManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Signals that the given account has logged in.
@@ -112,7 +113,7 @@ public sealed class AccountLoginTracker
         // State check.
         if (GetLoginState(accountId) != AccountLoginState.SelectingPlayer)
         {
-            logger.LogError("Attempt to select player for account {0} in invalid state.", accountId);
+            logger.LogError("Attempt to select player for account {Id} in invalid state.", accountId);
             return;
         }
 
@@ -125,7 +126,8 @@ public sealed class AccountLoginTracker
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception while selecting player {0} for account {1}.", playerEntityId, accountId);
+            logger.LogError(e, "Exception while selecting player {PlayerId} for account {AccountId}.",
+                playerEntityId, accountId);
 
             // Roll back any change.
             playersToConnections.Remove(playerEntityId);

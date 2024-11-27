@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
@@ -58,7 +58,7 @@ public class SingleEntityConnectionMapper : ISpecificConnectionMapper
         }
         else
         {
-            logger.ErrorFormat("No connection found to forward {0}.", evInfo.Event.EventId);
+            logger.LogError("No connection found to forward {Id}.", evInfo.Event.EventId);
         }
     }
 

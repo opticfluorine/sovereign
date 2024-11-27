@@ -18,6 +18,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using LiteNetLib;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.NetworkCore.Network.Infrastructure;
 
@@ -31,9 +32,10 @@ public sealed class NewConnectionProcessor
     /// <summary>
     ///     Size of the handoff key (account ID), in bytes.
     /// </summary>
-    private const int HANDOFF_KEY_BYTES = 38;
+    private const int HandoffKeyBytes = 38;
 
     private readonly NetworkConnectionManager connectionManager;
+    private readonly ILogger<NewConnectionProcessor> logger;
     private readonly LoginHandoffTracker loginHandoffTracker;
     private readonly AccountLoginTracker loginTracker;
     private readonly SharedSecretManager sharedSecretManager;
@@ -41,15 +43,15 @@ public sealed class NewConnectionProcessor
     public NewConnectionProcessor(NetworkConnectionManager connectionManager,
         LoginHandoffTracker loginHandoffTracker,
         SharedSecretManager sharedSecretManager,
-        AccountLoginTracker loginTracker)
+        AccountLoginTracker loginTracker,
+        ILogger<NewConnectionProcessor> logger)
     {
         this.connectionManager = connectionManager;
         this.loginHandoffTracker = loginHandoffTracker;
         this.sharedSecretManager = sharedSecretManager;
         this.loginTracker = loginTracker;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Processes a new connection request.
@@ -62,7 +64,7 @@ public sealed class NewConnectionProcessor
         if (accountId == Guid.Empty)
         {
             // Bad request.
-            logger.LogInformation("Rejecting new connection from {0}: malformed.",
+            logger.LogInformation("Rejecting new connection from {Ip}: malformed.",
                 request.RemoteEndPoint.ToString());
             request.Reject();
             return;
@@ -72,14 +74,14 @@ public sealed class NewConnectionProcessor
         if (!AttemptHandoff(request, accountId, out var sharedSecret))
         {
             // Failed.
-            logger.LogInformation("Rejecting new connection from {0}: bad handoff.",
+            logger.LogInformation("Rejecting new connection from {Ip}: bad handoff.",
                 request.RemoteEndPoint.ToString());
             request.Reject();
             return;
         }
 
         // Accept the connection.
-        logger.LogInformation("Accepting new connection for user {0} from {1}.",
+        logger.LogInformation("Accepting new connection for user {Id} from {Ip}.",
             accountId, request.RemoteEndPoint.ToString());
         var peer = request.Accept();
         loginTracker.AssociateConnection(accountId, peer.Id);
@@ -114,9 +116,9 @@ public sealed class NewConnectionProcessor
     /// <returns>Account ID, or Guid.Empty if the request is malformed.</returns>
     private Guid GetAccountId(ConnectionRequest request)
     {
-        if (request.Data.AvailableBytes == HANDOFF_KEY_BYTES)
+        if (request.Data.AvailableBytes == HandoffKeyBytes)
         {
-            var rawId = request.Data.GetString(HANDOFF_KEY_BYTES);
+            var rawId = request.Data.GetString(HandoffKeyBytes);
             return new Guid(rawId);
         }
 

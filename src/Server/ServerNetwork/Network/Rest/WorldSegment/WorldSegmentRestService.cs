@@ -17,6 +17,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Network.Rest;
@@ -35,8 +36,9 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
     private readonly WorldManagementServices worldManagementServices;
 
     public WorldSegmentRestService(RestAuthenticator authenticator,
-        WorldManagementServices worldManagementServices, AccountServices accountServices)
-        : base(authenticator)
+        WorldManagementServices worldManagementServices, AccountServices accountServices,
+        ILogger<WorldSegmentRestService> logger)
+        : base(authenticator, logger)
     {
         this.worldManagementServices = worldManagementServices;
         this.accountServices = accountServices;
@@ -67,7 +69,7 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
                 // If not, tell the client to try again later.
                 if (!worldManagementServices.IsWorldSegmentLoaded(segmentIndex))
                 {
-                    logger.LogDebug("Delaying response for segment {0} while load in progress.", segmentIndex);
+                    logger.LogDebug("Delaying response for segment {Index} while load in progress.", segmentIndex);
                     ctx.Response.StatusCode = 503;
                     await ctx.Response.Send();
                     return;
@@ -82,7 +84,7 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
                 if (blockDataBytes.Length == 0)
                 {
                     // Segment data was processed but is empty.     
-                    logger.LogError("Got empty block data for world segment {0}.", segmentIndex);
+                    logger.LogError("Got empty block data for world segment {Index}.", segmentIndex);
                     ctx.Response.StatusCode = 500;
                     await ctx.Response.Send();
                     return;

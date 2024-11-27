@@ -20,16 +20,16 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.ServerNetwork.Configuration;
-using Sovereign.ServerNetwork.Network.Rest;
 using WatsonWebserver.Core;
 
-namespace Sovereign.ServerNetwork.Network.Authentication;
+namespace Sovereign.ServerNetwork.Network.Rest.Accounts;
 
 /// <summary>
 ///     REST service for client authentication.
@@ -43,13 +43,14 @@ public sealed class AuthenticationRestService : IRestService
 
     private readonly AccountServices accountServices;
     private readonly IServerNetworkConfiguration configuration;
+    private readonly ILogger<AuthenticationRestService> logger;
 
     private readonly AccountLoginTracker loginTracker;
 
     /// <summary>
     ///     Map from result to HTTP status code.
     /// </summary>
-    private readonly IDictionary<AuthenticationResult, int> ResultToStatus
+    private readonly IDictionary<AuthenticationResult, int> resultToStatus
         = new Dictionary<AuthenticationResult, int>
         {
             { AuthenticationResult.Successful, 201 },
@@ -61,7 +62,7 @@ public sealed class AuthenticationRestService : IRestService
     /// <summary>
     ///     Map from result to human-readable result string.
     /// </summary>
-    private readonly IDictionary<AuthenticationResult, string> ResultToString
+    private readonly IDictionary<AuthenticationResult, string> resultToString
         = new Dictionary<AuthenticationResult, string>
         {
             { AuthenticationResult.Successful, "Successful." },
@@ -75,15 +76,14 @@ public sealed class AuthenticationRestService : IRestService
 
     public AuthenticationRestService(AccountServices accountServices,
         IServerNetworkConfiguration configuration,
-        AccountLoginTracker loginTracker)
+        AccountLoginTracker loginTracker,
+        ILogger<AuthenticationRestService> logger)
     {
         this.accountServices = accountServices;
         this.configuration = configuration;
         this.loginTracker = loginTracker;
+        this.logger = logger;
     }
-
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public string Path => RestEndpoints.Authentication;
 
@@ -119,14 +119,14 @@ public sealed class AuthenticationRestService : IRestService
             if (result != AuthenticationResult.Successful)
             {
                 // Report error.
-                await SendResponse(ctx, ResultToStatus[result], ResultToString[result]);
+                await SendResponse(ctx, resultToStatus[result], resultToString[result]);
                 return;
             }
 
             // Register handoff and return connection information.
             await SendResponse(ctx,
-                ResultToStatus[result],
-                ResultToString[result],
+                resultToStatus[result],
+                resultToString[result],
                 guid.ToString(),
                 loginTracker.GetApiKey(guid),
                 secret,
@@ -141,19 +141,19 @@ public sealed class AuthenticationRestService : IRestService
             }
             catch (Exception e)
             {
-                logger.LogError("Error sending malformed input response.", e);
+                logger.LogError(e, "Error sending malformed input response.");
             }
         }
         catch (Exception e)
         {
-            logger.LogError("Error handling login.", e);
+            logger.LogError(e, "Error handling login.");
             try
             {
                 await SendResponse(ctx, 500, "Error processing login request.");
             }
             catch (Exception e2)
             {
-                logger.LogError("Error sending error response.", e2);
+                logger.LogError(e2, "Error sending error response.");
             }
         }
     }
