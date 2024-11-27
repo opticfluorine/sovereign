@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
@@ -103,7 +102,7 @@ public class ClientStateSystem : ISystem
                 {
                     if (ev.EventDetails is not EntityEventDetails details)
                     {
-                        Logger.Error("Received OnPlayerSelected without details.");
+                        logger.LogError("Received OnPlayerSelected without details.");
                         break;
                     }
 
@@ -132,7 +131,7 @@ public class ClientStateSystem : ISystem
                 {
                     if (ev.EventDetails is not ClientStateFlagEventDetails details)
                     {
-                        Logger.Error("Received SetFlag event without details.");
+                        logger.LogError("Received SetFlag event without details.");
                         break;
                     }
 
@@ -144,7 +143,7 @@ public class ClientStateSystem : ISystem
                 {
                     if (ev.EventDetails is not MainMenuEventDetails details)
                     {
-                        Logger.Error("Received SetMainMenuState event without details.");
+                        logger.LogError("Received SetMainMenuState event without details.");
                         break;
                     }
 

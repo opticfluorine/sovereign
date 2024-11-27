@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using LiteNetLib;
-using Sovereign.EngineCore.Events;
+using Microsoft.Extensions.Logging;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.NetworkCore.Network.Pipeline.Outbound;
 
@@ -26,6 +26,8 @@ namespace Sovereign.NetworkCore.Network.Pipeline.Outbound;
 /// </summary>
 public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
 {
+    private readonly ILogger<DeliveryMethodOutboundPipelineStage> logger;
+
     /// <summary>
     ///     Map from event ID to delivery method.
     /// </summary>
@@ -53,7 +55,10 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Server_WorldEdit_RemoveBlock, DeliveryMethod.ReliableUnordered }
     };
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
+    public DeliveryMethodOutboundPipelineStage(ILogger<DeliveryMethodOutboundPipelineStage> logger)
+    {
+        this.logger = logger;
+    }
 
     /// <summary>
     ///     Next stage of the pipeline.
@@ -66,7 +71,7 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         if (methodMap.TryGetValue(evInfo.Event.EventId, out var mappedMethod))
             method = mappedMethod;
         else
-            Logger.WarnFormat("No delivery method specified for event ID {0}; defaulting to unreliable",
+            logger.LogWarning("No delivery method specified for event ID {0}; defaulting to unreliable",
                 evInfo.Event.EventId);
 
         NextStage?.Process(new OutboundEventInfo(evInfo, method));

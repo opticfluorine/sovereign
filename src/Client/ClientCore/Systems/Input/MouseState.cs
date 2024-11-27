@@ -16,7 +16,6 @@
 
 using System;
 using System.Numerics;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Systems.Input;
@@ -94,17 +93,17 @@ public class MouseState
         switch (button)
         {
             case MouseButton.Left:
-                Logger.DebugFormat("Left button down = {0}.", isDown);
+                logger.LogDebug("Left button down = {0}.", isDown);
                 IsLeftButtonDown = isDown;
                 break;
 
             case MouseButton.Middle:
-                Logger.DebugFormat("Middle button down = {0}.", isDown);
+                logger.LogDebug("Middle button down = {0}.", isDown);
                 IsMiddleButtonDown = isDown;
                 break;
 
             case MouseButton.Right:
-                Logger.DebugFormat("Right button down = {0}.", isDown);
+                logger.LogDebug("Right button down = {0}.", isDown);
                 IsRightButtonDown = isDown;
                 break;
         }
@@ -120,10 +119,10 @@ public class MouseState
 
         // Check if tick threshold exceeded in either direction.
         var delta = TotalScrollAmount - lastScrollTick;
-        Logger.DebugFormat("Scroll by {0}, total {1}, delta {2}.", amount, TotalScrollAmount, delta);
+        logger.LogDebug("Scroll by {0}, total {1}, delta {2}.", amount, TotalScrollAmount, delta);
         while (Math.Abs(delta) > ScrollTickThreshold)
         {
-            Logger.Debug("Scroll tick.");
+            logger.LogDebug("Scroll tick.");
             internalController.AnnounceScrollTick(eventSender, delta > 0.0f);
 
             var step = Math.Sign(delta) * ScrollTickThreshold;

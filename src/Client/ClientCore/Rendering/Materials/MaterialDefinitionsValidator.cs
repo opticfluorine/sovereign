@@ -18,7 +18,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineUtil.Validation;
 
@@ -131,7 +130,7 @@ public sealed class MaterialDefinitionsValidator
         {
             var error = GetMaterialModifierUniquenessErrorMessage(material);
             errorStringBuilder.Append(error).Append("\n\n");
-            Logger.Error(error);
+            logger.LogError(error);
         }
 
         return satisfied;

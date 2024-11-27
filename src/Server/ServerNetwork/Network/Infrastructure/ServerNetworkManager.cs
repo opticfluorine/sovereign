@@ -20,7 +20,6 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Castle.Core.Logging;
 using LiteNetLib;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network;
@@ -113,7 +112,7 @@ public sealed class ServerNetworkManager : INetworkManager
             .Append(" port ")
             .Append(config.Port)
             .Append(".");
-        Logger.Info(sb.ToString());
+        logger.LogInformation(sb.ToString());
 
         var result = netManager.Start(config.NetworkInterfaceIPv4,
             config.NetworkInterfaceIPv6,
@@ -122,7 +121,7 @@ public sealed class ServerNetworkManager : INetworkManager
             /* Something went wrong, probably failed to bind. */
             throw new NetworkException("Failed to bind socket.");
 
-        Logger.Info("Server started.");
+        logger.LogInformation("Server started.");
 
         // Start the REST server.
         restServer.Initialize();
@@ -134,7 +133,7 @@ public sealed class ServerNetworkManager : INetworkManager
         restServer.Dispose();
 
         /* Clean up the network manager. */
-        Logger.Info("Stopping server.");
+        logger.LogInformation("Stopping server.");
         netManager.Stop();
     }
 
@@ -148,7 +147,7 @@ public sealed class ServerNetworkManager : INetworkManager
             }
             catch (Exception e)
             {
-                Logger.Error("Failed to send event to client.", e);
+                logger.LogError("Failed to send event to client.", e);
             }
 
         // Handle incoming messages, connections, etc.
@@ -201,7 +200,7 @@ public sealed class ServerNetworkManager : INetworkManager
             sb.Append("Error receiving from ")
                 .Append(peer.Address)
                 .Append(".");
-            Logger.Error(sb.ToString(), e);
+            logger.LogError(sb.ToString(), e);
 
             // Terminate connection.
             CloseConnection(peer);
@@ -224,7 +223,7 @@ public sealed class ServerNetworkManager : INetworkManager
             sb.Append("New connection request from ")
                 .Append(request.RemoteEndPoint)
                 .Append(".");
-            Logger.Info(sb.ToString());
+            logger.LogInformation(sb.ToString());
 
             // Hand off to detailed request processing.
             newConnectionProcessor.ProcessConnectionRequest(request);
@@ -235,7 +234,7 @@ public sealed class ServerNetworkManager : INetworkManager
             sb.Append("Error accepting connection request from ")
                 .Append(request.RemoteEndPoint)
                 .Append(".");
-            Logger.Error(sb.ToString(), e);
+            logger.LogError(sb.ToString(), e);
         }
     }
 
@@ -246,7 +245,7 @@ public sealed class ServerNetworkManager : INetworkManager
     /// <param name="socketError">Error.</param>
     private void NetListener_NetworkErrorEvent(IPEndPoint endPoint, SocketError socketError)
     {
-        Logger.ErrorFormat("Network error from {0}: {1}.",
+        logger.LogError("Network error from {0}: {1}.",
             endPoint.ToString(), socketError.ToString());
     }
 
@@ -260,7 +259,7 @@ public sealed class ServerNetworkManager : INetworkManager
         {
             connectionManager.RemoveConnection(peer.Id);
             networkController.ClientDisconnected(eventSender, peer.Id);
-            Logger.InfoFormat("Connection closed from {0}.",
+            logger.LogInformation("Connection closed from {0}.",
                 peer.Address);
         }
         catch (Exception e)
@@ -268,7 +267,7 @@ public sealed class ServerNetworkManager : INetworkManager
             var sb = new StringBuilder();
             sb.Append("Error removing closed connection from ")
                 .Append(peer.Address).Append(".");
-            Logger.Error(sb.ToString(), e);
+            logger.LogError(sb.ToString(), e);
         }
     }
 }

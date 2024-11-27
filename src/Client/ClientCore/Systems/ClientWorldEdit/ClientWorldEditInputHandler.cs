@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Input;
 using Sovereign.EngineCore.Components.Indexers;
@@ -98,12 +97,12 @@ public class ClientWorldEditInputHandler
             case EditState.Idle:
                 if (inputServices.IsMouseButtonDown(DrawButton))
                 {
-                    Logger.Debug("Enter Draw state.");
+                    logger.LogDebug("Enter Draw state.");
                     currentState = EditState.Draw;
                 }
                 else if (inputServices.IsMouseButtonDown(EraseButton))
                 {
-                    Logger.Debug("Enter Erase state.");
+                    logger.LogDebug("Enter Erase state.");
                     currentState = EditState.Erase;
                 }
 
@@ -124,7 +123,7 @@ public class ClientWorldEditInputHandler
     /// </summary>
     private void Reset()
     {
-        Logger.Debug("Entering Idle state.");
+        logger.LogDebug("Entering Idle state.");
         currentState = EditState.Idle;
         editStarted = false;
     }
@@ -140,7 +139,7 @@ public class ClientWorldEditInputHandler
             editStarted = true;
             lastPosition = hoveredPos;
             internalController.SetBlock(eventSender, hoveredPos, userState.BlockTemplateId);
-            Logger.DebugFormat("Draw block at {0}.", hoveredPos);
+            logger.LogDebug("Draw block at {0}.", hoveredPos);
         }
     }
 

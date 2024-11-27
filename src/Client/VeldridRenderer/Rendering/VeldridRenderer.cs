@@ -16,7 +16,6 @@
  */
 
 using System;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Scenes;
@@ -49,12 +48,12 @@ public class VeldridRenderer : IRenderer
     /// </summary>
     private readonly VeldridSceneConsumer sceneConsumer;
 
-    private readonly WorldRenderer worldRenderer;
-
     /// <summary>
     ///     Scene manager.
     /// </summary>
     private readonly SceneManager sceneManager;
+
+    private readonly WorldRenderer worldRenderer;
 
     /// <summary>
     ///     Dispose flag.
@@ -62,7 +61,8 @@ public class VeldridRenderer : IRenderer
     private bool isDisposed;
 
     public VeldridRenderer(VeldridDevice device, VeldridResourceManager resourceManager,
-        SceneManager sceneManager, VeldridSceneConsumer sceneConsumer, WorldRenderer worldRenderer, GuiRenderer guiRenderer)
+        SceneManager sceneManager, VeldridSceneConsumer sceneConsumer, WorldRenderer worldRenderer,
+        GuiRenderer guiRenderer)
     {
         this.device = device;
         this.resourceManager = resourceManager;
@@ -141,7 +141,7 @@ public class VeldridRenderer : IRenderer
         }
         catch (Exception e)
         {
-            Logger.Error("Error during rendering.", e);
+            logger.LogError("Error during rendering.", e);
         }
 
         /* Render and present the next frame. */

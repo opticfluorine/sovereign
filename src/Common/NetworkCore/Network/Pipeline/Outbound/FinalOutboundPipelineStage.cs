@@ -14,28 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.NetworkCore.Network.Infrastructure;
 
 namespace Sovereign.NetworkCore.Network.Pipeline.Outbound;
 
 public class FinalOutboundPipelineStage : IOutboundPipelineStage
 {
+    private readonly ILogger<FinalOutboundPipelineStage> logger;
     private readonly INetworkManager networkManager;
 
-    public FinalOutboundPipelineStage(INetworkManager networkManager)
+    public FinalOutboundPipelineStage(INetworkManager networkManager, ILogger<FinalOutboundPipelineStage> logger)
     {
         this.networkManager = networkManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void Process(OutboundEventInfo evInfo)
     {
         // Validity check.
         if (evInfo.Event == null || evInfo.Connection == null)
         {
-            Logger.Warn("Incomplete event info produced by output pipeline; discarding.");
+            logger.LogWarning("Incomplete event info produced by output pipeline; discarding.");
             return;
         }
 

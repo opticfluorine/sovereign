@@ -19,7 +19,6 @@ using System;
 using System.Net;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.EngineUtil.Monads;
@@ -62,12 +61,12 @@ public sealed class RegistrationClient
             // REST client must not already be connected.
             if (restClient.Connected)
             {
-                Logger.Error("Cannot register while already connected.");
+                logger.LogError("Cannot register while already connected.");
                 result = new Option<RegistrationResponse, string>("Cannot register while already connected.");
                 return result;
             }
 
-            Logger.InfoFormat("Attempting to register new account {0} with server at {1}:{2}.",
+            logger.LogInformation("Attempting to register new account {0} with server at {1}:{2}.",
                 request.Username, connectionParameters.RestHost, connectionParameters.RestPort);
 
             // Temporarily connect to the target REST server.
@@ -77,7 +76,7 @@ public sealed class RegistrationClient
             var httpResponse = await restClient.PostJson(RestEndpoints.AccountRegistration, request);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
             {
-                Logger.ErrorFormat("Registration response length {0} is too long.",
+                logger.LogError("Registration response length {0} is too long.",
                     httpResponse.Content.Headers.ContentLength);
                 result = new Option<RegistrationResponse, string>("Response too long.");
                 return result;
@@ -87,32 +86,32 @@ public sealed class RegistrationClient
             if (response == null)
             {
                 var msg = "Received null response from server.";
-                Logger.Error(msg);
+                logger.LogError(msg);
                 return new Option<RegistrationResponse, string>(msg);
             }
 
             if (httpResponse.StatusCode == HttpStatusCode.Created)
             {
-                Logger.Info("Registration successful.");
+                logger.LogInformation("Registration successful.");
                 result = new Option<RegistrationResponse, string>(response);
             }
             else
             {
                 if (response.Result != null)
                 {
-                    Logger.ErrorFormat("Registration failed: {0}", response.Result);
+                    logger.LogError("Registration failed: {0}", response.Result);
                     result = new Option<RegistrationResponse, string>(response.Result);
                 }
                 else
                 {
-                    Logger.Error("Registration failed: Unknown error.");
+                    logger.LogError("Registration failed: Unknown error.");
                     result = new Option<RegistrationResponse, string>("Unknown error.");
                 }
             }
         }
         catch (Exception e)
         {
-            Logger.Error("Exception thrown while attempting to register.", e);
+            logger.LogError("Exception thrown while attempting to register.", e);
         }
         finally
         {

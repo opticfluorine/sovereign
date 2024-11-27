@@ -16,7 +16,7 @@
  */
 
 using System.Linq;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
@@ -35,21 +35,22 @@ public sealed class BlockManager
 
     private readonly IEntityFactory entityFactory;
     private readonly EntityManager entityManager;
+    private readonly ILogger<BlockManager> logger;
 
     public BlockManager(IEntityFactory entityFactory,
         EntityManager entityManager,
         BlockGridPositionIndexer blockPositionIndexer,
         AboveBlockComponentCollection aboveBlocks,
-        BlockPositionComponentCollection blockPositions)
+        BlockPositionComponentCollection blockPositions,
+        ILogger<BlockManager> logger)
     {
         this.entityFactory = entityFactory;
         this.entityManager = entityManager;
         this.blockPositionIndexer = blockPositionIndexer;
         this.aboveBlocks = aboveBlocks;
         this.blockPositions = blockPositions;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Adds a new block entity.
@@ -116,7 +117,7 @@ public sealed class BlockManager
     {
         if (!blockPositions.HasComponentForEntity(entityId))
         {
-            Logger.ErrorFormat("Block (Entity ID = {0}) has no position.", entityId);
+            logger.LogError("Block (Entity ID = {Id}) has no position.", entityId);
             return;
         }
 

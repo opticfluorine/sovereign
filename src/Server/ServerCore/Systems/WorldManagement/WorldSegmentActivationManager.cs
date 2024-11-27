@@ -16,7 +16,6 @@
 
 using System.Collections.Generic;
 using System.Threading;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.ServerCore.Systems.Persistence;
@@ -66,7 +65,7 @@ public class WorldSegmentActivationManager
             if (!segmentRefCounts.ContainsKey(segmentIndex))
             {
                 // New activation.
-                Logger.DebugFormat("New activation for {0}.", segmentIndex);
+                logger.LogDebug("New activation for {0}.", segmentIndex);
                 segmentRefCounts.Add(segmentIndex, changes[segmentIndex]);
                 persistenceController.RetrieveWorldSegment(eventSender, segmentIndex);
             }
@@ -74,7 +73,7 @@ public class WorldSegmentActivationManager
             {
                 // Change in reference count to an existing activation.
                 segmentRefCounts[segmentIndex] += changes[segmentIndex];
-                Logger.DebugFormat("Update ref count for {0} to {1}.", segmentIndex,
+                logger.LogDebug("Update ref count for {0} to {1}.", segmentIndex,
                     segmentRefCounts[segmentIndex]);
             }
     }
@@ -96,7 +95,7 @@ public class WorldSegmentActivationManager
             if (taken) loadedSegmentsSpinLock.Exit();
         }
 
-        Logger.DebugFormat("Segment {0} recorded as loaded.", segmentIndex);
+        logger.LogDebug("Segment {0} recorded as loaded.", segmentIndex);
     }
 
     /// <summary>

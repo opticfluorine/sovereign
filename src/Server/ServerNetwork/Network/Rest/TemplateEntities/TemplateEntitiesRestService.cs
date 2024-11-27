@@ -16,7 +16,6 @@
 
 using System;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Systems.TemplateEntity;
 using WatsonWebserver.Core;
@@ -44,7 +43,7 @@ public class TemplateEntitiesRestService : AuthenticatedRestService
 
     protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
     {
-        Logger.InfoFormat("Received template entity data request from account {0}.", accountId);
+        logger.LogInformation("Received template entity data request from account {0}.", accountId);
 
         try
         {
@@ -56,7 +55,7 @@ public class TemplateEntitiesRestService : AuthenticatedRestService
         }
         catch (Exception e)
         {
-            Logger.Error("Error when sending template entity data.", e);
+            logger.LogError("Error when sending template entity data.", e);
             try
             {
                 ctx.Response.StatusCode = 500;
@@ -64,7 +63,7 @@ public class TemplateEntitiesRestService : AuthenticatedRestService
             }
             catch (Exception e2)
             {
-                Logger.Error("Error when sending error response.", e2);
+                logger.LogError("Error when sending error response.", e2);
             }
         }
     }

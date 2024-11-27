@@ -16,7 +16,6 @@
  */
 
 using System;
-using Castle.Core.Logging;
 using Sovereign.Persistence.Database;
 
 namespace Sovereign.Persistence.Systems.Persistence;
@@ -41,14 +40,14 @@ public sealed class DatabaseValidator
         {
             var valid = provider.MigrationQuery.IsMigrationLevelApplied(LatestMigration);
             if (!valid)
-                Logger.FatalFormat("Database is not at migration level {0}.", LatestMigration);
+                logger.LogCritical("Database is not at migration level {0}.", LatestMigration);
             else
-                Logger.InfoFormat("Database is at migration level {0}.", LatestMigration);
+                logger.LogInformation("Database is at migration level {0}.", LatestMigration);
             return valid;
         }
         catch (Exception e)
         {
-            Logger.Fatal("Error checking database migration level.", e);
+            logger.LogCritical("Error checking database migration level.", e);
             return false;
         }
     }

@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Network;
 using Sovereign.EngineCore.Events;
@@ -55,7 +54,7 @@ public sealed class ClientNetworkEventHandler
             case EventId.Client_Network_BeginConnection:
                 if (ev.EventDetails == null)
                 {
-                    Logger.Error("Received BeginConnection without details.");
+                    logger.LogError("Received BeginConnection without details.");
                     break;
                 }
 
@@ -65,7 +64,7 @@ public sealed class ClientNetworkEventHandler
             case EventId.Core_WorldManagement_Subscribe:
                 if (ev.EventDetails == null)
                 {
-                    Logger.Error("Received Subscribe without details.");
+                    logger.LogError("Received Subscribe without details.");
                     break;
                 }
 
@@ -75,7 +74,7 @@ public sealed class ClientNetworkEventHandler
             case EventId.Core_WorldManagement_Unsubscribe:
                 if (ev.EventDetails == null)
                 {
-                    Logger.Error("Received Unsubscribe without details.");
+                    logger.LogError("Received Unsubscribe without details.");
                     break;
                 }
 
@@ -91,7 +90,7 @@ public sealed class ClientNetworkEventHandler
                 break;
 
             default:
-                Logger.WarnFormat("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
+                logger.LogWarning("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
                 break;
         }
     }
@@ -149,7 +148,7 @@ public sealed class ClientNetworkEventHandler
         if (networkClient.ClientState == NetworkClientState.Connected
             || networkClient.ClientState == NetworkClientState.Connecting)
         {
-            Logger.Error("Connection to server lost.");
+            logger.LogError("Connection to server lost.");
             networkClient.EndConnection();
             worldSegmentSubscriptionManager.UnsubscribeAll();
         }

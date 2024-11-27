@@ -16,7 +16,6 @@
  */
 
 using System;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Veldrid;
 
@@ -70,7 +69,7 @@ public class VeldridResourceManager : IDisposable
     /// </summary>
     public void InitializeBaseResources()
     {
-        Logger.Info("Initializing base renderer resources.");
+        logger.LogInformation("Initializing base renderer resources.");
 
         // Command lists.
         if (device.Device == null)
@@ -80,7 +79,7 @@ public class VeldridResourceManager : IDisposable
         // Textures.
         CreateAtlasTexture();
 
-        Logger.Info("Base renderer resource initialization complete.");
+        logger.LogInformation("Base renderer resource initialization complete.");
     }
 
     /// <summary>
@@ -88,7 +87,7 @@ public class VeldridResourceManager : IDisposable
     /// </summary>
     public void ReloadTextures()
     {
-        Logger.Info("Reloading textures.");
+        logger.LogInformation("Reloading textures.");
 
         AtlasTexture?.Dispose();
         CreateAtlasTexture();

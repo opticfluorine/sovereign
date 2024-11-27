@@ -16,12 +16,12 @@
  */
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Performance;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineCore.Util;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.EngineCore.Systems.Performance;
 
@@ -33,9 +33,10 @@ public class PerformanceSystem : ISystem
     /// <summary>
     ///     System time interval between performance reports.
     /// </summary>
-    private const ulong REPORT_INTERVAL_US = Units.SystemTime.Minute;
+    private const ulong ReportIntervalUs = Units.SystemTime.Minute;
 
     private readonly EventLatencyPerformanceMonitor eventLatency;
+    private readonly ILogger<PerformanceSystem> logger;
 
     /// <summary>
     ///     Performance monitors.
@@ -53,20 +54,17 @@ public class PerformanceSystem : ISystem
         EventLatencyPerformanceMonitor eventLatency,
         ISystemTimer systemTimer,
         IEventLoop eventLoop,
-        EventDescriptions eventDescriptions)
+        ILogger<PerformanceSystem> logger)
     {
         this.systemTimer = systemTimer;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
 
         this.eventLatency = eventLatency;
         monitors.Add(eventLatency);
 
-        eventDescriptions.RegisterEvent<TimeEventDetails>(EventId.Core_Performance_EventLatencyTest);
-
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public int WorkloadEstimate => 0;
     public EventCommunicator EventCommunicator { get; }
@@ -100,7 +98,7 @@ public class PerformanceSystem : ISystem
                 case EventId.Core_Performance_EventLatencyTest:
                     if (ev.EventDetails == null)
                     {
-                        Logger.Error("Received event EventLatencyTest without details.");
+                        logger.LogError("Received event EventLatencyTest without details.");
                         break;
                     }
 
@@ -121,7 +119,7 @@ public class PerformanceSystem : ISystem
     {
         // Check if it's time to publish another performance report.
         var now = systemTimer.GetTime();
-        if (now - lastReportTime < REPORT_INTERVAL_US) return;
+        if (now - lastReportTime < ReportIntervalUs) return;
 
         // Publish performance report.
         lastReportTime = now;

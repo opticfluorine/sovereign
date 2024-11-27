@@ -20,7 +20,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites;
@@ -260,7 +259,7 @@ public class AnimatedSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("RenderEditor(): editingSprite is null.");
+            logger.LogError("RenderEditor(): editingSprite is null.");
             return;
         }
 
@@ -418,7 +417,7 @@ public class AnimatedSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("SelectPhase(): editingSprite is null.");
+            logger.LogError("SelectPhase(): editingSprite is null.");
             return;
         }
 
@@ -440,7 +439,7 @@ public class AnimatedSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("SaveState(): editingSprite is null.");
+            logger.LogError("SaveState(): editingSprite is null.");
             return;
         }
 
@@ -478,7 +477,7 @@ public class AnimatedSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("HandleSpriteSelector(): editingSprite is null");
+            logger.LogError("HandleSpriteSelector(): editingSprite is null");
             return;
         }
 
@@ -497,7 +496,7 @@ public class AnimatedSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("AppendFrame(): editingSprite is null");
+            logger.LogError("AppendFrame(): editingSprite is null");
             return;
         }
 
@@ -520,7 +519,7 @@ public class AnimatedSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("RemoveFrame(): editingSprite is null");
+            logger.LogError("RemoveFrame(): editingSprite is null");
             return;
         }
 
@@ -593,7 +592,7 @@ public class AnimatedSpriteEditorTab
 
         if (editingSprite == null)
         {
-            Logger.Error("CanRemoveFrame(): editingSprite is null");
+            logger.LogError("CanRemoveFrame(): editingSprite is null");
             reason = "Unknown error.";
             return false;
         }

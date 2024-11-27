@@ -16,7 +16,6 @@
  */
 
 using System;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Timing;
@@ -74,7 +73,7 @@ public class RenderingMainLoopAction : IMainLoopAction
             }
             catch (Exception e)
             {
-                Logger.Error("Exception thrown during rendering.", e);
+                logger.LogError("Exception thrown during rendering.", e);
             }
 
             lastFrameTime = currentTime;

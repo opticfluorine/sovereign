@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
@@ -84,7 +83,7 @@ public sealed class AnimatedSpriteManager
         var definitions = LoadDefinitions();
         UnpackDefinitions(definitions);
 
-        Logger.Info("Loaded " + AnimatedSprites.Count + " animated sprites.");
+        logger.LogInformation("Loaded " + AnimatedSprites.Count + " animated sprites.");
     }
 
     /// <summary>
@@ -159,7 +158,7 @@ public sealed class AnimatedSpriteManager
         catch (Exception e)
         {
             /* Log and throw a fatal error. */
-            Logger.Fatal("Failed to load the animated sprite definitions.", e);
+            logger.LogCritical("Failed to load the animated sprite definitions.", e);
             ErrorHandler.Error("Failed to load the animated sprite definitions.\n"
                                + "Refer to the error log for details.");
 
@@ -214,11 +213,11 @@ public sealed class AnimatedSpriteManager
             var path = pathBuilder.BuildPathToResource(ResourceType.Sprite, DefinitionsFilename);
             using var stream = new FileStream(path, FileMode.Create, FileAccess.Write);
             JsonSerializer.Serialize(stream, defs);
-            Logger.InfoFormat("Saved {0} animated sprites.", defs.AnimatedSprites.Count);
+            logger.LogInformation("Saved {0} animated sprites.", defs.AnimatedSprites.Count);
         }
         catch (Exception e)
         {
-            Logger.Error("Failed to save animated sprite definitions.", e);
+            logger.LogError("Failed to save animated sprite definitions.", e);
         }
     }
 

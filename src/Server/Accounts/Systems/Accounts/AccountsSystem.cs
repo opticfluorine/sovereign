@@ -16,7 +16,6 @@
  */
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -93,7 +92,7 @@ public sealed class AccountsSystem : ISystem
                 case EventId.Server_Network_ClientDisconnected:
                     if (ev.EventDetails == null)
                     {
-                        Logger.Error("Received ClientDisconnected event with no details.");
+                        logger.LogError("Received ClientDisconnected event with no details.");
                         break;
                     }
 
@@ -104,7 +103,7 @@ public sealed class AccountsSystem : ISystem
                 case EventId.Server_Accounts_SelectPlayer:
                     if (ev.EventDetails == null)
                     {
-                        Logger.Error("Received SelectPlayer event with no details.");
+                        logger.LogError("Received SelectPlayer event with no details.");
                         break;
                     }
 
@@ -120,7 +119,7 @@ public sealed class AccountsSystem : ISystem
                 {
                     if (ev.EventDetails is not EntityEventDetails entityDetails)
                     {
-                        Logger.Error("Received Logout event without details.");
+                        logger.LogError("Received Logout event without details.");
                         break;
                     }
 

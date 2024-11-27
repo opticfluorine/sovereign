@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -64,7 +63,7 @@ public sealed class PersistenceEventHandler
             {
                 if (ev.EventDetails == null)
                 {
-                    Logger.Error("Received RetrieveEntity event with no details.");
+                    logger.LogError("Received RetrieveEntity event with no details.");
                     break;
                 }
 
@@ -77,7 +76,7 @@ public sealed class PersistenceEventHandler
             {
                 if (ev.EventDetails == null)
                 {
-                    Logger.Error("Received RetrieveWorldSegment event with no details.");
+                    logger.LogError("Received RetrieveWorldSegment event with no details.");
                     break;
                 }
 
@@ -94,7 +93,7 @@ public sealed class PersistenceEventHandler
             {
                 if (ev.EventDetails == null)
                 {
-                    Logger.Error("Received SelectPlayer event with no details.");
+                    logger.LogError("Received SelectPlayer event with no details.");
                     break;
                 }
 

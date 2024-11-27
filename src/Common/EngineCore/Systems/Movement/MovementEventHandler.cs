@@ -14,22 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.EngineCore.Systems.Movement;
 
 public class MovementEventHandler
 {
+    private readonly ILogger<MovementEventHandler> logger;
     private readonly MovementManager manager;
 
-    public MovementEventHandler(MovementManager manager)
+    public MovementEventHandler(MovementManager manager, ILogger<MovementEventHandler> logger)
     {
         this.manager = manager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Handles a movement event.
@@ -45,7 +46,7 @@ public class MovementEventHandler
                 if (ev.Local) break;
                 if (ev.EventDetails is not MoveEventDetails details)
                 {
-                    Logger.Error("Received Move event with bad details.");
+                    logger.LogError("Received Move event with bad details.");
                     break;
                 }
 
@@ -57,7 +58,7 @@ public class MovementEventHandler
             {
                 if (ev.EventDetails is not RequestMoveEventDetails details)
                 {
-                    Logger.Error("Received RequestMove event with bad details.");
+                    logger.LogError("Received RequestMove event with bad details.");
                     break;
                 }
 

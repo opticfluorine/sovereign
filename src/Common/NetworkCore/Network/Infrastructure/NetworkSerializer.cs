@@ -18,7 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineUtil.Collections;
@@ -37,8 +37,12 @@ public sealed class NetworkSerializer
     private readonly ObjectPool<BufferPair> bufferPool = new();
 
     private readonly ObjectPool<HMACSHA256> hmacPool = new();
+    private readonly ILogger<NetworkSerializer> logger;
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
+    public NetworkSerializer(ILogger<NetworkSerializer> logger)
+    {
+        this.logger = logger;
+    }
 
     /// <summary>
     ///     Deserializes an event from a network packet.
@@ -212,7 +216,7 @@ public sealed class NetworkSerializer
         var hmac = ComputeHmac(payloadBytes, payloadLength, connection);
         if (hmac.Length != hmacSpan.Length)
         {
-            Logger.Error("HMAC size mismatch.");
+            logger.LogError("HMAC size mismatch.");
             return false;
         }
 

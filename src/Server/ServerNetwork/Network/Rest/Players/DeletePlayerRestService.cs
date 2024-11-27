@@ -66,7 +66,7 @@ public class DeletePlayerRestService : AuthenticatedRestService
             }
             catch (FormatException)
             {
-                Logger.ErrorFormat("Account {0} tried to delete invalid player entity {1}.", accountId, idParam);
+                logger.LogError("Account {0} tried to delete invalid player entity {1}.", accountId, idParam);
                 await SendResponse(ctx, 400, "Invalid player entity ID.");
                 return;
             }
@@ -74,7 +74,7 @@ public class DeletePlayerRestService : AuthenticatedRestService
             // Verify that the player belongs to the authenticated account.
             if (!playerServices.ValidatePlayerAccountPair(playerEntityId, accountId))
             {
-                Logger.ErrorFormat("Entity {0} is not a player assigned to account {1}.", playerEntityId, accountId);
+                logger.LogError("Entity {0} is not a player assigned to account {1}.", playerEntityId, accountId);
                 await SendResponse(ctx, 400, "Player does not belong to account.");
                 return;
             }
@@ -86,7 +86,7 @@ public class DeletePlayerRestService : AuthenticatedRestService
             }
             catch (Exception e)
             {
-                Logger.ErrorFormat(e, "Error deleting player {0}.", playerEntityId);
+                logger.LogError(e, "Error deleting player {0}.", playerEntityId);
                 await SendResponse(ctx, 500, "Error deleting player.");
                 return;
             }
@@ -96,14 +96,14 @@ public class DeletePlayerRestService : AuthenticatedRestService
         }
         catch (Exception e)
         {
-            Logger.Error("Error handling delete player request.", e);
+            logger.LogError("Error handling delete player request.", e);
             try
             {
                 await SendResponse(ctx, 500, "Error processing request.");
             }
             catch (Exception e2)
             {
-                Logger.Error("Error sending error response.", e2);
+                logger.LogError("Error sending error response.", e2);
             }
         }
     }

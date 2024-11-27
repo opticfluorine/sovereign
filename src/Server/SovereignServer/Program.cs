@@ -20,6 +20,7 @@ using Serilog;
 using Sovereign.EngineCore;
 using Sovereign.NetworkCore;
 using Sovereign.ServerCore;
+using Sovereign.ServerNetwork;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -35,7 +36,8 @@ builder.Services
     .AddSovereignCore()
     .AddSovereignCoreHostedServices()
     .AddSovereignNetworkCore()
-    .AddSovereignServer();
+    .AddSovereignServer()
+    .AddSovereignServerNetwork();
 
 // Run application.
 var host = builder.Build();

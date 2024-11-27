@@ -18,7 +18,6 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
@@ -69,7 +68,7 @@ public class WorldSegmentPersister
     /// </remarks>
     public void LoadWorldSegmentBlockData(IPersistenceProvider provider, GridPosition segmentIndex)
     {
-        Logger.DebugFormat("Get block data for {0} from DB.", segmentIndex);
+        logger.LogDebug("Get block data for {0} from DB.", segmentIndex);
         var blockDataBuffer = bufferPool.TakeObject();
         WorldSegmentBlockData? blockData = null;
         try

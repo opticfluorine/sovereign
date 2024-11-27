@@ -17,7 +17,7 @@
 
 using System;
 using System.Threading;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.NetworkCore.Network.Infrastructure;
@@ -34,6 +34,7 @@ public sealed class NetworkingService
 {
     private readonly FatalErrorHandler fatalErrorHandler;
     private readonly InboundNetworkPipeline inboundPipeline;
+    private readonly ILogger<NetworkingService> logger;
     private readonly NetLogger netLogger;
     private readonly INetworkManager networkManager;
     private readonly OutboundNetworkPipeline outboundPipeline;
@@ -52,7 +53,8 @@ public sealed class NetworkingService
         OutboundNetworkPipeline outboundPipeline,
         NetLogger netLogger,
         INetworkManager networkManager,
-        FatalErrorHandler fatalErrorHandler)
+        FatalErrorHandler fatalErrorHandler,
+        ILogger<NetworkingService> logger)
     {
         // Dependency injection.
         this.inboundPipeline = inboundPipeline;
@@ -60,6 +62,7 @@ public sealed class NetworkingService
         this.netLogger = netLogger;
         this.networkManager = networkManager;
         this.fatalErrorHandler = fatalErrorHandler;
+        this.logger = logger;
 
         // Wire up pipelines.
         networkManager.OnNetworkReceive += NetworkManager_OnNetworkReceive;
@@ -70,8 +73,6 @@ public sealed class NetworkingService
             Name = "Networking"
         };
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Starts the networking service.
@@ -96,7 +97,7 @@ public sealed class NetworkingService
     /// </summary>
     private void Run()
     {
-        Logger.Info("Networking service is started.");
+        logger.LogInformation("Networking service is started.");
 
         /* Start the network manager. */
         try
@@ -105,7 +106,7 @@ public sealed class NetworkingService
         }
         catch (Exception e)
         {
-            Logger.Fatal("Failed to start the network manager.", e);
+            logger.LogCritical(e, "Failed to start the network manager.");
             fatalErrorHandler.FatalError();
             return;
         }
@@ -120,7 +121,7 @@ public sealed class NetworkingService
             catch (Exception e)
             {
                 /* Unhandled exception escaped the network thread. */
-                Logger.Error("Error in networking service.", e);
+                logger.LogError(e, "Error in networking service.");
             }
 
         /* Clean up networking resources. */
@@ -130,10 +131,10 @@ public sealed class NetworkingService
         }
         catch (Exception e)
         {
-            Logger.Fatal("Error stopping network manager.", e);
+            logger.LogCritical(e, "Error stopping network manager.");
         }
 
-        Logger.Info("Networking service is stopped.");
+        logger.LogInformation("Networking service is stopped.");
     }
 
     /// <summary>

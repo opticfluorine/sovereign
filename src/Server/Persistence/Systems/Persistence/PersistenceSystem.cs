@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Systems;
@@ -90,12 +89,12 @@ public sealed class PersistenceSystem : ISystem
 
     public void Initialize()
     {
-        Logger.Info("Starting Persistence system.");
+        logger.LogInformation("Starting Persistence system.");
 
         /* Schedule the first synchronization. */
         scheduler.ScheduleSynchronize();
 
-        Logger.Info("Persistence system started.");
+        logger.LogInformation("Persistence system started.");
     }
 
     public int ExecuteOnce()
@@ -112,12 +111,12 @@ public sealed class PersistenceSystem : ISystem
 
     public void Cleanup()
     {
-        Logger.Info("Stopping Persistence system.");
+        logger.LogInformation("Stopping Persistence system.");
 
         var provider = providerManager.PersistenceProvider;
         provider.Dispose();
 
-        Logger.Info("Persistence system stopped.");
+        logger.LogInformation("Persistence system stopped.");
     }
 
     /// <summary>
@@ -133,12 +132,12 @@ public sealed class PersistenceSystem : ISystem
         {
             entityMapper.InitializeMapper(providerManager.PersistenceProvider.NextPersistedIdQuery!);
 
-            Logger.DebugFormat("First available persisted entity ID is {0:X}.",
+            logger.LogDebug("First available persisted entity ID is {0:X}.",
                 entityMapper.NextPersistedId);
         }
         catch (Exception e)
         {
-            Logger.Fatal("Error creating entity mapper.", e);
+            logger.LogCritical("Error creating entity mapper.", e);
             throw new FatalErrorException();
         }
 
@@ -155,11 +154,11 @@ public sealed class PersistenceSystem : ISystem
             using var reader =
                 providerManager.PersistenceProvider.RetrieveAllTemplatesQuery.RetrieveAllTemplates();
             var count = entityProcessor.ProcessFromReader(reader.Reader);
-            Logger.InfoFormat("Loaded {0} template entities.", count);
+            logger.LogInformation("Loaded {0} template entities.", count);
         }
         catch (Exception e)
         {
-            Logger.Fatal("Error loading template entities.", e);
+            logger.LogCritical("Error loading template entities.", e);
             throw new FatalErrorException();
         }
     }

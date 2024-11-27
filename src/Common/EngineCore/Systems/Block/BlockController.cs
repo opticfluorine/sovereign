@@ -17,11 +17,12 @@
 
 using System;
 using System.Collections.Generic;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineUtil.Collections;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.EngineCore.Systems.Block;
 
@@ -45,7 +46,12 @@ public class BlockController
     /// </summary>
     private readonly ObjectPool<List<ulong>> batchRemovePool = new(() => new List<ulong>(DefaultBufferSize));
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
+    private readonly ILogger<BlockController> logger;
+
+    public BlockController(ILogger<BlockController> logger)
+    {
+        this.logger = logger;
+    }
 
     /// <summary>
     ///     Adds a single block and sends a subsequent block change notification.
@@ -56,7 +62,7 @@ public class BlockController
     public void AddBlock(IEventSender eventSender, BlockRecord blockRecord,
         ulong eventTime = Event.Immediate)
     {
-        Logger.DebugFormat("Requesting to add block {0}.", blockRecord.ToString());
+        logger.LogDebug("Requesting to add block {Block}.", blockRecord.ToString());
 
         var details = new BlockAddEventDetails
         {
@@ -81,7 +87,7 @@ public class BlockController
         recordList.Clear();
         recordProvider(recordList);
 
-        Logger.DebugFormat("Requesting to add {0} blocks.", recordList.Count);
+        logger.LogDebug("Requesting to add {Count} blocks.", recordList.Count);
         var details = new BlockAddBatchEventDetails
         {
             BlockRecords = recordList,
@@ -102,7 +108,7 @@ public class BlockController
     public void RemoveBlock(IEventSender eventSender, ulong blockEntityId,
         ulong eventTime = Event.Immediate)
     {
-        Logger.DebugFormat("Requesting to remove block {0}.", blockEntityId);
+        logger.LogDebug("Requesting to remove block {Id}.", blockEntityId);
         var details = new EntityEventDetails { EntityId = blockEntityId };
         var ev = new Event(EventId.Core_Block_Remove, details, eventTime);
         eventSender.SendEvent(ev);
@@ -122,7 +128,7 @@ public class BlockController
         blockEntityIdProvider(removeList);
 
         /* Send the event. */
-        Logger.DebugFormat("Requesting to remove {0} blocks.", removeList.Count);
+        logger.LogDebug("Requesting to remove {Count} blocks.", removeList.Count);
         var details = new BlockRemoveBatchEventDetails { EntityIds = removeList };
         var ev = new Event(EventId.Core_Block_RemoveBatch, details, eventTime);
         eventSender.SendEvent(ev);

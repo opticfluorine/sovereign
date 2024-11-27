@@ -17,9 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -37,7 +35,6 @@ public class MovementManager
     private readonly MovementInternalController internalController;
 
     private readonly KinematicComponentCollection kinematics;
-    private readonly MovingComponentIndexer movingComponents;
     private readonly OrientationComponentCollection orientations;
 
     /// <summary>
@@ -79,11 +76,10 @@ public class MovementManager
     /// </summary>
     private ulong lastUpdateSystemTime;
 
-    public MovementManager(MovingComponentIndexer movingComponents, KinematicComponentCollection kinematics,
+    public MovementManager(KinematicComponentCollection kinematics,
         ISystemTimer systemTimer, MovementInternalController internalController,
         IEventSender eventSender, OrientationComponentCollection orientations)
     {
-        this.movingComponents = movingComponents;
         this.kinematics = kinematics;
         this.systemTimer = systemTimer;
         this.internalController = internalController;
@@ -96,8 +92,6 @@ public class MovementManager
         kinematics.OnStartUpdates += OnStartUpdates;
         kinematics.OnBeginDirectAccess += UpdatePositions;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Called when movement is requested.

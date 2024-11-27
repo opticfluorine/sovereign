@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 
@@ -53,7 +52,7 @@ public class TemplateEntityManager
         if (definition.EntityId < EntityConstants.FirstTemplateEntityId ||
             definition.EntityId > EntityConstants.LastTemplateEntityId)
         {
-            Logger.ErrorFormat("Received update for non-template entity ID {0}; skipping.", definition.EntityId);
+            logger.LogError("Received update for non-template entity ID {0}; skipping.", definition.EntityId);
             return;
         }
 

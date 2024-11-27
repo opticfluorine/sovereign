@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
@@ -66,7 +65,7 @@ public class EntityAnimationSystem : ISystem
                 {
                     if (ev.EventDetails is not MoveEventDetails details)
                     {
-                        Logger.Error("Received Move event without details.");
+                        logger.LogError("Received Move event without details.");
                         break;
                     }
 

@@ -18,7 +18,6 @@
 using System;
 using System.Data;
 using System.Text;
-using Castle.Core.Logging;
 using Microsoft.Data.Sqlite;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Main;
@@ -89,7 +88,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         Connect();
         if (Connection == null)
         {
-            Logger.Fatal("Connection unexpectedly null.");
+            logger.LogCritical("Connection unexpectedly null.");
             throw new FatalErrorException();
         }
 
@@ -299,11 +298,11 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
 
     public void Dispose()
     {
-        Logger.InfoFormat("Closing the SQLite database if open.");
+        logger.LogInformation("Closing the SQLite database if open.");
 
         Connection.Close();
 
-        Logger.InfoFormat("SQLite database closed.");
+        logger.LogInformation("SQLite database closed.");
     }
 
     /// <summary>
@@ -311,7 +310,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     /// </summary>
     private void Connect()
     {
-        Logger.InfoFormat("Opening the SQLite database at {0}.",
+        logger.LogInformation("Opening the SQLite database at {0}.",
             configuration.Host);
 
         var connString = CreateConnectionString();
@@ -322,11 +321,11 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         }
         catch (Exception e)
         {
-            Logger.Fatal("Failed to open the SQLite database.", e);
+            logger.LogCritical("Failed to open the SQLite database.", e);
             throw new FatalErrorException();
         }
 
-        Logger.Info("SQLite database opened.");
+        logger.LogInformation("SQLite database opened.");
     }
 
     /// <summary>

@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Systems.ClientState;
@@ -80,7 +79,7 @@ public sealed class ClientNetworkController
     {
         if (!stateServices.TryGetSelectedPlayer(out var playerEntityId))
         {
-            Logger.Error("No player is selected.");
+            logger.LogError("No player is selected.");
             return;
         }
 

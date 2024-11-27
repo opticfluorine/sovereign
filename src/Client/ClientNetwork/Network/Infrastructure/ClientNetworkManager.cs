@@ -233,7 +233,7 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
                         break;
 
                     default:
-                        Logger.Error("Unrecognized client network command.");
+                        logger.LogError("Unrecognized client network command.");
                         break;
                 }
             }
@@ -249,7 +249,7 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
             // Sanity check.
             if (ClientState != NetworkClientState.Disconnected)
             {
-                Logger.Error("Client is not ready.");
+                logger.LogError("Client is not ready.");
                 return;
             }
 
@@ -280,7 +280,7 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
                 ErrorMessage = e.Message;
                 ClientState = NetworkClientState.Failed;
 
-                Logger.Error("Failed to connect to server.", e);
+                logger.LogError("Failed to connect to server.", e);
             }
         }
 
@@ -293,7 +293,7 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
             if (ClientState != NetworkClientState.Connecting ||
                 ClientState != NetworkClientState.Connected)
             {
-                Logger.Error("Client is not ready.");
+                logger.LogError("Client is not ready.");
                 return;
             }
 
@@ -305,7 +305,7 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
                     connectionManager.RemoveConnection(conn);
                     conn = null;
                 }
-                Logger.Error("Disconnected.");
+                logger.LogError("Disconnected.");
                 ClientState = NetworkClientState.Disconnected;
             }
             catch (Exception e)
@@ -314,7 +314,7 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
                 ErrorMessage = e.Message;
                 ClientState = NetworkClientState.Failed;
 
-                Logger.Error("Failed to end connection.", e);
+                logger.LogError("Failed to end connection.", e);
             }
         }
 
@@ -336,7 +336,7 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
             ErrorMessage = socketError.ToString();
             ClientState = NetworkClientState.Failed;
 
-            Logger.ErrorFormat("Network error: {0}", socketError.ToString());
+            logger.LogError("Network error: {0}", socketError.ToString());
         }
 
         /// <summary>
@@ -350,7 +350,7 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
         {
             if (conn == null)
             {
-                Logger.Error("Received packet when client not ready.");
+                logger.LogError("Received packet when client not ready.");
                 return;
             }
 
@@ -361,7 +361,7 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
             }
             catch (Exception e)
             {
-                Logger.Error("Error receiving packet.", e);
+                logger.LogError("Error receiving packet.", e);
             }
         }
 
@@ -374,7 +374,7 @@ namespace Sovereign.ClientNetwork.Network.Infrastructure
         {
             if (conn != null)
             {
-                Logger.InfoFormat("Disconnected by remote peer. Reason: {0}", disconnectInfo.Reason.ToString());
+                logger.LogInformation("Disconnected by remote peer. Reason: {0}", disconnectInfo.Reason.ToString());
                 connectionManager.RemoveConnection(conn);
                 conn = null;
                 ClientState = NetworkClientState.Failed;

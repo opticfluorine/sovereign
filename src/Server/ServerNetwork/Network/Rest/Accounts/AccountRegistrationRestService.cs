@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
@@ -82,7 +81,7 @@ public sealed class AccountRegistrationRestService : IRestService
             // Safety check.
             if (ctx.Request.ContentLength > MaxRequestLength)
             {
-                Logger.ErrorFormat("Received registration request from {0} that was too large.",
+                logger.LogError("Received registration request from {0} that was too large.",
                     ctx.Request.Source.IpAddress);
                 await SendResponse(ctx, 413, "Request too large.");
                 return;
@@ -96,7 +95,7 @@ public sealed class AccountRegistrationRestService : IRestService
             if (registrationRequest == null || registrationRequest.Username == null ||
                 registrationRequest.Password == null)
             {
-                Logger.ErrorFormat("Received incomplete registration request from {0}.",
+                logger.LogError("Received incomplete registration request from {0}.",
                     ctx.Request.Source.IpAddress);
                 await SendResponse(ctx, 400, "Incomplete request.");
                 return;
@@ -106,7 +105,7 @@ public sealed class AccountRegistrationRestService : IRestService
             var result = accountServices.Register(registrationRequest.Username,
                 registrationRequest.Password);
 
-            Logger.InfoFormat("Registration for user '{0}' from {1} returned status {2}.",
+            logger.LogInformation("Registration for user '{0}' from {1} returned status {2}.",
                 registrationRequest.Username, ctx.Request.Source.IpAddress, result);
             await SendResponse(ctx,
                 resultToStatus[result],
@@ -116,25 +115,25 @@ public sealed class AccountRegistrationRestService : IRestService
         {
             try
             {
-                Logger.ErrorFormat("Received malformed registration request from {0}.",
+                logger.LogError("Received malformed registration request from {0}.",
                     ctx.Request.Source.IpAddress);
                 await SendResponse(ctx, 400, "Malformed request.");
             }
             catch (Exception e)
             {
-                Logger.Error("Error sending malformed request response.", e);
+                logger.LogError("Error sending malformed request response.", e);
             }
         }
         catch (Exception e)
         {
-            Logger.Error("Error processing registration request.", e);
+            logger.LogError("Error processing registration request.", e);
             try
             {
                 await SendResponse(ctx, 500, "Error processing registration request.");
             }
             catch (Exception e2)
             {
-                Logger.Error("Error sending error response.", e2);
+                logger.LogError("Error sending error response.", e2);
             }
         }
     }

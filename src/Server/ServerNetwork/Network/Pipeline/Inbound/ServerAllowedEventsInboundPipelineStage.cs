@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
@@ -68,7 +67,7 @@ public class ServerAllowedEventsInboundPipelineStage : IInboundPipelineStage
         else
         {
             // Event type is not permitted, log warning and drop the event.
-            Logger.WarnFormat("Rejecting network event with ID {0} not found on allowlist.", ev.EventId);
+            logger.LogWarning("Rejecting network event with ID {0} not found on allowlist.", ev.EventId);
 
             // This is a breach of protocol and could be a security issue, so forcibly disconnect the client.
             networkController.Disconnect(eventSender, ev.FromConnectionId);

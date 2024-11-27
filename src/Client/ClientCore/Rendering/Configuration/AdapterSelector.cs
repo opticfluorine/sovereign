@@ -18,7 +18,6 @@
 using System;
 using System.Linq;
 using System.Text;
-using Castle.Core.Logging;
 
 namespace Sovereign.ClientCore.Rendering.Configuration;
 
@@ -63,7 +62,7 @@ public class AdapterSelector
     /// </exception>
     public IVideoAdapter SelectAdapter()
     {
-        /* 
+        /*
          * Select the adapter with the best memory, preferring dedicated
          * GPU memory over other types of memory. In most cases, this should
          * yield the most powerful video adapter available.
@@ -77,7 +76,7 @@ public class AdapterSelector
                                + adapter.DedicatedSystemMemory * DedicatedCpuFactor
                                + adapter.SharedSystemMemory * SharedFactor
                 ).First();
-            Logger.Info(() => CreateLogMessageForAdapter(selected));
+            logger.LogInformation(() => CreateLogMessageForAdapter(selected));
             return selected;
         }
         catch (InvalidOperationException e)

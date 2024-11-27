@@ -20,7 +20,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using MessagePack;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
@@ -160,7 +159,7 @@ public sealed class WorldSegmentBlockDataManager
             deletionTasks[segmentIndex] = currentTask.ContinueWith(
                 _ => DoRemoveWorldSegment(segmentIndex));
         else
-            Logger.ErrorFormat("Tried to remove world segemnt data for {0} before it was added.", segmentIndex);
+            logger.LogError("Tried to remove world segemnt data for {0} before it was added.", segmentIndex);
     }
 
     /// <summary>
@@ -187,14 +186,14 @@ public sealed class WorldSegmentBlockDataManager
     {
         try
         {
-            Logger.DebugFormat("Adding summary block data for world segment {0}.", segmentIndex);
+            logger.LogDebug("Adding summary block data for world segment {0}.", segmentIndex);
             var blockData = generator.Create(segmentIndex);
             var bytes = MessagePackSerializer.Serialize(blockData, MessageConfig.CompressedUntrustedMessagePackOptions);
             return Tuple.Create(blockData, bytes);
         }
         catch (Exception e)
         {
-            Logger.ErrorFormat(e, "Error adding summary block data for world segment {0}.", segmentIndex);
+            logger.LogError(e, "Error adding summary block data for world segment {0}.", segmentIndex);
             return Tuple.Create(new WorldSegmentBlockData(), Array.Empty<byte>());
         }
     }
@@ -272,7 +271,7 @@ public sealed class WorldSegmentBlockDataManager
         }
         catch (Exception e)
         {
-            Logger.ErrorFormat(e, "Could not schedule block for entity {0}.", entityId);
+            logger.LogError(e, "Could not schedule block for entity {0}.", entityId);
         }
     }
 

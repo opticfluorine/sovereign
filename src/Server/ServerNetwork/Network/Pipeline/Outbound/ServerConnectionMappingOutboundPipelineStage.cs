@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
@@ -130,7 +129,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             mapper.Process(evInfo);
         else
             // No mapper found for this event type.
-            Logger.ErrorFormat("No connection mapper available for event ID {0}.", evInfo.Event.EventId);
+            logger.LogError("No connection mapper available for event ID {0}.", evInfo.Event.EventId);
     }
 
     public IOutboundPipelineStage NextStage

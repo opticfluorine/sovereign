@@ -17,7 +17,6 @@
 
 using System.Collections.Generic;
 using System.Numerics;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineUtil.Collections;
@@ -95,7 +94,7 @@ public sealed class WorldLayerGrouper
     {
         if (activeLayer is null)
         {
-            Logger.Error("No active layer.");
+            logger.LogError("No active layer.");
             return;
         }
 

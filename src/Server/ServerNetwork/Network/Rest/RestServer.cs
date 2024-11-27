@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.ServerNetwork.Configuration;
 using WatsonWebserver;
@@ -43,12 +42,13 @@ public sealed class RestServer : IDisposable
 
     private readonly FatalErrorHandler fatalErrorHandler;
     private readonly IServerNetworkConfiguration networkConfiguration;
-    private readonly ICollection<IRestService> restServices;
 
     /// <summary>
     ///     Embedded web server.
     /// </summary>
     private readonly Lazy<Webserver> restServer;
+
+    private readonly ICollection<IRestService> restServices;
 
     public RestServer(IServerNetworkConfiguration networkConfiguration,
         ICollection<IRestService> restServices,
@@ -61,7 +61,7 @@ public sealed class RestServer : IDisposable
         restServer = new Lazy<Webserver>(() =>
         {
             return new Webserver(new WebserverSettings(networkConfiguration.RestHostname,
-                networkConfiguration.RestPort, false), OnUnmappedRequest);
+                networkConfiguration.RestPort), OnUnmappedRequest);
         });
     }
 
@@ -69,7 +69,7 @@ public sealed class RestServer : IDisposable
 
     public void Dispose()
     {
-        Logger.Info("Stopping REST server.");
+        logger.LogInformation("Stopping REST server.");
         if (restServer.Value.IsListening) restServer.Value.Stop();
     }
 
@@ -98,17 +98,17 @@ public sealed class RestServer : IDisposable
                         break;
 
                     default:
-                        Logger.Error("Unrecognized path type in REST service. The service will not be available.");
+                        logger.LogError("Unrecognized path type in REST service. The service will not be available.");
                         break;
                 }
 
-            Logger.InfoFormat("Started REST server on {0}:{1}.",
+            logger.LogInformation("Started REST server on {0}:{1}.",
                 networkConfiguration.RestHostname,
                 networkConfiguration.RestPort);
         }
         catch (Exception e)
         {
-            Logger.Fatal("Failed to create REST server.", e);
+            logger.LogCritical("Failed to create REST server.", e);
             fatalErrorHandler.FatalError();
         }
     }
@@ -120,7 +120,7 @@ public sealed class RestServer : IDisposable
     /// <returns>Task for sending response.</returns>
     private async Task OnUnmappedRequest(HttpContextBase ctx)
     {
-        Logger.DebugFormat("REST server returned 404 for {0} request at {1} from {2}.",
+        logger.LogDebug("REST server returned 404 for {0} request at {1} from {2}.",
             ctx.Request.Method.ToString(), ctx.Request.Url.Full, ctx.Request.Source.IpAddress);
 
         ctx.Response.StatusCode = 404;

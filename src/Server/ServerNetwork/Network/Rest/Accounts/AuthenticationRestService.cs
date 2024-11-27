@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Network;
@@ -142,19 +141,19 @@ public sealed class AuthenticationRestService : IRestService
             }
             catch (Exception e)
             {
-                Logger.Error("Error sending malformed input response.", e);
+                logger.LogError("Error sending malformed input response.", e);
             }
         }
         catch (Exception e)
         {
-            Logger.Error("Error handling login.", e);
+            logger.LogError("Error handling login.", e);
             try
             {
                 await SendResponse(ctx, 500, "Error processing login request.");
             }
             catch (Exception e2)
             {
-                Logger.Error("Error sending error response.", e2);
+                logger.LogError("Error sending error response.", e2);
             }
         }
     }

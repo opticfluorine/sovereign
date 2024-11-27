@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -79,7 +78,7 @@ public class EntitySynchronizationSystem : ISystem
                 case EventId.Client_EntitySynchronization_Sync:
                     if (ev.EventDetails is not EntityDefinitionEventDetails)
                     {
-                        Logger.Error("Received Sync event without details.");
+                        logger.LogError("Received Sync event without details.");
                         break;
                     }
 
@@ -89,7 +88,7 @@ public class EntitySynchronizationSystem : ISystem
                 case EventId.Client_EntitySynchronization_Desync:
                     if (ev.EventDetails is not EntityDesyncEventDetails)
                     {
-                        Logger.Error("Received Desync event without details.");
+                        logger.LogError("Received Desync event without details.");
                         break;
                     }
 
@@ -100,7 +99,7 @@ public class EntitySynchronizationSystem : ISystem
                 {
                     if (ev.EventDetails is not TemplateEntityDefinitionEventDetails syncDetails)
                     {
-                        Logger.Error("Received SyncTemplate event without details.");
+                        logger.LogError("Received SyncTemplate event without details.");
                         break;
                     }
 
@@ -111,7 +110,7 @@ public class EntitySynchronizationSystem : ISystem
                 case EventId.Core_WorldManagement_Subscribe:
                     if (ev.EventDetails is not WorldSegmentSubscriptionEventDetails)
                     {
-                        Logger.Error("Received Subscribe event without details.");
+                        logger.LogError("Received Subscribe event without details.");
                         break;
                     }
 
@@ -121,7 +120,7 @@ public class EntitySynchronizationSystem : ISystem
                 case EventId.Core_WorldManagement_Unsubscribe:
                     if (ev.EventDetails is not WorldSegmentSubscriptionEventDetails)
                     {
-                        Logger.Error("Received Unsubscribe event without details.");
+                        logger.LogError("Received Unsubscribe event without details.");
                         break;
                     }
 
@@ -131,7 +130,7 @@ public class EntitySynchronizationSystem : ISystem
                 case EventId.Client_Network_PlayerEntitySelected:
                     if (ev.EventDetails is not EntityEventDetails)
                     {
-                        Logger.Error("Received PlayerEntitySelected event without details.");
+                        logger.LogError("Received PlayerEntitySelected event without details.");
                         break;
                     }
 
@@ -141,7 +140,7 @@ public class EntitySynchronizationSystem : ISystem
                 case EventId.Core_WorldManagement_EntityLeaveWorldSegment:
                     if (ev.EventDetails is not EntityChangeWorldSegmentEventDetails)
                     {
-                        Logger.Error("Received EntityLeaveWorldSegment event without details.");
+                        logger.LogError("Received EntityLeaveWorldSegment event without details.");
                         break;
                     }
 
@@ -183,7 +182,7 @@ public class EntitySynchronizationSystem : ISystem
     private void HandleChangeWorldSegment(EntityChangeWorldSegmentEventDetails details)
     {
         if (details.EntityId == playerEntityId)
-            Logger.DebugFormat("Player entered world segment {0}.", details.NewSegmentIndex);
+            logger.LogDebug("Player entered world segment {0}.", details.NewSegmentIndex);
 
         unloader.OnEntityChangeWorldSegment(details.EntityId,
             details.NewSegmentIndex);
@@ -205,7 +204,7 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Update details.</param>
     private void HandleSync(EntityDefinitionEventDetails details)
     {
-        Logger.DebugFormat("Processing {0} entity definitions.", details.EntityDefinitions.Count);
+        logger.LogDebug("Processing {0} entity definitions.", details.EntityDefinitions.Count);
         foreach (var definition in details.EntityDefinitions)
             processor.ProcessDefinition(definition);
     }
@@ -216,7 +215,7 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Update details.</param>
     private void HandleSyncTemplate(TemplateEntityDefinitionEventDetails details)
     {
-        Logger.DebugFormat("Processing template entity update for entity {0}.", details.Definition.EntityId);
+        logger.LogDebug("Processing template entity update for entity {0}.", details.Definition.EntityId);
         processor.ProcessDefinition(details.Definition);
     }
 
@@ -226,7 +225,7 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Desync details.</param>
     private void HandleDesync(EntityDesyncEventDetails details)
     {
-        Logger.DebugFormat("Desynchronizing entity ID {0} and descendants.", details.EntityId);
+        logger.LogDebug("Desynchronizing entity ID {0} and descendants.", details.EntityId);
         unloader.OnDesync(details.EntityId);
     }
 }

@@ -54,7 +54,7 @@ namespace Sovereign.ClientNetwork.Network
             try
             {
                 // Prepare request.
-                Logger.InfoFormat("Attempting login as {0}.", loginParameters.Username);
+                logger.LogInformation("Attempting login as {0}.", loginParameters.Username);
                 var request = new LoginRequest()
                 {
                     Username = loginParameters.Username,
@@ -68,38 +68,38 @@ namespace Sovereign.ClientNetwork.Network
                 {
                     case HttpStatusCode.Created:
                         // Successful login.
-                        Logger.Info("Login successful.");
+                        logger.LogInformation("Login successful.");
                         result = await ProcessSuccessfulLogin(response);
                         break;
 
                     case HttpStatusCode.TooManyRequests:
                         // Failed: Too many login attempts, try again later.
-                        Logger.Error("Login failed: too many attempts, try again later.");
+                        logger.LogError("Login failed: too many attempts, try again later.");
                         break;
 
                     case HttpStatusCode.Conflict:
                         // Failed: Account is already logged in.
-                        Logger.Error("Login failed: account is already logged in.");
+                        logger.LogError("Login failed: account is already logged in.");
                         break;
 
                     case HttpStatusCode.Forbidden:
                         // Failed: Invalid username or password.
-                        Logger.Error("Login failed: invalid username or password.");
+                        logger.LogError("Login failed: invalid username or password.");
                         break;
 
                     case HttpStatusCode.BadRequest:
                         // Failed: Invalid request.
-                        Logger.Error("Login failed: invalid request.");
+                        logger.LogError("Login failed: invalid request.");
                         break;
 
                     case HttpStatusCode.InternalServerError:
                         // Failed: Server error.
-                        Logger.Error("Login failed: server error.");
+                        logger.LogError("Login failed: server error.");
                         break;
 
                     default:
                         // Failed: Unknown error.
-                        Logger.Error("Login failed: unknown error.");
+                        logger.LogError("Login failed: unknown error.");
                         break;
                 }
 
@@ -107,7 +107,7 @@ namespace Sovereign.ClientNetwork.Network
             }
             catch (Exception e)
             {
-                Logger.Error("Unhandled exception during login.", e);
+                logger.LogError("Unhandled exception during login.", e);
                 return new Maybe<LoginResponse>();
             }
         }
@@ -125,7 +125,7 @@ namespace Sovereign.ClientNetwork.Network
             }
             catch (Exception e)
             {
-                Logger.Error("Error while processing successful login.", e);
+                logger.LogError("Error while processing successful login.", e);
                 return new Maybe<LoginResponse>();
             }
         }

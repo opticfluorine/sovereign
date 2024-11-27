@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 
@@ -37,6 +37,8 @@ public class SystemExecutor
     /// </summary>
     private readonly IEventLoop eventLoop;
 
+    private readonly ILogger<SystemExecutor> logger;
+
     /// <summary>
     ///     Systems managed by this executor.
     /// </summary>
@@ -47,13 +49,13 @@ public class SystemExecutor
     /// </summary>
     private uint iterationCount;
 
-    public SystemExecutor(IEventLoop eventLoop, IEngineConfiguration engineConfiguration)
+    public SystemExecutor(IEventLoop eventLoop, IEngineConfiguration engineConfiguration,
+        ILogger<SystemExecutor> logger)
     {
         this.eventLoop = eventLoop;
         this.engineConfiguration = engineConfiguration;
+        this.logger = logger;
     }
-
-    public ILogger Log { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Adds a system to the executor.
@@ -67,17 +69,17 @@ public class SystemExecutor
     /// <summary>
     ///     Executes the systems. This should be invoked from its own thread.
     /// </summary>
-    public void Execute()
+    public void Execute(CancellationToken cancellationToken)
     {
         /* Ensure that at least one system is being managed. */
         if (systems.Count == 0)
         {
-            Log.Info("No systems to manage, this SystemExecutor will terminate.");
+            logger.LogInformation("No systems to manage, this SystemExecutor will terminate.");
             return;
         }
 
         InitializeSystems();
-        ExecuteSystems();
+        ExecuteSystems(cancellationToken);
         CleanupSystems();
     }
 
@@ -86,7 +88,7 @@ public class SystemExecutor
     /// </summary>
     private void InitializeSystems()
     {
-        Log.Info(FormatStartupLogMessage());
+        logger.LogInformation(FormatStartupLogMessage());
 
         foreach (var system in systems) system.Initialize();
     }
@@ -94,9 +96,10 @@ public class SystemExecutor
     /// <summary>
     ///     Executes the systems continuously until the main loop is terminated.
     /// </summary>
-    private void ExecuteSystems()
+    /// <param name="cancellationToken">Cancellation token to signal shutdown.</param>
+    private void ExecuteSystems(CancellationToken cancellationToken)
     {
-        while (!eventLoop.Terminated)
+        while (!eventLoop.Terminated && !cancellationToken.IsCancellationRequested)
         {
             // Execute all systems.
             foreach (var system in systems)
@@ -106,7 +109,7 @@ public class SystemExecutor
                 }
                 catch (Exception e)
                 {
-                    Log.Error("Unhandled exception in system.", e);
+                    logger.LogError(e, "Unhandled exception in SystemExecutor.");
                 }
 
             iterationCount++;
@@ -128,7 +131,7 @@ public class SystemExecutor
     /// </summary>
     private void CleanupSystems()
     {
-        Log.Info("SystemExecutor is shutting down.");
+        logger.LogInformation("SystemExecutor is shutting down.");
 
         foreach (var system in systems) system.Cleanup();
     }

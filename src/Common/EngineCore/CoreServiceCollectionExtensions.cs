@@ -75,6 +75,7 @@ public static class CoreServiceCollectionExtensions
     public static IServiceCollection AddSovereignCoreHostedServices(this IServiceCollection services)
     {
         services.AddHostedService<EngineService>();
+        services.AddHostedService<SystemManager>();
 
         return services;
     }
@@ -139,7 +140,6 @@ public static class CoreServiceCollectionExtensions
     {
         services.TryAddTransient<EventCommunicator>();
         services.TryAddSingleton<EventAdapterManager>();
-        services.TryAddSingleton<EventDescriptions>();
         services.TryAddSingleton<IEventLoop, MainEventLoop>();
         services.TryAddSingleton<IEventSender, EventSender>();
 
@@ -189,7 +189,6 @@ public static class CoreServiceCollectionExtensions
 
     private static void AddSystems(IServiceCollection services)
     {
-        services.TryAddSingleton<SystemManager>();
         services.TryAddTransient<SystemExecutor>();
 
         AddBlockSystem(services);

@@ -16,7 +16,6 @@
  */
 
 using System;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
@@ -51,7 +50,7 @@ public sealed class PersistenceEntityRetriever
     /// <param name="entityId">Entity ID to retrieve.</param>
     public void RetrieveEntity(ulong entityId)
     {
-        Logger.DebugFormat("Retrieve entity tree for entity ID {0}.", entityId);
+        logger.LogDebug("Retrieve entity tree for entity ID {0}.", entityId);
 
         DoRetrieve(entityId);
     }
@@ -74,7 +73,7 @@ public sealed class PersistenceEntityRetriever
         }
         catch (Exception e)
         {
-            Logger.Error(string.Format("Error retrieving entity {0,16:X}.", entityId), e);
+            logger.LogError(string.Format("Error retrieving entity {0,16:X}.", entityId), e);
         }
     }
 }

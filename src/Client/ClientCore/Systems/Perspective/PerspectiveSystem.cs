@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
@@ -66,7 +65,7 @@ public class PerspectiveSystem : ISystem
                 {
                     if (ev.EventDetails is not WorldSegmentSubscriptionEventDetails subDetails)
                     {
-                        Logger.Error("Bad details for Subscribe event.");
+                        logger.LogError("Bad details for Subscribe event.");
                         break;
                     }
 
@@ -78,7 +77,7 @@ public class PerspectiveSystem : ISystem
                 {
                     if (ev.EventDetails is not WorldSegmentSubscriptionEventDetails subDetails)
                     {
-                        Logger.Error("Bad details for Unsubscribe event.");
+                        logger.LogError("Bad details for Unsubscribe event.");
                         break;
                     }
 

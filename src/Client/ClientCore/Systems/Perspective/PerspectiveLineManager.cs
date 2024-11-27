@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
@@ -139,7 +138,7 @@ public class PerspectiveLineManager
             {
                 if (!perspectiveLines.TryGetValue(index, out var line))
                 {
-                    Logger.WarnFormat("Perspective line {0} not found for world segment unsubscribe.", index);
+                    logger.LogWarning("Perspective line {0} not found for world segment unsubscribe.", index);
                     continue;
                 }
 
@@ -323,7 +322,7 @@ public class PerspectiveLineManager
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices)) return;
         if (!zFloorByEntity.TryGetValue(entityId, out var zFloor))
         {
-            Logger.ErrorFormat("No cached z value for entity {0}; skipping removal.", entityId);
+            logger.LogError("No cached z value for entity {0}; skipping removal.", entityId);
             return;
         }
 
@@ -332,7 +331,7 @@ public class PerspectiveLineManager
             if (!perspectiveLines.TryGetValue(index, out var line)) continue;
             if (!line.TryGetListForZFloor(zFloor, out var list))
             {
-                Logger.ErrorFormat("Entity {0} not found in perspective line {1} for removal.", entityId, index);
+                logger.LogError("Entity {0} not found in perspective line {1} for removal.", entityId, index);
                 continue;
             }
 
@@ -359,7 +358,7 @@ public class PerspectiveLineManager
         if (!linesByEntity.TryGetValue(entityId, out var oldLines)
             || !zFloorByEntity.TryGetValue(entityId, out var oldZFloor))
         {
-            Logger.WarnFormat("Moved entity {0} not already tracked, treating as add.");
+            logger.LogWarning("Moved entity {0} not already tracked, treating as add.");
             AddNonBlockEntity(entityId, position);
             return;
         }
@@ -374,7 +373,7 @@ public class PerspectiveLineManager
             {
                 if (!perspectiveLines.TryGetValue(oldIndex, out var oldLine))
                 {
-                    Logger.ErrorFormat("Perspective line {0} is missing.", oldIndex);
+                    logger.LogError("Perspective line {0} is missing.", oldIndex);
                     continue;
                 }
 
@@ -551,7 +550,7 @@ public class PerspectiveLineManager
     {
         if (!kinematics.HasComponentForEntity(entityId))
         {
-            Logger.WarnFormat("No position for entity {0}.", entityId);
+            logger.LogWarning("No position for entity {0}.", entityId);
             return;
         }
 

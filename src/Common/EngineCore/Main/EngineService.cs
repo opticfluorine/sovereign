@@ -18,8 +18,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Timing;
 
@@ -30,12 +30,12 @@ namespace Sovereign.EngineCore.Main;
 /// </summary>
 public class EngineService : BackgroundService
 {
-    private readonly EventDescriptions eventDescriptions;
-
     /// <summary>
     ///     Event loop.
     /// </summary>
     private readonly IEventLoop eventLoop;
+
+    private readonly ILogger<EngineService> logger;
 
     private readonly List<IMainLoopAction> mainLoopActions;
 
@@ -50,15 +50,13 @@ public class EngineService : BackgroundService
     private ulong cycleCount;
 
     public EngineService(IEventLoop eventLoop, TimeManager timeManager, IList<IMainLoopAction> mainLoopActions,
-        ConsoleEventAdapter eventAdapter, EventDescriptions eventDescriptions)
+        ConsoleEventAdapter eventAdapter, ILogger<EngineService> logger)
     {
         this.eventLoop = eventLoop;
         this.timeManager = timeManager;
+        this.logger = logger;
         this.mainLoopActions = new List<IMainLoopAction>(mainLoopActions);
-        this.eventDescriptions = eventDescriptions;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -75,23 +73,23 @@ public class EngineService : BackgroundService
         LogDiagnostics();
 
         /* Start the engine. */
-        Logger.Info("EngineBase is starting.");
+        logger.LogInformation("EngineService is starting.");
         Startup();
-        Logger.Info("EngineBase is started.");
+        logger.LogInformation("EngineService is started.");
 
 #if DEBUG
-        Logger.Warn("This is a DEBUG build of Sovereign Engine.");
-        Logger.Warn("Debug builds are NOT suitable for production use.");
-        Logger.Warn("Ensure that only Release builds are used in production.");
+        logger.LogWarning("This is a DEBUG build of Sovereign Engine.");
+        logger.LogWarning("Debug builds are NOT suitable for production use.");
+        logger.LogWarning("Ensure that only Release builds are used in production.");
 #endif
 
         /* Run the engine. */
         RunEngine(stoppingToken);
 
         /* Stop the engine. */
-        Logger.Info("EngineBase is stopping.");
+        logger.LogInformation("EngineService is stopping.");
         Shutdown();
-        Logger.Info("EngineBase is stopped.");
+        logger.LogInformation("EngineService is stopped.");
     }
 
     /// <summary>
@@ -148,9 +146,7 @@ public class EngineService : BackgroundService
     private void LogDiagnostics()
     {
         ThreadPool.GetMaxThreads(out var workerThreads, out var completionPortThreads);
-        Logger.DebugFormat("Maximum worker threads = {0}.", workerThreads);
-        Logger.DebugFormat("Maximum I/O completion threads = {0}.", completionPortThreads);
-
-        eventDescriptions.LogDebugInfo();
+        logger.LogDebug("Maximum worker threads = {Threads}.", workerThreads);
+        logger.LogDebug("Maximum I/O completion threads = {Threads}.", completionPortThreads);
     }
 }

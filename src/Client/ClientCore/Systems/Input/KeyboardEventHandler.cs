@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
@@ -83,7 +82,7 @@ public class KeyboardEventHandler
     {
         if (ev.EventDetails == null)
         {
-            Logger.Error("Received KeyDown without details.");
+            logger.LogError("Received KeyDown without details.");
             return;
         }
 
@@ -105,7 +104,7 @@ public class KeyboardEventHandler
     {
         if (ev.EventDetails == null)
         {
-            Logger.Error("Received KeyUp without details.");
+            logger.LogError("Received KeyUp without details.");
             return;
         }
 

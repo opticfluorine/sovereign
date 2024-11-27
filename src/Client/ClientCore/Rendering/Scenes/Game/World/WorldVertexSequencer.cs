@@ -17,7 +17,6 @@
 
 using System;
 using System.Numerics;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
@@ -115,13 +114,13 @@ public sealed class WorldVertexSequencer
         var blocks = grouper.SolidBlocks;
         if (!renderPlan.TryAddVertices(SolidVerticesPerBlock * blocks.Count, out var vertices, out var baseIndex))
         {
-            Logger.Error("Not enough room in vertex buffer for solid geometry.");
+            logger.LogError("Not enough room in vertex buffer for solid geometry.");
             return;
         }
 
         if (!renderPlan.TryAddSolidIndices((int)totalIndexCount, out var indices,
-                out var _))
-            Logger.Error("Not enough room in solid index buffer for solid geometry.");
+                out _))
+            logger.LogError("Not enough room in solid index buffer for solid geometry.");
 
         for (var i = 0; i < blocks.Count; ++i)
         {

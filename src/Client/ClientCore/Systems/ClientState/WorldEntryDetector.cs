@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
 
@@ -93,7 +92,7 @@ public class WorldEntryDetector
         isEntryScheduled = false;
         scheduledTransitionTime = 0;
         if (!stateMachine.TryTransition(MainClientState.InGame))
-            Logger.Error("Unexpectedly failed to transition to in-game state.");
+            logger.LogError("Unexpectedly failed to transition to in-game state.");
     }
 
     /// <summary>
@@ -125,7 +124,7 @@ public class WorldEntryDetector
         if (subscribeCount != loadCount) return;
 
         // Detection.
-        Logger.Info("Sufficient world data loaded, transitioning to in-game.");
+        logger.LogInformation("Sufficient world data loaded, transitioning to in-game.");
         scheduledTransitionTime = systemTimer.GetTime() + TransitionDelay;
         isEntryScheduled = true;
     }

@@ -20,7 +20,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineUtil.Collections;
 using Sovereign.EngineUtil.Monads;
@@ -223,8 +222,6 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// </summary>
     public int ComponentCount => nextIndex;
 
-    public ILogger Log { private get; set; } = NullLogger.Instance;
-
     /// <summary>
     ///     Component type.
     /// </summary>
@@ -323,8 +320,6 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         {
             /* Component already exists - enqueue an update. */
             ModifyComponent(entityId, ComponentOperation.Set, initialValue);
-
-            Log.WarnFormat("Attempted duplicate component addition for entity {0}.", entityId);
         }
         else
         {

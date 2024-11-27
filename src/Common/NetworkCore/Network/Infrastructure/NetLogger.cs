@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using LiteNetLib;
+using Microsoft.Extensions.Logging;
 
 namespace Sovereign.NetworkCore.Network.Infrastructure;
 
@@ -25,31 +25,32 @@ namespace Sovereign.NetworkCore.Network.Infrastructure;
 /// </summary>
 public sealed class NetLogger : INetLogger
 {
-    public NetLogger()
+    private readonly ILogger<NetLogger> logger;
+
+    public NetLogger(ILogger<NetLogger> logger)
     {
+        this.logger = logger;
         NetDebug.Logger = this;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void WriteNet(NetLogLevel level, string str, params object[] args)
     {
         switch (level)
         {
             case NetLogLevel.Error:
-                Logger.ErrorFormat(str, args);
+                logger.LogError(str, args);
                 break;
 
             case NetLogLevel.Warning:
-                Logger.WarnFormat(str, args);
+                logger.LogWarning(str, args);
                 break;
 
             case NetLogLevel.Info:
-                Logger.InfoFormat(str, args);
+                logger.LogInformation(str, args);
                 break;
 
             case NetLogLevel.Trace:
-                Logger.DebugFormat(str, args);
+                logger.LogDebug(str, args);
                 break;
         }
     }

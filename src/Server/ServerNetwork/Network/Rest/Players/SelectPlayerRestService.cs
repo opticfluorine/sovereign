@@ -83,7 +83,7 @@ public class SelectPlayerRestService : AuthenticatedRestService
             }
             catch (FormatException)
             {
-                Logger.ErrorFormat("Account {0} tried to select invalid player entity {1}.", accountId, idParam);
+                logger.LogError("Account {0} tried to select invalid player entity {1}.", accountId, idParam);
                 await SendResponse(ctx, 400, "Invalid player entity ID.");
                 return;
             }
@@ -92,14 +92,14 @@ public class SelectPlayerRestService : AuthenticatedRestService
             if (!persistenceProviderManager.PersistenceProvider.GetAccountForPlayerQuery.TryGetAccountForPlayer(
                     playerEntityId, out var trueAccountId))
             {
-                Logger.ErrorFormat("No account found for player {0}.", playerEntityId);
+                logger.LogError("No account found for player {0}.", playerEntityId);
                 await SendResponse(ctx, 400, "No account found for player.");
                 return;
             }
 
             if (!trueAccountId.Equals(accountId))
             {
-                Logger.ErrorFormat("Entity {0} is not a player assigned to account {1}.", playerEntityId,
+                logger.LogError("Entity {0} is not a player assigned to account {1}.", playerEntityId,
                     accountId);
                 await SendResponse(ctx, 400, "Selected player dues not belong to this account.");
                 return;
@@ -123,14 +123,14 @@ public class SelectPlayerRestService : AuthenticatedRestService
         }
         catch (Exception e)
         {
-            Logger.Error("Error handling select player request.", e);
+            logger.LogError("Error handling select player request.", e);
             try
             {
                 await SendResponse(ctx, 500, "Error processing request.");
             }
             catch (Exception e2)
             {
-                Logger.Error("Error sending error response.", e2);
+                logger.LogError("Error sending error response.", e2);
             }
         }
     }

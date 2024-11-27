@@ -18,7 +18,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Infrastructure;
 
@@ -34,8 +34,12 @@ public sealed class InboundNetworkPipeline
     /// </summary>
     private readonly IInboundPipelineStage firstStage;
 
-    public InboundNetworkPipeline(IList<IInboundPipelineStage> stages)
+    private readonly ILogger<InboundNetworkPipeline> logger;
+
+    public InboundNetworkPipeline(IList<IInboundPipelineStage> stages, ILogger<InboundNetworkPipeline> logger)
     {
+        this.logger = logger;
+
         /* Sort the stages and build the pipeline. */
         var sortedStages = stages.OrderBy(stage => stage.Priority).ToList();
         firstStage = sortedStages[0];
@@ -47,8 +51,6 @@ public sealed class InboundNetworkPipeline
             previous = current;
         }
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Processes an inbound event.
@@ -76,6 +78,6 @@ public sealed class InboundNetworkPipeline
                 sb.Append(" -> ");
         }
 
-        Logger.Debug(sb.ToString());
+        logger.LogDebug(sb.ToString());
     }
 }

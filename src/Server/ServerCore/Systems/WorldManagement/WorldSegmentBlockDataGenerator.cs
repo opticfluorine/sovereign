@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
@@ -65,7 +64,7 @@ public sealed class WorldSegmentBlockDataGenerator
         var positionedBlocks = blocks
             .Select(entityId => Tuple.Create(entityId, blockPositions[entityId])).ToList();
 
-        Logger.DebugFormat("Segment {0} has {1} blocks.", segmentIndex, blocks.Count);
+        logger.LogDebug("Segment {0} has {1} blocks.", segmentIndex, blocks.Count);
 
         // Retrieve material data, group into depth planes.
         var basePoint = resolver.GetRangeForWorldSegment(segmentIndex).Item1;
@@ -121,7 +120,7 @@ public sealed class WorldSegmentBlockDataGenerator
             var offset = block.Item2.Z - baseZ;
             if (!entityTable.TryGetTemplate(block.Item1, out var templateEntityId))
             {
-                Logger.WarnFormat("No template for block ID {0}, skipping.", block.Item1);
+                logger.LogWarning("No template for block ID {0}, skipping.", block.Item1);
                 continue;
             }
 

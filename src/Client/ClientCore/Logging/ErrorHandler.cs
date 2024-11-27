@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Logging;
 
 namespace Sovereign.ClientCore.Logging;
@@ -31,6 +30,6 @@ public class ErrorHandler : IErrorHandler
     public void Error(string message)
     {
         // TODO Show error via ImGui if renderer is started, otherwise by other method
-        Logger.Error(message);
+        logger.LogError(message);
     }
 }

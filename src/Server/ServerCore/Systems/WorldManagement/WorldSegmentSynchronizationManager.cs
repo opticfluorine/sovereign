@@ -16,7 +16,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 
@@ -64,13 +63,13 @@ public class WorldSegmentSynchronizationManager
         if (activationManager.IsWorldSegmentLoaded(segmentIndex))
         {
             // World segment is already loaded, so we can immediately send the synchronization events.
-            Logger.DebugFormat("Segment already loaded; sync {0} to {1}.", segmentIndex, playerEntityId);
+            logger.LogDebug("Segment already loaded; sync {0} to {1}.", segmentIndex, playerEntityId);
             SendSynchronizationEvents(playerEntityId, segmentIndex);
         }
         else
         {
             // World segment still loading, so enqueue for later synchronization.
-            Logger.DebugFormat("Segment load in process; enqueue {0} for {1}.", segmentIndex, playerEntityId);
+            logger.LogDebug("Segment load in process; enqueue {0} for {1}.", segmentIndex, playerEntityId);
             if (!pendingPlayersBySegment.ContainsKey(segmentIndex))
                 pendingPlayersBySegment[segmentIndex] = new Queue<ulong>();
 
@@ -87,7 +86,7 @@ public class WorldSegmentSynchronizationManager
         // Process synchronization for any players that were waiting on the loaded world segment.
         if (pendingPlayersBySegment.TryGetValue(segmentIndex, out var queue))
         {
-            Logger.DebugFormat("Processing pending syncs for newly loaded segment {0}.", segmentIndex);
+            logger.LogDebug("Processing pending syncs for newly loaded segment {0}.", segmentIndex);
             while (queue.TryDequeue(out var playerEntityId)) SendSynchronizationEvents(playerEntityId, segmentIndex);
         }
     }

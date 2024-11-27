@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.EngineCore.Events;
 
@@ -46,7 +45,7 @@ public class MouseEventHandler
             {
                 if (ev.EventDetails is not MouseMotionEventDetails details)
                 {
-                    Logger.Error("Received MouseMotion event without details.");
+                    logger.LogError("Received MouseMotion event without details.");
                     break;
                 }
 
@@ -58,7 +57,7 @@ public class MouseEventHandler
             {
                 if (ev.EventDetails is not MouseButtonEventDetails details)
                 {
-                    Logger.Error("Received MouseUp event without details.");
+                    logger.LogError("Received MouseUp event without details.");
                     break;
                 }
 
@@ -70,7 +69,7 @@ public class MouseEventHandler
             {
                 if (ev.EventDetails is not MouseButtonEventDetails details)
                 {
-                    Logger.Error("Received MouseDown event without details.");
+                    logger.LogError("Received MouseDown event without details.");
                     break;
                 }
 
@@ -82,7 +81,7 @@ public class MouseEventHandler
             {
                 if (ev.EventDetails is not MouseWheelEventDetails details)
                 {
-                    Logger.Error("Received MouseWheel event without details.");
+                    logger.LogError("Received MouseWheel event without details.");
                     break;
                 }
 

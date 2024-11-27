@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
@@ -56,7 +55,7 @@ public sealed class WorldManagementEventHandler
             {
                 if (ev.EventDetails is not WorldSegmentEventDetails details)
                 {
-                    Logger.Error("Received WorldSegmentLoaded without details.");
+                    logger.LogError("Received WorldSegmentLoaded without details.");
                     break;
                 }
 
@@ -70,7 +69,7 @@ public sealed class WorldManagementEventHandler
             {
                 if (ev.EventDetails is not EntityChangeWorldSegmentEventDetails details)
                 {
-                    Logger.Error("Received EntityLeaveWorldSegment without details.");
+                    logger.LogError("Received EntityLeaveWorldSegment without details.");
                     break;
                 }
 
@@ -82,7 +81,7 @@ public sealed class WorldManagementEventHandler
             {
                 if (ev.EventDetails is not EntityEventDetails details)
                 {
-                    Logger.Error("Received ResyncPositionedEntity without details.");
+                    logger.LogError("Received ResyncPositionedEntity without details.");
                     break;
                 }
 
@@ -91,7 +90,7 @@ public sealed class WorldManagementEventHandler
                 break;
 
             default:
-                Logger.ErrorFormat("Unhandled event ID {0}.", ev.EventId);
+                logger.LogError("Unhandled event ID {0}.", ev.EventId);
                 break;
         }
     }

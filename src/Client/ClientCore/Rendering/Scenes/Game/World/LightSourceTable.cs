@@ -16,7 +16,6 @@
 
 using System.Collections.Generic;
 using System.Numerics;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Ranges;
@@ -83,13 +82,13 @@ public class LightSourceTable
         {
             if (!kinematics.TryFindNearest(lightEntityId, parents, out var posVel))
             {
-                Logger.WarnFormat("Entity {0} has unpositioned light source.", lightEntityId);
+                logger.LogWarning("Entity {0} has unpositioned light source.", lightEntityId);
                 continue;
             }
 
             if (!pointLightSources.TryGetValue(lightEntityId, out var details))
             {
-                Logger.WarnFormat("Entity {0} in light list without light data.", lightEntityId);
+                logger.LogWarning("Entity {0} in light list without light data.", lightEntityId);
                 continue;
             }
 

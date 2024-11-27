@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
@@ -95,7 +94,7 @@ public sealed class SpriteManager
 
         UpdateCoverageMaps();
 
-        Logger.Info("Loaded " + Sprites.Count + " sprites.");
+        logger.LogInformation("Loaded " + Sprites.Count + " sprites.");
     }
 
     /// <summary>
@@ -106,7 +105,7 @@ public sealed class SpriteManager
         var definitionsPath = resourcePathBuilder.BuildPathToResource(ResourceType.Sprite,
             SpriteDefinitionsFile);
         loader.SaveSpriteDefinitions(definitionsPath, Sprites);
-        Logger.Info("Sprite definitions saved.");
+        logger.LogInformation("Sprite definitions saved.");
 
         UpdateCoverageMaps();
 
@@ -136,7 +135,7 @@ public sealed class SpriteManager
         }
         catch (Exception e)
         {
-            Logger.Fatal("Failed to load the sprite definitions.", e);
+            logger.LogCritical("Failed to load the sprite definitions.", e);
             ErrorHandler.Error("Failed to load the sprite definitions.\n"
                                + "Refer to the error log for details.");
             throw new FatalErrorException();

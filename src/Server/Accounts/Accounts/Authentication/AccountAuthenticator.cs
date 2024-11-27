@@ -17,7 +17,6 @@
 
 using System;
 using System.Text;
-using Castle.Core.Logging;
 using Sodium;
 using Sovereign.Persistence.Accounts;
 
@@ -53,7 +52,7 @@ public sealed class AccountAuthenticator
             if (!account.HasValue)
             {
                 // Account does not exist.
-                Logger.Debug("Username \"" + username + "\" not known; rejecting.");
+                logger.LogDebug("Username \"" + username + "\" not known; rejecting.");
                 id = Guid.Empty;
                 return false;
             }
@@ -64,8 +63,8 @@ public sealed class AccountAuthenticator
         }
         catch (Exception e)
         {
-            Logger.Error("Error while authenticating account with username \""
-                         + username + "\"; rejecting.", e);
+            logger.LogError("Error while authenticating account with username \""
+                            + username + "\"; rejecting.", e);
             id = Guid.Empty;
             return false;
         }
@@ -90,7 +89,7 @@ public sealed class AccountAuthenticator
         if (trialHash.Length != account.Hash.Length)
         {
             // Hash sizes differ.
-            Logger.ErrorFormat("Hash sizes for user {0} differ ({1} vs {2}); rejecting.",
+            logger.LogError("Hash sizes for user {0} differ ({1} vs {2}); rejecting.",
                 account.Username, trialHash.Length, account.Hash.Length);
             return false;
         }

@@ -16,7 +16,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
@@ -72,7 +71,7 @@ public class EntitySynchronizer
         foreach (var batch in definitionBatches)
         foreach (var playerEntityId in playerEntityIds)
         {
-            Logger.DebugFormat("Sync {0} entities to player {1}.", batch.Count, playerEntityId);
+            logger.LogDebug("Sync {0} entities to player {1}.", batch.Count, playerEntityId);
             controller.PushSyncEvent(eventSender, playerEntityId, batch);
         }
     }
@@ -84,7 +83,7 @@ public class EntitySynchronizer
     /// <param name="segmentIndex">World segment index of the entity.</param>
     public void Desynchronize(ulong rootEntityId, GridPosition segmentIndex)
     {
-        Logger.DebugFormat("Desync {0} for world segment {1}.", rootEntityId, segmentIndex);
+        logger.LogDebug("Desync {0} for world segment {1}.", rootEntityId, segmentIndex);
         controller.PushDesyncEvent(eventSender, rootEntityId, segmentIndex);
     }
 }

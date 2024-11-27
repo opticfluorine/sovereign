@@ -17,7 +17,6 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Castle.Core.Logging;
 using LiteNetLib;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.NetworkCore.Network.Infrastructure;
@@ -63,7 +62,7 @@ public sealed class NewConnectionProcessor
         if (accountId == Guid.Empty)
         {
             // Bad request.
-            Logger.InfoFormat("Rejecting new connection from {0}: malformed.",
+            logger.LogInformation("Rejecting new connection from {0}: malformed.",
                 request.RemoteEndPoint.ToString());
             request.Reject();
             return;
@@ -73,14 +72,14 @@ public sealed class NewConnectionProcessor
         if (!AttemptHandoff(request, accountId, out var sharedSecret))
         {
             // Failed.
-            Logger.InfoFormat("Rejecting new connection from {0}: bad handoff.",
+            logger.LogInformation("Rejecting new connection from {0}: bad handoff.",
                 request.RemoteEndPoint.ToString());
             request.Reject();
             return;
         }
 
         // Accept the connection.
-        Logger.InfoFormat("Accepting new connection for user {0} from {1}.",
+        logger.LogInformation("Accepting new connection for user {0} from {1}.",
             accountId, request.RemoteEndPoint.ToString());
         var peer = request.Accept();
         loginTracker.AssociateConnection(accountId, peer.Id);

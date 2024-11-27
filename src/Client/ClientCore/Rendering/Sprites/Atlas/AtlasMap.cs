@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.Atlas;
@@ -63,7 +62,7 @@ public sealed class AtlasMap
         /* Iterate in order of sprite ID. */
         foreach (var sprite in spriteManager.Sprites) AddSprite(sprite);
 
-        Logger.Info("Mapped " + MapElements.Count + " sprites to the texture atlas.");
+        logger.LogInformation("Mapped " + MapElements.Count + " sprites to the texture atlas.");
     }
 
     /// <summary>

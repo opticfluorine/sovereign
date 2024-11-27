@@ -15,12 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineCore.Util;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.NetworkCore.Systems.Ping;
 
@@ -31,6 +32,7 @@ namespace Sovereign.NetworkCore.Systems.Ping;
 public class PingSystem : ISystem
 {
     private readonly IEventSender eventSender;
+    private readonly ILogger<PingSystem> logger;
     private readonly PingController pingController;
     private readonly ISystemTimer timer;
 
@@ -50,17 +52,16 @@ public class PingSystem : ISystem
     private ulong lastPingTime;
 
     public PingSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, ISystemTimer timer,
-        PingController pingController, IEventSender eventSender)
+        PingController pingController, IEventSender eventSender, ILogger<PingSystem> logger)
     {
         EventCommunicator = eventCommunicator;
         this.timer = timer;
         this.pingController = pingController;
         this.eventSender = eventSender;
+        this.logger = logger;
 
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 
@@ -97,7 +98,7 @@ public class PingSystem : ISystem
                 case EventId.Core_Ping_SetAuto:
                     if (ev.EventDetails == null)
                     {
-                        Logger.Error("Received SetAuto event without details.");
+                        logger.LogError("Received SetAuto event without details.");
                         break;
                     }
 
@@ -117,7 +118,7 @@ public class PingSystem : ISystem
                     break;
 
                 default:
-                    Logger.ErrorFormat("Received unhandled event with type {0}.", ev.EventId);
+                    logger.LogError("Received unhandled event with type {Type}.", ev.EventId);
                     break;
             }
         }
@@ -131,7 +132,7 @@ public class PingSystem : ISystem
         var now = timer.GetTime();
         var delta = now - lastPingTime;
 
-        Logger.DebugFormat("Ping roundtrip time for connection {0}: {1} ms",
+        logger.LogDebug("Ping roundtrip time for connection {Id}: {Time} ms",
             ev.FromConnectionId,
             (float)delta / Units.SystemTime.Millisecond);
     }

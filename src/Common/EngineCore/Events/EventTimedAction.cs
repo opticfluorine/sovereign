@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Timing;
 
@@ -40,8 +39,6 @@ public class EventTimedAction : ITimedAction
         this.eventLoop = eventLoop;
         this.engineConfiguration = engineConfiguration;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public ulong Interval => engineConfiguration.EventTickInterval;
 

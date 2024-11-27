@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events.Details;
@@ -29,15 +29,16 @@ public class BlockNoticeProcessor
     private readonly BlockManager blockManager;
     private readonly BlockServices blockServices;
     private readonly EntityTable entityTable;
+    private readonly ILogger<BlockNoticeProcessor> logger;
 
-    public BlockNoticeProcessor(BlockServices blockServices, BlockManager blockManager, EntityTable entityTable)
+    public BlockNoticeProcessor(BlockServices blockServices, BlockManager blockManager, EntityTable entityTable,
+        ILogger<BlockNoticeProcessor> logger)
     {
         this.blockServices = blockServices;
         this.blockManager = blockManager;
         this.entityTable = entityTable;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Processes a block modification notice from the server, overwriting any existing
@@ -46,7 +47,7 @@ public class BlockNoticeProcessor
     /// <param name="blockRecord">Block record from the modification notice.</param>
     public void ProcessModifyNotice(BlockRecord blockRecord)
     {
-        Logger.DebugFormat("Modify {0} => {1}", blockRecord.Position, blockRecord.TemplateEntityId);
+        logger.LogDebug("Modify {Pos} => {Id}", blockRecord.Position, blockRecord.TemplateEntityId);
 
         if (blockServices.TryGetBlockAtPosition(blockRecord.Position, out var entityId))
             // Block already exists, update in place.
@@ -63,7 +64,7 @@ public class BlockNoticeProcessor
     /// <param name="blockPosition">Block position from the removal notice.</param>
     public void ProcessRemoveNotice(GridPosition blockPosition)
     {
-        Logger.DebugFormat("Remove {0}", blockPosition);
+        logger.LogDebug("Remove {BlockPosition}", blockPosition);
 
         if (!blockServices.TryGetBlockAtPosition(blockPosition, out var entityId)) return;
         blockManager.RemoveBlock(entityId);

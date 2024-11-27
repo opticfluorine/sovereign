@@ -16,7 +16,6 @@
  */
 
 using System;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.World;
 using Sovereign.Persistence.Database;
@@ -53,7 +52,7 @@ public sealed class PersistenceRangeRetriever
     /// <param name="segmentIndex">World segment index.</param>
     public void RetrieveWorldSegment(GridPosition segmentIndex)
     {
-        Logger.DebugFormat("Retrieve world segment {0}.", segmentIndex);
+        logger.LogDebug("Retrieve world segment {0}.", segmentIndex);
 
         // Retrieve world segment.
         DoRetrieve(segmentIndex);
@@ -76,12 +75,12 @@ public sealed class PersistenceRangeRetriever
             using (var reader = query.RetrieveEntitiesInRange(minPos, maxPos))
             {
                 var count = entityProcessor.ProcessFromReader(reader.Reader);
-                Logger.DebugFormat("Retrieved {0} entities for segment {1}.", count, segmentIndex);
+                logger.LogDebug("Retrieved {0} entities for segment {1}.", count, segmentIndex);
             }
         }
         catch (Exception e)
         {
-            Logger.Error(string.Format("Error retrieving entities from {0} to {1}.",
+            logger.LogError(string.Format("Error retrieving entities from {0} to {1}.",
                 minPos, maxPos), e);
         }
     }

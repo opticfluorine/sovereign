@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Logging;
@@ -78,7 +77,7 @@ public class ClientChatSystem : ISystem
                 {
                     if (ev.EventDetails is not LocalChatEventDetails details)
                     {
-                        Logger.Warn("Received local chat without details.");
+                        logger.LogWarning("Received local chat without details.");
                         break;
                     }
 
@@ -90,7 +89,7 @@ public class ClientChatSystem : ISystem
                 {
                     if (ev.EventDetails is not GlobalChatEventDetails details)
                     {
-                        Logger.Warn("Received global chat without details.");
+                        logger.LogWarning("Received global chat without details.");
                         break;
                     }
 
@@ -102,7 +101,7 @@ public class ClientChatSystem : ISystem
                 {
                     if (ev.EventDetails is not SystemChatEventDetails details)
                     {
-                        Logger.Warn("Received system chat without details.");
+                        logger.LogWarning("Received system chat without details.");
                         break;
                     }
 
@@ -126,7 +125,7 @@ public class ClientChatSystem : ISystem
     /// <param name="details">Details.</param>
     private void OnLocalChat(LocalChatEventDetails details)
     {
-        Logger.InfoFormat("[Local] {0}: {1}", loggingUtil.FormatEntity(details.SenderEntityId), details.Message);
+        logger.LogInformation("[Local] {0}: {1}", loggingUtil.FormatEntity(details.SenderEntityId), details.Message);
         chatHistoryManager.AddChat(ChatType.Local, details.Message, details.SenderEntityId);
     }
 
@@ -136,7 +135,7 @@ public class ClientChatSystem : ISystem
     /// <param name="details">Details.</param>
     private void OnGlobalChat(GlobalChatEventDetails details)
     {
-        Logger.InfoFormat("[Global] {0}: {1}", details.SenderName, details.Message);
+        logger.LogInformation("[Global] {0}: {1}", details.SenderName, details.Message);
         chatHistoryManager.AddChat(ChatType.Global, details.Message, details.SenderName);
     }
 
@@ -146,7 +145,7 @@ public class ClientChatSystem : ISystem
     /// <param name="details">Details.</param>
     private void OnSystemChat(SystemChatEventDetails details)
     {
-        Logger.InfoFormat("[System] {0}", details.Message);
+        logger.LogInformation("[System] {0}", details.Message);
         chatHistoryManager.AddChat(ChatType.System, details.Message);
     }
 }

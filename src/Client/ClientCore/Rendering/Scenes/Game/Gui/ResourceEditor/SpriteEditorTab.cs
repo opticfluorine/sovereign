@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites;
@@ -159,7 +158,7 @@ public class SpriteEditorTab
         }
         catch (Exception e)
         {
-            Logger.ErrorFormat(e, "Error during sprite generation for {0}.", orderedSpriteSheets[currentSheetIdx]);
+            logger.LogError(e, "Error during sprite generation for {0}.", orderedSpriteSheets[currentSheetIdx]);
             exceptionToReport = e;
             ImGui.OpenPopup(ErrorPopup);
         }

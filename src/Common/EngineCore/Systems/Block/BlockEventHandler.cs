@@ -15,11 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems.WorldManagement;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.EngineCore.Systems.Block;
 
@@ -32,12 +33,14 @@ public sealed class BlockEventHandler
     private readonly BlockController controller;
     private readonly CoreWorldManagementController coreWorldManagementController;
     private readonly IEventSender eventSender;
+    private readonly ILogger<BlockEventHandler> logger;
     private readonly BlockManager manager;
     private readonly BlockNoticeProcessor noticeProcessor;
 
     public BlockEventHandler(BlockController controller, BlockManager manager,
         BlockGridPositionIndexer blockGridPositionIndexer, BlockNoticeProcessor noticeProcessor,
-        IEventSender eventSender, CoreWorldManagementController coreWorldManagementController)
+        IEventSender eventSender, CoreWorldManagementController coreWorldManagementController,
+        ILogger<BlockEventHandler> logger)
     {
         this.controller = controller;
         this.manager = manager;
@@ -45,9 +48,8 @@ public sealed class BlockEventHandler
         this.noticeProcessor = noticeProcessor;
         this.eventSender = eventSender;
         this.coreWorldManagementController = coreWorldManagementController;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Handles a block-related event.
@@ -59,25 +61,25 @@ public sealed class BlockEventHandler
         {
             case EventId.Core_Block_Add:
                 var addDetails = (BlockAddEventDetails)ev.EventDetails!;
-                Logger.DebugFormat("Adding block {0}.", addDetails.BlockRecord);
+                logger.LogDebug("Adding block {Block}.", addDetails.BlockRecord);
                 HandleAdd(addDetails);
                 break;
 
             case EventId.Core_Block_AddBatch:
                 var addBatchDetails = (BlockAddBatchEventDetails)ev.EventDetails!;
-                Logger.DebugFormat("Adding {0} blocks.", addBatchDetails.BlockRecords.Count);
+                logger.LogDebug("Adding {Block} blocks.", addBatchDetails.BlockRecords.Count);
                 HandleAddBatch(addBatchDetails);
                 break;
 
             case EventId.Core_Block_Remove:
                 var removeDetails = (EntityEventDetails)ev.EventDetails!;
-                Logger.DebugFormat("Removing block {0}.", removeDetails.EntityId);
+                logger.LogDebug("Removing block {Id}.", removeDetails.EntityId);
                 HandleRemove(removeDetails);
                 break;
 
             case EventId.Core_Block_RemoveBatch:
                 var removeBatchDetails = (BlockRemoveBatchEventDetails)ev.EventDetails!;
-                Logger.DebugFormat("Removing {0} blocks.", removeBatchDetails.EntityIds.Count);
+                logger.LogDebug("Removing {Count} blocks.", removeBatchDetails.EntityIds.Count);
                 HandleRemoveBatch(removeBatchDetails);
                 break;
 
@@ -85,7 +87,7 @@ public sealed class BlockEventHandler
             {
                 if (ev.EventDetails is not GridPositionEventDetails details)
                 {
-                    Logger.Warn("Received RemoveAt event without details.");
+                    logger.LogWarning("Received RemoveAt event without details.");
                     break;
                 }
 
@@ -100,7 +102,7 @@ public sealed class BlockEventHandler
 
                 if (ev.EventDetails is not BlockAddEventDetails details)
                 {
-                    Logger.Warn("Received ModifyNotice without details.");
+                    logger.LogWarning("Received ModifyNotice without details.");
                     break;
                 }
 
@@ -115,7 +117,7 @@ public sealed class BlockEventHandler
 
                 if (ev.EventDetails is not GridPositionEventDetails details)
                 {
-                    Logger.Warn("Received RemoveNotice without details.");
+                    logger.LogWarning("Received RemoveNotice without details.");
                     break;
                 }
 
@@ -124,7 +126,7 @@ public sealed class BlockEventHandler
             }
 
             default:
-                Logger.WarnFormat("Unexpected event ID {0}", ev.EventId);
+                logger.LogWarning("Unexpected event ID {Id}", ev.EventId);
                 break;
         }
     }

@@ -23,7 +23,6 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.EngineCore.Resources;
 using Sovereign.UpdaterCore.Updater;
@@ -192,7 +191,7 @@ public partial class AutoUpdater
         }
         catch (Exception e)
         {
-            Logger.ErrorFormat(e, "Error while updating {0}.", CurrentFile);
+            logger.LogError(e, "Error while updating {0}.", CurrentFile);
             Error = e.Message;
             State = AutoUpdaterState.Error;
         }
@@ -210,7 +209,7 @@ public partial class AutoUpdater
         var indexUri = new Uri(releaseBaseUri, IndexJsonUri);
         var indexJson = await client.GetFromJsonAsync<UpdaterResourceSet>(indexUri)
                         ?? throw new Exception("No release index found.");
-        Logger.DebugFormat("index.json contains {0} resources.", indexJson.Resources.Count);
+        logger.LogDebug("index.json contains {0} resources.", indexJson.Resources.Count);
 
         // Silently exclude any disallowed file types.
         var allowedResources = indexJson.Resources
@@ -219,7 +218,7 @@ public partial class AutoUpdater
             .ToList();
         foreach (var badResource in indexJson.Resources.Except(allowedResources))
         {
-            Logger.WarnFormat("Skipping disallowed resource {0}/{1}.", badResource.ResourceType, badResource.Filename);
+            logger.LogWarning("Skipping disallowed resource {0}/{1}.", badResource.ResourceType, badResource.Filename);
         }
 
         // Determine resources for update.

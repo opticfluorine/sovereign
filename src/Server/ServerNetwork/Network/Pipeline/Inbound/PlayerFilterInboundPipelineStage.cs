@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Logging;
@@ -77,7 +76,7 @@ public class PlayerFilterInboundPipelineStage : IInboundPipelineStage
     {
         if (!roleCheck.IsPlayerAdmin(playerEntityId))
         {
-            Logger.WarnFormat("Admin-only event rejected for non-admin player {0}.",
+            logger.LogWarning("Admin-only event rejected for non-admin player {0}.",
                 loggingUtil.FormatEntity(playerEntityId));
             return false;
         }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Timing;
@@ -27,6 +27,7 @@ namespace Sovereign.EngineCore.Performance;
 /// </summary>
 public sealed class EventLatencyPerformanceMonitor : IPerformanceMonitor
 {
+    private readonly ILogger<EventLatencyPerformanceMonitor> logger;
     private readonly ISystemTimer systemTimer;
 
     /// <summary>
@@ -39,12 +40,11 @@ public sealed class EventLatencyPerformanceMonitor : IPerformanceMonitor
     /// </summary>
     private ulong latencySumMicroseconds;
 
-    public EventLatencyPerformanceMonitor(ISystemTimer systemTimer)
+    public EventLatencyPerformanceMonitor(ISystemTimer systemTimer, ILogger<EventLatencyPerformanceMonitor> logger)
     {
         this.systemTimer = systemTimer;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void OnPerformanceEvent(IEventDetails eventDetails)
     {
@@ -59,6 +59,6 @@ public sealed class EventLatencyPerformanceMonitor : IPerformanceMonitor
         latencySumMicroseconds = 0;
         latencyEventCount = 0;
 
-        Logger.DebugFormat("Average local event latency: {0:F2} us", avgLatencyUs);
+        logger.LogDebug("Average local event latency: {0:F2} us", avgLatencyUs);
     }
 }

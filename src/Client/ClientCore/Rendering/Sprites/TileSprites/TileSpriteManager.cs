@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
@@ -81,7 +80,7 @@ public sealed class TileSpriteManager
         var definitions = LoadDefinitions();
         UnpackDefinitions(definitions);
 
-        Logger.Info("Loaded " + TileSprites.Count + " tile sprites.");
+        logger.LogInformation("Loaded " + TileSprites.Count + " tile sprites.");
     }
 
     /// <summary>
@@ -152,7 +151,7 @@ public sealed class TileSpriteManager
         {
             /* Log and throw a fatal error. */
             var msg = "Failed to load the tile sprite definitions.";
-            Logger.Fatal(msg, e);
+            logger.LogCritical(msg, e);
 
             ErrorHandler.Error("Failed to load the tile sprite definitions.\n"
                                + "Refer to the error log for details.");
@@ -193,11 +192,11 @@ public sealed class TileSpriteManager
             var path = pathBuilder.BuildPathToResource(ResourceType.Sprite, TileSpriteDefinitionsFilename);
             using var stream = new FileStream(path, FileMode.Create, FileAccess.Write);
             JsonSerializer.Serialize(stream, defs);
-            Logger.InfoFormat("Saved {0} tile sprites.", TileSprites.Count);
+            logger.LogInformation("Saved {0} tile sprites.", TileSprites.Count);
         }
         catch (Exception e)
         {
-            Logger.Error("Failed to save tile sprite definitions.", e);
+            logger.LogError("Failed to save tile sprite definitions.", e);
         }
     }
 

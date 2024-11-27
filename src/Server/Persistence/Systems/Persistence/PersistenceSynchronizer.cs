@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using Sovereign.Persistence.State;
 
 namespace Sovereign.Persistence.Systems.Persistence;
@@ -39,7 +38,7 @@ public sealed class PersistenceSynchronizer
     /// </summary>
     public void Synchronize()
     {
-        Logger.Info("Synchronize database.");
+        logger.LogInformation("Synchronize database.");
 
         stateManager.CommitChanges();
     }

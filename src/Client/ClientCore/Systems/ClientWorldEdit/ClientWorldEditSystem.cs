@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -88,7 +87,7 @@ public class ClientWorldEditSystem : ISystem
                 {
                     if (ev.EventDetails is not BooleanEventDetails details)
                     {
-                        Logger.Warn("Received MouseWheelTick without details.");
+                        logger.LogWarning("Received MouseWheelTick without details.");
                         break;
                     }
 
@@ -100,7 +99,7 @@ public class ClientWorldEditSystem : ISystem
                 {
                     if (ev.EventDetails is not GenericEventDetails<int> details)
                     {
-                        Logger.Warn("Received SetZOffset without details.");
+                        logger.LogWarning("Received SetZOffset without details.");
                         break;
                     }
 

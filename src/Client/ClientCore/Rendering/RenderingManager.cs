@@ -16,8 +16,6 @@
  */
 
 using System;
-using Castle.Core;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Rendering.Configuration;
@@ -38,12 +36,12 @@ public class RenderingManager : IStartable
     private readonly ClientConfigurationManager configManager;
     private readonly DisplayModeSelector displayModeSelector;
     private readonly CommonGuiManager guiManager;
-    private readonly ClientStateServices stateServices;
 
     private readonly MainDisplay mainDisplay;
     private readonly IRenderer renderer;
     private readonly RenderingResourceManager resourceManager;
     private readonly SDLEventAdapter sdlEventAdapter;
+    private readonly ClientStateServices stateServices;
 
     /// <summary>
     ///     Selected video adapter.
@@ -94,7 +92,7 @@ public class RenderingManager : IStartable
         }
         catch (Exception e)
         {
-            Logger.Fatal("Unhandled exception in RenderingManager.Start().", e);
+            logger.LogCritical("Unhandled exception in RenderingManager.Start().", e);
             Environment.Exit(1);
         }
     }
@@ -111,7 +109,7 @@ public class RenderingManager : IStartable
         }
         catch (Exception e)
         {
-            Logger.Error("Error while cleaning up the renderer.", e);
+            logger.LogError("Error while cleaning up the renderer.", e);
         }
 
         /* Clean up GUI resources. */
@@ -131,7 +129,7 @@ public class RenderingManager : IStartable
             LoadResources();
             renderer.ReloadResources();
         }
-        
+
         guiManager.NewFrame();
         renderer.Render();
     }
@@ -144,7 +142,7 @@ public class RenderingManager : IStartable
         if (selectedDisplayMode == null)
         {
             var msg = "Attempted to create main display without a display mode.";
-            Logger.Fatal(msg);
+            logger.LogCritical(msg);
             ErrorHandler.Error(msg);
             throw new FatalErrorException(msg);
         }
@@ -158,7 +156,7 @@ public class RenderingManager : IStartable
         {
             /* Fatal error - can't create the main display. */
             var msg = "Failed to create the main display.";
-            Logger.Fatal(msg, e);
+            logger.LogCritical(msg, e);
             ErrorHandler.Error(e.Message);
             throw new FatalErrorException(msg, e);
         }
@@ -172,7 +170,7 @@ public class RenderingManager : IStartable
         if (selectedAdapter == null)
         {
             var msg = "Attempted to initialize renderer without a display adapter.";
-            Logger.Fatal(msg);
+            logger.LogCritical(msg);
             ErrorHandler.Error(msg);
             throw new FatalErrorException(msg);
         }
@@ -185,7 +183,7 @@ public class RenderingManager : IStartable
         {
             /* Fatal error - can't initialize the renderer. */
             var msg = "Failed to initialize the renderer.";
-            Logger.Fatal(msg, e);
+            logger.LogCritical(msg, e);
             ErrorHandler.Error(e.Message);
             throw new FatalErrorException(msg, e);
         }
@@ -204,7 +202,7 @@ public class RenderingManager : IStartable
         {
             /* Fatal error - can't initialize the GUI. */
             var msg = "Failed to initialize the GUI.";
-            Logger.Fatal(msg, e);
+            logger.LogCritical(msg, e);
             ErrorHandler.Error(e.Message);
             throw new FatalErrorException(msg, e);
         }

@@ -17,7 +17,6 @@
 
 using System;
 using System.Text;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.EngineCore.Logging;
@@ -64,12 +63,12 @@ public class TextureAtlasManager
     /// </summary>
     public void InitializeTextureAtlas()
     {
-        Logger.Info("Creating the texture atlas.");
+        logger.LogInformation("Creating the texture atlas.");
 
         if (mainDisplay.DisplayMode == null)
         {
             var msg = "Attempted to create texture atlas without a display mode.";
-            Logger.Fatal(msg);
+            logger.LogCritical(msg);
             ErrorHandler.Error(msg);
             throw new FatalErrorException(msg);
         }
@@ -84,7 +83,7 @@ public class TextureAtlasManager
         {
             /* Report error. */
             var baseMessage = "Failed to create the texture atlas.";
-            Logger.Fatal(baseMessage, e);
+            logger.LogCritical(baseMessage, e);
 
             var sb = new StringBuilder();
             sb.Append(baseMessage).Append("\n\n").Append(e.Message);
@@ -95,7 +94,7 @@ public class TextureAtlasManager
 
         var w = TextureAtlas.AtlasSurface.Properties.Width;
         var h = TextureAtlas.AtlasSurface.Properties.Height;
-        Logger.InfoFormat("Texture atlas created ({0} x {1}).", w, h);
+        logger.LogInformation("Texture atlas created ({0} x {1}).", w, h);
     }
 
     /// <summary>

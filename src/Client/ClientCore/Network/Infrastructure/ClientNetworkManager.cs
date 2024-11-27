@@ -20,7 +20,6 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using Castle.Core.Logging;
 using LiteNetLib;
 using Sodium;
 using Sovereign.ClientCore.Network.Rest;
@@ -172,7 +171,7 @@ public sealed class ClientNetworkManager : INetworkManager
             }
             catch (Exception e)
             {
-                Logger.Error("Failed to send event to server.", e);
+                logger.LogError("Failed to send event to server.", e);
             }
 
         // Poll the network.
@@ -204,7 +203,7 @@ public sealed class ClientNetworkManager : INetworkManager
 
         ConnectionParameters = connectionParameters;
 
-        Logger.InfoFormat("Connecting to {0}:{1} [REST: {2}:{3}] as {4}.",
+        logger.LogInformation("Connecting to {0}:{1} [REST: {2}:{3}] as {4}.",
             ConnectionParameters.Host, ConnectionParameters.Port,
             ConnectionParameters.RestHost, ConnectionParameters.RestPort,
             loginParameters.Username);
@@ -217,7 +216,7 @@ public sealed class ClientNetworkManager : INetworkManager
             if (task.IsFaulted)
             {
                 // Special failure case.
-                Logger.Error("Login failed with unhandled exception; connection stopped.", task.Exception);
+                logger.LogError("Login failed with unhandled exception; connection stopped.", task.Exception);
                 ClientState = NetworkClientState.Failed;
                 if (task.Exception != null) ErrorMessage = task.Exception.Message;
                 clientNetworkController.LoginFailed(eventSender, "Unhandled exception occurred during login.");
@@ -292,7 +291,7 @@ public sealed class ClientNetworkManager : INetworkManager
         // Configure the REST API to make authenticated calls going forward.
         if (loginResponse.UserId == null || loginResponse.RestApiKey == null)
         {
-            Logger.Error("Received incomplete login response from server; aborting connection.");
+            logger.LogError("Received incomplete login response from server; aborting connection.");
             return;
         }
 
@@ -301,7 +300,7 @@ public sealed class ClientNetworkManager : INetworkManager
         // Start up the connection to the event server.
         if (ConnectionParameters == null)
         {
-            Logger.Error("No connection parameters set when continuing connection; aborting connection.");
+            logger.LogError("No connection parameters set when continuing connection; aborting connection.");
             return;
         }
 
@@ -334,7 +333,7 @@ public sealed class ClientNetworkManager : INetworkManager
                     break;
 
                 default:
-                    Logger.Error("Unrecognized client network command.");
+                    logger.LogError("Unrecognized client network command.");
                     break;
             }
     }
@@ -360,7 +359,7 @@ public sealed class ClientNetworkManager : INetworkManager
             // Grab HMAC key (shared secret) from the login response.
             if (loginResponse == null || loginResponse.SharedSecret == null || loginResponse.UserId == null)
             {
-                Logger.Error("Login response missing or incomplete; aborting connection.");
+                logger.LogError("Login response missing or incomplete; aborting connection.");
                 return;
             }
 
@@ -380,7 +379,7 @@ public sealed class ClientNetworkManager : INetworkManager
             ErrorMessage = e.Message;
             ClientState = NetworkClientState.Failed;
 
-            Logger.Error("Failed to connect to server.", e);
+            logger.LogError("Failed to connect to server.", e);
             clientNetworkController.ConnectionAttemptFailed(eventSender, ErrorMessage);
         }
     }
@@ -404,7 +403,7 @@ public sealed class ClientNetworkManager : INetworkManager
                 Connection = null;
             }
 
-            Logger.Error("Disconnected.");
+            logger.LogError("Disconnected.");
             ClientState = NetworkClientState.Disconnected;
             Connection = null;
         }
@@ -414,7 +413,7 @@ public sealed class ClientNetworkManager : INetworkManager
             ErrorMessage = e.Message;
             ClientState = NetworkClientState.Failed;
 
-            Logger.Error("Failed to end connection.", e);
+            logger.LogError("Failed to end connection.", e);
         }
     }
 
@@ -436,7 +435,7 @@ public sealed class ClientNetworkManager : INetworkManager
         ErrorMessage = socketError.ToString();
         ClientState = NetworkClientState.Failed;
 
-        Logger.ErrorFormat("Network error: {0}", socketError.ToString());
+        logger.LogError("Network error: {0}", socketError.ToString());
     }
 
     /// <summary>
@@ -451,7 +450,7 @@ public sealed class ClientNetworkManager : INetworkManager
     {
         if (Connection == null)
         {
-            Logger.Error("Received packet when client not ready.");
+            logger.LogError("Received packet when client not ready.");
             return;
         }
 
@@ -462,7 +461,7 @@ public sealed class ClientNetworkManager : INetworkManager
         }
         catch (Exception e)
         {
-            Logger.Error("Error receiving packet.", e);
+            logger.LogError("Error receiving packet.", e);
         }
     }
 
@@ -475,7 +474,7 @@ public sealed class ClientNetworkManager : INetworkManager
     {
         // Notify any systems that care that the connection has been lost.
         // This will route back to here and gracefully clean up the connection.
-        Logger.InfoFormat("Connection lost: {0}", disconnectInfo.Reason);
+        logger.LogInformation("Connection lost: {0}", disconnectInfo.Reason);
         if (disconnectInfo.Reason != DisconnectReason.DisconnectPeerCalled)
             clientNetworkController.DeclareConnectionLost(eventSender);
     }

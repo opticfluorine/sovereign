@@ -20,8 +20,12 @@ using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Entities;
 using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Logging;
+using Sovereign.ClientCore.Network.Infrastructure;
+using Sovereign.ClientCore.Network.Pipeline.Inbound;
+using Sovereign.ClientCore.Network.Pipeline.Outbound;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Resources;
+using Sovereign.ClientCore.Systems.Network;
 using Sovereign.ClientCore.Timing;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
@@ -30,6 +34,10 @@ using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
 using Sovereign.EngineCore.Timing;
+using Sovereign.NetworkCore.Network.Infrastructure;
+using Sovereign.NetworkCore.Network.Pipeline.Inbound;
+using Sovereign.NetworkCore.Network.Pipeline.Outbound;
+using Sovereign.NetworkCore.Systems.Network;
 
 namespace Sovereign.ClientCore;
 
@@ -48,6 +56,7 @@ public static class ClientServiceCollectionExtensions
         AddClientImplementations(services);
         AddEvents(services);
         AddMain(services);
+        AddInboundPipeline(services);
 
         return services;
     }
@@ -64,10 +73,20 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<IEngineConfiguration, ClientEngineConfiguration>();
         services.TryAddSingleton<IResourcePathBuilder, ClientResourcePathBuilder>();
         services.TryAddSingleton<ISystemTimer, SDLSystemTimer>();
+        services.TryAddSingleton<INetworkManager, ClientNetworkManager>();
+        services
+            .TryAddSingleton<IConnectionMappingOutboundPipelineStage, ClientConnectionMappingOutboundPipelineStage>();
+        services.TryAddSingleton<IOutboundEventSet, ClientOutboundEventSet>();
     }
 
     private static void AddMain(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IMainLoopAction, RenderingMainLoopAction>());
+    }
+
+    private static void AddInboundPipeline(IServiceCollection services)
+    {
+        services.TryAddEnumerable(ServiceDescriptor
+            .Singleton<IInboundPipelineStage, ClientAllowedEventsInboundPipelineStage>());
     }
 }

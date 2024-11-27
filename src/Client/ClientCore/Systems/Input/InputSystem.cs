@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
@@ -111,7 +110,7 @@ public class InputSystem : ISystem, IDisposable
                 case EventId.Client_Network_PlayerEntitySelected:
                     if (ev.EventDetails is not EntityEventDetails)
                     {
-                        Logger.Error("Received PlayerEntitySelected with bad details.");
+                        logger.LogError("Received PlayerEntitySelected with bad details.");
                         break;
                     }
 

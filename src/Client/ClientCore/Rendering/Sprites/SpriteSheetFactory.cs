@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Resources;
 
 namespace Sovereign.ClientCore.Rendering.Sprites;
@@ -52,7 +51,7 @@ public class SpriteSheetFactory
     /// <exception cref="SurfaceException">Thrown if the spritesheet file cannot be loaded.</exception>
     public SpriteSheet LoadSpriteSheet(SpriteSheetDefinition definition)
     {
-        Logger.DebugFormat("Loading spritesheet {0}", definition.Filename);
+        logger.LogDebug("Loading spritesheet {0}", definition.Filename);
 
         /* Attempt to load the spritesheet surface. */
         var surface = LoadSurfaceForSpritesheet(definition);

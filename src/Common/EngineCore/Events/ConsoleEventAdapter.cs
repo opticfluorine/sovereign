@@ -16,7 +16,7 @@
  */
 
 using System;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Sovereign.EngineCore.Events;
 
@@ -25,19 +25,20 @@ namespace Sovereign.EngineCore.Events;
 /// </summary>
 public sealed class ConsoleEventAdapter : IEventAdapter
 {
+    private readonly ILogger<ConsoleEventAdapter> logger;
+
     /// <summary>
     ///     Whether the server has been requested to stop from the console.
     /// </summary>
     private bool stopRequested;
 
-    public ConsoleEventAdapter(EventAdapterManager adapterManager)
+    public ConsoleEventAdapter(EventAdapterManager adapterManager, ILogger<ConsoleEventAdapter> logger)
     {
+        this.logger = logger;
         Console.CancelKeyPress += Console_CancelKeyPress;
 
         adapterManager.RegisterEventAdapter(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void PrepareEvents()
     {
@@ -47,7 +48,7 @@ public sealed class ConsoleEventAdapter : IEventAdapter
     {
         if (stopRequested)
         {
-            Logger.Info("Received SIGINT, shutting down.");
+            logger.LogInformation("Received SIGINT, shutting down.");
 
             Console.CancelKeyPress -= Console_CancelKeyPress;
             stopRequested = false;

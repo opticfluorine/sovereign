@@ -16,7 +16,6 @@
  */
 
 using System;
-using Castle.Core.Logging;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Registration;
 using Sovereign.EngineUtil.Monads;
@@ -75,7 +74,7 @@ public sealed class AccountServices
             if (limiter.IsAccountLoginDisabled(username))
             {
                 // Too many login attempts.
-                Logger.InfoFormat("Rejected login for {0}: too many failed attempts.", username);
+                logger.LogInformation("Rejected login for {0}: too many failed attempts.", username);
                 return AuthenticationResult.TooManyAttempts;
             }
 
@@ -85,7 +84,7 @@ public sealed class AccountServices
             {
                 // Bad password, log and reject.
                 limiter.RegisterFailedAttempt(username);
-                Logger.InfoFormat("Rejected login for {0}: authentication failure.", username);
+                logger.LogInformation("Rejected login for {0}: authentication failure.", username);
                 return AuthenticationResult.Failed;
             }
 
@@ -93,7 +92,7 @@ public sealed class AccountServices
             if (loginTracker.GetLoginState(id) != AccountLoginState.NotLoggedIn)
             {
                 // Already logged in, log and reject.
-                Logger.InfoFormat("Rejected login for {0}: already logged in.", username);
+                logger.LogInformation("Rejected login for {0}: already logged in.", username);
                 return AuthenticationResult.AlreadyLoggedIn;
             }
 
@@ -103,13 +102,13 @@ public sealed class AccountServices
             secret = sharedSecretManager.AddSecret(id);
             guid = id;
 
-            Logger.InfoFormat("Login successful for {0}.", username);
+            logger.LogInformation("Login successful for {0}.", username);
 
             return AuthenticationResult.Successful;
         }
         catch (Exception e)
         {
-            Logger.Error("Error while handling login request for " + username + "; rejecting.", e);
+            logger.LogError("Error while handling login request for " + username + "; rejecting.", e);
             return AuthenticationResult.Failed;
         }
     }
@@ -136,13 +135,13 @@ public sealed class AccountServices
                 // fault.
                 return RegistrationResult.UsernameTaken;
 
-            Logger.InfoFormat("New account registered for {0}.", username);
+            logger.LogInformation("New account registered for {0}.", username);
 
             return RegistrationResult.Successful;
         }
         catch (Exception e)
         {
-            Logger.Error("Error handling registration request.", e);
+            logger.LogError("Error handling registration request.", e);
             return RegistrationResult.UnknownFailure;
         }
     }

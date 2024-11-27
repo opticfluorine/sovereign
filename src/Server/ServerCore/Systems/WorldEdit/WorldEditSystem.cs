@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -81,7 +80,7 @@ public class WorldEditSystem : ISystem
                 {
                     if (ev.EventDetails is not BlockAddEventDetails details)
                     {
-                        Logger.Error("Received SetBlock with no details.");
+                        logger.LogError("Received SetBlock with no details.");
                         break;
                     }
 
@@ -93,7 +92,7 @@ public class WorldEditSystem : ISystem
                 {
                     if (ev.EventDetails is not GridPositionEventDetails details)
                     {
-                        Logger.Error("Received RemoveBlock with no details.");
+                        logger.LogError("Received RemoveBlock with no details.");
                         break;
                     }
 
@@ -112,7 +111,7 @@ public class WorldEditSystem : ISystem
     /// <param name="details">Request details.</param>
     private void HandleSetBlock(BlockAddEventDetails details)
     {
-        Logger.DebugFormat("Set block type {0} at {1}.", loggingUtil.FormatEntity(details.BlockRecord.TemplateEntityId),
+        logger.LogDebug("Set block type {0} at {1}.", loggingUtil.FormatEntity(details.BlockRecord.TemplateEntityId),
             details.BlockRecord.Position);
 
         if (blockServices.TryGetBlockAtPosition(details.BlockRecord.Position, out var entityId))
@@ -133,7 +132,7 @@ public class WorldEditSystem : ISystem
     /// <param name="details">Request details.</param>
     private void HandleRemoveBlock(GridPositionEventDetails details)
     {
-        Logger.DebugFormat("Remove block at {0}.", details.GridPosition);
+        logger.LogDebug("Remove block at {0}.", details.GridPosition);
         blockController.RemoveBlockAtPosition(eventSender, details.GridPosition);
     }
 }

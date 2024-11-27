@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
@@ -262,7 +261,7 @@ public class WorldSegmentSubscriptionManager
         foreach (var segment in newSubscriptionSet)
             if (!unchangedSet.Contains(segment))
             {
-                Logger.DebugFormat("Subscribe {0} to {1}.", playerEntityId, segment);
+                logger.LogDebug("Subscribe {0} to {1}.", playerEntityId, segment);
                 internalController.PushSubscribe(eventSender, playerEntityId, segment);
                 currentSubscriptionSet.Add(segment);
                 if (!playersByWorldSegments.ContainsKey(segment))
@@ -290,7 +289,7 @@ public class WorldSegmentSubscriptionManager
                 if (dx > unsubRadius || dy > unsubRadius || dz > unsubRadius)
                 {
                     // Beyond the unsubscribe radius, trigger unsubscribe.
-                    Logger.DebugFormat("Unsubscribe {0} from {1}.", playerEntityId, segment);
+                    logger.LogDebug("Unsubscribe {0} from {1}.", playerEntityId, segment);
                     internalController.PushUnsubscribe(eventSender, playerEntityId, segment);
                     currentSubscriptionSet.Remove(segment);
                     playersByWorldSegments[segment].Remove(playerEntityId);

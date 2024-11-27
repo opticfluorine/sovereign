@@ -18,7 +18,6 @@ using System;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using MessagePack;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Systems.ClientNetwork;
@@ -106,7 +105,7 @@ public sealed class WorldSegmentDataClient
                 var contentLen = response.Content.Headers.ContentLength;
                 if (contentLen > MaxResponseLength)
                 {
-                    Logger.ErrorFormat("Response length {0} too long.", contentLen);
+                    logger.LogError("Response length {0} too long.", contentLen);
                     continue;
                 }
 
@@ -119,17 +118,17 @@ public sealed class WorldSegmentDataClient
 
                     case HttpStatusCode.ServiceUnavailable:
                         // Server has not yet loaded the segment - delay and try again.
-                        Logger.WarnFormat("Server is not ready to serve segment data for {0}.", segmentIndex);
+                        logger.LogWarning("Server is not ready to serve segment data for {0}.", segmentIndex);
                         break;
 
                     case HttpStatusCode.Forbidden:
                         // Server reports the player is not currently subscribed - delay and try again.
-                        Logger.WarnFormat("Server denied access to segment data for {0}.", segmentIndex);
+                        logger.LogWarning("Server denied access to segment data for {0}.", segmentIndex);
                         break;
 
                     default:
                         // Other unknown error - log, try again.
-                        Logger.ErrorFormat("Unexpected response code {0} retrieving segment data for {1}.",
+                        logger.LogError("Unexpected response code {0} retrieving segment data for {1}.",
                             response.StatusCode, segmentIndex);
                         break;
                 }
@@ -137,16 +136,16 @@ public sealed class WorldSegmentDataClient
             catch (NetworkException)
             {
                 // If we get this here, then the connection is already known to be lost; abort.
-                Logger.DebugFormat("Aborting segment retrieval for {0} due to disconnect.", segmentIndex);
+                logger.LogDebug("Aborting segment retrieval for {0} due to disconnect.", segmentIndex);
                 return;
             }
             catch (Exception e)
             {
-                Logger.ErrorFormat(e, "Exception while retrieving segment data for {0}.", segmentIndex);
+                logger.LogError(e, "Exception while retrieving segment data for {0}.", segmentIndex);
             }
 
         /* If we get here, all the retries failed and we hit the limit. */
-        Logger.ErrorFormat("Failed to retrieve segment data for {0} after {1} tries; connection assumed lost.",
+        logger.LogError("Failed to retrieve segment data for {0} after {1} tries; connection assumed lost.",
             segmentIndex, MaxRetries);
         networkController.DeclareConnectionLost(eventSender);
     }

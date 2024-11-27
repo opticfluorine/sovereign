@@ -15,10 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details.Validators;
 using Sovereign.NetworkCore.Network.Infrastructure;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.NetworkCore.Network.Pipeline.Inbound;
 
@@ -27,6 +28,7 @@ namespace Sovereign.NetworkCore.Network.Pipeline.Inbound;
 /// </summary>
 public class ValidationInboundPipelineStage : IInboundPipelineStage
 {
+    private readonly ILogger<ValidationInboundPipelineStage> logger;
     private readonly TemplateEntityDefinitionEventDetailsValidator templateValidator;
     private readonly Dictionary<EventId, IEventDetailsValidator> validators;
 
@@ -43,9 +45,11 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         SystemChatEventDetailsValidator systemChatValidator,
         TemplateEntityDefinitionEventDetailsValidator templateValidator,
         BlockAddEventDetailsValidator blockAddValidator,
-        GridPositionEventDetailsValidator gridPositionValidator)
+        GridPositionEventDetailsValidator gridPositionValidator,
+        ILogger<ValidationInboundPipelineStage> logger)
     {
         this.templateValidator = templateValidator;
+        this.logger = logger;
         validators = new Dictionary<EventId, IEventDetailsValidator>
         {
             { EventId.Core_Ping_Ping, nullValidator },
@@ -71,8 +75,6 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         };
     }
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
-
     public int Priority => int.MinValue + 1;
     public IInboundPipelineStage? NextStage { get; set; }
 
@@ -83,12 +85,12 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             if (validator.IsValid(ev.EventDetails))
                 NextStage?.ProcessEvent(ev, connection);
             else
-                Logger.ErrorFormat("Received invalid details for event ID {0} from connection ID {1}.",
+                logger.LogError("Received invalid details for event ID {0} from connection ID {1}.",
                     ev.EventId, connection.Id);
         }
         else
         {
-            Logger.ErrorFormat("No validator found for event ID {0}, rejecting event.", ev.EventId);
+            logger.LogError("No validator found for event ID {0}, rejecting event.", ev.EventId);
         }
     }
 }

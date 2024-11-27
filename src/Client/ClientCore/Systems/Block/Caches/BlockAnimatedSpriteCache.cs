@@ -20,7 +20,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components;
@@ -165,7 +164,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         }
         catch (Exception e)
         {
-            Logger.Error("Error updating sprite cache.", e);
+            logger.LogError("Error updating sprite cache.", e);
         }
     }
 
@@ -193,7 +192,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
             if (!knownPositions.TryGetValue(blockId, out var position))
             {
-                Logger.ErrorFormat("No position known for changed block ID {0}.", blockId);
+                logger.LogError("No position known for changed block ID {0}.", blockId);
                 continue;
             }
 
@@ -217,7 +216,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
             if (!knownPositions.ContainsKey(blockId))
             {
-                Logger.ErrorFormat("No position known for removed block ID {0}.", blockId);
+                logger.LogError("No position known for removed block ID {0}.", blockId);
                 continue;
             }
 
@@ -380,7 +379,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     {
         if (!blockPositions.HasComponentForEntity(blockId))
         {
-            Logger.ErrorFormat("Block {0} has no position.", blockId);
+            logger.LogError("Block {0} has no position.", blockId);
             return;
         }
 

@@ -108,14 +108,14 @@ public class CreatePlayerRestService : AuthenticatedRestService
         }
         catch (Exception e)
         {
-            Logger.Error("Error handling create player request.", e);
+            logger.LogError("Error handling create player request.", e);
             try
             {
                 await SendResponse(ctx, 500, "Error processing request.");
             }
             catch (Exception e2)
             {
-                Logger.Error("Error sending error response.", e2);
+                logger.LogError("Error sending error response.", e2);
             }
         }
     }
@@ -177,7 +177,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
                 if (configManager.ServerConfiguration.NewPlayers.AdminByDefault)
                 {
-                    Logger.WarnFormat("Player {0} defaulting to admin; edit server configuration if unintended.",
+                    logger.LogWarning("Player {0} defaulting to admin; edit server configuration if unintended.",
                         request.PlayerName);
                     builder.Admin();
                 }

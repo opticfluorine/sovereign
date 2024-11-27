@@ -17,7 +17,6 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using MessagePack;
 using Sovereign.ClientCore.Entities;
 using Sovereign.ClientCore.Network.Rest;
@@ -77,14 +76,14 @@ public class TemplateEntityDataClient
             var response = await client.Get(RestEndpoints.TemplateEntities);
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                Logger.ErrorFormat("Failed to load template entities from server (status {0}).", response.StatusCode);
+                logger.LogError("Failed to load template entities from server (status {0}).", response.StatusCode);
                 networkController.DeclareConnectionLost(eventSender);
                 return;
             }
 
             if (response.Content.Headers.ContentLength > MaxContentLength)
             {
-                Logger.ErrorFormat("Template entity data content length {0} is too large (max {1}).",
+                logger.LogError("Template entity data content length {0} is too large (max {1}).",
                     response.Content.Headers.ContentLength, MaxContentLength);
                 networkController.DeclareConnectionLost(eventSender);
                 return;
@@ -96,7 +95,7 @@ public class TemplateEntityDataClient
         }
         catch (Exception e)
         {
-            Logger.Error("Error while loading template entities from server; connection lost.", e);
+            logger.LogError("Error while loading template entities from server; connection lost.", e);
             networkController.DeclareConnectionLost(eventSender);
         }
     }

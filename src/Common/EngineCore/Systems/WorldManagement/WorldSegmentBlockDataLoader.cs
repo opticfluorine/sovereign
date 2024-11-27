@@ -16,7 +16,7 @@
 
 using System;
 using System.Collections.Generic;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
@@ -35,18 +35,19 @@ public class WorldSegmentBlockDataLoader
     private readonly BlockController blockController;
     private readonly IWorldManagementConfiguration config;
     private readonly IEventSender eventSender;
+    private readonly ILogger<WorldSegmentBlockDataLoader> logger;
     private readonly WorldSegmentResolver resolver;
 
     public WorldSegmentBlockDataLoader(IEventSender eventSender, BlockController blockController,
-        IWorldManagementConfiguration config, WorldSegmentResolver resolver)
+        IWorldManagementConfiguration config, WorldSegmentResolver resolver,
+        ILogger<WorldSegmentBlockDataLoader> logger)
     {
         this.eventSender = eventSender;
         this.blockController = blockController;
         this.config = config;
         this.resolver = resolver;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Loads entities into a world segment from the given block data.
@@ -93,7 +94,7 @@ public class WorldSegmentBlockDataLoader
                 ProcessDefaultPlane(segmentIndex, i, segmentData.DefaultsPerPlane[i], blocksToAdd);
 
         if (blocksToAdd.Count > 0)
-            Logger.DebugFormat("Adding {0} blocks for world segment {1}.", blocksToAdd.Count, segmentIndex);
+            logger.LogDebug("Adding {0} blocks for world segment {1}.", blocksToAdd.Count, segmentIndex);
     }
 
     /// <summary>

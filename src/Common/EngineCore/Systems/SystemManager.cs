@@ -15,62 +15,60 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using Castle.Core;
-using Castle.Core.Logging;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Sovereign.EngineCore.Systems;
 
 /// <summary>
 ///     Manages the collection of System objects.
 /// </summary>
-public class SystemManager : IStartable
+public class SystemManager : IHostedService, IDisposable
 {
     /// <summary>
     ///     Number of system executor threads.
     /// </summary>
-    private const int EXECUTOR_COUNT = 1;
+    private const int ExecutorCount = 1;
 
-    /// <summary>
-    ///     Executors.
-    /// </summary>
-    private readonly List<SystemExecutor> executors = new();
+    private readonly List<ExecutorScope> executors = new();
+    private readonly List<Task> executorTasks = new();
+    private readonly ILogger<SystemManager> logger;
+    private readonly IServiceScopeFactory serviceScopeFactory;
+    private readonly CancellationTokenSource shutdownTokenSource = new();
+    private readonly IEnumerable<ISystem> systems;
 
-    /// <summary>
-    ///     System executor factory.
-    /// </summary>
-    private readonly ISystemExecutorFactory systemExecutorFactory;
-
-    /// <summary>
-    ///     Systems to be managed.
-    /// </summary>
-    private readonly IList<ISystem> systemList;
-
-    /// <summary>
-    ///     Executor threads.
-    /// </summary>
-    private readonly List<Thread> threads = new();
-
-    /// <summary>
-    ///     Creates a new SystemManager with the given update step.
-    /// </summary>
-    /// <param name="systemList">Systems to be managed.</param>
-    /// <param name="systemExecutorFactory">System executor factory.</param>
-    public SystemManager(IList<ISystem> systemList,
-        ISystemExecutorFactory systemExecutorFactory)
+    public SystemManager(IEnumerable<ISystem> systems,
+        ILogger<SystemManager> logger, IServiceScopeFactory serviceScopeFactory)
     {
-        this.systemList = systemList;
-        this.systemExecutorFactory = systemExecutorFactory;
+        this.systems = systems;
+        this.logger = logger;
+        this.serviceScopeFactory = serviceScopeFactory;
     }
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
-
-    public void Start()
+    public void Dispose()
     {
-        Logger.Info("Starting SystemManager.");
+        foreach (var scope in executors)
+        {
+            scope.ServiceScope.Dispose();
+        }
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Stopping SystemManager.");
+        shutdownTokenSource.Cancel();
+        await Task.WhenAll(executorTasks);
+    }
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Starting SystemManager.");
 
         /* Create executors. */
         CreateExecutors();
@@ -79,18 +77,7 @@ public class SystemManager : IStartable
         PartitionSystems();
 
         /* Run the executors. */
-        RunExecutors();
-    }
-
-    public void Stop()
-    {
-        Logger.Info("Stopping SystemManager.");
-
-        /* Join on the executor threads. */
-        foreach (var thread in threads) thread.Join();
-
-        /* Release the executor resources. */
-        foreach (var executor in executors) systemExecutorFactory.Release(executor);
+        await RunExecutors();
     }
 
     /// <summary>
@@ -98,10 +85,15 @@ public class SystemManager : IStartable
     /// </summary>
     private void CreateExecutors()
     {
-        for (var i = 0; i < EXECUTOR_COUNT; ++i)
+        for (var i = 0; i < ExecutorCount; ++i)
         {
-            var executor = systemExecutorFactory.Create();
-            executors.Add(executor);
+            var scope = serviceScopeFactory.CreateScope();
+            executors.Add(new ExecutorScope
+            {
+                ServiceScope = scope,
+                SystemExecutor = scope.ServiceProvider.GetService<SystemExecutor>() ??
+                                 throw new Exception("Got null executor.")
+            });
         }
     }
 
@@ -111,12 +103,12 @@ public class SystemManager : IStartable
     private void PartitionSystems()
     {
         /* Iterate over the systems in order of decreasing workload. */
-        var rankedSystems = systemList.OrderByDescending(system => system.WorkloadEstimate);
+        var rankedSystems = systems.OrderByDescending(system => system.WorkloadEstimate);
         var count = 0;
         foreach (var system in rankedSystems)
         {
             /* Cycle through the executors round-robin style. */
-            var executor = executors[count % EXECUTOR_COUNT];
+            var executor = executors[count % ExecutorCount].SystemExecutor;
             executor.AddSystem(system);
 
             count++;
@@ -126,25 +118,27 @@ public class SystemManager : IStartable
     /// <summary>
     ///     Runs the SystemExecutors in their own threads.
     /// </summary>
-    private void RunExecutors()
+    private async Task RunExecutors()
     {
-        var count = 0;
-        var sb = new StringBuilder();
         foreach (var executor in executors)
         {
-            /* Generate a name for the executor. */
-            sb.Clear();
-            sb.Append("Executor ").Append(count);
+            executorTasks.Add(Task.Run(() => executor.SystemExecutor.Execute(shutdownTokenSource.Token)));
+        }
 
-            /* Start the executor thread. */
-            var executorThread = new Thread(executor.Execute)
-            {
-                Name = sb.ToString()
-            };
-            executorThread.Start();
-            threads.Add(executorThread);
+        await Task.WhenAll(executorTasks);
+    }
 
-            count++;
+    /// <summary>
+    ///     Executor scope wrapper.
+    /// </summary>
+    private readonly record struct ExecutorScope : IDisposable
+    {
+        public required SystemExecutor SystemExecutor { get; init; }
+        public required IServiceScope ServiceScope { get; init; }
+
+        public void Dispose()
+        {
+            ServiceScope.Dispose();
         }
     }
 }

@@ -19,7 +19,6 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network.Rest;
@@ -65,7 +64,7 @@ public class PlayerManagementClient
             // REST client needs to be connected and authenticated.
             if (!restClient.Connected)
             {
-                Logger.Error("Cannot create player while disconnected from server.");
+                logger.LogError("Cannot create player while disconnected from server.");
                 result = new Option<ListPlayersResponse, string>("Not connected.");
                 return result;
             }
@@ -74,7 +73,7 @@ public class PlayerManagementClient
             var httpResponse = await restClient.Get(RestEndpoints.Player);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
             {
-                Logger.ErrorFormat("ListPlayers response length {0} is too long.",
+                logger.LogError("ListPlayers response length {0} is too long.",
                     httpResponse.Content.Headers.ContentLength);
                 result = new Option<ListPlayersResponse, string>("Response too long.");
                 return result;
@@ -82,7 +81,7 @@ public class PlayerManagementClient
 
             if (httpResponse.StatusCode != HttpStatusCode.OK)
             {
-                Logger.ErrorFormat("ListPlayers response status {0}.", httpResponse.StatusCode);
+                logger.LogError("ListPlayers response status {0}.", httpResponse.StatusCode);
                 result = new Option<ListPlayersResponse, string>("Bad response from server.");
                 return result;
             }
@@ -94,7 +93,7 @@ public class PlayerManagementClient
         }
         catch (Exception e)
         {
-            Logger.Error("Exception while listing players.", e);
+            logger.LogError("Exception while listing players.", e);
         }
 
         return result;
@@ -116,7 +115,7 @@ public class PlayerManagementClient
             // access player management APIs.
             if (!restClient.Connected)
             {
-                Logger.Error("Cannot manage players while disconnected from server.");
+                logger.LogError("Cannot manage players while disconnected from server.");
                 result = new Option<CreatePlayerResponse, string>("Not connected.");
                 return result;
             }
@@ -125,7 +124,7 @@ public class PlayerManagementClient
             var httpResponse = await restClient.PostJson(RestEndpoints.Player, request);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
             {
-                Logger.ErrorFormat("CreatePlayer response length {0} is too long.",
+                logger.LogError("CreatePlayer response length {0} is too long.",
                     httpResponse.Content.Headers.ContentLength);
                 result = new Option<CreatePlayerResponse, string>("Response too long.");
                 return result;
@@ -135,14 +134,14 @@ public class PlayerManagementClient
             if (response == null)
             {
                 var msg = "Received null response from server.";
-                Logger.Error(msg);
+                logger.LogError(msg);
                 return new Option<CreatePlayerResponse, string>(msg);
             }
 
             if (httpResponse.StatusCode == HttpStatusCode.Created)
             {
                 // Success
-                Logger.InfoFormat("Successfully created new player {0} (ID {1}).", request.PlayerName,
+                logger.LogInformation("Successfully created new player {0} (ID {1}).", request.PlayerName,
                     response.PlayerId);
                 internalController.SetPlayerEntityId(eventSender, response.PlayerId);
                 result = new Option<CreatePlayerResponse, string>(response);
@@ -152,19 +151,19 @@ public class PlayerManagementClient
                 // Failed
                 if (response.Result != null)
                 {
-                    Logger.ErrorFormat("Failed to create new player {0}: {1}", request.PlayerName, response.Result);
+                    logger.LogError("Failed to create new player {0}: {1}", request.PlayerName, response.Result);
                     result = new Option<CreatePlayerResponse, string>(response.Result);
                 }
                 else
                 {
-                    Logger.ErrorFormat("Failed to create new player {0}: unknown error.", request.PlayerName);
+                    logger.LogError("Failed to create new player {0}: unknown error.", request.PlayerName);
                     result = new Option<CreatePlayerResponse, string>("Unknown error.");
                 }
             }
         }
         catch (Exception e)
         {
-            Logger.Error("Exception thrown during player management.", e);
+            logger.LogError("Exception thrown during player management.", e);
         }
 
         return result;
@@ -185,7 +184,7 @@ public class PlayerManagementClient
             // access player management APIs.
             if (!restClient.Connected)
             {
-                Logger.Error("Cannot manage players while disconnected from server.");
+                logger.LogError("Cannot manage players while disconnected from server.");
                 result = new Option<SelectPlayerResponse, string>("Not connected.");
                 return result;
             }
@@ -195,7 +194,7 @@ public class PlayerManagementClient
             var httpResponse = await restClient.Post(playerUrl);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
             {
-                Logger.ErrorFormat("SelectPlayer response length {0} is too long.",
+                logger.LogError("SelectPlayer response length {0} is too long.",
                     httpResponse.Content.Headers.ContentLength);
                 result = new Option<SelectPlayerResponse, string>("Response too long.");
                 return result;
@@ -205,14 +204,14 @@ public class PlayerManagementClient
             if (response == null)
             {
                 var msg = "Null response received from server.";
-                Logger.Error(msg);
+                logger.LogError(msg);
                 return new Option<SelectPlayerResponse, string>(msg);
             }
 
             if (httpResponse.StatusCode == HttpStatusCode.OK)
             {
                 // Success
-                Logger.InfoFormat("Selected player ID {0}.", playerEntityId);
+                logger.LogInformation("Selected player ID {0}.", playerEntityId);
                 internalController.SetPlayerEntityId(eventSender, playerEntityId);
                 result = new Option<SelectPlayerResponse, string>(response);
             }
@@ -221,19 +220,19 @@ public class PlayerManagementClient
                 // Failed
                 if (response.Result != null)
                 {
-                    Logger.ErrorFormat("Failed to select player {0}: {1}", playerEntityId, response.Result);
+                    logger.LogError("Failed to select player {0}: {1}", playerEntityId, response.Result);
                     result = new Option<SelectPlayerResponse, string>(response.Result);
                 }
                 else
                 {
-                    Logger.ErrorFormat("Failed to select player {0}: Unknown error", playerEntityId);
+                    logger.LogError("Failed to select player {0}: Unknown error", playerEntityId);
                     result = new Option<SelectPlayerResponse, string>("Unknown error.");
                 }
             }
         }
         catch (Exception e)
         {
-            Logger.Error("Exception thrown during player management.", e);
+            logger.LogError("Exception thrown during player management.", e);
         }
 
         return result;
@@ -254,7 +253,7 @@ public class PlayerManagementClient
             // access player management APIs.
             if (!restClient.Connected)
             {
-                Logger.Error("Cannot manage players while disconnected from server.");
+                logger.LogError("Cannot manage players while disconnected from server.");
                 result = new Option<DeletePlayerResponse, string>("Not connected.");
                 return result;
             }
@@ -264,7 +263,7 @@ public class PlayerManagementClient
             var httpResponse = await restClient.Delete(playerUrl);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
             {
-                Logger.ErrorFormat("DeletePlayer response length {0} is too long.",
+                logger.LogError("DeletePlayer response length {0} is too long.",
                     httpResponse.Content.Headers.ContentLength);
                 result = new Option<DeletePlayerResponse, string>("Response too long.");
                 return result;
@@ -274,14 +273,14 @@ public class PlayerManagementClient
             if (response == null)
             {
                 var msg = "Null response received from server.";
-                Logger.Error(msg);
+                logger.LogError(msg);
                 return new Option<DeletePlayerResponse, string>(msg);
             }
 
             if (httpResponse.StatusCode == HttpStatusCode.OK)
             {
                 // Success
-                Logger.InfoFormat("Deleted player ID {0}.", playerEntityId);
+                logger.LogInformation("Deleted player ID {0}.", playerEntityId);
                 result = new Option<DeletePlayerResponse, string>(response);
             }
             else
@@ -289,19 +288,19 @@ public class PlayerManagementClient
                 // Failed
                 if (response.Result != null)
                 {
-                    Logger.ErrorFormat("Failed to delete player {0}: {1}", playerEntityId, response.Result);
+                    logger.LogError("Failed to delete player {0}: {1}", playerEntityId, response.Result);
                     result = new Option<DeletePlayerResponse, string>(response.Result);
                 }
                 else
                 {
-                    Logger.ErrorFormat("Failed to delete player {0}: Unknown error", playerEntityId);
+                    logger.LogError("Failed to delete player {0}: Unknown error", playerEntityId);
                     result = new Option<DeletePlayerResponse, string>("Unknown error.");
                 }
             }
         }
         catch (Exception e)
         {
-            Logger.Error("Exception thrown during player management.", e);
+            logger.LogError("Exception thrown during player management.", e);
         }
 
         return result;

@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
@@ -86,7 +85,7 @@ public class SpriteSheetManager
         /* Load the spritesheets. */
         try
         {
-            Logger.Info("Loading spritesheets.");
+            logger.LogInformation("Loading spritesheets.");
 
             SpriteSheets.Clear();
             foreach (var spriteSheet in LoadSpriteSheets()) SpriteSheets[spriteSheet.Definition.Filename] = spriteSheet;
@@ -98,7 +97,7 @@ public class SpriteSheetManager
             sb.Append("Failed to load spritesheets.\n\n").Append(e.Message);
             var message = sb.ToString();
 
-            Logger.Fatal(message, e);
+            logger.LogCritical(message, e);
             ErrorHandler.Error(message);
             throw new FatalErrorException(message, e);
         }
@@ -106,12 +105,12 @@ public class SpriteSheetManager
         if (SpriteSheets.Count == 0)
         {
             const string message = "No spritesheets were found.";
-            Logger.Fatal(message);
+            logger.LogCritical(message);
             ErrorHandler.Error(message);
             throw new FatalErrorException(message);
         }
 
-        Logger.InfoFormat("Successfully loaded {0} spritesheets.", SpriteSheets.Count);
+        logger.LogInformation("Successfully loaded {0} spritesheets.", SpriteSheets.Count);
     }
 
     /// <summary>

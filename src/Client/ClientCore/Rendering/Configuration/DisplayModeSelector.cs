@@ -18,7 +18,6 @@
 using System;
 using System.Linq;
 using System.Text;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Configuration;
@@ -91,7 +90,7 @@ public class DisplayModeSelector
             try
             {
                 selectedMode = resSortedModes.First();
-                Logger.WarnFormat("Requested display size {0}x{1} not supported, falling back to {0}x{1}.",
+                logger.LogWarning("Requested display size {0}x{1} not supported, falling back to {0}x{1}.",
                     selectedMode.Width, selectedMode.Height);
             }
             catch
@@ -101,7 +100,7 @@ public class DisplayModeSelector
         }
 
         /* Log the decision and return. */
-        Logger.Info(() => CreateLogMessageForMode(selectedMode));
+        logger.LogInformation(() => CreateLogMessageForMode(selectedMode));
         return selectedMode;
     }
 

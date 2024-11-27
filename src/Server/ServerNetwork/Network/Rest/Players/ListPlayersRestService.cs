@@ -44,7 +44,7 @@ public class ListPlayersRestService : AuthenticatedRestService
 
     protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
     {
-        Logger.DebugFormat("ListPlayers requested for account ID {0}.", accountId);
+        logger.LogDebug("ListPlayers requested for account ID {0}.", accountId);
         try
         {
             var players = playerServices.GetPlayersForAccount(accountId);
@@ -55,7 +55,7 @@ public class ListPlayersRestService : AuthenticatedRestService
         }
         catch (Exception e)
         {
-            Logger.ErrorFormat(e, "Exception while handling ListPlayers for account ID {0}.", accountId);
+            logger.LogError(e, "Exception while handling ListPlayers for account ID {0}.", accountId);
             try
             {
                 ctx.Response.StatusCode = 500;
@@ -63,7 +63,7 @@ public class ListPlayersRestService : AuthenticatedRestService
             }
             catch (Exception e2)
             {
-                Logger.ErrorFormat(e2, "Exception while sending error 500 during ListPlayers for account ID {0}.",
+                logger.LogError(e2, "Exception while sending error 500 during ListPlayers for account ID {0}.",
                     accountId);
             }
         }

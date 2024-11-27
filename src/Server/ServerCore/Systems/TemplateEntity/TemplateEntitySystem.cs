@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Logging;
@@ -83,7 +82,7 @@ public class TemplateEntitySystem : ISystem
                     break;
 
                 default:
-                    Logger.Error("Unhandled event in TemplateEntitySystem.");
+                    logger.LogError("Unhandled event in TemplateEntitySystem.");
                     break;
             }
         }
@@ -107,20 +106,20 @@ public class TemplateEntitySystem : ISystem
     {
         if (details is not EntityDefinitionEventDetails requestDetails)
         {
-            Logger.Error("Bad details for Update.");
+            logger.LogError("Bad details for Update.");
             return;
         }
 
         if (!roleCheck.IsPlayerAdmin(requestDetails.PlayerEntityId))
         {
-            Logger.ErrorFormat("[Security] Attempted Update by non-admin player {0}.",
+            logger.LogError("[Security] Attempted Update by non-admin player {0}.",
                 loggingUtil.FormatEntity(requestDetails.PlayerEntityId));
             return;
         }
 
         foreach (var definition in requestDetails.EntityDefinitions)
         {
-            Logger.InfoFormat("Template entity {0} updated by player {1}.", definition.EntityId,
+            logger.LogInformation("Template entity {0} updated by player {1}.", definition.EntityId,
                 loggingUtil.FormatEntity(requestDetails.PlayerEntityId));
             manager.UpdateExisting(definition);
         }

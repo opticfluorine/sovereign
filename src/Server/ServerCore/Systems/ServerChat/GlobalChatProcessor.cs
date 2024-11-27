@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Logging;
 
 namespace Sovereign.ServerCore.Systems.ServerChat;
@@ -49,7 +48,7 @@ public class GlobalChatProcessor : IChatProcessor
 
         // Send message.
         var name = loggingUtil.FormatEntity(senderEntityId);
-        Logger.InfoFormat("{0}: {1}", name, message);
+        logger.LogInformation("{0}: {1}", name, message);
         internalController.SendGlobalChat(message, name);
     }
 }

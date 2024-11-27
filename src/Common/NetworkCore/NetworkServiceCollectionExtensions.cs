@@ -17,7 +17,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sovereign.EngineCore.Events;
+using Sovereign.NetworkCore.Network.Infrastructure;
+using Sovereign.NetworkCore.Network.Pipeline.Inbound;
+using Sovereign.NetworkCore.Network.Pipeline.Outbound;
+using Sovereign.NetworkCore.Network.Service;
 using Sovereign.NetworkCore.Systems.Network;
+using Sovereign.NetworkCore.Systems.Ping;
 
 namespace Sovereign.NetworkCore;
 
@@ -29,6 +34,11 @@ public static class NetworkServiceCollectionExtensions
     public static IServiceCollection AddSovereignNetworkCore(this IServiceCollection services)
     {
         AddEvents(services);
+        AddInfrastructure(services);
+        AddInboundPipeline(services);
+        AddOutboundPipeline(services);
+        AddNetworkingService(services);
+        AddPingSystem(services);
 
         return services;
     }
@@ -36,5 +46,37 @@ public static class NetworkServiceCollectionExtensions
     private static void AddEvents(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IEventAdapter, NetworkEventAdapter>());
+    }
+
+    private static void AddInfrastructure(IServiceCollection services)
+    {
+        services.TryAddSingleton<NetLogger>();
+        services.TryAddSingleton<NetworkSerializer>();
+        services.TryAddSingleton<NetworkConnectionManager>();
+    }
+
+    private static void AddInboundPipeline(IServiceCollection services)
+    {
+        services.TryAddSingleton<InboundNetworkPipeline>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IInboundPipelineStage, ValidationInboundPipelineStage>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IInboundPipelineStage, FinalInboundPipelineStage>());
+    }
+
+    private static void AddOutboundPipeline(IServiceCollection services)
+    {
+        services.TryAddSingleton<OutboundNetworkPipeline>();
+        services.TryAddSingleton<DeliveryMethodOutboundPipelineStage>();
+        services.TryAddSingleton<FinalOutboundPipelineStage>();
+    }
+
+    private static void AddNetworkingService(IServiceCollection services)
+    {
+        services.TryAddSingleton<NetworkingService>();
+        services.TryAddSingleton<ReceivedEventQueue>();
+    }
+
+    private static void AddPingSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<PingController>();
     }
 }

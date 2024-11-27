@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.ClientCore.Entities;
@@ -44,6 +43,6 @@ public class TemplateEntityDataLoader
             definitionProcessor.ProcessDefinition(def);
         }
 
-        Logger.InfoFormat("Loaded {0} template entities from server.", data.TemplateEntityDefinitions.Count);
+        logger.LogInformation("Loaded {0} template entities from server.", data.TemplateEntityDefinitions.Count);
     }
 }

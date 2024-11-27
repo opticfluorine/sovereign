@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events.Details.Validators;
 
 namespace Sovereign.EngineCore.Entities;
@@ -26,15 +26,16 @@ namespace Sovereign.EngineCore.Entities;
 public class EntityDefinitionProcessor
 {
     private readonly IEntityFactory factory;
+    private readonly ILogger<EntityDefinitionProcessor> logger;
     private readonly EntityDefinitionValidator validator;
 
-    public EntityDefinitionProcessor(EntityDefinitionValidator validator, IEntityFactory factory)
+    public EntityDefinitionProcessor(EntityDefinitionValidator validator, IEntityFactory factory,
+        ILogger<EntityDefinitionProcessor> logger)
     {
         this.validator = validator;
         this.factory = factory;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Processes an entity definition to create an entity.
@@ -44,7 +45,7 @@ public class EntityDefinitionProcessor
     {
         if (!validator.Validate(definition))
         {
-            Logger.WarnFormat("Invalid entity definition for entity ID {0}.", definition.EntityId);
+            logger.LogWarning("Invalid entity definition for entity ID {Id}.", definition.EntityId);
             return;
         }
 
@@ -113,6 +114,6 @@ public class EntityDefinitionProcessor
             builder.WithoutPointLightSource();
 
         var entityId = builder.Build();
-        Logger.DebugFormat("Processed entity ID {0}.", entityId);
+        logger.LogDebug("Processed entity ID {Id}.", entityId);
     }
 }

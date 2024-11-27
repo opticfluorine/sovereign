@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -69,7 +68,7 @@ public class DrawableLookup
 
         if (!animatedSprites.HasComponentForEntity(entityId))
         {
-            Logger.WarnFormat("Non-block entity {0} has no AnimatedSprite component.");
+            logger.LogWarning("Non-block entity {0} has no AnimatedSprite component.");
             return Vector2.Zero;
         }
 

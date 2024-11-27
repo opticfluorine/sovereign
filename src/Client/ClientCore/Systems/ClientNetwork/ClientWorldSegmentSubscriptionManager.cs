@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.EngineCore.Components.Indexers;
 
@@ -44,13 +43,13 @@ public class ClientWorldSegmentSubscriptionManager
     {
         if (!subscribedSegments.Contains(worldSegmentIndex))
         {
-            Logger.DebugFormat("Subscribe to world segment {0}.", worldSegmentIndex);
+            logger.LogDebug("Subscribe to world segment {0}.", worldSegmentIndex);
             subscribedSegments.Add(worldSegmentIndex);
             dataClient.LoadSegment(worldSegmentIndex);
         }
         else
         {
-            Logger.WarnFormat("Multiple subscribe to world segment {0}.", worldSegmentIndex);
+            logger.LogWarning("Multiple subscribe to world segment {0}.", worldSegmentIndex);
         }
     }
 
@@ -62,12 +61,12 @@ public class ClientWorldSegmentSubscriptionManager
     {
         if (subscribedSegments.Contains(worldSegmentIndex))
         {
-            Logger.DebugFormat("Unsubscribe from world segment {0}.", worldSegmentIndex);
+            logger.LogDebug("Unsubscribe from world segment {0}.", worldSegmentIndex);
             subscribedSegments.Remove(worldSegmentIndex);
         }
         else
         {
-            Logger.WarnFormat("Unsubscribe from non-subscribed world segment {0}.", worldSegmentIndex);
+            logger.LogWarning("Unsubscribe from non-subscribed world segment {0}.", worldSegmentIndex);
         }
     }
 

@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Sodium;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
@@ -113,7 +112,7 @@ public sealed class AccountLoginTracker
         // State check.
         if (GetLoginState(accountId) != AccountLoginState.SelectingPlayer)
         {
-            Logger.ErrorFormat("Attempt to select player for account {0} in invalid state.", accountId);
+            logger.LogError("Attempt to select player for account {0} in invalid state.", accountId);
             return;
         }
 
@@ -126,7 +125,7 @@ public sealed class AccountLoginTracker
         }
         catch (Exception e)
         {
-            Logger.ErrorFormat(e, "Exception while selecting player {0} for account {1}.", playerEntityId, accountId);
+            logger.LogError(e, "Exception while selecting player {0} for account {1}.", playerEntityId, accountId);
 
             // Roll back any change.
             playersToConnections.Remove(playerEntityId);

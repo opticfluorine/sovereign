@@ -18,7 +18,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
@@ -110,7 +109,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("RenderBrowser(): editingSprite is null.");
+            logger.LogError("RenderBrowser(): editingSprite is null.");
             return;
         }
 
@@ -194,7 +193,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("RenderTopBar(): editingSprite is null.");
+            logger.LogError("RenderTopBar(): editingSprite is null.");
             return;
         }
 
@@ -226,7 +225,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("RenderContextTable(): editingSprite is null.");
+            logger.LogError("RenderContextTable(): editingSprite is null.");
             return;
         }
 
@@ -271,7 +270,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("RenderEditorControls(): editingSprite is null.");
+            logger.LogError("RenderEditorControls(): editingSprite is null.");
             return;
         }
 
@@ -294,7 +293,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("HandleAnimatedSpriteSelector(): editingSprite is null.");
+            logger.LogError("HandleAnimatedSpriteSelector(): editingSprite is null.");
             return;
         }
 
@@ -312,7 +311,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("HandleAnimatedSpriteSelector(): editingSprite is null.");
+            logger.LogError("HandleAnimatedSpriteSelector(): editingSprite is null.");
             return;
         }
 
@@ -369,7 +368,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("RenderContextRow(): editingSprite is null.");
+            logger.LogError("RenderContextRow(): editingSprite is null.");
             return;
         }
 
@@ -513,7 +512,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("RenderPreviewTooltip(): editingSprite is null.");
+            logger.LogError("RenderPreviewTooltip(): editingSprite is null.");
             return;
         }
 
@@ -620,7 +619,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("SaveState(): editingSprite is null");
+            logger.LogError("SaveState(): editingSprite is null");
             return;
         }
 
@@ -635,7 +634,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("ResetState(): editingSprite is null");
+            logger.LogError("ResetState(): editingSprite is null");
             return;
         }
 
@@ -649,7 +648,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("InsertNewTileSprite(): editingSprite is null.");
+            logger.LogError("InsertNewTileSprite(): editingSprite is null.");
             return;
         }
 
@@ -663,7 +662,7 @@ public class TileSpriteEditorTab
     {
         if (editingSprite == null)
         {
-            Logger.Error("RemoveSelectedTileSprite(): editingSprite is null.");
+            logger.LogError("RemoveSelectedTileSprite(): editingSprite is null.");
             return;
         }
 
@@ -683,7 +682,7 @@ public class TileSpriteEditorTab
         reason = null;
         if (editingSprite == null)
         {
-            Logger.Error("CanRemoveSprite(): editingSprite is null.");
+            logger.LogError("CanRemoveSprite(): editingSprite is null.");
             reason = "Internal error.";
             return false;
         }

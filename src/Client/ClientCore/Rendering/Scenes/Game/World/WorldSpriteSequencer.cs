@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Castle.Core.Logging;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
@@ -76,13 +75,13 @@ public sealed class WorldSpriteSequencer
 
         if (!renderPlan.TryAddVertices(sprites.Count * VerticesPerSprite, out var vertices, out var baseVertex))
         {
-            Logger.Error("Render plan vertex buffer too small for update.");
+            logger.LogError("Render plan vertex buffer too small for update.");
             return;
         }
 
         if (!renderPlan.TryAddSpriteIndices(sprites.Count * IndicesPerSprite, out var indices, out baseIndex))
         {
-            Logger.Error("Render plan index buffer too small for update.");
+            logger.LogError("Render plan index buffer too small for update.");
             return;
         }
 

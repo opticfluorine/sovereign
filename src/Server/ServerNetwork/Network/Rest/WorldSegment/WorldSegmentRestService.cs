@@ -67,7 +67,7 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
                 // If not, tell the client to try again later.
                 if (!worldManagementServices.IsWorldSegmentLoaded(segmentIndex))
                 {
-                    Logger.DebugFormat("Delaying response for segment {0} while load in progress.", segmentIndex);
+                    logger.LogDebug("Delaying response for segment {0} while load in progress.", segmentIndex);
                     ctx.Response.StatusCode = 503;
                     await ctx.Response.Send();
                     return;
@@ -82,7 +82,7 @@ public sealed class WorldSegmentRestService : AuthenticatedRestService
                 if (blockDataBytes.Length == 0)
                 {
                     // Segment data was processed but is empty.     
-                    Logger.ErrorFormat("Got empty block data for world segment {0}.", segmentIndex);
+                    logger.LogError("Got empty block data for world segment {0}.", segmentIndex);
                     ctx.Response.StatusCode = 500;
                     await ctx.Response.Send();
                     return;

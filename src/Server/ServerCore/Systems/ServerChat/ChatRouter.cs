@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events.Details;
@@ -65,7 +64,7 @@ public class ChatRouter
             var lowerCommand = command.Command.ToLower();
             if (processorsByCommand.TryGetValue(lowerCommand, out var otherProc))
             {
-                Logger.WarnFormat("Command {0} already registered by {1}; {2} will not be used for this command.",
+                logger.LogWarning("Command {0} already registered by {1}; {2} will not be used for this command.",
                     command.Command, otherProc.GetType(), proc.GetType());
                 continue;
             }
@@ -100,7 +99,7 @@ public class ChatRouter
         }
         catch (Exception e)
         {
-            Logger.ErrorFormat(e, "Error processing chat message from {0}.",
+            logger.LogError(e, "Error processing chat message from {0}.",
                 loggingUtil.FormatEntity(details.SenderEntityId));
             internalController.SendSystemMessage("An error occurred.", details.SenderEntityId);
         }
@@ -115,11 +114,11 @@ public class ChatRouter
         // Determine local world segment.
         if (!kinematics.HasComponentForEntity(details.SenderEntityId))
         {
-            Logger.ErrorFormat("Tried to send local chat for unpositioned entity {0}.", details.SenderEntityId);
+            logger.LogError("Tried to send local chat for unpositioned entity {0}.", details.SenderEntityId);
             return;
         }
 
-        Logger.InfoFormat("{0}: {1}", loggingUtil.FormatEntity(details.SenderEntityId), details.Message);
+        logger.LogInformation("{0}: {1}", loggingUtil.FormatEntity(details.SenderEntityId), details.Message);
         var segmentIndex = resolver.GetWorldSegmentForPosition(kinematics[details.SenderEntityId].Position);
         internalController.SendLocalChat(details.Message, details.SenderEntityId, segmentIndex);
     }

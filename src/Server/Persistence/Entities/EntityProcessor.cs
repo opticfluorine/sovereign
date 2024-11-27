@@ -18,7 +18,6 @@
 using System;
 using System.Data;
 using System.Numerics;
-using Castle.Core.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 
@@ -141,7 +140,7 @@ public sealed class EntityProcessor
         var bytesRead = reader.GetBytes(IndexAccount, 0, accountIdBytes, 0, 16);
         if (bytesRead < 16)
         {
-            Logger.ErrorFormat("Account GUID for entity {0} is too short; skipping component.", entityId);
+            logger.LogError("Account GUID for entity {0} is too short; skipping component.", entityId);
             return;
         }
 
