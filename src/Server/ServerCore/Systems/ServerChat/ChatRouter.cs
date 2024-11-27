@@ -49,7 +49,7 @@ public class ChatRouter
 
     private readonly WorldSegmentResolver resolver;
 
-    public ChatRouter(IList<IChatProcessor> processors, ServerChatInternalController internalController,
+    public ChatRouter(IEnumerable<IChatProcessor> processors, ServerChatInternalController internalController,
         KinematicComponentCollection kinematics, WorldSegmentResolver resolver, LoggingUtil loggingUtil,
         ChatHelpManager helpManager, ILogger<ChatRouter> logger)
     {

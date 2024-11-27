@@ -49,8 +49,8 @@ public class EngineService : BackgroundService
     /// </summary>
     private ulong cycleCount;
 
-    public EngineService(IEventLoop eventLoop, TimeManager timeManager, IList<IMainLoopAction> mainLoopActions,
-        ConsoleEventAdapter eventAdapter, ILogger<EngineService> logger)
+    public EngineService(IEventLoop eventLoop, TimeManager timeManager, IEnumerable<IMainLoopAction> mainLoopActions,
+        ILogger<EngineService> logger)
     {
         this.eventLoop = eventLoop;
         this.timeManager = timeManager;

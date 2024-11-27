@@ -32,7 +32,7 @@ public class ChatHelpManager
 
     private readonly ServerChatInternalController internalController;
 
-    public ChatHelpManager(IList<IChatProcessor> processors, ServerChatInternalController internalController)
+    public ChatHelpManager(IEnumerable<IChatProcessor> processors, ServerChatInternalController internalController)
     {
         this.internalController = internalController;
         var commands = processors

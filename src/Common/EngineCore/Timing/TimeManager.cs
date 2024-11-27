@@ -41,15 +41,15 @@ public class TimeManager
     /// </summary>
     private readonly IList<ITimedAction> timedActions;
 
-    public TimeManager(ISystemTimer systemTimer, IList<ITimedAction> timedActions)
+    public TimeManager(ISystemTimer systemTimer, IEnumerable<ITimedAction> timedActions)
     {
         /* Dependency injection. */
         this.systemTimer = systemTimer;
-        this.timedActions = timedActions;
+        this.timedActions = new List<ITimedAction>(timedActions);
 
         /* Start tracking previous ticks. */
-        lastTickNumbers = new ulong[timedActions.Count];
-        for (var i = 0; i < timedActions.Count; ++i) lastTickNumbers[i] = 0;
+        lastTickNumbers = new ulong[this.timedActions.Count];
+        for (var i = 0; i < this.timedActions.Count; ++i) lastTickNumbers[i] = 0;
     }
 
     /// <summary>

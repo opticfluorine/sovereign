@@ -16,12 +16,14 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Resources;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Timing;
+using Sovereign.ServerCore.Components;
 using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Entities;
 using Sovereign.ServerCore.Logging;
@@ -48,6 +50,7 @@ public static class ServerServiceCollectionExtensions
     /// <returns>Service collection.</returns>
     public static IServiceCollection AddSovereignServer(this IServiceCollection services)
     {
+        AddComponents(services);
         AddServerImplementations(services);
         AddConfiguration(services);
         AddPersistenceSystem(services);
@@ -58,6 +61,11 @@ public static class ServerServiceCollectionExtensions
         AddWorldManagementSystem(services);
 
         return services;
+    }
+
+    private static void AddComponents(IServiceCollection services)
+    {
+        services.TryAddComponentCollection<AccountComponentCollection>();
     }
 
     private static void AddServerImplementations(IServiceCollection services)
