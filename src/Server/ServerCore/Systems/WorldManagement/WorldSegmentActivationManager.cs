@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.ServerCore.Systems.Persistence;
@@ -34,6 +35,8 @@ public class WorldSegmentActivationManager
     /// </summary>
     private readonly HashSet<GridPosition> loadedSegments = new();
 
+    private readonly ILogger<WorldSegmentActivationManager> logger;
+
     private readonly PersistenceController persistenceController;
 
     /// <summary>
@@ -46,13 +49,13 @@ public class WorldSegmentActivationManager
     /// </summary>
     private SpinLock loadedSegmentsSpinLock;
 
-    public WorldSegmentActivationManager(IEventSender eventSender, PersistenceController persistenceController)
+    public WorldSegmentActivationManager(IEventSender eventSender, PersistenceController persistenceController,
+        ILogger<WorldSegmentActivationManager> logger)
     {
         this.eventSender = eventSender;
         this.persistenceController = persistenceController;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Processes a set of changes to the activation counts of a set of world segments.
@@ -65,7 +68,7 @@ public class WorldSegmentActivationManager
             if (!segmentRefCounts.ContainsKey(segmentIndex))
             {
                 // New activation.
-                logger.LogDebug("New activation for {0}.", segmentIndex);
+                logger.LogDebug("New activation for {SegmentIndex}.", segmentIndex);
                 segmentRefCounts.Add(segmentIndex, changes[segmentIndex]);
                 persistenceController.RetrieveWorldSegment(eventSender, segmentIndex);
             }
@@ -73,7 +76,7 @@ public class WorldSegmentActivationManager
             {
                 // Change in reference count to an existing activation.
                 segmentRefCounts[segmentIndex] += changes[segmentIndex];
-                logger.LogDebug("Update ref count for {0} to {1}.", segmentIndex,
+                logger.LogDebug("Update ref count for {SegmentIndex} to {RefCount}.", segmentIndex,
                     segmentRefCounts[segmentIndex]);
             }
     }
@@ -95,7 +98,7 @@ public class WorldSegmentActivationManager
             if (taken) loadedSegmentsSpinLock.Exit();
         }
 
-        logger.LogDebug("Segment {0} recorded as loaded.", segmentIndex);
+        logger.LogDebug("Segment {SegmentIndex} recorded as loaded.", segmentIndex);
     }
 
     /// <summary>

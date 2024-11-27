@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Logging;
 
 namespace Sovereign.ServerCore.Systems.ServerChat;
@@ -26,15 +27,16 @@ public class GlobalChatProcessor : IChatProcessor
 {
     private const string HelpText = "Send a global chat message.";
     private readonly ServerChatInternalController internalController;
+    private readonly ILogger<GlobalChatProcessor> logger;
     private readonly LoggingUtil loggingUtil;
 
-    public GlobalChatProcessor(ServerChatInternalController internalController, LoggingUtil loggingUtil)
+    public GlobalChatProcessor(ServerChatInternalController internalController, LoggingUtil loggingUtil,
+        ILogger<GlobalChatProcessor> logger)
     {
         this.internalController = internalController;
         this.loggingUtil = loggingUtil;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public List<ChatCommand> MatchingCommands => new()
     {

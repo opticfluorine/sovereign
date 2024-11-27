@@ -20,11 +20,18 @@ using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Resources;
+using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Timing;
 using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Entities;
 using Sovereign.ServerCore.Logging;
 using Sovereign.ServerCore.Resources;
+using Sovereign.ServerCore.Systems.Persistence;
+using Sovereign.ServerCore.Systems.ServerChat;
+using Sovereign.ServerCore.Systems.ServerManagement;
+using Sovereign.ServerCore.Systems.TemplateEntity;
+using Sovereign.ServerCore.Systems.WorldEdit;
+using Sovereign.ServerCore.Systems.WorldManagement;
 using Sovereign.ServerCore.Timing;
 
 namespace Sovereign.ServerCore;
@@ -34,9 +41,21 @@ namespace Sovereign.ServerCore;
 /// </summary>
 public static class ServerServiceCollectionExtensions
 {
+    /// <summary>
+    ///     Adds services for Sovereign.ServerCore.
+    /// </summary>
+    /// <param name="services">Service collection.</param>
+    /// <returns>Service collection.</returns>
     public static IServiceCollection AddSovereignServer(this IServiceCollection services)
     {
         AddServerImplementations(services);
+        AddConfiguration(services);
+        AddPersistenceSystem(services);
+        AddServerChatSystem(services);
+        AddServerManagementSystem(services);
+        AddTemplateEntitySystem(services);
+        AddWorldEditSystem(services);
+        AddWorldManagementSystem(services);
 
         return services;
     }
@@ -48,5 +67,65 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<IErrorHandler, ServerErrorHandler>();
         services.TryAddSingleton<IResourcePathBuilder, ServerResourcePathBuilder>();
         services.TryAddSingleton<ISystemTimer, ServerSystemTimer>();
+    }
+
+    private static void AddConfiguration(IServiceCollection services)
+    {
+        services.TryAddSingleton<IServerConfigurationManager, ServerConfigurationManager>();
+    }
+
+    private static void AddPersistenceSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<PersistenceController>();
+    }
+
+    private static void AddServerChatSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<ChatRouter>();
+        services.TryAddSingleton<ServerChatInternalController>();
+        services.TryAddSingleton<ChatHelpManager>();
+        services.TryAddSingleton<ServerChatScripting>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ServerChatSystem>());
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, GlobalChatProcessor>());
+    }
+
+    private static void AddServerManagementSystem(IServiceCollection services)
+    {
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ServerManagementSystem>());
+    }
+
+    private static void AddTemplateEntitySystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<TemplateEntityDataGenerator>();
+        services.TryAddSingleton<TemplateEntityServices>();
+        services.TryAddSingleton<TemplateEntityInternalController>();
+        services.TryAddSingleton<TemplateEntityManager>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, TemplateEntitySystem>());
+    }
+
+    private static void AddWorldEditSystem(IServiceCollection services)
+    {
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, WorldEditSystem>());
+    }
+
+    private static void AddWorldManagementSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<WorldManagementEventHandler>();
+        services.TryAddSingleton<WorldSegmentRegistry>();
+        services.TryAddSingleton<WorldSegmentBlockDataManager>();
+        services.TryAddSingleton<WorldSegmentBlockDataGenerator>();
+        services.TryAddSingleton<WorldSegmentActivationManager>();
+        services.TryAddSingleton<WorldSegmentSubscriptionManager>();
+        services.TryAddSingleton<WorldManagementInternalController>();
+        services.TryAddSingleton<WorldSegmentSynchronizationManager>();
+        services.TryAddSingleton<EntitySynchronizer>();
+        services.TryAddSingleton<WorldManagementServices>();
+        services.TryAddSingleton<WorldSegmentChangeMonitor>();
+        services.TryAddSingleton<WorldManagementController>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, WorldManagementSystem>());
     }
 }

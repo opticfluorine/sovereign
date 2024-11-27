@@ -19,6 +19,7 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Sovereign.EngineCore;
 using Sovereign.NetworkCore;
+using Sovereign.Persistence;
 using Sovereign.ServerCore;
 using Sovereign.ServerNetwork;
 
@@ -37,7 +38,8 @@ builder.Services
     .AddSovereignCoreHostedServices()
     .AddSovereignNetworkCore()
     .AddSovereignServer()
-    .AddSovereignServerNetwork();
+    .AddSovereignServerNetwork()
+    .AddSovereignPersistence();
 
 // Run application.
 var host = builder.Build();

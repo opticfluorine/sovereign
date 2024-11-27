@@ -34,7 +34,7 @@ public sealed class WorldManagementSystem : ISystem
 
     public WorldManagementSystem(EventCommunicator eventCommunicator,
         IEventLoop eventLoop, WorldManagementEventHandler eventHandler,
-        EventDescriptions eventDescriptions, WorldSegmentSubscriptionManager subscriptionManager,
+        WorldSegmentSubscriptionManager subscriptionManager,
         WorldSegmentChangeMonitor segmentChangeMonitor)
     {
         /* Dependency injection. */

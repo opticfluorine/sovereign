@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 
@@ -29,19 +30,20 @@ public class TemplateEntityManager
     private readonly IEntityFactory entityFactory;
     private readonly IEventSender eventSender;
     private readonly TemplateEntityInternalController internalController;
+    private readonly ILogger<TemplateEntityManager> logger;
 
     private readonly List<ulong> pendingSync = new();
 
     public TemplateEntityManager(IEntityFactory entityFactory, IEventSender eventSender,
-        TemplateEntityInternalController internalController, EntityDefinitionProcessor definitionProcessor)
+        TemplateEntityInternalController internalController, EntityDefinitionProcessor definitionProcessor,
+        ILogger<TemplateEntityManager> logger)
     {
         this.entityFactory = entityFactory;
         this.eventSender = eventSender;
         this.internalController = internalController;
         this.definitionProcessor = definitionProcessor;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Creates or updates a template entity based on an entity definition.
@@ -52,7 +54,7 @@ public class TemplateEntityManager
         if (definition.EntityId < EntityConstants.FirstTemplateEntityId ||
             definition.EntityId > EntityConstants.LastTemplateEntityId)
         {
-            logger.LogError("Received update for non-template entity ID {0}; skipping.", definition.EntityId);
+            logger.LogError("Received update for non-template entity ID {Id}; skipping.", definition.EntityId);
             return;
         }
 

@@ -15,8 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -27,21 +29,22 @@ public sealed class WorldManagementEventHandler
 {
     private readonly WorldSegmentActivationManager activationManager;
     private readonly WorldSegmentBlockDataManager blockDataManager;
+    private readonly ILogger<WorldManagementEventHandler> logger;
     private readonly WorldSegmentSubscriptionManager subscriptionManager;
     private readonly WorldSegmentSynchronizationManager syncManager;
 
     public WorldManagementEventHandler(WorldSegmentActivationManager activationManager,
         WorldSegmentSynchronizationManager syncManager,
         WorldSegmentBlockDataManager blockDataManager,
-        WorldSegmentSubscriptionManager subscriptionManager)
+        WorldSegmentSubscriptionManager subscriptionManager,
+        ILogger<WorldManagementEventHandler> logger)
     {
         this.activationManager = activationManager;
         this.syncManager = syncManager;
         this.blockDataManager = blockDataManager;
         this.subscriptionManager = subscriptionManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Handles an incoming event.
@@ -90,7 +93,7 @@ public sealed class WorldManagementEventHandler
                 break;
 
             default:
-                logger.LogError("Unhandled event ID {0}.", ev.EventId);
+                logger.LogError("Unhandled event ID {Id}.", ev.EventId);
                 break;
         }
     }

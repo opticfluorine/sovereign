@@ -17,12 +17,14 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Systems;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
 using Sovereign.Persistence.State.Trackers;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.Persistence.Systems.Persistence;
 
@@ -36,7 +38,7 @@ public sealed class PersistenceSystem : ISystem
     private readonly EntityProcessor entityProcessor;
     private readonly PersistenceEventHandler eventHandler;
 
-    private readonly IEventLoop eventLoop;
+    private readonly ILogger<PersistenceSystem> logger;
     private readonly PersistenceProviderManager providerManager;
     private readonly PersistenceScheduler scheduler;
     private readonly TrackerManager trackerManager;
@@ -50,20 +52,18 @@ public sealed class PersistenceSystem : ISystem
         EntityMapper entityMapper,
         EntityProcessor entityProcessor,
         TrackerManager trackerManager,
-        ILogger logger,
-        EventDescriptions eventDescriptions)
+        ILogger<PersistenceSystem> logger)
     {
         /* Dependency injection. */
         this.providerManager = providerManager;
         this.databaseValidator = databaseValidator;
         this.eventHandler = eventHandler;
         this.scheduler = scheduler;
-        this.eventLoop = eventLoop;
         this.entityMapper = entityMapper;
         this.entityProcessor = entityProcessor;
         this.trackerManager = trackerManager;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
-        Logger = logger;
 
         /* Register system. */
         eventLoop.RegisterSystem(this);
@@ -71,8 +71,6 @@ public sealed class PersistenceSystem : ISystem
         /* Configure the persistence engine against the database. */
         ConfigurePersistence();
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 
@@ -132,12 +130,12 @@ public sealed class PersistenceSystem : ISystem
         {
             entityMapper.InitializeMapper(providerManager.PersistenceProvider.NextPersistedIdQuery!);
 
-            logger.LogDebug("First available persisted entity ID is {0:X}.",
+            logger.LogDebug("First available persisted entity ID is {Id}.",
                 entityMapper.NextPersistedId);
         }
         catch (Exception e)
         {
-            logger.LogCritical("Error creating entity mapper.", e);
+            logger.LogCritical(e, "Error creating entity mapper.");
             throw new FatalErrorException();
         }
 
@@ -154,11 +152,11 @@ public sealed class PersistenceSystem : ISystem
             using var reader =
                 providerManager.PersistenceProvider.RetrieveAllTemplatesQuery.RetrieveAllTemplates();
             var count = entityProcessor.ProcessFromReader(reader.Reader);
-            logger.LogInformation("Loaded {0} template entities.", count);
+            logger.LogInformation("Loaded {Count} template entities.", count);
         }
         catch (Exception e)
         {
-            logger.LogCritical("Error loading template entities.", e);
+            logger.LogCritical(e, "Error loading template entities.");
             throw new FatalErrorException();
         }
     }

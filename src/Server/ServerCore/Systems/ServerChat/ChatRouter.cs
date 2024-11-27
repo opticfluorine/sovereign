@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events.Details;
@@ -38,6 +39,7 @@ public class ChatRouter
     private readonly ChatHelpManager helpManager;
     private readonly ServerChatInternalController internalController;
     private readonly KinematicComponentCollection kinematics;
+    private readonly ILogger<ChatRouter> logger;
     private readonly LoggingUtil loggingUtil;
 
     /// <summary>
@@ -49,13 +51,14 @@ public class ChatRouter
 
     public ChatRouter(IList<IChatProcessor> processors, ServerChatInternalController internalController,
         KinematicComponentCollection kinematics, WorldSegmentResolver resolver, LoggingUtil loggingUtil,
-        ChatHelpManager helpManager)
+        ChatHelpManager helpManager, ILogger<ChatRouter> logger)
     {
         this.internalController = internalController;
         this.kinematics = kinematics;
         this.resolver = resolver;
         this.loggingUtil = loggingUtil;
         this.helpManager = helpManager;
+        this.logger = logger;
 
         // Build lookup table.
         foreach (var proc in processors)
@@ -72,8 +75,6 @@ public class ChatRouter
             processorsByCommand[lowerCommand] = proc;
         }
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Routes an incoming chat message to the appropriate chat processor.

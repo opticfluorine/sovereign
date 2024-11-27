@@ -18,6 +18,7 @@
 using System;
 using System.Data;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 
@@ -53,15 +54,16 @@ public sealed class EntityProcessor
     private const int IndexPlsPosY = IndexPlsPosX + 1;
     private const int IndexPlsPosZ = IndexPlsPosY + 1;
     private readonly IEntityFactory entityFactory;
+    private readonly ILogger<EntityProcessor> logger;
     private readonly EntityMapper mapper;
 
-    public EntityProcessor(IEntityFactory entityFactory, EntityMapper mapper)
+    public EntityProcessor(IEntityFactory entityFactory, EntityMapper mapper,
+        ILogger<EntityProcessor> logger)
     {
         this.entityFactory = entityFactory;
         this.mapper = mapper;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Processes all entities from the given reader.
@@ -140,7 +142,7 @@ public sealed class EntityProcessor
         var bytesRead = reader.GetBytes(IndexAccount, 0, accountIdBytes, 0, 16);
         if (bytesRead < 16)
         {
-            logger.LogError("Account GUID for entity {0} is too short; skipping component.", entityId);
+            logger.LogError("Account GUID for entity {Id} is too short; skipping component.", entityId);
             return;
         }
 

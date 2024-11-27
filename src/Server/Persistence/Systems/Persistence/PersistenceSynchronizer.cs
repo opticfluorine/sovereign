@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Microsoft.Extensions.Logging;
 using Sovereign.Persistence.State;
 
 namespace Sovereign.Persistence.Systems.Persistence;
@@ -24,14 +25,14 @@ namespace Sovereign.Persistence.Systems.Persistence;
 /// </summary>
 public sealed class PersistenceSynchronizer
 {
+    private readonly ILogger<PersistenceSynchronizer> logger;
     private readonly StateManager stateManager;
 
-    public PersistenceSynchronizer(StateManager stateManager)
+    public PersistenceSynchronizer(StateManager stateManager, ILogger<PersistenceSynchronizer> logger)
     {
         this.stateManager = stateManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Synchronizes the database.

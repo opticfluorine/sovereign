@@ -15,9 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerCore.Systems.ServerChat;
 
@@ -26,17 +28,18 @@ namespace Sovereign.ServerCore.Systems.ServerChat;
 /// </summary>
 public class ServerChatSystem : ISystem
 {
+    private readonly ILogger<ServerChatSystem> logger;
     private readonly ChatRouter router;
 
-    public ServerChatSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, ChatRouter router)
+    public ServerChatSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, ChatRouter router,
+        ILogger<ServerChatSystem> logger)
     {
         this.router = router;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 

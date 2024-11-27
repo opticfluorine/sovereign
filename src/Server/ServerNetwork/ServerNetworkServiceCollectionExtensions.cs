@@ -20,10 +20,12 @@ using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.NetworkCore.Systems.Network;
+using Sovereign.ServerCore.Systems.ServerChat;
 using Sovereign.ServerNetwork.Network.Infrastructure;
 using Sovereign.ServerNetwork.Network.Pipeline.Inbound;
 using Sovereign.ServerNetwork.Network.Pipeline.Outbound;
 using Sovereign.ServerNetwork.Systems.Network;
+using Sovereign.ServerNetwork.Systems.ServerChat;
 
 namespace Sovereign.ServerNetwork;
 
@@ -33,6 +35,7 @@ public static class ServerNetworkServiceCollectionExtensions
     {
         AddServerImplementations(services);
         AddInboundPipeline(services);
+        AddChat(services);
 
         return services;
     }
@@ -53,5 +56,10 @@ public static class ServerNetworkServiceCollectionExtensions
             .Singleton<IInboundPipelineStage, SourceEntityMappingInboundPipelineStage>());
         services.TryAddEnumerable(ServiceDescriptor
             .Singleton<IInboundPipelineStage, ServerAllowedEventsInboundPipelineStage>());
+    }
+
+    private static void AddChat(IServiceCollection services)
+    {
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, AdminChatProcessor>());
     }
 }

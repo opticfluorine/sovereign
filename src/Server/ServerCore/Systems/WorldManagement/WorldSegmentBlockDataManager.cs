@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using MessagePack;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
@@ -63,6 +64,7 @@ public sealed class WorldSegmentBlockDataManager
     private readonly IEventSender eventSender;
 
     private readonly WorldSegmentBlockDataGenerator generator;
+    private readonly ILogger<WorldSegmentBlockDataManager> logger;
 
     private readonly WorldSegmentResolver resolver;
 
@@ -83,20 +85,20 @@ public sealed class WorldSegmentBlockDataManager
         EntityManager entityManager,
         EntityTable entityTable,
         BlockController blockController,
-        IEventSender eventSender)
+        IEventSender eventSender,
+        ILogger<WorldSegmentBlockDataManager> logger)
     {
         this.generator = generator;
         this.blockPositions = blockPositions;
         this.resolver = resolver;
         this.blockController = blockController;
         this.eventSender = eventSender;
+        this.logger = logger;
 
         blockPositions.OnComponentRemoved += OnBlockRemoved;
         entityManager.OnUpdatesComplete += OnEndUpdates;
         entityTable.OnTemplateSet += OnTemplateSet;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Gets summary block data for the given world segment.
@@ -159,7 +161,7 @@ public sealed class WorldSegmentBlockDataManager
             deletionTasks[segmentIndex] = currentTask.ContinueWith(
                 _ => DoRemoveWorldSegment(segmentIndex));
         else
-            logger.LogError("Tried to remove world segemnt data for {0} before it was added.", segmentIndex);
+            logger.LogError("Tried to remove world segemnt data for {Index} before it was added.", segmentIndex);
     }
 
     /// <summary>
@@ -186,14 +188,14 @@ public sealed class WorldSegmentBlockDataManager
     {
         try
         {
-            logger.LogDebug("Adding summary block data for world segment {0}.", segmentIndex);
+            logger.LogDebug("Adding summary block data for world segment {Index}.", segmentIndex);
             var blockData = generator.Create(segmentIndex);
             var bytes = MessagePackSerializer.Serialize(blockData, MessageConfig.CompressedUntrustedMessagePackOptions);
             return Tuple.Create(blockData, bytes);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error adding summary block data for world segment {0}.", segmentIndex);
+            logger.LogError(e, "Error adding summary block data for world segment {Index}.", segmentIndex);
             return Tuple.Create(new WorldSegmentBlockData(), Array.Empty<byte>());
         }
     }
@@ -271,7 +273,7 @@ public sealed class WorldSegmentBlockDataManager
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Could not schedule block for entity {0}.", entityId);
+            logger.LogError(e, "Could not schedule block for entity {Id}.", entityId);
         }
     }
 

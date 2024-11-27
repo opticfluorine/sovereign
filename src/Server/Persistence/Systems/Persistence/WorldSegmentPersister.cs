@@ -18,6 +18,7 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
@@ -40,6 +41,7 @@ public class WorldSegmentPersister
 
     private readonly ObjectPool<PersistenceBuffer> bufferPool = new();
     private readonly CoreWorldManagementController coreWorldManagementController;
+    private readonly ILogger<WorldSegmentPersister> logger;
     private readonly IEventSender eventSender;
 
     private readonly WorldSegmentBlockDataLoader loader;
@@ -47,15 +49,15 @@ public class WorldSegmentPersister
     private readonly WorldManagementServices worldManagementServices;
 
     public WorldSegmentPersister(WorldManagementServices worldManagementServices, WorldSegmentBlockDataLoader loader,
-        IEventSender eventSender, CoreWorldManagementController coreWorldManagementController)
+        IEventSender eventSender, CoreWorldManagementController coreWorldManagementController,
+        ILogger<WorldSegmentPersister> logger)
     {
         this.worldManagementServices = worldManagementServices;
         this.loader = loader;
         this.eventSender = eventSender;
         this.coreWorldManagementController = coreWorldManagementController;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Loads the world segment block data for the given world segment from the database.
@@ -68,9 +70,9 @@ public class WorldSegmentPersister
     /// </remarks>
     public void LoadWorldSegmentBlockData(IPersistenceProvider provider, GridPosition segmentIndex)
     {
-        logger.LogDebug("Get block data for {0} from DB.", segmentIndex);
+        logger.LogDebug("Get block data for {Index} from DB.", segmentIndex);
         var blockDataBuffer = bufferPool.TakeObject();
-        WorldSegmentBlockData? blockData = null;
+        WorldSegmentBlockData? blockData;
         try
         {
             if (!provider.GetWorldSegmentBlockDataQuery.TryGetWorldSegmentBlockData(segmentIndex,

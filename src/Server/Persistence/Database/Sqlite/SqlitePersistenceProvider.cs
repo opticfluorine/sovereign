@@ -19,6 +19,7 @@ using System;
 using System.Data;
 using System.Text;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Main;
 using Sovereign.Persistence.Configuration;
@@ -80,10 +81,13 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const string PointLightSourceTableName = "PointLightSource";
 
     private readonly IPersistenceConfiguration configuration;
+    private readonly ILogger<SqlitePersistenceProvider> logger;
 
-    public SqlitePersistenceProvider(IPersistenceConfiguration configuration)
+    public SqlitePersistenceProvider(IPersistenceConfiguration configuration,
+        ILogger<SqlitePersistenceProvider> logger)
     {
         this.configuration = configuration;
+        this.logger = logger;
 
         Connect();
         if (Connection == null)
@@ -223,8 +227,6 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             new SqliteRemoveComponentQuery(PointLightSourceTableName, (SqliteConnection)Connection);
     }
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
-
     public ISetTemplateQuery SetTemplateQuery { get; }
     public IRemoveComponentQuery RemoveAdminComponentQuery { get; }
     public IAddComponentQuery<string> AddNameQuery { get; }
@@ -321,7 +323,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         }
         catch (Exception e)
         {
-            logger.LogCritical("Failed to open the SQLite database.", e);
+            logger.LogCritical(e, "Failed to open the SQLite database.");
             throw new FatalErrorException();
         }
 

@@ -16,6 +16,7 @@
  */
 
 using System;
+using Microsoft.Extensions.Logging;
 using Sovereign.Persistence.Database;
 
 namespace Sovereign.Persistence.Systems.Persistence;
@@ -26,8 +27,12 @@ namespace Sovereign.Persistence.Systems.Persistence;
 public sealed class DatabaseValidator
 {
     public const int LatestMigration = 1;
+    private readonly ILogger<DatabaseValidator> logger;
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
+    public DatabaseValidator(ILogger<DatabaseValidator> logger)
+    {
+        this.logger = logger;
+    }
 
     /// <summary>
     ///     Validates the database associated with the given IPersistenceProvider.
@@ -40,14 +45,14 @@ public sealed class DatabaseValidator
         {
             var valid = provider.MigrationQuery.IsMigrationLevelApplied(LatestMigration);
             if (!valid)
-                logger.LogCritical("Database is not at migration level {0}.", LatestMigration);
+                logger.LogCritical("Database is not at migration level {Level}.", LatestMigration);
             else
-                logger.LogInformation("Database is at migration level {0}.", LatestMigration);
+                logger.LogInformation("Database is at migration level {Level}.", LatestMigration);
             return valid;
         }
         catch (Exception e)
         {
-            logger.LogCritical("Error checking database migration level.", e);
+            logger.LogCritical(e, "Error checking database migration level.");
             return false;
         }
     }

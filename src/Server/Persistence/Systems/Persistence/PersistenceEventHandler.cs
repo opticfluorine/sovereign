@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.ServerCore.Events;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.Persistence.Systems.Persistence;
 
@@ -30,6 +32,7 @@ public sealed class PersistenceEventHandler
     private readonly PersistenceEntityRetriever entityRetriever;
     private readonly IEventSender eventSender;
     private readonly PersistenceInternalController internalController;
+    private readonly ILogger<PersistenceEventHandler> logger;
     private readonly PersistenceRangeRetriever rangeRetriever;
     private readonly PersistenceScheduler scheduler;
     private readonly PersistenceSynchronizer synchronizer;
@@ -39,7 +42,8 @@ public sealed class PersistenceEventHandler
         PersistenceEntityRetriever entityRetriever,
         PersistenceRangeRetriever rangeRetriever,
         PersistenceInternalController internalController,
-        IEventSender eventSender)
+        IEventSender eventSender,
+        ILogger<PersistenceEventHandler> logger)
     {
         this.scheduler = scheduler;
         this.synchronizer = synchronizer;
@@ -47,9 +51,8 @@ public sealed class PersistenceEventHandler
         this.rangeRetriever = rangeRetriever;
         this.internalController = internalController;
         this.eventSender = eventSender;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void HandleEvent(Event ev)
     {

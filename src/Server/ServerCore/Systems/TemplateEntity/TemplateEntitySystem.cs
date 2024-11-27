@@ -15,11 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerCore.Systems.TemplateEntity;
 
@@ -29,23 +31,23 @@ namespace Sovereign.ServerCore.Systems.TemplateEntity;
 public class TemplateEntitySystem : ISystem
 {
     private readonly TemplateEntityDataGenerator dataGenerator;
+    private readonly ILogger<TemplateEntitySystem> logger;
     private readonly LoggingUtil loggingUtil;
     private readonly TemplateEntityManager manager;
     private readonly PlayerRoleCheck roleCheck;
 
     public TemplateEntitySystem(IEventLoop eventLoop, EventCommunicator eventCommunicator,
         TemplateEntityDataGenerator dataGenerator, PlayerRoleCheck roleCheck, LoggingUtil loggingUtil,
-        TemplateEntityManager manager)
+        TemplateEntityManager manager, ILogger<TemplateEntitySystem> logger)
     {
         this.dataGenerator = dataGenerator;
         this.roleCheck = roleCheck;
         this.loggingUtil = loggingUtil;
         this.manager = manager;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 
@@ -112,14 +114,14 @@ public class TemplateEntitySystem : ISystem
 
         if (!roleCheck.IsPlayerAdmin(requestDetails.PlayerEntityId))
         {
-            logger.LogError("[Security] Attempted Update by non-admin player {0}.",
+            logger.LogError("[Security] Attempted Update by non-admin player {Player}.",
                 loggingUtil.FormatEntity(requestDetails.PlayerEntityId));
             return;
         }
 
         foreach (var definition in requestDetails.EntityDefinitions)
         {
-            logger.LogInformation("Template entity {0} updated by player {1}.", definition.EntityId,
+            logger.LogInformation("Template entity {EntityId} updated by player {Player}.", definition.EntityId,
                 loggingUtil.FormatEntity(requestDetails.PlayerEntityId));
             manager.UpdateExisting(definition);
         }

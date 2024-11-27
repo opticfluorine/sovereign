@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Configuration;
@@ -37,20 +38,21 @@ public sealed class WorldSegmentBlockDataGenerator
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly IWorldManagementConfiguration config;
     private readonly EntityTable entityTable;
+    private readonly ILogger<WorldSegmentBlockDataGenerator> logger;
     private readonly WorldSegmentResolver resolver;
 
     public WorldSegmentBlockDataGenerator(WorldSegmentResolver resolver, EntityTable entityTable,
         IWorldManagementConfiguration config, BlockWorldSegmentIndexer blockIndexer,
-        BlockPositionComponentCollection blockPositions)
+        BlockPositionComponentCollection blockPositions,
+        ILogger<WorldSegmentBlockDataGenerator> logger)
     {
         this.resolver = resolver;
         this.entityTable = entityTable;
         this.config = config;
         this.blockIndexer = blockIndexer;
         this.blockPositions = blockPositions;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Creates summary block data for the given world segment.
@@ -64,7 +66,7 @@ public sealed class WorldSegmentBlockDataGenerator
         var positionedBlocks = blocks
             .Select(entityId => Tuple.Create(entityId, blockPositions[entityId])).ToList();
 
-        logger.LogDebug("Segment {0} has {1} blocks.", segmentIndex, blocks.Count);
+        logger.LogDebug("Segment {Index} has {Count} blocks.", segmentIndex, blocks.Count);
 
         // Retrieve material data, group into depth planes.
         var basePoint = resolver.GetRangeForWorldSegment(segmentIndex).Item1;
@@ -120,7 +122,7 @@ public sealed class WorldSegmentBlockDataGenerator
             var offset = block.Item2.Z - baseZ;
             if (!entityTable.TryGetTemplate(block.Item1, out var templateEntityId))
             {
-                logger.LogWarning("No template for block ID {0}, skipping.", block.Item1);
+                logger.LogWarning("No template for block ID {Id}, skipping.", block.Item1);
                 continue;
             }
 

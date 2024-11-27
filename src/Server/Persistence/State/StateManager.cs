@@ -16,7 +16,7 @@
  */
 
 using System;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
@@ -43,13 +43,15 @@ public sealed class StateManager : IDisposable
 
     public StateManager(EntityManager entityManager,
         PersistenceProviderManager persistenceProviderManager,
-        ILogger logger, FatalErrorHandler fatalErrorHandler,
+        ILogger<StateBuffer> stateBufferLogger, FatalErrorHandler fatalErrorHandler,
         EntityNotifier entityNotifier, EntityMapper entityMapper,
         IEventSender eventSender, PersistenceInternalController internalController,
         WorldSegmentPersister worldSegmentPersister)
     {
-        FrontBuffer = new StateBuffer(logger, fatalErrorHandler, eventSender, internalController, worldSegmentPersister);
-        backBuffer = new StateBuffer(logger, fatalErrorHandler, eventSender, internalController, worldSegmentPersister);
+        FrontBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
+            stateBufferLogger);
+        backBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
+            stateBufferLogger);
 
         this.entityManager = entityManager;
         this.persistenceProviderManager = persistenceProviderManager;

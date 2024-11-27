@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
@@ -56,6 +57,7 @@ public class WorldSegmentSubscriptionManager
     private readonly EntityHierarchyIndexer hierarchyIndexer;
     private readonly WorldManagementInternalController internalController;
     private readonly KinematicComponentCollection kinematics;
+    private readonly ILogger<WorldSegmentSubscriptionManager> logger;
     private readonly NonBlockPositionEventFilter nonBlockPositionEventFilter;
 
     /// <summary>
@@ -89,7 +91,8 @@ public class WorldSegmentSubscriptionManager
         IEventSender eventSender, WorldManagementInternalController internalController,
         WorldSegmentSynchronizationManager syncManager, KinematicComponentCollection kinematics,
         EntitySynchronizer synchronizer, EntityHierarchyIndexer hierarchyIndexer,
-        EntityTable entityTable, NonBlockPositionEventFilter nonBlockPositionEventFilter)
+        EntityTable entityTable, NonBlockPositionEventFilter nonBlockPositionEventFilter,
+        ILogger<WorldSegmentSubscriptionManager> logger)
     {
         this.positionEventFilter = positionEventFilter;
         this.resolver = resolver;
@@ -103,6 +106,7 @@ public class WorldSegmentSubscriptionManager
         this.hierarchyIndexer = hierarchyIndexer;
         this.entityTable = entityTable;
         this.nonBlockPositionEventFilter = nonBlockPositionEventFilter;
+        this.logger = logger;
 
         // Register event handlers.
         this.positionEventFilter.OnStartUpdates += OnStartUpdates;
@@ -114,8 +118,6 @@ public class WorldSegmentSubscriptionManager
         this.entityTable.OnNonBlockEntityRemoved += OnNonBlockEntityRemoved;
         this.nonBlockPositionEventFilter.OnComponentRemoved += OnNonBlockPositionRemoved;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Gets the players who are currently subscribed to the given world segment.
@@ -261,7 +263,7 @@ public class WorldSegmentSubscriptionManager
         foreach (var segment in newSubscriptionSet)
             if (!unchangedSet.Contains(segment))
             {
-                logger.LogDebug("Subscribe {0} to {1}.", playerEntityId, segment);
+                logger.LogDebug("Subscribe {Id} to {Index}.", playerEntityId, segment);
                 internalController.PushSubscribe(eventSender, playerEntityId, segment);
                 currentSubscriptionSet.Add(segment);
                 if (!playersByWorldSegments.ContainsKey(segment))
@@ -289,7 +291,7 @@ public class WorldSegmentSubscriptionManager
                 if (dx > unsubRadius || dy > unsubRadius || dz > unsubRadius)
                 {
                     // Beyond the unsubscribe radius, trigger unsubscribe.
-                    logger.LogDebug("Unsubscribe {0} from {1}.", playerEntityId, segment);
+                    logger.LogDebug("Unsubscribe {Id} from {Index}.", playerEntityId, segment);
                     internalController.PushUnsubscribe(eventSender, playerEntityId, segment);
                     currentSubscriptionSet.Remove(segment);
                     playersByWorldSegments[segment].Remove(playerEntityId);

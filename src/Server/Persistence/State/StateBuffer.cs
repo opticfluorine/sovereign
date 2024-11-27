@@ -17,7 +17,7 @@
 
 using System;
 using System.Data;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
@@ -66,7 +66,7 @@ public sealed class StateBuffer
     private readonly IEventSender eventSender;
     private readonly FatalErrorHandler fatalErrorHandler;
     private readonly PersistenceInternalController internalController;
-    private readonly ILogger logger;
+    private readonly ILogger<StateBuffer> logger;
 
     /// <summary>
     ///     Material modifier state updates.
@@ -125,14 +125,15 @@ public sealed class StateBuffer
 
     private readonly WorldSegmentPersister worldSegmentPersister;
 
-    public StateBuffer(ILogger logger, FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
-        PersistenceInternalController internalController, WorldSegmentPersister worldSegmentPersister)
+    public StateBuffer(FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
+        PersistenceInternalController internalController, WorldSegmentPersister worldSegmentPersister,
+        ILogger<StateBuffer> logger)
     {
-        this.logger = logger;
         this.fatalErrorHandler = fatalErrorHandler;
         this.eventSender = eventSender;
         this.internalController = internalController;
         this.worldSegmentPersister = worldSegmentPersister;
+        this.logger = logger;
     }
 
     /// <summary>
@@ -431,7 +432,7 @@ public sealed class StateBuffer
         }
         catch (Exception e)
         {
-            logger.Fatal("Error while synchronizing database.", e);
+            logger.LogCritical(e, "Error while synchronizing database.");
             fatalErrorHandler.FatalError();
         }
     }

@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
@@ -32,17 +33,18 @@ public class EntitySynchronizer
     private readonly WorldManagementInternalController controller;
     private readonly EntityDefinitionGenerator definitionGenerator;
     private readonly IEventSender eventSender;
+    private readonly ILogger<EntitySynchronizer> logger;
 
     public EntitySynchronizer(IEventSender eventSender, IServerConfigurationManager configManager,
-        WorldManagementInternalController controller, EntityDefinitionGenerator definitionGenerator)
+        WorldManagementInternalController controller, EntityDefinitionGenerator definitionGenerator,
+        ILogger<EntitySynchronizer> logger)
     {
         this.eventSender = eventSender;
         this.configManager = configManager;
         this.controller = controller;
         this.definitionGenerator = definitionGenerator;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Synchronizes the given set of entities to a client.
@@ -71,7 +73,7 @@ public class EntitySynchronizer
         foreach (var batch in definitionBatches)
         foreach (var playerEntityId in playerEntityIds)
         {
-            logger.LogDebug("Sync {0} entities to player {1}.", batch.Count, playerEntityId);
+            logger.LogDebug("Sync {Count} entities to player {Player}.", batch.Count, playerEntityId);
             controller.PushSyncEvent(eventSender, playerEntityId, batch);
         }
     }
@@ -83,7 +85,7 @@ public class EntitySynchronizer
     /// <param name="segmentIndex">World segment index of the entity.</param>
     public void Desynchronize(ulong rootEntityId, GridPosition segmentIndex)
     {
-        logger.LogDebug("Desync {0} for world segment {1}.", rootEntityId, segmentIndex);
+        logger.LogDebug("Desync {Id} for world segment {SegmentIndex}.", rootEntityId, segmentIndex);
         controller.PushDesyncEvent(eventSender, rootEntityId, segmentIndex);
     }
 }

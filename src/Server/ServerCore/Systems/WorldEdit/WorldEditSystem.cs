@@ -15,12 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Systems.Block;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerCore.Systems.WorldEdit;
 
@@ -33,22 +35,23 @@ public class WorldEditSystem : ISystem
     private readonly BlockServices blockServices;
     private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
+    private readonly ILogger<WorldEditSystem> logger;
     private readonly LoggingUtil loggingUtil;
 
     public WorldEditSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, BlockController blockController,
-        IEventSender eventSender, LoggingUtil loggingUtil, BlockServices blockServices, EntityTable entityTable)
+        IEventSender eventSender, LoggingUtil loggingUtil, BlockServices blockServices, EntityTable entityTable,
+        ILogger<WorldEditSystem> logger)
     {
         this.blockController = blockController;
         this.eventSender = eventSender;
         this.loggingUtil = loggingUtil;
         this.blockServices = blockServices;
         this.entityTable = entityTable;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 
@@ -111,19 +114,15 @@ public class WorldEditSystem : ISystem
     /// <param name="details">Request details.</param>
     private void HandleSetBlock(BlockAddEventDetails details)
     {
-        logger.LogDebug("Set block type {0} at {1}.", loggingUtil.FormatEntity(details.BlockRecord.TemplateEntityId),
+        logger.LogDebug("Set block type {Id} at {Pos}.", loggingUtil.FormatEntity(details.BlockRecord.TemplateEntityId),
             details.BlockRecord.Position);
 
         if (blockServices.TryGetBlockAtPosition(details.BlockRecord.Position, out var entityId))
-        {
             // Block already exists, update in place.
             entityTable.SetTemplate(entityId, details.BlockRecord.TemplateEntityId);
-        }
         else
-        {
             // Create new.
             blockController.AddBlock(eventSender, details.BlockRecord);
-        }
     }
 
     /// <summary>
@@ -132,7 +131,7 @@ public class WorldEditSystem : ISystem
     /// <param name="details">Request details.</param>
     private void HandleRemoveBlock(GridPositionEventDetails details)
     {
-        logger.LogDebug("Remove block at {0}.", details.GridPosition);
+        logger.LogDebug("Remove block at {Pos}.", details.GridPosition);
         blockController.RemoveBlockAtPosition(eventSender, details.GridPosition);
     }
 }

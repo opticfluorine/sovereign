@@ -16,6 +16,7 @@
  */
 
 using System;
+using Microsoft.Extensions.Logging;
 using Sovereign.Persistence.Configuration;
 using Sovereign.Persistence.Database.Sqlite;
 using Sovereign.ServerCore.Configuration;
@@ -29,12 +30,13 @@ namespace Sovereign.Persistence.Database;
 /// </summary>
 public sealed class PersistenceProviderManager
 {
-    public PersistenceProviderManager(IPersistenceConfiguration configuration)
+    public PersistenceProviderManager(IPersistenceConfiguration configuration,
+        ILogger<SqlitePersistenceProvider> sqliteLogger)
     {
         switch (configuration.DatabaseType)
         {
             case DatabaseType.Sqlite:
-                PersistenceProvider = new SqlitePersistenceProvider(configuration);
+                PersistenceProvider = new SqlitePersistenceProvider(configuration, sqliteLogger);
                 break;
 
             case DatabaseType.Postgres:

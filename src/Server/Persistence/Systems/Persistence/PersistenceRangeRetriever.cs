@@ -16,6 +16,7 @@
  */
 
 using System;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.World;
 using Sovereign.Persistence.Database;
@@ -29,6 +30,7 @@ namespace Sovereign.Persistence.Systems.Persistence;
 public sealed class PersistenceRangeRetriever
 {
     private readonly EntityProcessor entityProcessor;
+    private readonly ILogger<PersistenceRangeRetriever> logger;
     private readonly PersistenceProviderManager providerManager;
     private readonly WorldSegmentPersister worldSegmentPersister;
     private readonly WorldSegmentResolver worldSegmentResolver;
@@ -36,15 +38,15 @@ public sealed class PersistenceRangeRetriever
     public PersistenceRangeRetriever(EntityProcessor entityProcessor,
         PersistenceProviderManager providerManager,
         WorldSegmentResolver worldSegmentResolver,
-        WorldSegmentPersister worldSegmentPersister)
+        WorldSegmentPersister worldSegmentPersister,
+        ILogger<PersistenceRangeRetriever> logger)
     {
         this.entityProcessor = entityProcessor;
         this.providerManager = providerManager;
         this.worldSegmentResolver = worldSegmentResolver;
         this.worldSegmentPersister = worldSegmentPersister;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Retrieves all entities in the given world segment.
@@ -52,7 +54,7 @@ public sealed class PersistenceRangeRetriever
     /// <param name="segmentIndex">World segment index.</param>
     public void RetrieveWorldSegment(GridPosition segmentIndex)
     {
-        logger.LogDebug("Retrieve world segment {0}.", segmentIndex);
+        logger.LogDebug("Retrieve world segment {Index}.", segmentIndex);
 
         // Retrieve world segment.
         DoRetrieve(segmentIndex);
@@ -75,13 +77,12 @@ public sealed class PersistenceRangeRetriever
             using (var reader = query.RetrieveEntitiesInRange(minPos, maxPos))
             {
                 var count = entityProcessor.ProcessFromReader(reader.Reader);
-                logger.LogDebug("Retrieved {0} entities for segment {1}.", count, segmentIndex);
+                logger.LogDebug("Retrieved {Count} entities for segment {Index}.", count, segmentIndex);
             }
         }
         catch (Exception e)
         {
-            logger.LogError(string.Format("Error retrieving entities from {0} to {1}.",
-                minPos, maxPos), e);
+            logger.LogError(e, "Error retrieving entities from {Min} to {Max}.", minPos, maxPos);
         }
     }
 }

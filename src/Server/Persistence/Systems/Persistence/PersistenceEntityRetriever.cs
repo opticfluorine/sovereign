@@ -16,6 +16,7 @@
  */
 
 using System;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
@@ -30,19 +31,19 @@ public sealed class PersistenceEntityRetriever
     private readonly EntityProcessor entityProcessor;
     private readonly IEventSender eventSender;
     private readonly PersistenceInternalController internalController;
+    private readonly ILogger<PersistenceEntityRetriever> logger;
     private readonly PersistenceProviderManager providerManager;
 
     public PersistenceEntityRetriever(PersistenceProviderManager providerManager,
         EntityProcessor entityProcessor, PersistenceInternalController internalController,
-        IEventSender eventSender)
+        IEventSender eventSender, ILogger<PersistenceEntityRetriever> logger)
     {
         this.providerManager = providerManager;
         this.entityProcessor = entityProcessor;
         this.internalController = internalController;
         this.eventSender = eventSender;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Retrieves the entity tree rooted at the given entity from the database.
@@ -50,7 +51,7 @@ public sealed class PersistenceEntityRetriever
     /// <param name="entityId">Entity ID to retrieve.</param>
     public void RetrieveEntity(ulong entityId)
     {
-        logger.LogDebug("Retrieve entity tree for entity ID {0}.", entityId);
+        logger.LogDebug("Retrieve entity tree for entity ID {Id}.", entityId);
 
         DoRetrieve(entityId);
     }
@@ -73,7 +74,7 @@ public sealed class PersistenceEntityRetriever
         }
         catch (Exception e)
         {
-            logger.LogError(string.Format("Error retrieving entity {0,16:X}.", entityId), e);
+            logger.LogError(e, string.Format("Error retrieving entity {Id}.", entityId));
         }
     }
 }
