@@ -29,7 +29,7 @@ namespace Sovereign.EngineCore.Systems;
 /// <summary>
 ///     Manages the collection of System objects.
 /// </summary>
-public class SystemManager : IHostedService, IDisposable
+public class SystemManager : BackgroundService
 {
     /// <summary>
     ///     Number of system executor threads.
@@ -40,7 +40,6 @@ public class SystemManager : IHostedService, IDisposable
     private readonly List<Task> executorTasks = new();
     private readonly ILogger<SystemManager> logger;
     private readonly IServiceScopeFactory serviceScopeFactory;
-    private readonly CancellationTokenSource shutdownTokenSource = new();
     private readonly IEnumerable<ISystem> systems;
 
     public SystemManager(IEnumerable<ISystem> systems,
@@ -51,22 +50,17 @@ public class SystemManager : IHostedService, IDisposable
         this.serviceScopeFactory = serviceScopeFactory;
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         foreach (var scope in executors)
         {
             scope.ServiceScope.Dispose();
         }
+
+        base.Dispose();
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Stopping SystemManager.");
-        shutdownTokenSource.Cancel();
-        await Task.WhenAll(executorTasks);
-    }
-
-    public async Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Starting SystemManager.");
 
@@ -77,7 +71,9 @@ public class SystemManager : IHostedService, IDisposable
         PartitionSystems();
 
         /* Run the executors. */
-        await RunExecutors();
+        await RunExecutors(stoppingToken);
+
+        logger.LogInformation("SystemManager stopped.");
     }
 
     /// <summary>
@@ -118,11 +114,11 @@ public class SystemManager : IHostedService, IDisposable
     /// <summary>
     ///     Runs the SystemExecutors in their own threads.
     /// </summary>
-    private async Task RunExecutors()
+    private async Task RunExecutors(CancellationToken shutdownToken)
     {
         foreach (var executor in executors)
         {
-            executorTasks.Add(Task.Run(() => executor.SystemExecutor.Execute(shutdownTokenSource.Token)));
+            executorTasks.Add(Task.Run(() => executor.SystemExecutor.Execute(shutdownToken)));
         }
 
         await Task.WhenAll(executorTasks);
