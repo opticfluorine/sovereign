@@ -25,6 +25,9 @@
 
     <ItemGroup>
         <None Remove="Data\Logging.xml"/>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
