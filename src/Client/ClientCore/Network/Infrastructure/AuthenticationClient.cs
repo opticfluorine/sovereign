@@ -20,6 +20,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.EngineUtil.Monads;
@@ -37,14 +38,15 @@ public sealed class AuthenticationClient
     /// </summary>
     private const long MaxResponseLength = 1024;
 
+    private readonly ILogger<AuthenticationClient> logger;
+
     private readonly RestClient restClient;
 
-    public AuthenticationClient(RestClient restClient)
+    public AuthenticationClient(RestClient restClient, ILogger<AuthenticationClient> logger)
     {
         this.restClient = restClient;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Attempts to login to the server with the given username and password.
@@ -128,7 +130,7 @@ public sealed class AuthenticationClient
         }
         catch (Exception e)
         {
-            logger.LogError("Unhandled exception during login.", e);
+            logger.LogError(e, "Unhandled exception during login.");
             return new Option<LoginResponse, string>(e.Message);
         }
     }
@@ -147,7 +149,7 @@ public sealed class AuthenticationClient
         }
         catch (Exception e)
         {
-            logger.LogError("Error while processing successful login.", e);
+            logger.LogError(e, "Error while processing successful login.");
             return new Maybe<LoginResponse>();
         }
     }

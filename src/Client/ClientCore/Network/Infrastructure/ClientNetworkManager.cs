@@ -21,6 +21,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using LiteNetLib;
+using Microsoft.Extensions.Logging;
 using Sodium;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Systems.ClientNetwork;
@@ -80,6 +81,7 @@ public sealed class ClientNetworkManager : INetworkManager
 
     private readonly NetworkConnectionManager connectionManager;
     private readonly IEventSender eventSender;
+    private readonly ILogger<ClientNetworkManager> logger;
     private readonly EventBasedNetListener netListener;
     private readonly NetManager netManager;
     private readonly NetworkSerializer networkSerializer;
@@ -100,7 +102,8 @@ public sealed class ClientNetworkManager : INetworkManager
     public ClientNetworkManager(NetworkConnectionManager connectionManager,
         NetworkSerializer networkSerializer, RestClient restClient,
         AuthenticationClient authClient, IEventSender eventSender,
-        ClientNetworkController clientNetworkController, TemplateEntityDataClient templateEntityDataClient)
+        ClientNetworkController clientNetworkController, TemplateEntityDataClient templateEntityDataClient,
+        ILogger<ClientNetworkManager> logger)
     {
         this.connectionManager = connectionManager;
         this.networkSerializer = networkSerializer;
@@ -109,6 +112,7 @@ public sealed class ClientNetworkManager : INetworkManager
         this.eventSender = eventSender;
         this.clientNetworkController = clientNetworkController;
         this.templateEntityDataClient = templateEntityDataClient;
+        this.logger = logger;
 
         netListener = new EventBasedNetListener();
         netManager = new NetManager(netListener);
@@ -127,8 +131,6 @@ public sealed class ClientNetworkManager : INetworkManager
     ///     Active connection.
     /// </summary>
     public NetworkConnection? Connection { get; private set; }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Current connection parameters.
@@ -171,7 +173,7 @@ public sealed class ClientNetworkManager : INetworkManager
             }
             catch (Exception e)
             {
-                logger.LogError("Failed to send event to server.", e);
+                logger.LogError(e, "Failed to send event to server.");
             }
 
         // Poll the network.
@@ -211,12 +213,12 @@ public sealed class ClientNetworkManager : INetworkManager
         // Reconfigure the REST client for the latest connection, then attempt to login.
         ClientState = NetworkClientState.Connecting;
         restClient.SelectServer(ConnectionParameters);
-        var task = authClient.LoginAsync(loginParameters).ContinueWith(task =>
+        authClient.LoginAsync(loginParameters).ContinueWith(task =>
         {
             if (task.IsFaulted)
             {
                 // Special failure case.
-                logger.LogError("Login failed with unhandled exception; connection stopped.", task.Exception);
+                logger.LogError(task.Exception, "Login failed with unhandled exception; connection stopped.");
                 ClientState = NetworkClientState.Failed;
                 if (task.Exception != null) ErrorMessage = task.Exception.Message;
                 clientNetworkController.LoginFailed(eventSender, "Unhandled exception occurred during login.");
@@ -379,7 +381,7 @@ public sealed class ClientNetworkManager : INetworkManager
             ErrorMessage = e.Message;
             ClientState = NetworkClientState.Failed;
 
-            logger.LogError("Failed to connect to server.", e);
+            logger.LogError(e, "Failed to connect to server.");
             clientNetworkController.ConnectionAttemptFailed(eventSender, ErrorMessage);
         }
     }
@@ -413,7 +415,7 @@ public sealed class ClientNetworkManager : INetworkManager
             ErrorMessage = e.Message;
             ClientState = NetworkClientState.Failed;
 
-            logger.LogError("Failed to end connection.", e);
+            logger.LogError(e, "Failed to end connection.");
         }
     }
 
@@ -461,7 +463,7 @@ public sealed class ClientNetworkManager : INetworkManager
         }
         catch (Exception e)
         {
-            logger.LogError("Error receiving packet.", e);
+            logger.LogError(e, "Error receiving packet.");
         }
     }
 

@@ -19,6 +19,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network.Rest;
@@ -40,18 +41,18 @@ public class PlayerManagementClient
 
     private readonly IEventSender eventSender;
     private readonly ClientNetworkInternalController internalController;
+    private readonly ILogger<PlayerManagementClient> logger;
 
     private readonly RestClient restClient;
 
     public PlayerManagementClient(RestClient restClient, ClientNetworkInternalController internalController,
-        IEventSender eventSender)
+        IEventSender eventSender, ILogger<PlayerManagementClient> logger)
     {
         this.restClient = restClient;
         this.internalController = internalController;
         this.eventSender = eventSender;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     /// </summary>
@@ -93,7 +94,7 @@ public class PlayerManagementClient
         }
         catch (Exception e)
         {
-            logger.LogError("Exception while listing players.", e);
+            logger.LogError(e, "Exception while listing players.");
         }
 
         return result;
@@ -163,7 +164,7 @@ public class PlayerManagementClient
         }
         catch (Exception e)
         {
-            logger.LogError("Exception thrown during player management.", e);
+            logger.LogError(e, "Exception thrown during player management.");
         }
 
         return result;
@@ -232,7 +233,7 @@ public class PlayerManagementClient
         }
         catch (Exception e)
         {
-            logger.LogError("Exception thrown during player management.", e);
+            logger.LogError(e, "Exception thrown during player management.");
         }
 
         return result;
@@ -300,7 +301,7 @@ public class PlayerManagementClient
         }
         catch (Exception e)
         {
-            logger.LogError("Exception thrown during player management.", e);
+            logger.LogError(e, "Exception thrown during player management.");
         }
 
         return result;

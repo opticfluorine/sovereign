@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.ClientCore.Entities;
@@ -24,13 +25,14 @@ namespace Sovereign.ClientCore.Entities;
 public class TemplateEntityDataLoader
 {
     private readonly EntityDefinitionProcessor definitionProcessor;
+    private readonly ILogger<TemplateEntityDataLoader> logger;
 
-    public TemplateEntityDataLoader(EntityDefinitionProcessor definitionProcessor)
+    public TemplateEntityDataLoader(EntityDefinitionProcessor definitionProcessor,
+        ILogger<TemplateEntityDataLoader> logger)
     {
         this.definitionProcessor = definitionProcessor;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Loads a set of template entity data into the entity and component tables.

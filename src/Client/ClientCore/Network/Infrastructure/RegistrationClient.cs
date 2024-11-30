@@ -19,6 +19,7 @@ using System;
 using System.Net;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.EngineUtil.Monads;
@@ -32,14 +33,14 @@ namespace Sovereign.ClientCore.Network.Infrastructure;
 public sealed class RegistrationClient
 {
     private const long MaxResponseLength = 1024;
+    private readonly ILogger<RegistrationClient> logger;
     private readonly RestClient restClient;
 
-    public RegistrationClient(RestClient restClient)
+    public RegistrationClient(RestClient restClient, ILogger<RegistrationClient> logger)
     {
         this.restClient = restClient;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Sends a request to the server to register a new account.
@@ -111,7 +112,7 @@ public sealed class RegistrationClient
         }
         catch (Exception e)
         {
-            logger.LogError("Exception thrown while attempting to register.", e);
+            logger.LogError(e, "Exception thrown while attempting to register.");
         }
         finally
         {

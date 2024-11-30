@@ -19,6 +19,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MessagePack;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.EngineCore.Components.Indexers;
@@ -52,21 +53,22 @@ public sealed class WorldSegmentDataClient
 
     private readonly IEventSender eventSender;
     private readonly WorldSegmentBlockDataLoader loader;
+    private readonly ILogger<WorldSegmentDataClient> logger;
     private readonly ClientNetworkController networkController;
     private readonly RestClient restClient;
 
     public WorldSegmentDataClient(IEventSender eventSender,
         RestClient restClient,
         ClientNetworkController networkController,
-        WorldSegmentBlockDataLoader loader)
+        WorldSegmentBlockDataLoader loader,
+        ILogger<WorldSegmentDataClient> logger)
     {
         this.eventSender = eventSender;
         this.restClient = restClient;
         this.networkController = networkController;
         this.loader = loader;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Loads a world segment asynchronously from the server.

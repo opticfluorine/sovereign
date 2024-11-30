@@ -18,6 +18,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Configuration;
@@ -44,13 +45,15 @@ public class DisplayModeSelector
     /// </summary>
     private readonly IDisplayModeEnumerator displayModeEnumerator;
 
-    public DisplayModeSelector(IDisplayModeEnumerator displayModeEnumerator, ClientConfigurationManager configManager)
+    private readonly ILogger<DisplayModeSelector> logger;
+
+    public DisplayModeSelector(IDisplayModeEnumerator displayModeEnumerator, ClientConfigurationManager configManager,
+        ILogger<DisplayModeSelector> logger)
     {
         this.displayModeEnumerator = displayModeEnumerator;
         this.configManager = configManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Selects the display mode.
@@ -90,8 +93,8 @@ public class DisplayModeSelector
             try
             {
                 selectedMode = resSortedModes.First();
-                logger.LogWarning("Requested display size {0}x{1} not supported, falling back to {0}x{1}.",
-                    selectedMode.Width, selectedMode.Height);
+                logger.LogWarning("Requested display size {ReqW}x{ReqH} not supported, falling back to {W}x{H}.",
+                    desiredWidth, desiredHeight, selectedMode.Width, selectedMode.Height);
             }
             catch
             {
@@ -100,7 +103,7 @@ public class DisplayModeSelector
         }
 
         /* Log the decision and return. */
-        logger.LogInformation(() => CreateLogMessageForMode(selectedMode));
+        logger.LogInformation(CreateLogMessageForMode(selectedMode));
         return selectedMode;
     }
 

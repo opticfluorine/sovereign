@@ -16,7 +16,7 @@
 
 using System;
 using System.IO;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Resources;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -37,7 +37,7 @@ public class ClientConfigurationManager
         .WithNamingConvention(PascalCaseNamingConvention.Instance)
         .Build();
 
-    public ClientConfigurationManager(IResourcePathBuilder pathBuilder, ILogger logger)
+    public ClientConfigurationManager(IResourcePathBuilder pathBuilder, ILogger<ClientConfigurationManager> logger)
     {
         try
         {
@@ -50,7 +50,7 @@ public class ClientConfigurationManager
         }
         catch (Exception e)
         {
-            logger.Fatal("Error loading configuration file.", e);
+            logger.LogCritical(e, "Error loading configuration file.");
             throw;
         }
     }

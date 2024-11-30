@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Logging;
 
 namespace Sovereign.ClientCore.Logging;
@@ -25,7 +26,12 @@ namespace Sovereign.ClientCore.Logging;
 /// </summary>
 public class ErrorHandler : IErrorHandler
 {
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
+    private readonly ILogger<ErrorHandler> logger;
+
+    public ErrorHandler(ILogger<ErrorHandler> logger)
+    {
+        this.logger = logger;
+    }
 
     public void Error(string message)
     {

@@ -18,6 +18,7 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using MessagePack;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Entities;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Systems.ClientNetwork;
@@ -41,18 +42,18 @@ public class TemplateEntityDataClient
     private readonly RestClient client;
     private readonly IEventSender eventSender;
     private readonly TemplateEntityDataLoader loader;
+    private readonly ILogger<TemplateEntityDataClient> logger;
     private readonly ClientNetworkController networkController;
 
     public TemplateEntityDataClient(RestClient client, ClientNetworkController networkController,
-        IEventSender eventSender, TemplateEntityDataLoader loader)
+        IEventSender eventSender, TemplateEntityDataLoader loader, ILogger<TemplateEntityDataClient> logger)
     {
         this.client = client;
         this.networkController = networkController;
         this.eventSender = eventSender;
         this.loader = loader;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Asynchronously loads the template entities from the server.
@@ -95,7 +96,7 @@ public class TemplateEntityDataClient
         }
         catch (Exception e)
         {
-            logger.LogError("Error while loading template entities from server; connection lost.", e);
+            logger.LogError(e, "Error while loading template entities from server; connection lost.");
             networkController.DeclareConnectionLost(eventSender);
         }
     }

@@ -18,6 +18,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace Sovereign.ClientCore.Rendering.Configuration;
 
@@ -46,12 +47,13 @@ public class AdapterSelector
     /// </summary>
     private readonly IAdapterEnumerator adapterEnumerator;
 
-    public AdapterSelector(IAdapterEnumerator adapterEnumerator)
+    private readonly ILogger<AdapterSelector> logger;
+
+    public AdapterSelector(IAdapterEnumerator adapterEnumerator, ILogger<AdapterSelector> logger)
     {
         this.adapterEnumerator = adapterEnumerator;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Selects the video adapter to be used.
@@ -76,7 +78,7 @@ public class AdapterSelector
                                + adapter.DedicatedSystemMemory * DedicatedCpuFactor
                                + adapter.SharedSystemMemory * SharedFactor
                 ).First();
-            logger.LogInformation(() => CreateLogMessageForAdapter(selected));
+            logger.LogInformation(CreateLogMessageForAdapter(selected));
             return selected;
         }
         catch (InvalidOperationException e)

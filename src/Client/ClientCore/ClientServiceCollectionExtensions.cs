@@ -16,17 +16,24 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Sovereign.ClientCore.Components;
+using Sovereign.ClientCore.Components.Indexers;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Entities;
 using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Logging;
+using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Network.Pipeline.Inbound;
 using Sovereign.ClientCore.Network.Pipeline.Outbound;
+using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Rendering;
+using Sovereign.ClientCore.Rendering.Components.Indexers;
+using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Resources;
 using Sovereign.ClientCore.Systems.Network;
 using Sovereign.ClientCore.Timing;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
@@ -57,6 +64,11 @@ public static class ClientServiceCollectionExtensions
         AddEvents(services);
         AddMain(services);
         AddInboundPipeline(services);
+        AddComponents(services);
+        AddConfiguration(services);
+        AddEntities(services);
+        AddClientNetwork(services);
+        AddRendering(services);
 
         return services;
     }
@@ -88,5 +100,45 @@ public static class ClientServiceCollectionExtensions
     {
         services.TryAddEnumerable(ServiceDescriptor
             .Singleton<IInboundPipelineStage, ClientAllowedEventsInboundPipelineStage>());
+    }
+
+    private static void AddComponents(IServiceCollection services)
+    {
+        services.TryAddComponentCollection<AnimationPhaseComponentCollection>();
+
+        services.TryAddSingleton<BlockTemplateEntityFilter>();
+        services.TryAddSingleton<BlockTemplateEntityIndexer>();
+    }
+
+    private static void AddConfiguration(IServiceCollection services)
+    {
+        services.TryAddSingleton<ClientConfigurationManager>();
+    }
+
+    private static void AddEntities(IServiceCollection services)
+    {
+        services.TryAddSingleton<TemplateEntityDataLoader>();
+    }
+
+    private static void AddClientNetwork(IServiceCollection services)
+    {
+        services.TryAddSingleton<RestClient>();
+        services.TryAddSingleton<AuthenticationClient>();
+        services.TryAddSingleton<PlayerManagementClient>();
+        services.TryAddSingleton<RegistrationClient>();
+        services.TryAddSingleton<TemplateEntityDataClient>();
+        services.TryAddSingleton<WorldSegmentDataClient>();
+        services.TryAddSingleton<ClientNetworkInternalController>();
+        services.TryAddSingleton<INetworkClient, NetworkClient>();
+    }
+
+    private static void AddRendering(IServiceCollection services)
+    {
+        services.TryAddSingleton<DrawablePositionEventFilter>();
+        services.TryAddSingleton<DrawablePositionComponentIndexer>();
+        services.TryAddSingleton<AdapterSelector>();
+        services.TryAddSingleton<DisplayModeSelector>();
+        services.TryAddSingleton<DisplayViewport>();
+        services.TryAddSingleton<IDisplayModeEnumerator, SDLDisplayModeEnumerator>();
     }
 }
