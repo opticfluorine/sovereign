@@ -18,7 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
@@ -51,7 +51,7 @@ public class MaterialManager
     private readonly IResourcePathBuilder pathBuilder;
 
     public MaterialManager(MaterialDefinitionsLoader loader, IResourcePathBuilder pathBuilder,
-        ILogger logger, IErrorHandler errorHandler, TileSpriteManager tileSpriteManager)
+        ILogger<MaterialManager> logger, IErrorHandler errorHandler, TileSpriteManager tileSpriteManager)
     {
         /* Set dependencies. */
         this.loader = loader;
@@ -76,7 +76,7 @@ public class MaterialManager
         var definitions = LoadMaterialDefinitions();
         UnpackMaterialDefinitions(definitions);
 
-        logger.Info("Loaded " + Materials.Count + " materials.");
+        logger.LogInformation("Loaded {Count} materials.", Materials.Count);
     }
 
     /// <summary>
@@ -93,10 +93,7 @@ public class MaterialManager
             Id = id,
             MaterialSubtypes = new List<MaterialSubtype> { new() }
         });
-        for (var i = id + 1; i < Materials.Count; ++i)
-        {
-            Materials[i].Id++;
-        }
+        for (var i = id + 1; i < Materials.Count; ++i) Materials[i].Id++;
 
         OnMaterialAdded?.Invoke(id);
         SaveDefinitions();
@@ -126,10 +123,7 @@ public class MaterialManager
             throw new InvalidOperationException("Cannot remove Air material.");
 
         Materials.RemoveAt(id);
-        for (var i = id; i < Materials.Count; ++i)
-        {
-            Materials[i].Id--;
-        }
+        for (var i = id; i < Materials.Count; ++i) Materials[i].Id--;
 
         OnMaterialRemoved?.Invoke(id);
         SaveDefinitions();
@@ -156,7 +150,7 @@ public class MaterialManager
         {
             /* Failed to load the material definitions. */
             var msg = "Failed to load the material definitions.";
-            logger.Fatal(msg, e);
+            logger.LogCritical(e, msg);
             errorHandler.Error(msg);
 
             /* Signal the fatal error. */
@@ -209,7 +203,7 @@ public class MaterialManager
         var filename = pathBuilder.BuildPathToResource(ResourceType.World,
             MaterialDefinitionsFilename);
         loader.SaveDefinitions(filename, defs);
-        logger.InfoFormat("Saved {0} materials.", Materials.Count - 1);
+        logger.LogInformation("Saved {Count} materials.", Materials.Count - 1);
     }
 
     /// <summary>

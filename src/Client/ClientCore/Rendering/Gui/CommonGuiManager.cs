@@ -19,7 +19,6 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
-using Castle.Core.Logging;
 using ImGuiNET;
 using SDL2;
 using Sovereign.ClientCore.Rendering.Display;
@@ -77,8 +76,6 @@ public sealed class CommonGuiManager : IDisposable
 
         lastSystemTime = systemTimer.GetTime();
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void Dispose()
     {

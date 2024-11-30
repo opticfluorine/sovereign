@@ -30,6 +30,9 @@ using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Components.Indexers;
 using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.ClientCore.Rendering.Display;
+using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Resources;
 using Sovereign.ClientCore.Systems.Network;
 using Sovereign.ClientCore.Timing;
@@ -69,6 +72,8 @@ public static class ClientServiceCollectionExtensions
         AddEntities(services);
         AddClientNetwork(services);
         AddRendering(services);
+        AddGui(services);
+        AddResources(services);
 
         return services;
     }
@@ -140,5 +145,22 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<DisplayModeSelector>();
         services.TryAddSingleton<DisplayViewport>();
         services.TryAddSingleton<IDisplayModeEnumerator, SDLDisplayModeEnumerator>();
+        services.TryAddSingleton<MainDisplay>();
+    }
+
+    private static void AddGui(IServiceCollection services)
+    {
+        services.TryAddSingleton<CommonGuiManager>();
+        services.TryAddSingleton<GuiFontAtlas>();
+        services.TryAddSingleton<GuiExtensions>();
+        services.TryAddSingleton<GuiTextureMapper>();
+        services.TryAddSingleton<GuiComponentEditors>();
+    }
+
+    private static void AddResources(IServiceCollection services)
+    {
+        services.TryAddSingleton<MaterialManager>();
+        services.TryAddSingleton<MaterialDefinitionsValidator>();
+        services.TryAddSingleton<MaterialDefinitionsLoader>();
     }
 }

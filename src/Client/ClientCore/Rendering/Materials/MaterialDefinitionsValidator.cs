@@ -18,6 +18,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineUtil.Validation;
 
@@ -28,14 +29,15 @@ namespace Sovereign.ClientCore.Rendering.Materials;
 /// </summary>
 public sealed class MaterialDefinitionsValidator
 {
+    private readonly ILogger<MaterialDefinitionsValidator> logger;
     private readonly TileSpriteManager tileSpriteManager;
 
-    public MaterialDefinitionsValidator(TileSpriteManager tileSpriteManager)
+    public MaterialDefinitionsValidator(TileSpriteManager tileSpriteManager,
+        ILogger<MaterialDefinitionsValidator> logger)
     {
         this.tileSpriteManager = tileSpriteManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Validates the given material definitions.
