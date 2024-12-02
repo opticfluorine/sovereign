@@ -16,6 +16,7 @@
  */
 
 using System;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Timing;
@@ -29,6 +30,8 @@ namespace Sovereign.ClientCore.Rendering;
 /// </summary>
 public class RenderingMainLoopAction : IMainLoopAction
 {
+    private readonly ILogger<RenderingMainLoopAction> logger;
+
     /// <summary>
     ///     Minimum system time delta between frames.
     /// </summary>
@@ -43,15 +46,15 @@ public class RenderingMainLoopAction : IMainLoopAction
     private ulong lastFrameTime;
 
     public RenderingMainLoopAction(RenderingManager renderingManager,
-        ISystemTimer systemTimer, ClientConfigurationManager configManager)
+        ISystemTimer systemTimer, ClientConfigurationManager configManager,
+        ILogger<RenderingMainLoopAction> logger)
     {
         this.renderingManager = renderingManager;
         this.systemTimer = systemTimer;
+        this.logger = logger;
 
         minimumTimeDelta = Units.SystemTime.Second / (ulong)configManager.ClientConfiguration.Display.MaxFramerate;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     // Rendering is expensive, so pump the loop multiple times between frames.
     public ulong CycleInterval => 4;
@@ -73,7 +76,7 @@ public class RenderingMainLoopAction : IMainLoopAction
             }
             catch (Exception e)
             {
-                logger.LogError("Exception thrown during rendering.", e);
+                logger.LogError(e, "Exception thrown during rendering.");
             }
 
             lastFrameTime = currentTime;

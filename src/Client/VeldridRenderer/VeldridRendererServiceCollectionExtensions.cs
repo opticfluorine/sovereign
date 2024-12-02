@@ -16,6 +16,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.VeldridRenderer.Rendering.Configuration;
 
@@ -41,5 +42,6 @@ public static class VeldridRendererServiceCollectionExtensions
     public static void AddImplementations(IServiceCollection services)
     {
         services.TryAddSingleton<IAdapterEnumerator, VeldridAdapterEnumerator>();
+        services.TryAddSingleton<IRenderer, Rendering.VeldridRenderer>();
     }
 }

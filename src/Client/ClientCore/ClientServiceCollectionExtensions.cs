@@ -33,6 +33,19 @@ using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
+using Sovereign.ClientCore.Rendering.Scenes;
+using Sovereign.ClientCore.Rendering.Scenes.Game;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
+using Sovereign.ClientCore.Rendering.Scenes.MainMenu;
+using Sovereign.ClientCore.Rendering.Scenes.Update;
+using Sovereign.ClientCore.Rendering.Sprites;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
+using Sovereign.ClientCore.Rendering.Sprites.Atlas;
+using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.ClientCore.Resources;
 using Sovereign.ClientCore.Systems.Network;
 using Sovereign.ClientCore.Timing;
@@ -74,6 +87,8 @@ public static class ClientServiceCollectionExtensions
         AddRendering(services);
         AddGui(services);
         AddResources(services);
+        AddScenes(services);
+        AddSprites(services);
 
         return services;
     }
@@ -146,6 +161,9 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<DisplayViewport>();
         services.TryAddSingleton<IDisplayModeEnumerator, SDLDisplayModeEnumerator>();
         services.TryAddSingleton<MainDisplay>();
+        services.TryAddSingleton<RenderingManager>();
+        services.TryAddSingleton<RenderingResourceManager>();
+        services.TryAddSingleton<DrawableLookup>();
     }
 
     private static void AddGui(IServiceCollection services)
@@ -162,5 +180,68 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<MaterialManager>();
         services.TryAddSingleton<MaterialDefinitionsValidator>();
         services.TryAddSingleton<MaterialDefinitionsLoader>();
+    }
+
+    private static void AddScenes(IServiceCollection services)
+    {
+        services.TryAddSingleton<SceneManager>();
+        services.TryAddSingleton<RenderCamera>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IScene, GameScene>());
+        services.TryAddSingleton<InGameMenuGui>();
+        services.TryAddSingleton<ChatGui>();
+        services.TryAddSingleton<GameGui>();
+        services.TryAddSingleton<PlayerDebugGui>();
+        services.TryAddSingleton<EntityDebugGui>();
+        services.TryAddSingleton<ResourceEditorGui>();
+        services.TryAddSingleton<SpriteEditorTab>();
+        services.TryAddSingleton<AnimatedSpriteEditorTab>();
+        services.TryAddSingleton<TileSpriteEditorTab>();
+        services.TryAddSingleton<MaterialEditorTab>();
+        services.TryAddSingleton<SpriteSelectorPopup>();
+        services.TryAddSingleton<AnimatedSpriteSelectorPopup>();
+        services.TryAddSingleton<TileSpriteSelectorPopup>();
+        services.TryAddSingleton<MaterialSelectorPopup>();
+        services.TryAddSingleton<GenerateAnimatedSpritesPopup>();
+        services.TryAddSingleton<SpritesheetSelector>();
+        services.TryAddSingleton<TemplateEditorGui>();
+        services.TryAddSingleton<BlockTemplateEditorTab>();
+        services.TryAddSingleton<TemplateEditorInternalController>();
+        services.TryAddSingleton<WorldEditorGui>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IScene, MainMenuScene>());
+        services.TryAddSingleton<StartupGui>();
+        services.TryAddSingleton<LoginGui>();
+        services.TryAddSingleton<RegistrationGui>();
+        services.TryAddSingleton<PlayerSelectionGui>();
+        services.TryAddSingleton<CreatePlayerGui>();
+        services.TryAddSingleton<ConnectionLostGui>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IScene, UpdateScene>());
+        services.TryAddSingleton<UpdaterGui>();
+    }
+
+    private static void AddSprites(IServiceCollection services)
+    {
+        services.TryAddSingleton<SurfaceLoader>();
+        services.TryAddSingleton<SpriteSheetFactory>();
+        services.TryAddSingleton<SpriteSheetManager>();
+        services.TryAddSingleton<SpriteSheetDefinitionLoader>();
+        services.TryAddSingleton<SpriteSheetDefinitionValidator>();
+        services.TryAddSingleton<SpriteManager>();
+        services.TryAddSingleton<SpriteDefinitionsLoader>();
+        services.TryAddSingleton<SpriteDefinitionsValidator>();
+        services.TryAddSingleton<SpriteDefinitionsGenerator>();
+
+        services.TryAddSingleton<AnimatedSpriteDefinitionsLoader>();
+        services.TryAddSingleton<AnimatedSpriteDefinitionsValidator>();
+        services.TryAddSingleton<AnimatedSpriteManager>();
+
+        services.TryAddSingleton<TextureAtlasManager>();
+        services.TryAddSingleton<AtlasMap>();
+
+        services.TryAddSingleton<TileSpriteDefinitionsLoader>();
+        services.TryAddSingleton<TileSpriteDefinitionsValidator>();
+        services.TryAddSingleton<TileSpriteManager>();
     }
 }

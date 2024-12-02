@@ -16,6 +16,7 @@
  */
 
 using System;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Rendering.Configuration;
@@ -30,18 +31,21 @@ namespace Sovereign.ClientCore.Rendering;
 /// <summary>
 ///     Manages rendering services on the main thread.
 /// </summary>
-public class RenderingManager : IStartable
+public class RenderingManager : IDisposable
 {
     private readonly AdapterSelector adapterSelector;
     private readonly ClientConfigurationManager configManager;
     private readonly DisplayModeSelector displayModeSelector;
     private readonly CommonGuiManager guiManager;
+    private readonly ILogger<RenderingManager> logger;
 
     private readonly MainDisplay mainDisplay;
     private readonly IRenderer renderer;
     private readonly RenderingResourceManager resourceManager;
     private readonly SDLEventAdapter sdlEventAdapter;
     private readonly ClientStateServices stateServices;
+
+    private bool initialized;
 
     /// <summary>
     ///     Selected video adapter.
@@ -56,7 +60,8 @@ public class RenderingManager : IStartable
     public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
         DisplayModeSelector displayModeSelector, IRenderer renderer,
         RenderingResourceManager resourceManager, ClientConfigurationManager configManager,
-        SDLEventAdapter sdlEventAdapter, CommonGuiManager guiManager, ClientStateServices stateServices)
+        SDLEventAdapter sdlEventAdapter, CommonGuiManager guiManager, ClientStateServices stateServices,
+        ILogger<RenderingManager> logger)
     {
         this.mainDisplay = mainDisplay;
         this.adapterSelector = adapterSelector;
@@ -67,16 +72,26 @@ public class RenderingManager : IStartable
         this.sdlEventAdapter = sdlEventAdapter;
         this.guiManager = guiManager;
         this.stateServices = stateServices;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Error handler.
     /// </summary>
     public IErrorHandler ErrorHandler { private get; set; } = NullErrorHandler.Instance;
 
-    public void Start()
+    public void Dispose()
+    {
+        CleanupResources();
+        renderer.Cleanup();
+        guiManager.Dispose();
+        mainDisplay.Close();
+    }
+
+    /// <summary>
+    ///     Initializes the renderer.
+    /// </summary>
+    private void Initialize()
     {
         try
         {
@@ -85,6 +100,8 @@ public class RenderingManager : IStartable
             InitializeGui();
             LoadResources();
             InitializeRenderer();
+
+            initialized = true;
         }
         catch (FatalErrorException)
         {
@@ -92,31 +109,9 @@ public class RenderingManager : IStartable
         }
         catch (Exception e)
         {
-            logger.LogCritical("Unhandled exception in RenderingManager.Start().", e);
+            logger.LogCritical(e, "Unhandled exception in RenderingManager.");
             Environment.Exit(1);
         }
-    }
-
-    public void Stop()
-    {
-        /* Release resources used by the renderer. */
-        CleanupResources();
-
-        /* Stop the renderer. */
-        try
-        {
-            renderer.Cleanup();
-        }
-        catch (Exception e)
-        {
-            logger.LogError("Error while cleaning up the renderer.", e);
-        }
-
-        /* Clean up GUI resources. */
-        guiManager.Dispose();
-
-        /* Close the main window. */
-        mainDisplay.Close();
     }
 
     /// <summary>
@@ -124,6 +119,8 @@ public class RenderingManager : IStartable
     /// </summary>
     public void Render()
     {
+        if (!initialized) Initialize();
+
         if (stateServices.CheckAndClearFlagValue(ClientStateFlag.ReloadClientResources))
         {
             LoadResources();
