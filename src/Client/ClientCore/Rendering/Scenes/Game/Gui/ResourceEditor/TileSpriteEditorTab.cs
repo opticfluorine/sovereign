@@ -19,6 +19,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using ImGuiNET;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -40,6 +41,7 @@ public class TileSpriteEditorTab
     private readonly AnimatedSpriteSelectorPopup animatedSpriteSelector;
 
     private readonly GuiExtensions guiExtensions;
+    private readonly ILogger<TileSpriteEditorTab> logger;
     private readonly MaterialManager materialManager;
 
     private readonly TileSpriteManager tileSpriteManager;
@@ -60,16 +62,15 @@ public class TileSpriteEditorTab
 
     public TileSpriteEditorTab(TileSpriteManager tileSpriteManager, GuiExtensions guiExtensions,
         MaterialManager materialManager, AnimatedSpriteSelectorPopup animatedSpriteSelector,
-        TileSpriteSelectorPopup tileSpriteSelector)
+        TileSpriteSelectorPopup tileSpriteSelector, ILogger<TileSpriteEditorTab> logger)
     {
         this.tileSpriteManager = tileSpriteManager;
         this.guiExtensions = guiExtensions;
         this.materialManager = materialManager;
         this.animatedSpriteSelector = animatedSpriteSelector;
         this.tileSpriteSelector = tileSpriteSelector;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Renders the Tile Sprites resource editor tab.

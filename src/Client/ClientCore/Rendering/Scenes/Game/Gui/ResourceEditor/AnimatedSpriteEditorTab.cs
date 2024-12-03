@@ -21,6 +21,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using ImGuiNET;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -44,6 +45,7 @@ public class AnimatedSpriteEditorTab
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly GenerateAnimatedSpritesPopup generateAnimatedSpritesPopup;
     private readonly GuiExtensions guiExtensions;
+    private readonly ILogger<AnimatedSpriteEditorTab> logger;
 
     /// <summary>
     ///     All orientations in display order.
@@ -121,7 +123,7 @@ public class AnimatedSpriteEditorTab
 
     public AnimatedSpriteEditorTab(AnimatedSpriteManager animatedSpriteManager, GuiExtensions guiExtensions,
         SpriteSelectorPopup spriteSelectorPopup, SpriteManager spriteManager, TileSpriteManager tileSpriteManager,
-        GenerateAnimatedSpritesPopup generateAnimatedSpritesPopup)
+        GenerateAnimatedSpritesPopup generateAnimatedSpritesPopup, ILogger<AnimatedSpriteEditorTab> logger)
     {
         this.animatedSpriteManager = animatedSpriteManager;
         this.guiExtensions = guiExtensions;
@@ -129,13 +131,12 @@ public class AnimatedSpriteEditorTab
         this.spriteManager = spriteManager;
         this.tileSpriteManager = tileSpriteManager;
         this.generateAnimatedSpritesPopup = generateAnimatedSpritesPopup;
+        this.logger = logger;
 
         tileSpriteManager.OnTileSpriteAdded += RefreshDependencies;
         tileSpriteManager.OnTileSpriteUpdated += RefreshDependencies;
         tileSpriteManager.OnTileSpriteRemoved += RefreshDependencies;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Renders the menu bar for the animated sprite editor tab.

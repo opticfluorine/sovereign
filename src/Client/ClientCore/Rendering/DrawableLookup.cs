@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -32,21 +33,21 @@ public class DrawableLookup
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly ClientConfigurationManager configManager;
+    private readonly ILogger<DrawableLookup> logger;
     private readonly SpriteSheetManager spriteSheetManager;
 
     public DrawableLookup(BlockPositionComponentCollection blockPositions,
         AnimatedSpriteComponentCollection animatedSprites,
         AnimatedSpriteManager animatedSpriteManager, SpriteSheetManager spriteSheetManager,
-        ClientConfigurationManager configManager)
+        ClientConfigurationManager configManager, ILogger<DrawableLookup> logger)
     {
         this.blockPositions = blockPositions;
         this.animatedSprites = animatedSprites;
         this.animatedSpriteManager = animatedSpriteManager;
         this.spriteSheetManager = spriteSheetManager;
         this.configManager = configManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Gets the drawable size of the given entity in world units.
@@ -61,14 +62,12 @@ public class DrawableLookup
     public Vector2 GetEntityDrawableSizeWorld(ulong entityId)
     {
         if (blockPositions.HasComponentForEntity(entityId))
-        {
             // Entity is a block and has a constant size per face.
             return Vector2.One;
-        }
 
         if (!animatedSprites.HasComponentForEntity(entityId))
         {
-            logger.LogWarning("Non-block entity {0} has no AnimatedSprite component.");
+            logger.LogWarning("Non-block entity {Id} has no AnimatedSprite component.", entityId);
             return Vector2.Zero;
         }
 

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites;
 
@@ -36,6 +37,7 @@ public class SpriteEditorTab
 
     private readonly SpriteDefinitionsGenerator generator;
     private readonly GuiExtensions guiExtensions;
+    private readonly ILogger<SpriteEditorTab> logger;
     private readonly SpriteManager spriteManager;
     private readonly SpriteSheetManager spriteSheetManager;
 
@@ -55,15 +57,14 @@ public class SpriteEditorTab
     private List<string> orderedSpriteSheets = new();
 
     public SpriteEditorTab(SpriteSheetManager spriteSheetManager, GuiExtensions guiExtensions,
-        SpriteManager spriteManager, SpriteDefinitionsGenerator generator)
+        SpriteManager spriteManager, SpriteDefinitionsGenerator generator, ILogger<SpriteEditorTab> logger)
     {
         this.spriteSheetManager = spriteSheetManager;
         this.guiExtensions = guiExtensions;
         this.spriteManager = spriteManager;
         this.generator = generator;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Renders the Sprite Editor tab. Must be called from inside a tab bar.

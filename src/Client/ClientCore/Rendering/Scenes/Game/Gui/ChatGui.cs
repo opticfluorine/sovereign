@@ -16,8 +16,8 @@
 
 using System;
 using System.Numerics;
-using Castle.Core.Logging;
 using ImGuiNET;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Systems.ClientChat;
 using Sovereign.EngineCore.Events;
 
@@ -33,18 +33,19 @@ public class ChatGui
     private readonly ClientChatController chatController;
     private readonly ClientChatServices chatServices;
     private readonly IEventSender eventSender;
+    private readonly ILogger<ChatGui> logger;
     private string input = "";
     private int lastHistoryCount;
     private bool lockScrollToBottom = true;
 
-    public ChatGui(IEventSender eventSender, ClientChatServices chatServices, ClientChatController chatController)
+    public ChatGui(IEventSender eventSender, ClientChatServices chatServices, ClientChatController chatController,
+        ILogger<ChatGui> logger)
     {
         this.eventSender = eventSender;
         this.chatServices = chatServices;
         this.chatController = chatController;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Renders the chat window.

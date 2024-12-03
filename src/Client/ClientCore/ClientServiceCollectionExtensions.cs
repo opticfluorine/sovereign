@@ -40,6 +40,7 @@ using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
+using Sovereign.ClientCore.Rendering.Scenes.Game.World;
 using Sovereign.ClientCore.Rendering.Scenes.MainMenu;
 using Sovereign.ClientCore.Rendering.Scenes.Update;
 using Sovereign.ClientCore.Rendering.Sprites;
@@ -47,8 +48,19 @@ using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.ClientCore.Resources;
+using Sovereign.ClientCore.Systems.Block.Caches;
+using Sovereign.ClientCore.Systems.Camera;
+using Sovereign.ClientCore.Systems.ClientChat;
+using Sovereign.ClientCore.Systems.ClientNetwork;
+using Sovereign.ClientCore.Systems.ClientState;
+using Sovereign.ClientCore.Systems.ClientWorldEdit;
+using Sovereign.ClientCore.Systems.EntityAnimation;
+using Sovereign.ClientCore.Systems.EntitySynchronization;
+using Sovereign.ClientCore.Systems.Input;
 using Sovereign.ClientCore.Systems.Network;
+using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.ClientCore.Timing;
+using Sovereign.ClientCore.Updater;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
@@ -56,6 +68,7 @@ using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
+using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Timing;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
@@ -89,6 +102,8 @@ public static class ClientServiceCollectionExtensions
         AddResources(services);
         AddScenes(services);
         AddSprites(services);
+        AddSystems(services);
+        AddUpdater(services);
 
         return services;
     }
@@ -208,8 +223,14 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<BlockTemplateEditorTab>();
         services.TryAddSingleton<TemplateEditorInternalController>();
         services.TryAddSingleton<WorldEditorGui>();
+        services.TryAddSingleton<WorldVertexSequencer>();
+        services.TryAddSingleton<WorldLayerGrouper>();
+        services.TryAddSingleton<WorldLayerVertexSequencer>();
+        services.TryAddSingleton<WorldEntityRetriever>();
+        services.TryAddSingleton<WorldSpriteSequencer>();
+        services.TryAddSingleton<LightSourceTable>();
 
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IScene, MainMenuScene>());
+        services.TryAddSingleton<IScene, MainMenuScene>();
         services.TryAddSingleton<StartupGui>();
         services.TryAddSingleton<LoginGui>();
         services.TryAddSingleton<RegistrationGui>();
@@ -217,7 +238,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<CreatePlayerGui>();
         services.TryAddSingleton<ConnectionLostGui>();
 
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IScene, UpdateScene>());
+        services.TryAddSingleton<IScene, UpdateScene>();
         services.TryAddSingleton<UpdaterGui>();
     }
 
@@ -243,5 +264,70 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<TileSpriteDefinitionsLoader>();
         services.TryAddSingleton<TileSpriteDefinitionsValidator>();
         services.TryAddSingleton<TileSpriteManager>();
+    }
+
+    private static void AddSystems(IServiceCollection services)
+    {
+        services.TryAddSingleton<IBlockAnimatedSpriteCache, BlockAnimatedSpriteCache>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, CameraSystem>());
+        services.TryAddSingleton<CameraManager>();
+        services.TryAddSingleton<CameraEventHandler>();
+        services.TryAddSingleton<CameraServices>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ClientChatSystem>());
+        services.TryAddSingleton<ClientChatController>();
+        services.TryAddSingleton<ChatHistoryManager>();
+        services.TryAddSingleton<ClientChatServices>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ClientNetworkSystem>());
+        services.TryAddSingleton<ClientNetworkController>();
+        services.TryAddSingleton<ClientNetworkEventHandler>();
+        services.TryAddSingleton<ClientWorldSegmentSubscriptionManager>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ClientStateSystem>());
+        services.TryAddSingleton<ClientStateMachine>();
+        services.TryAddSingleton<ClientStateServices>();
+        services.TryAddSingleton<WorldEntryDetector>();
+        services.TryAddSingleton<ClientStateController>();
+        services.TryAddSingleton<ClientStateFlagManager>();
+        services.TryAddSingleton<PlayerStateManager>();
+        services.TryAddSingleton<MainMenuStateMachine>();
+        services.TryAddSingleton<AutoUpdaterEndDetector>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ClientWorldEditSystem>());
+        services.TryAddSingleton<ClientWorldEditState>();
+        services.TryAddSingleton<ClientWorldEditServices>();
+        services.TryAddSingleton<ClientWorldEditController>();
+        services.TryAddSingleton<ClientWorldEditInputHandler>();
+        services.TryAddSingleton<ClientWorldEditInternalController>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, EntityAnimationSystem>());
+        services.TryAddSingleton<AnimationPhaseStateMachine>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, EntitySynchronizationSystem>());
+        services.TryAddSingleton<ClientEntityUnloader>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, InputSystem>());
+        services.TryAddSingleton<KeyboardEventHandler>();
+        services.TryAddSingleton<KeyboardState>();
+        services.TryAddSingleton<MouseEventHandler>();
+        services.TryAddSingleton<MouseState>();
+        services.TryAddSingleton<PlayerInputMovementMapper>();
+        services.TryAddSingleton<GlobalKeyboardShortcuts>();
+        services.TryAddSingleton<InGameKeyboardShortcuts>();
+        services.TryAddSingleton<InputServices>();
+        services.TryAddSingleton<InputInternalController>();
+        services.TryAddSingleton<NullInputHandler>();
+        services.TryAddSingleton<InGameInputHandler>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PerspectiveSystem>());
+        services.TryAddSingleton<PerspectiveLineManager>();
+        services.TryAddSingleton<PerspectiveServices>();
+    }
+
+    private static void AddUpdater(IServiceCollection services)
+    {
+        services.TryAddSingleton<AutoUpdater>();
     }
 }
