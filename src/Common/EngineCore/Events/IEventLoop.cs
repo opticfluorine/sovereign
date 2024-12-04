@@ -25,11 +25,6 @@ namespace Sovereign.EngineCore.Events;
 public interface IEventLoop
 {
     /// <summary>
-    ///     Whether the event loop has terminated.
-    /// </summary>
-    bool Terminated { get; }
-
-    /// <summary>
     ///     Advances the event loop time to the given system time value.
     ///     This value should be a multiple of the tick interval.
     /// </summary>

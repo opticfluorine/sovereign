@@ -174,6 +174,7 @@ public static class CoreServiceCollectionExtensions
     {
         services.TryAddTransient<FatalErrorHandler>();
         services.TryAddSingleton<CoreController>();
+        services.TryAddSingleton<Terminator>();
     }
 
     private static void AddPerformance(IServiceCollection services)

@@ -73,7 +73,8 @@ public class SystemManager : BackgroundService
         /* Run the executors. */
         await RunExecutors(stoppingToken);
 
-        logger.LogInformation("SystemManager stopped.");
+        logger.LogInformation("SystemManager stopped. Engine will now be terminated.");
+        Environment.Exit(0);
     }
 
     /// <summary>
@@ -114,14 +115,14 @@ public class SystemManager : BackgroundService
     /// <summary>
     ///     Runs the SystemExecutors in their own threads.
     /// </summary>
-    private async Task RunExecutors(CancellationToken shutdownToken)
+    private Task RunExecutors(CancellationToken shutdownToken)
     {
         foreach (var executor in executors)
         {
             executorTasks.Add(Task.Run(() => executor.SystemExecutor.Execute(shutdownToken)));
         }
 
-        await Task.WhenAll(executorTasks);
+        return Task.WhenAll(executorTasks);
     }
 
     /// <summary>

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineUtil.Collections;
 
@@ -32,7 +33,7 @@ public class MainEventLoop : IEventLoop
     /// <summary>
     ///     Default size of the future event queue.
     /// </summary>
-    private const int QUEUE_SIZE = 4096;
+    private const int QueueSize = 4096;
 
     /// <summary>
     ///     Event communicators listening to each event ID.
@@ -55,7 +56,7 @@ public class MainEventLoop : IEventLoop
     ///     Priority queue of future events ordered by dispatch time.
     /// </summary>
     private readonly IHeap<Event> futureEventQueue
-        = new BinaryHeap<Event>(QUEUE_SIZE, new EventTimeComparer());
+        = new BinaryHeap<Event>(QueueSize, new EventTimeComparer());
 
     /// <summary>
     ///     Queue of tick-synced events waiting for dispatch at the start of the next tick.
@@ -67,20 +68,19 @@ public class MainEventLoop : IEventLoop
     /// </summary>
     private readonly HashSet<ISystem> systems = new();
 
+    private readonly Terminator terminator;
+
     /// <summary>
     ///     The system time of the last update step (microseconds).
     /// </summary>
     private ulong lastUpdateTime;
 
-    public MainEventLoop(
-        EventAdapterManager eventAdapterManager,
-        EntityManager entityManager)
+    public MainEventLoop(EventAdapterManager eventAdapterManager, EntityManager entityManager, Terminator terminator)
     {
         this.eventAdapterManager = eventAdapterManager;
         this.entityManager = entityManager;
+        this.terminator = terminator;
     }
-
-    public bool Terminated { get; private set; }
 
     public int PumpEventLoop()
     {
@@ -256,7 +256,7 @@ public class MainEventLoop : IEventLoop
         var eventId = ev.EventId;
 
         /* Handle Core_Quit events specially. */
-        if (eventId == EventId.Core_Quit) Terminated = true;
+        if (eventId == EventId.Core_Quit) terminator.Terminate();
 
         /* Set the event time to the current tick time. */
         ev.EventTime = lastUpdateTime;
