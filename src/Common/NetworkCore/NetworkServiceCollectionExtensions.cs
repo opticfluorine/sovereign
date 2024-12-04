@@ -16,7 +16,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
@@ -38,14 +38,14 @@ public static class NetworkServiceCollectionExtensions
         AddInboundPipeline(services);
         AddOutboundPipeline(services);
         AddNetworkingService(services);
-        AddPingSystem(services);
+        AddSystems(services);
 
         return services;
     }
 
     private static void AddEvents(IServiceCollection services)
     {
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IEventAdapter, NetworkEventAdapter>());
+        services.TryAddSingleton<NetworkEventAdapter>();
     }
 
     private static void AddInfrastructure(IServiceCollection services)
@@ -75,8 +75,9 @@ public static class NetworkServiceCollectionExtensions
         services.TryAddSingleton<ReceivedEventQueue>();
     }
 
-    private static void AddPingSystem(IServiceCollection services)
+    private static void AddSystems(IServiceCollection services)
     {
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, NetworkSystem>());
         services.TryAddSingleton<PingController>();
     }
 }

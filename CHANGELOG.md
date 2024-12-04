@@ -2,6 +2,17 @@
 
 ## 2024
 
+### December
+
+#### 03 December 2024
+
+* All: Spent the last week or so eliminating technical debt. Sovereign no longer depends on
+  any of the Castle libraries (which are effectively no longer maintained), instead using
+  the built-in .NET dependency injection alongside Serilog for logging. This required a very
+  significant amount of rework to get things ported over. However, it dramatically improves
+  startup time for both client and server, and it positions the engine for better backend
+  scripting support on the server.
+
 ### November
 
 #### 23 November 2024

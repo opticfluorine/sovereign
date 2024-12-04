@@ -36,7 +36,7 @@ public sealed class InboundNetworkPipeline
 
     private readonly ILogger<InboundNetworkPipeline> logger;
 
-    public InboundNetworkPipeline(IList<IInboundPipelineStage> stages, ILogger<InboundNetworkPipeline> logger)
+    public InboundNetworkPipeline(IEnumerable<IInboundPipelineStage> stages, ILogger<InboundNetworkPipeline> logger)
     {
         this.logger = logger;
 
