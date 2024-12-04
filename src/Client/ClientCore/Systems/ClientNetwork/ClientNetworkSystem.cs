@@ -17,9 +17,7 @@
 
 using System;
 using System.Collections.Generic;
-using Sovereign.ClientCore.Events.Details;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 
 namespace Sovereign.ClientCore.Systems.ClientNetwork;
@@ -33,18 +31,11 @@ public sealed class ClientNetworkSystem : ISystem, IDisposable
     private readonly IEventLoop eventLoop;
 
     public ClientNetworkSystem(EventCommunicator eventCommunicator,
-        IEventLoop eventLoop, EventDescriptions eventDescriptions,
-        ClientNetworkEventHandler eventHandler)
+        IEventLoop eventLoop, ClientNetworkEventHandler eventHandler)
     {
         this.eventLoop = eventLoop;
         this.eventHandler = eventHandler;
         EventCommunicator = eventCommunicator;
-
-        eventDescriptions.RegisterNullEvent(EventId.Client_Network_Connected);
-        eventDescriptions.RegisterNullEvent(EventId.Client_Network_ConnectionLost);
-        eventDescriptions.RegisterEvent<BeginConnectionEventDetails>(EventId.Client_Network_BeginConnection);
-        eventDescriptions.RegisterEvent<ErrorEventDetails>(EventId.Client_Network_ConnectionAttemptFailed);
-        eventDescriptions.RegisterEvent<ErrorEventDetails>(EventId.Client_Network_LoginFailed);
 
         eventLoop.RegisterSystem(this);
     }

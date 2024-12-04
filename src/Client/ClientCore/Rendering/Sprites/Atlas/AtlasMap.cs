@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.Atlas;
@@ -28,22 +29,23 @@ public sealed class AtlasMap
 {
     private readonly TextureAtlasManager atlasManager;
     private readonly ClientConfigurationManager configManager;
+    private readonly ILogger<AtlasMap> logger;
     private readonly SpriteManager spriteManager;
     private readonly SpriteSheetManager spriteSheetManager;
 
     public AtlasMap(TextureAtlasManager atlasManager, SpriteManager spriteManager,
         SpriteSheetManager spriteSheetManager,
-        ClientConfigurationManager configManager)
+        ClientConfigurationManager configManager,
+        ILogger<AtlasMap> logger)
     {
         this.atlasManager = atlasManager;
         this.spriteManager = spriteManager;
         this.spriteSheetManager = spriteSheetManager;
         this.configManager = configManager;
+        this.logger = logger;
 
         spriteManager.OnSpritesChanged += InitializeAtlasMap;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Maps each sprite ID to its texture atlas coordinates.

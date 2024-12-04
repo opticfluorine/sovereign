@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using SDL2;
 using Sovereign.ClientCore.Events.Details;
 
@@ -24,17 +24,17 @@ public class InGameInputHandler : IInputHandler
 {
     private readonly InGameKeyboardShortcuts inGameKeyboardShortcuts;
     private readonly KeyboardState keyboardState;
+    private readonly ILogger<InGameInputHandler> logger;
     private readonly PlayerInputMovementMapper playerInputMovementMapper;
 
     public InGameInputHandler(KeyboardState keyboardState, PlayerInputMovementMapper playerInputMovementMapper,
-        InGameKeyboardShortcuts inGameKeyboardShortcuts)
+        InGameKeyboardShortcuts inGameKeyboardShortcuts, ILogger<InGameInputHandler> logger)
     {
         this.keyboardState = keyboardState;
         this.playerInputMovementMapper = playerInputMovementMapper;
         this.inGameKeyboardShortcuts = inGameKeyboardShortcuts;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
     {

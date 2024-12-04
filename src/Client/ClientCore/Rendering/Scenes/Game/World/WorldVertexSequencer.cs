@@ -17,6 +17,7 @@
 
 using System;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
@@ -45,17 +46,18 @@ public sealed class WorldVertexSequencer
 
     private readonly WorldLayerGrouper grouper;
     private readonly WorldLayerVertexSequencer layerVertexSequencer;
+    private readonly ILogger<WorldVertexSequencer> logger;
 
     public WorldVertexSequencer(WorldLayerGrouper grouper,
         WorldLayerVertexSequencer layerVertexSequencer,
-        WorldEntityRetriever entityRetriever)
+        WorldEntityRetriever entityRetriever,
+        ILogger<WorldVertexSequencer> logger)
     {
         this.grouper = grouper;
         this.layerVertexSequencer = layerVertexSequencer;
         this.entityRetriever = entityRetriever;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Produces the vertex buffer for world rendering.

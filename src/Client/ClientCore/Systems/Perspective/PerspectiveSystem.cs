@@ -15,26 +15,28 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.Perspective;
 
 public class PerspectiveSystem : ISystem
 {
     private readonly PerspectiveLineManager lineManager;
+    private readonly ILogger<PerspectiveSystem> logger;
 
     public PerspectiveSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop,
-        PerspectiveLineManager lineManager)
+        PerspectiveLineManager lineManager, ILogger<PerspectiveSystem> logger)
     {
         this.lineManager = lineManager;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 

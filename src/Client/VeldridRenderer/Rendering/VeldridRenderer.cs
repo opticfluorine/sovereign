@@ -16,6 +16,7 @@
  */
 
 using System;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Scenes;
@@ -37,6 +38,7 @@ public class VeldridRenderer : IRenderer
     private readonly VeldridDevice device;
 
     private readonly GuiRenderer guiRenderer;
+    private readonly ILogger<VeldridRenderer> logger;
 
     /// <summary>
     ///     Veldrid resource manager.
@@ -62,7 +64,7 @@ public class VeldridRenderer : IRenderer
 
     public VeldridRenderer(VeldridDevice device, VeldridResourceManager resourceManager,
         SceneManager sceneManager, VeldridSceneConsumer sceneConsumer, WorldRenderer worldRenderer,
-        GuiRenderer guiRenderer)
+        GuiRenderer guiRenderer, ILogger<VeldridRenderer> logger)
     {
         this.device = device;
         this.resourceManager = resourceManager;
@@ -70,9 +72,8 @@ public class VeldridRenderer : IRenderer
         this.sceneConsumer = sceneConsumer;
         this.worldRenderer = worldRenderer;
         this.guiRenderer = guiRenderer;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void Initialize(IVideoAdapter videoAdapter)
     {
@@ -141,7 +142,7 @@ public class VeldridRenderer : IRenderer
         }
         catch (Exception e)
         {
-            logger.LogError("Error during rendering.", e);
+            logger.LogError(e, "Error during rendering.");
         }
 
         /* Render and present the next frame. */

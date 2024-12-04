@@ -15,26 +15,28 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.EntityAnimation;
 
 public class EntityAnimationSystem : ISystem
 {
     private readonly AnimationPhaseStateMachine animationPhaseStateMachine;
+    private readonly ILogger<EntityAnimationSystem> logger;
 
     public EntityAnimationSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop,
-        AnimationPhaseStateMachine animationPhaseStateMachine)
+        AnimationPhaseStateMachine animationPhaseStateMachine, ILogger<EntityAnimationSystem> logger)
     {
         this.animationPhaseStateMachine = animationPhaseStateMachine;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 

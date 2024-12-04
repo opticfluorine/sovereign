@@ -15,10 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Systems;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.ClientChat;
 
@@ -29,20 +31,20 @@ public class ClientChatSystem : ISystem
 {
     private readonly ChatHistoryManager chatHistoryManager;
     private readonly IEventLoop eventLoop;
+    private readonly ILogger<ClientChatSystem> logger;
     private readonly LoggingUtil loggingUtil;
 
     public ClientChatSystem(IEventLoop eventLoop, EventCommunicator eventCommunicator,
-        ChatHistoryManager chatHistoryManager, LoggingUtil loggingUtil)
+        ChatHistoryManager chatHistoryManager, LoggingUtil loggingUtil, ILogger<ClientChatSystem> logger)
     {
         this.eventLoop = eventLoop;
         this.chatHistoryManager = chatHistoryManager;
         this.loggingUtil = loggingUtil;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 

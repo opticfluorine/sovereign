@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Input;
 using Sovereign.EngineCore.Components.Indexers;
@@ -40,6 +41,7 @@ public class ClientWorldEditInputHandler
     private readonly IEventSender eventSender;
     private readonly InputServices inputServices;
     private readonly ClientWorldEditInternalController internalController;
+    private readonly ILogger<ClientWorldEditInputHandler> logger;
     private readonly ClientWorldEditState userState;
 
     /// <summary>
@@ -58,16 +60,16 @@ public class ClientWorldEditInputHandler
     private GridPosition lastPosition;
 
     public ClientWorldEditInputHandler(InputServices inputServices, ClientWorldEditState userState,
-        CameraServices cameraServices, ClientWorldEditInternalController internalController, IEventSender eventSender)
+        CameraServices cameraServices, ClientWorldEditInternalController internalController, IEventSender eventSender,
+        ILogger<ClientWorldEditInputHandler> logger)
     {
         this.inputServices = inputServices;
         this.userState = userState;
         this.cameraServices = cameraServices;
         this.internalController = internalController;
         this.eventSender = eventSender;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Handles input processing once per tick.

@@ -61,6 +61,8 @@ public sealed class CommonGuiManager : IDisposable
     /// </summary>
     private IntPtr context;
 
+    private bool initialized;
+
     /// <summary>
     ///     Last system time at which a frame was generated.
     /// </summary>
@@ -138,6 +140,8 @@ public sealed class CommonGuiManager : IDisposable
         io.DisplaySize = new Vector2(mainDisplay.DisplayMode!.Width,
             mainDisplay.DisplayMode!.Height);
         io.DisplayFramebufferScale = Vector2.One;
+
+        initialized = true;
     }
 
     /// <summary>
@@ -149,6 +153,8 @@ public sealed class CommonGuiManager : IDisposable
     /// </remarks>
     public void NewFrame()
     {
+        if (!initialized) return;
+
         var io = ImGui.GetIO();
         var now = systemTimer.GetTime();
         io.DeltaTime = (now - lastSystemTime) * UnitConversions.UsToS;
@@ -181,8 +187,10 @@ public sealed class CommonGuiManager : IDisposable
     /// </remarks>
     public void ProcessEvent(ref SDL.SDL_Event ev, out bool shouldDispatch)
     {
-        var io = ImGui.GetIO();
         shouldDispatch = true;
+        if (!initialized) return;
+
+        var io = ImGui.GetIO();
         switch (ev.type)
         {
             case SDL.SDL_EventType.SDL_MOUSEMOTION:

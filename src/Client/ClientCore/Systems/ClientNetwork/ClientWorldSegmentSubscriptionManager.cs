@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.EngineCore.Components.Indexers;
 
@@ -26,14 +27,15 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork;
 public class ClientWorldSegmentSubscriptionManager
 {
     private readonly WorldSegmentDataClient dataClient;
+    private readonly ILogger<ClientWorldSegmentSubscriptionManager> logger;
     private readonly HashSet<GridPosition> subscribedSegments = new();
 
-    public ClientWorldSegmentSubscriptionManager(WorldSegmentDataClient dataClient)
+    public ClientWorldSegmentSubscriptionManager(WorldSegmentDataClient dataClient,
+        ILogger<ClientWorldSegmentSubscriptionManager> logger)
     {
         this.dataClient = dataClient;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Subscribes the client to a world segment.

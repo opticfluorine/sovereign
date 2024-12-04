@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using SDL2;
 using Sovereign.ClientCore.Rendering.Display;
 
@@ -27,17 +27,18 @@ namespace Sovereign.ClientCore.Rendering.Sprites;
 /// </summary>
 public class SurfaceLoader
 {
+    private readonly ILogger<SurfaceLoader> logger;
+
     /// <summary>
     ///     Main display.
     /// </summary>
     private readonly MainDisplay mainDisplay;
 
-    public SurfaceLoader(MainDisplay mainDisplay)
+    public SurfaceLoader(MainDisplay mainDisplay, ILogger<SurfaceLoader> logger)
     {
         this.mainDisplay = mainDisplay;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Loads an image from a file into an SDL_Surface with the same format as

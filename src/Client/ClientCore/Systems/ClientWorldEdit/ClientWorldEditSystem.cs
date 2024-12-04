@@ -15,11 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 
@@ -30,22 +32,23 @@ public class ClientWorldEditSystem : ISystem
 {
     private readonly ClientStateServices clientStateServices;
     private readonly ClientWorldEditInputHandler inputHandler;
+    private readonly ILogger<ClientWorldEditSystem> logger;
     private readonly PlayerRoleCheck roleCheck;
     private readonly ClientWorldEditState state;
 
     public ClientWorldEditSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, PlayerRoleCheck roleCheck,
-        ClientStateServices clientStateServices, ClientWorldEditState state, ClientWorldEditInputHandler inputHandler)
+        ClientStateServices clientStateServices, ClientWorldEditState state, ClientWorldEditInputHandler inputHandler,
+        ILogger<ClientWorldEditSystem> logger)
     {
         this.roleCheck = roleCheck;
         this.clientStateServices = clientStateServices;
         this.state = state;
         this.inputHandler = inputHandler;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
 
@@ -43,6 +44,8 @@ public class WorldEntryDetector
     /// </summary>
     private const ulong TransitionDelay = (ulong)(1.0f * UnitConversions.SToUs);
 
+    private readonly ILogger<WorldEntryDetector> logger;
+
     private readonly ClientStateMachine stateMachine;
     private readonly ISystemTimer systemTimer;
     private bool isEntryScheduled;
@@ -52,13 +55,13 @@ public class WorldEntryDetector
     private ulong scheduledTransitionTime;
     private int subscribeCount;
 
-    public WorldEntryDetector(ClientStateMachine stateMachine, ISystemTimer systemTimer)
+    public WorldEntryDetector(ClientStateMachine stateMachine, ISystemTimer systemTimer,
+        ILogger<WorldEntryDetector> logger)
     {
         this.stateMachine = stateMachine;
         this.systemTimer = systemTimer;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Called when a new login is made to the server. This resets the detector.

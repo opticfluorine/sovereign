@@ -17,6 +17,7 @@
 
 using System;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.EngineCore.Logging;
@@ -30,6 +31,7 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas;
 public class TextureAtlasManager
 {
     private readonly GuiFontAtlas fontAtlas;
+    private readonly ILogger<TextureAtlasManager> logger;
 
     /// <summary>
     ///     Main display.
@@ -42,14 +44,13 @@ public class TextureAtlasManager
     private readonly SpriteSheetManager spriteSheetManager;
 
     public TextureAtlasManager(MainDisplay mainDisplay, SpriteSheetManager spriteSheetManager,
-        GuiFontAtlas fontAtlas)
+        GuiFontAtlas fontAtlas, ILogger<TextureAtlasManager> logger)
     {
         this.mainDisplay = mainDisplay;
         this.spriteSheetManager = spriteSheetManager;
         this.fontAtlas = fontAtlas;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public IErrorHandler ErrorHandler { private get; set; } = NullErrorHandler.Instance;
 

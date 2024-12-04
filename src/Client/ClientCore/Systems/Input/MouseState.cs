@@ -16,6 +16,7 @@
 
 using System;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Systems.Input;
@@ -32,19 +33,20 @@ public class MouseState
 
     private readonly IEventSender eventSender;
     private readonly InputInternalController internalController;
+    private readonly ILogger<MouseState> logger;
 
     /// <summary>
     ///     Scroll wheel position for the last scroll tick.
     /// </summary>
     private float lastScrollTick;
 
-    public MouseState(InputInternalController internalController, IEventSender eventSender)
+    public MouseState(InputInternalController internalController, IEventSender eventSender,
+        ILogger<MouseState> logger)
     {
         this.internalController = internalController;
         this.eventSender = eventSender;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Latest known mouse position in screen coordinates (pixels) relative to the window.

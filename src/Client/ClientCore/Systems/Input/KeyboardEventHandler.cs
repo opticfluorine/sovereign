@@ -15,9 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -34,6 +36,8 @@ public class KeyboardEventHandler
     /// </summary>
     private readonly KeyboardState keyboardState;
 
+    private readonly ILogger<KeyboardEventHandler> logger;
+
     private readonly NullInputHandler nullInputHandler;
 
     /// <summary>
@@ -46,7 +50,8 @@ public class KeyboardEventHandler
     public KeyboardEventHandler(KeyboardState keyboardState,
         PlayerInputMovementMapper playerInputMovementMapper,
         ClientStateServices stateServices, InGameInputHandler inGameInputHandler,
-        NullInputHandler nullInputHandler, GlobalKeyboardShortcuts globalKeyboardShortcuts)
+        NullInputHandler nullInputHandler, GlobalKeyboardShortcuts globalKeyboardShortcuts,
+        ILogger<KeyboardEventHandler> logger)
     {
         this.keyboardState = keyboardState;
         this.playerInputMovementMapper = playerInputMovementMapper;
@@ -54,9 +59,8 @@ public class KeyboardEventHandler
         this.inGameInputHandler = inGameInputHandler;
         this.nullInputHandler = nullInputHandler;
         this.globalKeyboardShortcuts = globalKeyboardShortcuts;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void HandleEvent(Event ev)
     {

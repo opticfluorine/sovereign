@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
@@ -48,16 +49,16 @@ public sealed class WorldSpriteSequencer
     private const int VerticesPerSprite = 4;
     private const int IndicesPerSprite = 6;
     private readonly AtlasMap atlasMap;
+    private readonly ILogger<WorldSpriteSequencer> logger;
 
     private readonly SpriteManager spriteManager;
 
-    public WorldSpriteSequencer(AtlasMap atlasMap, SpriteManager spriteManager)
+    public WorldSpriteSequencer(AtlasMap atlasMap, SpriteManager spriteManager, ILogger<WorldSpriteSequencer> logger)
     {
         this.atlasMap = atlasMap;
         this.spriteManager = spriteManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Sequences sprites into the buffers.

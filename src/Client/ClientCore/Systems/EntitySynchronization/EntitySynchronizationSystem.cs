@@ -15,33 +15,35 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.EntitySynchronization;
 
 public class EntitySynchronizationSystem : ISystem
 {
     private readonly IEventLoop eventLoop;
+    private readonly ILogger<EntitySynchronizationSystem> logger;
     private readonly EntityDefinitionProcessor processor;
     private readonly ClientEntityUnloader unloader;
     private ulong playerEntityId;
 
     public EntitySynchronizationSystem(EventCommunicator eventCommunicator,
         IEventLoop eventLoop, EntityDefinitionProcessor processor,
-        ClientEntityUnloader unloader)
+        ClientEntityUnloader unloader, ILogger<EntitySynchronizationSystem> logger)
     {
         this.eventLoop = eventLoop;
         this.processor = processor;
         this.unloader = unloader;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 

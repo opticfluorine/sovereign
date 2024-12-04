@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
@@ -39,6 +40,8 @@ public sealed class SpriteManager
     /// </summary>
     private readonly SpriteDefinitionsLoader loader;
 
+    private readonly ILogger<SpriteManager> logger;
+
     /// <summary>
     ///     Resource path builder.
     /// </summary>
@@ -53,14 +56,14 @@ public sealed class SpriteManager
     public Dictionary<string, Sprite?[,]> SpriteSheetCoverage = new();
 
     public SpriteManager(SpriteDefinitionsLoader loader,
-        IResourcePathBuilder resourcePathBuilder, SpriteSheetManager spriteSheetManager)
+        IResourcePathBuilder resourcePathBuilder, SpriteSheetManager spriteSheetManager,
+        ILogger<SpriteManager> logger)
     {
         this.loader = loader;
         this.resourcePathBuilder = resourcePathBuilder;
         this.spriteSheetManager = spriteSheetManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public IErrorHandler ErrorHandler { private get; set; } = NullErrorHandler.Instance;
 
@@ -135,7 +138,7 @@ public sealed class SpriteManager
         }
         catch (Exception e)
         {
-            logger.LogCritical("Failed to load the sprite definitions.", e);
+            logger.LogCritical(e, "Failed to load the sprite definitions.");
             ErrorHandler.Error("Failed to load the sprite definitions.\n"
                                + "Refer to the error log for details.");
             throw new FatalErrorException();

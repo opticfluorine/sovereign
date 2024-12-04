@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.EngineCore.Events;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -24,14 +26,14 @@ namespace Sovereign.ClientCore.Systems.Input;
 /// </summary>
 public class MouseEventHandler
 {
+    private readonly ILogger<MouseEventHandler> logger;
     private readonly MouseState mouseState;
 
-    public MouseEventHandler(MouseState mouseState)
+    public MouseEventHandler(MouseState mouseState, ILogger<MouseEventHandler> logger)
     {
         this.mouseState = mouseState;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Handles a mouse-related event.

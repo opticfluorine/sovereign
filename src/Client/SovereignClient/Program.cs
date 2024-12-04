@@ -8,6 +8,7 @@ using Serilog;
 using Sovereign.ClientCore;
 using Sovereign.EngineCore;
 using Sovereign.NetworkCore;
+using Sovereign.UpdaterCore;
 using Sovereign.VeldridRenderer;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -34,7 +35,8 @@ builder.Services
     .AddSovereignCoreHostedServices()
     .AddSovereignNetworkCore()
     .AddSovereignClient()
-    .AddSovereignVeldridRenderer();
+    .AddSovereignVeldridRenderer()
+    .AddSovereignUpdaterCore();
 
 // Run application.
 var host = builder.Build();

@@ -17,9 +17,11 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -31,12 +33,13 @@ public class InputSystem : ISystem, IDisposable
     private readonly IEventLoop eventLoop;
 
     private readonly KeyboardEventHandler keyboardEventHandler;
+    private readonly ILogger<InputSystem> logger;
     private readonly MouseEventHandler mouseEventHandler;
     private readonly PlayerInputMovementMapper movementMapper;
 
     public InputSystem(KeyboardEventHandler keyboardEventHandler,
         IEventLoop eventLoop, EventCommunicator eventCommunicator, PlayerInputMovementMapper movementMapper,
-        MouseEventHandler mouseEventHandler)
+        MouseEventHandler mouseEventHandler, ILogger<InputSystem> logger)
     {
         /* Dependency injection. */
         this.keyboardEventHandler = keyboardEventHandler;
@@ -44,12 +47,11 @@ public class InputSystem : ISystem, IDisposable
         EventCommunicator = eventCommunicator;
         this.movementMapper = movementMapper;
         this.mouseEventHandler = mouseEventHandler;
+        this.logger = logger;
 
         /* Register system. */
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public void Dispose()
     {

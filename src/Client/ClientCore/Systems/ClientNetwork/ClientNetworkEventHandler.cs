@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Network;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.ClientNetwork;
 
@@ -27,17 +29,18 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork;
 /// </summary>
 public sealed class ClientNetworkEventHandler
 {
+    private readonly ILogger<ClientNetworkEventHandler> logger;
     private readonly INetworkClient networkClient;
     private readonly ClientWorldSegmentSubscriptionManager worldSegmentSubscriptionManager;
 
     public ClientNetworkEventHandler(INetworkClient networkClient,
-        ClientWorldSegmentSubscriptionManager worldSegmentSubscriptionManager)
+        ClientWorldSegmentSubscriptionManager worldSegmentSubscriptionManager,
+        ILogger<ClientNetworkEventHandler> logger)
     {
         this.networkClient = networkClient;
         this.worldSegmentSubscriptionManager = worldSegmentSubscriptionManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Handles a client network related event.

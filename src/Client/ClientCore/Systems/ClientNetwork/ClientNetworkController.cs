@@ -15,11 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.ClientNetwork;
 
@@ -28,14 +30,14 @@ namespace Sovereign.ClientCore.Systems.ClientNetwork;
 /// </summary>
 public sealed class ClientNetworkController
 {
+    private readonly ILogger<ClientNetworkController> logger;
     private readonly ClientStateServices stateServices;
 
-    public ClientNetworkController(ClientStateServices stateServices)
+    public ClientNetworkController(ClientStateServices stateServices, ILogger<ClientNetworkController> logger)
     {
         this.stateServices = stateServices;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Sends an event announcing that the connection has been lost.

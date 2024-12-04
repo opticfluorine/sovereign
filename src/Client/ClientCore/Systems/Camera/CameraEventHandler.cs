@@ -15,9 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineUtil.Monads;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.Camera;
 
@@ -26,6 +28,7 @@ namespace Sovereign.ClientCore.Systems.Camera;
 /// </summary>
 public sealed class CameraEventHandler
 {
+    private readonly ILogger<CameraEventHandler> logger;
     private readonly CameraManager manager;
 
     /// <summary>
@@ -33,12 +36,11 @@ public sealed class CameraEventHandler
     /// </summary>
     private Maybe<ulong> defaultEntity = new();
 
-    public CameraEventHandler(CameraManager manager)
+    public CameraEventHandler(CameraManager manager, ILogger<CameraEventHandler> logger)
     {
         this.manager = manager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Handles a camera-related event.

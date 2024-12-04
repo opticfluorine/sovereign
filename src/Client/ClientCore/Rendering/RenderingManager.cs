@@ -60,8 +60,8 @@ public class RenderingManager : IDisposable
     public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
         DisplayModeSelector displayModeSelector, IRenderer renderer,
         RenderingResourceManager resourceManager, ClientConfigurationManager configManager,
-        SDLEventAdapter sdlEventAdapter, CommonGuiManager guiManager, ClientStateServices stateServices,
-        ILogger<RenderingManager> logger)
+        CommonGuiManager guiManager, ClientStateServices stateServices,
+        ILogger<RenderingManager> logger, SDLEventAdapter sdlEventAdapter)
     {
         this.mainDisplay = mainDisplay;
         this.adapterSelector = adapterSelector;
@@ -69,10 +69,10 @@ public class RenderingManager : IDisposable
         this.renderer = renderer;
         this.resourceManager = resourceManager;
         this.configManager = configManager;
-        this.sdlEventAdapter = sdlEventAdapter;
         this.guiManager = guiManager;
         this.stateServices = stateServices;
         this.logger = logger;
+        this.sdlEventAdapter = sdlEventAdapter;
     }
 
     /// <summary>

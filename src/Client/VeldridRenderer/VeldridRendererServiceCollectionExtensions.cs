@@ -18,7 +18,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.VeldridRenderer.Rendering;
 using Sovereign.VeldridRenderer.Rendering.Configuration;
+using Sovereign.VeldridRenderer.Rendering.Gui;
+using Sovereign.VeldridRenderer.Rendering.Resources;
+using Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 
 namespace Sovereign.VeldridRenderer;
 
@@ -35,13 +39,49 @@ public static class VeldridRendererServiceCollectionExtensions
     public static IServiceCollection AddSovereignVeldridRenderer(this IServiceCollection services)
     {
         AddImplementations(services);
+        AddRenderer(services);
+        AddGui(services);
+        AddResources(services);
+        AddGameScene(services);
 
         return services;
     }
 
-    public static void AddImplementations(IServiceCollection services)
+    private static void AddImplementations(IServiceCollection services)
     {
         services.TryAddSingleton<IAdapterEnumerator, VeldridAdapterEnumerator>();
         services.TryAddSingleton<IRenderer, Rendering.VeldridRenderer>();
+    }
+
+    private static void AddRenderer(IServiceCollection services)
+    {
+        services.TryAddSingleton<VeldridDevice>();
+        services.TryAddSingleton<VeldridSceneConsumer>();
+    }
+
+    private static void AddGui(IServiceCollection services)
+    {
+        services.TryAddSingleton<GuiPipeline>();
+        services.TryAddSingleton<GuiRenderer>();
+        services.TryAddSingleton<GuiResourceManager>();
+    }
+
+    private static void AddResources(IServiceCollection services)
+    {
+        services.TryAddSingleton<VeldridResourceManager>();
+    }
+
+    private static void AddGameScene(IServiceCollection services)
+    {
+        services.TryAddSingleton<GameSceneRenderer>();
+        services.TryAddSingleton<GameSceneConsumer>();
+        services.TryAddSingleton<GameResourceManager>();
+        services.TryAddSingleton<WorldRenderer>();
+        services.TryAddSingleton<WorldPipeline>();
+        services.TryAddSingleton<WorldVertexConstantsUpdater>();
+        services.TryAddSingleton<WorldFragmentConstantsUpdater>();
+        services.TryAddSingleton<LightingShaderConstantsUpdater>();
+        services.TryAddSingleton<PointLightDepthMapRenderer>();
+        services.TryAddSingleton<FullPointLightMapRenderer>();
     }
 }

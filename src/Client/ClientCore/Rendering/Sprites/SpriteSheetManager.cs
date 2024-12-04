@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
@@ -46,6 +47,8 @@ public class SpriteSheetManager
     /// </summary>
     private readonly SpriteSheetDefinitionValidator definitionValidator;
 
+    private readonly ILogger<SpriteSheetManager> logger;
+
     /// <summary>
     ///     Resource path builder.
     /// </summary>
@@ -59,15 +62,15 @@ public class SpriteSheetManager
     public SpriteSheetManager(SpriteSheetFactory spriteSheetFactory,
         SpriteSheetDefinitionLoader definitionLoader,
         SpriteSheetDefinitionValidator definitionValidator,
-        IResourcePathBuilder resourcePathBuilder)
+        IResourcePathBuilder resourcePathBuilder,
+        ILogger<SpriteSheetManager> logger)
     {
         this.spriteSheetFactory = spriteSheetFactory;
         this.definitionLoader = definitionLoader;
         this.definitionValidator = definitionValidator;
         this.resourcePathBuilder = resourcePathBuilder;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public IErrorHandler ErrorHandler { private get; set; } = NullErrorHandler.Instance;
 

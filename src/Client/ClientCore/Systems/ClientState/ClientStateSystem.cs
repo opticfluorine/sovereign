@@ -15,11 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.ClientState;
 
@@ -31,6 +33,7 @@ public class ClientStateSystem : ISystem
     private readonly AutoUpdaterEndDetector autoUpdaterEndDetector;
     private readonly EntityManager entityManager;
     private readonly ClientStateFlagManager flagManager;
+    private readonly ILogger<ClientStateSystem> logger;
     private readonly MainMenuStateMachine mainMenuStateMachine;
     private readonly PlayerStateManager playerStateManager;
     private readonly ClientStateMachine stateMachine;
@@ -40,7 +43,7 @@ public class ClientStateSystem : ISystem
         WorldEntryDetector worldEntryDetector, ClientStateFlagManager flagManager,
         PlayerStateManager playerStateManager, ClientStateMachine stateMachine,
         MainMenuStateMachine mainMenuStateMachine, EntityManager entityManager,
-        AutoUpdaterEndDetector autoUpdaterEndDetector)
+        AutoUpdaterEndDetector autoUpdaterEndDetector, ILogger<ClientStateSystem> logger)
     {
         this.worldEntryDetector = worldEntryDetector;
         this.flagManager = flagManager;
@@ -49,12 +52,11 @@ public class ClientStateSystem : ISystem
         this.mainMenuStateMachine = mainMenuStateMachine;
         this.entityManager = entityManager;
         this.autoUpdaterEndDetector = autoUpdaterEndDetector;
+        this.logger = logger;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public EventCommunicator EventCommunicator { get; }
 

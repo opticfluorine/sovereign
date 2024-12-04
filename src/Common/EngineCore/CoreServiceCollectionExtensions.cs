@@ -142,8 +142,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<EventAdapterManager>();
         services.TryAddSingleton<IEventLoop, MainEventLoop>();
         services.TryAddSingleton<IEventSender, EventSender>();
-
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IEventAdapter, ConsoleEventAdapter>());
+        services.TryAddSingleton<ConsoleEventAdapter>();
     }
 
     private static void AddEventValidators(IServiceCollection services)

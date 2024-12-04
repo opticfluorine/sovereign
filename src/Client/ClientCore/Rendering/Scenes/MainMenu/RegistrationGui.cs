@@ -16,7 +16,6 @@
 
 using System.Numerics;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using ImGuiNET;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network.Infrastructure;
@@ -77,8 +76,6 @@ public class RegistrationGui
         this.registrationClient = registrationClient;
         this.configManager = configManager;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Initializes the registration GUI on main menu state change.

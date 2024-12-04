@@ -23,6 +23,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.EngineCore.Resources;
 using Sovereign.UpdaterCore.Updater;
@@ -101,6 +102,7 @@ public partial class AutoUpdater
     private readonly HttpClient client;
 
     private readonly ClientConfigurationManager configurationManager;
+    private readonly ILogger<AutoUpdater> logger;
     private readonly IResourcePathBuilder resourcePathBuilder;
     private readonly UpdaterHash updaterHash;
 
@@ -110,11 +112,12 @@ public partial class AutoUpdater
     private Task? backgroundTask;
 
     public AutoUpdater(ClientConfigurationManager configurationManager, UpdaterHash updaterHash,
-        IResourcePathBuilder resourcePathBuilder)
+        IResourcePathBuilder resourcePathBuilder, ILogger<AutoUpdater> logger)
     {
         this.configurationManager = configurationManager;
         this.updaterHash = updaterHash;
         this.resourcePathBuilder = resourcePathBuilder;
+        this.logger = logger;
 
         var handler = new HttpClientHandler
         {
@@ -144,8 +147,6 @@ public partial class AutoUpdater
     ///     Percent complete of overall update operation.
     /// </summary>
     public float PercentComplete { get; private set; }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Starts the update process in the background.

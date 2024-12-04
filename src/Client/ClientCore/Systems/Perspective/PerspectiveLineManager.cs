@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
@@ -65,6 +66,8 @@ public class PerspectiveLineManager
     /// </summary>
     private readonly Dictionary<ulong, HashSet<PerspectiveLineKey>> linesByEntity = new();
 
+    private readonly ILogger<PerspectiveLineManager> logger;
+
     /// <summary>
     ///     Active perspective lines indexed by their z-intercept (x, y) coordinates.
     /// </summary>
@@ -79,20 +82,20 @@ public class PerspectiveLineManager
 
     public PerspectiveLineManager(KinematicComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
-        EntityTable entityTable, DrawableLookup drawableLookup, DrawableTagCollection drawables)
+        EntityTable entityTable, DrawableLookup drawableLookup, DrawableTagCollection drawables,
+        ILogger<PerspectiveLineManager> logger)
     {
         this.kinematics = kinematics;
         this.blockPositions = blockPositions;
         this.resolver = resolver;
         this.drawableLookup = drawableLookup;
         this.drawables = drawables;
+        this.logger = logger;
 
         entityTable.OnEntityAdded += AddEntity;
         entityTable.OnEntityRemoved += RemoveEntity;
         kinematics.OnComponentModified += (entityId, k) => NonBlockEntityMoved(entityId, k.Position);
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Called when the client is subscribed to a world segment. This activates any perspective
@@ -358,7 +361,7 @@ public class PerspectiveLineManager
         if (!linesByEntity.TryGetValue(entityId, out var oldLines)
             || !zFloorByEntity.TryGetValue(entityId, out var oldZFloor))
         {
-            logger.LogWarning("Moved entity {0} not already tracked, treating as add.");
+            logger.LogWarning("Moved entity {Id} not already tracked, treating as add.", entityId);
             AddNonBlockEntity(entityId, position);
             return;
         }

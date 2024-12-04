@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineUtil.Collections;
@@ -33,6 +34,8 @@ public sealed class WorldLayerGrouper
     /// </summary>
     private readonly ObjectPool<WorldLayer> layerPool = new();
 
+    private readonly ILogger<WorldLayerGrouper> logger;
+
     private WorldLayer? activeLayer;
 
     /// <summary>
@@ -45,7 +48,10 @@ public sealed class WorldLayerGrouper
     /// </summary>
     public List<List<uint>> SolidBlocksPerLight = new();
 
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
+    public WorldLayerGrouper(ILogger<WorldLayerGrouper> logger)
+    {
+        this.logger = logger;
+    }
 
     /// <summary>
     ///     Active layers.

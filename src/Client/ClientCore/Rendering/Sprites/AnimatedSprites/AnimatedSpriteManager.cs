@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
@@ -52,6 +53,8 @@ public sealed class AnimatedSpriteManager
     /// </summary>
     private readonly AnimatedSpriteDefinitionsLoader loader;
 
+    private readonly ILogger<AnimatedSpriteManager> logger;
+
     /// <summary>
     ///     Resource path builder.
     /// </summary>
@@ -63,14 +66,13 @@ public sealed class AnimatedSpriteManager
     private readonly SpriteManager spriteManager;
 
     public AnimatedSpriteManager(AnimatedSpriteDefinitionsLoader loader,
-        IResourcePathBuilder pathBuilder, SpriteManager spriteManager)
+        IResourcePathBuilder pathBuilder, SpriteManager spriteManager, ILogger<AnimatedSpriteManager> logger)
     {
         this.loader = loader;
         this.pathBuilder = pathBuilder;
         this.spriteManager = spriteManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public IErrorHandler ErrorHandler { private get; set; } = NullErrorHandler.Instance;
 
@@ -83,7 +85,7 @@ public sealed class AnimatedSpriteManager
         var definitions = LoadDefinitions();
         UnpackDefinitions(definitions);
 
-        logger.LogInformation("Loaded " + AnimatedSprites.Count + " animated sprites.");
+        logger.LogInformation("Loaded {Count} animated sprites.", AnimatedSprites.Count);
     }
 
     /// <summary>
@@ -158,7 +160,7 @@ public sealed class AnimatedSpriteManager
         catch (Exception e)
         {
             /* Log and throw a fatal error. */
-            logger.LogCritical("Failed to load the animated sprite definitions.", e);
+            logger.LogCritical(e, "Failed to load the animated sprite definitions.");
             ErrorHandler.Error("Failed to load the animated sprite definitions.\n"
                                + "Refer to the error log for details.");
 
@@ -217,7 +219,7 @@ public sealed class AnimatedSpriteManager
         }
         catch (Exception e)
         {
-            logger.LogError("Failed to save animated sprite definitions.", e);
+            logger.LogError(e, "Failed to save animated sprite definitions.");
         }
     }
 

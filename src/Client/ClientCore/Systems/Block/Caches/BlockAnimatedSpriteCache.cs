@@ -20,6 +20,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components;
@@ -72,6 +73,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     private readonly ConcurrentDictionary<ulong, GridPosition> knownPositions = new();
 
+    private readonly ILogger<BlockAnimatedSpriteCache> logger;
+
     private readonly MaterialManager materialManager;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
@@ -115,7 +118,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         MaterialManager materialManager,
         AboveBlockComponentCollection aboveBlocks,
         TileSpriteManager tileSpriteManager,
-        EntityManager entityManager, EntityTable entityTable)
+        EntityManager entityManager, EntityTable entityTable,
+        ILogger<BlockAnimatedSpriteCache> logger)
     {
         this.materials = materials;
         this.materialModifiers = materialModifiers;
@@ -126,11 +130,10 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         this.tileSpriteManager = tileSpriteManager;
         this.entityManager = entityManager;
         this.entityTable = entityTable;
+        this.logger = logger;
 
         RegisterEventHandlers();
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public List<int> GetFrontFaceAnimatedSpriteIds(ulong blockId)
     {
@@ -164,7 +167,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         }
         catch (Exception e)
         {
-            logger.LogError("Error updating sprite cache.", e);
+            logger.LogError(e, "Error updating sprite cache.");
         }
     }
 

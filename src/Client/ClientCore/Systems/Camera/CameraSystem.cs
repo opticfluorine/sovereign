@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 
 namespace Sovereign.ClientCore.Systems.Camera;
@@ -33,18 +32,13 @@ public sealed class CameraSystem : ISystem, IDisposable
     private readonly IEventLoop eventLoop;
 
     public CameraSystem(CameraManager cameraManager, CameraEventHandler eventHandler,
-        IEventLoop eventLoop, EventCommunicator eventCommunicator,
-        EventDescriptions eventDescriptions)
+        IEventLoop eventLoop, EventCommunicator eventCommunicator)
     {
         /* Dependency injection. */
         this.cameraManager = cameraManager;
         this.eventHandler = eventHandler;
         this.eventLoop = eventLoop;
         EventCommunicator = eventCommunicator;
-
-        /* Register events. */
-        eventDescriptions.RegisterEvent<EntityEventDetails>(EventId.Client_Camera_Attach);
-        eventDescriptions.RegisterNullEvent(EventId.Client_Camera_Detach);
 
         /* Register system. */
         eventLoop.RegisterSystem(this);

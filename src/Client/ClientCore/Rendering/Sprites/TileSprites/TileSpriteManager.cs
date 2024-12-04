@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
@@ -47,23 +48,25 @@ public sealed class TileSpriteManager
     /// </summary>
     private readonly TileSpriteDefinitionsLoader loader;
 
+    private readonly ILogger<TileSpriteManager> logger;
+
     /// <summary>
     ///     Resource path builder.
     /// </summary>
     private readonly IResourcePathBuilder pathBuilder;
 
     public TileSpriteManager(IResourcePathBuilder pathBuilder,
-        TileSpriteDefinitionsLoader loader, AnimatedSpriteManager animatedSpriteManager)
+        TileSpriteDefinitionsLoader loader, AnimatedSpriteManager animatedSpriteManager,
+        ILogger<TileSpriteManager> logger)
     {
         this.pathBuilder = pathBuilder;
         this.loader = loader;
         this.animatedSpriteManager = animatedSpriteManager;
+        this.logger = logger;
 
         animatedSpriteManager.OnAnimatedSpriteAdded += OnAnimatedSpriteAdded;
         animatedSpriteManager.OnAnimatedSpriteRemoved += OnAnimatedSpriteRemoved;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     public IErrorHandler ErrorHandler { private get; set; } = NullErrorHandler.Instance;
 
@@ -196,7 +199,7 @@ public sealed class TileSpriteManager
         }
         catch (Exception e)
         {
-            logger.LogError("Failed to save tile sprite definitions.", e);
+            logger.LogError(e, "Failed to save tile sprite definitions.");
         }
     }
 

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Resources;
 
 namespace Sovereign.ClientCore.Rendering.Sprites;
@@ -24,6 +25,8 @@ namespace Sovereign.ClientCore.Rendering.Sprites;
 /// </summary>
 public class SpriteSheetFactory
 {
+    private readonly ILogger<SpriteSheetFactory> logger;
+
     /// <summary>
     ///     Resource path builder.
     /// </summary>
@@ -35,13 +38,13 @@ public class SpriteSheetFactory
     private readonly SurfaceLoader surfaceLoader;
 
     public SpriteSheetFactory(SurfaceLoader surfaceLoader,
-        IResourcePathBuilder resourcePathBuilder)
+        IResourcePathBuilder resourcePathBuilder,
+        ILogger<SpriteSheetFactory> logger)
     {
         this.surfaceLoader = surfaceLoader;
         this.resourcePathBuilder = resourcePathBuilder;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Loads the spritesheet described by the given definition.

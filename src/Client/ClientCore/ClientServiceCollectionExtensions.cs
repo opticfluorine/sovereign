@@ -64,7 +64,6 @@ using Sovereign.ClientCore.Updater;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
-using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
@@ -110,7 +109,7 @@ public static class ClientServiceCollectionExtensions
 
     private static void AddEvents(IServiceCollection services)
     {
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IEventAdapter, SDLEventAdapter>());
+        services.TryAddSingleton<SDLEventAdapter>();
     }
 
     private static void AddClientImplementations(IServiceCollection services)
@@ -120,7 +119,8 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<IEngineConfiguration, ClientEngineConfiguration>();
         services.TryAddSingleton<IResourcePathBuilder, ClientResourcePathBuilder>();
         services.TryAddSingleton<ISystemTimer, SDLSystemTimer>();
-        services.TryAddSingleton<INetworkManager, ClientNetworkManager>();
+        services.TryAddSingleton<ClientNetworkManager>();
+        services.TryAddSingleton<INetworkManager>(x => x.GetService<ClientNetworkManager>()!);
         services
             .TryAddSingleton<IConnectionMappingOutboundPipelineStage, ClientConnectionMappingOutboundPipelineStage>();
         services.TryAddSingleton<IOutboundEventSet, ClientOutboundEventSet>();
@@ -202,7 +202,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<SceneManager>();
         services.TryAddSingleton<RenderCamera>();
 
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IScene, GameScene>());
+        services.TryAddSingleton<GameScene>();
         services.TryAddSingleton<InGameMenuGui>();
         services.TryAddSingleton<ChatGui>();
         services.TryAddSingleton<GameGui>();
@@ -230,7 +230,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<WorldSpriteSequencer>();
         services.TryAddSingleton<LightSourceTable>();
 
-        services.TryAddSingleton<IScene, MainMenuScene>();
+        services.TryAddSingleton<MainMenuScene>();
         services.TryAddSingleton<StartupGui>();
         services.TryAddSingleton<LoginGui>();
         services.TryAddSingleton<RegistrationGui>();
@@ -238,7 +238,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<CreatePlayerGui>();
         services.TryAddSingleton<ConnectionLostGui>();
 
-        services.TryAddSingleton<IScene, UpdateScene>();
+        services.TryAddSingleton<UpdateScene>();
         services.TryAddSingleton<UpdaterGui>();
     }
 

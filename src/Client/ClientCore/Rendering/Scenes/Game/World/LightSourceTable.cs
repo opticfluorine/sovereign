@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Ranges;
@@ -51,21 +52,22 @@ public class LightSourceTable
     private readonly KinematicComponentCollection kinematics;
 
     private readonly List<ulong> knownSources = new();
+    private readonly ILogger<LightSourceTable> logger;
     private readonly ParentComponentCollection parents;
     private readonly PointLightSourceComponentCollection pointLightSources;
 
     public LightSourceTable(PointLightSourceComponentCollection pointLightSources,
-        KinematicComponentCollection kinematics, ParentComponentCollection parents)
+        KinematicComponentCollection kinematics, ParentComponentCollection parents,
+        ILogger<LightSourceTable> logger)
     {
         this.pointLightSources = pointLightSources;
         this.kinematics = kinematics;
         this.parents = parents;
+        this.logger = logger;
 
         pointLightSources.OnComponentAdded += OnLightAdded;
         pointLightSources.OnComponentRemoved += OnLightRemoved;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Gets the point light sources whose emissions overlap the given range.

@@ -16,6 +16,7 @@
  */
 
 using System;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Veldrid;
 
@@ -36,13 +37,15 @@ public class VeldridResourceManager : IDisposable
     /// </summary>
     private readonly VeldridDevice device;
 
-    public VeldridResourceManager(VeldridDevice device, TextureAtlasManager atlasManager)
+    private readonly ILogger<VeldridResourceManager> logger;
+
+    public VeldridResourceManager(VeldridDevice device, TextureAtlasManager atlasManager,
+        ILogger<VeldridResourceManager> logger)
     {
         this.device = device;
         this.atlasManager = atlasManager;
+        this.logger = logger;
     }
-
-    public ILogger Logger { private get; set; } = NullLogger.Instance;
 
     /// <summary>
     ///     Veldrid texture containing the full texture atlas.
