@@ -43,6 +43,11 @@ public sealed class ServerConfiguration
     public NewPlayersRecord NewPlayers { get; set; } = new();
 
     /// <summary>
+    ///     Scripting engine configuration settings.
+    /// </summary>
+    public ScriptingRecord Scripting { get; set; } = new();
+
+    /// <summary>
     ///     Full description of the accounts configuration.
     /// </summary>
     public sealed class AccountsRecord
@@ -192,5 +197,22 @@ public sealed class ServerConfiguration
         ///     Whether to grant the admin role to new players by default.
         /// </summary>
         public bool AdminByDefault { get; set; } = false;
+    }
+
+    /// <summary>
+    ///     Full description of the scripting engine configuration.
+    /// </summary>
+    public sealed class ScriptingRecord
+    {
+        /// <summary>
+        ///     Base directory where scripts are located.
+        /// </summary>
+        public string ScriptDirectory { get; set; } = "Scripts";
+
+        /// <summary>
+        ///     Maximum number of directories (including the base directory) to recurse into when
+        ///     searching for scripts.
+        /// </summary>
+        public uint MaxDirectoryDepth { get; set; } = 5;
     }
 }

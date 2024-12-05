@@ -29,6 +29,7 @@ using Sovereign.ServerCore.Entities;
 using Sovereign.ServerCore.Logging;
 using Sovereign.ServerCore.Resources;
 using Sovereign.ServerCore.Systems.Persistence;
+using Sovereign.ServerCore.Systems.Scripting;
 using Sovereign.ServerCore.Systems.ServerChat;
 using Sovereign.ServerCore.Systems.ServerManagement;
 using Sovereign.ServerCore.Systems.TemplateEntity;
@@ -59,6 +60,7 @@ public static class ServerServiceCollectionExtensions
         AddTemplateEntitySystem(services);
         AddWorldEditSystem(services);
         AddWorldManagementSystem(services);
+        AddScriptingSystem(services);
 
         return services;
     }
@@ -135,5 +137,12 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<WorldManagementController>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, WorldManagementSystem>());
+    }
+
+    private static void AddScriptingSystem(IServiceCollection services)
+    {
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ScriptingSystem>());
+
+        services.TryAddSingleton<ScriptLoader>();
     }
 }

@@ -155,17 +155,17 @@ Network:
   # Automatic ping interval, in milliseconds.
   PingIntervalMs: 10000
   
-  # ---------------
+  # -------------------
   # ConnectionTimeoutMs
-  # ---------------
+  # -------------------
   # Timeout period (in milliseconds) after which a client will be disconnected.
   # This is recommended to be at least 2.5x PingIntervalMs for low-activity connections
   # where a ping is dropped.
   ConnectionTimeoutMs: 30000
   
-  # ---------------
+  # -------------------
   # EntitySyncBatchSize
-  # ---------------
+  # -------------------
   # Timeout period (in milliseconds) after which a client will be disconnected.
   # Maximum number of entities to synchronize to the client in a single event.
   # Greater values improve throughput at the cost of increased latency due to a 
@@ -187,3 +187,21 @@ NewPlayers:
   # will have admin privileges. It should be set to false before opening the server
   # to the public.
   AdminByDefault: true
+
+# ---------
+# Scripting
+# ---------
+Scripting:
+  
+  # ---------------
+  # ScriptDirectory
+  # ---------------
+  # Base directory where scripts are stored.
+  ScriptDirectory: Scripts
+  
+  # -----------------
+  # MaxDirectoryDepth
+  # -----------------
+  # Maximum number of directories (including the base directory) to recursively search
+  # when scanning for scripts to load.
+  MaxDirectoryDepth: 5
