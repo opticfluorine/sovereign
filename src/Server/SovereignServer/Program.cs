@@ -19,9 +19,11 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Sovereign.Accounts;
 using Sovereign.EngineCore;
+using Sovereign.EngineCore.Lua;
 using Sovereign.NetworkCore;
 using Sovereign.Persistence;
 using Sovereign.ServerCore;
+using Sovereign.ServerCore.Lua;
 using Sovereign.ServerNetwork;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -41,7 +43,9 @@ builder.Services
     .AddSovereignServer()
     .AddSovereignServerNetwork()
     .AddSovereignPersistence()
-    .AddSovereignAccounts();
+    .AddSovereignAccounts()
+    .AddEngineCoreLuaLibraries()
+    .AddServerCoreLuaLibraries();
 
 // Run application.
 var host = builder.Build();

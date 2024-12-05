@@ -48,7 +48,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
         // each containing the library information and its functions.
 
         // Start by gathering all the [ScriptableLibrary] classes.
-        var pipeline = context.SyntaxProvider
+        var libraryPipeline = context.SyntaxProvider
             .ForAttributeWithMetadataName(ScriptableLibraryFullName,
                 static (context, _) => context is ClassDeclarationSyntax,
                 static (context, cToken) =>
@@ -63,7 +63,9 @@ public class LuaLibraryGenerator : IIncrementalGenerator
                         LibraryShortClass = clsSymbol.Name,
                         LibraryNamespace = GetFullNamespace(clsSymbol.ContainingNamespace)
                     };
-                })
+                });
+
+        var pipeline = libraryPipeline
             .Combine(
                 // Pair each library with an array of *all* functions. (Will be narrowed down later.)
                 context.SyntaxProvider
@@ -103,6 +105,9 @@ public class LuaLibraryGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(pipeline,
             static (context, details) => GenerateSource(context, details.Left, details.Item2));
+
+        context.RegisterSourceOutput(libraryPipeline.Collect().Combine(context.CompilationProvider),
+            static (context, details) => GenerateServiceCollectionSource(context, details.Left, details.Right));
     }
 
     /// <summary>
@@ -270,6 +275,48 @@ public class LuaLibraryGenerator : IIncrementalGenerator
             }");
 
         context.AddSource($"{libraryModel.LibraryShortClass}LuaLibrary.g.cs", sb.ToString());
+    }
+
+    /// <summary>
+    ///     Generates IServiceCollection extension method for registering all library bindings in this
+    ///     assembly with a service collection.
+    /// </summary>
+    /// <param name="context">Source context.</param>
+    /// <param name="models">All library models in assembly.</param>
+    /// <param name="compilation">Compilation information.</param>
+    private static void GenerateServiceCollectionSource(SourceProductionContext context,
+        ImmutableArray<LibraryModel> models, Compilation compilation)
+    {
+        var assemblyName = compilation.AssemblyName ?? throw new Exception("AssemblyName is null");
+        var baseName = assemblyName.Substring(assemblyName.IndexOf('.') + 1);
+        var className = $"{baseName}LuaLibraryServiceCollectionExtensions";
+        var methodName = $"Add{baseName}LuaLibraries";
+
+        var sb = new StringBuilder();
+        sb.Append($@"
+            using Microsoft.Extensions.DependencyInjection;
+            using Microsoft.Extensions.DependencyInjection.Extensions;
+            using Sovereign.Scripting.Lua;
+            namespace {assemblyName}.Lua;
+            public static class {className}
+            {{
+                public static IServiceCollection {methodName}(this IServiceCollection services)
+                {{");
+
+        foreach (var model in models)
+        {
+            var fullName = $"{model.LibraryNamespace}.{model.LibraryShortClass}LuaLibrary";
+            sb.Append($@"
+                    services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, {fullName}>());");
+        }
+
+        sb.Append(@"
+                    return services;
+                }
+            }
+        ");
+
+        context.AddSource($"{className}.g.cs", sb.ToString());
     }
 
     /// <summary>

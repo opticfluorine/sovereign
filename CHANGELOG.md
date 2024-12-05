@@ -6,6 +6,8 @@
 
 #### 04 December 2024
 
+* Scripting: Add new source generator for registering all Lua library bindings with the DI
+  service container at startup.
 * Chat: Automatically open the chat window when first logging in. Fix the default position of
   the chat window so that it doesn't extend beyond the bottom of the screen. Lose window focus
   when pressing Enter without any text entered into the chat window. Lose window focus when
