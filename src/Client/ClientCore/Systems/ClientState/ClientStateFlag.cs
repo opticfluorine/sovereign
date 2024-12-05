@@ -74,9 +74,14 @@ public enum ClientStateFlag
     ///     Flag indicating that the game is in world edit mode.
     /// </summary>
     WorldEditMode,
-    
+
     /// <summary>
     ///     Flag indicating the need to reload client resources (e.g. after an update).
     /// </summary>
     ReloadClientResources,
+
+    /// <summary>
+    ///     Flag indicating that the player has newly logged into the game in the last frame.
+    /// </summary>
+    NewLogin
 }

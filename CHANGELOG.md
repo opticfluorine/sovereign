@@ -4,6 +4,13 @@
 
 ### December
 
+#### 04 December 2024
+
+* Chat: Automatically open the chat window when first logging in. Fix the default position of
+  the chat window so that it doesn't extend beyond the bottom of the screen. Lose window focus
+  when pressing Enter without any text entered into the chat window. Lose window focus when
+  first logging in. Altogether, these changes greatly improve the usability of the chat feature.
+
 #### 03 December 2024
 
 * All: Spent the last week or so eliminating technical debt. Sovereign no longer depends on

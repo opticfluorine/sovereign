@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using ImGuiNET;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
@@ -60,6 +61,10 @@ public class GameGui
 
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowInGameMenu)) menuGui.Render();
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowChat)) chatGui.Render();
+
+        // Clear window focus when first entering the game so that controls aren't absorbed by the GUI.
+        if (stateServices.CheckAndClearFlagValue(ClientStateFlag.NewLogin))
+            ImGui.SetWindowFocus(null);
     }
 
     /// <summary>

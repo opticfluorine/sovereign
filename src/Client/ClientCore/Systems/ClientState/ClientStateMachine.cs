@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using Sovereign.ClientCore.Configuration;
-using Sovereign.ClientCore.Rendering;
 
 namespace Sovereign.ClientCore.Systems.ClientState;
 
@@ -28,17 +27,19 @@ public class ClientStateMachine
 {
     private readonly ClientStateFlagManager flagManager;
 
-    /// <summary>
-    ///     Current client state.
-    /// </summary>
-    public MainClientState State { get; private set; }
-
+    private readonly Dictionary<MainClientState, Action> stateEntryHandlers;
     private readonly Dictionary<MainClientState, Action> stateExitHandlers;
 
     public ClientStateMachine(ClientConfigurationManager configManager, ClientStateFlagManager flagManager)
     {
         this.flagManager = flagManager;
-        stateExitHandlers = new Dictionary<MainClientState, Action>()
+
+        stateEntryHandlers = new Dictionary<MainClientState, Action>
+        {
+            { MainClientState.InGame, OnEnterInGame }
+        };
+
+        stateExitHandlers = new Dictionary<MainClientState, Action>
         {
             { MainClientState.Update, OnExitUpdate }
         };
@@ -47,6 +48,11 @@ public class ClientStateMachine
             ? MainClientState.Update
             : MainClientState.MainMenu;
     }
+
+    /// <summary>
+    ///     Current client state.
+    /// </summary>
+    public MainClientState State { get; private set; }
 
     /// <summary>
     ///     Attempts a state transition.
@@ -66,12 +72,22 @@ public class ClientStateMachine
         {
             var priorState = State;
 
-            if (stateExitHandlers.TryGetValue(priorState, out var handler))
-                handler.Invoke();
-            
+            if (stateExitHandlers.TryGetValue(priorState, out var handler)) handler.Invoke();
+            if (stateEntryHandlers.TryGetValue(desiredState, out handler)) handler.Invoke();
+
             State = desiredState;
         }
+
         return valid;
+    }
+
+    /// <summary>
+    ///     Called when about to enter the InGame state.
+    /// </summary>
+    private void OnEnterInGame()
+    {
+        flagManager.SetStateFlagValue(ClientStateFlag.ShowChat, true);
+        flagManager.SetStateFlagValue(ClientStateFlag.NewLogin, true);
     }
 
     /// <summary>
@@ -79,6 +95,6 @@ public class ClientStateMachine
     /// </summary>
     private void OnExitUpdate()
     {
-        flagManager.SetStateFlagValue(ClientStateFlag.ReloadClientResources, true);   
+        flagManager.SetStateFlagValue(ClientStateFlag.ReloadClientResources, true);
     }
 }

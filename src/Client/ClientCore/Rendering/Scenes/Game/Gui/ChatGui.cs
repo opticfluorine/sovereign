@@ -28,7 +28,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 /// </summary>
 public class ChatGui
 {
-    private static readonly Vector2 WindowRelPos = new(0.15f, 0.75f);
+    private static readonly Vector2 WindowRelPos = new(0.15f, 0.65f);
     private static readonly Vector2 TableScale = new(0.7f, 0.2f);
     private readonly ClientChatController chatController;
     private readonly ClientChatServices chatServices;
@@ -59,7 +59,7 @@ public class ChatGui
 
         ImGui.SetNextWindowSize(Vector2.Zero);
         ImGui.SetNextWindowPos(chatPos, ImGuiCond.FirstUseEver);
-        if (ImGui.Begin("Chat", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar))
+        if (ImGui.Begin("Chat", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse))
         {
             var tableDims = io.DisplaySize * TableScale;
             if (ImGui.BeginTable("chat", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, tableDims))
@@ -103,13 +103,15 @@ public class ChatGui
     /// </summary>
     private void OnSubmit()
     {
-        // Ignore zero-length inputs.
-        if (input.Length == 0) return;
+        // If no input, remove focus from the window.
+        if (input.Length == 0)
+        {
+            ImGui.SetWindowFocus(null);
+            return;
+        }
 
         // Send message.
         chatController.SendChat(eventSender, input);
-
-        // Clear input buffer.
         input = "";
     }
 }
