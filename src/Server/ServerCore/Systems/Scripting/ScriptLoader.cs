@@ -15,6 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Configuration;
@@ -29,19 +32,59 @@ public class ScriptLoader
     private readonly IServerConfigurationManager configManager;
     private readonly ILogger<ScriptLoader> logger;
     private readonly IEnumerable<ILuaLibrary> luaLibraries;
+    private readonly IServiceScopeFactory scopeFactory;
 
     public ScriptLoader(ILogger<ScriptLoader> logger, IServerConfigurationManager configManager,
-        IEnumerable<ILuaLibrary> luaLibraries)
+        IEnumerable<ILuaLibrary> luaLibraries, IServiceScopeFactory scopeFactory)
     {
         this.logger = logger;
         this.configManager = configManager;
         this.luaLibraries = luaLibraries;
+        this.scopeFactory = scopeFactory;
     }
 
     /// <summary>
-    ///     Loads or reloads all scripts.
+    ///     Loads and hosts all scripts.
     /// </summary>
-    public void LoadAll()
+    public List<LuaHost> LoadAll()
     {
+        var config = configManager.ServerConfiguration.Scripting;
+
+        var files = Directory.EnumerateFiles(config.ScriptDirectory, "*.lua",
+            new EnumerationOptions
+            {
+                MatchCasing = MatchCasing.CaseInsensitive,
+                IgnoreInaccessible = true,
+                RecurseSubdirectories = true,
+                MaxRecursionDepth = (int)config.MaxDirectoryDepth
+            });
+
+        return files.Select(HostScript).ToList();
+    }
+
+    /// <summary>
+    ///     Loads and hosts the given Lua script.
+    /// </summary>
+    /// <param name="file">Path to script file.</param>
+    /// <returns>Hosted script.</returns>
+    private LuaHost HostScript(string file)
+    {
+        var host = GetNewHost();
+
+        // TODO Load script into host.
+
+        return host;
+    }
+
+    /// <summary>
+    ///     Creates a new Lua host and configures it for integration with the engine.
+    /// </summary>
+    /// <returns>Configured Lua host.</returns>
+    private LuaHost GetNewHost()
+    {
+        var host = new LuaHost();
+        foreach (var library in luaLibraries) library.Install(host);
+
+        return host;
     }
 }
