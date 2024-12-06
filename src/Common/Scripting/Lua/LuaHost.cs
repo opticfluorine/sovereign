@@ -122,11 +122,18 @@ public class LuaHost : IDisposable
 
         var result = lua_pcall(LuaState, 0, 0, 0);
         if (result != LuaResult.Ok)
-        {
             // TODO handle error
             throw new LuaException("Error while calling function.");
-        }
 
         // TODO handle results
+    }
+
+    /// <summary>
+    ///     Loads and executes a script file.
+    /// </summary>
+    /// <param name="filename">Path to script file.</param>
+    public void LoadScript(string filename)
+    {
+        luaL_loadfile(LuaState, filename);
     }
 }

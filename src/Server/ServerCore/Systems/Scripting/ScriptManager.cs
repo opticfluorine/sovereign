@@ -14,41 +14,44 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
-using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Systems;
+using Microsoft.Extensions.Logging;
+using Sovereign.Scripting.Lua;
 
 namespace Sovereign.ServerCore.Systems.Scripting;
 
 /// <summary>
-///     System responsible for managing server-side scripts.
+///     Manages the active set of scripts.
 /// </summary>
-public class ScriptingSystem : ISystem
+public class ScriptManager : IDisposable
 {
-    private readonly ScriptManager manager;
+    private readonly ScriptLoader loader;
+    private readonly ILogger<ScriptManager> logger;
+    private List<LuaHost> scriptHosts = new();
 
-    public ScriptingSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, ScriptManager manager)
+    public ScriptManager(ScriptLoader loader, ILogger<ScriptManager> logger)
     {
-        this.manager = manager;
-        EventCommunicator = eventCommunicator;
-        eventLoop.RegisterSystem(this);
+        this.loader = loader;
+        this.logger = logger;
     }
 
-    public EventCommunicator EventCommunicator { get; }
-    public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>();
-    public int WorkloadEstimate => 1000;
-
-    public void Initialize()
+    public void Dispose()
     {
-        manager.Reload();
+        foreach (var host in scriptHosts) host.Dispose();
     }
 
-    public void Cleanup()
+    /// <summary>
+    ///     Loads or reloads all scripts.
+    /// </summary>
+    public void Reload()
     {
-    }
+        logger.LogInformation("Loading scripts...");
 
-    public int ExecuteOnce()
-    {
-        return 0;
+        foreach (var host in scriptHosts) host.Dispose();
+
+        scriptHosts = loader.LoadAll();
+
+        logger.LogInformation("Finished loading scripts.");
     }
 }

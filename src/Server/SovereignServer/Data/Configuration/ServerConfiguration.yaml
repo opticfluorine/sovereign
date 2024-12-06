@@ -197,7 +197,7 @@ Scripting:
   # ScriptDirectory
   # ---------------
   # Base directory where scripts are stored.
-  ScriptDirectory: Scripts
+  ScriptDirectory: Data/Scripts
   
   # -----------------
   # MaxDirectoryDepth

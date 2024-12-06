@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sovereign.Scripting.Lua;
@@ -59,7 +59,18 @@ public class ScriptLoader
                 MaxRecursionDepth = (int)config.MaxDirectoryDepth
             });
 
-        return files.Select(HostScript).ToList();
+        var hosts = new List<LuaHost>();
+        foreach (var file in files)
+            try
+            {
+                hosts.Add(HostScript(file));
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to load script {File}.", file);
+            }
+
+        return hosts;
     }
 
     /// <summary>
@@ -69,9 +80,10 @@ public class ScriptLoader
     /// <returns>Hosted script.</returns>
     private LuaHost HostScript(string file)
     {
-        var host = GetNewHost();
+        logger.LogInformation("Loading script {File}.", file);
 
-        // TODO Load script into host.
+        var host = GetNewHost();
+        host.LoadScript(file);
 
         return host;
     }
