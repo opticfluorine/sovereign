@@ -24,22 +24,17 @@
     </Choose>
 
     <ItemGroup>
-        <None Remove="Data\Logging.xml"/>
         <None Update="appsettings.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 
-    <ItemGroup>
-        <Content Include="Data\Logging.xml">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
-
     <Target Name="CopyAfterBuild" AfterTargets="AfterBuild">
         <ItemGroup>
+            <DataFiles Include="Data/**/*" Exclude="Data/Configuration/ServerConfiguration.yaml"/>
             <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
+        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"/>
         <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(OutDir)"/>
     </Target>
 
@@ -48,10 +43,12 @@
             <MigrationFiles Include="$(SolutionDir)Server/Persistence/Migrations/**/*"/>
             <LicenseFile Include="$(SolutionDir)../LICENSE"/>
             <LibFiles Include="Contrib/$(ContribSet)/*"/>
+            <DataFiles Include="$(OutDir)Data/**/*"/>
         </ItemGroup>
         <Copy SourceFiles="@(MigrationFiles)" DestinationFolder="$(PublishDir)Migrations/%(RecursiveDir)"/>
         <Copy SourceFiles="@(LicenseFile)" DestinationFolder="$(PublishDir)"/>
         <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(PublishDir)"/>
+        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(PublishDir)"/>
     </Target>
 
     <ItemGroup>

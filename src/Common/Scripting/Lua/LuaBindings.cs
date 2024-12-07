@@ -181,11 +181,11 @@ public static partial class LuaBindings
     public static partial bool lua_toboolean(IntPtr luaState, int idx);
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial string lua_tolstring(IntPtr luaState, int idx, IntPtr len);
+    public static partial IntPtr lua_tolstring(IntPtr luaState, int idx, IntPtr len);
 
     public static string lua_tostring(IntPtr luaState, int idx)
     {
-        return lua_tolstring(luaState, idx, IntPtr.Zero);
+        return Marshal.PtrToStringUTF8(lua_tolstring(luaState, idx, IntPtr.Zero)) ?? "";
     }
 
     [LibraryImport(LibName)]
@@ -372,14 +372,29 @@ public static partial class LuaBindings
         return result == LuaResult.Ok ? lua_pcall(luaState, 0, LUA_MULTRET, 0) : result;
     }
 
-    [LibraryImport(LibName)]
-    public static partial int lua_error(IntPtr luaState);
+    //
+    // A note on error functions:
+    // lua_error, luaL_argerror, and luaL_typeerror are not supported by these bindings.
+    // These functions perform a longjmp which would cross a managed frame if called from
+    // within managed code invoked from Lua; this will crash the .NET CLR.
+    // 
+    // See https://learn.microsoft.com/en-us/dotnet/standard/native-interop/exceptions-interoperability
+    // for additional information.
+    //
+    public static int lua_error(IntPtr luaState)
+    {
+        throw new NotSupportedException();
+    }
 
-    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial void luaL_argerror(IntPtr luaState, int arg, string extramsg);
+    public static void luaL_argerror(IntPtr luaState, int arg, string extramsg)
+    {
+        throw new NotSupportedException();
+    }
 
-    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial void luaL_typeerror(IntPtr luaState, int arg, string tname);
+    public static void luaL_typeerror(IntPtr luaState, int arg, string tname)
+    {
+        throw new NotSupportedException();
+    }
 
     [LibraryImport(LibName)]
     public static partial void luaL_openlibs(IntPtr luaState);

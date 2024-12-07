@@ -144,5 +144,6 @@ public static class ServerServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ScriptingSystem>());
 
         services.TryAddSingleton<ScriptLoader>();
+        services.TryAddSingleton<ScriptManager>();
     }
 }

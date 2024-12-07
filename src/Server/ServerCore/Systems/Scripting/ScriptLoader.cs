@@ -31,16 +31,18 @@ public class ScriptLoader
 {
     private readonly IServerConfigurationManager configManager;
     private readonly ILogger<ScriptLoader> logger;
+    private readonly ILoggerFactory loggerFactory;
     private readonly IEnumerable<ILuaLibrary> luaLibraries;
     private readonly IServiceScopeFactory scopeFactory;
 
     public ScriptLoader(ILogger<ScriptLoader> logger, IServerConfigurationManager configManager,
-        IEnumerable<ILuaLibrary> luaLibraries, IServiceScopeFactory scopeFactory)
+        IEnumerable<ILuaLibrary> luaLibraries, IServiceScopeFactory scopeFactory, ILoggerFactory loggerFactory)
     {
         this.logger = logger;
         this.configManager = configManager;
         this.luaLibraries = luaLibraries;
         this.scopeFactory = scopeFactory;
+        this.loggerFactory = loggerFactory;
     }
 
     /// <summary>
@@ -82,7 +84,7 @@ public class ScriptLoader
     {
         logger.LogInformation("Loading script {File}.", file);
 
-        var host = GetNewHost();
+        var host = GetNewHost(file);
         host.LoadScript(file);
 
         return host;
@@ -92,9 +94,13 @@ public class ScriptLoader
     ///     Creates a new Lua host and configures it for integration with the engine.
     /// </summary>
     /// <returns>Configured Lua host.</returns>
-    private LuaHost GetNewHost()
+    private LuaHost GetNewHost(string filename)
     {
-        var host = new LuaHost();
+        var scriptName = Path.GetFileNameWithoutExtension(filename);
+        var loggerCat = $"Script ({scriptName})";
+        var hostLogger = loggerFactory.CreateLogger(loggerCat);
+
+        var host = new LuaHost(hostLogger);
         foreach (var library in luaLibraries) library.Install(host);
 
         return host;
