@@ -164,12 +164,65 @@ public class LuaHost : IDisposable
         try
         {
             StartLibrary("util");
+            AddLibraryFunction("log_trace", UtilLogTrace);
+            AddLibraryFunction("log_debug", UtilLogDebug);
             AddLibraryFunction("log_info", UtilLogInformation);
+            AddLibraryFunction("log_warn", UtilLogWarn);
+            AddLibraryFunction("log_error", UtilLogError);
+            AddLibraryFunction("log_crit", UtilLogCritical);
         }
         finally
         {
             EndLibrary();
         }
+    }
+
+    /// <summary>
+    ///     Provides the util.log_info Lua function which logs a trace message.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int UtilLogTrace(IntPtr luaState)
+    {
+        try
+        {
+            if (lua_gettop(luaState) != 1) throw new LuaException("Requires one argument.");
+            if (!lua_isstring(luaState, 1)) throw new LuaException("First argument must be a string.");
+            var msg = lua_tostring(luaState, 1);
+
+            logger.LogTrace(msg);
+        }
+        catch (Exception e)
+        {
+            // Log error but continue the script as-is.
+            logger.LogError(e, "Error in util.log_trace.");
+        }
+
+        return (int)LuaResult.Ok;
+    }
+
+    /// <summary>
+    ///     Provides the util.log_info Lua function which logs a debug message.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int UtilLogDebug(IntPtr luaState)
+    {
+        try
+        {
+            if (lua_gettop(luaState) != 1) throw new LuaException("Requires one argument.");
+            if (!lua_isstring(luaState, 1)) throw new LuaException("First argument must be a string.");
+            var msg = lua_tostring(luaState, 1);
+
+            logger.LogDebug(msg);
+        }
+        catch (Exception e)
+        {
+            // Log error but continue the script as-is.
+            logger.LogError(e, "Error in util.log_debug.");
+        }
+
+        return (int)LuaResult.Ok;
     }
 
     /// <summary>
@@ -191,6 +244,78 @@ public class LuaHost : IDisposable
         {
             // Log error but continue the script as-is.
             logger.LogError(e, "Error in util.log_info.");
+        }
+
+        return (int)LuaResult.Ok;
+    }
+
+    /// <summary>
+    ///     Provides the util.log_info Lua function which logs a warning message.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int UtilLogWarn(IntPtr luaState)
+    {
+        try
+        {
+            if (lua_gettop(luaState) != 1) throw new LuaException("Requires one argument.");
+            if (!lua_isstring(luaState, 1)) throw new LuaException("First argument must be a string.");
+            var msg = lua_tostring(luaState, 1);
+
+            logger.LogWarning(msg);
+        }
+        catch (Exception e)
+        {
+            // Log error but continue the script as-is.
+            logger.LogError(e, "Error in util.log_warn.");
+        }
+
+        return (int)LuaResult.Ok;
+    }
+
+    /// <summary>
+    ///     Provides the util.log_info Lua function which logs an error message.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int UtilLogError(IntPtr luaState)
+    {
+        try
+        {
+            if (lua_gettop(luaState) != 1) throw new LuaException("Requires one argument.");
+            if (!lua_isstring(luaState, 1)) throw new LuaException("First argument must be a string.");
+            var msg = lua_tostring(luaState, 1);
+
+            logger.LogError(msg);
+        }
+        catch (Exception e)
+        {
+            // Log error but continue the script as-is.
+            logger.LogError(e, "Error in util.log_error.");
+        }
+
+        return (int)LuaResult.Ok;
+    }
+
+    /// <summary>
+    ///     Provides the util.log_info Lua function which logs a critical message.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int UtilLogCritical(IntPtr luaState)
+    {
+        try
+        {
+            if (lua_gettop(luaState) != 1) throw new LuaException("Requires one argument.");
+            if (!lua_isstring(luaState, 1)) throw new LuaException("First argument must be a string.");
+            var msg = lua_tostring(luaState, 1);
+
+            logger.LogCritical(msg);
+        }
+        catch (Exception e)
+        {
+            // Log error but continue the script as-is.
+            logger.LogError(e, "Error in util.log_crit.");
         }
 
         return (int)LuaResult.Ok;

@@ -1,1 +1,6 @@
 util.log_info("This is a test of the scripting engine.")
+util.log_warn("This is a warning.")
+util.log_error("This is an error.")
+util.log_crit("This is a critical message.")
+util.log_trace("This is a trace message.")
+util.log_debug("This is a debug message.")

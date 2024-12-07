@@ -4,6 +4,11 @@
 
 ### December
 
+#### 06 December 2024
+
+* Scripting: Add all levels of logging functions to the `util` module. The log category is
+  set uniquely for each script, allowing traceability of log messages back to specific scripts.
+
 #### 04 December 2024
 
 * Scripting: Add new source generator for registering all Lua library bindings with the DI
