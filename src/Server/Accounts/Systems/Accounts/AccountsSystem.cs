@@ -21,7 +21,6 @@ using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
-using Sovereign.ServerCore.Events;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.Accounts.Systems.Accounts;

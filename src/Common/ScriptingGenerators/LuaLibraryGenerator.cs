@@ -225,7 +225,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
 
                 public void Install(LuaHost luaHost)
                 {{
-                    luaHost.StartLibrary(""{libraryModel.LibraryName}"");");
+                    luaHost.BeginLibrary(""{libraryModel.LibraryName}"");");
 
         foreach (var function in functionModels)
             sb.Append($@"

@@ -15,10 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Sovereign.EngineCore.Events;
 using Sovereign.EngineUtil.Attributes;
 
-namespace Sovereign.ServerCore.Events;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
 ///     Event details for player selection events.

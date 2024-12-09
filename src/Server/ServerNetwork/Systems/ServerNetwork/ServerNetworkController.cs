@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Events;
-using Sovereign.ServerCore.Events;
+using Sovereign.EngineCore.Events.Details;
 
 namespace Sovereign.ServerNetwork.Network.ServerNetwork;
 

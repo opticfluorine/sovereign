@@ -17,10 +17,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Lua;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Configuration;
+using static Sovereign.Scripting.Lua.LuaBindings;
 
 namespace Sovereign.ServerCore.Systems.Scripting;
 
@@ -33,15 +34,13 @@ public class ScriptLoader
     private readonly ILogger<ScriptLoader> logger;
     private readonly ILoggerFactory loggerFactory;
     private readonly IEnumerable<ILuaLibrary> luaLibraries;
-    private readonly IServiceScopeFactory scopeFactory;
 
     public ScriptLoader(ILogger<ScriptLoader> logger, IServerConfigurationManager configManager,
-        IEnumerable<ILuaLibrary> luaLibraries, IServiceScopeFactory scopeFactory, ILoggerFactory loggerFactory)
+        IEnumerable<ILuaLibrary> luaLibraries, ILoggerFactory loggerFactory)
     {
         this.logger = logger;
         this.configManager = configManager;
         this.luaLibraries = luaLibraries;
-        this.scopeFactory = scopeFactory;
         this.loggerFactory = loggerFactory;
     }
 
@@ -67,6 +66,10 @@ public class ScriptLoader
             {
                 hosts.Add(HostScript(file));
             }
+            catch (LuaException e)
+            {
+                logger.LogError("{Error}", e.Message);
+            }
             catch (Exception e)
             {
                 logger.LogError(e, "Failed to load script {File}.", file);
@@ -85,6 +88,7 @@ public class ScriptLoader
         logger.LogInformation("Loading script {File}.", file);
 
         var host = GetNewHost(file);
+        host.Name = Path.GetFileNameWithoutExtension(file);
         host.LoadScript(file);
 
         return host;
@@ -101,8 +105,27 @@ public class ScriptLoader
         var hostLogger = loggerFactory.CreateLogger(loggerCat);
 
         var host = new LuaHost(hostLogger);
+        InstallEventTable(host);
         foreach (var library in luaLibraries) library.Install(host);
 
         return host;
+    }
+
+    /// <summary>
+    ///     Installs the event ID table into the given host.
+    /// </summary>
+    /// <param name="host">Lua host.</param>
+    private void InstallEventTable(LuaHost host)
+    {
+        luaL_checkstack(host.LuaState, 2, null);
+
+        lua_createtable(host.LuaState, 0, 0);
+        foreach (var eventId in ScriptableEventSet.Events)
+        {
+            lua_pushinteger(host.LuaState, (long)eventId);
+            lua_setfield(host.LuaState, -2, eventId.ToString());
+        }
+
+        lua_setglobal(host.LuaState, "events");
     }
 }

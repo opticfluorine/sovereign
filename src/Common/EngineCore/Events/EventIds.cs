@@ -15,6 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineUtil.Attributes;
+
 namespace Sovereign.EngineCore.Events;
 
 /// <summary>
@@ -40,6 +45,7 @@ public enum EventId
     ///     Event sent at the beginning of a new tick.
     /// </summary>
     /// Associated details: None
+    [ScriptableEvent]
     Core_Tick = 2,
 
     #region Movement
@@ -431,6 +437,7 @@ public enum EventId
     ///     Event sent to select a player character during account login.
     /// </summary>
     /// Associated details: SelectPlayerEventDetails
+    [ScriptableEvent(nameof(SelectPlayerEventDetails))]
     Server_Accounts_SelectPlayer = 200300,
 
     #endregion Server_Accounts
@@ -473,6 +480,16 @@ public enum EventId
     Server_WorldEdit_RemoveBlock = 200601,
 
     #endregion
+    
+    #region Server_Scripting 
+    
+    /// <summary>
+    ///     Requests that all scripts be reloaded.
+    /// </summary>
+    /// Associated details: None
+    Server_Scripting_ReloadAll = 200700,
+    
+    #endregion Server_Scripting
 
     #endregion Server
 }

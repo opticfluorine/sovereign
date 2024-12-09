@@ -4,6 +4,17 @@
 
 ### December
 
+#### 09 December 2024
+
+* Scripting: Add `events` table to all Lua scripts, which provides an enumeration of all
+  event IDs that a Lua script can react to. Also added a callback system that allows scripts
+  to register callback functions to receive events. The sample `Motd.lua` script is updated
+  to react to the `Core_Tick` event.
+* Scripting: Improve error handling, logging full error details including a Lua traceback
+  when an error occurs.
+* Scripting: Execute all scripts in separate tasks to ensure that a misbehaving script does
+  not trap an executor task in an infinite loop, deadlock, or other bad things.
+
 #### 06 December 2024
 
 * Scripting: Add all levels of logging functions to the `util` module. The log category is

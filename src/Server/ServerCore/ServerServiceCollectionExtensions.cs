@@ -23,6 +23,7 @@ using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Resources;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Timing;
+using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Components;
 using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Entities;
@@ -142,8 +143,9 @@ public static class ServerServiceCollectionExtensions
     private static void AddScriptingSystem(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ScriptingSystem>());
-
         services.TryAddSingleton<ScriptLoader>();
         services.TryAddSingleton<ScriptManager>();
+        services.TryAddSingleton<ScriptingCallbackManager>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, ScriptingLuaLibrary>());
     }
 }

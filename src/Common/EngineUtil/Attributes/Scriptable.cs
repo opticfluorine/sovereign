@@ -64,6 +64,7 @@ public class ScriptableLibrary : Attribute
 /// <summary>
 ///     Designates a method in a [ScriptableLibrary] class as a target for export to Lua.
 /// </summary>
+[AttributeUsage(AttributeTargets.Method)]
 public class ScriptableFunction : Attribute
 {
     public ScriptableFunction(string name)
@@ -72,4 +73,15 @@ public class ScriptableFunction : Attribute
     }
 
     public string Name { get; }
+}
+
+/// <summary>
+///     Designates an event ID as an event which a script can react to.
+/// </summary>
+[AttributeUsage(AttributeTargets.Field)]
+public class ScriptableEvent : Attribute
+{
+    public ScriptableEvent(string? detailsClass = null)
+    {
+    }
 }

@@ -17,9 +17,9 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
 using Sovereign.NetworkCore.Network.Infrastructure;
-using Sovereign.ServerCore.Events;
 using Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
 using EventId = Sovereign.EngineCore.Events.EventId;
 

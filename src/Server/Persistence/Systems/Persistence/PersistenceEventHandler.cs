@@ -19,7 +19,6 @@ using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
-using Sovereign.ServerCore.Events;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.Persistence.Systems.Persistence;

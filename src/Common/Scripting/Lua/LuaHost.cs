@@ -25,9 +25,13 @@ namespace Sovereign.Scripting.Lua;
 public class LuaHost : IDisposable
 {
     private const int QuickLookupSizeHint = 32;
+    private const string QuickLookupKey = "sovereign_ql";
     private readonly ILogger logger;
 
+    private readonly Lock opsLock = new();
+
     private readonly int quickLookupStackPosition;
+    private readonly int tracebackStackPosition;
     private string library = "";
     private uint nextQuickLookupIndex = 1;
 
@@ -40,37 +44,62 @@ public class LuaHost : IDisposable
         luaL_openlibs(LuaState);
         InstallUtilLibrary();
 
+        luaL_checkstack(LuaState, 3, null);
+
+        // Install traceback error handler.
+        lua_getglobal(LuaState, "debug");
+        lua_getfield(LuaState, -1, "traceback");
+        tracebackStackPosition = lua_gettop(LuaState);
+
         // Create the Quick Lookup table for fast C#-to-Lua callback access.
         // No need to push it to global state - it will permanently live on the stack for fast access.
+        // Also set the table into the registry for lookup in other stacks.
         lua_createtable(LuaState, QuickLookupSizeHint, 0);
         quickLookupStackPosition = lua_gettop(LuaState);
+        lua_pushnil(LuaState);
+        lua_copy(LuaState, quickLookupStackPosition, -1);
+        lua_setfield(LuaState, LUA_REGISTRYINDEX, QuickLookupKey);
     }
+
+    /// <summary>
+    ///     Flag indicating whether this host has been disposed.
+    /// </summary>
+    public bool IsDisposed { get; private set; }
 
     /// <summary>
     ///     Lua state handle.
     /// </summary>
     public IntPtr LuaState { get; }
 
+    /// <summary>
+    ///     Name of this Lua host.
+    /// </summary>
+    public string Name { get; set; } = "";
+
     public void Dispose()
     {
-        lua_close(LuaState);
+        lock (opsLock)
+        {
+            lua_close(LuaState);
+            IsDisposed = true;
+        }
     }
 
     /// <summary>
     ///     Starts a new library.
     /// </summary>
     /// <param name="name">Library name.</param>
-    public void StartLibrary(string name)
+    public void BeginLibrary(string name)
     {
-        library = name;
+        lock (opsLock)
+        {
+            library = name;
 
-        luaL_checkstack(LuaState, 1, null);
+            luaL_checkstack(LuaState, 1, null);
 
-        lua_createtable(LuaState, 0, 0);
-        lua_setglobal(LuaState, library);
-
-        // Place library name at top of stack while the library is open.
-        lua_getglobal(LuaState, library);
+            lua_createtable(LuaState, 0, 0);
+            lua_setglobal(LuaState, library);
+        }
     }
 
     /// <summary>
@@ -80,11 +109,14 @@ public class LuaHost : IDisposable
     /// <param name="func">Function.</param>
     public void AddLibraryFunction(string name, LuaCFunction func)
     {
-        luaL_checkstack(LuaState, 2, null);
+        lock (opsLock)
+        {
+            luaL_checkstack(LuaState, 2, null);
 
-        lua_getglobal(LuaState, library);
-        lua_pushcfunction(LuaState, func);
-        lua_setfield(LuaState, -2, name);
+            lua_getglobal(LuaState, library);
+            lua_pushcfunction(LuaState, func);
+            lua_setfield(LuaState, -2, name);
+        }
     }
 
     /// <summary>
@@ -92,18 +124,28 @@ public class LuaHost : IDisposable
     /// </summary>
     public void EndLibrary()
     {
-        library = "";
-        lua_pop(LuaState, 1);
+        lock (opsLock)
+        {
+            library = "";
+            lua_pop(LuaState, 1);
+        }
     }
 
     /// <summary>
     ///     Pops the function from the top of the Lua stack and adds it to the quick
-    ///     lookup table.
+    ///     lookup table. This should only be called from within a protected Lua
+    ///     context where the managed opsLock is already held by the caller.
     /// </summary>
     /// <returns>Quick lookup index for later retrieval.</returns>
     public uint AddQuickLookupFunction()
     {
-        lua_seti(LuaState, quickLookupStackPosition, (int)nextQuickLookupIndex);
+        // For registering functions, grab the table from the registry since we are probably
+        // in a separate stack tied to a managed function call (e.g. a callback registration method).
+        luaL_checkstack(LuaState, 1, null);
+        lua_getfield(LuaState, LUA_REGISTRYINDEX, QuickLookupKey);
+        lua_rotate(LuaState, -2, 1);
+        lua_seti(LuaState, -2, (int)nextQuickLookupIndex);
+        lua_pop(LuaState, 1);
         return nextQuickLookupIndex++;
     }
 
@@ -111,49 +153,49 @@ public class LuaHost : IDisposable
     ///     Calls the Lua function at the given position of the quick lookup table.
     /// </summary>
     /// <param name="index">Index.</param>
-    /// <param name="par">Parameters.</param>
+    /// <param name="setupFunction">Function to call to push any arguments onto the stack.</param>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if index is out of range.</exception>
     /// <exception cref="LuaException">Thrown if the quick lookup table is corrupt.</exception>
-    public void CallQuickLookupFunction<TParams, TResult>(uint index, TParams par)
+    public void CallQuickLookupFunction(uint index, Action setupFunction)
     {
-        if (index < 1 || index >= nextQuickLookupIndex) throw new ArgumentOutOfRangeException("index");
+        lock (opsLock)
+        {
+            if (index < 1 || index >= nextQuickLookupIndex) throw new ArgumentOutOfRangeException("index");
 
-        luaL_checkstack(LuaState, 1, null); // TODO space for args/results
+            // Push function onto stack.
+            luaL_checkstack(LuaState, 1, null);
+            var ftype = lua_geti(LuaState, quickLookupStackPosition, (int)index);
+            if (ftype != LuaType.Function) throw new LuaException("Quick lookup table has non-function value.");
 
-        var ftype = lua_geti(LuaState, quickLookupStackPosition, (int)index);
-        if (ftype != LuaType.Function) throw new LuaException("Quick lookup table has non-function value.");
+            // Call the setup function to push any arguments onto the stack.
+            setupFunction();
 
-        // TODO handle args
-
-        var result = lua_pcall(LuaState, 0, 0, 0);
-        if (result != LuaResult.Ok)
-            // TODO handle error
-            throw new LuaException("Error while calling function.");
-
-        // TODO handle results
+            // Invoke function in a protected context.
+            Validate(lua_pcall(LuaState, 0, 0, tracebackStackPosition));
+        }
     }
 
     /// <summary>
-    ///     Asynchronously calls the Lua function at the given position of the quick lookup table.
-    /// </summary>
-    /// <param name="index"></param>
-    /// <param name="par"></param>
-    /// <typeparam name="TParams"></typeparam>
-    /// <typeparam name="TResult"></typeparam>
-    /// <returns></returns>
-    public Task CallQuickLookupFunctionAsync<TParams, TResult>(uint index, TParams par)
-    {
-        return Task.Run(() => CallQuickLookupFunction<TParams, TResult>(index, par));
-    }
-
-    /// <summary>
-    ///     Loads and executes a script file.
+    ///     Loads a script file (but does not execute it).
     /// </summary>
     /// <param name="filename">Path to script file.</param>
     public void LoadScript(string filename)
     {
-        luaL_loadfile(LuaState, filename);
-        lua_pcall(LuaState, 0, LUA_MULTRET, 0);
+        lock (opsLock)
+        {
+            Validate(luaL_loadfile(LuaState, filename));
+        }
+    }
+
+    /// <summary>
+    ///     Executes an already loaded script.
+    /// </summary>
+    public void ExecuteLoadedScript()
+    {
+        lock (opsLock)
+        {
+            Validate(lua_pcall(LuaState, 0, LUA_MULTRET, tracebackStackPosition));
+        }
     }
 
     /// <summary>
@@ -163,7 +205,7 @@ public class LuaHost : IDisposable
     {
         try
         {
-            StartLibrary("util");
+            BeginLibrary("util");
             AddLibraryFunction("log_trace", UtilLogTrace);
             AddLibraryFunction("log_debug", UtilLogDebug);
             AddLibraryFunction("log_info", UtilLogInformation);
@@ -319,5 +361,18 @@ public class LuaHost : IDisposable
         }
 
         return (int)LuaResult.Ok;
+    }
+
+    /// <summary>
+    ///     Convenience method that validates a Lua call, throwing an exception on failure.
+    /// </summary>
+    /// <param name="result">Result of Lua call.</param>
+    /// <exception cref="LuaException">Thrown if the Lua call failed for any reason.</exception>
+    private void Validate(LuaResult result)
+    {
+        if (result == LuaResult.Ok) return;
+
+        var err = lua_tostring(LuaState, -1);
+        throw new LuaException(err);
     }
 }

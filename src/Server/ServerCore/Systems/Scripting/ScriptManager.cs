@@ -16,6 +16,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sovereign.Scripting.Lua;
 
@@ -26,13 +28,12 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 /// </summary>
 public class ScriptManager : IDisposable
 {
-    private readonly ScriptLoader loader;
+    private readonly Dictionary<IntPtr, LuaHost> hostsByState = new();
     private readonly ILogger<ScriptManager> logger;
     private List<LuaHost> scriptHosts = new();
 
-    public ScriptManager(ScriptLoader loader, ILogger<ScriptManager> logger)
+    public ScriptManager(ILogger<ScriptManager> logger)
     {
-        this.loader = loader;
         this.logger = logger;
     }
 
@@ -42,16 +43,51 @@ public class ScriptManager : IDisposable
     }
 
     /// <summary>
-    ///     Loads or reloads all scripts.
+    ///     Unloads all currently loaded scripts.
     /// </summary>
-    public void Reload()
+    public void UnloadAll()
     {
-        logger.LogInformation("Loading scripts...");
-
         foreach (var host in scriptHosts) host.Dispose();
+        hostsByState.Clear();
+    }
 
-        scriptHosts = loader.LoadAll();
+    /// <summary>
+    ///     Loads all scripts.
+    /// </summary>
+    public void Load(List<LuaHost> scripts)
+    {
+        scriptHosts = scripts;
+        foreach (var host in scriptHosts)
+        {
+            hostsByState[host.LuaState] = host;
 
-        logger.LogInformation("Finished loading scripts.");
+            // Now that host registration is complete, execute the pending script asynchronously.
+            Task.Run(() =>
+            {
+                try
+                {
+                    host.ExecuteLoadedScript();
+                }
+                catch (LuaException e)
+                {
+                    logger.LogError("{Error}", e.Message);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Error while executing loaded script.");
+                }
+            });
+        }
+    }
+
+    /// <summary>
+    ///     Gets the host associated with the given Lua state handle.
+    /// </summary>
+    /// <param name="luaState">Lua state handle.</param>
+    /// <param name="host">Associated host.</param>
+    /// <returns>true if a matching host was found, false otherwise.</returns>
+    public bool TryGetHost(IntPtr luaState, [NotNullWhen(true)] out LuaHost? host)
+    {
+        return hostsByState.TryGetValue(luaState, out host);
     }
 }

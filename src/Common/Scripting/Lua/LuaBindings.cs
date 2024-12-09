@@ -86,6 +86,8 @@ public static partial class LuaBindings
 
     public const int LUA_MULTRET = -1;
 
+    public const int LUA_REGISTRYINDEX = -1001000;
+
     private const string LibName = "lua5.4";
 
     [LibraryImport(LibName)]

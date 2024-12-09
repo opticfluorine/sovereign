@@ -16,7 +16,7 @@
 
 using System;
 using Sovereign.EngineCore.Events;
-using Sovereign.ServerCore.Events;
+using Sovereign.EngineCore.Events.Details;
 
 namespace Sovereign.Accounts.Systems.Accounts;
 

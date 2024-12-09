@@ -180,7 +180,7 @@ public class RenderingManager : IDisposable
         {
             /* Fatal error - can't initialize the renderer. */
             var msg = "Failed to initialize the renderer.";
-            logger.LogCritical(msg, e);
+            logger.LogCritical(e, msg);
             ErrorHandler.Error(e.Message);
             throw new FatalErrorException(msg, e);
         }

@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Events;
-
-namespace Sovereign.ServerCore.Events;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
 ///     Details associated with an event that references a specific connection.
