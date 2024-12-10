@@ -8,6 +8,7 @@
 
 * Server: Send new event type when a player enters the world.
 * Scripting: Add support for scripts reacting to players entering the world.
+* Scripting: Get a basic MOTD script working that greets the player on login.
 
 #### 08 December 2024
 
