@@ -6,6 +6,11 @@
 
 #### 09 December 2024
 
+* Server: Send new event type when a player enters the world.
+* Scripting: Add support for scripts reacting to players entering the world.
+
+#### 08 December 2024
+
 * Scripting: Add `events` table to all Lua scripts, which provides an enumeration of all
   event IDs that a Lua script can react to. Also added a callback system that allows scripts
   to register callback functions to receive events. The sample `Motd.lua` script is updated

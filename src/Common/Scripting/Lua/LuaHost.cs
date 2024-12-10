@@ -153,10 +153,13 @@ public class LuaHost : IDisposable
     ///     Calls the Lua function at the given position of the quick lookup table.
     /// </summary>
     /// <param name="index">Index.</param>
-    /// <param name="setupFunction">Function to call to push any arguments onto the stack.</param>
+    /// <param name="setupFunction">
+    ///     Function to call to push any arguments onto the stack.
+    ///     Return value indicates the number of arguments.
+    /// </param>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if index is out of range.</exception>
     /// <exception cref="LuaException">Thrown if the quick lookup table is corrupt.</exception>
-    public void CallQuickLookupFunction(uint index, Action setupFunction)
+    public void CallQuickLookupFunction(uint index, Func<int> setupFunction)
     {
         lock (opsLock)
         {
@@ -168,10 +171,10 @@ public class LuaHost : IDisposable
             if (ftype != LuaType.Function) throw new LuaException("Quick lookup table has non-function value.");
 
             // Call the setup function to push any arguments onto the stack.
-            setupFunction();
+            var nargs = setupFunction();
 
             // Invoke function in a protected context.
-            Validate(lua_pcall(LuaState, 0, 0, tracebackStackPosition));
+            Validate(lua_pcall(LuaState, nargs, 0, tracebackStackPosition));
         }
     }
 

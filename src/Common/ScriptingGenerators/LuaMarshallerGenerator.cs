@@ -110,10 +110,11 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
             /// </remarks>
             public static class LuaMarshaller
             {{
-                public static void Marshal(IntPtr luaState, long value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, long value, bool checkStack = true)
                 {{
                     if (checkStack) luaL_checkstack(luaState, 1, null);
                     lua_pushinteger(luaState, value);
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out long value)
@@ -123,10 +124,11 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
-                public static void Marshal(IntPtr luaState, ulong value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, ulong value, bool checkStack = true)
                 {{
                     if (checkStack) luaL_checkstack(luaState, 1, null);
-                    lua_pushinteger(luaState, (int)value);
+                    lua_pushinteger(luaState, (long)value);
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out ulong value)
@@ -136,9 +138,10 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
-                public static void Marshal(IntPtr luaState, int value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, int value, bool checkStack = true)
                 {{
                     Marshal(luaState, (long)value, checkStack);
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out int value)
@@ -148,9 +151,10 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
-                public static void Marshal(IntPtr luaState, uint value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, uint value, bool checkStack = true)
                 {{
                     Marshal(luaState, (ulong)value, checkStack);
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out uint value)
@@ -160,9 +164,10 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
-                public static void Marshal(IntPtr luaState, short value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, short value, bool checkStack = true)
                 {{
                     Marshal(luaState, (long)value, checkStack);
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out short value)
@@ -172,9 +177,10 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
-                public static void Marshal(IntPtr luaState, ushort value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, ushort value, bool checkStack = true)
                 {{
                     Marshal(luaState, (ulong)value, checkStack);
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out ushort value)
@@ -184,9 +190,10 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
-                public static void Marshal(IntPtr luaState, byte value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, byte value, bool checkStack = true)
                 {{
                     Marshal(luaState, (long)value, checkStack);
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out byte value)
@@ -196,10 +203,11 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
-                public static void Marshal(IntPtr luaState, float value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, float value, bool checkStack = true)
                 {{
                     if (checkStack) luaL_checkstack(luaState, 1, null);
                     lua_pushnumber(luaState, value);
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out float value)
@@ -209,10 +217,11 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
-                public static void Marshal(IntPtr luaState, bool value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, bool value, bool checkStack = true)
                 {{
                     if (checkStack) luaL_checkstack(luaState, 1, null);
                     lua_pushboolean(luaState, value);
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out bool value)
@@ -222,10 +231,11 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
-                public static void Marshal(IntPtr luaState, string value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, string value, bool checkStack = true)
                 {{
                     if (checkStack) luaL_checkstack(luaState, 1, null);
                     lua_pushstring(luaState, value);
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out string value)
@@ -235,12 +245,13 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
-                public static void Marshal(IntPtr luaState, Vector3 value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, Vector3 value, bool checkStack = true)
                 {{
                     if (checkStack) luaL_checkstack(luaState, 3, null);
                     Marshal(luaState, value.X, false);
                     Marshal(luaState, value.Y, false);
                     Marshal(luaState, value.Z, false);
+                    return 3;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out Vector3 value)
@@ -251,10 +262,11 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     Unmarshal(luaState, out value.X);
                 }}
 
-                public static void Marshal(IntPtr luaState, Guid value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, Guid value, bool checkStack = true)
                 {{
                     if (checkStack) luaL_checkstack(luaState, 1, null);
                     Marshal(luaState, value.ToString(), false);
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out Guid value)
@@ -269,17 +281,19 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
         foreach (var record in models)
         {
             sb.Append($@"
-                public static void Marshal(IntPtr luaState, {record.Name} value, bool checkStack = true)
+                public static int Marshal(IntPtr luaState, {record.Name} value, bool checkStack = true)
                 {{
+                    int pushCount = 0;
                     if (checkStack) luaL_checkstack(luaState, {record.DataModels.List.Count}, null);
             ");
 
             foreach (var dataModel in record.DataModels.List)
                 sb.Append($@"
-                    Marshal(luaState, value.{dataModel.Name}, false);
+                    pushCount += Marshal(luaState, value.{dataModel.Name}, false);
                 ");
 
             sb.Append($@"
+                    return pushCount;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out {record.Name} value)

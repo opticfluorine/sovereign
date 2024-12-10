@@ -39,12 +39,13 @@ public class ScriptableEventSetGenerator : IIncrementalGenerator
                     if (context.SemanticModel.GetDeclaredSymbol(context.TargetNode, cToken) is not IFieldSymbol sym)
                         throw new Exception("Not FieldSymbol");
 
-                    return new EventModel()
+                    return new EventModel
                     {
                         Name = sym.Name,
                         Details = sym.GetAttributes()
                             .Where(a => a.AttributeClass != null && a.AttributeClass.Name == "ScriptableEvent")
-                            .Select(a => a.ConstructorArguments[0].IsNull ? "" : a.ConstructorArguments[0].Value!.ToString())
+                            .Select(a =>
+                                a.ConstructorArguments[0].IsNull ? "" : a.ConstructorArguments[0].Value!.ToString())
                             .First()
                     };
                 })
@@ -55,11 +56,11 @@ public class ScriptableEventSetGenerator : IIncrementalGenerator
             static (context, details) => GenerateSource(context, details.Left, details.Right));
     }
 
-    private static void GenerateSource(SourceProductionContext context, ImmutableArray<EventModel> events, 
+    private static void GenerateSource(SourceProductionContext context, ImmutableArray<EventModel> events,
         Compilation compilation)
     {
         if (events.Length == 0) return;
-        
+
         var sb = new StringBuilder();
 
         sb.Append($@"
@@ -82,37 +83,39 @@ public class ScriptableEventSetGenerator : IIncrementalGenerator
                 {{");
 
         foreach (var ev in events)
-        {
             sb.Append($@"
                     EventId.{ev.Name},");
-        }
 
         sb.Append(@"
                 };
 
-                public static void MarshalEventDetails(LuaHost luaHost, EventId eventId, IEventDetails details)
+                /// <summary>
+                ///     Marshals details for the given event.
+                /// </summary>
+                /// <param name=""luaHost"">Lua host.</param>
+                /// <param name=""eventId"">Event ID.</param>
+                /// <param name=""details"">Details, or null if none.</param>
+                /// <returns>Number of Lua arguments pushed to the stack.</returns>
+                public static int MarshalEventDetails(LuaHost luaHost, EventId eventId, IEventDetails details)
                 {
                     switch (eventId)
                     {");
 
         foreach (var ev in events)
-        {
             if (ev.Details != "")
                 sb.Append($@"
                         case EventId.{ev.Name}:
                             if (details is null) throw new LuaException(""Details are null."");
-                            LuaMarshaller.Marshal(luaHost.LuaState, ({ev.Details})details);
-                            break;");
-        }
+                            return LuaMarshaller.Marshal(luaHost.LuaState, ({ev.Details})details);");
 
         sb.Append(@"
                         default:
-                            break;
+                            return 0;
                     }
                 }
             }
         ");
-        
+
         context.AddSource("ScriptableEventSet.g.cs", sb.ToString());
     }
 

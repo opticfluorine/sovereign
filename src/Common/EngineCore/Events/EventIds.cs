@@ -15,8 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineUtil.Attributes;
 
@@ -45,8 +43,7 @@ public enum EventId
     ///     Event sent at the beginning of a new tick.
     /// </summary>
     /// Associated details: None
-    [ScriptableEvent]
-    Core_Tick = 2,
+    [ScriptableEvent] Core_Tick = 2,
 
     #region Movement
 
@@ -402,6 +399,17 @@ public enum EventId
     Server_Persistence_RetrieveWorldSegment = 200001,
 
     /// <summary>
+    ///     Event sent when a player has entered the world and their data is fully loaded.
+    ///     Follows a Server_Accounts_SelectPlayer and the associated data load.
+    /// </summary>
+    /// <remarks>
+    ///     Details entity is the player entity
+    /// </remarks>
+    /// Associated details: EntityEventDetails
+    [ScriptableEvent(nameof(EntityEventDetails))]
+    Server_Persistence_PlayerEnteredWorld = 200002,
+
+    /// <summary>
     ///     Event sent to synchronize the server with the database.
     /// </summary>
     /// Associated details: None
@@ -437,7 +445,6 @@ public enum EventId
     ///     Event sent to select a player character during account login.
     /// </summary>
     /// Associated details: SelectPlayerEventDetails
-    [ScriptableEvent(nameof(SelectPlayerEventDetails))]
     Server_Accounts_SelectPlayer = 200300,
 
     #endregion Server_Accounts
@@ -480,15 +487,15 @@ public enum EventId
     Server_WorldEdit_RemoveBlock = 200601,
 
     #endregion
-    
-    #region Server_Scripting 
-    
+
+    #region Server_Scripting
+
     /// <summary>
     ///     Requests that all scripts be reloaded.
     /// </summary>
     /// Associated details: None
     Server_Scripting_ReloadAll = 200700,
-    
+
     #endregion Server_Scripting
 
     #endregion Server

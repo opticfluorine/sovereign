@@ -116,6 +116,8 @@ public sealed class PersistenceEventHandler
         // but only if the player isn't newly created (and therefore already in memory).
         if (!details.NewPlayer)
             OnRetrieveEntity(details.PlayerCharacterEntityId);
+
+        internalController.PlayerEnteredWorld(eventSender, details.PlayerCharacterEntityId);
     }
 
     /// <summary>
