@@ -61,7 +61,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
                         LibraryName = GetLibraryName(clsSymbol),
                         LibraryClass = GetClassForLibrary(clsSymbol),
                         LibraryShortClass = clsSymbol.Name,
-                        LibraryNamespace = GetFullNamespace(clsSymbol.ContainingNamespace)
+                        LibraryNamespace = SyntaxUtil.GetFullNamespace(clsSymbol.ContainingNamespace)
                     };
                 });
 
@@ -89,7 +89,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
                                 LibraryClass = GetClassForFunction(function),
                                 ParameterModels = new ValueEquatableList<ParameterModel>(parameters.ToList()),
                                 ReturnTypeName =
-                                    $"{GetFullNamespace(function.ReturnType.ContainingNamespace)}.{function.ReturnType.Name}",
+                                    $"{SyntaxUtil.GetFullNamespace(function.ReturnType.ContainingNamespace)}.{function.ReturnType.Name}",
                                 ReturnTypeMarshallerClass = GetMarshallerClass(returnType)
                             };
                         })
@@ -122,7 +122,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
         return new ParameterModel
         {
             Name = param.Name,
-            TypeName = $"{GetFullNamespace(typeSymbol.ContainingNamespace)}.{typeSymbol.Name}",
+            TypeName = $"{SyntaxUtil.GetFullNamespace(typeSymbol.ContainingNamespace)}.{typeSymbol.Name}",
             MarshallerClass = GetMarshallerClass(typeSymbol)
         };
     }
@@ -332,31 +332,6 @@ public class LuaLibraryGenerator : IIncrementalGenerator
         ");
 
         context.AddSource($"{className}.g.cs", sb.ToString());
-    }
-
-    /// <summary>
-    ///     Gets the fully qualified name of the given namespace.
-    /// </summary>
-    /// <param name="namespaceSymbol">Namespace symbol.</param>
-    /// <returns>Fully qualified name of namespace.</returns>
-    private static string GetFullNamespace(INamespaceSymbol namespaceSymbol)
-    {
-        var namespaceStack = new Stack<string>();
-        var current = namespaceSymbol;
-        while (current != null)
-        {
-            namespaceStack.Push(current.Name);
-            current = current.ContainingNamespace;
-        }
-
-        var sb = new StringBuilder();
-        while (namespaceStack.Count > 0)
-        {
-            if (sb.Length > 0) sb.Append(".");
-            sb.Append(namespaceStack.Pop());
-        }
-
-        return sb.ToString();
     }
 
     /// <summary>

@@ -33,15 +33,17 @@ public class ScriptLoader
     private readonly IServerConfigurationManager configManager;
     private readonly ILogger<ScriptLoader> logger;
     private readonly ILoggerFactory loggerFactory;
+    private readonly IEnumerable<ILuaComponents> luaComponents;
     private readonly IEnumerable<ILuaLibrary> luaLibraries;
 
     public ScriptLoader(ILogger<ScriptLoader> logger, IServerConfigurationManager configManager,
-        IEnumerable<ILuaLibrary> luaLibraries, ILoggerFactory loggerFactory)
+        IEnumerable<ILuaLibrary> luaLibraries, ILoggerFactory loggerFactory, IEnumerable<ILuaComponents> luaComponents)
     {
         this.logger = logger;
         this.configManager = configManager;
         this.luaLibraries = luaLibraries;
         this.loggerFactory = loggerFactory;
+        this.luaComponents = luaComponents;
     }
 
     /// <summary>
@@ -106,6 +108,7 @@ public class ScriptLoader
 
         var host = new LuaHost(hostLogger);
         InstallEventTable(host);
+        InstallComponents(host);
         foreach (var library in luaLibraries) library.Install(host);
 
         return host;
@@ -127,5 +130,22 @@ public class ScriptLoader
         }
 
         lua_setglobal(host.LuaState, "events");
+    }
+
+    /// <summary>
+    ///     Installs component collection bindings into the host.
+    /// </summary>
+    /// <param name="host">Lua host.</param>
+    private void InstallComponents(LuaHost host)
+    {
+        luaL_checkstack(host.LuaState, 2, null);
+
+        lua_createtable(host.LuaState, 0, 0);
+        foreach (var component in luaComponents)
+        {
+            component.Install(host);
+        }
+
+        lua_setglobal(host.LuaState, "components");
     }
 }

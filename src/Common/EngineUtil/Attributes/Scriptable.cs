@@ -85,3 +85,17 @@ public class ScriptableEvent : Attribute
     {
     }
 }
+
+/// <summary>
+///     Designates a component collection class as one for which Lua bindings should be generated.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+public class ScriptableComponents : Attribute
+{
+    public ScriptableComponents(string name)
+    {
+        Name = name;
+    }
+
+    public string Name { get; }
+}
