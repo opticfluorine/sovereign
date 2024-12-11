@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Immutable;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -41,7 +42,9 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     {
                         Name = clsSymbol.Name,
                         FullNamespace = SyntaxUtil.GetFullNamespace(clsSymbol.ContainingNamespace),
-                        BindingName = $"{clsSymbol.Name}LuaComponents"
+                        BindingName = $"{clsSymbol.Name}LuaComponents",
+                        LuaName = "",
+                        ValueTypeAssemblyName = ""
                     };
                 });
 
@@ -56,11 +59,197 @@ public class LuaComponentsGenerator : IIncrementalGenerator
 
     private static void GenerateBinding(SourceProductionContext context, Model model)
     {
+        var sb = new StringBuilder();
+        sb.Append($@"
+            using System;
+            using Microsoft.Extensions.Logging;
+            using Sovereign.Scripting.Lua;
+            using static Sovereign.Scripting.Lua.LuaBindings;
+
+            namespace {model.FullNamespace};
+
+            /// <summary>
+            ///     Lua component collection bindings for {model.Name}.
+            /// </summary>
+            public class {model.BindingName} : ILuaComponents
+            {{
+                private readonly {model.Name} components;
+                private readonly ILogger logger;
+
+                public {model.BindingName}({model.Name} components, ILogger<{model.BindingName}> logger)
+                {{
+                    this.components = components;
+                    this.logger = logger;
+                }}
+
+                public void Install(LuaHost luaHost)
+                {{
+                    luaL_checkstack(luaHost.LuaState, 2);
+
+                    lua_createtable(luaHost.LuaState, 0, 0);
+
+                    lua_pushcfunction(luaHost.LuaState, HasComponentForEntity);
+                    lua_setfield(luaHost.LuaState, -2, ""exists"");
+
+                    lua_pushcfunction(luaHost.LuaState, GetComponent);
+                    lua_setfield(luaHost.LuaState, -2, ""get"");
+
+                    lua_pushcfunction(luaHost.LuaState, RemoveComponent);
+                    lua_setfield(luaHost.LuaState, -2, ""remove"");
+
+                    lua_pushcfunction(luaHost.LuaState, SetComponent);
+                    lua_setfield(luaHost.LuaState, -2, ""set"");
+
+                    lua_pushcfunction(luaHost.LuaState, AddComponent);
+                    lua_setfield(luaHost.LuaState, -2, ""add"");
+
+                    lua_pushcfunction(luaHost.LuaState, MultiplyComponent);
+                    lua_setfield(luaHost.LuaState, -2, ""multiply"");
+
+                    lua_pushcfunction(luaHost.LuaState, DivideComponent);
+                    lua_setfield(luaHost.LuaState, -2, ""divide"");
+
+                    lua_pushcfunction(luaHost.LuaState, SetVelocityComponent);
+                    lua_setfield(luaHost.LuaState, -2, ""set_velocity"");
+
+                    lua_pushcfunction(luaHost.LuaState, AddPositionComponent);
+                    lua_setfield(luaHost.LuaState, -2, ""add_position"");
+
+                    lua_setfield(luaHost.LuaState, -2, ""{model.LuaName}"");
+                }}
+
+                private int HasComponentForEntity(IntPtr luaState)
+                {{
+                    var result = false;
+
+                    try 
+                    {{
+                        var argCount = lua_gettop(lusState);
+                        if (argCount != 1) throw new LuaException(""Must be called with one argument."");
+                        if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
+
+                        var entityId = (ulong)lua_tointeger(luaState, 1);
+
+                        result = components.HasComponentForEntity(entityId);
+                    }}
+                    catch (Exception e)
+                    {{
+                        logger.LogError(e, ""Error in components.{model.LuaName}.exists()."");
+                    }}
+
+                    luaL_checkstack(luaState, 1);
+                    lua_pushboolean(result);
+                    return 1;
+                }}
+
+                private int GetComponent(IntPtr luaState)
+                {{
+                    var resultCount = 1;
+
+                    try
+                    {{
+                        luaL_checkstack(luaState, 1);
+
+                        var argCount = lua_gettop();
+                        if (argCount != 1) throw new LuaException(""Must be called with one argument."");
+                        if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
+
+                        var entityId = (ulong)lua_tointeger(luaState, -1);
+                        var value = components[entityId];
+
+                        resultCount = {model.ValueTypeAssemblyName}.Lua.LuaMarshaller.Marshal(luaState, value);
+                    }}
+                    catch (Exception e)
+                    {{
+                        logger.LogError(e, ""Error in components.{model.LuaName}.get()."");
+                        lua_pushnil(luaState);
+                    }}
+
+                    return resultCount;
+                }}
+
+                private int RemoveComponent(IntPtr luaState)
+                {{
+                    // TODO
+                    return 0;
+                }}
+
+                private int SetComponent(IntPtr luaState)
+                {{
+                    // TODO
+                    return 0;
+                }}
+
+                private int AddComponent(IntPtr luaState)
+                {{
+                    // TODO
+                    return 0;
+                }}
+
+                private int MultiplyComponent(IntPtr luaState)
+                {{
+                    // TODO
+                    return 0;
+                }}
+
+                private int DivideComponent(IntPtr luaState)
+                {{
+                    // TODO
+                    return 0;
+                }}
+
+                private int SetVelocityComponent(IntPtr luaState)
+                {{
+                    // TODO
+                    return 0;
+                }}
+
+                private int AddPositionComponent(IntPtr luaState)
+                {{
+                    // TODO
+                    return 0;
+                }}
+        ");
     }
 
     private static void GenerateServiceCollectionExtensions(SourceProductionContext context,
         ImmutableArray<Model> models, Compilation compilation)
     {
+        if (models.Length == 0) return;
+
+        var assemblyName = compilation.AssemblyName!;
+        var assemblyShortName = assemblyName.Substring(assemblyName.IndexOf('.') + 1);
+        var className = $"{assemblyShortName}LuaComponentsServiceCollectionExtensions.g.cs";
+
+        var sb = new StringBuilder();
+        sb.Append($@"
+            using Microsoft.Extensions.DependencyInjection;
+            using Microsoft.Extensions.DependencyInjection.Extensions;
+            using Sovereign.Scripting.Lua;
+
+            namespace {assemblyName}.Lua;
+
+            public static class {className}
+            {{
+
+                /// <summary>
+                ///     Adds the ILuaComponents services from {assemblyName}.
+                /// </summary>
+                /// <param name=""services"">Service collection.</param>
+                /// <returns>Service collection.</returns>
+                public static IServiceCollection AddSovereign{assemblyShortName}LuaComponents(this IServiceCollection services)
+                {{");
+
+        foreach (var model in models)
+            sb.Append($@"
+                    services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaComponents, {model.FullNamespace}.{model.BindingName}>());");
+
+        sb.Append(@"
+                    return services;
+                }
+            }");
+
+        context.AddSource($"{className}LuaComponentsServiceCollectionExtensions.g.cs", sb.ToString());
     }
 
     private record struct Model
@@ -68,5 +257,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
         public string Name { get; set; }
         public string FullNamespace { get; set; }
         public string BindingName { get; set; }
+        public string LuaName { get; set; }
+        public string ValueTypeAssemblyName { get; set; }
     }
 }
