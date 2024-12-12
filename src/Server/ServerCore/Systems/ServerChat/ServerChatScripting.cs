@@ -29,8 +29,20 @@ public class ServerChatScripting
     }
 
     [ScriptableFunction("send_system_message")]
-    public void SendSystemMessage(string message, ulong targetEntityId)
+    public void SendSystemMessage(ulong targetEntityId, string message)
     {
         internalController.SendSystemMessage(message, targetEntityId);
+    }
+
+    [ScriptableFunction("send_to_player")]
+    public void SendMessageToPlayer(ulong playerEntityId, byte red, byte green, byte blue, string message)
+    {
+        internalController.SendMessageToPlayer(playerEntityId, message, red, green, blue);
+    }
+
+    [ScriptableFunction("send_to_all")]
+    public void SendMessageToAll(byte red, byte green, byte blue, string message)
+    {
+        internalController.SendMessageToAll(message, red, green, blue);
     }
 }

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Numerics;
 using Sovereign.EngineCore.Components;
 
 namespace Sovereign.ClientCore.Systems.ClientChat;
@@ -79,6 +80,16 @@ public class ChatHistoryManager
             color = ClientChatConstants.DefaultTextColor;
 
         // Append the chat history.
+        history.Add(new ChatHistoryEntry { Message = message, Color = color });
+    }
+
+    /// <summary>
+    ///     Adds a line to the chat history.
+    /// </summary>
+    /// <param name="message">Chat message.</param>
+    /// <param name="color">Font color.</param>
+    public void AddChat(string message, Vector4 color)
+    {
         history.Add(new ChatHistoryEntry { Message = message, Color = color });
     }
 

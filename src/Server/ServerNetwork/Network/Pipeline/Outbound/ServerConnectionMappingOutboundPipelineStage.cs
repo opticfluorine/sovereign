@@ -47,6 +47,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         SingleEntityConnectionMapperFactory singleConnMapperFactory,
         EntityWorldSegmentConnectionMapperFactory entityWorldSegmentMapperFactory,
         WorldSegmentConnectionMapperFactory worldSegmentMapperFactory,
+        GenericChatConnectionMapper genericChatMapper,
         AccountServices accountServices, WorldSegmentResolver resolver,
         ILogger<ServerConnectionMappingOutboundPipelineStage> logger)
     {
@@ -121,6 +122,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Core_Chat_Local] = localChatMapper;
         specificMappers[EventId.Core_Chat_Global] = globalMapper;
         specificMappers[EventId.Core_Chat_System] = systemChatMapper;
+        specificMappers[EventId.Core_Chat_Generic] = genericChatMapper;
         specificMappers[EventId.Core_Block_ModifyNotice] = blockAddMapper;
         specificMappers[EventId.Core_Block_RemoveNotice] = blockPosMapper;
     }

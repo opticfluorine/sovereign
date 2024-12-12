@@ -55,7 +55,7 @@ public class ChatGui
         var io = ImGui.GetIO();
         var chatPos = io.DisplaySize * WindowRelPos;
 
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4.0f, 0.0f));
 
         ImGui.SetNextWindowSize(Vector2.Zero);
         ImGui.SetNextWindowPos(chatPos, ImGuiCond.FirstUseEver);

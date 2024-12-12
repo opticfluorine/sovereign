@@ -163,6 +163,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<SystemChatEventDetailsValidator>();
         services.TryAddSingleton<TemplateEntityDefinitionEventDetailsValidator>();
         services.TryAddSingleton<WorldSegmentSubscriptionEventDetailsValidator>();
+        services.TryAddSingleton<GenericChatEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)

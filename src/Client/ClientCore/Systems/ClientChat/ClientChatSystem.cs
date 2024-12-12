@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Numerics;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -53,6 +54,7 @@ public class ClientChatSystem : ISystem
         EventId.Core_Chat_Local,
         EventId.Core_Chat_Global,
         EventId.Core_Chat_System,
+        EventId.Core_Chat_Generic,
         EventId.Client_Network_ConnectionLost,
         EventId.Core_Network_Logout
     };
@@ -111,6 +113,18 @@ public class ClientChatSystem : ISystem
                 }
                     break;
 
+                case EventId.Core_Chat_Generic:
+                {
+                    if (ev.EventDetails is not GenericChatEventDetails details)
+                    {
+                        logger.LogWarning("Received generic chat without details.");
+                        break;
+                    }
+
+                    OnGenericChat(details);
+                }
+                    break;
+
                 case EventId.Client_Network_ConnectionLost:
                 case EventId.Core_Network_Logout:
                     chatHistoryManager.Clear();
@@ -149,5 +163,17 @@ public class ClientChatSystem : ISystem
     {
         logger.LogInformation("[System] {0}", details.Message);
         chatHistoryManager.AddChat(ChatType.System, details.Message);
+    }
+
+    /// <summary>
+    ///     Called when a generic message is received.
+    /// </summary>
+    /// <param name="details">Details.</param>
+    private void OnGenericChat(GenericChatEventDetails details)
+    {
+        logger.LogInformation("[Message] {Message}", details.Message);
+        var color = new Vector4(details.ColorRed / 255.0f, details.ColorGreen / 255.0f, details.ColorBlue / 255.0f,
+            1.0f);
+        chatHistoryManager.AddChat(details.Message, color);
     }
 }

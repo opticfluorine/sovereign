@@ -18,8 +18,10 @@
 
 function on_player_entered(playerEntityId)
     playerName = components.name.get(playerEntityId)
-    chat.send_system_message(string.format("Welcome to Sovereign Engine, %s!", playerName),
-            playerEntityId)
+    chat.send_to_player(playerEntityId, 160, 160, 240,
+            string.format("Welcome to Sovereign Engine, %s!", playerName))
+    chat.send_to_all(240, 240, 240,
+            string.format("%s has entered the world.", playerName))
 end
 
 scripting.add_event_callback(events.Server_Persistence_PlayerEnteredWorld, on_player_entered)

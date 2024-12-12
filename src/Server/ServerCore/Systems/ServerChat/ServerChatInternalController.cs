@@ -81,4 +81,48 @@ public class ServerChatInternalController
         var ev = new Event(EventId.Core_Chat_System, details);
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Sends a generic message to the given player.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <param name="message">Message.</param>
+    /// <param name="red">Red component of the font color.</param>
+    /// <param name="green">Green component of the font color.</param>
+    /// <param name="blue">Blue component of the font color.</param>
+    public void SendMessageToPlayer(ulong playerEntityId, string message, byte red, byte green, byte blue)
+    {
+        var details = new GenericChatEventDetails
+        {
+            Message = message,
+            Target = GenericChatTarget.Player,
+            TargetId = playerEntityId,
+            ColorRed = red,
+            ColorGreen = green,
+            ColorBlue = blue
+        };
+        var ev = new Event(EventId.Core_Chat_Generic, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Sends a generic message to all players.
+    /// </summary>
+    /// <param name="message">Message.</param>
+    /// <param name="red">Red component of font color.</param>
+    /// <param name="green">Green component of font color.</param>
+    /// <param name="blue">Blue component of font color.</param>
+    public void SendMessageToAll(string message, byte red, byte green, byte blue)
+    {
+        var details = new GenericChatEventDetails
+        {
+            Message = message,
+            Target = GenericChatTarget.Global,
+            ColorRed = red,
+            ColorGreen = green,
+            ColorBlue = blue
+        };
+        var ev = new Event(EventId.Core_Chat_Generic, details);
+        eventSender.SendEvent(ev);
+    }
 }

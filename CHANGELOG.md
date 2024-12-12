@@ -4,6 +4,14 @@
 
 ### December
 
+#### 11 December 2024
+
+* Scripting: Add generator for component collection bindings.
+* Chat: Add new `Core_Chat_Generic` event for sending generic messages from server to
+  client with variable color.
+* Scripting: Updated the demo `Motd.lua` script to announce players as they enter the
+  world to all players.
+
 #### 09 December 2024
 
 * Server: Send new event type when a player enters the world.

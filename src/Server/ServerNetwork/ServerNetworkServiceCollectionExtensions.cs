@@ -96,6 +96,7 @@ public static class ServerNetworkServiceCollectionExtensions
         services.TryAddSingleton<EntityWorldSegmentConnectionMapperFactory>();
         services.TryAddSingleton<WorldSegmentConnectionMapperFactory>();
         services.TryAddSingleton<RegionalConnectionMapCache>();
+        services.TryAddSingleton<GenericChatConnectionMapper>();
     }
 
     private static void AddRest(IServiceCollection services)
