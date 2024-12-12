@@ -16,9 +16,14 @@
 
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
+/// <summary>
+///     Orientation component collection.
+/// </summary>
+[ScriptableComponents("orientation")]
 public class OrientationComponentCollection : BaseComponentCollection<Orientation>
 {
     /// <summary>

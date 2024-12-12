@@ -37,13 +37,15 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
         var pipeline = context.SyntaxProvider
             .ForAttributeWithMetadataName(ScriptableName,
                 static (syntaxNode, _) =>
-                    syntaxNode is ClassDeclarationSyntax || syntaxNode is StructDeclarationSyntax,
+                    syntaxNode is ClassDeclarationSyntax || syntaxNode is StructDeclarationSyntax ||
+                    syntaxNode is EnumDeclarationSyntax,
                 static (context, cToken) =>
                 {
                     if (context.SemanticModel.GetDeclaredSymbol(context.TargetNode, cToken) is not INamedTypeSymbol sym)
                         throw new Exception("Bad symbol.");
 
                     var name = sym.ToString();
+                    var isEnum = sym.EnumUnderlyingType != null;
 
                     // Identify all public fields and readable properties.
                     var memberFields = sym.GetMembers()
@@ -68,6 +70,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     return new Model
                     {
                         Name = name ?? throw new Exception("null name"),
+                        IsEnum = isEnum,
                         DataModels = new ValueEquatableList<DataModel>(allToMarshall)
                     };
                 })
@@ -283,14 +286,25 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
             sb.Append($@"
                 public static int Marshal(IntPtr luaState, {record.Name} value, bool checkStack = true)
                 {{
-                    int pushCount = 0;
+                    int pushCount = 0;");
+
+            if (record.IsEnum)
+            {
+                sb.Append(@"
+                    if (checkStack) luaL_checkstack(luaState, 1, null);
+                    pushCount += Marshal(luaState, (long)value, false);");
+            }
+            else
+            {
+                sb.Append($@"
                     if (checkStack) luaL_checkstack(luaState, {record.DataModels.List.Count}, null);
             ");
 
-            foreach (var dataModel in record.DataModels.List)
-                sb.Append($@"
+                foreach (var dataModel in record.DataModels.List)
+                    sb.Append($@"
                     pushCount += Marshal(luaState, value.{dataModel.Name}, false);
                 ");
+            }
 
             sb.Append($@"
                     return pushCount;
@@ -394,6 +408,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
     private record struct Model
     {
         public string Name { get; set; }
+        public bool IsEnum { get; set; }
         public ValueEquatableList<DataModel> DataModels { get; set; }
     }
 

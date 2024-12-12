@@ -20,6 +20,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 using MessagePack;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
@@ -27,6 +28,7 @@ namespace Sovereign.EngineCore.Components.Indexers;
 ///     Represents an integer position, useful for aligning blocks on the unit grid.
 /// </summary>
 [MessagePackObject]
+[Scriptable]
 public struct GridPosition : IEquatable<GridPosition>
 {
     public static readonly GridPosition Zero = new(0, 0, 0);

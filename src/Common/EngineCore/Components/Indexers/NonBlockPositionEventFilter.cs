@@ -25,7 +25,7 @@ public class NonBlockPositionEventFilter : BaseComponentEventFilter<Kinematics>
 {
     private readonly MaterialComponentCollection materials;
 
-    public NonBlockPositionEventFilter(KinematicComponentCollection kinematics,
+    public NonBlockPositionEventFilter(KinematicsComponentCollection kinematics,
         MaterialComponentCollection materials)
         : base(kinematics, kinematics)
     {

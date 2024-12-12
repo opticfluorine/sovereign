@@ -35,7 +35,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly DrawableTagCollection drawables;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
@@ -50,7 +50,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     private ulong nextBlockId = EntityConstants.FirstBlockEntityId;
 
     public ClientEntityFactory(EntityManager entityManager,
-        KinematicComponentCollection kinematics,
+        KinematicsComponentCollection kinematics,
         DrawableTagCollection drawables,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,

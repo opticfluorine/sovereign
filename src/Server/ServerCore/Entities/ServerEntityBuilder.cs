@@ -31,7 +31,7 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
 
     public ServerEntityBuilder(ulong entityId, bool load,
         EntityManager entityManager,
-        KinematicComponentCollection kinematics,
+        KinematicsComponentCollection kinematics,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,

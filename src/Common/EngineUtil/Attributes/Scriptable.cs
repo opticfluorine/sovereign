@@ -21,7 +21,7 @@ namespace Sovereign.EngineUtil.Attributes;
 /// <summary>
 ///     Attribute used to indicate that a type may be passed to and from Lua scripts.
 /// </summary>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
 public class Scriptable : Attribute
 {
 }

@@ -30,7 +30,7 @@ public class EntityDefinitionGenerator
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
@@ -40,7 +40,7 @@ public class EntityDefinitionGenerator
     private readonly PointLightSourceComponentCollection pointLightSources;
 
     public EntityDefinitionGenerator(
-        KinematicComponentCollection kinematics,
+        KinematicsComponentCollection kinematics,
         MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
         ParentComponentCollection parents, DrawableTagCollection drawables,

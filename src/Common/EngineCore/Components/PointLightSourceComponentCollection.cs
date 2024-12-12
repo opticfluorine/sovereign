@@ -16,12 +16,14 @@
 
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     PointLightSource component collection.
 /// </summary>
+[ScriptableComponents("point_light")]
 public class PointLightSourceComponentCollection : BaseComponentCollection<PointLight>
 {
     private const int InitialSize = 2048;

@@ -26,7 +26,7 @@ public class PositionComponentIndexer : BasePositionComponentIndexer
     ///     Creates the PositionComponentCollection position indexer.
     /// </summary>
     /// <param name="componentCollection">PositionComponentCollection.</param>
-    public PositionComponentIndexer(KinematicComponentCollection componentCollection)
+    public PositionComponentIndexer(KinematicsComponentCollection componentCollection)
         : base(componentCollection, componentCollection)
     {
     }

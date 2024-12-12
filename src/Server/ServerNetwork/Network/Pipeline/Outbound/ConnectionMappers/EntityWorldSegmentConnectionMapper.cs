@@ -37,7 +37,7 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
     private readonly AccountServices accountServices;
     private readonly NetworkConnectionManager connectionManager;
     private readonly Func<OutboundEventInfo, Maybe<ulong>> entitySelector;
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger logger;
     private readonly WorldSegmentResolver resolver;
     private readonly WorldManagementServices worldManagementServices;
@@ -47,7 +47,7 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
     /// </summary>
     /// <param name="entitySelector">Function that gets the associated entity for the event.</param>
     internal EntityWorldSegmentConnectionMapper(
-        KinematicComponentCollection kinematics,
+        KinematicsComponentCollection kinematics,
         WorldSegmentResolver resolver,
         WorldManagementServices worldManagementServices,
         NetworkConnectionManager connectionManager,

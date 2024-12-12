@@ -16,12 +16,14 @@
  */
 
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     The Material component specifies the material index for a block entity.
 /// </summary>
+[ScriptableComponents("material")]
 public sealed class MaterialComponentCollection : BaseComponentCollection<int>
 {
     /// <summary>

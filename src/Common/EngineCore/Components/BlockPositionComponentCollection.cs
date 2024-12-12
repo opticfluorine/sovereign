@@ -16,12 +16,14 @@
 
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     Manages the grid-based positions of block entities.
 /// </summary>
+[ScriptableComponents("block_position")]
 public class BlockPositionComponentCollection : BaseComponentCollection<GridPosition>
 {
     /// <summary>

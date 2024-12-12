@@ -37,7 +37,7 @@ public class EntityDebugGui
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
@@ -51,7 +51,7 @@ public class EntityDebugGui
         DrawableTagCollection drawables, MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers, NameComponentCollection names,
         OrientationComponentCollection orientations, ParentComponentCollection parents,
-        KinematicComponentCollection kinematics,
+        KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows,
         EntityTable entityTable,

@@ -14,11 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineUtil.Attributes;
+
 namespace Sovereign.EngineCore.Components.Types;
 
 /// <summary>
 ///     Specifies a directional orientation.
 /// </summary>
+[Scriptable]
 public enum Orientation
 {
     South = 0,

@@ -59,7 +59,7 @@ public class PerspectiveLineManager
     /// </summary>
     private readonly ObjectPool<List<PerspectiveLineKey>> indexListPool = new();
 
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
 
     /// <summary>
     ///     Map from entity ID to set of overlapping perspective line indices.
@@ -80,7 +80,7 @@ public class PerspectiveLineManager
     /// </summary>
     private readonly Dictionary<ulong, int> zFloorByEntity = new();
 
-    public PerspectiveLineManager(KinematicComponentCollection kinematics,
+    public PerspectiveLineManager(KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
         EntityTable entityTable, DrawableLookup drawableLookup, DrawableTagCollection drawables,
         ILogger<PerspectiveLineManager> logger)

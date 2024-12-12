@@ -15,12 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     Component collection for Parent component which maps an entity to its parent entity.
 /// </summary>
+[ScriptableComponents("parent")]
 public class ParentComponentCollection : BaseComponentCollection<ulong>
 {
     private const int INITIAL_SIZE = 65536;

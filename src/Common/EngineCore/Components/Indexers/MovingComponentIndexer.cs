@@ -30,7 +30,7 @@ public class MovingComponentIndexer : BaseComponentIndexer<Kinematics>
     /// </summary>
     private readonly HashSet<ulong> movingEntities = new();
 
-    public MovingComponentIndexer(KinematicComponentCollection kinematics) : base(kinematics, kinematics)
+    public MovingComponentIndexer(KinematicsComponentCollection kinematics) : base(kinematics, kinematics)
     {
     }
 

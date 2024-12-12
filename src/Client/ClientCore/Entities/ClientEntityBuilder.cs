@@ -28,7 +28,7 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
 {
     public ClientEntityBuilder(ulong entityId, bool isLoad,
         EntityManager entityManager,
-        KinematicComponentCollection kinematics,
+        KinematicsComponentCollection kinematics,
         DrawableTagCollection drawables,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,

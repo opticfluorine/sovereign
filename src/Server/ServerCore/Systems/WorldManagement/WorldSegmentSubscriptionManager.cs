@@ -56,7 +56,7 @@ public class WorldSegmentSubscriptionManager
     private readonly IEventSender eventSender;
     private readonly EntityHierarchyIndexer hierarchyIndexer;
     private readonly WorldManagementInternalController internalController;
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<WorldSegmentSubscriptionManager> logger;
     private readonly NonBlockPositionEventFilter nonBlockPositionEventFilter;
 
@@ -89,7 +89,7 @@ public class WorldSegmentSubscriptionManager
         WorldSegmentResolver resolver, IWorldManagementConfiguration worldConfig,
         WorldSegmentActivationManager activationManager,
         IEventSender eventSender, WorldManagementInternalController internalController,
-        WorldSegmentSynchronizationManager syncManager, KinematicComponentCollection kinematics,
+        WorldSegmentSynchronizationManager syncManager, KinematicsComponentCollection kinematics,
         EntitySynchronizer synchronizer, EntityHierarchyIndexer hierarchyIndexer,
         EntityTable entityTable, NonBlockPositionEventFilter nonBlockPositionEventFilter,
         ILogger<WorldSegmentSubscriptionManager> logger)

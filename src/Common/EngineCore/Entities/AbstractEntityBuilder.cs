@@ -39,7 +39,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     protected readonly ulong entityId;
     protected readonly EntityTable entityTable;
     protected readonly bool isTemplate;
-    protected readonly KinematicComponentCollection Kinematics;
+    protected readonly KinematicsComponentCollection Kinematics;
     protected readonly bool load;
     protected readonly MaterialModifierComponentCollection materialModifiers;
     protected readonly MaterialComponentCollection materials;
@@ -55,7 +55,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
     private ulong templateEntityId;
 
     protected AbstractEntityBuilder(ulong entityId, bool load,
-        EntityManager entityManager, KinematicComponentCollection kinematics,
+        EntityManager entityManager, KinematicsComponentCollection kinematics,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,

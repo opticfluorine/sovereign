@@ -24,7 +24,7 @@ namespace Sovereign.EngineCore.Components.Indexers;
 public class PlayerPositionEventFilter : PlayerComponentEventFilter<Kinematics>
 {
     public PlayerPositionEventFilter(PlayerCharacterTagCollection playerTags,
-        KinematicComponentCollection kinematics)
+        KinematicsComponentCollection kinematics)
         : base(playerTags, kinematics, kinematics)
     {
     }

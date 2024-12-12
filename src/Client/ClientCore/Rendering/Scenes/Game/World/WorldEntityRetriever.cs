@@ -56,7 +56,7 @@ public sealed class WorldEntityRetriever
     /// </summary>
     private readonly float halfY;
 
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
 
     public readonly List<PositionedLight> Lights = new();
     private readonly LightSourceTable lightSourceTable;
@@ -72,7 +72,7 @@ public sealed class WorldEntityRetriever
 
     public WorldEntityRetriever(CameraManager camera, DisplayViewport viewport,
         ClientConfigurationManager configManager, PerspectiveServices perspectiveServices,
-        WorldLayerGrouper grouper, KinematicComponentCollection kinematics,
+        WorldLayerGrouper grouper, KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
         AnimatedSpriteComponentCollection animatedSprites,
         AnimatedSpriteManager animatedSpriteManager,

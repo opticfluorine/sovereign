@@ -38,7 +38,7 @@ public class ChatRouter
 
     private readonly ChatHelpManager helpManager;
     private readonly ServerChatInternalController internalController;
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<ChatRouter> logger;
     private readonly LoggingUtil loggingUtil;
 
@@ -50,7 +50,7 @@ public class ChatRouter
     private readonly WorldSegmentResolver resolver;
 
     public ChatRouter(IEnumerable<IChatProcessor> processors, ServerChatInternalController internalController,
-        KinematicComponentCollection kinematics, WorldSegmentResolver resolver, LoggingUtil loggingUtil,
+        KinematicsComponentCollection kinematics, WorldSegmentResolver resolver, LoggingUtil loggingUtil,
         ChatHelpManager helpManager, ILogger<ChatRouter> logger)
     {
         this.internalController = internalController;

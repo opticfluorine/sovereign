@@ -54,7 +54,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     var valueTypeFullNs = SyntaxUtil.GetFullNamespace(valueTypeSym.ContainingNamespace!);
                     var marshallerAssemblyName = isSystemType
                         ? "Sovereign.EngineCore"
-                        : Regex.Match(valueTypeFullNs, @"^(Sovereign\..*)\.").Groups[0].Value;
+                        : Regex.Match(valueTypeFullNs, @"^(Sovereign\..*?)\.").Groups[1].Value;
 
                     return new Model
                     {

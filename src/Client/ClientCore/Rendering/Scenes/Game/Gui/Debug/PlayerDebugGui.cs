@@ -33,7 +33,7 @@ public class PlayerDebugGui
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockGridPositionIndexer blocks;
     private readonly DrawableTagCollection drawables;
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
@@ -43,7 +43,7 @@ public class PlayerDebugGui
     private readonly WorldSegmentResolver worldSegmentResolver;
 
     public PlayerDebugGui(ClientStateServices stateServices, NameComponentCollection names,
-        KinematicComponentCollection kinematics,
+        KinematicsComponentCollection kinematics,
         AnimatedSpriteComponentCollection animatedSprites, WorldSegmentResolver worldSegmentResolver,
         DrawableTagCollection drawables, PlayerCharacterTagCollection players,
         OrientationComponentCollection orientations, BlockGridPositionIndexer blocks,

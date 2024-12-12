@@ -16,6 +16,7 @@
 
 using System.Numerics;
 using MessagePack;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components.Types;
 
@@ -23,6 +24,7 @@ namespace Sovereign.EngineCore.Components.Types;
 ///     Describes a point light source.
 /// </summary>
 [MessagePackObject]
+[Scriptable]
 public struct PointLight
 {
     /// <summary>

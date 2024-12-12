@@ -39,7 +39,7 @@ public class NonBlockWorldSegmentIndexer : BaseComponentIndexer<Kinematics>
 
     private readonly WorldSegmentResolver resolver;
 
-    public NonBlockWorldSegmentIndexer(KinematicComponentCollection kinematics, WorldSegmentResolver resolver)
+    public NonBlockWorldSegmentIndexer(KinematicsComponentCollection kinematics, WorldSegmentResolver resolver)
         : base(kinematics, kinematics)
     {
         this.resolver = resolver;

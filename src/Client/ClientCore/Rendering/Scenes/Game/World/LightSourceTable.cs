@@ -49,7 +49,7 @@ public readonly struct PositionedLight(int index, Vector3 position, PointLight d
 /// </summary>
 public class LightSourceTable
 {
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
 
     private readonly List<ulong> knownSources = new();
     private readonly ILogger<LightSourceTable> logger;
@@ -57,7 +57,7 @@ public class LightSourceTable
     private readonly PointLightSourceComponentCollection pointLightSources;
 
     public LightSourceTable(PointLightSourceComponentCollection pointLightSources,
-        KinematicComponentCollection kinematics, ParentComponentCollection parents,
+        KinematicsComponentCollection kinematics, ParentComponentCollection parents,
         ILogger<LightSourceTable> logger)
     {
         this.pointLightSources = pointLightSources;

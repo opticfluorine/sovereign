@@ -33,13 +33,13 @@ public class EntityWorldSegmentConnectionMapperFactory
 {
     private readonly AccountServices accountServices;
     private readonly NetworkConnectionManager connectionManager;
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<EntityWorldSegmentConnectionMapperFactory> logger;
     private readonly WorldSegmentResolver resolver;
     private readonly WorldManagementServices worldManagementServices;
 
     public EntityWorldSegmentConnectionMapperFactory(
-        KinematicComponentCollection kinematics,
+        KinematicsComponentCollection kinematics,
         WorldSegmentResolver resolver,
         WorldManagementServices worldManagementServices,
         NetworkConnectionManager connectionManager,

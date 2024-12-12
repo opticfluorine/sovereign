@@ -17,20 +17,22 @@
 
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     Manages the kinematic data of all non-block positionable entities.
 /// </summary>
-public sealed class KinematicComponentCollection : BaseComponentCollection<Kinematics>
+[ScriptableComponents("kinematics")]
+public sealed class KinematicsComponentCollection : BaseComponentCollection<Kinematics>
 {
     /// <summary>
     ///     Initial number of allocated components.
     /// </summary>
     private const int BaseSize = 65536;
 
-    public KinematicComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+    public KinematicsComponentCollection(EntityTable entityTable, ComponentManager componentManager)
         : base(entityTable, componentManager, BaseSize, ComponentOperators.KinematicsOperators,
             ComponentType.Kinematic)
     {

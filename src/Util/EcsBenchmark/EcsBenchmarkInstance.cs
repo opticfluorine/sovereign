@@ -37,7 +37,7 @@ public class EcsBenchmarkInstance
     /// </summary>
     private const int MeasuredCycleCount = 500;
 
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
 
     private readonly List<ulong> runtimesUs = new(MeasuredCycleCount);
     private readonly ServerSystemTimer timer = new();
@@ -48,7 +48,7 @@ public class EcsBenchmarkInstance
         var entityTable = new EntityTable();
         var entityNotifier = new EntityNotifier();
         var componentManager = new ComponentManager(entityNotifier);
-        kinematics = new KinematicComponentCollection(entityTable, componentManager);
+        kinematics = new KinematicsComponentCollection(entityTable, componentManager);
 
         for (var i = 0; i < size; ++i)
             kinematics.AddComponent((ulong)i, new Kinematics

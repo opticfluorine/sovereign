@@ -28,9 +28,9 @@ public sealed class DrawablePositionEventFilter : BaseComponentEventFilter<Kinem
 {
     private readonly DrawableTagCollection drawableCollection;
 
-    public DrawablePositionEventFilter(KinematicComponentCollection kinematicCollection,
+    public DrawablePositionEventFilter(KinematicsComponentCollection kinematicsCollection,
         DrawableTagCollection drawableCollection)
-        : base(kinematicCollection, kinematicCollection)
+        : base(kinematicsCollection, kinematicsCollection)
     {
         this.drawableCollection = drawableCollection;
     }

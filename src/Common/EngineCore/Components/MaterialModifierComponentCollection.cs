@@ -16,6 +16,7 @@
  */
 
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
@@ -23,6 +24,7 @@ namespace Sovereign.EngineCore.Components;
 ///     The MaterialModifier component specifies the material modifier of a
 ///     material block entity.
 /// </summary>
+[ScriptableComponents("material_modifier")]
 public sealed class MaterialModifierComponentCollection : BaseComponentCollection<int>
 {
     /// <summary>

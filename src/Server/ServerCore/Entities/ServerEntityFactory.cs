@@ -38,7 +38,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly EntityAssigner entityAssigner;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
@@ -51,7 +51,7 @@ public sealed class ServerEntityFactory : IEntityFactory
 
     public ServerEntityFactory(
         EntityManager entityManager,
-        KinematicComponentCollection kinematics,
+        KinematicsComponentCollection kinematics,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,

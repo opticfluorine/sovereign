@@ -90,7 +90,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<BlockPositionComponentCollection>();
         services.TryAddComponentCollection<CastBlockShadowsTagCollection>();
         services.TryAddComponentCollection<DrawableTagCollection>();
-        services.TryAddComponentCollection<KinematicComponentCollection>();
+        services.TryAddComponentCollection<KinematicsComponentCollection>();
         services.TryAddComponentCollection<MaterialComponentCollection>();
         services.TryAddComponentCollection<MaterialModifierComponentCollection>();
         services.TryAddComponentCollection<NameComponentCollection>();

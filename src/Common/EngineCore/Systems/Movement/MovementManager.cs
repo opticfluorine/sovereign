@@ -34,7 +34,7 @@ public class MovementManager
     private readonly IEventSender eventSender;
     private readonly MovementInternalController internalController;
 
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
     private readonly OrientationComponentCollection orientations;
 
     /// <summary>
@@ -76,7 +76,7 @@ public class MovementManager
     /// </summary>
     private ulong lastUpdateSystemTime;
 
-    public MovementManager(KinematicComponentCollection kinematics,
+    public MovementManager(KinematicsComponentCollection kinematics,
         ISystemTimer systemTimer, MovementInternalController internalController,
         IEventSender eventSender, OrientationComponentCollection orientations)
     {

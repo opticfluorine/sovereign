@@ -27,9 +27,9 @@ namespace Sovereign.ClientCore.Systems.Camera;
 public sealed class CameraManager
 {
     private readonly DrawableLookup drawableLookup;
-    private readonly KinematicComponentCollection kinematics;
+    private readonly KinematicsComponentCollection kinematics;
 
-    public CameraManager(KinematicComponentCollection kinematics, DrawableLookup drawableLookup)
+    public CameraManager(KinematicsComponentCollection kinematics, DrawableLookup drawableLookup)
     {
         this.kinematics = kinematics;
         this.drawableLookup = drawableLookup;
