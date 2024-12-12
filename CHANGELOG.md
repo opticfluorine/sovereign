@@ -10,7 +10,10 @@
 * Chat: Add new `Core_Chat_Generic` event for sending generic messages from server to
   client with variable color.
 * Scripting: Updated the demo `Motd.lua` script to announce players as they enter the
-  world to all players.
+  world to all players. Also issue a warning to admins that they have admin privileges
+  when they enter the world.
+* Scripting: Fix issue where binding delegates would be garbage collected between script
+  calls, resulting in server crashes.
 
 #### 09 December 2024
 

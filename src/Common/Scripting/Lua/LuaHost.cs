@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using static Sovereign.Scripting.Lua.LuaBindings;
 
@@ -26,10 +27,9 @@ public class LuaHost : IDisposable
 {
     private const int QuickLookupSizeHint = 32;
     private const string QuickLookupKey = "sovereign_ql";
+    private readonly List<GCHandle> bindings = new();
     private readonly ILogger logger;
-
     private readonly Lock opsLock = new();
-
     private readonly int quickLookupStackPosition;
     private readonly int tracebackStackPosition;
     private string library = "";
@@ -114,6 +114,7 @@ public class LuaHost : IDisposable
             luaL_checkstack(LuaState, 2, null);
 
             lua_getglobal(LuaState, library);
+            bindings.Add(GCHandle.Alloc(func));
             lua_pushcfunction(LuaState, func);
             lua_setfield(LuaState, -2, name);
         }

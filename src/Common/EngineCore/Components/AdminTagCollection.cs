@@ -15,12 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     Tag that designates a player as an administrator (admin).
 /// </summary>
+[ScriptableComponents("admin")]
 public class AdminTagCollection : BaseTagCollection
 {
     /// <summary>

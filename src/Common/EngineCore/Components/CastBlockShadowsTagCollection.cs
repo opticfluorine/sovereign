@@ -15,12 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     Tag collection for the CastBlockShadows component.
 /// </summary>
+[ScriptableComponents("cast_block_shadows")]
 public class CastBlockShadowsTagCollection : BaseTagCollection
 {
     private const int InitialSize = 1024;

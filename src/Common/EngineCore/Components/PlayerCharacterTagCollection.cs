@@ -15,12 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     Tag collection for the PlayerCharacter tag, used to indicate that an entity is a player character.
 /// </summary>
+[ScriptableComponents("player_character")]
 public class PlayerCharacterTagCollection : BaseTagCollection
 {
     /// <summary>

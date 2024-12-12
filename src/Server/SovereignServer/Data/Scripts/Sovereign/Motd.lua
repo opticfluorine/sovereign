@@ -22,6 +22,11 @@ function on_player_entered(playerEntityId)
             string.format("Welcome to Sovereign Engine, %s!", playerName))
     chat.send_to_all(240, 240, 240,
             string.format("%s has entered the world.", playerName))
+
+    isAdmin = components.admin.get(playerEntityId)
+    if (isAdmin) then
+        chat.send_to_player(playerEntityId, 210, 80, 80, "You are an admin.")
+    end
 end
 
 scripting.add_event_callback(events.Server_Persistence_PlayerEnteredWorld, on_player_entered)

@@ -16,12 +16,14 @@
  */
 
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     Describes a component tag that indicates whether an entity can be drawn.
 /// </summary>
+[ScriptableComponents("drawable")]
 public sealed class DrawableTagCollection : BaseTagCollection
 {
     private const int BaseSize = 65536;

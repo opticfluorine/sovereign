@@ -34,7 +34,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
     {
         var pipeline = context.SyntaxProvider
             .ForAttributeWithMetadataName("Sovereign.EngineUtil.Attributes.ScriptableComponents",
-                static (context, _) => context is ClassDeclarationSyntax cSyntax,
+                static (context, _) => context is ClassDeclarationSyntax,
                 static (context, cToken) =>
                 {
                     if (context.SemanticModel.GetDeclaredSymbol(context.TargetNode, cToken) is not
@@ -45,6 +45,19 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                         .Select(a => a.ConstructorArguments[0].Value)
                         .OfType<string>()
                         .First();
+
+                    if (clsSymbol.BaseType!.Name == "BaseTagCollection")
+                        return new Model
+                        {
+                            Name = clsSymbol.Name,
+                            FullNamespace = SyntaxUtil.GetFullNamespace(clsSymbol.ContainingNamespace),
+                            BindingName = $"{clsSymbol.Name}LuaComponents",
+                            LuaName = luaName,
+                            ValueType = "Boolean",
+                            ValueTypeFullNamespace = "System",
+                            MarshallerAssemblyName = "Sovereign.EngineCore",
+                            IsTag = true
+                        };
 
                     var valueTypeSym = clsSymbol.BaseType!.TypeArguments[0];
                     var valueTypeName = valueTypeSym.Name;
@@ -64,7 +77,8 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                         LuaName = luaName,
                         ValueType = valueTypeName,
                         ValueTypeFullNamespace = valueTypeFullNs,
-                        MarshallerAssemblyName = marshallerAssemblyName
+                        MarshallerAssemblyName = marshallerAssemblyName,
+                        IsTag = false
                     };
                 });
 
@@ -82,6 +96,8 @@ public class LuaComponentsGenerator : IIncrementalGenerator
         var sb = new StringBuilder();
         sb.Append($@"
             using System;
+            using System.Collections.Generic;
+            using System.Runtime.InteropServices;
             using Microsoft.Extensions.Logging;
             using Sovereign.EngineCore.Components;
             using Sovereign.Scripting.Lua;
@@ -96,6 +112,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
             {{
                 private readonly {model.Name} components;
                 private readonly ILogger logger;
+                private readonly List<GCHandle> bindings = new();
 
                 public {model.BindingName}({model.Name} components, ILogger<{model.BindingName}> logger)
                 {{
@@ -109,34 +126,24 @@ public class LuaComponentsGenerator : IIncrementalGenerator
 
                     lua_createtable(luaHost.LuaState, 0, 0);
 
-                    lua_pushcfunction(luaHost.LuaState, HasComponentForEntity);
-                    lua_setfield(luaHost.LuaState, -2, ""exists"");
-
-                    lua_pushcfunction(luaHost.LuaState, GetComponent);
-                    lua_setfield(luaHost.LuaState, -2, ""get"");
-
-                    lua_pushcfunction(luaHost.LuaState, RemoveComponent);
-                    lua_setfield(luaHost.LuaState, -2, ""remove"");
-
-                    lua_pushcfunction(luaHost.LuaState, SetComponent);
-                    lua_setfield(luaHost.LuaState, -2, ""set"");
-
-                    lua_pushcfunction(luaHost.LuaState, AddComponent);
-                    lua_setfield(luaHost.LuaState, -2, ""add"");
-
-                    lua_pushcfunction(luaHost.LuaState, MultiplyComponent);
-                    lua_setfield(luaHost.LuaState, -2, ""multiply"");
-
-                    lua_pushcfunction(luaHost.LuaState, DivideComponent);
-                    lua_setfield(luaHost.LuaState, -2, ""divide"");
-
-                    lua_pushcfunction(luaHost.LuaState, SetVelocityComponent);
-                    lua_setfield(luaHost.LuaState, -2, ""set_velocity"");
-
-                    lua_pushcfunction(luaHost.LuaState, AddPositionComponent);
-                    lua_setfield(luaHost.LuaState, -2, ""add_position"");
+                    InstallSingle(luaHost, HasComponentForEntity, ""exists"");
+                    InstallSingle(luaHost, GetComponent, ""get"");
+                    InstallSingle(luaHost, RemoveComponent, ""remove"");
+                    InstallSingle(luaHost, SetComponent, ""set"");
+                    InstallSingle(luaHost, AddComponent, ""add"");
+                    InstallSingle(luaHost, MultiplyComponent, ""multiply"");
+                    InstallSingle(luaHost, DivideComponent, ""divide"");
+                    InstallSingle(luaHost, SetVelocityComponent, ""set_velocity"");
+                    InstallSingle(luaHost, AddPositionComponent, ""add_position"");
 
                     lua_setfield(luaHost.LuaState, -2, ""{model.LuaName}"");
+                }}
+
+                private void InstallSingle(LuaHost luaHost, LuaCFunction fn, string name)
+                {{
+                    bindings.Add(GCHandle.Alloc(fn));
+                    lua_pushcfunction(luaHost.LuaState, fn);
+                    lua_setfield(luaHost.LuaState, -2, name);
                 }}
 
                 private int HasComponentForEntity(IntPtr luaState)
@@ -175,8 +182,16 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                         if (argCount != 1) throw new LuaException(""Must be called with one argument."");
                         if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
 
-                        var entityId = (ulong)lua_tointeger(luaState, -1);
-                        var value = components[entityId];
+                        var entityId = (ulong)lua_tointeger(luaState, -1);");
+
+        if (model.IsTag)
+            sb.Append(@"
+                        var value = components.HasTagForEntity(entityId);");
+        else
+            sb.Append(@"
+                        var value = components[entityId];");
+
+        sb.Append($@"
 
                         resultCount = {model.MarshallerAssemblyName}.Lua.LuaMarshaller.Marshal(luaState, value);
                     }}
@@ -359,5 +374,6 @@ public class LuaComponentsGenerator : IIncrementalGenerator
         public string ValueType { get; set; }
         public string ValueTypeFullNamespace { get; set; }
         public string MarshallerAssemblyName { get; set; }
+        public bool IsTag { get; set; }
     }
 }
