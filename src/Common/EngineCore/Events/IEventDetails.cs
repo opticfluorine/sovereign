@@ -38,6 +38,7 @@ namespace Sovereign.EngineCore.Events;
 [Union(12, typeof(TemplateEntityDefinitionEventDetails))]
 [Union(13, typeof(GridPositionEventDetails))]
 [Union(14, typeof(BlockAddEventDetails))]
+[Union(15, typeof(GenericChatEventDetails))]
 public interface IEventDetails
 {
 }

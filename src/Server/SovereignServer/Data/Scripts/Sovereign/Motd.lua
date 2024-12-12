@@ -17,7 +17,9 @@
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 function on_player_entered(playerEntityId)
-    chat.send_system_message("Welcome to Sovereign Engine!", playerEntityId)
+    playerName = components.name.get(playerEntityId)
+    chat.send_system_message(string.format("Welcome to Sovereign Engine, %s!", playerName),
+            playerEntityId)
 end
 
 scripting.add_event_callback(events.Server_Persistence_PlayerEnteredWorld, on_player_entered)

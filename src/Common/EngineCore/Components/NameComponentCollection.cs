@@ -15,12 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     Component collection for the Name component which gives a name to its entity.
 /// </summary>
+[ScriptableComponents("name")]
 public class NameComponentCollection : BaseComponentCollection<string>
 {
     private const int InitialSize = 4096;

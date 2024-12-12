@@ -305,7 +305,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
         var assemblyName = compilation.AssemblyName ?? throw new Exception("AssemblyName is null");
         var baseName = assemblyName.Substring(assemblyName.IndexOf('.') + 1);
         var className = $"{baseName}LuaLibraryServiceCollectionExtensions";
-        var methodName = $"Add{baseName}LuaLibraries";
+        var methodName = $"AddSovereign{baseName}LuaLibraries";
 
         var sb = new StringBuilder();
         sb.Append($@"

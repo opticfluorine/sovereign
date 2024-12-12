@@ -14,21 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.Scripting.Lua;
+using Sovereign.EngineCore.Configuration;
+
+namespace Sovereign.EngineCore.Events.Details.Validators;
 
 /// <summary>
-///     Interface for Lua component collection bindings.
+///     Event validator for GenericChatEventDetails.
 /// </summary>
-public interface ILuaComponents
+public class GenericChatEventDetailsValidator : IEventDetailsValidator
 {
-    /// <summary>
-    ///     Installs the component collection into a Lua host.
-    /// </summary>
-    /// <param name="luaHost">Lua host.</param>
-    /// <remarks>
-    ///     The 'components' table must be at the top of the Lua stack when this is called.
-    ///     The Lua stack must be unchanged when this method returns to the caller (however,
-    ///     it may be mutated within the method call as long as it is restored afterwards).
-    /// </remarks>
-    void Install(LuaHost luaHost);
+    public bool IsValid(IEventDetails? details)
+    {
+        if (details is not GenericChatEventDetails chatDetails) return false;
+        return chatDetails.Message.Length > 0 && chatDetails.Message.Length <= ChatConstants.MaxMessageLengthChars;
+    }
 }

@@ -212,6 +212,12 @@ public enum EventId
     /// Associated details: SystemChatEventDetails
     Core_Chat_System = 803,
 
+    /// <summary>
+    ///     Sent from server to client to deliver a generic message.
+    /// </summary>
+    /// Associated details: GenericChatEventDetails
+    Core_Chat_Generic = 804,
+
     #endregion Chat
 
     #endregion Core

@@ -16,7 +16,9 @@
 
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -32,19 +34,37 @@ public class LuaComponentsGenerator : IIncrementalGenerator
     {
         var pipeline = context.SyntaxProvider
             .ForAttributeWithMetadataName("Sovereign.EngineUtil.Attributes.ScriptableComponents",
-                static (context, _) => context is ClassDeclarationSyntax,
+                static (context, _) => context is ClassDeclarationSyntax cSyntax,
                 static (context, cToken) =>
                 {
                     if (context.SemanticModel.GetDeclaredSymbol(context.TargetNode, cToken) is not
                         INamedTypeSymbol clsSymbol) throw new Exception("not a named type");
+
+                    var luaName = clsSymbol.GetAttributes()
+                        .Where(a => a.AttributeClass!.Name == "ScriptableComponents")
+                        .Select(a => a.ConstructorArguments[0].Value)
+                        .OfType<string>()
+                        .First();
+
+                    var valueTypeSym = clsSymbol.BaseType!.TypeArguments[0];
+                    var valueTypeName = valueTypeSym.Name;
+                    var isSystemType = valueTypeSym.ContainingNamespace == null || // intrinsics
+                                       valueTypeSym.ContainingNamespace.Name == "System" || // most base types
+                                       valueTypeSym.ContainingNamespace.Name == "Numerics"; // vectors/matrices
+                    var valueTypeFullNs = SyntaxUtil.GetFullNamespace(valueTypeSym.ContainingNamespace!);
+                    var marshallerAssemblyName = isSystemType
+                        ? "Sovereign.EngineCore"
+                        : Regex.Match(valueTypeFullNs, @"^(Sovereign\..*)\.").Groups[0].Value;
 
                     return new Model
                     {
                         Name = clsSymbol.Name,
                         FullNamespace = SyntaxUtil.GetFullNamespace(clsSymbol.ContainingNamespace),
                         BindingName = $"{clsSymbol.Name}LuaComponents",
-                        LuaName = "",
-                        ValueTypeAssemblyName = ""
+                        LuaName = luaName,
+                        ValueType = valueTypeName,
+                        ValueTypeFullNamespace = valueTypeFullNs,
+                        MarshallerAssemblyName = marshallerAssemblyName
                     };
                 });
 
@@ -63,6 +83,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
         sb.Append($@"
             using System;
             using Microsoft.Extensions.Logging;
+            using Sovereign.EngineCore.Components;
             using Sovereign.Scripting.Lua;
             using static Sovereign.Scripting.Lua.LuaBindings;
 
@@ -84,7 +105,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
 
                 public void Install(LuaHost luaHost)
                 {{
-                    luaL_checkstack(luaHost.LuaState, 2);
+                    luaL_checkstack(luaHost.LuaState, 2, null);
 
                     lua_createtable(luaHost.LuaState, 0, 0);
 
@@ -124,7 +145,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
 
                     try 
                     {{
-                        var argCount = lua_gettop(lusState);
+                        var argCount = lua_gettop(luaState);
                         if (argCount != 1) throw new LuaException(""Must be called with one argument."");
                         if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
 
@@ -137,8 +158,8 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                         logger.LogError(e, ""Error in components.{model.LuaName}.exists()."");
                     }}
 
-                    luaL_checkstack(luaState, 1);
-                    lua_pushboolean(result);
+                    luaL_checkstack(luaState, 1, null);
+                    lua_pushboolean(luaState, result);
                     return 1;
                 }}
 
@@ -148,16 +169,16 @@ public class LuaComponentsGenerator : IIncrementalGenerator
 
                     try
                     {{
-                        luaL_checkstack(luaState, 1);
+                        luaL_checkstack(luaState, 1, null);
 
-                        var argCount = lua_gettop();
+                        var argCount = lua_gettop(luaState);
                         if (argCount != 1) throw new LuaException(""Must be called with one argument."");
                         if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
 
                         var entityId = (ulong)lua_tointeger(luaState, -1);
                         var value = components[entityId];
 
-                        resultCount = {model.ValueTypeAssemblyName}.Lua.LuaMarshaller.Marshal(luaState, value);
+                        resultCount = {model.MarshallerAssemblyName}.Lua.LuaMarshaller.Marshal(luaState, value);
                     }}
                     catch (Exception e)
                     {{
@@ -170,46 +191,123 @@ public class LuaComponentsGenerator : IIncrementalGenerator
 
                 private int RemoveComponent(IntPtr luaState)
                 {{
-                    // TODO
+                    try
+                    {{
+                        var argCount = lua_gettop(luaState);
+                        if (argCount != 1) throw new LuaException(""Must be called with one argument."");
+                        if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
+
+                        var entityId = (ulong)lua_tointeger(luaState, 1);
+                        components.RemoveComponent(entityId);
+                    }}
+                    catch (Exception e)
+                    {{
+                        logger.LogError(e, ""Error in components.{model.LuaName}.remove()."");
+                    }}
                     return 0;
                 }}
 
                 private int SetComponent(IntPtr luaState)
                 {{
-                    // TODO
+                    try
+                    {{
+                        var argCount = lua_gettop(luaState);
+                        if (argCount < 2) throw new LuaException(""Too few arguments."");
+                        if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
+
+                        var entityId = (ulong)lua_tointeger(luaState, 1);
+                        {model.ValueTypeFullNamespace}.{model.ValueType} value;
+                        {model.MarshallerAssemblyName}.Lua.LuaMarshaller.Unmarshal(luaState, out value);
+
+                        components.AddOrUpdateComponent(entityId, value);
+                    }}
+                    catch (Exception e)
+                    {{
+                        logger.LogError(e, ""Error in components.{model.LuaName}.set()."");
+                    }}
                     return 0;
                 }}
 
                 private int AddComponent(IntPtr luaState)
                 {{
-                    // TODO
+                    try
+                    {{
+                        ModifyComponent(luaState, ComponentOperation.Add);
+                    }}
+                    catch (Exception e)
+                    {{
+                        logger.LogError(e, ""Error in components.{model.LuaName}.add()."");
+                    }}
                     return 0;
                 }}
 
                 private int MultiplyComponent(IntPtr luaState)
                 {{
-                    // TODO
+                    try
+                    {{
+                        ModifyComponent(luaState, ComponentOperation.Multiply);
+                    }}
+                    catch (Exception e)
+                    {{
+                        logger.LogError(e, ""Error in components.{model.LuaName}.multiply()."");
+                    }}
                     return 0;
                 }}
 
                 private int DivideComponent(IntPtr luaState)
                 {{
-                    // TODO
+                    try
+                    {{
+                        ModifyComponent(luaState, ComponentOperation.Divide);
+                    }}
+                    catch (Exception e)
+                    {{
+                        logger.LogError(e, ""Error in components.{model.LuaName}.divide()."");
+                    }}
                     return 0;
                 }}
 
                 private int SetVelocityComponent(IntPtr luaState)
                 {{
-                    // TODO
+                    try
+                    {{
+                        ModifyComponent(luaState, ComponentOperation.SetVelocity);
+                    }}
+                    catch (Exception e)
+                    {{
+                        logger.LogError(e, ""Error in components.{model.LuaName}.set_velocity()."");
+                    }}
                     return 0;
                 }}
 
                 private int AddPositionComponent(IntPtr luaState)
                 {{
-                    // TODO
+                    try
+                    {{
+                        ModifyComponent(luaState, ComponentOperation.AddPosition);
+                    }}
+                    catch (Exception e)
+                    {{
+                        logger.LogError(e, ""Error in components.{model.LuaName}.add_position()."");
+                    }}
                     return 0;
                 }}
-        ");
+
+                private void ModifyComponent(IntPtr luaState, ComponentOperation op)
+                {{
+                    var argCount = lua_gettop(luaState);
+                    if (argCount < 2) throw new LuaException(""Too few arguments."");
+                    if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
+
+                    var entityId = (ulong)lua_tointeger(luaState, 1);
+                    {model.ValueTypeFullNamespace}.{model.ValueType} value;
+                    {model.MarshallerAssemblyName}.Lua.LuaMarshaller.Unmarshal(luaState, out value);
+
+                    components.ModifyComponent(entityId, op, value);
+                }}
+            }}");
+
+        context.AddSource($"{model.BindingName}.g.cs", sb.ToString());
     }
 
     private static void GenerateServiceCollectionExtensions(SourceProductionContext context,
@@ -219,7 +317,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
 
         var assemblyName = compilation.AssemblyName!;
         var assemblyShortName = assemblyName.Substring(assemblyName.IndexOf('.') + 1);
-        var className = $"{assemblyShortName}LuaComponentsServiceCollectionExtensions.g.cs";
+        var className = $"{assemblyShortName}LuaComponentsServiceCollectionExtensions";
 
         var sb = new StringBuilder();
         sb.Append($@"
@@ -249,7 +347,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                 }
             }");
 
-        context.AddSource($"{className}LuaComponentsServiceCollectionExtensions.g.cs", sb.ToString());
+        context.AddSource($"{className}.g.cs", sb.ToString());
     }
 
     private record struct Model
@@ -258,6 +356,8 @@ public class LuaComponentsGenerator : IIncrementalGenerator
         public string FullNamespace { get; set; }
         public string BindingName { get; set; }
         public string LuaName { get; set; }
-        public string ValueTypeAssemblyName { get; set; }
+        public string ValueType { get; set; }
+        public string ValueTypeFullNamespace { get; set; }
+        public string MarshallerAssemblyName { get; set; }
     }
 }

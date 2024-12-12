@@ -44,8 +44,9 @@ builder.Services
     .AddSovereignServerNetwork()
     .AddSovereignPersistence()
     .AddSovereignAccounts()
-    .AddEngineCoreLuaLibraries()
-    .AddServerCoreLuaLibraries();
+    .AddSovereignEngineCoreLuaLibraries()
+    .AddSovereignServerCoreLuaLibraries()
+    .AddSovereignEngineCoreLuaComponents();
 
 // Run application.
 var host = builder.Build();

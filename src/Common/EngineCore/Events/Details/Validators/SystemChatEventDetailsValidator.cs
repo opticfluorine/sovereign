@@ -18,6 +18,9 @@ using Sovereign.EngineCore.Configuration;
 
 namespace Sovereign.EngineCore.Events.Details.Validators;
 
+/// <summary>
+///     Event validator for SystemChatEventDetails.
+/// </summary>
 public class SystemChatEventDetailsValidator : IEventDetailsValidator
 {
     public bool IsValid(IEventDetails? details)

@@ -48,6 +48,7 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Core_Chat_Local, DeliveryMethod.Unreliable },
         { EventId.Core_Chat_Global, DeliveryMethod.Unreliable },
         { EventId.Core_Chat_System, DeliveryMethod.Unreliable },
+        { EventId.Core_Chat_Generic, DeliveryMethod.Unreliable },
         { EventId.Server_TemplateEntity_Update, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Block_ModifyNotice, DeliveryMethod.ReliableOrdered },
         { EventId.Core_Block_RemoveNotice, DeliveryMethod.ReliableOrdered },
