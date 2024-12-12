@@ -14,6 +14,7 @@
   when they enter the world.
 * Scripting: Fix issue where binding delegates would be garbage collected between script
   calls, resulting in server crashes.
+* Scripting: Improve Lua stack size checking to avoid possible crashes.
 
 #### 09 December 2024
 
