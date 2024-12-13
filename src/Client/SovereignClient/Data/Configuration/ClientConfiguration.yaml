@@ -53,6 +53,11 @@ Display:
   # Font to use.
   Font: NotoSans-SemiBold.ttf
 
+  # Base font size (specified as height in pixels). Scales with resolution.
+  BaseFontSize: 18.0
+  
+  # Base height against which the font scaling is calculated.
+  BaseScalingHeight: 768
 
 ###################
 # General settings.

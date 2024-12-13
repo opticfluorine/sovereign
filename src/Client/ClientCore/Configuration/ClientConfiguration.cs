@@ -88,6 +88,16 @@ public class DisplayConfiguration
     ///     Font.
     /// </summary>
     public string Font { get; set; } = "";
+
+    /// <summary>
+    ///     Base font size.
+    /// </summary>
+    public float BaseFontSize { get; set; }
+
+    /// <summary>
+    ///     Base height for determining the UI scaling factor.
+    /// </summary>
+    public int BaseScalingHeight { get; set; }
 }
 
 /// <summary>

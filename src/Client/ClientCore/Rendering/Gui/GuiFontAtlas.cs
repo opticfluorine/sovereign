@@ -20,6 +20,7 @@ using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.EngineCore.Resources;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
@@ -35,6 +36,7 @@ public sealed class GuiFontAtlas : IDisposable
     public static readonly IntPtr TextureId = 1;
 
     private readonly ClientConfigurationManager configManager;
+    private readonly MainDisplay mainDisplay;
     private readonly IResourcePathBuilder resourcePathBuilder;
 
     /// <summary>
@@ -52,10 +54,12 @@ public sealed class GuiFontAtlas : IDisposable
     /// </summary>
     private int width;
 
-    public GuiFontAtlas(ClientConfigurationManager configManager, IResourcePathBuilder resourcePathBuilder)
+    public GuiFontAtlas(ClientConfigurationManager configManager, IResourcePathBuilder resourcePathBuilder,
+        MainDisplay mainDisplay)
     {
         this.configManager = configManager;
         this.resourcePathBuilder = resourcePathBuilder;
+        this.mainDisplay = mainDisplay;
     }
 
     /// <summary>
@@ -108,11 +112,16 @@ public sealed class GuiFontAtlas : IDisposable
     [MemberNotNull("fontAtlasSurface")]
     private void InitializeSurface()
     {
+        // Determine UI scaling with resolution.
+        var scaleFactor = (float)mainDisplay.DisplayMode!.Height /
+                          configManager.ClientConfiguration.Display.BaseScalingHeight;
+        var fontSize = scaleFactor * configManager.ClientConfiguration.Display.BaseFontSize;
+
         // Load font.
         var fontPath =
             resourcePathBuilder.BuildPathToResource(ResourceType.Fonts, configManager.ClientConfiguration.Display.Font);
         var io = ImGui.GetIO();
-        io.Fonts.AddFontFromFileTTF(fontPath, 18.0f, null, io.Fonts.GetGlyphRangesDefault());
+        io.Fonts.AddFontFromFileTTF(fontPath, fontSize, null, io.Fonts.GetGlyphRangesDefault());
         io.Fonts.Build();
 
         // Retrieve raw data from ImGui.
