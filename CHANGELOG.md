@@ -4,6 +4,12 @@
 
 ### December
 
+#### 12 December 2024
+
+* Scripting: Add `color` module providing RGB packing functions as well as a number of
+  predefined color constants. Update `chat` module to use packed integers for color
+  instead of separate arguments per color component.
+
 #### 11 December 2024
 
 * Scripting: Add generator for component collection bindings.

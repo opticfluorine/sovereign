@@ -172,8 +172,6 @@ public class ClientChatSystem : ISystem
     private void OnGenericChat(GenericChatEventDetails details)
     {
         logger.LogInformation("[Message] {Message}", details.Message);
-        var color = new Vector4(details.ColorRed / 255.0f, details.ColorGreen / 255.0f, details.ColorBlue / 255.0f,
-            1.0f);
-        chatHistoryManager.AddChat(details.Message, color);
+        chatHistoryManager.AddChat(details.Message, new Vector4(details.Color, 1.0f));
     }
 }

@@ -23,6 +23,10 @@ namespace Sovereign.Scripting.Lua;
 /// <summary>
 ///     Execution host for a Lua script.
 /// </summary>
+/// <remarks>
+///     This class is thread-safe, however deadlocks may occur if the thread holding the lock
+///     is busy (e.g. with an infinite loop or blocking call in an executing Lua script).
+/// </remarks>
 public class LuaHost : IDisposable
 {
     private const int QuickLookupSizeHint = 32;
@@ -176,6 +180,22 @@ public class LuaHost : IDisposable
 
             // Invoke function in a protected context.
             Validate(lua_pcall(LuaState, nargs, 0, tracebackStackPosition));
+        }
+    }
+
+    /// <summary>
+    ///     Loads and executes the given string of Lua code.
+    /// </summary>
+    /// <param name="luaCode">Code to execute.</param>
+    /// <exception cref="LuaException">Thrown if the Lua library reports an error.</exception>
+    public void LoadAndExecuteString(string luaCode)
+    {
+        lock (opsLock)
+        {
+            luaL_checkstack(LuaState, 1, null);
+
+            Validate(luaL_loadstring(LuaState, luaCode));
+            Validate(lua_pcall(LuaState, 0, 0, tracebackStackPosition));
         }
     }
 

@@ -107,6 +107,7 @@ public class ScriptLoader
         var hostLogger = loggerFactory.CreateLogger(loggerCat);
 
         var host = new LuaHost(hostLogger);
+        InstallCommonLibraries(host);
         InstallEventTable(host);
         InstallComponents(host);
         foreach (var library in luaLibraries) library.Install(host);
@@ -147,5 +148,14 @@ public class ScriptLoader
         }
 
         lua_setglobal(host.LuaState, "components");
+    }
+
+    /// <summary>
+    ///     Installs common libraries from ScriptingCommonLibraries.
+    /// </summary>
+    /// <param name="host">Lua host.</param>
+    private void InstallCommonLibraries(LuaHost host)
+    {
+        host.LoadAndExecuteString(ScriptingCommonLibraries.Color);
     }
 }

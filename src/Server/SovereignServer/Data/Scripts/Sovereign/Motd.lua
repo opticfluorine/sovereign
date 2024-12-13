@@ -18,14 +18,14 @@
 
 function on_player_entered(playerEntityId)
     playerName = components.name.get(playerEntityId)
-    chat.send_to_player(playerEntityId, 160, 160, 240,
+    chat.send_to_player(playerEntityId, color.MOTD,
             string.format("Welcome to Sovereign Engine, %s!", playerName))
-    chat.send_to_all(240, 240, 240,
+    chat.send_to_all(color.CHAT_GLOBAL,
             string.format("%s has entered the world.", playerName))
 
     isAdmin = components.admin.get(playerEntityId)
     if (isAdmin) then
-        chat.send_to_player(playerEntityId, 210, 80, 80, "You are an admin.")
+        chat.send_to_player(playerEntityId, color.ALERT, "You are an admin.")
     end
 end
 

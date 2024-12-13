@@ -366,13 +366,10 @@ public static partial class LuaBindings
     }
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial void luaL_checkstack(IntPtr luaState, int sz, string? msg);
+    public static partial LuaResult luaL_loadstring(IntPtr luaState, string s);
 
-    public static LuaResult luaL_dofile(IntPtr luaState, string filename)
-    {
-        var result = luaL_loadfile(luaState, filename);
-        return result == LuaResult.Ok ? lua_pcall(luaState, 0, LUA_MULTRET, 0) : result;
-    }
+    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
+    public static partial void luaL_checkstack(IntPtr luaState, int sz, string? msg);
 
     //
     // A note on error functions:
