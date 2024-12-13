@@ -45,5 +45,10 @@ public enum ResourceType
     /// <summary>
     ///     World definition files.
     /// </summary>
-    World
+    World,
+
+    /// <summary>
+    ///     Fonts.
+    /// </summary>
+    Fonts
 }

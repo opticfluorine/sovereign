@@ -112,7 +112,7 @@ public class GuiRenderer : IDisposable
             -1.0f,
             1.0f
         );
-        scaleFactor = new Vector2(configManager.ClientConfiguration.Display.UiScaleFactor);
+        scaleFactor = Vector2.One;
         io.DisplaySize = new Vector2(device.DisplayMode.Width / scaleFactor.X,
             device.DisplayMode.Height / scaleFactor.Y);
         io.DisplayFramebufferScale = scaleFactor;

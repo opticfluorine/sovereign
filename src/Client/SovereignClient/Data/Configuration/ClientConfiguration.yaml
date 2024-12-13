@@ -44,14 +44,14 @@ Display:
   # Game window height in pixels.
   ResolutionHeight: 1080
   
-  # Scaling factor for the user interface elements.
-  UiScaleFactor: 1.0
-  
   # Maximum framerate (in frames per second).
   MaxFramerate: 120
 
   # Whether to run in fullscreen mode.
   Fullscreen: false
+  
+  # Font to use.
+  Font: NotoSans-SemiBold.ttf
 
 
 ###################

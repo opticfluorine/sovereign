@@ -75,11 +75,6 @@ public class DisplayConfiguration
     public int ResolutionHeight { get; set; }
 
     /// <summary>
-    ///     User interface scale factor.
-    /// </summary>
-    public float UiScaleFactor { get; set; }
-
-    /// <summary>
     ///     Fullscreen flag.
     /// </summary>
     public bool Fullscreen { get; set; }
@@ -88,6 +83,11 @@ public class DisplayConfiguration
     ///     Maximum framerate.
     /// </summary>
     public int MaxFramerate { get; set; }
+
+    /// <summary>
+    ///     Font.
+    /// </summary>
+    public string Font { get; set; } = "";
 }
 
 /// <summary>

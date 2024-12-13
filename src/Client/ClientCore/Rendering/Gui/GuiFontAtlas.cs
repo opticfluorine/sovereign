@@ -18,7 +18,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.EngineCore.Resources;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
 
@@ -30,7 +32,10 @@ public sealed class GuiFontAtlas : IDisposable
     /// <summary>
     ///     ImGui texture ID for the font atlas.
     /// </summary>
-    public static readonly IntPtr TextureId = (IntPtr)1;
+    public static readonly IntPtr TextureId = 1;
+
+    private readonly ClientConfigurationManager configManager;
+    private readonly IResourcePathBuilder resourcePathBuilder;
 
     /// <summary>
     ///     Pointer to the SDL surface containing the font atlas.
@@ -46,6 +51,12 @@ public sealed class GuiFontAtlas : IDisposable
     ///     Width.
     /// </summary>
     private int width;
+
+    public GuiFontAtlas(ClientConfigurationManager configManager, IResourcePathBuilder resourcePathBuilder)
+    {
+        this.configManager = configManager;
+        this.resourcePathBuilder = resourcePathBuilder;
+    }
 
     /// <summary>
     ///     Gets a pointer to the SDL surface containing the font atlas.
@@ -97,8 +108,14 @@ public sealed class GuiFontAtlas : IDisposable
     [MemberNotNull("fontAtlasSurface")]
     private void InitializeSurface()
     {
-        // Retrieve raw data from ImGui.
+        // Load font.
+        var fontPath =
+            resourcePathBuilder.BuildPathToResource(ResourceType.Fonts, configManager.ClientConfiguration.Display.Font);
         var io = ImGui.GetIO();
+        io.Fonts.AddFontFromFileTTF(fontPath, 18.0f, null, io.Fonts.GetGlyphRangesDefault());
+        io.Fonts.Build();
+
+        // Retrieve raw data from ImGui.
         io.Fonts.GetTexDataAsRGBA32(out IntPtr outPixels,
             out var outWidth, out var outHeight);
         width = outWidth;

@@ -9,6 +9,8 @@
 * Scripting: Add `color` module providing RGB packing functions as well as a number of
   predefined color constants. Update `chat` module to use packed integers for color
   instead of separate arguments per color component.
+* GUI: Load Noto font instead of the default font that ships with ImGui. This will be
+  necessary in order to properly scale the GUI with changing resolutions.
 
 #### 11 December 2024
 
