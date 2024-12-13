@@ -28,12 +28,12 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Update;
 /// </summary>
 public class UpdaterGui
 {
-    private const float PreUpdateWindowWidth = 240.0f;
-    private const float PreUpdateWindowHeight = 100.0f;
-    private const float InUpdateWindowWidth = 360.0f;
-    private const float InUpdateWindowHeight = 140.0f;
-    private const float InUpdateProgressWidth = 280.0f;
-    private const float InUpdateProgressHeight = 24.0f;
+    private const float PreUpdateWindowWidth = 13.3f;
+    private const float PreUpdateWindowHeight = 5.56f;
+    private const float InUpdateWindowWidth = 19.8f;
+    private const float InUpdateWindowHeight = 7.7f;
+    private const float InUpdateProgressWidth = 15.56f;
+    private const float InUpdateProgressHeight = 1.33f;
     private const float InUpdateProgressGap = 0.5f * (InUpdateWindowWidth - InUpdateProgressWidth);
     private readonly AutoUpdater autoUpdater;
     private readonly ClientConfigurationManager configurationManager;
@@ -56,9 +56,10 @@ public class UpdaterGui
     {
         if (!configurationManager.ClientConfiguration.AutoUpdater.UpdateOnStartup) return;
 
-        var windowSize = autoUpdater.State == AutoUpdaterState.NotStarted
+        var fontSize = ImGui.GetFontSize();
+        var windowSize = fontSize * (autoUpdater.State == AutoUpdaterState.NotStarted
             ? new Vector2(PreUpdateWindowWidth, PreUpdateWindowHeight)
-            : new Vector2(InUpdateWindowWidth, InUpdateWindowHeight);
+            : new Vector2(InUpdateWindowWidth, InUpdateWindowHeight));
 
         var io = ImGui.GetIO();
         ImGui.SetNextWindowSize(windowSize, ImGuiCond.Always);
