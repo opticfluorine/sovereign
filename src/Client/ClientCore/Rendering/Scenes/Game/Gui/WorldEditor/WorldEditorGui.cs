@@ -77,7 +77,7 @@ public class WorldEditorGui
     public void Render()
     {
         var fontSize = ImGui.GetFontSize();
-        ImGui.SetNextWindowSize(fontSize * new Vector2(13.0f, 9.3f));
+        ImGui.SetNextWindowSize(fontSize * new Vector2(14.0f, 10.0f));
         if (!ImGui.Begin("World Editor", ImGuiWindowFlags.NoResize)) return;
 
         RenderBlockTemplateControl();

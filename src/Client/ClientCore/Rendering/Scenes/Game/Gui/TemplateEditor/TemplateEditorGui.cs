@@ -36,8 +36,10 @@ public class TemplateEditorGui
     /// </summary>
     public void Render()
     {
-        ImGui.SetNextWindowSize(new Vector2(900.0f, 640.0f), ImGuiCond.FirstUseEver);
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 0.0f));
+        var fontSize = ImGui.GetFontSize();
+
+        ImGui.SetNextWindowSize(fontSize * new Vector2(50.0f, 35.56f), ImGuiCond.Once);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, fontSize * new Vector2(0.889f, 0.0f));
         if (!ImGui.Begin("Template Entity Editor")) return;
 
         ImGui.Spacing();
