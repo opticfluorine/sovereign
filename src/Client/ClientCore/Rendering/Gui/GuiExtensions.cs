@@ -30,7 +30,7 @@ public class GuiExtensions
     /// <summary>
     ///     Scale factor to apply to displayed sprites.
     /// </summary>
-    public const float SpriteScaleFactor = 1.5f;
+    public const float SpriteScaleFactor = 0.0833f;
 
     private readonly GuiTextureMapper textureMapper;
 
@@ -187,6 +187,7 @@ public class GuiExtensions
     /// <returns></returns>
     private Vector2 GetSpriteDimensions(GuiTextureMapper.TextureData texData)
     {
-        return new Vector2(SpriteScaleFactor * texData.Width, SpriteScaleFactor * texData.Height);
+        var fontSize = ImGui.GetFontSize();
+        return new Vector2(fontSize * SpriteScaleFactor * texData.Width, fontSize * SpriteScaleFactor * texData.Height);
     }
 }

@@ -111,6 +111,8 @@ public class SpritesheetSelector
     /// </summary>
     private void DrawSpritesheetView()
     {
+        var fontSize = ImGui.GetFontSize();
+
         // Wrap the view in a single-cell table to get scrollbars for larger spritesheets.
         var screenSize = ImGui.GetIO().DisplaySize;
         var basePos = ImGui.GetCursorPos();
@@ -137,9 +139,11 @@ public class SpritesheetSelector
                 if (coverageMap[i, j] != null)
                 {
                     // Sprite exists, draw a box around it.
-                    var minPos = start + new Vector2(j * sheet.Definition.SpriteWidth,
+                    var minPos = start + fontSize * GuiExtensions.SpriteScaleFactor * new Vector2(
+                        j * sheet.Definition.SpriteWidth,
                         i * sheet.Definition.SpriteHeight);
-                    var maxPos = minPos + new Vector2(sheet.Definition.SpriteWidth, sheet.Definition.SpriteHeight);
+                    var maxPos = minPos + fontSize * GuiExtensions.SpriteScaleFactor *
+                        new Vector2(sheet.Definition.SpriteWidth, sheet.Definition.SpriteHeight);
                     drawList.AddRect(minPos, maxPos, 0x7FFFFFFF);
                 }
 
@@ -148,8 +152,10 @@ public class SpritesheetSelector
             if (spriteHovered)
             {
                 // Mouse is overlapping the spritesheet.
-                var row = (int)Math.Floor(relMousePos.Y / sheet.Definition.SpriteHeight);
-                var col = (int)Math.Floor(relMousePos.X / sheet.Definition.SpriteWidth);
+                var scaledHeight = fontSize * GuiExtensions.SpriteScaleFactor * sheet.Definition.SpriteHeight;
+                var scaledWidth = fontSize * GuiExtensions.SpriteScaleFactor * sheet.Definition.SpriteWidth;
+                var row = (int)Math.Floor(relMousePos.Y / scaledHeight);
+                var col = (int)Math.Floor(relMousePos.X / scaledWidth);
                 if (row == rows) row--;
                 if (col == cols) col--;
 
