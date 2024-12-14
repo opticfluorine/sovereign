@@ -74,7 +74,9 @@ public class LoginGui
     /// </returns>
     public MainMenuState Render()
     {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
+        var fontSize = ImGui.GetFontSize();
+
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, fontSize * new Vector2(0.8f, 0.8f));
 
         var io = ImGui.GetIO();
         ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
@@ -104,9 +106,15 @@ public class LoginGui
     private MainMenuState DoInputState()
     {
         var nextState = MainMenuState.Login;
+        var fontSize = ImGui.GetFontSize();
 
+        if (!ImGui.BeginTable("login", 2, ImGuiTableFlags.SizingFixedFit)) return nextState;
+
+        ImGui.TableNextColumn();
         ImGui.Text(Username);
-        ImGui.SameLine();
+
+        ImGui.TableNextColumn();
+        ImGui.PushItemWidth(fontSize * 8.0f);
         if (setDefaultFocus)
         {
             ImGui.SetKeyboardFocusHere();
@@ -117,11 +125,17 @@ public class LoginGui
                 ImGuiInputTextFlags.EnterReturnsTrue)) DoLogin();
         ImGui.SetItemDefaultFocus();
 
+        ImGui.TableNextColumn();
         ImGui.Text(Password);
-        ImGui.SameLine();
+
+        ImGui.TableNextColumn();
         if (ImGui.InputText("##password", ref passwordInput, MaxFieldSize,
                 ImGuiInputTextFlags.Password | ImGuiInputTextFlags.EnterReturnsTrue)) DoLogin();
 
+        ImGui.PopItemWidth();
+        ImGui.EndTable();
+
+        ImGui.Spacing();
         if (ImGui.Button(Login)) DoLogin();
         ImGui.SameLine();
         if (ImGui.Button(Cancel)) nextState = MainMenuState.Startup;

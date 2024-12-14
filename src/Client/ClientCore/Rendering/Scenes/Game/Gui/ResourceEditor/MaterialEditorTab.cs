@@ -74,6 +74,8 @@ public class MaterialEditorTab
     /// </summary>
     public void Render()
     {
+        var fontSize = ImGui.GetFontSize();
+
         if (!initialized)
         {
             Select(1);
@@ -84,7 +86,7 @@ public class MaterialEditorTab
 
         if (ImGui.BeginTable("materialOuter", 2, ImGuiTableFlags.SizingFixedFit))
         {
-            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 254.0f);
+            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, fontSize * 14.11f);
             ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
 
             ImGui.TableNextColumn();
@@ -105,14 +107,16 @@ public class MaterialEditorTab
     private void RenderBrowser()
     {
         // Browser selector.
+        var fontSize = ImGui.GetFontSize();
         var maxSize = ImGui.GetWindowSize();
         if (ImGui.BeginTable("materialBrowser", 3,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter |
-                ImGuiTableFlags.RowBg, new Vector2 { X = 254.0f, Y = maxSize.Y - 125 }))
+                ImGuiTableFlags.RowBg, new Vector2 { X = fontSize * 14.11f, Y = maxSize.Y - fontSize * 7.30f }))
         {
             ImGui.TableSetupColumn("ID");
             ImGui.TableSetupColumn("Material");
             ImGui.TableSetupColumn("Name");
+            ImGui.TableSetupScrollFreeze(0, 1);
             ImGui.TableHeadersRow();
 
             for (var i = 1; i < materialManager.Materials.Count; ++i)
@@ -199,6 +203,8 @@ public class MaterialEditorTab
     /// </summary>
     private void RenderEditorTopBar()
     {
+        var fontSize = ImGui.GetFontSize();
+
         if (ImGui.BeginTable("Header", 5, ImGuiTableFlags.SizingFixedFit))
         {
             ImGui.TableSetupColumn("");
@@ -213,7 +219,7 @@ public class MaterialEditorTab
             ImGui.Text("Name:");
 
             ImGui.TableNextColumn();
-            ImGui.SetNextItemWidth(180.0f);
+            ImGui.SetNextItemWidth(fontSize * 10.0f);
             ImGui.InputText("##materialName", ref editingName, MaxNameLen);
 
             ImGui.TableNextColumn();
@@ -232,10 +238,11 @@ public class MaterialEditorTab
     /// </summary>
     private void RenderSubtypeTable()
     {
+        var fontSize = ImGui.GetFontSize();
         var maxSize = ImGui.GetWindowSize();
         if (!ImGui.BeginTable("subtypeTable", 5,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
-                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 156 })) return;
+                new Vector2 { X = maxSize.X - fontSize * 15.33f, Y = maxSize.Y - fontSize * 9.1f })) return;
 
         ImGui.TableSetupColumn("Modifier ID");
         ImGui.TableSetupColumn("Front Face");

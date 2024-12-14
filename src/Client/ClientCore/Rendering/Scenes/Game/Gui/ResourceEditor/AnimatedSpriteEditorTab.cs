@@ -159,6 +159,8 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     public void Render()
     {
+        var fontSize = ImGui.GetFontSize();
+
         if (!initialized)
         {
             Select(0);
@@ -170,7 +172,7 @@ public class AnimatedSpriteEditorTab
         {
             if (ImGui.BeginTable("animSprOuter", 2, ImGuiTableFlags.SizingFixedFit))
             {
-                ImGui.TableSetupColumn("#browser", ImGuiTableColumnFlags.WidthFixed, 220.0f);
+                ImGui.TableSetupColumn("#browser", ImGuiTableColumnFlags.WidthFixed, fontSize * 12.22f);
                 ImGui.TableSetupColumn("#editor", ImGuiTableColumnFlags.WidthStretch);
 
                 ImGui.TableNextColumn();
@@ -192,13 +194,15 @@ public class AnimatedSpriteEditorTab
     private void RenderBrowser()
     {
         // Browser selector.
+        var fontSize = ImGui.GetFontSize();
         var maxSize = ImGui.GetWindowSize();
         if (ImGui.BeginTable("animSprBrowser", 2,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter |
-                ImGuiTableFlags.RowBg, new Vector2 { X = 222.0f, Y = maxSize.Y - 125 }))
+                ImGuiTableFlags.RowBg, new Vector2 { X = fontSize * 12.33f, Y = maxSize.Y - fontSize * 7.30f }))
         {
             ImGui.TableSetupColumn("ID");
             ImGui.TableSetupColumn("Animated Sprite");
+            ImGui.TableSetupScrollFreeze(0, 1);
             ImGui.TableHeadersRow();
 
             for (var i = 0; i < animatedSpriteManager.AnimatedSprites.Count; ++i)
@@ -258,6 +262,8 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     private void RenderEditor()
     {
+        var fontSize = ImGui.GetFontSize();
+
         if (editingSprite == null)
         {
             logger.LogError("RenderEditor(): editingSprite is null.");
@@ -280,7 +286,7 @@ public class AnimatedSpriteEditorTab
 
             ImGui.TableNextColumn();
             var phaseStr = currentPhase.ToString();
-            ImGui.SetNextItemWidth(120.0f);
+            ImGui.SetNextItemWidth(fontSize * 6.67f);
             if (ImGui.BeginCombo("##phaseSelect", phaseStr))
             {
                 foreach (var phase in orderedPhases)
@@ -304,7 +310,7 @@ public class AnimatedSpriteEditorTab
 
         ImGui.Text("Animation Timestep:");
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(120.0f);
+        ImGui.SetNextItemWidth(fontSize * 6.67f);
         ImGui.InputFloat("ms##timestep", ref inputTimestepMs);
         if (inputTimestepMs > 0)
             editingSprite.Phases[currentPhase].FrameTime = (ulong)(inputTimestepMs * UnitConversions.MsToUs);
@@ -315,8 +321,9 @@ public class AnimatedSpriteEditorTab
             .Max();
         if (ImGui.BeginTable("frameEdtior", maxFrames + 3,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
-                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 179 }))
+                new Vector2 { X = maxSize.X - fontSize * 15.33f, Y = maxSize.Y - fontSize * 10.57f }))
         {
+            // 9.94f
             ImGui.TableSetupColumn("Orientation");
             ImGui.TableSetupColumn("");
             ImGui.TableSetupColumn("+/-");

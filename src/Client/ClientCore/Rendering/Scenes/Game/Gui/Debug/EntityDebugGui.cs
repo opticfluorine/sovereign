@@ -81,6 +81,8 @@ public class EntityDebugGui
     /// </summary>
     public void Render()
     {
+        var fontSize = ImGui.GetFontSize();
+        ImGui.SetNextWindowSize(fontSize * new Vector2(26.0f, 28.0f), ImGuiCond.Once);
         if (!ImGui.Begin("Entity Debug")) return;
 
         if (ImGui.BeginTabBar("entityDebugTabs", ImGuiTabBarFlags.None))

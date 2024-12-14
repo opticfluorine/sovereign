@@ -27,7 +27,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game;
 /// </summary>
 public class InGameMenuGui
 {
-    private static readonly Vector2 ButtonSize = new(128.0f, 24.0f);
+    private static readonly Vector2 ButtonSize = new(7.11f, 1.33f);
     private readonly ClientNetworkController clientNetworkController;
     private readonly CoreController coreController;
     private readonly IEventSender eventSender;
@@ -45,11 +45,12 @@ public class InGameMenuGui
     /// </summary>
     public void Render()
     {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
+        var fontSize = ImGui.GetFontSize();
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, fontSize * new Vector2(0.8f, 0.8f));
 
         var io = ImGui.GetIO();
         ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
-        ImGui.SetNextWindowSize(new Vector2(160.0f, 0.0f), ImGuiCond.Always);
+        ImGui.SetNextWindowSize(fontSize * new Vector2(8.89f, 0.0f), ImGuiCond.Always);
         ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
         ImGui.Begin("##inGameMenu",
             ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize);
@@ -58,10 +59,10 @@ public class InGameMenuGui
         {
             ImGui.TableNextColumn();
             ImGui.TableSetupColumn("##gameMenuCol", ImGuiTableColumnFlags.WidthStretch);
-            if (ImGui.Button("Logout", ButtonSize)) OnLogout();
+            if (ImGui.Button("Logout", fontSize * ButtonSize)) OnLogout();
 
             ImGui.TableNextColumn();
-            if (ImGui.Button("Exit", ButtonSize)) OnExit();
+            if (ImGui.Button("Exit", fontSize * ButtonSize)) OnExit();
 
             ImGui.EndTable();
         }

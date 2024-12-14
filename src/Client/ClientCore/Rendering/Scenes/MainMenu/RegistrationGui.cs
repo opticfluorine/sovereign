@@ -91,7 +91,8 @@ public class RegistrationGui
     /// <returns>Next main menu state.</returns>
     public MainMenuState Render()
     {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
+        var fontSize = ImGui.GetFontSize();
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, fontSize * new Vector2(0.8f, 0.8f));
         var io = ImGui.GetIO();
         ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
         ImGui.SetNextWindowSize(Vector2.Zero, ImGuiCond.Always);
@@ -118,13 +119,14 @@ public class RegistrationGui
     private MainMenuState DoInputState()
     {
         var nextState = MainMenuState.Registration;
+        var fontSize = ImGui.GetFontSize();
 
-        if (ImGui.BeginTable("register", 2))
+        if (ImGui.BeginTable("register", 2, ImGuiTableFlags.SizingFixedFit))
         {
             ImGui.TableNextColumn();
             ImGui.Text(Username);
             ImGui.TableNextColumn();
-            ImGui.PushItemWidth(-4.0f);
+            ImGui.PushItemWidth(fontSize * 8.0f);
             if (setDefaultFocus)
             {
                 ImGui.SetKeyboardFocusHere();

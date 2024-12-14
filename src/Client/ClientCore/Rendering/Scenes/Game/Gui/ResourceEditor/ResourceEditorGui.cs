@@ -43,7 +43,8 @@ public class ResourceEditorGui
     /// </summary>
     public void Render()
     {
-        ImGui.SetNextWindowSize(new Vector2(900.0f, 640.0f), ImGuiCond.FirstUseEver);
+        var fontSize = ImGui.GetFontSize();
+        ImGui.SetNextWindowSize(fontSize * new Vector2(50.0f, 35.56f), ImGuiCond.FirstUseEver);
         if (ImGui.Begin("Resource Editor", ImGuiWindowFlags.MenuBar))
         {
             if (ImGui.BeginMenuBar())

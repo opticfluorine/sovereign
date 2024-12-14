@@ -67,7 +67,8 @@ public class CreatePlayerGui
     /// <returns></returns>
     public MainMenuState Render()
     {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
+        var fontSize = ImGui.GetFontSize();
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, fontSize * new Vector2(0.8f, 0.8f));
 
         var io = ImGui.GetIO();
         ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
@@ -94,6 +95,7 @@ public class CreatePlayerGui
     /// <returns>Next main menu state.</returns>
     private MainMenuState DoInput()
     {
+        var fontSize = ImGui.GetFontSize();
         var nextState = MainMenuState.PlayerCreation;
 
         ImGui.BeginTable("createPlayer", 2, ImGuiTableFlags.SizingFixedFit);
@@ -107,7 +109,7 @@ public class CreatePlayerGui
             setDefaultFocus = false;
         }
 
-        ImGui.SetNextItemWidth(240.0f);
+        ImGui.SetNextItemWidth(fontSize * 13.33f);
         if (ImGui.InputText("##playerName", ref playerNameInput, EntityConstants.MaxNameLength,
                 ImGuiInputTextFlags.EnterReturnsTrue)) OnCreate();
 

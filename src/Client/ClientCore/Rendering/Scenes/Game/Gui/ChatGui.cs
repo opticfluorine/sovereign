@@ -28,8 +28,8 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 /// </summary>
 public class ChatGui
 {
-    private static readonly Vector2 WindowRelPos = new(0.15f, 0.65f);
-    private static readonly Vector2 TableScale = new(0.7f, 0.2f);
+    private static readonly Vector2 WindowRelPos = new(30.0f, 35.0f);
+    private static readonly Vector2 TableSize = new(50.0f, 12.0f);
     private readonly ClientChatController chatController;
     private readonly ClientChatServices chatServices;
     private readonly IEventSender eventSender;
@@ -53,15 +53,15 @@ public class ChatGui
     public void Render()
     {
         var io = ImGui.GetIO();
-        var chatPos = io.DisplaySize * WindowRelPos;
+        var fontSize = ImGui.GetFontSize();
 
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4.0f, 0.0f));
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, fontSize * new Vector2(0.222f, 0.0f));
 
-        ImGui.SetNextWindowSize(Vector2.Zero);
-        ImGui.SetNextWindowPos(chatPos, ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSize(Vector2.Zero, ImGuiCond.Once);
+        ImGui.SetNextWindowPos(fontSize * WindowRelPos, ImGuiCond.Once, new Vector2(0.5f));
         if (ImGui.Begin("Chat", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse))
         {
-            var tableDims = io.DisplaySize * TableScale;
+            var tableDims = fontSize * TableSize;
             if (ImGui.BeginTable("chat", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, tableDims))
             {
                 // Draw chat entries.

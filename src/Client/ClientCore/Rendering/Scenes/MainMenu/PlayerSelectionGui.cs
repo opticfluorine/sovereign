@@ -88,9 +88,12 @@ public class PlayerSelectionGui
     /// <returns>Next main menu state.</returns>
     public MainMenuState Render()
     {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
+        var fontSize = ImGui.GetFontSize();
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, fontSize * new Vector2(0.8f, 0.8f));
 
-        var windowSize = selectionState == PlayerSelectionState.Input ? new Vector2(0.0f, 520.0f) : Vector2.Zero;
+        var windowSize = selectionState == PlayerSelectionState.Input
+            ? fontSize * new Vector2(0.0f, 28.89f)
+            : Vector2.Zero;
 
         var io = ImGui.GetIO();
         ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
@@ -157,6 +160,8 @@ public class PlayerSelectionGui
     /// <returns>Next main menu state.</returns>
     private MainMenuState DoInput()
     {
+        var fontSize = ImGui.GetFontSize();
+
         if (playerListRequest == null)
         {
             errorMessage = "Player list request is null.";
@@ -174,7 +179,7 @@ public class PlayerSelectionGui
 
         ImGui.BeginTable("players", 3,
             ImGuiTableFlags.BordersH | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingFixedFit,
-            new Vector2(0.0f, 440.0f));
+            fontSize * new Vector2(0.0f, 24.44f));
         foreach (var player in playerList) RenderPlayer(player);
 
         ImGui.EndTable();

@@ -77,6 +77,8 @@ public class TileSpriteEditorTab
     /// </summary>
     public void Render()
     {
+        var fontSize = ImGui.GetFontSize();
+
         if (!initialized)
         {
             Select(0);
@@ -87,7 +89,7 @@ public class TileSpriteEditorTab
         {
             if (ImGui.BeginTable("tileSprOuter", 2, ImGuiTableFlags.SizingFixedFit))
             {
-                ImGui.TableSetupColumn("#browser", ImGuiTableColumnFlags.WidthFixed, 220.0f);
+                ImGui.TableSetupColumn("#browser", ImGuiTableColumnFlags.WidthFixed, fontSize * 12.22f);
                 ImGui.TableSetupColumn("#editor", ImGuiTableColumnFlags.WidthStretch);
 
                 ImGui.TableNextColumn();
@@ -108,6 +110,8 @@ public class TileSpriteEditorTab
     /// </summary>
     private void RenderBrowser()
     {
+        var fontSize = ImGui.GetFontSize();
+
         if (editingSprite == null)
         {
             logger.LogError("RenderBrowser(): editingSprite is null.");
@@ -118,10 +122,11 @@ public class TileSpriteEditorTab
         var maxSize = ImGui.GetWindowSize();
         if (ImGui.BeginTable("tileSprBrowser", 2,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter |
-                ImGuiTableFlags.RowBg, new Vector2 { X = 222.0f, Y = maxSize.Y - 125 }))
+                ImGuiTableFlags.RowBg, new Vector2 { X = fontSize * 12.33f, Y = maxSize.Y - fontSize * 7.25f }))
         {
             ImGui.TableSetupColumn("ID");
             ImGui.TableSetupColumn("Tile Sprite");
+            ImGui.TableSetupScrollFreeze(0, 1);
             ImGui.TableHeadersRow();
 
             for (var i = 0; i < tileSpriteManager.TileSprites.Count; ++i)
@@ -224,6 +229,8 @@ public class TileSpriteEditorTab
     /// </summary>
     private void RenderContextTable()
     {
+        var fontSize = ImGui.GetFontSize();
+
         if (editingSprite == null)
         {
             logger.LogError("RenderContextTable(): editingSprite is null.");
@@ -235,11 +242,11 @@ public class TileSpriteEditorTab
             .Select(ctx => ctx.AnimatedSpriteIds.Count).Max();
         if (ImGui.BeginTable("contextTable", maxLayers + 12,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
-                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - 156 }))
+                new Vector2 { X = maxSize.X - fontSize * 15.33f, Y = maxSize.Y - fontSize * 9.05f }))
         {
             ImGui.TableSetupColumn(""); // Discard button
             ImGui.TableSetupColumn(""); // Preview
-            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 16.0f); // Spacer
+            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, fontSize * 0.889f); // Spacer
             ImGui.TableSetupColumn("N");
             ImGui.TableSetupColumn("NE");
             ImGui.TableSetupColumn("E");

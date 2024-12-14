@@ -32,7 +32,7 @@ public class StartupGui
     private const string Register = "Register";
     private const string Exit = "Exit";
 
-    private static readonly Vector2 ButtonSize = new(128.0f, 24.0f);
+    private static readonly Vector2 ButtonSize = new(7.11f, 1.33f);
     private readonly CoreController coreController;
     private readonly IEventSender eventSender;
 
@@ -52,11 +52,13 @@ public class StartupGui
     {
         var newState = MainMenuState.Startup;
 
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16.0f, 16.0f));
+        var fontSize = ImGui.GetFontSize();
+
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, fontSize * new Vector2(0.8f, 0.8f));
 
         var io = ImGui.GetIO();
         ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
-        ImGui.SetNextWindowSize(new Vector2(160.0f, 0.0f), ImGuiCond.Always);
+        ImGui.SetNextWindowSize(fontSize * new Vector2(8.89f, 0.0f), ImGuiCond.Always);
         ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
         ImGui.Begin(Title);
 
@@ -64,13 +66,13 @@ public class StartupGui
         {
             ImGui.TableNextColumn();
             ImGui.TableSetupColumn("##startupCol", ImGuiTableColumnFlags.WidthStretch);
-            if (ImGui.Button(Login, ButtonSize)) newState = MainMenuState.Login;
+            if (ImGui.Button(Login, fontSize * ButtonSize)) newState = MainMenuState.Login;
 
             ImGui.TableNextColumn();
-            if (ImGui.Button(Register, ButtonSize)) newState = MainMenuState.Registration;
+            if (ImGui.Button(Register, fontSize * ButtonSize)) newState = MainMenuState.Registration;
 
             ImGui.TableNextColumn();
-            if (ImGui.Button(Exit, ButtonSize)) coreController.Quit(eventSender);
+            if (ImGui.Button(Exit, fontSize * ButtonSize)) coreController.Quit(eventSender);
 
             ImGui.EndTable();
         }
