@@ -4,6 +4,11 @@
 
 ### December
 
+#### 13 December 2024
+
+* GUI: Scale GUI dimensions with resolution in order to support various DPI settings.
+* GUI: Various minor style and usability improvements to all GUIs.
+
 #### 12 December 2024
 
 * Scripting: Add `color` module providing RGB packing functions as well as a number of

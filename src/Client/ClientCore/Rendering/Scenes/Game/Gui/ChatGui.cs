@@ -28,7 +28,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 /// </summary>
 public class ChatGui
 {
-    private static readonly Vector2 WindowRelPos = new(30.0f, 35.0f);
+    private static readonly Vector2 WindowRelPos = new(30.0f, 38.0f);
     private static readonly Vector2 TableSize = new(50.0f, 12.0f);
     private readonly ClientChatController chatController;
     private readonly ClientChatServices chatServices;

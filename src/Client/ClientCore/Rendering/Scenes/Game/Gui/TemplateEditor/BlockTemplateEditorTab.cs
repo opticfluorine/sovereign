@@ -41,8 +41,6 @@ public class BlockTemplateEditorTab
     /// </summary>
     private const uint SelectionColor = 0xFF773333;
 
-    private const float BottomOffsetY = 85;
-
     private readonly EntityDefinitionGenerator definitionGenerator;
 
     private readonly EntityTable entityTable;
@@ -96,6 +94,8 @@ public class BlockTemplateEditorTab
     /// </summary>
     public void Render()
     {
+        var fontSize = ImGui.GetFontSize();
+
         if (!initialized)
         {
             Select(-1);
@@ -106,7 +106,7 @@ public class BlockTemplateEditorTab
 
         if (ImGui.BeginTable("blockTemplateOuter", 2, ImGuiTableFlags.SizingFixedFit))
         {
-            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 254.0f);
+            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, fontSize * 14.11f);
             ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
 
             ImGui.TableNextColumn();
@@ -126,14 +126,17 @@ public class BlockTemplateEditorTab
     /// </summary>
     private void RenderBrowser()
     {
+        var fontSize = ImGui.GetFontSize();
+
         // Browser selector.
         var maxSize = ImGui.GetWindowSize();
         if (ImGui.BeginTable("blockTemplateBrowser", 2,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter |
-                ImGuiTableFlags.RowBg, new Vector2 { X = 254.0f, Y = maxSize.Y - BottomOffsetY }))
+                ImGuiTableFlags.RowBg, new Vector2 { X = fontSize * 14.11f, Y = maxSize.Y - fontSize * 5.3f }))
         {
             ImGui.TableSetupColumn("Material");
             ImGui.TableSetupColumn("Name");
+            ImGui.TableSetupScrollFreeze(0, 1);
             ImGui.TableHeadersRow();
 
             for (var i = 0; i < sortedTemplateEntityIds.Count; ++i)
@@ -213,15 +216,15 @@ public class BlockTemplateEditorTab
     /// </summary>
     private void RenderComponentTable()
     {
+        var fontSize = ImGui.GetFontSize();
         var maxSize = ImGui.GetWindowSize();
         if (!ImGui.BeginTable("componentTable", 1,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingStretchProp,
-                new Vector2 { X = maxSize.X - 276, Y = maxSize.Y - BottomOffsetY })) return;
+                new Vector2 { X = maxSize.X - fontSize * 15.33f, Y = maxSize.Y - fontSize * 5.3f })) return;
 
         ImGui.TableNextColumn();
 
         if (ImGui.CollapsingHeader("Basic Information", ImGuiTreeNodeFlags.DefaultOpen))
-        {
             if (ImGui.BeginTable("BasicInfo", 2, ImGuiTableFlags.SizingFixedFit))
             {
                 ImGui.TableNextColumn();
@@ -231,7 +234,6 @@ public class BlockTemplateEditorTab
 
                 ImGui.EndTable();
             }
-        }
 
         if (ImGui.CollapsingHeader("Appearance", ImGuiTreeNodeFlags.DefaultOpen))
         {
@@ -270,13 +272,11 @@ public class BlockTemplateEditorTab
             if (!canSave)
             {
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                {
                     if (ImGui.BeginTooltip())
                     {
                         ImGui.Text(reason);
                         ImGui.EndTooltip();
                     }
-                }
 
                 ImGui.EndDisabled();
             }
