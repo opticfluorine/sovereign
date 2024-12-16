@@ -156,6 +156,11 @@ public static partial class LuaBindings
         return lua_type(luaState, idx) == LuaType.Boolean;
     }
 
+    public static bool lua_istable(IntPtr luaState, int idx)
+    {
+        return lua_type(luaState, idx) == LuaType.Table;
+    }
+
     [LibraryImport(LibName)]
     public static partial LuaType lua_type(IntPtr luaState, int idx);
 

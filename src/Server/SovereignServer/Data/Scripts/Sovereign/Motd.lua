@@ -16,21 +16,23 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-function on_player_entered(playerEntityId)
-    playerName = components.name.get(playerEntityId)
+function on_player_entered(event)
+    local playerEntityId = event.EntityId
+    local playerName = components.name.get(playerEntityId)
     chat.send_to_player(playerEntityId, color.MOTD,
             string.format("Welcome to Sovereign Engine, %s!", playerName))
     chat.send_to_all(color.CHAT_GLOBAL,
             string.format("%s has entered the world.", playerName))
 
-    isAdmin = components.admin.get(playerEntityId)
+    local isAdmin = components.admin.get(playerEntityId)
     if (isAdmin) then
         chat.send_to_player(playerEntityId, color.ALERT, "You are an admin.")
     end
 end
 
-function on_player_logout(playerEntityId)
-    playerName = components.name.get(playerEntityId)
+function on_player_logout(event)
+    local playerEntityId = event.EntityId
+    local playerName = components.name.get(playerEntityId)
     chat.send_to_all(color.CHAT_GLOBAL,
             string.format("%s has left the world.", playerName))
 end

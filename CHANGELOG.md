@@ -10,6 +10,9 @@
 * Server: Improve logging of account and player login/logout.
 * Scripting: Update `Motd.lua` to announce player logout to all connected players.
 * Client: Properly clear chat history when switching players without exiting the client.
+* Scripting: Improve generated marshallers to produce tables in place of objects instead
+  of one argument per field. Gives a much nicer encapsulation of types that maps directly
+  onto the originating managed type.
 
 #### 13 December 2024
 

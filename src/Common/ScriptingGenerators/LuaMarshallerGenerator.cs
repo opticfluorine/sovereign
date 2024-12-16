@@ -250,19 +250,28 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
 
                 public static int Marshal(IntPtr luaState, Vector3 value)
                 {{
-                    luaL_checkstack(luaState, 3, null);
+                    luaL_checkstack(luaState, 2, null);
+                    lua_createtable(luaState, 0, 3);
                     Marshal(luaState, value.X);
+                    lua_setfield(luaState, -2, ""x"");
                     Marshal(luaState, value.Y);
+                    lua_setfield(luaState, -2, ""y"");
                     Marshal(luaState, value.Z);
-                    return 3;
+                    lua_setfield(luaState, -2, ""z"");
+                    return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out Vector3 value)
                 {{
                     value = new Vector3();
-                    Unmarshal(luaState, out value.Z);
-                    Unmarshal(luaState, out value.Y);
+                    if (!lua_istable(luaState, -1)) {throwTypeError};
+                    luaL_checkstack(luaState, 1, null);
+                    if (lua_getfield(luaState, -1, ""x"") != LuaType.Number) {throwTypeError};
                     Unmarshal(luaState, out value.X);
+                    if (lua_getfield(luaState, -1, ""y"") != LuaType.Number) {throwTypeError};
+                    Unmarshal(luaState, out value.Y);
+                    if (lua_getfield(luaState, -1, ""z"") != LuaType.Number) {throwTypeError};
+                    Unmarshal(luaState, out value.Z);
                 }}
 
                 public static int Marshal(IntPtr luaState, Guid value)
@@ -289,40 +298,62 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     int pushCount = 0;");
 
             if (record.IsEnum)
+            {
                 sb.Append(@"
                     luaL_checkstack(luaState, 1, null);
                     pushCount += Marshal(luaState, (long)value);");
+            }
             else
+            {
+                sb.Append(@"
+                    luaL_checkstack(luaState, 2, null);
+                    lua_createtable(luaState, 0, 0);
+                    pushCount = 1;");
                 foreach (var dataModel in record.DataModels.List)
                     sb.Append($@"
-                    pushCount += Marshal(luaState, value.{dataModel.Name});
-                ");
+                    Marshal(luaState, value.{dataModel.Name});
+                    lua_setfield(luaState, -2, ""{dataModel.Name}"");");
+            }
 
             sb.Append($@"
                     return pushCount;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out {record.Name} value)
-                {{
-                    var tmp = new {record.Name}();
-            ");
-
-            for (var i = record.DataModels.List.Count - 1; i >= 0; --i)
+                {{");
+            if (record.IsEnum)
             {
-                var dataModel = record.DataModels.List[i];
                 sb.Append($@"
+                    long tmp;
+                    Unmarshal(luaState, out tmp);
+                    value = ({record.Name})tmp;
+                }}
+                ");
+            }
+            else
+            {
+                sb.Append($@"
+                    var tmp = new {record.Name}();
+                    luaL_checkstack(luaState, 1, null);
+                    if (!lua_istable(luaState, -1)) {throwTypeError};");
+
+                for (var i = record.DataModels.List.Count - 1; i >= 0; --i)
+                {
+                    var dataModel = record.DataModels.List[i];
+                    sb.Append($@"
                     {{
+                        lua_getfield(luaState, -1, ""{dataModel.Name}"");
                         Unmarshal(luaState, out {dataModel.NativeType} tval);
                         tmp.{dataModel.Name} = tval;
                     }}
                 ");
-            }
-
-            sb.Append(@"
-                    value = tmp;
                 }
 
-            ");
+                sb.Append(@"
+                    value = tmp;
+                }
+                ");
+            }
         }
 
         // End.
