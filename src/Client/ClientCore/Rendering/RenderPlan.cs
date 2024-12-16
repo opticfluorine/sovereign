@@ -100,6 +100,27 @@ public struct RenderLight
 }
 
 /// <summary>
+///     Specifies information for an entity that requires a name label to be drawn.
+/// </summary>
+public struct NameLabel
+{
+    /// <summary>
+    ///     Entity ID.
+    /// </summary>
+    public ulong EntityId;
+
+    /// <summary>
+    ///     Entity position interpolated to the time of the current frame.
+    /// </summary>
+    public Vector3 InterpolatedPosition;
+
+    /// <summary>
+    ///     Sprite ID to use for size reference.
+    /// </summary>
+    public int SpriteId;
+}
+
+/// <summary>
 ///     Manages the plan for rendering a frame.
 /// </summary>
 public class RenderPlan
@@ -108,6 +129,11 @@ public class RenderPlan
     ///     Initial size of point light list.
     /// </summary>
     private const int InitialLightSize = 128;
+
+    /// <summary>
+    ///     Initial size of name label list.
+    /// </summary>
+    private const int InitialNameLabelSize = 128;
 
     private readonly uint[] solidIndexBuffer;
 
@@ -135,6 +161,16 @@ public class RenderPlan
     ///     Point lights to include in rendering.
     /// </summary>
     public RenderLight[] Lights;
+
+    /// <summary>
+    ///     Running total of used name labels.
+    /// </summary>
+    private int nameLabelCount;
+
+    /// <summary>
+    ///     Name labels to include in rendering.
+    /// </summary>
+    public NameLabel[] NameLabels;
 
     /// <summary>
     ///     Running total of used solid geometry indices already allocated to point lights.
@@ -174,6 +210,7 @@ public class RenderPlan
         this.solidIndexBuffer = solidIndexBuffer;
         renderCommands = new RenderCommand[commandListSize];
         Lights = new RenderLight[InitialLightSize];
+        NameLabels = new NameLabel[InitialNameLabelSize];
     }
 
     /// <summary>
@@ -202,6 +239,11 @@ public class RenderPlan
     public int LightCount => lightCount;
 
     /// <summary>
+    ///     Number of name labels in the render plan.
+    /// </summary>
+    public int NameLabelCount => nameLabelCount;
+
+    /// <summary>
     ///     Camera position in world coordinates.
     /// </summary>
     public Vector3 CameraPosition { get; set; }
@@ -218,6 +260,7 @@ public class RenderPlan
         worldSolidIndexCount = 0;
         lightCount = 0;
         pointLightSolidIndexCount = 0;
+        nameLabelCount = 0;
     }
 
     /// <summary>
@@ -395,6 +438,22 @@ public class RenderPlan
             Light = light
         };
         pointLightSolidIndexCount += (uint)indexCount;
+    }
+
+    /// <summary>
+    ///     Adds a name label to the render plan data.
+    /// </summary>
+    /// <param name="nameLabel">Name label to add.</param>
+    public void AddNameLabel(NameLabel nameLabel)
+    {
+        if (nameLabelCount == NameLabels.Length)
+        {
+            var newNameLabels = new NameLabel[NameLabels.Length + InitialNameLabelSize];
+            Array.Copy(NameLabels, newNameLabels, NameLabels.Length);
+            NameLabels = newNameLabels;
+        }
+
+        NameLabels[nameLabelCount++] = nameLabel;
     }
 
     /// <summary>

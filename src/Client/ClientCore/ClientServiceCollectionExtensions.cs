@@ -188,6 +188,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<GuiExtensions>();
         services.TryAddSingleton<GuiTextureMapper>();
         services.TryAddSingleton<GuiComponentEditors>();
+        services.TryAddSingleton<OverlayGui>();
     }
 
     private static void AddResources(IServiceCollection services)

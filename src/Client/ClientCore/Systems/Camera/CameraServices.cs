@@ -38,6 +38,16 @@ public class CameraServices
     }
 
     /// <summary>
+    ///     Camera position.
+    /// </summary>
+    public Vector3 Position => cameraManager.Position;
+
+    /// <summary>
+    ///     Camera velocity.
+    /// </summary>
+    public Vector3 Velocity => cameraManager.Velocity;
+
+    /// <summary>
     ///     Gets the latest mouse position transformed to world coordinates.
     /// </summary>
     /// <returns>World coordinates of mouse position.</returns>

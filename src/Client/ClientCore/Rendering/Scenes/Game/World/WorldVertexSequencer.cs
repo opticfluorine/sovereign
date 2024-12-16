@@ -111,6 +111,7 @@ public sealed class WorldVertexSequencer
     {
         // Prepare resource layout in render plan.
         GenerateLightingPlan(renderPlan, out var totalIndexCount);
+        GenerateNameLabelPlan(renderPlan);
 
         // Allocate resources within the render plan.
         var blocks = grouper.SolidBlocks;
@@ -147,6 +148,16 @@ public sealed class WorldVertexSequencer
                 offset++;
             }
         }
+    }
+
+    /// <summary>
+    ///     Generates the name label rendering plan for the current frame.
+    /// </summary>
+    /// <param name="renderPlan">Render plan.</param>
+    private void GenerateNameLabelPlan(RenderPlan renderPlan)
+    {
+        foreach (var nameLabel in entityRetriever.NameLabels)
+            renderPlan.AddNameLabel(nameLabel);
     }
 
     /// <summary>

@@ -111,7 +111,7 @@ public class MainMenuScene : IScene
         globalLightColor = Vector4.One;
     }
 
-    public void UpdateGui()
+    public void UpdateGui(RenderPlan renderPlan)
     {
         var needToInit = stateServices.CheckAndClearMainMenuResetFlag();
         var lastState = stateServices.MainMenuState;

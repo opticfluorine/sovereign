@@ -29,6 +29,7 @@ namespace Sovereign.VeldridRenderer.Rendering;
 /// </summary>
 public class VeldridSceneConsumer : ISceneConsumer, IDisposable
 {
+    private readonly GameResourceManager gameResMgr;
     private readonly GameSceneConsumer gameSceneConsumer;
     private readonly ResourceEditorGui resourceEditorGui;
     private readonly ClientStateServices stateServices;
@@ -39,11 +40,12 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
     private bool isDisposed;
 
     public VeldridSceneConsumer(GameSceneConsumer gameSceneConsumer, ClientStateServices stateServices,
-        ResourceEditorGui resourceEditorGui)
+        ResourceEditorGui resourceEditorGui, GameResourceManager gameResMgr)
     {
         this.gameSceneConsumer = gameSceneConsumer;
         this.stateServices = stateServices;
         this.resourceEditorGui = resourceEditorGui;
+        this.gameResMgr = gameResMgr;
     }
 
     public void Dispose()
@@ -78,7 +80,7 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
             if (stateServices.GetStateFlagValue(ClientStateFlag.ShowResourceEditor)) resourceEditorGui.Render();
 
             // State specific updates.
-            scene.UpdateGui();
+            scene.UpdateGui(gameResMgr.RenderPlan!);
         }
     }
 

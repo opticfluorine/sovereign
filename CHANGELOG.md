@@ -4,6 +4,10 @@
 
 ### December
 
+#### 15 December 2024
+
+* Client: Display player name above each player sprite.
+
 #### 13 December 2024
 
 * GUI: Scale GUI dimensions with resolution in order to support various DPI settings.

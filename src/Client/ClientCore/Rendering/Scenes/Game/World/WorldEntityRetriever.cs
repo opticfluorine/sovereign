@@ -21,6 +21,7 @@ using System.Numerics;
 using Sovereign.ClientCore.Components;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Systems.Block.Caches;
 using Sovereign.ClientCore.Systems.Camera;
@@ -41,7 +42,7 @@ public sealed class WorldEntityRetriever
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly IBlockAnimatedSpriteCache blockSpriteCache;
-    private readonly CameraManager camera;
+    private readonly CameraServices camera;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly ClientConfigurationManager configManager;
     private readonly WorldLayerGrouper grouper;
@@ -60,17 +61,19 @@ public sealed class WorldEntityRetriever
 
     public readonly List<PositionedLight> Lights = new();
     private readonly LightSourceTable lightSourceTable;
+    public readonly List<NameLabel> NameLabels = new();
     private readonly OrientationComponentCollection orientations;
 
     private readonly PerspectiveServices perspectiveServices;
     private readonly AnimationPhaseComponentCollection phases;
+    private readonly PlayerCharacterTagCollection playerCharacters;
 
     /// <summary>
     ///     Number of solid blocks added so far in a frame.
     /// </summary>
     private uint solidBlockIndex;
 
-    public WorldEntityRetriever(CameraManager camera, DisplayViewport viewport,
+    public WorldEntityRetriever(CameraServices camera, DisplayViewport viewport,
         ClientConfigurationManager configManager, PerspectiveServices perspectiveServices,
         WorldLayerGrouper grouper, KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
@@ -78,7 +81,7 @@ public sealed class WorldEntityRetriever
         AnimatedSpriteManager animatedSpriteManager,
         OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases,
         IBlockAnimatedSpriteCache blockSpriteCache, CastBlockShadowsTagCollection castBlockShadows,
-        LightSourceTable lightSourceTable)
+        LightSourceTable lightSourceTable, PlayerCharacterTagCollection playerCharacters)
     {
         this.camera = camera;
         this.configManager = configManager;
@@ -93,6 +96,7 @@ public sealed class WorldEntityRetriever
         this.blockSpriteCache = blockSpriteCache;
         this.castBlockShadows = castBlockShadows;
         this.lightSourceTable = lightSourceTable;
+        this.playerCharacters = playerCharacters;
 
         halfX = viewport.WidthInTiles * 0.5f;
         halfY = viewport.HeightInTiles * 0.5f;
@@ -106,9 +110,12 @@ public sealed class WorldEntityRetriever
     public void RetrieveEntities(float timeSinceTick, ulong systemTime)
     {
         grouper.ResetLayers();
+        NameLabels.Clear();
         solidBlockIndex = 0;
 
-        DetermineExtents(out var minExtent, out var maxExtent, timeSinceTick);
+        var cameraPos = camera.Position.InterpolateByTime(camera.Velocity, timeSinceTick);
+
+        DetermineExtents(out var minExtent, out var maxExtent, cameraPos);
 
         var clientConfiguration = configManager.ClientConfiguration;
         var zMin = EntityList.ForComparison(
@@ -130,7 +137,7 @@ public sealed class WorldEntityRetriever
             if (!perspectiveServices.TryGetPerspectiveLine(intersectingPos, out var line))
                 continue;
 
-            ProcessPerspectiveLine(line, zMin, zMax, systemTime);
+            ProcessPerspectiveLine(line, zMin, zMax, systemTime, timeSinceTick);
         }
     }
 
@@ -141,8 +148,9 @@ public sealed class WorldEntityRetriever
     /// <param name="zMin">Minimum of Z extent for rendering.</param>
     /// <param name="zMax">Maximum of Z extent for rendering.</param>
     /// <param name="systemTime">System time of current frame.</param>
+    /// <param name="timeSinceTick">Time since last tick, in seconds.</param>
     private void ProcessPerspectiveLine(PerspectiveLine perspectiveLine, EntityList zMin, EntityList zMax,
-        ulong systemTime)
+        ulong systemTime, float timeSinceTick)
     {
         var foundOpaqueBlock = false;
         for (var i = 0; i < perspectiveLine.ZFloors.Count; ++i)
@@ -201,7 +209,7 @@ public sealed class WorldEntityRetriever
                 // Skip block faces since they were already handled above.
                 var entity = zSet.Entities[j];
                 if (entity.EntityType != EntityType.NonBlock) continue;
-                if (entity.OriginOnLine) ProcessSprite(entity.EntityId, systemTime);
+                if (entity.OriginOnLine) ProcessSprite(entity.EntityId, systemTime, timeSinceTick);
             }
 
             // Opaque blocking is updated at the end of each z-depth since a front face and top face
@@ -214,7 +222,7 @@ public sealed class WorldEntityRetriever
     /// <summary>
     ///     Processes an animated sprite on a perspective line.
     /// </summary>
-    private void ProcessSprite(ulong entityId, ulong systemTime)
+    private void ProcessSprite(ulong entityId, ulong systemTime, float timeSinceTick)
     {
         var entityKinematics = kinematics[entityId];
         var animatedSpriteId = animatedSprites[entityId];
@@ -224,6 +232,26 @@ public sealed class WorldEntityRetriever
         var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
         var sprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(systemTime, orientation);
         grouper.AddSprite(EntityType.NonBlock, entityKinematics.Position, entityKinematics.Velocity, sprite, 1.0f);
+
+        if (playerCharacters.HasTagForEntity(entityId))
+            AddNameLabel(entityId, entityKinematics, sprite, timeSinceTick);
+    }
+
+    /// <summary>
+    ///     Adds a name label for the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="entityKinematics">Kinematics for entity.</param>
+    /// <param name="sprite">Current sprite for entity.</param>
+    /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
+    private void AddNameLabel(ulong entityId, Kinematics entityKinematics, Sprite sprite, float timeSinceTick)
+    {
+        NameLabels.Add(new NameLabel
+        {
+            EntityId = entityId,
+            InterpolatedPosition = entityKinematics.Position + timeSinceTick * entityKinematics.Velocity,
+            SpriteId = sprite.Id
+        });
     }
 
     /// <summary>
@@ -303,13 +331,10 @@ public sealed class WorldEntityRetriever
     /// </summary>
     /// <param name="minExtent">Minimum extent.</param>
     /// <param name="maxExtent">Maximum extent.</param>
-    /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
+    /// <param name="centerPos">Center position in world coordinates.</param>
     private void DetermineExtents(out GridPosition minExtent, out GridPosition maxExtent,
-        float timeSinceTick)
+        Vector3 centerPos)
     {
-        /* Interpolate the camera position */
-        var centerPos = camera.Position.InterpolateByTime(camera.Velocity, timeSinceTick);
-
         var clientConfiguration = configManager.ClientConfiguration;
         var minX = (int)Math.Floor(centerPos.X - halfX - clientConfiguration.RenderSearchSpacerX);
         var maxX = (int)Math.Floor(centerPos.X + halfX + clientConfiguration.RenderSearchSpacerX);

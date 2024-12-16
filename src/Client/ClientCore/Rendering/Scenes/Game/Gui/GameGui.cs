@@ -31,6 +31,7 @@ public class GameGui
     private readonly ChatGui chatGui;
     private readonly EntityDebugGui entityDebugGui;
     private readonly InGameMenuGui menuGui;
+    private readonly OverlayGui overlayGui;
     private readonly PlayerDebugGui playerDebugGui;
     private readonly PlayerRoleCheck roleCheck;
     private readonly ClientStateServices stateServices;
@@ -39,7 +40,7 @@ public class GameGui
 
     public GameGui(ClientStateServices stateServices, PlayerDebugGui playerDebugGui, EntityDebugGui entityDebugGui,
         InGameMenuGui menuGui, ChatGui chatGui, TemplateEditorGui templateEditorGui, PlayerRoleCheck roleCheck,
-        WorldEditorGui worldEditorGui)
+        WorldEditorGui worldEditorGui, OverlayGui overlayGui)
     {
         this.stateServices = stateServices;
         this.playerDebugGui = playerDebugGui;
@@ -49,18 +50,22 @@ public class GameGui
         this.templateEditorGui = templateEditorGui;
         this.roleCheck = roleCheck;
         this.worldEditorGui = worldEditorGui;
+        this.overlayGui = overlayGui;
     }
 
     /// <summary>
     ///     Renders the in-game GUI.
     /// </summary>
-    public void Render()
+    /// <param name="renderPlan">Render plan for the current frame.</param>
+    public void Render(RenderPlan renderPlan)
     {
         UpdateDebugGui();
         UpdateAdminGui();
 
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowInGameMenu)) menuGui.Render();
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowChat)) chatGui.Render();
+
+        overlayGui.Render(renderPlan);
 
         // Clear window focus when first entering the game so that controls aren't absorbed by the GUI.
         if (stateServices.CheckAndClearFlagValue(ClientStateFlag.NewLogin))

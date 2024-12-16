@@ -80,8 +80,9 @@ public interface IScene
     /// <summary>
     ///     Called to update the GUI for the scene.
     /// </summary>
+    /// <param name="renderPlan">Render plan for the current frame.</param>
     /// <remarks>
     ///     This method will only be called if the RenderGui property is true.
     /// </remarks>
-    void UpdateGui();
+    void UpdateGui(RenderPlan renderPlan);
 }

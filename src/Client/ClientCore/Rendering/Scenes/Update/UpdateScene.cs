@@ -80,7 +80,7 @@ public class UpdateScene : IScene
         globalLightColor = Vector4.One;
     }
 
-    public void UpdateGui()
+    public void UpdateGui(RenderPlan renderPlan)
     {
         updaterGui.Render();
     }

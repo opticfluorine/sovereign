@@ -113,9 +113,9 @@ public sealed class GameScene : IScene
         globalLightColor = new Vector4(0.3f, 0.3f, 0.3f, 1.0f);
     }
 
-    public void UpdateGui()
+    public void UpdateGui(RenderPlan renderPlan)
     {
-        gameGui.Render();
+        gameGui.Render(renderPlan);
     }
 
     /// <summary>
