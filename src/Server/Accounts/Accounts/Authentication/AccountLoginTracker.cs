@@ -21,6 +21,7 @@ using Microsoft.Extensions.Logging;
 using Sodium;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Logging;
 using Sovereign.ServerCore.Components;
 
 namespace Sovereign.Accounts.Accounts.Authentication;
@@ -69,6 +70,7 @@ public sealed class AccountLoginTracker
 
     private readonly EntityHierarchyIndexer hierarchyIndexer;
     private readonly ILogger<AccountLoginTracker> logger;
+    private readonly LoggingUtil loggingUtil;
 
     /// <summary>
     ///     Set of players that are currently in cooldown until the next persistence sync completes.
@@ -81,12 +83,13 @@ public sealed class AccountLoginTracker
     private readonly Dictionary<ulong, int> playersToConnections = new();
 
     public AccountLoginTracker(AccountComponentCollection accounts, EntityHierarchyIndexer hierarchyIndexer,
-        EntityManager entityManager, ILogger<AccountLoginTracker> logger)
+        EntityManager entityManager, ILogger<AccountLoginTracker> logger, LoggingUtil loggingUtil)
     {
         this.accounts = accounts;
         this.hierarchyIndexer = hierarchyIndexer;
         this.entityManager = entityManager;
         this.logger = logger;
+        this.loggingUtil = loggingUtil;
     }
 
     /// <summary>
@@ -132,6 +135,22 @@ public sealed class AccountLoginTracker
             // Roll back any change.
             playersToConnections.Remove(playerEntityId);
             accountIdsToPlayerEntityIds.Remove(accountId);
+        }
+    }
+
+    public void PlayerEnteredWorld(ulong playerEntityId)
+    {
+        try
+        {
+            var conn = playersToConnections[playerEntityId];
+            var account = connectionsToAccounts[conn];
+
+            logger.LogInformation("{Player} has logged in (account {Account}).",
+                loggingUtil.FormatEntity(playerEntityId), account);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error in PlayerEnteredWorld.");
         }
     }
 
@@ -264,6 +283,8 @@ public sealed class AccountLoginTracker
     /// <param name="playerEntityId">Player entity ID.</param>
     private void LogoutPlayer(ulong playerEntityId)
     {
+        logger.LogInformation("{Player} has logged out.", loggingUtil.FormatEntity(playerEntityId));
+
         // Put the player into cooldown to prevent login before the persistence system has a chance to sync
         // the database. Otherwise a rapid logout/login cycle could "roll back" the player state to the last
         // synchronization point.
@@ -290,6 +311,8 @@ public sealed class AccountLoginTracker
     /// <param name="accountId">Account ID.</param>
     private void LogoutAccount(Guid accountId)
     {
+        logger.LogInformation("Account {Id} has logged out.", accountId);
+
         accountIdsToApiKeys.Remove(accountId);
         accountIdsToPlayerEntityIds.Remove(accountId);
         accountLoginStates.Remove(accountId);

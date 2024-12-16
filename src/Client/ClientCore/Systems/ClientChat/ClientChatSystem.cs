@@ -56,7 +56,8 @@ public class ClientChatSystem : ISystem
         EventId.Core_Chat_System,
         EventId.Core_Chat_Generic,
         EventId.Client_Network_ConnectionLost,
-        EventId.Core_Network_Logout
+        EventId.Core_Network_Logout,
+        EventId.Client_Network_AboutToSelectPlayer
     };
 
     public int WorkloadEstimate => 20;
@@ -127,6 +128,7 @@ public class ClientChatSystem : ISystem
 
                 case EventId.Client_Network_ConnectionLost:
                 case EventId.Core_Network_Logout:
+                case EventId.Client_Network_AboutToSelectPlayer:
                     chatHistoryManager.Clear();
                     break;
             }

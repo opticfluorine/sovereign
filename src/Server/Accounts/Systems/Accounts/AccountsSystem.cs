@@ -70,6 +70,7 @@ public sealed class AccountsSystem : ISystem
         EventId.Server_Network_ClientDisconnected,
         EventId.Server_Accounts_SelectPlayer,
         EventId.Server_Persistence_SynchronizeComplete,
+        EventId.Server_Persistence_PlayerEnteredWorld,
         EventId.Core_Network_Logout
     };
 
@@ -115,6 +116,16 @@ public sealed class AccountsSystem : ISystem
 
                 case EventId.Server_Persistence_SynchronizeComplete:
                     OnSyncComplete();
+                    break;
+
+                case EventId.Server_Persistence_PlayerEnteredWorld:
+                    if (ev.EventDetails is not EntityEventDetails playerDetails)
+                    {
+                        logger.LogError("Received PlayerEnteredWorld with no details.");
+                        break;
+                    }
+
+                    OnPlayerEnteredWorld(playerDetails.EntityId);
                     break;
 
                 case EventId.Core_Network_Logout:
@@ -186,5 +197,14 @@ public sealed class AccountsSystem : ISystem
     private void OnLogout(ulong playerEntityId)
     {
         loginTracker.Logout(playerEntityId);
+    }
+
+    /// <summary>
+    ///     Called when a player has entered the world.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    private void OnPlayerEnteredWorld(ulong playerEntityId)
+    {
+        loginTracker.PlayerEnteredWorld(playerEntityId);
     }
 }

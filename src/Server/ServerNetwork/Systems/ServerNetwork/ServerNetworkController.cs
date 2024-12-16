@@ -47,4 +47,16 @@ public class ServerNetworkController
             new ConnectionIdEventDetails { ConnectionId = connectionId });
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Announces that a player has been logged out.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    public void PlayerLoggedOut(IEventSender eventSender, ulong playerEntityId)
+    {
+        var ev = new Event(EventId.Core_Network_Logout,
+            new EntityEventDetails { EntityId = playerEntityId });
+        eventSender.SendEvent(ev);
+    }
 }

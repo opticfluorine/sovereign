@@ -37,4 +37,14 @@ public class ClientNetworkInternalController
         };
         eventSender.SendEvent(new Event(EventId.Client_Network_PlayerEntitySelected, details));
     }
+
+    /// <summary>
+    ///     Announces that the request to select or create a player is about to be sent.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    public void AboutToSelectPlayer(IEventSender eventSender)
+    {
+        var ev = new Event(EventId.Client_Network_AboutToSelectPlayer);
+        eventSender.SendEvent(ev);
+    }
 }

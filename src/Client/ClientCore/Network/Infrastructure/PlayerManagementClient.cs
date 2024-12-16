@@ -122,6 +122,7 @@ public class PlayerManagementClient
             }
 
             // Send the request.
+            internalController.AboutToSelectPlayer(eventSender);
             var httpResponse = await restClient.PostJson(RestEndpoints.Player, request);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
             {
@@ -191,6 +192,7 @@ public class PlayerManagementClient
             }
 
             // Send the request.
+            internalController.AboutToSelectPlayer(eventSender);
             var playerUrl = new StringBuilder(RestEndpoints.Player).Append("/").Append(playerEntityId).ToString();
             var httpResponse = await restClient.Post(playerUrl);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)

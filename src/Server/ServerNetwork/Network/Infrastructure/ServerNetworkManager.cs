@@ -22,6 +22,7 @@ using System.Net.Sockets;
 using System.Text;
 using LiteNetLib;
 using Microsoft.Extensions.Logging;
+using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network;
 using Sovereign.NetworkCore.Network.Infrastructure;
@@ -38,6 +39,7 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure;
 /// </summary>
 public sealed class ServerNetworkManager : INetworkManager
 {
+    private readonly AccountServices accountServices;
     private readonly IServerNetworkConfiguration config;
     private readonly NetworkConnectionManager connectionManager;
     private readonly IEventSender eventSender;
@@ -72,7 +74,8 @@ public sealed class ServerNetworkManager : INetworkManager
         NewConnectionProcessor newConnectionProcessor,
         ServerNetworkController networkController,
         IEventSender eventSender,
-        ILogger<ServerNetworkManager> logger)
+        ILogger<ServerNetworkManager> logger,
+        AccountServices accountServices)
     {
         /* Dependency injection. */
         this.config = config;
@@ -83,6 +86,7 @@ public sealed class ServerNetworkManager : INetworkManager
         this.networkController = networkController;
         this.eventSender = eventSender;
         this.logger = logger;
+        this.accountServices = accountServices;
 
         /* Connect the network event plumbing. */
         netListener = new EventBasedNetListener();
@@ -246,6 +250,9 @@ public sealed class ServerNetworkManager : INetworkManager
     {
         try
         {
+            var playerEntityId = accountServices.GetPlayerForConnectionId(peer.Id);
+            if (playerEntityId.HasValue) networkController.PlayerLoggedOut(eventSender, playerEntityId.Value);
+
             connectionManager.RemoveConnection(peer.Id);
             networkController.ClientDisconnected(eventSender, peer.Id);
             logger.LogInformation("Connection closed from {Ip}.", peer.Address);

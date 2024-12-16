@@ -7,6 +7,9 @@
 #### 15 December 2024
 
 * Client: Display player name above each player sprite.
+* Server: Improve logging of account and player login/logout.
+* Scripting: Update `Motd.lua` to announce player logout to all connected players.
+* Client: Properly clear chat history when switching players without exiting the client.
 
 #### 13 December 2024
 

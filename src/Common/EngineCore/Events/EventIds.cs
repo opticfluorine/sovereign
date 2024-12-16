@@ -182,6 +182,7 @@ public enum EventId
     ///     Sent from client to server to log out of the current player and return to player selection.
     /// </summary>
     /// Associated details: EntityEventDetails
+    [ScriptableEvent(nameof(EntityEventDetails))]
     Core_Network_Logout = 700,
 
     #endregion Network
@@ -331,6 +332,12 @@ public enum EventId
     /// </summary>
     /// Associated details: None
     Client_Network_EndConnection = 100206,
+
+    /// <summary>
+    ///     Event sent immediately before the client requests to create or select a player.
+    /// </summary>
+    /// Associated details: None
+    Client_Network_AboutToSelectPlayer = 100207,
 
     #endregion Client_Network
 

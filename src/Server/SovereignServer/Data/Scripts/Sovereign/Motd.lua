@@ -29,4 +29,11 @@ function on_player_entered(playerEntityId)
     end
 end
 
+function on_player_logout(playerEntityId)
+    playerName = components.name.get(playerEntityId)
+    chat.send_to_all(color.CHAT_GLOBAL,
+            string.format("%s has left the world.", playerName))
+end
+
 scripting.add_event_callback(events.Server_Persistence_PlayerEnteredWorld, on_player_entered)
+scripting.add_event_callback(events.Core_Network_Logout, on_player_logout)
