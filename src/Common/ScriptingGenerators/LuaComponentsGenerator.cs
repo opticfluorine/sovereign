@@ -18,7 +18,6 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -67,7 +66,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     var valueTypeFullNs = SyntaxUtil.GetFullNamespace(valueTypeSym.ContainingNamespace!);
                     var marshallerAssemblyName = isSystemType
                         ? "Sovereign.EngineCore"
-                        : Regex.Match(valueTypeFullNs, @"^(Sovereign\..*?)\.").Groups[1].Value;
+                        : SyntaxUtil.GetSovereignAssembly(valueTypeFullNs);
 
                     return new Model
                     {

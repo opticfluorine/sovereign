@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 
 namespace Sovereign.ScriptingGenerators;
@@ -48,5 +49,15 @@ public static class SyntaxUtil
         }
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    ///     Gets the assembly associated with the given Sovereign namespace.
+    /// </summary>
+    /// <param name="fullNamespace">Sovereign namespace.</param>
+    /// <returns>Assembly name.</returns>
+    public static string GetSovereignAssembly(string fullNamespace)
+    {
+        return Regex.Match(fullNamespace, @"^(Sovereign\..*?)\.").Groups[1].Value;
     }
 }
