@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Numerics;
 
@@ -34,8 +33,6 @@ public class PointLightComponentValidator
     {
         return pointLight.Radius >= 0.0f
                && pointLight.Intensity >= 0.0f
-               && pointLight.Color.GreaterThanOrEqualAll(Vector3.Zero)
-               && pointLight.Color.LessThanOrEqualAll(Vector3.One)
                && pointLight.PositionOffset.IsFinite();
     }
 }

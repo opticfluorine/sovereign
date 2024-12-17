@@ -47,10 +47,8 @@ public sealed class EntityProcessor
     private const int IndexCastBlockShadows = IndexAdmin + 1;
     private const int IndexPlsRadius = IndexCastBlockShadows + 1;
     private const int IndexPlsIntensity = IndexPlsRadius + 1;
-    private const int IndexPlsColorR = IndexPlsIntensity + 1;
-    private const int IndexPlsColorG = IndexPlsColorR + 1;
-    private const int IndexPlsColorB = IndexPlsColorG + 1;
-    private const int IndexPlsPosX = IndexPlsColorB + 1;
+    private const int IndexPlsColor = IndexPlsIntensity + 1;
+    private const int IndexPlsPosX = IndexPlsColor + 1;
     private const int IndexPlsPosY = IndexPlsPosX + 1;
     private const int IndexPlsPosZ = IndexPlsPosY + 1;
     private readonly IEntityFactory entityFactory;
@@ -290,7 +288,7 @@ public sealed class EntityProcessor
         {
             Radius = reader.GetFloat(IndexPlsRadius),
             Intensity = reader.GetFloat(IndexPlsIntensity),
-            Color = GetVector3(reader, IndexPlsColorR, IndexPlsColorG, IndexPlsColorB),
+            Color = (uint)reader.GetInt64(IndexPlsColor),
             PositionOffset = GetVector3(reader, IndexPlsPosX, IndexPlsPosY, IndexPlsPosZ)
         });
     }

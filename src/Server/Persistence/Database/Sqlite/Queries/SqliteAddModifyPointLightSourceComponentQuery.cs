@@ -28,15 +28,13 @@ public class SqliteAddModifyPointLightSourceComponentQuery : IAddComponentQuery<
     IModifyComponentQuery<PointLight>
 {
     private const string query = @"
-        INSERT INTO PointLightSource (id, radius, intensity, color_r, color_g, color_b, pos_x, pos_y, pos_z)
+        INSERT INTO PointLightSource (id, radius, intensity, color, pos_x, pos_y, pos_z)
         VALUES (@Id, @Radius, @Intensity, @ColorR, @ColorG, @ColorB, @PosX, @PosY, @PosZ)
         ON CONFLICT(id) DO
         UPDATE PointLightSource SET
             radius = excluded.radius,
             intensity = excluded.intensity,
-            color_r = excluded.color_r,
-            color_g = excluded.color_g,
-            color_b = excluded.color_b,
+            color = excluded.color_r,
             pos_x = excluded.pos_x,
             pos_y = excluded.pos_y,
             pos_z = excluded.pos_z
@@ -79,27 +77,11 @@ public class SqliteAddModifyPointLightSourceComponentQuery : IAddComponentQuery<
 
         var pColorR = new SqliteParameter
         {
-            ParameterName = "ColorR",
-            Value = value.Color.X,
-            SqliteType = SqliteType.Real
+            ParameterName = "Color",
+            Value = value.Color,
+            SqliteType = SqliteType.Integer
         };
         cmd.Parameters.Add(pColorR);
-
-        var pColorG = new SqliteParameter
-        {
-            ParameterName = "ColorG",
-            Value = value.Color.Y,
-            SqliteType = SqliteType.Real
-        };
-        cmd.Parameters.Add(pColorG);
-
-        var pColorB = new SqliteParameter
-        {
-            ParameterName = "ColorB",
-            Value = value.Color.Z,
-            SqliteType = SqliteType.Real
-        };
-        cmd.Parameters.Add(pColorB);
 
         var pPosX = new SqliteParameter
         {

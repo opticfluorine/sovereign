@@ -16,12 +16,12 @@
 
 using System.Numerics;
 
-namespace Sovereign.ServerCore.Systems.Scripting;
+namespace Sovereign.EngineUtil.Types;
 
 /// <summary>
 ///     Utility functions for the scripting system.
 /// </summary>
-public static class ScriptingUtil
+public static class ColorUtil
 {
     private const uint RMask = 0xff000000;
     private const uint GMask = 0x00ff0000;

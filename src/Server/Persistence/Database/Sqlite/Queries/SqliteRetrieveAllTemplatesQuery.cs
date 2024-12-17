@@ -32,7 +32,7 @@ public class SqliteRetrieveAllTemplatesQuery : IRetrieveAllTemplatesQuery
     private const string query =
         @"SELECT id, NULL, NULL, NULL, NULL, material, materialModifier, NULL, name, NULL, 
                 NULL, drawable, animatedSprite, orientation, NULL, castBlockShadows,
-                plsRadius, plsIntensity, plsColorR, plsColorG, plsColorB, plsPosX, plsPosY, plsPosZ
+                plsRadius, plsIntensity, plsColor, plsPosX, plsPosY, plsPosZ
             FROM EntityWithComponents WHERE id >= @FirstTemplateId AND id <= @LastTemplateId";
 
     private readonly SqliteConnection connection;

@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineUtil.Attributes;
-using Sovereign.ServerCore.Systems.Scripting;
 
 namespace Sovereign.ServerCore.Systems.ServerChat;
 
@@ -38,12 +37,12 @@ public class ServerChatScripting
     [ScriptableFunction("send_to_player")]
     public void SendMessageToPlayer(ulong playerEntityId, uint color, string message)
     {
-        internalController.SendMessageToPlayer(playerEntityId, message, ScriptingUtil.UnpackColorRgb(color));
+        internalController.SendMessageToPlayer(playerEntityId, message, color);
     }
 
     [ScriptableFunction("send_to_all")]
     public void SendMessageToAll(uint color, string message)
     {
-        internalController.SendMessageToAll(message, ScriptingUtil.UnpackColorRgb(color));
+        internalController.SendMessageToAll(message, color);
     }
 }

@@ -21,6 +21,7 @@ using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineUtil.Types;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.ClientChat;
@@ -174,6 +175,6 @@ public class ClientChatSystem : ISystem
     private void OnGenericChat(GenericChatEventDetails details)
     {
         logger.LogInformation("[Message] {Message}", details.Message);
-        chatHistoryManager.AddChat(details.Message, new Vector4(details.Color, 1.0f));
+        chatHistoryManager.AddChat(details.Message, new Vector4(ColorUtil.UnpackColorRgb(details.Color), 1.0f));
     }
 }

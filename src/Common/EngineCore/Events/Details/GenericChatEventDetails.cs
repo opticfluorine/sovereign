@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
 using MessagePack;
 
 namespace Sovereign.EngineCore.Events.Details;
@@ -65,5 +64,5 @@ public class GenericChatEventDetails : IEventDetails
     ///     Text color.
     /// </summary>
     [Key(1)]
-    public Vector3 Color { get; set; }
+    public uint Color { get; set; }
 }

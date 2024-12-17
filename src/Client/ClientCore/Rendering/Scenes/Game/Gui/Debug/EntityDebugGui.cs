@@ -22,6 +22,7 @@ using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Types;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 
@@ -133,7 +134,7 @@ public class EntityDebugGui
                         {
                             AddValueRow("PLS Radius:", pls.Radius);
                             AddValueRow("PLS Intensity:", pls.Intensity);
-                            AddValueRow("PLS Color:", CleanVec3ToString(pls.Color));
+                            AddValueRow("PLS Color:", CleanVec3ToString(ColorUtil.UnpackColorRgb(pls.Color)));
                             AddValueRow("PLS Pos Offset:", CleanVec3ToString(pls.PositionOffset));
                         });
                     ImGui.EndTable();

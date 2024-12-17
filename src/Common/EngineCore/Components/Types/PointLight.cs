@@ -38,9 +38,9 @@ public struct PointLight
     [Key(1)] public float Intensity;
 
     /// <summary>
-    ///     RGB color of light source.
+    ///     Packed RGB color of light source.
     /// </summary>
-    [Key(2)] public Vector3 Color;
+    [Key(2)] public uint Color;
 
     /// <summary>
     ///     Position offset relative to the position of the associated entity.

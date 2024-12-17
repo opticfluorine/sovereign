@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -88,10 +87,8 @@ public class ServerChatInternalController
     /// </summary>
     /// <param name="playerEntityId">Player entity ID.</param>
     /// <param name="message">Message.</param>
-    /// <param name="red">Red component of the font color.</param>
-    /// <param name="green">Green component of the font color.</param>
-    /// <param name="blue">Blue component of the font color.</param>
-    public void SendMessageToPlayer(ulong playerEntityId, string message, Vector3 color)
+    /// <param name="color">Text color.</param>
+    public void SendMessageToPlayer(ulong playerEntityId, string message, uint color)
     {
         var details = new GenericChatEventDetails
         {
@@ -109,7 +106,7 @@ public class ServerChatInternalController
     /// </summary>
     /// <param name="message">Message.</param>
     /// <param name="color">Text color.</param>
-    public void SendMessageToAll(string message, Vector3 color)
+    public void SendMessageToAll(string message, uint color)
     {
         var details = new GenericChatEventDetails
         {

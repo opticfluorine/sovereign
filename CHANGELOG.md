@@ -4,6 +4,12 @@
 
 ### December
 
+#### 16 December 2024
+
+* Server: Use packed integers for color where possible instead of vector types. While some
+  of the client-side ImGui routines still need vector color values, the packed integer
+  format is much more convenient for server-side scripting.
+
 #### 15 December 2024
 
 * Client: Display player name above each player sprite.

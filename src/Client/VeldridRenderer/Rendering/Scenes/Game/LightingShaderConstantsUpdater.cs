@@ -16,6 +16,7 @@
 
 using System.Numerics;
 using Sovereign.ClientCore.Rendering;
+using Sovereign.EngineUtil.Types;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 
@@ -99,7 +100,7 @@ public class LightingShaderConstantsUpdater
             LightPosition = light.Light.Position,
             Radius = light.Light.Details.Radius,
             Intensity = light.Light.Details.Intensity,
-            LightColor = light.Light.Details.Color,
+            LightColor = ColorUtil.UnpackColorRgb(light.Light.Details.Color),
             LightTransform = new Matrix4x4(
                 1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, -1.0f, 0.0f, 0.0f,

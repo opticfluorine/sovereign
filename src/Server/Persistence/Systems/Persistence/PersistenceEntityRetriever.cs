@@ -74,7 +74,7 @@ public sealed class PersistenceEntityRetriever
         }
         catch (Exception e)
         {
-            logger.LogError(e, string.Format("Error retrieving entity {Id}.", entityId));
+            logger.LogError(e, "Error retrieving entity {Id}.", entityId);
         }
     }
 }

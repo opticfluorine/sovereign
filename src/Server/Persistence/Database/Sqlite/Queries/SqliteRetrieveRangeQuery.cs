@@ -33,12 +33,12 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
     private const string Query =
         @"WITH RECURSIVE 
             EntityTree(id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
-                drawable, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColorR,
-                plsColorG, plsColorB, plsPosX, plsPosY, plsPosZ)
+                drawable, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
+                plsPosX, plsPosY, plsPosZ)
 	        AS (
 	        	SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
                         drawable, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
-                        plsColorR, plsColorG, plsColorB, plsPosX, plsPosY, plsPosZ
+                        plsColor, plsPosX, plsPosY, plsPosZ
 	        		FROM EntityWithComponents
 	        		WHERE x >= @X1 AND x < @X2
 	        		  AND y >= @Y1 AND y < @Y2
@@ -47,15 +47,15 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
 	        	UNION ALL
 	        	SELECT ec.id, ec.template_id, NULL, NULL, NULL, ec.material, ec.materialModifier, ec.playerCharacter, 
                         ec.name, ec.account, ec.parent, ec.drawable, ec.animatedSprite, ec.orientation, ec.admin,
-                        ec.castBlockShadows, ec.plsRadius, ec.plsIntensity, ec.plsColorR, ec.plsColorG, ec.plsColorB,
+                        ec.castBlockShadows, ec.plsRadius, ec.plsIntensity, ec.plsColor,
                         ec.plsPosX, ec.plsPosY, ec.plsPosZ
 	        		FROM EntityWithComponents ec, EntityTree et
 	        		WHERE ec.parent = et.id 
                       AND ec.playerCharacter IS NULL
 	        )
             SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
-                drawable, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColorR,
-                plsColorG, plsColorB, plsPosX, plsPosY, plsPosZ
+                drawable, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
+                plsPosX, plsPosY, plsPosZ
             FROM EntityTree 
             ORDER BY parent NULLS LAST";
 
