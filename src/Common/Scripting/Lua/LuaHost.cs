@@ -32,7 +32,6 @@ public class LuaHost : IDisposable
     private const int QuickLookupSizeHint = 32;
     private const string QuickLookupKey = "sovereign_ql";
     private readonly List<GCHandle> bindings = new();
-    private readonly ILogger logger;
     private readonly Lock opsLock = new();
     private readonly int quickLookupStackPosition;
     private readonly int tracebackStackPosition;
@@ -41,7 +40,7 @@ public class LuaHost : IDisposable
 
     public LuaHost(ILogger logger)
     {
-        this.logger = logger;
+        Logger = logger;
 
         // Create basic Lua environment.
         LuaState = luaL_newstate();
@@ -64,6 +63,8 @@ public class LuaHost : IDisposable
         lua_copy(LuaState, quickLookupStackPosition, -1);
         lua_setfield(LuaState, LUA_REGISTRYINDEX, QuickLookupKey);
     }
+
+    public ILogger Logger { get; }
 
     /// <summary>
     ///     Flag indicating whether this host has been disposed.
@@ -256,12 +257,12 @@ public class LuaHost : IDisposable
             if (!lua_isstring(luaState, 1)) throw new LuaException("First argument must be a string.");
             var msg = lua_tostring(luaState, 1);
 
-            logger.LogTrace(msg);
+            Logger.LogTrace(msg);
         }
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            logger.LogError(e, "Error in util.log_trace.");
+            Logger.LogError(e, "Error in util.log_trace.");
         }
 
         return (int)LuaResult.Ok;
@@ -280,12 +281,12 @@ public class LuaHost : IDisposable
             if (!lua_isstring(luaState, 1)) throw new LuaException("First argument must be a string.");
             var msg = lua_tostring(luaState, 1);
 
-            logger.LogDebug(msg);
+            Logger.LogDebug(msg);
         }
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            logger.LogError(e, "Error in util.log_debug.");
+            Logger.LogError(e, "Error in util.log_debug.");
         }
 
         return (int)LuaResult.Ok;
@@ -304,12 +305,12 @@ public class LuaHost : IDisposable
             if (!lua_isstring(luaState, 1)) throw new LuaException("First argument must be a string.");
             var msg = lua_tostring(luaState, 1);
 
-            logger.LogInformation(msg);
+            Logger.LogInformation(msg);
         }
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            logger.LogError(e, "Error in util.log_info.");
+            Logger.LogError(e, "Error in util.log_info.");
         }
 
         return (int)LuaResult.Ok;
@@ -328,12 +329,12 @@ public class LuaHost : IDisposable
             if (!lua_isstring(luaState, 1)) throw new LuaException("First argument must be a string.");
             var msg = lua_tostring(luaState, 1);
 
-            logger.LogWarning(msg);
+            Logger.LogWarning(msg);
         }
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            logger.LogError(e, "Error in util.log_warn.");
+            Logger.LogError(e, "Error in util.log_warn.");
         }
 
         return (int)LuaResult.Ok;
@@ -352,12 +353,12 @@ public class LuaHost : IDisposable
             if (!lua_isstring(luaState, 1)) throw new LuaException("First argument must be a string.");
             var msg = lua_tostring(luaState, 1);
 
-            logger.LogError(msg);
+            Logger.LogError(msg);
         }
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            logger.LogError(e, "Error in util.log_error.");
+            Logger.LogError(e, "Error in util.log_error.");
         }
 
         return (int)LuaResult.Ok;
@@ -376,12 +377,12 @@ public class LuaHost : IDisposable
             if (!lua_isstring(luaState, 1)) throw new LuaException("First argument must be a string.");
             var msg = lua_tostring(luaState, 1);
 
-            logger.LogCritical(msg);
+            Logger.LogCritical(msg);
         }
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            logger.LogError(e, "Error in util.log_crit.");
+            Logger.LogError(e, "Error in util.log_crit.");
         }
 
         return (int)LuaResult.Ok;

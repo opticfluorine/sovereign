@@ -27,7 +27,7 @@ namespace Sovereign.EngineCore.Entities;
 /// <summary>
 ///     Base builder class for new entities.
 /// </summary>
-public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
+public abstract class AbstractEntityBuilder : IEntityBuilder
 {
     protected readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AdminTagCollection admins;
@@ -51,6 +51,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
     private bool isBlock;
+    private bool isDisposed;
 
     private ulong templateEntityId;
 
@@ -100,7 +101,11 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
 
     public void Dispose()
     {
-        weakLock.Dispose();
+        if (!isDisposed)
+        {
+            weakLock.Dispose();
+            isDisposed = true;
+        }
     }
 
     public ulong Build()
@@ -117,17 +122,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder, IDisposable
         return this;
     }
 
-    public IEntityBuilder Positionable(Vector3 position, Vector3 velocity)
+    public IEntityBuilder Positionable(Kinematics kinematics)
     {
         // Disallowed for template entities.
         if (isTemplate) return this;
 
-        Kinematics.AddOrUpdateComponent(entityId, new Kinematics
-        {
-            Position = position,
-            Velocity = velocity
-        }, load);
+        Kinematics.AddOrUpdateComponent(entityId, kinematics, load);
         return this;
+    }
+
+    public IEntityBuilder Positionable(Vector3 position, Vector3 velocity)
+    {
+        return Positionable(new Kinematics { Position = position, Velocity = velocity });
     }
 
     public IEntityBuilder Positionable(Vector3 position)

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using MessagePack;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components.Types;
 
@@ -23,6 +24,7 @@ namespace Sovereign.EngineCore.Components.Types;
 ///     material modifier.
 /// </summary>
 [MessagePackObject]
+[Scriptable]
 public class MaterialPair
 {
     public MaterialPair()
@@ -39,11 +41,13 @@ public class MaterialPair
     ///     Material ID.
     /// </summary>
     [Key(0)]
+    [ScriptableOrder(0)]
     public int MaterialId { get; set; }
 
     /// <summary>
     ///     Material modifier.
     /// </summary>
     [Key(1)]
+    [ScriptableOrder(1)]
     public int MaterialModifier { get; set; }
 }

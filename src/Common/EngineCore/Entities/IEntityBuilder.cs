@@ -19,13 +19,14 @@ using System;
 using System.Numerics;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Entities;
 
 /// <summary>
 ///     Utility interface for creating and updating entities.
 /// </summary>
-public interface IEntityBuilder
+public interface IEntityBuilder : IDisposable
 {
     /// <summary>
     ///     Builds the entity.
@@ -38,6 +39,7 @@ public interface IEntityBuilder
     /// </summary>
     /// <param name="templateEntityId">Template entity ID.</param>
     /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("Template")]
     IEntityBuilder Template(ulong templateEntityId);
 
     /// <summary>
@@ -47,6 +49,14 @@ public interface IEntityBuilder
     /// <param name="velocity">Velocity.</param>
     /// <returns>Builder.</returns>
     IEntityBuilder Positionable(Vector3 position, Vector3 velocity);
+
+    /// <summary>
+    ///     Makes the new entity positionable with the given kinematics.
+    /// </summary>
+    /// <param name="kinematics">Kinematics.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("Kinematics")]
+    IEntityBuilder Positionable(Kinematics kinematics);
 
     /// <summary>
     ///     Makes the new entity positionable with the given position and
@@ -74,6 +84,7 @@ public interface IEntityBuilder
     /// </summary>
     /// <param name="position">Grid position.</param>
     /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("BlockPosition")]
     IEntityBuilder BlockPositionable(GridPosition position);
 
     /// <summary>
@@ -86,6 +97,7 @@ public interface IEntityBuilder
     ///     Makes the new entity drawable.
     /// </summary>
     /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("Drawable")]
     IEntityBuilder Drawable();
 
     /// <summary>
@@ -99,6 +111,7 @@ public interface IEntityBuilder
     /// </summary>
     /// <param name="animatedSpriteId">Animated sprite ID.</param>
     /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("AnimatedSprite")]
     IEntityBuilder AnimatedSprite(int animatedSpriteId);
 
     /// <summary>
@@ -120,6 +133,7 @@ public interface IEntityBuilder
     /// </summary>
     /// <param name="material">Material.</param>
     /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("Material")]
     IEntityBuilder Material(MaterialPair material);
 
     /// <summary>
@@ -160,6 +174,7 @@ public interface IEntityBuilder
     /// </summary>
     /// <param name="name">Entity name.</param>
     /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("Name")]
     IEntityBuilder Name(string name);
 
     /// <summary>
@@ -186,6 +201,7 @@ public interface IEntityBuilder
     /// </summary>
     /// <param name="parentEntityId">Parent entity ID.</param>
     /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("Parent")]
     IEntityBuilder Parent(ulong parentEntityId);
 
     /// <summary>
@@ -199,6 +215,7 @@ public interface IEntityBuilder
     /// </summary>
     /// <param name="orientation">Orientation.</param>
     /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("Orientation")]
     IEntityBuilder Orientation(Orientation orientation);
 
     /// <summary>
@@ -223,6 +240,7 @@ public interface IEntityBuilder
     ///     Tags the entity as casting block shadows.
     /// </summary>
     /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("CastBlockShadows")]
     IEntityBuilder CastBlockShadows();
 
     /// <summary>
@@ -236,6 +254,7 @@ public interface IEntityBuilder
     /// </summary>
     /// <param name="pointLight">Point light source details.</param>
     /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("PointLightSource")]
     IEntityBuilder PointLightSource(PointLight pointLight);
 
     /// <summary>

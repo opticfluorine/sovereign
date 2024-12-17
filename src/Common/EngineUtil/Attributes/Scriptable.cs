@@ -99,3 +99,17 @@ public class ScriptableComponents : Attribute
 
     public string Name { get; }
 }
+
+/// <summary>
+///     Designates an IEntityBuilder method for binding to Lua.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class ScriptableEntityBuilderAction : Attribute
+{
+    public ScriptableEntityBuilderAction(string keyName)
+    {
+        KeyName = keyName;
+    }
+
+    public string KeyName { get; }
+}
