@@ -231,12 +231,12 @@ public class LuaHost : IDisposable
         try
         {
             BeginLibrary("util");
-            AddLibraryFunction("log_trace", UtilLogTrace);
-            AddLibraryFunction("log_debug", UtilLogDebug);
-            AddLibraryFunction("log_info", UtilLogInformation);
-            AddLibraryFunction("log_warn", UtilLogWarn);
-            AddLibraryFunction("log_error", UtilLogError);
-            AddLibraryFunction("log_crit", UtilLogCritical);
+            AddLibraryFunction("LogTrace", UtilLogTrace);
+            AddLibraryFunction("LogDebug", UtilLogDebug);
+            AddLibraryFunction("LogInfo", UtilLogInformation);
+            AddLibraryFunction("LogWarn", UtilLogWarn);
+            AddLibraryFunction("LogError", UtilLogError);
+            AddLibraryFunction("LogCrit", UtilLogCritical);
         }
         finally
         {

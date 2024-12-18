@@ -188,7 +188,7 @@ public sealed class WorldSegmentBlockDataManager
     {
         try
         {
-            logger.LogDebug("Adding summary block data for world segment {Index}.", segmentIndex);
+            logger.LogTrace("Adding summary block data for world segment {Index}.", segmentIndex);
             var blockData = generator.Create(segmentIndex);
             var bytes = MessagePackSerializer.Serialize(blockData, MessageConfig.CompressedUntrustedMessagePackOptions);
             return Tuple.Create(blockData, bytes);

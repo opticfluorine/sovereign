@@ -45,7 +45,7 @@ public class ScriptingLuaLibrary : ILuaLibrary
         try
         {
             luaHost.BeginLibrary("scripting");
-            luaHost.AddLibraryFunction("add_event_callback", AddEventCallback);
+            luaHost.AddLibraryFunction("AddEventCallback", AddEventCallback);
         }
         finally
         {

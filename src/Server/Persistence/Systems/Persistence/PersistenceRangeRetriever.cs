@@ -54,7 +54,7 @@ public sealed class PersistenceRangeRetriever
     /// <param name="segmentIndex">World segment index.</param>
     public void RetrieveWorldSegment(GridPosition segmentIndex)
     {
-        logger.LogDebug("Retrieve world segment {Index}.", segmentIndex);
+        logger.LogTrace("Retrieve world segment {Index}.", segmentIndex);
 
         // Retrieve world segment.
         DoRetrieve(segmentIndex);
@@ -77,7 +77,7 @@ public sealed class PersistenceRangeRetriever
             using (var reader = query.RetrieveEntitiesInRange(minPos, maxPos))
             {
                 var count = entityProcessor.ProcessFromReader(reader.Reader);
-                logger.LogDebug("Retrieved {Count} entities for segment {Index}.", count, segmentIndex);
+                logger.LogTrace("Retrieved {Count} entities for segment {Index}.", count, segmentIndex);
             }
         }
         catch (Exception e)

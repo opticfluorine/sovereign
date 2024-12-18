@@ -61,25 +61,25 @@ public sealed class BlockEventHandler
         {
             case EventId.Core_Block_Add:
                 var addDetails = (BlockAddEventDetails)ev.EventDetails!;
-                logger.LogDebug("Adding block {Block}.", addDetails.BlockRecord);
+                logger.LogTrace("Adding block {Block}.", addDetails.BlockRecord);
                 HandleAdd(addDetails);
                 break;
 
             case EventId.Core_Block_AddBatch:
                 var addBatchDetails = (BlockAddBatchEventDetails)ev.EventDetails!;
-                logger.LogDebug("Adding {Block} blocks.", addBatchDetails.BlockRecords.Count);
+                logger.LogTrace("Adding {Block} blocks.", addBatchDetails.BlockRecords.Count);
                 HandleAddBatch(addBatchDetails);
                 break;
 
             case EventId.Core_Block_Remove:
                 var removeDetails = (EntityEventDetails)ev.EventDetails!;
-                logger.LogDebug("Removing block {Id}.", removeDetails.EntityId);
+                logger.LogTrace("Removing block {Id}.", removeDetails.EntityId);
                 HandleRemove(removeDetails);
                 break;
 
             case EventId.Core_Block_RemoveBatch:
                 var removeBatchDetails = (BlockRemoveBatchEventDetails)ev.EventDetails!;
-                logger.LogDebug("Removing {Count} blocks.", removeBatchDetails.EntityIds.Count);
+                logger.LogTrace("Removing {Count} blocks.", removeBatchDetails.EntityIds.Count);
                 HandleRemoveBatch(removeBatchDetails);
                 break;
 

@@ -68,7 +68,7 @@ public class WorldSegmentActivationManager
             if (!segmentRefCounts.ContainsKey(segmentIndex))
             {
                 // New activation.
-                logger.LogDebug("New activation for {SegmentIndex}.", segmentIndex);
+                logger.LogTrace("New activation for {SegmentIndex}.", segmentIndex);
                 segmentRefCounts.Add(segmentIndex, changes[segmentIndex]);
                 persistenceController.RetrieveWorldSegment(eventSender, segmentIndex);
             }
@@ -76,7 +76,7 @@ public class WorldSegmentActivationManager
             {
                 // Change in reference count to an existing activation.
                 segmentRefCounts[segmentIndex] += changes[segmentIndex];
-                logger.LogDebug("Update ref count for {SegmentIndex} to {RefCount}.", segmentIndex,
+                logger.LogTrace("Update ref count for {SegmentIndex} to {RefCount}.", segmentIndex,
                     segmentRefCounts[segmentIndex]);
             }
     }
@@ -98,7 +98,7 @@ public class WorldSegmentActivationManager
             if (taken) loadedSegmentsSpinLock.Exit();
         }
 
-        logger.LogDebug("Segment {SegmentIndex} recorded as loaded.", segmentIndex);
+        logger.LogTrace("Segment {SegmentIndex} recorded as loaded.", segmentIndex);
     }
 
     /// <summary>

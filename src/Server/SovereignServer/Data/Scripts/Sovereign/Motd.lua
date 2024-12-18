@@ -18,24 +18,25 @@
 
 function on_player_entered(event)
     local playerEntityId = event.EntityId
-    local playerName = components.name.get(playerEntityId)
-    chat.send_to_player(playerEntityId, color.MOTD,
+    util.LogDebug(string.format("playerEntityId = %s (type %s)", playerEntityId, type(playerEntityId)))
+    local playerName = components.name.Get(playerEntityId)
+    chat.SendToPlayer(playerEntityId, color.MOTD,
             string.format("Welcome to Sovereign Engine, %s!", playerName))
-    chat.send_to_all(color.CHAT_GLOBAL,
+    chat.SendToAll(color.CHAT_GLOBAL,
             string.format("%s has entered the world.", playerName))
 
-    local isAdmin = components.admin.get(playerEntityId)
+    local isAdmin = components.admin.Get(playerEntityId)
     if (isAdmin) then
-        chat.send_to_player(playerEntityId, color.ALERT, "You are an admin.")
+        chat.SendToPlayer(playerEntityId, color.ALERT, "You are an admin.")
     end
 end
 
 function on_player_logout(event)
     local playerEntityId = event.EntityId
-    local playerName = components.name.get(playerEntityId)
-    chat.send_to_all(color.CHAT_GLOBAL,
+    local playerName = components.name.Get(playerEntityId)
+    chat.SendToAll(color.CHAT_GLOBAL,
             string.format("%s has left the world.", playerName))
 end
 
-scripting.add_event_callback(events.Server_Persistence_PlayerEnteredWorld, on_player_entered)
-scripting.add_event_callback(events.Core_Network_Logout, on_player_logout)
+scripting.AddEventCallback(events.Server_Persistence_PlayerEnteredWorld, on_player_entered)
+scripting.AddEventCallback(events.Core_Network_Logout, on_player_logout)

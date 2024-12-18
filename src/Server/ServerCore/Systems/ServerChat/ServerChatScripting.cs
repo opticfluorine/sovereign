@@ -28,19 +28,19 @@ public class ServerChatScripting
         this.internalController = internalController;
     }
 
-    [ScriptableFunction("send_system_message")]
+    [ScriptableFunction("SendSystemMessage")]
     public void SendSystemMessage(ulong targetEntityId, string message)
     {
         internalController.SendSystemMessage(message, targetEntityId);
     }
 
-    [ScriptableFunction("send_to_player")]
+    [ScriptableFunction("SendToPlayer")]
     public void SendMessageToPlayer(ulong playerEntityId, uint color, string message)
     {
         internalController.SendMessageToPlayer(playerEntityId, message, color);
     }
 
-    [ScriptableFunction("send_to_all")]
+    [ScriptableFunction("SendToAll")]
     public void SendMessageToAll(uint color, string message)
     {
         internalController.SendMessageToAll(message, color);
