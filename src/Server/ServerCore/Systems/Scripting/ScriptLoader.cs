@@ -103,7 +103,7 @@ public class ScriptLoader
     private LuaHost GetNewHost(string filename)
     {
         var scriptName = Path.GetFileNameWithoutExtension(filename);
-        var loggerCat = $"Script ({scriptName})";
+        var loggerCat = $".Script ({scriptName})"; // first dot is to help with Serilog context expressions
         var hostLogger = loggerFactory.CreateLogger(loggerCat);
 
         var host = new LuaHost(hostLogger);

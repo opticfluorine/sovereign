@@ -4,6 +4,14 @@
 
 ### December
 
+#### 17 December 2024
+
+* Server: Add Lua bindings for `IEntityBuilder`. The Lua interface takes a table mapping
+  component names to their values. Any components omitted are ignored. The `Without*` APIs
+  are not supported in Lua (except for tags, where passing false will call the
+  corresponding `Without*` API); removal of components should be done directly through the
+  `components` module in Lua.
+
 #### 16 December 2024
 
 * Server: Use packed integers for color where possible instead of vector types. While some

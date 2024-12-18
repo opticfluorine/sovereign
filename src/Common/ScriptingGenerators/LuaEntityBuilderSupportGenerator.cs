@@ -18,6 +18,7 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -45,20 +46,38 @@ public class LuaEntityBuilderSupportGenerator : IIncrementalGenerator
                         .OfType<string>()
                         .First();
 
-                    if (methodSym.Parameters.Length != 1) throw new Exception("must be one parameter");
-                    var paramTypeSym = methodSym.Parameters[0].Type;
-                    var paramFullNs = SyntaxUtil.GetFullNamespace(paramTypeSym.ContainingNamespace);
-                    var isExternalType = paramFullNs.StartsWith("Sovereign");
-                    var paramMarshallerAssembly = isExternalType
-                        ? "Sovereign.EngineCore"
-                        : SyntaxUtil.GetSovereignAssembly(paramFullNs);
+                    var methodName = methodSym.Name;
+                    var unsetMethodName = Regex.Replace(methodName, @"^With", "Without");
+
+                    if (methodSym.Parameters.Length > 1)
+                        throw new Exception($"{methodSym.Name}: must be zero or one parameters");
+                    if (methodSym.Parameters.Length == 1)
+                    {
+                        var paramTypeSym = methodSym.Parameters[0].Type;
+                        var paramFullNs = SyntaxUtil.GetFullNamespace(paramTypeSym.ContainingNamespace);
+                        var isExternalType = !paramFullNs.StartsWith("Sovereign");
+                        var paramMarshallerAssembly = isExternalType
+                            ? "Sovereign.EngineCore"
+                            : SyntaxUtil.GetSovereignAssembly(paramFullNs);
+
+                        return new Model
+                        {
+                            Key = key,
+                            MethodName = methodName,
+                            UnsetMethodName = unsetMethodName,
+                            IsTag = false,
+                            ParamTypeName = paramTypeSym.Name,
+                            ParamTypeFullNs = paramFullNs,
+                            ParamMarshallerAssembly = paramMarshallerAssembly
+                        };
+                    }
 
                     return new Model
                     {
                         Key = key,
-                        ParamTypeName = paramTypeSym.Name,
-                        ParamTypeFullNs = paramFullNs,
-                        ParamMarshallerAssembly = paramMarshallerAssembly
+                        MethodName = methodName,
+                        UnsetMethodName = unsetMethodName,
+                        IsTag = true
                     };
                 })
             .Collect()
@@ -77,28 +96,92 @@ public class LuaEntityBuilderSupportGenerator : IIncrementalGenerator
 
         sb.Append($@"
             using System;
+            using Microsoft.Extensions.Logging;
+            using Sovereign.EngineCore.Entities;
 
             namespace {compilation.AssemblyName!}.Lua;
 
-            public enum LuaEntitySpecKey
-            {{");
+            /// <summary>
+            ///     Generated class that supports the Lua bindings for IEntityBuilder.
+            /// </summary>
+            public static class LuaEntityBuilderSupport
+            {{
+                private enum LuaEntitySpecKey
+                {{");
 
         foreach (var model in models)
             sb.Append($@"
-                {model.Key},");
+                    {model.Key},");
 
         sb.Append(@"
-            }
-
-            public static class LuaEntityBuilderSupport
-            {
-
-                public static void HandleKeyValuePair(IntPtr luaState, LuaEntitySpecKey key)
-                PP
-                
                 }
+
+                /// <summary>
+                ///     Processes a key-value pair from an entity builder specification.
+                /// </summary>
+                /// <param name=""luaState"">Lua state.</param>
+                /// <param name=""builder"">Entity builder.</param>
+                /// <param name=""localLogger"">Logger associated with the executing script.</param>
+                /// <param name=""key"">Current key in entity specification.</param>
+                /// <return>true if successful, false if error.</return>
+                /// <remarks>
+                ///     The value associated with the key should be at the top of the Lua stack.
+                ///     This method pops the value from the top of the Lua stack.
+                /// </remarks>
+                public static bool HandleKeyValuePair(IntPtr luaState, IEntityBuilder builder, ILogger localLogger, string key)
+                {
+                    if (!LuaEntitySpecKey.TryParse(key, out LuaEntitySpecKey keyConstant))
+                    {
+                        localLogger.LogError(""Unrecognized entity specification key '{Key}'."", key);
+                        return false;
+                    }
+
+                    try
+                    {
+                        switch (keyConstant)
+                        {");
+
+        foreach (var model in models)
+        {
+            if (model.IsTag)
+            {
+                sb.Append($@"
+                        case LuaEntitySpecKey.{model.Key}:
+                            {{
+                                Sovereign.EngineCore.Lua.LuaMarshaller.Unmarshal(luaState, out bool isTagSet);
+                                if (isTagSet) builder.{model.MethodName}();
+                                else builder.{model.UnsetMethodName}();
+                                return true;
+                            }}
+                ");
             }
-        ");
+            else
+            {
+                sb.Append($@"
+                        case LuaEntitySpecKey.{model.Key}:
+                            {{
+                                {model.ParamMarshallerAssembly}.Lua.LuaMarshaller.Unmarshal(luaState, out {model.ParamTypeFullNs}.{model.ParamTypeName} value);
+                                builder.{model.MethodName}(value);
+                                return true;
+                            }}
+                ");
+            }
+        }
+
+        sb.Append(@"
+                        default:
+                            localLogger.LogError(""Internal error: Unhandled key in HandleKeyValuePair."");
+                            break;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        localLogger.LogError(e, ""Error reading key '{Key} from entity specification."", key);
+                    }
+
+                    return false;
+                }
+            }");
 
         context.AddSource("LuaEntityBuilderSupport.g.cs", sb.ToString());
     }
@@ -106,6 +189,9 @@ public class LuaEntityBuilderSupportGenerator : IIncrementalGenerator
     private record struct Model
     {
         public string Key { get; set; }
+        public string MethodName { get; set; }
+        public string UnsetMethodName { get; set; }
+        public bool IsTag { get; set; }
         public string ParamTypeName { get; set; }
         public string ParamTypeFullNs { get; set; }
         public string ParamMarshallerAssembly { get; set; }

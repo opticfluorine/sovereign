@@ -146,6 +146,8 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<ScriptLoader>();
         services.TryAddSingleton<ScriptManager>();
         services.TryAddSingleton<ScriptingCallbackManager>();
+        services.TryAddSingleton<ScriptingServices>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, ScriptingLuaLibrary>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, ServerEntityBuilderLuaLibrary>());
     }
 }

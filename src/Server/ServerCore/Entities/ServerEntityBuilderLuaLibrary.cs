@@ -17,6 +17,7 @@
 using System;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Lua;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Systems.Scripting;
 using static Sovereign.Scripting.Lua.LuaBindings;
@@ -94,7 +95,6 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
                 }
 
                 var entityId = (ulong)lua_tointeger(luaState, -1);
-                lua_pop(luaState, 1);
                 builder = entityFactory.GetBuilder(entityId);
             }
             else
@@ -103,10 +103,12 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
                 builder = entityFactory.GetBuilder();
             }
 
+            lua_pop(luaState, 1);
+
             // Now that the builder has been created, iterate the remaining fields and set components.
+            var tablePos = lua_gettop(luaState);
             luaL_checkstack(luaState, 3, null);
             lua_pushnil(luaState);
-            var tablePos = lua_gettop(luaState);
             while (lua_next(luaState, tablePos) != 0)
             {
                 if (!HandleKeyValuePair(luaState, localLogger, builder))
@@ -116,7 +118,7 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
                     return 1;
                 }
 
-                lua_pop(luaState, 1);
+                // No need to pop the value - the handler does this for us in the success case.
             }
 
             var builtEntityId = builder.Build();
@@ -146,16 +148,17 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
     private bool HandleKeyValuePair(IntPtr luaState, ILogger localLogger, IEntityBuilder builder)
     {
         const int keyIdx = -2;
-        //const int valIdx = -1;
-        if (lua_type(luaState, keyIdx) != LuaType.String)
+        var keyType = lua_type(luaState, keyIdx);
+        if (keyType != LuaType.String)
         {
-            localLogger.LogError("entities.Build: argument keys must be strings");
+            localLogger.LogError("entities.Build: argument keys must be strings, found type {Type} ({Id}).",
+                keyType, (int)keyType);
             return false;
         }
 
         var key = lua_tostring(luaState, keyIdx);
         if (key == "EntityId") return true; // Already handled when builder was selected.
 
-        return true;
+        return LuaEntityBuilderSupport.HandleKeyValuePair(luaState, builder, localLogger, key);
     }
 }

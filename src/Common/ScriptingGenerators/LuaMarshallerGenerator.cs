@@ -272,6 +272,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     Unmarshal(luaState, out value.Y);
                     if (lua_getfield(luaState, -1, ""z"") != LuaType.Number) {throwTypeError};
                     Unmarshal(luaState, out value.Z);
+                    lua_pop(luaState, 1);
                 }}
 
                 public static int Marshal(IntPtr luaState, Guid value)
@@ -350,6 +351,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                 }
 
                 sb.Append(@"
+                    lua_pop(luaState, 1);
                     value = tmp;
                 }
                 ");
