@@ -33,12 +33,12 @@ public class SelectPlayerEventDetails : IEventDetails
     /// <summary>
     ///     Player character entity ID.
     /// </summary>
-    [ScriptableOrder(1)]
+    [ScriptableField]
     public ulong PlayerCharacterEntityId { get; set; }
 
     /// <summary>
     ///     Flag indicating whether the player character is new (true = new).
     /// </summary>
-    [ScriptableOrder(2)]
+    [ScriptableField]
     public bool NewPlayer { get; set; }
 }

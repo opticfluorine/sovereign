@@ -32,13 +32,13 @@ public sealed class EntityVectorEventDetails : IEventDetails
     ///     Entity ID.
     /// </summary>
     [Key(0)]
-    [ScriptableOrder(0)]
+    [ScriptableField]
     public ulong EntityId { get; set; }
 
     /// <summary>
     ///     Position.
     /// </summary>
     [Key(1)]
-    [ScriptableOrder(1)]
+    [ScriptableField]
     public Vector3 Vector { get; set; }
 }

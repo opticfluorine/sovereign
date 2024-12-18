@@ -64,7 +64,6 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                         .Select(m => (IPropertySymbol)m);
                     var allToMarshall = memberFields.Select(FieldToDataModel)
                         .Union(memberProperties.Select(PropertyToDataModel))
-                        .OrderBy(dm => dm.Index)
                         .ToList();
 
                     return new Model
@@ -381,23 +380,6 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    ///     Gets the index parameter from the ScriptableOrder attribute decorating the symbol.
-    /// </summary>
-    /// <param name="symbol">Field or property symbol.</param>
-    /// <returns>Index parameter.</returns>
-    /// <exception cref="Exception">Thrown if something is malformed (should be prevented by compile errors).</exception>
-    private static uint GetScriptableOrder(ISymbol symbol)
-    {
-        return symbol
-            .GetAttributes()
-            .Where(attr => attr.AttributeClass != null &&
-                           attr.AttributeClass.Name.Equals(ScriptableOrderName))
-            .Select(attr =>
-                (uint)(attr.ConstructorArguments.First().Value ?? throw new Exception("Unexpected null index.")))
-            .First();
-    }
-
-    /// <summary>
     ///     Extracts a DataModel from a public field.
     /// </summary>
     /// <param name="symbol">Field symbol.</param>
@@ -407,8 +389,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
         return new DataModel
         {
             Name = symbol.Name,
-            NativeType = symbol.Type.Name,
-            Index = GetScriptableOrder(symbol)
+            NativeType = symbol.Type.Name
         };
     }
 
@@ -422,8 +403,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
         return new DataModel
         {
             Name = symbol.Name,
-            NativeType = symbol.Type.Name,
-            Index = GetScriptableOrder(symbol)
+            NativeType = symbol.Type.Name
         };
     }
 
@@ -444,6 +424,5 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
     {
         public string Name { get; set; }
         public string NativeType { get; set; }
-        public uint Index { get; set; }
     }
 }

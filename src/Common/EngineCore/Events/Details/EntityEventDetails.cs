@@ -32,6 +32,6 @@ public class EntityEventDetails : IEventDetails
     ///     ID of the affected entity.
     /// </summary>
     [Key(0)]
-    [ScriptableOrder(0)]
+    [ScriptableField]
     public ulong EntityId { get; set; }
 }

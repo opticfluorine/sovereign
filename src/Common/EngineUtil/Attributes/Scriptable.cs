@@ -30,21 +30,8 @@ public class Scriptable : Attribute
 ///     Attribute used to indicate that a field or property is to be marshalled to Lua.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public class ScriptableOrder : Attribute
+public class ScriptableField : Attribute
 {
-    /// <summary>
-    ///     Indicates that a field or property is to be marshalled to Lua.
-    /// </summary>
-    /// <param name="index">Parameter index for this field or property. Must be unique per class/struct.</param>
-    public ScriptableOrder(uint index)
-    {
-        Index = index;
-    }
-
-    /// <summary>
-    ///     Order in which this field or property will be marshalled (0 = first).
-    /// </summary>
-    public uint Index { get; }
 }
 
 /// <summary>

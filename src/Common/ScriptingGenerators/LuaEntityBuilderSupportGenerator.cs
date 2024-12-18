@@ -106,16 +106,6 @@ public class LuaEntityBuilderSupportGenerator : IIncrementalGenerator
             /// </summary>
             public static class LuaEntityBuilderSupport
             {{
-                private enum LuaEntitySpecKey
-                {{");
-
-        foreach (var model in models)
-            sb.Append($@"
-                    {model.Key},");
-
-        sb.Append(@"
-                }
-
                 /// <summary>
                 ///     Processes a key-value pair from an entity builder specification.
                 /// </summary>
@@ -129,24 +119,17 @@ public class LuaEntityBuilderSupportGenerator : IIncrementalGenerator
                 ///     This method pops the value from the top of the Lua stack.
                 /// </remarks>
                 public static bool HandleKeyValuePair(IntPtr luaState, IEntityBuilder builder, ILogger localLogger, string key)
-                {
-                    if (!LuaEntitySpecKey.TryParse(key, out LuaEntitySpecKey keyConstant))
-                    {
-                        localLogger.LogError(""Unrecognized entity specification key '{Key}'."", key);
-                        return false;
-                    }
-
+                {{
                     try
-                    {
-                        switch (keyConstant)
-                        {");
+                    {{
+                        switch (key)
+                        {{
+                ");
 
         foreach (var model in models)
-        {
             if (model.IsTag)
-            {
                 sb.Append($@"
-                        case LuaEntitySpecKey.{model.Key}:
+                        case ""{model.Key}"":
                             {{
                                 Sovereign.EngineCore.Lua.LuaMarshaller.Unmarshal(luaState, out bool isTagSet);
                                 if (isTagSet) builder.{model.MethodName}();
@@ -154,29 +137,25 @@ public class LuaEntityBuilderSupportGenerator : IIncrementalGenerator
                                 return true;
                             }}
                 ");
-            }
             else
-            {
                 sb.Append($@"
-                        case LuaEntitySpecKey.{model.Key}:
+                        case ""{model.Key}"":
                             {{
                                 {model.ParamMarshallerAssembly}.Lua.LuaMarshaller.Unmarshal(luaState, out {model.ParamTypeFullNs}.{model.ParamTypeName} value);
                                 builder.{model.MethodName}(value);
                                 return true;
                             }}
                 ");
-            }
-        }
 
         sb.Append(@"
                         default:
-                            localLogger.LogError(""Internal error: Unhandled key in HandleKeyValuePair."");
+                            localLogger.LogError(""entities.Build: Unrecognized entity specification key '{Key}'."", key);
                             break;
                         }
                     }
                     catch (Exception e)
                     {
-                        localLogger.LogError(e, ""Error reading key '{Key} from entity specification."", key);
+                        localLogger.LogError(e, ""entities.Build: Error reading key '{Key} from entity specification."", key);
                     }
 
                     return false;

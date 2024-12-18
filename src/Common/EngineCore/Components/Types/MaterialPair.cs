@@ -41,13 +41,13 @@ public class MaterialPair
     ///     Material ID.
     /// </summary>
     [Key(0)]
-    [ScriptableOrder(0)]
+    [ScriptableField]
     public int MaterialId { get; set; }
 
     /// <summary>
     ///     Material modifier.
     /// </summary>
     [Key(1)]
-    [ScriptableOrder(1)]
+    [ScriptableField]
     public int MaterialModifier { get; set; }
 }
