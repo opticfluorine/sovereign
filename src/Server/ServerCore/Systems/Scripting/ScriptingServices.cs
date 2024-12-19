@@ -54,4 +54,14 @@ public class ScriptingServices
     {
         return TryGetHostForState(luaState, out var host) ? host.Logger : fallback;
     }
+
+    /// <summary>
+    ///     Checks whether the given script is currently loaded.
+    /// </summary>
+    /// <param name="name">Script name.</param>
+    /// <returns>true if loaded, false otherwise.</returns>
+    public bool IsScriptLoaded(string name)
+    {
+        return scriptManager.TryGetHost(name, out _);
+    }
 }

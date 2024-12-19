@@ -30,7 +30,7 @@ namespace Sovereign.ScriptingGenerators;
 public class LuaMarshallerGenerator : IIncrementalGenerator
 {
     private const string ScriptableName = "Sovereign.EngineUtil.Attributes.Scriptable";
-    private const string ScriptableOrderName = "ScriptableOrder";
+    private const string ScriptableFieldName = "ScriptableField";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -49,12 +49,12 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
 
                     // Identify all public fields and readable properties.
                     var memberFields = sym.GetMembers()
-                        .Where(HasScriptableOrder)
+                        .Where(HasScriptableField)
                         .Where(m => m.DeclaredAccessibility == Accessibility.Public)
                         .Where(m => m is IFieldSymbol f && !f.IsConst)
                         .Select(m => (IFieldSymbol)m);
                     var memberProperties = sym.GetMembers()
-                        .Where(HasScriptableOrder)
+                        .Where(HasScriptableField)
                         .Where(m => m.DeclaredAccessibility == Accessibility.Public)
                         .Where(m => m is IPropertySymbol p
                                     && p.GetMethod != null
@@ -367,16 +367,16 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    ///     Checks whether the given symbol has the ScriptableOrder attribute.
+    ///     Checks whether the given symbol has the ScriptableField attribute.
     /// </summary>
     /// <param name="symbol">Symbol.</param>
-    /// <returns>true if the ScriptableOrder attribute is present, false otherwise.</returns>
-    private static bool HasScriptableOrder(ISymbol symbol)
+    /// <returns>true if the ScriptableField attribute is present, false otherwise.</returns>
+    private static bool HasScriptableField(ISymbol symbol)
     {
         return symbol
             .GetAttributes()
             .Any(attr => attr.AttributeClass != null &&
-                         attr.AttributeClass.Name.Equals(ScriptableOrderName));
+                         attr.AttributeClass.Name.Equals(ScriptableFieldName));
     }
 
     /// <summary>

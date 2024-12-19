@@ -509,6 +509,18 @@ public enum EventId
     /// Associated details: None
     Server_Scripting_ReloadAll = 200700,
 
+    /// <summary>
+    ///     Requests that a specific script be reloaded.
+    /// </summary>
+    /// Associated details: StringEventDetails
+    Server_Scripting_Reload = 200701,
+
+    /// <summary>
+    ///     Requests that any new scripts be loaded without reloading existing scripts.
+    /// </summary>
+    /// Associated details: None
+    Server_Scripting_LoadNew = 200702,
+
     #endregion Server_Scripting
 
     #endregion Server

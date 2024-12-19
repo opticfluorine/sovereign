@@ -27,6 +27,7 @@ using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems.Block;
 using Sovereign.Persistence.Players;
+using Sovereign.ServerCore.Systems.Scripting;
 using Sovereign.ServerCore.Systems.ServerChat;
 using Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -57,6 +58,21 @@ public class AdminChatProcessor : IChatProcessor
     /// </summary>
     private const string RemoveBlock = "removeblock";
 
+    /// <summary>
+    ///     Command name for /reloadallscripts.
+    /// </summary>
+    private const string ReloadAllScripts = "reloadallscripts";
+
+    /// <summary>
+    ///     Command name for /reloadscript.
+    /// </summary>
+    private const string ReloadScript = "reloadscript";
+
+    /// <summary>
+    ///     Command name for /loadnewscripts.
+    /// </summary>
+    private const string LoadNewScripts = "loadnewscripts";
+
     private readonly AdminTagCollection admins;
     private readonly BlockController blockController;
     private readonly BlockServices blockServices;
@@ -70,6 +86,8 @@ public class AdminChatProcessor : IChatProcessor
     private readonly PersistencePlayerServices persistencePlayerServices;
     private readonly PlayerNameComponentIndexer playerNameIndex;
     private readonly PlayerRoleCheck playerRoleCheck;
+    private readonly ScriptingController scriptingController;
+    private readonly ScriptingServices scriptingServices;
     private readonly WorldManagementController worldManagementController;
 
     public AdminChatProcessor(AdminTagCollection admins, ServerChatInternalController internalController,
@@ -77,7 +95,8 @@ public class AdminChatProcessor : IChatProcessor
         NameComponentValidator nameValidator, PersistencePlayerServices persistencePlayerServices,
         LoggingUtil loggingUtil, NameComponentCollection names, WorldManagementController worldManagementController,
         IEventSender eventSender, BlockController blockController, BlockServices blockServices,
-        BlockTemplateNameComponentIndexer blockTemplateNames, ILogger<AdminChatProcessor> logger)
+        BlockTemplateNameComponentIndexer blockTemplateNames, ILogger<AdminChatProcessor> logger,
+        ScriptingController scriptingController, ScriptingServices scriptingServices)
     {
         this.admins = admins;
         this.internalController = internalController;
@@ -93,6 +112,8 @@ public class AdminChatProcessor : IChatProcessor
         this.blockServices = blockServices;
         this.blockTemplateNames = blockTemplateNames;
         this.logger = logger;
+        this.scriptingController = scriptingController;
+        this.scriptingServices = scriptingServices;
     }
 
     public List<ChatCommand> MatchingCommands => new()
@@ -100,7 +121,10 @@ public class AdminChatProcessor : IChatProcessor
         new ChatCommand { Command = AddAdmin, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = RemoveAdmin, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = AddBlock, HelpSummary = "", IncludeInHelp = false },
-        new ChatCommand { Command = RemoveBlock, HelpSummary = "", IncludeInHelp = false }
+        new ChatCommand { Command = RemoveBlock, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = ReloadAllScripts, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = ReloadScript, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = LoadNewScripts, HelpSummary = "", IncludeInHelp = false }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)
@@ -119,14 +143,36 @@ public class AdminChatProcessor : IChatProcessor
             command, message);
 
         // Admin role verified, dispatch to specific handlers.
-        if (command == AddAdmin)
-            OnAddAdmin(message, senderEntityId);
-        else if (command == RemoveAdmin)
-            OnRemoveAdmin(message, senderEntityId);
-        else if (command == AddBlock)
-            OnAddBlock(message, senderEntityId);
-        else if (command == RemoveBlock)
-            OnRemoveBlock(message, senderEntityId);
+        switch (command)
+        {
+            case AddAdmin:
+                OnAddAdmin(message, senderEntityId);
+                break;
+
+            case RemoveAdmin:
+                OnRemoveAdmin(message, senderEntityId);
+                break;
+
+            case AddBlock:
+                OnAddBlock(message, senderEntityId);
+                break;
+
+            case RemoveBlock:
+                OnRemoveBlock(message, senderEntityId);
+                break;
+
+            case ReloadAllScripts:
+                OnReloadAllScripts(senderEntityId);
+                break;
+
+            case ReloadScript:
+                OnReloadScript(message, senderEntityId);
+                break;
+
+            case LoadNewScripts:
+                OnLoadNewScripts(senderEntityId);
+                break;
+        }
     }
 
     /// <summary>
@@ -337,5 +383,38 @@ public class AdminChatProcessor : IChatProcessor
 
         // Remove block.
         blockController.RemoveBlockAtPosition(eventSender, blockPosition);
+    }
+
+    /// <summary>
+    ///     Handles the /reloadallscripts command.
+    /// </summary>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnReloadAllScripts(ulong senderEntityId)
+    {
+        scriptingController.ReloadAllScripts(eventSender);
+        internalController.SendSystemMessage("All scripts requested to reload.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /reloadscript command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnReloadScript(string message, ulong senderEntityId)
+    {
+        if (!scriptingServices.IsScriptLoaded(message))
+        {
+            internalController.SendSystemMessage($"Script {message} is not currently loaded.", senderEntityId);
+            return;
+        }
+
+        scriptingController.ReloadScript(eventSender, message);
+        internalController.SendSystemMessage($"Script {message} will be reloaded.", senderEntityId);
+    }
+
+    private void OnLoadNewScripts(ulong senderEntityId)
+    {
+        scriptingController.LoadNewScripts(eventSender);
+        internalController.SendSystemMessage("Any new scripts will be loaded.", senderEntityId);
     }
 }

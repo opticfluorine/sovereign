@@ -28,9 +28,10 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 /// </summary>
 public class ScriptManager : IDisposable
 {
+    private readonly Dictionary<string, LuaHost> hostsByName = new();
     private readonly Dictionary<IntPtr, LuaHost> hostsByState = new();
     private readonly ILogger<ScriptManager> logger;
-    private List<LuaHost> scriptHosts = new();
+    private readonly List<LuaHost> scriptHosts = new();
 
     public ScriptManager(ILogger<ScriptManager> logger)
     {
@@ -49,35 +50,62 @@ public class ScriptManager : IDisposable
     {
         foreach (var host in scriptHosts) host.Dispose();
         hostsByState.Clear();
+        hostsByName.Clear();
+        scriptHosts.Clear();
     }
 
     /// <summary>
-    ///     Loads all scripts.
+    ///     Unloads a currently loaded script.
+    /// </summary>
+    /// <param name="host">Lua host associated with the script to be unloaded.</param>
+    public void Unload(LuaHost host)
+    {
+        hostsByState.Remove(host.LuaState);
+        hostsByName.Remove(host.Name);
+        for (var i = scriptHosts.Count - 1; i >= 0; --i)
+        {
+            if (scriptHosts[i].LuaState != host.LuaState) continue;
+            scriptHosts.RemoveAt(i);
+            break;
+        }
+
+        host.Dispose();
+    }
+
+    /// <summary>
+    ///     Loads a list of hosted scripts.
     /// </summary>
     public void Load(List<LuaHost> scripts)
     {
-        scriptHosts = scripts;
-        foreach (var host in scriptHosts)
-        {
-            hostsByState[host.LuaState] = host;
+        foreach (var host in scripts) Load(host);
+    }
 
-            // Now that host registration is complete, execute the pending script asynchronously.
-            Task.Run(() =>
+    /// <summary>
+    ///     Loads the given hosted script.
+    /// </summary>
+    /// <param name="host">Hosted script.</param>
+    public void Load(LuaHost host)
+    {
+        scriptHosts.Add(host);
+        hostsByState[host.LuaState] = host;
+        hostsByName[host.Name] = host;
+
+        // Now that host registration is complete, execute the pending script asynchronously.
+        Task.Run(() =>
+        {
+            try
             {
-                try
-                {
-                    host.ExecuteLoadedScript();
-                }
-                catch (LuaException e)
-                {
-                    logger.LogError("{Error}", e.Message);
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "Error while executing loaded script.");
-                }
-            });
-        }
+                host.ExecuteLoadedScript();
+            }
+            catch (LuaException e)
+            {
+                logger.LogError("{Error}", e.Message);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error while executing loaded script.");
+            }
+        });
     }
 
     /// <summary>
@@ -89,5 +117,16 @@ public class ScriptManager : IDisposable
     public bool TryGetHost(IntPtr luaState, [NotNullWhen(true)] out LuaHost? host)
     {
         return hostsByState.TryGetValue(luaState, out host);
+    }
+
+    /// <summary>
+    ///     Gets the host associated with the given script by name.
+    /// </summary>
+    /// <param name="name">Script name.</param>
+    /// <param name="host">Script host.</param>
+    /// <returns>true if a matching host was found, false otherwise.</returns>
+    public bool TryGetHost(string name, [NotNullWhen(true)] out LuaHost? host)
+    {
+        return hostsByName.TryGetValue(name, out host);
     }
 }

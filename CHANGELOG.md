@@ -4,6 +4,15 @@
 
 ### December
 
+#### 18 December 2024
+
+* Scripting: Add new script management chat commands `/reloadallscripts`, `/reloadscript`,
+  and `/loadnewscripts`. See the README for more details about what they do and how
+  to use them.
+* Scripting: Fix issue accidentally introduced yesterday where the Lua marshaller wasn't
+  doing anything due to a mismatched name in the generator code.
+* Persistence: Update SQLite dependency to latest to eliminate warnings in .NET 8 and later.
+
 #### 17 December 2024
 
 * Server: Add Lua bindings for `IEntityBuilder`. The Lua interface takes a table mapping

@@ -31,9 +31,9 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 /// </summary>
 public class ScriptingCallbackManager
 {
-    private readonly ILogger<ScriptingCallbackManager> logger;
     private readonly ConcurrentDictionary<EventId, List<Callback>> callbacks = new();
     private readonly ConcurrentDictionary<IntPtr, HashSet<EventId>> eventIdsByHost = new();
+    private readonly ILogger<ScriptingCallbackManager> logger;
 
     public ScriptingCallbackManager(ILogger<ScriptingCallbackManager> logger)
     {
@@ -62,6 +62,41 @@ public class ScriptingCallbackManager
 
         cbList.Add(new Callback(luaHost, quickLookupIndex));
         evList.Add(eventId);
+    }
+
+    /// <summary>
+    ///     Removes all callbacks associated with the given host.
+    /// </summary>
+    /// <param name="luaHost">Lua host.</param>
+    public void RemoveCallbacksForHost(LuaHost luaHost)
+    {
+        if (!eventIdsByHost.TryGetValue(luaHost.LuaState, out var eventIds)) return;
+
+        foreach (var eventId in eventIds)
+        {
+            if (!callbacks.TryGetValue(eventId, out var cbs))
+            {
+                logger.LogError("No callbacks found during reverse lookup for event ID {EventId}.", eventId);
+                continue;
+            }
+
+            for (var i = cbs.Count - 1; i >= 0; --i)
+            {
+                var cb = cbs[i];
+                if (cb.LuaHost.LuaState == luaHost.LuaState) cbs.RemoveAt(i);
+            }
+        }
+
+        eventIdsByHost.TryRemove(luaHost.LuaState, out _);
+    }
+
+    /// <summary>
+    ///     Removes all callbacks.
+    /// </summary>
+    public void RemoveAllCallbacks()
+    {
+        callbacks.Clear();
+        eventIdsByHost.Clear();
     }
 
     /// <summary>

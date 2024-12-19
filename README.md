@@ -98,14 +98,17 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 
 #### Chat Commands
 
-| Command      | Arguments             | Action                                                |
-|--------------|-----------------------|-------------------------------------------------------|
-| /help        |                       | List commands and their descriptions.                 |
-| /g           | message               | Broadcasts a message through global chat.             |
-| /addadmin    | playerName            | Admin only. Grants admin role to the given player.    |
-| /removeadmin | playerName            | Admin only. Revokes admin role from the given player. |
-| /addblock    | x, y, z, templateName | Admin only. Adds a block at the given position.       |
-| /removeblock | x, y, z               | Admin only. Removes a block at the given position.    |
+| Command           | Arguments             | Action                                                |
+|-------------------|-----------------------|-------------------------------------------------------|
+| /help             |                       | List commands and their descriptions.                 |
+| /g                | message               | Broadcasts a message through global chat.             |
+| /addadmin         | playerName            | Admin only. Grants admin role to the given player.    |
+| /removeadmin      | playerName            | Admin only. Revokes admin role from the given player. |
+| /addblock         | x, y, z, templateName | Admin only. Adds a block at the given position.       |
+| /removeblock      | x, y, z               | Admin only. Removes a block at the given position.    |
+| /reloadallscripts |                       | Admin only. Reloads all server-side scripts.          |
+| /reloadscript     | scriptName            | Admin only. Reloads the specific named script.        |
+| /loadnewscripts   |                       | Admin only. Loads any new scripts.                    |
 
 ## Reporting Issues
 

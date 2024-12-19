@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Lua;
 using Sovereign.Scripting.Lua;
@@ -51,17 +52,38 @@ public class ScriptLoader
     /// </summary>
     public List<LuaHost> LoadAll()
     {
+        return LoadScriptList(GetAllScriptFiles());
+    }
+
+    /// <summary>
+    ///     Loads scripts where the script name satisfies a given predicate.
+    /// </summary>
+    /// <param name="namePredicate">Predicate acting on script names. Names for which this returns true are loaded.</param>
+    /// <returns>Loaded scripts whose names satisfied the given predicate.</returns>
+    public List<LuaHost> LoadWhere(Func<string, bool> namePredicate)
+    {
+        return LoadScriptList(GetAllScriptFiles().Where(f => namePredicate(GetNameFromPath(f))));
+    }
+
+    /// <summary>
+    ///     Loads the script with the given name.
+    /// </summary>
+    /// <param name="scriptName">Script name.</param>
+    /// <returns></returns>
+    public LuaHost Load(string scriptName)
+    {
         var config = configManager.ServerConfiguration.Scripting;
+        var scriptPath = Path.Combine(config.ScriptDirectory, $"{scriptName}.lua");
+        return HostScript(scriptPath);
+    }
 
-        var files = Directory.EnumerateFiles(config.ScriptDirectory, "*.lua",
-            new EnumerationOptions
-            {
-                MatchCasing = MatchCasing.CaseInsensitive,
-                IgnoreInaccessible = true,
-                RecurseSubdirectories = true,
-                MaxRecursionDepth = (int)config.MaxDirectoryDepth
-            });
-
+    /// <summary>
+    ///     Loads the given scripts into a list.
+    /// </summary>
+    /// <param name="files">Script files to attempt loading.</param>
+    /// <returns>List of successfully loaded scripts.</returns>
+    private List<LuaHost> LoadScriptList(IEnumerable<string> files)
+    {
         var hosts = new List<LuaHost>();
         foreach (var file in files)
             try
@@ -81,6 +103,24 @@ public class ScriptLoader
     }
 
     /// <summary>
+    ///     Identifies all script files.
+    /// </summary>
+    /// <returns>Enumerated script files.</returns>
+    private IEnumerable<string> GetAllScriptFiles()
+    {
+        var config = configManager.ServerConfiguration.Scripting;
+
+        return Directory.EnumerateFiles(config.ScriptDirectory, "*.lua",
+            new EnumerationOptions
+            {
+                MatchCasing = MatchCasing.CaseInsensitive,
+                IgnoreInaccessible = true,
+                RecurseSubdirectories = true,
+                MaxRecursionDepth = (int)config.MaxDirectoryDepth
+            });
+    }
+
+    /// <summary>
     ///     Loads and hosts the given Lua script.
     /// </summary>
     /// <param name="file">Path to script file.</param>
@@ -90,10 +130,21 @@ public class ScriptLoader
         logger.LogInformation("Loading script {File}.", file);
 
         var host = GetNewHost(file);
-        host.Name = Path.GetFileNameWithoutExtension(file);
+        host.Name = GetNameFromPath(file);
         host.LoadScript(file);
 
         return host;
+    }
+
+    /// <summary>
+    ///     Gets the script name for the given script filename.
+    /// </summary>
+    /// <param name="file">Script filename.</param>
+    /// <returns>Script name.</returns>
+    private string GetNameFromPath(string file)
+    {
+        var relPath = Path.GetRelativePath(configManager.ServerConfiguration.Scripting.ScriptDirectory, file);
+        return relPath.Substring(0, relPath.LastIndexOf('.'));
     }
 
     /// <summary>
