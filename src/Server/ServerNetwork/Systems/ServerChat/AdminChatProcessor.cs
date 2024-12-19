@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
@@ -73,6 +74,11 @@ public class AdminChatProcessor : IChatProcessor
     /// </summary>
     private const string LoadNewScripts = "loadnewscripts";
 
+    /// <summary>
+    ///     Command name for /listscripts.
+    /// </summary>
+    private const string ListScripts = "listscripts";
+
     private readonly AdminTagCollection admins;
     private readonly BlockController blockController;
     private readonly BlockServices blockServices;
@@ -124,7 +130,8 @@ public class AdminChatProcessor : IChatProcessor
         new ChatCommand { Command = RemoveBlock, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ReloadAllScripts, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ReloadScript, HelpSummary = "", IncludeInHelp = false },
-        new ChatCommand { Command = LoadNewScripts, HelpSummary = "", IncludeInHelp = false }
+        new ChatCommand { Command = LoadNewScripts, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = ListScripts, HelpSummary = "", IncludeInHelp = false }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)
@@ -171,6 +178,10 @@ public class AdminChatProcessor : IChatProcessor
 
             case LoadNewScripts:
                 OnLoadNewScripts(senderEntityId);
+                break;
+
+            case ListScripts:
+                OnListScripts(senderEntityId);
                 break;
         }
     }
@@ -412,9 +423,24 @@ public class AdminChatProcessor : IChatProcessor
         internalController.SendSystemMessage($"Script {message} will be reloaded.", senderEntityId);
     }
 
+    /// <summary>
+    ///     Handles the /loadnewscripts command.
+    /// </summary>
+    /// <param name="senderEntityId">Sender entity ID.</param>
     private void OnLoadNewScripts(ulong senderEntityId)
     {
         scriptingController.LoadNewScripts(eventSender);
         internalController.SendSystemMessage("Any new scripts will be loaded.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /listscripts command.
+    /// </summary>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnListScripts(ulong senderEntityId)
+    {
+        internalController.SendSystemMessage("Currently loaded scripts:", senderEntityId);
+        foreach (var name in scriptingServices.GetLoadedScripts().Order())
+            internalController.SendSystemMessage($"  - {name}", senderEntityId);
     }
 }

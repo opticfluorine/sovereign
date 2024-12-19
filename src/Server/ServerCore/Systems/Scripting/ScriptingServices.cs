@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Sovereign.Scripting.Lua;
@@ -63,5 +64,14 @@ public class ScriptingServices
     public bool IsScriptLoaded(string name)
     {
         return scriptManager.TryGetHost(name, out _);
+    }
+
+    /// <summary>
+    ///     Gets the names of all currently loaded scripts.
+    /// </summary>
+    /// <returns>IEnumerable over all currently loaded script names.</returns>
+    public IEnumerable<string> GetLoadedScripts()
+    {
+        return scriptManager.GetScriptNames();
     }
 }

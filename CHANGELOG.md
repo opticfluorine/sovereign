@@ -4,6 +4,11 @@
 
 ### December
 
+#### 19 December 2024
+
+* Scripting: Add new script management command `/listscripts` which lists all currently
+  loaded scripts.
+
 #### 18 December 2024
 
 * Scripting: Add new script management chat commands `/reloadallscripts`, `/reloadscript`,

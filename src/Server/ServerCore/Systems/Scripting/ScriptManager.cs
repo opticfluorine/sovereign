@@ -129,4 +129,13 @@ public class ScriptManager : IDisposable
     {
         return hostsByName.TryGetValue(name, out host);
     }
+
+    /// <summary>
+    ///     Gets the names of all currently loaded scripts.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerable<string> GetScriptNames()
+    {
+        return hostsByName.Keys;
+    }
 }

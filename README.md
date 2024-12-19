@@ -109,6 +109,7 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 | /reloadallscripts |                       | Admin only. Reloads all server-side scripts.          |
 | /reloadscript     | scriptName            | Admin only. Reloads the specific named script.        |
 | /loadnewscripts   |                       | Admin only. Loads any new scripts.                    |
+| /listscripts      |                       | Admin only. Lists all currently loaded scripts.       |
 
 ## Reporting Issues
 
