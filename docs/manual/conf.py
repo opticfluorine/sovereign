@@ -9,14 +9,15 @@
 project = 'Sovereign Engine'
 copyright = '2024, opticfluorine'
 author = 'opticfluorine'
-release = 'v0.3.0'
+release = 'v0.4.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
     'myst_parser',
-    'sphinxcontrib.mermaid'
+    'sphinxcontrib.mermaid',
+    'sphinxcontrib.luadomain'
 ]
 myst_enable_extensions = ['colon_fence']
 

@@ -8,4 +8,5 @@ world/index.md
 resources/index.md
 templates/index.md
 admin/index.md
+scripting/index.md
 :::

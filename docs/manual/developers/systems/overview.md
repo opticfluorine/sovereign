@@ -40,6 +40,7 @@ Server systems are only present in the server.
 |--------------------|--------------------------|-------------------------------------------------------------------|
 | `Accounts`         | `AccountsSystem`         | Responsible for managing the locked account list.                 |
 | `Persistence`      | `PersistenceSystem`      | Responsible for managing the database.                            |
+| `Scripting`        | `ScriptingSystem`        | Responsible for managing server-side scripts.                     |
 | `ServerChat`       | `ServerChatSystem`       | Responsible for managing chat functions in the server.            |
 | `ServerManagement` | `ServerManagementSystem` | Responsible for managing the engine in its server configuration.  |
 | `ServerNetwork`    | `ServerNetworkSystem`    | Responsible for managing server network resources.                |
