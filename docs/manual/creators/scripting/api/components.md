@@ -1,4 +1,4 @@
-# Components API
+# components Module
 
 :::{contents}
 :local:
@@ -110,7 +110,7 @@ end
 components.point_light.Remove(entityId)
 ```
 
-### Set
+### Set(entityId, value)
 
 #### Definition
 
@@ -149,7 +149,7 @@ if (components.drawable.Get(entityId)) then
 end
 ```
 
-### Add
+### Add(entityId, value)
 
 #### Definition
 
@@ -188,7 +188,7 @@ if (components.health.Get(entityId) == currentHealth) then
 end
 ```
 
-### Multiply
+### Multiply(entityId, value)
 
 #### Definition
 
@@ -227,7 +227,7 @@ if (components.health.Get(entityId) == currentHealth) then
 end
 ```
 
-### Divide
+### Divide(entityId, value)
 
 #### Definition
 
@@ -270,7 +270,7 @@ end
 
 ## Kinematics Functions
 
-### SetVelocity
+### SetVelocity(entityId, value)
 
 #### Definition
 
@@ -300,7 +300,7 @@ components.kinematics.SetVelocity(entityId, {
 })
 ```
 
-### AddPosition
+### AddPosition(entityId, value)
 
 #### Definition
 

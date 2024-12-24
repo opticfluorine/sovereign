@@ -5,5 +5,10 @@ to server-side scripts.
 
 ```{toctree}
 :maxdepth: 1
+chat.md
+color.md
 components.md
+events.md
+scripting.md
+util.md
 ```
