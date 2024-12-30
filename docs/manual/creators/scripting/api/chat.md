@@ -29,6 +29,7 @@ The `chat` module provides APIs for sending chat messages to players.
 chat.SendSystemMessage(playerEntityId, "This is a system message.")
 ```
 
+(script-chat-sendtoplayer)=
 ### SendToPlayer(playerEntityId, color, message)
 
 #### Definition

@@ -7,6 +7,7 @@ conditions (e.g. a specific event is received).
 
 ## Callback Registration Functions
 
+(script-scripting-addeventcallback)=
 ### AddEventCallback(eventId, callback)
 
 #### Definition

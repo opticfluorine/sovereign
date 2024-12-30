@@ -1,3 +1,4 @@
+(script-color)=
 # color Module
 
 ## Predefined Colors

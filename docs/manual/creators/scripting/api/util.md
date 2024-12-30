@@ -46,6 +46,7 @@ util.LogInfo("Hello World!")
 util.LogWarn("Hello World!")
 ```
 
+(script-util-logerror)=
 ### LogError(message)
 
 #### Definition
