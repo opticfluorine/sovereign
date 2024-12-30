@@ -30,15 +30,17 @@ namespace Sovereign.ServerCore.Entities;
 public class ServerEntityBuilderLuaLibrary : ILuaLibrary
 {
     private readonly IEntityFactory entityFactory;
+    private readonly EntityManager entityManager;
     private readonly ILogger<ServerEntityBuilderLuaLibrary> logger;
     private readonly ScriptingServices scriptingServices;
 
     public ServerEntityBuilderLuaLibrary(IEntityFactory entityFactory, ScriptingServices scriptingServices,
-        ILogger<ServerEntityBuilderLuaLibrary> logger)
+        ILogger<ServerEntityBuilderLuaLibrary> logger, EntityManager entityManager)
     {
         this.entityFactory = entityFactory;
         this.scriptingServices = scriptingServices;
         this.logger = logger;
+        this.entityManager = entityManager;
     }
 
     public void Install(LuaHost luaHost)
@@ -47,11 +49,39 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
         try
         {
             luaHost.AddLibraryFunction("Build", BuildEntity);
+            luaHost.AddLibraryFunction("Remove", RemoveEntity);
         }
         finally
         {
             luaHost.EndLibrary();
         }
+    }
+
+    /// <summary>
+    ///     Implementation of Lua function entities.Remove.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of results pushed to the Lua stack.</returns>
+    private int RemoveEntity(IntPtr luaState)
+    {
+        var localLogger = scriptingServices.GetScriptLogger(luaState, logger);
+        try
+        {
+            if (lua_gettop(luaState) != 1)
+            {
+                localLogger.LogError("entities.Remove requires one argument.");
+                return 0;
+            }
+
+            LuaMarshaller.Unmarshal(luaState, out ulong entityId);
+            entityManager.RemoveEntity(entityId);
+        }
+        catch (Exception e)
+        {
+            localLogger.LogError(e, "Error in entities.Remove.");
+        }
+
+        return 0;
     }
 
     /// <summary>
@@ -110,7 +140,6 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
             luaL_checkstack(luaState, 3, null);
             lua_pushnil(luaState);
             while (lua_next(luaState, tablePos) != 0)
-            {
                 if (!HandleKeyValuePair(luaState, localLogger, builder))
                 {
                     lua_pop(luaState, 1);
@@ -118,9 +147,7 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
                     return 1;
                 }
 
-                // No need to pop the value - the handler does this for us in the success case.
-            }
-
+            // No need to pop the value - the handler does this for us in the success case.
             var builtEntityId = builder.Build();
             lua_pushinteger(luaState, (long)builtEntityId);
             return 1;
