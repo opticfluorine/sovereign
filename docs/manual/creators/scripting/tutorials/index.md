@@ -1,3 +1,4 @@
+(script-tutorials)=
 # Tutorials
 
 ```{toctree}

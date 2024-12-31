@@ -1,3 +1,4 @@
+(script-scripting)=
 # scripting Module
 
 The `scripting` module provides APIs for interacting with the server-side

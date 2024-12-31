@@ -1,3 +1,4 @@
+(script-components)=
 # components Module
 
 :::{contents}

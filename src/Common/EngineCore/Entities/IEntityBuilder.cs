@@ -133,7 +133,6 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <param name="material">Material.</param>
     /// <returns>Builder.</returns>
-    [ScriptableEntityBuilderAction("Material")]
     IEntityBuilder Material(MaterialPair material);
 
     /// <summary>

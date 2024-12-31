@@ -27,6 +27,38 @@ Revokes the Admin role from the given player. If the player does not already hav
 Admin role, no change will be made. This command cannot be used to revoke the Admin
 role from yourself.
 
+(chat-admin-scripting)=
+## Scripting
+
+### /listscripts
+
+**Usage:** `/listscripts`
+
+Lists all currently loaded scripts.
+
+### /loadnewscripts
+
+**Usage:** `/loadnewscripts`
+
+Loads any scripts that are not currently loaded, but does not reload any currently
+loaded scripts. Useful for when new scripts need to be loaded but you don't want to
+reset the state of currently running scripts.
+
+### /reloadscript
+
+**Usage:** `/reloadscripts [script_name]`
+
+**Parameters:**
+* `script_name`: Name of the script to reload.
+
+Reloads the specified script.
+
+### /reloadscripts
+
+**Usage:** `/reloadscripts`
+
+Reloads all scripts, including any scripts which are not currently loaded.
+
 ## World Editing
 
 ### /addblock

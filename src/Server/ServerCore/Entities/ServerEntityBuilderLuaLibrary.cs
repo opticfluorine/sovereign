@@ -48,7 +48,7 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
         luaHost.BeginLibrary("entities");
         try
         {
-            luaHost.AddLibraryFunction("Build", BuildEntity);
+            luaHost.AddLibraryFunction("Create", BuildEntity);
             luaHost.AddLibraryFunction("Remove", RemoveEntity);
         }
         finally
