@@ -32,19 +32,19 @@ The absence of any entry indicates that no value will be initially set, with the
 exception of the `EntityId` entry for which a value will be automatically selected
 if one is not provided.
 
-| Key                | Value Type     | Meaning                                          |
-|--------------------|----------------|--------------------------------------------------|
-| `EntityId`         | integer        | Entity ID                                        |
-| `Template`         | integer        | Template entity ID                               |
-| `Kinematics`       | `Kinematics`   | Position and velocity (non-block entities)       |
-| `BlockPosition`    | `GridPosition` | Position (block entities)                        |
-| `Drawable`         | `boolean`      | Whether entity is visible when rendered          |
-| `AnimatedSprite`   | `integer`      | Animated sprite ID                               |
-| `Name`             | `string`       | Name                                             |
-| `Parent`           | `integer`      | Entity ID of parent entity                       |
-| `Orientation`      | `integer`      | Orientation                                      |
-| `CastBlockShadows` | `boolean`      | Whether entity casts block shadows when rendered |
-| `PointLightSource` | `PointLight`   | Point light source                               |
+| Key              | Value Type                                 | Meaning                                          |
+|------------------|--------------------------------------------|--------------------------------------------------|
+| EntityId         | integer                                    | Entity ID                                        |
+| Template         | integer                                    | Template entity ID                               |
+| Kinematics       | [Kinematics](#script-types-kinematics)     | Position and velocity (non-block entities)       |
+| BlockPosition    | [GridPosition](#script-types-gridposition) | Position (block entities)                        |
+| Drawable         | boolean                                    | Whether entity is visible when rendered          |
+| AnimatedSprite   | integer                                    | Animated sprite ID                               |
+| Name             | string                                     | Name                                             |
+| Parent           | integer                                    | Entity ID of parent entity                       |
+| Orientation      | integer                                    | Orientation                                      |
+| CastBlockShadows | boolean                                    | Whether entity casts block shadows when rendered |
+| PointLightSource | [PointLight](#script-types-pointlight)     | Point light source                               |
 
 #### Example
 

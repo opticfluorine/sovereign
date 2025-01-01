@@ -12,4 +12,5 @@ entities.md
 events.md
 scripting.md
 util.md
+types.md
 ```

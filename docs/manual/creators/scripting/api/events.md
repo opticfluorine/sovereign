@@ -8,8 +8,8 @@ that scripts can react to.
 
 The following event types are supported in server-side scripts.
 
-|Event|Details Type|Purpose|
-|----------------------------------------------|---------------------|----------------------------------------|
-|`events.Core_Tick`                            |`nil`                |Sent at the beginning of each game tick.|
-|`events.Core_Network_Logout`                  |`EntityEventDetails` |Sent when a player logs out.            |
-|`events.Server_Persistence_PlayerEnteredWorld`|`EnitityEventDetails`|Sent when a player logs in.             |
+| Event                                      | Details Type                                          | Purpose                                |
+|--------------------------------------------|-------------------------------------------------------|----------------------------------------|
+|events.Core_Tick                            |nil                                                    |Sent at the beginning of each game tick.|
+|events.Core_Network_Logout                  |[EntityEventDetails](#script-types-entityeventdetails) |Sent when a player logs out.            |
+|events.Server_Persistence_PlayerEnteredWorld|[EntityEventDetails](#script-types-entityeventdetails) |Sent when a player logs in.             |
