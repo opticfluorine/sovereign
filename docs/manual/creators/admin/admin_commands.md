@@ -46,7 +46,7 @@ reset the state of currently running scripts.
 
 ### /reloadscript
 
-**Usage:** `/reloadscripts [script_name]`
+**Usage:** `/reloadscript [script_name]`
 
 **Parameters:**
 * `script_name`: Name of the script to reload.
@@ -55,7 +55,7 @@ Reloads the specified script.
 
 ### /reloadscripts
 
-**Usage:** `/reloadscripts`
+**Usage:** `/reloadallscripts`
 
 Reloads all scripts, including any scripts which are not currently loaded.
 

@@ -126,6 +126,23 @@ public class LuaHost : IDisposable
     }
 
     /// <summary>
+    ///     Adds an integer-valued constant to the current library.
+    /// </summary>
+    /// <param name="name">Constant name.</param>
+    /// <param name="value">Value.</param>
+    public void AddLibraryConstant(string name, long value)
+    {
+        lock (opsLock)
+        {
+            luaL_checkstack(LuaState, 2, null);
+
+            lua_getglobal(LuaState, library);
+            lua_pushinteger(LuaState, value);
+            lua_setfield(LuaState, -2, name);
+        }
+    }
+
+    /// <summary>
     ///     Ends the current library, if any.
     /// </summary>
     public void EndLibrary()

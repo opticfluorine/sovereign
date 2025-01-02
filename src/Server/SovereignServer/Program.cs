@@ -46,7 +46,8 @@ builder.Services
     .AddSovereignAccounts()
     .AddSovereignEngineCoreLuaLibraries()
     .AddSovereignServerCoreLuaLibraries()
-    .AddSovereignEngineCoreLuaComponents();
+    .AddSovereignEngineCoreLuaComponents()
+    .AddSovereignEngineCoreLuaEnums();
 
 // Run application.
 var host = builder.Build();

@@ -113,7 +113,7 @@ To load this script, you can do one of several options:
 
 * Restart the server. The server automatically loads all scripts in the `Data/Scripts` directory
   at startup.
-* If you don't want to restart the server, you can use the `/reloadscripts` chat command from
+* If you don't want to restart the server, you can use the `/reloadallscripts` chat command from
   an admin player to reload all scripts without taking the server offline.
 * If you don't want to interrupt any currently loaded scripts, you can use the `/loadnewscripts`
   command to load any new scripts that have not already been loaded. If the script was already

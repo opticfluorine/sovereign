@@ -22,6 +22,7 @@ namespace Sovereign.EngineCore.Components.Types;
 ///     Specifies a directional orientation.
 /// </summary>
 [Scriptable]
+[ScriptableEnum]
 public enum Orientation
 {
     South = 0,

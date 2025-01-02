@@ -74,6 +74,14 @@ public class ScriptableEvent : Attribute
 }
 
 /// <summary>
+///     Designates an enum to be bound to the scripting engine.
+/// </summary>
+[AttributeUsage(AttributeTargets.Enum)]
+public class ScriptableEnum : Attribute
+{
+}
+
+/// <summary>
 ///     Designates a component collection class as one for which Lua bindings should be generated.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
