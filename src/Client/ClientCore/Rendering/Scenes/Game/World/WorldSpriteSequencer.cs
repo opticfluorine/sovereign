@@ -33,12 +33,21 @@ public enum SpritePlane
     /// <summary>
     ///     Sprite lies in the XY plane.
     /// </summary>
-    XY,
+    Xy,
 
     /// <summary>
-    ///     Sprite lies in the XZ plane.
+    ///     Sprite lies in the XZ plane at the "back" Y position.
+    ///     Used for block front faces, which appear along the back plane
+    ///     of the cell in which they appear.
     /// </summary>
-    XZ
+    XzBack,
+
+    /// <summary>
+    ///     Sprite lies in the XZ plane at the "front" Y position.
+    ///     Used for free sprites, which appear along the front plane of
+    ///     their cell in order to give correct depth ordering in Y.
+    /// </summary>
+    XzFront
 }
 
 /// <summary>
@@ -98,13 +107,18 @@ public sealed class WorldSpriteSequencer
 
             switch (spritePlane)
             {
-                case SpritePlane.XY:
+                case SpritePlane.Xy:
                     AddVerticesForSpriteXY(sprite, pos, vel, lightFactor,
                         vertices.Slice(spriteCount * VerticesPerSprite, VerticesPerSprite));
                     break;
 
-                case SpritePlane.XZ:
-                    AddVerticesForSpriteXZ(sprite, pos, vel, lightFactor,
+                case SpritePlane.XzBack:
+                    AddVerticesForSpriteXZBack(sprite, pos, vel, lightFactor,
+                        vertices.Slice(spriteCount * VerticesPerSprite, VerticesPerSprite));
+                    break;
+
+                case SpritePlane.XzFront:
+                    AddVerticesForSpriteXZFront(sprite, pos, vel, lightFactor,
                         vertices.Slice(spriteCount * VerticesPerSprite, VerticesPerSprite));
                     break;
             }
@@ -193,7 +207,7 @@ public sealed class WorldSpriteSequencer
     }
 
     /// <summary>
-    ///     Adds the four vertices for the given sprite in the XZ plane.
+    ///     Adds the four vertices for the given sprite in the XZ plane at the back of the cell.
     /// </summary>
     /// <remarks>
     ///     Vertices are generated clockwise from top-left.
@@ -203,7 +217,7 @@ public sealed class WorldSpriteSequencer
     /// <param name="velocity">Velocity of entity.</param>
     /// <param name="lightFactor">Light factor of sprite.</param>
     /// <param name="vertices">Span containing vertices for the single sprite.</param>
-    private void AddVerticesForSpriteXZ(Sprite sprite, Vector3 position,
+    private void AddVerticesForSpriteXZBack(Sprite sprite, Vector3 position,
         Vector3 velocity, float lightFactor, Span<WorldVertex> vertices)
     {
         /* Retrieve sprite information. */
@@ -257,6 +271,80 @@ public sealed class WorldSpriteSequencer
             PosX = position.X,
             PosY = position.Y,
             PosZ = position.Z - spriteInfo.HeightInTiles,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedLeftX,
+            TexY = spriteInfo.NormalizedBottomY,
+            LightFactor = lightFactor
+        };
+    }
+
+    /// <summary>
+    ///     Adds the four vertices for the given sprite in the XZ plane at the front of the cell..
+    /// </summary>
+    /// <remarks>
+    ///     Vertices are generated clockwise from top-left.
+    /// </remarks>
+    /// <param name="sprite">Sprite to sequence.</param>
+    /// <param name="position">Position of entity.</param>
+    /// <param name="velocity">Velocity of entity.</param>
+    /// <param name="lightFactor">Light factor of sprite.</param>
+    /// <param name="vertices">Span containing vertices for the single sprite.</param>
+    private void AddVerticesForSpriteXZFront(Sprite sprite, Vector3 position,
+        Vector3 velocity, float lightFactor, Span<WorldVertex> vertices)
+    {
+        /* Retrieve sprite information. */
+        var spriteInfo = atlasMap.MapElements[sprite.Id];
+
+        /* Top left. */
+        vertices[0] = new WorldVertex
+        {
+            PosX = position.X,
+            PosY = position.Y - spriteInfo.HeightInTiles,
+            PosZ = position.Z + spriteInfo.HeightInTiles,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedLeftX,
+            TexY = spriteInfo.NormalizedTopY,
+            LightFactor = lightFactor
+        };
+
+        /* Top right. */
+        vertices[1] = new WorldVertex
+        {
+            PosX = position.X + spriteInfo.WidthInTiles,
+            PosY = position.Y - spriteInfo.HeightInTiles,
+            PosZ = position.Z + spriteInfo.HeightInTiles,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedRightX,
+            TexY = spriteInfo.NormalizedTopY,
+            LightFactor = lightFactor
+        };
+
+        /* Bottom right. */
+        vertices[2] = new WorldVertex
+        {
+            PosX = position.X + spriteInfo.WidthInTiles,
+            PosY = position.Y - spriteInfo.HeightInTiles,
+            PosZ = position.Z,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedRightX,
+            TexY = spriteInfo.NormalizedBottomY,
+            LightFactor = lightFactor
+        };
+
+        /* Bottom left. */
+        vertices[3] = new WorldVertex
+        {
+            PosX = position.X,
+            PosY = position.Y - spriteInfo.HeightInTiles,
+            PosZ = position.Z,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,

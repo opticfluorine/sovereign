@@ -4,6 +4,13 @@
 
 ### January
 
+#### 05 January 2025
+
+* Renderer: Draw free sprites in an XZ plane at the front of the entity's volume instead of an
+  XY plane across the volume. This gives a natural ordering of sprites and block faces along
+  the Y axis. Later we'll use this to fix the renderer's behavior with sprite occlusion at
+  different depths.
+
 #### 01 January 2025
 
 * Happy New Year!

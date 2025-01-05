@@ -37,11 +37,12 @@ public sealed class WorldLayerVertexSequencer
     /// <param name="systemTime">System time of the current frame.</param>
     public void AddLayer(WorldLayer layer, RenderPlan renderPlan, ulong systemTime)
     {
-        spriteSequencer.SequenceSprites(layer.FrontFaceTileSprites, renderPlan, SpritePlane.XZ, out var frontBaseIndex,
+        spriteSequencer.SequenceSprites(layer.FrontFaceTileSprites, renderPlan, SpritePlane.XzBack,
+            out var frontBaseIndex,
             out var frontIndexCount);
-        spriteSequencer.SequenceSprites(layer.TopFaceTileSprites, renderPlan, SpritePlane.XY, out var topBaseIndex,
+        spriteSequencer.SequenceSprites(layer.TopFaceTileSprites, renderPlan, SpritePlane.Xy, out var topBaseIndex,
             out var topIndexCount);
-        spriteSequencer.SequenceSprites(layer.AnimatedSprites, renderPlan, SpritePlane.XY, out var spriteBaseIndex,
+        spriteSequencer.SequenceSprites(layer.AnimatedSprites, renderPlan, SpritePlane.XzFront, out var spriteBaseIndex,
             out var spriteIndexCount);
 
         renderPlan.PushDebugGroup($"Layer {layer.ZFloor}");
