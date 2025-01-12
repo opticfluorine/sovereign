@@ -37,11 +37,6 @@ public sealed class WorldVertexSequencer
     /// </summary>
     private const int SolidIndicesPerBlock = 30;
 
-    /// <summary>
-    ///     Default size of the drawable buffer.
-    /// </summary>
-    public const int DefaultDrawableListSize = 4096;
-
     private readonly WorldEntityRetriever entityRetriever;
 
     private readonly WorldLayerGrouper grouper;
@@ -67,6 +62,8 @@ public sealed class WorldVertexSequencer
     /// <param name="systemTime">System time of the current frame.</param>
     public void SequenceVertices(RenderPlan renderPlan, float timeSinceTick, ulong systemTime)
     {
+        layerVertexSequencer.NewFrame();
+
         RetrieveEntities(timeSinceTick, systemTime);
         PrepareLayers(renderPlan, systemTime);
     }

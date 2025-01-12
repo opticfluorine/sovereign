@@ -72,10 +72,7 @@ public class VeldridDevice : IDisposable
     [MemberNotNull("Device")]
     public void CreateDevice()
     {
-        // No fancy options for now, just enable debug mode.
-        // TODO Control debug mode via settings.
-        // TODO Control vsync via settings.
-        var options = new GraphicsDeviceOptions(false);
+        var options = new GraphicsDeviceOptions(false, PixelFormat.R32_Float, false);
 
         // We use the Vulkan renderer since it is reasonably cross-platform
         // and more stable than the OpenGL renderer on Linux.

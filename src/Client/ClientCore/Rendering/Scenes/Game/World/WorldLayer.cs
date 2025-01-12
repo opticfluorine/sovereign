@@ -54,7 +54,7 @@ public sealed class WorldLayer
     /// <summary>
     ///     Animated sprites to additionally be drawn in this layer.
     /// </summary>
-    public List<PosVelId> AnimatedSprites { get; }
+    public List<PosVelId> FreeSprites { get; }
         = new(InitialAnimatedSpriteCount);
 
     /// <summary>
@@ -64,6 +64,6 @@ public sealed class WorldLayer
     {
         TopFaceTileSprites.Clear();
         FrontFaceTileSprites.Clear();
-        AnimatedSprites.Clear();
+        FreeSprites.Clear();
     }
 }

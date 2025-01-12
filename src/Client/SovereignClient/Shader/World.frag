@@ -20,6 +20,7 @@
 layout (location = 0) in vec2 texCoord;
 layout (location = 1) in vec4 color;
 layout (location = 2) in vec4 shadowPosition;
+layout (location = 3) in float vertexDepth;
 layout (origin_upper_left) in vec4 gl_FragCoord;
 
 layout (location = 0) out vec4 colorOut;
@@ -52,4 +53,5 @@ void main()
 
     // Blend everything to a final color.
     colorOut = fullColor * texture(sampler2D(g_textureAtlas, g_textureAtlasSampler), texCoord);
+    gl_FragDepth = vertexDepth;
 }

@@ -106,10 +106,10 @@ public sealed class WorldLayerGrouper
 
         var collection = entityType switch
         {
-            EntityType.NonBlock => activeLayer.AnimatedSprites,
+            EntityType.NonBlock => activeLayer.FreeSprites,
             EntityType.BlockTopFace => activeLayer.TopFaceTileSprites,
             EntityType.BlockFrontFace => activeLayer.FrontFaceTileSprites,
-            _ => activeLayer.AnimatedSprites
+            _ => activeLayer.FreeSprites
         };
 
         collection.Add(new PosVelId

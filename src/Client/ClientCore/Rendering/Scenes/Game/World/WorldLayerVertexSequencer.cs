@@ -15,6 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
+using System.Collections.Generic;
+using Sovereign.ClientCore.Rendering.Sprites.Atlas;
+
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 
 /// <summary>
@@ -22,11 +26,25 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 /// </summary>
 public sealed class WorldLayerVertexSequencer
 {
-    private readonly WorldSpriteSequencer spriteSequencer;
+    private const int DefaultFreeSpriteCount = 2048;
+    private readonly AtlasMap atlasMap;
 
-    public WorldLayerVertexSequencer(WorldSpriteSequencer spriteSequencer)
+    private readonly List<FreeSprite> freeSprites = new(DefaultFreeSpriteCount);
+    private readonly WorldSpriteSequencer spriteSequencer;
+    private readonly List<PosVelId> toDraw = new();
+
+    public WorldLayerVertexSequencer(WorldSpriteSequencer spriteSequencer, AtlasMap atlasMap)
     {
         this.spriteSequencer = spriteSequencer;
+        this.atlasMap = atlasMap;
+    }
+
+    /// <summary>
+    ///     Resets the sequencer for a new frame.
+    /// </summary>
+    public void NewFrame()
+    {
+        freeSprites.Clear();
     }
 
     /// <summary>
@@ -37,28 +55,93 @@ public sealed class WorldLayerVertexSequencer
     /// <param name="systemTime">System time of the current frame.</param>
     public void AddLayer(WorldLayer layer, RenderPlan renderPlan, ulong systemTime)
     {
+        // Blocks. These only need to be handled at the current layer.
         spriteSequencer.SequenceSprites(layer.FrontFaceTileSprites, renderPlan, SpritePlane.XzBack,
             out var frontBaseIndex,
             out var frontIndexCount);
         spriteSequencer.SequenceSprites(layer.TopFaceTileSprites, renderPlan, SpritePlane.Xy, out var topBaseIndex,
             out var topIndexCount);
-        spriteSequencer.SequenceSprites(layer.AnimatedSprites, renderPlan, SpritePlane.XzFront, out var spriteBaseIndex,
+
+        // Free sprites. These must be handled at the current layer plus any future layers with which they overlap.
+        spriteSequencer.SequenceSprites(layer.FreeSprites, renderPlan, SpritePlane.XzFront, out var spriteBaseIndex,
             out var spriteIndexCount);
 
         renderPlan.PushDebugGroup($"Layer {layer.ZFloor}");
 
+        renderPlan.PushDebugGroup("Free Sprite Overdraw");
+        OverdrawFreeSpritesForZFloor(layer.ZFloor, renderPlan);
+        UpdateFreeSpritesForLayer(layer);
+        renderPlan.PopDebugGroup();
+
         renderPlan.PushDebugGroup("Block Front Faces");
-        renderPlan.DrawSprites(frontBaseIndex, frontIndexCount);
+        renderPlan.DrawSprites(frontBaseIndex, frontIndexCount, false);
         renderPlan.PopDebugGroup();
 
         renderPlan.PushDebugGroup("Block Top Faces");
-        renderPlan.DrawSprites(topBaseIndex, topIndexCount);
+        renderPlan.DrawSprites(topBaseIndex, topIndexCount, false);
         renderPlan.PopDebugGroup();
 
-        renderPlan.PushDebugGroup("Animated Sprites");
-        renderPlan.DrawSprites(spriteBaseIndex, spriteIndexCount);
+        renderPlan.PushDebugGroup("Free Sprites");
+        renderPlan.DrawSprites(spriteBaseIndex, spriteIndexCount, true);
         renderPlan.PopDebugGroup();
 
         renderPlan.PopDebugGroup();
+    }
+
+    /// <summary>
+    ///     Overdraws free sprites from previous layers which overlap the current layer in
+    ///     projected space.
+    /// </summary>
+    /// <param name="zFloor">Z floor of current layer.</param>
+    /// <param name="renderPlan">Render plan.</param>
+    private void OverdrawFreeSpritesForZFloor(int zFloor, RenderPlan renderPlan)
+    {
+        toDraw.Clear();
+
+        foreach (var sprite in freeSprites)
+        {
+            if (sprite.MaxLayer < zFloor) continue;
+            toDraw.Add(sprite.Data);
+
+            spriteSequencer.SequenceSprites(toDraw, renderPlan, SpritePlane.XzFront, out var baseIndex,
+                out var indexCount);
+            renderPlan.DrawSprites(baseIndex, indexCount, true);
+        }
+    }
+
+    /// <summary>
+    ///     Updates the tracked free sprites for the given layer.
+    /// </summary>
+    /// <param name="layer">Current layer.</param>
+    private void UpdateFreeSpritesForLayer(WorldLayer layer)
+    {
+        foreach (var sprite in layer.FreeSprites)
+        {
+            // Free sprites need to be overdrawn in each layer they overlap.
+            var height = atlasMap.MapElements[sprite.Id].HeightInTiles;
+            var maxLayer = (int)Math.Floor(sprite.Position.Z + height);
+            if (maxLayer > layer.ZFloor)
+                freeSprites.Add(new FreeSprite
+                {
+                    Data = sprite,
+                    MaxLayer = maxLayer
+                });
+        }
+    }
+
+    /// <summary>
+    ///     Tracks a free sprite to be revisited in later layers.
+    /// </summary>
+    private struct FreeSprite
+    {
+        /// <summary>
+        ///     Sprite data.
+        /// </summary>
+        public PosVelId Data;
+
+        /// <summary>
+        ///     Highest layer at which this sprite should be rendered.
+        /// </summary>
+        public int MaxLayer;
     }
 }

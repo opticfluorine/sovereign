@@ -82,7 +82,6 @@ public class WorldRenderer : IDisposable
             throw new InvalidOperationException("Display mode not set.");
 
         // Create resources.
-        pipeline.Initialize();
         CreateResourceSet();
         CreateBlockShadowResourceSet();
 
@@ -184,7 +183,7 @@ public class WorldRenderer : IDisposable
 
         // Final render pass for layer.
         commandList.PushDebugGroup("Sprites");
-        ConfigureSpritesPipeline(commandList);
+        ConfigureSpritesPipeline(commandList, command);
         commandList.DrawIndexed(command.IndexCount, 1, command.BaseIndex, 0, 0);
         commandList.PopDebugGroup();
     }
@@ -192,10 +191,11 @@ public class WorldRenderer : IDisposable
     /// <summary>
     ///     Configures the rendering pipeline to draw sprites.
     /// </summary>
-    private void ConfigureSpritesPipeline(CommandList commandList)
+    private void ConfigureSpritesPipeline(CommandList commandList, RenderCommand command)
     {
         commandList.SetViewport(0, viewport);
-        commandList.SetPipeline(pipeline.Pipeline);
+        commandList.SetPipeline(
+            command.EnableDepthTest ? pipeline.PipelineWithDepthTest.Value : pipeline.Pipeline.Value);
         commandList.SetIndexBuffer(gameResMgr.SpriteIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
         commandList.SetGraphicsResourceSet(0, resourceSet);
         commandList.SetFramebuffer(device.Device!.SwapchainFramebuffer);
@@ -207,7 +207,7 @@ public class WorldRenderer : IDisposable
     private void ConfigureShadowMapPipeline(CommandList commandList)
     {
         commandList.SetViewport(0, blockShadowViewport);
-        commandList.SetPipeline(pipeline.BlockShadowPipeline);
+        commandList.SetPipeline(pipeline.BlockShadowPipeline.Value);
         commandList.SetIndexBuffer(gameResMgr.SolidIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
         commandList.SetGraphicsResourceSet(0, blockShadowResourceSet);
         commandList.SetFramebuffer(gameResMgr.ShadowMapFramebuffer);

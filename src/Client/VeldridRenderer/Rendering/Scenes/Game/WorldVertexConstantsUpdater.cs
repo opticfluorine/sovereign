@@ -18,6 +18,7 @@
 using System;
 using System.Numerics;
 using Sovereign.ClientCore.Rendering.Scenes;
+using Sovereign.ClientCore.Rendering.Scenes.Game.World;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 
@@ -27,10 +28,13 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 public class WorldVertexConstantsUpdater
 {
     private readonly GameResourceManager gameResourceManager;
+    private readonly WorldRangeSelector rangeSelector;
 
-    public WorldVertexConstantsUpdater(GameResourceManager gameResourceManager)
+    public WorldVertexConstantsUpdater(GameResourceManager gameResourceManager,
+        WorldRangeSelector rangeSelector)
     {
         this.gameResourceManager = gameResourceManager;
+        this.rangeSelector = rangeSelector;
     }
 
     /// <summary>
@@ -141,5 +145,12 @@ public class WorldVertexConstantsUpdater
         // Matrices are transposed here, so treat as if acting to the left.
         shadowBuf[0].WorldViewTransform = rotMat * rotMatPhi * shadowProjMat;
         buf[0].ShadowWorldViewTransform = shadowBuf[0].WorldViewTransform * projToTexMat;
+
+        // Draw depth is calculated along the y axis to give correct front-to-back ordering
+        // of projected sprites. Need to normalize the y window to [0,1] with 1.0f being the
+        // far plane of the draw volume.
+        rangeSelector.DetermineExtents(out var minExtent, out var maxExtent, cameraPos);
+        buf[0].YDepthScale = 1.0f / (maxExtent.Y - minExtent.Y);
+        buf[0].YDepthOffset = -buf[0].YDepthScale * minExtent.Y;
     }
 }

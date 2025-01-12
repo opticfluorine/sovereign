@@ -43,8 +43,8 @@ layout (binding = 2) uniform WorldVertexShaderConstants
     mat4 g_worldTransform;
     mat4 g_shadowMapTransform;
     float g_timeSinceTick;
-    float g_reserved0;
-    float g_reserved1;
+    float g_yDepthScale;
+    float g_yDepthOffset;
     float g_reserved2;
 };
 

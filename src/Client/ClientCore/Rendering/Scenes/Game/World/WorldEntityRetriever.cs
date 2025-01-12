@@ -47,16 +47,6 @@ public sealed class WorldEntityRetriever
     private readonly ClientConfigurationManager configManager;
     private readonly WorldLayerGrouper grouper;
 
-    /// <summary>
-    ///     Half of the viewport width as a multiple of the tile width.
-    /// </summary>
-    private readonly float halfX;
-
-    /// <summary>
-    ///     Half of the viewport height as a multiple of the tile height.
-    /// </summary>
-    private readonly float halfY;
-
     private readonly KinematicsComponentCollection kinematics;
 
     public readonly List<PositionedLight> Lights = new();
@@ -67,6 +57,8 @@ public sealed class WorldEntityRetriever
     private readonly PerspectiveServices perspectiveServices;
     private readonly AnimationPhaseComponentCollection phases;
     private readonly PlayerCharacterTagCollection playerCharacters;
+    private readonly WorldRangeSelector rangeSelector;
+    private readonly DisplayViewport viewport;
 
     /// <summary>
     ///     Number of solid blocks added so far in a frame.
@@ -81,9 +73,11 @@ public sealed class WorldEntityRetriever
         AnimatedSpriteManager animatedSpriteManager,
         OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases,
         IBlockAnimatedSpriteCache blockSpriteCache, CastBlockShadowsTagCollection castBlockShadows,
-        LightSourceTable lightSourceTable, PlayerCharacterTagCollection playerCharacters)
+        LightSourceTable lightSourceTable, PlayerCharacterTagCollection playerCharacters,
+        WorldRangeSelector rangeSelector)
     {
         this.camera = camera;
+        this.viewport = viewport;
         this.configManager = configManager;
         this.perspectiveServices = perspectiveServices;
         this.grouper = grouper;
@@ -97,9 +91,7 @@ public sealed class WorldEntityRetriever
         this.castBlockShadows = castBlockShadows;
         this.lightSourceTable = lightSourceTable;
         this.playerCharacters = playerCharacters;
-
-        halfX = viewport.WidthInTiles * 0.5f;
-        halfY = viewport.HeightInTiles * 0.5f;
+        this.rangeSelector = rangeSelector;
     }
 
     /// <summary>
@@ -113,9 +105,11 @@ public sealed class WorldEntityRetriever
         NameLabels.Clear();
         solidBlockIndex = 0;
 
+        var halfY = viewport.HeightInTiles * 0.5f;
+
         var cameraPos = camera.Position.InterpolateByTime(camera.Velocity, timeSinceTick);
 
-        DetermineExtents(out var minExtent, out var maxExtent, cameraPos);
+        rangeSelector.DetermineExtents(out var minExtent, out var maxExtent, cameraPos);
 
         var clientConfiguration = configManager.ClientConfiguration;
         var zMin = EntityList.ForComparison(
@@ -323,28 +317,5 @@ public sealed class WorldEntityRetriever
         }
 
         solidBlockIndex++;
-    }
-
-    /// <summary>
-    ///     Determines the search extents as a 2D grid of block positions. The perspective lines
-    ///     which intersect this grid will be searched for drawable entities.
-    /// </summary>
-    /// <param name="minExtent">Minimum extent.</param>
-    /// <param name="maxExtent">Maximum extent.</param>
-    /// <param name="centerPos">Center position in world coordinates.</param>
-    private void DetermineExtents(out GridPosition minExtent, out GridPosition maxExtent,
-        Vector3 centerPos)
-    {
-        var clientConfiguration = configManager.ClientConfiguration;
-        var minX = (int)Math.Floor(centerPos.X - halfX - clientConfiguration.RenderSearchSpacerX);
-        var maxX = (int)Math.Floor(centerPos.X + halfX + clientConfiguration.RenderSearchSpacerX);
-
-        var minY = (int)Math.Ceiling(centerPos.Y - halfY - clientConfiguration.RenderSearchSpacerY);
-        var maxY = (int)Math.Ceiling(centerPos.Y + halfY + clientConfiguration.RenderSearchSpacerY);
-
-        var z = (int)Math.Floor(centerPos.Z);
-
-        minExtent = new GridPosition(minX, minY, z);
-        maxExtent = new GridPosition(maxX, maxY, z);
     }
 }

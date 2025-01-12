@@ -228,6 +228,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<WorldLayerGrouper>();
         services.TryAddSingleton<WorldLayerVertexSequencer>();
         services.TryAddSingleton<WorldEntityRetriever>();
+        services.TryAddSingleton<WorldRangeSelector>();
         services.TryAddSingleton<WorldSpriteSequencer>();
         services.TryAddSingleton<LightSourceTable>();
 

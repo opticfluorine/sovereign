@@ -25,27 +25,29 @@ layout (location = 3) in float lightFactor;
 layout (location = 0) out vec2 texCoordOut;
 layout (location = 1) out vec4 color;
 layout (location = 2) out vec4 shadowPosition;
+layout (location = 3) out float vertexDepth;
 
 layout (binding = 0) uniform ShaderConstants
 {
     mat4 g_transform;
     mat4 g_shadowMapTransform;
     float g_timeSinceTick;
-    float g_reserved0;
-    float g_reserved1;
+    float g_yDepthScale;
+    float g_yDepthOffset;
     float g_reserved2;
-} shaderConstants;
+};
 
 void main()
 {
     // Interpolate the position within the current game tick.
     // This assumes no acceleration is present.
-    vec3 interpolated = position + shaderConstants.g_timeSinceTick * velocity;
+    vec3 interpolated = position + g_timeSinceTick * velocity;
 
     // Embed the position in a vec4 and apply the 2D perspective transform.
     vec4 position4 = vec4(interpolated, 1.0);
-    gl_Position = shaderConstants.g_transform * position4;
-    shadowPosition = shaderConstants.g_shadowMapTransform * position4;
+    gl_Position = g_transform * position4;
+    shadowPosition = g_shadowMapTransform * position4;
+    vertexDepth = g_yDepthScale * position4.y + g_yDepthOffset;
 
     // Forward the texture coordinate for the vertex.
     texCoordOut = texCoord;

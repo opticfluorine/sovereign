@@ -130,6 +130,7 @@ public class VeldridRenderer : IRenderer
             commandList.Begin();
             commandList.SetFramebuffer(device.Device.SwapchainFramebuffer);
             commandList.ClearColorTarget(0, RgbaFloat.Black);
+            commandList.ClearDepthStencil(1.0f);
 
             /* Do scene processing to fill buffers for GPU. */
             var scene = sceneManager.ActiveScene;

@@ -76,6 +76,11 @@ public struct RenderCommand
     ///     Debug group name (for PushDebugGroup commands only).
     /// </summary>
     public string? DebugGroupName;
+
+    /// <summary>
+    ///     Whether to enable depth test.
+    /// </summary>
+    public bool EnableDepthTest;
 }
 
 /// <summary>
@@ -334,7 +339,8 @@ public class RenderPlan
     /// </summary>
     /// <param name="drawBaseIndex">Base index.</param>
     /// <param name="drawIndexCount">Index count.</param>
-    public void DrawSprites(uint drawBaseIndex, uint drawIndexCount)
+    /// <param name="enableDepthTest">Whether to enable depth test for this command.</param>
+    public void DrawSprites(uint drawBaseIndex, uint drawIndexCount, bool enableDepthTest)
     {
         if (commandCount == renderCommands.Length) ExpandCommandList();
 
@@ -345,7 +351,8 @@ public class RenderPlan
         {
             RenderCommandType = RenderCommandType.DrawSprites,
             BaseIndex = drawBaseIndex,
-            IndexCount = drawIndexCount
+            IndexCount = drawIndexCount,
+            EnableDepthTest = enableDepthTest
         };
         commandCount++;
     }

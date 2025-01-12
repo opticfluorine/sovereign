@@ -41,7 +41,15 @@ public struct WorldVertexShaderConstants
     /// </summary>
     public float TimeSinceTick;
 
-    public float Reserved0;
-    public float Reserved1;
+    /// <summary>
+    ///     Scaling factor to use when computing the draw depth from the world Y coordinate.
+    /// </summary>
+    public float YDepthScale;
+
+    /// <summary>
+    ///     Offset to use when computing the draw depth from the world Y coordinate.
+    /// </summary>
+    public float YDepthOffset;
+
     public float Reserved2;
 }

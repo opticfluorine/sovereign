@@ -32,56 +32,69 @@ public class WorldPipeline : IDisposable
     {
         this.device = device;
         this.gameResMgr = gameResMgr;
+
+        Pipeline = new Lazy<Pipeline>(() =>
+        {
+            var pipelineDesc = new GraphicsPipelineDescription(
+                BlendStateDescription.SingleAlphaBlend,
+                new DepthStencilStateDescription(false, true, ComparisonKind.LessEqual),
+                CreateRasterizerState(),
+                PrimitiveTopology.TriangleList,
+                CreateShaderSet(),
+                CreateResourceLayout(),
+                device.Device!.SwapchainFramebuffer.OutputDescription
+            );
+
+            return device.Device.ResourceFactory.CreateGraphicsPipeline(pipelineDesc);
+        });
+
+        PipelineWithDepthTest = new Lazy<Pipeline>(() =>
+        {
+            var pipelineDesc = new GraphicsPipelineDescription(
+                BlendStateDescription.SingleAlphaBlend,
+                DepthStencilStateDescription.DepthOnlyLessEqual,
+                CreateRasterizerState(),
+                PrimitiveTopology.TriangleList,
+                CreateShaderSet(),
+                CreateResourceLayout(),
+                device.Device!.SwapchainFramebuffer.OutputDescription
+            );
+
+            return device.Device.ResourceFactory.CreateGraphicsPipeline(pipelineDesc);
+        });
+
+        BlockShadowPipeline = new Lazy<Pipeline>(() =>
+        {
+            var shadowMapPipelineDesc = new GraphicsPipelineDescription(
+                BlendStateDescription.Empty,
+                DepthStencilStateDescription.DepthOnlyGreaterEqual,
+                CreateBlockShadowRasterizerState(),
+                PrimitiveTopology.TriangleList,
+                CreateBlockShadowShaderSet(),
+                CreateBlockShadowResourceLayout(),
+                gameResMgr.ShadowMapFramebuffer!.OutputDescription);
+
+            return device.Device!.ResourceFactory.CreateGraphicsPipeline(shadowMapPipelineDesc);
+        });
     }
 
     /// <summary>
     ///     Veldrid pipeline for world rendering.
     /// </summary>
-    public Pipeline? Pipeline { get; private set; }
+    public Lazy<Pipeline> Pipeline { get; }
+
+    public Lazy<Pipeline> PipelineWithDepthTest { get; }
 
     /// <summary>
     ///     Veldrid pipeline for block shadow map rendering.
     /// </summary>
-    public Pipeline? BlockShadowPipeline { get; private set; }
+    public Lazy<Pipeline> BlockShadowPipeline { get; }
 
     public void Dispose()
     {
-        Pipeline?.Dispose();
-        BlockShadowPipeline?.Dispose();
-    }
-
-    /// <summary>
-    ///     Initializes the pipeline.
-    /// </summary>
-    public void Initialize()
-    {
-        if (device.Device == null)
-            throw new InvalidOperationException("Device not ready.");
-        if (gameResMgr.ShadowMapFramebuffer == null)
-            throw new InvalidOperationException("Shadow map framebuffer not ready.");
-
-        var pipelineDesc = new GraphicsPipelineDescription(
-            BlendStateDescription.SingleAlphaBlend,
-            DepthStencilStateDescription.Disabled,
-            CreateRasterizerState(),
-            PrimitiveTopology.TriangleList,
-            CreateShaderSet(),
-            CreateResourceLayout(),
-            device.Device.SwapchainFramebuffer.OutputDescription
-        );
-
-        Pipeline = device.Device.ResourceFactory.CreateGraphicsPipeline(pipelineDesc);
-
-        var shadowMapPipelineDesc = new GraphicsPipelineDescription(
-            BlendStateDescription.Empty,
-            DepthStencilStateDescription.DepthOnlyGreaterEqual,
-            CreateBlockShadowRasterizerState(),
-            PrimitiveTopology.TriangleList,
-            CreateBlockShadowShaderSet(),
-            CreateBlockShadowResourceLayout(),
-            gameResMgr.ShadowMapFramebuffer.OutputDescription);
-
-        BlockShadowPipeline = device.Device.ResourceFactory.CreateGraphicsPipeline(shadowMapPipelineDesc);
+        if (Pipeline.IsValueCreated) Pipeline.Value.Dispose();
+        if (PipelineWithDepthTest.IsValueCreated) PipelineWithDepthTest.Value.Dispose();
+        if (BlockShadowPipeline.IsValueCreated) BlockShadowPipeline.Value.Dispose();
     }
 
     /// <summary>
