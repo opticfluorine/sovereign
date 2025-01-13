@@ -195,7 +195,7 @@ public class WorldRenderer : IDisposable
     {
         commandList.SetViewport(0, viewport);
         commandList.SetPipeline(
-            command.EnableDepthTest ? pipeline.PipelineWithDepthTest.Value : pipeline.Pipeline.Value);
+            command.EnableDepthWrite ? pipeline.PipelineWithDepthWrite.Value : pipeline.Pipeline.Value);
         commandList.SetIndexBuffer(gameResMgr.SpriteIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
         commandList.SetGraphicsResourceSet(0, resourceSet);
         commandList.SetFramebuffer(device.Device!.SwapchainFramebuffer);

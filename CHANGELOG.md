@@ -4,6 +4,14 @@
 
 ### January
 
+#### 12 January 2025
+
+* Renderer: Overdraw free sprites in all layers where the sprite overlaps a pixel in projected
+  space. This ensures that sprites do not incorrectly clip through walls when partially
+  overlapping from the front. Also introduce a depth buffer to occlude the overdrawn sprites
+  by foreground objects at higher layers. There's probably still some broken edge cases, but
+  we'll identify and fix those as we go.
+
 #### 05 January 2025
 
 * Renderer: Draw free sprites in an XZ plane at the front of the entity's volume instead of an

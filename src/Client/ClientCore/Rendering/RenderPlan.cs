@@ -80,7 +80,7 @@ public struct RenderCommand
     /// <summary>
     ///     Whether to enable depth test.
     /// </summary>
-    public bool EnableDepthTest;
+    public bool EnableDepthWrite;
 }
 
 /// <summary>
@@ -339,8 +339,8 @@ public class RenderPlan
     /// </summary>
     /// <param name="drawBaseIndex">Base index.</param>
     /// <param name="drawIndexCount">Index count.</param>
-    /// <param name="enableDepthTest">Whether to enable depth test for this command.</param>
-    public void DrawSprites(uint drawBaseIndex, uint drawIndexCount, bool enableDepthTest)
+    /// <param name="enableDepthWrite">Whether to enable depth write for this command.</param>
+    public void DrawSprites(uint drawBaseIndex, uint drawIndexCount, bool enableDepthWrite)
     {
         if (commandCount == renderCommands.Length) ExpandCommandList();
 
@@ -352,7 +352,7 @@ public class RenderPlan
             RenderCommandType = RenderCommandType.DrawSprites,
             BaseIndex = drawBaseIndex,
             IndexCount = drawIndexCount,
-            EnableDepthTest = enableDepthTest
+            EnableDepthWrite = enableDepthWrite
         };
         commandCount++;
     }

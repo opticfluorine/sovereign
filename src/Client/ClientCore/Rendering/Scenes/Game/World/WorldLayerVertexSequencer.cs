@@ -68,21 +68,21 @@ public sealed class WorldLayerVertexSequencer
 
         renderPlan.PushDebugGroup($"Layer {layer.ZFloor}");
 
+        renderPlan.PushDebugGroup("Block Front Faces");
+        renderPlan.DrawSprites(frontBaseIndex, frontIndexCount, true);
+        renderPlan.PopDebugGroup();
+
+        renderPlan.PushDebugGroup("Block Top Faces");
+        renderPlan.DrawSprites(topBaseIndex, topIndexCount, true);
+        renderPlan.PopDebugGroup();
+
         renderPlan.PushDebugGroup("Free Sprite Overdraw");
         OverdrawFreeSpritesForZFloor(layer.ZFloor, renderPlan);
         UpdateFreeSpritesForLayer(layer);
         renderPlan.PopDebugGroup();
 
-        renderPlan.PushDebugGroup("Block Front Faces");
-        renderPlan.DrawSprites(frontBaseIndex, frontIndexCount, false);
-        renderPlan.PopDebugGroup();
-
-        renderPlan.PushDebugGroup("Block Top Faces");
-        renderPlan.DrawSprites(topBaseIndex, topIndexCount, false);
-        renderPlan.PopDebugGroup();
-
         renderPlan.PushDebugGroup("Free Sprites");
-        renderPlan.DrawSprites(spriteBaseIndex, spriteIndexCount, true);
+        renderPlan.DrawSprites(spriteBaseIndex, spriteIndexCount, false);
         renderPlan.PopDebugGroup();
 
         renderPlan.PopDebugGroup();
@@ -105,7 +105,7 @@ public sealed class WorldLayerVertexSequencer
 
             spriteSequencer.SequenceSprites(toDraw, renderPlan, SpritePlane.XzFront, out var baseIndex,
                 out var indexCount);
-            renderPlan.DrawSprites(baseIndex, indexCount, true);
+            renderPlan.DrawSprites(baseIndex, indexCount, false);
         }
     }
 

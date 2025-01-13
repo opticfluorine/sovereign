@@ -37,7 +37,7 @@ public class WorldPipeline : IDisposable
         {
             var pipelineDesc = new GraphicsPipelineDescription(
                 BlendStateDescription.SingleAlphaBlend,
-                new DepthStencilStateDescription(false, true, ComparisonKind.LessEqual),
+                DepthStencilStateDescription.DepthOnlyLessEqualRead,
                 CreateRasterizerState(),
                 PrimitiveTopology.TriangleList,
                 CreateShaderSet(),
@@ -48,7 +48,7 @@ public class WorldPipeline : IDisposable
             return device.Device.ResourceFactory.CreateGraphicsPipeline(pipelineDesc);
         });
 
-        PipelineWithDepthTest = new Lazy<Pipeline>(() =>
+        PipelineWithDepthWrite = new Lazy<Pipeline>(() =>
         {
             var pipelineDesc = new GraphicsPipelineDescription(
                 BlendStateDescription.SingleAlphaBlend,
@@ -83,7 +83,7 @@ public class WorldPipeline : IDisposable
     /// </summary>
     public Lazy<Pipeline> Pipeline { get; }
 
-    public Lazy<Pipeline> PipelineWithDepthTest { get; }
+    public Lazy<Pipeline> PipelineWithDepthWrite { get; }
 
     /// <summary>
     ///     Veldrid pipeline for block shadow map rendering.
@@ -93,7 +93,7 @@ public class WorldPipeline : IDisposable
     public void Dispose()
     {
         if (Pipeline.IsValueCreated) Pipeline.Value.Dispose();
-        if (PipelineWithDepthTest.IsValueCreated) PipelineWithDepthTest.Value.Dispose();
+        if (PipelineWithDepthWrite.IsValueCreated) PipelineWithDepthWrite.Value.Dispose();
         if (BlockShadowPipeline.IsValueCreated) BlockShadowPipeline.Value.Dispose();
     }
 
