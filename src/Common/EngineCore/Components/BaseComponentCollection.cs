@@ -498,8 +498,13 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <param name="entityId">Entity ID at which to begin search.</param>
     /// <param name="parentCollection">Component collection mapping entities to their parent entities.</param>
     /// <param name="nearestValue">Nearest component value. Only meaningful if this method returns true.</param>
+    /// <param name="owningEntityId">
+    ///     Entity ID of the entity with the matching component. Only meaningful if this method
+    ///     returns true.
+    /// </param>
     /// <returns>true if a component value was found, false otherwise.</returns>
-    public bool TryFindNearest(ulong entityId, BaseComponentCollection<ulong> parentCollection, out T nearestValue)
+    public bool TryFindNearest(ulong entityId, BaseComponentCollection<ulong> parentCollection, out T nearestValue,
+        out ulong owningEntityId)
     {
         var current = entityId;
         do
@@ -507,12 +512,14 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             if (HasComponentForEntity(current))
             {
                 nearestValue = this[current];
+                owningEntityId = current;
                 return true;
             }
         } while (parentCollection.TryGetValue(current, out current));
 
         // If we get here, we didn't find anything in the hierarchy.
         nearestValue = default!;
+        owningEntityId = 0;
         return false;
     }
 

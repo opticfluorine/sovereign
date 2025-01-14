@@ -4,6 +4,14 @@
 
 ### January
 
+#### 13 January 2025
+
+* Point Lights: Update the position offset to be a relative offset calculated from the sprite
+  size instead of absolute units. This allows a held item to confer a relatively positioned
+  point light source to its holder independent of the holder's sprite size. For example, a torch
+  with a centered offset of (0.5, 0.5, 0.0) will appear at the center of its holder regardless of
+  whether the holder is a single-tile sprite or a giant monstrosity taking up half of the screen.
+
 #### 12 January 2025
 
 * Renderer: Overdraw free sprites in all layers where the sprite overlaps a pixel in projected

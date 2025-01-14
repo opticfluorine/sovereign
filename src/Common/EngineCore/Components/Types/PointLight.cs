@@ -43,7 +43,7 @@ public struct PointLight
     [ScriptableField] [Key(2)] public uint Color;
 
     /// <summary>
-    ///     Position offset relative to the position of the associated entity.
+    ///     Percentage-based position offset relative to the position of the associated entity.
     /// </summary>
     [ScriptableField] [Key(3)] public Vector3 PositionOffset;
 }

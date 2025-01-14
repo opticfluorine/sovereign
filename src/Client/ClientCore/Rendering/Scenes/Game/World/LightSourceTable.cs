@@ -17,6 +17,8 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.Extensions.Logging;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
+using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Ranges;
@@ -49,6 +51,9 @@ public readonly struct PositionedLight(int index, Vector3 position, PointLight d
 /// </summary>
 public class LightSourceTable
 {
+    private readonly AnimatedSpriteManager animatedSpriteManager;
+    private readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly AtlasMap atlasMap;
     private readonly KinematicsComponentCollection kinematics;
 
     private readonly List<ulong> knownSources = new();
@@ -58,12 +63,16 @@ public class LightSourceTable
 
     public LightSourceTable(PointLightSourceComponentCollection pointLightSources,
         KinematicsComponentCollection kinematics, ParentComponentCollection parents,
-        ILogger<LightSourceTable> logger)
+        ILogger<LightSourceTable> logger, AnimatedSpriteComponentCollection animatedSprites,
+        AnimatedSpriteManager animatedSpriteManager, AtlasMap atlasMap)
     {
         this.pointLightSources = pointLightSources;
         this.kinematics = kinematics;
         this.parents = parents;
         this.logger = logger;
+        this.animatedSprites = animatedSprites;
+        this.animatedSpriteManager = animatedSpriteManager;
+        this.atlasMap = atlasMap;
 
         pointLightSources.OnComponentAdded += OnLightAdded;
         pointLightSources.OnComponentRemoved += OnLightRemoved;
@@ -82,7 +91,7 @@ public class LightSourceTable
         var nextIndex = 0;
         foreach (var lightEntityId in knownSources)
         {
-            if (!kinematics.TryFindNearest(lightEntityId, parents, out var posVel))
+            if (!kinematics.TryFindNearest(lightEntityId, parents, out var posVel, out var parentEntityId))
             {
                 logger.LogWarning("Entity {0} has unpositioned light source.", lightEntityId);
                 continue;
@@ -99,7 +108,18 @@ public class LightSourceTable
 
             // Determine true center of light.
             var basePos = posVel.Position + timeSinceTick * posVel.Velocity;
-            var lightCenter = basePos + details.PositionOffset;
+            var offset = Vector3.Zero;
+            if (animatedSprites.HasComponentForEntity(parentEntityId))
+            {
+                // Compute a relative offset based on the sprite size.
+                // Assume the sprite size is constant across all phases, orientations, and frames.
+                var sprite = animatedSpriteManager.AnimatedSprites[animatedSprites[parentEntityId]].GetDefaultSprite();
+                var spriteInfo = atlasMap.MapElements[sprite.Id];
+                offset = details.PositionOffset * new Vector3(spriteInfo.WidthInTiles, -spriteInfo.HeightInTiles,
+                    -spriteInfo.HeightInTiles);
+            }
+
+            var lightCenter = basePos + offset;
 
             // Expand the search range by the radius of the light, then check whether the true
             // center lies within this expanded range. If so, the light needs to be considered

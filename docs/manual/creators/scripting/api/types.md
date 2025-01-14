@@ -83,7 +83,9 @@ to be used in scripts.
         
     .. lua:attribute:: PositionOffset: Vector3
     
-        Offset of the light source relative to the entity position.
+        Offset of the light source relative to the entity position, specified as a percentage
+        of the sprite size. For example, an offset of (0.5, 0.5, 0.0) positions the light source
+        in the center of the entity's XY plane.
 ```
 
 (script-types-vector3)=

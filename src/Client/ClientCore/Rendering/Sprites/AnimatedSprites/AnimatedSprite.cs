@@ -83,6 +83,16 @@ public sealed class AnimatedSprite
     }
 
     /// <summary>
+    ///     Utility method that gets a default frame for the animated sprite. Useful for querying sprite
+    ///     information (e.g. size).
+    /// </summary>
+    /// <returns>Default frame for animated sprite.</returns>
+    public Sprite GetDefaultSprite()
+    {
+        return GetPhaseData(AnimationPhase.Default).GetSpriteForTime(0, Orientation.South);
+    }
+
+    /// <summary>
     ///     Animation data for a single animation phase.
     /// </summary>
     public class AnimationPhaseData
