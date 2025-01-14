@@ -11,6 +11,8 @@
   point light source to its holder independent of the holder's sprite size. For example, a torch
   with a centered offset of (0.5, 0.5, 0.0) will appear at the center of its holder regardless of
   whether the holder is a single-tile sprite or a giant monstrosity taking up half of the screen.
+* Documentation: Update documentation for changes made in the upcoming v0.5.0 release. Some additional
+  updates regarding component persistence will be necessary with the remaining database restructuring.
 
 #### 12 January 2025
 

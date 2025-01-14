@@ -144,3 +144,16 @@ Persisting a component in the database requires several changes:
    `EntityWithComponents` by adding a new `ProcessX(IDataReader, IEntityBuilder)`
    method (where `X` is the component name) and calling it from the
    `ProcessSingleEntity(IDataReader)` method.
+
+### Binding Components to Scripting Engine
+
+:::{note}
+This section applies only to common- and server-scoped components.
+:::
+
+For many components, it is useful to have a binding of the component collection to
+the scripting engine so that scripts may read and write the component value. To do this,
+simply add the `[ScriptableComponents]` attribute to the component collection class
+with a single parameter corresponding to the name that will be assigned to the binding.
+By standard Lua conventions, this name should be all lowercase. Refer to an existing
+bound component collection (e.g. `NameComponentCollection`) for examples.

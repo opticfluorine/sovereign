@@ -13,7 +13,8 @@ Adding a new event without network replication is a straightforward process:
 1. Add a new event to the `EventIds` enum. Note that this enum is organized by
    application (client/server/"core") and system. The general naming convention for
    events is to name them after the primary system responsible for processing the
-   event and its location.
+   event and its location. Note however that there is not always a clear choice of
+   name under this scheme, and so this guidance is only loosely followed.
    :::{note}
    Specifying the application of an event indicates the application that is
    responsible for processing the event, not the sending application. For example, 

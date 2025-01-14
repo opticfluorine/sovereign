@@ -29,6 +29,7 @@ Core components are available in both the client and server.
 | `Orientation`      | `OrientationComponentCollection`      | Specifies the directional orientation of the entity.                                                                   |
 | `Parent`           | `ParentComponentCollection`           | Maps an entity to its parent entity.                                                                                   |
 | `PlayerCharacter`  | `PlayerCharacterTagCollection`        | Indicates that an entity is a player character.                                                                        |
+| `PointLightSource` | `PointLightSourceComponentCollection` | Specifies the properties of a point light source attached to the entity.                                               |
 
 ## Client Components
 
