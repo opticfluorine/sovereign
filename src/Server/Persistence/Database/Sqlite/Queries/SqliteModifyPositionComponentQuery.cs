@@ -27,7 +27,7 @@ public class SqliteModifyPositionComponentQuery : IModifyComponentQuery<Kinemati
 
     public SqliteModifyPositionComponentQuery(SqliteConnection dbConnection)
     {
-        query = new Vector3SqliteModifyComponentQuery("Position", dbConnection);
+        query = new Vector3SqliteModifyComponentQuery("pos_", dbConnection);
     }
 
     public void Modify(ulong entityId, Kinematics value, IDbTransaction transaction)

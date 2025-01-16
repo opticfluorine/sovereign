@@ -28,11 +28,9 @@ public class SqliteAddAdminRoleQuery : IAddAdminRoleQuery
     ///     SQL query.
     /// </summary>
     private const string Query =
-        @"INSERT INTO Admin (id, value)
-	        SELECT Name.id, TRUE
-	        FROM Name
-	        INNER JOIN PlayerCharacter PC ON PC.id = Name.id
-	        WHERE Name.value = @Name AND PC.deleted = FALSE";
+        @"UPDATE Entity
+            SET admin = TRUE
+            WHERE Name.value = @Name AND player_char = TRUE AND player_char_deleted = FALSE";
 
     private readonly SqliteConnection connection;
 

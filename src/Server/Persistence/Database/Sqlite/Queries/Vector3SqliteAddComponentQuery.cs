@@ -17,7 +17,6 @@
 
 using System.Data;
 using System.Numerics;
-using System.Text;
 using Microsoft.Data.Sqlite;
 using Sovereign.Persistence.Database.Queries;
 
@@ -37,19 +36,20 @@ public sealed class Vector3SqliteAddComponentQuery : IAddComponentQuery<Vector3>
     /// <summary>
     ///     Creates an add query.
     /// </summary>
-    /// <param name="tableName">Table name.</param>
+    /// <param name="columnPrefix">Column name prefix.</param>
     /// <param name="connection">Database connection.</param>
     /// <remarks>
     ///     Do not pass user data as tableName. It will not be sanitized.
     /// </remarks>
-    public Vector3SqliteAddComponentQuery(string tableName, SqliteConnection connection)
+    public Vector3SqliteAddComponentQuery(string columnPrefix, SqliteConnection connection)
     {
         this.connection = connection;
 
-        var sb = new StringBuilder();
-        sb.Append("INSERT INTO ").Append(tableName)
-            .Append(" (id, x, y, z) VALUES (@Id, @X, @Y, @Z)");
-        sql = sb.ToString();
+        sql = @$"UPDATE Entity SET
+                    {columnPrefix}x = @X,
+                    {columnPrefix}y = @Y,
+                    {columnPrefix}z = @Z
+                    WHERE id = @Id";
     }
 
     public void Add(ulong entityId, Vector3 value, IDbTransaction transaction)

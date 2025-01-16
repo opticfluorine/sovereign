@@ -31,12 +31,8 @@ public class SqliteListPlayersQuery : IListPlayersQuery
     ///     SQL query.
     /// </summary>
     private const string query =
-        @"SELECT PC.id, N.value, A.value
-          FROM AccountComponent AC
-          INNER JOIN Name N ON AC.id = N.id
-          INNER JOIN PlayerCharacter PC ON AC.id = PC.id
-          INNER JOIN AnimatedSprite A ON AC.id = A.id
-          WHERE AC.account_id = @AccountId AND PC.value = TRUE AND PC.deleted = FALSE";
+        @"SELECT id, name, animated_sprite FROM Entity
+            WHERE account_id = @AccountId AND player_char = TRUE AND player_char_deleted = FALSE";
 
     private readonly SqliteConnection connection;
 

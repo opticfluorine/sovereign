@@ -69,182 +69,36 @@ CREATE TABLE Account_Authentication
 
 CREATE TABLE Entity
 (
-    id          INTEGER PRIMARY KEY NOT NULL,
-    template_id INTEGER,
-    FOREIGN KEY (template_id) REFERENCES Entity (id)
-);
-
-
-------------------------
--- Material Component --
-------------------------
-
-CREATE TABLE Material
-(
-    id       INTEGER PRIMARY KEY NOT NULL,
-    material INTEGER             NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
-
-
---------------------------------
--- MaterialModifier Component --
---------------------------------
-
-CREATE TABLE MaterialModifier
-(
-    id       INTEGER PRIMARY KEY NOT NULL,
-    modifier INTEGER             NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
-
-
-------------------------
--- Position Component --
-------------------------
-
-CREATE TABLE Position
-(
-    id INTEGER PRIMARY KEY NOT NULL,
-    x  FLOAT               NOT NULL,
-    y  FLOAT               NOT NULL,
-    z  FLOAT               NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
-
--- Index the position coordinates.
-CREATE INDEX Position_Xyz_Index ON Position (x, y, z);
-
-
--------------------------
--- PlayerCharacter Tag --
--------------------------
-
-CREATE TABLE PlayerCharacter
-(
-    id      INTEGER PRIMARY KEY NOT NULL,
-    value   BOOLEAN             NOT NULL,
-    deleted BOOLEAN             NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
-
-
---------------------
--- Name Component --
---------------------
-
-CREATE TABLE Name
-(
-    id    INTEGER PRIMARY KEY NOT NULL,
-    value TEXT                NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
-
--- Index name for faster searches.
-CREATE INDEX Name_Index ON Name (value);
-
-
------------------------
--- Account Component --
------------------------
-
--- Note non-standard table name to deconflict from the Account table
-CREATE TABLE AccountComponent
-(
-    id         INTEGER PRIMARY KEY NOT NULL,
-    account_id BLOB                NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id),
+    id                  INTEGER PRIMARY KEY NOT NULL,
+    template_id         INTEGER,
+    material            INTEGER,
+    material_mod        INTEGER,
+    pos_x               FLOAT,
+    pos_y               FLOAT,
+    pos_z               FLOAT,
+    player_char         BOOLEAN,
+    player_char_deleted BOOLEAN             NOT NULL DEFAULT (FALSE),
+    name                TEXT,
+    account_id          BLOB,
+    parent_id           INTEGER,
+    drawable            BOOLEAN,
+    animated_sprite     INTEGER,
+    orientation         INTEGER,
+    admin               BOOLEAN,
+    cast_block_shadows  BOOLEAN,
+    pls_radius          FLOAT,
+    pls_intensity       FLOAT,
+    pls_color           INTEGER,
+    pls_pos_x           FLOAT,
+    pls_pos_y           FLOAT,
+    pls_pos_z           FLOAT,
+    FOREIGN KEY (template_id) REFERENCES Entity (id),
+    FOREIGN KEY (parent_id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
 );
 
-
-----------------------
--- Parent Component --
-----------------------
-
-CREATE TABLE Parent
-(
-    id        INTEGER PRIMARY KEY NOT NULL,
-    parent_id INTEGER             NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id),
-    FOREIGN KEY (parent_id) REFERENCES Entity (id)
-);
-
-
-------------------
--- Drawable Tag --
-------------------
-
-CREATE TABLE Drawable
-(
-    id    INTEGER PRIMARY KEY NOT NULL,
-    value BOOLEAN             NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
-
-
-------------------------------
--- AnimatedSprite Component --
-------------------------------
-
-CREATE TABLE AnimatedSprite
-(
-    id    INTEGER PRIMARY KEY NOT NULL,
-    value INTEGER             NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
-
-
----------------------------
--- Orientation Component --
----------------------------
-
-CREATE TABLE Orientation
-(
-    id    INTEGER PRIMARY KEY NOT NULL,
-    value INTEGER             NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
-
----------------
--- Admin Tag --
----------------
-
-CREATE TABLE Admin
-(
-    id    INTEGER PRIMARY KEY NOT NULL,
-    value BOOLEAN             NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
-
-
-----------------------
--- CastBlockShadows --
-----------------------
-
-CREATE TABLE CastBlockShadows
-(
-    id    INTEGER PRIMARY KEY NOT NULL,
-    value BOOLEAN             NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
-
-
-----------------------
--- PointLightSource --
-----------------------
-
-CREATE TABLE PointLightSource
-(
-    id        INTEGER PRIMARY KEY NOT NULL,
-    radius    FLOAT               NOT NULL,
-    intensity FLOAT               NOT NULL,
-    color     INTEGER             NOT NULL,
-    pos_x     FLOAT               NOT NULL,
-    pos_y     FLOAT               NOT NULL,
-    pos_z     FLOAT               NOT NULL,
-    FOREIGN KEY (id) REFERENCES Entity (id)
-);
+CREATE INDEX Entity_PC ON Entity (player_char);
+CREATE INDEX Entity_Pos ON Entity (pos_x, pos_y, pos_z);
 
 
 ------------------------------
@@ -281,42 +135,29 @@ FROM Account
 ---------------------------------
 
 CREATE VIEW EntityWithComponents AS
-SELECT Entity.id                   AS id,
-       Entity.template_id          AS template_id,
-       Position.x                  AS x,
-       Position.y                  AS y,
-       Position.z                  AS z,
-       Material.material           AS material,
-       MaterialModifier.modifier   AS materialModifier,
-       PlayerCharacter.value       AS playerCharacter,
-       Name.value                  AS name,
-       AccountComponent.account_id AS account,
-       Parent.parent_id            AS parent,
-       Drawable.value              AS drawable,
-       AnimatedSprite.value        AS animatedSprite,
-       Orientation.value           AS orientation,
-       Admin.value                 AS admin,
-       CastBlockShadows.value      AS castBlockShadows,
-       PLS.radius                  AS plsRadius,
-       PLS.intensity               AS plsIntensity,
-       PLS.color                   AS plsColor,
-       PLS.pos_x                   AS plsPosX,
-       PLS.pos_y                   AS plsPosY,
-       PLS.pos_z                   AS plsPosZ
-FROM Entity
-         LEFT JOIN Position ON Position.id = Entity.id
-         LEFT JOIN Material ON Material.id = Entity.id
-         LEFT JOIN MaterialModifier ON MaterialModifier.id = Entity.id
-         LEFT JOIN PlayerCharacter ON Entity.id = PlayerCharacter.id
-         LEFT JOIN Name ON Entity.id = Name.id
-         LEFT JOIN AccountComponent ON Entity.id = AccountComponent.id
-         LEFT JOIN Parent ON Entity.id = Parent.id
-         LEFT JOIN Drawable ON Entity.id = Drawable.id
-         LEFT JOIN AnimatedSprite ON Entity.id = AnimatedSprite.id
-         LEFT JOIN Orientation ON Entity.id = Orientation.id
-         LEFT JOIN Admin ON Entity.id = Admin.id
-         LEFT JOIN CastBlockShadows ON Entity.id = CastBlockShadows.id
-         LEFT JOIN PointLightSource PLS on Entity.id = PLS.id;
+SELECT Entity.id                 AS id,
+       Entity.template_id        AS template_id,
+       Entity.pos_x              AS x,
+       Entity.pos_y              AS y,
+       Entity.pos_z              AS z,
+       Entity.material           AS material,
+       Entity.material_mod       AS materialModifier,
+       Entity.player_char        AS playerCharacter,
+       Entity.name               AS name,
+       Entity.account_id         AS account,
+       Entity.parent_id          AS parent,
+       Entity.drawable           AS drawable,
+       Entity.animated_sprite    AS animatedSprite,
+       Entity.orientation        AS orientation,
+       Entity.admin              AS admin,
+       Entity.cast_block_shadows AS castBlockShadows,
+       Entity.pls_radius         AS plsRadius,
+       Entity.pls_intensity      AS plsIntensity,
+       Entity.pls_color          AS plsColor,
+       Entity.pls_pos_x          AS plsPosX,
+       Entity.pls_pos_y          AS plsPosY,
+       Entity.pls_pos_z          AS plsPosZ
+FROM Entity;
 
 
 --------------------------------------
@@ -324,100 +165,32 @@ FROM Entity
 --------------------------------------
 
 -- Grass block template entity.
-INSERT INTO Entity (id)
-VALUES (0x7FFE000000000000);
-INSERT INTO Name (id, value)
-VALUES (0x7FFE000000000000, 'Grass');
-INSERT INTO Material (id, material)
-VALUES (0x7FFE000000000000, 1);
-INSERT INTO MaterialModifier (id, modifier)
-VALUES (0x7FFE000000000000, 0);
-INSERT INTO Drawable (id, value)
-VALUES (0x7FFE000000000000, 1);
-INSERT INTO CastBlockShadows (id, value)
-VALUES (0x7FFE000000000000, 1);
+INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
+VALUES (0x7FFE000000000000, 'Grass', 1, 0, 1, 1);
 
 -- Water block template entity.
-INSERT INTO Entity (id)
-VALUES (0x7FFE000000000001);
-INSERT INTO Name (id, value)
-VALUES (0x7FFE000000000001, 'Water');
-INSERT INTO Material (id, material)
-VALUES (0x7FFE000000000001, 2);
-INSERT INTO MaterialModifier (id, modifier)
-VALUES (0x7FFE000000000001, 0);
-INSERT INTO Drawable (id, value)
-VALUES (0x7FFE000000000001, 1);
+INSERT INTO Entity (id, name, material, material_mod, drawable)
+VALUES (0x7FFE000000000001, 'Water', 2, 0, 1);
 
 -- GrassRock block template entity (currently unused).
-INSERT INTO Entity (id)
-VALUES (0x7FFE000000000002);
-INSERT INTO Name (id, value)
-VALUES (0x7FFE000000000002, 'GrassRock');
-INSERT INTO Material (id, material)
-VALUES (0x7FFE000000000002, 1);
-INSERT INTO MaterialModifier (id, modifier)
-VALUES (0x7FFE000000000002, 0);
-INSERT INTO Drawable (id, value)
-VALUES (0x7FFE000000000002, 1);
-INSERT INTO CastBlockShadows (id, value)
-VALUES (0x7FFE000000000002, 1);
+INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
+VALUES (0x7FFE000000000002, 'GrassRock', 1, 0, 1, 1);
 
 -- Dirt block template entity.
-INSERT INTO Entity (id)
-VALUES (0x7FFE000000000003);
-INSERT INTO Name (id, value)
-VALUES (0x7FFE000000000003, 'Dirt');
-INSERT INTO Material (id, material)
-VALUES (0x7FFE000000000003, 3);
-INSERT INTO MaterialModifier (id, modifier)
-VALUES (0x7FFE000000000003, 0);
-INSERT INTO Drawable (id, value)
-VALUES (0x7FFE000000000003, 1);
-INSERT INTO CastBlockShadows (id, value)
-VALUES (0x7FFE000000000003, 1);
+INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
+VALUES (0x7FFE000000000003, 'Dirt', 3, 0, 1, 1);
 
 -- Sand block template entity.
-INSERT INTO Entity (id)
-VALUES (0x7FFE000000000004);
-INSERT INTO Name (id, value)
-VALUES (0x7FFE000000000004, 'Sand');
-INSERT INTO Material (id, material)
-VALUES (0x7FFE000000000004, 4);
-INSERT INTO MaterialModifier (id, modifier)
-VALUES (0x7FFE000000000004, 0);
-INSERT INTO Drawable (id, value)
-VALUES (0x7FFE000000000004, 1);
-INSERT INTO CastBlockShadows (id, value)
-VALUES (0x7FFE000000000004, 1);
+INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
+VALUES (0x7FFE000000000004, 'Sand', 4, 0, 1, 1);
 
 -- Rock block template entity.
-INSERT INTO Entity (id)
-VALUES (0x7FFE000000000005);
-INSERT INTO Name (id, value)
-VALUES (0x7FFE000000000005, 'Rock');
-INSERT INTO Material (id, material)
-VALUES (0x7FFE000000000005, 5);
-INSERT INTO MaterialModifier (id, modifier)
-VALUES (0x7FFE000000000005, 0);
-INSERT INTO Drawable (id, value)
-VALUES (0x7FFE000000000005, 1);
-INSERT INTO CastBlockShadows (id, value)
-VALUES (0x7FFE000000000005, 1);
+INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
+VALUES (0x7FFE000000000005, 'Rock', 5, 0, 1, 1);
 
 -- Cobblestone block template entity.
-INSERT INTO Entity (id)
-VALUES (0x7FFE000000000006);
-INSERT INTO Name (id, value)
-VALUES (0x7FFE000000000006, 'Cobblestone');
-INSERT INTO Material (id, material)
-VALUES (0x7FFE000000000006, 6);
-INSERT INTO MaterialModifier (id, modifier)
-VALUES (0x7FFE000000000006, 0);
-INSERT INTO Drawable (id, value)
-VALUES (0x7FFE000000000006, 1);
-INSERT INTO CastBlockShadows (id, value)
-VALUES (0x7FFE000000000006, 1);
+INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
+VALUES (0x7FFE000000000006, 'Cobblestone', 6, 0, 1, 1);
 
 -- Initial block data at origin.
 INSERT INTO WorldSegmentBlockData

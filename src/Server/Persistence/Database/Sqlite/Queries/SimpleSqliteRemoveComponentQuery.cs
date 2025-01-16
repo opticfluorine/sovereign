@@ -16,7 +16,6 @@
  */
 
 using System.Data;
-using System.Text;
 using Microsoft.Data.Sqlite;
 using Sovereign.Persistence.Database.Queries;
 
@@ -25,18 +24,21 @@ namespace Sovereign.Persistence.Database.Sqlite.Queries;
 /// <summary>
 ///     SQLite implementation of IRemoveComponentQuery.
 /// </summary>
-public sealed class SqliteRemoveComponentQuery : IRemoveComponentQuery
+public sealed class SimpleSqliteRemoveComponentQuery : IRemoveComponentQuery
 {
     private readonly SqliteConnection connection;
     private readonly string sql;
 
-    public SqliteRemoveComponentQuery(string tableName, SqliteConnection connection)
+    /// <summary>
+    ///     Creates a query to remove the given component from an entity.
+    /// </summary>
+    /// <param name="columnName">Column name in Entity table.</param>
+    /// <param name="connection">Database connection.</param>
+    public SimpleSqliteRemoveComponentQuery(string columnName, SqliteConnection connection)
     {
         this.connection = connection;
 
-        var sb = new StringBuilder();
-        sb.Append("DELETE FROM ").Append(tableName).Append(" WHERE id = @Id");
-        sql = sb.ToString();
+        sql = $"UPDATE Entity SET {columnName} = NULL WHERE id = @Id";
     }
 
     public void Remove(ulong entityId, IDbTransaction transaction)

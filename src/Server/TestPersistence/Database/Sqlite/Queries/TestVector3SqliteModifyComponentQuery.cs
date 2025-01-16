@@ -50,7 +50,7 @@ public sealed class TestVector3SqliteModifyComponentQuery
         testFixture.PositionEntity(entityId, original);
 
         /* Execute query. */
-        var query = new Vector3SqliteModifyComponentQuery("Position", testFixture.Connection);
+        var query = new Vector3SqliteModifyComponentQuery("pos_", testFixture.Connection);
         using (var transaction = testFixture.Connection.BeginTransaction())
         {
             query.Modify(entityId, position, transaction);
@@ -58,7 +58,7 @@ public sealed class TestVector3SqliteModifyComponentQuery
         }
 
         /* Verify result. */
-        var sql = @"SELECT x, y, z FROM Position WHERE id = @Id";
+        var sql = @"SELECT pos_x, pos_y, pos_z FROM Entity WHERE id = @Id";
         using (var cmd = new SqliteCommand(sql, testFixture.Connection))
         {
             var param = new SqliteParameter("Id", entityId);

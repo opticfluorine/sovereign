@@ -27,18 +27,15 @@ namespace Sovereign.Persistence.Database.Sqlite.Queries;
 public class SqliteAddModifyPointLightSourceComponentQuery : IAddComponentQuery<PointLight>,
     IModifyComponentQuery<PointLight>
 {
-    private const string query = @"
-        INSERT INTO PointLightSource (id, radius, intensity, color, pos_x, pos_y, pos_z)
-        VALUES (@Id, @Radius, @Intensity, @ColorR, @ColorG, @ColorB, @PosX, @PosY, @PosZ)
-        ON CONFLICT(id) DO
-        UPDATE PointLightSource SET
-            radius = excluded.radius,
-            intensity = excluded.intensity,
-            color = excluded.color_r,
-            pos_x = excluded.pos_x,
-            pos_y = excluded.pos_y,
-            pos_z = excluded.pos_z
-            WHERE PointLightSource.id = excluded.id";
+    private const string query =
+        @"UPDATE Entity SET
+            pls_radius = @Radius,
+            pls_intensity = @Intensity,
+            pls_color = @Color,
+            pls_pos_x = @PosX,
+            pls_pos_y = @PosY,
+            pls_pos_z = @PosZ
+            WHERE id = @Id";
 
     private readonly SqliteConnection connection;
 

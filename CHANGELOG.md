@@ -4,6 +4,13 @@
 
 ### January
 
+#### 15 January 2025
+
+* Persistence: Denormalize the database schema so that the `Entity` table contains all
+  components, using `NULL` as a sigil to indicate the absence of a component. This eliminates
+  most JOINs from loader queries which should give much better scalability at the cost of
+  additional disk space (to store the `NULL` values at scale).
+
 #### 13 January 2025
 
 * Point Lights: Update the position offset to be a relative offset calculated from the sprite

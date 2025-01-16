@@ -29,8 +29,7 @@ public class SqliteGetAccountForPlayerQuery : IGetAccountForPlayerQuery
     ///     SQL query to execute.
     /// </summary>
     private const string query =
-        @"SELECT AC.account_id FROM PlayerCharacter PC 
-            INNER JOIN AccountComponent AC ON PC.id = AC.id WHERE PC.id = @PlayerId";
+        @"SELECT account_id FROM Entity WHERE id = @PlayerId";
 
     private readonly SqliteConnection connection;
 

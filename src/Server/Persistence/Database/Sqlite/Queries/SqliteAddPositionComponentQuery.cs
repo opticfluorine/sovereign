@@ -30,7 +30,7 @@ public class SqliteAddPositionComponentQuery : IAddComponentQuery<Kinematics>
 
     public SqliteAddPositionComponentQuery(SqliteConnection dbConnection)
     {
-        query = new Vector3SqliteAddComponentQuery("Position", dbConnection);
+        query = new Vector3SqliteAddComponentQuery("pos_", dbConnection);
     }
 
     public void Add(ulong entityId, Kinematics value, IDbTransaction transaction)

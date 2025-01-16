@@ -25,12 +25,12 @@ namespace TestPersistence.Database.Sqlite.Queries;
 ///     Unit tests for SqliteRemoveComponentQuery.
 /// </summary>
 [Collection("Sqlite")]
-public sealed class TestSqliteRemoveComponentQuery
+public sealed class TestSimpleSqliteRemoveComponentQuery
 {
     private const ulong baseEntityId = 0x7fff000000080000;
     private readonly SqliteTestFixture testFixture;
 
-    public TestSqliteRemoveComponentQuery(SqliteTestFixture testFixture)
+    public TestSimpleSqliteRemoveComponentQuery(SqliteTestFixture testFixture)
     {
         this.testFixture = testFixture;
     }
@@ -50,7 +50,7 @@ public sealed class TestSqliteRemoveComponentQuery
         testFixture.AddMaterial(entityId2, 1);
 
         /* Remove the material from the first entity. */
-        var query = new SqliteRemoveComponentQuery("Material", testFixture.Connection);
+        var query = new SimpleSqliteRemoveComponentQuery("Material", testFixture.Connection);
         using (var transaction = testFixture.Connection.BeginTransaction())
         {
             query.Remove(entityId1, transaction);
@@ -58,7 +58,7 @@ public sealed class TestSqliteRemoveComponentQuery
         }
 
         /* Confirm that the first entity's component was removed. */
-        var sql = @"SELECT COUNT(*) FROM Material WHERE id = @Id";
+        var sql = @"SELECT COUNT(*) FROM Entity WHERE id = @Id AND material IS NOT NULL";
         using (var cmd = new SqliteCommand(sql, testFixture.Connection))
         {
             var param = new SqliteParameter("Id", entityId1);

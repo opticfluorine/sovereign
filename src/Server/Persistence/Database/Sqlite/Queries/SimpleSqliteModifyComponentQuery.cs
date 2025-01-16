@@ -16,7 +16,6 @@
  */
 
 using System.Data;
-using System.Text;
 using Microsoft.Data.Sqlite;
 using Sovereign.Persistence.Database.Queries;
 
@@ -31,32 +30,27 @@ namespace Sovereign.Persistence.Database.Sqlite.Queries;
 /// </remarks>
 public class SimpleSqliteModifyComponentQuery<T> : IModifyComponentQuery<T>
 {
+    private readonly SqliteType columnType;
     private readonly SqliteConnection dbConnection;
-    private readonly SqliteType paramType;
     private readonly string sql;
 
     /// <summary>
     ///     Creates the modify component query.
     /// </summary>
-    /// <param name="tableName">Database table name.</param>
-    /// <param name="paramName">Database parameter name.</param>
-    /// <param name="paramType">Database parameter type.</param>
+    /// <param name="columnName">Database column name.</param>
+    /// <param name="columnType">Database column type.</param>
     /// <param name="dbConnection">Database connection.</param>
     /// <remarks>
-    ///     Do not pass user-supplied data for tableName or paramName; it
+    ///     Do not pass user-supplied data for or paramName; it
     ///     will not be sanitized.
     /// </remarks>
-    public SimpleSqliteModifyComponentQuery(string tableName, string paramName,
-        SqliteType paramType, SqliteConnection dbConnection)
+    public SimpleSqliteModifyComponentQuery(string columnName,
+        SqliteType columnType, SqliteConnection dbConnection)
     {
         this.dbConnection = dbConnection;
-        this.paramType = paramType;
+        this.columnType = columnType;
 
-        var sb = new StringBuilder();
-        sb.Append("UPDATE ").Append(tableName)
-            .Append(" SET ").Append(paramName)
-            .Append(" = @Val WHERE id = @Id");
-        sql = sb.ToString();
+        sql = $"UPDATE Entity SET {columnName} = @Val WHERE id = @Id";
     }
 
     public void Modify(ulong entityId, T value, IDbTransaction transaction)
@@ -68,7 +62,7 @@ public class SimpleSqliteModifyComponentQuery<T> : IModifyComponentQuery<T>
             cmd.Parameters.Add(idParam);
 
             var valParam = new SqliteParameter("Val", value);
-            valParam.SqliteType = paramType;
+            valParam.SqliteType = columnType;
             cmd.Parameters.Add(valParam);
 
             cmd.ExecuteNonQuery();

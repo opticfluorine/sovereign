@@ -51,7 +51,7 @@ public sealed class TestSimpleSqliteModifyComponentQuery
         testFixture.AddMaterial(entityId, original);
 
         /* Execute query. */
-        var query = new SimpleSqliteModifyComponentQuery<int>("Material", "material",
+        var query = new SimpleSqliteModifyComponentQuery<int>("material",
             SqliteType.Integer, testFixture.Connection);
         using (var transaction = testFixture.Connection.BeginTransaction())
         {
@@ -60,7 +60,7 @@ public sealed class TestSimpleSqliteModifyComponentQuery
         }
 
         /* Check that the component was added. */
-        var sql = "SELECT COUNT(*) FROM Material WHERE id = @Id AND material = @Mat";
+        var sql = "SELECT COUNT(*) FROM Entity WHERE id = @Id AND material = @Mat";
         using (var cmd = new SqliteCommand(sql, testFixture.Connection))
         {
             var paramId = new SqliteParameter("Id", entityId);

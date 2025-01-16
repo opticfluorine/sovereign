@@ -31,16 +31,15 @@ public class GuidSqliteModifyComponentQuery : IModifyComponentQuery<Guid>
     /// <summary>
     ///     Creates the modify component query.
     /// </summary>
-    /// <param name="tableName">Database table name.</param>
     /// <param name="paramName">Database parameter name.</param>
     /// <param name="dbConnection">Database connection.</param>
     /// <remarks>
     ///     Do not pass user-supplied data for tableName or paramName; it
     ///     will not be sanitized.
     /// </remarks>
-    public GuidSqliteModifyComponentQuery(string tableName, string paramName, SqliteConnection dbConnection)
+    public GuidSqliteModifyComponentQuery(string paramName, SqliteConnection dbConnection)
     {
-        innerQuery = new SimpleSqliteModifyComponentQuery<byte[]>(tableName, paramName, SqliteType.Blob, dbConnection);
+        innerQuery = new SimpleSqliteModifyComponentQuery<byte[]>(paramName, SqliteType.Blob, dbConnection);
     }
 
     public void Modify(ulong entityId, Guid value, IDbTransaction transaction)

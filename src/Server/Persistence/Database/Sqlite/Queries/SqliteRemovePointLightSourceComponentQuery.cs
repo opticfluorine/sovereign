@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,39 +14,45 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Data;
 using Microsoft.Data.Sqlite;
 using Sovereign.Persistence.Database.Queries;
 
 namespace Sovereign.Persistence.Database.Sqlite.Queries;
 
 /// <summary>
-///     SQLite implementation of IRemoveAdminRoleQuery.
+///     SQLite query for removing a PointLightSource component from an entity.
 /// </summary>
-public class SqliteRemoveAdminRoleQuery : IRemoveAdminRoleQuery
+public class SqliteRemovePointLightSourceComponentQuery : IRemoveComponentQuery
 {
-    /// <summary>
-    ///     SQL query.
-    /// </summary>
-    private const string Sql
-        = @"UPDATE Entity SET admin = NULL 
-            WHERE name = @Name 
-                AND player_char = TRUE 
-                AND player_char_deleted = FALSE";
+    private const string query =
+        @"UPDATE Entity SET
+            pls_radius = NULL,
+            pls_intensity = NULL,
+            pls_color = NULL,
+            pls_pos_x = NULL,
+            pls_pos_y = NULL,
+            pls_pos_z = NULL
+            WHERE id = @Id";
 
     private readonly SqliteConnection connection;
 
-    public SqliteRemoveAdminRoleQuery(SqliteConnection connection)
+    public SqliteRemovePointLightSourceComponentQuery(SqliteConnection connection)
     {
         this.connection = connection;
     }
 
-    public void RemoveAdminRole(string playerName)
+    public void Remove(ulong entityId, IDbTransaction transaction)
     {
-        using var cmd = new SqliteCommand(Sql, connection);
+        using var cmd = new SqliteCommand(query, connection, (SqliteTransaction)transaction);
 
-        var pName = new SqliteParameter("Name", playerName);
-        pName.SqliteType = SqliteType.Text;
-        cmd.Parameters.Add(pName);
+        var pId = new SqliteParameter
+        {
+            ParameterName = "Id",
+            Value = entityId,
+            SqliteType = SqliteType.Integer
+        };
+        cmd.Parameters.Add(pId);
 
         cmd.ExecuteNonQuery();
     }

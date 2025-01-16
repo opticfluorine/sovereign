@@ -31,16 +31,15 @@ public class GuidSqliteAddComponentQuery : IAddComponentQuery<Guid>
     /// <summary>
     ///     Creates the add component query.
     /// </summary>
-    /// <param name="tableName">Database table name.</param>
     /// <param name="paramName">Database parameter name.</param>
     /// <param name="dbConnection">Database connection.</param>
     /// <remarks>
     ///     Do not pass user-supplied data for tableName or paramName; it
     ///     will not be sanitized.
     /// </remarks>
-    public GuidSqliteAddComponentQuery(string tableName, string paramName, SqliteConnection dbConnection)
+    public GuidSqliteAddComponentQuery(string paramName, SqliteConnection dbConnection)
     {
-        innerQuery = new SimpleSqliteAddComponentQuery<byte[]>(tableName, paramName, SqliteType.Blob, dbConnection);
+        innerQuery = new SimpleSqliteAddComponentQuery<byte[]>(paramName, SqliteType.Blob, dbConnection);
     }
 
     public void Add(ulong entityId, Guid value, IDbTransaction transaction)

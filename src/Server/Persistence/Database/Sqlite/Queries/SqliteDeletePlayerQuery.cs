@@ -27,7 +27,7 @@ public class SqliteDeletePlayerQuery : IDeletePlayerQuery
     /// <summary>
     ///     SQL query.
     /// </summary>
-    private const string Query = @"UPDATE PlayerCharacter SET deleted = TRUE WHERE id = @Id";
+    private const string Query = @"UPDATE Entity SET player_char_deleted = TRUE WHERE id = @Id";
 
     private readonly SqliteConnection dbConnection;
 

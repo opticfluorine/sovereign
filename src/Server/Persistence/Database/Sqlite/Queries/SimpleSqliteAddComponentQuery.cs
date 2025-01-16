@@ -16,7 +16,6 @@
  */
 
 using System.Data;
-using System.Text;
 using Microsoft.Data.Sqlite;
 using Sovereign.Persistence.Database.Queries;
 
@@ -38,7 +37,6 @@ public class SimpleSqliteAddComponentQuery<T> : IAddComponentQuery<T>
     /// <summary>
     ///     Creates the add component query.
     /// </summary>
-    /// <param name="tableName">Database table name.</param>
     /// <param name="paramName">Database parameter name.</param>
     /// <param name="paramType">Database parameter type.</param>
     /// <param name="dbConnection">Database connection.</param>
@@ -46,16 +44,13 @@ public class SimpleSqliteAddComponentQuery<T> : IAddComponentQuery<T>
     ///     Do not pass user-supplied data for tableName or paramName; it
     ///     will not be sanitized.
     /// </remarks>
-    public SimpleSqliteAddComponentQuery(string tableName, string paramName,
+    public SimpleSqliteAddComponentQuery(string paramName,
         SqliteType paramType, SqliteConnection dbConnection)
     {
         this.dbConnection = dbConnection;
         this.paramType = paramType;
 
-        var sb = new StringBuilder();
-        sb.Append("INSERT INTO ").Append(tableName).Append(" (id, ")
-            .Append(paramName).Append(") VALUES (@Id, @Val)");
-        sql = sb.ToString();
+        sql = $@"UPDATE Entity SET {paramName} = @Val WHERE id = @Id";
     }
 
     public void Add(ulong entityId, T value, IDbTransaction transaction)

@@ -74,8 +74,7 @@ public class SqliteTestFixture : IDisposable
     /// <param name="position">Position.</param>
     public void PositionEntity(ulong entityId, Vector3 position)
     {
-        const string sql = @"INSERT INTO Position (id, x, y, z) 
-                                 VALUES (@Id, @X, @Y, @Z)";
+        const string sql = @"UPDATE Entity SET pos_x = @X, pos_y = @Y, pos_z = @Z WHERE id = @Id";
         var cmd = new SqliteCommand(sql, Connection);
 
         var pId = new SqliteParameter("Id", entityId);
@@ -104,7 +103,7 @@ public class SqliteTestFixture : IDisposable
     /// <param name="material">Material.</param>
     public void AddMaterial(ulong entityId, int material)
     {
-        const string sql = @"INSERT INTO Material (id, material) VALUES (@Id, @Val)";
+        const string sql = @"UPDATE Entity SET material = @Val WHERE id = @Id";
         using (var cmd = new SqliteCommand(sql, Connection))
         {
             var pId = new SqliteParameter("Id", entityId);
@@ -126,7 +125,7 @@ public class SqliteTestFixture : IDisposable
     /// <param name="name">Name.</param>
     public void AddName(ulong entityId, string name)
     {
-        const string sql = @"INSERT INTO Name (id, value) VALUES (@Id, @Name)";
+        const string sql = @"UPDATE Entity SET name = @Name WHERE id = @Id";
         using (var cmd = new SqliteCommand(sql, Connection))
         {
             var pId = new SqliteParameter("Id", entityId);
@@ -147,7 +146,7 @@ public class SqliteTestFixture : IDisposable
     /// <param name="entityId">Entity ID.</param>
     public void AddPlayerCharacter(ulong entityId)
     {
-        const string sql = @"INSERT INTO PlayerCharacter (id, value) VALUES (@Id, TRUE)";
+        const string sql = @"UPDATE Entity SET player_char = TRUE WHERE id = @Id";
         using (var cmd = new SqliteCommand(sql, Connection))
         {
             var pId = new SqliteParameter("Id", entityId);
@@ -165,7 +164,7 @@ public class SqliteTestFixture : IDisposable
     /// <param name="animatedSpriteId">Animated sprite ID.</param>
     public void AddAnimatedSprite(ulong entityId, int animatedSpriteId)
     {
-        const string sql = @"INSERT INTO AnimatedSprite (id, value) VALUES (@Id, @SpriteId)";
+        const string sql = @"UPDATE Entity SET animated_sprite = @SpriteId WHERE id = @Id";
         using var cmd = new SqliteCommand(sql, Connection);
 
         var pId = new SqliteParameter("Id", entityId);
@@ -186,7 +185,7 @@ public class SqliteTestFixture : IDisposable
     /// <param name="accountId">Linked account ID.</param>
     public void AddAccountComponent(ulong entityId, Guid accountId)
     {
-        const string sql = @"INSERT INTO AccountComponent (id, account_id) VALUES (@Id, @AccountId)";
+        const string sql = @"UPDATE Entity SET account_id = @AccountId WHERE id = @Id";
         using (var cmd = new SqliteCommand(sql, Connection))
         {
             var pId = new SqliteParameter("Id", entityId);
