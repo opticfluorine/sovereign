@@ -1,6 +1,6 @@
-# Sovereign MMORPG Engine - 2D Multiplayer RPG Engine
+# Sovereign MMORPG Engine - 2.5D Multiplayer RPG Engine
 
-[Website](https://sovereignengine.com) | [Documentation (v0.4.0)](https://docs.sovereignengine.com) | [Discord](https://discord.gg/Mg2jUmePyx)
+[Website](https://sovereignengine.com) | [Documentation (v0.5.0)](https://docs.sovereignengine.com) | [Discord](https://discord.gg/Mg2jUmePyx)
 
 Sovereign Engine is a 2.5D MMORPG engine with the 2D graphical style of classic RPGs
 together with a 3D voxel-based world. The world is highly dynamic and allows
@@ -10,37 +10,38 @@ create and share multiplayer RPGs.
 
 Sovereign is developed in C#, runs on Windows and Linux, and is easy to
 extend through its distributed Entity-Component-System (ECS) framework.
+It also provides a Lua 5.4 scripting engine integrated with the server for
+easy extensibility through server-side scripting.
 
 Sovereign Engine is made available under the GPLv3 license.
 
-![Screenshot of Sovereign Engine v0.4.0.](https://update.sovereignengine.com/screenshots/Sovereign_v0.4.0.png)
+![Screenshot of Sovereign Engine v0.5.0.](https://update.sovereignengine.com/screenshots/Sovereign_v0.5.0.png)
 
-## Current Features (v0.4.0)
+## Current Features (v0.5.0)
 
 * Client and server supporting Windows and Linux platforms
-* Login and registration
-* Player listing, selection, creation, and deletion via in-game GUI
-* Basic rendering of world including automatic borders between neighboring tiles, animated
-  sprites, directional sprites
-* Sprite metadata including attribution information for easy inclusion of third party
-  assets
+* Dynamic 2.5D lighting and shadows with global and point light sources
+* Server-side Lua scripting engine for easy extensibility
+* Login, registration, player creation and selection
 * Player movement via keyboard
+* In-game chat (local and global)
+* Integrated editor for world map, server-side data, and graphical resources
+* Integrated debug GUI in client
+* Admin roles for users
+* Default graphical resources included with client
 * Distributed entity-component-system (ECS) data model with full client-side synchronization from
   server, full server-side persistence in a relational database (SQLite currently supported,
   Postgres planned)
-* Integrated debug GUI in client
-* In-game chat
-* Admin roles for users
-* Integrated editor for world map, server-side data, and graphical resources
-* Default graphical resources included with client
 
 For full details of the latest changes and features, see the [changelog](CHANGELOG.md).
 
-## Upcoming Features (v0.5.0)
+## Upcoming Features (v0.6.0)
 
-* Improved renderer with more flexibility to support advanced effects
-* Lighting and shadows
+* Scalable physics engine with gravity and collisions
+* Day/night cycle
+* Improved rendering for indoor environments
 * Procedural world generation
+* Automatic database creation on first startup (SQLite only)
 
 ## Getting Started
 
@@ -51,8 +52,9 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 
 ### Install Dependencies
 
-Sovereign Engine requires the .NET 8 (or later) SDK and SQLite 3.x to be
-installed on your system.
+Sovereign Engine requires the .NET 9 (or later) SDK and SQLite 3.x to be
+installed on your system. The SDL2, SDL2_image, and Lua 5.4 libraries are also
+required for Linux installations (these are included by default for Windows builds).
 
 ### Server
 

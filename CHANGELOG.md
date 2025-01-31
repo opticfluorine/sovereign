@@ -4,6 +4,10 @@
 
 ### January
 
+#### 30 January 2025
+
+* **Release v0.5.0**
+
 #### 15 January 2025
 
 * Persistence: Denormalize the database schema so that the `Entity` table contains all
