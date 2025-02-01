@@ -48,7 +48,7 @@
         <Copy SourceFiles="@(MigrationFiles)" DestinationFolder="$(PublishDir)Migrations/%(RecursiveDir)"/>
         <Copy SourceFiles="@(LicenseFile)" DestinationFolder="$(PublishDir)"/>
         <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(PublishDir)"/>
-        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(PublishDir)"/>
+        <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(PublishDir)Data/%(RecursiveDir)"/>
     </Target>
 
     <ItemGroup>
