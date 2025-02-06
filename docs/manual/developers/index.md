@@ -8,4 +8,5 @@ development.
 ecs/index.md
 systems/index.md
 networking/index.md
+physics/index.md
 :::
