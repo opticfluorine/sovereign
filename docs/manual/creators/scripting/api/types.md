@@ -10,6 +10,24 @@ to be used in scripts.
 :depth: 2
 :::
 
+(script-types-boundingbox)=
+## BoundingBox
+
+```{eval-rst}
+.. lua:class:: BoundingBox
+
+    Bounding box used for physics calculations.
+
+    .. lua:attribute:: Position: [#script-types-vector3](Vector3)```
+
+        The position relative to the upper-top-left corner of the entity at which
+        the bounding box starts.
+
+    .. lua:attribute:: Size
+
+        The size of the bounding box.
+```
+
 (script-types-entityeventdetails)=
 ## EntityEventDetails
 

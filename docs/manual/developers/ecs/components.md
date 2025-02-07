@@ -20,6 +20,7 @@ Core components are available in both the client and server.
 | `Admin`            | `AdminTagCollection`                  | Denotes a player character as an admin.                                                                                |
 | `AnimatedSprite`   | `AnimatedSpriteComponentCollection`   | For non-block drawable entities (see `Drawable` component), denotes the animated sprite ID to use for rendering.       |
 | `BlockPosition`    | `BlockPositionComponentCollection`    | Grid-aligned position of a block entity.                                                                               |
+| `BoundingBox`      | `BoundingBoxComponentCollection`      | For non-block entities, specifies the bounding box used for physics calculations.                                      |
 | `CastBlockShadows` | `CastBlockShadowsTagCollection`       | For block entities, indicates that the block should be included for calculating shadows.                               |
 | `Drawable`         | `DrawableTagCollection`               | The existence of this component indicates that the entity should be considered for rendering.                          |
 | `Kinematics`       | `KinematicsComponentCollection`       | For non-block positioned entities, contains the position and velocity of the entity.                                   |
@@ -28,6 +29,7 @@ Core components are available in both the client and server.
 | `Name`             | `NameComponentCollection`             | Gives the name of the entity.                                                                                          |
 | `Orientation`      | `OrientationComponentCollection`      | Specifies the directional orientation of the entity.                                                                   |
 | `Parent`           | `ParentComponentCollection`           | Maps an entity to its parent entity.                                                                                   |
+| `Physics`          | `PhysicsTagCollection`                | Indicates that a non-block entity has physics effects.                                                                 |
 | `PlayerCharacter`  | `PlayerCharacterTagCollection`        | Indicates that an entity is a player character.                                                                        |
 | `PointLightSource` | `PointLightSourceComponentCollection` | Specifies the properties of a point light source attached to the entity.                                               |
 

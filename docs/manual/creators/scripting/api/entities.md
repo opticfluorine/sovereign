@@ -45,6 +45,8 @@ if one is not provided.
 | Orientation      | [Orientation](#script-constants-orientation) | Orientation                                      |
 | CastBlockShadows | boolean                                      | Whether entity casts block shadows when rendered |
 | PointLightSource | [PointLight](#script-types-pointlight)       | Point light source                               |
+| Physics          | boolean                                      | Whether entity has physics effects               |
+| BoundingBox      | [BoundingBox](#script-types-boundingbox)     | Bounding box for physics effects                 |
 
 #### Example
 
