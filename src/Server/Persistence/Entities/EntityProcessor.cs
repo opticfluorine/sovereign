@@ -51,6 +51,13 @@ public sealed class EntityProcessor
     private const int IndexPlsPosX = IndexPlsColor + 1;
     private const int IndexPlsPosY = IndexPlsPosX + 1;
     private const int IndexPlsPosZ = IndexPlsPosY + 1;
+    private const int IndexPhysics = IndexPlsPosZ + 1;
+    private const int IndexBbPosX = IndexPhysics + 1;
+    private const int IndexBbPosY = IndexBbPosX + 1;
+    private const int IndexBbPosZ = IndexBbPosY + 1;
+    private const int IndexBbSizeX = IndexBbPosZ + 1;
+    private const int IndexBbSizeY = IndexBbSizeX + 1;
+    private const int IndexBbSizeZ = IndexBbSizeY + 1;
     private readonly IEntityFactory entityFactory;
     private readonly ILogger<EntityProcessor> logger;
     private readonly EntityMapper mapper;
@@ -107,6 +114,8 @@ public sealed class EntityProcessor
         ProcessAdmin(reader, builder);
         ProcessCastBlockShadows(reader, builder);
         ProcessPointLightSource(reader, builder);
+        ProcessPhysics(reader, builder);
+        ProcessBoundingBox(reader, builder);
 
         /* Complete the entity. */
         builder.Build();
@@ -290,6 +299,32 @@ public sealed class EntityProcessor
             Intensity = reader.GetFloat(IndexPlsIntensity),
             Color = (uint)reader.GetInt64(IndexPlsColor),
             PositionOffset = GetVector3(reader, IndexPlsPosX, IndexPlsPosY, IndexPlsPosZ)
+        });
+    }
+
+    /// <summary>
+    ///     Processes the Physics tag.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessPhysics(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexPhysics)) return;
+        if (reader.GetBoolean(IndexPhysics)) builder.Physics();
+    }
+
+    /// <summary>
+    ///     Processes the BoundingBox component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessBoundingBox(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexBbPosX)) return;
+        builder.BoundingBox(new BoundingBox
+        {
+            Position = GetVector3(reader, IndexBbPosX, IndexBbPosY, IndexBbPosZ),
+            Size = GetVector3(reader, IndexBbSizeX, IndexBbSizeY, IndexBbSizeZ)
         });
     }
 

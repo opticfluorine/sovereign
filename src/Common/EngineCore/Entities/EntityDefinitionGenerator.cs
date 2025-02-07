@@ -27,6 +27,7 @@ public class EntityDefinitionGenerator
     private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
@@ -36,6 +37,7 @@ public class EntityDefinitionGenerator
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
+    private readonly PhysicsTagCollection physics;
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly PointLightSourceComponentCollection pointLightSources;
 
@@ -47,6 +49,7 @@ public class EntityDefinitionGenerator
         AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations,
         AdminTagCollection admins, BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows, PointLightSourceComponentCollection pointLightSources,
+        PhysicsTagCollection physics, BoundingBoxComponentCollection boundingBoxes,
         EntityTable entityTable)
     {
         this.kinematics = kinematics;
@@ -62,6 +65,8 @@ public class EntityDefinitionGenerator
         this.blockPositions = blockPositions;
         this.castBlockShadows = castBlockShadows;
         this.pointLightSources = pointLightSources;
+        this.physics = physics;
+        this.boundingBoxes = boundingBoxes;
         this.entityTable = entityTable;
     }
 
@@ -110,6 +115,11 @@ public class EntityDefinitionGenerator
 
         if (pointLightSources.HasComponentForEntity(entityId))
             def.PointLightSource = pointLightSources[entityId];
+
+        def.Physics = physics.HasTagForEntity(entityId);
+
+        if (boundingBoxes.HasComponentForEntity(entityId))
+            def.BoundingBox = boundingBoxes[entityId];
 
         return def;
     }

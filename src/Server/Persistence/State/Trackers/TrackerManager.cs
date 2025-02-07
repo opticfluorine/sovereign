@@ -24,11 +24,13 @@ namespace Sovereign.Persistence.State.Trackers;
 public sealed class TrackerManager
 {
     private readonly AdminStateTracker adminStateTracker;
+    private readonly BoundingBoxStateTracker boundingBoxStateTracker;
     private readonly CastBlockShadowsStateTracker castBlockShadowsStateTracker;
+    private readonly PhysicsStateTracker physicsStateTracker;
     private readonly PointLightSourceStateTracker pointLightSourceStateTracker;
     private readonly TemplateStateTracker templateStateTracker;
 
-    public TrackerManager(PositionStateTracker positionStateTracker,
+    public TrackerManager(KinematicsStateTracker kinematicsStateTracker,
         MaterialStateTracker materialStateTracker,
         MaterialModifierStateTracker materialModifierStateTracker,
         PlayerCharacterStateTracker playerCharacterStateTracker,
@@ -41,14 +43,18 @@ public sealed class TrackerManager
         AdminStateTracker adminStateTracker,
         TemplateStateTracker templateStateTracker,
         CastBlockShadowsStateTracker castBlockShadowsStateTracker,
-        PointLightSourceStateTracker pointLightSourceStateTracker)
+        PointLightSourceStateTracker pointLightSourceStateTracker,
+        PhysicsStateTracker physicsStateTracker,
+        BoundingBoxStateTracker boundingBoxStateTracker)
     {
         this.adminStateTracker = adminStateTracker;
         this.templateStateTracker = templateStateTracker;
         this.castBlockShadowsStateTracker = castBlockShadowsStateTracker;
         this.pointLightSourceStateTracker = pointLightSourceStateTracker;
+        this.physicsStateTracker = physicsStateTracker;
+        this.boundingBoxStateTracker = boundingBoxStateTracker;
         OrientationStateTracker = orientationStateTracker;
-        PositionStateTracker = positionStateTracker;
+        KinematicsStateTracker = kinematicsStateTracker;
         MaterialStateTracker = materialStateTracker;
         MaterialModifierStateTracker = materialModifierStateTracker;
         PlayerCharacterStateTracker = playerCharacterStateTracker;
@@ -67,7 +73,7 @@ public sealed class TrackerManager
     /// <summary>
     ///     Position state tracker.
     /// </summary>
-    public PositionStateTracker PositionStateTracker { get; }
+    public KinematicsStateTracker KinematicsStateTracker { get; }
 
     /// <summary>
     ///     Material state tracker.

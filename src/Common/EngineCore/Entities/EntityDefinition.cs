@@ -111,4 +111,16 @@ public class EntityDefinition
     /// </summary>
     [Key(13)]
     public PointLight? PointLightSource { get; set; }
+
+    /// <summary>
+    ///     Set to true if the entity is a non-block entity with physics effects, false otherwise.
+    /// </summary>
+    [Key(14)]
+    public bool Physics { get; set; }
+
+    /// <summary>
+    ///     Bounding box for physics, or null if the entity has no explicit bounding box.
+    /// </summary>
+    [Key(15)]
+    public BoundingBox? BoundingBox { get; set; }
 }

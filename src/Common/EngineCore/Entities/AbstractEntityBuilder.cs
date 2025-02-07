@@ -33,6 +33,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly AdminTagCollection admins;
     protected readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     protected readonly DrawableTagCollection drawables;
 
@@ -46,6 +47,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     protected readonly NameComponentCollection names;
     protected readonly OrientationComponentCollection orientations;
     protected readonly ParentComponentCollection parents;
+    private readonly PhysicsTagCollection physics;
     protected readonly PlayerCharacterTagCollection playerCharacterTags;
     private readonly PointLightSourceComponentCollection pointLightSources;
 
@@ -70,6 +72,8 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows,
         PointLightSourceComponentCollection pointLightSources,
+        PhysicsTagCollection physics,
+        BoundingBoxComponentCollection boundingBoxes,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -89,6 +93,8 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.blockPositions = blockPositions;
         this.castBlockShadows = castBlockShadows;
         this.pointLightSources = pointLightSources;
+        this.physics = physics;
+        this.boundingBoxes = boundingBoxes;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -314,13 +320,37 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
 
     public IEntityBuilder PointLightSource(PointLight pointLight)
     {
-        pointLightSources.AddComponent(entityId, pointLight, load);
+        pointLightSources.AddOrUpdateComponent(entityId, pointLight, load);
         return this;
     }
 
     public IEntityBuilder WithoutPointLightSource()
     {
         pointLightSources.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder Physics()
+    {
+        physics.TagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutPhysics()
+    {
+        physics.UntagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder BoundingBox(BoundingBox boundingBox)
+    {
+        boundingBoxes.AddOrUpdateComponent(entityId, boundingBox, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutBoundingBox()
+    {
+        boundingBoxes.RemoveComponent(entityId, load);
         return this;
     }
 }

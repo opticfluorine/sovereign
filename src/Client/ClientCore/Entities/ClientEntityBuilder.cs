@@ -42,10 +42,13 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows,
         PointLightSourceComponentCollection pointLightSources,
+        PhysicsTagCollection physics,
+        BoundingBoxComponentCollection boundingBoxes,
         EntityTable entityTable)
         : base(entityId, isLoad, entityManager, kinematics, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
-            orientations, admins, blockPositions, castBlockShadows, pointLightSources, entityTable)
+            orientations, admins, blockPositions, castBlockShadows, pointLightSources, physics, boundingBoxes,
+            entityTable)
     {
     }
 

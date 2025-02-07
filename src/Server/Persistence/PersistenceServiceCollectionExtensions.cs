@@ -82,7 +82,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<StateManager>();
         services.TryAddSingleton<AccountStateTracker>();
         services.TryAddSingleton<TrackerManager>();
-        services.TryAddSingleton<PositionStateTracker>();
+        services.TryAddSingleton<KinematicsStateTracker>();
         services.TryAddSingleton<MaterialStateTracker>();
         services.TryAddSingleton<MaterialModifierStateTracker>();
         services.TryAddSingleton<PlayerCharacterStateTracker>();
@@ -95,6 +95,8 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<TemplateStateTracker>();
         services.TryAddSingleton<CastBlockShadowsStateTracker>();
         services.TryAddSingleton<PointLightSourceStateTracker>();
+        services.TryAddSingleton<PhysicsStateTracker>();
+        services.TryAddSingleton<BoundingBoxStateTracker>();
     }
 
     private static void AddPersistenceSystem(IServiceCollection services)

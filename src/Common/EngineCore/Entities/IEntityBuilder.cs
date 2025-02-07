@@ -261,4 +261,31 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutPointLightSource();
+
+    /// <summary>
+    ///     Tags the entity for physics processing.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("Physics")]
+    IEntityBuilder Physics();
+
+    /// <summary>
+    ///     Removes the Physics tag if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutPhysics();
+
+    /// <summary>
+    ///     Adds a BoundingBox component to the entity.
+    /// </summary>
+    /// <param name="boundingBox">Bounding box.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("BoundingBox")]
+    IEntityBuilder BoundingBox(BoundingBox boundingBox);
+
+    /// <summary>
+    ///     Removes the BoundingBox component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutBoundingBox();
 }

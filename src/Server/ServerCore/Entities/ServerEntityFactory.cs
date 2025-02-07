@@ -32,6 +32,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly DrawableTagCollection drawables;
 
@@ -44,6 +45,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
+    private readonly PhysicsTagCollection physics;
     private readonly PlayerCharacterTagCollection playerCharacterTags;
     private readonly PointLightSourceComponentCollection pointLightSources;
 
@@ -66,6 +68,8 @@ public sealed class ServerEntityFactory : IEntityFactory
         BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows,
         PointLightSourceComponentCollection pointLightSources,
+        PhysicsTagCollection physics,
+        BoundingBoxComponentCollection boundingBoxes,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -84,6 +88,8 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.blockPositions = blockPositions;
         this.castBlockShadows = castBlockShadows;
         this.pointLightSources = pointLightSources;
+        this.physics = physics;
+        this.boundingBoxes = boundingBoxes;
         this.entityTable = entityTable;
         entityAssigner = entityManager.GetNewAssigner();
     }
@@ -119,6 +125,8 @@ public sealed class ServerEntityFactory : IEntityFactory
             blockPositions,
             castBlockShadows,
             pointLightSources,
+            physics,
+            boundingBoxes,
             entityTable);
     }
 }

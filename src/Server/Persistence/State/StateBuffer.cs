@@ -54,6 +54,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<int>> animatedSpriteUpdates = new(BufferSize);
 
     /// <summary>
+    ///     BoundingBox state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<BoundingBox>> boundingBoxUpdates = new(BufferSize);
+
+    /// <summary>
     ///     CastBlockShadows state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<bool>> castBlockShadowsUpdates = new(BufferSize);
@@ -66,6 +71,12 @@ public sealed class StateBuffer
     private readonly IEventSender eventSender;
     private readonly FatalErrorHandler fatalErrorHandler;
     private readonly PersistenceInternalController internalController;
+
+    /// <summary>
+    ///     Position state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<Kinematics>> kinematicsUpdates = new(BufferSize);
+
     private readonly ILogger<StateBuffer> logger;
 
     /// <summary>
@@ -99,6 +110,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<ulong>> parentUpdates = new(BufferSize);
 
     /// <summary>
+    ///     Physics state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<bool>> physicsUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Player character tag state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<bool>> playerCharacterUpdates = new(BufferSize);
@@ -107,11 +123,6 @@ public sealed class StateBuffer
     ///     Point light source updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<PointLight>> pointLightSourceUpdates = new(BufferSize);
-
-    /// <summary>
-    ///     Position state updates.
-    /// </summary>
-    private readonly StructBuffer<StateUpdate<Kinematics>> positionUpdates = new(BufferSize);
 
     /// <summary>
     ///     Removed entity IDs.
@@ -169,7 +180,7 @@ public sealed class StateBuffer
     /// <param name="update">State update.</param>
     public void UpdatePosition(ref StateUpdate<Kinematics> update)
     {
-        positionUpdates.Add(ref update);
+        kinematicsUpdates.Add(ref update);
     }
 
     /// <summary>
@@ -281,6 +292,24 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Enqueues an update to the Physics tag.
+    /// </summary>
+    /// <param name="update">Update.</param>
+    public void UpdatePhysics(ref StateUpdate<bool> update)
+    {
+        physicsUpdates.Add(ref update);
+    }
+
+    /// <summary>
+    ///     Enqueues an update to the BoundingBox component.
+    /// </summary>
+    /// <param name="update">Update.</param>
+    public void UpdateBoundingBox(ref StateUpdate<BoundingBox> update)
+    {
+        boundingBoxUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Resets the buffer.
     /// </summary>
     public void Reset()
@@ -288,7 +317,7 @@ public sealed class StateBuffer
         newEntities.Clear();
         removedEntities.Clear();
         templateUpdates.Clear();
-        positionUpdates.Clear();
+        kinematicsUpdates.Clear();
         materialUpdates.Clear();
         materialModifierUpdates.Clear();
         playerCharacterUpdates.Clear();
@@ -301,6 +330,8 @@ public sealed class StateBuffer
         adminUpdates.Clear();
         castBlockShadowsUpdates.Clear();
         pointLightSourceUpdates.Clear();
+        physicsUpdates.Clear();
+        boundingBoxUpdates.Clear();
     }
 
     /// <summary>
@@ -331,7 +362,7 @@ public sealed class StateBuffer
                 SynchronizeTemplates(persistenceProvider.SetTemplateQuery, transaction);
 
                 /* Position. */
-                SynchronizeComponent(positionUpdates,
+                SynchronizeComponent(kinematicsUpdates,
                     persistenceProvider.AddPositionQuery,
                     persistenceProvider.ModifyPositionQuery,
                     persistenceProvider.RemovePositionQuery,
@@ -419,6 +450,20 @@ public sealed class StateBuffer
                     persistenceProvider.AddPointLightSourceComponentQuery,
                     persistenceProvider.ModifyPointLightSourceComponentQuery,
                     persistenceProvider.RemovePointLightSourceComponentQuery,
+                    transaction);
+
+                // Physics.
+                SynchronizeComponent(physicsUpdates,
+                    persistenceProvider.AddPhysicsComponentQuery,
+                    persistenceProvider.ModifyPhysicsComponentQuery,
+                    persistenceProvider.RemovePhysicsComponentQuery,
+                    transaction);
+
+                // BoundingBox.
+                SynchronizeComponent(boundingBoxUpdates,
+                    persistenceProvider.AddBoundingBoxComponentQuery,
+                    persistenceProvider.ModifyBoundingBoxComponentQuery,
+                    persistenceProvider.RemoveBoundingBoxComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

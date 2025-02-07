@@ -66,6 +66,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const string CastBlockShadowsParamName = "cast_block_shadows";
     private const string PositionColumnPrefix = "pos_";
 
+    private const SqliteType PhysicsParamType = SqliteType.Integer;
+    private const string PhysicsParamName = "physics";
+
     private readonly IPersistenceConfiguration configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
 
@@ -211,6 +214,20 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         ModifyPointLightSourceComponentQuery = pointLightSourceQuery;
         RemovePointLightSourceComponentQuery =
             new SqliteRemovePointLightSourceComponentQuery((SqliteConnection)Connection);
+
+        // Physics component.
+        AddPhysicsComponentQuery = new SimpleSqliteAddComponentQuery<bool>(PhysicsParamName, PhysicsParamType,
+            (SqliteConnection)Connection);
+        ModifyPhysicsComponentQuery = new SimpleSqliteModifyComponentQuery<bool>(PhysicsParamName, PhysicsParamType,
+            (SqliteConnection)Connection);
+        RemovePhysicsComponentQuery =
+            new SimpleSqliteRemoveComponentQuery(PhysicsParamName, (SqliteConnection)Connection);
+
+        // BoundingBox component.
+        var boundingBoxQuery = new SqliteAddModifyBoundingBoxComponentQuery((SqliteConnection)Connection);
+        AddBoundingBoxComponentQuery = boundingBoxQuery;
+        ModifyBoundingBoxComponentQuery = boundingBoxQuery;
+        RemoveBoundingBoxComponentQuery = new SqliteRemoveBoundingBoxComponentQuery((SqliteConnection)Connection);
     }
 
     public ISetTemplateQuery SetTemplateQuery { get; }
@@ -283,6 +300,12 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<PointLight> AddPointLightSourceComponentQuery { get; }
     public IModifyComponentQuery<PointLight> ModifyPointLightSourceComponentQuery { get; }
     public IRemoveComponentQuery RemovePointLightSourceComponentQuery { get; }
+    public IAddComponentQuery<bool> AddPhysicsComponentQuery { get; }
+    public IModifyComponentQuery<bool> ModifyPhysicsComponentQuery { get; }
+    public IRemoveComponentQuery RemovePhysicsComponentQuery { get; }
+    public IAddComponentQuery<BoundingBox> AddBoundingBoxComponentQuery { get; }
+    public IModifyComponentQuery<BoundingBox> ModifyBoundingBoxComponentQuery { get; }
+    public IRemoveComponentQuery RemoveBoundingBoxComponentQuery { get; }
 
     public void Dispose()
     {

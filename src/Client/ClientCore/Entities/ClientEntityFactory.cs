@@ -31,6 +31,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly EntityAssigner assigner;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly DrawableTagCollection drawables;
     private readonly EntityManager entityManager;
@@ -41,6 +42,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
+    private readonly PhysicsTagCollection physics;
     private readonly PlayerCharacterTagCollection playerCharacterTags;
     private readonly PointLightSourceComponentCollection pointLightSources;
 
@@ -64,6 +66,8 @@ public sealed class ClientEntityFactory : IEntityFactory
         BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows,
         PointLightSourceComponentCollection pointLightSources,
+        PhysicsTagCollection physics,
+        BoundingBoxComponentCollection boundingBoxes,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -81,6 +85,8 @@ public sealed class ClientEntityFactory : IEntityFactory
         this.blockPositions = blockPositions;
         this.castBlockShadows = castBlockShadows;
         this.pointLightSources = pointLightSources;
+        this.physics = physics;
+        this.boundingBoxes = boundingBoxes;
         this.entityTable = entityTable;
 
         assigner = entityManager.GetNewAssigner();
@@ -101,6 +107,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         return new ClientEntityBuilder(entityId, isLoad,
             entityManager, kinematics, drawables, materials,
             materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
-            orientations, admins, blockPositions, castBlockShadows, pointLightSources, entityTable);
+            orientations, admins, blockPositions, castBlockShadows, pointLightSources,
+            physics, boundingBoxes, entityTable);
     }
 }

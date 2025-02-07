@@ -25,9 +25,9 @@ namespace Sovereign.Persistence.State.Trackers;
 /// <summary>
 ///     State tracker for the Position component.
 /// </summary>
-public sealed class PositionStateTracker : BaseStateTracker<Kinematics>
+public sealed class KinematicsStateTracker : BaseStateTracker<Kinematics>
 {
-    public PositionStateTracker(KinematicsComponentCollection kinematics,
+    public KinematicsStateTracker(KinematicsComponentCollection kinematics,
         EntityMapper entityMapper, StateManager stateManager)
         : base(kinematics, new Kinematics { Position = Vector3.Zero, Velocity = Vector3.Zero }, entityMapper,
             stateManager)

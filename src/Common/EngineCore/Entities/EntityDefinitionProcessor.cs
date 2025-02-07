@@ -113,6 +113,16 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutPointLightSource();
 
+        if (definition.Physics)
+            builder.Physics();
+        else
+            builder.WithoutPhysics();
+
+        if (definition.BoundingBox.HasValue)
+            builder.BoundingBox(definition.BoundingBox.Value);
+        else
+            builder.WithoutBoundingBox();
+
         var entityId = builder.Build();
         logger.LogDebug("Processed entity ID {Id}.", entityId);
     }

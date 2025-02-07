@@ -2,6 +2,16 @@
 
 ## 2025
 
+### February 
+
+#### 06 February 2025
+
+* All: Add `Physics` and `BoundingBox` components to suuport the physics engine.
+
+#### 05 February 2025
+
+* Movement: Document initial design of the physics engine.
+
 ### January
 
 #### 30 January 2025

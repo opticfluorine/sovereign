@@ -94,6 +94,16 @@ public enum ComponentType
     /// </summary>
     PointLightSource = 0x000E,
 
+    /// <summary>
+    ///     Physics component.
+    /// </summary>
+    Physics = 0x000F,
+
+    /// <summary>
+    ///     BoundingBox component.
+    /// </summary>
+    BoundingBox = 0x0010,
+
     #endregion Common
 
     #region Client

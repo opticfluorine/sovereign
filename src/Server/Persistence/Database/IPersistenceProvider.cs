@@ -273,7 +273,7 @@ public interface IPersistenceProvider : IDisposable
     IAddComponentQuery<PointLight> AddPointLightSourceComponentQuery { get; }
 
     /// <summary>
-    ///     IModifyComponentQUery for PointLightSource component.
+    ///     IModifyComponentQuery for PointLightSource component.
     /// </summary>
     IModifyComponentQuery<PointLight> ModifyPointLightSourceComponentQuery { get; }
 
@@ -281,6 +281,36 @@ public interface IPersistenceProvider : IDisposable
     ///     IRemoveComponentQuery for PointLightSource component.
     /// </summary>
     IRemoveComponentQuery RemovePointLightSourceComponentQuery { get; }
+
+    /// <summary>
+    ///     IAddComponentQuery for the Physics tag.
+    /// </summary>
+    IAddComponentQuery<bool> AddPhysicsComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the Physics tag.
+    /// </summary>
+    IModifyComponentQuery<bool> ModifyPhysicsComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the Physics tag.
+    /// </summary>
+    IRemoveComponentQuery RemovePhysicsComponentQuery { get; }
+
+    /// <summary>
+    ///     IAddComponentQuery for the BoundingBox component.
+    /// </summary>
+    IAddComponentQuery<BoundingBox> AddBoundingBoxComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the BoundingBox component.
+    /// </summary>
+    IModifyComponentQuery<BoundingBox> ModifyBoundingBoxComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the BoundingBox component.
+    /// </summary>
+    IRemoveComponentQuery RemoveBoundingBoxComponentQuery { get; }
 
     /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.

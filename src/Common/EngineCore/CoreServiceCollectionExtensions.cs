@@ -98,6 +98,8 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<ParentComponentCollection>();
         services.TryAddComponentCollection<PlayerCharacterTagCollection>();
         services.TryAddComponentCollection<PointLightSourceComponentCollection>();
+        services.TryAddComponentCollection<PhysicsTagCollection>();
+        services.TryAddComponentCollection<BoundingBoxComponentCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)

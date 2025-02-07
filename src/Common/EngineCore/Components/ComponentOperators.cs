@@ -139,4 +139,13 @@ public static class ComponentOperators
         {
             { ComponentOperation.Set, (_, b) => b }
         };
+
+    /// <summary>
+    ///     Standard operators for BoundingBox-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<BoundingBox, BoundingBox, BoundingBox>>
+        BoundingBoxOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
+        };
 }
