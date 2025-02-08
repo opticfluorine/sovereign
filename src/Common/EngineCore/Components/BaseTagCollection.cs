@@ -54,6 +54,18 @@ public class BaseTagCollection : BaseComponentCollection<bool>
     }
 
     /// <summary>
+    ///     Determines whether the given entity is explicitly tagged (i.e. not tagged through its template
+    ///     entity).
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="lookback">If true, consider newly removed tags that were removed in the same tick.</param>
+    /// <returns>true if explicitly tagged, false otherwise.</returns>
+    public bool HasLocalTagForEntity(ulong entityId, bool lookback = false)
+    {
+        return HasLocalComponentForEntity(entityId, lookback) && this[entityId];
+    }
+
+    /// <summary>
     ///     Determines whether the given entity will be newly tagged in the following tick.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>

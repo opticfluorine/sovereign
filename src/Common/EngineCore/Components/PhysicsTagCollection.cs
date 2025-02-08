@@ -25,7 +25,7 @@ public class PhysicsTagCollection : BaseTagCollection
 {
     private const int InitialSize = 32768;
 
-    protected PhysicsTagCollection(EntityTable entityTable, ComponentManager componentManager)
+    public PhysicsTagCollection(EntityTable entityTable, ComponentManager componentManager)
         : base(entityTable, componentManager, InitialSize, ComponentType.Physics)
     {
     }

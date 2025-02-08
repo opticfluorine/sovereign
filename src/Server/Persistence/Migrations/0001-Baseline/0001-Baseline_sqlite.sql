@@ -93,12 +93,12 @@ CREATE TABLE Entity
     pls_pos_y           FLOAT,
     pls_pos_z           FLOAT,
     physics             BOOLEAN,
-    bb_base_x           FLOAT,
-    bb_base_y           FLOAT,
-    bb_base_z           FLOAT,
     bb_pos_x            FLOAT,
     bb_pos_y            FLOAT,
     bb_pos_z            FLOAT,
+    bb_size_x           FLOAT,
+    bb_size_y           FLOAT,
+    bb_size_z           FLOAT,
     FOREIGN KEY (template_id) REFERENCES Entity (id),
     FOREIGN KEY (parent_id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
@@ -165,12 +165,12 @@ SELECT Entity.id                 AS id,
        Entity.pls_pos_y          AS plsPosY,
        Entity.pls_pos_z          AS plsPosZ,
        Entity.physics            AS physics,
-       Entity.bb_base_x          AS bbPosX,
-       Entity.bb_base_y          AS bbPosY,
-       Entity.bb_base_z          AS bbPosZ,
-       Entity.bb_pos_x           AS bbSizeX,
-       Entity.bb_pos_y           AS bbSizeY,
-       Entity.bb_pos_z           AS bbSizeZ
+       Entity.bb_pos_x           AS bbPosX,
+       Entity.bb_pos_y           AS bbPosY,
+       Entity.bb_pos_z           AS bbPosZ,
+       Entity.bb_size_x          AS bbSizeX,
+       Entity.bb_size_y          AS bbSizeY,
+       Entity.bb_size_z          AS bbSizeZ
 FROM Entity;
 
 

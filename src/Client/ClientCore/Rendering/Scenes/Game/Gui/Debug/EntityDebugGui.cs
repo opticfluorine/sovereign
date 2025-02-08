@@ -34,6 +34,7 @@ public class EntityDebugGui
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CameraServices cameraServices;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly DrawableTagCollection drawables;
@@ -45,6 +46,7 @@ public class EntityDebugGui
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PerspectiveServices perspectiveServices;
+    private readonly PhysicsTagCollection physics;
     private readonly PointLightSourceComponentCollection pointLightSources;
     private string entityIdInput = "";
 
@@ -58,7 +60,9 @@ public class EntityDebugGui
         EntityTable entityTable,
         CameraServices cameraServices,
         PerspectiveServices perspectiveServices,
-        PointLightSourceComponentCollection pointLightSources)
+        PointLightSourceComponentCollection pointLightSources,
+        PhysicsTagCollection physics,
+        BoundingBoxComponentCollection boundingBoxes)
     {
         this.aboveBlocks = aboveBlocks;
         this.animatedSprites = animatedSprites;
@@ -75,6 +79,8 @@ public class EntityDebugGui
         this.cameraServices = cameraServices;
         this.perspectiveServices = perspectiveServices;
         this.pointLightSources = pointLightSources;
+        this.physics = physics;
+        this.boundingBoxes = boundingBoxes;
     }
 
     /// <summary>
@@ -136,6 +142,13 @@ public class EntityDebugGui
                             AddValueRow("PLS Intensity:", pls.Intensity);
                             AddValueRow("PLS Color:", CleanVec3ToString(ColorUtil.UnpackColorRgb(pls.Color)));
                             AddValueRow("PLS Pos Offset:", CleanVec3ToString(pls.PositionOffset));
+                        });
+                    AddComponentRow("Physics:", entityId, physics);
+                    AddCompoundRows("Bounding Box:", entityId, boundingBoxes,
+                        box =>
+                        {
+                            AddValueRow("Bounding Box Pos:", CleanVec3ToString(box.Position));
+                            AddValueRow("Bounding Box Size:", CleanVec3ToString(box.Size));
                         });
                     ImGui.EndTable();
                 }

@@ -393,9 +393,21 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <returns>true if a component is associated, false otherwise.</returns>
     public bool HasComponentForEntity(ulong entityId, bool lookback = false)
     {
-        var hasLocal = entityToComponentMap.ContainsKey(entityId) && (lookback || !pendingReclaims.Contains(entityId));
+        var hasLocal = HasLocalComponentForEntity(entityId, lookback);
         return hasLocal || (entityTable.TryGetTemplate(entityId, out var templateEntityId) &&
                             HasComponentForEntity(templateEntityId));
+    }
+
+    /// <summary>
+    ///     Determines whether a component is explicitly associated with the given entity (i.e. not
+    ///     through a template entity inherited by the entity).
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="lookback">Whether to consider newly removed components in the same tick.</param>
+    /// <returns>true if a local component is associated, false otherwise.</returns>
+    public bool HasLocalComponentForEntity(ulong entityId, bool lookback = false)
+    {
+        return entityToComponentMap.ContainsKey(entityId) && (lookback || !pendingReclaims.Contains(entityId));
     }
 
     /// <summary>

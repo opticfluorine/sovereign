@@ -84,41 +84,41 @@ public class EntityDefinitionGenerator
             ? templateEntityId
             : 0;
 
-        if (kinematics.HasComponentForEntity(entityId))
+        if (kinematics.HasLocalComponentForEntity(entityId))
             def.Position = kinematics[entityId].Position;
 
-        def.Drawable = drawables.HasTagForEntity(entityId);
+        def.Drawable = drawables.HasLocalTagForEntity(entityId);
 
-        if (animatedSprites.HasComponentForEntity(entityId))
+        if (animatedSprites.HasLocalComponentForEntity(entityId))
             def.AnimatedSpriteId = animatedSprites[entityId];
 
-        if (materials.HasComponentForEntity(entityId))
+        if (materials.HasLocalComponentForEntity(entityId))
             def.Material = new MaterialPair(materials[entityId], materialModifiers[entityId]);
 
-        def.PlayerCharacter = playerCharacters.HasTagForEntity(entityId);
+        def.PlayerCharacter = playerCharacters.HasLocalTagForEntity(entityId);
 
-        if (names.HasComponentForEntity(entityId))
+        if (names.HasLocalComponentForEntity(entityId))
             def.Name = names[entityId];
 
-        if (parents.HasComponentForEntity(entityId))
+        if (parents.HasLocalComponentForEntity(entityId))
             def.Parent = parents[entityId];
 
-        if (orientations.HasComponentForEntity(entityId))
+        if (orientations.HasLocalComponentForEntity(entityId))
             def.Orientation = orientations[entityId];
 
-        def.Admin = admins.HasTagForEntity(entityId);
+        def.Admin = admins.HasLocalTagForEntity(entityId);
 
-        if (blockPositions.HasComponentForEntity(entityId))
+        if (blockPositions.HasLocalComponentForEntity(entityId))
             def.BlockPosition = blockPositions[entityId];
 
-        def.CastBlockShadows = castBlockShadows.HasTagForEntity(entityId);
+        def.CastBlockShadows = castBlockShadows.HasLocalTagForEntity(entityId);
 
-        if (pointLightSources.HasComponentForEntity(entityId))
+        if (pointLightSources.HasLocalComponentForEntity(entityId))
             def.PointLightSource = pointLightSources[entityId];
 
-        def.Physics = physics.HasTagForEntity(entityId);
+        def.Physics = physics.HasLocalTagForEntity(entityId);
 
-        if (boundingBoxes.HasComponentForEntity(entityId))
+        if (boundingBoxes.HasLocalComponentForEntity(entityId))
             def.BoundingBox = boundingBoxes[entityId];
 
         return def;

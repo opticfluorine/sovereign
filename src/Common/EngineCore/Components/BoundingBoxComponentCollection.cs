@@ -27,7 +27,7 @@ public class BoundingBoxComponentCollection : BaseComponentCollection<BoundingBo
 {
     private const int InitialSize = 4096;
 
-    protected BoundingBoxComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+    public BoundingBoxComponentCollection(EntityTable entityTable, ComponentManager componentManager)
         : base(entityTable, componentManager, InitialSize, ComponentOperators.BoundingBoxOperators,
             ComponentType.BoundingBox)
     {
