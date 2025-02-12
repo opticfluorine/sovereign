@@ -5,5 +5,6 @@ for creating your game world.
 
 :::{toctree}
 :maxdepth: 2
+structure.md
 editing.md
 :::

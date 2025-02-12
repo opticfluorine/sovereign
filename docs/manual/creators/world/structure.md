@@ -30,11 +30,11 @@ The world is constructed of a collection of blocks as described above.
 A block is a unit cube (in position units) with side lengths equal to the
 tile dimension (in pixels) when rendered. Material blocks must be of unit
 length, but other entities may have arbitrary dimensions. All entities
-(material blocks and otherwise) are positioned by the upper-top-left corner
+(material blocks and otherwise) are positioned by the lower-bottom-left corner
 of the unit length block whose base is centered on the bottom plane of
-the entity.
-
-![Block structure](img/BlockStructure.png)
+the entity. This choice of coordinates allows us to specify the three-dimensional
+range of a block as starting with its position coordinate {math}`(x, y, z)` and
+ending at {math}`(x+1, y+1, z+1)`.
 
 The game world is composed of a non-overlapping set of blocks positioned at integer
 coordinates on a three-dimensional grid. By non-overlapping, we mean that each coordinate
@@ -42,13 +42,12 @@ coordinates on a three-dimensional grid. By non-overlapping, we mean that each c
 The absence of a block at a coordinate implies that the special "air" block exists at
 that position. The "air" block is not stored in memory as a real block; it is only used
 to imply the absence of a block which enables certain optimizations when transferring
-world data from server to client (see the [networking documentation](networking.md) for
-more information).
+world data from server to client.
 
 ## World Segments
 
 The game world is normally handled in small three-dimensional regions known as
 *world segments*. Each world segment is a cube having a length of 32 blocks, therefore
 containing up to 32768 blocks per world segment. The game state is loaded, unloaded, and
-synchronized one world segment at a time; see the [networking documentation](networking.md)
-and the [persistence documentation](persistence.md) for more details.
+synchronized one world segment at a time.
+
