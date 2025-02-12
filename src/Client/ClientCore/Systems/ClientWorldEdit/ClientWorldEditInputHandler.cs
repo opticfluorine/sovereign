@@ -17,7 +17,7 @@
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Input;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Systems.ClientWorldEdit;

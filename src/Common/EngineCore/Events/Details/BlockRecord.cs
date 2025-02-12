@@ -17,7 +17,7 @@
 
 using System.Text;
 using MessagePack;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Events.Details;
 

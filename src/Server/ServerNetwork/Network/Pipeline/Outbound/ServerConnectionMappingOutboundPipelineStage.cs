@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.World;
 using Sovereign.EngineUtil.Monads;

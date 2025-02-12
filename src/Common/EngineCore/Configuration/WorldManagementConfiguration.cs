@@ -20,9 +20,9 @@ namespace Sovereign.EngineCore.Configuration;
 /// <summary>
 ///     Hardcoded configuration for WorldManagementSystem.
 /// </summary>
-public sealed class WorldManagementConfiguration : IWorldManagementConfiguration
+public static class WorldManagementConfiguration
 {
-    public uint SegmentLength => 32;
+    public const uint SegmentLength = 32;
 
-    public int SubscriptionRange => 1;
+    public const int SubscriptionRange = 1;
 }

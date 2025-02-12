@@ -17,6 +17,7 @@
 using System.Linq;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Systems.Block;
 

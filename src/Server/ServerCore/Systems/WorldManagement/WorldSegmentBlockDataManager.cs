@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 using MessagePack;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;

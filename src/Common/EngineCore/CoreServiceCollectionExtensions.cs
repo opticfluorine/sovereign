@@ -19,7 +19,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Validators;
-using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details.Validators;
@@ -52,7 +51,6 @@ public static class CoreServiceCollectionExtensions
         AddComponents(services);
         AddComponentIndexers(services);
         AddComponentValidators(services);
-        AddConfiguration(services);
         AddEntities(services);
         AddEvents(services);
         AddEventValidators(services);
@@ -122,11 +120,6 @@ public static class CoreServiceCollectionExtensions
     {
         services.TryAddSingleton<NameComponentValidator>();
         services.TryAddSingleton<PointLightComponentValidator>();
-    }
-
-    private static void AddConfiguration(IServiceCollection services)
-    {
-        services.TryAddSingleton<IWorldManagementConfiguration, WorldManagementConfiguration>();
     }
 
     private static void AddEntities(IServiceCollection services)

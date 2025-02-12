@@ -16,7 +16,7 @@
 
 using System;
 using System.Collections.Generic;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.ServerCore.Systems.WorldManagement;
 
 namespace Sovereign.ServerNetwork.Network.Pipeline.Outbound.ConnectionMappers;
@@ -73,9 +73,7 @@ public class RegionalConnectionMapCache
 
         playerSet.Clear();
         foreach (var currentSegment in GetRadiusSet(key))
-        {
             playerSet.UnionWith(worldManagementServices.GetPlayersSubscribedToWorldSegment(currentSegment));
-        }
 
         validSets.Add(key);
         return playerSet;
@@ -107,15 +105,9 @@ public class RegionalConnectionMapCache
             radiusSet = new HashSet<GridPosition>();
             var (center, radius) = key;
             for (var i = center.X - (int)radius; i < center.X + radius + 1; ++i)
-            {
-                for (var j = center.Y - (int)radius; j < center.Y + radius + 1; ++j)
-                {
-                    for (var k = center.Z - (int)radius; k < center.Z + radius + 1; ++k)
-                    {
-                        radiusSet.Add(new GridPosition(i, j, k));
-                    }
-                }
-            }
+            for (var j = center.Y - (int)radius; j < center.Y + radius + 1; ++j)
+            for (var k = center.Z - (int)radius; k < center.Z + radius + 1; ++k)
+                radiusSet.Add(new GridPosition(i, j, k));
 
             radiusSets[key] = radiusSet;
         }

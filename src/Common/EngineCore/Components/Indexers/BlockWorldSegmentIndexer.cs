@@ -18,6 +18,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.EngineCore.Components.Indexers;

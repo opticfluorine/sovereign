@@ -21,7 +21,7 @@ using System.Numerics;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.World;
 using Sovereign.EngineUtil.Collections;

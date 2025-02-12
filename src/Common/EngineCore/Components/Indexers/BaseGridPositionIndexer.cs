@@ -17,6 +17,7 @@
 
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 

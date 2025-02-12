@@ -19,6 +19,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 

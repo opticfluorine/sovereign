@@ -17,7 +17,7 @@
 
 using System;
 using Microsoft.Extensions.Logging;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.World;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;

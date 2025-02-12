@@ -17,7 +17,7 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Network.Infrastructure;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Systems.ClientNetwork;
 

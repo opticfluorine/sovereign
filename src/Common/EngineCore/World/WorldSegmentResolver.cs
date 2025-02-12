@@ -17,7 +17,7 @@
 
 using System;
 using System.Numerics;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
 
 namespace Sovereign.EngineCore.World;
@@ -27,13 +27,11 @@ namespace Sovereign.EngineCore.World;
 /// </summary>
 public sealed class WorldSegmentResolver
 {
-    private readonly IWorldManagementConfiguration config;
     private readonly Vector3 step;
 
-    public WorldSegmentResolver(IWorldManagementConfiguration config)
+    public WorldSegmentResolver()
     {
-        this.config = config;
-        step = new Vector3(config.SegmentLength);
+        step = new Vector3(WorldManagementConfiguration.SegmentLength);
     }
 
     /// <summary>
@@ -44,7 +42,7 @@ public sealed class WorldSegmentResolver
     public Tuple<Vector3, Vector3> GetRangeForWorldSegment(GridPosition segmentIndex)
     {
         var min = new Vector3(segmentIndex.X, segmentIndex.Y, segmentIndex.Z) *
-                  config.SegmentLength;
+                  WorldManagementConfiguration.SegmentLength;
         var max = min + step;
         return new Tuple<Vector3, Vector3>(min, max);
     }
@@ -58,9 +56,9 @@ public sealed class WorldSegmentResolver
     {
         return new GridPosition
         {
-            X = (int)Math.Floor(position.X / config.SegmentLength),
-            Y = (int)Math.Floor(position.Y / config.SegmentLength),
-            Z = (int)Math.Floor(position.Z / config.SegmentLength)
+            X = (int)Math.Floor(position.X / WorldManagementConfiguration.SegmentLength),
+            Y = (int)Math.Floor(position.Y / WorldManagementConfiguration.SegmentLength),
+            Z = (int)Math.Floor(position.Z / WorldManagementConfiguration.SegmentLength)
         };
     }
 }

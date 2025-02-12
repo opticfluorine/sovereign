@@ -19,7 +19,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Systems.WorldManagement;
@@ -41,10 +41,10 @@ public class WorldSegmentPersister
 
     private readonly ObjectPool<PersistenceBuffer> bufferPool = new();
     private readonly CoreWorldManagementController coreWorldManagementController;
-    private readonly ILogger<WorldSegmentPersister> logger;
     private readonly IEventSender eventSender;
 
     private readonly WorldSegmentBlockDataLoader loader;
+    private readonly ILogger<WorldSegmentPersister> logger;
 
     private readonly WorldManagementServices worldManagementServices;
 

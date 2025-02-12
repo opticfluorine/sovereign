@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using MessagePack;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Events.Details;
 
@@ -25,12 +25,10 @@ public class WorldSegmentSubscriptionEventDetails : IEventDetails
     /// <summary>
     ///     Entity ID of the subscribing player.
     /// </summary>
-    [IgnoreMember]
-    public ulong EntityId;
+    [IgnoreMember] public ulong EntityId;
 
     /// <summary>
     ///     Segment index of the subscribed world segment.
     /// </summary>
-    [Key(0)]
-    public GridPosition SegmentIndex;
+    [Key(0)] public GridPosition SegmentIndex;
 }

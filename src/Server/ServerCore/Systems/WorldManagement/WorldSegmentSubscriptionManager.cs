@@ -83,11 +83,8 @@ public class WorldSegmentSubscriptionManager
 
     private readonly WorldSegmentSynchronizationManager syncManager;
 
-    private readonly IWorldManagementConfiguration worldConfig;
-
     public WorldSegmentSubscriptionManager(PlayerPositionEventFilter positionEventFilter,
-        WorldSegmentResolver resolver, IWorldManagementConfiguration worldConfig,
-        WorldSegmentActivationManager activationManager,
+        WorldSegmentResolver resolver, WorldSegmentActivationManager activationManager,
         IEventSender eventSender, WorldManagementInternalController internalController,
         WorldSegmentSynchronizationManager syncManager, KinematicsComponentCollection kinematics,
         EntitySynchronizer synchronizer, EntityHierarchyIndexer hierarchyIndexer,
@@ -96,7 +93,6 @@ public class WorldSegmentSubscriptionManager
     {
         this.positionEventFilter = positionEventFilter;
         this.resolver = resolver;
-        this.worldConfig = worldConfig;
         this.activationManager = activationManager;
         this.eventSender = eventSender;
         this.internalController = internalController;
@@ -231,13 +227,16 @@ public class WorldSegmentSubscriptionManager
     /// <param name="center">Center world segment.</param>
     private HashSet<GridPosition> BuildSubscriptionSet(GridPosition center)
     {
-        var result = new HashSet<GridPosition>(worldConfig.SubscriptionRange * worldConfig.SubscriptionRange);
-        for (var x = center.X - worldConfig.SubscriptionRange; x < center.X + worldConfig.SubscriptionRange + 1; ++x)
-        for (var y = center.Y - worldConfig.SubscriptionRange;
-             y < center.Y + worldConfig.SubscriptionRange + 1;
+        var result = new HashSet<GridPosition>(WorldManagementConfiguration.SubscriptionRange *
+                                               WorldManagementConfiguration.SubscriptionRange);
+        for (var x = center.X - WorldManagementConfiguration.SubscriptionRange;
+             x < center.X + WorldManagementConfiguration.SubscriptionRange + 1;
+             ++x)
+        for (var y = center.Y - WorldManagementConfiguration.SubscriptionRange;
+             y < center.Y + WorldManagementConfiguration.SubscriptionRange + 1;
              ++y)
-        for (var z = center.Z - worldConfig.SubscriptionRange;
-             z < center.Z + worldConfig.SubscriptionRange + 1;
+        for (var z = center.Z - WorldManagementConfiguration.SubscriptionRange;
+             z < center.Z + WorldManagementConfiguration.SubscriptionRange + 1;
              ++z)
             result.Add(new GridPosition(x, y, z));
 
@@ -284,7 +283,7 @@ public class WorldSegmentSubscriptionManager
             if (!unchangedSet.Contains(segment))
             {
                 // Beyond the subscribe radius, now check whether beyond the unsubscribe radius.
-                var unsubRadius = worldConfig.SubscriptionRange + 1;
+                var unsubRadius = WorldManagementConfiguration.SubscriptionRange + 1;
                 var dx = Math.Abs(segment.X - center.X);
                 var dy = Math.Abs(segment.Y - center.Y);
                 var dz = Math.Abs(segment.Z - center.Z);

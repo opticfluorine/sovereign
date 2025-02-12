@@ -22,7 +22,7 @@ using System.Text;
 using MessagePack;
 using Sovereign.EngineUtil.Attributes;
 
-namespace Sovereign.EngineCore.Components.Indexers;
+namespace Sovereign.EngineCore.Components.Types;
 
 /// <summary>
 ///     Represents an integer position, useful for aligning blocks on the unit grid.

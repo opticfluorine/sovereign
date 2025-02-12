@@ -17,7 +17,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Sovereign.ClientCore.Rendering.Configuration;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Systems.Perspective;
 

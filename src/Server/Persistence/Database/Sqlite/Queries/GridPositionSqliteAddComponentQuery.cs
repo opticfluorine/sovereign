@@ -16,7 +16,7 @@
 
 using System.Data;
 using Microsoft.Data.Sqlite;
-using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.Persistence.Database.Queries;
 
 namespace Sovereign.Persistence.Database.Sqlite.Queries;
