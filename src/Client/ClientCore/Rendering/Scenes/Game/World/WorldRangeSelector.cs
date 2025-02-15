@@ -53,8 +53,8 @@ public class WorldRangeSelector
         var minX = (int)Math.Floor(centerPos.X - halfX - clientConfiguration.RenderSearchSpacerX);
         var maxX = (int)Math.Floor(centerPos.X + halfX + clientConfiguration.RenderSearchSpacerX);
 
-        var minY = (int)Math.Ceiling(centerPos.Y - halfY - clientConfiguration.RenderSearchSpacerY);
-        var maxY = (int)Math.Ceiling(centerPos.Y + halfY + clientConfiguration.RenderSearchSpacerY);
+        var minY = (int)Math.Floor(centerPos.Y - halfY - clientConfiguration.RenderSearchSpacerY);
+        var maxY = (int)Math.Floor(centerPos.Y + halfY + clientConfiguration.RenderSearchSpacerY);
 
         var z = (int)Math.Floor(centerPos.Z);
 

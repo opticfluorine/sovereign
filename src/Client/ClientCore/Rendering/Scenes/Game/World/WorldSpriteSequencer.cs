@@ -149,40 +149,26 @@ public sealed class WorldSpriteSequencer
         /* Retrieve sprite information. */
         var spriteInfo = atlasMap.MapElements[sprite.Id];
 
-        /* Top left. */
+        /* Bottom left. */
         vertices[0] = new WorldVertex
         {
             PosX = position.X,
             PosY = position.Y,
-            PosZ = position.Z,
+            PosZ = position.Z + spriteInfo.HeightInTiles,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedLeftX,
-            TexY = spriteInfo.NormalizedTopY,
-            LightFactor = lightFactor
-        };
-
-        /* Top right. */
-        vertices[1] = new WorldVertex
-        {
-            PosX = position.X + spriteInfo.WidthInTiles,
-            PosY = position.Y,
-            PosZ = position.Z,
-            VelX = velocity.X,
-            VelY = velocity.Y,
-            VelZ = velocity.Z,
-            TexX = spriteInfo.NormalizedRightX,
-            TexY = spriteInfo.NormalizedTopY,
+            TexY = spriteInfo.NormalizedBottomY,
             LightFactor = lightFactor
         };
 
         /* Bottom right. */
-        vertices[2] = new WorldVertex
+        vertices[1] = new WorldVertex
         {
             PosX = position.X + spriteInfo.WidthInTiles,
-            PosY = position.Y - spriteInfo.HeightInTiles,
-            PosZ = position.Z,
+            PosY = position.Y,
+            PosZ = position.Z + spriteInfo.HeightInTiles,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,
@@ -191,17 +177,31 @@ public sealed class WorldSpriteSequencer
             LightFactor = lightFactor
         };
 
-        /* Bottom left. */
+        /* Top right. */
+        vertices[2] = new WorldVertex
+        {
+            PosX = position.X + spriteInfo.WidthInTiles,
+            PosY = position.Y + spriteInfo.HeightInTiles,
+            PosZ = position.Z + spriteInfo.HeightInTiles,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedRightX,
+            TexY = spriteInfo.NormalizedTopY,
+            LightFactor = lightFactor
+        };
+
+        /* Top left. */
         vertices[3] = new WorldVertex
         {
             PosX = position.X,
-            PosY = position.Y - spriteInfo.HeightInTiles,
-            PosZ = position.Z,
+            PosY = position.Y + spriteInfo.HeightInTiles,
+            PosZ = position.Z + spriteInfo.HeightInTiles,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedLeftX,
-            TexY = spriteInfo.NormalizedBottomY,
+            TexY = spriteInfo.NormalizedTopY,
             LightFactor = lightFactor
         };
     }
@@ -223,40 +223,26 @@ public sealed class WorldSpriteSequencer
         /* Retrieve sprite information. */
         var spriteInfo = atlasMap.MapElements[sprite.Id];
 
-        /* Top left. */
+        /* Bottom left. */
         vertices[0] = new WorldVertex
         {
             PosX = position.X,
-            PosY = position.Y,
+            PosY = position.Y + spriteInfo.HeightInTiles,
             PosZ = position.Z,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedLeftX,
-            TexY = spriteInfo.NormalizedTopY,
-            LightFactor = lightFactor
-        };
-
-        /* Top right. */
-        vertices[1] = new WorldVertex
-        {
-            PosX = position.X + spriteInfo.WidthInTiles,
-            PosY = position.Y,
-            PosZ = position.Z,
-            VelX = velocity.X,
-            VelY = velocity.Y,
-            VelZ = velocity.Z,
-            TexX = spriteInfo.NormalizedRightX,
-            TexY = spriteInfo.NormalizedTopY,
+            TexY = spriteInfo.NormalizedBottomY,
             LightFactor = lightFactor
         };
 
         /* Bottom right. */
-        vertices[2] = new WorldVertex
+        vertices[1] = new WorldVertex
         {
             PosX = position.X + spriteInfo.WidthInTiles,
-            PosY = position.Y,
-            PosZ = position.Z - spriteInfo.HeightInTiles,
+            PosY = position.Y + spriteInfo.HeightInTiles,
+            PosZ = position.Z,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,
@@ -265,17 +251,31 @@ public sealed class WorldSpriteSequencer
             LightFactor = lightFactor
         };
 
-        /* Bottom left. */
+        /* Top right. */
+        vertices[2] = new WorldVertex
+        {
+            PosX = position.X + spriteInfo.WidthInTiles,
+            PosY = position.Y + spriteInfo.HeightInTiles,
+            PosZ = position.Z + spriteInfo.HeightInTiles,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedRightX,
+            TexY = spriteInfo.NormalizedTopY,
+            LightFactor = lightFactor
+        };
+
+        /* Top left. */
         vertices[3] = new WorldVertex
         {
             PosX = position.X,
-            PosY = position.Y,
-            PosZ = position.Z - spriteInfo.HeightInTiles,
+            PosY = position.Y + spriteInfo.HeightInTiles,
+            PosZ = position.Z + spriteInfo.HeightInTiles,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedLeftX,
-            TexY = spriteInfo.NormalizedBottomY,
+            TexY = spriteInfo.NormalizedTopY,
             LightFactor = lightFactor
         };
     }
@@ -297,39 +297,25 @@ public sealed class WorldSpriteSequencer
         /* Retrieve sprite information. */
         var spriteInfo = atlasMap.MapElements[sprite.Id];
 
-        /* Top left. */
+        /* Bottom left. */
         vertices[0] = new WorldVertex
         {
             PosX = position.X,
-            PosY = position.Y - spriteInfo.HeightInTiles,
-            PosZ = position.Z + spriteInfo.HeightInTiles,
+            PosY = position.Y,
+            PosZ = position.Z,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedLeftX,
-            TexY = spriteInfo.NormalizedTopY,
-            LightFactor = lightFactor
-        };
-
-        /* Top right. */
-        vertices[1] = new WorldVertex
-        {
-            PosX = position.X + spriteInfo.WidthInTiles,
-            PosY = position.Y - spriteInfo.HeightInTiles,
-            PosZ = position.Z + spriteInfo.HeightInTiles,
-            VelX = velocity.X,
-            VelY = velocity.Y,
-            VelZ = velocity.Z,
-            TexX = spriteInfo.NormalizedRightX,
-            TexY = spriteInfo.NormalizedTopY,
+            TexY = spriteInfo.NormalizedBottomY,
             LightFactor = lightFactor
         };
 
         /* Bottom right. */
-        vertices[2] = new WorldVertex
+        vertices[1] = new WorldVertex
         {
             PosX = position.X + spriteInfo.WidthInTiles,
-            PosY = position.Y - spriteInfo.HeightInTiles,
+            PosY = position.Y,
             PosZ = position.Z,
             VelX = velocity.X,
             VelY = velocity.Y,
@@ -339,17 +325,31 @@ public sealed class WorldSpriteSequencer
             LightFactor = lightFactor
         };
 
-        /* Bottom left. */
+        /* Top right. */
+        vertices[2] = new WorldVertex
+        {
+            PosX = position.X + spriteInfo.WidthInTiles,
+            PosY = position.Y,
+            PosZ = position.Z + spriteInfo.HeightInTiles,
+            VelX = velocity.X,
+            VelY = velocity.Y,
+            VelZ = velocity.Z,
+            TexX = spriteInfo.NormalizedRightX,
+            TexY = spriteInfo.NormalizedTopY,
+            LightFactor = lightFactor
+        };
+
+        /* Top left. */
         vertices[3] = new WorldVertex
         {
             PosX = position.X,
-            PosY = position.Y - spriteInfo.HeightInTiles,
-            PosZ = position.Z,
+            PosY = position.Y,
+            PosZ = position.Z + spriteInfo.HeightInTiles,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedLeftX,
-            TexY = spriteInfo.NormalizedBottomY,
+            TexY = spriteInfo.NormalizedTopY,
             LightFactor = lightFactor
         };
     }

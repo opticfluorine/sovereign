@@ -183,7 +183,7 @@ public sealed class WorldVertexSequencer
     /// <param name="blockVertices">Vertices to populate for this block.</param>
     private void AddVerticesForBlock(Vector3 basePos, Span<WorldVertex> blockVertices)
     {
-        // Vertex 0 = (0, 0, 0) [left, back, top]
+        // Vertex 0 = (0, 0, 0) [left, front, bottom]
         blockVertices[0] = new WorldVertex
         {
             PosX = basePos.X,
@@ -196,7 +196,7 @@ public sealed class WorldVertexSequencer
             VelZ = 0.0f // unused
         };
 
-        // Vertex 1 = (1, 0, 0) [right, back, top]
+        // Vertex 1 = (1, 0, 0) [right, front, bottom]
         blockVertices[1] = new WorldVertex
         {
             PosX = basePos.X + 1,
@@ -209,11 +209,11 @@ public sealed class WorldVertexSequencer
             VelZ = 0.0f // unused
         };
 
-        // Vertex 2 = (1, -1, 0) [right, front, top]
+        // Vertex 2 = (1, 1, 0) [right, back, bottom]
         blockVertices[2] = new WorldVertex
         {
             PosX = basePos.X + 1,
-            PosY = basePos.Y - 1,
+            PosY = basePos.Y + 1,
             PosZ = basePos.Z,
             TexX = 0.0f, // unused
             TexY = 0.0f, // unused
@@ -222,11 +222,11 @@ public sealed class WorldVertexSequencer
             VelZ = 0.0f // unused
         };
 
-        // Vertex 3 = (0, -1, 0) [left, front, top]
+        // Vertex 3 = (0, 1, 0) [left, back, bottom]
         blockVertices[3] = new WorldVertex
         {
             PosX = basePos.X,
-            PosY = basePos.Y - 1,
+            PosY = basePos.Y + 1,
             PosZ = basePos.Z,
             TexX = 0.0f, // unused
             TexY = 0.0f, // unused
@@ -235,12 +235,12 @@ public sealed class WorldVertexSequencer
             VelZ = 0.0f // unused
         };
 
-        // Vertex 4 = (0, 0, -1) [left, back, bottom]
+        // Vertex 4 = (0, 0, 1) [left, front, top]
         blockVertices[4] = new WorldVertex
         {
             PosX = basePos.X,
             PosY = basePos.Y,
-            PosZ = basePos.Z - 1,
+            PosZ = basePos.Z + 1,
             TexX = 0.0f, // unused
             TexY = 0.0f, // unused
             VelX = 0.0f, // unused
@@ -248,12 +248,12 @@ public sealed class WorldVertexSequencer
             VelZ = 0.0f // unused
         };
 
-        // Vertex 5 = (1, 0, -1) [right, back, bottom]
+        // Vertex 5 = (1, 0, 1) [right, front, top]
         blockVertices[5] = new WorldVertex
         {
             PosX = basePos.X + 1,
             PosY = basePos.Y,
-            PosZ = basePos.Z - 1,
+            PosZ = basePos.Z + 1,
             TexX = 0.0f, // unused
             TexY = 0.0f, // unused
             VelX = 0.0f, // unused
@@ -261,12 +261,12 @@ public sealed class WorldVertexSequencer
             VelZ = 0.0f // unused
         };
 
-        // Vertex 6 = (1, -1, -1) [right, front, top]
+        // Vertex 6 = (1, 1, 1) [right, back, top]
         blockVertices[6] = new WorldVertex
         {
             PosX = basePos.X + 1,
-            PosY = basePos.Y - 1,
-            PosZ = basePos.Z - 1,
+            PosY = basePos.Y + 1,
+            PosZ = basePos.Z + 1,
             TexX = 0.0f, // unused
             TexY = 0.0f, // unused
             VelX = 0.0f, // unused
@@ -274,12 +274,12 @@ public sealed class WorldVertexSequencer
             VelZ = 0.0f // unused
         };
 
-        // Vertex 7 = (0, -1, -1) [left, front, top]
+        // Vertex 7 = (0, 1, 1) [left, back, top]
         blockVertices[7] = new WorldVertex
         {
             PosX = basePos.X,
-            PosY = basePos.Y - 1,
-            PosZ = basePos.Z - 1,
+            PosY = basePos.Y + 1,
+            PosZ = basePos.Z + 1,
             TexX = 0.0f, // unused
             TexY = 0.0f, // unused
             VelX = 0.0f, // unused
@@ -296,46 +296,46 @@ public sealed class WorldVertexSequencer
     public void AddIndicesForBlock(uint baseIndex, Span<uint> blockIndices)
     {
         // Top face.
-        blockIndices[0] = baseIndex + 0;
-        blockIndices[1] = baseIndex + 3;
-        blockIndices[2] = baseIndex + 1;
-        blockIndices[3] = baseIndex + 1;
-        blockIndices[4] = baseIndex + 3;
-        blockIndices[5] = baseIndex + 2;
+        blockIndices[0] = baseIndex + 4;
+        blockIndices[1] = baseIndex + 5;
+        blockIndices[2] = baseIndex + 7;
+        blockIndices[3] = baseIndex + 7;
+        blockIndices[4] = baseIndex + 5;
+        blockIndices[5] = baseIndex + 6;
 
         // Front face.
-        blockIndices[6] = baseIndex + 3;
-        blockIndices[7] = baseIndex + 7;
-        blockIndices[8] = baseIndex + 2;
-        blockIndices[9] = baseIndex + 2;
-        blockIndices[10] = baseIndex + 7;
+        blockIndices[6] = baseIndex + 4;
+        blockIndices[7] = baseIndex + 5;
+        blockIndices[8] = baseIndex + 7;
+        blockIndices[9] = baseIndex + 7;
+        blockIndices[10] = baseIndex + 5;
         blockIndices[11] = baseIndex + 6;
 
         // Bottom face is omitted. Might need to eventually add to handle point light
         // sources that radiate upward?
 
         // Back face.
-        blockIndices[12] = baseIndex + 0;
-        blockIndices[13] = baseIndex + 1;
-        blockIndices[14] = baseIndex + 4;
-        blockIndices[15] = baseIndex + 4;
-        blockIndices[16] = baseIndex + 1;
-        blockIndices[17] = baseIndex + 5;
+        blockIndices[12] = baseIndex + 2;
+        blockIndices[13] = baseIndex + 3;
+        blockIndices[14] = baseIndex + 6;
+        blockIndices[15] = baseIndex + 6;
+        blockIndices[16] = baseIndex + 3;
+        blockIndices[17] = baseIndex + 7;
 
         // Left face.
-        blockIndices[18] = baseIndex + 4;
+        blockIndices[18] = baseIndex + 3;
         blockIndices[19] = baseIndex + 0;
         blockIndices[20] = baseIndex + 7;
         blockIndices[21] = baseIndex + 7;
         blockIndices[22] = baseIndex + 0;
-        blockIndices[23] = baseIndex + 3;
+        blockIndices[23] = baseIndex + 4;
 
         // Right face.
-        blockIndices[24] = baseIndex + 2;
-        blockIndices[25] = baseIndex + 1;
-        blockIndices[26] = baseIndex + 6;
-        blockIndices[27] = baseIndex + 6;
-        blockIndices[28] = baseIndex + 1;
-        blockIndices[29] = baseIndex + 5;
+        blockIndices[24] = baseIndex + 1;
+        blockIndices[25] = baseIndex + 2;
+        blockIndices[26] = baseIndex + 5;
+        blockIndices[27] = baseIndex + 5;
+        blockIndices[28] = baseIndex + 2;
+        blockIndices[29] = baseIndex + 6;
     }
 }

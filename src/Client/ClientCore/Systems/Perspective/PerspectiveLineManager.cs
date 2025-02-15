@@ -530,8 +530,8 @@ public class PerspectiveLineManager
     /// <returns>Perspective line index.</returns>
     private PerspectiveLineKey GetIndexForPosition(Vector3 position)
     {
-        return GetIndexForBlockPosition((int)Math.Floor(position.X), (int)Math.Ceiling(position.Y),
-            (int)Math.Ceiling(position.Z));
+        return GetIndexForBlockPosition((int)Math.Floor(position.X), (int)Math.Floor(position.Y),
+            (int)Math.Floor(position.Z));
     }
 
     /// <summary>
@@ -541,7 +541,7 @@ public class PerspectiveLineManager
     /// <returns>Perspective line index.</returns>
     private Tuple<int, int> GetIndexForProjectedPosition(Vector2 projectedPosition)
     {
-        return Tuple.Create((int)Math.Floor(projectedPosition.X), (int)Math.Ceiling(projectedPosition.Y));
+        return Tuple.Create((int)Math.Floor(projectedPosition.X), (int)Math.Floor(projectedPosition.Y));
     }
 
     /// <summary>
@@ -560,7 +560,7 @@ public class PerspectiveLineManager
         var position = kinematics[entityId].Position;
         var projectedPosition = new Vector2(position.X, position.Y + position.Z);
         var originX = (int)Math.Floor(projectedPosition.X);
-        var originY = (int)Math.Ceiling(projectedPosition.Y);
+        var originY = (int)Math.Floor(projectedPosition.Y);
         var entityExtent = drawableLookup.GetEntityDrawableSizeWorld(entityId);
 
         // Determine line extent along projected x and y axes.
