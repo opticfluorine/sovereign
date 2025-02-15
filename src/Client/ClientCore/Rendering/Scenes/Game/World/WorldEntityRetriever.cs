@@ -23,11 +23,11 @@ using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
+using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.ClientCore.Systems.Block.Caches;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Numerics;
 
@@ -40,6 +40,7 @@ public sealed class WorldEntityRetriever
 {
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly AtlasMap atlasMap;
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly IBlockAnimatedSpriteCache blockSpriteCache;
     private readonly CameraServices camera;
@@ -74,7 +75,7 @@ public sealed class WorldEntityRetriever
         OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases,
         IBlockAnimatedSpriteCache blockSpriteCache, CastBlockShadowsTagCollection castBlockShadows,
         LightSourceTable lightSourceTable, PlayerCharacterTagCollection playerCharacters,
-        WorldRangeSelector rangeSelector)
+        WorldRangeSelector rangeSelector, AtlasMap atlasMap)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -92,6 +93,7 @@ public sealed class WorldEntityRetriever
         this.lightSourceTable = lightSourceTable;
         this.playerCharacters = playerCharacters;
         this.rangeSelector = rangeSelector;
+        this.atlasMap = atlasMap;
     }
 
     /// <summary>
@@ -240,10 +242,14 @@ public sealed class WorldEntityRetriever
     /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
     private void AddNameLabel(ulong entityId, Kinematics entityKinematics, Sprite sprite, float timeSinceTick)
     {
+        // The name label should appear above the sprite, so translate it upward by the sprite height.
+        var spriteInfo = atlasMap.MapElements[sprite.Id];
+        var zOffset = new Vector3(0.0f, 0.0f, spriteInfo.HeightInTiles);
+
         NameLabels.Add(new NameLabel
         {
             EntityId = entityId,
-            InterpolatedPosition = entityKinematics.Position + timeSinceTick * entityKinematics.Velocity,
+            InterpolatedPosition = entityKinematics.Position + zOffset + timeSinceTick * entityKinematics.Velocity,
             SpriteId = sprite.Id
         });
     }
