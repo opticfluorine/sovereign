@@ -187,9 +187,9 @@ public class PerspectiveLineManager
         {
             // If there are multiple entities at the highest depth, the priority is:
             //   1. Non-block entities (take first available)
-            //   2. Block top face (will only ever be one at a given z floor)
-            //   3. Block front face (will only ever be one at a given z floor)
-            var foundTopFace = false;
+            //   2. Block front face (will only ever be one at a given z floor)
+            //   3. Block top face (will only ever be one at a given z floor)
+            var foundFrontFace = false;
             var projectedPoint = new Vector2(point.X, point.Y + point.Z);
             var foundAny = false;
             foreach (var entityInfo in zSet.Entities)
@@ -204,13 +204,13 @@ public class PerspectiveLineManager
                         entityId = entityInfo.EntityId;
                         return true;
 
-                    case EntityType.BlockTopFace:
-                        foundTopFace = true;
+                    case EntityType.BlockFrontFace:
+                        foundFrontFace = true;
                         entityId = entityInfo.EntityId;
                         break;
 
-                    case EntityType.BlockFrontFace:
-                        if (!foundTopFace) entityId = entityInfo.EntityId;
+                    case EntityType.BlockTopFace:
+                        if (!foundFrontFace) entityId = entityInfo.EntityId;
                         break;
                 }
             }
@@ -245,19 +245,19 @@ public class PerspectiveLineManager
             case EntityType.BlockTopFace:
             {
                 var blockPos = blockPositions[entityId];
-                entityPosition = new Vector2(blockPos.X, blockPos.Y + blockPos.Z);
+                entityPosition = new Vector2(blockPos.X, blockPos.Y + blockPos.Z + 1);
                 break;
             }
 
             case EntityType.BlockFrontFace:
             {
                 var blockPos = blockPositions[entityId];
-                entityPosition = new Vector2(blockPos.X, blockPos.Y + blockPos.Z - 1);
+                entityPosition = new Vector2(blockPos.X, blockPos.Y + blockPos.Z);
                 break;
             }
         }
 
-        var entityRangeMin = entityPosition with { Y = entityPosition.Y - entityExtent.Y };
+        var entityRangeMin = entityPosition;
         var entityRangeMax = entityRangeMin + entityExtent;
 
         return RangeUtil.IsPointInRange(entityRangeMin, entityRangeMax, projectedPoint);
@@ -283,11 +283,11 @@ public class PerspectiveLineManager
     private void AddBlockEntity(ulong entityId, GridPosition blockPosition)
     {
         // Block entities only overlap a single perspective line since they are always positioned
-        // in the same block position lattice as the lines. However, their two faces differ in their y
+        // in the same block position lattice as the lines. However, their two faces differ in their z
         // coordinate and therefore fall on two different perspective lines.
-        var indexTopFace = GetIndexForBlockPosition(blockPosition);
-        var indexFrontFace = GetIndexForBlockPosition(blockPosition with { Y = blockPosition.Y - 1 });
-        AddEntityToLine(entityId, indexTopFace, blockPosition.Z, EntityType.BlockTopFace, indexTopFace.OriginFlag);
+        var indexTopFace = GetIndexForBlockPosition(blockPosition with { Z = blockPosition.Z + 1 });
+        var indexFrontFace = GetIndexForBlockPosition(blockPosition);
+        AddEntityToLine(entityId, indexTopFace, blockPosition.Z + 1, EntityType.BlockTopFace, indexTopFace.OriginFlag);
         AddEntityToLine(entityId, indexFrontFace, blockPosition.Z, EntityType.BlockFrontFace,
             indexFrontFace.OriginFlag);
     }
@@ -564,7 +564,7 @@ public class PerspectiveLineManager
         var entityExtent = drawableLookup.GetEntityDrawableSizeWorld(entityId);
 
         // Determine line extent along projected x and y axes.
-        var minPosition = projectedPosition with { Y = projectedPosition.Y - entityExtent.Y };
+        var minPosition = projectedPosition;
         var maxPosition = projectedPosition + entityExtent;
         var minIndices = GetIndexForProjectedPosition(minPosition);
         var maxIndices = GetIndexForProjectedPosition(maxPosition);
