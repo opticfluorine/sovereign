@@ -154,7 +154,7 @@ public sealed class WorldSpriteSequencer
         {
             PosX = position.X,
             PosY = position.Y,
-            PosZ = position.Z + spriteInfo.HeightInTiles,
+            PosZ = position.Z,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,
@@ -168,7 +168,7 @@ public sealed class WorldSpriteSequencer
         {
             PosX = position.X + spriteInfo.WidthInTiles,
             PosY = position.Y,
-            PosZ = position.Z + spriteInfo.HeightInTiles,
+            PosZ = position.Z,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,
@@ -182,7 +182,7 @@ public sealed class WorldSpriteSequencer
         {
             PosX = position.X + spriteInfo.WidthInTiles,
             PosY = position.Y + spriteInfo.HeightInTiles,
-            PosZ = position.Z + spriteInfo.HeightInTiles,
+            PosZ = position.Z,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,
@@ -196,7 +196,7 @@ public sealed class WorldSpriteSequencer
         {
             PosX = position.X,
             PosY = position.Y + spriteInfo.HeightInTiles,
-            PosZ = position.Z + spriteInfo.HeightInTiles,
+            PosZ = position.Z,
             VelX = velocity.X,
             VelY = velocity.Y,
             VelZ = velocity.Z,

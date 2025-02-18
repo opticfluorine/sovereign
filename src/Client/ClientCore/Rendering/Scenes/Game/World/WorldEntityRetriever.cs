@@ -190,11 +190,11 @@ public sealed class WorldEntityRetriever
             }
 
             // Between passes, handle the faces.
-            if (!foundOpaqueBlock && topFaceId < ulong.MaxValue)
-                ProcessBlockTopFace(topFaceId, systemTime, out opaqueThisDepth);
-
-            if (!foundOpaqueBlock && !opaqueThisDepth && frontFaceId < ulong.MaxValue)
+            if (!foundOpaqueBlock && frontFaceId < ulong.MaxValue)
                 ProcessBlockFrontFace(frontFaceId, systemTime, out opaqueThisDepth);
+
+            if (!foundOpaqueBlock && !opaqueThisDepth && topFaceId < ulong.MaxValue)
+                ProcessBlockTopFace(topFaceId, systemTime, out opaqueThisDepth);
 
             // If a top face was found, mark the block for solid geometry rendering.
             if (topFaceId < ulong.MaxValue) ProcessSolidBlock(topFaceId);
@@ -262,7 +262,7 @@ public sealed class WorldEntityRetriever
         isOpaque = false;
 
         var blockPosition = blockPositions[entityId];
-        var facePosition = (Vector3)(blockPosition with { Y = blockPosition.Y - 1 });
+        var facePosition = (Vector3)blockPosition;
         var animatedSpriteIds = blockSpriteCache.GetFrontFaceAnimatedSpriteIds(entityId);
         var firstLayer = true;
         foreach (var animatedSpriteId in animatedSpriteIds)
@@ -283,14 +283,15 @@ public sealed class WorldEntityRetriever
     {
         isOpaque = false;
 
-        var blockPosition = (Vector3)blockPositions[entityId];
+        var blockPosition = blockPositions[entityId];
+        var facePosition = (Vector3)(blockPosition with { Z = blockPosition.Z + 1 });
         var animatedSpriteIds = blockSpriteCache.GetTopFaceAnimatedSpriteIds(entityId);
         var firstLayer = true;
         foreach (var animatedSpriteId in animatedSpriteIds)
         {
             var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)
                 .GetSpriteForTime(systemTime, Orientation.South);
-            grouper.AddSprite(EntityType.BlockTopFace, blockPosition, Vector3.Zero, sprite,
+            grouper.AddSprite(EntityType.BlockTopFace, facePosition, Vector3.Zero, sprite,
                 firstLayer ? 1.0f : 0.0f);
             isOpaque = isOpaque || sprite.Opaque;
             firstLayer = false;
