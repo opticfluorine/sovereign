@@ -56,24 +56,24 @@ public sealed class WorldLayerVertexSequencer
     public void AddLayer(WorldLayer layer, RenderPlan renderPlan, ulong systemTime)
     {
         // Blocks. These only need to be handled at the current layer.
-        spriteSequencer.SequenceSprites(layer.FrontFaceTileSprites, renderPlan, SpritePlane.XzBack,
-            out var frontBaseIndex,
-            out var frontIndexCount);
         spriteSequencer.SequenceSprites(layer.TopFaceTileSprites, renderPlan, SpritePlane.Xy, out var topBaseIndex,
             out var topIndexCount);
+        spriteSequencer.SequenceSprites(layer.FrontFaceTileSprites, renderPlan, SpritePlane.Xz,
+            out var frontBaseIndex,
+            out var frontIndexCount);
 
         // Free sprites. These must be handled at the current layer plus any future layers with which they overlap.
-        spriteSequencer.SequenceSprites(layer.FreeSprites, renderPlan, SpritePlane.XzFront, out var spriteBaseIndex,
+        spriteSequencer.SequenceSprites(layer.FreeSprites, renderPlan, SpritePlane.Xz, out var spriteBaseIndex,
             out var spriteIndexCount);
 
         renderPlan.PushDebugGroup($"Layer {layer.ZFloor}");
 
-        renderPlan.PushDebugGroup("Block Front Faces");
-        renderPlan.DrawSprites(frontBaseIndex, frontIndexCount, true);
-        renderPlan.PopDebugGroup();
-
         renderPlan.PushDebugGroup("Block Top Faces");
         renderPlan.DrawSprites(topBaseIndex, topIndexCount, true);
+        renderPlan.PopDebugGroup();
+
+        renderPlan.PushDebugGroup("Block Front Faces");
+        renderPlan.DrawSprites(frontBaseIndex, frontIndexCount, true);
         renderPlan.PopDebugGroup();
 
         renderPlan.PushDebugGroup("Free Sprite Overdraw");
@@ -103,7 +103,7 @@ public sealed class WorldLayerVertexSequencer
             if (sprite.MaxLayer < zFloor) continue;
             toDraw.Add(sprite.Data);
 
-            spriteSequencer.SequenceSprites(toDraw, renderPlan, SpritePlane.XzFront, out var baseIndex,
+            spriteSequencer.SequenceSprites(toDraw, renderPlan, SpritePlane.Xz, out var baseIndex,
                 out var indexCount);
             renderPlan.DrawSprites(baseIndex, indexCount, false);
         }

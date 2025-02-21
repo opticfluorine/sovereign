@@ -115,8 +115,8 @@ public class LightSourceTable
                 // Assume the sprite size is constant across all phases, orientations, and frames.
                 var sprite = animatedSpriteManager.AnimatedSprites[animatedSprites[parentEntityId]].GetDefaultSprite();
                 var spriteInfo = atlasMap.MapElements[sprite.Id];
-                offset = details.PositionOffset * new Vector3(spriteInfo.WidthInTiles, -spriteInfo.HeightInTiles,
-                    -spriteInfo.HeightInTiles);
+                offset = details.PositionOffset * new Vector3(spriteInfo.WidthInTiles, spriteInfo.HeightInTiles,
+                    spriteInfo.HeightInTiles);
             }
 
             var lightCenter = basePos + offset;

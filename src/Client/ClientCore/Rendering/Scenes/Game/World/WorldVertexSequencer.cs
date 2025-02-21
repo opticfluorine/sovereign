@@ -304,12 +304,12 @@ public sealed class WorldVertexSequencer
         blockIndices[5] = baseIndex + 6;
 
         // Front face.
-        blockIndices[6] = baseIndex + 4;
-        blockIndices[7] = baseIndex + 5;
-        blockIndices[8] = baseIndex + 7;
-        blockIndices[9] = baseIndex + 7;
-        blockIndices[10] = baseIndex + 5;
-        blockIndices[11] = baseIndex + 6;
+        blockIndices[6] = baseIndex + 0;
+        blockIndices[7] = baseIndex + 1;
+        blockIndices[8] = baseIndex + 4;
+        blockIndices[9] = baseIndex + 4;
+        blockIndices[10] = baseIndex + 1;
+        blockIndices[11] = baseIndex + 5;
 
         // Bottom face is omitted. Might need to eventually add to handle point light
         // sources that radiate upward?
