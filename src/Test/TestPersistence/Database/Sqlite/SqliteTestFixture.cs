@@ -32,7 +32,7 @@ public class SqliteTestFixture : IDisposable
     /// <summary>
     ///     Path to the full SQL setup file.
     /// </summary>
-    private const string SetupFile = @"../../../../Persistence/Migrations/Full/Full_sqlite.sql";
+    private const string SetupFile = @"../../../../../Server/Persistence/Migrations/Full/Full_sqlite.sql";
 
     public SqliteTestFixture()
     {

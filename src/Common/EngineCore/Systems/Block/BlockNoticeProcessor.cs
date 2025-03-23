@@ -27,11 +27,11 @@ namespace Sovereign.EngineCore.Systems.Block;
 public class BlockNoticeProcessor
 {
     private readonly BlockManager blockManager;
-    private readonly BlockServices blockServices;
+    private readonly IBlockServices blockServices;
     private readonly EntityTable entityTable;
     private readonly ILogger<BlockNoticeProcessor> logger;
 
-    public BlockNoticeProcessor(BlockServices blockServices, BlockManager blockManager, EntityTable entityTable,
+    public BlockNoticeProcessor(IBlockServices blockServices, BlockManager blockManager, EntityTable entityTable,
         ILogger<BlockNoticeProcessor> logger)
     {
         this.blockServices = blockServices;

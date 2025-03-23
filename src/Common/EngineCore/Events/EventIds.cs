@@ -106,6 +106,12 @@ public enum EventId
     /// Associated details: GridPositionEventDetails
     Core_Block_RemoveNotice = 206,
 
+    /// <summary>
+    ///     Announces that the block presence grid for a z plane in a world segment has been modified.
+    /// </summary>
+    /// Associated details: BlockPresenceGridUpdatedEventDetails
+    Core_Block_GridUpdated = 207,
+
     #endregion Blocks
 
     #region Performance

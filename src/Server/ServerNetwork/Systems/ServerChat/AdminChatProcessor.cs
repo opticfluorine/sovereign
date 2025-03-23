@@ -82,7 +82,7 @@ public class AdminChatProcessor : IChatProcessor
 
     private readonly AdminTagCollection admins;
     private readonly BlockController blockController;
-    private readonly BlockServices blockServices;
+    private readonly IBlockServices blockServices;
     private readonly BlockTemplateNameComponentIndexer blockTemplateNames;
     private readonly IEventSender eventSender;
     private readonly ServerChatInternalController internalController;
@@ -101,7 +101,7 @@ public class AdminChatProcessor : IChatProcessor
         PlayerRoleCheck playerRoleCheck, PlayerNameComponentIndexer playerNameIndex,
         NameComponentValidator nameValidator, PersistencePlayerServices persistencePlayerServices,
         LoggingUtil loggingUtil, NameComponentCollection names, WorldManagementController worldManagementController,
-        IEventSender eventSender, BlockController blockController, BlockServices blockServices,
+        IEventSender eventSender, BlockController blockController, IBlockServices blockServices,
         BlockTemplateNameComponentIndexer blockTemplateNames, ILogger<AdminChatProcessor> logger,
         ScriptingController scriptingController, ScriptingServices scriptingServices)
     {

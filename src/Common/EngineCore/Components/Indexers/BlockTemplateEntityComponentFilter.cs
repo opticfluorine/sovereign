@@ -24,11 +24,11 @@ namespace Sovereign.EngineCore.Components.Indexers;
 /// <typeparam name="T">Component value type.</typeparam>
 public class BlockTemplateEntityComponentFilter<T> : TemplateEntityComponentFilter<T> where T : notnull
 {
-    private readonly BlockServices blockServices;
+    private readonly IBlockServices blockServices;
 
     public BlockTemplateEntityComponentFilter(BaseComponentCollection<T> components,
         IComponentEventSource<T> eventSource,
-        BlockServices blockServices)
+        IBlockServices blockServices)
         : base(components, eventSource)
     {
         this.blockServices = blockServices;

@@ -31,6 +31,7 @@ namespace Sovereign.EngineCore.Systems.Block;
 public sealed class BlockManager
 {
     private readonly AboveBlockComponentCollection aboveBlocks;
+    private readonly BlockGridTracker blockGridTracker;
     private readonly BlockGridPositionIndexer blockPositionIndexer;
     private readonly BlockPositionComponentCollection blockPositions;
 
@@ -43,7 +44,8 @@ public sealed class BlockManager
         BlockGridPositionIndexer blockPositionIndexer,
         AboveBlockComponentCollection aboveBlocks,
         BlockPositionComponentCollection blockPositions,
-        ILogger<BlockManager> logger)
+        ILogger<BlockManager> logger,
+        BlockGridTracker blockGridTracker)
     {
         this.entityFactory = entityFactory;
         this.entityManager = entityManager;
@@ -51,6 +53,7 @@ public sealed class BlockManager
         this.aboveBlocks = aboveBlocks;
         this.blockPositions = blockPositions;
         this.logger = logger;
+        this.blockGridTracker = blockGridTracker;
     }
 
     /// <summary>
@@ -62,6 +65,7 @@ public sealed class BlockManager
     {
         var blockId = CreateBlockForRecord(blockRecord, isLoad);
         CoverBelowBlock(blockRecord, blockId);
+        blockGridTracker.AddBlock(blockRecord.Position);
     }
 
     /// <summary>
@@ -70,10 +74,18 @@ public sealed class BlockManager
     /// <param name="entityId">Entity ID of the block to be removed.</param>
     public void RemoveBlock(ulong entityId)
     {
+        if (!blockPositions.HasComponentForEntity(entityId))
+        {
+            logger.LogError("Tried to remove block {BlockId} with no block position.", entityId);
+            return;
+        }
+
+        var blockPosition = blockPositions[entityId];
+        blockGridTracker.RemoveBlock(blockPosition);
+
         UncoverBelowBlock(entityId);
         entityManager.RemoveEntity(entityId);
     }
-
 
     /// <summary>
     ///     Creates the block described by the given record.

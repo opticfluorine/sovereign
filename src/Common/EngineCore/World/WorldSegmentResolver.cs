@@ -31,7 +31,7 @@ public sealed class WorldSegmentResolver
 
     public WorldSegmentResolver()
     {
-        step = new Vector3(WorldManagementConfiguration.SegmentLength);
+        step = new Vector3(WorldConstants.SegmentLength);
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public sealed class WorldSegmentResolver
     public Tuple<Vector3, Vector3> GetRangeForWorldSegment(GridPosition segmentIndex)
     {
         var min = new Vector3(segmentIndex.X, segmentIndex.Y, segmentIndex.Z) *
-                  WorldManagementConfiguration.SegmentLength;
+                  WorldConstants.SegmentLength;
         var max = min + step;
         return new Tuple<Vector3, Vector3>(min, max);
     }
@@ -56,9 +56,19 @@ public sealed class WorldSegmentResolver
     {
         return new GridPosition
         {
-            X = (int)Math.Floor(position.X / WorldManagementConfiguration.SegmentLength),
-            Y = (int)Math.Floor(position.Y / WorldManagementConfiguration.SegmentLength),
-            Z = (int)Math.Floor(position.Z / WorldManagementConfiguration.SegmentLength)
+            X = (int)Math.Floor(position.X / WorldConstants.SegmentLength),
+            Y = (int)Math.Floor(position.Y / WorldConstants.SegmentLength),
+            Z = (int)Math.Floor(position.Z / WorldConstants.SegmentLength)
         };
+    }
+
+    /// <summary>
+    ///     Gets the world segment index to which the given position belongs.
+    /// </summary>
+    /// <param name="position">Position.</param>
+    /// <returns>World segment index.</returns>
+    public GridPosition GetWorldSegmentForPosition(GridPosition position)
+    {
+        return GetWorldSegmentForPosition((Vector3)position);
     }
 }

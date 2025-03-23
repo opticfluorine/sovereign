@@ -25,11 +25,14 @@ public class MovementEventHandler
 {
     private readonly ILogger<MovementEventHandler> logger;
     private readonly MovementManager manager;
+    private readonly CollisionMeshManager meshManager;
 
-    public MovementEventHandler(MovementManager manager, ILogger<MovementEventHandler> logger)
+    public MovementEventHandler(MovementManager manager, ILogger<MovementEventHandler> logger,
+        CollisionMeshManager meshManager)
     {
         this.manager = manager;
         this.logger = logger;
+        this.meshManager = meshManager;
     }
 
     /// <summary>
@@ -68,7 +71,20 @@ public class MovementEventHandler
 
             case EventId.Core_Tick:
                 manager.HandleTick();
+                meshManager.OnTick();
                 break;
+
+            case EventId.Core_Block_GridUpdated:
+            {
+                if (ev.EventDetails is not BlockPresenceGridUpdatedEventDetails details)
+                {
+                    logger.LogError("Received GridUpdated event with bad details.");
+                    break;
+                }
+
+                meshManager.ScheduleUpdate(details.WorldSegmentIndex, details.Z);
+                break;
+            }
         }
     }
 }

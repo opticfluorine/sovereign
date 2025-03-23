@@ -4,6 +4,15 @@
 
 ### February 
 
+#### 20 February 2025
+
+* World: Change coordinate system so that position specifies the bottom-front-left vertex.
+  Previously the position specified the top-back-left vertex. The new approach simplifies
+  a lot of things including rendering logic and computing offsets (which are now simple
+  vector addition instead of requiring awkward manipulation of the signs of each component).
+  Not only does this simplify the existing rendering logic, it should also simplify the
+  upcoming physics engine work.
+
 #### 06 February 2025
 
 * All: Add `Physics` and `BoundingBox` components to suuport the physics engine.

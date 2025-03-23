@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,18 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Systems.Block;
+using Sovereign.EngineCore.Components.Types;
 
-namespace Sovereign.EngineCore.Components.Indexers;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Component filter that only accepts events from the Name component attached to a
-///     block template entity.
+///     Event details indicating an update to the block presence grid for a Z plane in a world segment.
 /// </summary>
-public class BlockTemplateNameComponentFilter : BlockTemplateEntityComponentFilter<string>
+public class BlockPresenceGridUpdatedEventDetails : IEventDetails
 {
-    public BlockTemplateNameComponentFilter(NameComponentCollection names, IBlockServices blockServices)
-        : base(names, names, blockServices)
-    {
-    }
+    /// <summary>
+    ///     World segment index.
+    /// </summary>
+    public GridPosition WorldSegmentIndex { get; set; }
+
+    /// <summary>
+    ///     Z coordinate of the affected plane.
+    /// </summary>
+    public int Z { get; set; }
 }

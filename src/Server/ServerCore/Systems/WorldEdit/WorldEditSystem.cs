@@ -32,14 +32,14 @@ namespace Sovereign.ServerCore.Systems.WorldEdit;
 public class WorldEditSystem : ISystem
 {
     private readonly BlockController blockController;
-    private readonly BlockServices blockServices;
+    private readonly IBlockServices blockServices;
     private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
     private readonly ILogger<WorldEditSystem> logger;
     private readonly LoggingUtil loggingUtil;
 
     public WorldEditSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, BlockController blockController,
-        IEventSender eventSender, LoggingUtil loggingUtil, BlockServices blockServices, EntityTable entityTable,
+        IEventSender eventSender, LoggingUtil loggingUtil, IBlockServices blockServices, EntityTable entityTable,
         ILogger<WorldEditSystem> logger)
     {
         this.blockController = blockController;

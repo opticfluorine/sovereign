@@ -227,16 +227,16 @@ public class WorldSegmentSubscriptionManager
     /// <param name="center">Center world segment.</param>
     private HashSet<GridPosition> BuildSubscriptionSet(GridPosition center)
     {
-        var result = new HashSet<GridPosition>(WorldManagementConfiguration.SubscriptionRange *
-                                               WorldManagementConfiguration.SubscriptionRange);
-        for (var x = center.X - WorldManagementConfiguration.SubscriptionRange;
-             x < center.X + WorldManagementConfiguration.SubscriptionRange + 1;
+        var result = new HashSet<GridPosition>(WorldConstants.SubscriptionRange *
+                                               WorldConstants.SubscriptionRange);
+        for (var x = center.X - WorldConstants.SubscriptionRange;
+             x < center.X + WorldConstants.SubscriptionRange + 1;
              ++x)
-        for (var y = center.Y - WorldManagementConfiguration.SubscriptionRange;
-             y < center.Y + WorldManagementConfiguration.SubscriptionRange + 1;
+        for (var y = center.Y - WorldConstants.SubscriptionRange;
+             y < center.Y + WorldConstants.SubscriptionRange + 1;
              ++y)
-        for (var z = center.Z - WorldManagementConfiguration.SubscriptionRange;
-             z < center.Z + WorldManagementConfiguration.SubscriptionRange + 1;
+        for (var z = center.Z - WorldConstants.SubscriptionRange;
+             z < center.Z + WorldConstants.SubscriptionRange + 1;
              ++z)
             result.Add(new GridPosition(x, y, z));
 
@@ -283,7 +283,7 @@ public class WorldSegmentSubscriptionManager
             if (!unchangedSet.Contains(segment))
             {
                 // Beyond the subscribe radius, now check whether beyond the unsubscribe radius.
-                var unsubRadius = WorldManagementConfiguration.SubscriptionRange + 1;
+                var unsubRadius = WorldConstants.SubscriptionRange + 1;
                 var dx = Math.Abs(segment.X - center.X);
                 var dy = Math.Abs(segment.Y - center.Y);
                 var dz = Math.Abs(segment.Z - center.Z);

@@ -20,7 +20,7 @@ namespace Sovereign.EngineCore.Configuration;
 /// <summary>
 ///     Hardcoded configuration for WorldManagementSystem.
 /// </summary>
-public static class WorldManagementConfiguration
+public static class WorldConstants
 {
     public const uint SegmentLength = 32;
 

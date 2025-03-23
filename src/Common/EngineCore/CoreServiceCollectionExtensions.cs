@@ -198,8 +198,10 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<BlockEventHandler>();
         services.TryAddSingleton<BlockController>();
         services.TryAddSingleton<BlockManager>();
-        services.TryAddSingleton<BlockServices>();
+        services.TryAddSingleton<IBlockServices, BlockServices>();
         services.TryAddSingleton<BlockNoticeProcessor>();
+        services.TryAddSingleton<BlockGridTracker>();
+        services.TryAddSingleton<BlockInternalController>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, BlockSystem>());
     }
 
@@ -209,6 +211,8 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<MovementController>();
         services.TryAddSingleton<MovementManager>();
         services.TryAddSingleton<MovementInternalController>();
+        services.TryAddSingleton<CollisionMeshFactory>();
+        services.TryAddSingleton<CollisionMeshManager>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, MovementSystem>());
     }
 

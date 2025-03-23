@@ -69,16 +69,16 @@ public sealed class WorldSegmentBlockDataGenerator
 
         // Retrieve material data, group into depth planes.
         var basePoint = resolver.GetRangeForWorldSegment(segmentIndex).Item1;
-        var depthPlanes = new DepthPlane[WorldManagementConfiguration.SegmentLength];
-        for (var i = 0; i < WorldManagementConfiguration.SegmentLength; ++i)
-            depthPlanes[i] = new DepthPlane(WorldManagementConfiguration.SegmentLength, i);
+        var depthPlanes = new DepthPlane[WorldConstants.SegmentLength];
+        for (var i = 0; i < WorldConstants.SegmentLength; ++i)
+            depthPlanes[i] = new DepthPlane(WorldConstants.SegmentLength, i);
         GroupByDepth(positionedBlocks, depthPlanes, (int)basePoint.Z);
 
         // Initialize a new block summary data object.
         var data = GetEmptyBlockData();
 
         // Process each depth plane separately.
-        for (var i = 0; i < WorldManagementConfiguration.SegmentLength; ++i)
+        for (var i = 0; i < WorldConstants.SegmentLength; ++i)
         {
             // Update defaults.
             data.DefaultsPerPlane[i] = depthPlanes[i].DefaultBlockType;
@@ -102,7 +102,7 @@ public sealed class WorldSegmentBlockDataGenerator
     {
         var data = new WorldSegmentBlockData();
         data.DefaultsPerPlane =
-            new EngineCore.Systems.WorldManagement.BlockData[WorldManagementConfiguration.SegmentLength];
+            new EngineCore.Systems.WorldManagement.BlockData[WorldConstants.SegmentLength];
         data.DataPlanes = new List<WorldSegmentBlockDataPlane>();
 
         return data;
@@ -159,7 +159,7 @@ public sealed class WorldSegmentBlockDataGenerator
         out WorldSegmentBlockDataPlane converted)
     {
         // Allocate all possible data lines.
-        var lines = new WorldSegmentBlockDataLine[WorldManagementConfiguration.SegmentLength];
+        var lines = new WorldSegmentBlockDataLine[WorldConstants.SegmentLength];
         for (var i = 0; i < lines.Length; ++i)
             lines[i] = new WorldSegmentBlockDataLine
             {
@@ -218,8 +218,8 @@ public sealed class WorldSegmentBlockDataGenerator
         int baseX, int baseY, int baseZ)
     {
         // Determine where air blocks need to be added.
-        var filledPoints = new bool[WorldManagementConfiguration.SegmentLength,
-            WorldManagementConfiguration.SegmentLength];
+        var filledPoints = new bool[WorldConstants.SegmentLength,
+            WorldConstants.SegmentLength];
         foreach (var block in depthPlane.Blocks)
         {
             var offsetX = block.Position.X - baseX;
@@ -230,8 +230,8 @@ public sealed class WorldSegmentBlockDataGenerator
         // Now add all of the air blocks.
         var airType = new EngineCore.Systems.WorldManagement.BlockData
             { BlockType = BlockDataType.Air };
-        for (var i = 0; i < WorldManagementConfiguration.SegmentLength; ++i)
-        for (var j = 0; j < WorldManagementConfiguration.SegmentLength; ++j)
+        for (var i = 0; i < WorldConstants.SegmentLength; ++i)
+        for (var j = 0; j < WorldConstants.SegmentLength; ++j)
             if (!filledPoints[i, j])
             {
                 var block = new BlockData

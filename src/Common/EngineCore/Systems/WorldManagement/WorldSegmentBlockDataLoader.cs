@@ -55,7 +55,7 @@ public class WorldSegmentBlockDataLoader
     public void Load(GridPosition segmentIndex, WorldSegmentBlockData segmentData)
     {
         // Validate input.
-        if (segmentData.DefaultsPerPlane.Length != WorldManagementConfiguration.SegmentLength)
+        if (segmentData.DefaultsPerPlane.Length != WorldConstants.SegmentLength)
             throw new RankException("Bad number of default materials in segment data.");
 
         // Load and create block entities.
@@ -75,11 +75,11 @@ public class WorldSegmentBlockDataLoader
         IList<BlockRecord> blocksToAdd)
     {
         /* Start by processing depth plaens containing non-default blocks. */
-        var processed = new bool[WorldManagementConfiguration.SegmentLength];
+        var processed = new bool[WorldConstants.SegmentLength];
         foreach (var plane in segmentData.DataPlanes)
         {
             // Validation.
-            if (plane.OffsetZ >= WorldManagementConfiguration.SegmentLength)
+            if (plane.OffsetZ >= WorldConstants.SegmentLength)
                 throw new IndexOutOfRangeException("Bad Z-offset in world segment data plane.");
 
             processed[plane.OffsetZ] = true;
@@ -110,8 +110,8 @@ public class WorldSegmentBlockDataLoader
         var baseY = (int)basePosition.Y;
         var baseZ = (int)basePosition.Z;
 
-        for (var x = 0; x < WorldManagementConfiguration.SegmentLength; x++)
-        for (var y = 0; y < WorldManagementConfiguration.SegmentLength; y++)
+        for (var x = 0; x < WorldConstants.SegmentLength; x++)
+        for (var y = 0; y < WorldConstants.SegmentLength; y++)
         {
             var block = new BlockRecord
             {
@@ -138,18 +138,18 @@ public class WorldSegmentBlockDataLoader
         var baseZ = (int)basePosition.Z;
 
         /* Process the non-default blocks. */
-        var nonDefaults = new bool[WorldManagementConfiguration.SegmentLength,
-            WorldManagementConfiguration.SegmentLength];
+        var nonDefaults = new bool[WorldConstants.SegmentLength,
+            WorldConstants.SegmentLength];
         foreach (var line in plane.Lines)
         {
             /* Validate. */
-            if (line.OffsetY >= WorldManagementConfiguration.SegmentLength)
+            if (line.OffsetY >= WorldConstants.SegmentLength)
                 throw new IndexOutOfRangeException("Bad Y-offset in world segment data line.");
 
             foreach (var block in line.BlockData)
             {
                 /* Validate. */
-                if (block.OffsetX >= WorldManagementConfiguration.SegmentLength)
+                if (block.OffsetX >= WorldConstants.SegmentLength)
                     throw new IndexOutOfRangeException("Bad X-offset in world segment data block.");
 
                 var x = baseX + block.OffsetX;
@@ -170,8 +170,8 @@ public class WorldSegmentBlockDataLoader
 
         /* Fill in the default blocks (unless they are air). */
         if (defaultBlock.BlockType != BlockDataType.Air)
-            for (var i = 0; i < WorldManagementConfiguration.SegmentLength; ++i)
-            for (var j = 0; j < WorldManagementConfiguration.SegmentLength; ++j)
+            for (var i = 0; i < WorldConstants.SegmentLength; ++i)
+            for (var j = 0; j < WorldConstants.SegmentLength; ++j)
                 if (!nonDefaults[i, j])
                 {
                     var blockRecord = new BlockRecord
