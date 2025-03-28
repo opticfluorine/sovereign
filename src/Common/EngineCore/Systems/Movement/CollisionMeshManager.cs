@@ -70,9 +70,16 @@ public class CollisionMeshManager
     {
         foreach (var info in scheduledUpdates)
             if (generationTasks.TryGetValue(info, out var task))
-                generationTasks[info] = task.ContinueWith(_ => DoFullGeneration(info));
+            {
+                // If regeneration is already in progress, schedule another regeneration for when it is done.
+                // Otherwise, just use the normal processing path.
+                if (task.IsCompleted) DoFastGeneration(info);
+                else generationTasks[info] = task.ContinueWith(_ => DoFullGeneration(info));
+            }
             else
+            {
                 DoFastGeneration(info);
+            }
 
         scheduledUpdates.Clear();
     }

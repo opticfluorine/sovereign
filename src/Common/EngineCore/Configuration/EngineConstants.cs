@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,19 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Events.Details.Validators;
+namespace Sovereign.EngineCore.Configuration;
 
 /// <summary>
-///     Validator for RequestMoveEventDetails.
+///     Constants related to core engine functionality.
 /// </summary>
-public class RequestMoveEventDetailsValidator : IEventDetailsValidator
+public static class EngineConstants
 {
-    public bool IsValid(IEventDetails? details)
-    {
-        if (details is not RequestMoveEventDetails) return false;
-        var requestDetails = (RequestMoveEventDetails)details;
-        return requestDetails.RelativeVelocity.LengthSquared() <= 1.0f
-               && float.IsFinite(requestDetails.RelativeVelocity.X)
-               && float.IsFinite(requestDetails.RelativeVelocity.Y);
-    }
+    /// <summary>
+    ///     Time in microseconds between successive engine ticks.
+    /// </summary>
+    public const ulong TickIntervalUs = 10000;
 }

@@ -40,7 +40,9 @@ public class MovementSystem : ISystem
         EventId.Core_Movement_Move,
         EventId.Core_Movement_RequestMove,
         EventId.Core_Tick,
-        EventId.Core_Block_GridUpdated
+        EventId.Core_Block_GridUpdated,
+        EventId.Core_WorldManagement_WorldSegmentLoaded,
+        EventId.Core_WorldManagement_WorldSegmentUnloaded
     };
 
     public int WorkloadEstimate => 300;

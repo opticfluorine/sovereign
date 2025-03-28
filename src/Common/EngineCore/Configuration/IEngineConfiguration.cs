@@ -23,11 +23,6 @@ namespace Sovereign.EngineCore.Configuration;
 public interface IEngineConfiguration
 {
     /// <summary>
-    ///     Interval between event ticks in us.
-    /// </summary>
-    ulong EventTickInterval { get; }
-
-    /// <summary>
     ///     Briefly sleep the executor threads after every this many iterations.
     ///     Never sleep if set to zero.
     /// </summary>

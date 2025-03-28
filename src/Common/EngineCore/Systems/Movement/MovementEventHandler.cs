@@ -26,13 +26,15 @@ public class MovementEventHandler
     private readonly ILogger<MovementEventHandler> logger;
     private readonly MovementManager manager;
     private readonly CollisionMeshManager meshManager;
+    private readonly PhysicsProcessor physicsProcessor;
 
     public MovementEventHandler(MovementManager manager, ILogger<MovementEventHandler> logger,
-        CollisionMeshManager meshManager)
+        CollisionMeshManager meshManager, PhysicsProcessor physicsProcessor)
     {
         this.manager = manager;
         this.logger = logger;
         this.meshManager = meshManager;
+        this.physicsProcessor = physicsProcessor;
     }
 
     /// <summary>
@@ -72,6 +74,7 @@ public class MovementEventHandler
             case EventId.Core_Tick:
                 manager.HandleTick();
                 meshManager.OnTick();
+                physicsProcessor.OnTick();
                 break;
 
             case EventId.Core_Block_GridUpdated:
@@ -83,6 +86,31 @@ public class MovementEventHandler
                 }
 
                 meshManager.ScheduleUpdate(details.WorldSegmentIndex, details.Z);
+                manager.OnMeshUpdate(details.WorldSegmentIndex, details.Z);
+                break;
+            }
+
+            case EventId.Core_WorldManagement_WorldSegmentLoaded:
+            {
+                if (ev.EventDetails is not WorldSegmentEventDetails details)
+                {
+                    logger.LogError("Received WorldSegmentLoaded with bad details.");
+                    break;
+                }
+
+                physicsProcessor.OnWorldSegmentLoaded(details.SegmentIndex);
+                break;
+            }
+
+            case EventId.Core_WorldManagement_WorldSegmentUnloaded:
+            {
+                if (ev.EventDetails is not WorldSegmentEventDetails details)
+                {
+                    logger.LogError("Received WorldSegmentUnloaded with bad details.");
+                    break;
+                }
+
+                physicsProcessor.OnWorldSegmentUnloaded(details.SegmentIndex);
                 break;
             }
         }

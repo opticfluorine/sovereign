@@ -177,8 +177,14 @@ public enum EventId
     /// <summary>
     ///     Signals that the entities of a world segment have been loaded.
     /// </summary>
-    /// Asssociated details: WorldSegmentEventDetails
+    /// Associated details: WorldSegmentEventDetails
     Core_WorldManagement_WorldSegmentLoaded = 603,
+
+    /// <summary>
+    ///     Signals that the entities of a world segment have been unloaded.
+    /// </summary>
+    /// Associated details: WorldSegmentEventDetails
+    Core_WorldManagement_WorldSegmentUnloaded = 604,
 
     #endregion WorldManagement
 

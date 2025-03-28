@@ -35,8 +35,8 @@ public class MovementController
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
     /// <param name="entityId">Player entity ID.</param>
-    /// <param name="relativeVelocity">Relative velocity, norm not to exceed 1.0.</param>
-    public void RequestMovement(IEventSender eventSender, ulong entityId, Vector3 relativeVelocity)
+    /// <param name="relativeVelocity">Relative velocity in the XY plane, norm not to exceed 1.0.</param>
+    public void RequestMovement(IEventSender eventSender, ulong entityId, Vector2 relativeVelocity)
     {
         var details = new RequestMoveEventDetails
         {

@@ -32,8 +32,8 @@ public class EntityAssigner
     /// <summary>
     ///     Counter for the local segment of the id.
     /// </summary>
-    private ulong localIdCounter;
-    
+    private ulong localIdCounter = 1;
+
     /// <summary>
     ///     Creates an assigner for the given block.
     /// </summary>

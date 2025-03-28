@@ -32,15 +32,13 @@ public class MovementInternalController
     /// <param name="entityId">Entity ID.</param>
     /// <param name="position">Position.</param>
     /// <param name="velocity">Velocity.</param>
-    /// <param name="sequence">Sequence number.</param>
-    public void Move(IEventSender eventSender, ulong entityId, Vector3 position, Vector3 velocity, byte sequence)
+    public void Move(IEventSender eventSender, ulong entityId, Vector3 position, Vector3 velocity)
     {
         var details = new MoveEventDetails
         {
             EntityId = entityId,
             Position = position,
-            Velocity = velocity,
-            Sequence = sequence
+            Velocity = velocity
         };
         var ev = new Event(EventId.Core_Movement_Move, details);
         eventSender.SendEvent(ev);

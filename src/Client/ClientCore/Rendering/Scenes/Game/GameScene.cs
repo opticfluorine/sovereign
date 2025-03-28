@@ -123,7 +123,7 @@ public sealed class GameScene : IScene
     private void ComputeTimes()
     {
         systemTime = systemTimer.GetTime();
-        timeSinceTick = systemTime % engineConfiguration.EventTickInterval
+        timeSinceTick = systemTime % EngineConstants.TickIntervalUs
                         * UnitConversions.UsToS;
     }
 }

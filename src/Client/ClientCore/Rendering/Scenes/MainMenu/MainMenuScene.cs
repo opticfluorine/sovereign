@@ -82,7 +82,7 @@ public class MainMenuScene : IScene
     public void BeginScene()
     {
         systemTime = systemTimer.GetTime();
-        timeSinceTick = systemTime % engineConfiguration.EventTickInterval
+        timeSinceTick = systemTime % EngineConstants.TickIntervalUs
                         * UnitConversions.UsToS;
     }
 

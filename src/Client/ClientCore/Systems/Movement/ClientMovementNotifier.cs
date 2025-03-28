@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,19 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Events.Details.Validators;
+using Sovereign.EngineCore.Systems.Movement;
+
+namespace Sovereign.ClientCore.Systems.Movement;
 
 /// <summary>
-///     Validator for RequestMoveEventDetails.
+///     Client-side implementation of IMovementNotifier.
 /// </summary>
-public class RequestMoveEventDetailsValidator : IEventDetailsValidator
+public class ClientMovementNotifier : IMovementNotifier
 {
-    public bool IsValid(IEventDetails? details)
+    public void ScheduleEntity(ulong entityId)
     {
-        if (details is not RequestMoveEventDetails) return false;
-        var requestDetails = (RequestMoveEventDetails)details;
-        return requestDetails.RelativeVelocity.LengthSquared() <= 1.0f
-               && float.IsFinite(requestDetails.RelativeVelocity.X)
-               && float.IsFinite(requestDetails.RelativeVelocity.Y);
+        // no-op
+    }
+
+    public void SendScheduled()
+    {
+        // no-op
     }
 }

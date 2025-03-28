@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,19 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Events.Details.Validators;
+namespace Sovereign.EngineCore.Systems.Movement;
 
 /// <summary>
-///     Validator for RequestMoveEventDetails.
+///     Manages periodic notifications of movement from server to client.
 /// </summary>
-public class RequestMoveEventDetailsValidator : IEventDetailsValidator
+public interface IMovementNotifier
 {
-    public bool IsValid(IEventDetails? details)
-    {
-        if (details is not RequestMoveEventDetails) return false;
-        var requestDetails = (RequestMoveEventDetails)details;
-        return requestDetails.RelativeVelocity.LengthSquared() <= 1.0f
-               && float.IsFinite(requestDetails.RelativeVelocity.X)
-               && float.IsFinite(requestDetails.RelativeVelocity.Y);
-    }
+    /// <summary>
+    ///     Schedules the given entity for a motion update in the next batch.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    void ScheduleEntity(ulong entityId);
+
+    /// <summary>
+    ///     Sends any notifications that are due to be sent.
+    /// </summary>
+    void SendScheduled();
 }

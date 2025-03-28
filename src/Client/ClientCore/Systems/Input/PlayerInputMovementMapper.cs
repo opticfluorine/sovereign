@@ -35,9 +35,9 @@ public class PlayerInputMovementMapper
     private readonly MovementController movementController;
 
     /// <summary>
-    ///     Current target velocity for the player based on user input.
+    ///     Current target velocity in XY plane for the player based on user input.
     /// </summary>
-    private Vector3 currentRelativeVelocity = Vector3.Zero;
+    private Vector2 currentRelativeVelocity = Vector2.Zero;
 
     /// <summary>
     ///     Current player entity ID.
@@ -48,11 +48,6 @@ public class PlayerInputMovementMapper
     ///     Flag indicating whether a player is currently selected.
     /// </summary>
     private bool playerSelected;
-
-    /// <summary>
-    ///     Current sequence value for repeat movement tracking.
-    /// </summary>
-    private uint sequenceCount;
 
     /// <summary>
     ///     Ticks remaining until repeat.
@@ -85,14 +80,13 @@ public class PlayerInputMovementMapper
         if (dx == 0 && dy == 0)
         {
             // Stop movement.
-            currentRelativeVelocity = Vector3.Zero;
+            currentRelativeVelocity = Vector2.Zero;
             movementController.RequestMovement(eventSender, playerEntityId, currentRelativeVelocity);
-            sequenceCount++;
         }
         else
         {
             // Move.
-            currentRelativeVelocity = new Vector3(dx, dy, 0.0f);
+            currentRelativeVelocity = new Vector2(dx, dy);
             currentRelativeVelocity /= currentRelativeVelocity.Length();
             RequestNextMovement();
         }
@@ -126,9 +120,8 @@ public class PlayerInputMovementMapper
         movementController.RequestMovement(eventSender, playerEntityId, currentRelativeVelocity);
 
         // Schedule a repeat movement.
-        if (currentRelativeVelocity != Vector3.Zero)
+        if (currentRelativeVelocity != Vector2.Zero)
         {
-            sequenceCount++;
             ticksUntilRepeat = MovementConfiguration.DefaultMovementLengthTicks - 1;
         }
     }

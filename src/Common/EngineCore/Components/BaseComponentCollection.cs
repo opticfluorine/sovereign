@@ -536,6 +536,30 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     }
 
     /// <summary>
+    ///     Gets the entity ID associated with the given direct index, if any.
+    /// </summary>
+    /// <param name="index">Direct index.</param>
+    /// <param name="entityId">Entity ID. Only valid if the method returns true.</param>
+    /// <returns>true if the direct index in use, false otherwise.</returns>
+    public bool TryGetEntityForIndex(int index, out ulong entityId)
+    {
+        var found = componentToEntityMap[index] > 0;
+        entityId = found ? componentToEntityMap[0] : 0;
+        return found;
+    }
+
+    /// <summary>
+    ///     Gets the component index associated with the given entity ID, if any.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="index">Component index. Only valid if the method returns true.</param>
+    /// <returns>true if the entity has a component, false otherwise.</returns>
+    public bool TryGetIndexForEntity(ulong entityId, out int index)
+    {
+        return entityToComponentMap.TryGetValue(entityId, out index);
+    }
+
+    /// <summary>
     ///     Fires all pending component events.
     /// </summary>
     private void FireComponentEvents()
@@ -736,6 +760,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         else
             pendingRemoveEvents.Add(entityId);
 
+        componentToEntityMap[entityToComponentMap[entityId]] = 0;
         pendingReclaims.Add(entityId);
         hasReclaims = true;
     }
@@ -748,11 +773,12 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <param name="entityId">Entity ID.</param>
     private void ApplyReclaim(ulong entityId)
     {
-        /* Ensure that a component is associated to the entity. */
+        /* Ensure that a component is associated to the entity. *default/
         if (!entityToComponentMap.ContainsKey(entityId)) return;
 
         /* Remove the component, but leave it allocated for later reuse. */
         var index = entityToComponentMap[entityId];
+        components[index] = default!;
         entityToComponentMap.Remove(entityId, out _);
         indexQueue.Enqueue(index);
     }

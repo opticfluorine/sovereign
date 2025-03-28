@@ -57,6 +57,7 @@ using Sovereign.ClientCore.Systems.ClientWorldEdit;
 using Sovereign.ClientCore.Systems.EntityAnimation;
 using Sovereign.ClientCore.Systems.EntitySynchronization;
 using Sovereign.ClientCore.Systems.Input;
+using Sovereign.ClientCore.Systems.Movement;
 using Sovereign.ClientCore.Systems.Network;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.ClientCore.Timing;
@@ -68,6 +69,7 @@ using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Systems.Movement;
 using Sovereign.EngineCore.Timing;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
@@ -124,6 +126,7 @@ public static class ClientServiceCollectionExtensions
         services
             .TryAddSingleton<IConnectionMappingOutboundPipelineStage, ClientConnectionMappingOutboundPipelineStage>();
         services.TryAddSingleton<IOutboundEventSet, ClientOutboundEventSet>();
+        services.TryAddSingleton<IMovementNotifier, ClientMovementNotifier>();
     }
 
     private static void AddMain(IServiceCollection services)

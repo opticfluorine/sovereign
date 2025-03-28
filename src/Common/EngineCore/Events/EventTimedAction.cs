@@ -25,22 +25,16 @@ namespace Sovereign.EngineCore.Events;
 public class EventTimedAction : ITimedAction
 {
     /// <summary>
-    ///     Engine configuration.
-    /// </summary>
-    private readonly IEngineConfiguration engineConfiguration;
-
-    /// <summary>
     ///     Event loop.
     /// </summary>
     private readonly IEventLoop eventLoop;
 
-    public EventTimedAction(IEventLoop eventLoop, IEngineConfiguration engineConfiguration)
+    public EventTimedAction(IEventLoop eventLoop)
     {
         this.eventLoop = eventLoop;
-        this.engineConfiguration = engineConfiguration;
     }
 
-    public ulong Interval => engineConfiguration.EventTickInterval;
+    public ulong Interval => EngineConstants.TickIntervalUs;
 
     public void Invoke(ulong triggerTime)
     {

@@ -22,6 +22,7 @@ using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Resources;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Systems.Movement;
 using Sovereign.EngineCore.Timing;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Components;
@@ -29,6 +30,7 @@ using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Entities;
 using Sovereign.ServerCore.Logging;
 using Sovereign.ServerCore.Resources;
+using Sovereign.ServerCore.Systems.Movement;
 using Sovereign.ServerCore.Systems.Persistence;
 using Sovereign.ServerCore.Systems.Scripting;
 using Sovereign.ServerCore.Systems.ServerChat;
@@ -78,6 +80,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<IErrorHandler, ServerErrorHandler>();
         services.TryAddSingleton<IResourcePathBuilder, ServerResourcePathBuilder>();
         services.TryAddSingleton<ISystemTimer, ServerSystemTimer>();
+        services.TryAddSingleton<IMovementNotifier, ServerMovementNotifier>();
     }
 
     private static void AddConfiguration(IServiceCollection services)

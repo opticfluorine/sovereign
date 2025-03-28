@@ -51,8 +51,7 @@ public class UpdateScene : IScene
     public void BeginScene()
     {
         systemTime = systemTimer.GetTime();
-        timeSinceTick = systemTime % engineConfiguration.EventTickInterval
-                        * UnitConversions.UsToS;
+        timeSinceTick = systemTime % EngineConstants.TickIntervalUs * UnitConversions.UsToS;
     }
 
     public void EndScene()

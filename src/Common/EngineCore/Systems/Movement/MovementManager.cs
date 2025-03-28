@@ -17,7 +17,9 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -35,6 +37,14 @@ public class MovementManager
     private readonly MovementInternalController internalController;
 
     private readonly KinematicsComponentCollection kinematics;
+
+    /// <summary>
+    ///     Cache of physics tags indexed by the corresponding Kinematics component index.
+    /// </summary>
+    private readonly List<bool> kinematicsComponentIndexPhysicsTags = new();
+
+    private readonly ILogger<MovementManager> logger;
+    private readonly IMovementNotifier movementNotifier;
     private readonly OrientationComponentCollection orientations;
 
     /// <summary>
@@ -53,12 +63,18 @@ public class MovementManager
     /// </summary>
     private readonly Queue<RequestMoveEventDetails> pendingRequests = new();
 
+    private readonly List<bool> physicsActiveFlags = new();
+
+    private readonly PhysicsProcessor physicsProcessor;
+    private readonly List<int> physicsUpdates = new();
+
     /// <summary>
     ///     Map from entity ID to sequence counts.
     /// </summary>
     private readonly Dictionary<ulong, byte> sequenceCountsByEntity = new();
 
     private readonly ISystemTimer systemTimer;
+    private readonly NonBlockWorldSegmentIndexer worldSegmentIndexer;
 
     /// <summary>
     ///     Flag indicating whether the pending check table has been updated for the current tick.
@@ -78,19 +94,28 @@ public class MovementManager
 
     public MovementManager(KinematicsComponentCollection kinematics,
         ISystemTimer systemTimer, MovementInternalController internalController,
-        IEventSender eventSender, OrientationComponentCollection orientations)
+        IEventSender eventSender, OrientationComponentCollection orientations,
+        PhysicsTagCollection physics, PhysicsProcessor physicsProcessor,
+        ILogger<MovementManager> logger, NonBlockWorldSegmentIndexer worldSegmentIndexer,
+        IMovementNotifier movementNotifier)
     {
         this.kinematics = kinematics;
         this.systemTimer = systemTimer;
         this.internalController = internalController;
         this.eventSender = eventSender;
         this.orientations = orientations;
+        this.physicsProcessor = physicsProcessor;
+        this.logger = logger;
+        this.worldSegmentIndexer = worldSegmentIndexer;
+        this.movementNotifier = movementNotifier;
 
         for (var i = 0; i < pendingChecks.Length; ++i)
             pendingChecks[i] = new List<PendingCheck>();
 
         kinematics.OnStartUpdates += OnStartUpdates;
         kinematics.OnBeginDirectAccess += UpdatePositions;
+        physics.OnComponentAdded += OnPhysicsTagAdded;
+        physics.OnComponentRemoved += OnPhysicsTagRemoved;
     }
 
     /// <summary>
@@ -108,9 +133,15 @@ public class MovementManager
         }
 
         // Set velocity and update records.
+        if (!kinematics.TryGetValue(details.EntityId, out var posVel))
+        {
+            logger.LogError("Tried to move entity {EntityID:X} which has no Kinematics.", details.EntityId);
+            return;
+        }
+
         var velocity = details.RelativeVelocity * MovementConfiguration.DefaultBaseVelocity;
         kinematics.ModifyComponent(details.EntityId, ComponentOperation.SetVelocity,
-            new Kinematics { Velocity = velocity });
+            new Kinematics { Velocity = new Vector3(velocity, posVel.Velocity.Z) });
         sequenceCountsByEntity[details.EntityId] = details.Sequence;
         pendingMoveEvents.Enqueue(details.EntityId);
 
@@ -124,7 +155,6 @@ public class MovementManager
         });
     }
 
-
     /// <summary>
     ///     Called when an authoritative movement event is received from the server.
     /// </summary>
@@ -137,7 +167,7 @@ public class MovementManager
             Position = details.Position,
             Velocity = details.Velocity
         });
-        SetOrientation(details.EntityId, details.Velocity);
+        SetOrientation(details.EntityId, new Vector2(details.Velocity.X, details.Velocity.Y));
     }
 
     /// <summary>
@@ -149,11 +179,31 @@ public class MovementManager
         while (pendingMoveEvents.TryDequeue(out var entityId))
         {
             var kinematicData = kinematics[entityId];
-            internalController.Move(eventSender, entityId, kinematicData.Position, kinematicData.Velocity,
-                sequenceCountsByEntity[entityId]);
+            internalController.Move(eventSender, entityId, kinematicData.Position, kinematicData.Velocity);
         }
 
         ProcessChecks();
+        movementNotifier.SendScheduled();
+    }
+
+    /// <summary>
+    ///     Called when collision meshes are changed.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <param name="z">Z coordinate of Z plane.</param>
+    public void OnMeshUpdate(GridPosition segmentIndex, int z)
+    {
+        // Flag all physics-enabled entities in this world segment and the one above for active processing.
+        for (var segZ = segmentIndex.Z; segZ < segmentIndex.Z + 2; segZ++)
+        {
+            var recheckIndex = segmentIndex with { Z = segZ };
+            var entities = worldSegmentIndexer.GetEntitiesInWorldSegment(recheckIndex);
+            foreach (var entityId in entities)
+            {
+                if (!kinematics.TryGetIndexForEntity(entityId, out var kinematicsIndex)) continue;
+                physicsActiveFlags[kinematicsIndex] = true;
+            }
+        }
     }
 
     /// <summary>
@@ -167,12 +217,40 @@ public class MovementManager
 
         var componentList = kinematics.Components;
         var directMods = 0;
+
+        // Forward propagation step.
+        physicsUpdates.Clear();
         for (var i = 0; i < kinematics.ComponentCount; ++i)
+        {
+            if (!kinematics.TryGetEntityForIndex(i, out var entityId)) continue;
+
             if (componentList[i].Velocity != Vector3.Zero)
             {
                 // Using + instead of += shows a ~ 6.6% speedup with Release builds in EcsBenchmark.
                 componentList[i].Position = componentList[i].Position + delta * componentList[i].Velocity;
                 modifiedIndices[directMods++] = i;
+
+                // We always process physics for moving entities (if they have the Physics tag).
+                if (kinematicsComponentIndexPhysicsTags[i]) physicsUpdates.Add(i);
+
+                // If this is the server, make sure a move event is sent in the next update batch.
+                // This also schedules an event in the following batch to ensure that an event is
+                // also sent when motion stops.
+                movementNotifier.ScheduleEntity(entityId);
+            }
+            else if (physicsActiveFlags[i])
+            {
+                // Even if the entity is not moving, we want to do physics processing if it is tagged for update.
+                physicsUpdates.Add(i);
+            }
+        }
+
+        // Physics update step.
+        foreach (var i in physicsUpdates)
+            if (kinematics.TryGetEntityForIndex(i, out var entityId))
+            {
+                physicsProcessor.DoPhysicsForEntity(i, entityId, out var isActive);
+                physicsActiveFlags[i] = isActive;
             }
 
         lastUpdateSystemTime = currentSystemTime;
@@ -194,11 +272,12 @@ public class MovementManager
                 continue;
 
             // Check is current and no newer move request has been received.
-            // Stop movement and send a move event.
+            // Stop movement (except for gravity) and send a move event.
+            var posVel = kinematics[check.EntityId];
+            var newVel = posVel.Velocity with { X = 0.0f, Y = 0.0f };
             kinematics.ModifyComponent(check.EntityId, ComponentOperation.SetVelocity,
-                new Kinematics { Velocity = Vector3.Zero });
-            internalController.Move(eventSender, check.EntityId, kinematics[check.EntityId].Position,
-                Vector3.Zero, check.SequenceCount);
+                new Kinematics { Velocity = newVel });
+            internalController.Move(eventSender, check.EntityId, posVel.Position, newVel);
         }
 
         // Reset the check list so that it can be populated with new checks for move requests arriving this tick.
@@ -221,18 +300,16 @@ public class MovementManager
     /// <summary>
     ///     Sets the orientation of an entity based on its velocity.
     /// </summary>
-    /// <param name="entityId"></param>
-    /// <param name="velocity"></param>
-    private void SetOrientation(ulong entityId, Vector3 velocity)
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="velocity">Velocity in the XY plane.</param>
+    private void SetOrientation(ulong entityId, Vector2 velocity)
     {
-        // Special case, if velocity is zero then do not change the orientation.
-        if (velocity.Equals(Vector3.Zero)) return;
+        // Special case, if velocity is zero in the xy plane, then do not change the orientation.
+        if (velocity is { X: 0.0f, Y: 0.0f }) return;
 
         // Find the angle of movement in the orthogonal space of the screen.
-        // Project y and z together to account for z-oriented motion being projected onto the y axis for rendering.
         // Note that Math.Atan2 properly handles the boundaries of the quadrants for us.
-        var projY = velocity.Y + velocity.Z;
-        var theta = (float)Math.Atan2(projY, velocity.X);
+        var theta = (float)Math.Atan2(velocity.Y, velocity.X);
 
         // Map the angle onto the defined orientations.
         // Rotate by pi/8 radians so that the first bin starts at 0.
@@ -245,6 +322,58 @@ public class MovementManager
         var orientation = (Orientation)((int)(adjTheta * invBinWidth + orientationOffset) % orientationCount);
 
         orientations.AddOrUpdateComponent(entityId, orientation);
+    }
+
+    /// <summary>
+    ///     Called when a physics tag is added to an entity.
+    /// </summary>
+    /// <param name="entityId">Entity.</param>
+    /// <param name="_">Unused.</param>
+    /// <param name="__">Unused.</param>
+    private void OnPhysicsTagAdded(ulong entityId, bool _, bool __)
+    {
+        if (!kinematics.TryGetIndexForEntity(entityId, out var index))
+        {
+            logger.LogError("No kinematics component index for entity {EntityId:X} when adding physics tag.", entityId);
+            return;
+        }
+
+        // Ensure cache is large enough to hold the new component index.
+        if (kinematicsComponentIndexPhysicsTags.Count <= index)
+        {
+            while (kinematicsComponentIndexPhysicsTags.Count <= index)
+            {
+                kinematicsComponentIndexPhysicsTags.Add(false);
+                physicsActiveFlags.Add(false);
+            }
+
+            physicsUpdates.EnsureCapacity(kinematicsComponentIndexPhysicsTags.Count);
+        }
+
+        kinematicsComponentIndexPhysicsTags[index] = true;
+    }
+
+    /// <summary>
+    ///     Called when a physics tag is removed from an entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="_">Unused.</param>
+    private void OnPhysicsTagRemoved(ulong entityId, bool _)
+    {
+        if (!kinematics.TryGetIndexForEntity(entityId, out var index))
+        {
+            logger.LogError("No kinematics component index for entity {EntityId:X} when removing physics tag.",
+                entityId);
+            return;
+        }
+
+        if (kinematicsComponentIndexPhysicsTags.Count <= index)
+        {
+            logger.LogError("Kinematics component index out of bounds for {EntityId:X}.", entityId);
+            return;
+        }
+
+        kinematicsComponentIndexPhysicsTags[index] = false;
     }
 
     /// <summary>

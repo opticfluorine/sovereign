@@ -213,6 +213,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<MovementInternalController>();
         services.TryAddSingleton<CollisionMeshFactory>();
         services.TryAddSingleton<CollisionMeshManager>();
+        services.TryAddSingleton<PhysicsProcessor>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, MovementSystem>());
     }
 

@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,19 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Events.Details.Validators;
+namespace Sovereign.EngineCore.Configuration;
 
 /// <summary>
-///     Validator for RequestMoveEventDetails.
+///     Constants related to game physics.
 /// </summary>
-public class RequestMoveEventDetailsValidator : IEventDetailsValidator
+public static class PhysicsConstants
 {
-    public bool IsValid(IEventDetails? details)
-    {
-        if (details is not RequestMoveEventDetails) return false;
-        var requestDetails = (RequestMoveEventDetails)details;
-        return requestDetails.RelativeVelocity.LengthSquared() <= 1.0f
-               && float.IsFinite(requestDetails.RelativeVelocity.X)
-               && float.IsFinite(requestDetails.RelativeVelocity.Y);
-    }
+    /// <summary>
+    ///     Gravitational acceleration along z axis in world units per sec^2.
+    /// </summary>
+    public const float GravityAcceleration = -1.0f;
+
+    /// <summary>
+    ///     Maximum falling velocity in world units per second.
+    /// </summary>
+    public const float TerminalVelocity = 4.0f;
 }

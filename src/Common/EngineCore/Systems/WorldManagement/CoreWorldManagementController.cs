@@ -36,10 +36,31 @@ public class CoreWorldManagementController
         {
             SegmentIndex = segmentIndex
         };
-        var ev = new Event(EventId.Core_WorldManagement_WorldSegmentLoaded, details);
+        var ev = new Event(EventId.Core_WorldManagement_WorldSegmentLoaded, details)
+        {
+            // Latch event to the next tick to ensure that entities and components are committed before announcement.
+            SyncToTick = true
+        };
 
-        // Latch event to the next tick to ensure that entities and components are committed before announcement.
-        ev.SyncToTick = true;
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Announces that the given world segment has been unloaded.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="segmentIndex">World segment index.</param>
+    public void AnnounceWorldSegmentUnloaded(IEventSender eventSender, GridPosition segmentIndex)
+    {
+        var details = new WorldSegmentEventDetails
+        {
+            SegmentIndex = segmentIndex
+        };
+        var ev = new Event(EventId.Core_WorldManagement_WorldSegmentUnloaded, details)
+        {
+            // Latch event to the next tick to ensure that entities and components are committed before announcement.
+            SyncToTick = true
+        };
 
         eventSender.SendEvent(ev);
     }

@@ -42,10 +42,4 @@ public class MoveEventDetails : IEventDetails
     /// </summary>
     [Key(2)]
     public ulong EntityId { get; set; }
-
-    /// <summary>
-    ///     Sequence number. Used for synchronization.
-    /// </summary>
-    [Key(3)]
-    public byte Sequence { get; set; }
 }

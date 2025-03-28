@@ -2,6 +2,18 @@
 
 ## 2025
 
+### March
+
+#### 23 March 2025
+
+* Physics: Generate collision meshes for blocks at runtime. Since a fully-packed world
+  segment would contain 32768 block meshes, the engine performs a simplification step
+  where each plane of a world segment is reduced to a smaller number of merged meshes,
+  taking up to the top four largest rectangles in the plane before falling back on
+  individual per-block meshes (which are much faster to generate upfront).
+* All: Minor refactorings. Renamed some classes for consistency. Rearranged unit test
+  projects into their own directory to keep things clean.
+
 ### February 
 
 #### 20 February 2025

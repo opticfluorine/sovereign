@@ -19,6 +19,8 @@ using System.Linq;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems.WorldManagement;
 
 namespace Sovereign.ClientCore.Systems.EntitySynchronization;
 
@@ -29,6 +31,7 @@ public class ClientEntityUnloader
 {
     private readonly BlockWorldSegmentIndexer blockSegmentIndexer;
     private readonly EntityManager entityManager;
+    private readonly IEventSender eventSender;
     private readonly EntityHierarchyIndexer hierarchyIndexer;
     private readonly NonBlockWorldSegmentIndexer nonBlockSegmentIndexer;
 
@@ -37,6 +40,8 @@ public class ClientEntityUnloader
     /// </summary>
     private readonly HashSet<GridPosition> subscribedSegments = new();
 
+    private readonly CoreWorldManagementController worldController;
+
     /// <summary>
     ///     Current player entity ID.
     /// </summary>
@@ -44,12 +49,15 @@ public class ClientEntityUnloader
 
     public ClientEntityUnloader(BlockWorldSegmentIndexer blockSegmentIndexer,
         NonBlockWorldSegmentIndexer nonBlockSegmentIndexer,
-        EntityHierarchyIndexer hierarchyIndexer, EntityManager entityManager)
+        EntityHierarchyIndexer hierarchyIndexer, EntityManager entityManager,
+        CoreWorldManagementController worldController, IEventSender eventSender)
     {
         this.blockSegmentIndexer = blockSegmentIndexer;
         this.nonBlockSegmentIndexer = nonBlockSegmentIndexer;
         this.hierarchyIndexer = hierarchyIndexer;
         this.entityManager = entityManager;
+        this.worldController = worldController;
+        this.eventSender = eventSender;
     }
 
     /// <summary>
@@ -116,6 +124,8 @@ public class ClientEntityUnloader
                 .SelectMany(GetDescendantsAndSelf)
             );
         foreach (var entityId in entitiesToUnload) entityManager.UnloadEntity(entityId);
+
+        worldController.AnnounceWorldSegmentUnloaded(eventSender, segmentIndex);
     }
 
     /// <summary>

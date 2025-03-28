@@ -23,10 +23,10 @@ namespace Sovereign.EngineCore.Events.Details;
 public class RequestMoveEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Relative velocity. Norm is not to exceed 1.0.
+    ///     Relative velocity in the XY plane. Norm is not to exceed 1.0.
     /// </summary>
     [Key(0)]
-    public Vector3 RelativeVelocity { get; set; }
+    public Vector2 RelativeVelocity { get; set; }
 
     /// <summary>
     ///     Affected entity ID.
