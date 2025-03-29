@@ -22,6 +22,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Systems.Accounts;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
@@ -175,6 +176,12 @@ public class CreatePlayerRestService : AuthenticatedRestService
                     .PlayerCharacter()
                     .Positionable(new Vector3(0.0f, 0.0f, 1.0f)) // TODO Configurable start position
                     .Drawable()
+                    .Physics()
+                    .BoundingBox(new BoundingBox
+                    {
+                        Position = Vector3.Zero,
+                        Size = Vector3.One
+                    })
                     .AnimatedSprite(221); // TODO Configurable appearance
 
                 if (configManager.ServerConfiguration.NewPlayers.AdminByDefault)
