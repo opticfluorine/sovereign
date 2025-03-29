@@ -53,6 +53,10 @@ public class InGameInputHandler : IInputHandler
             case SDL.SDL_Keycode.SDLK_d:
                 HandleDirectionKeyEvent(oldState, !isKeyUp);
                 break;
+            
+            case SDL.SDL_Keycode.SDLK_SPACE:
+                HandleSpaceKeyEvent(oldState, !isKeyUp);
+                break;
 
             /* Ignore keys that don't do anything for now. */
         }
@@ -72,5 +76,18 @@ public class InGameInputHandler : IInputHandler
                 keyboardState[SDL.SDL_Keycode.SDLK_DOWN] || keyboardState[SDL.SDL_Keycode.SDLK_s],
                 keyboardState[SDL.SDL_Keycode.SDLK_LEFT] || keyboardState[SDL.SDL_Keycode.SDLK_a],
                 keyboardState[SDL.SDL_Keycode.SDLK_RIGHT] || keyboardState[SDL.SDL_Keycode.SDLK_d]);
+    }
+    
+    /// <summary>
+    ///     Handles space key events.
+    /// </summary>
+    /// <param name="oldState">Old state of the key.</param>
+    /// <param name="newState">New state of the key.</param>
+    private void HandleSpaceKeyEvent(bool oldState, bool newState)
+    {
+        if (!oldState && newState)
+        {
+            playerInputMovementMapper.Jump();
+        }
     }
 }

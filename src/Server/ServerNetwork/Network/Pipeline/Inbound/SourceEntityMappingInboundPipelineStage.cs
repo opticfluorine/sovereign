@@ -44,6 +44,7 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
         mappers = new Dictionary<EventId, Action<IEventDetails, ulong>>
         {
             { EventId.Core_Movement_RequestMove, RequestMoveEventMapper },
+            { EventId.Core_Movement_Jump, EntityEventMapper },
             { EventId.Core_Network_Logout, EntityEventMapper },
             { EventId.Core_Chat_Send, ChatEventMapper },
             { EventId.Server_TemplateEntity_Update, EntityDefinitionEventMapper }

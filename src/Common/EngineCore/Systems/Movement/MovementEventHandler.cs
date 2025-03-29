@@ -68,8 +68,20 @@ public class MovementEventHandler
                 }
 
                 manager.HandleRequestMove(details);
-            }
                 break;
+            }
+
+            case EventId.Core_Movement_Jump:
+            {
+                if (ev.EventDetails is not EntityEventDetails details)
+                {
+                    logger.LogError("Received Jump event with bad details.");
+                    break;
+                }
+
+                manager.HandleJump(details.EntityId);
+                break;
+            }
 
             case EventId.Core_Tick:
                 manager.HandleTick();

@@ -111,9 +111,11 @@ public class PhysicsProcessor
     /// <param name="kinematicsIndex">Kinematics component direct index.</param>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="isActive">Set to true if physics processing should continue in the next tick.</param>
-    public void DoPhysicsForEntity(int kinematicsIndex, ulong entityId, out bool isActive)
+    /// <param name="isSupportedBelow">Set to true if the entity is supported from below by a surface.</param>
+    public void DoPhysicsForEntity(int kinematicsIndex, ulong entityId, out bool isActive, out bool isSupportedBelow)
     {
         isActive = false;
+        isSupportedBelow = false;
 
         var segmentIndex = resolver.GetWorldSegmentForPosition(kinematics.Components[kinematicsIndex].Position);
         if (!activeWorldSegments.Contains(segmentIndex))
@@ -123,7 +125,6 @@ public class PhysicsProcessor
             return;
         }
 
-        var supportedBelow = false;
         var passes = 0;
         var changed = true;
         while (changed && passes < MaxCollisionPasses)
@@ -139,13 +140,13 @@ public class PhysicsProcessor
 
             var entityMesh = sourceMesh.Translate(posVel.Position);
             SelectActiveMeshes(entityMesh);
-            changed = HandleCollisions(kinematicsIndex, entityMesh, posVel, out supportedBelow);
+            changed = HandleCollisions(kinematicsIndex, entityMesh, posVel, out isSupportedBelow);
         }
 
         if (changed)
             logger.LogWarning("Unresolved collision for entity {EntityId:X}.", entityId);
 
-        if (!supportedBelow)
+        if (!isSupportedBelow)
         {
             ApplyGravity(kinematicsIndex);
             isActive = true;

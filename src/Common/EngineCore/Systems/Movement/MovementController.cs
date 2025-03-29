@@ -47,4 +47,19 @@ public class MovementController
         var ev = new Event(EventId.Core_Movement_RequestMove, details);
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Initiates a jump.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Jumping entity ID.</param>
+    public void Jump(IEventSender eventSender, ulong entityId)
+    {
+        var details = new EntityEventDetails
+        {
+            EntityId = entityId
+        };
+        var ev = new Event(EventId.Core_Movement_Jump, details);
+        eventSender.SendEvent(ev);
+    }
 }

@@ -91,7 +91,21 @@ public class PlayerInputMovementMapper
             RequestNextMovement();
         }
     }
+    
+    /// <summary>
+    ///     Initiates a jump for the player.
+    /// </summary>
+    public void Jump()
+    {
+        if (playerSelected)
+        {
+            movementController.Jump(eventSender, playerEntityId);
+        }
+    }
 
+    /// <summary>
+    ///     Called at the start of a new tick.
+    /// </summary>
     public void OnTick()
     {
         if (ticksUntilRepeat > 0)

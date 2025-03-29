@@ -21,6 +21,7 @@ using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Timing;
@@ -35,6 +36,11 @@ public class MovementManager
 {
     private readonly IEventSender eventSender;
     private readonly MovementInternalController internalController;
+
+    /// <summary>
+    ///     Jump flags indexed by the corresponding Kinematics component index.
+    /// </summary>
+    private readonly List<bool> isJumping = new();
 
     private readonly KinematicsComponentCollection kinematics;
 
@@ -171,6 +177,28 @@ public class MovementManager
     }
 
     /// <summary>
+    ///     Starts a jump for the specified entity if the entity is not already in a jump.
+    /// </summary>
+    /// <param name="entityId"></param>
+    public void HandleJump(ulong entityId)
+    {
+        if (!kinematics.TryGetIndexForEntity(entityId, out var index))
+        {
+            logger.LogError("No kinematics component index for entity {EntityId:X} when jumping.", entityId);
+            return;
+        }
+
+        if (isJumping[index]) return;
+
+        var posVel = kinematics[entityId];
+        kinematics.ModifyComponent(entityId, ComponentOperation.SetVelocity, new Kinematics
+        {
+            Velocity = posVel.Velocity with { Z = PhysicsConstants.InitialJumpVelocity }
+        });
+        isJumping[index] = true;
+    }
+
+    /// <summary>
     ///     Called at the start of a new tick.
     /// </summary>
     public void HandleTick()
@@ -249,8 +277,9 @@ public class MovementManager
         foreach (var i in physicsUpdates)
             if (kinematics.TryGetEntityForIndex(i, out var entityId))
             {
-                physicsProcessor.DoPhysicsForEntity(i, entityId, out var isActive);
+                physicsProcessor.DoPhysicsForEntity(i, entityId, out var isActive, out var isSupportedBelow);
                 physicsActiveFlags[i] = isActive;
+                if (isSupportedBelow) isJumping[i] = false;
             }
 
         lastUpdateSystemTime = currentSystemTime;
@@ -345,6 +374,7 @@ public class MovementManager
             {
                 kinematicsComponentIndexPhysicsTags.Add(false);
                 physicsActiveFlags.Add(false);
+                isJumping.Add(false);
             }
 
             physicsUpdates.EnsureCapacity(kinematicsComponentIndexPhysicsTags.Count);
@@ -374,6 +404,8 @@ public class MovementManager
         }
 
         kinematicsComponentIndexPhysicsTags[index] = false;
+        physicsActiveFlags[index] = false;
+        isJumping[index] = false;
     }
 
     /// <summary>

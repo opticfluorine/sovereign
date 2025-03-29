@@ -88,6 +88,7 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 |------------|-------------------------------------------------------------|
 | Esc        | Open in-game menu                                           |
 | Arrow keys | Move player                                                 |
+| Space     | Jump                                                        |
 | Enter      | Toggle chat                                                 |
 | `          | Toggle Resource Editor Window                               |
 | Insert     | Toggle Template Entity Editor Window (must be admin player) |

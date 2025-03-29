@@ -62,6 +62,7 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Client_EntitySynchronization_SyncTemplate, templateValidator },
             { EventId.Core_Movement_Move, moveValidator },
             { EventId.Core_Movement_RequestMove, requestMoveValidator },
+            { EventId.Core_Movement_Jump, entityValidator },
             { EventId.Core_WorldManagement_EntityLeaveWorldSegment, entityGridPositionValidator },
             { EventId.Core_Network_Logout, entityValidator },
             { EventId.Core_Chat_Send, chatValidator },

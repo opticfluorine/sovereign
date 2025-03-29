@@ -59,6 +59,12 @@ public enum EventId
     /// Associated details: MoveEventDetails
     Core_Movement_Move = 101,
 
+    /// <summary>
+    ///     Initiates a jump.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Core_Movement_Jump = 102,
+
     #endregion Movement
 
     #region Blocks
