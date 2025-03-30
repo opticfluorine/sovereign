@@ -24,15 +24,15 @@ public static class PhysicsConstants
     /// <summary>
     ///     Gravitational acceleration along z axis in world units per sec^2.
     /// </summary>
-    public const float GravityAcceleration = -1.0f;
+    public const float GravityAcceleration = -8.0f;
 
     /// <summary>
     ///     Maximum falling velocity in world units per second.
     /// </summary>
-    public const float TerminalVelocity = 4.0f;
+    public const float TerminalVelocity = -8.0f;
 
     /// <summary>
     ///     Initial jump velocity in world units per second.
     /// </summary>
-    public const float InitialJumpVelocity = 4.0f;
+    public const float InitialJumpVelocity = 6.0f;
 }

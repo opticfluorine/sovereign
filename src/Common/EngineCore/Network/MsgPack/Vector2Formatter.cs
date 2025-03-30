@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,24 +21,24 @@ using MessagePack.Formatters;
 namespace Sovereign.EngineCore.Network.MsgPack;
 
 /// <summary>
-///     MsgPack resolver for Vector<T>.
+///     MsgPack formatter for Vector2.
 /// </summary>
-public class VectorResolver : IFormatterResolver
+public class Vector2Formatter : IMessagePackFormatter<Vector2>
 {
-    public static readonly VectorResolver Instance = new();
+    public static readonly Vector2Formatter Instance = new();
 
-    public IMessagePackFormatter<T>? GetFormatter<T>()
+    public void Serialize(ref MessagePackWriter writer, Vector2 value, MessagePackSerializerOptions options)
     {
-        if (typeof(T) == typeof(Vector3))
-        {
-            return (IMessagePackFormatter<T>)Vector3Formatter.Instance;
-        }
+        writer.Write(value.X);
+        writer.Write(value.Y);
+    }
 
-        if (typeof(T) == typeof(Vector2))
-        {
-            return (IMessagePackFormatter<T>)Vector2Formatter.Instance;
-        }
-
-        return null;
+    public Vector2 Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+    {
+        options.Security.DepthStep(ref reader);
+        var x = reader.ReadSingle();
+        var y = reader.ReadSingle();
+        reader.Depth--;
+        return new Vector2(x, y);
     }
 }

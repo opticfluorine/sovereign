@@ -80,6 +80,7 @@ public class BlockGridTracker
     public void AddBlock(GridPosition blockPosition)
     {
         var segmentIndex = resolver.GetWorldSegmentForPosition(blockPosition);
+        var segmentBasePos = resolver.GetRangeForWorldSegment(segmentIndex).Item1;
         var gridKey = Tuple.Create(segmentIndex, blockPosition.Z);
 
         if (!grids.TryGetValue(gridKey, out var grid))
@@ -88,7 +89,9 @@ public class BlockGridTracker
             grids[gridKey] = grid;
         }
 
-        var index = WorldConstants.SegmentLength * blockPosition.Y + blockPosition.X;
+        var relX = blockPosition.X - (int)segmentBasePos.X;
+        var relY = blockPosition.Y - (int)segmentBasePos.Y;
+        var index = WorldConstants.SegmentLength * relY + relX;
         grid.Grid[index] = true;
         grid.Count++;
 

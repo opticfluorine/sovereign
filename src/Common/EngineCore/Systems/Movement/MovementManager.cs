@@ -246,6 +246,14 @@ public class MovementManager
         var componentList = kinematics.Components;
         var directMods = 0;
 
+        // Ensure flags exist for all components.
+        while (kinematicsComponentIndexPhysicsTags.Count <= kinematics.Components.Length)
+        {
+            kinematicsComponentIndexPhysicsTags.Add(false);
+            physicsActiveFlags.Add(false);
+            isJumping.Add(false);
+        }
+
         // Forward propagation step.
         physicsUpdates.Clear();
         for (var i = 0; i < kinematics.ComponentCount; ++i)
@@ -370,13 +378,6 @@ public class MovementManager
         // Ensure cache is large enough to hold the new component index.
         if (kinematicsComponentIndexPhysicsTags.Count <= index)
         {
-            while (kinematicsComponentIndexPhysicsTags.Count <= index)
-            {
-                kinematicsComponentIndexPhysicsTags.Add(false);
-                physicsActiveFlags.Add(false);
-                isJumping.Add(false);
-            }
-
             physicsUpdates.EnsureCapacity(kinematicsComponentIndexPhysicsTags.Count);
         }
 

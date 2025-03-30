@@ -21,12 +21,12 @@ using MessagePack.Formatters;
 namespace Sovereign.EngineCore.Network.MsgPack;
 
 /// <summary>
-/// MsgPack formatter for Vector3.
+///     MsgPack formatter for Vector3.
 /// </summary>
-public class VectorFormatter : IMessagePackFormatter<Vector3>
+public class Vector3Formatter : IMessagePackFormatter<Vector3>
 {
-    public static readonly VectorFormatter Instance = new();
-    
+    public static readonly Vector3Formatter Instance = new();
+
     public void Serialize(ref MessagePackWriter writer, Vector3 value, MessagePackSerializerOptions options)
     {
         writer.Write(value.X);
