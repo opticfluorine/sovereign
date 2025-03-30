@@ -115,4 +115,35 @@ public class TestBoundingBox
         Assert.True(finalResult);
         Assert.Equal(Vector3.Zero, finalResolvingTranslation);
     }
+
+    /// <summary>
+    ///     Tests that partial overlaps in z from above are resolved in the correct direction.
+    ///     This is the common case for gravity pulling an entity onto a surface.
+    /// </summary>
+    [Fact]
+    public void Intersects_ResolvesZOverlapCorrectly()
+    {
+        var box1 = new BoundingBox { Position = new Vector3(0, 0, 0.9f), Size = Vector3.One };
+        var box2 = new BoundingBox { Position = Vector3.Zero, Size = Vector3.One };
+
+        // Step 1: Check initial intersection
+        var initialResult = box1.Intersects(box2, out var resolvingTranslation, out var minimumAbsOverlap);
+        Assert.True(initialResult);
+
+        // Step 2: Translate box1 by the resolving translation
+        var translatedBox1 = box1.Translate(resolvingTranslation);
+
+        // Step 3: Check that the translated box1 has a larger z position than box2
+        Assert.True(translatedBox1.Position.Z > box2.Position.Z);
+
+        // Step 4: Check that the x and y positions are equal for both boxes
+        Assert.Equal(translatedBox1.Position.X, box2.Position.X);
+        Assert.Equal(translatedBox1.Position.Y, box2.Position.Y);
+
+        // Step 5: Check that Intersects called on translatedBox1 with box2 gives zero minimumAbsOverlap
+        var finalResult =
+            translatedBox1.Intersects(box2, out var finalResolvingTranslation, out var finalMinimumAbsOverlap);
+        Assert.True(finalResult);
+        Assert.Equal(0.0f, finalMinimumAbsOverlap);
+    }
 }

@@ -76,11 +76,34 @@ public struct BoundingBox
         if (!intersects) return false;
 
         var shifts = new Vector3(
-            Math.Min(bmax.X - amin.X, bmin.X - amax.X),
-            Math.Min(bmax.Y - amin.Y, bmin.Y - amax.Y),
-            Math.Min(bmax.Z - amin.Z, bmin.Z - amax.Z)
+            AbsMin(bmax.X - amin.X, bmin.X - amax.X),
+            AbsMin(bmax.Y - amin.Y, bmin.Y - amax.Y),
+            AbsMin(bmax.Z - amin.Z, bmin.Z - amax.Z)
         );
         var absShifts = new Vector3(Math.Abs(shifts.X), Math.Abs(shifts.Y), Math.Abs(shifts.Z));
+
+        var foundFiniteShift = false;
+        minimumAbsOverlap = float.MaxValue;
+        if (absShifts.X > 0.0f && absShifts.X < minimumAbsOverlap)
+        {
+            minimumAbsOverlap = absShifts.X;
+            foundFiniteShift = true;
+        }
+
+        if (absShifts.Y > 0.0f && absShifts.Y < minimumAbsOverlap)
+        {
+            minimumAbsOverlap = absShifts.Y;
+            foundFiniteShift = true;
+        }
+
+        if (absShifts.Z > 0.0f && absShifts.Z < minimumAbsOverlap)
+        {
+            minimumAbsOverlap = absShifts.Z;
+            foundFiniteShift = true;
+        }
+
+        if (!foundFiniteShift) minimumAbsOverlap = 0.0f;
+
         minimumAbsOverlap = Math.Min(absShifts.X, Math.Min(absShifts.Y, absShifts.Z));
         resolvingTranslation = new Vector3(
             absShifts.X > minimumAbsOverlap ? 0.0f : shifts.X,
@@ -89,5 +112,16 @@ public struct BoundingBox
         );
 
         return true;
+    }
+
+    /// <summary>
+    ///     Selects the value with the minimum absolute value. If the absolute values are equal, returns the first.
+    /// </summary>
+    /// <param name="a">First number.</param>
+    /// <param name="b">Second number.</param>
+    /// <returns>Number with smallest absolute value, or the first number if absolute values are equal.</returns>
+    private static float AbsMin(float a, float b)
+    {
+        return Math.Abs(a) <= Math.Abs(b) ? a : b;
     }
 }

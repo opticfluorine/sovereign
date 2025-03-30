@@ -29,7 +29,7 @@ public static class PhysicsConstants
     /// <summary>
     ///     Maximum falling velocity in world units per second.
     /// </summary>
-    public const float TerminalVelocity = -8.0f;
+    public const float TerminalVelocity = -12.0f;
 
     /// <summary>
     ///     Initial jump velocity in world units per second.
