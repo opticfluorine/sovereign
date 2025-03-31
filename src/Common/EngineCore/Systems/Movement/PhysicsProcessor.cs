@@ -125,6 +125,12 @@ public class PhysicsProcessor
             return;
         }
 
+        if (!boundingBoxes.TryGetValue(entityId, out var sourceMesh))
+        {
+            logger.LogError("No BoundingBox for entity {EntityID:X}.", entityId);
+            return;
+        }
+
         var passes = 0;
         var changed = true;
         while (changed && passes < MaxCollisionPasses)
@@ -132,14 +138,9 @@ public class PhysicsProcessor
             passes++;
 
             var posVel = kinematics.Components[(ulong)kinematicsIndex];
-            if (!boundingBoxes.TryGetValue(entityId, out var sourceMesh))
-            {
-                logger.LogError("No BoundingBox for entity {EntityID:X}.", entityId);
-                return;
-            }
-
             var entityMesh = sourceMesh.Translate(posVel.Position);
             SelectActiveMeshes(entityMesh);
+
             changed = HandleCollisions(kinematicsIndex, entityMesh, posVel, out isSupportedBelow);
         }
 
@@ -166,8 +167,11 @@ public class PhysicsProcessor
 
         var firstSegment = resolver.GetWorldSegmentForPosition(entityStart);
         var lastSegment = resolver.GetWorldSegmentForPosition(entityEnd);
-        var firstZ = (int)Math.Floor(entityStart.Z);
-        var lastZ = (int)Math.Floor(entityStart.Z);
+
+        // Include the z planes above and below the entity mesh in the search in order to
+        // handle the surface contact edge case (necessary for gravity to work correctly).
+        var firstZ = (int)Math.Floor(entityStart.Z) - 1;
+        var lastZ = (int)Math.Ceiling(entityEnd.Z);
 
         for (var segX = firstSegment.X; segX <= lastSegment.X; ++segX)
         for (var segY = firstSegment.Y; segY <= lastSegment.Y; ++segY)
@@ -216,7 +220,8 @@ public class PhysicsProcessor
                 return true;
             }
 
-            if (resolvingTranslation.Z < 0.0f && -resolvingTranslation.Z < ContactTestEpsilon)
+            // If the bottom of the entity has the same z as the top of the block mesh...
+            if (Math.Abs(entityMesh.Position.Z - (blockMesh.Position.Z + blockMesh.Size.Z)) < ContactTestEpsilon)
                 // This mesh supports the entity from below, so inhibit gravity processing later.
                 supportedBelow = true;
         }

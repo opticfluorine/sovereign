@@ -80,35 +80,12 @@ public struct BoundingBox
             AbsMin(bmax.Y - amin.Y, bmin.Y - amax.Y),
             AbsMin(bmax.Z - amin.Z, bmin.Z - amax.Z)
         );
-        var absShifts = new Vector3(Math.Abs(shifts.X), Math.Abs(shifts.Y), Math.Abs(shifts.Z));
 
-        var foundFiniteShift = false;
-        minimumAbsOverlap = float.MaxValue;
-        if (absShifts.X > 0.0f && absShifts.X < minimumAbsOverlap)
-        {
-            minimumAbsOverlap = absShifts.X;
-            foundFiniteShift = true;
-        }
-
-        if (absShifts.Y > 0.0f && absShifts.Y < minimumAbsOverlap)
-        {
-            minimumAbsOverlap = absShifts.Y;
-            foundFiniteShift = true;
-        }
-
-        if (absShifts.Z > 0.0f && absShifts.Z < minimumAbsOverlap)
-        {
-            minimumAbsOverlap = absShifts.Z;
-            foundFiniteShift = true;
-        }
-
-        if (!foundFiniteShift) minimumAbsOverlap = 0.0f;
-
-        minimumAbsOverlap = Math.Min(absShifts.X, Math.Min(absShifts.Y, absShifts.Z));
+        minimumAbsOverlap = Math.Abs(AbsMin(shifts.X, AbsMin(shifts.Y, shifts.Z)));
         resolvingTranslation = new Vector3(
-            absShifts.X > minimumAbsOverlap ? 0.0f : shifts.X,
-            absShifts.Y > minimumAbsOverlap ? 0.0f : shifts.Y,
-            absShifts.Z > minimumAbsOverlap ? 0.0f : shifts.Z
+            Math.Abs(shifts.X) > minimumAbsOverlap ? 0.0f : shifts.X,
+            Math.Abs(shifts.Y) > minimumAbsOverlap ? 0.0f : shifts.Y,
+            Math.Abs(shifts.Z) > minimumAbsOverlap ? 0.0f : shifts.Z
         );
 
         return true;
