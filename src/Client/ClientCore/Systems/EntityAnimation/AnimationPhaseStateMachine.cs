@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
 using Sovereign.ClientCore.Components;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.EngineCore.Events.Details;
@@ -40,6 +39,8 @@ public class AnimationPhaseStateMachine
     public void OnMovement(MoveEventDetails details)
     {
         animationPhases.AddOrUpdateComponent(details.EntityId,
-            details.Velocity == Vector3.Zero ? AnimationPhase.Default : AnimationPhase.Moving);
+            details.Velocity is { X: 0, Y: 0 } || details.Velocity.Z != 0
+                ? AnimationPhase.Default
+                : AnimationPhase.Moving);
     }
 }
