@@ -215,7 +215,7 @@ public class PhysicsProcessor
                 kinematics.Components[(ulong)kinematicsIndex] = new Kinematics
                 {
                     Position = posVel.Position + resolvingTranslation,
-                    Velocity = Vector3.Zero
+                    Velocity = AdjustVelocityForCollision(resolvingTranslation, posVel.Velocity)
                 };
                 return true;
             }
@@ -227,6 +227,22 @@ public class PhysicsProcessor
         }
 
         return false;
+    }
+
+    /// <summary>
+    ///     Adjusts entity velocity in response to a collision.
+    /// </summary>
+    /// <param name="resolvingTranslation">Entity translation that resolves the collision.</param>
+    /// <param name="velocity">Current entity velocity.</param>
+    /// <returns>Adjusted entity velocity.</returns>
+    private Vector3 AdjustVelocityForCollision(Vector3 resolvingTranslation, Vector3 velocity)
+    {
+        return new Vector3
+        {
+            X = Math.Abs(resolvingTranslation.X) > 0.0f ? 0.0f : velocity.X,
+            Y = Math.Abs(resolvingTranslation.Y) > 0.0f ? 0.0f : velocity.Y,
+            Z = Math.Abs(resolvingTranslation.Z) > 0.0f ? 0.0f : velocity.Z
+        };
     }
 
     /// <summary>
