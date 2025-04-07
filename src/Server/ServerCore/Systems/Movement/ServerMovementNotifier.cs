@@ -30,7 +30,7 @@ public class ServerMovementNotifier : IMovementNotifier
     /// <summary>
     ///     Number of ticks between successive batches.
     /// </summary>
-    private const ulong ScheduleDelay = 5;
+    private const ulong ScheduleDelay = 20;
 
     private readonly MovementInternalController controller;
     private readonly IEventSender eventSender;

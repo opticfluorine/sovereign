@@ -2,7 +2,19 @@
 
 ## 2025
 
+### April
+
+#### 6 April 2025
+
+* Physics: Reduce rate of periodic authoritative movement updates to something more reasonable (5 Hz instead of
+  the arbitrary initial value of 20 Hz). Preliminary testing seems good - the movement stays cleanly synchronized
+  between client and server with minimal artifacts while also avoiding excessive network traffic.
+
 ### March
+
+#### 25 March 2025
+
+* Physics: Add collisions and gravity.
 
 #### 23 March 2025
 
@@ -14,7 +26,7 @@
 * All: Minor refactorings. Renamed some classes for consistency. Rearranged unit test
   projects into their own directory to keep things clean.
 
-### February 
+### February
 
 #### 20 February 2025
 
