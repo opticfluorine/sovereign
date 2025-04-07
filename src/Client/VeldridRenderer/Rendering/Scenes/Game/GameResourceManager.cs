@@ -47,12 +47,12 @@ public class GameResourceManager : IDisposable
     /// <summary>
     ///     Shadow map texture width.
     /// </summary>
-    public const int ShadowMapWidth = 1024;
+    public const int ShadowMapWidth = 2048;
 
     /// <summary>
     ///     Shadow map texture height.
     /// </summary>
-    public const int ShadowMapHeight = 1024;
+    public const int ShadowMapHeight = 2048;
 
     /// <summary>
     ///     Initial size of point light related buffers.

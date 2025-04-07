@@ -58,7 +58,7 @@ public class WorldVertexConstantsUpdater
         var invHalfHeight = 2.0f / heightInTiles;
         var invHeight = 1.0f / heightInTiles;
         var invWidthShadow = 1.4f / widthInTiles;
-        var invHeightShadow = 1.4f / heightInTiles;
+        var invHeightShadow = 0.8f / heightInTiles;
 
         /* Update constant buffers. */
         var buf = gameResourceManager.VertexUniformBuffer.Buffer;
@@ -122,7 +122,7 @@ public class WorldVertexConstantsUpdater
         shadowProjMat.M12 = 0.0f;
         shadowProjMat.M22 = -invHeightShadow;
         shadowProjMat.M32 = -invHeightShadow;
-        shadowProjMat.M42 = -invHeightShadow * (cameraPos.Z - cameraPos.Y);
+        shadowProjMat.M42 = invHeightShadow * (cameraPos.Z + cameraPos.Y);
 
         shadowProjMat.M13 = 0.0f;
         shadowProjMat.M23 = 0.0f;

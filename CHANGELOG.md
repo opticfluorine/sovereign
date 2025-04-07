@@ -9,6 +9,10 @@
 * Physics: Reduce rate of periodic authoritative movement updates to something more reasonable (5 Hz instead of
   the arbitrary initial value of 20 Hz). Preliminary testing seems good - the movement stays cleanly synchronized
   between client and server with minimal artifacts while also avoiding excessive network traffic.
+* Renderer: Adjust block shadow map parameters (texture size and frustum scaling) to reduce shadow cutoffs and
+  sampling noise at the edges. Some further adjustments to the frustum scaling (particularly the height) may still
+  be required when the camera is positioned far above a block, however this has not been tested yet.
+* Renderer: Fix an issue where the camera transform for block shadow rendering was slightly inaccurate.
 
 ### March
 
