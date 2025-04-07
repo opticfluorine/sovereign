@@ -83,6 +83,18 @@ public class MovementEventHandler
                 break;
             }
 
+            case EventId.Core_Movement_Teleport:
+            {
+                if (ev.EventDetails is not EntityVectorEventDetails details)
+                {
+                    logger.LogError("Received Teleport event with bad details.");
+                    break;
+                }
+
+                manager.HandleTeleport(details.EntityId, details.Vector);
+                break;
+            }
+
             case EventId.Core_Tick:
                 manager.HandleTick();
                 meshManager.OnTick();

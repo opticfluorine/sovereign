@@ -65,6 +65,15 @@ public enum EventId
     /// Associated details: EntityEventDetails
     Core_Movement_Jump = 102,
 
+    /// <summary>
+    ///     Teleports an entity to a new position.
+    /// </summary>
+    /// <remarks>
+    ///     Vector in the details is the new position.
+    /// </remarks>
+    /// Associated details: EntityVectorEventDetails
+    Core_Movement_Teleport = 103,
+
     #endregion Movement
 
     #region Blocks

@@ -199,6 +199,30 @@ public class MovementManager
     }
 
     /// <summary>
+    ///     Teleports an entity to a new position.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="newPosition">New position.</param>
+    public void HandleTeleport(ulong entityId, Vector3 newPosition)
+    {
+        if (!kinematics.TryGetIndexForEntity(entityId, out var componentIndex))
+        {
+            logger.LogError("Tried to teleport entity {EntityId:X} which has no Kinematics.", entityId);
+            return;
+        }
+        
+        // Update position and flag for physics checks in the next tick.
+        // The physics checks will also ensure that authoritative move updates are sent out as needed.
+        kinematics.ModifyComponent(entityId, ComponentOperation.Set, new Kinematics
+        {
+            Position = newPosition,
+            Velocity = Vector3.Zero
+        });
+        physicsActiveFlags[componentIndex] = true;
+        movementNotifier.ScheduleEntity(entityId);
+    }
+
+    /// <summary>
     ///     Called at the start of a new tick.
     /// </summary>
     public void HandleTick()

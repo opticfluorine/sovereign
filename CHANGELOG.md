@@ -13,6 +13,9 @@
   sampling noise at the edges. Some further adjustments to the frustum scaling (particularly the height) may still
   be required when the camera is positioned far above a block, however this has not been tested yet.
 * Renderer: Fix an issue where the camera transform for block shadow rendering was slightly inaccurate.
+* Chat: Added the `/rescue` command which teleports the player back to the spawn point. This is useful if the
+  player gets stuck for any reason. There is still an edge case that needs to be solved for teleport synchronization;
+  I have a solution and will get around to implementing it later this week.
 
 ### March
 

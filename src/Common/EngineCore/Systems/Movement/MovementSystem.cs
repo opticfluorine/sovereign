@@ -40,6 +40,7 @@ public class MovementSystem : ISystem
         EventId.Core_Movement_Move,
         EventId.Core_Movement_RequestMove,
         EventId.Core_Movement_Jump,
+        EventId.Core_Movement_Teleport,
         EventId.Core_Tick,
         EventId.Core_Block_GridUpdated,
         EventId.Core_WorldManagement_WorldSegmentLoaded,

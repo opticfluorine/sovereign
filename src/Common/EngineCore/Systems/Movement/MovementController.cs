@@ -62,4 +62,26 @@ public class MovementController
         var ev = new Event(EventId.Core_Movement_Jump, details);
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Teleports an entity to a new position.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="newPosition">New position.</param>
+    /// <remarks>
+    ///     This is generally only used for server-side teleportation of entities.
+    ///     If used on the client side, the effect will be rolled back by the next
+    ///     authoritative position update from the server.
+    /// </remarks>
+    public void Teleport(IEventSender eventSender, ulong entityId, Vector3 newPosition)
+    {
+        var details = new EntityVectorEventDetails
+        {
+            EntityId = entityId,
+            Vector = newPosition
+        };
+        var ev = new Event(EventId.Core_Movement_Teleport, details);
+        eventSender.SendEvent(ev);
+    }
 }

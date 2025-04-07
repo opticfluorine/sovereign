@@ -103,6 +103,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ServerChatSystem>());
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, GlobalChatProcessor>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, RescueChatProcessor>());
     }
 
     private static void AddServerManagementSystem(IServiceCollection services)

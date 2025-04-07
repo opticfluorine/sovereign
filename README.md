@@ -105,6 +105,7 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 |-------------------|-----------------------|-------------------------------------------------------|
 | /help             |                       | List commands and their descriptions.                 |
 | /g                | message               | Broadcasts a message through global chat.             |
+| /rescue           |                       | Emergency teleport back to spawn point.               |
 | /addadmin         | playerName            | Admin only. Grants admin role to the given player.    |
 | /removeadmin      | playerName            | Admin only. Revokes admin role from the given player. |
 | /addblock         | x, y, z, templateName | Admin only. Adds a block at the given position.       |
