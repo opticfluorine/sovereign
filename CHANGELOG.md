@@ -4,6 +4,11 @@
 
 ### April
 
+#### 7 April 2025
+
+* Physics: Apply physics processing to newly created/loaded entities that have the `Physics` tag.
+  Previously physics would not be applied until the first time the entity moved.
+
 #### 6 April 2025
 
 * Physics: Reduce rate of periodic authoritative movement updates to something more reasonable (5 Hz instead of

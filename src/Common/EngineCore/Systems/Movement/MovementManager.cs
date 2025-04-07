@@ -210,7 +210,7 @@ public class MovementManager
             logger.LogError("Tried to teleport entity {EntityId:X} which has no Kinematics.", entityId);
             return;
         }
-        
+
         // Update position and flag for physics checks in the next tick.
         // The physics checks will also ensure that authoritative move updates are sent out as needed.
         kinematics.ModifyComponent(entityId, ComponentOperation.Set, new Kinematics
@@ -405,7 +405,10 @@ public class MovementManager
             physicsUpdates.EnsureCapacity(kinematicsComponentIndexPhysicsTags.Count);
         }
 
+        // Array capacity is ensured by the earlier call to UpdatePositions
+        // (bulk updates are done before component events are fired, see BaseComponentCollection).
         kinematicsComponentIndexPhysicsTags[index] = true;
+        physicsActiveFlags[index] = true;
     }
 
     /// <summary>
