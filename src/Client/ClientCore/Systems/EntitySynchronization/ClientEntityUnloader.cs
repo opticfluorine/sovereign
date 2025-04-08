@@ -109,6 +109,27 @@ public class ClientEntityUnloader
     }
 
     /// <summary>
+    ///     Called when the client is informed that an entity has teleported.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="toSegmentIndex">World segment index of teleportation target.</param>
+    public void OnEntityTeleported(ulong entityId, GridPosition toSegmentIndex)
+    {
+        if (subscribedSegments.Contains(toSegmentIndex)) return;
+        
+        // Entity has teleported out of the subscribed area, unload from the client.
+        UnloadEntity(entityId);
+    }
+    
+    /// <summary>
+    ///     Unsubscribes from all world segments.
+    /// </summary>
+    public void UnsubscribeAll()
+    {
+        foreach (var segmentIndex in subscribedSegments) UnloadWorldSegment(segmentIndex);
+    }
+
+    /// <summary>
     ///     Unloads all entities from the given world segment.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
@@ -151,11 +172,4 @@ public class ClientEntityUnloader
         foreach (var nextEntityId in entitiesToUnload) entityManager.UnloadEntity(nextEntityId);
     }
 
-    /// <summary>
-    ///     Unsubscribes from all world segments.
-    /// </summary>
-    public void UnsubscribeAll()
-    {
-        foreach (var segmentIndex in subscribedSegments) UnloadWorldSegment(segmentIndex);
-    }
 }

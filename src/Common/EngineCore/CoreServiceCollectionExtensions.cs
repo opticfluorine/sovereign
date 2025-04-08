@@ -159,6 +159,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<TemplateEntityDefinitionEventDetailsValidator>();
         services.TryAddSingleton<WorldSegmentSubscriptionEventDetailsValidator>();
         services.TryAddSingleton<GenericChatEventDetailsValidator>();
+        services.TryAddSingleton<TeleportNoticeEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)

@@ -74,6 +74,12 @@ public enum EventId
     /// Associated details: EntityVectorEventDetails
     Core_Movement_Teleport = 103,
 
+    /// <summary>
+    ///     Notifies clients that a nearby entity is about to teleport.
+    /// </summary>
+    /// Associated details:
+    Core_Movement_TeleportNotice = 104,
+
     #endregion Movement
 
     #region Blocks

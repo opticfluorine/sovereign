@@ -29,6 +29,7 @@ namespace Sovereign.NetworkCore.Network.Pipeline.Inbound;
 public class ValidationInboundPipelineStage : IInboundPipelineStage
 {
     private readonly ILogger<ValidationInboundPipelineStage> logger;
+    private readonly TeleportNoticeEventDetailsValidator teleportNoticeValidator;
     private readonly TemplateEntityDefinitionEventDetailsValidator templateValidator;
     private readonly Dictionary<EventId, IEventDetailsValidator> validators;
 
@@ -47,9 +48,11 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         TemplateEntityDefinitionEventDetailsValidator templateValidator,
         BlockAddEventDetailsValidator blockAddValidator,
         GridPositionEventDetailsValidator gridPositionValidator,
+        TeleportNoticeEventDetailsValidator teleportNoticeValidator,
         ILogger<ValidationInboundPipelineStage> logger)
     {
         this.templateValidator = templateValidator;
+        this.teleportNoticeValidator = teleportNoticeValidator;
         this.logger = logger;
         validators = new Dictionary<EventId, IEventDetailsValidator>
         {
@@ -63,6 +66,7 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Movement_Move, moveValidator },
             { EventId.Core_Movement_RequestMove, requestMoveValidator },
             { EventId.Core_Movement_Jump, entityValidator },
+            { EventId.Core_Movement_TeleportNotice, teleportNoticeValidator },
             { EventId.Core_WorldManagement_EntityLeaveWorldSegment, entityGridPositionValidator },
             { EventId.Core_Network_Logout, entityValidator },
             { EventId.Core_Chat_Send, chatValidator },

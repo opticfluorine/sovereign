@@ -39,6 +39,7 @@ namespace Sovereign.EngineCore.Events;
 [Union(13, typeof(GridPositionEventDetails))]
 [Union(14, typeof(BlockAddEventDetails))]
 [Union(15, typeof(GenericChatEventDetails))]
+[Union(16, typeof(TeleportNoticeEventDetails))]
 public interface IEventDetails
 {
 }

@@ -56,7 +56,8 @@ public class EntitySynchronizationSystem : ISystem
         EventId.Core_WorldManagement_Unsubscribe,
         EventId.Client_Network_PlayerEntitySelected,
         EventId.Core_WorldManagement_EntityLeaveWorldSegment,
-        EventId.Core_Network_Logout
+        EventId.Core_Network_Logout,
+        EventId.Core_Movement_TeleportNotice
     };
 
     public int WorkloadEstimate => 50;
@@ -152,6 +153,16 @@ public class EntitySynchronizationSystem : ISystem
                 case EventId.Core_Network_Logout:
                     OnLogout();
                     break;
+
+                case EventId.Core_Movement_TeleportNotice:
+                    if (ev.EventDetails is not TeleportNoticeEventDetails)
+                    {
+                        logger.LogError("Received TeleportNotice event without details.");
+                        break;
+                    }
+
+                    HandleTeleportNotice((TeleportNoticeEventDetails)ev.EventDetails);
+                    break;
             }
         }
 
@@ -229,5 +240,16 @@ public class EntitySynchronizationSystem : ISystem
     {
         logger.LogDebug("Desynchronizing entity ID {0} and descendants.", details.EntityId);
         unloader.OnDesync(details.EntityId);
+    }
+
+    /// <summary>
+    ///     Handles an entity teleport notice.
+    /// </summary>
+    /// <param name="details">Teleport notice details.</param>
+    private void HandleTeleportNotice(TeleportNoticeEventDetails details)
+    {
+        logger.LogDebug("Entity ID {EntityId:X} teleported to world segment {SegmentIndex}.",
+            details.EntityId, details.ToWorldSegment);
+        unloader.OnEntityTeleported(details.EntityId, details.ToWorldSegment);
     }
 }

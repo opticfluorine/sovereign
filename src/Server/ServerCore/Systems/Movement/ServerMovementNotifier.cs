@@ -15,9 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Movement;
 
 namespace Sovereign.ServerCore.Systems.Movement;
@@ -33,20 +31,15 @@ public class ServerMovementNotifier : IMovementNotifier
     private const ulong ScheduleDelay = 20;
 
     private readonly MovementInternalController controller;
-    private readonly IEventSender eventSender;
     private readonly KinematicsComponentCollection kinematics;
-    private readonly ILogger<ServerMovementNotifier> logger;
     private readonly Dictionary<ulong, ulong> scheduledCountByEntityId = new();
     private readonly List<ulong> toRemove = new();
     private ulong sendCount;
 
-    public ServerMovementNotifier(KinematicsComponentCollection kinematics, MovementInternalController controller,
-        IEventSender eventSender, ILogger<ServerMovementNotifier> logger)
+    public ServerMovementNotifier(KinematicsComponentCollection kinematics, MovementInternalController controller)
     {
         this.kinematics = kinematics;
         this.controller = controller;
-        this.eventSender = eventSender;
-        this.logger = logger;
     }
 
     public void ScheduleEntity(ulong entityId)
@@ -74,7 +67,7 @@ public class ServerMovementNotifier : IMovementNotifier
                 continue;
             }
 
-            controller.Move(eventSender, entityId, posVel.Position, posVel.Velocity);
+            controller.Move(entityId, posVel.Position, posVel.Velocity);
         }
 
         foreach (var entityId in toRemove)

@@ -41,6 +41,7 @@ public class ClientAllowedEventsInboundPipelineStage : IInboundPipelineStage
         EventId.Client_EntitySynchronization_Desync,
         EventId.Client_EntitySynchronization_SyncTemplate,
         EventId.Core_Movement_Move,
+        EventId.Core_Movement_TeleportNotice,
         EventId.Core_WorldManagement_EntityLeaveWorldSegment,
         EventId.Core_Chat_Global,
         EventId.Core_Chat_Local,

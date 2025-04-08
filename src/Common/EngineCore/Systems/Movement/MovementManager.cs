@@ -22,7 +22,6 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
-using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
@@ -34,7 +33,6 @@ namespace Sovereign.EngineCore.Systems.Movement;
 /// </summary>
 public class MovementManager
 {
-    private readonly IEventSender eventSender;
     private readonly MovementInternalController internalController;
 
     /// <summary>
@@ -100,7 +98,7 @@ public class MovementManager
 
     public MovementManager(KinematicsComponentCollection kinematics,
         ISystemTimer systemTimer, MovementInternalController internalController,
-        IEventSender eventSender, OrientationComponentCollection orientations,
+        OrientationComponentCollection orientations,
         PhysicsTagCollection physics, PhysicsProcessor physicsProcessor,
         ILogger<MovementManager> logger, NonBlockWorldSegmentIndexer worldSegmentIndexer,
         IMovementNotifier movementNotifier)
@@ -108,7 +106,6 @@ public class MovementManager
         this.kinematics = kinematics;
         this.systemTimer = systemTimer;
         this.internalController = internalController;
-        this.eventSender = eventSender;
         this.orientations = orientations;
         this.physicsProcessor = physicsProcessor;
         this.logger = logger;
@@ -213,6 +210,9 @@ public class MovementManager
 
         // Update position and flag for physics checks in the next tick.
         // The physics checks will also ensure that authoritative move updates are sent out as needed.
+        // A teleport notice is sent to fill in any clients which are not subscribed to authoritiative move
+        // updates in the new world segment.
+        internalController.NotifyTeleport(entityId, newPosition);
         kinematics.ModifyComponent(entityId, ComponentOperation.Set, new Kinematics
         {
             Position = newPosition,
@@ -231,7 +231,7 @@ public class MovementManager
         while (pendingMoveEvents.TryDequeue(out var entityId))
         {
             var kinematicData = kinematics[entityId];
-            internalController.Move(eventSender, entityId, kinematicData.Position, kinematicData.Velocity);
+            internalController.Move(entityId, kinematicData.Position, kinematicData.Velocity);
         }
 
         ProcessChecks();
@@ -338,7 +338,7 @@ public class MovementManager
             var newVel = posVel.Velocity with { X = 0.0f, Y = 0.0f };
             kinematics.ModifyComponent(check.EntityId, ComponentOperation.SetVelocity,
                 new Kinematics { Velocity = newVel });
-            internalController.Move(eventSender, check.EntityId, posVel.Position, newVel);
+            internalController.Move(check.EntityId, posVel.Position, newVel);
         }
 
         // Reset the check list so that it can be populated with new checks for move requests arriving this tick.

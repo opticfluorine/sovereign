@@ -15,8 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.World;
 
 namespace Sovereign.EngineCore.Systems.Movement;
 
@@ -25,14 +27,25 @@ namespace Sovereign.EngineCore.Systems.Movement;
 /// </summary>
 public class MovementInternalController
 {
+    private readonly IEventSender eventSender;
+    private readonly KinematicsComponentCollection kinematics;
+    private readonly WorldSegmentResolver resolver;
+
+    public MovementInternalController(IEventSender eventSender, WorldSegmentResolver resolver,
+        KinematicsComponentCollection kinematics)
+    {
+        this.eventSender = eventSender;
+        this.resolver = resolver;
+        this.kinematics = kinematics;
+    }
+
     /// <summary>
     ///     Moves an entity.
     /// </summary>
-    /// <param name="eventSender">Event sender.</param>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="position">Position.</param>
     /// <param name="velocity">Velocity.</param>
-    public void Move(IEventSender eventSender, ulong entityId, Vector3 position, Vector3 velocity)
+    public void Move(ulong entityId, Vector3 position, Vector3 velocity)
     {
         var details = new MoveEventDetails
         {
@@ -41,6 +54,23 @@ public class MovementInternalController
             Velocity = velocity
         };
         var ev = new Event(EventId.Core_Movement_Move, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Notifies clients that an entity is teleporting.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="newPosition">New position of entity after teleport.</param>
+    public void NotifyTeleport(ulong entityId, Vector3 newPosition)
+    {
+        var details = new TeleportNoticeEventDetails
+        {
+            EntityId = entityId,
+            FromWorldSegment = resolver.GetWorldSegmentForPosition(kinematics[entityId].Position),
+            ToWorldSegment = resolver.GetWorldSegmentForPosition(newPosition)
+        };
+        var ev = new Event(EventId.Core_Movement_TeleportNotice, details);
         eventSender.SendEvent(ev);
     }
 }

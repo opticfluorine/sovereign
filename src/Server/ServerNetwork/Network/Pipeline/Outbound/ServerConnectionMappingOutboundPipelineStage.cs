@@ -110,6 +110,12 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             return new Maybe<GridPosition>(resolver.GetWorldSegmentForPosition((Vector3)details.GridPosition));
         });
 
+        var teleportNoticeMapper = worldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not TeleportNoticeEventDetails details) return new Maybe<GridPosition>();
+            return new Maybe<GridPosition>(details.FromWorldSegment);
+        });
+
         // Configure specific connection mappers.
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
@@ -118,6 +124,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Client_EntitySynchronization_Desync] = desyncMapper;
         specificMappers[EventId.Client_EntitySynchronization_SyncTemplate] = globalMapper;
         specificMappers[EventId.Core_Movement_Move] = moveMapper;
+        specificMappers[EventId.Core_Movement_TeleportNotice] = teleportNoticeMapper;
         specificMappers[EventId.Core_WorldManagement_EntityLeaveWorldSegment] = entityGridMapper;
         specificMappers[EventId.Core_Chat_Local] = localChatMapper;
         specificMappers[EventId.Core_Chat_Global] = globalMapper;

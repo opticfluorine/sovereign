@@ -8,6 +8,11 @@
 
 * Physics: Apply physics processing to newly created/loaded entities that have the `Physics` tag.
   Previously physics would not be applied until the first time the entity moved.
+* Movement: Handle edge case with long-range teleportation synchronization where clients who are
+  not subscribed to the target world segment would not be informed that the entity had moved.
+  There are several ways to do this. A trade-off was made here to leak some information about the
+  destination of the teleport (specifically, the world segment index) to clients subscribed to the
+  source world segment in order to simplify the server-side logic.
 
 #### 6 April 2025
 
