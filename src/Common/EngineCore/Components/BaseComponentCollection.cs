@@ -667,6 +667,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             // Adds.
             foreach (var entityId in pendingAddEvents)
             {
+                if (!HasLocalComponentForEntity(entityId)) continue;
                 var value = this[entityId];
                 OnComponentAdded.Invoke(entityId, value, false);
             }
@@ -674,6 +675,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             // Loads.
             foreach (var entityId in pendingLoadEvents)
             {
+                if (!HasLocalComponentForEntity(entityId)) continue;
                 var value = this[entityId];
                 OnComponentAdded.Invoke(entityId, value, true);
             }
@@ -696,6 +698,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             foreach (var entityId in pendingModifyEvents)
             {
                 /* Notify all listeners. */
+                if (!HasLocalComponentForEntity(entityId)) continue;
                 var value = this[entityId];
                 OnComponentModified.Invoke(entityId, value);
             }
@@ -703,6 +706,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             for (var i = 0; i < directModCount; ++i)
             {
                 var entityId = componentToEntityMap[directAccessModifiedIndices[i]];
+                if (!HasLocalComponentForEntity(entityId)) continue;
                 var value = this[entityId];
                 OnComponentModified.Invoke(entityId, value);
             }

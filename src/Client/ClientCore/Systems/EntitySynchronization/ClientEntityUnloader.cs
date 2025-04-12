@@ -115,12 +115,13 @@ public class ClientEntityUnloader
     /// <param name="toSegmentIndex">World segment index of teleportation target.</param>
     public void OnEntityTeleported(ulong entityId, GridPosition toSegmentIndex)
     {
+        if (entityId == playerEntityId) return;
         if (subscribedSegments.Contains(toSegmentIndex)) return;
-        
+
         // Entity has teleported out of the subscribed area, unload from the client.
         UnloadEntity(entityId);
     }
-    
+
     /// <summary>
     ///     Unsubscribes from all world segments.
     /// </summary>
@@ -171,5 +172,4 @@ public class ClientEntityUnloader
         entitiesToUnload.Add(entityId);
         foreach (var nextEntityId in entitiesToUnload) entityManager.UnloadEntity(nextEntityId);
     }
-
 }
