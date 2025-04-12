@@ -7,21 +7,22 @@ namespace Sovereign.ClientCore.Rendering.Configuration;
 /// </summary>
 public sealed class DisplayViewport
 {
+    private readonly ClientConfigurationManager configManager;
+
     public DisplayViewport(ClientConfigurationManager configManager)
     {
-        WidthInTiles = (float)Width / configManager.ClientConfiguration.TileWidth;
-        HeightInTiles = (float)Height / configManager.ClientConfiguration.TileWidth;
+        this.configManager = configManager;
     }
 
     /// <summary>
     ///     Width of the display viewport in pixels.
     /// </summary>
-    public int Width => 1024;
+    public int Width { get; private set; }
 
     /// <summary>
     ///     Height of the display viewport in pixels.
     /// </summary>
-    public int Height => 576;
+    public int Height { get; private set; }
 
     /// <summary>
     ///     Width of the display viewport as a multiple of the tile width.
@@ -32,4 +33,20 @@ public sealed class DisplayViewport
     ///     Height of the display viewport as a multiple of the tile height.
     /// </summary>
     public float HeightInTiles { get; private set; }
+
+    /// <summary>
+    ///     Sets the scale of the display viewport.
+    /// </summary>
+    /// <param name="screenWidth">Screen width in pixels.</param>
+    /// <param name="screenHeight">Screen height in pixels.</param>
+    public void UpdateScale(int screenWidth, int screenHeight)
+    {
+        // Balance between supporting high DPI displays and minimizing texture sampling artifacts.
+        var scaleFactor = 1 + screenWidth / 1280;
+
+        Width = screenWidth / scaleFactor;
+        Height = screenHeight / scaleFactor;
+        WidthInTiles = (float)Width / configManager.ClientConfiguration.TileWidth;
+        HeightInTiles = (float)Height / configManager.ClientConfiguration.TileWidth;
+    }
 }

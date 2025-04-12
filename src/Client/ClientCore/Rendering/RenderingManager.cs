@@ -44,6 +44,7 @@ public class RenderingManager : IDisposable
     private readonly RenderingResourceManager resourceManager;
     private readonly SDLEventAdapter sdlEventAdapter;
     private readonly ClientStateServices stateServices;
+    private readonly DisplayViewport viewport;
 
     private bool initialized;
 
@@ -61,7 +62,8 @@ public class RenderingManager : IDisposable
         DisplayModeSelector displayModeSelector, IRenderer renderer,
         RenderingResourceManager resourceManager, ClientConfigurationManager configManager,
         CommonGuiManager guiManager, ClientStateServices stateServices,
-        ILogger<RenderingManager> logger, SDLEventAdapter sdlEventAdapter)
+        ILogger<RenderingManager> logger, SDLEventAdapter sdlEventAdapter,
+        DisplayViewport viewport)
     {
         this.mainDisplay = mainDisplay;
         this.adapterSelector = adapterSelector;
@@ -73,6 +75,7 @@ public class RenderingManager : IDisposable
         this.stateServices = stateServices;
         this.logger = logger;
         this.sdlEventAdapter = sdlEventAdapter;
+        this.viewport = viewport;
     }
 
     /// <summary>
@@ -212,6 +215,7 @@ public class RenderingManager : IDisposable
     {
         selectedAdapter = adapterSelector.SelectAdapter();
         selectedDisplayMode = displayModeSelector.SelectDisplayMode(selectedAdapter);
+        viewport.UpdateScale(selectedDisplayMode.Width, selectedDisplayMode.Height);
     }
 
     /// <summary>
