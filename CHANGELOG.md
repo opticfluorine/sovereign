@@ -4,6 +4,15 @@
 
 ### April
 
+#### 12 April 2025
+
+* Renderer: Fix minor renderer errors where the edges of tiles were sometimes cut off. The cause
+  was twofold. First, the world viewport scale factor was not an integer for most screen resolutions,
+  which led to sampling artifacts at the edges of tiles. Second, these artifacts had previously been
+  misunderstood as errors in texture coordinates, and an incorrect "correction" was applied that
+  effectively "zoomed in" by ~0.5px at each border. Both issues have now been corrected and the
+  tiles are displayed with pixel-level accuracy at all supported screen resolutions.
+
 #### 7 April 2025
 
 * Physics: Apply physics processing to newly created/loaded entities that have the `Physics` tag.

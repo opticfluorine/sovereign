@@ -99,10 +99,12 @@ public sealed class AtlasMap
         /* Add record to map. */
         MapElements.Add(new AtlasMapElement
         {
-            NormalizedLeftX = tlx / atlasWidth + offsetX,
-            NormalizedTopY = tly / atlasHeight + offsetY,
-            NormalizedRightX = brx / atlasWidth - offsetX,
-            NormalizedBottomY = bry / atlasHeight - offsetY,
+            //NormalizedLeftX = tlx / atlasWidth + offsetX,
+            //NormalizedTopY = tly / atlasHeight + offsetY,
+            NormalizedLeftX = tlx / atlasWidth,
+            NormalizedTopY = tly / atlasHeight,
+            NormalizedRightX = brx / atlasWidth,
+            NormalizedBottomY = bry / atlasHeight,
             WidthInTiles = (float)spriteWidth / configManager.ClientConfiguration.TileWidth,
             HeightInTiles = (float)spriteHeight / configManager.ClientConfiguration.TileWidth
         });
