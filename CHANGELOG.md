@@ -4,6 +4,10 @@
 
 ### April
 
+#### 14 April 2025
+
+* Renderer: Fix coordinate error that left camera slightly off-center.
+
 #### 12 April 2025
 
 * Renderer: Fix minor renderer errors where the edges of tiles were sometimes cut off. The cause

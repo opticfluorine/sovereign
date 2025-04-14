@@ -78,7 +78,7 @@ public sealed class CameraManager
             Position = targetKinematics.Position with
             {
                 X = targetKinematics.Position.X + halfEntityExtent.X,
-                Y = targetKinematics.Position.Y - halfEntityExtent.Y
+                Y = targetKinematics.Position.Y + halfEntityExtent.Y
             };
             Velocity = targetKinematics.Velocity;
         }
