@@ -67,7 +67,7 @@ public sealed class RegistrationClient
                 return result;
             }
 
-            logger.LogInformation("Attempting to register new account {0} with server at {1}:{2}.",
+            logger.LogInformation("Attempting to register new account {Username} with server at {RestHost}:{RestPort}.",
                 request.Username, connectionParameters.RestHost, connectionParameters.RestPort);
 
             // Temporarily connect to the target REST server.
@@ -77,7 +77,7 @@ public sealed class RegistrationClient
             var httpResponse = await restClient.PostJson(RestEndpoints.AccountRegistration, request);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
             {
-                logger.LogError("Registration response length {0} is too long.",
+                logger.LogError("Registration response length {Length} is too long.",
                     httpResponse.Content.Headers.ContentLength);
                 result = new Option<RegistrationResponse, string>("Response too long.");
                 return result;
@@ -100,7 +100,7 @@ public sealed class RegistrationClient
             {
                 if (response.Result != null)
                 {
-                    logger.LogError("Registration failed: {0}", response.Result);
+                    logger.LogError("Registration failed: {Result}", response.Result);
                     result = new Option<RegistrationResponse, string>(response.Result);
                 }
                 else

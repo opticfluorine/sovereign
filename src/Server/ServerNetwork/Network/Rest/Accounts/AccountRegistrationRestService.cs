@@ -83,7 +83,7 @@ public sealed class AccountRegistrationRestService : IRestService
             // Safety check.
             if (ctx.Request.ContentLength > MaxRequestLength)
             {
-                logger.LogError("Received registration request from {0} that was too large.",
+                logger.LogError("Received registration request from {IpAddress} that was too large.",
                     ctx.Request.Source.IpAddress);
                 await SendResponse(ctx, 413, "Request too large.");
                 return;
@@ -97,7 +97,7 @@ public sealed class AccountRegistrationRestService : IRestService
             if (registrationRequest == null || registrationRequest.Username == null ||
                 registrationRequest.Password == null)
             {
-                logger.LogError("Received incomplete registration request from {0}.",
+                logger.LogError("Received incomplete registration request from {IpAddress}.",
                     ctx.Request.Source.IpAddress);
                 await SendResponse(ctx, 400, "Incomplete request.");
                 return;
@@ -107,7 +107,7 @@ public sealed class AccountRegistrationRestService : IRestService
             var result = accountServices.Register(registrationRequest.Username,
                 registrationRequest.Password);
 
-            logger.LogInformation("Registration for user '{0}' from {1} returned status {2}.",
+            logger.LogInformation("Registration for user '{Username}' from {IpAddress} returned status {Result}.",
                 registrationRequest.Username, ctx.Request.Source.IpAddress, result);
             await SendResponse(ctx,
                 resultToStatus[result],
@@ -117,7 +117,7 @@ public sealed class AccountRegistrationRestService : IRestService
         {
             try
             {
-                logger.LogError("Received malformed registration request from {0}.",
+                logger.LogError("Received malformed registration request from {IpAddress}.",
                     ctx.Request.Source.IpAddress);
                 await SendResponse(ctx, 400, "Malformed request.");
             }

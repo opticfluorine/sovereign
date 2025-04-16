@@ -141,7 +141,7 @@ public class ClientWorldEditInputHandler
             editStarted = true;
             lastPosition = hoveredPos;
             internalController.SetBlock(eventSender, hoveredPos, userState.BlockTemplateId);
-            logger.LogDebug("Draw block at {0}.", hoveredPos);
+            logger.LogDebug("Draw block at {Position}.", hoveredPos);
         }
     }
 

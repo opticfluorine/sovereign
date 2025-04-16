@@ -45,6 +45,6 @@ public class TemplateEntityDataLoader
             definitionProcessor.ProcessDefinition(def);
         }
 
-        logger.LogInformation("Loaded {0} template entities from server.", data.TemplateEntityDefinitions.Count);
+        logger.LogInformation("Loaded {Count} template entities from server.", data.TemplateEntityDefinitions.Count);
     }
 }

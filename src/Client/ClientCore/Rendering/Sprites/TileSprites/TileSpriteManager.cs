@@ -195,7 +195,7 @@ public sealed class TileSpriteManager
             var path = pathBuilder.BuildPathToResource(ResourceType.Sprite, TileSpriteDefinitionsFilename);
             using var stream = new FileStream(path, FileMode.Create, FileAccess.Write);
             JsonSerializer.Serialize(stream, defs);
-            logger.LogInformation("Saved {0} tile sprites.", TileSprites.Count);
+            logger.LogInformation("Saved {Count} tile sprites.", TileSprites.Count);
         }
         catch (Exception e)
         {

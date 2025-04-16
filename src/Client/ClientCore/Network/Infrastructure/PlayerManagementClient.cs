@@ -74,7 +74,7 @@ public class PlayerManagementClient
             var httpResponse = await restClient.Get(RestEndpoints.Player);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
             {
-                logger.LogError("ListPlayers response length {0} is too long.",
+                logger.LogError("ListPlayers response length {Length} is too long.",
                     httpResponse.Content.Headers.ContentLength);
                 result = new Option<ListPlayersResponse, string>("Response too long.");
                 return result;
@@ -82,7 +82,7 @@ public class PlayerManagementClient
 
             if (httpResponse.StatusCode != HttpStatusCode.OK)
             {
-                logger.LogError("ListPlayers response status {0}.", httpResponse.StatusCode);
+                logger.LogError("ListPlayers response status {StatusCode}.", httpResponse.StatusCode);
                 result = new Option<ListPlayersResponse, string>("Bad response from server.");
                 return result;
             }
@@ -126,7 +126,7 @@ public class PlayerManagementClient
             var httpResponse = await restClient.PostJson(RestEndpoints.Player, request);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
             {
-                logger.LogError("CreatePlayer response length {0} is too long.",
+                logger.LogError("CreatePlayer response length {Length} is too long.",
                     httpResponse.Content.Headers.ContentLength);
                 result = new Option<CreatePlayerResponse, string>("Response too long.");
                 return result;
@@ -143,8 +143,8 @@ public class PlayerManagementClient
             if (httpResponse.StatusCode == HttpStatusCode.Created)
             {
                 // Success
-                logger.LogInformation("Successfully created new player {0} (ID {1}).", request.PlayerName,
-                    response.PlayerId);
+                logger.LogInformation("Successfully created new player {PlayerName} (ID {PlayerId:X}).",
+                    request.PlayerName, response.PlayerId);
                 internalController.SetPlayerEntityId(eventSender, response.PlayerId);
                 result = new Option<CreatePlayerResponse, string>(response);
             }
@@ -153,12 +153,13 @@ public class PlayerManagementClient
                 // Failed
                 if (response.Result != null)
                 {
-                    logger.LogError("Failed to create new player {0}: {1}", request.PlayerName, response.Result);
+                    logger.LogError("Failed to create new player {PlayerName}: {Result}", request.PlayerName,
+                        response.Result);
                     result = new Option<CreatePlayerResponse, string>(response.Result);
                 }
                 else
                 {
-                    logger.LogError("Failed to create new player {0}: unknown error.", request.PlayerName);
+                    logger.LogError("Failed to create new player {PlayerName}: unknown error.", request.PlayerName);
                     result = new Option<CreatePlayerResponse, string>("Unknown error.");
                 }
             }
@@ -197,7 +198,7 @@ public class PlayerManagementClient
             var httpResponse = await restClient.Post(playerUrl);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
             {
-                logger.LogError("SelectPlayer response length {0} is too long.",
+                logger.LogError("SelectPlayer response length {Length} is too long.",
                     httpResponse.Content.Headers.ContentLength);
                 result = new Option<SelectPlayerResponse, string>("Response too long.");
                 return result;
@@ -214,7 +215,7 @@ public class PlayerManagementClient
             if (httpResponse.StatusCode == HttpStatusCode.OK)
             {
                 // Success
-                logger.LogInformation("Selected player ID {0}.", playerEntityId);
+                logger.LogInformation("Selected player ID {EntityId:X}.", playerEntityId);
                 internalController.SetPlayerEntityId(eventSender, playerEntityId);
                 result = new Option<SelectPlayerResponse, string>(response);
             }
@@ -223,12 +224,12 @@ public class PlayerManagementClient
                 // Failed
                 if (response.Result != null)
                 {
-                    logger.LogError("Failed to select player {0}: {1}", playerEntityId, response.Result);
+                    logger.LogError("Failed to select player {EntityId:X}: {Result}", playerEntityId, response.Result);
                     result = new Option<SelectPlayerResponse, string>(response.Result);
                 }
                 else
                 {
-                    logger.LogError("Failed to select player {0}: Unknown error", playerEntityId);
+                    logger.LogError("Failed to select player {EntityId:X}: Unknown error", playerEntityId);
                     result = new Option<SelectPlayerResponse, string>("Unknown error.");
                 }
             }
@@ -266,7 +267,7 @@ public class PlayerManagementClient
             var httpResponse = await restClient.Delete(playerUrl);
             if (httpResponse.Content.Headers.ContentLength > MaxResponseLength)
             {
-                logger.LogError("DeletePlayer response length {0} is too long.",
+                logger.LogError("DeletePlayer response length {Length} is too long.",
                     httpResponse.Content.Headers.ContentLength);
                 result = new Option<DeletePlayerResponse, string>("Response too long.");
                 return result;
@@ -283,7 +284,7 @@ public class PlayerManagementClient
             if (httpResponse.StatusCode == HttpStatusCode.OK)
             {
                 // Success
-                logger.LogInformation("Deleted player ID {0}.", playerEntityId);
+                logger.LogInformation("Deleted player ID {EntityId:X}.", playerEntityId);
                 result = new Option<DeletePlayerResponse, string>(response);
             }
             else
@@ -291,12 +292,12 @@ public class PlayerManagementClient
                 // Failed
                 if (response.Result != null)
                 {
-                    logger.LogError("Failed to delete player {0}: {1}", playerEntityId, response.Result);
+                    logger.LogError("Failed to delete player {EntityId:X}: {Result}", playerEntityId, response.Result);
                     result = new Option<DeletePlayerResponse, string>(response.Result);
                 }
                 else
                 {
-                    logger.LogError("Failed to delete player {0}: Unknown error", playerEntityId);
+                    logger.LogError("Failed to delete player {EntityId:X}: Unknown error", playerEntityId);
                     result = new Option<DeletePlayerResponse, string>("Unknown error.");
                 }
             }

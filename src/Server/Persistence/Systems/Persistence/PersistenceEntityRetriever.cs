@@ -51,7 +51,7 @@ public sealed class PersistenceEntityRetriever
     /// <param name="entityId">Entity ID to retrieve.</param>
     public void RetrieveEntity(ulong entityId)
     {
-        logger.LogDebug("Retrieve entity tree for entity ID {Id}.", entityId);
+        logger.LogDebug("Retrieve entity tree for entity ID {Id:X}.", entityId);
 
         DoRetrieve(entityId);
     }
@@ -74,7 +74,7 @@ public sealed class PersistenceEntityRetriever
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error retrieving entity {Id}.", entityId);
+            logger.LogError(e, "Error retrieving entity {Id:X}.", entityId);
         }
     }
 }

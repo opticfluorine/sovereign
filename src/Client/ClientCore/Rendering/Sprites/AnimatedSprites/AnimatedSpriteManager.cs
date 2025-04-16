@@ -215,7 +215,7 @@ public sealed class AnimatedSpriteManager
             var path = pathBuilder.BuildPathToResource(ResourceType.Sprite, DefinitionsFilename);
             using var stream = new FileStream(path, FileMode.Create, FileAccess.Write);
             JsonSerializer.Serialize(stream, defs);
-            logger.LogInformation("Saved {0} animated sprites.", defs.AnimatedSprites.Count);
+            logger.LogInformation("Saved {Count} animated sprites.", defs.AnimatedSprites.Count);
         }
         catch (Exception e)
         {

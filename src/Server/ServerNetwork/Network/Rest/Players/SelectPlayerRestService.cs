@@ -83,7 +83,8 @@ public class SelectPlayerRestService : AuthenticatedRestService
             }
             catch (FormatException)
             {
-                logger.LogError("Account {0} tried to select invalid player entity {1}.", accountId, idParam);
+                logger.LogError("Account {AccountId} tried to select invalid player entity {EntityId:X}.", accountId,
+                    idParam);
                 await SendResponse(ctx, 400, "Invalid player entity ID.");
                 return;
             }
@@ -92,14 +93,14 @@ public class SelectPlayerRestService : AuthenticatedRestService
             if (!persistenceProviderManager.PersistenceProvider.GetAccountForPlayerQuery.TryGetAccountForPlayer(
                     playerEntityId, out var trueAccountId))
             {
-                logger.LogError("No account found for player {0}.", playerEntityId);
+                logger.LogError("No account found for player {EntityId:X}.", playerEntityId);
                 await SendResponse(ctx, 400, "No account found for player.");
                 return;
             }
 
             if (!trueAccountId.Equals(accountId))
             {
-                logger.LogError("Entity {0} is not a player assigned to account {1}.", playerEntityId,
+                logger.LogError("Entity {EntityId:X} is not a player assigned to account {AccountId}.", playerEntityId,
                     accountId);
                 await SendResponse(ctx, 400, "Selected player dues not belong to this account.");
                 return;

@@ -196,7 +196,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
             if (!knownPositions.TryGetValue(blockId, out var position))
             {
-                logger.LogError("No position known for changed block ID {0}.", blockId);
+                logger.LogError("No position known for changed block ID {EntityId:X}.", blockId);
                 continue;
             }
 
@@ -220,7 +220,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
             if (!knownPositions.ContainsKey(blockId))
             {
-                logger.LogError("No position known for removed block ID {0}.", blockId);
+                logger.LogError("No position known for removed block ID {EntityId:X}.", blockId);
                 continue;
             }
 
@@ -383,7 +383,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     {
         if (!blockPositions.HasComponentForEntity(blockId))
         {
-            logger.LogError("Block {0} has no position.", blockId);
+            logger.LogError("Block {EntityId:X} has no position.", blockId);
             return;
         }
 

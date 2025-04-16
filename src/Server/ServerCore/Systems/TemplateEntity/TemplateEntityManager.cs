@@ -54,7 +54,7 @@ public class TemplateEntityManager
         if (definition.EntityId < EntityConstants.FirstTemplateEntityId ||
             definition.EntityId > EntityConstants.LastTemplateEntityId)
         {
-            logger.LogError("Received update for non-template entity ID {Id}; skipping.", definition.EntityId);
+            logger.LogError("Received update for non-template entity ID {Id:X}; skipping.", definition.EntityId);
             return;
         }
 

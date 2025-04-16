@@ -205,7 +205,7 @@ public sealed class ClientNetworkManager : INetworkManager
 
         ConnectionParameters = connectionParameters;
 
-        logger.LogInformation("Connecting to {0}:{1} [REST: {2}:{3}] as {4}.",
+        logger.LogInformation("Connecting to {Host}:{Port} [REST: {RestHost}:{RestPort}] as {Username}.",
             ConnectionParameters.Host, ConnectionParameters.Port,
             ConnectionParameters.RestHost, ConnectionParameters.RestPort,
             loginParameters.Username);
@@ -437,7 +437,7 @@ public sealed class ClientNetworkManager : INetworkManager
         ErrorMessage = socketError.ToString();
         ClientState = NetworkClientState.Failed;
 
-        logger.LogError("Network error: {0}", socketError.ToString());
+        logger.LogError("Network error: {Error}", socketError.ToString());
     }
 
     /// <summary>
@@ -476,7 +476,7 @@ public sealed class ClientNetworkManager : INetworkManager
     {
         // Notify any systems that care that the connection has been lost.
         // This will route back to here and gracefully clean up the connection.
-        logger.LogInformation("Connection lost: {0}", disconnectInfo.Reason);
+        logger.LogInformation("Connection lost: {Reason}", disconnectInfo.Reason);
         if (disconnectInfo.Reason != DisconnectReason.DisconnectPeerCalled)
             clientNetworkController.DeclareConnectionLost(eventSender);
     }

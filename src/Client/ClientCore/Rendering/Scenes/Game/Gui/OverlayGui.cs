@@ -83,7 +83,7 @@ public class OverlayGui
     {
         if (!names.HasComponentForEntity(nameLabel.EntityId))
         {
-            logger.LogWarning("No name for entity ID {EntityId}.", nameLabel.EntityId);
+            logger.LogWarning("No name for entity ID {EntityId:X}.", nameLabel.EntityId);
             return;
         }
 

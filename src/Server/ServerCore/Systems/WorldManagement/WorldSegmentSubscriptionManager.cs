@@ -262,7 +262,7 @@ public class WorldSegmentSubscriptionManager
         foreach (var segment in newSubscriptionSet)
             if (!unchangedSet.Contains(segment))
             {
-                logger.LogDebug("Subscribe {Id} to {Index}.", playerEntityId, segment);
+                logger.LogDebug("Subscribe {Id:X} to {Index}.", playerEntityId, segment);
                 internalController.PushSubscribe(eventSender, playerEntityId, segment);
                 currentSubscriptionSet.Add(segment);
                 if (!playersByWorldSegments.ContainsKey(segment))
@@ -290,7 +290,7 @@ public class WorldSegmentSubscriptionManager
                 if (dx > unsubRadius || dy > unsubRadius || dz > unsubRadius)
                 {
                     // Beyond the unsubscribe radius, trigger unsubscribe.
-                    logger.LogDebug("Unsubscribe {Id} from {Index}.", playerEntityId, segment);
+                    logger.LogDebug("Unsubscribe {Id:X} from {Index}.", playerEntityId, segment);
                     internalController.PushUnsubscribe(eventSender, playerEntityId, segment);
                     currentSubscriptionSet.Remove(segment);
                     playersByWorldSegments[segment].Remove(playerEntityId);

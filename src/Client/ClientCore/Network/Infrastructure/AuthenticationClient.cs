@@ -58,7 +58,7 @@ public sealed class AuthenticationClient
         try
         {
             // Prepare request.
-            logger.LogInformation("Attempting login as {0}.", loginParameters.Username);
+            logger.LogInformation("Attempting login as {Username}.", loginParameters.Username);
             var request = new LoginRequest
             {
                 Username = loginParameters.Username,
@@ -71,7 +71,7 @@ public sealed class AuthenticationClient
             var result = new Option<LoginResponse, string>("Unknown error.");
             if (contentLen > MaxResponseLength)
             {
-                logger.LogError("Response length {0} too long.", contentLen);
+                logger.LogError("Response length {Length} too long.", contentLen);
                 return result;
             }
 

@@ -93,13 +93,13 @@ public class LightSourceTable
         {
             if (!kinematics.TryFindNearest(lightEntityId, parents, out var posVel, out var parentEntityId))
             {
-                logger.LogWarning("Entity {0} has unpositioned light source.", lightEntityId);
+                logger.LogWarning("Entity {EntityId:X} has unpositioned light source.", lightEntityId);
                 continue;
             }
 
             if (!pointLightSources.TryGetValue(lightEntityId, out var details))
             {
-                logger.LogWarning("Entity {0} in light list without light data.", lightEntityId);
+                logger.LogWarning("Entity {EntityId:X} in light list without light data.", lightEntityId);
                 continue;
             }
 

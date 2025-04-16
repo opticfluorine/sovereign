@@ -121,7 +121,7 @@ public class TemplateEntitySystem : ISystem
 
         foreach (var definition in requestDetails.EntityDefinitions)
         {
-            logger.LogInformation("Template entity {EntityId} updated by player {Player}.", definition.EntityId,
+            logger.LogInformation("Template entity {EntityId:X} updated by player {Player}.", definition.EntityId,
                 loggingUtil.FormatEntity(requestDetails.PlayerEntityId));
             manager.UpdateExisting(definition);
         }

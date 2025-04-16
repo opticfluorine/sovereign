@@ -45,7 +45,7 @@ public class EntityDefinitionProcessor
     {
         if (!validator.Validate(definition))
         {
-            logger.LogWarning("Invalid entity definition for entity ID {Id}.", definition.EntityId);
+            logger.LogWarning("Invalid entity definition for entity ID {Id:X}.", definition.EntityId);
             return;
         }
 
@@ -124,6 +124,6 @@ public class EntityDefinitionProcessor
             builder.WithoutBoundingBox();
 
         var entityId = builder.Build();
-        logger.LogDebug("Processed entity ID {Id}.", entityId);
+        logger.LogDebug("Processed entity ID {Id:X}.", entityId);
     }
 }

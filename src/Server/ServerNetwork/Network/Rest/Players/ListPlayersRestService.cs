@@ -46,7 +46,7 @@ public class ListPlayersRestService : AuthenticatedRestService
 
     protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
     {
-        logger.LogDebug("ListPlayers requested for account ID {0}.", accountId);
+        logger.LogDebug("ListPlayers requested for account ID {AccountId}.", accountId);
         try
         {
             var players = playerServices.GetPlayersForAccount(accountId);

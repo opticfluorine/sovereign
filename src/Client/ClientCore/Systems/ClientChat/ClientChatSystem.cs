@@ -144,7 +144,8 @@ public class ClientChatSystem : ISystem
     /// <param name="details">Details.</param>
     private void OnLocalChat(LocalChatEventDetails details)
     {
-        logger.LogInformation("[Local] {0}: {1}", loggingUtil.FormatEntity(details.SenderEntityId), details.Message);
+        logger.LogInformation("[Local] {Player}: {Message}", loggingUtil.FormatEntity(details.SenderEntityId),
+            details.Message);
         chatHistoryManager.AddChat(ChatType.Local, details.Message, details.SenderEntityId);
     }
 
@@ -154,7 +155,7 @@ public class ClientChatSystem : ISystem
     /// <param name="details">Details.</param>
     private void OnGlobalChat(GlobalChatEventDetails details)
     {
-        logger.LogInformation("[Global] {0}: {1}", details.SenderName, details.Message);
+        logger.LogInformation("[Global] {PlayerName}: {Message}", details.SenderName, details.Message);
         chatHistoryManager.AddChat(ChatType.Global, details.Message, details.SenderName);
     }
 
@@ -164,7 +165,7 @@ public class ClientChatSystem : ISystem
     /// <param name="details">Details.</param>
     private void OnSystemChat(SystemChatEventDetails details)
     {
-        logger.LogInformation("[System] {0}", details.Message);
+        logger.LogInformation("[System] {Message}", details.Message);
         chatHistoryManager.AddChat(ChatType.System, details.Message);
     }
 

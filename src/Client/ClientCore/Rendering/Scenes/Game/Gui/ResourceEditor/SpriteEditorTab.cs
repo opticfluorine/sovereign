@@ -159,7 +159,7 @@ public class SpriteEditorTab
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error during sprite generation for {0}.", orderedSpriteSheets[currentSheetIdx]);
+            logger.LogError(e, "Error during sprite generation for {Sheet}.", orderedSpriteSheets[currentSheetIdx]);
             exceptionToReport = e;
             ImGui.OpenPopup(ErrorPopup);
         }

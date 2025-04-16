@@ -149,7 +149,7 @@ public sealed class EntityProcessor
         var bytesRead = reader.GetBytes(IndexAccount, 0, accountIdBytes, 0, 16);
         if (bytesRead < 16)
         {
-            logger.LogError("Account GUID for entity {Id} is too short; skipping component.", entityId);
+            logger.LogError("Account GUID for entity {Id:X} is too short; skipping component.", entityId);
             return;
         }
 

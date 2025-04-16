@@ -43,7 +43,7 @@ public class TemplateEntitiesRestService : AuthenticatedRestService
 
     protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
     {
-        logger.LogInformation("Received template entity data request from account {0}.", accountId);
+        logger.LogInformation("Received template entity data request from account {AccountId}.", accountId);
 
         try
         {

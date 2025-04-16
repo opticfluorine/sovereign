@@ -74,7 +74,7 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         if (methodMap.TryGetValue(evInfo.Event.EventId, out var mappedMethod))
             method = mappedMethod;
         else
-            logger.LogWarning("No delivery method specified for event ID {0}; defaulting to unreliable",
+            logger.LogWarning("No delivery method specified for event ID {EventId}; defaulting to unreliable",
                 evInfo.Event.EventId);
 
         NextStage?.Process(new OutboundEventInfo(evInfo, method));

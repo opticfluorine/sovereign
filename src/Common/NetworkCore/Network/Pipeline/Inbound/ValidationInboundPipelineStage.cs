@@ -92,12 +92,12 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             if (validator.IsValid(ev.EventDetails))
                 NextStage?.ProcessEvent(ev, connection);
             else
-                logger.LogError("Received invalid details for event ID {0} from connection ID {1}.",
+                logger.LogError("Received invalid details for event ID {EventId} from connection ID {Id}.",
                     ev.EventId, connection.Id);
         }
         else
         {
-            logger.LogError("No validator found for event ID {0}, rejecting event.", ev.EventId);
+            logger.LogError("No validator found for event ID {EventId}, rejecting event.", ev.EventId);
         }
     }
 }

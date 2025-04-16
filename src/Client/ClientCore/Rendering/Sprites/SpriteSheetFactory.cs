@@ -54,7 +54,7 @@ public class SpriteSheetFactory
     /// <exception cref="SurfaceException">Thrown if the spritesheet file cannot be loaded.</exception>
     public SpriteSheet LoadSpriteSheet(SpriteSheetDefinition definition)
     {
-        logger.LogDebug("Loading spritesheet {0}", definition.Filename);
+        logger.LogDebug("Loading spritesheet {Filename}", definition.Filename);
 
         /* Attempt to load the spritesheet surface. */
         var surface = LoadSurfaceForSpritesheet(definition);

@@ -67,7 +67,7 @@ public class DrawableLookup
 
         if (!animatedSprites.HasComponentForEntity(entityId))
         {
-            logger.LogWarning("Non-block entity {Id} has no AnimatedSprite component.", entityId);
+            logger.LogWarning("Non-block entity {Id:X} has no AnimatedSprite component.", entityId);
             return Vector2.Zero;
         }
 

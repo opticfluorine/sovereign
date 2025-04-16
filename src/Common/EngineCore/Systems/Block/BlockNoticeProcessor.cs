@@ -47,7 +47,7 @@ public class BlockNoticeProcessor
     /// <param name="blockRecord">Block record from the modification notice.</param>
     public void ProcessModifyNotice(BlockRecord blockRecord)
     {
-        logger.LogDebug("Modify {Pos} => {Id}", blockRecord.Position, blockRecord.TemplateEntityId);
+        logger.LogDebug("Modify {Pos} => {Id:X}", blockRecord.Position, blockRecord.TemplateEntityId);
 
         if (blockServices.TryGetBlockAtPosition(blockRecord.Position, out var entityId))
             // Block already exists, update in place.

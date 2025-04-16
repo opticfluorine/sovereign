@@ -95,17 +95,17 @@ public class MouseState
         switch (button)
         {
             case MouseButton.Left:
-                logger.LogDebug("Left button down = {0}.", isDown);
+                logger.LogDebug("Left button down = {IsDown}.", isDown);
                 IsLeftButtonDown = isDown;
                 break;
 
             case MouseButton.Middle:
-                logger.LogDebug("Middle button down = {0}.", isDown);
+                logger.LogDebug("Middle button down = {IsDown}.", isDown);
                 IsMiddleButtonDown = isDown;
                 break;
 
             case MouseButton.Right:
-                logger.LogDebug("Right button down = {0}.", isDown);
+                logger.LogDebug("Right button down = {IsDown}.", isDown);
                 IsRightButtonDown = isDown;
                 break;
         }
@@ -121,7 +121,7 @@ public class MouseState
 
         // Check if tick threshold exceeded in either direction.
         var delta = TotalScrollAmount - lastScrollTick;
-        logger.LogDebug("Scroll by {0}, total {1}, delta {2}.", amount, TotalScrollAmount, delta);
+        logger.LogDebug("Scroll by {Amount}, total {Total}, delta {Delta}.", amount, TotalScrollAmount, delta);
         while (Math.Abs(delta) > ScrollTickThreshold)
         {
             logger.LogDebug("Scroll tick.");

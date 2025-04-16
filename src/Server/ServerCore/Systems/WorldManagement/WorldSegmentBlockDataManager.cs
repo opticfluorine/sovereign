@@ -273,7 +273,7 @@ public sealed class WorldSegmentBlockDataManager
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Could not schedule block for entity {Id}.", entityId);
+            logger.LogError(e, "Could not schedule block for entity {Id:X}.", entityId);
         }
     }
 

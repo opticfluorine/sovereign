@@ -64,7 +64,7 @@ public class BlockTemplateNameComponentIndexer : BaseComponentIndexer<string>
         var lowerName = componentValue.ToLower();
         if (namedBlocks.TryGetValue(lowerName, out var otherEntityId))
         {
-            logger.LogWarning("Entity {0} conflicts with entity {1}; it will not be searchable by name.",
+            logger.LogWarning("Entity {Name} conflicts with entity {OtherName}; it will not be searchable by name.",
                 componentValue, loggingUtil.FormatEntity(entityId));
             return;
         }

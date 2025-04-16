@@ -192,7 +192,7 @@ public partial class AutoUpdater
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error while updating {0}.", CurrentFile);
+            logger.LogError(e, "Error while updating {CurrentFile}.", CurrentFile);
             Error = e.Message;
             State = AutoUpdaterState.Error;
         }
@@ -210,7 +210,7 @@ public partial class AutoUpdater
         var indexUri = new Uri(releaseBaseUri, IndexJsonUri);
         var indexJson = await client.GetFromJsonAsync<UpdaterResourceSet>(indexUri)
                         ?? throw new Exception("No release index found.");
-        logger.LogDebug("index.json contains {0} resources.", indexJson.Resources.Count);
+        logger.LogDebug("index.json contains {Count} resources.", indexJson.Resources.Count);
 
         // Silently exclude any disallowed file types.
         var allowedResources = indexJson.Resources
@@ -219,7 +219,8 @@ public partial class AutoUpdater
             .ToList();
         foreach (var badResource in indexJson.Resources.Except(allowedResources))
         {
-            logger.LogWarning("Skipping disallowed resource {0}/{1}.", badResource.ResourceType, badResource.Filename);
+            logger.LogWarning("Skipping disallowed resource {ResourceType}/{Filename}.",
+                badResource.ResourceType, badResource.Filename);
         }
 
         // Determine resources for update.

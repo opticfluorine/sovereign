@@ -92,7 +92,7 @@ public class WorldSegmentBlockDataLoader
                 ProcessDefaultPlane(segmentIndex, i, segmentData.DefaultsPerPlane[i], blocksToAdd);
 
         if (blocksToAdd.Count > 0)
-            logger.LogDebug("Adding {0} blocks for world segment {1}.", blocksToAdd.Count, segmentIndex);
+            logger.LogDebug("Adding {Count} blocks for world segment {SegmentIndex}.", blocksToAdd.Count, segmentIndex);
     }
 
     /// <summary>

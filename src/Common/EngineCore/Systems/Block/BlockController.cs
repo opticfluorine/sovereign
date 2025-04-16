@@ -108,7 +108,7 @@ public class BlockController
     public void RemoveBlock(IEventSender eventSender, ulong blockEntityId,
         ulong eventTime = Event.Immediate)
     {
-        logger.LogDebug("Requesting to remove block {Id}.", blockEntityId);
+        logger.LogDebug("Requesting to remove block {Id:X}.", blockEntityId);
         var details = new EntityEventDetails { EntityId = blockEntityId };
         var ev = new Event(EventId.Core_Block_Remove, details, eventTime);
         eventSender.SendEvent(ev);

@@ -195,7 +195,7 @@ public class EntitySynchronizationSystem : ISystem
     private void HandleChangeWorldSegment(EntityChangeWorldSegmentEventDetails details)
     {
         if (details.EntityId == playerEntityId)
-            logger.LogDebug("Player entered world segment {0}.", details.NewSegmentIndex);
+            logger.LogDebug("Player entered world segment {SegmentIndex}.", details.NewSegmentIndex);
 
         unloader.OnEntityChangeWorldSegment(details.EntityId,
             details.NewSegmentIndex);
@@ -217,7 +217,7 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Update details.</param>
     private void HandleSync(EntityDefinitionEventDetails details)
     {
-        logger.LogDebug("Processing {0} entity definitions.", details.EntityDefinitions.Count);
+        logger.LogDebug("Processing {Count} entity definitions.", details.EntityDefinitions.Count);
         foreach (var definition in details.EntityDefinitions)
             processor.ProcessDefinition(definition);
     }
@@ -228,7 +228,7 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Update details.</param>
     private void HandleSyncTemplate(TemplateEntityDefinitionEventDetails details)
     {
-        logger.LogDebug("Processing template entity update for entity {0}.", details.Definition.EntityId);
+        logger.LogDebug("Processing template entity update for entity {EntityId:X}.", details.Definition.EntityId);
         processor.ProcessDefinition(details.Definition);
     }
 
@@ -238,7 +238,7 @@ public class EntitySynchronizationSystem : ISystem
     /// <param name="details">Desync details.</param>
     private void HandleDesync(EntityDesyncEventDetails details)
     {
-        logger.LogDebug("Desynchronizing entity ID {0} and descendants.", details.EntityId);
+        logger.LogDebug("Desynchronizing entity ID {EntityId:X} and descendants.", details.EntityId);
         unloader.OnDesync(details.EntityId);
     }
 

@@ -77,7 +77,7 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
 
         if (!kinematics.HasComponentForEntity(entityId.Value))
         {
-            logger.LogError("Can't broadcast to world segment for non-positioned entity {Id}.", entityId);
+            logger.LogError("Can't broadcast to world segment for non-positioned entity {Id:X}.", entityId);
             return;
         }
 

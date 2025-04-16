@@ -77,14 +77,15 @@ public class TemplateEntityDataClient
             var response = await client.Get(RestEndpoints.TemplateEntities);
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                logger.LogError("Failed to load template entities from server (status {0}).", response.StatusCode);
+                logger.LogError("Failed to load template entities from server (status {StatusCode}).",
+                    response.StatusCode);
                 networkController.DeclareConnectionLost(eventSender);
                 return;
             }
 
             if (response.Content.Headers.ContentLength > MaxContentLength)
             {
-                logger.LogError("Template entity data content length {0} is too large (max {1}).",
+                logger.LogError("Template entity data content length {Length} is too large (max {MaxLength}).",
                     response.Content.Headers.ContentLength, MaxContentLength);
                 networkController.DeclareConnectionLost(eventSender);
                 return;

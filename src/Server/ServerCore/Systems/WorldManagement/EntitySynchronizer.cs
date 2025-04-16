@@ -85,7 +85,7 @@ public class EntitySynchronizer
     /// <param name="segmentIndex">World segment index of the entity.</param>
     public void Desynchronize(ulong rootEntityId, GridPosition segmentIndex)
     {
-        logger.LogDebug("Desync {Id} for world segment {SegmentIndex}.", rootEntityId, segmentIndex);
+        logger.LogDebug("Desync {Id:X} for world segment {SegmentIndex}.", rootEntityId, segmentIndex);
         controller.PushDesyncEvent(eventSender, rootEntityId, segmentIndex);
     }
 }

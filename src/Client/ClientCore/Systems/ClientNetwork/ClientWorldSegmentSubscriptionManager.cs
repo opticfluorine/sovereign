@@ -45,13 +45,13 @@ public class ClientWorldSegmentSubscriptionManager
     {
         if (!subscribedSegments.Contains(worldSegmentIndex))
         {
-            logger.LogDebug("Subscribe to world segment {0}.", worldSegmentIndex);
+            logger.LogDebug("Subscribe to world segment {SegmentIndex}.", worldSegmentIndex);
             subscribedSegments.Add(worldSegmentIndex);
             dataClient.LoadSegment(worldSegmentIndex);
         }
         else
         {
-            logger.LogWarning("Multiple subscribe to world segment {0}.", worldSegmentIndex);
+            logger.LogWarning("Multiple subscribe to world segment {SegmentIndex}.", worldSegmentIndex);
         }
     }
 
@@ -63,12 +63,12 @@ public class ClientWorldSegmentSubscriptionManager
     {
         if (subscribedSegments.Contains(worldSegmentIndex))
         {
-            logger.LogDebug("Unsubscribe from world segment {0}.", worldSegmentIndex);
+            logger.LogDebug("Unsubscribe from world segment {SegmentIndex}.", worldSegmentIndex);
             subscribedSegments.Remove(worldSegmentIndex);
         }
         else
         {
-            logger.LogWarning("Unsubscribe from non-subscribed world segment {0}.", worldSegmentIndex);
+            logger.LogWarning("Unsubscribe from non-subscribed world segment {SegmentIndex}.", worldSegmentIndex);
         }
     }
 

@@ -178,7 +178,7 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
         var keyType = lua_type(luaState, keyIdx);
         if (keyType != LuaType.String)
         {
-            localLogger.LogError("entities.Build: argument keys must be strings, found type {Type} ({Id}).",
+            localLogger.LogError("entities.Build: argument keys must be strings, found type {Type} ({Id:X}).",
                 keyType, (int)keyType);
             return false;
         }

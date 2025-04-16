@@ -66,13 +66,13 @@ public class WorldSegmentSynchronizationManager
         if (activationManager.IsWorldSegmentLoaded(segmentIndex))
         {
             // World segment is already loaded, so we can immediately send the synchronization events.
-            logger.LogTrace("Segment already loaded; sync {Index} to {Id}.", segmentIndex, playerEntityId);
+            logger.LogTrace("Segment already loaded; sync {Index} to {Id:X}.", segmentIndex, playerEntityId);
             SendSynchronizationEvents(playerEntityId, segmentIndex);
         }
         else
         {
             // World segment still loading, so enqueue for later synchronization.
-            logger.LogTrace("Segment load in process; enqueue {Index} for {Id}.", segmentIndex, playerEntityId);
+            logger.LogTrace("Segment load in process; enqueue {Index} for {Id:X}.", segmentIndex, playerEntityId);
             if (!pendingPlayersBySegment.ContainsKey(segmentIndex))
                 pendingPlayersBySegment[segmentIndex] = new Queue<ulong>();
 

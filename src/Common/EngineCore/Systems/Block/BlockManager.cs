@@ -130,7 +130,7 @@ public sealed class BlockManager
     {
         if (!blockPositions.HasComponentForEntity(entityId))
         {
-            logger.LogError("Block (Entity ID = {Id}) has no position.", entityId);
+            logger.LogError("Block (Entity ID = {Id:X}) has no position.", entityId);
             return;
         }
 

@@ -93,7 +93,7 @@ public sealed class ClientNetworkEventHandler
                 break;
 
             default:
-                logger.LogWarning("Unhandled event {0} in ClientNetworkEventHandler.", ev.EventId);
+                logger.LogWarning("Unhandled event {EventId} in ClientNetworkEventHandler.", ev.EventId);
                 break;
         }
     }

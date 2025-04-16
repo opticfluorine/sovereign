@@ -95,7 +95,7 @@ public class TextureAtlasManager
 
         var w = TextureAtlas.AtlasSurface.Properties.Width;
         var h = TextureAtlas.AtlasSurface.Properties.Height;
-        logger.LogInformation("Texture atlas created ({0} x {1}).", w, h);
+        logger.LogInformation("Texture atlas created ({Width} x {Height}).", w, h);
     }
 
     /// <summary>

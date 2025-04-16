@@ -130,7 +130,7 @@ public sealed class PersistenceSystem : ISystem
         {
             entityMapper.InitializeMapper(providerManager.PersistenceProvider.NextPersistedIdQuery!);
 
-            logger.LogDebug("First available persisted entity ID is {Id}.",
+            logger.LogDebug("First available persisted entity ID is {Id:X}.",
                 entityMapper.NextPersistedId);
         }
         catch (Exception e)

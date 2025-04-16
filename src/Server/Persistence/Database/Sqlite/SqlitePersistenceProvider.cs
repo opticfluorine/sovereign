@@ -321,7 +321,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     /// </summary>
     private void Connect()
     {
-        logger.LogInformation("Opening the SQLite database at {0}.",
+        logger.LogInformation("Opening the SQLite database at {Host}.",
             configuration.Host);
 
         var connString = CreateConnectionString();

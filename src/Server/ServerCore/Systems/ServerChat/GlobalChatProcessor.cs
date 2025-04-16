@@ -50,7 +50,7 @@ public class GlobalChatProcessor : IChatProcessor
 
         // Send message.
         var name = loggingUtil.FormatEntity(senderEntityId);
-        logger.LogInformation("{0}: {1}", name, message);
+        logger.LogInformation("{Name}: {Message}", name, message);
         internalController.SendGlobalChat(message, name);
     }
 }

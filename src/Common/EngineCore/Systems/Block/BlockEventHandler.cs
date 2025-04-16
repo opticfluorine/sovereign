@@ -74,7 +74,7 @@ public sealed class BlockEventHandler
 
             case EventId.Core_Block_Remove:
                 var removeDetails = (EntityEventDetails)ev.EventDetails!;
-                logger.LogTrace("Removing block {Id}.", removeDetails.EntityId);
+                logger.LogTrace("Removing block {Id:X}.", removeDetails.EntityId);
                 HandleRemove(removeDetails);
                 break;
 

@@ -113,7 +113,7 @@ public class SpriteSheetManager
             throw new FatalErrorException(message);
         }
 
-        logger.LogInformation("Successfully loaded {0} spritesheets.", SpriteSheets.Count);
+        logger.LogInformation("Successfully loaded {Count} spritesheets.", SpriteSheets.Count);
     }
 
     /// <summary>

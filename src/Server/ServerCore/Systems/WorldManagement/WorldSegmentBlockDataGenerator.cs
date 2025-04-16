@@ -123,7 +123,7 @@ public sealed class WorldSegmentBlockDataGenerator
             var offset = block.Item2.Z - baseZ;
             if (!entityTable.TryGetTemplate(block.Item1, out var templateEntityId))
             {
-                logger.LogWarning("No template for block ID {Id}, skipping.", block.Item1);
+                logger.LogWarning("No template for block ID {Id:X}, skipping.", block.Item1);
                 continue;
             }
 
