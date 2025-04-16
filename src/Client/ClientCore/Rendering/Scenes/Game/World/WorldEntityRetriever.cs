@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Components;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
@@ -52,6 +53,7 @@ public sealed class WorldEntityRetriever
 
     public readonly List<PositionedLight> Lights = new();
     private readonly LightSourceTable lightSourceTable;
+    private readonly ILogger<WorldEntityRetriever> logger;
     public readonly List<NameLabel> NameLabels = new();
     private readonly OrientationComponentCollection orientations;
 
@@ -75,7 +77,8 @@ public sealed class WorldEntityRetriever
         OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases,
         IBlockAnimatedSpriteCache blockSpriteCache, CastBlockShadowsTagCollection castBlockShadows,
         LightSourceTable lightSourceTable, PlayerCharacterTagCollection playerCharacters,
-        WorldRangeSelector rangeSelector, AtlasMap atlasMap)
+        WorldRangeSelector rangeSelector, AtlasMap atlasMap,
+        ILogger<WorldEntityRetriever> logger)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -94,6 +97,7 @@ public sealed class WorldEntityRetriever
         this.playerCharacters = playerCharacters;
         this.rangeSelector = rangeSelector;
         this.atlasMap = atlasMap;
+        this.logger = logger;
     }
 
     /// <summary>
@@ -261,7 +265,12 @@ public sealed class WorldEntityRetriever
     {
         isOpaque = false;
 
-        var blockPosition = blockPositions[entityId];
+        if (!blockPositions.TryGetValue(entityId, out var blockPosition))
+        {
+            logger.LogWarning("Block {EntityId:X} not found.", entityId);
+            return;
+        }
+
         var facePosition = (Vector3)blockPosition;
         var animatedSpriteIds = blockSpriteCache.GetFrontFaceAnimatedSpriteIds(entityId);
         var firstLayer = true;
@@ -283,7 +292,12 @@ public sealed class WorldEntityRetriever
     {
         isOpaque = false;
 
-        var blockPosition = blockPositions[entityId];
+        if (!blockPositions.TryGetValue(entityId, out var blockPosition))
+        {
+            logger.LogWarning("Block {EntityId:X} not found.", entityId);
+            return;
+        }
+
         var facePosition = (Vector3)(blockPosition with { Z = blockPosition.Z + 1 });
         var animatedSpriteIds = blockSpriteCache.GetTopFaceAnimatedSpriteIds(entityId);
         var firstLayer = true;
@@ -305,7 +319,14 @@ public sealed class WorldEntityRetriever
     private void ProcessSolidBlock(ulong entityId)
     {
         if (!castBlockShadows.HasTagForEntity(entityId)) return;
-        var blockPosition = (Vector3)blockPositions[entityId];
+
+        if (!blockPositions.TryGetValue(entityId, out var blockGridPos))
+        {
+            logger.LogWarning("Block {EntityId:X} not found.", entityId);
+            return;
+        }
+
+        var blockPosition = (Vector3)blockGridPos;
 
         // Global lighting.
         grouper.AddSolidBlock(blockPosition);

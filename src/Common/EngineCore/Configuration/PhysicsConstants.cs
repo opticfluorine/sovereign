@@ -37,7 +37,7 @@ public static class PhysicsConstants
     ///     can be quite a bit faster than what you would see if you watched an apple
     ///     fall from a tree...
     /// </remarks>
-    public const float TerminalVelocity = -32.0f;
+    public const float TerminalVelocity = -16.0f;
 
     /// <summary>
     ///     Initial jump velocity in world units per second.

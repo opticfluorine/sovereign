@@ -290,6 +290,8 @@ public class PerspectiveLineManager
         AddEntityToLine(entityId, indexTopFace, blockPosition.Z + 1, EntityType.BlockTopFace, indexTopFace.OriginFlag);
         AddEntityToLine(entityId, indexFrontFace, blockPosition.Z, EntityType.BlockFrontFace,
             indexFrontFace.OriginFlag);
+
+        zFloorByEntity[entityId] = blockPosition.Z;
     }
 
     /// <summary>
@@ -312,6 +314,8 @@ public class PerspectiveLineManager
             indices.Clear();
             indexListPool.ReturnObject(indices);
         }
+
+        zFloorByEntity[entityId] = (int)Math.Floor(position.Z);
     }
 
     /// <summary>
@@ -325,24 +329,36 @@ public class PerspectiveLineManager
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices)) return;
         if (!zFloorByEntity.TryGetValue(entityId, out var zFloor))
         {
-            logger.LogError("No cached z value for entity {0}; skipping removal.", entityId);
+            logger.LogError("No cached z value for entity {EntityId:X}; skipping removal.", entityId);
             return;
         }
+
+        var isBlock = blockPositions.HasComponentForEntity(entityId, true);
 
         foreach (var index in lineIndices)
         {
             if (!perspectiveLines.TryGetValue(index, out var line)) continue;
-            if (!line.TryGetListForZFloor(zFloor, out var list))
-            {
-                logger.LogError("Entity {0} not found in perspective line {1} for removal.", entityId, index);
-                continue;
-            }
 
-            list.RemoveEntity(entityId);
-            if (list.Entities.Count == 0)
+            // Blocks also appear in the next z-floor up (because of the top face).
+            // Non-blocks only appear in their base z-floor.
+            for (var zOff = 0; zOff < (isBlock ? 2 : 1); ++zOff)
             {
-                line.RemoveZFloor(zFloor);
-                entityListPool.ReturnObject(list.Entities);
+                if (!line.TryGetListForZFloor(zFloor + zOff, out var list))
+                {
+                    // This is expected for blocks (we overscan to simplify the removal logic),
+                    // but not for non-block entities.
+                    if (!isBlock)
+                        logger.LogError("Entity {EntityID:X} not found in perspective line {LineIndex} for removal.",
+                            entityId, index);
+                    continue;
+                }
+
+                list.RemoveEntity(entityId);
+                if (list.Entities.Count == 0)
+                {
+                    line.RemoveZFloor(zFloor + zOff);
+                    entityListPool.ReturnObject(list.Entities);
+                }
             }
         }
 
@@ -432,7 +448,6 @@ public class PerspectiveLineManager
             OriginOnLine = originOnLine,
             Z = z
         });
-        zFloorByEntity[entityId] = zFloor;
 
         // Keep a record of where this block is for easier removal later.
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices))
@@ -619,6 +634,11 @@ public class PerspectiveLineManager
         public static bool operator !=(PerspectiveLineKey left, PerspectiveLineKey right)
         {
             return !left.Equals(right);
+        }
+
+        public override string ToString()
+        {
+            return $"<{X}, {Yz}>";
         }
     }
 }

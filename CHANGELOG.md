@@ -4,6 +4,13 @@
 
 ### April
 
+#### 16 April 2025
+
+* Renderer: Fix issue where perspective lines were not properly updated when entities are removed.
+  Specifically, blocks were being correctly placed on two perspective lines, but only one of those
+  lines was updated when the block was removed.
+* Physics: More fine-tuning of constants.
+
 #### 14 April 2025
 
 * Renderer: Fix coordinate error that left camera slightly off-center.
