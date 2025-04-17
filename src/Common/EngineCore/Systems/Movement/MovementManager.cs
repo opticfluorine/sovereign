@@ -328,13 +328,13 @@ public class MovementManager
         foreach (var check in pendingChecks[currentTickIndex])
         {
             // Process check.
-            // Skip if superseded by a more recent move request.
-            if (check.SequenceCount != sequenceCountsByEntity[check.EntityId])
+            // Skip if superseded by a more recent move request or if the entity was unloaded/removed.
+            if (check.SequenceCount != sequenceCountsByEntity[check.EntityId] ||
+                !kinematics.TryGetValue(check.EntityId, out var posVel))
                 continue;
 
             // Check is current and no newer move request has been received.
             // Stop movement (except for gravity) and send a move event.
-            var posVel = kinematics[check.EntityId];
             var newVel = posVel.Velocity with { X = 0.0f, Y = 0.0f };
             kinematics.ModifyComponent(check.EntityId, ComponentOperation.SetVelocity,
                 new Kinematics { Velocity = newVel });
