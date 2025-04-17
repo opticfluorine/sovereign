@@ -22,6 +22,7 @@ associated component collection, and the corresponding value type.
 |`components.animated_sprite`   |`AnimatedSpriteComponentCollection`  |`integer`     |
 |`components.block_position`    |`BlockPositionComponentCollection`   |`GridPosition`|
 |`components.cast_block_shadows`|`CastBlockShadowsTagCollection`      |`boolean`     |
+|`components.cast_shadows`      |`CastShadowsComponentCollection`     |`Shadow`      |
 |`components.drawable`          |`DrawableTagCollection`              |`boolean`     |
 |`components.kinematics`        |`KinematicsComponentCollection`      |`Kinematics`  |
 |`components.material`          |`MaterialComponentCollection`        |`integer`     |

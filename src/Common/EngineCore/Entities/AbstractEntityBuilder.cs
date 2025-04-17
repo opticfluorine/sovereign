@@ -18,7 +18,6 @@
 using System;
 using System.Numerics;
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Threading;
 
@@ -35,6 +34,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
+    private readonly CastShadowsComponentCollection castShadows;
     protected readonly DrawableTagCollection drawables;
 
     protected readonly ulong entityId;
@@ -74,6 +74,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         PointLightSourceComponentCollection pointLightSources,
         PhysicsTagCollection physics,
         BoundingBoxComponentCollection boundingBoxes,
+        CastShadowsComponentCollection castShadows,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -95,6 +96,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.pointLightSources = pointLightSources;
         this.physics = physics;
         this.boundingBoxes = boundingBoxes;
+        this.castShadows = castShadows;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -351,6 +353,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutBoundingBox()
     {
         boundingBoxes.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder CastShadows(Shadow shadow)
+    {
+        castShadows.AddOrUpdateComponent(entityId, shadow, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutCastShadows()
+    {
+        castShadows.RemoveComponent(entityId, load);
         return this;
     }
 }

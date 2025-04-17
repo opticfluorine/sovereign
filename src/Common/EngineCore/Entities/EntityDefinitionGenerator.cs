@@ -29,6 +29,7 @@ public class EntityDefinitionGenerator
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
+    private readonly CastShadowsComponentCollection castShadows;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
     private readonly KinematicsComponentCollection kinematics;
@@ -50,6 +51,7 @@ public class EntityDefinitionGenerator
         AdminTagCollection admins, BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows, PointLightSourceComponentCollection pointLightSources,
         PhysicsTagCollection physics, BoundingBoxComponentCollection boundingBoxes,
+        CastShadowsComponentCollection castShadows,
         EntityTable entityTable)
     {
         this.kinematics = kinematics;
@@ -67,6 +69,7 @@ public class EntityDefinitionGenerator
         this.pointLightSources = pointLightSources;
         this.physics = physics;
         this.boundingBoxes = boundingBoxes;
+        this.castShadows = castShadows;
         this.entityTable = entityTable;
     }
 
@@ -120,6 +123,9 @@ public class EntityDefinitionGenerator
 
         if (boundingBoxes.HasLocalComponentForEntity(entityId))
             def.BoundingBox = boundingBoxes[entityId];
+
+        if (castShadows.HasLocalComponentForEntity(entityId))
+            def.CastShadows = castShadows[entityId];
 
         return def;
     }

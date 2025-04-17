@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Components;
@@ -145,6 +144,15 @@ public static class ComponentOperators
     /// </summary>
     public static readonly Dictionary<ComponentOperation, Func<BoundingBox, BoundingBox, BoundingBox>>
         BoundingBoxOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
+        };
+
+    /// <summary>
+    ///     Standard operators for Shadow-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<Shadow, Shadow, Shadow>>
+        ShadowOperators = new()
         {
             { ComponentOperation.Set, (_, b) => b }
         };

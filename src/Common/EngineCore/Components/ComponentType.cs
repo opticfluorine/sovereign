@@ -104,6 +104,11 @@ public enum ComponentType
     /// </summary>
     BoundingBox = 0x0010,
 
+    /// <summary>
+    ///     CastShadows component.
+    /// </summary>
+    CastShadows = 0x0011,
+
     #endregion Common
 
     #region Client

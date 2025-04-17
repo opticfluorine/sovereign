@@ -10,6 +10,8 @@
   Specifically, blocks were being correctly placed on two perspective lines, but only one of those
   lines was updated when the block was removed.
 * Physics: More fine-tuning of constants.
+* Physics: Fix issue where collision meshes were not properly regenerated when blocks are removed.
+* All: Add new `CastShadows` component for specifying how a non-block entity should cast a shadow.
 
 #### 14 April 2025
 

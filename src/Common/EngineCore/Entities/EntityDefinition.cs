@@ -16,7 +16,6 @@
 
 using System.Numerics;
 using MessagePack;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Entities;
@@ -123,4 +122,10 @@ public class EntityDefinition
     /// </summary>
     [Key(15)]
     public BoundingBox? BoundingBox { get; set; }
+
+    /// <summary>
+    ///     Shadow description, or null if the entity does not cast a shadow.
+    /// </summary>
+    [Key(16)]
+    public Shadow? CastShadows { get; set; }
 }

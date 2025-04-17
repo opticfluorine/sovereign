@@ -22,6 +22,7 @@ Core components are available in both the client and server.
 | `BlockPosition`    | `BlockPositionComponentCollection`    | Grid-aligned position of a block entity.                                                                               |
 | `BoundingBox`      | `BoundingBoxComponentCollection`      | For non-block entities, specifies the bounding box used for physics calculations.                                      |
 | `CastBlockShadows` | `CastBlockShadowsTagCollection`       | For block entities, indicates that the block should be included for calculating shadows.                               |
+| `CastShadows`      | `CastShadowsComponentCollection`      | For non-block entities, specifies the shape of the shadow cast by the entity.                                          |
 | `Drawable`         | `DrawableTagCollection`               | The existence of this component indicates that the entity should be considered for rendering.                          |
 | `Kinematics`       | `KinematicsComponentCollection`       | For non-block positioned entities, contains the position and velocity of the entity.                                   |
 | `Material`         | `MaterialComponentCollection`         | Indicates that the entity is a block of the given material ID.                                                         |

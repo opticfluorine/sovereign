@@ -99,6 +99,7 @@ CREATE TABLE Entity
     bb_size_x           FLOAT,
     bb_size_y           FLOAT,
     bb_size_z           FLOAT,
+    shadow_radius       FLOAT,
     FOREIGN KEY (template_id) REFERENCES Entity (id),
     FOREIGN KEY (parent_id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
@@ -170,7 +171,8 @@ SELECT Entity.id                 AS id,
        Entity.bb_pos_z           AS bbPosZ,
        Entity.bb_size_x          AS bbSizeX,
        Entity.bb_size_y          AS bbSizeY,
-       Entity.bb_size_z          AS bbSizeZ
+       Entity.bb_size_z          AS bbSizeZ,
+       Entity.shadow_radius      AS shadowRadius
 FROM Entity;
 
 

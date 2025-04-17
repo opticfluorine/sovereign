@@ -36,17 +36,18 @@ if one is not provided.
 |------------------|----------------------------------------------|--------------------------------------------------|
 | EntityId         | integer                                      | Entity ID                                        |
 | Template         | integer                                      | Template entity ID                               |
-| Kinematics       | [Kinematics](#script-types-kinematics)       | Position and velocity (non-block entities)       |
-| BlockPosition    | [GridPosition](#script-types-gridposition)   | Position (block entities)                        |
-| Drawable         | boolean                                      | Whether entity is visible when rendered          |
 | AnimatedSprite   | integer                                      | Animated sprite ID                               |
-| Name             | string                                       | Name                                             |
-| Parent           | integer                                      | Entity ID of parent entity                       |
-| Orientation      | [Orientation](#script-constants-orientation) | Orientation                                      |
-| CastBlockShadows | boolean                                      | Whether entity casts block shadows when rendered |
-| PointLightSource | [PointLight](#script-types-pointlight)       | Point light source                               |
-| Physics          | boolean                                      | Whether entity has physics effects               |
+| BlockPosition    | [GridPosition](#script-types-gridposition)   | Position (block entities)                        |
 | BoundingBox      | [BoundingBox](#script-types-boundingbox)     | Bounding box for physics effects                 |
+| CastBlockShadows | boolean                                      | Whether entity casts block shadows when rendered |
+| CastShadows      | [Shadow](#script-types-shadow)               | Shadow cast by a non-block entity                |
+| Drawable         | boolean                                      | Whether entity is visible when rendered          |
+| Kinematics       | [Kinematics](#script-types-kinematics)       | Position and velocity (non-block entities)       |
+| Name             | string                                       | Name                                             |
+| Orientation      | [Orientation](#script-constants-orientation) | Orientation                                      |
+| Parent           | integer                                      | Entity ID of parent entity                       |
+| Physics          | boolean                                      | Whether entity has physics effects               |
+| PointLightSource | [PointLight](#script-types-pointlight)       | Point light source                               |
 
 #### Example
 

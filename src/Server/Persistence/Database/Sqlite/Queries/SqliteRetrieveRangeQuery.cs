@@ -34,11 +34,12 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
         @"WITH RECURSIVE 
             EntityTree(id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
                 drawable, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
-                plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ)
+                plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius)
 	        AS (
 	        	SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
                         drawable, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
-                        plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ
+                        plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ,
+                        shadowRadius
 	        		FROM EntityWithComponents
 	        		WHERE x >= @X1 AND x < @X2
 	        		  AND y >= @Y1 AND y < @Y2
@@ -49,14 +50,14 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                         ec.name, ec.account, ec.parent, ec.drawable, ec.animatedSprite, ec.orientation, ec.admin,
                         ec.castBlockShadows, ec.plsRadius, ec.plsIntensity, ec.plsColor,
                         ec.plsPosX, ec.plsPosY, ec.plsPosZ, ec.physics, ec.bbPosX, ec.bbPosY, ec.bbPosZ,
-                        ec.bbSizeX, ec.bbSizeY, ec.bbSizeZ
+                        ec.bbSizeX, ec.bbSizeY, ec.bbSizeZ, ec.shadowRadius
 	        		FROM EntityWithComponents ec, EntityTree et
 	        		WHERE ec.parent = et.id 
                       AND ec.playerCharacter IS NULL
 	        )
             SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
                 drawable, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
-                plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ
+                plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius
             FROM EntityTree 
             ORDER BY parent NULLS LAST";
 

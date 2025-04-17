@@ -123,6 +123,11 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutBoundingBox();
 
+        if (definition.CastShadows.HasValue)
+            builder.CastShadows(definition.CastShadows.Value);
+        else
+            builder.WithoutCastShadows();
+
         var entityId = builder.Build();
         logger.LogDebug("Processed entity ID {Id:X}.", entityId);
     }

@@ -37,6 +37,7 @@ public class EntityDebugGui
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CameraServices cameraServices;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
+    private readonly CastShadowsComponentCollection castShadows;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
     private readonly KinematicsComponentCollection kinematics;
@@ -62,7 +63,8 @@ public class EntityDebugGui
         PerspectiveServices perspectiveServices,
         PointLightSourceComponentCollection pointLightSources,
         PhysicsTagCollection physics,
-        BoundingBoxComponentCollection boundingBoxes)
+        BoundingBoxComponentCollection boundingBoxes,
+        CastShadowsComponentCollection castShadows)
     {
         this.aboveBlocks = aboveBlocks;
         this.animatedSprites = animatedSprites;
@@ -81,6 +83,7 @@ public class EntityDebugGui
         this.pointLightSources = pointLightSources;
         this.physics = physics;
         this.boundingBoxes = boundingBoxes;
+        this.castShadows = castShadows;
     }
 
     /// <summary>
@@ -150,6 +153,8 @@ public class EntityDebugGui
                             AddValueRow("Bounding Box Pos:", CleanVec3ToString(box.Position));
                             AddValueRow("Bounding Box Size:", CleanVec3ToString(box.Size));
                         });
+                    AddCompoundRows("Cast Shadows:", entityId, castShadows,
+                        shadow => { AddValueRow("Shadow Radius:", shadow.Radius); });
                     ImGui.EndTable();
                 }
             }

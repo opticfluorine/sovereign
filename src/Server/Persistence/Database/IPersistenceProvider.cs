@@ -313,6 +313,21 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveBoundingBoxComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for CastShadows component.
+    /// </summary>
+    IAddComponentQuery<Shadow> AddCastShadowsComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for CastShadows component.
+    /// </summary>
+    IModifyComponentQuery<Shadow> ModifyCastShadowsComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for CastShadows component.
+    /// </summary>
+    IRemoveComponentQuery RemoveCastShadowsComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }

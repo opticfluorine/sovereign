@@ -98,6 +98,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<PointLightSourceComponentCollection>();
         services.TryAddComponentCollection<PhysicsTagCollection>();
         services.TryAddComponentCollection<BoundingBoxComponentCollection>();
+        services.TryAddComponentCollection<CastShadowsComponentCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)
@@ -120,6 +121,7 @@ public static class CoreServiceCollectionExtensions
     {
         services.TryAddSingleton<NameComponentValidator>();
         services.TryAddSingleton<PointLightComponentValidator>();
+        services.TryAddSingleton<ShadowComponentValidator>();
     }
 
     private static void AddEntities(IServiceCollection services)

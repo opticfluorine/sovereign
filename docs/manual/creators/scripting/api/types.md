@@ -106,6 +106,19 @@ to be used in scripts.
         in the center of the entity's XY plane.
 ```
 
+(script-types-shadow)=
+## Shadow
+
+```{eval-rst}
+.. lua:class:: Shadow
+
+    Describes a shadow cast by a non-block entity.
+
+    .. lua:attribute:: Radius: number
+
+        Radius of the shadow as a multiple of the block size.
+```
+
 (script-types-vector3)=
 ## Vector3
 

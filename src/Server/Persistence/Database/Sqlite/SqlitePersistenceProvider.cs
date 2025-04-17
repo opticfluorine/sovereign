@@ -228,6 +228,12 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         AddBoundingBoxComponentQuery = boundingBoxQuery;
         ModifyBoundingBoxComponentQuery = boundingBoxQuery;
         RemoveBoundingBoxComponentQuery = new SqliteRemoveBoundingBoxComponentQuery((SqliteConnection)Connection);
+        
+        // CastShadows component.
+        var castShadowsQueries = new SqliteCastShadowsComponentQueries((SqliteConnection)Connection);
+        AddCastShadowsComponentQuery = castShadowsQueries;
+        ModifyCastShadowsComponentQuery = castShadowsQueries;
+        RemoveCastShadowsComponentQuery = castShadowsQueries;
     }
 
     public ISetTemplateQuery SetTemplateQuery { get; }
@@ -306,6 +312,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<BoundingBox> AddBoundingBoxComponentQuery { get; }
     public IModifyComponentQuery<BoundingBox> ModifyBoundingBoxComponentQuery { get; }
     public IRemoveComponentQuery RemoveBoundingBoxComponentQuery { get; }
+    public IAddComponentQuery<Shadow> AddCastShadowsComponentQuery { get; }
+    public IModifyComponentQuery<Shadow> ModifyCastShadowsComponentQuery { get; }
+    public IRemoveComponentQuery RemoveCastShadowsComponentQuery { get; }
 
     public void Dispose()
     {

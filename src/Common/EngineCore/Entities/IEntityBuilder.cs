@@ -17,7 +17,6 @@
 
 using System;
 using System.Numerics;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineUtil.Attributes;
 
@@ -288,4 +287,18 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutBoundingBox();
+
+    /// <summary>
+    ///     Adds a CastShadows component to the entity.
+    /// </summary>
+    /// <param name="shadow">Shadow.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("CastShadows")]
+    IEntityBuilder CastShadows(Shadow shadow);
+
+    /// <summary>
+    ///     Removes the CastShadows component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutCastShadows();
 }
