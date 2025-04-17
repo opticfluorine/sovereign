@@ -90,6 +90,7 @@ public class CollisionMeshManager
     /// <param name="key">World segment index and Z coordinate.</param>
     private void DoFastGeneration(Tuple<GridPosition, int> key)
     {
+        logger.LogDebug("Doing fast mesh generation for {Key}.", key);
         meshes[key] = meshFactory.MakeBlockwiseSlabs(key.Item1, key.Item2, out var shouldSimplify);
         if (shouldSimplify) generationTasks[key] = Task.Run(() => DoFullGeneration(key));
     }
@@ -103,6 +104,7 @@ public class CollisionMeshManager
     {
         try
         {
+            logger.LogDebug("Doing full mesh generation for {Key}.", key);
             meshes[key] = meshFactory.MakeMergedSlabs(key.Item1, key.Item2);
         }
         catch (Exception e)
