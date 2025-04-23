@@ -543,9 +543,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <returns>true if the direct index in use, false otherwise.</returns>
     public bool TryGetEntityForIndex(int index, out ulong entityId)
     {
-        var found = componentToEntityMap[index] > 0;
-        entityId = found ? componentToEntityMap[0] : 0;
-        return found;
+        entityId = componentToEntityMap[index];
+        return entityId > 0;
     }
 
     /// <summary>

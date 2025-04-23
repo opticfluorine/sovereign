@@ -9,6 +9,7 @@
 * Renderer: Add non-block entity shadows. This gives a much-needed sense of depth when moving
   through the air. The shadow is cast directly downward from the entity, so it breaks up the
   z-projection for the 3/4 perspective and gives a hint as to where the entity will land.
+* Movement: Fix bug where movement notifications were sometimes sent for the wrong entity.
 
 #### 16 April 2025
 

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Systems.Movement;
 
@@ -32,14 +33,17 @@ public class ServerMovementNotifier : IMovementNotifier
 
     private readonly MovementInternalController controller;
     private readonly KinematicsComponentCollection kinematics;
+    private readonly ILogger<ServerMovementNotifier> logger;
     private readonly Dictionary<ulong, ulong> scheduledCountByEntityId = new();
     private readonly List<ulong> toRemove = new();
     private ulong sendCount;
 
-    public ServerMovementNotifier(KinematicsComponentCollection kinematics, MovementInternalController controller)
+    public ServerMovementNotifier(KinematicsComponentCollection kinematics, MovementInternalController controller,
+        ILogger<ServerMovementNotifier> logger)
     {
         this.kinematics = kinematics;
         this.controller = controller;
+        this.logger = logger;
     }
 
     public void ScheduleEntity(ulong entityId)
