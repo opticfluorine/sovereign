@@ -16,6 +16,7 @@
  */
 
 using System;
+using Sovereign.VeldridRenderer.Rendering.Scenes.Game.NonBlockShadow;
 using Veldrid;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
@@ -33,6 +34,9 @@ public class WorldPipeline : IDisposable
         this.device = device;
         this.gameResMgr = gameResMgr;
 
+        ResourceLayout = new Lazy<ResourceLayout>(CreateResourceLayout);
+        BlockShadowResourceLayout = new Lazy<ResourceLayout>(CreateBlockShadowResourceLayout);
+
         Pipeline = new Lazy<Pipeline>(() =>
         {
             var pipelineDesc = new GraphicsPipelineDescription(
@@ -41,7 +45,7 @@ public class WorldPipeline : IDisposable
                 CreateRasterizerState(),
                 PrimitiveTopology.TriangleList,
                 CreateShaderSet(),
-                CreateResourceLayout(),
+                ResourceLayout.Value,
                 device.Device!.SwapchainFramebuffer.OutputDescription
             );
 
@@ -56,7 +60,7 @@ public class WorldPipeline : IDisposable
                 CreateRasterizerState(),
                 PrimitiveTopology.TriangleList,
                 CreateShaderSet(),
-                CreateResourceLayout(),
+                ResourceLayout.Value,
                 device.Device!.SwapchainFramebuffer.OutputDescription
             );
 
@@ -71,12 +75,17 @@ public class WorldPipeline : IDisposable
                 CreateBlockShadowRasterizerState(),
                 PrimitiveTopology.TriangleList,
                 CreateBlockShadowShaderSet(),
-                CreateBlockShadowResourceLayout(),
+                BlockShadowResourceLayout.Value,
                 gameResMgr.ShadowMapFramebuffer!.OutputDescription);
 
             return device.Device!.ResourceFactory.CreateGraphicsPipeline(shadowMapPipelineDesc);
         });
     }
+
+    /// <summary>
+    ///     Resource layout for the block shadow map rendering pipeline.
+    /// </summary>
+    public Lazy<ResourceLayout> BlockShadowResourceLayout { get; }
 
     /// <summary>
     ///     Veldrid pipeline for world rendering.
@@ -90,11 +99,18 @@ public class WorldPipeline : IDisposable
     /// </summary>
     public Lazy<Pipeline> BlockShadowPipeline { get; }
 
+    /// <summary>
+    ///     Resource layout used by the world rendering pipeline.
+    /// </summary>
+    public Lazy<ResourceLayout> ResourceLayout { get; }
+
     public void Dispose()
     {
         if (Pipeline.IsValueCreated) Pipeline.Value.Dispose();
         if (PipelineWithDepthWrite.IsValueCreated) PipelineWithDepthWrite.Value.Dispose();
         if (BlockShadowPipeline.IsValueCreated) BlockShadowPipeline.Value.Dispose();
+        if (ResourceLayout.IsValueCreated) ResourceLayout.Value.Dispose();
+        if (BlockShadowResourceLayout.IsValueCreated) BlockShadowResourceLayout.Value.Dispose();
     }
 
     /// <summary>
@@ -119,6 +135,10 @@ public class WorldPipeline : IDisposable
                 VertexElementSemantic.TextureCoordinate
             ), new VertexElementDescription(
                 "lightFactor",
+                VertexElementFormat.Float1,
+                VertexElementSemantic.Color
+            ), new VertexElementDescription(
+                "shadowFloor",
                 VertexElementFormat.Float1,
                 VertexElementSemantic.Color
             ));
@@ -211,6 +231,10 @@ public class WorldPipeline : IDisposable
                 ResourceKind.UniformBuffer,
                 ShaderStages.Vertex),
             new ResourceLayoutElementDescription(
+                nameof(NonBlockShadowShaderConstants),
+                ResourceKind.UniformBuffer,
+                ShaderStages.Vertex),
+            new ResourceLayoutElementDescription(
                 GameResourceManager.ResTextureAtlas,
                 ResourceKind.TextureReadOnly,
                 ShaderStages.Fragment),
@@ -227,6 +251,14 @@ public class WorldPipeline : IDisposable
                 ResourceKind.Sampler,
                 ShaderStages.Fragment),
             new ResourceLayoutElementDescription(
+                GameResourceManager.ResNonBlockShadowMapTexture,
+                ResourceKind.TextureReadOnly,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
+                GameResourceManager.ResNonBlockShadowMapTextureSampler,
+                ResourceKind.Sampler,
+                ShaderStages.Fragment),
+            new ResourceLayoutElementDescription(
                 GameResourceManager.ResLightMapTexture,
                 ResourceKind.TextureReadOnly,
                 ShaderStages.Fragment),
@@ -238,6 +270,7 @@ public class WorldPipeline : IDisposable
                 GameResourceManager.ResShaderConstants,
                 ResourceKind.UniformBuffer,
                 ShaderStages.Fragment));
+
         return device.Device.ResourceFactory.CreateResourceLayout(desc);
     }
 

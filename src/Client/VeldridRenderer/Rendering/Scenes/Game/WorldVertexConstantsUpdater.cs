@@ -177,18 +177,31 @@ public class WorldVertexConstantsUpdater
         // Shadow map transform includes the camera translation but no Z-projection.
         // The camera translation includes its local Z-projection in order to align the center point
         // of the shadow map and the world render volume.
-        buf[0].Transform = Matrix4x4.Identity;
+        buf[0].DrawTransform = Matrix4x4.Identity;
 
-        buf[0].Transform.M11 = invHalfWidth;
-        buf[0].Transform.M41 = -invHalfWidth * cameraPos.X;
+        buf[0].DrawTransform.M11 = invHalfWidth;
+        buf[0].DrawTransform.M41 = -invHalfWidth * cameraPos.X;
 
-        buf[0].Transform.M22 = -invHalfHeight;
-        buf[0].Transform.M42 = invHalfHeight * (cameraPos.Y + cameraPos.Z);
+        buf[0].DrawTransform.M22 = -invHalfHeight;
+        buf[0].DrawTransform.M42 = invHalfHeight * (cameraPos.Y + cameraPos.Z);
 
         // The Z transform assigns a relative depth from a camera placed above the scene,
         // with 1.0f being the farthest (lowest Z) object.
         var invHalfZ = 2.0f / zLength;
-        buf[0].Transform.M33 = -invHalfZ;
-        buf[0].Transform.M43 = invHalfZ * cameraPos.Z + 0.5f;
+        buf[0].DrawTransform.M33 = -invHalfZ;
+        buf[0].DrawTransform.M43 = invHalfZ * cameraPos.Z + 0.5f;
+
+        // The sample transform is the same as the draw transform, but the output coordinates
+        // run over [0,1] instead of [-1,1].
+        buf[0].SampleTransform = Matrix4x4.Identity;
+
+        buf[0].SampleTransform.M11 = 0.5f * invHalfWidth;
+        buf[0].SampleTransform.M41 = -0.5f * invHalfWidth * cameraPos.X + 0.5f;
+
+        buf[0].SampleTransform.M22 = -0.5f * invHalfHeight;
+        buf[0].SampleTransform.M42 = 0.5f * invHalfHeight * (cameraPos.Y + cameraPos.Z) + 0.5f;
+
+        buf[0].SampleTransform.M33 = -invHalfZ;
+        buf[0].SampleTransform.M43 = invHalfZ * cameraPos.Z + 0.5f;
     }
 }

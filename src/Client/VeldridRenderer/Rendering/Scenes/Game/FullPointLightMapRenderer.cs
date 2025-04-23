@@ -115,6 +115,7 @@ public class FullPointLightMapRenderer : IDisposable
     {
         commandList.PushDebugGroup("Light Map");
 
+        commandList.SetIndexBuffer(gameResMgr.SpriteIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
         commandList.SetFramebuffer(framebuffer.Value);
         commandList.SetPipeline(pipeline.Value);
         commandList.ClearColorTarget(0, RgbaFloat.Clear);
@@ -138,9 +139,9 @@ public class FullPointLightMapRenderer : IDisposable
             UpdateViewport(commandList, light, renderPlan.CameraPosition);
 
             commandList.DrawIndexed(command.IndexCount, 1, command.BaseIndex, 0, 0);
-
-            commandList.PopDebugGroup();
         }
+
+        commandList.PopDebugGroup();
     }
 
     /// <summary>

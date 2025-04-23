@@ -121,8 +121,5 @@ public class PointLightDepthMapRenderer
                 commandList.PopDebugGroup();
             }
         }
-
-        // Restore index buffer state when done.
-        commandList.SetIndexBuffer(gameResMgr.SpriteIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
     }
 }

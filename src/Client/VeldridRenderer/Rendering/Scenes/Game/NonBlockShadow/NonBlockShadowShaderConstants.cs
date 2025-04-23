@@ -26,9 +26,14 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game.NonBlockShadow;
 public struct NonBlockShadowShaderConstants
 {
     /// <summary>
-    ///     Shadow map transformation matrix.
+    ///     Shadow map transformation matrix for drawing the shadow map.
     /// </summary>
-    public Matrix4x4 Transform;
+    public Matrix4x4 DrawTransform;
+
+    /// <summary>
+    ///     Shadow map transformation matrix for sampling the shadow map.
+    /// </summary>
+    public Matrix4x4 SampleTransform;
 
     /// <summary>
     ///     Time since the last tick, in seconds.

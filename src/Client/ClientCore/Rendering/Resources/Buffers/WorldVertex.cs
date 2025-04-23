@@ -65,4 +65,10 @@ public struct WorldVertex
     ///     * Non-block shadow map: shadow radius
     /// </remarks>
     [FieldOffset(8 * sizeof(float))] public float LightFactor;
+
+    /// <summary>
+    ///     Non-block shadow floor factor. Overrides the non-block shadow
+    ///     term if this factor is larger.
+    /// </summary>
+    [FieldOffset(9 * sizeof(float))] public float ShadowFloor;
 }

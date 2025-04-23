@@ -4,6 +4,12 @@
 
 ### April
 
+#### 23 April 2025
+
+* Renderer: Add non-block entity shadows. This gives a much-needed sense of depth when moving
+  through the air. The shadow is cast directly downward from the entity, so it breaks up the
+  z-projection for the 3/4 perspective and gives a hint as to where the entity will land.
+
 #### 16 April 2025
 
 * Renderer: Fix issue where perspective lines were not properly updated when entities are removed.

@@ -28,9 +28,12 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 /// </summary>
 public class WorldRenderer : IDisposable
 {
+    private readonly Lazy<Sampler> depthMapSampler;
     private readonly VeldridDevice device;
     private readonly FullPointLightMapRenderer fullPointLightMapRenderer;
     private readonly GameResourceManager gameResMgr;
+    private readonly Lazy<Sampler> nonBlockDepthMapSampler;
+    private readonly NonBlockShadowMap nonBlockShadowMap;
     private readonly NonBlockShadowMapRenderer nonBlockShadowMapRenderer;
     private readonly WorldPipeline pipeline;
     private readonly PointLightDepthMapRenderer pointLightDepthMapRenderer;
@@ -59,7 +62,7 @@ public class WorldRenderer : IDisposable
     public WorldRenderer(VeldridDevice device, WorldPipeline pipeline,
         VeldridResourceManager resMgr, GameResourceManager gameResMgr,
         PointLightDepthMapRenderer pointLightDepthMapRenderer, FullPointLightMapRenderer fullPointLightMapRenderer,
-        NonBlockShadowMapRenderer nonBlockShadowMapRenderer)
+        NonBlockShadowMapRenderer nonBlockShadowMapRenderer, NonBlockShadowMap nonBlockShadowMap)
     {
         this.device = device;
         this.pipeline = pipeline;
@@ -68,6 +71,25 @@ public class WorldRenderer : IDisposable
         this.pointLightDepthMapRenderer = pointLightDepthMapRenderer;
         this.fullPointLightMapRenderer = fullPointLightMapRenderer;
         this.nonBlockShadowMapRenderer = nonBlockShadowMapRenderer;
+        this.nonBlockShadowMap = nonBlockShadowMap;
+
+        depthMapSampler = new Lazy<Sampler>(() =>
+        {
+            var desc = new SamplerDescription(SamplerAddressMode.Clamp, SamplerAddressMode.Clamp,
+                SamplerAddressMode.Clamp,
+                SamplerFilter.MinLinear_MagLinear_MipLinear, ComparisonKind.GreaterEqual, 0, 1, 1,
+                0, SamplerBorderColor.OpaqueBlack);
+            return device.Device!.ResourceFactory.CreateSampler(desc);
+        });
+
+        nonBlockDepthMapSampler = new Lazy<Sampler>(() =>
+        {
+            var desc = new SamplerDescription(SamplerAddressMode.Clamp, SamplerAddressMode.Clamp,
+                SamplerAddressMode.Clamp,
+                SamplerFilter.MinLinear_MagLinear_MipLinear, ComparisonKind.LessEqual, 0, 1, 1,
+                0, SamplerBorderColor.OpaqueBlack);
+            return device.Device!.ResourceFactory.CreateSampler(desc);
+        });
     }
 
     public void Dispose()
@@ -172,14 +194,15 @@ public class WorldRenderer : IDisposable
     {
         commandList.PushDebugGroup("Block Shadow Map");
 
-        ConfigureShadowMapPipeline(commandList);
+        commandList.SetIndexBuffer(gameResMgr.SolidIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
+        commandList.SetViewport(0, blockShadowViewport);
+        commandList.SetPipeline(pipeline.BlockShadowPipeline.Value);
+        commandList.SetGraphicsResourceSet(0, blockShadowResourceSet);
+        commandList.SetFramebuffer(gameResMgr.ShadowMapFramebuffer);
         commandList.ClearDepthStencil(0.0f);
         commandList.DrawIndexed(renderPlan.GlobalSolidIndexCount);
 
         commandList.PopDebugGroup();
-
-        // Restore index buffer state when done.
-        commandList.SetIndexBuffer(gameResMgr.SpriteIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
     }
 
     /// <summary>
@@ -195,34 +218,16 @@ public class WorldRenderer : IDisposable
 
         // Final render pass for layer.
         commandList.PushDebugGroup("Sprites");
-        ConfigureSpritesPipeline(commandList, command);
-        commandList.DrawIndexed(command.IndexCount, 1, command.BaseIndex, 0, 0);
-        commandList.PopDebugGroup();
-    }
 
-    /// <summary>
-    ///     Configures the rendering pipeline to draw sprites.
-    /// </summary>
-    private void ConfigureSpritesPipeline(CommandList commandList, RenderCommand command)
-    {
         commandList.SetViewport(0, viewport);
         commandList.SetPipeline(
             command.EnableDepthWrite ? pipeline.PipelineWithDepthWrite.Value : pipeline.Pipeline.Value);
         commandList.SetIndexBuffer(gameResMgr.SpriteIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
         commandList.SetGraphicsResourceSet(0, resourceSet);
         commandList.SetFramebuffer(device.Device!.SwapchainFramebuffer);
-    }
+        commandList.DrawIndexed(command.IndexCount, 1, command.BaseIndex, 0, 0);
 
-    /// <summary>
-    ///     Configures the rendering pipeline to draw the block shadow map.
-    /// </summary>
-    private void ConfigureShadowMapPipeline(CommandList commandList)
-    {
-        commandList.SetViewport(0, blockShadowViewport);
-        commandList.SetPipeline(pipeline.BlockShadowPipeline.Value);
-        commandList.SetIndexBuffer(gameResMgr.SolidIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);
-        commandList.SetGraphicsResourceSet(0, blockShadowResourceSet);
-        commandList.SetFramebuffer(gameResMgr.ShadowMapFramebuffer);
+        commandList.PopDebugGroup();
     }
 
     /// <summary>
@@ -243,47 +248,16 @@ public class WorldRenderer : IDisposable
 
         resourceSet?.Dispose();
 
-        var resLayoutDesc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
-                GameResourceManager.ResShaderConstants,
-                ResourceKind.UniformBuffer,
-                ShaderStages.Vertex),
-            new ResourceLayoutElementDescription(
-                GameResourceManager.ResTextureAtlas,
-                ResourceKind.TextureReadOnly,
-                ShaderStages.Fragment),
-            new ResourceLayoutElementDescription(
-                GameResourceManager.ResTextureAtlasSampler,
-                ResourceKind.Sampler,
-                ShaderStages.Fragment),
-            new ResourceLayoutElementDescription(
-                GameResourceManager.ResShadowMapTexture,
-                ResourceKind.TextureReadOnly,
-                ShaderStages.Fragment),
-            new ResourceLayoutElementDescription(
-                GameResourceManager.ResShadowMapTextureSampler,
-                ResourceKind.Sampler,
-                ShaderStages.Fragment),
-            new ResourceLayoutElementDescription(
-                GameResourceManager.ResLightMapTexture,
-                ResourceKind.TextureReadOnly,
-                ShaderStages.Fragment),
-            new ResourceLayoutElementDescription(
-                GameResourceManager.ResLightMapTextureSampler,
-                ResourceKind.Sampler,
-                ShaderStages.Fragment),
-            new ResourceLayoutElementDescription(
-                GameResourceManager.ResShaderConstants,
-                ResourceKind.UniformBuffer,
-                ShaderStages.Fragment));
-        var resLayout = device.Device.ResourceFactory.CreateResourceLayout(resLayoutDesc);
-
         var resSetDesc = new ResourceSetDescription(
-            resLayout,
+            pipeline.ResourceLayout.Value,
             gameResMgr.VertexUniformBuffer.DeviceBuffer,
+            nonBlockShadowMap.ConstantsBuffer.Value.DeviceBuffer,
             resMgr.AtlasTexture.TextureView,
             device.Device.PointSampler,
             gameResMgr.ShadowMapTexture.TextureView,
-            device.Device.LinearSampler,
+            depthMapSampler.Value,
+            nonBlockShadowMap.NonBlockShadowMapTexture.Value.TextureView,
+            nonBlockDepthMapSampler.Value,
             gameResMgr.FullPointLightMap.Value.TextureView,
             device.Device.LinearSampler,
             gameResMgr.FragmentUniformBuffer.DeviceBuffer
@@ -303,15 +277,8 @@ public class WorldRenderer : IDisposable
 
         blockShadowResourceSet?.Dispose();
 
-        var resLayoutDesc = new ResourceLayoutDescription(new ResourceLayoutElementDescription(
-            GameResourceManager.ResShaderConstants,
-            ResourceKind.UniformBuffer,
-            ShaderStages.Vertex
-        ));
-        var resLayout = device.Device.ResourceFactory.CreateResourceLayout(resLayoutDesc);
-
         var resSetDesc = new ResourceSetDescription(
-            resLayout,
+            pipeline.BlockShadowResourceLayout.Value,
             gameResMgr.BlockShadowVertexUniformBuffer.DeviceBuffer
         );
         blockShadowResourceSet = device.Device.ResourceFactory.CreateResourceSet(resSetDesc);

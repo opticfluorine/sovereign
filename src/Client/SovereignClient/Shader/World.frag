@@ -20,18 +20,22 @@
 layout (location = 0) in vec2 texCoord;
 layout (location = 1) in vec4 color;
 layout (location = 2) in vec4 shadowPosition;
-layout (location = 3) in float vertexDepth;
+layout (location = 3) in vec4 nonBlockShadowPosition;
+layout (location = 4) in float vertexDepth;
+layout (location = 5) in float shadowFloor;
 layout (origin_upper_left) in vec4 gl_FragCoord;
 
 layout (location = 0) out vec4 colorOut;
 
-layout (set = 0, binding = 1) uniform texture2D g_textureAtlas;
-layout (set = 0, binding = 2) uniform sampler g_textureAtlasSampler;
-layout (set = 0, binding = 3) uniform texture2D g_shadowMap;
-layout (set = 0, binding = 4) uniform sampler g_shadowMapSampler;
-layout (set = 0, binding = 5) uniform texture2D g_lightMap;
-layout (set = 0, binding = 6) uniform sampler g_lightMapSampler;
-layout (set = 0, binding = 7) uniform ShaderConstants
+layout (set = 0, binding = 2) uniform texture2D g_textureAtlas;
+layout (set = 0, binding = 3) uniform sampler g_textureAtlasSampler;
+layout (set = 0, binding = 4) uniform texture2D g_blockShadowMap;
+layout (set = 0, binding = 5) uniform sampler g_blockShadowMapSampler;
+layout (set = 0, binding = 6) uniform texture2D g_nonBlockShadowMap;
+layout (set = 0, binding = 7) uniform sampler g_nonBlockShadowMapSampler;
+layout (set = 0, binding = 8) uniform texture2D g_lightMap;
+layout (set = 0, binding = 9) uniform sampler g_lightMapSampler;
+layout (set = 0, binding = 10) uniform ShaderConstants
 {
     vec4 g_ambientLightColor; /* ambient light color; appears in shadows */
     vec4 g_globalLightColor;  /* global light color (e.g. sun, moon) */
@@ -39,16 +43,21 @@ layout (set = 0, binding = 7) uniform ShaderConstants
     vec2 g_unused;            /* unused */
 };
 
+const vec3 blockShadowBias = vec3(0.0f, 0.0f, 0.001f);
+const vec3 nonBlockShadowBias = vec3(0.0f, 0.0f, 0.001f);
+
 void main()
 {
     // Sample shadow map for this fragment.
-    vec2 shadowTexCoord = shadowPosition.xy;
-    float shadowDepth = texture(sampler2D(g_shadowMap, g_shadowMapSampler), shadowTexCoord).r;
+    float bs = texture(sampler2DShadow(g_blockShadowMap, g_blockShadowMapSampler),
+                       shadowPosition.xyz + blockShadowBias);
+    float nbs = max(texture(sampler2DShadow(g_nonBlockShadowMap, g_nonBlockShadowMapSampler),
+                            nonBlockShadowPosition.xyz + nonBlockShadowBias), shadowFloor);
 
     // Determine base lighting color from ambient and global lights.
     vec2 lightMapCoord = gl_FragCoord.xy / g_viewportSize;
     vec4 pointColor = texture(sampler2D(g_lightMap, g_lightMapSampler), lightMapCoord);
-    vec4 baseColor = shadowPosition.z >= shadowDepth - 0.01f ? g_globalLightColor : g_ambientLightColor;
+    vec4 baseColor = g_ambientLightColor + bs * nbs * (g_globalLightColor - g_ambientLightColor);
     vec4 fullColor = color * clamp(baseColor + pointColor, 0.0f, 1.0f);
 
     // Blend everything to a final color.

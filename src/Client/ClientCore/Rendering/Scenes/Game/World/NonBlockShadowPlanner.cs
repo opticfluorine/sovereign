@@ -50,7 +50,8 @@ public class NonBlockShadowPlanner
     {
         // Determine extents of quad containing shadow.
         var spriteInfo = atlasMap.MapElements[spriteId];
-        var center = new Vector2(posVel.Position.X + 0.5f * spriteInfo.WidthInTiles, posVel.Position.Y);
+        var center = new Vector2(posVel.Position.X + 0.5f * spriteInfo.WidthInTiles,
+            posVel.Position.Y + 0.2f * spriteInfo.HeightInTiles);
         var halfDim = new Vector2(shadow.Radius);
         var start = new Vector3(center - halfDim, posVel.Position.Z);
         var end = new Vector3(center + halfDim, posVel.Position.Z);

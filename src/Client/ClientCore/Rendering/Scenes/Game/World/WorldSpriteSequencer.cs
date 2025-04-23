@@ -134,6 +134,7 @@ public sealed class WorldSpriteSequencer
     {
         /* Retrieve sprite information. */
         var spriteInfo = atlasMap.MapElements[sprite.Id];
+        var shadowFloor = 0.5f;
 
         /* Bottom left. */
         vertices[0] = new WorldVertex
@@ -146,7 +147,8 @@ public sealed class WorldSpriteSequencer
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedLeftX,
             TexY = spriteInfo.NormalizedBottomY,
-            LightFactor = lightFactor
+            LightFactor = lightFactor,
+            ShadowFloor = shadowFloor
         };
 
         /* Bottom right. */
@@ -160,7 +162,8 @@ public sealed class WorldSpriteSequencer
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedRightX,
             TexY = spriteInfo.NormalizedBottomY,
-            LightFactor = lightFactor
+            LightFactor = lightFactor,
+            ShadowFloor = shadowFloor
         };
 
         /* Top right. */
@@ -174,7 +177,8 @@ public sealed class WorldSpriteSequencer
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedRightX,
             TexY = spriteInfo.NormalizedTopY,
-            LightFactor = lightFactor
+            LightFactor = lightFactor,
+            ShadowFloor = shadowFloor
         };
 
         /* Top left. */
@@ -188,7 +192,8 @@ public sealed class WorldSpriteSequencer
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedLeftX,
             TexY = spriteInfo.NormalizedTopY,
-            LightFactor = lightFactor
+            LightFactor = lightFactor,
+            ShadowFloor = shadowFloor
         };
     }
 
@@ -205,6 +210,7 @@ public sealed class WorldSpriteSequencer
     {
         /* Retrieve sprite information. */
         var spriteInfo = atlasMap.MapElements[sprite.Id];
+        var shadowFloor = 1.0f;
 
         /* Bottom left. */
         vertices[0] = new WorldVertex
@@ -217,7 +223,8 @@ public sealed class WorldSpriteSequencer
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedLeftX,
             TexY = spriteInfo.NormalizedBottomY,
-            LightFactor = lightFactor
+            LightFactor = lightFactor,
+            ShadowFloor = shadowFloor
         };
 
         /* Bottom right. */
@@ -231,7 +238,8 @@ public sealed class WorldSpriteSequencer
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedRightX,
             TexY = spriteInfo.NormalizedBottomY,
-            LightFactor = lightFactor
+            LightFactor = lightFactor,
+            ShadowFloor = 0.5f
         };
 
         /* Top right. */
@@ -245,7 +253,8 @@ public sealed class WorldSpriteSequencer
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedRightX,
             TexY = spriteInfo.NormalizedTopY,
-            LightFactor = lightFactor
+            LightFactor = lightFactor,
+            ShadowFloor = 0.5f
         };
 
         /* Top left. */
@@ -259,7 +268,8 @@ public sealed class WorldSpriteSequencer
             VelZ = velocity.Z,
             TexX = spriteInfo.NormalizedLeftX,
             TexY = spriteInfo.NormalizedTopY,
-            LightFactor = lightFactor
+            LightFactor = lightFactor,
+            ShadowFloor = shadowFloor
         };
     }
 

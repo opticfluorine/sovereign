@@ -83,12 +83,22 @@ public class GameResourceManager : IDisposable
     /// <summary>
     ///     Resource name for the shadow map texture.
     /// </summary>
-    public const string ResShadowMapTexture = "g_shadowMap";
+    public const string ResShadowMapTexture = "g_blockShadowMap";
 
     /// <summary>
     ///     Resource name for the shadow map texture sampler.
     /// </summary>
-    public const string ResShadowMapTextureSampler = "g_shadowMapSampler";
+    public const string ResShadowMapTextureSampler = "g_blockShadowMapSampler";
+
+    /// <summary>
+    ///     Resource name for the non-block shadow map texture.
+    /// </summary>
+    public const string ResNonBlockShadowMapTexture = "g_nonBlockShadowMap";
+
+    /// <summary>
+    ///     Resource name for the non-block shadow map texture sampler.
+    /// </summary>
+    public const string ResNonBlockShadowMapTextureSampler = "g_nonBlockShadowMapSampler";
 
     /// <summary>
     ///     Resource name for the light map.

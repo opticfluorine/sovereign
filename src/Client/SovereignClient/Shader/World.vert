@@ -21,11 +21,14 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 velocity;
 layout (location = 2) in vec2 texCoord;
 layout (location = 3) in float lightFactor;
+layout (location = 4) in float shadowFloor;
 
 layout (location = 0) out vec2 texCoordOut;
 layout (location = 1) out vec4 color;
 layout (location = 2) out vec4 shadowPosition;
-layout (location = 3) out float vertexDepth;
+layout (location = 3) out vec4 nonBlockShadowPosition;
+layout (location = 4) out float vertexDepth;
+layout (location = 5) out float shadowFloorOut;
 
 layout (binding = 0) uniform ShaderConstants
 {
@@ -35,6 +38,13 @@ layout (binding = 0) uniform ShaderConstants
     float g_yDepthScale;
     float g_yDepthOffset;
     float g_reserved2;
+};
+
+layout (binding = 1) uniform NonBlockShadowShaderConstants
+{
+    mat4 g_unused;
+    mat4 g_nonBlockShadowMapTransform;
+    float g_unused2;
 };
 
 void main()
@@ -47,7 +57,9 @@ void main()
     vec4 position4 = vec4(interpolated, 1.0);
     gl_Position = g_transform * position4;
     shadowPosition = g_shadowMapTransform * position4;
+    nonBlockShadowPosition = g_nonBlockShadowMapTransform * position4;
     vertexDepth = g_yDepthScale * position4.y + g_yDepthOffset;
+    shadowFloorOut = shadowFloor;
 
     // Forward the texture coordinate for the vertex.
     texCoordOut = texCoord;

@@ -22,6 +22,8 @@
 layout (location = 0) in vec3 vPosition;
 layout (location = 1) in vec3 vVelocity;
 layout (location = 2) in vec2 vTexCoord;
+layout (location = 3) in float unused;
+layout (location = 4) in float unused2;
 
 layout (binding = 0) uniform ShaderConstants
 {
