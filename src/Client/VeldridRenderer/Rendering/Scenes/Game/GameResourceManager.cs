@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.VeldridRenderer.Rendering.Resources;
+using Sovereign.VeldridRenderer.Rendering.Scenes.Game.NonBlockShadow;
 using Veldrid;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
@@ -43,6 +44,11 @@ public class GameResourceManager : IDisposable
     ///     Maximum number of indices in each index buffer.
     /// </summary>
     public const int MaximumIndices = 262144;
+
+    /// <summary>
+    ///     Maximum number of indices in the shadow index buffer.
+    /// </summary>
+    public const int MaximumShadowIndices = 32768;
 
     /// <summary>
     ///     Shadow map texture width.
@@ -95,15 +101,17 @@ public class GameResourceManager : IDisposable
     public const string ResLightMapTextureSampler = "g_lightMapSampler";
 
     private readonly VeldridDevice device;
+    private readonly NonBlockShadowMap shadowMap;
 
     /// <summary>
     ///     Dispose flag.
     /// </summary>
     private bool isDisposed;
 
-    public GameResourceManager(VeldridDevice device)
+    public GameResourceManager(VeldridDevice device, NonBlockShadowMap shadowMap)
     {
         this.device = device;
+        this.shadowMap = shadowMap;
 
         PointLightDepthMapVertexShader = new Lazy<Shader>(() =>
         {
@@ -147,6 +155,9 @@ public class GameResourceManager : IDisposable
 
         FullPointLightMap = new Lazy<VeldridTexture>(() => new VeldridTexture(device, (uint)device.DisplayMode!.Width,
             (uint)device.DisplayMode!.Height, TexturePurpose.RenderTexture));
+
+        ShadowIndexBuffer = new Lazy<VeldridUpdateBuffer<uint>>(
+            () => new VeldridUpdateBuffer<uint>(device, BufferUsage.IndexBuffer, MaximumShadowIndices));
     }
 
     /// <summary>
@@ -168,6 +179,11 @@ public class GameResourceManager : IDisposable
     ///     Index buffer for rendering solid geometry from blocks.
     /// </summary>
     public VeldridUpdateBuffer<uint>? SolidIndexBuffer { get; private set; }
+
+    /// <summary>
+    ///     Index buffer for rendering non-block shadows.
+    /// </summary>
+    public Lazy<VeldridUpdateBuffer<uint>> ShadowIndexBuffer { get; }
 
     /// <summary>
     ///     Uniform buffer for the world vertex shader.
@@ -264,6 +280,7 @@ public class GameResourceManager : IDisposable
             if (FullPointLightMapVertexShader.IsValueCreated) FullPointLightMapVertexShader.Value.Dispose();
             if (FullPointLightMapFragmentShader.IsValueCreated) FullPointLightMapFragmentShader.Value.Dispose();
             if (FullPointLightMap.IsValueCreated) FullPointLightMap.Value.Dispose();
+            if (ShadowIndexBuffer.IsValueCreated) ShadowIndexBuffer.Value.Dispose();
             PointLightBuffer?.Dispose();
             PointLightDepthMapBuffer?.Dispose();
             ShadowMapFramebuffer?.Dispose();
@@ -304,7 +321,7 @@ public class GameResourceManager : IDisposable
                 (int)PointLightDepthMap.LayerCount * InitialLightBufferSize);
 
         RenderPlan = new RenderPlan(VertexBuffer.Buffer, SpriteIndexBuffer.Buffer, SolidIndexBuffer.Buffer,
-            MaximumDraws);
+            ShadowIndexBuffer.Value.Buffer, MaximumDraws);
 
         CreateDynamicTextures();
         LoadWorldShaders();
@@ -320,11 +337,13 @@ public class GameResourceManager : IDisposable
         VertexBuffer?.Update(commandList);
         SpriteIndexBuffer?.Update(commandList);
         SolidIndexBuffer?.Update(commandList);
+        ShadowIndexBuffer.Value.Update(commandList);
         VertexUniformBuffer?.Update(commandList);
         FragmentUniformBuffer?.Update(commandList);
         BlockShadowVertexUniformBuffer?.Update(commandList);
         PointLightBuffer?.Update(commandList);
         PointLightDepthMapBuffer?.Update(commandList);
+        shadowMap.ConstantsBuffer.Value.Update(commandList);
         commandList.PopDebugGroup();
     }
 

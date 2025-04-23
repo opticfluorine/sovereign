@@ -18,6 +18,7 @@ using System;
 using System.Numerics;
 using Sovereign.ClientCore.Rendering.Resources.Buffers;
 using Sovereign.ClientCore.Rendering.Scenes.Game.World;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering;
 
@@ -40,6 +41,11 @@ public enum RenderCommandType
     ///     Draw the shadow maps for point light sources.
     /// </summary>
     DrawPointLightShadowMaps,
+
+    /// <summary>
+    ///     Draw the shadow map for non-block entities.
+    /// </summary>
+    DrawNonBlockShadowMap,
 
     /// <summary>
     ///     Push a debug group onto the stack.
@@ -105,6 +111,18 @@ public struct RenderLight
 }
 
 /// <summary>
+///     Details of a rendered non-block shadow.
+/// </summary>
+public struct RenderShadow
+{
+    public uint BaseIndex;
+
+    public uint IndexCount;
+
+    public Shadow Shadow;
+}
+
+/// <summary>
 ///     Specifies information for an entity that requires a name label to be drawn.
 /// </summary>
 public struct NameLabel
@@ -139,6 +157,13 @@ public class RenderPlan
     ///     Initial size of name label list.
     /// </summary>
     private const int InitialNameLabelSize = 128;
+
+    private const int InitialShadowSize = 128;
+
+    /// <summary>
+    ///     Index buffer for non-block shadows.
+    /// </summary>
+    private readonly uint[] shadowIndexBuffer;
 
     private readonly uint[] solidIndexBuffer;
 
@@ -188,6 +213,21 @@ public class RenderPlan
     private RenderCommand[] renderCommands;
 
     /// <summary>
+    ///     Number of shadows in the plan.
+    /// </summary>
+    private int shadowCount;
+
+    /// <summary>
+    ///     Non-block entity DIs casting shadows.
+    /// </summary>
+    private ulong[] shadowEntityIds;
+
+    /// <summary>
+    ///     Number of indices in the shadow index buffer.
+    /// </summary>
+    private int shadowIndexCount;
+
+    /// <summary>
     ///     Number of indices in the solid geometry index buffer.
     /// </summary>
     private int solidIndexCount;
@@ -208,14 +248,16 @@ public class RenderPlan
     private uint worldSolidIndexCount;
 
     public RenderPlan(WorldVertex[] vertexBuffer, uint[] spriteIndexBuffer, uint[] solidIndexBuffer,
-        int commandListSize)
+        uint[] shadowIndexBuffer, int commandListSize)
     {
         this.vertexBuffer = vertexBuffer;
         this.spriteIndexBuffer = spriteIndexBuffer;
         this.solidIndexBuffer = solidIndexBuffer;
+        this.shadowIndexBuffer = shadowIndexBuffer;
         renderCommands = new RenderCommand[commandListSize];
         Lights = new RenderLight[InitialLightSize];
         NameLabels = new NameLabel[InitialNameLabelSize];
+        shadowEntityIds = new ulong[InitialShadowSize];
     }
 
     /// <summary>
@@ -234,6 +276,11 @@ public class RenderPlan
     public int SolidIndexCount => solidIndexCount;
 
     /// <summary>
+    ///     Shadow index count.
+    /// </summary>
+    public int ShadowIndexCount => shadowIndexCount;
+
+    /// <summary>
     ///     Number of solid geometry indices used for world shadow map.
     /// </summary>
     public uint GlobalSolidIndexCount => worldSolidIndexCount;
@@ -249,6 +296,11 @@ public class RenderPlan
     public int NameLabelCount => nameLabelCount;
 
     /// <summary>
+    ///     IDs of non-block entities casting shadows in the scene.
+    /// </summary>
+    public ReadOnlySpan<ulong> NonBlockShadowIds => new(shadowEntityIds, 0, shadowCount);
+
+    /// <summary>
     ///     Camera position in world coordinates.
     /// </summary>
     public Vector3 CameraPosition { get; set; }
@@ -261,11 +313,13 @@ public class RenderPlan
         vertexCount = 0;
         spriteIndexCount = 0;
         solidIndexCount = 0;
+        shadowIndexCount = 0;
         commandCount = 0;
         worldSolidIndexCount = 0;
         lightCount = 0;
         pointLightSolidIndexCount = 0;
         nameLabelCount = 0;
+        shadowCount = 0;
     }
 
     /// <summary>
@@ -335,6 +389,28 @@ public class RenderPlan
     }
 
     /// <summary>
+    ///     Tries to reserve a contiguous block of shadow indices in the plan if space is available.
+    /// </summary>
+    /// <param name="count">Number of contiguous indices to reserve.</param>
+    /// <param name="indices">Block of indices to populate.</param>
+    /// <param name="baseIndex">Index to first index in the block.</param>
+    /// <returns>true if successful, false otherwise.</returns>
+    public bool TryAddShadowIndices(int count, out Span<uint> indices, out uint baseIndex)
+    {
+        if (shadowIndexCount + count > shadowIndexBuffer.Length)
+        {
+            indices = new Span<uint>();
+            baseIndex = 0;
+            return false;
+        }
+
+        indices = new Span<uint>(shadowIndexBuffer, shadowIndexCount, count);
+        baseIndex = (uint)shadowIndexCount;
+        shadowIndexCount += count;
+        return true;
+    }
+
+    /// <summary>
     ///     Adds a DrawSprites command to the plan.
     /// </summary>
     /// <param name="drawBaseIndex">Base index.</param>
@@ -367,6 +443,20 @@ public class RenderPlan
         renderCommands[commandCount] = new RenderCommand
         {
             RenderCommandType = RenderCommandType.DrawGlobalShadowMap
+        };
+        commandCount++;
+    }
+
+    /// <summary>
+    ///     Adds a DrawNonBlockShadowMap command to the plan.
+    /// </summary>
+    public void DrawNonBlockShadowMap()
+    {
+        if (commandCount == renderCommands.Length) ExpandCommandList();
+
+        renderCommands[commandCount] = new RenderCommand
+        {
+            RenderCommandType = RenderCommandType.DrawNonBlockShadowMap
         };
         commandCount++;
     }
@@ -461,6 +551,22 @@ public class RenderPlan
         }
 
         NameLabels[nameLabelCount++] = nameLabel;
+    }
+
+    /// <summary>
+    ///     Adds a non-block entity shadow to the render plan data.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    public void AddNonBlockShadow(ulong entityId)
+    {
+        if (shadowCount == shadowEntityIds.Length)
+        {
+            var newShadows = new ulong[shadowEntityIds.Length + InitialShadowSize];
+            Array.Copy(shadowEntityIds, newShadows, shadowEntityIds.Length);
+            shadowEntityIds = newShadows;
+        }
+
+        shadowEntityIds[shadowCount++] = entityId;
     }
 
     /// <summary>

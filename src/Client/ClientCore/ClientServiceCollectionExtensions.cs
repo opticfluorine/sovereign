@@ -234,6 +234,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<WorldRangeSelector>();
         services.TryAddSingleton<WorldSpriteSequencer>();
         services.TryAddSingleton<LightSourceTable>();
+        services.TryAddSingleton<NonBlockShadowPlanner>();
 
         services.TryAddSingleton<MainMenuScene>();
         services.TryAddSingleton<StartupGui>();

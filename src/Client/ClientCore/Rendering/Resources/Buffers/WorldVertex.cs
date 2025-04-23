@@ -33,8 +33,36 @@ public struct WorldVertex
     [FieldOffset(4 * sizeof(float))] public float VelY;
     [FieldOffset(5 * sizeof(float))] public float VelZ;
 
+    /// <summary>
+    ///     Context-specific vector value (x component).
+    /// </summary>
+    /// <remarks>
+    ///     In C this would be a union based on the specific rendering
+    ///     pipeline in use. Uses include:
+    ///     * World rendering: texture coordinate
+    ///     * Non-block shadow map: shadow center in xy plane
+    /// </remarks>
     [FieldOffset(6 * sizeof(float))] public float TexX;
+
+    /// <summary>
+    ///     Context-specific vector value (x component).
+    /// </summary>
+    /// <remarks>
+    ///     In C this would be a union based on the specific rendering
+    ///     pipeline in use. Uses include:
+    ///     * World rendering: texture coordinate
+    ///     * Non-block shadow map: shadow center in xy plane
+    /// </remarks>
     [FieldOffset(7 * sizeof(float))] public float TexY;
 
+    /// <summary>
+    ///     Context-specific scalar value.
+    /// </summary>
+    /// <remarks>
+    ///     In C this would be a union based on the specific rendering
+    ///     pipeline in use. Uses include:
+    ///     * World rendering: light factor
+    ///     * Non-block shadow map: shadow radius
+    /// </remarks>
     [FieldOffset(8 * sizeof(float))] public float LightFactor;
 }

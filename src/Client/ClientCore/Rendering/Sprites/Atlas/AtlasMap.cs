@@ -92,15 +92,9 @@ public sealed class AtlasMap
         var brx = tlx + spriteWidth;
         var bry = tly + spriteHeight;
 
-        // Texel coordinates point to center of texel, so we need to include offsets in the relative coordinates.
-        var offsetX = 0.5f / atlasWidth;
-        var offsetY = 0.5f / atlasHeight;
-
         /* Add record to map. */
         MapElements.Add(new AtlasMapElement
         {
-            //NormalizedLeftX = tlx / atlasWidth + offsetX,
-            //NormalizedTopY = tly / atlasHeight + offsetY,
             NormalizedLeftX = tlx / atlasWidth,
             NormalizedTopY = tly / atlasHeight,
             NormalizedRightX = brx / atlasWidth,

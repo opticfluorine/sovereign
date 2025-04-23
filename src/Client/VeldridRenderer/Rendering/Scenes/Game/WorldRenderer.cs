@@ -18,6 +18,7 @@
 using System;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.VeldridRenderer.Rendering.Resources;
+using Sovereign.VeldridRenderer.Rendering.Scenes.Game.NonBlockShadow;
 using Veldrid;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
@@ -30,6 +31,7 @@ public class WorldRenderer : IDisposable
     private readonly VeldridDevice device;
     private readonly FullPointLightMapRenderer fullPointLightMapRenderer;
     private readonly GameResourceManager gameResMgr;
+    private readonly NonBlockShadowMapRenderer nonBlockShadowMapRenderer;
     private readonly WorldPipeline pipeline;
     private readonly PointLightDepthMapRenderer pointLightDepthMapRenderer;
     private readonly VeldridResourceManager resMgr;
@@ -56,7 +58,8 @@ public class WorldRenderer : IDisposable
 
     public WorldRenderer(VeldridDevice device, WorldPipeline pipeline,
         VeldridResourceManager resMgr, GameResourceManager gameResMgr,
-        PointLightDepthMapRenderer pointLightDepthMapRenderer, FullPointLightMapRenderer fullPointLightMapRenderer)
+        PointLightDepthMapRenderer pointLightDepthMapRenderer, FullPointLightMapRenderer fullPointLightMapRenderer,
+        NonBlockShadowMapRenderer nonBlockShadowMapRenderer)
     {
         this.device = device;
         this.pipeline = pipeline;
@@ -64,6 +67,7 @@ public class WorldRenderer : IDisposable
         this.gameResMgr = gameResMgr;
         this.pointLightDepthMapRenderer = pointLightDepthMapRenderer;
         this.fullPointLightMapRenderer = fullPointLightMapRenderer;
+        this.nonBlockShadowMapRenderer = nonBlockShadowMapRenderer;
     }
 
     public void Dispose()
@@ -142,6 +146,10 @@ public class WorldRenderer : IDisposable
                     pointLightDepthMapRenderer.Render(commandList, renderPlan);
                     break;
 
+                case RenderCommandType.DrawNonBlockShadowMap:
+                    nonBlockShadowMapRenderer.Render(commandList, renderPlan);
+                    break;
+
                 case RenderCommandType.PushDebug:
                     commandList.PushDebugGroup(command.DebugGroupName!);
                     break;
@@ -162,9 +170,13 @@ public class WorldRenderer : IDisposable
     /// <param name="renderPlan">Render plan.</param>
     private void DrawGlobalShadowMap(CommandList commandList, RenderPlan renderPlan)
     {
+        commandList.PushDebugGroup("Block Shadow Map");
+
         ConfigureShadowMapPipeline(commandList);
         commandList.ClearDepthStencil(0.0f);
         commandList.DrawIndexed(renderPlan.GlobalSolidIndexCount);
+
+        commandList.PopDebugGroup();
 
         // Restore index buffer state when done.
         commandList.SetIndexBuffer(gameResMgr.SpriteIndexBuffer!.DeviceBuffer, IndexFormat.UInt32);

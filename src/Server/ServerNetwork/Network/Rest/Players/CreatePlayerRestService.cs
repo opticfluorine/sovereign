@@ -182,6 +182,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
                         Position = Vector3.Zero,
                         Size = Vector3.One
                     })
+                    .CastShadows(new Shadow { Radius = 0.2f })
                     .AnimatedSprite(221); // TODO Configurable appearance
 
                 if (configManager.ServerConfiguration.NewPlayers.AdminByDefault)

@@ -46,6 +46,7 @@ public sealed class WorldEntityRetriever
     private readonly IBlockAnimatedSpriteCache blockSpriteCache;
     private readonly CameraServices camera;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
+    private readonly CastShadowsComponentCollection castsShadows;
     private readonly ClientConfigurationManager configManager;
     private readonly WorldLayerGrouper grouper;
 
@@ -61,6 +62,7 @@ public sealed class WorldEntityRetriever
     private readonly AnimationPhaseComponentCollection phases;
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly WorldRangeSelector rangeSelector;
+    private readonly NonBlockShadowPlanner shadowPlanner;
     private readonly DisplayViewport viewport;
 
     /// <summary>
@@ -78,7 +80,8 @@ public sealed class WorldEntityRetriever
         IBlockAnimatedSpriteCache blockSpriteCache, CastBlockShadowsTagCollection castBlockShadows,
         LightSourceTable lightSourceTable, PlayerCharacterTagCollection playerCharacters,
         WorldRangeSelector rangeSelector, AtlasMap atlasMap,
-        ILogger<WorldEntityRetriever> logger)
+        ILogger<WorldEntityRetriever> logger, CastShadowsComponentCollection castsShadows,
+        NonBlockShadowPlanner shadowPlanner)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -98,6 +101,8 @@ public sealed class WorldEntityRetriever
         this.rangeSelector = rangeSelector;
         this.atlasMap = atlasMap;
         this.logger = logger;
+        this.castsShadows = castsShadows;
+        this.shadowPlanner = shadowPlanner;
     }
 
     /// <summary>
@@ -105,7 +110,8 @@ public sealed class WorldEntityRetriever
     /// </summary>
     /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
     /// <param name="systemTime">System time of current frame.</param>
-    public void RetrieveEntities(float timeSinceTick, ulong systemTime)
+    /// <param name="renderPlan">Render plan.</param>
+    public void RetrieveEntities(float timeSinceTick, ulong systemTime, RenderPlan renderPlan)
     {
         grouper.ResetLayers();
         NameLabels.Clear();
@@ -137,7 +143,7 @@ public sealed class WorldEntityRetriever
             if (!perspectiveServices.TryGetPerspectiveLine(intersectingPos, out var line))
                 continue;
 
-            ProcessPerspectiveLine(line, zMin, zMax, systemTime, timeSinceTick);
+            ProcessPerspectiveLine(line, zMin, zMax, systemTime, timeSinceTick, renderPlan);
         }
     }
 
@@ -149,8 +155,9 @@ public sealed class WorldEntityRetriever
     /// <param name="zMax">Maximum of Z extent for rendering.</param>
     /// <param name="systemTime">System time of current frame.</param>
     /// <param name="timeSinceTick">Time since last tick, in seconds.</param>
+    /// <param name="renderPlan">Render plan.</param>
     private void ProcessPerspectiveLine(PerspectiveLine perspectiveLine, EntityList zMin, EntityList zMax,
-        ulong systemTime, float timeSinceTick)
+        ulong systemTime, float timeSinceTick, RenderPlan renderPlan)
     {
         var foundOpaqueBlock = false;
         for (var i = 0; i < perspectiveLine.ZFloors.Count; ++i)
@@ -209,7 +216,7 @@ public sealed class WorldEntityRetriever
                 // Skip block faces since they were already handled above.
                 var entity = zSet.Entities[j];
                 if (entity.EntityType != EntityType.NonBlock) continue;
-                if (entity.OriginOnLine) ProcessSprite(entity.EntityId, systemTime, timeSinceTick);
+                if (entity.OriginOnLine) ProcessSprite(entity.EntityId, systemTime, timeSinceTick, renderPlan);
             }
 
             // Opaque blocking is updated at the end of each z-depth since a front face and top face
@@ -222,7 +229,11 @@ public sealed class WorldEntityRetriever
     /// <summary>
     ///     Processes an animated sprite on a perspective line.
     /// </summary>
-    private void ProcessSprite(ulong entityId, ulong systemTime, float timeSinceTick)
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="systemTime">System time of current frame in ticks.</param>
+    /// <param name="timeSinceTick">Time since the last tick in seconds.</param>
+    /// <param name="renderPlan">Render plan.</param>
+    private void ProcessSprite(ulong entityId, ulong systemTime, float timeSinceTick, RenderPlan renderPlan)
     {
         var entityKinematics = kinematics[entityId];
         var animatedSpriteId = animatedSprites[entityId];
@@ -235,6 +246,8 @@ public sealed class WorldEntityRetriever
 
         if (playerCharacters.HasTagForEntity(entityId))
             AddNameLabel(entityId, entityKinematics, sprite, timeSinceTick);
+        if (castsShadows.TryGetValue(entityId, out var shadow))
+            shadowPlanner.AddNonBlockShadow(renderPlan, shadow, entityKinematics, sprite.Id);
     }
 
     /// <summary>

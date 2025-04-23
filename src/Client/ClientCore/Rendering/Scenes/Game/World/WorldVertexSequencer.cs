@@ -64,7 +64,7 @@ public sealed class WorldVertexSequencer
     {
         layerVertexSequencer.NewFrame();
 
-        RetrieveEntities(timeSinceTick, systemTime);
+        RetrieveEntities(timeSinceTick, systemTime, renderPlan);
         PrepareLayers(renderPlan, systemTime);
     }
 
@@ -73,9 +73,10 @@ public sealed class WorldVertexSequencer
     /// </summary>
     /// <param name="timeSinceTick">Time since the last tick, in seconds.</param>
     /// <param name="systemTime">System time of the current frame.</param>
-    private void RetrieveEntities(float timeSinceTick, ulong systemTime)
+    /// <param name="renderPlan">Render plan.</param>
+    private void RetrieveEntities(float timeSinceTick, ulong systemTime, RenderPlan renderPlan)
     {
-        entityRetriever.RetrieveEntities(timeSinceTick, systemTime);
+        entityRetriever.RetrieveEntities(timeSinceTick, systemTime, renderPlan);
     }
 
     /// <summary>

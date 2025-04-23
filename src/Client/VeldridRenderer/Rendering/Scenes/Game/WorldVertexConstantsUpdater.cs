@@ -19,6 +19,7 @@ using System;
 using System.Numerics;
 using Sovereign.ClientCore.Rendering.Scenes;
 using Sovereign.ClientCore.Rendering.Scenes.Game.World;
+using Sovereign.VeldridRenderer.Rendering.Scenes.Game.NonBlockShadow;
 
 namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 
@@ -29,12 +30,14 @@ public class WorldVertexConstantsUpdater
 {
     private readonly GameResourceManager gameResourceManager;
     private readonly WorldRangeSelector rangeSelector;
+    private readonly NonBlockShadowMap shadowMap;
 
     public WorldVertexConstantsUpdater(GameResourceManager gameResourceManager,
-        WorldRangeSelector rangeSelector)
+        WorldRangeSelector rangeSelector, NonBlockShadowMap shadowMap)
     {
         this.gameResourceManager = gameResourceManager;
         this.rangeSelector = rangeSelector;
+        this.shadowMap = shadowMap;
     }
 
     /// <summary>
@@ -152,5 +155,40 @@ public class WorldVertexConstantsUpdater
         rangeSelector.DetermineExtents(out var minExtent, out var maxExtent, cameraPos);
         buf[0].YDepthScale = 1.0f / (maxExtent.Y - minExtent.Y);
         buf[0].YDepthOffset = -buf[0].YDepthScale * minExtent.Y;
+
+        UpdateShadowMapConstants(timeSinceTick, invHalfWidth, invHalfHeight, cameraPos, maxExtent.Y - minExtent.Y);
+    }
+
+    /// <summary>
+    ///     Updates the non-block shadow map shader constants.
+    /// </summary>
+    /// <param name="timeSinceTick">Time since last tick, in seconds.</param>
+    /// <param name="invHalfWidth">1 / (screen width in world units).</param>
+    /// <param name="invHalfHeight">1 / (screen height in world units).</param>
+    /// <param name="cameraPos">Camera position in world units.</param>
+    /// <param name="zLength">Length of the line segment along z centered on the camera position to consider.</param>
+    private void UpdateShadowMapConstants(float timeSinceTick, float invHalfWidth, float invHalfHeight,
+        Vector3 cameraPos, int zLength)
+    {
+        var buf = shadowMap.ConstantsBuffer.Value.Buffer;
+
+        buf[0].TimeSinceTick = timeSinceTick;
+
+        // Shadow map transform includes the camera translation but no Z-projection.
+        // The camera translation includes its local Z-projection in order to align the center point
+        // of the shadow map and the world render volume.
+        buf[0].Transform = Matrix4x4.Identity;
+
+        buf[0].Transform.M11 = invHalfWidth;
+        buf[0].Transform.M41 = -invHalfWidth * cameraPos.X;
+
+        buf[0].Transform.M22 = -invHalfHeight;
+        buf[0].Transform.M42 = invHalfHeight * (cameraPos.Y + cameraPos.Z);
+
+        // The Z transform assigns a relative depth from a camera placed above the scene,
+        // with 1.0f being the farthest (lowest Z) object.
+        var invHalfZ = 2.0f / zLength;
+        buf[0].Transform.M33 = -invHalfZ;
+        buf[0].Transform.M43 = invHalfZ * cameraPos.Z + 0.5f;
     }
 }

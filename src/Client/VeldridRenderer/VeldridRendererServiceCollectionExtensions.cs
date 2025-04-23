@@ -23,6 +23,7 @@ using Sovereign.VeldridRenderer.Rendering.Configuration;
 using Sovereign.VeldridRenderer.Rendering.Gui;
 using Sovereign.VeldridRenderer.Rendering.Resources;
 using Sovereign.VeldridRenderer.Rendering.Scenes.Game;
+using Sovereign.VeldridRenderer.Rendering.Scenes.Game.NonBlockShadow;
 
 namespace Sovereign.VeldridRenderer;
 
@@ -83,5 +84,7 @@ public static class VeldridRendererServiceCollectionExtensions
         services.TryAddSingleton<LightingShaderConstantsUpdater>();
         services.TryAddSingleton<PointLightDepthMapRenderer>();
         services.TryAddSingleton<FullPointLightMapRenderer>();
+        services.TryAddSingleton<NonBlockShadowMap>();
+        services.TryAddSingleton<NonBlockShadowMapRenderer>();
     }
 }

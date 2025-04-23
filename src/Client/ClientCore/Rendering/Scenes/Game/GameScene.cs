@@ -88,6 +88,7 @@ public sealed class GameScene : IScene
         // Start by scheduling the shadow map render pass.
         renderPlan.PushDebugGroup("Shadow Maps");
         renderPlan.DrawBlockShadowMap();
+        renderPlan.DrawNonBlockShadowMap();
         renderPlan.DrawPointLightShadowMaps();
         renderPlan.PopDebugGroup();
 
