@@ -46,10 +46,10 @@ public class ServerMovementNotifier : IMovementNotifier
         this.logger = logger;
     }
 
-    public void ScheduleEntity(ulong entityId)
+    public void ScheduleEntity(ulong entityId, bool immediate)
     {
         if (scheduledCountByEntityId.TryGetValue(entityId, out var count) && count >= sendCount) return;
-        scheduledCountByEntityId[entityId] = sendCount + ScheduleDelay;
+        scheduledCountByEntityId[entityId] = sendCount + (immediate ? 1 : ScheduleDelay);
     }
 
     public void SendScheduled()

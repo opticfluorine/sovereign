@@ -193,6 +193,9 @@ public class MovementManager
             Velocity = posVel.Velocity with { Z = PhysicsConstants.InitialJumpVelocity }
         });
         isJumping[index] = true;
+        
+        // Schedule an immediate movement notification to broadcast the start of the jump to clients.
+        movementNotifier.ScheduleEntity(entityId, true);
     }
 
     /// <summary>

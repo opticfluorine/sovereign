@@ -4,6 +4,12 @@
 
 ### April
 
+#### 24 April 2025
+
+* Movement: Improve timing of Move events sent when an entity initially jumps. Previously a
+  long delay was incurred which resulted in clients missing the upward motion when a jump
+  was started from a stationary position.
+
 #### 23 April 2025
 
 * Renderer: Add non-block entity shadows. This gives a much-needed sense of depth when moving

@@ -23,7 +23,7 @@ namespace Sovereign.ClientCore.Systems.Movement;
 /// </summary>
 public class ClientMovementNotifier : IMovementNotifier
 {
-    public void ScheduleEntity(ulong entityId)
+    public void ScheduleEntity(ulong entityId, bool immediate)
     {
         // no-op
     }

@@ -25,7 +25,8 @@ public interface IMovementNotifier
     ///     Schedules the given entity for a motion update in the next batch.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    void ScheduleEntity(ulong entityId);
+    /// <param name="immediate">If true, send as soon as possible.</param>
+    void ScheduleEntity(ulong entityId, bool immediate = false);
 
     /// <summary>
     ///     Sends any notifications that are due to be sent.
