@@ -38,7 +38,6 @@ public class EngineService : BackgroundService
     private readonly ILogger<EngineService> logger;
 
     private readonly List<IMainLoopAction> mainLoopActions;
-    private readonly Terminator terminator;
 
     /// <summary>
     ///     Time manager.
@@ -51,12 +50,11 @@ public class EngineService : BackgroundService
     private ulong cycleCount;
 
     public EngineService(IEventLoop eventLoop, TimeManager timeManager, IEnumerable<IMainLoopAction> mainLoopActions,
-        ILogger<EngineService> logger, Terminator terminator)
+        ILogger<EngineService> logger)
     {
         this.eventLoop = eventLoop;
         this.timeManager = timeManager;
         this.logger = logger;
-        this.terminator = terminator;
         this.mainLoopActions = new List<IMainLoopAction>(mainLoopActions);
     }
 
@@ -108,7 +106,7 @@ public class EngineService : BackgroundService
     private void RunEngine(CancellationToken stoppingToken)
     {
         /* Enter the main loop. */
-        while (!stoppingToken.IsCancellationRequested && !terminator.TerminationToken.IsCancellationRequested)
+        while (!stoppingToken.IsCancellationRequested)
         {
             /* Process any timed actions on the main thread. */
             timeManager.AdvanceTime();

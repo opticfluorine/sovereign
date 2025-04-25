@@ -4,6 +4,13 @@
 
 ### April
 
+#### 25 April 2025
+
+* Debug Tools: Added an event logger for debugging. As the event log files can be quite
+  large, this is disabled by default. It can be enabled through the `appsettings.json`
+  file or by passing the command line argument `--Sovereign:DebugOptions:EnableEventLogging=true`
+  to either the client or server. See the manual for details.
+
 #### 24 April 2025
 
 * Movement: Improve timing of Move events sent when an entity initially jumps. Previously a

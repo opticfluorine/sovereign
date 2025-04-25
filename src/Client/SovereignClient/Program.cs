@@ -38,6 +38,10 @@ builder.Services
     .AddSovereignVeldridRenderer()
     .AddSovereignUpdaterCore();
 
+// Bind appsettings.json (and other sources) to options classes.
+builder.Services
+    .AddSovereignCoreOptions(builder.Configuration);
+
 // Run application.
 var host = builder.Build();
 host.Run();

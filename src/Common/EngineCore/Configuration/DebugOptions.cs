@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,27 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading;
-
-namespace Sovereign.EngineCore.Main;
+namespace Sovereign.EngineCore.Configuration;
 
 /// <summary>
-///     Responsible for signaling graceful termination of the engine.
+///     User-configurable debug settings.
 /// </summary>
-public class Terminator
+public sealed class DebugOptions
 {
-    private readonly CancellationTokenSource tokenSource = new();
+    /// <summary>
+    ///     Flag indicating whether event logging is enabled.
+    /// </summary>
+    public bool EnableEventLogging { get; set; } = false;
 
     /// <summary>
-    ///     CancellationToken used to signal engine termination.
+    ///     If event logging is enabled, specifies the directory where
+    ///     the event log files are stored.
     /// </summary>
-    public CancellationToken TerminationToken => tokenSource.Token;
-
-    /// <summary>
-    ///     Terminates the engine gracefully.
-    /// </summary>
-    public void Terminate()
-    {
-        tokenSource.Cancel();
-    }
+    public string EventLogDirectory { get; set; } = "Logs";
 }

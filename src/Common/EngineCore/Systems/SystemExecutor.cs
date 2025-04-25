@@ -22,7 +22,6 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Main;
 
 namespace Sovereign.EngineCore.Systems;
 
@@ -45,20 +44,17 @@ public class SystemExecutor
     /// </summary>
     private readonly List<ISystem> systems = new();
 
-    private readonly Terminator terminator;
-
     /// <summary>
     ///     Executor loop iteration count.
     /// </summary>
     private uint iterationCount;
 
     public SystemExecutor(IEventLoop eventLoop, IEngineConfiguration engineConfiguration,
-        ILogger<SystemExecutor> logger, Terminator terminator)
+        ILogger<SystemExecutor> logger)
     {
         this.eventLoop = eventLoop;
         this.engineConfiguration = engineConfiguration;
         this.logger = logger;
-        this.terminator = terminator;
     }
 
     /// <summary>
@@ -103,7 +99,7 @@ public class SystemExecutor
     /// <param name="cancellationToken">Cancellation token to signal shutdown.</param>
     private void ExecuteSystems(CancellationToken cancellationToken)
     {
-        while (!cancellationToken.IsCancellationRequested && !terminator.TerminationToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             // Execute all systems.
             foreach (var system in systems)

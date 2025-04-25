@@ -16,9 +16,11 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Sovereign.Accounts;
 using Sovereign.EngineCore;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Lua;
 using Sovereign.NetworkCore;
 using Sovereign.Persistence;
@@ -49,6 +51,12 @@ builder.Services
     .AddSovereignEngineCoreLuaComponents()
     .AddSovereignEngineCoreLuaEnums();
 
+// Bind appsettings.json (and other sources) to options classes.
+builder.Services
+    .AddSovereignCoreOptions(builder.Configuration);
+
 // Run application.
 var host = builder.Build();
+var debugOptions = host.Services.GetService(typeof(IOptions<DebugOptions>)) as IOptions<DebugOptions>;
+Log.Logger.Information("EnableEventLogging: {EnableEventLogging}", debugOptions?.Value.EnableEventLogging);
 host.Run();

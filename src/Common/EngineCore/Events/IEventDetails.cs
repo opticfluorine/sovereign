@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Text.Json.Serialization;
 using MessagePack;
 using Sovereign.EngineCore.Events.Details;
 
@@ -40,6 +41,40 @@ namespace Sovereign.EngineCore.Events;
 [Union(14, typeof(BlockAddEventDetails))]
 [Union(15, typeof(GenericChatEventDetails))]
 [Union(16, typeof(TeleportNoticeEventDetails))]
+[JsonPolymorphic]
+[JsonDerivedType(typeof(AutoPingEventDetails), nameof(AutoPingEventDetails))]
+[JsonDerivedType(typeof(BlockAddBatchEventDetails), nameof(BlockAddBatchEventDetails))]
+[JsonDerivedType(typeof(BlockAddEventDetails), nameof(BlockAddEventDetails))]
+[JsonDerivedType(typeof(BlockPresenceGridUpdatedEventDetails), nameof(BlockPresenceGridUpdatedEventDetails))]
+[JsonDerivedType(typeof(BlockRemoveBatchEventDetails), nameof(BlockRemoveBatchEventDetails))]
+[JsonDerivedType(typeof(BooleanEventDetails), nameof(BooleanEventDetails))]
+[JsonDerivedType(typeof(ChatEventDetails), nameof(ChatEventDetails))]
+[JsonDerivedType(typeof(ConnectionIdEventDetails), nameof(ConnectionIdEventDetails))]
+[JsonDerivedType(typeof(EntityChangeWorldSegmentEventDetails), nameof(EntityChangeWorldSegmentEventDetails))]
+[JsonDerivedType(typeof(EntityDefinitionEventDetails), nameof(EntityDefinitionEventDetails))]
+[JsonDerivedType(typeof(EntityDesyncEventDetails), nameof(EntityDesyncEventDetails))]
+[JsonDerivedType(typeof(EntityEventDetails), nameof(EntityEventDetails))]
+[JsonDerivedType(typeof(EntitySequenceEventDetails), nameof(EntitySequenceEventDetails))]
+[JsonDerivedType(typeof(EntityVectorEventDetails), nameof(EntityVectorEventDetails))]
+[JsonDerivedType(typeof(ErrorEventDetails), nameof(ErrorEventDetails))]
+[JsonDerivedType(typeof(GenericChatEventDetails), nameof(GenericChatEventDetails))]
+[JsonDerivedType(typeof(GlobalChatEventDetails), nameof(GlobalChatEventDetails))]
+[JsonDerivedType(typeof(GridPositionEventDetails), nameof(GridPositionEventDetails))]
+[JsonDerivedType(typeof(LocalChatEventDetails), nameof(LocalChatEventDetails))]
+[JsonDerivedType(typeof(MaterialPairEventDetails), nameof(MaterialPairEventDetails))]
+[JsonDerivedType(typeof(MoveEventDetails), nameof(MoveEventDetails))]
+[JsonDerivedType(typeof(RequestMoveEventDetails), nameof(RequestMoveEventDetails))]
+[JsonDerivedType(typeof(SelectPlayerEventDetails), nameof(SelectPlayerEventDetails))]
+[JsonDerivedType(typeof(SequenceEventDetails), nameof(SequenceEventDetails))]
+[JsonDerivedType(typeof(StringEventDetails), nameof(StringEventDetails))]
+[JsonDerivedType(typeof(SystemChatEventDetails), nameof(SystemChatEventDetails))]
+[JsonDerivedType(typeof(TeleportNoticeEventDetails), nameof(TeleportNoticeEventDetails))]
+[JsonDerivedType(typeof(TemplateEntityDefinitionEventDetails), nameof(TemplateEntityDefinitionEventDetails))]
+[JsonDerivedType(typeof(TimeEventDetails), nameof(TimeEventDetails))]
+[JsonDerivedType(typeof(VectorEventDetails), nameof(VectorEventDetails))]
+[JsonDerivedType(typeof(VectorPairEventDetails), nameof(VectorPairEventDetails))]
+[JsonDerivedType(typeof(WorldSegmentEventDetails), nameof(WorldSegmentEventDetails))]
+[JsonDerivedType(typeof(WorldSegmentSubscriptionEventDetails), nameof(WorldSegmentSubscriptionEventDetails))]
 public interface IEventDetails
 {
 }

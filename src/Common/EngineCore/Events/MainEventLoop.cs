@@ -17,9 +17,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events.Details;
-using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineUtil.Collections;
 
@@ -35,10 +37,14 @@ public class MainEventLoop : IEventLoop
     /// </summary>
     private const int QueueSize = 4096;
 
+    private readonly IHostApplicationLifetime appLifetime;
+
     /// <summary>
     ///     Event communicators listening to each event ID.
     /// </summary>
     private readonly Dictionary<EventId, List<EventCommunicator>> communicatorsByEventId = new();
+
+    private readonly IOptions<DebugOptions> debugOptions;
 
     private readonly EntityManager entityManager;
 
@@ -46,6 +52,8 @@ public class MainEventLoop : IEventLoop
     ///     Event adapter manager.
     /// </summary>
     private readonly EventAdapterManager eventAdapterManager;
+
+    private readonly EventLogger eventLogger;
 
     /// <summary>
     ///     The collection of event senders to listen on.
@@ -68,18 +76,19 @@ public class MainEventLoop : IEventLoop
     /// </summary>
     private readonly HashSet<ISystem> systems = new();
 
-    private readonly Terminator terminator;
-
     /// <summary>
     ///     The system time of the last update step (microseconds).
     /// </summary>
     private ulong lastUpdateTime;
 
-    public MainEventLoop(EventAdapterManager eventAdapterManager, EntityManager entityManager, Terminator terminator)
+    public MainEventLoop(EventAdapterManager eventAdapterManager, EntityManager entityManager,
+        EventLogger eventLogger, IOptions<DebugOptions> debugOptions, IHostApplicationLifetime appLifetime)
     {
         this.eventAdapterManager = eventAdapterManager;
         this.entityManager = entityManager;
-        this.terminator = terminator;
+        this.eventLogger = eventLogger;
+        this.debugOptions = debugOptions;
+        this.appLifetime = appLifetime;
     }
 
     public int PumpEventLoop()
@@ -256,7 +265,7 @@ public class MainEventLoop : IEventLoop
         var eventId = ev.EventId;
 
         /* Handle Core_Quit events specially. */
-        if (eventId == EventId.Core_Quit) terminator.Terminate();
+        if (eventId == EventId.Core_Quit) appLifetime.StopApplication();
 
         /* Set the event time to the current tick time. */
         ev.EventTime = lastUpdateTime;
@@ -265,6 +274,8 @@ public class MainEventLoop : IEventLoop
         if (communicatorsByEventId.TryGetValue(eventId, out var communicators))
             foreach (var comm in communicators)
                 comm.SendEventToSystem(ev);
+
+        if (debugOptions.Value.EnableEventLogging) eventLogger.LogEvent(ev);
     }
 
     /// <summary>

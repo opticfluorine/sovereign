@@ -62,7 +62,7 @@ public class SystemManager : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Starting SystemManager.");
+        logger.LogInformation("SystemManager started.");
 
         /* Create executors. */
         CreateExecutors();
@@ -73,8 +73,7 @@ public class SystemManager : BackgroundService
         /* Run the executors. */
         await RunExecutors(stoppingToken);
 
-        logger.LogInformation("SystemManager stopped. Engine will now be terminated.");
-        Environment.Exit(0);
+        logger.LogInformation("SystemManager stopped.");
     }
 
     /// <summary>

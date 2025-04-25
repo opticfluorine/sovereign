@@ -14,11 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Validators;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details.Validators;
@@ -41,6 +43,21 @@ namespace Sovereign.EngineCore;
 /// </summary>
 public static class CoreServiceCollectionExtensions
 {
+    /// <summary>
+    ///     Configures configuration bindings for Sovereign.EngineCore.
+    /// </summary>
+    /// <param name="services">Service collection.</param>
+    /// <param name="configuration">Configuration.</param>
+    /// <returns></returns>
+    public static IServiceCollection AddSovereignCoreOptions(this IServiceCollection services,
+        IConfigurationManager configuration)
+    {
+        services.Configure<DebugOptions>(
+            configuration.GetSection($"Sovereign:{nameof(DebugOptions)}"));
+
+        return services;
+    }
+
     /// <summary>
     ///     Adds service classes for Sovereign.EngineCore.
     /// </summary>
@@ -72,8 +89,9 @@ public static class CoreServiceCollectionExtensions
     /// <returns>Service collection.</returns>
     public static IServiceCollection AddSovereignCoreHostedServices(this IServiceCollection services)
     {
-        services.AddHostedService<EngineService>();
         services.AddHostedService<SystemManager>();
+        services.AddHostedService<EngineService>();
+        services.AddHostedService<EventLoggerService>();
 
         return services;
     }
@@ -140,6 +158,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<IEventLoop, MainEventLoop>();
         services.TryAddSingleton<IEventSender, EventSender>();
         services.TryAddSingleton<ConsoleEventAdapter>();
+        services.TryAddSingleton<EventLogger>();
     }
 
     private static void AddEventValidators(IServiceCollection services)
@@ -173,7 +192,6 @@ public static class CoreServiceCollectionExtensions
     {
         services.TryAddTransient<FatalErrorHandler>();
         services.TryAddSingleton<CoreController>();
-        services.TryAddSingleton<Terminator>();
     }
 
     private static void AddPerformance(IServiceCollection services)
