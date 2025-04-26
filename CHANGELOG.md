@@ -4,6 +4,11 @@
 
 ### April
 
+#### 26 April 2025
+
+* Database: Add option (enabled by default) to automatically create a new SQLite database
+  for the server if one does not already exist.
+
 #### 25 April 2025
 
 * Debug Tools: Added an event logger for debugging. As the event log files can be quite

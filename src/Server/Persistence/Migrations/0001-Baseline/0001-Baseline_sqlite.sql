@@ -225,3 +225,7 @@ VALUES (0, -1, 0,
 -- Log the migration.
 INSERT INTO MigrationLog
 VALUES (1, 'Baseline');
+
+-- Enable WAL.
+PRAGMA
+journal_mode=WAL;

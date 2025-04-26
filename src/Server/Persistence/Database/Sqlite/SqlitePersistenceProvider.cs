@@ -17,6 +17,7 @@
 
 using System;
 using System.Data;
+using System.IO;
 using System.Text;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
@@ -33,6 +34,8 @@ namespace Sovereign.Persistence.Database.Sqlite;
 /// </summary>
 public sealed class SqlitePersistenceProvider : IPersistenceProvider
 {
+    private const string FullMigrationFilename = "Migrations/Full/Full_sqlite.sql";
+
     private const string MaterialParamName = "material";
     private const SqliteType MaterialParamType = SqliteType.Integer;
 
@@ -333,6 +336,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         logger.LogInformation("Opening the SQLite database at {Host}.",
             configuration.Host);
 
+        if (configuration.CreateIfMissing) CreateIfMissing();
+
         var connString = CreateConnectionString();
         try
         {
@@ -360,5 +365,36 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             .Append(configuration.Host);
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    ///     Creates the database if it is missing.
+    /// </summary>
+    private void CreateIfMissing()
+    {
+        var dbFilename = configuration.Host;
+        if (File.Exists(dbFilename)) return;
+
+        logger.LogInformation("Database {dbFilename} not found; creating new database.", dbFilename);
+
+        try
+        {
+            var sql = File.ReadAllText(FullMigrationFilename);
+
+            using (var connection = new SqliteConnection(CreateConnectionString()))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = sql;
+                command.ExecuteNonQuery();
+            }
+
+            logger.LogInformation("Database created.");
+        }
+        catch (Exception e)
+        {
+            logger.LogCritical(e, "Failed to create the SQLite database.");
+            throw new FatalErrorException();
+        }
     }
 }

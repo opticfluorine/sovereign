@@ -51,7 +51,7 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 
 ### Install Dependencies
 
-Sovereign Engine requires the .NET 9 (or later) SDK and SQLite 3.x to be
+Sovereign Engine requires the .NET 9 (or later) SDK to be
 installed on your system. The SDL2, SDL2_image, and Lua 5.4 libraries are also
 required for Linux installations (these are included by default for Windows builds).
 
@@ -59,21 +59,13 @@ required for Linux installations (these are included by default for Windows buil
 
 1. Download the server binaries for your platform, or compile binaries from source (via
    `dotnet build` and `dotnet publish` from the `src` directory after cloning the Git repository).
-2. From the server directory, initialize a new SQLite database. Using bash:
-   ```bash
-   $ cd Data
-   $ sqlite3 sovereign.db < ../Migrations/Full/Full_sqlite.sql
-   ```
-   Using PowerShell:
-   ```powershell
-   cd Data
-   Get-Content ..\Migrations\Full\Full_sqlite.sql | sqlite3 sovereign.db
-   ```
-3. Run the server:
+2. Run the server:
    ```bash
    $ ./Sovereign.Server
    ```
-4. The server is configured by default to grant the Admin role to all new players. Once you have created
+   This will automatically create a new SQLite database at `Data/sovereign.db` if one does not
+   already exist.
+3. The server is configured by default to grant the Admin role to all new players. Once you have created
    an initial player with Admin role, it is strongly recommended to disable this option by editing
    the server's `appsettings.json` and changing `AdminByDefault` to `false`.
 

@@ -72,6 +72,12 @@ public sealed class DatabaseOptions
     ///     in seconds.
     /// </summary>
     public int SyncIntervalSeconds { get; set; } = 60;
+
+    /// <summary>
+    ///     Flag indicating whether to create the database if it does not exist.
+    ///     Only used for SQLite.
+    /// </summary>
+    public bool CreateIfMissing { get; set; } = true;
 }
 
 /// <summary>

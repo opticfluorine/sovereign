@@ -31,11 +31,13 @@
 
     <Target Name="CopyAfterBuild" AfterTargets="AfterBuild">
         <ItemGroup>
-            <DataFiles Include="Data/**/*" />
+            <MigrationFiles Include="$(SolutionDir)Server/Persistence/Migrations/**/*"/>
+            <DataFiles Include="Data/**/*"/>
             <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"/>
         <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(OutDir)"/>
+        <Copy SourceFiles="@(MigrationFiles)" DestinationFolder="$(OutDir)Migrations/%(RecursiveDir)"/>
     </Target>
 
     <Target Name="CopyAfterPublish" AfterTargets="Publish">
