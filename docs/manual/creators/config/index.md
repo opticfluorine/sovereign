@@ -66,6 +66,7 @@ Any configuration option can be overridden from the command line by passing a `-
 - **PoolSizeMin**: The minimum size of the connection pool.
 - **PoolSizeMax**: The maximum size of the connection pool.
 - **SyncIntervalSeconds**: The interval in seconds for database synchronization.
+- **CreateIfMissing**: Create the database if it does not already exist. SQLite only.
 
 ### NewPlayersOptions
 - **AdminByDefault**: A boolean indicating whether new players are granted admin privileges by default. It is strongly recommended to disable this option after the first admin player has been created.
