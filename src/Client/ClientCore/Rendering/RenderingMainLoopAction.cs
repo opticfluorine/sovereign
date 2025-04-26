@@ -17,6 +17,7 @@
 
 using System;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Timing;
@@ -46,14 +47,14 @@ public class RenderingMainLoopAction : IMainLoopAction
     private ulong lastFrameTime;
 
     public RenderingMainLoopAction(RenderingManager renderingManager,
-        ISystemTimer systemTimer, ClientConfigurationManager configManager,
+        ISystemTimer systemTimer, IOptions<DisplayOptions> displayOptions,
         ILogger<RenderingMainLoopAction> logger)
     {
         this.renderingManager = renderingManager;
         this.systemTimer = systemTimer;
         this.logger = logger;
 
-        minimumTimeDelta = Units.SystemTime.Second / (ulong)configManager.ClientConfiguration.Display.MaxFramerate;
+        minimumTimeDelta = Units.SystemTime.Second / (ulong)displayOptions.Value.MaxFramerate;
     }
 
     // Rendering is expensive, so pump the loop multiple times between frames.

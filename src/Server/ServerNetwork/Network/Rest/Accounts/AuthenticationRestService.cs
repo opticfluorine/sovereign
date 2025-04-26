@@ -21,12 +21,13 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
-using Sovereign.ServerNetwork.Configuration;
+using Sovereign.ServerCore.Configuration;
 using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Accounts;
@@ -42,10 +43,11 @@ public sealed class AuthenticationRestService : IRestService
     private const int MaxRequestLength = 1024;
 
     private readonly AccountServices accountServices;
-    private readonly IServerNetworkConfiguration configuration;
     private readonly ILogger<AuthenticationRestService> logger;
 
     private readonly AccountLoginTracker loginTracker;
+
+    private readonly NetworkOptions networkOptions;
 
     /// <summary>
     ///     Map from result to HTTP status code.
@@ -75,12 +77,12 @@ public sealed class AuthenticationRestService : IRestService
         };
 
     public AuthenticationRestService(AccountServices accountServices,
-        IServerNetworkConfiguration configuration,
+        IOptions<NetworkOptions> networkOptions,
         AccountLoginTracker loginTracker,
         ILogger<AuthenticationRestService> logger)
     {
         this.accountServices = accountServices;
-        this.configuration = configuration;
+        this.networkOptions = networkOptions.Value;
         this.loginTracker = loginTracker;
         this.logger = logger;
     }
@@ -130,8 +132,8 @@ public sealed class AuthenticationRestService : IRestService
                 guid.ToString(),
                 loginTracker.GetApiKey(guid),
                 secret,
-                configuration.Host,
-                configuration.Port);
+                networkOptions.Host,
+                networkOptions.Port);
         }
         catch (JsonException)
         {

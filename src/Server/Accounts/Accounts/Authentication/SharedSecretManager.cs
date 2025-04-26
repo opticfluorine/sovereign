@@ -19,11 +19,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Options;
 using Sodium;
-using Sovereign.Accounts.Configuration;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
 using Sovereign.NetworkCore.Network.Authentication;
+using Sovereign.ServerCore.Configuration;
 
 namespace Sovereign.Accounts.Accounts.Authentication;
 
@@ -40,7 +41,7 @@ internal sealed class PendingSecret
 /// </summary>
 public sealed class SharedSecretManager
 {
-    private readonly IAccountsConfiguration accountsConfiguration;
+    private readonly AccountsOptions config;
 
     /// <summary>
     ///     Pending secrets by user ID.
@@ -51,10 +52,10 @@ public sealed class SharedSecretManager
     private readonly ISystemTimer timer;
 
     public SharedSecretManager(ISystemTimer timer,
-        IAccountsConfiguration accountsConfiguration)
+        IOptions<AccountsOptions> accountsOptions)
     {
         this.timer = timer;
-        this.accountsConfiguration = accountsConfiguration;
+        config = accountsOptions.Value;
     }
 
     /// <summary>
@@ -136,6 +137,6 @@ public sealed class SharedSecretManager
     private bool HasSecretExpired(PendingSecret pendingSecret, ulong systemTime)
     {
         var delta = (systemTime - pendingSecret.GenerationTime) * UnitConversions.UsToS;
-        return delta > accountsConfiguration.HandoffPeriodSeconds;
+        return delta > config.HandoffPeriodSeconds;
     }
 }

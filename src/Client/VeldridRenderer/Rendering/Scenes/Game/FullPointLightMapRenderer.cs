@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
@@ -29,24 +30,24 @@ namespace Sovereign.VeldridRenderer.Rendering.Scenes.Game;
 /// </summary>
 public class FullPointLightMapRenderer : IDisposable
 {
-    private readonly ClientConfigurationManager configManager;
     private readonly VeldridDevice device;
     private readonly DisplayViewport displayViewport;
     private readonly Lazy<Framebuffer> framebuffer;
     private readonly GameResourceManager gameResMgr;
     private readonly uint[] offsets = new uint[1];
     private readonly Lazy<Pipeline> pipeline;
+    private readonly RendererOptions rendererOptions;
     private readonly Lazy<ResourceLayout> resourceLayout;
     private readonly List<ResourceSet> resourceSets = new();
     private readonly Lazy<Sampler> shadowSampler;
 
     public FullPointLightMapRenderer(VeldridDevice device, GameResourceManager gameResMgr,
-        DisplayViewport displayViewport, WorldPipeline worldPipeline, ClientConfigurationManager configManager)
+        DisplayViewport displayViewport, WorldPipeline worldPipeline, IOptions<RendererOptions> rendererOptions)
     {
         this.device = device;
         this.gameResMgr = gameResMgr;
         this.displayViewport = displayViewport;
-        this.configManager = configManager;
+        this.rendererOptions = rendererOptions.Value;
 
         framebuffer = new Lazy<Framebuffer>(() =>
         {
@@ -154,7 +155,7 @@ public class FullPointLightMapRenderer : IDisposable
     {
         var lightRelativePos = light.Light.Position - cameraPos;
         var radius = light.Light.Details.Radius;
-        var tileWidth = configManager.ClientConfiguration.TileWidth;
+        var tileWidth = rendererOptions.TileWidth;
         var scaleX = (float)device.DisplayMode!.Width / displayViewport.Width;
         var scaleY = (float)device.DisplayMode!.Height / displayViewport.Height;
 

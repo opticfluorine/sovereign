@@ -22,12 +22,13 @@ using System.Net.Sockets;
 using System.Text;
 using LiteNetLib;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
-using Sovereign.ServerNetwork.Configuration;
+using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerNetwork.Network.Connections;
 using Sovereign.ServerNetwork.Network.Rest;
 using Sovereign.ServerNetwork.Network.ServerNetwork;
@@ -40,7 +41,6 @@ namespace Sovereign.ServerNetwork.Network.Infrastructure;
 public sealed class ServerNetworkManager : INetworkManager
 {
     private readonly AccountServices accountServices;
-    private readonly IServerNetworkConfiguration config;
     private readonly NetworkConnectionManager connectionManager;
     private readonly IEventSender eventSender;
     private readonly ILogger<ServerNetworkManager> logger;
@@ -56,6 +56,7 @@ public sealed class ServerNetworkManager : INetworkManager
     private readonly NetManager netManager;
 
     private readonly ServerNetworkController networkController;
+    private readonly NetworkOptions networkOptions;
 
     private readonly NewConnectionProcessor newConnectionProcessor;
 
@@ -67,7 +68,7 @@ public sealed class ServerNetworkManager : INetworkManager
     private readonly RestServer restServer;
     private readonly NetworkSerializer serializer;
 
-    public ServerNetworkManager(IServerNetworkConfiguration config,
+    public ServerNetworkManager(IOptions<NetworkOptions> networkOptions,
         NetworkConnectionManager connectionManager,
         NetworkSerializer serializer,
         RestServer restServer,
@@ -78,7 +79,7 @@ public sealed class ServerNetworkManager : INetworkManager
         AccountServices accountServices)
     {
         /* Dependency injection. */
-        this.config = config;
+        this.networkOptions = networkOptions.Value;
         this.connectionManager = connectionManager;
         this.serializer = serializer;
         this.restServer = restServer;
@@ -112,17 +113,17 @@ public sealed class ServerNetworkManager : INetworkManager
         /* Start the network manager in server mode. */
         var sb = new StringBuilder();
         sb.Append("Starting server on ")
-            .Append(config.NetworkInterfaceIPv4)
+            .Append(networkOptions.NetworkInterfaceIPv4)
             .Append(" / ")
-            .Append(config.NetworkInterfaceIPv6)
+            .Append(networkOptions.NetworkInterfaceIPv6)
             .Append(" port ")
-            .Append(config.Port)
+            .Append(networkOptions.Port)
             .Append(".");
         logger.LogInformation(sb.ToString());
 
-        var result = netManager.Start(config.NetworkInterfaceIPv4,
-            config.NetworkInterfaceIPv6,
-            config.Port);
+        var result = netManager.Start(networkOptions.NetworkInterfaceIPv4,
+            networkOptions.NetworkInterfaceIPv6,
+            networkOptions.Port);
         if (!result)
             /* Something went wrong, probably failed to bind. */
             throw new NetworkException("Failed to bind socket.");

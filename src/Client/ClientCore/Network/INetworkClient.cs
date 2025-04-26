@@ -16,6 +16,7 @@
  */
 
 using System;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
@@ -45,12 +46,12 @@ public interface INetworkClient
     /// <summary>
     ///     Begins a connection to a remote server by making an authentication attempt with the REST server.
     /// </summary>
-    /// <param name="connectionParameters">Client connection parameters.</param>
+    /// <param name="connectionOptions">Client connection parameters.</param>
     /// <param name="loginParameters">Login parameters.</param>
     /// <exception cref="InvalidOperationException">
     ///     Thrown if ClientState is not Disconnected.
     /// </exception>
-    void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters);
+    void BeginConnection(ConnectionOptions connectionOptions, LoginParameters loginParameters);
 
     /// <summary>
     ///     Continues a connection to a remote server following successful authentication.

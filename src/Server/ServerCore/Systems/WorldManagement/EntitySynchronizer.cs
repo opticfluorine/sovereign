@@ -17,6 +17,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
@@ -29,21 +30,21 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public class EntitySynchronizer
 {
-    private readonly IServerConfigurationManager configManager;
     private readonly WorldManagementInternalController controller;
     private readonly EntityDefinitionGenerator definitionGenerator;
     private readonly IEventSender eventSender;
     private readonly ILogger<EntitySynchronizer> logger;
+    private readonly NetworkOptions networkOptions;
 
-    public EntitySynchronizer(IEventSender eventSender, IServerConfigurationManager configManager,
+    public EntitySynchronizer(IEventSender eventSender, IOptions<NetworkOptions> networkOptions,
         WorldManagementInternalController controller, EntityDefinitionGenerator definitionGenerator,
         ILogger<EntitySynchronizer> logger)
     {
         this.eventSender = eventSender;
-        this.configManager = configManager;
         this.controller = controller;
         this.definitionGenerator = definitionGenerator;
         this.logger = logger;
+        this.networkOptions = networkOptions.Value;
     }
 
     /// <summary>
@@ -66,7 +67,7 @@ public class EntitySynchronizer
         // Batch the entities and generate definitions for each.
         var definitionBatches =
             entities
-                .Chunk(configManager.ServerConfiguration.Network.EntitySyncBatchSize)
+                .Chunk(networkOptions.EntitySyncBatchSize)
                 .Select(batch => batch.Select(definitionGenerator.GenerateDefinition).ToList());
 
         // Send each batch to the client as its own event.

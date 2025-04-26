@@ -16,6 +16,7 @@
  */
 
 using System;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
@@ -46,9 +47,9 @@ public sealed class NetworkClient : INetworkClient
 
     public string ErrorMessage => clientNetworkManager.ErrorMessage;
 
-    public void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
+    public void BeginConnection(ConnectionOptions connectionOptions, LoginParameters loginParameters)
     {
-        clientNetworkManager.BeginConnection(connectionParameters, loginParameters);
+        clientNetworkManager.BeginConnection(connectionOptions, loginParameters);
     }
 
     public void ContinueConnection(LoginResponse loginResponse)

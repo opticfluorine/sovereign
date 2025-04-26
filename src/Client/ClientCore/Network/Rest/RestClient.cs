@@ -21,6 +21,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.NetworkCore.Network;
 
 namespace Sovereign.ClientCore.Network.Rest;
@@ -49,13 +50,13 @@ public sealed class RestClient
     ///     Selects the REST server to use for all future requests. This additionally sets
     ///     the REST client state to "connected".
     /// </summary>
-    /// <param name="connectionParameters">Updated connection parameters to use.</param>
-    public void SelectServer(ClientConnectionParameters connectionParameters)
+    /// <param name="connectionOptions">Updated connection parameters to use.</param>
+    public void SelectServer(ConnectionOptions connectionOptions)
     {
         var builder = new UriBuilder();
-        builder.Scheme = connectionParameters.RestTls ? "https" : "http";
-        builder.Host = connectionParameters.RestHost;
-        builder.Port = connectionParameters.RestPort;
+        builder.Scheme = connectionOptions.RestTls ? "https" : "http";
+        builder.Host = connectionOptions.RestHost;
+        builder.Port = connectionOptions.RestPort;
         baseUri = builder.Uri;
 
         Connected = true;

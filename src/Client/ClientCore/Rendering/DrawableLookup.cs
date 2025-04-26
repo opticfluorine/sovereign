@@ -16,6 +16,7 @@
 
 using System.Numerics;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -32,21 +33,21 @@ public class DrawableLookup
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
-    private readonly ClientConfigurationManager configManager;
     private readonly ILogger<DrawableLookup> logger;
+    private readonly RendererOptions rendererOptions;
     private readonly SpriteSheetManager spriteSheetManager;
 
     public DrawableLookup(BlockPositionComponentCollection blockPositions,
         AnimatedSpriteComponentCollection animatedSprites,
         AnimatedSpriteManager animatedSpriteManager, SpriteSheetManager spriteSheetManager,
-        ClientConfigurationManager configManager, ILogger<DrawableLookup> logger)
+        ILogger<DrawableLookup> logger, IOptions<RendererOptions> rendererOptions)
     {
         this.blockPositions = blockPositions;
         this.animatedSprites = animatedSprites;
         this.animatedSpriteManager = animatedSpriteManager;
         this.spriteSheetManager = spriteSheetManager;
-        this.configManager = configManager;
         this.logger = logger;
+        this.rendererOptions = rendererOptions.Value;
     }
 
     /// <summary>
@@ -78,7 +79,7 @@ public class DrawableLookup
 
         // Now look up its size.
         var definition = spriteSheetManager.SpriteSheets[sprite.SpritesheetName].Definition;
-        var tileWidth = configManager.ClientConfiguration.TileWidth;
+        var tileWidth = rendererOptions.TileWidth;
         return new Vector2((float)definition.SpriteWidth / tileWidth, (float)definition.SpriteHeight / tileWidth);
     }
 }

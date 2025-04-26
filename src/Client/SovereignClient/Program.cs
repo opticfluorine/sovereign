@@ -40,7 +40,8 @@ builder.Services
 
 // Bind appsettings.json (and other sources) to options classes.
 builder.Services
-    .AddSovereignCoreOptions(builder.Configuration);
+    .AddSovereignCoreOptions(builder.Configuration)
+    .AddSovereignClientOptions(builder.Configuration);
 
 // Run application.
 var host = builder.Build();

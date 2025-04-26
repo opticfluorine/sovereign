@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sovereign.EngineCore.Components;
@@ -48,6 +49,29 @@ namespace Sovereign.ServerCore;
 public static class ServerServiceCollectionExtensions
 {
     /// <summary>
+    ///     Binds configuration options for the server.
+    /// </summary>
+    /// <param name="services">Service collection.</param>
+    /// <param name="configuration">Configuration.</param>
+    /// <returns>Service collection.</returns>
+    public static IServiceCollection AddSovereignServerOptions(this IServiceCollection services,
+        IConfigurationManager configuration)
+    {
+        services.Configure<NetworkOptions>(
+            configuration.GetSection($"Sovereign:{nameof(NetworkOptions)}"));
+        services.Configure<DatabaseOptions>(
+            configuration.GetSection($"Sovereign:{nameof(DatabaseOptions)}"));
+        services.Configure<NewPlayersOptions>(
+            configuration.GetSection($"Sovereign:{nameof(NewPlayersOptions)}"));
+        services.Configure<AccountsOptions>(
+            configuration.GetSection($"Sovereign:{nameof(AccountsOptions)}"));
+        services.Configure<ScriptingOptions>(
+            configuration.GetSection($"Sovereign:{nameof(ScriptingOptions)}"));
+
+        return services;
+    }
+
+    /// <summary>
     ///     Adds services for Sovereign.ServerCore.
     /// </summary>
     /// <param name="services">Service collection.</param>
@@ -56,7 +80,6 @@ public static class ServerServiceCollectionExtensions
     {
         AddComponents(services);
         AddServerImplementations(services);
-        AddConfiguration(services);
         AddPersistenceSystem(services);
         AddServerChatSystem(services);
         AddServerManagementSystem(services);
@@ -81,11 +104,6 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<IResourcePathBuilder, ServerResourcePathBuilder>();
         services.TryAddSingleton<ISystemTimer, ServerSystemTimer>();
         services.TryAddSingleton<IMovementNotifier, ServerMovementNotifier>();
-    }
-
-    private static void AddConfiguration(IServiceCollection services)
-    {
-        services.TryAddSingleton<IServerConfigurationManager, ServerConfigurationManager>();
     }
 
     private static void AddPersistenceSystem(IServiceCollection services)

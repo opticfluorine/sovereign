@@ -18,201 +18,170 @@
 namespace Sovereign.ServerCore.Configuration;
 
 /// <summary>
-///     Full description of the server runtime configuration.
+///     Full description of the database configuration.
 /// </summary>
-public sealed class ServerConfiguration
+public sealed class DatabaseOptions
 {
     /// <summary>
-    ///     Accounts configuration settings.
+    ///     Database type.
     /// </summary>
-    public AccountsRecord Accounts { get; set; } = new();
+    public DatabaseType DatabaseType { get; set; } = DatabaseType.Sqlite;
 
     /// <summary>
-    ///     Database configuration settings.
+    ///     Database host for database servers, or data source for sqlite.
     /// </summary>
-    public DatabaseRecord Database { get; set; } = new();
+    public string Host { get; set; } = "Data/sovereign.db";
 
     /// <summary>
-    ///     Server-side network configuration settings.
+    ///     Database port for database servers. Not used for sqlite.
     /// </summary>
-    public NetworkRecord Network { get; set; } = new();
+    public ushort Port { get; set; } = 5432;
 
     /// <summary>
-    ///     New player configuration settings.
+    ///     Database name. Not used for sqlite.
     /// </summary>
-    public NewPlayersRecord NewPlayers { get; set; } = new();
+    public string Database { get; set; } = "sovereign";
 
     /// <summary>
-    ///     Scripting engine configuration settings.
+    ///     Database username. Not used for sqlite.
     /// </summary>
-    public ScriptingRecord Scripting { get; set; } = new();
+    public string Username { get; set; } = "sovereign";
 
     /// <summary>
-    ///     Full description of the accounts configuration.
+    ///     Database password. Not used for sqlite.
     /// </summary>
-    public sealed class AccountsRecord
-    {
-        /// <summary>
-        ///     Maximum number of failed login attempts before access to
-        ///     an account is temporarily disabled.
-        /// </summary>
-        public int MaxFailedLoginAttempts { get; set; } = 10;
-
-        /// <summary>
-        ///     Length of the login denial period, in seconds. The failed
-        ///     login attempt count is reset after this amount of time has
-        ///     elapsed since the last failed login attempt.
-        /// </summary>
-        public int LoginDenialPeriodSeconds { get; set; } = 1800;
-
-        /// <summary>
-        ///     Minimum length of all new passwords.
-        /// </summary>
-        public int MinimumPasswordLength { get; set; } = 8;
-
-        /// <summary>
-        ///     Length of the connection handoff period following a successful
-        ///     login. The connection may only be established during the handoff,
-        ///     beyond which the handoff will be invalidated.
-        /// </summary>
-        public int HandoffPeriodSeconds { get; set; } = 30;
-    }
+    public string Password { get; set; } = "";
 
     /// <summary>
-    ///     Full description of the database configuration.
+    ///     Whether to use connection pooling.
     /// </summary>
-    public sealed class DatabaseRecord
-    {
-        /// <summary>
-        ///     Database type.
-        /// </summary>
-        public DatabaseType DatabaseType { get; set; }
-
-        /// <summary>
-        ///     Database host for database servers, or data source for sqlite.
-        /// </summary>
-        public string Host { get; set; } = "";
-
-        /// <summary>
-        ///     Database port for database servers. Not used for sqlite.
-        /// </summary>
-        public ushort Port { get; set; } = 5432;
-
-        /// <summary>
-        ///     Database name. Not used for sqlite.
-        /// </summary>
-        public string Database { get; set; } = "sovereign";
-
-        /// <summary>
-        ///     Database username. Not used for sqlite.
-        /// </summary>
-        public string Username { get; set; } = "sovereign";
-
-        /// <summary>
-        ///     Database password. Not used for sqlite.
-        /// </summary>
-        public string Password { get; set; } = "";
-
-        /// <summary>
-        ///     Whether to use connection pooling.
-        /// </summary>
-        public bool Pooling { get; set; } = true;
-
-        /// <summary>
-        ///     Minimum connection pool size.
-        /// </summary>
-        public int PoolSizeMin { get; set; } = 1;
-
-        /// <summary>
-        ///     Maximum connection pool size.
-        /// </summary>
-        public int PoolSizeMax { get; set; } = 100;
-
-        /// <summary>
-        ///     Maximum interval between database synchronizations,
-        ///     in seconds.
-        /// </summary>
-        public int SyncIntervalSeconds { get; set; } = 60;
-    }
+    public bool Pooling { get; set; } = true;
 
     /// <summary>
-    ///     Full description of the server-side network configuration.
+    ///     Minimum connection pool size.
     /// </summary>
-    public sealed class NetworkRecord
-    {
-        /// <summary>
-        ///     IPv4 network interface to bind.
-        /// </summary>
-        public string NetworkInterfaceIPv4 { get; set; } = "0.0.0.0";
-
-        /// <summary>
-        ///     IPv6 network interface to bind.
-        /// </summary>
-        public string NetworkInterfaceIPv6 { get; set; } = "::0";
-
-        /// <summary>
-        ///     Server hostname to use for connection handoff.
-        /// </summary>
-        public string Host { get; set; } = "localhost";
-
-        /// <summary>
-        ///     Server port.
-        /// </summary>
-        public ushort Port { get; set; } = 12820;
-
-        /// <summary>
-        ///     REST server hostname.
-        /// </summary>
-        public string RestHostname { get; set; } = "127.0.0.1";
-
-        /// <summary>
-        ///     REST server port.
-        /// </summary>
-        public ushort RestPort { get; set; } = 8080;
-
-        /// <summary>
-        ///     Automatic ping interval, in milliseconds.
-        /// </summary>
-        public uint PingIntervalMs { get; set; } = 10000;
-
-        /// <summary>
-        ///     Timeout period (in milliseconds) after which a client will be disconnected from
-        ///     the event server if the server has not received any messages.
-        /// </summary>
-        public uint ConnectionTimeoutMs { get; set; } = 30000;
-
-        /// <summary>
-        ///     Maximum number of entities to synchronize to the client in a single event.
-        ///     Greater values improve throughput at the cost of increased latency due to a higher packet loss rate.
-        /// </summary>
-        public int EntitySyncBatchSize { get; set; } = 16;
-    }
+    public int PoolSizeMin { get; set; } = 1;
 
     /// <summary>
-    ///     Full description of the new players configuration.
+    ///     Maximum connection pool size.
     /// </summary>
-    public sealed class NewPlayersRecord
-    {
-        /// <summary>
-        ///     Whether to grant the admin role to new players by default.
-        /// </summary>
-        public bool AdminByDefault { get; set; } = false;
-    }
+    public int PoolSizeMax { get; set; } = 100;
 
     /// <summary>
-    ///     Full description of the scripting engine configuration.
+    ///     Maximum interval between database synchronizations,
+    ///     in seconds.
     /// </summary>
-    public sealed class ScriptingRecord
-    {
-        /// <summary>
-        ///     Base directory where scripts are located.
-        /// </summary>
-        public string ScriptDirectory { get; set; } = "Scripts";
+    public int SyncIntervalSeconds { get; set; } = 60;
+}
 
-        /// <summary>
-        ///     Maximum number of directories (including the base directory) to recurse into when
-        ///     searching for scripts.
-        /// </summary>
-        public uint MaxDirectoryDepth { get; set; } = 5;
-    }
+/// <summary>
+///     Full description of the server-side network configuration.
+/// </summary>
+public sealed class NetworkOptions
+{
+    /// <summary>
+    ///     IPv4 network interface to bind.
+    /// </summary>
+    public string NetworkInterfaceIPv4 { get; set; } = "0.0.0.0";
+
+    /// <summary>
+    ///     IPv6 network interface to bind.
+    /// </summary>
+    public string NetworkInterfaceIPv6 { get; set; } = "::0";
+
+    /// <summary>
+    ///     Server hostname to use for connection handoff.
+    /// </summary>
+    public string Host { get; set; } = "localhost";
+
+    /// <summary>
+    ///     Server port.
+    /// </summary>
+    public ushort Port { get; set; } = 12820;
+
+    /// <summary>
+    ///     REST server hostname.
+    /// </summary>
+    public string RestHostname { get; set; } = "127.0.0.1";
+
+    /// <summary>
+    ///     REST server port.
+    /// </summary>
+    public ushort RestPort { get; set; } = 8080;
+
+    /// <summary>
+    ///     Automatic ping interval, in milliseconds.
+    /// </summary>
+    public uint PingIntervalMs { get; set; } = 10000;
+
+    /// <summary>
+    ///     Timeout period (in milliseconds) after which a client will be disconnected from
+    ///     the event server if the server has not received any messages.
+    /// </summary>
+    public uint ConnectionTimeoutMs { get; set; } = 30000;
+
+    /// <summary>
+    ///     Maximum number of entities to synchronize to the client in a single event.
+    ///     Greater values improve throughput at the cost of increased latency due to a higher packet loss rate.
+    /// </summary>
+    public int EntitySyncBatchSize { get; set; } = 16;
+}
+
+/// <summary>
+///     Full description of the new players configuration.
+/// </summary>
+public sealed class NewPlayersOptions
+{
+    /// <summary>
+    ///     Whether to grant the admin role to new players by default.
+    /// </summary>
+    public bool AdminByDefault { get; set; } = false;
+}
+
+/// <summary>
+///     Full description of the scripting engine configuration.
+/// </summary>
+public sealed class ScriptingOptions
+{
+    /// <summary>
+    ///     Base directory where scripts are located.
+    /// </summary>
+    public string ScriptDirectory { get; set; } = "Data/Scripts";
+
+    /// <summary>
+    ///     Maximum number of directories (including the base directory) to recurse into when
+    ///     searching for scripts.
+    /// </summary>
+    public uint MaxDirectoryDepth { get; set; } = 5;
+}
+
+/// <summary>
+///     Full description of the accounts configuration.
+/// </summary>
+public sealed class AccountsOptions
+{
+    /// <summary>
+    ///     Maximum number of failed login attempts before access to
+    ///     an account is temporarily disabled.
+    /// </summary>
+    public int MaxFailedLoginAttempts { get; set; } = 10;
+
+    /// <summary>
+    ///     Length of the login denial period, in seconds. The failed
+    ///     login attempt count is reset after this amount of time has
+    ///     elapsed since the last failed login attempt.
+    /// </summary>
+    public int LoginDenialPeriodSeconds { get; set; } = 1800;
+
+    /// <summary>
+    ///     Minimum length of all new passwords.
+    /// </summary>
+    public int MinimumPasswordLength { get; set; } = 8;
+
+    /// <summary>
+    ///     Length of the connection handoff period following a successful
+    ///     login. The connection may only be established during the handoff,
+    ///     beyond which the handoff will be invalidated.
+    /// </summary>
+    public int HandoffPeriodSeconds { get; set; } = 30;
 }

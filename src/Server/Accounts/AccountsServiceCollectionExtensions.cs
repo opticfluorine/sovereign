@@ -19,7 +19,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Registration;
 using Sovereign.Accounts.Accounts.Services;
-using Sovereign.Accounts.Configuration;
 using Sovereign.Accounts.Systems.Accounts;
 using Sovereign.EngineCore.Systems;
 
@@ -40,7 +39,6 @@ public static class AccountsServiceCollectionExtensions
         AddAuthentication(services);
         AddRegistration(services);
         AddAccountServices(services);
-        AddConfiguration(services);
         AddAccountsSystem(services);
 
         return services;
@@ -64,11 +62,6 @@ public static class AccountsServiceCollectionExtensions
     private static void AddAccountServices(IServiceCollection services)
     {
         services.TryAddSingleton<AccountServices>();
-    }
-
-    private static void AddConfiguration(IServiceCollection services)
-    {
-        services.TryAddSingleton<IAccountsConfiguration, AccountsConfiguration>();
     }
 
     private static void AddAccountsSystem(IServiceCollection services)

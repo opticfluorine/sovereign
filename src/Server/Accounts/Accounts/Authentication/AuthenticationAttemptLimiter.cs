@@ -16,9 +16,10 @@
  */
 
 using System.Collections.Generic;
-using Sovereign.Accounts.Configuration;
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineCore.Util;
+using Sovereign.ServerCore.Configuration;
 
 namespace Sovereign.Accounts.Accounts.Authentication;
 
@@ -34,13 +35,14 @@ public sealed class AuthenticationAttemptLimiter
     private readonly IDictionary<string, AttemptRecord> attemptRecords
         = new Dictionary<string, AttemptRecord>();
 
-    private readonly IAccountsConfiguration config;
+    private readonly AccountsOptions config;
+
     private readonly ISystemTimer systemTimer;
 
-    public AuthenticationAttemptLimiter(IAccountsConfiguration config,
+    public AuthenticationAttemptLimiter(IOptions<AccountsOptions> config,
         ISystemTimer systemTimer)
     {
-        this.config = config;
+        this.config = config.Value;
         this.systemTimer = systemTimer;
     }
 

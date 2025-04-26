@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.ClientCore.Network;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
@@ -27,10 +27,10 @@ namespace Sovereign.ClientCore.Events.Details;
 public sealed class RegisterAccountEventDetails : IEventDetails
 {
     public RegisterAccountEventDetails(RegistrationRequest registrationRequest,
-        ClientConnectionParameters connectionParameters)
+        ConnectionOptions connectionOptions)
     {
         RegistrationRequest = registrationRequest;
-        ConnectionParameters = connectionParameters;
+        ConnectionOptions = connectionOptions;
     }
 
     /// <summary>
@@ -41,5 +41,5 @@ public sealed class RegisterAccountEventDetails : IEventDetails
     /// <summary>
     ///     Connection parameters.
     /// </summary>
-    public ClientConnectionParameters ConnectionParameters { get; private set; }
+    public ConnectionOptions ConnectionOptions { get; private set; }
 }

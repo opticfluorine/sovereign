@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network;
 using Sovereign.EngineCore.Events;
 
@@ -25,16 +26,16 @@ namespace Sovereign.ClientCore.Events.Details;
 /// </summary>
 public sealed class BeginConnectionEventDetails : IEventDetails
 {
-    public BeginConnectionEventDetails(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
+    public BeginConnectionEventDetails(ConnectionOptions connectionOptions, LoginParameters loginParameters)
     {
-        ConnectionParameters = connectionParameters;
+        ConnectionOptions = connectionOptions;
         LoginParameters = loginParameters;
     }
 
     /// <summary>
     ///     Connection parameters to be used for the connection.
     /// </summary>
-    public ClientConnectionParameters ConnectionParameters { get; private set; }
+    public ConnectionOptions ConnectionOptions { get; private set; }
 
     public LoginParameters LoginParameters { get; private set; }
 }

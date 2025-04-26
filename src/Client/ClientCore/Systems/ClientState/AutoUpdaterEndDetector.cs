@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Updater;
 
 namespace Sovereign.ClientCore.Systems.ClientState;
@@ -25,15 +24,12 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 public class AutoUpdaterEndDetector
 {
     private readonly AutoUpdater autoUpdater;
-    private readonly ClientConfigurationManager configManager;
     private readonly ClientStateMachine stateMachine;
 
-
-    public AutoUpdaterEndDetector(AutoUpdater autoUpdater, ClientConfigurationManager configManager,
+    public AutoUpdaterEndDetector(AutoUpdater autoUpdater,
         ClientStateMachine stateMachine)
     {
         this.autoUpdater = autoUpdater;
-        this.configManager = configManager;
         this.stateMachine = stateMachine;
     }
 

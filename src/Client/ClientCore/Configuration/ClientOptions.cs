@@ -15,18 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.ClientCore.Network;
-
 namespace Sovereign.ClientCore.Configuration;
 
 /// <summary>
-///     Client configuration.
+///     Renderer-specific settings.
 /// </summary>
-/// <remarks>
-///     In the future, the values of IClientConfiguration will be loaded at
-///     runtime from a file.
-/// </remarks>
-public sealed class ClientConfiguration
+public sealed class RendererOptions
 {
     /// <summary>
     ///     Width of a tile in pixels.
@@ -42,27 +36,12 @@ public sealed class ClientConfiguration
     ///     Extra tiles to search for renderable entities along the y axis.
     /// </summary>
     public float RenderSearchSpacerY { get; set; } = 8.0f;
-
-    /// <summary>
-    ///     Connection parameters.
-    /// </summary>
-    public ClientConnectionParameters ConnectionParameters { get; set; } = new();
-
-    /// <summary>
-    ///     Display settings.
-    /// </summary>
-    public DisplayConfiguration Display { get; set; } = new();
-
-    /// <summary>
-    ///     Autoupdater settings.
-    /// </summary>
-    public AutoUpdaterConfiguration AutoUpdater { get; set; } = new();
 }
 
 /// <summary>
-///     Data type for display configuration.
+///     User-configurable display settings.
 /// </summary>
-public class DisplayConfiguration
+public class DisplayOptions
 {
     /// <summary>
     ///     Game window width in pixels.
@@ -103,7 +82,7 @@ public class DisplayConfiguration
 /// <summary>
 ///     Configuration settings for the autoupdater.
 /// </summary>
-public class AutoUpdaterConfiguration
+public class AutoUpdaterOptions
 {
     /// <summary>
     ///     URL of the update server to use.
@@ -119,4 +98,59 @@ public class AutoUpdaterConfiguration
     ///     If true, prompt the user before beginning the update process.
     /// </summary>
     public bool PromptForUpdate { get; set; }
+}
+
+/// <summary>
+///     Configuration options for connection details.
+/// </summary>
+public sealed class ConnectionOptions
+{
+    public const string DefaultHost = "127.0.0.1";
+
+    public const ushort DefaultPort = 12820;
+
+    public const string DefaultRestHost = "127.0.0.1";
+
+    public const ushort DefaultRestPort = 8080;
+
+    public const bool DefaultRestTls = false;
+
+    public ConnectionOptions() : this(DefaultHost, DefaultPort, DefaultRestHost,
+        DefaultRestPort, DefaultRestTls)
+    {
+    }
+
+    public ConnectionOptions(string host, ushort port, string restHost, ushort restPort, bool restTls)
+    {
+        Host = host;
+        Port = port;
+        RestHost = restHost;
+        RestPort = restPort;
+        RestTls = restTls;
+    }
+
+    /// <summary>
+    ///     Server hostname.
+    /// </summary>
+    public string Host { get; private set; }
+
+    /// <summary>
+    ///     Server port.
+    /// </summary>
+    public ushort Port { get; private set; }
+
+    /// <summary>
+    ///     REST server hostname. Typically the same as Host.
+    /// </summary>
+    public string RestHost { get; private set; }
+
+    /// <summary>
+    ///     REST server port.
+    /// </summary>
+    public ushort RestPort { get; private set; }
+
+    /// <summary>
+    ///     Whether the REST server is using a TLS-encrypted connection.
+    /// </summary>
+    public bool RestTls { get; private set; }
 }

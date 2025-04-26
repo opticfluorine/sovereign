@@ -24,6 +24,7 @@ using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.EngineCore.Resources;
 using Sovereign.UpdaterCore.Updater;
@@ -96,12 +97,13 @@ public partial class AutoUpdater
         ResourceType.World
     };
 
+    private readonly AutoUpdaterOptions autoUpdaterOptions;
+
     /// <summary>
     ///     HTTP client used for interacting with the update server.
     /// </summary>
     private readonly HttpClient client;
 
-    private readonly ClientConfigurationManager configurationManager;
     private readonly ILogger<AutoUpdater> logger;
     private readonly IResourcePathBuilder resourcePathBuilder;
     private readonly UpdaterHash updaterHash;
@@ -111,13 +113,13 @@ public partial class AutoUpdater
     /// </summary>
     private Task? backgroundTask;
 
-    public AutoUpdater(ClientConfigurationManager configurationManager, UpdaterHash updaterHash,
+    public AutoUpdater(UpdaterHash updaterHash, IOptions<AutoUpdaterOptions> autoUpdaterOptions,
         IResourcePathBuilder resourcePathBuilder, ILogger<AutoUpdater> logger)
     {
-        this.configurationManager = configurationManager;
         this.updaterHash = updaterHash;
         this.resourcePathBuilder = resourcePathBuilder;
         this.logger = logger;
+        this.autoUpdaterOptions = autoUpdaterOptions.Value;
 
         var handler = new HttpClientHandler
         {
@@ -173,7 +175,7 @@ public partial class AutoUpdater
         try
         {
             // Set up.
-            var baseUri = new Uri(configurationManager.ClientConfiguration.AutoUpdater.UpdateServerUrl);
+            var baseUri = new Uri(autoUpdaterOptions.UpdateServerUrl);
 
             // Get current release.
             State = AutoUpdaterState.GetRelease;

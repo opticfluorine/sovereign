@@ -38,9 +38,8 @@ For full details of the latest changes and features, see the [changelog](CHANGEL
 ## Upcoming Features (v0.6.0)
 
 * Scalable physics engine with gravity and collisions
+* More shadows
 * Day/night cycle
-* Improved rendering for indoor environments
-* Procedural world generation
 * Automatic database creation on first startup (SQLite only)
 
 ## Getting Started
@@ -76,7 +75,7 @@ required for Linux installations (these are included by default for Windows buil
    ```
 4. The server is configured by default to grant the Admin role to all new players. Once you have created
    an initial player with Admin role, it is strongly recommended to disable this option by editing
-   the server configuration file and changing `AdminByDefault` to `false`.
+   the server's `appsettings.json` and changing `AdminByDefault` to `false`.
 
 ### Client
 
@@ -88,7 +87,7 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 |------------|-------------------------------------------------------------|
 | Esc        | Open in-game menu                                           |
 | Arrow keys | Move player                                                 |
-| Space     | Jump                                                        |
+| Space      | Jump                                                        |
 | Enter      | Toggle chat                                                 |
 | `          | Toggle Resource Editor Window                               |
 | Insert     | Toggle Template Entity Editor Window (must be admin player) |

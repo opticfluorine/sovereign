@@ -22,9 +22,9 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Main;
-using Sovereign.Persistence.Configuration;
 using Sovereign.Persistence.Database.Queries;
 using Sovereign.Persistence.Database.Sqlite.Queries;
+using Sovereign.ServerCore.Configuration;
 
 namespace Sovereign.Persistence.Database.Sqlite;
 
@@ -69,10 +69,10 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const SqliteType PhysicsParamType = SqliteType.Integer;
     private const string PhysicsParamName = "physics";
 
-    private readonly IPersistenceConfiguration configuration;
+    private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
 
-    public SqlitePersistenceProvider(IPersistenceConfiguration configuration,
+    public SqlitePersistenceProvider(DatabaseOptions configuration,
         ILogger<SqlitePersistenceProvider> logger)
     {
         this.configuration = configuration;
@@ -228,7 +228,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         AddBoundingBoxComponentQuery = boundingBoxQuery;
         ModifyBoundingBoxComponentQuery = boundingBoxQuery;
         RemoveBoundingBoxComponentQuery = new SqliteRemoveBoundingBoxComponentQuery((SqliteConnection)Connection);
-        
+
         // CastShadows component.
         var castShadowsQueries = new SqliteCastShadowsComponentQueries((SqliteConnection)Connection);
         AddCastShadowsComponentQuery = castShadowsQueries;

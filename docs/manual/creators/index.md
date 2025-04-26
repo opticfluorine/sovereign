@@ -4,6 +4,7 @@ This section contains everything you need to know about creating games using Sov
 
 :::{toctree}
 :maxdepth: 2
+config/index.md
 world/index.md
 resources/index.md
 templates/index.md

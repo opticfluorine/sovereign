@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -76,7 +77,6 @@ public class GuiTextureMapper
 
     private readonly TextureAtlasManager atlasManager;
     private readonly AtlasMap atlasMap;
-    private readonly ClientConfigurationManager clientConfigurationManager;
 
     /// <summary>
     ///     Map from custom ID to corresponding texture list entry.
@@ -87,6 +87,8 @@ public class GuiTextureMapper
     ///     Queue of indices that can be reclaimed for use.
     /// </summary>
     private readonly Queue<int> reclaimableIndices = new();
+
+    private readonly RendererOptions rendererOptions;
 
     /// <summary>
     ///     Map from sprite ID to corresponding textures list entry.
@@ -114,15 +116,14 @@ public class GuiTextureMapper
 
     public GuiTextureMapper(TextureAtlasManager atlasManager, SpriteSheetManager spriteSheetManager,
         AnimatedSpriteManager animatedSpriteManager, AtlasMap atlasMap,
-        ClientConfigurationManager clientConfigurationManager,
-        TileSpriteManager tileSpriteManager)
+        TileSpriteManager tileSpriteManager, IOptions<RendererOptions> rendererOptions)
     {
         this.atlasManager = atlasManager;
         this.spriteSheetManager = spriteSheetManager;
         this.animatedSpriteManager = animatedSpriteManager;
         this.atlasMap = atlasMap;
-        this.clientConfigurationManager = clientConfigurationManager;
         this.tileSpriteManager = tileSpriteManager;
+        this.rendererOptions = rendererOptions.Value;
 
         animatedSpriteManager.OnAnimatedSpriteAdded += OnAnimatedSpriteAdded;
         animatedSpriteManager.OnAnimatedSpriteRemoved += OnAnimatedSpriteRemoved;
@@ -157,9 +158,8 @@ public class GuiTextureMapper
             var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
             var firstSprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(0, orientation);
             var spriteBounds = atlasMap.MapElements[firstSprite.Id];
-            var clientConfiguration = clientConfigurationManager.ClientConfiguration;
-            var width = spriteBounds.WidthInTiles * clientConfiguration.TileWidth;
-            var height = spriteBounds.HeightInTiles * clientConfiguration.TileWidth;
+            var width = spriteBounds.WidthInTiles * rendererOptions.TileWidth;
+            var height = spriteBounds.HeightInTiles * rendererOptions.TileWidth;
 
             // Add record to table.
             index = AddTextureData(new TextureData
@@ -200,9 +200,8 @@ public class GuiTextureMapper
         // Update existing record in case any paramters were changed since the last call.
         var firstSprite = customSprite.GetPhaseData(phase).GetSpriteForTime(0, orientation);
         var spriteBounds = atlasMap.MapElements[firstSprite.Id];
-        var clientConfiguration = clientConfigurationManager.ClientConfiguration;
-        var width = spriteBounds.WidthInTiles * clientConfiguration.TileWidth;
-        var height = spriteBounds.HeightInTiles * clientConfiguration.TileWidth;
+        var width = spriteBounds.WidthInTiles * rendererOptions.TileWidth;
+        var height = spriteBounds.HeightInTiles * rendererOptions.TileWidth;
 
         var texData = textures[index];
         texData.CustomAnimatedSprite = customSprite;
@@ -269,8 +268,8 @@ public class GuiTextureMapper
                 StartY = spriteData.NormalizedTopY,
                 EndX = spriteData.NormalizedRightX,
                 EndY = spriteData.NormalizedBottomY,
-                Width = spriteData.WidthInTiles * clientConfigurationManager.ClientConfiguration.TileWidth,
-                Height = spriteData.HeightInTiles * clientConfigurationManager.ClientConfiguration.TileWidth
+                Width = spriteData.WidthInTiles * rendererOptions.TileWidth,
+                Height = spriteData.HeightInTiles * rendererOptions.TileWidth
             });
             spriteIndices[spriteId] = index;
         }
@@ -311,6 +310,7 @@ public class GuiTextureMapper
                 Width = firstLayerTexData.Width,
                 Height = firstLayerTexData.Height
             });
+            tileSpriteIndices[Tuple.Create(tileSpriteId, contextKey)] = index;
         }
 
         return new IntPtr(index + IndexOffset);

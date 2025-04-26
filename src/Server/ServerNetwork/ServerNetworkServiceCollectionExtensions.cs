@@ -22,7 +22,6 @@ using Sovereign.NetworkCore.Network.Pipeline.Inbound;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.NetworkCore.Systems.Network;
 using Sovereign.ServerCore.Systems.ServerChat;
-using Sovereign.ServerNetwork.Configuration;
 using Sovereign.ServerNetwork.Network.Connections;
 using Sovereign.ServerNetwork.Network.Infrastructure;
 using Sovereign.ServerNetwork.Network.Pipeline.Inbound;
@@ -47,7 +46,6 @@ public static class ServerNetworkServiceCollectionExtensions
         AddServerImplementations(services);
         AddInboundPipeline(services);
         AddChat(services);
-        AddConfiguration(services);
         AddConnections(services);
         AddConnectionMappers(services);
         AddRest(services);
@@ -77,11 +75,6 @@ public static class ServerNetworkServiceCollectionExtensions
     private static void AddChat(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, AdminChatProcessor>());
-    }
-
-    private static void AddConfiguration(IServiceCollection services)
-    {
-        services.TryAddSingleton<IServerNetworkConfiguration, ServerNetworkConfiguration>();
     }
 
     private static void AddConnections(IServiceCollection services)

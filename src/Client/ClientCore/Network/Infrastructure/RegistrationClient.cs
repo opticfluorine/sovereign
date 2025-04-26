@@ -20,6 +20,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.EngineUtil.Monads;
@@ -45,14 +46,14 @@ public sealed class RegistrationClient
     /// <summary>
     ///     Sends a request to the server to register a new account.
     /// </summary>
-    /// <param name="connectionParameters">Connection parameters for server.</param>
+    /// <param name="connectionOptions">Connection parameters for server.</param>
     /// <param name="request">Registration request.</param>
     /// <returns>
     ///     Async task that will yield either the response on success,
     ///     or an error message string on failure.
     /// </returns>
     public async Task<Option<RegistrationResponse, string>> RegisterAsync(
-        ClientConnectionParameters connectionParameters,
+        ConnectionOptions connectionOptions,
         RegistrationRequest request)
     {
         var result = new Option<RegistrationResponse, string>("Unexpected error occurred.");
@@ -68,10 +69,10 @@ public sealed class RegistrationClient
             }
 
             logger.LogInformation("Attempting to register new account {Username} with server at {RestHost}:{RestPort}.",
-                request.Username, connectionParameters.RestHost, connectionParameters.RestPort);
+                request.Username, connectionOptions.RestHost, connectionOptions.RestPort);
 
             // Temporarily connect to the target REST server.
-            restClient.SelectServer(connectionParameters);
+            restClient.SelectServer(connectionOptions);
 
             // Send the registration request.
             var httpResponse = await restClient.PostJson(RestEndpoints.AccountRegistration, request);

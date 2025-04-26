@@ -17,6 +17,7 @@
 
 using System;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Events;
 using Sovereign.ClientCore.Rendering.Configuration;
@@ -34,8 +35,9 @@ namespace Sovereign.ClientCore.Rendering;
 public class RenderingManager : IDisposable
 {
     private readonly AdapterSelector adapterSelector;
-    private readonly ClientConfigurationManager configManager;
     private readonly DisplayModeSelector displayModeSelector;
+
+    private readonly DisplayOptions displayOptions;
     private readonly CommonGuiManager guiManager;
     private readonly ILogger<RenderingManager> logger;
 
@@ -60,22 +62,22 @@ public class RenderingManager : IDisposable
 
     public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
         DisplayModeSelector displayModeSelector, IRenderer renderer,
-        RenderingResourceManager resourceManager, ClientConfigurationManager configManager,
+        RenderingResourceManager resourceManager,
         CommonGuiManager guiManager, ClientStateServices stateServices,
         ILogger<RenderingManager> logger, SDLEventAdapter sdlEventAdapter,
-        DisplayViewport viewport)
+        DisplayViewport viewport, IOptions<DisplayOptions> displayOptions)
     {
         this.mainDisplay = mainDisplay;
         this.adapterSelector = adapterSelector;
         this.displayModeSelector = displayModeSelector;
         this.renderer = renderer;
         this.resourceManager = resourceManager;
-        this.configManager = configManager;
         this.guiManager = guiManager;
         this.stateServices = stateServices;
         this.logger = logger;
         this.sdlEventAdapter = sdlEventAdapter;
         this.viewport = viewport;
+        this.displayOptions = displayOptions.Value;
     }
 
     /// <summary>
@@ -150,7 +152,7 @@ public class RenderingManager : IDisposable
         try
         {
             /* Create the main window. */
-            mainDisplay.Show(selectedDisplayMode, configManager.ClientConfiguration.Display.Fullscreen);
+            mainDisplay.Show(selectedDisplayMode, displayOptions.Fullscreen);
         }
         catch (Exception e)
         {

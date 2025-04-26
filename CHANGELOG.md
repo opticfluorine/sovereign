@@ -10,6 +10,14 @@
   large, this is disabled by default. It can be enabled through the `appsettings.json`
   file or by passing the command line argument `--Sovereign:DebugOptions:EnableEventLogging=true`
   to either the client or server. See the manual for details.
+* Server: Replace the `ServerConfiguration.yaml` file with `appsettings.json`. This is a much
+  more flexible approach than the previous way of consuming YAML configuration, and makes it
+  much easier to add new settings to the config file. As this is backed by the
+  `Microsoft.Extensions.Configuration` package, it comes with a lot of extra features that
+  can be helpful for development (e.g. command line argument overrides, environment variable
+  based configuration, integration with cloud secret stores, etc.).
+* Client: Replace the `ClientConfiguration.yaml` file with `appsettings.json`, similar to the
+  server change above.
 
 #### 24 April 2025
 

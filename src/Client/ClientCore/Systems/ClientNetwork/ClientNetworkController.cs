@@ -16,6 +16,7 @@
  */
 
 using Microsoft.Extensions.Logging;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Systems.ClientState;
@@ -53,13 +54,13 @@ public sealed class ClientNetworkController
     ///     Sends an event commanding the system to begin a connection to the server.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
-    /// <param name="connectionParameters">Connection parameters.</param>
+    /// <param name="connectionOptions">Connection parameters.</param>
     /// <param name="loginParameters">Login parameters.</param>
-    public void BeginConnection(IEventSender eventSender, ClientConnectionParameters connectionParameters,
+    public void BeginConnection(IEventSender eventSender, ConnectionOptions connectionOptions,
         LoginParameters loginParameters)
     {
         var ev = new Event(EventId.Client_Network_BeginConnection,
-            new BeginConnectionEventDetails(connectionParameters, loginParameters));
+            new BeginConnectionEventDetails(connectionOptions, loginParameters));
         eventSender.SendEvent(ev);
     }
 

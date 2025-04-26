@@ -16,6 +16,7 @@
 
 using System.Numerics;
 using ImGuiNET;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Updater;
 using Sovereign.EngineCore.Events;
@@ -36,17 +37,17 @@ public class UpdaterGui
     private const float InUpdateProgressHeight = 1.33f;
     private const float InUpdateProgressGap = 0.5f * (InUpdateWindowWidth - InUpdateProgressWidth);
     private readonly AutoUpdater autoUpdater;
-    private readonly ClientConfigurationManager configurationManager;
+    private readonly AutoUpdaterOptions autoUpdaterOptions;
     private readonly CoreController coreController;
     private readonly IEventSender eventSender;
 
-    public UpdaterGui(AutoUpdater autoUpdater, ClientConfigurationManager configurationManager,
+    public UpdaterGui(AutoUpdater autoUpdater, IOptions<AutoUpdaterOptions> autoUpdaterOptions,
         CoreController coreController, IEventSender eventSender)
     {
         this.autoUpdater = autoUpdater;
-        this.configurationManager = configurationManager;
         this.coreController = coreController;
         this.eventSender = eventSender;
+        this.autoUpdaterOptions = autoUpdaterOptions.Value;
     }
 
     /// <summary>
@@ -54,7 +55,7 @@ public class UpdaterGui
     /// </summary>
     public void Render()
     {
-        if (!configurationManager.ClientConfiguration.AutoUpdater.UpdateOnStartup) return;
+        if (!autoUpdaterOptions.UpdateOnStartup) return;
 
         var fontSize = ImGui.GetFontSize();
         var windowSize = fontSize * (autoUpdater.State == AutoUpdaterState.NotStarted
@@ -107,7 +108,7 @@ public class UpdaterGui
     /// </summary>
     private void RenderNotStarted()
     {
-        if (configurationManager.ClientConfiguration.AutoUpdater.PromptForUpdate)
+        if (autoUpdaterOptions.PromptForUpdate)
         {
             if (ImGui.BeginTable("updateLayoutTable", 3, ImGuiTableFlags.SizingStretchSame))
             {

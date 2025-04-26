@@ -18,7 +18,6 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using ImGuiNET;
-using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
@@ -38,7 +37,6 @@ public class GuiRenderer : IDisposable
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly TextureAtlasManager atlasManager;
     private readonly AtlasMap atlasMap;
-    private readonly ClientConfigurationManager configManager;
     private readonly VeldridDevice device;
     private readonly CommonGuiManager guiManager;
     private readonly GuiPipeline guiPipeline;
@@ -67,7 +65,7 @@ public class GuiRenderer : IDisposable
     public GuiRenderer(CommonGuiManager guiManager, GuiResourceManager guiResourceManager, GuiPipeline guiPipeline,
         TextureAtlasManager atlasManager, ISystemTimer systemTimer, AnimatedSpriteManager animatedSpriteManager,
         AtlasMap atlasMap, VeldridDevice device, VeldridResourceManager resourceManager,
-        ClientConfigurationManager configManager, GuiTextureMapper textureMapper)
+        GuiTextureMapper textureMapper)
     {
         this.guiManager = guiManager;
         this.guiResourceManager = guiResourceManager;
@@ -78,7 +76,6 @@ public class GuiRenderer : IDisposable
         this.atlasMap = atlasMap;
         this.device = device;
         this.resourceManager = resourceManager;
-        this.configManager = configManager;
         this.textureMapper = textureMapper;
     }
 

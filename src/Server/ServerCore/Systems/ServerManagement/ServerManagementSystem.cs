@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using Sovereign.NetworkCore.Systems.Ping;
@@ -27,17 +28,17 @@ namespace Sovereign.ServerCore.Systems.ServerManagement;
 /// </summary>
 public class ServerManagementSystem : ISystem
 {
-    private readonly IServerConfigurationManager configManager;
     private readonly IEventSender eventSender;
+    private readonly NetworkOptions networkOptions;
     private readonly PingController pingController;
 
     public ServerManagementSystem(IEventLoop eventLoop, EventCommunicator eventCommunicator, IEventSender eventSender,
-        PingController pingController, IServerConfigurationManager configManager)
+        PingController pingController, IOptions<NetworkOptions> networkOptions)
     {
         EventCommunicator = eventCommunicator;
         this.eventSender = eventSender;
         this.pingController = pingController;
-        this.configManager = configManager;
+        this.networkOptions = networkOptions.Value;
         eventLoop.RegisterSystem(this);
     }
 
@@ -49,7 +50,7 @@ public class ServerManagementSystem : ISystem
     public void Initialize()
     {
         // Enable outbound auto-ping from the server to client.
-        pingController.SetAutoPing(eventSender, true, configManager.ServerConfiguration.Network.PingIntervalMs);
+        pingController.SetAutoPing(eventSender, true, networkOptions.PingIntervalMs);
     }
 
     public void Cleanup()

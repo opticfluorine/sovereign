@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Timing;
-using Sovereign.Persistence.Configuration;
+using Sovereign.ServerCore.Configuration;
 
 namespace Sovereign.Persistence.Systems.Persistence;
 
@@ -26,17 +27,17 @@ namespace Sovereign.Persistence.Systems.Persistence;
 /// </summary>
 public sealed class PersistenceScheduler
 {
-    private const ulong S_TO_US = 1000000;
-    private readonly IPersistenceConfiguration configuration;
+    private const ulong SToUs = 1000000;
+    private readonly DatabaseOptions configuration;
     private readonly IEventSender sender;
     private readonly ISystemTimer systemTimer;
 
     public PersistenceScheduler(IEventSender sender,
-        IPersistenceConfiguration configuration,
+        IOptions<DatabaseOptions> configuration,
         ISystemTimer systemTimer)
     {
         this.sender = sender;
-        this.configuration = configuration;
+        this.configuration = configuration.Value;
         this.systemTimer = systemTimer;
     }
 
@@ -47,7 +48,7 @@ public sealed class PersistenceScheduler
     {
         /* Determine time of next synchronization. */
         var nextTime = systemTimer.GetTime()
-                       + (ulong)configuration.SyncIntervalSeconds * S_TO_US;
+                       + (ulong)configuration.SyncIntervalSeconds * SToUs;
 
         /* Schedule event. */
         var ev = new Event(EventId.Server_Persistence_Synchronize,

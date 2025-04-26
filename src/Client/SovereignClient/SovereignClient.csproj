@@ -28,9 +28,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="Data\Configuration\ClientConfiguration.yaml">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
         <None Update="appsettings.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -47,7 +44,7 @@
 
     <Target Name="CopyAfterBuild" AfterTargets="AfterBuild">
         <ItemGroup>
-            <DataFiles Include="Data/**/*" Exclude="Data/Configuration/ClientConfiguration.yaml"/>
+            <DataFiles Include="Data/**/*"/>
             <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"

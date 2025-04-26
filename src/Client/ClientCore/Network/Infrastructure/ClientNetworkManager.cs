@@ -23,6 +23,7 @@ using System.Net.Sockets;
 using LiteNetLib;
 using Microsoft.Extensions.Logging;
 using Sodium;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.EngineCore.Events;
@@ -135,7 +136,7 @@ public sealed class ClientNetworkManager : INetworkManager
     /// <summary>
     ///     Current connection parameters.
     /// </summary>
-    public ClientConnectionParameters? ConnectionParameters { get; private set; }
+    public ConnectionOptions? ConnectionParameters { get; private set; }
 
     /// <summary>
     ///     Client state.
@@ -193,17 +194,17 @@ public sealed class ClientNetworkManager : INetworkManager
     /// <summary>
     ///     Asynchronously begins a connection to a server.
     /// </summary>
-    /// <param name="connectionParameters">Client connection parameters to use.</param>
+    /// <param name="connectionOptions">Client connection parameters to use.</param>
     /// <param name="loginParameters">Login parameters to use.</param>
     /// <exception cref="InvalidOperationException">
     ///     Thrown if the client is not currently disconnected.
     /// </exception>
-    internal void BeginConnection(ClientConnectionParameters connectionParameters, LoginParameters loginParameters)
+    internal void BeginConnection(ConnectionOptions connectionOptions, LoginParameters loginParameters)
     {
         if (ClientState != NetworkClientState.Disconnected && ClientState != NetworkClientState.Failed)
             throw new InvalidOperationException("Client is not disconnected.");
 
-        ConnectionParameters = connectionParameters;
+        ConnectionParameters = connectionOptions;
 
         logger.LogInformation("Connecting to {Host}:{Port} [REST: {RestHost}:{RestPort}] as {Username}.",
             ConnectionParameters.Host, ConnectionParameters.Port,

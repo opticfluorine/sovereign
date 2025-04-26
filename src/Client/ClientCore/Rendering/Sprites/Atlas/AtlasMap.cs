@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.Atlas;
@@ -28,21 +29,21 @@ namespace Sovereign.ClientCore.Rendering.Sprites.Atlas;
 public sealed class AtlasMap
 {
     private readonly TextureAtlasManager atlasManager;
-    private readonly ClientConfigurationManager configManager;
     private readonly ILogger<AtlasMap> logger;
+    private readonly RendererOptions rendererOptions;
     private readonly SpriteManager spriteManager;
     private readonly SpriteSheetManager spriteSheetManager;
 
     public AtlasMap(TextureAtlasManager atlasManager, SpriteManager spriteManager,
         SpriteSheetManager spriteSheetManager,
-        ClientConfigurationManager configManager,
-        ILogger<AtlasMap> logger)
+        ILogger<AtlasMap> logger,
+        IOptions<RendererOptions> rendererOptions)
     {
         this.atlasManager = atlasManager;
         this.spriteManager = spriteManager;
         this.spriteSheetManager = spriteSheetManager;
-        this.configManager = configManager;
         this.logger = logger;
+        this.rendererOptions = rendererOptions.Value;
 
         spriteManager.OnSpritesChanged += InitializeAtlasMap;
     }
@@ -99,8 +100,8 @@ public sealed class AtlasMap
             NormalizedTopY = tly / atlasHeight,
             NormalizedRightX = brx / atlasWidth,
             NormalizedBottomY = bry / atlasHeight,
-            WidthInTiles = (float)spriteWidth / configManager.ClientConfiguration.TileWidth,
-            HeightInTiles = (float)spriteHeight / configManager.ClientConfiguration.TileWidth
+            WidthInTiles = (float)spriteWidth / rendererOptions.TileWidth,
+            HeightInTiles = (float)spriteHeight / rendererOptions.TileWidth
         });
     }
 }

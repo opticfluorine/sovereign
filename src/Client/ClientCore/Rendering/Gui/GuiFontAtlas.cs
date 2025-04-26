@@ -18,6 +18,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
@@ -35,7 +36,8 @@ public sealed class GuiFontAtlas : IDisposable
     /// </summary>
     public static readonly IntPtr TextureId = 1;
 
-    private readonly ClientConfigurationManager configManager;
+    private readonly DisplayOptions displayOptions;
+
     private readonly MainDisplay mainDisplay;
     private readonly IResourcePathBuilder resourcePathBuilder;
 
@@ -54,12 +56,12 @@ public sealed class GuiFontAtlas : IDisposable
     /// </summary>
     private int width;
 
-    public GuiFontAtlas(ClientConfigurationManager configManager, IResourcePathBuilder resourcePathBuilder,
-        MainDisplay mainDisplay)
+    public GuiFontAtlas(IResourcePathBuilder resourcePathBuilder,
+        MainDisplay mainDisplay, IOptions<DisplayOptions> displayOptions)
     {
-        this.configManager = configManager;
         this.resourcePathBuilder = resourcePathBuilder;
         this.mainDisplay = mainDisplay;
+        this.displayOptions = displayOptions.Value;
     }
 
     /// <summary>
@@ -114,12 +116,12 @@ public sealed class GuiFontAtlas : IDisposable
     {
         // Determine UI scaling with resolution.
         var scaleFactor = (float)mainDisplay.DisplayMode!.Height /
-                          configManager.ClientConfiguration.Display.BaseScalingHeight;
-        var fontSize = scaleFactor * configManager.ClientConfiguration.Display.BaseFontSize;
+                          displayOptions.BaseScalingHeight;
+        var fontSize = scaleFactor * displayOptions.BaseFontSize;
 
         // Load font.
         var fontPath =
-            resourcePathBuilder.BuildPathToResource(ResourceType.Fonts, configManager.ClientConfiguration.Display.Font);
+            resourcePathBuilder.BuildPathToResource(ResourceType.Fonts, displayOptions.Font);
         var io = ImGui.GetIO();
         io.Fonts.AddFontFromFileTTF(fontPath, fontSize, null, io.Fonts.GetGlyphRangesDefault());
         io.Fonts.Build();

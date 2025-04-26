@@ -16,6 +16,7 @@
 
 using System.Numerics;
 using ImGuiNET;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Network.Infrastructure;
@@ -40,7 +41,7 @@ public class LoginGui
 
     private const int MaxFieldSize = 256;
     private readonly ClientNetworkController clientNetworkController;
-    private readonly ClientConfigurationManager configManager;
+    private readonly ConnectionOptions connectionOptions;
     private readonly IEventSender eventSender;
     private readonly ClientNetworkManager networkManager;
     private string errorText = "";
@@ -50,12 +51,13 @@ public class LoginGui
     private string usernameInput = "";
 
     public LoginGui(ClientNetworkManager networkManager, IEventSender eventSender,
-        ClientNetworkController clientNetworkController, ClientConfigurationManager configManager)
+        ClientNetworkController clientNetworkController,
+        IOptions<ConnectionOptions> connectionOptions)
     {
         this.networkManager = networkManager;
         this.eventSender = eventSender;
         this.clientNetworkController = clientNetworkController;
-        this.configManager = configManager;
+        this.connectionOptions = connectionOptions.Value;
     }
 
     /// <summary>
@@ -198,7 +200,7 @@ public class LoginGui
 
         // Initiate login.
         loginState = LoginState.Pending;
-        clientNetworkController.BeginConnection(eventSender, configManager.ClientConfiguration.ConnectionParameters,
+        clientNetworkController.BeginConnection(eventSender, connectionOptions,
             new LoginParameters(usernameInput, passwordInput));
     }
 

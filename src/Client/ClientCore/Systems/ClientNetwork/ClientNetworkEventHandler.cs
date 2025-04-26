@@ -130,7 +130,7 @@ public sealed class ClientNetworkEventHandler
     /// <param name="details">Connection details.</param>
     private void HandleBeginConnection(BeginConnectionEventDetails details)
     {
-        networkClient.BeginConnection(details.ConnectionParameters, details.LoginParameters);
+        networkClient.BeginConnection(details.ConnectionOptions, details.LoginParameters);
     }
 
     /// <summary>

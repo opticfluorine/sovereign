@@ -20,8 +20,9 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Main;
-using Sovereign.ServerNetwork.Configuration;
+using Sovereign.ServerCore.Configuration;
 using WatsonWebserver;
 using WatsonWebserver.Core;
 
@@ -43,7 +44,7 @@ public sealed class RestServer : IDisposable
 
     private readonly FatalErrorHandler fatalErrorHandler;
     private readonly ILogger<RestServer> logger;
-    private readonly IServerNetworkConfiguration networkConfiguration;
+    private readonly NetworkOptions networkOptions;
 
     /// <summary>
     ///     Embedded web server.
@@ -52,20 +53,20 @@ public sealed class RestServer : IDisposable
 
     private readonly IEnumerable<IRestService> restServices;
 
-    public RestServer(IServerNetworkConfiguration networkConfiguration,
+    public RestServer(IOptions<NetworkOptions> networkOptions,
         IEnumerable<IRestService> restServices,
         FatalErrorHandler fatalErrorHandler,
         ILogger<RestServer> logger)
     {
-        this.networkConfiguration = networkConfiguration;
+        this.networkOptions = networkOptions.Value;
         this.restServices = restServices;
         this.fatalErrorHandler = fatalErrorHandler;
         this.logger = logger;
 
         restServer = new Lazy<Webserver>(() =>
         {
-            return new Webserver(new WebserverSettings(networkConfiguration.RestHostname,
-                networkConfiguration.RestPort), OnUnmappedRequest);
+            return new Webserver(new WebserverSettings(this.networkOptions.RestHostname,
+                this.networkOptions.RestPort), OnUnmappedRequest);
         });
     }
 
@@ -105,8 +106,8 @@ public sealed class RestServer : IDisposable
                 }
 
             logger.LogInformation("Started REST server on {Host}:{Port}.",
-                networkConfiguration.RestHostname,
-                networkConfiguration.RestPort);
+                networkOptions.RestHostname,
+                networkOptions.RestPort);
         }
         catch (Exception e)
         {

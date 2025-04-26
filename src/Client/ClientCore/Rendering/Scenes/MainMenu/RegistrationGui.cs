@@ -17,6 +17,7 @@
 using System.Numerics;
 using System.Threading.Tasks;
 using ImGuiNET;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Systems.ClientState;
@@ -48,8 +49,7 @@ public class RegistrationGui
     private const string UnknownError = "An unknown error occurred during registration.";
 
     private const string Successful = "Registration successful.";
-
-    private readonly ClientConfigurationManager configManager;
+    private readonly ConnectionOptions connectionOptions;
 
     private readonly RegistrationClient registrationClient;
 
@@ -71,10 +71,10 @@ public class RegistrationGui
 
     private string usernameInput = "";
 
-    public RegistrationGui(RegistrationClient registrationClient, ClientConfigurationManager configManager)
+    public RegistrationGui(RegistrationClient registrationClient, IOptions<ConnectionOptions> connectionOptions)
     {
         this.registrationClient = registrationClient;
-        this.configManager = configManager;
+        this.connectionOptions = connectionOptions.Value;
     }
 
     /// <summary>
@@ -200,7 +200,7 @@ public class RegistrationGui
             Password = passwordInput
         };
         registrationTask =
-            registrationClient.RegisterAsync(configManager.ClientConfiguration.ConnectionParameters, request);
+            registrationClient.RegisterAsync(connectionOptions, request);
         registrationState = RegistrationState.Pending;
     }
 

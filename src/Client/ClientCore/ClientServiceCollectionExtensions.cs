@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sovereign.ClientCore.Components;
@@ -84,6 +85,27 @@ namespace Sovereign.ClientCore;
 public static class ClientServiceCollectionExtensions
 {
     /// <summary>
+    ///     Binds configuration options for the client.
+    /// </summary>
+    /// <param name="services">Service collection.</param>
+    /// <param name="configuration">Configuration.</param>
+    /// <returns>Service collection.</returns>
+    public static IServiceCollection AddSovereignClientOptions(this IServiceCollection services,
+        IConfigurationManager configuration)
+    {
+        services.Configure<ConnectionOptions>(
+            configuration.GetSection($"Sovereign:{nameof(ConnectionOptions)}"));
+        services.Configure<AutoUpdaterOptions>(
+            configuration.GetSection($"Sovereign:{nameof(AutoUpdaterOptions)}"));
+        services.Configure<DisplayOptions>(
+            configuration.GetSection($"Sovereign:{nameof(DisplayOptions)}"));
+        services.Configure<RendererOptions>(
+            configuration.GetSection($"Sovereign:{nameof(RendererOptions)}"));
+
+        return services;
+    }
+
+    /// <summary>
     ///     Adds Sovereign.ClientCore classes to the service collection.
     /// </summary>
     /// <param name="services">Service collection.</param>
@@ -95,7 +117,6 @@ public static class ClientServiceCollectionExtensions
         AddMain(services);
         AddInboundPipeline(services);
         AddComponents(services);
-        AddConfiguration(services);
         AddEntities(services);
         AddClientNetwork(services);
         AddRendering(services);
@@ -146,11 +167,6 @@ public static class ClientServiceCollectionExtensions
 
         services.TryAddSingleton<BlockTemplateEntityFilter>();
         services.TryAddSingleton<BlockTemplateEntityIndexer>();
-    }
-
-    private static void AddConfiguration(IServiceCollection services)
-    {
-        services.TryAddSingleton<ClientConfigurationManager>();
     }
 
     private static void AddEntities(IServiceCollection services)

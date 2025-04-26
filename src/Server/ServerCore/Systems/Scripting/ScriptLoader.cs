@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Lua;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Configuration;
@@ -31,20 +32,20 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 /// </summary>
 public class ScriptLoader
 {
-    private readonly IServerConfigurationManager configManager;
+    private readonly ScriptingOptions config;
     private readonly ILogger<ScriptLoader> logger;
     private readonly ILoggerFactory loggerFactory;
     private readonly IEnumerable<ILuaComponents> luaComponents;
     private readonly IEnumerable<ILuaLibrary> luaLibraries;
 
-    public ScriptLoader(ILogger<ScriptLoader> logger, IServerConfigurationManager configManager,
+    public ScriptLoader(ILogger<ScriptLoader> logger, IOptions<ScriptingOptions> scriptingOptions,
         IEnumerable<ILuaLibrary> luaLibraries, ILoggerFactory loggerFactory, IEnumerable<ILuaComponents> luaComponents)
     {
         this.logger = logger;
-        this.configManager = configManager;
         this.luaLibraries = luaLibraries;
         this.loggerFactory = loggerFactory;
         this.luaComponents = luaComponents;
+        config = scriptingOptions.Value;
     }
 
     /// <summary>
@@ -72,7 +73,6 @@ public class ScriptLoader
     /// <returns></returns>
     public LuaHost Load(string scriptName)
     {
-        var config = configManager.ServerConfiguration.Scripting;
         var scriptPath = Path.Combine(config.ScriptDirectory, $"{scriptName}.lua");
         return HostScript(scriptPath);
     }
@@ -108,8 +108,6 @@ public class ScriptLoader
     /// <returns>Enumerated script files.</returns>
     private IEnumerable<string> GetAllScriptFiles()
     {
-        var config = configManager.ServerConfiguration.Scripting;
-
         return Directory.EnumerateFiles(config.ScriptDirectory, "*.lua",
             new EnumerationOptions
             {
@@ -143,7 +141,7 @@ public class ScriptLoader
     /// <returns>Script name.</returns>
     private string GetNameFromPath(string file)
     {
-        var relPath = Path.GetRelativePath(configManager.ServerConfiguration.Scripting.ScriptDirectory, file);
+        var relPath = Path.GetRelativePath(config.ScriptDirectory, file);
         return relPath.Substring(0, relPath.LastIndexOf('.'));
     }
 

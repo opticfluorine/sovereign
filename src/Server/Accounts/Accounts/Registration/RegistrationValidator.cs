@@ -15,7 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.Accounts.Configuration;
+using Microsoft.Extensions.Options;
+using Sovereign.ServerCore.Configuration;
 
 namespace Sovereign.Accounts.Accounts.Registration;
 
@@ -24,11 +25,11 @@ namespace Sovereign.Accounts.Accounts.Registration;
 /// </summary>
 public sealed class RegistrationValidator
 {
-    private readonly IAccountsConfiguration configuration;
+    private readonly AccountsOptions config;
 
-    public RegistrationValidator(IAccountsConfiguration configuration)
+    public RegistrationValidator(IOptions<AccountsOptions> accountsOptions)
     {
-        this.configuration = configuration;
+        config = accountsOptions.Value;
     }
 
     /// <summary>
@@ -43,7 +44,7 @@ public sealed class RegistrationValidator
         if (username.Length < 1) return false;
 
         // Password must be at least the minimum length.
-        if (password.Length < configuration.MinimumPasswordLength) return false;
+        if (password.Length < config.MinimumPasswordLength) return false;
 
         // All tests passed.
         return true;

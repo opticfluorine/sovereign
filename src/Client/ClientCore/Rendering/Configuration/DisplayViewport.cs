@@ -1,4 +1,5 @@
-﻿using Sovereign.ClientCore.Configuration;
+﻿using Microsoft.Extensions.Options;
+using Sovereign.ClientCore.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Configuration;
 
@@ -7,11 +8,11 @@ namespace Sovereign.ClientCore.Rendering.Configuration;
 /// </summary>
 public sealed class DisplayViewport
 {
-    private readonly ClientConfigurationManager configManager;
+    private readonly RendererOptions rendererOptions;
 
-    public DisplayViewport(ClientConfigurationManager configManager)
+    public DisplayViewport(IOptions<RendererOptions> rendererOptions)
     {
-        this.configManager = configManager;
+        this.rendererOptions = rendererOptions.Value;
     }
 
     /// <summary>
@@ -46,7 +47,7 @@ public sealed class DisplayViewport
 
         Width = screenWidth / scaleFactor;
         Height = screenHeight / scaleFactor;
-        WidthInTiles = (float)Width / configManager.ClientConfiguration.TileWidth;
-        HeightInTiles = (float)Height / configManager.ClientConfiguration.TileWidth;
+        WidthInTiles = (float)Width / rendererOptions.TileWidth;
+        HeightInTiles = (float)Height / rendererOptions.TileWidth;
     }
 }

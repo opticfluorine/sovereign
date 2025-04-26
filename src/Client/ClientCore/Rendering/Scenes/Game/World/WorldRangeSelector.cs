@@ -16,6 +16,7 @@
 
 using System;
 using System.Numerics;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.EngineCore.Components.Types;
@@ -27,13 +28,13 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 /// </summary>
 public class WorldRangeSelector
 {
-    private readonly ClientConfigurationManager configManager;
+    private readonly RendererOptions rendererOptions;
     private readonly DisplayViewport viewport;
 
-    public WorldRangeSelector(DisplayViewport viewport, ClientConfigurationManager configManager)
+    public WorldRangeSelector(DisplayViewport viewport, IOptions<RendererOptions> rendererOptions)
     {
         this.viewport = viewport;
-        this.configManager = configManager;
+        this.rendererOptions = rendererOptions.Value;
     }
 
     /// <summary>
@@ -49,12 +50,11 @@ public class WorldRangeSelector
         var halfX = viewport.WidthInTiles * 0.5f;
         var halfY = viewport.HeightInTiles * 0.5f;
 
-        var clientConfiguration = configManager.ClientConfiguration;
-        var minX = (int)Math.Floor(centerPos.X - halfX - clientConfiguration.RenderSearchSpacerX);
-        var maxX = (int)Math.Floor(centerPos.X + halfX + clientConfiguration.RenderSearchSpacerX);
+        var minX = (int)Math.Floor(centerPos.X - halfX - rendererOptions.RenderSearchSpacerX);
+        var maxX = (int)Math.Floor(centerPos.X + halfX + rendererOptions.RenderSearchSpacerX);
 
-        var minY = (int)Math.Floor(centerPos.Y - halfY - clientConfiguration.RenderSearchSpacerY);
-        var maxY = (int)Math.Floor(centerPos.Y + halfY + clientConfiguration.RenderSearchSpacerY);
+        var minY = (int)Math.Floor(centerPos.Y - halfY - rendererOptions.RenderSearchSpacerY);
+        var maxY = (int)Math.Floor(centerPos.Y + halfY + rendererOptions.RenderSearchSpacerY);
 
         var z = (int)Math.Floor(centerPos.Z);
 

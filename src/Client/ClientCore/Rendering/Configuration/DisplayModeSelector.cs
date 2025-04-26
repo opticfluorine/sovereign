@@ -19,6 +19,7 @@ using System;
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Configuration;
@@ -38,20 +39,21 @@ public class DisplayModeSelector
     /// </summary>
     private const double AspectRatioTolerance = 1E-1;
 
-    private readonly ClientConfigurationManager configManager;
-
     /// <summary>
     ///     Display mode enumerator.
     /// </summary>
     private readonly IDisplayModeEnumerator displayModeEnumerator;
 
+    private readonly DisplayOptions displayOptions;
+
     private readonly ILogger<DisplayModeSelector> logger;
 
-    public DisplayModeSelector(IDisplayModeEnumerator displayModeEnumerator, ClientConfigurationManager configManager,
+    public DisplayModeSelector(IDisplayModeEnumerator displayModeEnumerator,
+        IOptions<DisplayOptions> displayOptions,
         ILogger<DisplayModeSelector> logger)
     {
         this.displayModeEnumerator = displayModeEnumerator;
-        this.configManager = configManager;
+        this.displayOptions = displayOptions.Value;
         this.logger = logger;
     }
 
@@ -72,8 +74,8 @@ public class DisplayModeSelector
 
         /* Use the preferred mode if it is available. */
         IDisplayMode? selectedMode = null;
-        var desiredWidth = configManager.ClientConfiguration.Display.ResolutionWidth;
-        var desiredHeight = configManager.ClientConfiguration.Display.ResolutionHeight;
+        var desiredWidth = displayOptions.ResolutionWidth;
+        var desiredHeight = displayOptions.ResolutionHeight;
         var preferredModes = from mode in availableModes
             where mode.Width == desiredWidth && mode.Height == desiredHeight
             select mode;

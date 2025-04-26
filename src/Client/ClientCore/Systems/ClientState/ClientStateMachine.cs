@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 
 namespace Sovereign.ClientCore.Systems.ClientState;
@@ -30,7 +31,7 @@ public class ClientStateMachine
     private readonly Dictionary<MainClientState, Action> stateEntryHandlers;
     private readonly Dictionary<MainClientState, Action> stateExitHandlers;
 
-    public ClientStateMachine(ClientConfigurationManager configManager, ClientStateFlagManager flagManager)
+    public ClientStateMachine(IOptions<AutoUpdaterOptions> autoUpdaterOptions, ClientStateFlagManager flagManager)
     {
         this.flagManager = flagManager;
 
@@ -44,7 +45,7 @@ public class ClientStateMachine
             { MainClientState.Update, OnExitUpdate }
         };
 
-        State = configManager.ClientConfiguration.AutoUpdater.UpdateOnStartup
+        State = autoUpdaterOptions.Value.UpdateOnStartup
             ? MainClientState.Update
             : MainClientState.MainMenu;
     }

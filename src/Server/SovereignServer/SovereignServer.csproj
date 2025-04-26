@@ -31,7 +31,7 @@
 
     <Target Name="CopyAfterBuild" AfterTargets="AfterBuild">
         <ItemGroup>
-            <DataFiles Include="Data/**/*" Exclude="Data/Configuration/ServerConfiguration.yaml"/>
+            <DataFiles Include="Data/**/*" />
             <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"/>
@@ -59,9 +59,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="Data\Configuration\ServerConfiguration.yaml">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
         <None Update="Logs\README.md">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>

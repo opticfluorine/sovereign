@@ -21,6 +21,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.Accounts.Systems.Accounts;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
@@ -45,7 +46,6 @@ public class CreatePlayerRestService : AuthenticatedRestService
     private const int MaxRequestLength = 1024;
 
     private readonly AccountsController accountsController;
-    private readonly IServerConfigurationManager configManager;
 
     /// <summary>
     ///     Object used as a lock to avoid name duplication due to a race condition.
@@ -54,6 +54,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
     private readonly IEntityFactory entityFactory;
     private readonly IEventSender eventSender;
+    private readonly NewPlayersOptions newPlayersOptions;
     private readonly PersistencePlayerServices playerServices;
 
     /// <summary>
@@ -65,7 +66,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
     public CreatePlayerRestService(RestAuthenticator authenticator, IEntityFactory entityFactory,
         CreatePlayerRequestValidator requestValidator, PersistencePlayerServices playerServices,
-        AccountsController accountsController, IEventSender eventSender, IServerConfigurationManager configManager,
+        AccountsController accountsController, IEventSender eventSender, IOptions<NewPlayersOptions> newPlayersOptions,
         ILogger<CreatePlayerRestService> logger)
         : base(authenticator, logger)
     {
@@ -74,7 +75,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
         this.playerServices = playerServices;
         this.accountsController = accountsController;
         this.eventSender = eventSender;
-        this.configManager = configManager;
+        this.newPlayersOptions = newPlayersOptions.Value;
     }
 
     public override string Path => RestEndpoints.Player;
@@ -185,7 +186,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
                     .CastShadows(new Shadow { Radius = 0.2f })
                     .AnimatedSprite(221); // TODO Configurable appearance
 
-                if (configManager.ServerConfiguration.NewPlayers.AdminByDefault)
+                if (newPlayersOptions.AdminByDefault)
                 {
                     logger.LogWarning("Player {Name} defaulting to admin; edit server configuration if unintended.",
                         request.PlayerName);

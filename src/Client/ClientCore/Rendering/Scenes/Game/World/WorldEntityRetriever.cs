@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Components;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
@@ -47,7 +48,6 @@ public sealed class WorldEntityRetriever
     private readonly CameraServices camera;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castsShadows;
-    private readonly ClientConfigurationManager configManager;
     private readonly WorldLayerGrouper grouper;
 
     private readonly KinematicsComponentCollection kinematics;
@@ -62,6 +62,8 @@ public sealed class WorldEntityRetriever
     private readonly AnimationPhaseComponentCollection phases;
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly WorldRangeSelector rangeSelector;
+
+    private readonly RendererOptions rendererOptions;
     private readonly NonBlockShadowPlanner shadowPlanner;
     private readonly DisplayViewport viewport;
 
@@ -71,7 +73,7 @@ public sealed class WorldEntityRetriever
     private uint solidBlockIndex;
 
     public WorldEntityRetriever(CameraServices camera, DisplayViewport viewport,
-        ClientConfigurationManager configManager, PerspectiveServices perspectiveServices,
+        PerspectiveServices perspectiveServices,
         WorldLayerGrouper grouper, KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
         AnimatedSpriteComponentCollection animatedSprites,
@@ -81,11 +83,10 @@ public sealed class WorldEntityRetriever
         LightSourceTable lightSourceTable, PlayerCharacterTagCollection playerCharacters,
         WorldRangeSelector rangeSelector, AtlasMap atlasMap,
         ILogger<WorldEntityRetriever> logger, CastShadowsComponentCollection castsShadows,
-        NonBlockShadowPlanner shadowPlanner)
+        NonBlockShadowPlanner shadowPlanner, IOptions<RendererOptions> rendererOptions)
     {
         this.camera = camera;
         this.viewport = viewport;
-        this.configManager = configManager;
         this.perspectiveServices = perspectiveServices;
         this.grouper = grouper;
         this.kinematics = kinematics;
@@ -103,6 +104,7 @@ public sealed class WorldEntityRetriever
         this.logger = logger;
         this.castsShadows = castsShadows;
         this.shadowPlanner = shadowPlanner;
+        this.rendererOptions = rendererOptions.Value;
     }
 
     /// <summary>
@@ -123,11 +125,10 @@ public sealed class WorldEntityRetriever
 
         rangeSelector.DetermineExtents(out var minExtent, out var maxExtent, cameraPos);
 
-        var clientConfiguration = configManager.ClientConfiguration;
         var zMin = EntityList.ForComparison(
-            (int)Math.Floor(minExtent.Z - halfY - clientConfiguration.RenderSearchSpacerY));
+            (int)Math.Floor(minExtent.Z - halfY - rendererOptions.RenderSearchSpacerY));
         var zMax = EntityList.ForComparison(
-            (int)Math.Floor(minExtent.Z + halfY + clientConfiguration.RenderSearchSpacerY));
+            (int)Math.Floor(minExtent.Z + halfY + rendererOptions.RenderSearchSpacerY));
 
         // Identify light sources. This must be done at this point so that blocks can be flagged
         // for inclusion in the per-light shadow maps appropriately.
