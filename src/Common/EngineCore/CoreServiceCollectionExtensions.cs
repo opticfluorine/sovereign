@@ -30,6 +30,7 @@ using Sovereign.EngineCore.Performance;
 using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Systems.Block;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineCore.Systems.Movement;
 using Sovereign.EngineCore.Systems.Performance;
 using Sovereign.EngineCore.Systems.WorldManagement;
@@ -209,6 +210,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddTransient<SystemExecutor>();
 
         AddBlockSystem(services);
+        AddDataSystem(services);
         AddMovementSystem(services);
         AddPerformanceSystem(services);
         AddWorldManagementSystem(services);
@@ -224,6 +226,17 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<BlockGridTracker>();
         services.TryAddSingleton<BlockInternalController>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, BlockSystem>());
+    }
+
+    private static void AddDataSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<IDataServices, DataServices>();
+        services.TryAddSingleton<IDataController, DataController>();
+        services.TryAddSingleton<IDataChangeNotifier, DataChangeNotifier>();
+        services.TryAddSingleton<IDataChangeNotifierInternal>(provider =>
+            (IDataChangeNotifierInternal)provider.GetRequiredService<IDataChangeNotifier>());
+        services.TryAddSingleton<GlobalKeyValueStore>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, DataSystem>());
     }
 
     private static void AddMovementSystem(IServiceCollection services)

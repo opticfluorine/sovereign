@@ -2,6 +2,15 @@
 
 ## 2025
 
+### May
+
+#### 2 May 2025
+
+* Data: Add new Data system for managing non-component data. This provides a local mechanism
+  (i.e. not replicated between client and server) to associate key-value pairs in various
+  scopes. Currently only the global scope is supported. Still to be done is persisting this
+  data on the server and adding scripting interfaces.
+
 ### April
 
 #### 26 April 2025

@@ -60,6 +60,7 @@ namespace Sovereign.EngineCore.Events;
 [JsonDerivedType(typeof(GenericChatEventDetails), nameof(GenericChatEventDetails))]
 [JsonDerivedType(typeof(GlobalChatEventDetails), nameof(GlobalChatEventDetails))]
 [JsonDerivedType(typeof(GridPositionEventDetails), nameof(GridPositionEventDetails))]
+[JsonDerivedType(typeof(KeyValueEventDetails), nameof(KeyValueEventDetails))]
 [JsonDerivedType(typeof(LocalChatEventDetails), nameof(LocalChatEventDetails))]
 [JsonDerivedType(typeof(MaterialPairEventDetails), nameof(MaterialPairEventDetails))]
 [JsonDerivedType(typeof(MoveEventDetails), nameof(MoveEventDetails))]

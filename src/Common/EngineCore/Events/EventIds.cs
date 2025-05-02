@@ -254,6 +254,22 @@ public enum EventId
 
     #endregion Chat
 
+    #region Data
+
+    /// <summary>
+    ///     Sets a global key-value pair.
+    /// </summary>
+    /// Associated details: KeyValueEventDetails
+    Core_Data_SetGlobal = 900,
+
+    /// <summary>
+    ///     Removes a global key-value pair.
+    /// </summary>
+    /// Associated details: StringEventDetails
+    Core_Data_RemoveGlobal = 901,
+
+    #endregion Data
+
     #endregion Core
 
     #region Client
