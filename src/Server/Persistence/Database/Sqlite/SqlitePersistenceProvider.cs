@@ -88,9 +88,11 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             throw new FatalErrorException();
         }
 
+        var conn = (SqliteConnection)Connection;
+
         MigrationQuery = new SqliteMigrationQuery(Connection);
         NextPersistedIdQuery = new SqliteNextPersistedIdQuery(Connection);
-        RetrieveAllTemplatesQuery = new SqliteRetrieveAllTemplatesQuery((SqliteConnection)Connection);
+        RetrieveAllTemplatesQuery = new SqliteRetrieveAllTemplatesQuery(conn);
 
         AddAccountQuery = new SqliteAddAccountQuery(Connection);
         RetrieveAccountQuery = new SqliteRetrieveAccountQuery(Connection);
@@ -102,138 +104,140 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         AddEntityQuery = new SqliteAddEntityQuery(Connection);
         RemoveEntityQuery = new SqliteRemoveEntityQuery(Connection);
 
-        SetTemplateQuery = new SqliteSetTemplateQuery((SqliteConnection)Connection);
+        SetTemplateQuery = new SqliteSetTemplateQuery(conn);
 
-        PlayerExistsQuery = new SqlitePlayerExistsQuery((SqliteConnection)Connection);
-        GetAccountForPlayerQuery = new SqliteGetAccountForPlayerQuery((SqliteConnection)Connection);
-        ListPlayersQuery = new SqliteListPlayersQuery((SqliteConnection)Connection);
-        DeletePlayerQuery = new SqliteDeletePlayerQuery((SqliteConnection)Connection);
+        PlayerExistsQuery = new SqlitePlayerExistsQuery(conn);
+        GetAccountForPlayerQuery = new SqliteGetAccountForPlayerQuery(conn);
+        ListPlayersQuery = new SqliteListPlayersQuery(conn);
+        DeletePlayerQuery = new SqliteDeletePlayerQuery(conn);
 
-        AddAdminRoleQuery = new SqliteAddAdminRoleQuery((SqliteConnection)Connection);
-        RemoveAdminRoleQuery = new SqliteRemoveAdminRoleQuery((SqliteConnection)Connection);
+        AddAdminRoleQuery = new SqliteAddAdminRoleQuery(conn);
+        RemoveAdminRoleQuery = new SqliteRemoveAdminRoleQuery(conn);
+
+        GetGlobalKeyValuePairsQuery = new SqliteGetGlobalKeyValuePairsQuery(conn);
 
         /* Position component. */
-        AddPositionQuery = new SqliteAddPositionComponentQuery((SqliteConnection)Connection);
-        ModifyPositionQuery = new SqliteModifyPositionComponentQuery((SqliteConnection)Connection);
-        RemovePositionQuery = new Vector3SqliteRemoveComponentQuery(PositionColumnPrefix, (SqliteConnection)Connection);
+        AddPositionQuery = new SqliteAddPositionComponentQuery(conn);
+        ModifyPositionQuery = new SqliteModifyPositionComponentQuery(conn);
+        RemovePositionQuery = new Vector3SqliteRemoveComponentQuery(PositionColumnPrefix, conn);
 
         /* Material component. */
         AddMaterialQuery = new SimpleSqliteAddComponentQuery<int>(
             MaterialParamName, MaterialParamType,
-            (SqliteConnection)Connection);
+            conn);
         ModifyMaterialQuery = new SimpleSqliteModifyComponentQuery<int>(
             MaterialParamName, MaterialParamType,
-            (SqliteConnection)Connection);
+            conn);
         RemoveMaterialQuery = new SimpleSqliteRemoveComponentQuery(MaterialParamName,
-            (SqliteConnection)Connection);
+            conn);
 
         /* MaterialModifier component. */
         AddMaterialModifierQuery = new SimpleSqliteAddComponentQuery<int>(
             MaterialModifierParamName,
-            MaterialModifierParamType, (SqliteConnection)Connection);
+            MaterialModifierParamType, conn);
         ModifyMaterialModifierQuery = new SimpleSqliteModifyComponentQuery<int>(
             MaterialModifierParamName,
-            MaterialModifierParamType, (SqliteConnection)Connection);
+            MaterialModifierParamType, conn);
         RemoveMaterialModifierQuery = new SimpleSqliteRemoveComponentQuery(MaterialModifierParamName,
-            (SqliteConnection)Connection);
+            conn);
 
         /* PlayerCharacter tag. */
         AddPlayerCharacterQuery = new SimpleSqliteAddComponentQuery<bool>(
-            PlayerCharacterParamName, PlayerCharacterParamType, (SqliteConnection)Connection);
+            PlayerCharacterParamName, PlayerCharacterParamType, conn);
         ModifyPlayerCharacterQuery = new SimpleSqliteModifyComponentQuery<bool>(
-            PlayerCharacterParamName, PlayerCharacterParamType, (SqliteConnection)Connection);
+            PlayerCharacterParamName, PlayerCharacterParamType, conn);
         RemovePlayerCharacterQuery = new SimpleSqliteRemoveComponentQuery(PlayerCharacterParamName,
-            (SqliteConnection)Connection);
+            conn);
 
         /* Name component. */
         AddNameQuery = new SimpleSqliteAddComponentQuery<string>(
-            NameParamName, NameParamType, (SqliteConnection)Connection);
+            NameParamName, NameParamType, conn);
         ModifyNameQuery = new SimpleSqliteModifyComponentQuery<string>(NameParamName,
-            NameParamType, (SqliteConnection)Connection);
-        RemoveNameQuery = new SimpleSqliteRemoveComponentQuery(NameParamName, (SqliteConnection)Connection);
+            NameParamType, conn);
+        RemoveNameQuery = new SimpleSqliteRemoveComponentQuery(NameParamName, conn);
 
         /* Account component. */
         AddAccountComponentQuery = new GuidSqliteAddComponentQuery(
-            AccountComponentParamName, (SqliteConnection)Connection);
+            AccountComponentParamName, conn);
         ModifyAccountComponentQuery = new GuidSqliteModifyComponentQuery(
-            AccountComponentParamName, (SqliteConnection)Connection);
+            AccountComponentParamName, conn);
         RemoveAccountComponentQuery = new SimpleSqliteRemoveComponentQuery(AccountComponentParamName,
-            (SqliteConnection)Connection);
+            conn);
 
         // Parent component.
         AddParentComponentQuery = new SimpleSqliteAddComponentQuery<ulong>(ParentParamName,
-            ParentParamType, (SqliteConnection)Connection);
+            ParentParamType, conn);
         ModifyParentComponentQuery = new SimpleSqliteModifyComponentQuery<ulong>(ParentParamName,
-            ParentParamType, (SqliteConnection)Connection);
+            ParentParamType, conn);
         RemoveParentComponentQuery =
-            new SimpleSqliteRemoveComponentQuery(ParentParamName, (SqliteConnection)Connection);
+            new SimpleSqliteRemoveComponentQuery(ParentParamName, conn);
 
         // Drawable component.
         AddDrawableComponentQuery = new SimpleSqliteAddComponentQuery<bool>(DrawableParamName,
-            DrawableParamType, (SqliteConnection)Connection);
+            DrawableParamType, conn);
         ModifyDrawableComponentQuery = new SimpleSqliteModifyComponentQuery<bool>(
             DrawableParamName,
-            DrawableParamType, (SqliteConnection)Connection);
+            DrawableParamType, conn);
         RemoveDrawableComponentQuery =
-            new SimpleSqliteRemoveComponentQuery(DrawableParamName, (SqliteConnection)Connection);
+            new SimpleSqliteRemoveComponentQuery(DrawableParamName, conn);
 
         // AnimatedSprite component.
         AddAnimatedSpriteComponentQuery = new SimpleSqliteAddComponentQuery<int>(
-            AnimatedSpriteParamName, AnimatedSpriteParamType, (SqliteConnection)Connection);
+            AnimatedSpriteParamName, AnimatedSpriteParamType, conn);
         ModifyAnimatedSpriteComponentQuery = new SimpleSqliteModifyComponentQuery<int>(
-            AnimatedSpriteParamName, AnimatedSpriteParamType, (SqliteConnection)Connection);
+            AnimatedSpriteParamName, AnimatedSpriteParamType, conn);
         RemoveAnimatedSpriteComponentQuery = new SimpleSqliteRemoveComponentQuery(
-            AnimatedSpriteParamName, (SqliteConnection)Connection);
+            AnimatedSpriteParamName, conn);
 
         // Orientation component.
         AddOrientationComponentQuery = new SimpleSqliteAddComponentQuery<Orientation>(
-            OrientationParamName, OrientationParamType, (SqliteConnection)Connection);
+            OrientationParamName, OrientationParamType, conn);
         ModifyOrientationComponentQuery = new SimpleSqliteModifyComponentQuery<Orientation>(
-            OrientationParamName, OrientationParamType, (SqliteConnection)Connection);
+            OrientationParamName, OrientationParamType, conn);
         RemoveOrientationComponentQuery =
-            new SimpleSqliteRemoveComponentQuery(OrientationParamName, (SqliteConnection)Connection);
+            new SimpleSqliteRemoveComponentQuery(OrientationParamName, conn);
 
         // Admin component.
         AddAdminComponentQuery = new SimpleSqliteAddComponentQuery<bool>(
-            AdminParamName, AdminParamType, (SqliteConnection)Connection);
+            AdminParamName, AdminParamType, conn);
         ModifyAdminComponentQuery = new SimpleSqliteModifyComponentQuery<bool>(
-            AdminParamName, AdminParamType, (SqliteConnection)Connection);
-        RemoveAdminComponentQuery = new SimpleSqliteRemoveComponentQuery(AdminParamName, (SqliteConnection)Connection);
+            AdminParamName, AdminParamType, conn);
+        RemoveAdminComponentQuery = new SimpleSqliteRemoveComponentQuery(AdminParamName, conn);
 
-        GetWorldSegmentBlockDataQuery = new SqliteGetWorldSegmentBlockDataQuery((SqliteConnection)Connection);
-        SetWorldSegmentBlockDataQuery = new SqliteSetWorldSegmentBlockDataQuery((SqliteConnection)Connection);
+        GetWorldSegmentBlockDataQuery = new SqliteGetWorldSegmentBlockDataQuery(conn);
+        SetWorldSegmentBlockDataQuery = new SqliteSetWorldSegmentBlockDataQuery(conn);
 
         // CastBlockShadows component.
         AddCastBlockShadowsComponentQuery = new SimpleSqliteAddComponentQuery<bool>(
-            CastBlockShadowsParamName, CastBlockShadowsParamType, (SqliteConnection)Connection);
+            CastBlockShadowsParamName, CastBlockShadowsParamType, conn);
         ModifyCastBlockShadowsComponentQuery = new SimpleSqliteModifyComponentQuery<bool>(
-            CastBlockShadowsParamName, CastBlockShadowsParamType, (SqliteConnection)Connection);
+            CastBlockShadowsParamName, CastBlockShadowsParamType, conn);
         RemoveCastBlockShadowsComponentQuery = new SimpleSqliteRemoveComponentQuery(CastBlockShadowsParamName,
-            (SqliteConnection)Connection);
+            conn);
 
         // PointLightSource component.
-        var pointLightSourceQuery = new SqliteAddModifyPointLightSourceComponentQuery((SqliteConnection)Connection);
+        var pointLightSourceQuery = new SqliteAddModifyPointLightSourceComponentQuery(conn);
         AddPointLightSourceComponentQuery = pointLightSourceQuery;
         ModifyPointLightSourceComponentQuery = pointLightSourceQuery;
         RemovePointLightSourceComponentQuery =
-            new SqliteRemovePointLightSourceComponentQuery((SqliteConnection)Connection);
+            new SqliteRemovePointLightSourceComponentQuery(conn);
 
         // Physics component.
         AddPhysicsComponentQuery = new SimpleSqliteAddComponentQuery<bool>(PhysicsParamName, PhysicsParamType,
-            (SqliteConnection)Connection);
+            conn);
         ModifyPhysicsComponentQuery = new SimpleSqliteModifyComponentQuery<bool>(PhysicsParamName, PhysicsParamType,
-            (SqliteConnection)Connection);
+            conn);
         RemovePhysicsComponentQuery =
-            new SimpleSqliteRemoveComponentQuery(PhysicsParamName, (SqliteConnection)Connection);
+            new SimpleSqliteRemoveComponentQuery(PhysicsParamName, conn);
 
         // BoundingBox component.
-        var boundingBoxQuery = new SqliteAddModifyBoundingBoxComponentQuery((SqliteConnection)Connection);
+        var boundingBoxQuery = new SqliteAddModifyBoundingBoxComponentQuery(conn);
         AddBoundingBoxComponentQuery = boundingBoxQuery;
         ModifyBoundingBoxComponentQuery = boundingBoxQuery;
-        RemoveBoundingBoxComponentQuery = new SqliteRemoveBoundingBoxComponentQuery((SqliteConnection)Connection);
+        RemoveBoundingBoxComponentQuery = new SqliteRemoveBoundingBoxComponentQuery(conn);
 
         // CastShadows component.
-        var castShadowsQueries = new SqliteCastShadowsComponentQueries((SqliteConnection)Connection);
+        var castShadowsQueries = new SqliteCastShadowsComponentQueries(conn);
         AddCastShadowsComponentQuery = castShadowsQueries;
         ModifyCastShadowsComponentQuery = castShadowsQueries;
         RemoveCastShadowsComponentQuery = castShadowsQueries;
@@ -318,6 +322,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<Shadow> AddCastShadowsComponentQuery { get; }
     public IModifyComponentQuery<Shadow> ModifyCastShadowsComponentQuery { get; }
     public IRemoveComponentQuery RemoveCastShadowsComponentQuery { get; }
+    public IGetGlobalKeyValuePairsQuery GetGlobalKeyValuePairsQuery { get; }
 
     public void Dispose()
     {

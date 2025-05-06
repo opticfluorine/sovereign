@@ -51,10 +51,7 @@ internal class GlobalKeyValueStore
         var isNewKey = KeyValueStore.ContainsKey(key);
         KeyValueStore[key] = value;
 
-        if (isNewKey)
-            internalController.GlobalAdded(key, value);
-        else
-            internalController.GlobalUpdated(key, value);
+        internalController.GlobalSet(key, value);
     }
 
     /// <summary>

@@ -366,4 +366,9 @@ public interface IPersistenceProvider : IDisposable
     ///     ISetWorldSegmentBlockDataQuery for this persistence provider.
     /// </summary>
     ISetWorldSegmentBlockDataQuery SetWorldSegmentBlockDataQuery { get; }
+
+    /// <summary>
+    ///     IGetGlobalKeyValuePairsQuery for this persistence provider.
+    /// </summary>
+    IGetGlobalKeyValuePairsQuery GetGlobalKeyValuePairsQuery { get; }
 }

@@ -4,6 +4,10 @@
 
 ### May
 
+#### 6 May 2025
+
+* Data: Load global key-value pairs from database at startup.
+
 #### 2 May 2025
 
 * Data: Add new Data system for managing non-component data. This provides a local mechanism

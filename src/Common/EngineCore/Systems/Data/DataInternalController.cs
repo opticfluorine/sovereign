@@ -32,34 +32,18 @@ internal class DataInternalController
     }
 
     /// <summary>
-    ///     Announces a global key-value pair has been added.
+    ///     Announces a global key-value pair has been added or updated.
     /// </summary>
     /// <param name="key">Key.</param>
     /// <param name="value">Value.</param>
-    public void GlobalAdded(string key, string value)
+    public void GlobalSet(string key, string value)
     {
         var details = new KeyValueEventDetails
         {
             Key = key,
             Value = value
         };
-        var ev = new Event(EventId.Core_Data_GlobalAdded, details);
-        eventSender.SendEvent(ev);
-    }
-
-    /// <summary>
-    ///     Announces a global key-value pair has been updated.
-    /// </summary>
-    /// <param name="key">Key.</param>
-    /// <param name="value">Value.</param>
-    public void GlobalUpdated(string key, string value)
-    {
-        var details = new KeyValueEventDetails
-        {
-            Key = key,
-            Value = value
-        };
-        var ev = new Event(EventId.Core_Data_GlobalUpdated, details);
+        var ev = new Event(EventId.Core_Data_GlobalSet, details);
         eventSender.SendEvent(ev);
     }
 

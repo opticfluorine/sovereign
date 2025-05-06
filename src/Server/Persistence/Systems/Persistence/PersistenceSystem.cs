@@ -21,6 +21,7 @@ using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Systems;
+using Sovereign.Persistence.Data;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
 using Sovereign.Persistence.State.Trackers;
@@ -37,6 +38,7 @@ public sealed class PersistenceSystem : ISystem
     private readonly EntityMapper entityMapper;
     private readonly EntityProcessor entityProcessor;
     private readonly PersistenceEventHandler eventHandler;
+    private readonly GlobalKeyValueProcessor globalKeyValueProcessor;
 
     private readonly ILogger<PersistenceSystem> logger;
     private readonly PersistenceProviderManager providerManager;
@@ -52,7 +54,8 @@ public sealed class PersistenceSystem : ISystem
         EntityMapper entityMapper,
         EntityProcessor entityProcessor,
         TrackerManager trackerManager,
-        ILogger<PersistenceSystem> logger)
+        ILogger<PersistenceSystem> logger,
+        GlobalKeyValueProcessor globalKeyValueProcessor)
     {
         /* Dependency injection. */
         this.providerManager = providerManager;
@@ -63,6 +66,7 @@ public sealed class PersistenceSystem : ISystem
         this.entityProcessor = entityProcessor;
         this.trackerManager = trackerManager;
         this.logger = logger;
+        this.globalKeyValueProcessor = globalKeyValueProcessor;
         EventCommunicator = eventCommunicator;
 
         /* Register system. */
@@ -140,6 +144,7 @@ public sealed class PersistenceSystem : ISystem
         }
 
         LoadTemplates();
+        LoadGlobalKeyValuePairs();
     }
 
     /// <summary>
@@ -157,6 +162,24 @@ public sealed class PersistenceSystem : ISystem
         catch (Exception e)
         {
             logger.LogCritical(e, "Error loading template entities.");
+            throw new FatalErrorException();
+        }
+    }
+
+    /// <summary>
+    ///     Loads all global key-value pairs from the database.
+    /// </summary>
+    private void LoadGlobalKeyValuePairs()
+    {
+        try
+        {
+            using var reader = providerManager.PersistenceProvider.GetGlobalKeyValuePairsQuery.GetGlobalKeyValuePairs();
+            var count = globalKeyValueProcessor.Process(reader);
+            logger.LogInformation("Loaded {Count} global key-value pairs.", count);
+        }
+        catch (Exception e)
+        {
+            logger.LogCritical(e, "Error loading global key-value pairs.");
             throw new FatalErrorException();
         }
     }
