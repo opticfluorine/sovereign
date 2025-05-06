@@ -123,6 +123,17 @@ CREATE TABLE WorldSegmentBlockData
 );
 
 
+----------------------------
+-- Global Key-Value Store --
+----------------------------
+
+CREATE TABLE GlobalKeyValue
+(
+    key   TEXT PRIMARY KEY NOT NULL,
+    value TEXT             NOT NULL
+);
+
+
 --------------------------------------
 -- Account With Authentication View --
 --------------------------------------

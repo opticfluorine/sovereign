@@ -24,16 +24,20 @@ namespace Sovereign.EngineCore.Systems.Data;
 /// </summary>
 internal class GlobalKeyValueStore
 {
-    private readonly IDataChangeNotifierInternal dataChangeNotifier;
-    private readonly ConcurrentDictionary<string, string> globalKeyValueStore = new();
+    private readonly DataInternalController internalController;
     private readonly ILogger<GlobalKeyValueStore> logger;
 
-    public GlobalKeyValueStore(IDataChangeNotifierInternal dataChangeNotifier,
+    public GlobalKeyValueStore(DataInternalController internalController,
         ILogger<GlobalKeyValueStore> logger)
     {
-        this.dataChangeNotifier = dataChangeNotifier;
+        this.internalController = internalController;
         this.logger = logger;
     }
+
+    /// <summary>
+    ///     Key-value store.
+    /// </summary>
+    public ConcurrentDictionary<string, string> KeyValueStore { get; } = new();
 
     /// <summary>
     ///     Adds or updates a global key-value pair.
@@ -44,13 +48,13 @@ internal class GlobalKeyValueStore
     {
         logger.LogDebug("Global: Set {Key} = {Value}.", key, value);
 
-        var isNewKey = globalKeyValueStore.ContainsKey(key);
-        globalKeyValueStore[key] = value;
+        var isNewKey = KeyValueStore.ContainsKey(key);
+        KeyValueStore[key] = value;
 
         if (isNewKey)
-            dataChangeNotifier.NotifyGlobalAdded(key, value);
+            internalController.GlobalAdded(key, value);
         else
-            dataChangeNotifier.NotifyGlobalModified(key, value);
+            internalController.GlobalUpdated(key, value);
     }
 
     /// <summary>
@@ -59,10 +63,10 @@ internal class GlobalKeyValueStore
     /// <param name="key">Global key.</param>
     public void RemoveGlobal(string key)
     {
-        if (globalKeyValueStore.TryRemove(key, out _))
+        if (KeyValueStore.TryRemove(key, out _))
         {
             logger.LogDebug("Global: Remove {Key}.", key);
-            dataChangeNotifier.NotifyGlobalRemoved(key);
+            internalController.GlobalRemoved(key);
         }
     }
 }

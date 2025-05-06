@@ -265,8 +265,26 @@ public enum EventId
     /// <summary>
     ///     Removes a global key-value pair.
     /// </summary>
-    /// Associated details: StringEventDetails
+    /// Associated details: StringEventDetails (specifying the key)
     Core_Data_RemoveGlobal = 901,
+
+    /// <summary>
+    ///     Announces that a global key-value pair has been created.
+    /// </summary>
+    /// Associated details: KeyValueEventDetails
+    Core_Data_GlobalAdded = 902,
+
+    /// <summary>
+    ///     Announces that a global key-value pair has been updated.
+    /// </summary>
+    /// Associated details: KeyValueEventDetails
+    Core_Data_GlobalUpdated = 902,
+
+    /// <summary>
+    ///     Announces that a global key-value pair has been removed.
+    /// </summary>
+    /// Associated details: StringEventDetails (specifying the key)
+    Core_Data_GlobalRemoved = 903,
 
     #endregion Data
 

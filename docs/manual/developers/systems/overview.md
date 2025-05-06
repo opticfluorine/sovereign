@@ -11,6 +11,7 @@ Core systems are present in both the client and server.
 | System        | System Class        | Description                                                        |
 |---------------|---------------------|--------------------------------------------------------------------|
 | `Block`       | `BlockSystem`       | Responsible for managing the lifecycle of block entities.          |
+| `Data`        | `DataSystem`        | Responsible for managing non-component data.                       |
 | `Movement`    | `MovementSystem`    | Responsible for controlling the movement of positionable entities. |
 | `Network`     | `NetworkSystem`     | Responsible for replicating local events onto the network.         |
 | `Performance` | `PerformanceSystem` | Responsible for monitoring engine performance.                     |

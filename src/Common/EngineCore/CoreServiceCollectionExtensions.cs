@@ -232,9 +232,7 @@ public static class CoreServiceCollectionExtensions
     {
         services.TryAddSingleton<IDataServices, DataServices>();
         services.TryAddSingleton<IDataController, DataController>();
-        services.TryAddSingleton<IDataChangeNotifier, DataChangeNotifier>();
-        services.TryAddSingleton<IDataChangeNotifierInternal>(provider =>
-            (IDataChangeNotifierInternal)provider.GetRequiredService<IDataChangeNotifier>());
+        services.TryAddSingleton<DataInternalController>();
         services.TryAddSingleton<GlobalKeyValueStore>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, DataSystem>());
     }

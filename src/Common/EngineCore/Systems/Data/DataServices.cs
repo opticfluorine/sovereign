@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Sovereign.EngineCore.Systems.Data;
 
@@ -38,39 +39,95 @@ public interface IDataServices
     ///     Gets the string value associated with the given global key.
     /// </summary>
     /// <param name="key">Global key.</param>
-    /// <returns>Associated value.</returns>
-    /// <exception cref="KeyNotFoundException">Thrown if the given key is not found.</exception>
-    string GetGlobal(string key);
+    /// <param name="value">Associated value, or null if the method returns false.</param>
+    /// <returns>true if a matching key was found, false otherwise.</returns>
+    bool TryGetGlobal(string key, [NotNullWhen(true)] out string? value);
 
     /// <summary>
-    ///     Gets the value associated with the given global key, converting the value from string
-    ///     to the specified type.
+    ///     Gets the value associated with the given global key as an integer.
     /// </summary>
     /// <param name="key">Global key.</param>
-    /// <typeparam name="T">Desired value type.</typeparam>
-    /// <returns>Associated value.</returns>
+    /// <param name="value">Associated value. Only valid if the method returns true.</param>
+    /// <returns>true if the key is found and the value can be converted; false otherwise.</returns>
     /// <exception cref="KeyNotFoundException">Thrown if the given key is not found.</exception>
-    /// <exception cref="InvalidCastException">Thrown if the value cannot be converted to the given type.</exception>
-    T GetGlobal<T>(string key);
+    /// <exception cref="InvalidCastException">Thrown if the value cannot be converted to integer.</exception>
+    bool TryGetGlobalInt(string key, out int value);
+
+    /// <summary>
+    ///     Gets the value associated with the given global key as an ulong.
+    /// </summary>
+    /// <param name="key">Global key.</param>
+    /// <param name="value">Associated value. Only valid if the method returns true.</param>
+    /// <returns>Associated ulong value.</returns>
+    /// <returns>true if the key is found and the value can be converted; false otherwise.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the given key is not found.</exception>
+    /// <exception cref="InvalidCastException">Thrown if the value cannot be converted to ulong.</exception>
+    bool TryGetGlobalUlong(string key, out ulong value);
+
+    /// <summary>
+    ///     Gets the value associated with the given global key as an float.
+    /// </summary>
+    /// <param name="key">Global key.</param>
+    /// <param name="value">Associated value. Only valid if the method returns true.</param>
+    /// <returns>true if the key is found and the value can be converted; false otherwise.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the given key is not found.</exception>
+    /// <exception cref="InvalidCastException">Thrown if the value cannot be converted to float.</exception>
+    bool TryGetGlobalFloat(string key, out float value);
+
+    /// <summary>
+    ///     Gets the value associated with the given global key as an bool.
+    /// </summary>
+    /// <param name="key">Global key.</param>
+    /// <param name="value">Associated value. Only valid if the method returns true.</param>
+    /// <returns>true if the key is found and the value can be converted; false otherwise.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the given key is not found.</exception>
+    /// <exception cref="InvalidCastException">Thrown if the value cannot be converted to bool.</exception>
+    bool TryGetGlobalBool(string key, out bool value);
 }
 
 /// <summary>
 ///     Implementation of IDataServices.
 /// </summary>
-public class DataServices : IDataServices
+internal class DataServices : IDataServices
 {
+    private readonly GlobalKeyValueStore globalStore;
+
+    public DataServices(GlobalKeyValueStore globalStore)
+    {
+        this.globalStore = globalStore;
+    }
+
     public bool HasGlobal(string key)
     {
-        return false;
+        return globalStore.KeyValueStore.ContainsKey(key);
     }
 
-    public string GetGlobal(string key)
+    public bool TryGetGlobal(string key, [NotNullWhen(true)] out string? value)
     {
-        throw new KeyNotFoundException();
+        return globalStore.KeyValueStore.TryGetValue(key, out value);
     }
 
-    public T GetGlobal<T>(string key)
+    public bool TryGetGlobalInt(string key, out int value)
     {
-        throw new KeyNotFoundException();
+        value = 0;
+        return TryGetGlobal(key, out var rawValue) && int.TryParse(rawValue, out value);
+    }
+
+    public bool TryGetGlobalUlong(string key, out ulong value)
+    {
+        value = 0;
+        return TryGetGlobal(key, out var rawValue) && ulong.TryParse(rawValue, out value);
+    }
+
+    public bool TryGetGlobalFloat(string key, out float value)
+    {
+        value = 0.0f;
+        return TryGetGlobal(key, out var rawValue) && float.TryParse(rawValue, out value);
+    }
+
+    public bool TryGetGlobalBool(string key, out bool value)
+    {
+        value = false;
+        return TryGetGlobal(key, out var rawValue) && bool.TryParse(rawValue, out value);
     }
 }
