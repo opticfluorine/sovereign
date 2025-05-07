@@ -46,7 +46,7 @@ internal class GlobalKeyValueStore
     /// <param name="value">Global value.</param>
     public void SetGlobal(string key, string value)
     {
-        logger.LogDebug("Global: Set {Key} = {Value}.", key, value);
+        logger.LogTrace("Global: Set {Key} = {Value}.", key, value);
 
         var isNewKey = KeyValueStore.ContainsKey(key);
         KeyValueStore[key] = value;
@@ -62,7 +62,7 @@ internal class GlobalKeyValueStore
     {
         if (KeyValueStore.TryRemove(key, out _))
         {
-            logger.LogDebug("Global: Remove {Key}.", key);
+            logger.LogTrace("Global: Remove {Key}.", key);
             internalController.GlobalRemoved(key);
         }
     }

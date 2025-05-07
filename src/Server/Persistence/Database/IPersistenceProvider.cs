@@ -371,4 +371,14 @@ public interface IPersistenceProvider : IDisposable
     ///     IGetGlobalKeyValuePairsQuery for this persistence provider.
     /// </summary>
     IGetGlobalKeyValuePairsQuery GetGlobalKeyValuePairsQuery { get; }
+
+    /// <summary>
+    ///     IUpdateGlobalKeyValuePairQuery for this persistence provider.
+    /// </summary>
+    IUpdateGlobalKeyValuePairQuery UpdateGlobalKeyValuePairQuery { get; }
+
+    /// <summary>
+    ///     IRemoveGlobalKeyValuePairQuery for this persistence provider.
+    /// </summary>
+    IRemoveGlobalKeyValuePairQuery RemoveGlobalKeyValuePairQuery { get; }
 }

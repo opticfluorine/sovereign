@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.Persistence.State;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.Persistence.Systems.Persistence;
@@ -34,6 +35,7 @@ public sealed class PersistenceEventHandler
     private readonly ILogger<PersistenceEventHandler> logger;
     private readonly PersistenceRangeRetriever rangeRetriever;
     private readonly PersistenceScheduler scheduler;
+    private readonly StateManager stateManager;
     private readonly PersistenceSynchronizer synchronizer;
 
     public PersistenceEventHandler(PersistenceScheduler scheduler,
@@ -42,7 +44,8 @@ public sealed class PersistenceEventHandler
         PersistenceRangeRetriever rangeRetriever,
         PersistenceInternalController internalController,
         IEventSender eventSender,
-        ILogger<PersistenceEventHandler> logger)
+        ILogger<PersistenceEventHandler> logger,
+        StateManager stateManager)
     {
         this.scheduler = scheduler;
         this.synchronizer = synchronizer;
@@ -51,6 +54,7 @@ public sealed class PersistenceEventHandler
         this.internalController = internalController;
         this.eventSender = eventSender;
         this.logger = logger;
+        this.stateManager = stateManager;
     }
 
     public void HandleEvent(Event ev)
@@ -71,8 +75,8 @@ public sealed class PersistenceEventHandler
 
                 var details = (EntityEventDetails)ev.EventDetails;
                 OnRetrieveEntity(details.EntityId);
-            }
                 break;
+            }
 
             case EventId.Server_Persistence_RetrieveWorldSegment:
             {
@@ -84,8 +88,8 @@ public sealed class PersistenceEventHandler
 
                 var details = (WorldSegmentEventDetails)ev.EventDetails;
                 OnRetrieveWorldSegment(details.SegmentIndex);
-            }
                 break;
+            }
 
             case EventId.Server_Persistence_Synchronize:
                 OnSynchronize();
@@ -101,9 +105,42 @@ public sealed class PersistenceEventHandler
 
                 var details = (SelectPlayerEventDetails)ev.EventDetails;
                 OnSelectPlayer(details);
-            }
                 break;
+            }
+
+            case EventId.Core_Data_GlobalSet:
+            {
+                if (ev.EventDetails is not KeyValueEventDetails details)
+                {
+                    logger.LogError("Received GlobalSet event with bad details.");
+                    break;
+                }
+
+                OnGlobalKeyValuePairChanged(details.Key);
+                break;
+            }
+
+            case EventId.Core_Data_GlobalRemoved:
+            {
+                if (ev.EventDetails is not StringEventDetails details)
+                {
+                    logger.LogError("Received GlobalRemoved event with bad details.");
+                    break;
+                }
+
+                OnGlobalKeyValuePairChanged(details.Value);
+                break;
+            }
         }
+    }
+
+    /// <summary>
+    ///     Handles a change (create, update, delete) to a global key-value pair.
+    /// </summary>
+    /// <param name="key">Key.</param>
+    private void OnGlobalKeyValuePairChanged(string key)
+    {
+        stateManager.FrontBuffer.GlobalKeyValuePairChanged(key);
     }
 
     /// <summary>
@@ -125,8 +162,7 @@ public sealed class PersistenceEventHandler
     /// </summary>
     private void OnCoreQuit()
     {
-        /* Synchronize the database before exit. */
-        PerformSynchronization();
+        OnSynchronize();
     }
 
     /// <summary>
@@ -152,18 +188,7 @@ public sealed class PersistenceEventHandler
     /// </summary>
     private void OnSynchronize()
     {
-        /* Synchronize. */
-        PerformSynchronization();
-
-        /* Schedule the next synchronization. */
-        scheduler.ScheduleSynchronize();
-    }
-
-    /// <summary>
-    ///     Performs the database synchronization.
-    /// </summary>
-    private void PerformSynchronization()
-    {
         synchronizer.Synchronize();
+        scheduler.ScheduleSynchronize();
     }
 }

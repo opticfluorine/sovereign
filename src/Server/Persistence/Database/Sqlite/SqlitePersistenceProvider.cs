@@ -115,6 +115,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         RemoveAdminRoleQuery = new SqliteRemoveAdminRoleQuery(conn);
 
         GetGlobalKeyValuePairsQuery = new SqliteGetGlobalKeyValuePairsQuery(conn);
+        UpdateGlobalKeyValuePairQuery = new SqliteUpdateGlobalKeyValuePairQuery(conn);
+        RemoveGlobalKeyValuePairQuery = new SqliteRemoveGlobalKeyValuePairQuery(conn);
 
         /* Position component. */
         AddPositionQuery = new SqliteAddPositionComponentQuery(conn);
@@ -323,6 +325,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IModifyComponentQuery<Shadow> ModifyCastShadowsComponentQuery { get; }
     public IRemoveComponentQuery RemoveCastShadowsComponentQuery { get; }
     public IGetGlobalKeyValuePairsQuery GetGlobalKeyValuePairsQuery { get; }
+    public IUpdateGlobalKeyValuePairQuery UpdateGlobalKeyValuePairQuery { get; }
+    public IRemoveGlobalKeyValuePairQuery RemoveGlobalKeyValuePairQuery { get; }
 
     public void Dispose()
     {

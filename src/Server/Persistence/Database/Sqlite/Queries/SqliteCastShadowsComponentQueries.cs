@@ -45,7 +45,7 @@ public class SqliteCastShadowsComponentQueries : IAddComponentQuery<Shadow>, IMo
 
     public void Remove(ulong entityId, IDbTransaction transaction)
     {
-        var cmd = new SqliteCommand(removeSql, connection, (SqliteTransaction)transaction);
+        using var cmd = new SqliteCommand(removeSql, connection, (SqliteTransaction)transaction);
 
         var pId = new SqliteParameter("Id", SqliteType.Integer);
         pId.Value = entityId;
@@ -62,8 +62,8 @@ public class SqliteCastShadowsComponentQueries : IAddComponentQuery<Shadow>, IMo
     /// <param name="transaction">Database transaction.</param>
     private void DoUpdate(ulong entityId, Shadow value, IDbTransaction transaction)
     {
-        var cmd = new SqliteCommand(updateSql, connection, (SqliteTransaction)transaction);
-        
+        using var cmd = new SqliteCommand(updateSql, connection, (SqliteTransaction)transaction);
+
         var pId = new SqliteParameter("Id", SqliteType.Integer);
         pId.Value = entityId;
         cmd.Parameters.Add(pId);

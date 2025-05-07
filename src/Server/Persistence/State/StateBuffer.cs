@@ -16,11 +16,13 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Data;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineUtil.Collections;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Database.Queries;
@@ -64,6 +66,7 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<bool>> castBlockShadowsUpdates = new(BufferSize);
 
     private readonly StructBuffer<StateUpdate<Shadow>> castShadowsUpdates = new(BufferSize);
+    private readonly IDataServices dataServices;
 
     /// <summary>
     ///     Drawable state updates.
@@ -72,6 +75,12 @@ public sealed class StateBuffer
 
     private readonly IEventSender eventSender;
     private readonly FatalErrorHandler fatalErrorHandler;
+
+    /// <summary>
+    ///     Global key-value pairs to be synchronized.
+    /// </summary>
+    private readonly HashSet<string> globalKeyValuePairs = new();
+
     private readonly PersistenceInternalController internalController;
 
     /// <summary>
@@ -140,13 +149,14 @@ public sealed class StateBuffer
 
     public StateBuffer(FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
         PersistenceInternalController internalController, WorldSegmentPersister worldSegmentPersister,
-        ILogger<StateBuffer> logger)
+        ILogger<StateBuffer> logger, IDataServices dataServices)
     {
         this.fatalErrorHandler = fatalErrorHandler;
         this.eventSender = eventSender;
         this.internalController = internalController;
         this.worldSegmentPersister = worldSegmentPersister;
         this.logger = logger;
+        this.dataServices = dataServices;
     }
 
     /// <summary>
@@ -321,6 +331,15 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Flags a global key-value pair for synchronization.
+    /// </summary>
+    /// <param name="key">Key.</param>
+    public void GlobalKeyValuePairChanged(string key)
+    {
+        globalKeyValuePairs.Add(key);
+    }
+
+    /// <summary>
     ///     Resets the buffer.
     /// </summary>
     public void Reset()
@@ -344,6 +363,7 @@ public sealed class StateBuffer
         physicsUpdates.Clear();
         boundingBoxUpdates.Clear();
         castShadowsUpdates.Clear();
+        globalKeyValuePairs.Clear();
     }
 
     /// <summary>
@@ -351,15 +371,6 @@ public sealed class StateBuffer
     /// </summary>
     /// <param name="persistenceProvider">Persistence provider.</param>
     public void Synchronize(IPersistenceProvider persistenceProvider)
-    {
-        DoSynchronize(persistenceProvider);
-    }
-
-    /// <summary>
-    ///     Actually performs the synchronization.
-    /// </summary>
-    /// <param name="persistenceProvider">Persistence provider.</param>
-    private void DoSynchronize(IPersistenceProvider persistenceProvider)
     {
         try
         {
@@ -477,7 +488,7 @@ public sealed class StateBuffer
                     persistenceProvider.ModifyBoundingBoxComponentQuery,
                     persistenceProvider.RemoveBoundingBoxComponentQuery,
                     transaction);
-                
+
                 // CastShadows.
                 SynchronizeComponent(castShadowsUpdates,
                     persistenceProvider.AddCastShadowsComponentQuery,
@@ -488,6 +499,8 @@ public sealed class StateBuffer
                 SynchronizeRemovedEntities(persistenceProvider, transaction);
 
                 worldSegmentPersister.SynchronizeWorldSegments(persistenceProvider, transaction);
+
+                SynchronizeGlobalKeyValuePairs(persistenceProvider, transaction);
 
                 transaction.Commit();
             }
@@ -500,7 +513,6 @@ public sealed class StateBuffer
             fatalErrorHandler.FatalError();
         }
     }
-
 
     /// <summary>
     ///     Adds new entities to the database.
@@ -568,5 +580,24 @@ public sealed class StateBuffer
                     remQuery.Remove(update.EntityId, transaction);
                     break;
             }
+    }
+
+    /// <summary>
+    ///     Synchronizes global key-value pairs that have changed since the last synchronization.
+    /// </summary>
+    /// <param name="provider">Persistence provider.</param>
+    /// <param name="transaction">Transaction.</param>
+    private void SynchronizeGlobalKeyValuePairs(IPersistenceProvider provider, IDbTransaction transaction)
+    {
+        var updateQuery = provider.UpdateGlobalKeyValuePairQuery;
+        var removeQuery = provider.RemoveGlobalKeyValuePairQuery;
+
+        foreach (var key in globalKeyValuePairs)
+        {
+            if (dataServices.TryGetGlobal(key, out var value))
+                updateQuery.UpdateGlobalKeyValuePair(key, value, transaction);
+            else
+                removeQuery.RemoveGlobalKeyValuePair(key, transaction);
+        }
     }
 }

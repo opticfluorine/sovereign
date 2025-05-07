@@ -4,6 +4,10 @@
 
 ### May
 
+#### 7 May 2025
+
+* Data: Synchronize global key-value pairs to database when changed.
+
 #### 6 May 2025
 
 * Data: Load global key-value pairs from database at startup.

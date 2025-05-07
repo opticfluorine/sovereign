@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
 using Sovereign.Persistence.Systems.Persistence;
@@ -46,12 +47,12 @@ public sealed class StateManager : IDisposable
         ILogger<StateBuffer> stateBufferLogger, FatalErrorHandler fatalErrorHandler,
         EntityNotifier entityNotifier, EntityMapper entityMapper,
         IEventSender eventSender, PersistenceInternalController internalController,
-        WorldSegmentPersister worldSegmentPersister)
+        WorldSegmentPersister worldSegmentPersister, IDataServices dataServices)
     {
         FrontBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
-            stateBufferLogger);
+            stateBufferLogger, dataServices);
         backBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
-            stateBufferLogger);
+            stateBufferLogger, dataServices);
 
         this.entityManager = entityManager;
         this.persistenceProviderManager = persistenceProviderManager;
