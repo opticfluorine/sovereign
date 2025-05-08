@@ -80,7 +80,6 @@ public sealed class PersistenceSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
-        EventId.Core_Quit,
         EventId.Server_Persistence_RetrieveEntity,
         EventId.Server_Persistence_RetrieveWorldSegment,
         EventId.Server_Persistence_Synchronize,
@@ -116,6 +115,8 @@ public sealed class PersistenceSystem : ISystem
     public void Cleanup()
     {
         logger.LogInformation("Stopping Persistence system.");
+        
+        eventHandler.Cleanup();
 
         var provider = providerManager.PersistenceProvider;
         provider.Dispose();

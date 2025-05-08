@@ -4,6 +4,13 @@
 
 ### May
 
+#### 8 May 2025
+
+* Logging: Fix default logging configuration to show source context. This was accidentally being
+  overridden by the color theme settings for console output.
+* Persistence: Properly synchronize database during graceful shutdown of server. Previously this
+  was tied to an event that was no longer firing since moving to Generic Host.
+
 #### 7 May 2025
 
 * Data: Synchronize global key-value pairs to database when changed.

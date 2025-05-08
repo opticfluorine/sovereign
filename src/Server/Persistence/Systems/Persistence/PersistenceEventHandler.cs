@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
@@ -61,10 +62,6 @@ public sealed class PersistenceEventHandler
     {
         switch (ev.EventId)
         {
-            case EventId.Core_Quit:
-                OnCoreQuit();
-                break;
-
             case EventId.Server_Persistence_RetrieveEntity:
             {
                 if (ev.EventDetails == null)
@@ -135,6 +132,22 @@ public sealed class PersistenceEventHandler
     }
 
     /// <summary>
+    ///     Called to gracefully stop the persistence system.
+    /// </summary>
+    public void Cleanup()
+    {
+        // Do one last synchronization to the database is possible.
+        try
+        {
+            OnSynchronize();
+        }
+        catch (Exception e)
+        {
+            logger.LogCritical(e, "Error synchronizing database at shutdown.");
+        }
+    }
+
+    /// <summary>
     ///     Handles a change (create, update, delete) to a global key-value pair.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -155,14 +168,6 @@ public sealed class PersistenceEventHandler
             OnRetrieveEntity(details.PlayerCharacterEntityId);
 
         internalController.PlayerEnteredWorld(eventSender, details.PlayerCharacterEntityId);
-    }
-
-    /// <summary>
-    ///     Called to handle a Core_Quit event.
-    /// </summary>
-    private void OnCoreQuit()
-    {
-        OnSynchronize();
     }
 
     /// <summary>
