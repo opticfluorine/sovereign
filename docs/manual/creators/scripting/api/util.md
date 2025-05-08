@@ -130,3 +130,29 @@ util.LogDebug("Hello World!")
 :emphasize-lines: 1
 util.LogTrace("Hello World!")
 ```
+
+### ToBool(value)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: util.ToBool(value)
+
+    Tries to convert the given string to a boolean.
+
+    :param value: String to convert to boolean.
+    :type value: string
+
+    :return: Converted boolean value, or `nil` if not convertible.
+    :rtype: boolean
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Converting a string to boolean using the util.ToBool(value) function.
+:emphasize-lines: 1,2,3
+util.ToBool("True")          -- returns true
+util.ToBool("False")         -- returns false
+util.ToBool("Hello World!")  -- returns nil
+```

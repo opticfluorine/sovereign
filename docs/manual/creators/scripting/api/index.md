@@ -8,6 +8,7 @@ to server-side scripts.
 chat.md
 color.md
 components.md
+data.md
 entities.md
 events.md
 scripting.md
