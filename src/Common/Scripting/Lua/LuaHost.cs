@@ -126,6 +126,21 @@ public class LuaHost : IDisposable
     }
 
     /// <summary>
+    ///     Pushes a function onto the top of the Lua stack.
+    /// </summary>
+    /// <param name="func">Function.</param>
+    public void PushFunction(LuaCFunction func)
+    {
+        lock (opsLock)
+        {
+            luaL_checkstack(LuaState, 1, null);
+
+            bindings.Add(GCHandle.Alloc(func));
+            lua_pushcfunction(LuaState, func);
+        }
+    }
+
+    /// <summary>
     ///     Adds an integer-valued constant to the current library.
     /// </summary>
     /// <param name="name">Constant name.</param>
@@ -254,6 +269,7 @@ public class LuaHost : IDisposable
             AddLibraryFunction("LogWarn", UtilLogWarn);
             AddLibraryFunction("LogError", UtilLogError);
             AddLibraryFunction("LogCrit", UtilLogCritical);
+            AddLibraryFunction("ToBool", UtilStringToBool);
         }
         finally
         {
@@ -282,7 +298,7 @@ public class LuaHost : IDisposable
             Logger.LogError(e, "Error in util.log_trace.");
         }
 
-        return (int)LuaResult.Ok;
+        return 0;
     }
 
     /// <summary>
@@ -306,7 +322,7 @@ public class LuaHost : IDisposable
             Logger.LogError(e, "Error in util.log_debug.");
         }
 
-        return (int)LuaResult.Ok;
+        return 0;
     }
 
     /// <summary>
@@ -330,7 +346,7 @@ public class LuaHost : IDisposable
             Logger.LogError(e, "Error in util.log_info.");
         }
 
-        return (int)LuaResult.Ok;
+        return 0;
     }
 
     /// <summary>
@@ -354,7 +370,7 @@ public class LuaHost : IDisposable
             Logger.LogError(e, "Error in util.log_warn.");
         }
 
-        return (int)LuaResult.Ok;
+        return 0;
     }
 
     /// <summary>
@@ -378,7 +394,7 @@ public class LuaHost : IDisposable
             Logger.LogError(e, "Error in util.log_error.");
         }
 
-        return (int)LuaResult.Ok;
+        return 0;
     }
 
     /// <summary>
@@ -402,7 +418,40 @@ public class LuaHost : IDisposable
             Logger.LogError(e, "Error in util.log_crit.");
         }
 
-        return (int)LuaResult.Ok;
+        return 0;
+    }
+
+    /// <summary>
+    ///     util.to_bool Lua function. Converts string to bool.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of return values.</returns>
+    private int UtilStringToBool(IntPtr luaState)
+    {
+        try
+        {
+            if (lua_gettop(luaState) != 1) throw new LuaException("util.to_bool requires one argument.");
+            if (!lua_isstring(luaState, -1)) throw new LuaException("util.to_bool expects a string argument.");
+
+            luaL_checkstack(luaState, 1, null);
+            var input = lua_tostring(luaState, -1);
+            if (bool.TryParse(input, out var result))
+                lua_pushboolean(luaState, result);
+            else
+                throw new LuaException($"util.to_bool: cannot convert string '{input}' to bool.");
+
+            return 1;
+        }
+        catch (LuaException e)
+        {
+            Logger.LogError("{Error}", e.Message);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Error in util.to_bool.");
+        }
+
+        return 0;
     }
 
     /// <summary>

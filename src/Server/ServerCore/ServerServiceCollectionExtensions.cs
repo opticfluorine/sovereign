@@ -31,6 +31,7 @@ using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Entities;
 using Sovereign.ServerCore.Logging;
 using Sovereign.ServerCore.Resources;
+using Sovereign.ServerCore.Systems.Data;
 using Sovereign.ServerCore.Systems.Movement;
 using Sovereign.ServerCore.Systems.Persistence;
 using Sovereign.ServerCore.Systems.Scripting;
@@ -80,6 +81,7 @@ public static class ServerServiceCollectionExtensions
     {
         AddComponents(services);
         AddServerImplementations(services);
+        AddDataSystem(services);
         AddPersistenceSystem(services);
         AddServerChatSystem(services);
         AddServerManagementSystem(services);
@@ -104,6 +106,11 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<IResourcePathBuilder, ServerResourcePathBuilder>();
         services.TryAddSingleton<ISystemTimer, ServerSystemTimer>();
         services.TryAddSingleton<IMovementNotifier, ServerMovementNotifier>();
+    }
+
+    private static void AddDataSystem(IServiceCollection services)
+    {
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, DataLuaLibrary>());
     }
 
     private static void AddPersistenceSystem(IServiceCollection services)

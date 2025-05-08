@@ -17,6 +17,7 @@
 using System;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.EngineCore.Systems.Data;
 

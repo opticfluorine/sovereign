@@ -168,9 +168,9 @@ public static partial class LuaBindings
     public static partial string lua_typename(IntPtr luaState, LuaType tp);
 
     [LibraryImport(LibName)]
-    public static partial float lua_tonumberx(IntPtr luaState, int idx, IntPtr isnum);
+    public static partial double lua_tonumberx(IntPtr luaState, int idx, IntPtr isnum);
 
-    public static float lua_tonumber(IntPtr luaState, int idx)
+    public static double lua_tonumber(IntPtr luaState, int idx)
     {
         return lua_tonumberx(luaState, idx, IntPtr.Zero);
     }
@@ -230,7 +230,7 @@ public static partial class LuaBindings
     public static partial void lua_pushnil(IntPtr luaState);
 
     [LibraryImport(LibName)]
-    public static partial void lua_pushnumber(IntPtr luaState, float n);
+    public static partial void lua_pushnumber(IntPtr luaState, double n);
 
     [LibraryImport(LibName)]
     public static partial void lua_pushinteger(IntPtr luaState, long n);

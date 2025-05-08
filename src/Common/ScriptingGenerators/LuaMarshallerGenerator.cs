@@ -207,12 +207,23 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
 
                 public static int Marshal(IntPtr luaState, float value)
                 {{
+                    return Marshal(luaState, (double)value);
+                }}
+
+                public static void Unmarshal(IntPtr luaState, out float value)
+                {{
+                    Unmarshal(luaState, out double dval);
+                    value = (float)dval;
+                }}
+
+                public static int Marshal(IntPtr luaState, double value)
+                {{
                     luaL_checkstack(luaState, 1, null);
                     lua_pushnumber(luaState, value);
                     return 1;
                 }}
 
-                public static void Unmarshal(IntPtr luaState, out float value)
+                public static void Unmarshal(IntPtr luaState, out double value)
                 {{
                     if (!lua_isnumber(luaState, -1)) {throwTypeError};
                     value = lua_tonumber(luaState, -1);

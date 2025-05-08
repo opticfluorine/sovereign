@@ -244,7 +244,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             if (entityTable.TryGetTemplate(entityId, out var templateId) &&
                 entityToComponentMap.TryGetValue(templateId, out var templateIndex))
                 return components[templateIndex];
-            throw new KeyNotFoundException($"No component or template component for entity {entityId}.");
+            throw new KeyNotFoundException($"No component or template component for entity {entityId:X}.");
         }
     }
 

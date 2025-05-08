@@ -7,6 +7,7 @@
 #### 7 May 2025
 
 * Data: Synchronize global key-value pairs to database when changed.
+* Scripting: Add new `data.global` scripting API that provides access to global key-value pairs.
 
 #### 6 May 2025
 
