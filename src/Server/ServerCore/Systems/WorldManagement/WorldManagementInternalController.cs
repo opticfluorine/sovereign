@@ -59,7 +59,7 @@ public class WorldManagementInternalController
             PlayerEntityId = entityId,
             EntityDefinitions = definitions
         };
-        var ev = new Event(EventId.Client_EntitySynchronization_Sync, details);
+        var ev = new Event(EventId.Core_EntitySync_Sync, details);
         eventSender.SendEvent(ev);
     }
 
@@ -76,7 +76,7 @@ public class WorldManagementInternalController
             EntityId = entityId,
             WorldSegmentIndex = segmentIndex
         };
-        var ev = new Event(EventId.Client_EntitySynchronization_Desync, details);
+        var ev = new Event(EventId.Core_EntitySync_Desync, details);
         eventSender.SendEvent(ev);
     }
 

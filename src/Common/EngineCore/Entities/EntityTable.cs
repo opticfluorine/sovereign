@@ -28,8 +28,6 @@ public class EntityTable
 {
     private const int InitialPendingBufferSize = 16384;
 
-    private object templateLockHandle = new();
-
     /// <summary>
     ///     Set of all entities that are currently held in memory.
     /// </summary>
@@ -53,7 +51,9 @@ public class EntityTable
     /// <summary>
     ///     Set of all entities that are enqueued to be removed from the table.
     /// </summary>
-    private readonly ConcurrentBag<ulong> pendingRemoves = new();
+    private readonly ConcurrentQueue<ulong> pendingRemoves = new();
+
+    private readonly object templateLockHandle = new();
 
     /// <summary>
     ///     Set of all currently loaded entity IDs, including template entity IDs.
@@ -121,7 +121,7 @@ public class EntityTable
     public void Remove(ulong entityId)
     {
         if (!Exists(entityId)) return;
-        pendingRemoves.Add(entityId);
+        pendingRemoves.Enqueue(entityId);
     }
 
     /// <summary>
@@ -148,8 +148,10 @@ public class EntityTable
                 OnTemplateSet?.Invoke(entityId, pendingAdd.TemplateEntityId);
         }
 
+        pendingAdds.Clear();
+
         // Removals.
-        foreach (var entityId in pendingRemoves)
+        while (pendingRemoves.TryDequeue(out var entityId))
         {
             entities.Remove(entityId);
             if (nonBlockEntities.Contains(entityId))
@@ -160,10 +162,6 @@ public class EntityTable
 
             OnEntityRemoved?.Invoke(entityId);
         }
-
-        // Reset pending sets.
-        pendingAdds.Clear();
-        pendingRemoves.Clear();
     }
 
     /// <summary>

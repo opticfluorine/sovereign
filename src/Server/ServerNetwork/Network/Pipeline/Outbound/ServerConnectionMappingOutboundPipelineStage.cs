@@ -120,9 +120,9 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
         specificMappers[EventId.Core_WorldManagement_Unsubscribe] = worldSubEventMapper;
-        specificMappers[EventId.Client_EntitySynchronization_Sync] = entityDefMapper;
-        specificMappers[EventId.Client_EntitySynchronization_Desync] = desyncMapper;
-        specificMappers[EventId.Client_EntitySynchronization_SyncTemplate] = globalMapper;
+        specificMappers[EventId.Core_EntitySync_Sync] = entityDefMapper;
+        specificMappers[EventId.Core_EntitySync_Desync] = desyncMapper;
+        specificMappers[EventId.Core_EntitySync_SyncTemplate] = globalMapper;
         specificMappers[EventId.Core_Movement_Move] = moveMapper;
         specificMappers[EventId.Core_Movement_TeleportNotice] = teleportNoticeMapper;
         specificMappers[EventId.Core_WorldManagement_EntityLeaveWorldSegment] = entityGridMapper;

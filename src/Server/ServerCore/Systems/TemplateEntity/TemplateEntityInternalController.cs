@@ -40,6 +40,6 @@ public class TemplateEntityInternalController
         {
             Definition = definitionGenerator.GenerateDefinition(templateEntityId)
         };
-        eventSender.SendEvent(new Event(EventId.Client_EntitySynchronization_SyncTemplate, details));
+        eventSender.SendEvent(new Event(EventId.Core_EntitySync_SyncTemplate, details));
     }
 }

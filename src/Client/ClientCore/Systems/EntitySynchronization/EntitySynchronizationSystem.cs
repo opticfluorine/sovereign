@@ -49,9 +49,9 @@ public class EntitySynchronizationSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
-        EventId.Client_EntitySynchronization_Sync,
-        EventId.Client_EntitySynchronization_Desync,
-        EventId.Client_EntitySynchronization_SyncTemplate,
+        EventId.Core_EntitySync_Sync,
+        EventId.Core_EntitySync_Desync,
+        EventId.Core_EntitySync_SyncTemplate,
         EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_Unsubscribe,
         EventId.Client_Network_PlayerEntitySelected,
@@ -78,7 +78,7 @@ public class EntitySynchronizationSystem : ISystem
             eventsProcessed++;
             switch (ev.EventId)
             {
-                case EventId.Client_EntitySynchronization_Sync:
+                case EventId.Core_EntitySync_Sync:
                     if (ev.EventDetails is not EntityDefinitionEventDetails)
                     {
                         logger.LogError("Received Sync event without details.");
@@ -88,7 +88,7 @@ public class EntitySynchronizationSystem : ISystem
                     HandleSync((EntityDefinitionEventDetails)ev.EventDetails);
                     break;
 
-                case EventId.Client_EntitySynchronization_Desync:
+                case EventId.Core_EntitySync_Desync:
                     if (ev.EventDetails is not EntityDesyncEventDetails)
                     {
                         logger.LogError("Received Desync event without details.");
@@ -98,7 +98,7 @@ public class EntitySynchronizationSystem : ISystem
                     HandleDesync((EntityDesyncEventDetails)ev.EventDetails);
                     break;
 
-                case EventId.Client_EntitySynchronization_SyncTemplate:
+                case EventId.Core_EntitySync_SyncTemplate:
                 {
                     if (ev.EventDetails is not TemplateEntityDefinitionEventDetails syncDetails)
                     {

@@ -8,6 +8,12 @@
 
 * Data: Synchronize global key-value pairs to database when changed.
 * Scripting: Add new `data.global` scripting API that provides access to global key-value pairs.
+* Entities: Fix issue where entity remove events were not always fired from `EntityTable`, resulting
+  in stale perspective lines and renderer crashes. Also (probably) fixed a similar, though much less
+  common, issue with entity add events from `EntityTable`.
+* Events: Renamed the `EntitySynchronization` events to `EntitySync` for easier debugging with the
+  event log and jq. Also moved these events from the `Client` group to the `Core` group to avoid
+  event log filtering.
 
 #### 6 May 2025
 
