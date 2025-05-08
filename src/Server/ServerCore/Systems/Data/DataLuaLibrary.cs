@@ -98,21 +98,30 @@ public class DataLuaLibrary : ILuaLibrary
         // First argument: data.global
         // Second argument: key
 
-        luaL_checkstack(luaState, 1, null);
-
-        if (!lua_isstring(luaState, -1))
+        try
         {
-            scriptingServices.GetScriptLogger(luaState, logger)
-                .LogError("data.global[key] requires a string key.");
-            lua_pushnil(luaState);
-            return 1;
-        }
+            luaL_checkstack(luaState, 1, null);
 
-        var key = lua_tostring(luaState, -1);
-        if (dataServices.TryGetGlobal(key, out var value))
-            lua_pushstring(luaState, value);
-        else
+            if (!lua_isstring(luaState, -1))
+            {
+                scriptingServices.GetScriptLogger(luaState, logger)
+                    .LogError("data.global[key] requires a string key.");
+                lua_pushnil(luaState);
+                return 1;
+            }
+
+            var key = lua_tostring(luaState, -1);
+            if (dataServices.TryGetGlobal(key, out var value))
+                lua_pushstring(luaState, value);
+            else
+                lua_pushnil(luaState);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error in data.global[key].");
+            luaL_checkstack(luaState, 1, null);
             lua_pushnil(luaState);
+        }
 
         return 1;
     }
@@ -128,36 +137,44 @@ public class DataLuaLibrary : ILuaLibrary
         // Second argument: key
         // Third argument: value
 
-        if (!lua_isstring(luaState, -2))
+        try
+        {
+            if (!lua_isstring(luaState, -2))
+            {
+                scriptingServices.GetScriptLogger(luaState, logger)
+                    .LogError("data.global[key] requires a string key.");
+                return 0;
+            }
+
+            var key = lua_tostring(luaState, -2);
+            var valueType = lua_type(luaState, -1);
+            switch (valueType)
+            {
+                case LuaType.String:
+                    dataController.SetGlobal(eventSender, key, lua_tostring(luaState, -1));
+                    break;
+
+                case LuaType.Number:
+                    if (lua_isinteger(luaState, -1))
+                        dataController.SetGlobal(eventSender, key, lua_tointeger(luaState, -1));
+                    else
+                        dataController.SetGlobal(eventSender, key, lua_tonumber(luaState, -1));
+                    break;
+
+                case LuaType.Boolean:
+                    dataController.SetGlobal(eventSender, key, lua_toboolean(luaState, -1));
+                    break;
+
+                default:
+                    scriptingServices.GetScriptLogger(luaState, logger)
+                        .LogError("Unsupported value type for data.global[key].");
+                    return 0;
+            }
+        }
+        catch (Exception e)
         {
             scriptingServices.GetScriptLogger(luaState, logger)
-                .LogError("data.global[key] requires a string key.");
-            return 0;
-        }
-
-        var key = lua_tostring(luaState, -2);
-        var valueType = lua_type(luaState, -1);
-        switch (valueType)
-        {
-            case LuaType.String:
-                dataController.SetGlobal(eventSender, key, lua_tostring(luaState, -1));
-                break;
-
-            case LuaType.Number:
-                if (lua_isinteger(luaState, -1))
-                    dataController.SetGlobal(eventSender, key, lua_tointeger(luaState, -1));
-                else
-                    dataController.SetGlobal(eventSender, key, lua_tonumber(luaState, -1));
-                break;
-
-            case LuaType.Boolean:
-                dataController.SetGlobal(eventSender, key, lua_toboolean(luaState, -1));
-                break;
-
-            default:
-                scriptingServices.GetScriptLogger(luaState, logger)
-                    .LogError("Unsupported value type for data.global[key].");
-                return 0;
+                .LogError(e, "Error setting data.global[key].");
         }
 
         return 0;
@@ -174,22 +191,30 @@ public class DataLuaLibrary : ILuaLibrary
         // First argument: data.global
         // Second argument: key
 
-        if (lua_gettop(luaState) != 1)
+        try
+        {
+            if (lua_gettop(luaState) != 1)
+            {
+                scriptingServices.GetScriptLogger(luaState, logger)
+                    .LogError("data.RemoveGlobal(key) requires 1 argument.");
+                return 0;
+            }
+
+            if (!lua_isstring(luaState, -1))
+            {
+                scriptingServices.GetScriptLogger(luaState, logger)
+                    .LogError("data.RemoveGlobal(key) requires a string key.");
+                return 0;
+            }
+
+            var key = lua_tostring(luaState, -1);
+            dataController.RemoveGlobal(eventSender, key);
+        }
+        catch (Exception e)
         {
             scriptingServices.GetScriptLogger(luaState, logger)
-                .LogError("data.remove_global(key) requires 1 argument.");
-            return 0;
+                .LogError(e, "Error in data.RemoveGlobal(key).");
         }
-
-        if (!lua_isstring(luaState, -1))
-        {
-            scriptingServices.GetScriptLogger(luaState, logger)
-                .LogError("data.remove_global(key) requires a string key.");
-            return 0;
-        }
-
-        var key = lua_tostring(luaState, -1);
-        dataController.RemoveGlobal(eventSender, key);
 
         return 0;
     }
