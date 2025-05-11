@@ -132,6 +132,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Core_Chat_Generic] = genericChatMapper;
         specificMappers[EventId.Core_Block_ModifyNotice] = blockAddMapper;
         specificMappers[EventId.Core_Block_RemoveNotice] = blockPosMapper;
+        specificMappers[EventId.Core_Time_Clock] = globalMapper;
     }
 
     public void Process(OutboundEventInfo evInfo)

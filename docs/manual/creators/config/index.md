@@ -36,10 +36,6 @@ Any configuration option can be overridden from the command line by passing a `-
 - **RenderSearchSpacerX**: X padding to include when rendering (for e.g. offscreen shadows).
 - **RenderSearchSpacerY**: Y/Z padding to include when rendering (for e.g. offscreen shadows).
 
-### DebugOptions
-- **EnableEventLogging**: A boolean indicating whether to enable event logging.
-- **EventLogDirectory**: The directory where event logs are stored.
-
 ---
 
 ## Server Configuration Options
@@ -80,6 +76,21 @@ Any configuration option can be overridden from the command line by passing a `-
 ### ScriptingOptions
 - **ScriptDirectory**: The directory where scripts are stored.
 - **MaxDirectoryDepth**: The maximum directory depth for script discovery.
+
+---
+
+## Common Configuration Options (Client and Server)
+
+### TimeOptions
+:::{note}
+All time-related options must match between client and server configurations in order for in-game clock
+synchronization to work correctly.
+:::
+ - **SecondsPerDay**: Number of real-world seconds per in-game day. Must match between client and server.
+ - **DaysPerWeek**: Number of in-game days per in-game week.
+ - **WeeksPerMonth**: Number of in-game weeks per in-game month.
+ - **MonthsPerSeason**: Number of in-game months per in-game season (one quarter of an in-game year).
+ - **SyncIntervalSeconds**: Number of seconds between clock synchronization events. (Only relevant for server.)
 
 ### DebugOptions
 - **EnableEventLogging**: A boolean indicating whether to enable event logging.

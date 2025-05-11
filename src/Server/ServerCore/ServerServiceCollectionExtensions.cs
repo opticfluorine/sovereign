@@ -38,6 +38,7 @@ using Sovereign.ServerCore.Systems.Scripting;
 using Sovereign.ServerCore.Systems.ServerChat;
 using Sovereign.ServerCore.Systems.ServerManagement;
 using Sovereign.ServerCore.Systems.TemplateEntity;
+using Sovereign.ServerCore.Systems.Time;
 using Sovereign.ServerCore.Systems.WorldEdit;
 using Sovereign.ServerCore.Systems.WorldManagement;
 using Sovereign.ServerCore.Timing;
@@ -86,6 +87,7 @@ public static class ServerServiceCollectionExtensions
         AddServerChatSystem(services);
         AddServerManagementSystem(services);
         AddTemplateEntitySystem(services);
+        AddTimeSystem(services);
         AddWorldEditSystem(services);
         AddWorldManagementSystem(services);
         AddScriptingSystem(services);
@@ -144,6 +146,11 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<TemplateEntityManager>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, TemplateEntitySystem>());
+    }
+
+    private static void AddTimeSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<TimeScripting>();
     }
 
     private static void AddWorldEditSystem(IServiceCollection services)

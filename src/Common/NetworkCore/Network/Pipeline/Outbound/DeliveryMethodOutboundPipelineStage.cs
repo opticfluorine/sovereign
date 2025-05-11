@@ -55,7 +55,8 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Core_Block_ModifyNotice, DeliveryMethod.ReliableOrdered },
         { EventId.Core_Block_RemoveNotice, DeliveryMethod.ReliableOrdered },
         { EventId.Server_WorldEdit_SetBlock, DeliveryMethod.ReliableUnordered },
-        { EventId.Server_WorldEdit_RemoveBlock, DeliveryMethod.ReliableUnordered }
+        { EventId.Server_WorldEdit_RemoveBlock, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Time_Clock, DeliveryMethod.Unreliable }
     };
 
     public DeliveryMethodOutboundPipelineStage(ILogger<DeliveryMethodOutboundPipelineStage> logger)

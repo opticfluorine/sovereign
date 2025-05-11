@@ -33,6 +33,7 @@ using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineCore.Systems.Movement;
 using Sovereign.EngineCore.Systems.Performance;
+using Sovereign.EngineCore.Systems.Time;
 using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineCore.World;
@@ -53,6 +54,8 @@ public static class CoreServiceCollectionExtensions
     public static IServiceCollection AddSovereignCoreOptions(this IServiceCollection services,
         IConfigurationManager configuration)
     {
+        services.Configure<TimeOptions>(
+            configuration.GetSection($"Sovereign:{nameof(TimeOptions)}"));
         services.Configure<DebugOptions>(
             configuration.GetSection($"Sovereign:{nameof(DebugOptions)}"));
 
@@ -182,6 +185,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<WorldSegmentSubscriptionEventDetailsValidator>();
         services.TryAddSingleton<GenericChatEventDetailsValidator>();
         services.TryAddSingleton<TeleportNoticeEventDetailsValidator>();
+        services.TryAddSingleton<IntEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)
@@ -213,6 +217,7 @@ public static class CoreServiceCollectionExtensions
         AddDataSystem(services);
         AddMovementSystem(services);
         AddPerformanceSystem(services);
+        AddTimeSystem(services);
         AddWorldManagementSystem(services);
     }
 
@@ -252,6 +257,14 @@ public static class CoreServiceCollectionExtensions
     private static void AddPerformanceSystem(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PerformanceSystem>());
+    }
+
+    private static void AddTimeSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<IGameClock, GameClock>();
+        services.TryAddSingleton<TimeInternalController>();
+        services.TryAddSingleton<ITimeServices, TimeServices>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, TimeSystem>());
     }
 
     private static void AddWorldManagementSystem(IServiceCollection services)

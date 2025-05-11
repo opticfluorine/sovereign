@@ -308,6 +308,16 @@ public enum EventId
 
     #endregion EntitySynchronization
 
+    #region Time
+
+    /// <summary>
+    ///     Event sent to announce the current in-game time.
+    /// </summary>
+    /// Associated details: IntEventDetails (value is in-game time in seconds)
+    Core_Time_Clock = 1100,
+
+    #endregion Time
+
     #endregion Core
 
     #region Client

@@ -62,7 +62,14 @@ local MyValue = data.global["MyValue"]  -- MyValue is string if key exists, nil 
 A key-value pair may be created or updated in the global store by assigning
 a value to `data.global[key]`. Fields in `data.global` may be assigned
 strings, integers, numbers, or booleans; all input values will be converted
-to strings.
+to strings. Note that this is an asynchronous operation, and there may be
+a delay before the new value is reflected in subsequent reads.
+
+:::{note}
+Keys that start with two underscores (`__`) are considered special reserved 
+values managed by the engine. Any attempt to modify or remove one of these
+values from a script will fail with an error.
+:::
 
 #### Example
 

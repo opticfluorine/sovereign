@@ -12,6 +12,7 @@ data.md
 entities.md
 events.md
 scripting.md
+time.md
 util.md
 types.md
 constants.md

@@ -18,6 +18,9 @@ using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.ServerCore.Systems.ServerChat;
 
+/// <summary>
+///     Provides the "chat" Lua module for sending messages to players.
+/// </summary>
 [ScriptableLibrary("chat")]
 public class ServerChatScripting
 {

@@ -30,6 +30,8 @@ namespace Sovereign.ServerCore.Systems.Data;
 public class DataLuaLibrary : ILuaLibrary
 {
     private const string LibraryName = "data";
+
+    private const string ReadOnlyKeyPrefix = "__";
     private readonly IDataController dataController;
     private readonly IDataServices dataServices;
     private readonly IEventSender eventSender;
@@ -147,6 +149,14 @@ public class DataLuaLibrary : ILuaLibrary
             }
 
             var key = lua_tostring(luaState, -2);
+
+            if (IsKeyReadOnly(key))
+            {
+                scriptingServices.GetScriptLogger(luaState, logger)
+                    .LogError("data.global[key]: key {Key} is read-only.", key);
+                return 0;
+            }
+
             var valueType = lua_type(luaState, -1);
             switch (valueType)
             {
@@ -208,6 +218,14 @@ public class DataLuaLibrary : ILuaLibrary
             }
 
             var key = lua_tostring(luaState, -1);
+
+            if (IsKeyReadOnly(key))
+            {
+                scriptingServices.GetScriptLogger(luaState, logger)
+                    .LogError("data.RemoveGlobal(key): key {Key} is read-only.", key);
+                return 0;
+            }
+
             dataController.RemoveGlobal(eventSender, key);
         }
         catch (Exception e)
@@ -217,5 +235,16 @@ public class DataLuaLibrary : ILuaLibrary
         }
 
         return 0;
+    }
+
+    /// <summary>
+    ///     Determines whether a key is read-only to scripts (i.e. special internal
+    ///     keys used by the engine such as the in-game clock).
+    /// </summary>
+    /// <param name="key">Key.</param>
+    /// <returns>true if read-only to scripts, false otherwise.</returns>
+    private bool IsKeyReadOnly(string key)
+    {
+        return key.StartsWith(ReadOnlyKeyPrefix);
     }
 }

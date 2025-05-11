@@ -4,6 +4,10 @@
 
 ### May
 
+#### 11 May 2025
+
+* All: Add new `TimeSystem` that provides an in-game clock and calendar.
+
 #### 8 May 2025
 
 * Logging: Fix default logging configuration to show source context. This was accidentally being

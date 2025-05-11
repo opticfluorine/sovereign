@@ -48,14 +48,22 @@ public class ScriptingCallbackManager
     /// <param name="quickLookupIndex">Quick lookup function index to be called.</param>
     public void AddEventCallback(LuaHost luaHost, EventId eventId, uint quickLookupIndex)
     {
-        if (!callbacks.TryGetValue(eventId, out var cbList))
+        logger.LogTrace("Registering callback for {EventId} in {Script}.", eventId, luaHost.Name);
+
+        List<Callback>? cbList;
+        lock (callbacks)
         {
-            cbList = new List<Callback>();
-            callbacks[eventId] = cbList;
+            if (!callbacks.TryGetValue(eventId, out cbList))
+            {
+                logger.LogTrace("New callback list for {EventId}.", eventId);
+                cbList = new List<Callback>();
+                callbacks[eventId] = cbList;
+            }
         }
 
         if (!eventIdsByHost.TryGetValue(luaHost.LuaState, out var evList))
         {
+            logger.LogTrace("New event ID list for {Script}.", luaHost.Name);
             evList = new HashSet<EventId>();
             eventIdsByHost[luaHost.LuaState] = evList;
         }
@@ -70,6 +78,8 @@ public class ScriptingCallbackManager
     /// <param name="luaHost">Lua host.</param>
     public void RemoveCallbacksForHost(LuaHost luaHost)
     {
+        logger.LogTrace("Renove all event callbacks for {Script}.", luaHost.Name);
+
         if (!eventIdsByHost.TryGetValue(luaHost.LuaState, out var eventIds)) return;
 
         foreach (var eventId in eventIds)
@@ -124,6 +134,7 @@ public class ScriptingCallbackManager
     {
         Task.Run(() =>
         {
+            logger.LogTrace("Dispatch {EventId} to {Script}.", eventId, callback.LuaHost.Name);
             if (callback.LuaHost.IsDisposed) return;
             try
             {

@@ -16,6 +16,7 @@ Core systems are present in both the client and server.
 | `Network`     | `NetworkSystem`     | Responsible for replicating local events onto the network.         |
 | `Performance` | `PerformanceSystem` | Responsible for monitoring engine performance.                     |
 | `Ping`        | `PingSystem`        | Responsible for periodic and aperiodic network ping.               |
+| `Time`        | `TimeSystem`        | Responsible for tracking and synchronizing in-game time.          |
 
 ## Client Systems
 

@@ -247,6 +247,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
             sb.Append($@"
                 public int {function.MethodName}_Lua(IntPtr luaState)
                 {{
+                    int returnCount = 0;
                     try {{");
 
             for (var i = function.ParameterModels.List.Count - 1; i >= 0; --i)
@@ -273,15 +274,16 @@ public class LuaLibraryGenerator : IIncrementalGenerator
             if (function.ReturnTypeName != "System.Void")
                 sb.Append($@"
                         // return type = {function.ReturnTypeName}
-                        {function.ReturnTypeMarshallerClass}.Marshal(luaState, result);");
+                        returnCount = {function.ReturnTypeMarshallerClass}.Marshal(luaState, result);");
 
             sb.Append(@"
                     }
                     catch (Exception e)
                     {
                         logger.LogError(e, ""Error when calling function from Lua."");
+                        return 0;
                     }
-                    return 0;
+                    return returnCount;
                 }
             ");
         }
