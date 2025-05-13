@@ -17,10 +17,10 @@
 
 using System.Numerics;
 using Sovereign.ClientCore.Rendering.Configuration;
-using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 using Sovereign.ClientCore.Rendering.Scenes.Game.World;
 using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Systems.Time;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
 
@@ -34,7 +34,9 @@ public sealed class GameScene : IScene
     private readonly RenderCamera camera;
     private readonly IEngineConfiguration engineConfiguration;
     private readonly GameGui gameGui;
+    private readonly GlobalLightTable globalLightTable;
     private readonly ISystemTimer systemTimer;
+    private readonly ITimeServices timeServices;
     private readonly DisplayViewport viewport;
     private readonly WorldVertexSequencer worldVertexSequencer;
 
@@ -55,15 +57,17 @@ public sealed class GameScene : IScene
     private float timeSinceTick;
 
     public GameScene(ISystemTimer systemTimer, IEngineConfiguration engineConfiguration,
-        RenderCamera camera, DisplayViewport viewport, MainDisplay mainDisplay,
-        WorldVertexSequencer worldVertexSequencer, GameGui gameGui)
+        RenderCamera camera, DisplayViewport viewport, ITimeServices timeServices,
+        WorldVertexSequencer worldVertexSequencer, GameGui gameGui, GlobalLightTable globalLightTable)
     {
         this.systemTimer = systemTimer;
         this.engineConfiguration = engineConfiguration;
         this.camera = camera;
         this.viewport = viewport;
+        this.timeServices = timeServices;
         this.worldVertexSequencer = worldVertexSequencer;
         this.gameGui = gameGui;
+        this.globalLightTable = globalLightTable;
     }
 
     public SceneType SceneType => SceneType.Game;
@@ -110,7 +114,7 @@ public sealed class GameScene : IScene
     public void PopulateWorldFragmentConstants(out Vector4 ambientLightColor, out Vector4 globalLightColor)
     {
         ambientLightColor = new Vector4(0.2f, 0.2f, 0.2f, 1.0f);
-        globalLightColor = Vector4.One;
+        globalLightColor = globalLightTable.GetGlobalLightColor(timeServices.SecondOfDay);
     }
 
     public void UpdateGui(RenderPlan renderPlan)

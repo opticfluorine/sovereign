@@ -101,6 +101,8 @@ public static class ClientServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(DisplayOptions)}"));
         services.Configure<RendererOptions>(
             configuration.GetSection($"Sovereign:{nameof(RendererOptions)}"));
+        services.Configure<DayNightOptions>(
+            configuration.GetSection($"Sovereign:{nameof(DayNightOptions)}"));
 
         return services;
     }
@@ -223,6 +225,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<RenderCamera>();
 
         services.TryAddSingleton<GameScene>();
+        services.TryAddSingleton<GlobalLightTable>();
         services.TryAddSingleton<InGameMenuGui>();
         services.TryAddSingleton<ChatGui>();
         services.TryAddSingleton<GameGui>();

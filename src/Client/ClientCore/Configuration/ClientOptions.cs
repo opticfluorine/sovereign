@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
+using System.Numerics;
+
 namespace Sovereign.ClientCore.Configuration;
 
 /// <summary>
@@ -153,4 +156,56 @@ public sealed class ConnectionOptions
     ///     Whether the REST server is using a TLS-encrypted connection.
     /// </summary>
     public bool RestTls { get; private set; }
+}
+
+/// <summary>
+///     Describes a step of the day/night global light progression.
+/// </summary>
+public sealed class GlobalLightStep
+{
+    /// <summary>
+    ///     Second of the day at which this step begins.
+    /// </summary>
+    public uint SecondOfDay { get; set; }
+
+    /// <summary>
+    ///     Red component of the global light.
+    /// </summary>
+    public float Red { get; set; }
+
+    /// <summary>
+    ///     Green component of the global light.
+    /// </summary>
+    public float Green { get; set; }
+
+    /// <summary>
+    ///     Blue component of the global light.
+    /// </summary>
+    public float Blue { get; set; }
+
+    /// <summary>
+    ///     Convenience property to get the global light color as a Vector3.
+    /// </summary>
+    public Vector3 Color => new(Red, Green, Blue);
+}
+
+/// <summary>
+///     Options for the day/night cycle.
+/// </summary>
+public sealed class DayNightOptions
+{
+    /// <summary>
+    ///     Global light steps in the day/night cycle. Must be monotonically
+    ///     increasing in SecondOfDay.
+    /// </summary>
+    public List<GlobalLightStep> GlobalLightSteps { get; set; } = new()
+    {
+        new GlobalLightStep()
+        {
+            SecondOfDay = 0,
+            Red = 1.0f,
+            Green = 1.0f,
+            Blue = 1.0f
+        }
+    };
 }

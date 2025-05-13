@@ -36,6 +36,18 @@ Any configuration option can be overridden from the command line by passing a `-
 - **RenderSearchSpacerX**: X padding to include when rendering (for e.g. offscreen shadows).
 - **RenderSearchSpacerY**: Y/Z padding to include when rendering (for e.g. offscreen shadows).
 
+### DayNightOptions
+- **GlobalLightSteps**: A list of steps in the day/night global light cycle. Each step
+  is an object having the following fields:
+  - **SecondOfDay**: In-game second of day at which this step begins.
+  - **Red**: Red component of global light for this step (0.0 to 1.0).
+  - **Green**: Green component of global light for this step (0.0 to 1.0).
+  - **Blue**: Blue component of global light for this step (0.0 to 1.0).
+:::{tip}
+The global light color for a specific second of the day can be found by linearly
+interpolating the two steps around the point in time.
+:::
+
 ---
 
 ## Server Configuration Options
@@ -86,7 +98,8 @@ Any configuration option can be overridden from the command line by passing a `-
 All time-related options must match between client and server configurations in order for in-game clock
 synchronization to work correctly.
 :::
- - **SecondsPerDay**: Number of real-world seconds per in-game day. Must match between client and server.
+ - **SecondsPerHour**: Number of real-world seconds per in-game hour.
+ - **HoursPerDay**: Number of in-game hours per in-game day.
  - **DaysPerWeek**: Number of in-game days per in-game week.
  - **WeeksPerMonth**: Number of in-game weeks per in-game month.
  - **MonthsPerSeason**: Number of in-game months per in-game season (one quarter of an in-game year).

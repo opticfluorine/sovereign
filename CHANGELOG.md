@@ -4,6 +4,11 @@
 
 ### May
 
+#### 12 May 2025
+
+* Lighting: Add day/night cycle to global lighting. The day/night light pattern is configurable
+  through the client appsettings.json file.
+
 #### 11 May 2025
 
 * All: Add new `TimeSystem` that provides an in-game clock and calendar.
