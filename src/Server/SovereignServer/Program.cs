@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -22,6 +23,7 @@ using Sovereign.EngineCore;
 using Sovereign.EngineCore.Lua;
 using Sovereign.NetworkCore;
 using Sovereign.Persistence;
+using Sovereign.Server;
 using Sovereign.ServerCore;
 using Sovereign.ServerCore.Lua;
 using Sovereign.ServerNetwork;
@@ -53,6 +55,15 @@ builder.Services
 builder.Services
     .AddSovereignCoreOptions(builder.Configuration)
     .AddSovereignServerOptions(builder.Configuration);
+
+// Load server runtime options.
+var runtimeOptions = builder.Configuration
+    .GetSection($"Sovereign:{nameof(RuntimeOptions)}")
+    .Get<RuntimeOptions>() ?? new RuntimeOptions();
+
+// Configure runtime modes.
+builder.Services.AddSystemd();
+builder.Services.AddWindowsService(options => { options.ServiceName = runtimeOptions.WindowsServiceName; });
 
 // Run application.
 var host = builder.Build();

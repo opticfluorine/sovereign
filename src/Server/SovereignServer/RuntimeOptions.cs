@@ -16,7 +16,13 @@
 
 namespace Sovereign.Server;
 
-public class RuntimeOptions
+/// <summary>
+///     User-configurable runtime options for server.
+/// </summary>
+public sealed class RuntimeOptions
 {
-    
+    /// <summary>
+    ///     Name to use when running as a Windows Service.
+    /// </summary>
+    public string WindowsServiceName = "Sovereign Server";
 }

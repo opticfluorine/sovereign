@@ -33,9 +33,11 @@
         <ItemGroup>
             <MigrationFiles Include="$(SolutionDir)Server/Persistence/Migrations/**/*"/>
             <DataFiles Include="Data/**/*"/>
+            <DeployFiles Include="Deploy/**/*"/>
             <LibFiles Include="Contrib/$(ContribSet)/*"/>
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutDir)Data/%(RecursiveDir)"/>
+        <Copy SourceFiles="@(DeployFiles)" DestinationFolder="$(OutDir)Deploy/%(RecursiveDir)"/>
         <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(OutDir)"/>
         <Copy SourceFiles="@(MigrationFiles)" DestinationFolder="$(OutDir)Migrations/%(RecursiveDir)"/>
     </Target>
@@ -46,11 +48,13 @@
             <LicenseFile Include="$(SolutionDir)../LICENSE"/>
             <LibFiles Include="Contrib/$(ContribSet)/*"/>
             <DataFiles Include="$(OutDir)Data/**/*"/>
+            <DeployFiles Include="$(OutDir)Deploy/**/*"/>
         </ItemGroup>
         <Copy SourceFiles="@(MigrationFiles)" DestinationFolder="$(PublishDir)Migrations/%(RecursiveDir)"/>
         <Copy SourceFiles="@(LicenseFile)" DestinationFolder="$(PublishDir)"/>
         <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(PublishDir)"/>
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(PublishDir)Data/%(RecursiveDir)"/>
+        <Copy SourceFiles="@(DeployFiles)" DestinationFolder="$(PublishDir)Deploy/%(RecursiveDir)"/>
     </Target>
 
     <ItemGroup>
@@ -67,6 +71,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.4"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.4"/>
     </ItemGroup>
 
 </Project>

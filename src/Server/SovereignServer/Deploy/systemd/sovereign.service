@@ -1,0 +1,16 @@
+[Unit]
+Description=Sovereign Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart={INSTALL_DIR}/Sovereign.Server
+WorkingDirectory={INSTALL_DIR}
+Restart=always
+RestartSec=10
+User=sovereign
+Group=sovereign
+Environment=DOTNET_ENVIRONMENT=Production
+
+[Install]
+WantedBy=multi-user.target
