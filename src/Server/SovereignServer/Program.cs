@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -27,6 +29,10 @@ using Sovereign.Server;
 using Sovereign.ServerCore;
 using Sovereign.ServerCore.Lua;
 using Sovereign.ServerNetwork;
+
+// Pin working directory to the executable location.
+// This is needed for running as a Windows Service.
+Environment.CurrentDirectory = Path.GetFullPath(AppContext.BaseDirectory);
 
 var builder = Host.CreateApplicationBuilder(args);
 

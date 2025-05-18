@@ -8,6 +8,7 @@
         <Platforms>AnyCPU;x64</Platforms>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <PublishSingleFile>true</PublishSingleFile>
     </PropertyGroup>
 
     <Choose>
@@ -26,6 +27,7 @@
     <ItemGroup>
         <None Update="appsettings.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
         </None>
     </ItemGroup>
 
