@@ -83,7 +83,7 @@ public class Event
     public EventId EventId { get; set; }
 
     /// <summary>
-    ///     Time at which the event becomes valid, in microseconds.
+    ///     System time at which the event becomes valid, in microseconds.
     /// </summary>
     /// <remarks>
     ///     This field is not sent over the network as timed events will not
@@ -91,6 +91,17 @@ public class Event
     /// </remarks>
     [IgnoreMember]
     public ulong EventTime { get; set; }
+
+    /// <summary>
+    ///     System time at which the event was dispatched by the main event loop, in microseconds.
+    /// </summary>
+    /// <remarks>
+    ///     This field is intended for diagnostics and debugging purposes only.
+    ///     It is only set if event logging is enabled.
+    ///     It is not sent over the network.
+    /// </remarks>
+    [IgnoreMember]
+    public ulong DispatchTime { get; set; }
 
     /// <summary>
     ///     Flag indicating that the event originated locally

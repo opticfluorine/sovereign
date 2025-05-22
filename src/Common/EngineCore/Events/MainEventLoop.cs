@@ -23,6 +23,7 @@ using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.EngineCore.Events;
@@ -76,19 +77,23 @@ public class MainEventLoop : IEventLoop
     /// </summary>
     private readonly HashSet<ISystem> systems = new();
 
+    private readonly ISystemTimer systemTimer;
+
     /// <summary>
     ///     The system time of the last update step (microseconds).
     /// </summary>
     private ulong lastUpdateTime;
 
     public MainEventLoop(EventAdapterManager eventAdapterManager, EntityManager entityManager,
-        EventLogger eventLogger, IOptions<DebugOptions> debugOptions, IHostApplicationLifetime appLifetime)
+        EventLogger eventLogger, IOptions<DebugOptions> debugOptions, IHostApplicationLifetime appLifetime,
+        ISystemTimer systemTimer)
     {
         this.eventAdapterManager = eventAdapterManager;
         this.entityManager = entityManager;
         this.eventLogger = eventLogger;
         this.debugOptions = debugOptions;
         this.appLifetime = appLifetime;
+        this.systemTimer = systemTimer;
     }
 
     public int PumpEventLoop()
@@ -275,7 +280,11 @@ public class MainEventLoop : IEventLoop
             foreach (var comm in communicators)
                 comm.SendEventToSystem(ev);
 
-        if (debugOptions.Value.EnableEventLogging) eventLogger.LogEvent(ev);
+        if (debugOptions.Value.EnableEventLogging)
+        {
+            ev.DispatchTime = systemTimer.GetTime();
+            eventLogger.LogEvent(ev);
+        }
     }
 
     /// <summary>
