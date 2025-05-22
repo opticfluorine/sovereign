@@ -58,6 +58,8 @@ public static class CoreServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(TimeOptions)}"));
         services.Configure<DebugOptions>(
             configuration.GetSection($"Sovereign:{nameof(DebugOptions)}"));
+        services.Configure<MovementOptions>(
+            configuration.GetSection($"Sovereign:{nameof(MovementOptions)}"));
 
         return services;
     }

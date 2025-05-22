@@ -16,6 +16,8 @@
  */
 
 using System.Numerics;
+using Microsoft.Extensions.Options;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems.Movement;
@@ -33,6 +35,8 @@ public class PlayerInputMovementMapper
     private readonly IEventSender eventSender;
 
     private readonly MovementController movementController;
+
+    private readonly MovementOptions movementOptions;
 
     /// <summary>
     ///     Current target velocity in XY plane for the player based on user input.
@@ -55,10 +59,11 @@ public class PlayerInputMovementMapper
     private int ticksUntilRepeat = -1;
 
     public PlayerInputMovementMapper(IEventSender eventSender,
-        MovementController movementController)
+        MovementController movementController, IOptions<MovementOptions> movementOptions)
     {
         this.eventSender = eventSender;
         this.movementController = movementController;
+        this.movementOptions = movementOptions.Value;
     }
 
     /// <summary>
@@ -91,16 +96,13 @@ public class PlayerInputMovementMapper
             RequestNextMovement();
         }
     }
-    
+
     /// <summary>
     ///     Initiates a jump for the player.
     /// </summary>
     public void Jump()
     {
-        if (playerSelected)
-        {
-            movementController.Jump(eventSender, playerEntityId);
-        }
+        if (playerSelected) movementController.Jump(eventSender, playerEntityId);
     }
 
     /// <summary>
@@ -134,9 +136,6 @@ public class PlayerInputMovementMapper
         movementController.RequestMovement(eventSender, playerEntityId, currentRelativeVelocity);
 
         // Schedule a repeat movement.
-        if (currentRelativeVelocity != Vector2.Zero)
-        {
-            ticksUntilRepeat = MovementConfiguration.DefaultMovementLengthTicks - 1;
-        }
+        if (currentRelativeVelocity != Vector2.Zero) ticksUntilRepeat = movementOptions.RequestIntervalTicks;
     }
 }

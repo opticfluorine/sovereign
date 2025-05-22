@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,17 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
-
-namespace Sovereign.EngineCore.Systems.Movement;
+namespace Sovereign.EngineCore.Configuration;
 
 /// <summary>
-///     Configuration for the Movement system.
+///     User-configurable options for movement.
 /// </summary>
-public class MovementConfiguration
+public sealed class MovementOptions
 {
     /// <summary>
-    ///     Default base velocity for all entities.
+    ///     Interval between movement requests in ticks.
     /// </summary>
-    public static readonly Vector2 DefaultBaseVelocity = new(4.0f, 4.0f);
+    public int RequestIntervalTicks { get; set; } = 15;
+
+    /// <summary>
+    ///     Number of ticks until a move request expires.
+    /// </summary>
+    public int MoveExpirationTicks { get; set; } = 20;
 }

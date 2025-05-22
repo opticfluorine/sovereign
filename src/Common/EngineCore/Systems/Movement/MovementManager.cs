@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
@@ -49,13 +50,13 @@ public class MovementManager
 
     private readonly ILogger<MovementManager> logger;
     private readonly IMovementNotifier movementNotifier;
+
     private readonly OrientationComponentCollection orientations;
 
     /// <summary>
     ///     Circular buffer of lists of pending checks per tick.
     /// </summary>
-    private readonly List<PendingCheck>[] pendingChecks =
-        new List<PendingCheck>[MovementConfiguration.DefaultMovementLengthTicks];
+    private readonly List<PendingCheck>[] pendingChecks;
 
     /// <summary>
     ///     Queue of entities needing move events sent.
@@ -101,7 +102,7 @@ public class MovementManager
         OrientationComponentCollection orientations,
         PhysicsTagCollection physics, PhysicsProcessor physicsProcessor,
         ILogger<MovementManager> logger, NonBlockWorldSegmentIndexer worldSegmentIndexer,
-        IMovementNotifier movementNotifier)
+        IMovementNotifier movementNotifier, IOptions<MovementOptions> movementOptions)
     {
         this.kinematics = kinematics;
         this.systemTimer = systemTimer;
@@ -112,6 +113,7 @@ public class MovementManager
         this.worldSegmentIndexer = worldSegmentIndexer;
         this.movementNotifier = movementNotifier;
 
+        pendingChecks = new List<PendingCheck>[movementOptions.Value.MoveExpirationTicks];
         for (var i = 0; i < pendingChecks.Length; ++i)
             pendingChecks[i] = new List<PendingCheck>();
 
@@ -193,7 +195,7 @@ public class MovementManager
             Velocity = posVel.Velocity with { Z = PhysicsConstants.InitialJumpVelocity }
         });
         isJumping[index] = true;
-        
+
         // Schedule an immediate movement notification to broadcast the start of the jump to clients.
         movementNotifier.ScheduleEntity(entityId, true);
     }
@@ -404,9 +406,7 @@ public class MovementManager
 
         // Ensure cache is large enough to hold the new component index.
         if (kinematicsComponentIndexPhysicsTags.Count <= index)
-        {
             physicsUpdates.EnsureCapacity(kinematicsComponentIndexPhysicsTags.Count);
-        }
 
         // Array capacity is ensured by the earlier call to UpdatePositions
         // (bulk updates are done before component events are fired, see BaseComponentCollection).
