@@ -30,13 +30,13 @@ namespace Sovereign.NetworkCore.Network.Infrastructure;
 /// </summary>
 public sealed class NetworkSerializer
 {
-    public const int HmacSizeBytes = 256 / 8;
+    public const int HmacSizeBytes = 128 / 8;
 
     public const int MaxPayloadSize = 1200;
 
     private readonly ObjectPool<BufferPair> bufferPool = new();
 
-    private readonly ObjectPool<HMACSHA256> hmacPool = new();
+    private readonly ObjectPool<HMACSHA512> hmacPool = new();
     private readonly ILogger<NetworkSerializer> logger;
 
     public NetworkSerializer(ILogger<NetworkSerializer> logger)
@@ -133,10 +133,10 @@ public sealed class NetworkSerializer
     {
         // Compute the HMAC digest for the packet.
         var hmac = ComputeHmac(payload, payloadLength, connection);
-        Array.Copy(hmac, 0, packet, 0, hmac.Length);
+        Array.Copy(hmac, 0, packet, 0, HmacSizeBytes);
 
         // Fill the rest of the packet.
-        Array.Copy(payload, 0, packet, hmac.Length, payload.Length);
+        Array.Copy(payload, 0, packet, HmacSizeBytes, payload.Length);
     }
 
     /// <summary>
@@ -214,16 +214,16 @@ public sealed class NetworkSerializer
     {
         /* Compute the HMAC for the payload. */
         var hmac = ComputeHmac(payloadBytes, payloadLength, connection);
-        if (hmac.Length != hmacSpan.Length)
+        if (hmac.Length < hmacSpan.Length)
         {
             logger.LogError("HMAC size mismatch.");
             return false;
         }
 
-        // Compare all of the bytes of the HMACs.
+        // Compare all of the bytes of the HMACs (up to truncation).
         // Checking all bytes in all cases improves resistance to timing attacks.
         var delta = 0;
-        for (var i = 0; i < hmac.Length; ++i)
+        for (var i = 0; i < hmacSpan.Length; ++i)
             if (hmacSpan[i] != hmac[i])
                 delta++;
         return delta == 0;
