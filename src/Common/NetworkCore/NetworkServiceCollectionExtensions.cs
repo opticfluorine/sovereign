@@ -16,6 +16,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Sovereign.EngineCore.Performance;
 using Sovereign.EngineCore.Systems;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
@@ -53,6 +54,7 @@ public static class NetworkServiceCollectionExtensions
         services.TryAddSingleton<NetLogger>();
         services.TryAddSingleton<NetworkSerializer>();
         services.TryAddSingleton<NetworkConnectionManager>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IPerformanceMonitor, NetworkPerformanceMonitor>());
     }
 
     private static void AddInboundPipeline(IServiceCollection services)

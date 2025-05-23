@@ -16,6 +16,7 @@
  */
 
 using System;
+using LiteNetLib;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 
@@ -59,4 +60,9 @@ public interface INetworkManager : IDisposable
     /// </summary>
     /// <param name="connectionId">Connection ID.</param>
     void Disconnect(int connectionId);
+
+    /// <summary>
+    ///     Network statistics.
+    /// </summary>
+    NetStatistics NetStatistics { get; }
 }

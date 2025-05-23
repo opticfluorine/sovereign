@@ -68,6 +68,8 @@ public sealed class ServerNetworkManager : INetworkManager
     private readonly RestServer restServer;
     private readonly NetworkSerializer serializer;
 
+    public NetStatistics NetStatistics => netManager.Statistics;
+
     public ServerNetworkManager(IOptions<NetworkOptions> networkOptions,
         NetworkConnectionManager connectionManager,
         NetworkSerializer serializer,
@@ -98,6 +100,7 @@ public sealed class ServerNetworkManager : INetworkManager
 
         /* Create the network manager, but defer startup. */
         netManager = new NetManager(netListener);
+        netManager.EnableStatistics = true;
 
 #if DEBUG
         // For debug builds only, max out the disconnect timeout so that the connection survives

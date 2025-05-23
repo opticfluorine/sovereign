@@ -100,6 +100,8 @@ public sealed class ClientNetworkManager : INetworkManager
     /// </summary>
     private LoginResponse? loginResponse;
 
+    public NetStatistics NetStatistics => netManager.Statistics;
+
     public ClientNetworkManager(NetworkConnectionManager connectionManager,
         NetworkSerializer networkSerializer, RestClient restClient,
         AuthenticationClient authClient, IEventSender eventSender,
@@ -117,6 +119,7 @@ public sealed class ClientNetworkManager : INetworkManager
 
         netListener = new EventBasedNetListener();
         netManager = new NetManager(netListener);
+        netManager.EnableStatistics = true;
 
         netListener.PeerDisconnectedEvent += NetListener_PeerDisconnectedEvent;
         netListener.NetworkReceiveEvent += NetListener_NetworkReceiveEvent;

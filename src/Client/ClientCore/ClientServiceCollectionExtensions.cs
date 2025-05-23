@@ -33,6 +33,7 @@ using Sovereign.ClientCore.Rendering.Components.Indexers;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Rendering.Gui.Debug;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Scenes;
 using Sovereign.ClientCore.Rendering.Scenes.Game;
@@ -210,6 +211,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<GuiTextureMapper>();
         services.TryAddSingleton<GuiComponentEditors>();
         services.TryAddSingleton<OverlayGui>();
+        services.TryAddSingleton<NetworkDebugGui>();
     }
 
     private static void AddResources(IServiceCollection services)

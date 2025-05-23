@@ -39,6 +39,11 @@ public enum ClientStateFlag
     ///     Flag indicating that the Dear ImGui demo window should be displayed.
     /// </summary>
     ShowImGuiDemo,
+    
+    /// <summary>
+    ///     Flag indicating that the network debug window should be displayed.
+    /// </summary>
+    ShowNetworkDebug,
 
     /// <summary>
     ///     Flag indicating that the in-game menu should be displayed.

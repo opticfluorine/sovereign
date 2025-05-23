@@ -17,6 +17,7 @@
 
 using System;
 using ImGuiNET;
+using Sovereign.ClientCore.Rendering.Gui.Debug;
 using Sovereign.ClientCore.Rendering.Scenes;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 using Sovereign.ClientCore.Systems.ClientState;
@@ -30,6 +31,7 @@ namespace Sovereign.VeldridRenderer.Rendering;
 public class VeldridSceneConsumer : ISceneConsumer, IDisposable
 {
     private readonly GameResourceManager gameResMgr;
+    private readonly NetworkDebugGui networkDebugGui;
     private readonly GameSceneConsumer gameSceneConsumer;
     private readonly ResourceEditorGui resourceEditorGui;
     private readonly ClientStateServices stateServices;
@@ -40,12 +42,13 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
     private bool isDisposed;
 
     public VeldridSceneConsumer(GameSceneConsumer gameSceneConsumer, ClientStateServices stateServices,
-        ResourceEditorGui resourceEditorGui, GameResourceManager gameResMgr)
+        ResourceEditorGui resourceEditorGui, GameResourceManager gameResMgr, NetworkDebugGui networkDebugGui)
     {
         this.gameSceneConsumer = gameSceneConsumer;
         this.stateServices = stateServices;
         this.resourceEditorGui = resourceEditorGui;
         this.gameResMgr = gameResMgr;
+        this.networkDebugGui = networkDebugGui;
     }
 
     public void Dispose()
@@ -71,6 +74,7 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
         if (scene.RenderGui)
         {
             // Global debug menus.
+            if (stateServices.GetStateFlagValue(ClientStateFlag.ShowNetworkDebug)) networkDebugGui.Render();
             if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiMetrics)) ImGui.ShowMetricsWindow();
             if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiDebugLog)) ImGui.ShowDebugLogWindow();
             if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiIdStackTool)) ImGui.ShowIDStackToolWindow();
