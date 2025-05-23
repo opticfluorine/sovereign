@@ -233,11 +233,13 @@ public class MovementManager
     public void HandleTick()
     {
         // Send move events for any newly processed move requests.
+        /*
         while (pendingMoveEvents.TryDequeue(out var entityId))
         {
             var kinematicData = kinematics[entityId];
             internalController.Move(entityId, kinematicData.Position, kinematicData.Velocity);
         }
+        */
 
         ProcessChecks();
         movementNotifier.SendScheduled();
