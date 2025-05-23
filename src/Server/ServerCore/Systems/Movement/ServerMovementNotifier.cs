@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Systems.Movement;
 
 namespace Sovereign.ServerCore.Systems.Movement;
@@ -26,30 +27,25 @@ namespace Sovereign.ServerCore.Systems.Movement;
 /// </summary>
 public class ServerMovementNotifier : IMovementNotifier
 {
-    /// <summary>
-    ///     Number of ticks between successive batches.
-    /// </summary>
-    private const ulong ScheduleDelay = 20;
-
     private readonly MovementInternalController controller;
     private readonly KinematicsComponentCollection kinematics;
-    private readonly ILogger<ServerMovementNotifier> logger;
     private readonly Dictionary<ulong, ulong> scheduledCountByEntityId = new();
     private readonly List<ulong> toRemove = new();
     private ulong sendCount;
+    private readonly MovementOptions movementOptions;
 
-    public ServerMovementNotifier(KinematicsComponentCollection kinematics, MovementInternalController controller,
-        ILogger<ServerMovementNotifier> logger)
+    public ServerMovementNotifier(KinematicsComponentCollection kinematics, MovementInternalController controller, 
+        IOptions<MovementOptions> movementOptions)
     {
         this.kinematics = kinematics;
         this.controller = controller;
-        this.logger = logger;
+        this.movementOptions = movementOptions.Value;
     }
 
     public void ScheduleEntity(ulong entityId, bool immediate)
     {
         if (scheduledCountByEntityId.TryGetValue(entityId, out var count) && count >= sendCount) return;
-        scheduledCountByEntityId[entityId] = sendCount + (immediate ? 1 : ScheduleDelay);
+        scheduledCountByEntityId[entityId] = sendCount + (immediate ? 1 : (ulong)movementOptions.UpdateIntervalTicks);
     }
 
     public void SendScheduled()

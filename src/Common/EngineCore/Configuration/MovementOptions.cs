@@ -30,4 +30,9 @@ public sealed class MovementOptions
     ///     Number of ticks until a move request expires.
     /// </summary>
     public int MoveExpirationTicks { get; set; } = 20;
+
+    /// <summary>
+    ///     Number of ticks between successive movement updates.
+    /// </summary>
+    public int UpdateIntervalTicks { get; set; } = 20;
 }

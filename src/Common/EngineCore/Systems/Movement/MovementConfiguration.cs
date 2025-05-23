@@ -26,5 +26,5 @@ public class MovementConfiguration
     /// <summary>
     ///     Default base velocity for all entities.
     /// </summary>
-    public static readonly Vector2 DefaultBaseVelocity = new(4.0f, 4.0f);
+    public static readonly Vector2 DefaultBaseVelocity = new(3.0f, 3.0f);
 }
