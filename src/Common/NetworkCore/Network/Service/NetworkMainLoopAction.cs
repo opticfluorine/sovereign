@@ -30,74 +30,32 @@ namespace Sovereign.NetworkCore.Network.Service;
 ///     Responsible for managing network operations on one or more
 ///     separate threads.
 /// </summary>
-public sealed class NetworkingService
+public sealed class NetworkMainLoopAction : IMainLoopAction
 {
-    private readonly FatalErrorHandler fatalErrorHandler;
     private readonly InboundNetworkPipeline inboundPipeline;
-    private readonly ILogger<NetworkingService> logger;
+    private readonly ILogger<NetworkMainLoopAction> logger;
     private readonly NetLogger netLogger;
     private readonly INetworkManager networkManager;
     private readonly OutboundNetworkPipeline outboundPipeline;
 
-    /// <summary>
-    ///     Thread that the service is running on.
-    /// </summary>
-    private readonly Thread serviceThread;
-
-    /// <summary>
-    ///     Flag indicating whether the service has been requested to stop.
-    /// </summary>
-    private bool stopRequested;
-
-    public NetworkingService(InboundNetworkPipeline inboundPipeline,
+    public NetworkMainLoopAction(InboundNetworkPipeline inboundPipeline,
         OutboundNetworkPipeline outboundPipeline,
         NetLogger netLogger,
         INetworkManager networkManager,
         FatalErrorHandler fatalErrorHandler,
-        ILogger<NetworkingService> logger)
+        ILogger<NetworkMainLoopAction> logger)
     {
         // Dependency injection.
         this.inboundPipeline = inboundPipeline;
         this.outboundPipeline = outboundPipeline;
         this.netLogger = netLogger;
         this.networkManager = networkManager;
-        this.fatalErrorHandler = fatalErrorHandler;
         this.logger = logger;
 
         // Wire up pipelines.
         networkManager.OnNetworkReceive += NetworkManager_OnNetworkReceive;
 
-        // Set up thread, but do not start.
-        serviceThread = new Thread(Run)
-        {
-            Name = "Networking"
-        };
-    }
-
-    /// <summary>
-    ///     Starts the networking service.
-    /// </summary>
-    public void Start()
-    {
-        stopRequested = false;
-        serviceThread.Start();
-    }
-
-    /// <summary>
-    ///     Stops the networking service.
-    /// </summary>
-    public void Stop()
-    {
-        stopRequested = true;
-        serviceThread.Join();
-    }
-
-    /// <summary>
-    ///     Runs the networking service.
-    /// </summary>
-    private void Run()
-    {
-        logger.LogInformation("Networking service is started.");
+        logger.LogInformation("Starting network manager.");
 
         /* Start the network manager. */
         try
@@ -108,33 +66,22 @@ public sealed class NetworkingService
         {
             logger.LogCritical(e, "Failed to start the network manager.");
             fatalErrorHandler.FatalError();
-            return;
         }
-
-        /* Loop until shutdown. */
-        while (!stopRequested)
-            try
-            {
-                networkManager.Poll();
-                Thread.Sleep(1);
-            }
-            catch (Exception e)
-            {
-                /* Unhandled exception escaped the network thread. */
-                logger.LogError(e, "Error in networking service.");
-            }
-
-        /* Clean up networking resources. */
+    }
+    
+    public ulong CycleInterval => 1;
+    
+    public void Execute()
+    {
         try
         {
-            networkManager.Dispose();
+            networkManager.Poll();
         }
         catch (Exception e)
         {
-            logger.LogCritical(e, "Error stopping network manager.");
+            /* Unhandled exception escaped the network thread. */
+            logger.LogError(e, "Error in network manager.");
         }
-
-        logger.LogInformation("Networking service is stopped.");
     }
 
     /// <summary>
@@ -146,4 +93,5 @@ public sealed class NetworkingService
     {
         inboundPipeline.ProcessEvent(ev, connection);
     }
+
 }

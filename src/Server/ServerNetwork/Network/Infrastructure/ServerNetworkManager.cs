@@ -114,15 +114,8 @@ public sealed class ServerNetworkManager : INetworkManager
     public void Initialize()
     {
         /* Start the network manager in server mode. */
-        var sb = new StringBuilder();
-        sb.Append("Starting server on ")
-            .Append(networkOptions.NetworkInterfaceIPv4)
-            .Append(" / ")
-            .Append(networkOptions.NetworkInterfaceIPv6)
-            .Append(" port ")
-            .Append(networkOptions.Port)
-            .Append(".");
-        logger.LogInformation(sb.ToString());
+        logger.LogInformation("Starting server on {IPv4} / {IPv6} port {Port}.", networkOptions.NetworkInterfaceIPv4,
+            networkOptions.NetworkInterfaceIPv6, networkOptions.Port);
 
         var result = netManager.Start(networkOptions.NetworkInterfaceIPv4,
             networkOptions.NetworkInterfaceIPv6,

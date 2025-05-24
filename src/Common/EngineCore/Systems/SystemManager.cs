@@ -23,6 +23,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Sovereign.EngineCore.Configuration;
 
 namespace Sovereign.EngineCore.Systems;
 
@@ -31,23 +33,21 @@ namespace Sovereign.EngineCore.Systems;
 /// </summary>
 public class SystemManager : BackgroundService
 {
-    /// <summary>
-    ///     Number of system executor threads.
-    /// </summary>
-    private const int ExecutorCount = 1;
-
     private readonly List<ExecutorScope> executors = new();
     private readonly List<Task> executorTasks = new();
     private readonly ILogger<SystemManager> logger;
     private readonly IServiceScopeFactory serviceScopeFactory;
     private readonly IEnumerable<ISystem> systems;
+    private readonly PerformanceOptions performanceOptions;
 
     public SystemManager(IEnumerable<ISystem> systems,
-        ILogger<SystemManager> logger, IServiceScopeFactory serviceScopeFactory)
+        ILogger<SystemManager> logger, IServiceScopeFactory serviceScopeFactory, 
+        IOptions<PerformanceOptions> performanceOptions)
     {
         this.systems = systems;
         this.logger = logger;
         this.serviceScopeFactory = serviceScopeFactory;
+        this.performanceOptions = performanceOptions.Value;
     }
 
     public override void Dispose()
@@ -81,7 +81,7 @@ public class SystemManager : BackgroundService
     /// </summary>
     private void CreateExecutors()
     {
-        for (var i = 0; i < ExecutorCount; ++i)
+        for (var i = 0; i < performanceOptions.SystemExecutorCount; ++i)
         {
             var scope = serviceScopeFactory.CreateScope();
             executors.Add(new ExecutorScope
@@ -104,7 +104,7 @@ public class SystemManager : BackgroundService
         foreach (var system in rankedSystems)
         {
             /* Cycle through the executors round-robin style. */
-            var executor = executors[count % ExecutorCount].SystemExecutor;
+            var executor = executors[count % performanceOptions.SystemExecutorCount].SystemExecutor;
             executor.AddSystem(system);
 
             count++;

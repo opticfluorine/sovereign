@@ -23,10 +23,12 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 /// </summary>
 public class PlayerStateManager
 {
+    private const ulong NoPlayer = 0;
+    
     /// <summary>
     ///     Current player entity ID. Empty if a player is not logged in.
     /// </summary>
-    private Maybe<ulong> playerEntityId = new();
+    private ulong playerEntityId = NoPlayer;
 
     /// <summary>
     ///     Updates state for a player selection/login.
@@ -34,7 +36,7 @@ public class PlayerStateManager
     /// <param name="playerEntityId">Selected player entity ID.</param>
     public void PlayerSelected(ulong playerEntityId)
     {
-        this.playerEntityId = new Maybe<ulong>(playerEntityId);
+        this.playerEntityId = playerEntityId;
     }
 
     /// <summary>
@@ -42,7 +44,7 @@ public class PlayerStateManager
     /// </summary>
     public void PlayerLogout()
     {
-        playerEntityId = new Maybe<ulong>();
+        playerEntityId = NoPlayer;
     }
 
     /// <summary>
@@ -52,7 +54,7 @@ public class PlayerStateManager
     /// <returns>true if a player has been selected, false otherwise.</returns>
     public bool TryGetPlayerEntityId(out ulong playerEntityId)
     {
-        playerEntityId = this.playerEntityId.HasValue ? this.playerEntityId.Value : 0;
-        return this.playerEntityId.HasValue;
+        playerEntityId = this.playerEntityId;
+        return this.playerEntityId != NoPlayer;
     }
 }

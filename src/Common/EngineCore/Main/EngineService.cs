@@ -20,6 +20,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Timing;
 
@@ -49,13 +51,16 @@ public class EngineService : BackgroundService
     /// </summary>
     private ulong cycleCount;
 
+    private readonly PerformanceOptions performanceOptions;
+
     public EngineService(IEventLoop eventLoop, TimeManager timeManager, IEnumerable<IMainLoopAction> mainLoopActions,
-        ILogger<EngineService> logger)
+        ILogger<EngineService> logger, IOptions<PerformanceOptions> runtimeOptions)
     {
         this.eventLoop = eventLoop;
         this.timeManager = timeManager;
         this.logger = logger;
         this.mainLoopActions = new List<IMainLoopAction>(mainLoopActions);
+        this.performanceOptions = runtimeOptions.Value;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -118,7 +123,7 @@ public class EngineService : BackgroundService
             PerformMainLoopActions();
 
             /* Yield to avoid consuming 100% CPU. */
-            Thread.Yield();
+            if (performanceOptions.YieldEventLoop) Thread.Yield();
         }
     }
 

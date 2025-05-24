@@ -60,6 +60,8 @@ public static class CoreServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(DebugOptions)}"));
         services.Configure<MovementOptions>(
             configuration.GetSection($"Sovereign:{nameof(MovementOptions)}"));
+        services.Configure<PerformanceOptions>(
+            configuration.GetSection($"Sovereign:{nameof(PerformanceOptions)}"));
 
         return services;
     }

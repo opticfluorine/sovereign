@@ -102,6 +102,16 @@ public sealed class ClientNetworkManager : INetworkManager
 
     public NetStatistics NetStatistics => netManager.Statistics;
 
+    /// <summary>
+    ///     Current ping in milliseconds.
+    /// </summary>
+    public int PingMs => Connection?.PingMs ?? -999;
+
+    /// <summary>
+    ///     Current round trip time in milliseconds.
+    /// </summary>
+    public int RttMs => Connection?.RttMs ?? -999;
+
     public ClientNetworkManager(NetworkConnectionManager connectionManager,
         NetworkSerializer networkSerializer, RestClient restClient,
         AuthenticationClient authClient, IEventSender eventSender,

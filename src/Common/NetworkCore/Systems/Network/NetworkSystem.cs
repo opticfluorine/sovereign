@@ -28,18 +28,15 @@ namespace Sovereign.NetworkCore.Systems.Network;
 /// </summary>
 public sealed class NetworkSystem : ISystem
 {
-    private readonly NetworkingService networkingService;
     private readonly IOutboundEventSet outboundEventSet;
     private readonly OutboundNetworkPipeline outboundPipeline;
 
-    public NetworkSystem(NetworkingService networkingService,
-        EventCommunicator eventCommunicator,
+    public NetworkSystem(EventCommunicator eventCommunicator,
         IEventLoop eventLoop,
         NetworkEventAdapter eventAdapter,
         OutboundNetworkPipeline outboundPipeline,
         IOutboundEventSet outboundEventSet)
     {
-        this.networkingService = networkingService;
         EventCommunicator = eventCommunicator;
         this.outboundPipeline = outboundPipeline;
         this.outboundEventSet = outboundEventSet;
@@ -56,9 +53,12 @@ public sealed class NetworkSystem : ISystem
 
     public int WorkloadEstimate => 50;
 
+    public void Initialize()
+    {
+    }
+    
     public void Cleanup()
     {
-        networkingService.Stop();
     }
 
     public int ExecuteOnce()
@@ -79,8 +79,4 @@ public sealed class NetworkSystem : ISystem
         return eventsProcessed;
     }
 
-    public void Initialize()
-    {
-        networkingService.Start();
-    }
 }

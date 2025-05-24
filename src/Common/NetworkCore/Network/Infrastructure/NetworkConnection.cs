@@ -62,6 +62,16 @@ public sealed class NetworkConnection : IDisposable
     public int Id => peer.Id;
 
     /// <summary>
+    ///     Current ping in milliseconds.
+    /// </summary>
+    public int PingMs => peer.Ping;
+
+    /// <summary>
+    ///     Current round trip time in milliseconds.
+    /// </summary>
+    public int RttMs => peer.RoundTripTime;
+
+    /// <summary>
     ///     Key used for HMAC.
     /// </summary>
     internal byte[] Key { get; }

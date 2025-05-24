@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 
@@ -44,17 +45,15 @@ public class SystemExecutor
     /// </summary>
     private readonly List<ISystem> systems = new();
 
-    /// <summary>
-    ///     Executor loop iteration count.
-    /// </summary>
-    private uint iterationCount;
+    private readonly PerformanceOptions performanceOptions;
 
     public SystemExecutor(IEventLoop eventLoop, IEngineConfiguration engineConfiguration,
-        ILogger<SystemExecutor> logger)
+        ILogger<SystemExecutor> logger, IOptions<PerformanceOptions> runtimeOptions)
     {
         this.eventLoop = eventLoop;
         this.engineConfiguration = engineConfiguration;
         this.logger = logger;
+        this.performanceOptions = runtimeOptions.Value;
     }
 
     /// <summary>
@@ -112,17 +111,7 @@ public class SystemExecutor
                     logger.LogError(e, "Unhandled exception in SystemExecutor.");
                 }
 
-            iterationCount++;
-            if (engineConfiguration.ExecutorThreadSleepInterval > 0 &&
-                iterationCount == engineConfiguration.ExecutorThreadSleepInterval)
-            {
-                iterationCount = 0;
-                Thread.Sleep(1);
-            }
-            else
-            {
-                Thread.Yield();
-            }
+            if (performanceOptions.YieldSystemLoop) Thread.Yield();
         }
     }
 

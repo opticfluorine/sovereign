@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Service;
 
@@ -26,6 +27,7 @@ namespace Sovereign.NetworkCore.Systems.Network;
 public sealed class NetworkEventAdapter : IEventAdapter
 {
     private readonly ReceivedEventQueue eventQueue;
+    private readonly Queue<Event> localQueue = new();
 
     public NetworkEventAdapter(ReceivedEventQueue eventQueue,
         EventAdapterManager adapterManager)
@@ -37,11 +39,15 @@ public sealed class NetworkEventAdapter : IEventAdapter
 
     public bool PollEvent(out Event? ev)
     {
-        return eventQueue.ReceivedEvents.TryDequeue(out ev);
+        return localQueue.TryDequeue(out ev);
     }
 
     public void PrepareEvents()
     {
-        /* no action */
+        // Rapidly drain the shared queue to minimize locked time.
+        while (eventQueue.ReceivedEvents.TryDequeue(out var ev))
+        {
+            localQueue.Enqueue(ev);
+        }
     }
 }

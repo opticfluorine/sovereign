@@ -16,6 +16,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Performance;
 using Sovereign.EngineCore.Systems;
 using Sovereign.NetworkCore.Network.Infrastructure;
@@ -73,13 +74,14 @@ public static class NetworkServiceCollectionExtensions
 
     private static void AddNetworkingService(IServiceCollection services)
     {
-        services.TryAddSingleton<NetworkingService>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IMainLoopAction, NetworkMainLoopAction>());
         services.TryAddSingleton<ReceivedEventQueue>();
     }
 
     private static void AddSystems(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, NetworkSystem>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PingSystem>());
         services.TryAddSingleton<PingController>();
     }
 }
