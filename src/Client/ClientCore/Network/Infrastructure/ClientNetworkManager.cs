@@ -22,10 +22,12 @@ using System.Net;
 using System.Net.Sockets;
 using LiteNetLib;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sodium;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Systems.ClientNetwork;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
@@ -116,7 +118,7 @@ public sealed class ClientNetworkManager : INetworkManager
         NetworkSerializer networkSerializer, RestClient restClient,
         AuthenticationClient authClient, IEventSender eventSender,
         ClientNetworkController clientNetworkController, TemplateEntityDataClient templateEntityDataClient,
-        ILogger<ClientNetworkManager> logger)
+        ILogger<ClientNetworkManager> logger, IOptions<PerformanceOptions> performanceOptions)
     {
         this.connectionManager = connectionManager;
         this.networkSerializer = networkSerializer;
@@ -130,6 +132,7 @@ public sealed class ClientNetworkManager : INetworkManager
         netListener = new EventBasedNetListener();
         netManager = new NetManager(netListener);
         netManager.EnableStatistics = true;
+        netManager.UpdateTime = performanceOptions.Value.NetworkUpdateTimeMs;
 
         netListener.PeerDisconnectedEvent += NetListener_PeerDisconnectedEvent;
         netListener.NetworkReceiveEvent += NetListener_NetworkReceiveEvent;

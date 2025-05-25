@@ -24,6 +24,7 @@ using LiteNetLib;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.Accounts.Accounts.Services;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network;
 using Sovereign.NetworkCore.Network.Infrastructure;
@@ -78,7 +79,8 @@ public sealed class ServerNetworkManager : INetworkManager
         ServerNetworkController networkController,
         IEventSender eventSender,
         ILogger<ServerNetworkManager> logger,
-        AccountServices accountServices)
+        AccountServices accountServices,
+        IOptions<PerformanceOptions> performanceOptions)
     {
         /* Dependency injection. */
         this.networkOptions = networkOptions.Value;
@@ -101,6 +103,7 @@ public sealed class ServerNetworkManager : INetworkManager
         /* Create the network manager, but defer startup. */
         netManager = new NetManager(netListener);
         netManager.EnableStatistics = true;
+        netManager.UpdateTime = performanceOptions.Value.NetworkUpdateTimeMs;
 
 #if DEBUG
         // For debug builds only, max out the disconnect timeout so that the connection survives

@@ -39,7 +39,7 @@ public class TimeManager
     /// <summary>
     ///     All registered ITimedActions.
     /// </summary>
-    private readonly IList<ITimedAction> timedActions;
+    private readonly List<ITimedAction> timedActions;
 
     public TimeManager(ISystemTimer systemTimer, IEnumerable<ITimedAction> timedActions)
     {

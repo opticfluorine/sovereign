@@ -35,4 +35,9 @@ public sealed class PerformanceOptions
     ///     If true, yield the system executor threads after each iteration to limit CPU usage.
     /// </summary>
     public bool YieldSystemLoop { get; set; } = false;
+
+    /// <summary>
+    ///     Interval in milliseconds at which the network processing thread operates.
+    /// </summary>
+    public int NetworkUpdateTimeMs { get; set; } = 15;
 }
