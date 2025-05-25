@@ -50,15 +50,16 @@ public class ScriptingCallbackManager
     {
         logger.LogTrace("Registering callback for {EventId} in {Script}.", eventId, luaHost.Name);
 
-        List<Callback>? cbList;
         lock (callbacks)
         {
-            if (!callbacks.TryGetValue(eventId, out cbList))
+            if (!callbacks.TryGetValue(eventId, out var cbList))
             {
                 logger.LogTrace("New callback list for {EventId}.", eventId);
                 cbList = new List<Callback>();
                 callbacks[eventId] = cbList;
             }
+
+            cbList.Add(new Callback(luaHost, quickLookupIndex));
         }
 
         if (!eventIdsByHost.TryGetValue(luaHost.LuaState, out var evList))
@@ -68,7 +69,6 @@ public class ScriptingCallbackManager
             eventIdsByHost[luaHost.LuaState] = evList;
         }
 
-        cbList.Add(new Callback(luaHost, quickLookupIndex));
         evList.Add(eventId);
     }
 
@@ -83,19 +83,20 @@ public class ScriptingCallbackManager
         if (!eventIdsByHost.TryGetValue(luaHost.LuaState, out var eventIds)) return;
 
         foreach (var eventId in eventIds)
-        {
-            if (!callbacks.TryGetValue(eventId, out var cbs))
+            lock (callbacks)
             {
-                logger.LogError("No callbacks found during reverse lookup for event ID {EventId}.", eventId);
-                continue;
-            }
+                if (!callbacks.TryGetValue(eventId, out var cbs))
+                {
+                    logger.LogError("No callbacks found during reverse lookup for event ID {EventId}.", eventId);
+                    continue;
+                }
 
-            for (var i = cbs.Count - 1; i >= 0; --i)
-            {
-                var cb = cbs[i];
-                if (cb.LuaHost.LuaState == luaHost.LuaState) cbs.RemoveAt(i);
+                for (var i = cbs.Count - 1; i >= 0; --i)
+                {
+                    var cb = cbs[i];
+                    if (cb.LuaHost.LuaState == luaHost.LuaState) cbs.RemoveAt(i);
+                }
             }
-        }
 
         eventIdsByHost.TryRemove(luaHost.LuaState, out _);
     }
@@ -105,7 +106,11 @@ public class ScriptingCallbackManager
     /// </summary>
     public void RemoveAllCallbacks()
     {
-        callbacks.Clear();
+        lock (callbacks)
+        {
+            callbacks.Clear();
+        }
+
         eventIdsByHost.Clear();
     }
 
@@ -120,8 +125,11 @@ public class ScriptingCallbackManager
     /// <param name="details">Event details.</param>
     public void DispatchEvent(EventId eventId, IEventDetails? details)
     {
-        if (!callbacks.TryGetValue(eventId, out var cbList)) return;
-        foreach (var callback in cbList) DispatchEventAsync(eventId, callback, details);
+        lock (callbacks)
+        {
+            if (!callbacks.TryGetValue(eventId, out var cbList)) return;
+            foreach (var callback in cbList) DispatchEventAsync(eventId, callback, details);
+        }
     }
 
     /// <summary>
