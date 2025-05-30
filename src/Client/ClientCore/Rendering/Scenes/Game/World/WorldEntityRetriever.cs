@@ -351,7 +351,7 @@ public sealed class WorldEntityRetriever
             // Check whether in range.
             // Use a larger radius to ensure blocks which partially overlap the lighted volume.
             var displacement = blockPosition - light.Position;
-            var wideRadius = light.Details.Radius + 1.0f;
+            var wideRadius = 2.0f * light.Details.Radius + 1.0f;
             if (displacement.LengthSquared() > wideRadius * wideRadius) continue;
 
             // Block is in range, tag it for local lighting calculations.

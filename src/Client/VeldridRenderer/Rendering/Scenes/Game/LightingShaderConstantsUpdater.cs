@@ -103,8 +103,8 @@ public class LightingShaderConstantsUpdater
             LightColor = ColorUtil.UnpackColorRgb(light.Light.Details.Color),
             LightTransform = new Matrix4x4(
                 1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, -1.0f, 0.0f, 0.0f,
-                0.0f, -1.0f, 0.5f * (1.0f + radius), 0.0f,
+                0.0f, -0.5f, 0.0f, 0.0f,
+                0.0f, -0.5f, 0.5f * (1.0f + radius), 0.0f,
                 -pos.X, pos.Y + pos.Z, 0.5f * (1.0f - pos.Z), radius)
         };
 
