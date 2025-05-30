@@ -105,7 +105,7 @@ public class LightingShaderConstantsUpdater
                 1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, -0.5f, 0.0f, 0.0f,
                 0.0f, -0.5f, 0.5f * (1.0f + radius), 0.0f,
-                -pos.X, pos.Y + pos.Z, 0.5f * (1.0f - pos.Z), radius)
+                -pos.X, 0.5f * (pos.Y + pos.Z), 0.5f * (1.0f - pos.Z), radius)
         };
 
         // World-projection matrix shared by all cube faces.
