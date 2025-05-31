@@ -165,8 +165,9 @@ public class ClientWorldEditInputHandler
     /// <returns>Hovered block coordinate.</returns>
     private GridPosition GetHoveredBlockWithOffset()
     {
+        // Select the block whose top face is hovered by the mouse.
         var hoverPos = cameraServices.GetMousePositionWorldCoordinates();
-        var posWithOffset = hoverPos with { Y = hoverPos.Y - userState.ZOffset, Z = hoverPos.Z + userState.ZOffset };
+        var posWithOffset = hoverPos with { Y = hoverPos.Y - userState.ZOffset, Z = hoverPos.Z + userState.ZOffset - 1.0f };
         return (GridPosition)posWithOffset;
     }
 
