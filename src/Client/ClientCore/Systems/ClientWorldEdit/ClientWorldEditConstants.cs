@@ -30,4 +30,14 @@ public static class ClientWorldEditConstants
     ///     Maximum value of Z offset.
     /// </summary>
     public const int MaxZOffset = 10;
+
+    /// <summary>
+    ///     Minimum pen width in blocks.
+    /// </summary>
+    public const int MinPenWidth = 1;
+
+    /// <summary>
+    ///     Maximum pen width in blocks.
+    /// </summary>
+    public const int MaxPenWidth = 7;
 }

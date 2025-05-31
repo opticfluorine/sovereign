@@ -38,4 +38,19 @@ public class ClientWorldEditController
         var ev = new Event(EventId.Client_WorldEdit_SetZOffset, details);
         eventSender.SendEvent(ev);
     }
+    
+    /// <summary>
+    ///     Sets the pen width for the world editor.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="penWidth">Pen width.</param>
+    public void SetPenWidth(IEventSender eventSender, int penWidth)
+    {
+        var details = new GenericEventDetails<int>
+        {
+            Value = penWidth
+        };
+        var ev = new Event(EventId.Client_WorldEdit_SetPenWidth, details);
+        eventSender.SendEvent(ev);
+    }
 }

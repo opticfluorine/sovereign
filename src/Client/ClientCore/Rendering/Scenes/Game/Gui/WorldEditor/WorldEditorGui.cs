@@ -50,11 +50,21 @@ public class WorldEditorGui
     ///     Backing buffer for Z offset input field.
     /// </summary>
     private int zOffsetBuffer;
+    
+    /// <summary>
+    ///     Backing buffer for pen width input field.
+    /// </summary>
+    private int penWidthBuffer;
 
     /// <summary>
     ///     Change flag for Z offset.
     /// </summary>
     private bool zOffsetChangeInProgress;
+    
+    /// <summary>
+    ///     Change flag for pen width.
+    /// </summary>
+    private bool penWidthChangeInProgress;
 
     public WorldEditorGui(ClientWorldEditServices worldEditServices, MaterialManager materialManager,
         GuiExtensions guiExtensions, IEventSender eventSender,
@@ -77,11 +87,12 @@ public class WorldEditorGui
     public void Render()
     {
         var fontSize = ImGui.GetFontSize();
-        ImGui.SetNextWindowSize(fontSize * new Vector2(14.0f, 10.0f));
+        ImGui.SetNextWindowSize(fontSize * new Vector2(15.0f, 13.5f));
         if (!ImGui.Begin("World Editor", ImGuiWindowFlags.NoResize)) return;
 
         RenderBlockTemplateControl();
         RenderZOffsetControl();
+        RenderPenWidthControl();
         RenderHelp();
 
         ImGui.End();
@@ -134,8 +145,7 @@ public class WorldEditorGui
         // Validate and update state if needed.
         if (zOffsetBuffer != worldEditServices.ZOffset)
         {
-            if (zOffsetBuffer < ClientWorldEditConstants.MinZOffset ||
-                zOffsetBuffer > ClientWorldEditConstants.MaxZOffset)
+            if (zOffsetBuffer is < ClientWorldEditConstants.MinZOffset or > ClientWorldEditConstants.MaxZOffset)
             {
                 zOffsetBuffer = worldEditServices.ZOffset;
             }
@@ -146,11 +156,47 @@ public class WorldEditorGui
             }
         }
     }
+    
+    /// <summary>
+    ///     Renders the pen width selection control.
+    /// </summary>
+    private void RenderPenWidthControl()
+    {
+        // Sync input buffers with backend.
+        if (penWidthBuffer == worldEditServices.PenWidth)
+            penWidthChangeInProgress = false;
+        else if (!penWidthChangeInProgress)
+            penWidthBuffer = worldEditServices.PenWidth;
+        
+        ImGui.Separator();
+        ImGui.Text("Pen Width:");
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(120.0f);
+        ImGui.InputInt("##penwidth", ref penWidthBuffer);
+        
+        // Validate and update state if needed.
+        if (penWidthBuffer != worldEditServices.PenWidth)
+        {
+            if (penWidthBuffer is < ClientWorldEditConstants.MinPenWidth or > ClientWorldEditConstants.MaxPenWidth)
+            {
+                penWidthBuffer = worldEditServices.PenWidth;
+            }
+            else
+            {
+                penWidthChangeInProgress = true;
+                worldEditController.SetPenWidth(eventSender, penWidthBuffer);
+            }
+        }
+    }
 
+    /// <summary>
+    ///     Renders the help text for the world editor GUI.
+    /// </summary>
     private void RenderHelp()
     {
         ImGui.Separator();
         ImGui.TextColored(helpTextColor, "Scroll to change block template.");
         ImGui.TextColored(helpTextColor, "Ctrl+Scroll to change Z offset.");
+        ImGui.TextColored(helpTextColor, "Shift+Scroll to change pen width.");
     }
 }

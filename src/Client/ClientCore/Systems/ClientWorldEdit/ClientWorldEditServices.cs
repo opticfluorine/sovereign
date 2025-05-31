@@ -37,4 +37,9 @@ public class ClientWorldEditServices
     ///     Z offset relative to camera to use for world editing.
     /// </summary>
     public int ZOffset => state.ZOffset;
+    
+    /// <summary>
+    ///     Pen width in blocks to use for world editing.
+    /// </summary>
+    public int PenWidth => state.PenWidth;
 }

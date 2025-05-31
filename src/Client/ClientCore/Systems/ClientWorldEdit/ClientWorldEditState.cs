@@ -64,20 +64,35 @@ public class ClientWorldEditState
     public int ZOffset { get; private set; }
 
     /// <summary>
+    ///     Pen width in blocks.
+    /// </summary>
+    public int PenWidth { get; private set; } = ClientWorldEditConstants.MinPenWidth;
+
+    /// <summary>
     ///     Processes a scroll tick.
     /// </summary>
     /// <param name="isScrollUp">If true, scroll is up; if false, scroll is down.</param>
     public void OnScrollTick(bool isScrollUp)
     {
+        // The following rules are applied in priority order:
         // Scroll while holding CTRL varies the z-offset.
-        // Scrolling without holding CTRL varies the material and material modifier.
+        // Scroll while holding SHIFT varies the pen width.
+        // Scrolling without holding keys varies the material and material modifier.
         var ctrlPressed = inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_LCTRL)
                           || inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_RCTRL);
+        var shiftPressed = inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_LSHIFT)
+                           || inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_RSHIFT);
         if (ctrlPressed)
         {
             // Z offset scroll.
             ZOffset = Math.Min(Math.Max(ZOffset + (isScrollUp ? 1 : -1), ClientWorldEditConstants.MinZOffset),
                 ClientWorldEditConstants.MaxZOffset);
+        }
+        else if (shiftPressed)
+        {
+            // Pen width scroll.
+            PenWidth = Math.Min(Math.Max(PenWidth + (isScrollUp ? 1 : -1), ClientWorldEditConstants.MinPenWidth),
+                ClientWorldEditConstants.MaxPenWidth);
         }
         else
         {
@@ -97,5 +112,14 @@ public class ClientWorldEditState
     public void SetZOffset(int zOffset)
     {
         ZOffset = zOffset;
+    }
+    
+    /// <summary>
+    ///     Sets the pen width. Does not perform any validation.
+    /// </summary>
+    /// <param name="penWidth">Pen width.</param>
+    public void SetPenWidth(int penWidth)
+    {
+        PenWidth = penWidth;
     }
 }
