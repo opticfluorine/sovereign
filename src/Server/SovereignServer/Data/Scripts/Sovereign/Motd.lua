@@ -33,7 +33,7 @@ end
 
 function on_player_logout(event)
     local playerEntityId = event.EntityId
-    local playerName = components.name.Get(playerEntityId)
+    local playerName = components.name.Get(playerEntityId, true)
     chat.SendToAll(color.CHAT_GLOBAL,
             string.format("%s has left the world.", playerName))
 end
