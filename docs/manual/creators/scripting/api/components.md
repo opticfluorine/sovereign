@@ -42,12 +42,14 @@ The following functions are common to multiple component types.
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: components.<component>.Exists(entityId)
+.. lua:function:: components.<component>.Exists(entityId, lookback=false)
 
    Gets whether the given entity has this component.
    
    :param entityId: Entity ID.
    :type entityId: integer
+   :param lookback: Whether to look back at components deleted in the last tick (default: false).
+   :type lookback: boolean
    :return: true if the entity has this component, or false otherwise.
    :rtype: boolean
 ```
@@ -56,10 +58,16 @@ The following functions are common to multiple component types.
 
 ```{code-block} lua
 :caption: Using `Exists(entityId)` to check for the presence of a tag.
-:emphasize-lines: 1
+:emphasize-lines: 1, 8
 if (components.player_character.Exists(entityId)) then
   -- This entity is a player character.
-  util.log_info(string.format("%x is a player.", entityId))
+  util.LogInfo(string.format("%x is a player.", entityId))
+end
+
+-- If the player just logged out, the tag may have been removed before the script
+-- was called. Use lookback to handle this situation.
+if (components.player_character.Exists(entityId, true)) then
+  -- ...
 end
 ```
 
@@ -68,12 +76,14 @@ end
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: components.<component>.Get(entityId)
+.. lua:function:: components.<component>.Get(entityId, lookback=false)
 
    Gets the component value for the given entity.
 
    :param entityId: Entity ID.
    :type entityId: integer
+   :param lookback: Whether to look back at components deleted in the last tick (default: false).
+   :type lookback: boolean
    :return: Component value, or nil if no the entity does not have this component.
             For tags, returns false instead of nil.
    :rtype: Component value type
@@ -83,10 +93,17 @@ end
 
 ```{code-block} lua
 :caption: Using `Get(entityId)` to get the name of an entity.
-:emphasize-lines: 1
+:emphasize-lines: 1, 8
 local name = components.name.Get(entityId)
 if (name) then
-  util.log_info(string.format("%x is named %s.", entityId, name))
+  util.LogInfo(string.format("%x is named %s.", entityId, name))
+end
+
+-- If the player just logged out, the name component may have been unloaded before
+-- the script was called. Use lookback to handle this situation.
+local nameWithLookback = components.name.Get(entityId, true)
+if (name) then
+   -- ...
 end
 ```
 
