@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Input;
@@ -140,8 +141,7 @@ public class ClientWorldEditInputHandler
         {
             editStarted = true;
             lastPosition = hoveredPos;
-            internalController.SetBlock(eventSender, hoveredPos, userState.BlockTemplateId);
-            logger.LogDebug("Draw block at {Position}.", hoveredPos);
+            ApplyPen(hoveredPos, pos => internalController.SetBlock(eventSender, pos, userState.BlockTemplateId));
         }
     }
 
@@ -155,7 +155,7 @@ public class ClientWorldEditInputHandler
         {
             editStarted = true;
             lastPosition = hoveredPos;
-            internalController.RemoveBlock(eventSender, hoveredPos);
+            ApplyPen(hoveredPos, pos => internalController.RemoveBlock(eventSender, pos));
         }
     }
 
@@ -167,8 +167,29 @@ public class ClientWorldEditInputHandler
     {
         // Select the block whose top face is hovered by the mouse.
         var hoverPos = cameraServices.GetMousePositionWorldCoordinates();
-        var posWithOffset = hoverPos with { Y = hoverPos.Y - userState.ZOffset, Z = hoverPos.Z + userState.ZOffset - 1.0f };
+        var posWithOffset = hoverPos with
+        {
+            Y = hoverPos.Y - userState.ZOffset, Z = hoverPos.Z + userState.ZOffset - 1.0f
+        };
         return (GridPosition)posWithOffset;
+    }
+
+    /// <summary>
+    ///     Applies the given action to each block under the current pen.
+    /// </summary>
+    /// <param name="center">Center of pen.</param>
+    /// <param name="action">Action to be applied.</param>
+    private void ApplyPen(GridPosition center, Action<GridPosition> action)
+    {
+        var rightStep = userState.PenWidth / 2;
+        var leftStep = userState.PenWidth % 2 == 0 ? rightStep - 1 : rightStep;
+
+        for (var x = -leftStep; x <= rightStep; ++x)
+        for (var y = -leftStep; y <= rightStep; ++y)
+        {
+            var pos = center with { X = center.X + x, Y = center.Y + y };
+            action(pos);
+        }
     }
 
     /// <summary>

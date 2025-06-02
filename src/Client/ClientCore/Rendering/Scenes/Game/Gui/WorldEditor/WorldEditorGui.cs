@@ -47,24 +47,24 @@ public class WorldEditorGui
     private readonly ClientWorldEditServices worldEditServices;
 
     /// <summary>
-    ///     Backing buffer for Z offset input field.
-    /// </summary>
-    private int zOffsetBuffer;
-    
-    /// <summary>
     ///     Backing buffer for pen width input field.
     /// </summary>
     private int penWidthBuffer;
 
     /// <summary>
-    ///     Change flag for Z offset.
-    /// </summary>
-    private bool zOffsetChangeInProgress;
-    
-    /// <summary>
     ///     Change flag for pen width.
     /// </summary>
     private bool penWidthChangeInProgress;
+
+    /// <summary>
+    ///     Backing buffer for Z offset input field.
+    /// </summary>
+    private int zOffsetBuffer;
+
+    /// <summary>
+    ///     Change flag for Z offset.
+    /// </summary>
+    private bool zOffsetChangeInProgress;
 
     public WorldEditorGui(ClientWorldEditServices worldEditServices, MaterialManager materialManager,
         GuiExtensions guiExtensions, IEventSender eventSender,
@@ -91,8 +91,7 @@ public class WorldEditorGui
         if (!ImGui.Begin("World Editor", ImGuiWindowFlags.NoResize)) return;
 
         RenderBlockTemplateControl();
-        RenderZOffsetControl();
-        RenderPenWidthControl();
+        RenderDrawControls();
         RenderHelp();
 
         ImGui.End();
@@ -128,7 +127,7 @@ public class WorldEditorGui
     /// <summary>
     ///     Renders the z-offset selection control.
     /// </summary>
-    private void RenderZOffsetControl()
+    private void RenderDrawControls()
     {
         // Sync input buffers with backend.
         if (zOffsetBuffer == worldEditServices.ZOffset)
@@ -136,9 +135,17 @@ public class WorldEditorGui
         else if (!zOffsetChangeInProgress)
             zOffsetBuffer = worldEditServices.ZOffset;
 
-        ImGui.Separator();
+        if (penWidthBuffer == worldEditServices.PenWidth)
+            penWidthChangeInProgress = false;
+        else if (!penWidthChangeInProgress)
+            penWidthBuffer = worldEditServices.PenWidth;
+
+        if (!ImGui.BeginTable("WorldEditControls", 2, ImGuiTableFlags.SizingStretchProp)) return;
+
+        ImGui.TableNextColumn();
         ImGui.Text("Z Offset:");
-        ImGui.SameLine();
+
+        ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(120.0f);
         ImGui.InputInt("##zoff", ref zOffsetBuffer);
 
@@ -155,25 +162,14 @@ public class WorldEditorGui
                 worldEditController.SetZOffset(eventSender, zOffsetBuffer);
             }
         }
-    }
-    
-    /// <summary>
-    ///     Renders the pen width selection control.
-    /// </summary>
-    private void RenderPenWidthControl()
-    {
-        // Sync input buffers with backend.
-        if (penWidthBuffer == worldEditServices.PenWidth)
-            penWidthChangeInProgress = false;
-        else if (!penWidthChangeInProgress)
-            penWidthBuffer = worldEditServices.PenWidth;
-        
-        ImGui.Separator();
+
+        ImGui.TableNextColumn();
         ImGui.Text("Pen Width:");
-        ImGui.SameLine();
+
+        ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(120.0f);
         ImGui.InputInt("##penwidth", ref penWidthBuffer);
-        
+
         // Validate and update state if needed.
         if (penWidthBuffer != worldEditServices.PenWidth)
         {
@@ -187,6 +183,8 @@ public class WorldEditorGui
                 worldEditController.SetPenWidth(eventSender, penWidthBuffer);
             }
         }
+
+        ImGui.EndTable();
     }
 
     /// <summary>
