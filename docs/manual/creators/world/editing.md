@@ -19,9 +19,11 @@ active. Several pieces of information are displayed in this window:
 | -------------- | --------------------------------------------------------------------- |
 | Block Template | The block template that will be placed by the editor.                 |
 | Z Offset       | The z coordinate (relative to player) at which blocks will be placed. |
+| Pen Width      | The width in blocks of the pen used to place or remove blocks.        |
 
 Instructions for adjusting these properties are displayed at the bottom of the World Editor window. Scrolling with the
-mouse wheel adjusts the currently selected Block Template entity; holding **Ctrl** while scrolling adjusts the Z Offset.
+mouse wheel adjusts the currently selected Block Template entity. Holding **Ctrl** while scrolling adjusts the Z Offset.
+Holding **Shift** while scrolling adjusts the Pen Width.
 
 :::{tip}
 If the World Editor window is not responding to mouse scrolls, make sure that the mouse is not hovering over
@@ -32,7 +34,8 @@ reach the editor.
 While the World Editor window is displayed, left clicking on the world will place a block with the selected 
 Block Template at the selected mouse position and Z Offset relative to the player's current z coordinate. 
 Right clicking will remove the block at that position. Holding down the mouse button and dragging will make
-the corresponding change to all positions over which the mouse is dragged. Note that you can still move the
+the corresponding change to all positions over which the mouse is dragged. Blocks are placed or removed in
+a square centered on the cursor with width equal to the current Pen Width. Note that you can still move the
 player using the **WASD** or **arrow** keys while the World Editor is open.
 
 :::{tip}
