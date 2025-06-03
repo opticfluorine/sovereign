@@ -38,10 +38,10 @@ jobs:
         run: dotnet test --no-restore
         working-directory: src
       - name: Publish (Linux x64)
-        run: dotnet publish -r linux-x64 -c Release --sc true
+        run: dotnet publish -r linux-x64 -c Release --sc true -p:DebugSymbols=false -p:DebugType=None
         working-directory: src
       - name: Publish (Windows x64)
-        run: dotnet publish -r win-x64 -c Release --sc true
+        run: dotnet publish -r win-x64 -c Release --sc true -p:DebugSymbols=false -p:DebugType=None
         working-directory: src
       - name: Archive
         if: startsWith(github.ref, 'refs/tags/')
@@ -66,6 +66,13 @@ jobs:
           popd
           popd
         working-directory: src
+      - name: Create Windows Installer
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          sudo apt-get install -y nsis
+          makensis -DCLIENT_PUBLISH_DIR=../../Client/SovereignClient/bin/Release/net9.0/win-x64/publish -DSERVER_PUBLISH_DIR=../../Server/SovereignServer/bin/Release/net9.0/win-x64/publish -DVERSION=$GITHUB_REF_NAME sovereign.nsi
+          mv Sovereign_Install.exe $GITHUB_WORKSPACE/artifacts/Sovereign_Install_$GITHUB_REF_NAME.exe
+        working-directory: src/Util/Installer
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
