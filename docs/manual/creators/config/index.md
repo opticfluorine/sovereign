@@ -105,6 +105,20 @@ synchronization to work correctly.
  - **MonthsPerSeason**: Number of in-game months per in-game season (one quarter of an in-game year).
  - **SyncIntervalSeconds**: Number of seconds between clock synchronization events. (Only relevant for server.)
 
+### MovementOptions
+:::{note}
+Movement-related options should match between client and server.
+:::
+ - **RequestIntervalTicks**: Number of ticks between subsequent movement requests.
+ - **MoveExpirationTicks**: Number of ticks after which movement is stopepd if no further request is received.
+ - **UpdateIntervalTicks**: Number of ticks between sending subsequent movement updates.
+
+### PerformanceOptions
+ - **SystemExecutorCount**: Number of threads to use for executing systems.
+ - **YieldEventLoop**: Whether to periodically yield control of the event loop thread. Lowers CPU usage at the cost of increased event latency.
+ - **YieldSystemLoop**: Whether to periodically yield control of each system exeuctor thread. Lowers CPU usage at the cost of increased system latency.
+ - **NetworkUpdateTimeMs**: Polling interval for the network thread. Higher values reduce CPU usage at the cost of increased (effective) network latency.
+
 ### DebugOptions
 - **EnableEventLogging**: A boolean indicating whether to enable event logging.
 - **EventLogDirectory**: The directory where event logs are stored.
