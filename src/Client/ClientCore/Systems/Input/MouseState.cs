@@ -117,15 +117,15 @@ public class MouseState
     /// <param name="amount">Relative amount scrolled (positive is up, negative is down).</param>
     public void UpdateWheel(float amount)
     {
-        TotalScrollAmount += amount;
+        TotalScrollAmount += Math.Abs(amount);
 
         // Check if tick threshold exceeded in either direction.
         var delta = TotalScrollAmount - lastScrollTick;
         logger.LogDebug("Scroll by {Amount}, total {Total}, delta {Delta}.", amount, TotalScrollAmount, delta);
-        while (Math.Abs(delta) > ScrollTickThreshold)
+        while (delta >= ScrollTickThreshold)
         {
             logger.LogDebug("Scroll tick.");
-            internalController.AnnounceScrollTick(eventSender, delta > 0.0f);
+            internalController.AnnounceScrollTick(eventSender, amount > 0.0f);
 
             var step = Math.Sign(delta) * ScrollTickThreshold;
             lastScrollTick += step;
