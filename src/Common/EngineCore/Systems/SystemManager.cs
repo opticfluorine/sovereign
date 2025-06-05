@@ -73,7 +73,8 @@ public class SystemManager : BackgroundService
         /* Run the executors. */
         await RunExecutors(stoppingToken);
 
-        logger.LogInformation("SystemManager stopped.");
+        logger.LogInformation("SystemManager stopped. Exiting application.");
+        Environment.Exit(0);
     }
 
     /// <summary>
