@@ -1,6 +1,6 @@
 # Sovereign MMORPG Engine - 2.5D Multiplayer RPG Engine
 
-[Website](https://sovereignengine.com) | [Documentation (v0.5.0)](https://docs.sovereignengine.com) | [Discord](https://discord.gg/Mg2jUmePyx)
+[Website](https://sovereignengine.com) | [Documentation (v0.6.0)](https://docs.sovereignengine.com) | [Discord](https://discord.gg/Mg2jUmePyx)
 
 Sovereign Engine is a 2.5D MMORPG engine with the 2D graphical style of classic RPGs
 together with a 3D voxel-based world. The world is highly dynamic and allows
@@ -17,10 +17,12 @@ Sovereign Engine is made available under the GPLv3 license.
 
 ![Screenshot of Sovereign Engine v0.5.0.](https://update.sovereignengine.com/screenshots/Sovereign_v0.5.0.png)
 
-## Current Features (v0.5.0)
+## Current Features (v0.6.0)
 
 * Client and server supporting Windows and Linux platforms
 * Dynamic 2.5D lighting and shadows with global and point light sources
+* Dynamic day/night cycle with full calendar (days, weeks, months, seasons, years)
+* 3D physics engine with collision handling
 * Server-side Lua scripting engine for easy extensibility
 * Login, registration, player creation and selection
 * Player movement via keyboard
@@ -35,43 +37,57 @@ Sovereign Engine is made available under the GPLv3 license.
 
 For full details of the latest changes and features, see the [changelog](CHANGELOG.md).
 
-## Upcoming Features (v0.6.0)
+## Upcoming Features (v0.7.0)
 
-* Scalable physics engine with gravity and collisions
-* More shadows
-* Day/night cycle
-* Automatic database creation on first startup (SQLite only)
+* Improved rendering for indoor/underground areas
+* Player templates and character customization
+* Items and inventory
+* NPCs
 
-## Getting Started
+## Installation
 
 > [!IMPORTANT]
 > Sovereign Engine is in a pre-alpha state and is not ready for production use.
 > The below instructions are provided for users who are interested in trying out the
 > current features or using the engine as a starting point for their own development.
 
-### Install Dependencies
+### Windows
 
-Sovereign Engine requires the .NET 9 (or later) SDK to be
-installed on your system. The SDL2, SDL2_image, and Lua 5.4 libraries are also
-required for Linux installations (these are included by default for Windows builds).
+Download and run the Windows installer for the latest release.
+
+### Linux
+
+Use your distribution's package manager to install the required dependencies:
+* libSDL2
+* libSDL2_image
+* liblua5.4
+
+Download the binary .tar.gz files for the latest release and extract them to the location
+where you would like the client and server to be installed.
+
+## Building from Source
+
+Sovereign Engine requires the .NET 9 (or later) SDK to be installed on your system. Clone This
+Git repository, then build the `src/Sovereign.sln` solution from your favorite IDE or from
+the command line (via `dotnet build` and `dotnet publish`).
+
+## Running the Engine
 
 ### Server
 
-1. Download the server binaries for your platform, or compile binaries from source (via
-   `dotnet build` and `dotnet publish` from the `src` directory after cloning the Git repository).
-2. Run the server:
-   ```bash
-   $ ./Sovereign.Server
-   ```
-   This will automatically create a new SQLite database at `Data/sovereign.db` if one does not
-   already exist.
-3. The server is configured by default to grant the Admin role to all new players. Once you have created
-   an initial player with Admin role, it is strongly recommended to disable this option by editing
-   the server's `appsettings.json` and changing `AdminByDefault` to `false`.
+On Windows, double-click the `Sovereign.Server.exe` file to launch the server. On Linux, run the
+`Sovereign.Server` executable from a shell. This will automatically create a new SQLite database 
+at `Data/sovereign.db` if one does not already exist.
+
+The server is configured by default to grant the Admin role to all new players. Once you have created
+an initial player with Admin role, it is strongly recommended to disable this option by editing
+the server's `appsettings.json` and changing `AdminByDefault` to `false`.
 
 ### Client
 
-With the server running, simply run the `Sovereign.Client` executable from its directory.
+On Windows, double-click the `Sovereign.Client.exe` file to launch the client. On Linux, run the
+`Sovereign.Client` executable from a shell or a desktop launcher. Click "Yes" on the auto-update
+prompt to download the latest game data files.
 
 #### Controls
 
@@ -81,7 +97,7 @@ With the server running, simply run the `Sovereign.Client` executable from its d
 | Arrow keys | Move player                                                 |
 | Space      | Jump                                                        |
 | Enter      | Toggle chat                                                 |
-| `          | Toggle Resource Editor Window                               |
+| \`         | Toggle Resource Editor Window                               |
 | Insert     | Toggle Template Entity Editor Window (must be admin player) |
 | Del        | Toggle World Editor Window (must be admin player)           |
 | F2         | Toggle Player Debug Window                                  |

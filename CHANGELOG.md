@@ -2,12 +2,52 @@
 
 ## 2025
 
+### June
+
+#### 4 June 2025
+
+* **Release v0.6.0**
+
+#### 3 June 2025
+
+* Lighting: Fix more depth artifacts in shadows.
+* Input: Fix issue where the first "tick" of mouse scroll was ignored.
+* Client: Fix issue where the client freezes when exiting on Windows.
+
+#### 2 June 2025
+
+* Documentation: Update for upcoming v0.6.0 release.
+* CI/CD: Automatically generate Windows installer during CI/CD builds.
+
+#### 1 June 2025
+
+* World Editor: Add adjustable pen width.
+
 ### May
+
+#### 30 May 2025
+
+* Lighting: Fix depth artifacts in shadows that primarily affected NVIDIA GPUs.
+* World Editor: Place blocks by top face instead of front face (feels much more
+  natural when editing).
+
+#### 25 May 2025
+
+* Scripting: Fix race condition in callback registration.
+
+#### 24 May 2025
+
+* Network: Various performance improvements to reduce average ping.
+
+#### 17 May 2025
+
+* General: Add Windows installer for client and server.
 
 #### 12 May 2025
 
 * Lighting: Add day/night cycle to global lighting. The day/night light pattern is configurable
   through the client appsettings.json file.
+* Server: Add support for running as a systemd service on Linux or a Windows Service on Windows.
 
 #### 11 May 2025
 
