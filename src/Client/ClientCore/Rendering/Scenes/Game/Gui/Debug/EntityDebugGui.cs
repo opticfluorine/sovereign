@@ -46,7 +46,7 @@ public class EntityDebugGui
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
-    private readonly PerspectiveServices perspectiveServices;
+    private readonly IPerspectiveServices perspectiveServices;
     private readonly PhysicsTagCollection physics;
     private readonly PointLightSourceComponentCollection pointLightSources;
     private string entityIdInput = "";
@@ -60,7 +60,7 @@ public class EntityDebugGui
         CastBlockShadowsTagCollection castBlockShadows,
         EntityTable entityTable,
         CameraServices cameraServices,
-        PerspectiveServices perspectiveServices,
+        IPerspectiveServices perspectiveServices,
         PointLightSourceComponentCollection pointLightSources,
         PhysicsTagCollection physics,
         BoundingBoxComponentCollection boundingBoxes,

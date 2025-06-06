@@ -24,17 +24,8 @@ namespace Sovereign.ClientCore.Systems.Perspective;
 /// <summary>
 ///     Public read API for perspective information.
 /// </summary>
-public class PerspectiveServices
+public interface IPerspectiveServices
 {
-    private readonly PerspectiveLineManager lineManager;
-    private readonly DisplayViewport viewport;
-
-    public PerspectiveServices(PerspectiveLineManager lineManager, DisplayViewport viewport)
-    {
-        this.lineManager = lineManager;
-        this.viewport = viewport;
-    }
-
     /// <summary>
     ///     Gets the highest entity appearing to overlap a position within a given z window.
     /// </summary>
@@ -43,10 +34,7 @@ public class PerspectiveServices
     /// <param name="maximumZ">Maximum Z for window.</param>
     /// <param name="entityId">Entity ID.</param>
     /// <returns>true if an entity overlapped, false otherwise.</returns>
-    public bool TryGetHighestCoveringEntity(Vector3 position, float minimumZ, float maximumZ, out ulong entityId)
-    {
-        return lineManager.TryGetHighestEntityAtPoint(position, minimumZ, maximumZ, out entityId);
-    }
+    bool TryGetHighestCoveringEntity(Vector3 position, float minimumZ, float maximumZ, out ulong entityId);
 
     /// <summary>
     ///     Gets the highest entity appearing to overlap a position within a z window with the same
@@ -55,12 +43,7 @@ public class PerspectiveServices
     /// <param name="position">Position in world coordinates to overlap.</param>
     /// <param name="entityId">Entity ID.</param>
     /// <returns>true if an entity overlapped, false otherwise.</returns>
-    public bool TryGetHighestCoveringEntity(Vector3 position, out ulong entityId)
-    {
-        var minZ = position.Z - viewport.HeightInTiles * 0.5f;
-        var maxZ = position.Z + viewport.HeightInTiles * 0.5f;
-        return TryGetHighestCoveringEntity(position, minZ, maxZ, out entityId);
-    }
+    bool TryGetHighestCoveringEntity(Vector3 position, out ulong entityId);
 
     /// <summary>
     ///     Gets the perspective line (if any) on which the given block position sits.
@@ -68,20 +51,70 @@ public class PerspectiveServices
     /// <param name="blockPosition">Block position on the perspective line.</param>
     /// <param name="perspectiveLine">Perspective line if one is found.</param>
     /// <returns>true if a perspective line was found, false otherwise.</returns>
-    public bool TryGetPerspectiveLine(GridPosition blockPosition,
-        [NotNullWhen(true)] out PerspectiveLine? perspectiveLine)
-    {
-        return lineManager.TryGetPerspectiveLine(blockPosition, out perspectiveLine);
-    }
+    bool TryGetPerspectiveLine(GridPosition blockPosition,
+        [NotNullWhen(true)] out PerspectiveLine? perspectiveLine);
 
     /// <summary>
     ///     Gets the opacity alpha factor for the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <returns>Opacity alpha factor.</returns>
+    float GetOpacityForEntity(ulong entityId);
+
+    /// <summary>
+    ///     Begins a new frame.
+    /// </summary>
+    /// <remarks>
+    ///     This technically breaks the "read-only" contract of the *Services interfaces,
+    ///     but is a necessary compromise given the coupling of the perspective system
+    ///     to the rendering pipeline - the latency of an event-based invocation would not
+    ///     be acceptable here.
+    /// </remarks>
+    void BeginFrame();
+}
+
+/// <summary>
+///     Implementation of IPerspectiveServices.
+/// </summary>
+internal class PerspectiveServices : IPerspectiveServices
+{
+    private readonly PerspectiveLineManager lineManager;
+    private readonly OverheadTransparency overheadTransparency;
+    private readonly DisplayViewport viewport;
+
+    public PerspectiveServices(PerspectiveLineManager lineManager, DisplayViewport viewport,
+        OverheadTransparency overheadTransparency)
+    {
+        this.lineManager = lineManager;
+        this.viewport = viewport;
+        this.overheadTransparency = overheadTransparency;
+    }
+
+    public bool TryGetHighestCoveringEntity(Vector3 position, float minimumZ, float maximumZ, out ulong entityId)
+    {
+        return lineManager.TryGetHighestEntityAtPoint(position, minimumZ, maximumZ, out entityId);
+    }
+
+    public bool TryGetHighestCoveringEntity(Vector3 position, out ulong entityId)
+    {
+        var minZ = position.Z - viewport.HeightInTiles * 0.5f;
+        var maxZ = position.Z + viewport.HeightInTiles * 0.5f;
+        return TryGetHighestCoveringEntity(position, minZ, maxZ, out entityId);
+    }
+
+    public bool TryGetPerspectiveLine(GridPosition blockPosition,
+        [NotNullWhen(true)] out PerspectiveLine? perspectiveLine)
+    {
+        return lineManager.TryGetPerspectiveLine(blockPosition, out perspectiveLine);
+    }
+
     public float GetOpacityForEntity(ulong entityId)
     {
-        // TODO
-        return 1.0f;
+        return overheadTransparency.GetOpacityForEntity(entityId);
+    }
+
+    public void BeginFrame()
+    {
+        overheadTransparency.BeginFrame();
     }
 }

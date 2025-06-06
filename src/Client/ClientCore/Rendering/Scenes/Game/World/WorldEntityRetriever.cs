@@ -60,7 +60,7 @@ public sealed class WorldEntityRetriever
     public readonly List<NameLabel> NameLabels = new();
     private readonly OrientationComponentCollection orientations;
 
-    private readonly PerspectiveServices perspectiveServices;
+    private readonly IPerspectiveServices perspectiveServices;
     private readonly AnimationPhaseComponentCollection phases;
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly WorldRangeSelector rangeSelector;
@@ -75,7 +75,7 @@ public sealed class WorldEntityRetriever
     private uint solidBlockIndex;
 
     public WorldEntityRetriever(CameraServices camera, DisplayViewport viewport,
-        PerspectiveServices perspectiveServices,
+        IPerspectiveServices perspectiveServices,
         WorldLayerGrouper grouper, KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
         AnimatedSpriteComponentCollection animatedSprites,
@@ -120,6 +120,8 @@ public sealed class WorldEntityRetriever
         grouper.ResetLayers();
         NameLabels.Clear();
         solidBlockIndex = 0;
+
+        perspectiveServices.BeginFrame();
 
         var halfY = viewport.HeightInTiles * 0.5f;
 
