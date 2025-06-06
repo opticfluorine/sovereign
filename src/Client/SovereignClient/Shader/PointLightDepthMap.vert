@@ -22,6 +22,7 @@ layout (location = 1) in vec3 velocity;
 layout (location = 2) in vec2 texCoord;
 layout (location = 3) in float lightFactor;
 layout (location = 4) in float unused;
+layout (location = 5) in float unused2;
 
 layout (location = 0) out vec3 distanceFromLight;
 

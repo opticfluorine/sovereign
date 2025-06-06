@@ -71,4 +71,9 @@ public struct WorldVertex
     ///     term if this factor is larger.
     /// </summary>
     [FieldOffset(9 * sizeof(float))] public float ShadowFloor;
+
+    /// <summary>
+    ///     Opacity alpha factor.
+    /// </summary>
+    [FieldOffset(10 * sizeof(float))] public float Opacity;
 }

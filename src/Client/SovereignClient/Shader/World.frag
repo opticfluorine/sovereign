@@ -23,6 +23,7 @@ layout (location = 2) in vec4 shadowPosition;
 layout (location = 3) in vec4 nonBlockShadowPosition;
 layout (location = 4) in float vertexDepth;
 layout (location = 5) in float shadowFloor;
+layout (location = 6) in float opacity;
 layout (origin_upper_left) in vec4 gl_FragCoord;
 
 layout (location = 0) out vec4 colorOut;
@@ -61,6 +62,7 @@ void main()
     vec4 fullColor = color * clamp(baseColor + pointColor, 0.0f, 1.0f);
 
     // Blend everything to a final color.
-    colorOut = fullColor * texture(sampler2D(g_textureAtlas, g_textureAtlasSampler), texCoord);
+    colorOut = vec4(1.0f, 1.0f, 1.0f, opacity) * fullColor * texture(
+        sampler2D(g_textureAtlas, g_textureAtlasSampler), texCoord);
     gl_FragDepth = vertexDepth;
 }

@@ -73,4 +73,15 @@ public class PerspectiveServices
     {
         return lineManager.TryGetPerspectiveLine(blockPosition, out perspectiveLine);
     }
+
+    /// <summary>
+    ///     Gets the opacity alpha factor for the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>Opacity alpha factor.</returns>
+    public float GetOpacityForEntity(ulong entityId)
+    {
+        // TODO
+        return 1.0f;
+    }
 }

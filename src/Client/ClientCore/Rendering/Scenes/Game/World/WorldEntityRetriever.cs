@@ -40,6 +40,8 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 /// </summary>
 public sealed class WorldEntityRetriever
 {
+    private const float OpacityCullThreshold = 0.01f;
+
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly AtlasMap atlasMap;
@@ -236,6 +238,9 @@ public sealed class WorldEntityRetriever
     /// <param name="renderPlan">Render plan.</param>
     private void ProcessSprite(ulong entityId, ulong systemTime, float timeSinceTick, RenderPlan renderPlan)
     {
+        var opacity = perspectiveServices.GetOpacityForEntity(entityId);
+        if (opacity < OpacityCullThreshold) return;
+
         var entityKinematics = kinematics[entityId];
         var animatedSpriteId = animatedSprites[entityId];
         var orientation = orientations.HasComponentForEntity(entityId) ? orientations[entityId] : Orientation.South;
@@ -243,7 +248,8 @@ public sealed class WorldEntityRetriever
 
         var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
         var sprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(systemTime, orientation);
-        grouper.AddSprite(EntityType.NonBlock, entityKinematics.Position, entityKinematics.Velocity, sprite, 1.0f);
+        grouper.AddSprite(EntityType.NonBlock, entityKinematics.Position, entityKinematics.Velocity, sprite, 1.0f,
+            opacity);
 
         if (playerCharacters.HasTagForEntity(entityId))
             AddNameLabel(entityId, entityKinematics, sprite, timeSinceTick);
@@ -285,6 +291,9 @@ public sealed class WorldEntityRetriever
             return;
         }
 
+        var opacity = perspectiveServices.GetOpacityForEntity(entityId);
+        if (opacity < OpacityCullThreshold) return;
+
         var facePosition = (Vector3)blockPosition;
         var animatedSpriteIds = blockSpriteCache.GetFrontFaceAnimatedSpriteIds(entityId);
         var firstLayer = true;
@@ -293,7 +302,7 @@ public sealed class WorldEntityRetriever
             var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)
                 .GetSpriteForTime(systemTime, Orientation.South);
             grouper.AddSprite(EntityType.BlockFrontFace, facePosition, Vector3.Zero, sprite,
-                firstLayer ? 1.0f : 0.0f);
+                firstLayer ? 1.0f : 0.0f, opacity);
             isOpaque = isOpaque || sprite.Opaque;
             firstLayer = false;
         }
@@ -312,6 +321,9 @@ public sealed class WorldEntityRetriever
             return;
         }
 
+        var opacity = perspectiveServices.GetOpacityForEntity(entityId);
+        if (opacity < OpacityCullThreshold) return;
+
         var facePosition = (Vector3)(blockPosition with { Z = blockPosition.Z + 1 });
         var animatedSpriteIds = blockSpriteCache.GetTopFaceAnimatedSpriteIds(entityId);
         var firstLayer = true;
@@ -320,7 +332,7 @@ public sealed class WorldEntityRetriever
             var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)
                 .GetSpriteForTime(systemTime, Orientation.South);
             grouper.AddSprite(EntityType.BlockTopFace, facePosition, Vector3.Zero, sprite,
-                firstLayer ? 1.0f : 0.0f);
+                firstLayer ? 1.0f : 0.0f, opacity);
             isOpaque = isOpaque || sprite.Opaque;
             firstLayer = false;
         }
