@@ -351,6 +351,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PerspectiveSystem>());
         services.TryAddSingleton<PerspectiveLineManager>();
         services.TryAddSingleton<IPerspectiveServices, PerspectiveServices>();
+        services.TryAddSingleton<IPerspectiveController, PerspectiveController>();
         services.TryAddSingleton<OverheadTransparency>();
         services.TryAddSingleton<OverheadBlockGraphManager>();
     }

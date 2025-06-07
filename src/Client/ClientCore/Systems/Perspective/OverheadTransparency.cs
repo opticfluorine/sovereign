@@ -15,7 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
+using System.Numerics;
 using Microsoft.Extensions.Logging;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
+using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
@@ -29,11 +33,21 @@ namespace Sovereign.ClientCore.Systems.Perspective;
 internal class OverheadTransparency(
     KinematicsComponentCollection kinematics,
     BlockPositionComponentCollection blockPositions,
+    AnimatedSpriteComponentCollection animatedSprites,
     ClientStateServices clientStateServices,
     ILogger<OverheadTransparency> logger,
-    OverheadBlockGraphManager graphManager)
+    OverheadBlockGraphManager graphManager,
+    AnimatedSpriteManager animatedSpriteManager,
+    AtlasMap atlasMap)
 {
     private const float InterpolationThreshold = 0.01f;
+
+    /// <summary>
+    ///     Map from (z, componentId) to the component's overlap with the player sprite.
+    /// </summary>
+    private readonly Dictionary<(int, int), float> componentOverlapCache = new();
+
+    private readonly List<(int, int, float)> playerOverlaps = new();
 
     private UnionFind2dGrid graph0 = new();
     private UnionFind2dGrid graph1 = new();
@@ -44,7 +58,8 @@ internal class OverheadTransparency(
     /// <summary>
     ///     Sets up overhead transparency for the next frame.
     /// </summary>
-    public void BeginFrame()
+    /// <param name="timeSinceTick">Time in seconds since the last tick.</param>
+    public void BeginFrame(float timeSinceTick)
     {
         isActive = true;
 
@@ -55,6 +70,9 @@ internal class OverheadTransparency(
             return;
         }
 
+        // Clear caches.
+        componentOverlapCache.Clear();
+
         if (!kinematics.TryGetValue(playerId, out var posVel))
         {
             logger.LogWarning("No position for player; overhead transparency disabled.");
@@ -64,7 +82,8 @@ internal class OverheadTransparency(
 
         graphManager.BeginFrame();
 
-        playerZ = posVel.Position.Z;
+        var playerPosition = posVel.Position + timeSinceTick * posVel.Velocity;
+        playerZ = playerPosition.Z;
         var z0 = (int)Math.Floor(playerZ);
         var z1 = (int)Math.Ceiling(playerZ);
         interpolating = z1 > z0 && playerZ - z0 > InterpolationThreshold;
@@ -90,6 +109,8 @@ internal class OverheadTransparency(
                 interpolating = false;
             }
         }
+
+        DeterminePlayerOverlaps(playerId, playerPosition);
     }
 
     /// <summary>
@@ -134,7 +155,71 @@ internal class OverheadTransparency(
     /// <returns>Opacity factor.</returns>
     private float GetOpacityFromGraph(GridPosition entityPosition, UnionFind2dGrid graph)
     {
-        // TODO
-        return 1.0f;
+        var latticePoint = (entityPosition.X, entityPosition.Y + entityPosition.Z);
+        if (!graph.TryGetComponent(latticePoint, out var componentId)) return 1.0f;
+
+        if (!componentOverlapCache.TryGetValue((entityPosition.Z, componentId), out var overlapFactor))
+        {
+            overlapFactor = ConputeComponentPlayerOverlap(graph, componentId);
+            componentOverlapCache[(entityPosition.Z, componentId)] = overlapFactor;
+        }
+
+        return 1.0f - overlapFactor;
+    }
+
+    /// <summary>
+    ///     Determines the overlap between the player and the perspective lattice.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <param name="playerPosition">Interpolated player position.</param>
+    private void DeterminePlayerOverlaps(ulong playerEntityId, Vector3 playerPosition)
+    {
+        playerOverlaps.Clear();
+
+        // Get player draw info.
+        var pos0 = new Vector2(playerPosition.X, playerPosition.Y + playerPosition.Z);
+        if (!animatedSprites.TryGetValue(playerEntityId, out var animSpriteId))
+        {
+            logger.LogWarning("Player has no animated sprite; using simple overhead overlap.");
+            playerOverlaps.Add(((int)Math.Floor(pos0.X), (int)Math.Floor(pos0.Y), 1.0f));
+            return;
+        }
+
+        var animSprite = animatedSpriteManager.AnimatedSprites[animSpriteId];
+        var spriteId = animSprite.GetDefaultSprite().Id;
+        var spriteInfo = atlasMap.MapElements[spriteId];
+        var pos1 = pos0 + new Vector2(spriteInfo.WidthInTiles, spriteInfo.HeightInTiles);
+
+        var x0 = (int)Math.Floor(pos0.X);
+        var y0 = (int)Math.Floor(pos0.Y);
+        var x1 = (int)Math.Ceiling(pos1.X);
+        var y1 = (int)Math.Ceiling(pos1.Y);
+
+        for (var x = x0; x < x1; ++x)
+        for (var y = y0; y < y1; ++y)
+        {
+            var dx = 1.0f - Math.Max(0.0f, pos0.X - x) - Math.Max(0.0f, x1 - pos1.X);
+            var dy = 1.0f - Math.Max(0.0f, pos0.Y - y) - Math.Max(0.0f, y1 - pos1.Y);
+            var overlap = dx * dy;
+            playerOverlaps.Add((x, y, overlap));
+        }
+    }
+
+    /// <summary>
+    ///     Computes the overlap between the player sprite and a component of the given perspective lattice subgraph.
+    /// </summary>
+    /// <param name="graph">Graph.</param>
+    /// <param name="componentId">Connected component ID.</param>
+    /// <returns>Overlap factor.</returns>
+    private float ConputeComponentPlayerOverlap(UnionFind2dGrid graph, int componentId)
+    {
+        var overlapSum = 0.0f;
+
+        foreach (var overlapVertex in playerOverlaps)
+            if (graph.TryGetComponent((overlapVertex.Item1, overlapVertex.Item2), out var compId) &&
+                compId == componentId)
+                overlapSum += overlapVertex.Item3;
+
+        return overlapSum / playerOverlaps.Count;
     }
 }

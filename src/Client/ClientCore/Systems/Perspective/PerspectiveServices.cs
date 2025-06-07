@@ -60,17 +60,6 @@ public interface IPerspectiveServices
     /// <param name="entityId">Entity ID.</param>
     /// <returns>Opacity alpha factor.</returns>
     float GetOpacityForEntity(ulong entityId);
-
-    /// <summary>
-    ///     Begins a new frame.
-    /// </summary>
-    /// <remarks>
-    ///     This technically breaks the "read-only" contract of the *Services interfaces,
-    ///     but is a necessary compromise given the coupling of the perspective system
-    ///     to the rendering pipeline - the latency of an event-based invocation would not
-    ///     be acceptable here.
-    /// </remarks>
-    void BeginFrame();
 }
 
 /// <summary>
@@ -111,10 +100,5 @@ internal class PerspectiveServices : IPerspectiveServices
     public float GetOpacityForEntity(ulong entityId)
     {
         return overheadTransparency.GetOpacityForEntity(entityId);
-    }
-
-    public void BeginFrame()
-    {
-        overheadTransparency.BeginFrame();
     }
 }
