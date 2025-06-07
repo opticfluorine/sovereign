@@ -352,6 +352,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<PerspectiveLineManager>();
         services.TryAddSingleton<IPerspectiveServices, PerspectiveServices>();
         services.TryAddSingleton<OverheadTransparency>();
+        services.TryAddSingleton<OverheadBlockGraphManager>();
     }
 
     private static void AddUpdater(IServiceCollection services)
