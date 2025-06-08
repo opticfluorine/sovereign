@@ -82,8 +82,8 @@ internal class OverheadBlockGraphManager
     /// </summary>
     public void OnTick()
     {
-        if ((ticksSinceChange >= MinimumScheduleDelay && dirtyLatticePointsFront.Count > 0 &&
-             graphUpdateTask is null) || graphUpdateTask!.IsCompleted)
+        if (ticksSinceChange >= MinimumScheduleDelay && dirtyLatticePointsFront.Count > 0 &&
+            (graphUpdateTask is null || graphUpdateTask.IsCompleted))
         {
             (dirtyLatticePointsFront, dirtyLatticePointsBack) = (dirtyLatticePointsBack, dirtyLatticePointsFront);
             dirtyLatticePointsFront.Clear();
