@@ -90,6 +90,7 @@ internal class OverheadTransparency(
 
         if (!graphManager.TryGetGraphForZ(z0, out var maybeGraph0))
         {
+            logger.LogTrace("Disable overhead transparency; no graph for z {Z}.", z0);
             isActive = false;
             return;
         }

@@ -16,6 +16,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -89,6 +90,8 @@ internal class OverheadBlockGraphManager
             dirtyLatticePointsFront.Clear();
             graphUpdateTask = Task.Run(UpdateGraphs);
         }
+
+        ticksSinceChange++;
     }
 
     /// <summary>
@@ -96,8 +99,16 @@ internal class OverheadBlockGraphManager
     /// </summary>
     private void UpdateGraphs()
     {
+        var stopwatch = new Stopwatch();
+
+        stopwatch.Restart();
         ApplyAdds();
         ApplyRemoves();
+        stopwatch.Stop();
+
+        logger.LogTrace("{Count} updates ({GraphCount} graphs) took {Elapsed} ms.",
+            dirtyLatticePointsBack.Count, graphs.Count,
+            stopwatch.Elapsed.Nanoseconds * 1E-6);
     }
 
     /// <summary>
