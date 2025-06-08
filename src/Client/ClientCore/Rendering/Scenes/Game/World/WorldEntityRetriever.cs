@@ -150,7 +150,7 @@ public sealed class WorldEntityRetriever
             if (!perspectiveServices.TryGetPerspectiveLine(intersectingPos, out var line))
                 continue;
 
-            ProcessPerspectiveLine(line, zMin, zMax, systemTime, timeSinceTick, renderPlan);
+            ProcessPerspectiveLine(line, zMin, zMax, systemTime, timeSinceTick, renderPlan, cameraPos);
         }
     }
 
@@ -163,8 +163,9 @@ public sealed class WorldEntityRetriever
     /// <param name="systemTime">System time of current frame.</param>
     /// <param name="timeSinceTick">Time since last tick, in seconds.</param>
     /// <param name="renderPlan">Render plan.</param>
+    /// <param name="cameraPos">Camera position.</param>
     private void ProcessPerspectiveLine(PerspectiveLine perspectiveLine, EntityList zMin, EntityList zMax,
-        ulong systemTime, float timeSinceTick, RenderPlan renderPlan)
+        ulong systemTime, float timeSinceTick, RenderPlan renderPlan, Vector3 cameraPos)
     {
         var foundOpaqueBlock = false;
         for (var i = 0; i < perspectiveLine.ZFloors.Count; ++i)
@@ -181,13 +182,17 @@ public sealed class WorldEntityRetriever
 
             // We make a few optimizations here based on the idea that opaque sprites will obscure anything
             // drawn below them. Blocks drawn on a perspective line perfectly overlap, so we only need to draw
-            // blocks to the depth of the first encountered opaque sprite (if any).
+            // blocks to the depth of the first encountered opaque sprite (if any). Since overhead transparency
+            // effects may apply, we also need to include any block faces which are at or above the depth
+            // of the player.
             //
             // On the other hand, sprites may not be perfectly overlapped by an obscuring block sprite, and they
             // may not fully overlap any other sprites or block sprites below them. Accordingly, we draw all
             // animated sprites on the line regardless of if they may be obscured. To avoid multiple draws of the
             // same sprite, we only draw animated sprites for which the top-left corner of the sprite is on the
             // perspective line.
+
+            var disableOcclusionCulling = zSet.ZFloor >= Math.Floor(cameraPos.Z);
 
             // First pass, pull out the block faces so they can be ordered and checked appropriately.
             for (var j = zSet.Entities.Count - 1; j >= 0; j--)
@@ -208,10 +213,10 @@ public sealed class WorldEntityRetriever
             }
 
             // Between passes, handle the faces.
-            if (!foundOpaqueBlock && frontFaceId < ulong.MaxValue)
+            if ((!foundOpaqueBlock || disableOcclusionCulling) && frontFaceId < ulong.MaxValue)
                 ProcessBlockFrontFace(frontFaceId, systemTime, out opaqueThisDepth);
 
-            if (!foundOpaqueBlock && !opaqueThisDepth && topFaceId < ulong.MaxValue)
+            if (((!foundOpaqueBlock && !opaqueThisDepth) || disableOcclusionCulling) && topFaceId < ulong.MaxValue)
                 ProcessBlockTopFace(topFaceId, systemTime, out opaqueThisDepth);
 
             // If a top face was found, mark the block for solid geometry rendering.
