@@ -205,4 +205,32 @@ public class PerspectiveLine
 
         ZFloors.RemoveAt(index);
     }
+
+    /// <summary>
+    ///     Gets the first Z floor above the given base Z floor that has either face of a block entity on it.
+    /// </summary>
+    /// <param name="baseZFloor">Base Z floor.</param>
+    /// <param name="nextZFloor">Next highest Z floor with block. Only meaningful if method returns true.</param>
+    /// <returns>true if a higher block was found, false otherwise.</returns>
+    public bool TryGetFirstZFloorWithBlockAbove(int baseZFloor, out int nextZFloor)
+    {
+        nextZFloor = 0;
+        var baseIndex = ZFloors.BinarySearch(EntityList.ForComparison(baseZFloor), EntityList.Comparer);
+        if (baseIndex < 0) return false;
+
+        for (var i = baseIndex; i >= 0; i--)
+        {
+            var layer = ZFloors[i];
+            if (layer.ZFloor <= baseZFloor) continue;
+            foreach (var entity in layer.Entities)
+                if (entity.EntityType == EntityType.BlockTopFace ||
+                    entity.EntityType == EntityType.BlockFrontFace)
+                {
+                    nextZFloor = layer.ZFloor;
+                    return true;
+                }
+        }
+
+        return false;
+    }
 }

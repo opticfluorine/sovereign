@@ -170,6 +170,19 @@ public class PerspectiveLineManager
     }
 
     /// <summary>
+    ///     Gets the perspective line, if any, that has the given index.
+    /// </summary>
+    /// <param name="lineIndex">Perspective line index.</param>
+    /// <param name="perspectiveLine">Perspective line, or null if none found.</param>
+    /// <returns>true if a perspective line was found, false otherwise.</returns>
+    public bool TryGetPerspectiveLine(ValueTuple<int, int> lineIndex,
+        [NotNullWhen(true)] out PerspectiveLine? perspectiveLine)
+    {
+        return perspectiveLines.TryGetValue(new PerspectiveLineKey(lineIndex.Item1, lineIndex.Item2),
+            out perspectiveLine);
+    }
+
+    /// <summary>
     ///     Gets the highest z floor for the given perspective line index, if any.
     /// </summary>
     /// <param name="lineIndex">Perspective line index.</param>

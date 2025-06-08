@@ -38,6 +38,7 @@ internal class OverheadTransparency(
     ILogger<OverheadTransparency> logger,
     OverheadBlockGraphManager graphManager,
     AnimatedSpriteManager animatedSpriteManager,
+    PerspectiveLineManager perspectiveLineManager,
     AtlasMap atlasMap)
 {
     private const float InterpolationThreshold = 0.01f;
@@ -53,6 +54,7 @@ internal class OverheadTransparency(
     private UnionFind2dGrid graph1 = new();
     private bool interpolating;
     private bool isActive;
+    private int minimumZ;
     private float playerZ;
 
     /// <summary>
@@ -88,7 +90,6 @@ internal class OverheadTransparency(
 
         if (!graphManager.TryGetGraphForZ(z0, out var maybeGraph0))
         {
-            logger.LogWarning("No graph for z {Z}; overhead transparency disabled.", z0);
             isActive = false;
             return;
         }
@@ -98,17 +99,13 @@ internal class OverheadTransparency(
         if (interpolating)
         {
             if (graphManager.TryGetGraphForZ(z1, out var maybeGraph1))
-            {
                 graph1 = maybeGraph1;
-            }
             else
-            {
-                logger.LogWarning("No graph for higher z {Z}; interpolation disabled.", z1);
                 interpolating = false;
-            }
         }
 
         DeterminePlayerOverlaps(playerId, playerPosition);
+        minimumZ = SelectMinimumZ();
     }
 
     /// <summary>
@@ -135,6 +132,8 @@ internal class OverheadTransparency(
                 (int)Math.Floor(posVel.Position.Y),
                 (int)Math.Floor(posVel.Position.Z));
         }
+
+        if (entityPosition.Z < minimumZ) return 1.0f;
 
         // Lower graph opacity.
         var opacity0 = GetOpacityFromGraph(entityPosition, graph0);
@@ -219,5 +218,24 @@ internal class OverheadTransparency(
                 overlapSum += overlapVertex.Item3;
 
         return overlapSum / playerOverlaps.Count;
+    }
+
+    /// <summary>
+    ///     Selects the minimum Z at which overhead transparency should be applied.
+    /// </summary>
+    /// <returns></returns>
+    private int SelectMinimumZ()
+    {
+        var minAbove = int.MaxValue;
+        var baseZ = (int)Math.Floor(playerZ);
+        foreach (var overlapVertex in playerOverlaps)
+        {
+            if (!perspectiveLineManager.TryGetPerspectiveLine((overlapVertex.Item1, overlapVertex.Item2), out var line))
+                continue;
+            if (!line.TryGetFirstZFloorWithBlockAbove(baseZ, out var aboveZ)) continue;
+            minAbove = Math.Min(minAbove, aboveZ);
+        }
+
+        return minAbove == int.MaxValue ? baseZ + 1 : minAbove;
     }
 }
