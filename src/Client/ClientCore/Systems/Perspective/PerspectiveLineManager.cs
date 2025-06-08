@@ -170,6 +170,23 @@ public class PerspectiveLineManager
     }
 
     /// <summary>
+    ///     Gets the highest z floor for the given perspective line index, if any.
+    /// </summary>
+    /// <param name="lineIndex">Perspective line index.</param>
+    /// <param name="highestZFloor">Highest Z floor. Only meaningful if method returns true.</param>
+    /// <returns>true if the perspective line contains at least one entity, false otherwise.</returns>
+    public bool TryGetHighestZFloorForLine(ValueTuple<int, int> lineIndex, out int highestZFloor)
+    {
+        highestZFloor = 0;
+        if (!perspectiveLines.TryGetValue(new PerspectiveLineKey(lineIndex.Item1, lineIndex.Item2), out var line))
+            return false;
+
+        if (line.ZFloors.Count == 0) return false;
+        highestZFloor = line.ZFloors[0].ZFloor;
+        return true;
+    }
+
+    /// <summary>
     ///     Gets the highest entity, if any, within a z window around a point.
     /// </summary>
     /// <param name="point">Point of interest in world coordinates.</param>

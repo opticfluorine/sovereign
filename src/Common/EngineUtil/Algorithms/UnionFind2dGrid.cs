@@ -22,6 +22,9 @@ namespace Sovereign.EngineUtil.Algorithms;
 /// <summary>
 ///     Implements the Union-Find algorithm for a subgraph of the 2D lattice graph.
 /// </summary>
+/// <remarks>
+///     This class is thread-safe. All operations on the graph are atomic.
+/// </remarks>
 public class UnionFind2dGrid
 {
     private static readonly (int dx, int dy)[] Neighbors =
@@ -31,8 +34,12 @@ public class UnionFind2dGrid
 
     private readonly Dictionary<(int, int), int> componentIds = new();
     private readonly Queue<(int, int)> floodFillQueue = new();
+
+    private readonly object graphLock = new();
     private readonly Dictionary<(int, int), (int, int)> parent = new();
     private readonly Dictionary<(int, int), int> rank = new();
+    private readonly HashSet<(int, int)> toRemove = new();
+    private readonly HashSet<(int, int)> visited = new();
     private int nextComponentId = 1;
 
     /// <summary>
@@ -43,14 +50,17 @@ public class UnionFind2dGrid
     /// <returns>true if the vertex belongs to a connected component, false otherwise.</returns>
     public bool TryGetComponent(ValueTuple<int, int> vertex, out int componentId)
     {
-        if (!parent.ContainsKey(vertex))
+        lock (graphLock)
         {
-            componentId = 0;
-            return false;
-        }
+            if (!parent.ContainsKey(vertex))
+            {
+                componentId = 0;
+                return false;
+            }
 
-        var root = Find(vertex);
-        return componentIds.TryGetValue(root, out componentId);
+            var root = Find(vertex);
+            return componentIds.TryGetValue(root, out componentId);
+        }
     }
 
     /// <summary>
@@ -59,17 +69,20 @@ public class UnionFind2dGrid
     /// <param name="vertices">Vertices.</param>
     public void AddVertices(IEnumerable<ValueTuple<int, int>> vertices)
     {
-        foreach (var v in vertices)
+        lock (graphLock)
         {
-            if (!parent.TryAdd(v, v)) continue;
-            componentIds[v] = nextComponentId++;
-            rank[v] = 0;
-
-            // Union with neighbors
-            foreach (var (dx, dy) in Neighbors)
+            foreach (var v in vertices)
             {
-                var n = (v.Item1 + dx, v.Item2 + dy);
-                if (parent.ContainsKey(n)) Union(v, n);
+                if (!parent.TryAdd(v, v)) continue;
+                componentIds[v] = nextComponentId++;
+                rank[v] = 0;
+
+                // Union with neighbors
+                foreach (var (dx, dy) in Neighbors)
+                {
+                    var n = (v.Item1 + dx, v.Item2 + dy);
+                    if (parent.ContainsKey(n)) Union(v, n);
+                }
             }
         }
     }
@@ -81,21 +94,25 @@ public class UnionFind2dGrid
     /// <param name="vertices">Vertices.</param>
     public void RemoveVertices(IEnumerable<ValueTuple<int, int>> vertices)
     {
-        var toRemove = new HashSet<(int, int)>(vertices);
-        foreach (var v in toRemove)
+        lock (graphLock)
         {
-            parent.Remove(v);
-            componentIds.Remove(v);
-            rank.Remove(v);
-        }
+            toRemove.Clear();
+            toRemove.UnionWith(vertices);
+            foreach (var v in toRemove)
+            {
+                parent.Remove(v);
+                componentIds.Remove(v);
+                rank.Remove(v);
+            }
 
-        // Relabel components for affected neighbors
-        var visited = new HashSet<(int, int)>();
-        foreach (var v in toRemove)
-        foreach (var (dx, dy) in Neighbors)
-        {
-            var n = (v.Item1 + dx, v.Item2 + dy);
-            if (parent.ContainsKey(n) && !visited.Contains(n)) FloodFillRelabel(n, nextComponentId++, visited);
+            // Relabel components for affected neighbors
+            visited.Clear();
+            foreach (var v in toRemove)
+            foreach (var (dx, dy) in Neighbors)
+            {
+                var n = (v.Item1 + dx, v.Item2 + dy);
+                if (parent.ContainsKey(n) && !visited.Contains(n)) FloodFillRelabel(n, nextComponentId++);
+            }
         }
     }
 
@@ -105,15 +122,18 @@ public class UnionFind2dGrid
     /// <returns>New instance with equivalent state.</returns>
     public UnionFind2dGrid Clone()
     {
-        var clone = new UnionFind2dGrid();
-        foreach (var kv in parent)
-            clone.parent[kv.Key] = kv.Value;
-        foreach (var kv in componentIds)
-            clone.componentIds[kv.Key] = kv.Value;
-        foreach (var kv in rank)
-            clone.rank[kv.Key] = kv.Value;
-        clone.nextComponentId = nextComponentId;
-        return clone;
+        lock (graphLock)
+        {
+            var clone = new UnionFind2dGrid();
+            foreach (var kv in parent)
+                clone.parent[kv.Key] = kv.Value;
+            foreach (var kv in componentIds)
+                clone.componentIds[kv.Key] = kv.Value;
+            foreach (var kv in rank)
+                clone.rank[kv.Key] = kv.Value;
+            clone.nextComponentId = nextComponentId;
+            return clone;
+        }
     }
 
     /// <summary>
@@ -173,8 +193,7 @@ public class UnionFind2dGrid
     /// </summary>
     /// <param name="start">Starting vertex.</param>
     /// <param name="newComponentId">New component ID.</param>
-    /// <param name="visited">Set of visited components.</param>
-    private void FloodFillRelabel((int, int) start, int newComponentId, HashSet<(int, int)> visited)
+    private void FloodFillRelabel((int, int) start, int newComponentId)
     {
         floodFillQueue.Clear();
         floodFillQueue.Enqueue(start);

@@ -80,8 +80,6 @@ internal class OverheadTransparency(
             return;
         }
 
-        graphManager.BeginFrame();
-
         var playerPosition = posVel.Position + timeSinceTick * posVel.Velocity;
         playerZ = playerPosition.Z;
         var z0 = (int)Math.Floor(playerZ);
