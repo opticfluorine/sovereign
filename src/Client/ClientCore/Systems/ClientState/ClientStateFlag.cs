@@ -39,7 +39,7 @@ public enum ClientStateFlag
     ///     Flag indicating that the Dear ImGui demo window should be displayed.
     /// </summary>
     ShowImGuiDemo,
-    
+
     /// <summary>
     ///     Flag indicating that the network debug window should be displayed.
     /// </summary>
@@ -88,5 +88,10 @@ public enum ClientStateFlag
     /// <summary>
     ///     Flag indicating that the player has newly logged into the game in the last frame.
     /// </summary>
-    NewLogin
+    NewLogin,
+
+    /// <summary>
+    ///     Flag indicating that the next frame should be traced for debugging.
+    /// </summary>
+    DebugFrame
 }

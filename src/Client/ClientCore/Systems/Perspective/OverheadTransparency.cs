@@ -49,6 +49,7 @@ internal class OverheadTransparency(
     private readonly Dictionary<(int, int), float> componentOverlapCache = new();
 
     private readonly List<(int, int, float)> playerOverlaps = new();
+    private bool debugFrame;
 
     private UnionFind2dGrid graph0 = new();
     private UnionFind2dGrid graph1 = new();
@@ -66,8 +67,10 @@ internal class OverheadTransparency(
         isActive = true;
 
         // Retrieve necessary player state. If any is missing, disable overhead transparency for this frame.
+        debugFrame = clientStateServices.GetStateFlagValue(ClientStateFlag.DebugFrame);
         if (!clientStateServices.TryGetSelectedPlayer(out var playerId))
         {
+            if (debugFrame) logger.LogDebug("No selected player; overhead transparency disabled.");
             isActive = false;
             return;
         }
@@ -104,6 +107,10 @@ internal class OverheadTransparency(
             else
                 interpolating = false;
         }
+
+        if (debugFrame)
+            logger.LogDebug("z0: {Z0}, z1: {Z1}, interpolating: {Interpolating}",
+                z0, z1, interpolating);
 
         DeterminePlayerOverlaps(playerId, playerPosition);
         minimumZ = SelectMinimumZ();
@@ -193,13 +200,17 @@ internal class OverheadTransparency(
         var x1 = (int)Math.Ceiling(pos1.X);
         var y1 = (int)Math.Ceiling(pos1.Y);
 
+        var invNorm = 1.0f / (x1 - x0) * (y1 - y0);
         for (var x = x0; x < x1; ++x)
         for (var y = y0; y < y1; ++y)
         {
-            var dx = 1.0f - Math.Max(0.0f, pos0.X - x) - Math.Max(0.0f, x1 - pos1.X);
-            var dy = 1.0f - Math.Max(0.0f, pos0.Y - y) - Math.Max(0.0f, y1 - pos1.Y);
-            var overlap = dx * dy;
+            var dx = 1.0f - Math.Max(0.0f, pos0.X - x) - Math.Max(0.0f, x + 1 - pos1.X);
+            var dy = 1.0f - Math.Max(0.0f, pos0.Y - y) - Math.Max(0.0f, y + 1 - pos1.Y);
+            var overlap = dx * dy * invNorm;
             playerOverlaps.Add((x, y, overlap));
+
+            if (debugFrame) logger.LogDebug("Player overlap at ({X}, {Y}): {Overlap}", x, y, overlap);
+            ;
         }
     }
 
@@ -218,7 +229,8 @@ internal class OverheadTransparency(
                 compId == componentId)
                 overlapSum += overlapVertex.Item3;
 
-        return overlapSum / playerOverlaps.Count;
+        if (debugFrame) logger.LogDebug("Component {ComponentId} overlap: {Overlap}", componentId, overlapSum);
+        return overlapSum;
     }
 
     /// <summary>

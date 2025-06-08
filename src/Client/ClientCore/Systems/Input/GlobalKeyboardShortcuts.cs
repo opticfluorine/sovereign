@@ -50,6 +50,7 @@ public class GlobalKeyboardShortcuts
         shortcutTable[SDL.SDL_Keycode.SDLK_F9] = () => Toggle(ClientStateFlag.ShowImGuiDemo);
         shortcutTable[SDL.SDL_Keycode.SDLK_F10] = () => Toggle(ClientStateFlag.ShowImGuiIdStackTool);
         shortcutTable[SDL.SDL_Keycode.SDLK_F11] = () => Toggle(ClientStateFlag.ShowImGuiMetrics);
+        shortcutTable[SDL.SDL_Keycode.SDLK_F12] = () => Toggle(ClientStateFlag.DebugFrame);
         shortcutTable[SDL.SDL_Keycode.SDLK_BACKQUOTE] = () => Toggle(ClientStateFlag.ShowResourceEditor);
     }
 

@@ -107,8 +107,7 @@ internal class OverheadBlockGraphManager
         stopwatch.Stop();
 
         logger.LogTrace("{Count} updates ({GraphCount} graphs) took {Elapsed} ms.",
-            dirtyLatticePointsBack.Count, graphs.Count,
-            stopwatch.Elapsed.Nanoseconds * 1E-6);
+            dirtyLatticePointsBack.Count, graphs.Count, stopwatch.Elapsed.TotalMilliseconds);
     }
 
     /// <summary>
