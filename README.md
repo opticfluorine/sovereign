@@ -1,8 +1,8 @@
-# Sovereign MMORPG Engine - 2.5D Multiplayer RPG Engine
+# Sovereign Engine - 2.5D Multiplayer RPG Engine
 
 [Website](https://sovereignengine.com) | [Documentation (v0.6.0)](https://docs.sovereignengine.com) | [Discord](https://discord.gg/Mg2jUmePyx)
 
-Sovereign Engine is a 2.5D MMORPG engine with the 2D graphical style of classic RPGs
+Sovereign Engine is a 2.5D multiplayer RPG engine with the 2D graphical style of classic RPGs
 together with a 3D voxel-based world. The world is highly dynamic and allows
 developers and players alike the ability to build homes, mine for resources, farm the
 land, and delve into dungeons. Currently in early development, Sovereign will make it easy to
