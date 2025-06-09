@@ -42,6 +42,7 @@ internal class OverheadTransparency(
     AtlasMap atlasMap)
 {
     private const float InterpolationThreshold = 0.01f;
+    private const int ZLimitSearchRadius = 3;
 
     /// <summary>
     ///     Map from (z, componentId) to the component's overlap with the player sprite.
@@ -113,7 +114,7 @@ internal class OverheadTransparency(
                 z0, z1, interpolating);
 
         DeterminePlayerOverlaps(playerId, playerPosition);
-        minimumZ = SelectMinimumZ();
+        minimumZ = SelectMinimumZ(playerPosition);
     }
 
     /// <summary>
@@ -236,19 +237,28 @@ internal class OverheadTransparency(
     /// <summary>
     ///     Selects the minimum Z at which overhead transparency should be applied.
     /// </summary>
-    /// <returns></returns>
-    private int SelectMinimumZ()
+    /// <param name="playerPosition">Player position.</param>
+    /// <returns>Minimum Z at which transparency should be applied.</returns>
+    private int SelectMinimumZ(Vector3 playerPosition)
     {
-        var minAbove = int.MaxValue;
+        var maxAbove = int.MinValue;
+        var baseX = (int)Math.Floor(playerPosition.X);
+        var baseY = (int)Math.Floor(playerPosition.Y + playerPosition.Z);
         var baseZ = (int)Math.Floor(playerZ);
-        foreach (var overlapVertex in playerOverlaps)
+
+        // Search an area around the player position to find the highest Z above the player.
+        // Use this as a threshold. This eliminates some choppiness when passing through
+        // doors and other areas.
+        for (var dx = -ZLimitSearchRadius; dx <= ZLimitSearchRadius; ++dx)
+        for (var dy = -ZLimitSearchRadius; dy <= ZLimitSearchRadius; ++dy)
         {
-            if (!perspectiveLineManager.TryGetPerspectiveLine((overlapVertex.Item1, overlapVertex.Item2), out var line))
-                continue;
-            if (!line.TryGetFirstZFloorWithBlockAbove(baseZ, out var aboveZ)) continue;
-            minAbove = Math.Min(minAbove, aboveZ);
+            var searchPoint = (baseX + dx, baseY + dy);
+            if (!perspectiveLineManager.TryGetPerspectiveLine(searchPoint, out var line)) continue;
+            if (!line.TryGetFirstZFloorWithBlockAbove(baseZ, out var lineZ)) continue;
+
+            maxAbove = Math.Max(maxAbove, lineZ);
         }
 
-        return minAbove == int.MaxValue ? baseZ + 1 : minAbove;
+        return maxAbove == int.MinValue ? baseZ + 1 : maxAbove;
     }
 }
