@@ -27,7 +27,7 @@ public class PointLightDepthMap : IDisposable
     /// <summary>
     ///     Dimension of each texture.
     /// </summary>
-    private const int TextureSize = 256;
+    private const int TextureSize = 512;
 
     /// <summary>
     ///     Number of layers in the texture.
