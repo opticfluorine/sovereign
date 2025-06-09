@@ -35,7 +35,7 @@ public sealed class WorldVertexSequencer
     /// <summary>
     ///     Number of indices per block in the solid geometry.
     /// </summary>
-    private const int SolidIndicesPerBlock = 30;
+    private const int SolidIndicesPerBlock = 36;
 
     private readonly WorldEntityRetriever entityRetriever;
 
@@ -313,7 +313,7 @@ public sealed class WorldVertexSequencer
         blockIndices[11] = baseIndex + 5;
 
         // Bottom face is omitted. Might need to eventually add to handle point light
-        // sources that radiate upward?
+        // sources that radiate upward? (Yes, yes you do...)
 
         // Back face.
         blockIndices[12] = baseIndex + 2;
@@ -338,5 +338,13 @@ public sealed class WorldVertexSequencer
         blockIndices[27] = baseIndex + 5;
         blockIndices[28] = baseIndex + 2;
         blockIndices[29] = baseIndex + 6;
+
+        // Bottom face.
+        blockIndices[30] = baseIndex + 0;
+        blockIndices[31] = baseIndex + 3;
+        blockIndices[32] = baseIndex + 2;
+        blockIndices[33] = baseIndex + 2;
+        blockIndices[34] = baseIndex + 1;
+        blockIndices[35] = baseIndex + 0;
     }
 }
