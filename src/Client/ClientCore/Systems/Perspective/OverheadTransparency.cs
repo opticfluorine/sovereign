@@ -205,10 +205,6 @@ internal class OverheadTransparency(
         var x1 = (int)Math.Ceiling(pos1.X);
         var y1 = (int)Math.Ceiling(pos1.Y);
 
-        if (debugFrame)
-            logger.LogDebug("pos0: {Pos0}, pos1: {Pos1}, x0: {X0}, y0: {Y0}, x1: {X1}, y1: {Y1}",
-                pos0, pos1, x0, y0, x1, y1);
-
         var invNorm = 1.0f / (spriteInfo.WidthInTiles * spriteInfo.HeightInTiles);
         for (var x = x0; x < x1; ++x)
         for (var y = y0; y < y1; ++y)
