@@ -15,8 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MessagePack;
 using Microsoft.Extensions.Logging;
@@ -51,11 +53,15 @@ public sealed class WorldSegmentDataClient
     /// </summary>
     private const long MaxResponseLength = 128 * 1024;
 
+    private readonly Dictionary<GridPosition, CancellationTokenSource> cancellationTokens = new();
+
     private readonly IEventSender eventSender;
     private readonly WorldSegmentBlockDataLoader loader;
     private readonly ILogger<WorldSegmentDataClient> logger;
     private readonly ClientNetworkController networkController;
     private readonly RestClient restClient;
+
+    private readonly Dictionary<GridPosition, Task> segmentLoadTasks = new();
 
     public WorldSegmentDataClient(IEventSender eventSender,
         RestClient restClient,
@@ -77,21 +83,37 @@ public sealed class WorldSegmentDataClient
     public void LoadSegment(GridPosition segmentIndex)
     {
         /* Spin up a background task to asynchronously get the segment from the server. */
-        Task.Run(() => RetrieveSegmentViaRest(segmentIndex));
+        var token = new CancellationTokenSource();
+        cancellationTokens[segmentIndex] = token;
+        segmentLoadTasks[segmentIndex] = Task.Run(() => RetrieveSegmentViaRest(segmentIndex, token.Token));
+    }
+
+    /// <summary>
+    ///     Called when a world segment is unsubscribed.
+    /// </summary>
+    /// <param name="gridPosition">World segment index.</param>
+    public void OnUnsubscribe(GridPosition segmentIndex)
+    {
+        if (!cancellationTokens.TryGetValue(segmentIndex, out var tokenSource)) return;
+
+        logger.LogDebug("Cancel load of {SegmentIndex} due to unsubscribe.", segmentIndex);
+        tokenSource.Cancel();
     }
 
     /// <summary>
     ///     Asynchronously retrieves a world segment from the server via REST API.
     /// </summary>
     /// <param name="segmentIndex">Segment index.</param>
-    private async void RetrieveSegmentViaRest(GridPosition segmentIndex)
+    /// <param name="cancellationToken">Cancellation token.</param>
+    private async void RetrieveSegmentViaRest(GridPosition segmentIndex, CancellationToken cancellationToken)
     {
         var retryCount = 0;
-        while (retryCount < MaxRetries)
+        var success = false;
+        while (!success && retryCount < MaxRetries && !cancellationToken.IsCancellationRequested)
             try
             {
                 /* If this is a retry, delay. */
-                if (retryCount > 0) await Task.Delay(RetryDelayMs);
+                if (retryCount > 0) await Task.Delay(RetryDelayMs, cancellationToken);
                 retryCount++;
 
                 /* Attempt to retreive segment from server. */
@@ -114,8 +136,9 @@ public sealed class WorldSegmentDataClient
                 switch (response.StatusCode)
                 {
                     case HttpStatusCode.OK:
-                        var segmentBytes = await response.Content.ReadAsByteArrayAsync();
+                        var segmentBytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
                         ProcessSegmentBytes(segmentIndex, segmentBytes);
+                        success = true;
                         return;
 
                     case HttpStatusCode.ServiceUnavailable:
@@ -140,12 +163,23 @@ public sealed class WorldSegmentDataClient
             {
                 // If we get this here, then the connection is already known to be lost; abort.
                 logger.LogDebug("Aborting segment retrieval for {SegmentIndex} due to disconnect.", segmentIndex);
-                return;
+                break;
+            }
+            catch (OperationCanceledException)
+            {
+                break;
             }
             catch (Exception e)
             {
                 logger.LogError(e, "Exception while retrieving segment data for {SegmentIndex}.", segmentIndex);
             }
+
+        cancellationTokens.Remove(segmentIndex);
+        segmentLoadTasks.Remove(segmentIndex);
+
+        if (success || cancellationToken.IsCancellationRequested)
+            // Operation succeeded or was canceled.
+            return;
 
         /* If we get here, all the retries failed and we hit the limit. */
         logger.LogError(
