@@ -95,8 +95,9 @@ public sealed class WorldLayerGrouper
     /// <param name="velocity">Entity velocity.</param>
     /// <param name="sprite">Sprite.</param>
     /// <param name="lightFactor">Light factor.</param>
+    /// <param name="opacity">Opacity alpha factor.</param>
     public void AddSprite(EntityType entityType, Vector3 position, Vector3 velocity, Sprite sprite,
-        float lightFactor)
+        float lightFactor, float opacity)
     {
         if (activeLayer is null)
         {
@@ -117,7 +118,8 @@ public sealed class WorldLayerGrouper
             Position = position,
             Velocity = velocity,
             Id = sprite.Id,
-            LightFactor = lightFactor
+            LightFactor = lightFactor,
+            Opacity = opacity
         });
     }
 

@@ -16,9 +16,12 @@
  */
 
 using System;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
+using Sovereign.ClientCore.Systems.ClientState;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineCore.Util;
@@ -31,6 +34,9 @@ namespace Sovereign.ClientCore.Rendering;
 /// </summary>
 public class RenderingMainLoopAction : IMainLoopAction
 {
+    private readonly ClientStateController clientStateController;
+    private readonly ClientStateServices clientStateServices;
+    private readonly IEventSender eventSender;
     private readonly ILogger<RenderingMainLoopAction> logger;
 
     /// <summary>
@@ -39,6 +45,7 @@ public class RenderingMainLoopAction : IMainLoopAction
     private readonly ulong minimumTimeDelta;
 
     private readonly RenderingManager renderingManager;
+    private readonly Stopwatch stopwatch = new();
     private readonly ISystemTimer systemTimer;
 
     /// <summary>
@@ -48,11 +55,15 @@ public class RenderingMainLoopAction : IMainLoopAction
 
     public RenderingMainLoopAction(RenderingManager renderingManager,
         ISystemTimer systemTimer, IOptions<DisplayOptions> displayOptions,
-        ILogger<RenderingMainLoopAction> logger)
+        ILogger<RenderingMainLoopAction> logger, ClientStateServices clientStateServices,
+        ClientStateController clientStateController, IEventSender eventSender)
     {
         this.renderingManager = renderingManager;
         this.systemTimer = systemTimer;
         this.logger = logger;
+        this.clientStateServices = clientStateServices;
+        this.clientStateController = clientStateController;
+        this.eventSender = eventSender;
 
         minimumTimeDelta = Units.SystemTime.Second / (ulong)displayOptions.Value.MaxFramerate;
     }
@@ -67,6 +78,13 @@ public class RenderingMainLoopAction : IMainLoopAction
         var delta = currentTime - lastFrameTime;
         if (delta >= minimumTimeDelta)
         {
+            var debugFrame = clientStateServices.GetStateFlagValue(ClientStateFlag.DebugFrame);
+            if (debugFrame)
+            {
+                logger.LogDebug("Begin debug frame.");
+                stopwatch.Restart();
+            }
+
             try
             {
                 renderingManager.Render();
@@ -81,6 +99,12 @@ public class RenderingMainLoopAction : IMainLoopAction
             }
 
             lastFrameTime = currentTime;
+            if (debugFrame)
+            {
+                stopwatch.Stop();
+                logger.LogDebug("End debug frame ({Time:F4} ms).", stopwatch.Elapsed.TotalMilliseconds);
+                clientStateController.SetStateFlag(eventSender, ClientStateFlag.DebugFrame, false);
+            }
         }
     }
 }

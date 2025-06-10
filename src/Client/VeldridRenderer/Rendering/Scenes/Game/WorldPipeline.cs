@@ -141,6 +141,10 @@ public class WorldPipeline : IDisposable
                 "shadowFloor",
                 VertexElementFormat.Float1,
                 VertexElementSemantic.Color
+            ), new VertexElementDescription(
+                "opacity",
+                VertexElementFormat.Float1,
+                VertexElementSemantic.Color
             ));
     }
 

@@ -23,16 +23,19 @@ using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.Perspective;
 
-public class PerspectiveSystem : ISystem
+internal class PerspectiveSystem : ISystem
 {
     private readonly PerspectiveLineManager lineManager;
     private readonly ILogger<PerspectiveSystem> logger;
+    private readonly OverheadBlockGraphManager overheadBlockGraphManager;
 
     public PerspectiveSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop,
-        PerspectiveLineManager lineManager, ILogger<PerspectiveSystem> logger)
+        PerspectiveLineManager lineManager, ILogger<PerspectiveSystem> logger,
+        OverheadBlockGraphManager overheadBlockGraphManager)
     {
         this.lineManager = lineManager;
         this.logger = logger;
+        this.overheadBlockGraphManager = overheadBlockGraphManager;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
@@ -42,6 +45,7 @@ public class PerspectiveSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>
     {
+        EventId.Core_Tick,
         EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_Unsubscribe
     };
@@ -63,6 +67,10 @@ public class PerspectiveSystem : ISystem
         {
             switch (ev.EventId)
             {
+                case EventId.Core_Tick:
+                    overheadBlockGraphManager.OnTick();
+                    break;
+
                 case EventId.Core_WorldManagement_Subscribe:
                 {
                     if (ev.EventDetails is not WorldSegmentSubscriptionEventDetails subDetails)

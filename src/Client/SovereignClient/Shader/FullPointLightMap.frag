@@ -35,7 +35,8 @@ layout (binding = 2) uniform textureCube g_depthMap; // Depth map (cubemap).
 layout (binding = 3) uniform sampler g_sampler;      // Depth map sampler.
 
 const float r2_limit = 0.001f;     // cutoff point for small distances
-const float depthBias = 0.90f;     // depth bias for shadow map sampling
+const float depthBias = 0.99f;     // depth bias for shadow map sampling
+const float biasSlope = -0.09f;
 
 void main() {
     // Use a smoothstep instead of inverse-square because it looks better visually
@@ -46,8 +47,9 @@ void main() {
     float scale = smoothstep(radius2, 0.0f, r2);
 
     // Check depth map for this light and fragment.
+    float bias = biasSlope * normR2 + depthBias;
     float d = texture(samplerCubeShadow(g_depthMap, g_sampler),
-                      vec4(distanceFromLight.xyz, depthBias * normR2));
+                      vec4(distanceFromLight.xyz, bias * normR2));
 
     colorOut = lightFactor * vec4(d * scale * g_lightIntensity * g_lightColor, 1.0f);
 }

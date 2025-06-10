@@ -22,6 +22,7 @@ layout (location = 1) in vec3 velocity;
 layout (location = 2) in vec2 shadowCenter;
 layout (location = 3) in float radius;
 layout (location = 4) in float unused;
+layout (location = 5) in float unused2;
 
 layout (location = 0) out vec2 relPosition;
 layout (location = 1) out float radius2;

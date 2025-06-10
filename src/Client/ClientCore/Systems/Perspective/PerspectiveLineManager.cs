@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
@@ -64,21 +65,21 @@ public class PerspectiveLineManager
     /// <summary>
     ///     Map from entity ID to set of overlapping perspective line indices.
     /// </summary>
-    private readonly Dictionary<ulong, HashSet<PerspectiveLineKey>> linesByEntity = new();
+    private readonly ConcurrentDictionary<ulong, HashSet<PerspectiveLineKey>> linesByEntity = new();
 
     private readonly ILogger<PerspectiveLineManager> logger;
 
     /// <summary>
     ///     Active perspective lines indexed by their z-intercept (x, y) coordinates.
     /// </summary>
-    private readonly Dictionary<PerspectiveLineKey, PerspectiveLine> perspectiveLines = new();
+    private readonly ConcurrentDictionary<PerspectiveLineKey, PerspectiveLine> perspectiveLines = new();
 
     private readonly WorldSegmentResolver resolver;
 
     /// <summary>
     ///     Cache of current z floor of each tracked entity, used for efficient updates.
     /// </summary>
-    private readonly Dictionary<ulong, int> zFloorByEntity = new();
+    private readonly ConcurrentDictionary<ulong, int> zFloorByEntity = new();
 
     public PerspectiveLineManager(KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
@@ -146,7 +147,7 @@ public class PerspectiveLineManager
                 }
 
                 line.ReferenceCount--;
-                if (line.ReferenceCount <= 0) perspectiveLines.Remove(index);
+                if (line.ReferenceCount <= 0) perspectiveLines.TryRemove(index, out _);
             }
         }
         finally
@@ -167,6 +168,36 @@ public class PerspectiveLineManager
     {
         var lineIndex = GetIndexForBlockPosition(blockPosition);
         return perspectiveLines.TryGetValue(lineIndex, out perspectiveLine);
+    }
+
+    /// <summary>
+    ///     Gets the perspective line, if any, that has the given index.
+    /// </summary>
+    /// <param name="lineIndex">Perspective line index.</param>
+    /// <param name="perspectiveLine">Perspective line, or null if none found.</param>
+    /// <returns>true if a perspective line was found, false otherwise.</returns>
+    public bool TryGetPerspectiveLine(ValueTuple<int, int> lineIndex,
+        [NotNullWhen(true)] out PerspectiveLine? perspectiveLine)
+    {
+        return perspectiveLines.TryGetValue(new PerspectiveLineKey(lineIndex.Item1, lineIndex.Item2),
+            out perspectiveLine);
+    }
+
+    /// <summary>
+    ///     Gets the highest z floor for the given perspective line index, if any.
+    /// </summary>
+    /// <param name="lineIndex">Perspective line index.</param>
+    /// <param name="highestZFloor">Highest Z floor. Only meaningful if method returns true.</param>
+    /// <returns>true if the perspective line contains at least one entity, false otherwise.</returns>
+    public bool TryGetHighestZFloorForLine(ValueTuple<int, int> lineIndex, out int highestZFloor)
+    {
+        highestZFloor = 0;
+        if (!perspectiveLines.TryGetValue(new PerspectiveLineKey(lineIndex.Item1, lineIndex.Item2), out var line))
+            return false;
+
+        if (line.ZFloors.Count == 0) return false;
+        highestZFloor = line.ZFloors[0].ZFloor;
+        return true;
     }
 
     /// <summary>
@@ -220,6 +251,17 @@ public class PerspectiveLineManager
 
         // If we get here, nothing was found in the window.
         return false;
+    }
+
+    /// <summary>
+    ///     Iterates all current perspective lines.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerable<(int, int, PerspectiveLine)> GetAllLines()
+    {
+        // Take a snapshot before iterating in case the lines change during iteration.
+        var copy = new Dictionary<PerspectiveLineKey, PerspectiveLine>(perspectiveLines);
+        foreach (var kvp in copy) yield return (kvp.Key.X, kvp.Key.Yz, kvp.Value);
     }
 
     /// <summary>
@@ -362,8 +404,8 @@ public class PerspectiveLineManager
             }
         }
 
-        zFloorByEntity.Remove(entityId);
-        linesByEntity.Remove(entityId);
+        zFloorByEntity.TryRemove(entityId, out _);
+        linesByEntity.TryRemove(entityId, out _);
     }
 
     /// <summary>

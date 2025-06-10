@@ -40,6 +40,8 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 /// </summary>
 public sealed class WorldEntityRetriever
 {
+    private const float OpacityCullThreshold = 0.01f;
+
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly AtlasMap atlasMap;
@@ -57,8 +59,9 @@ public sealed class WorldEntityRetriever
     private readonly ILogger<WorldEntityRetriever> logger;
     public readonly List<NameLabel> NameLabels = new();
     private readonly OrientationComponentCollection orientations;
+    private readonly IPerspectiveController perspectiveController;
 
-    private readonly PerspectiveServices perspectiveServices;
+    private readonly IPerspectiveServices perspectiveServices;
     private readonly AnimationPhaseComponentCollection phases;
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly WorldRangeSelector rangeSelector;
@@ -73,7 +76,7 @@ public sealed class WorldEntityRetriever
     private uint solidBlockIndex;
 
     public WorldEntityRetriever(CameraServices camera, DisplayViewport viewport,
-        PerspectiveServices perspectiveServices,
+        IPerspectiveServices perspectiveServices, IPerspectiveController perspectiveController,
         WorldLayerGrouper grouper, KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
         AnimatedSpriteComponentCollection animatedSprites,
@@ -88,6 +91,7 @@ public sealed class WorldEntityRetriever
         this.camera = camera;
         this.viewport = viewport;
         this.perspectiveServices = perspectiveServices;
+        this.perspectiveController = perspectiveController;
         this.grouper = grouper;
         this.kinematics = kinematics;
         this.blockPositions = blockPositions;
@@ -119,6 +123,8 @@ public sealed class WorldEntityRetriever
         NameLabels.Clear();
         solidBlockIndex = 0;
 
+        perspectiveController.BeginFrameSync(timeSinceTick);
+
         var halfY = viewport.HeightInTiles * 0.5f;
 
         var cameraPos = camera.Position.InterpolateByTime(camera.Velocity, timeSinceTick);
@@ -144,7 +150,7 @@ public sealed class WorldEntityRetriever
             if (!perspectiveServices.TryGetPerspectiveLine(intersectingPos, out var line))
                 continue;
 
-            ProcessPerspectiveLine(line, zMin, zMax, systemTime, timeSinceTick, renderPlan);
+            ProcessPerspectiveLine(line, zMin, zMax, systemTime, timeSinceTick, renderPlan, cameraPos);
         }
     }
 
@@ -157,8 +163,9 @@ public sealed class WorldEntityRetriever
     /// <param name="systemTime">System time of current frame.</param>
     /// <param name="timeSinceTick">Time since last tick, in seconds.</param>
     /// <param name="renderPlan">Render plan.</param>
+    /// <param name="cameraPos">Camera position.</param>
     private void ProcessPerspectiveLine(PerspectiveLine perspectiveLine, EntityList zMin, EntityList zMax,
-        ulong systemTime, float timeSinceTick, RenderPlan renderPlan)
+        ulong systemTime, float timeSinceTick, RenderPlan renderPlan, Vector3 cameraPos)
     {
         var foundOpaqueBlock = false;
         for (var i = 0; i < perspectiveLine.ZFloors.Count; ++i)
@@ -175,13 +182,17 @@ public sealed class WorldEntityRetriever
 
             // We make a few optimizations here based on the idea that opaque sprites will obscure anything
             // drawn below them. Blocks drawn on a perspective line perfectly overlap, so we only need to draw
-            // blocks to the depth of the first encountered opaque sprite (if any).
+            // blocks to the depth of the first encountered opaque sprite (if any). Since overhead transparency
+            // effects may apply, we also need to include any block faces which are at or above the depth
+            // of the player.
             //
             // On the other hand, sprites may not be perfectly overlapped by an obscuring block sprite, and they
             // may not fully overlap any other sprites or block sprites below them. Accordingly, we draw all
             // animated sprites on the line regardless of if they may be obscured. To avoid multiple draws of the
             // same sprite, we only draw animated sprites for which the top-left corner of the sprite is on the
             // perspective line.
+
+            var disableOcclusionCulling = zSet.ZFloor >= Math.Floor(cameraPos.Z);
 
             // First pass, pull out the block faces so they can be ordered and checked appropriately.
             for (var j = zSet.Entities.Count - 1; j >= 0; j--)
@@ -202,10 +213,10 @@ public sealed class WorldEntityRetriever
             }
 
             // Between passes, handle the faces.
-            if (!foundOpaqueBlock && frontFaceId < ulong.MaxValue)
+            if ((!foundOpaqueBlock || disableOcclusionCulling) && frontFaceId < ulong.MaxValue)
                 ProcessBlockFrontFace(frontFaceId, systemTime, out opaqueThisDepth);
 
-            if (!foundOpaqueBlock && !opaqueThisDepth && topFaceId < ulong.MaxValue)
+            if (((!foundOpaqueBlock && !opaqueThisDepth) || disableOcclusionCulling) && topFaceId < ulong.MaxValue)
                 ProcessBlockTopFace(topFaceId, systemTime, out opaqueThisDepth);
 
             // If a top face was found, mark the block for solid geometry rendering.
@@ -236,6 +247,9 @@ public sealed class WorldEntityRetriever
     /// <param name="renderPlan">Render plan.</param>
     private void ProcessSprite(ulong entityId, ulong systemTime, float timeSinceTick, RenderPlan renderPlan)
     {
+        var opacity = perspectiveServices.GetOpacityForEntity(entityId);
+        if (opacity < OpacityCullThreshold) return;
+
         var entityKinematics = kinematics[entityId];
         var animatedSpriteId = animatedSprites[entityId];
         var orientation = orientations.HasComponentForEntity(entityId) ? orientations[entityId] : Orientation.South;
@@ -243,7 +257,8 @@ public sealed class WorldEntityRetriever
 
         var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
         var sprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(systemTime, orientation);
-        grouper.AddSprite(EntityType.NonBlock, entityKinematics.Position, entityKinematics.Velocity, sprite, 1.0f);
+        grouper.AddSprite(EntityType.NonBlock, entityKinematics.Position, entityKinematics.Velocity, sprite, 1.0f,
+            opacity);
 
         if (playerCharacters.HasTagForEntity(entityId))
             AddNameLabel(entityId, entityKinematics, sprite, timeSinceTick);
@@ -285,6 +300,9 @@ public sealed class WorldEntityRetriever
             return;
         }
 
+        var opacity = perspectiveServices.GetOpacityForEntity(entityId);
+        if (opacity < OpacityCullThreshold) return;
+
         var facePosition = (Vector3)blockPosition;
         var animatedSpriteIds = blockSpriteCache.GetFrontFaceAnimatedSpriteIds(entityId);
         var firstLayer = true;
@@ -293,7 +311,7 @@ public sealed class WorldEntityRetriever
             var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)
                 .GetSpriteForTime(systemTime, Orientation.South);
             grouper.AddSprite(EntityType.BlockFrontFace, facePosition, Vector3.Zero, sprite,
-                firstLayer ? 1.0f : 0.0f);
+                firstLayer ? 1.0f : 0.0f, opacity);
             isOpaque = isOpaque || sprite.Opaque;
             firstLayer = false;
         }
@@ -312,6 +330,9 @@ public sealed class WorldEntityRetriever
             return;
         }
 
+        var opacity = perspectiveServices.GetOpacityForEntity(entityId);
+        if (opacity < OpacityCullThreshold) return;
+
         var facePosition = (Vector3)(blockPosition with { Z = blockPosition.Z + 1 });
         var animatedSpriteIds = blockSpriteCache.GetTopFaceAnimatedSpriteIds(entityId);
         var firstLayer = true;
@@ -320,7 +341,7 @@ public sealed class WorldEntityRetriever
             var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)
                 .GetSpriteForTime(systemTime, Orientation.South);
             grouper.AddSprite(EntityType.BlockTopFace, facePosition, Vector3.Zero, sprite,
-                firstLayer ? 1.0f : 0.0f);
+                firstLayer ? 1.0f : 0.0f, opacity);
             isOpaque = isOpaque || sprite.Opaque;
             firstLayer = false;
         }

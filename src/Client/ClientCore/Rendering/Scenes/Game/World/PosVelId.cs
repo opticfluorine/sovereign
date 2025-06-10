@@ -44,4 +44,9 @@ public struct PosVelId
     ///     Light factor.
     /// </summary>
     public float LightFactor;
+
+    /// <summary>
+    ///     Opacity alpha factor.
+    /// </summary>
+    public float Opacity;
 }

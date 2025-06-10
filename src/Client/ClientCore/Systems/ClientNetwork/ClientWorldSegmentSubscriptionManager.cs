@@ -65,6 +65,7 @@ public class ClientWorldSegmentSubscriptionManager
         {
             logger.LogDebug("Unsubscribe from world segment {SegmentIndex}.", worldSegmentIndex);
             subscribedSegments.Remove(worldSegmentIndex);
+            dataClient.OnUnsubscribe(worldSegmentIndex);
         }
         else
         {
