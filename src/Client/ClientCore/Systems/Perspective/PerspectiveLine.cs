@@ -211,10 +211,13 @@ public class PerspectiveLine
     /// </summary>
     /// <param name="baseZFloor">Base Z floor.</param>
     /// <param name="nextZFloor">Next highest Z floor with block. Only meaningful if method returns true.</param>
-    /// <returns>true if a higher block was found, false otherwise.</returns>
-    public bool TryGetFirstZFloorWithBlockAbove(int baseZFloor, out int nextZFloor)
+    /// <param name="hasTopFace">
+    ///     Set to true if the found Z floor contains a top face.
+    ///     <returns>true if a higher block was found, false otherwise.</returns>
+    public bool TryGetFirstZFloorWithBlockAbove(int baseZFloor, out int nextZFloor, out bool hasTopFace)
     {
         nextZFloor = 0;
+        hasTopFace = false;
         var baseIndex = ZFloors.BinarySearch(EntityList.ForComparison(baseZFloor), EntityList.Comparer);
         if (baseIndex < 0) return false;
 
@@ -227,8 +230,14 @@ public class PerspectiveLine
                     entity.EntityType == EntityType.BlockFrontFace)
                 {
                     nextZFloor = layer.ZFloor;
-                    return true;
+                    if (entity.EntityType == EntityType.BlockTopFace)
+                    {
+                        hasTopFace = true;
+                        return true;
+                    }
                 }
+
+            if (nextZFloor == layer.ZFloor) return true;
         }
 
         return false;

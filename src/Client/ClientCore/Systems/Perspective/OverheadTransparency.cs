@@ -57,6 +57,7 @@ internal class OverheadTransparency(
     private bool interpolating;
     private bool isActive;
     private int minimumZ;
+    private ulong playerId;
     private float playerZ;
 
     /// <summary>
@@ -69,7 +70,7 @@ internal class OverheadTransparency(
 
         // Retrieve necessary player state. If any is missing, disable overhead transparency for this frame.
         debugFrame = clientStateServices.GetStateFlagValue(ClientStateFlag.DebugFrame);
-        if (!clientStateServices.TryGetSelectedPlayer(out var playerId))
+        if (!clientStateServices.TryGetSelectedPlayer(out playerId))
         {
             if (debugFrame) logger.LogDebug("No selected player; overhead transparency disabled.");
             isActive = false;
@@ -140,9 +141,12 @@ internal class OverheadTransparency(
                 (int)Math.Floor(posVel.Position.X),
                 (int)Math.Floor(posVel.Position.Y),
                 (int)Math.Floor(posVel.Position.Z));
+
+            // Non-block entities at same z layer as player are always fully opaque.
+            if ((int)Math.Floor(playerZ) == entityPosition.Z) return 1.0f;
         }
 
-        if (entityPosition.Z < minimumZ) return 1.0f;
+        if (entityPosition.Z < minimumZ || entityId == playerId) return 1.0f;
 
         // Lower graph opacity.
         var opacity0 = GetOpacityFromGraph(entityPosition, graph0);
@@ -201,7 +205,11 @@ internal class OverheadTransparency(
         var x1 = (int)Math.Ceiling(pos1.X);
         var y1 = (int)Math.Ceiling(pos1.Y);
 
-        var invNorm = 1.0f / (x1 - x0) * (y1 - y0);
+        if (debugFrame)
+            logger.LogDebug("pos0: {Pos0}, pos1: {Pos1}, x0: {X0}, y0: {Y0}, x1: {X1}, y1: {Y1}",
+                pos0, pos1, x0, y0, x1, y1);
+
+        var invNorm = 1.0f / (spriteInfo.WidthInTiles * spriteInfo.HeightInTiles);
         for (var x = x0; x < x1; ++x)
         for (var y = y0; y < y1; ++y)
         {
@@ -211,7 +219,6 @@ internal class OverheadTransparency(
             playerOverlaps.Add((x, y, overlap));
 
             if (debugFrame) logger.LogDebug("Player overlap at ({X}, {Y}): {Overlap}", x, y, overlap);
-            ;
         }
     }
 
@@ -245,6 +252,7 @@ internal class OverheadTransparency(
         var baseX = (int)Math.Floor(playerPosition.X);
         var baseY = (int)Math.Floor(playerPosition.Y + playerPosition.Z);
         var baseZ = (int)Math.Floor(playerZ);
+        var directAbove = int.MaxValue;
 
         // Search an area around the player position to find the highest Z above the player.
         // Use this as a threshold. This eliminates some choppiness when passing through
@@ -254,11 +262,17 @@ internal class OverheadTransparency(
         {
             var searchPoint = (baseX + dx, baseY + dy);
             if (!perspectiveLineManager.TryGetPerspectiveLine(searchPoint, out var line)) continue;
-            if (!line.TryGetFirstZFloorWithBlockAbove(baseZ, out var lineZ)) continue;
+            if (!line.TryGetFirstZFloorWithBlockAbove(baseZ, out var lineZ, out var hasTopFace)) continue;
 
-            maxAbove = Math.Max(maxAbove, lineZ);
+            // If there is a top face, also grab the front face in the z floor below.
+            maxAbove = Math.Max(maxAbove, hasTopFace ? lineZ - 1 : lineZ);
+
+            // Ensure that the threshold doesn't rise above the lowest layer of the ceiling.
+            foreach (var (ox, oy, overlap) in playerOverlaps)
+                if (ox == searchPoint.Item1 && oy == searchPoint.Item2 && overlap > 0.0f)
+                    directAbove = Math.Min(lineZ, directAbove);
         }
 
-        return maxAbove == int.MinValue ? baseZ + 1 : maxAbove;
+        return maxAbove == int.MinValue ? baseZ + 1 : Math.Min(maxAbove, directAbove);
     }
 }
