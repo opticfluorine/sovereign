@@ -38,6 +38,7 @@ internal class OverheadBlockGraphManager
 
     private readonly ConcurrentDictionary<int, UnionFind2dGrid> graphs = new();
     private readonly ILogger<OverheadBlockGraphManager> logger;
+    private readonly List<(int, int)> newGraphPoints = new();
     private readonly PerspectiveLineManager perspectiveLineManager;
 
     /// <summary>
@@ -119,12 +120,6 @@ internal class OverheadBlockGraphManager
         changeSet.Clear();
         for (var z = maxZ; z >= minZ; z--)
         {
-            if (!graphs.TryGetValue(z, out var graph))
-            {
-                graph = new UnionFind2dGrid();
-                graphs[z] = graph;
-            }
-
             foreach (var latticePoint in dirtyLatticePointsBack)
             {
                 if (changeSet.Contains(latticePoint)) continue;
@@ -133,8 +128,33 @@ internal class OverheadBlockGraphManager
                     changeSet.Add(latticePoint);
             }
 
+            var graph = GetOrCreateGraph(z);
             graph.AddVertices(changeSet);
         }
+    }
+
+    /// <summary>
+    ///     Gets the graph for the given z, or creates it if it doesn't exist yet.
+    ///     Should only be called from the worker thread.
+    /// </summary>
+    /// <param name="z">z.</param>
+    /// <returns>Graph.</returns>
+    private UnionFind2dGrid GetOrCreateGraph(int z)
+    {
+        if (graphs.TryGetValue(z, out var graph)) return graph;
+
+        // Graph doesn't exist. Create new graph from scratch.
+        graph = new UnionFind2dGrid();
+        newGraphPoints.Clear();
+        foreach (var (x, y, line) in perspectiveLineManager.GetAllLines())
+        {
+            if (line.ZFloors.Count == 0) continue;
+            if (line.ZFloors[0].ZFloor > z) newGraphPoints.Add((x, y));
+        }
+
+        graph.AddVertices(newGraphPoints);
+        graphs[z] = graph;
+        return graph;
     }
 
     /// <summary>

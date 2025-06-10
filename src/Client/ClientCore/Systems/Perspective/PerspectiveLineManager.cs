@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
@@ -64,21 +65,21 @@ public class PerspectiveLineManager
     /// <summary>
     ///     Map from entity ID to set of overlapping perspective line indices.
     /// </summary>
-    private readonly Dictionary<ulong, HashSet<PerspectiveLineKey>> linesByEntity = new();
+    private readonly ConcurrentDictionary<ulong, HashSet<PerspectiveLineKey>> linesByEntity = new();
 
     private readonly ILogger<PerspectiveLineManager> logger;
 
     /// <summary>
     ///     Active perspective lines indexed by their z-intercept (x, y) coordinates.
     /// </summary>
-    private readonly Dictionary<PerspectiveLineKey, PerspectiveLine> perspectiveLines = new();
+    private readonly ConcurrentDictionary<PerspectiveLineKey, PerspectiveLine> perspectiveLines = new();
 
     private readonly WorldSegmentResolver resolver;
 
     /// <summary>
     ///     Cache of current z floor of each tracked entity, used for efficient updates.
     /// </summary>
-    private readonly Dictionary<ulong, int> zFloorByEntity = new();
+    private readonly ConcurrentDictionary<ulong, int> zFloorByEntity = new();
 
     public PerspectiveLineManager(KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
@@ -146,7 +147,7 @@ public class PerspectiveLineManager
                 }
 
                 line.ReferenceCount--;
-                if (line.ReferenceCount <= 0) perspectiveLines.Remove(index);
+                if (line.ReferenceCount <= 0) perspectiveLines.TryRemove(index, out _);
             }
         }
         finally
@@ -250,6 +251,17 @@ public class PerspectiveLineManager
 
         // If we get here, nothing was found in the window.
         return false;
+    }
+
+    /// <summary>
+    ///     Iterates all current perspective lines.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerable<(int, int, PerspectiveLine)> GetAllLines()
+    {
+        // Take a snapshot before iterating in case the lines change during iteration.
+        var copy = new Dictionary<PerspectiveLineKey, PerspectiveLine>(perspectiveLines);
+        foreach (var kvp in copy) yield return (kvp.Key.X, kvp.Key.Yz, kvp.Value);
     }
 
     /// <summary>
@@ -392,8 +404,8 @@ public class PerspectiveLineManager
             }
         }
 
-        zFloorByEntity.Remove(entityId);
-        linesByEntity.Remove(entityId);
+        zFloorByEntity.TryRemove(entityId, out _);
+        linesByEntity.TryRemove(entityId, out _);
     }
 
     /// <summary>
