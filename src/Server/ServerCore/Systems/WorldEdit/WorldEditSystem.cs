@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -31,12 +32,17 @@ namespace Sovereign.ServerCore.Systems.WorldEdit;
 /// </summary>
 public class WorldEditSystem : ISystem
 {
+    private const int ResetHistoryTicks = 10;
+
     private readonly BlockController blockController;
     private readonly IBlockServices blockServices;
     private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
     private readonly ILogger<WorldEditSystem> logger;
     private readonly LoggingUtil loggingUtil;
+
+    private readonly HashSet<GridPosition> recentAdds = new();
+    private int ticksSinceAdd;
 
     public WorldEditSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, BlockController blockController,
         IEventSender eventSender, LoggingUtil loggingUtil, IBlockServices blockServices, EntityTable entityTable,
@@ -57,6 +63,7 @@ public class WorldEditSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
+        EventId.Core_Tick,
         EventId.Server_WorldEdit_SetBlock,
         EventId.Server_WorldEdit_RemoveBlock
     };
@@ -79,6 +86,10 @@ public class WorldEditSystem : ISystem
             processed++;
             switch (ev.EventId)
             {
+                case EventId.Core_Tick:
+                    OnTick();
+                    break;
+
                 case EventId.Server_WorldEdit_SetBlock:
                 {
                     if (ev.EventDetails is not BlockAddEventDetails details)
@@ -109,6 +120,18 @@ public class WorldEditSystem : ISystem
     }
 
     /// <summary>
+    ///     Called once per tick.
+    /// </summary>
+    private void OnTick()
+    {
+        if (ticksSinceAdd++ > ResetHistoryTicks)
+        {
+            recentAdds.Clear();
+            ticksSinceAdd = 0;
+        }
+    }
+
+    /// <summary>
     ///     Handles a set block world edit request.
     /// </summary>
     /// <param name="details">Request details.</param>
@@ -117,12 +140,25 @@ public class WorldEditSystem : ISystem
         logger.LogDebug("Set block type {Id} at {Pos}.", loggingUtil.FormatEntity(details.BlockRecord.TemplateEntityId),
             details.BlockRecord.Position);
 
+        // Ignore rapid duplicates.
+        if (recentAdds.Contains(details.BlockRecord.Position))
+        {
+            logger.LogDebug("Block at {Position} recently added, skipping.", details.BlockRecord.Position);
+            return;
+        }
+
         if (blockServices.TryGetBlockAtPosition(details.BlockRecord.Position, out var entityId))
             // Block already exists, update in place.
+        {
             entityTable.SetTemplate(entityId, details.BlockRecord.TemplateEntityId);
+        }
         else
+        {
             // Create new.
             blockController.AddBlock(eventSender, details.BlockRecord);
+            recentAdds.Add(details.BlockRecord.Position);
+            ticksSinceAdd = 0;
+        }
     }
 
     /// <summary>
