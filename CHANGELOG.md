@@ -4,6 +4,16 @@
 
 ### June
 
+#### 11 June 2025
+
+* World Editor: Fix race condition that led to duplicate block creation on the server.
+
+#### 10 June 2025
+
+* Client: Render blocks above player as transparent. The client will attempt to determine which
+  blocks above the player connect to form a "ceiling" that should all become transparent together.
+  Also add smooth transitions for the transparency.
+
 #### 4 June 2025
 
 * **Release v0.6.0**
