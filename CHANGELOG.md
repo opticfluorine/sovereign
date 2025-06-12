@@ -4,6 +4,11 @@
 
 ### June
 
+#### 12 June 2025
+
+* Renderer: Fix block shadow calculation so it works correctly away from the center of the world.
+  Also reduce the angle at which shadows are cast.
+
 #### 11 June 2025
 
 * World Editor: Fix race condition that led to duplicate block creation on the server.

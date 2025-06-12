@@ -107,8 +107,8 @@ public sealed class GameScene : IScene
         heightInTiles = viewport.HeightInTiles;
         cameraPos = this.cameraPos;
         timeSinceTick = this.timeSinceTick;
-        globalLightThetaRad = 0.2f;
-        globalLightPhiRad = 0.02f;
+        globalLightThetaRad = -0.1f;
+        globalLightPhiRad = 0.00f;
     }
 
     public void PopulateWorldFragmentConstants(out Vector4 ambientLightColor, out Vector4 globalLightColor)

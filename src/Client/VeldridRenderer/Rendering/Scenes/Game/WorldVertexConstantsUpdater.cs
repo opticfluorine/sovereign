@@ -68,26 +68,6 @@ public class WorldVertexConstantsUpdater
         var shadowBuf = gameResourceManager.BlockShadowVertexUniformBuffer.Buffer;
         buf[0].TimeSinceTick = timeSinceTick;
 
-        // Calculate camera rotation matrix for the global light source.
-        // Note that we reverse the indices to match the column-major layout expected by Vulkan.
-        var rotMat = Matrix4x4.Identity;
-        var sinTheta = (float)Math.Sin(globalLightThetaRad);
-        var cosTheta = (float)Math.Cos(globalLightThetaRad);
-        rotMat.M11 = cosTheta;
-        rotMat.M21 = -sinTheta;
-        rotMat.M12 = sinTheta;
-        rotMat.M22 = cosTheta;
-
-        var rotMatPhi = Matrix4x4.Identity;
-        if (globalLightPhiRad != 0.0f)
-        {
-            var sinPhi = (float)Math.Sin(globalLightPhiRad);
-            var cosPhi = (float)Math.Cos(globalLightPhiRad);
-            rotMatPhi.M22 = cosPhi;
-            rotMatPhi.M23 = -sinPhi;
-            rotMatPhi.M32 = sinPhi;
-            rotMatPhi.M33 = cosPhi;
-        }
 
         /* Calculate world-view transform matrix. */
         ref var projMat = ref buf[0].WorldViewTransform;
@@ -115,27 +95,57 @@ public class WorldVertexConstantsUpdater
         projMat.M34 = 0.0f;
         projMat.M44 = 1.0f;
 
-        // Calculate the shadow map transform matrix.
+        /*
+         * Shadow Map Transforms
+         * ---
+         * The idea here is to view the scene from another angle (the sun's perspective, more specifically).
+         * Since 3/4 perspective already behaves as if the camera is at infinite distance, this is just a
+         * rotation of the scene. Crucially, this rotation must happen *before* the z axis is projected onto
+         * the y axis. However, the rotation must be centered on the camera position, so the camera translation
+         * must be decoupled from the projection.
+         *
+         * The transform we will build applies the following linear transformations in order:
+         * 1. Translate the camera to the origin, taking z projection *of the camera* into account.
+         * 2. Rotate the scene in the xy plane (about the z axis) by theta.
+         * 3. Rotate the scene in the yz plane (about the x axis) by phi.
+         * 4. Project the z axis onto the y axis to obtain 3/4 perspective from the sun's POV.
+         */
+
+        // Calculate camera rotation matrix for the global light source.
+        // Note that we reverse the indices to match the column-major layout expected by Vulkan.
+        var rotMat = Matrix4x4.Identity;
+        var sinTheta = (float)Math.Sin(globalLightThetaRad);
+        var cosTheta = (float)Math.Cos(globalLightThetaRad);
+        rotMat.M11 = cosTheta;
+        rotMat.M21 = -sinTheta;
+        rotMat.M12 = sinTheta;
+        rotMat.M22 = cosTheta;
+
+        var rotMatPhi = Matrix4x4.Identity;
+        if (globalLightPhiRad != 0.0f)
+        {
+            var sinPhi = (float)Math.Sin(globalLightPhiRad);
+            var cosPhi = (float)Math.Cos(globalLightPhiRad);
+            rotMatPhi.M22 = cosPhi;
+            rotMatPhi.M23 = -sinPhi;
+            rotMatPhi.M32 = sinPhi;
+            rotMatPhi.M33 = cosPhi;
+        }
+
+        // Shadow translation.
+        var shadowTransMat = Matrix4x4.Identity;
+        shadowTransMat.M11 = invWidthShadow;
+        shadowTransMat.M41 = -invWidthShadow * cameraPos.X;
+
+        shadowTransMat.M22 = -invHeightShadow;
+        shadowTransMat.M42 = invHeightShadow * (cameraPos.Z + cameraPos.Y);
+
+        shadowTransMat.M33 = invHeightShadow;
+        shadowTransMat.M43 = cameraPos.Z * invHeightShadow + 0.5f;
+
+        // Shadow projection.
         var shadowProjMat = Matrix4x4.Identity;
-        shadowProjMat.M11 = invWidthShadow;
-        shadowProjMat.M21 = 0.0f;
-        shadowProjMat.M31 = 0.0f;
-        shadowProjMat.M41 = -invWidthShadow * cameraPos.X;
-
-        shadowProjMat.M12 = 0.0f;
-        shadowProjMat.M22 = -invHeightShadow;
-        shadowProjMat.M32 = -invHeightShadow;
-        shadowProjMat.M42 = invHeightShadow * (cameraPos.Z + cameraPos.Y);
-
-        shadowProjMat.M13 = 0.0f;
-        shadowProjMat.M23 = 0.0f;
-        shadowProjMat.M33 = invHeightShadow;
-        shadowProjMat.M43 = cameraPos.Z * invHeightShadow + 0.5f;
-
-        shadowProjMat.M14 = 0.0f;
-        shadowProjMat.M24 = 0.0f;
-        shadowProjMat.M34 = 0.0f;
-        shadowProjMat.M44 = 1.0f;
+        shadowProjMat.M32 = -1.0f;
 
         // NDC coordinates are [-1,1], while normalized texture coordinates are [0,1].
         // Need to shift in the world vertex shader when sampling the shadow map.
@@ -146,7 +156,7 @@ public class WorldVertexConstantsUpdater
         projToTexMat.M42 = 0.5f;
 
         // Matrices are transposed here, so treat as if acting to the left.
-        shadowBuf[0].WorldViewTransform = rotMat * rotMatPhi * shadowProjMat;
+        shadowBuf[0].WorldViewTransform = shadowTransMat * rotMatPhi * rotMat * shadowProjMat;
         buf[0].ShadowWorldViewTransform = shadowBuf[0].WorldViewTransform * projToTexMat;
 
         // Draw depth is calculated along the y axis to give correct front-to-back ordering
