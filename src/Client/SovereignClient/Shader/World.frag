@@ -59,7 +59,7 @@ void main()
     vec2 lightMapCoord = gl_FragCoord.xy / g_viewportSize;
     vec4 pointColor = texture(sampler2D(g_lightMap, g_lightMapSampler), lightMapCoord);
     vec4 baseColor = g_ambientLightColor + bs * nbs * (g_globalLightColor - g_ambientLightColor);
-    vec4 fullColor = color * clamp(baseColor + pointColor, 0.0f, 1.0f);
+    vec4 fullColor = color * clamp(baseColor + floor(nbs) * pointColor, 0.0f, 1.0f);
 
     // Blend everything to a final color.
     colorOut = vec4(1.0f, 1.0f, 1.0f, opacity) * fullColor * texture(

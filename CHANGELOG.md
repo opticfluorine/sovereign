@@ -7,6 +7,7 @@
 #### 11 June 2025
 
 * World Editor: Fix race condition that led to duplicate block creation on the server.
+* Renderer: Make non-block entity shadows override point light sources.
 
 #### 10 June 2025
 
