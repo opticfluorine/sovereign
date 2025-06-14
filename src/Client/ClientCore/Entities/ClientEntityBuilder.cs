@@ -45,11 +45,12 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         PhysicsTagCollection physics,
         BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows,
+        EntityTypeComponentCollection entityTypes,
         EntityTable entityTable)
         : base(entityId, isLoad, entityManager, kinematics, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources, physics, boundingBoxes,
-            castShadows, entityTable)
+            castShadows, entityTypes, entityTable)
     {
     }
 

@@ -59,6 +59,7 @@ public sealed class EntityProcessor
     private const int IndexBbSizeY = IndexBbSizeX + 1;
     private const int IndexBbSizeZ = IndexBbSizeY + 1;
     private const int IndexShadowRadius = IndexBbSizeZ + 1;
+    private const int IndexEntityType = IndexShadowRadius + 1;
     private readonly IEntityFactory entityFactory;
     private readonly ILogger<EntityProcessor> logger;
     private readonly EntityMapper mapper;
@@ -118,6 +119,7 @@ public sealed class EntityProcessor
         ProcessPhysics(reader, builder);
         ProcessBoundingBox(reader, builder);
         ProcessCastShadows(reader, builder);
+        ProcessEntityType(reader, builder);
 
         /* Complete the entity. */
         builder.Build();
@@ -342,6 +344,17 @@ public sealed class EntityProcessor
         {
             Radius = reader.GetFloat(IndexShadowRadius)
         });
+    }
+
+    /// <summary>
+    ///     Processes the EntityType component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessEntityType(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexEntityType)) return;
+        builder.EntityType((EntityType)reader.GetByte(IndexEntityType));
     }
 
     /// <summary>

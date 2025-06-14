@@ -42,6 +42,20 @@ public interface IEntityBuilder : IDisposable
     IEntityBuilder Template(ulong templateEntityId);
 
     /// <summary>
+    ///     Assigns an entity type to the entity.
+    /// </summary>
+    /// <param name="entityType">Entity type.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("EntityType")]
+    IEntityBuilder EntityType(EntityType entityType);
+
+    /// <summary>
+    ///     Removes the entity type component if it is currently set.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutEntityType();
+
+    /// <summary>
     ///     Makes the new entity positionable with the given position and velocity.
     /// </summary>
     /// <param name="position">Position.</param>

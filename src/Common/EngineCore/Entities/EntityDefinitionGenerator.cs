@@ -32,6 +32,7 @@ public class EntityDefinitionGenerator
     private readonly CastShadowsComponentCollection castShadows;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
+    private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
@@ -51,7 +52,7 @@ public class EntityDefinitionGenerator
         AdminTagCollection admins, BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows, PointLightSourceComponentCollection pointLightSources,
         PhysicsTagCollection physics, BoundingBoxComponentCollection boundingBoxes,
-        CastShadowsComponentCollection castShadows,
+        CastShadowsComponentCollection castShadows, EntityTypeComponentCollection entityTypes,
         EntityTable entityTable)
     {
         this.kinematics = kinematics;
@@ -70,6 +71,7 @@ public class EntityDefinitionGenerator
         this.physics = physics;
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
+        this.entityTypes = entityTypes;
         this.entityTable = entityTable;
     }
 
@@ -126,6 +128,8 @@ public class EntityDefinitionGenerator
 
         if (castShadows.HasLocalComponentForEntity(entityId))
             def.CastShadows = castShadows[entityId];
+
+        def.EntityType = entityTypes.HasLocalComponentForEntity(entityId) ? entityTypes[entityId] : EntityType.Other;
 
         return def;
     }

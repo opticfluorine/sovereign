@@ -100,6 +100,7 @@ CREATE TABLE Entity
     bb_size_y           FLOAT,
     bb_size_z           FLOAT,
     shadow_radius       FLOAT,
+    entity_type         INTEGER,
     FOREIGN KEY (template_id) REFERENCES Entity (id),
     FOREIGN KEY (parent_id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
@@ -183,7 +184,8 @@ SELECT Entity.id                 AS id,
        Entity.bb_size_x          AS bbSizeX,
        Entity.bb_size_y          AS bbSizeY,
        Entity.bb_size_z          AS bbSizeZ,
-       Entity.shadow_radius      AS shadowRadius
+       Entity.shadow_radius      AS shadowRadius,
+       Entity.entity_type        AS entityType
 FROM Entity;
 
 
@@ -239,4 +241,4 @@ VALUES (1, 'Baseline');
 
 -- Enable WAL.
 PRAGMA
-journal_mode=WAL;
+    journal_mode= WAL;

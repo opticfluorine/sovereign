@@ -24,6 +24,7 @@ Core components are available in both the client and server.
 | `CastBlockShadows` | `CastBlockShadowsTagCollection`       | For block entities, indicates that the block should be included for calculating shadows.                               |
 | `CastShadows`      | `CastShadowsComponentCollection`      | For non-block entities, specifies the shape of the shadow cast by the entity.                                          |
 | `Drawable`         | `DrawableTagCollection`               | The existence of this component indicates that the entity should be considered for rendering.                          |
+| `EntityType`       | `EntityTypeComponentCollection`       | Denotes that the entity is a special type (e.g. item, NPC, player).                                                    |
 | `Kinematics`       | `KinematicsComponentCollection`       | For non-block positioned entities, contains the position and velocity of the entity.                                   |
 | `Material`         | `MaterialComponentCollection`         | Indicates that the entity is a block of the given material ID.                                                         |
 | `MaterialModifier` | `MaterialModifierComponentCollection` | For material block entities (see `Material` component), denotes the material modifier of the block.                    |

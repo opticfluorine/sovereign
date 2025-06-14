@@ -14,8 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Runtime.CompilerServices;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
+using Sovereign.Persistence.Entities;
 
-[assembly: InternalsVisibleTo("Sovereign.TestEngineCore")]
-[assembly: InternalsVisibleTo("Sovereign.BenchmarkEngineCore")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+namespace Sovereign.Persistence.State.Trackers;
+
+/// <summary>
+///     Persistence state tracker for the EntityType component.
+/// </summary>
+public class EntityTypeStateTracker : BaseStateTracker<EntityType>
+{
+    public EntityTypeStateTracker(EntityTypeComponentCollection components, EntityMapper entityMapper,
+        StateManager stateManager)
+        : base(components, EntityType.Other, entityMapper, stateManager)
+    {
+    }
+
+    protected override void OnStateUpdate(ref StateUpdate<EntityType> update)
+    {
+    }
+}

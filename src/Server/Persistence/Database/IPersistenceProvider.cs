@@ -328,6 +328,21 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveCastShadowsComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for EntityType component.
+    /// </summary>
+    IAddComponentQuery<EntityType> AddEntityTypeComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for EntityType component.
+    /// </summary>
+    IModifyComponentQuery<EntityType> ModifyEntityTypeComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for EntityType component.
+    /// </summary>
+    IRemoveComponentQuery RemoveEntityTypeComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }

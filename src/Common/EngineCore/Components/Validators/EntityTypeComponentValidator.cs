@@ -14,8 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Runtime.CompilerServices;
+using Sovereign.EngineCore.Components.Types;
 
-[assembly: InternalsVisibleTo("Sovereign.TestEngineCore")]
-[assembly: InternalsVisibleTo("Sovereign.BenchmarkEngineCore")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+namespace Sovereign.EngineCore.Components.Validators;
+
+/// <summary>
+///     Validator for EntityType components.
+/// </summary>
+public class EntityTypeComponentValidator
+{
+    /// <summary>
+    ///     Determines if the entity type is valid.
+    /// </summary>
+    /// <param name="entityType">Entity type.</param>
+    /// <returns>true if valid, false otherwise.</returns>
+    public bool IsValid(EntityType entityType)
+    {
+        // Check if the entity type is valid
+        return entityType == EntityType.Npc ||
+               entityType == EntityType.Item ||
+               entityType == EntityType.Player;
+    }
+}

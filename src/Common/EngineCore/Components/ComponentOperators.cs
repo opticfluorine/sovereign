@@ -156,4 +156,13 @@ public static class ComponentOperators
         {
             { ComponentOperation.Set, (_, b) => b }
         };
+
+    /// <summary>
+    ///     Standard operators for EntityType-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<EntityType, EntityType, EntityType>>
+        EntityTypeOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
+        };
 }
