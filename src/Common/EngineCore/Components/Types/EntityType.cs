@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,22 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
+namespace Sovereign.EngineCore.Components.Types;
+
+/// <summary>
+///     Entity type for non-block entities.
+/// </summary>
+[Scriptable]
+[ScriptableEnum]
 public enum EntityType
 {
     /// <summary>
-    ///     Standard non-block entity.
+    ///     Entity is an NPC.
     /// </summary>
-    Standard,
-    
+    Npc = 0,
+
     /// <summary>
-    ///     Block entity.
+    ///     Entity is an item.
     /// </summary>
-    Block,
-    
+    Item = 1,
+
     /// <summary>
-    ///     Template entity.
+    ///     Entity is a player.
     /// </summary>
-    Template
+    Player = 2,
+
+    /// <summary>
+    ///     Entity has no special type. Not explicitly stored; only used in EntityDefinition.
+    /// </summary>
+    Other = 0x7F
 }

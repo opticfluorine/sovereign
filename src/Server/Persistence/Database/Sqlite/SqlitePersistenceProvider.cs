@@ -72,6 +72,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const SqliteType PhysicsParamType = SqliteType.Integer;
     private const string PhysicsParamName = "physics";
 
+    private const string EntityTypeName = "entity_type";
+    private const SqliteType EntityTypeType = SqliteType.Integer;
+
     private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
 
@@ -243,6 +246,13 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         AddCastShadowsComponentQuery = castShadowsQueries;
         ModifyCastShadowsComponentQuery = castShadowsQueries;
         RemoveCastShadowsComponentQuery = castShadowsQueries;
+
+        // EntityType component.
+        AddEntityTypeComponentQuery = new SimpleSqliteAddComponentQuery<EntityType>(
+            EntityTypeName, EntityTypeType, conn);
+        ModifyEntityTypeComponentQuery = new SimpleSqliteModifyComponentQuery<EntityType>(
+            EntityTypeName, EntityTypeType, conn);
+        RemoveEntityTypeComponentQuery = new SimpleSqliteRemoveComponentQuery(EntityTypeName, conn);
     }
 
     public ISetTemplateQuery SetTemplateQuery { get; }
@@ -304,6 +314,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<bool> AddCastBlockShadowsComponentQuery { get; }
     public IModifyComponentQuery<bool> ModifyCastBlockShadowsComponentQuery { get; }
     public IRemoveComponentQuery RemoveCastBlockShadowsComponentQuery { get; }
+    public IRemoveComponentQuery RemoveEntityTypeComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }
@@ -324,6 +335,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<Shadow> AddCastShadowsComponentQuery { get; }
     public IModifyComponentQuery<Shadow> ModifyCastShadowsComponentQuery { get; }
     public IRemoveComponentQuery RemoveCastShadowsComponentQuery { get; }
+    public IAddComponentQuery<EntityType> AddEntityTypeComponentQuery { get; }
+    public IModifyComponentQuery<EntityType> ModifyEntityTypeComponentQuery { get; }
     public IGetGlobalKeyValuePairsQuery GetGlobalKeyValuePairsQuery { get; }
     public IUpdateGlobalKeyValuePairQuery UpdateGlobalKeyValuePairQuery { get; }
     public IRemoveGlobalKeyValuePairQuery RemoveGlobalKeyValuePairQuery { get; }

@@ -24,6 +24,7 @@ associated component collection, and the corresponding value type.
 |`components.cast_block_shadows`|`CastBlockShadowsTagCollection`      |`boolean`     |
 |`components.cast_shadows`      |`CastShadowsComponentCollection`     |`Shadow`      |
 |`components.drawable`          |`DrawableTagCollection`              |`boolean`     |
+|`components.entity_type`       |`EntityTypeComponentCollection`      |`EntityType`  |
 |`components.kinematics`        |`KinematicsComponentCollection`      |`Kinematics`  |
 |`components.material`          |`MaterialComponentCollection`        |`integer`     |
 |`components.material_modifier` |`MaterialModifierComponentCollection`|`integer`     |

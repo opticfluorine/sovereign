@@ -33,25 +33,26 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
         @"WITH RECURSIVE EntityTree(id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, 
                 parent, drawable, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
                 plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ,
-                shadowRadius)
+                shadowRadius, entityType)
 	        AS (
 		        SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
                         drawable, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
                         plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ,
-                        shadowRadius
+                        shadowRadius, entityType
 			        FROM EntityWithComponents WHERE id = @Id
 		        UNION ALL
             		SELECT ec.id, ec.template_id, ec.x, ec.y, ec.z, ec.material, ec.materialModifier, ec.playerCharacter,
                         ec.name, ec.account, ec.parent, ec.drawable, ec.animatedSprite, ec.orientation, ec.admin,
                         ec.castBlockShadows, ec.plsRadius, ec.plsIntensity, ec.plsColor,
                         ec.plsPosX, ec.plsPosY, ec.plsPosZ, ec.physics, ec.bbPosX, ec.bbPosY, ec.bbPosZ,
-                        ec.bbSizeX, ec.bbSizeY, ec.bbSizeZ, ec.shadowRadius
+                        ec.bbSizeX, ec.bbSizeY, ec.bbSizeZ, ec.shadowRadius, ec.entityType
 			        FROM EntityWithComponents ec, EntityTree et
         			WHERE ec.parent = et.id
 	        )
             SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable,
                 animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
-                plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius
+                plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius,
+                entityType
             FROM EntityTree ORDER BY parent NULLS LAST";
 
     private readonly SqliteConnection dbConnection;

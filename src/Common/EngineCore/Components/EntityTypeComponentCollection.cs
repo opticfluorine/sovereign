@@ -14,8 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Runtime.CompilerServices;
+using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
-[assembly: InternalsVisibleTo("Sovereign.TestEngineCore")]
-[assembly: InternalsVisibleTo("Sovereign.BenchmarkEngineCore")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+namespace Sovereign.EngineCore.Components;
+
+/// <summary>
+///     Component that denotes whether an entity is of a special type.
+/// </summary>
+[ScriptableComponents("entity_type")]
+public class EntityTypeComponentCollection : BaseComponentCollection<EntityType>
+{
+    private const int InitialSize = 65536;
+
+    public EntityTypeComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, InitialSize, ComponentOperators.EntityTypeOperators,
+            ComponentType.EntityType)
+    {
+    }
+}

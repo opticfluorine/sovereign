@@ -39,6 +39,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
 
     protected readonly ulong entityId;
     protected readonly EntityTable entityTable;
+    private readonly EntityTypeComponentCollection entityTypes;
     protected readonly bool isTemplate;
     protected readonly KinematicsComponentCollection Kinematics;
     protected readonly bool load;
@@ -75,6 +76,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         PhysicsTagCollection physics,
         BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows,
+        EntityTypeComponentCollection entityTypes,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -97,6 +99,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.physics = physics;
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
+        this.entityTypes = entityTypes;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -127,6 +130,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder Template(ulong templateEntityId)
     {
         this.templateEntityId = templateEntityId;
+        return this;
+    }
+
+    public IEntityBuilder EntityType(EntityType entityType)
+    {
+        entityTypes.AddOrUpdateComponent(entityId, entityType, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutEntityType()
+    {
+        entityTypes.RemoveComponent(entityId, load);
         return this;
     }
 

@@ -109,6 +109,11 @@ public enum ComponentType
     /// </summary>
     CastShadows = 0x0011,
 
+    /// <summary>
+    ///     EntityType component.
+    /// </summary>
+    EntityType = 0x0012,
+
     #endregion Common
 
     #region Client

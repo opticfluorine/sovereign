@@ -42,6 +42,7 @@ if one is not provided.
 | CastBlockShadows | boolean                                      | Whether entity casts block shadows when rendered |
 | CastShadows      | [Shadow](#script-types-shadow)               | Shadow cast by a non-block entity                |
 | Drawable         | boolean                                      | Whether entity is visible when rendered          |
+| EntityType       | [EntityType](#script-constants-entitytype)   | Special type of entity (NPC/item/etc.), if any.  |
 | Kinematics       | [Kinematics](#script-types-kinematics)       | Position and velocity (non-block entities)       |
 | Name             | string                                       | Name                                             |
 | Orientation      | [Orientation](#script-constants-orientation) | Orientation                                      |

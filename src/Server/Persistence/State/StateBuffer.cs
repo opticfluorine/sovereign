@@ -73,6 +73,11 @@ public sealed class StateBuffer
     /// </summary>
     private readonly StructBuffer<StateUpdate<bool>> drawableUpdates = new(BufferSize);
 
+    /// <summary>
+    ///     EntityType state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<EntityType>> entityTypeUpdates = new(BufferSize);
+
     private readonly IEventSender eventSender;
     private readonly FatalErrorHandler fatalErrorHandler;
 
@@ -331,6 +336,15 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Enqueues an update to the EntityType component.
+    /// </summary>
+    /// <param name="update">Update.</param>
+    public void UpdateEntityType(ref StateUpdate<EntityType> update)
+    {
+        entityTypeUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -363,6 +377,7 @@ public sealed class StateBuffer
         physicsUpdates.Clear();
         boundingBoxUpdates.Clear();
         castShadowsUpdates.Clear();
+        entityTypeUpdates.Clear();
         globalKeyValuePairs.Clear();
     }
 
@@ -494,6 +509,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddCastShadowsComponentQuery,
                     persistenceProvider.ModifyCastShadowsComponentQuery,
                     persistenceProvider.RemoveCastShadowsComponentQuery,
+                    transaction);
+
+                // EntityType.
+                SynchronizeComponent(entityTypeUpdates,
+                    persistenceProvider.AddEntityTypeComponentQuery,
+                    persistenceProvider.ModifyEntityTypeComponentQuery,
+                    persistenceProvider.RemoveEntityTypeComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

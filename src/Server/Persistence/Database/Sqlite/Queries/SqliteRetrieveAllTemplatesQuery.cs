@@ -33,7 +33,7 @@ public class SqliteRetrieveAllTemplatesQuery : IRetrieveAllTemplatesQuery
         @"SELECT id, NULL, NULL, NULL, NULL, material, materialModifier, NULL, name, NULL, 
                 NULL, drawable, animatedSprite, orientation, NULL, castBlockShadows,
                 plsRadius, plsIntensity, plsColor, plsPosX, plsPosY, plsPosZ,
-                physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius
+                physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius, entityType
             FROM EntityWithComponents WHERE id >= @FirstTemplateId AND id <= @LastTemplateId";
 
     private readonly SqliteConnection connection;

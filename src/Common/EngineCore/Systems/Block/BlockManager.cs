@@ -97,7 +97,7 @@ public sealed class BlockManager
     {
         var hasAboveBlock = GetAboveBlock(blockRecord, out var aboveBlock);
 
-        var builder = entityFactory.GetBuilder(EntityType.Block, isLoad)
+        var builder = entityFactory.GetBuilder(EntityCategory.Block, isLoad)
             .BlockPositionable(blockRecord.Position)
             .Template(blockRecord.TemplateEntityId);
 

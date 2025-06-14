@@ -40,6 +40,7 @@ public class EntityDebugGui
     private readonly CastShadowsComponentCollection castShadows;
     private readonly DrawableTagCollection drawables;
     private readonly EntityTable entityTable;
+    private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
@@ -64,7 +65,8 @@ public class EntityDebugGui
         PointLightSourceComponentCollection pointLightSources,
         PhysicsTagCollection physics,
         BoundingBoxComponentCollection boundingBoxes,
-        CastShadowsComponentCollection castShadows)
+        CastShadowsComponentCollection castShadows,
+        EntityTypeComponentCollection entityTypes)
     {
         this.aboveBlocks = aboveBlocks;
         this.animatedSprites = animatedSprites;
@@ -84,6 +86,7 @@ public class EntityDebugGui
         this.physics = physics;
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
+        this.entityTypes = entityTypes;
     }
 
     /// <summary>
@@ -92,7 +95,7 @@ public class EntityDebugGui
     public void Render()
     {
         var fontSize = ImGui.GetFontSize();
-        ImGui.SetNextWindowSize(fontSize * new Vector2(26.0f, 28.0f), ImGuiCond.Once);
+        ImGui.SetNextWindowSize(fontSize * new Vector2(26.0f, 37.0f), ImGuiCond.Once);
         if (!ImGui.Begin("Entity Debug")) return;
 
         if (ImGui.BeginTabBar("entityDebugTabs", ImGuiTabBarFlags.None))
@@ -113,7 +116,7 @@ public class EntityDebugGui
                 valid = perspectiveServices.TryGetHighestCoveringEntity(mousePosWorld, out entityId);
 
                 ImGui.Text($"Hovered Position: {mousePosWorld}");
-                if (valid) ImGui.Text($"Hovered Entity ID: {entityId:x16}");
+                if (valid) ImGui.Text($"Hovered Entity ID: {entityId:X16}");
                 else ImGui.TextColored(new Vector4(0.7f), "No entity hovered");
                 ImGui.EndTabItem();
             }
@@ -125,8 +128,10 @@ public class EntityDebugGui
             {
                 if (ImGui.BeginTable("entityInfo", 2))
                 {
-                    AddValueRow("In EntityTable:", entityTable.Exists(entityId));
-                    AddComponentRow("AboveBlock:", entityId, aboveBlocks, x => $"{x:X}");
+                    AddValueRow("Template:",
+                        entityTable.TryGetTemplate(entityId, out var templateId) ? $"{templateId:X16}" : "None");
+                    AddComponentRow("EntityType:", entityId, entityTypes);
+                    AddComponentRow("AboveBlock:", entityId, aboveBlocks, x => $"{x:X16}");
                     AddComponentRow("AnimatedSprite:", entityId, animatedSprites);
                     AddComponentRow("Drawable:", entityId, drawables);
                     AddComponentRow("Material:", entityId, materials);

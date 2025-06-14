@@ -128,4 +128,6 @@ public class EntityDefinition
     /// </summary>
     [Key(16)]
     public Shadow? CastShadows { get; set; }
+
+    [Key(17)] public EntityType EntityType { get; set; }
 }

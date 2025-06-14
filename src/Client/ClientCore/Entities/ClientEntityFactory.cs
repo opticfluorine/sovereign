@@ -37,6 +37,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly DrawableTagCollection drawables;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
+    private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
@@ -70,6 +71,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         PhysicsTagCollection physics,
         BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows,
+        EntityTypeComponentCollection entityTypes,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -90,17 +92,18 @@ public sealed class ClientEntityFactory : IEntityFactory
         this.physics = physics;
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
+        this.entityTypes = entityTypes;
         this.entityTable = entityTable;
 
         assigner = entityManager.GetNewAssigner();
     }
 
-    public IEntityBuilder GetBuilder(EntityType entityType, bool load = false)
+    public IEntityBuilder GetBuilder(EntityCategory entityCategory, bool load = false)
     {
-        return entityType switch
+        return entityCategory switch
         {
-            EntityType.Block => GetBuilder(Interlocked.Increment(ref nextBlockId), load),
-            EntityType.Template => GetBuilder(entityTable.TakeNextTemplateEntityId(), load),
+            EntityCategory.Block => GetBuilder(Interlocked.Increment(ref nextBlockId), load),
+            EntityCategory.Template => GetBuilder(entityTable.TakeNextTemplateEntityId(), load),
             _ => GetBuilder(assigner.GetNextId(), load)
         };
     }
@@ -111,6 +114,6 @@ public sealed class ClientEntityFactory : IEntityFactory
             entityManager, kinematics, drawables, materials,
             materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources,
-            physics, boundingBoxes, castShadows, entityTable);
+            physics, boundingBoxes, castShadows, entityTypes, entityTable);
     }
 }

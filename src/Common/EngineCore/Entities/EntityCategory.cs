@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2025 opticfluorine
+// Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,8 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Runtime.CompilerServices;
+namespace Sovereign.EngineCore.Entities;
 
-[assembly: InternalsVisibleTo("Sovereign.TestEngineCore")]
-[assembly: InternalsVisibleTo("Sovereign.BenchmarkEngineCore")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+public enum EntityCategory
+{
+    /// <summary>
+    ///     Standard non-block entity.
+    /// </summary>
+    Standard,
+
+    /// <summary>
+    ///     Block entity.
+    /// </summary>
+    Block,
+
+    /// <summary>
+    ///     Template entity.
+    /// </summary>
+    Template
+}
