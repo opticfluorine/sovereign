@@ -135,6 +135,19 @@ CREATE TABLE GlobalKeyValue
 );
 
 
+----------------------------
+-- Entity Key-Value Store --
+----------------------------
+
+CREATE TABLE EntityKeyValue
+(
+    entity_id INTEGER PRIMARY KEY NOT NULL,
+    key       TEXT                NOT NULL,
+    value     TEXT                NOT NULL,
+    FOREIGN KEY (entity_id) REFERENCES Entity (id)
+);
+
+
 --------------------------------------
 -- Account With Authentication View --
 --------------------------------------
@@ -241,4 +254,4 @@ VALUES (1, 'Baseline');
 
 -- Enable WAL.
 PRAGMA
-journal_mode=WAL;
+journal_mode= WAL;

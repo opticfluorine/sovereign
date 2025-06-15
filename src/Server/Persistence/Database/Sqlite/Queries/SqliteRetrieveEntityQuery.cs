@@ -4,7 +4,7 @@
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, ET.either version 3 of the License, ET.or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, ET.see <https://www.gnu.org/licenses/>.
  */
 
 using System.Data;
@@ -49,11 +49,13 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
 			        FROM EntityWithComponents ec, EntityTree et
         			WHERE ec.parent = et.id
 	        )
-            SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, drawable,
-                animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
-                plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius,
-                entityType
-            FROM EntityTree ORDER BY parent NULLS LAST";
+            SELECT et.id, kv.key, kv.value, et.template_id, et.x, et.y, et.z, et.material, et.materialModifier, et.playerCharacter, et.name, 
+                et.account, et.parent, et.drawable, et.animatedSprite, et.orientation, et.admin, et.castBlockShadows, et.plsRadius, 
+                et.plsIntensity, et.plsColor, et.plsPosX, et.plsPosY, et.plsPosZ, et.physics, et.bbPosX, et.bbPosY, et.bbPosZ, 
+                et.bbSizeX, et.bbSizeY, et.bbSizeZ, et.shadowRadius, et.entityType
+            FROM EntityTree et
+            LEFT JOIN EntityKeyValue kv ON kv.entity_id = et.id
+            ORDER BY et.parent NULLS LAST";
 
     private readonly SqliteConnection dbConnection;
 

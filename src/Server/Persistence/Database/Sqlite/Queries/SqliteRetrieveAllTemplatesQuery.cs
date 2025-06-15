@@ -30,11 +30,13 @@ public class SqliteRetrieveAllTemplatesQuery : IRetrieveAllTemplatesQuery
     ///     with EntityProcessor.
     /// </summary>
     private const string query =
-        @"SELECT id, NULL, NULL, NULL, NULL, material, materialModifier, NULL, name, NULL, 
+        @"SELECT id, kv.key, kv.value, NULL, NULL, NULL, NULL, material, materialModifier, NULL, name, NULL, 
                 NULL, drawable, animatedSprite, orientation, NULL, castBlockShadows,
                 plsRadius, plsIntensity, plsColor, plsPosX, plsPosY, plsPosZ,
                 physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius, entityType
-            FROM EntityWithComponents WHERE id >= @FirstTemplateId AND id <= @LastTemplateId";
+            FROM EntityWithComponents 
+            LEFT JOIN EntityKeyValue kv ON kv.entity_id = id
+            WHERE id >= @FirstTemplateId AND id <= @LastTemplateId";
 
     private readonly SqliteConnection connection;
 

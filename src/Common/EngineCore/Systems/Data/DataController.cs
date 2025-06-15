@@ -42,12 +42,28 @@ public interface IDataController
     /// <param name="eventSender">Event sender.</param>
     /// <param name="key">Key.</param>
     void RemoveGlobal(IEventSender eventSender, string key);
+
+    /// <summary>
+    ///     Sets a key-value pair for an entity synchronously.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    /// <param name="value">Value.</param>
+    /// <typeparam name="T">Value type.</typeparam>
+    void SetEntityKeyValueSync<T>(ulong entityId, string key, T value) where T : notnull;
+
+    /// <summary>
+    ///     Removes a key-value pair from an entity synchronously.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    void RemoveEntityKeyValueSync(ulong entityId, string key);
 }
 
 /// <summary>
 ///     Implementation of the IDataController interface.
 /// </summary>
-internal class DataController : IDataController
+internal class DataController(EntityKeyValueStore entityKeyValueStore) : IDataController
 {
     public void SetGlobal<T>(IEventSender eventSender, string key, T value) where T : notnull
     {
@@ -68,5 +84,15 @@ internal class DataController : IDataController
         };
         var ev = new Event(EventId.Core_Data_RemoveGlobal, details);
         eventSender.SendEvent(ev);
+    }
+
+    public void SetEntityKeyValueSync<T>(ulong entityId, string key, T value) where T : notnull
+    {
+        entityKeyValueStore.SetValue(entityId, key, value);
+    }
+
+    public void RemoveEntityKeyValueSync(ulong entityId, string key)
+    {
+        entityKeyValueStore.RemoveKey(entityId, key);
     }
 }

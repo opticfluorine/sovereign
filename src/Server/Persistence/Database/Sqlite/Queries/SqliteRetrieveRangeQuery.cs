@@ -56,11 +56,12 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
 	        		WHERE ec.parent = et.id 
                       AND ec.playerCharacter IS NULL
 	        )
-            SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
+            SELECT id, kv.key, kv.value, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
                 drawable, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
                 plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius,
                 entityType
             FROM EntityTree 
+            LEFT JOIN EntityKeyValue kv ON kv.entity_id = id
             ORDER BY parent NULLS LAST";
 
     private readonly SqliteConnection dbConnection;

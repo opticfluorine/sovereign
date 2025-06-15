@@ -245,6 +245,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<IDataController, DataController>();
         services.TryAddSingleton<DataInternalController>();
         services.TryAddSingleton<GlobalKeyValueStore>();
+        services.TryAddSingleton<EntityKeyValueStore>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, DataSystem>());
     }
 

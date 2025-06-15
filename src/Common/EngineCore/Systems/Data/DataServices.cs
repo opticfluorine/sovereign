@@ -75,7 +75,7 @@ public interface IDataServices
     bool TryGetGlobalFloat(string key, out float value);
 
     /// <summary>
-    ///     Gets the value associated with the given global key as an bool.
+    ///     Gets the value associated with the given global key as a bool.
     /// </summary>
     /// <param name="key">Global key.</param>
     /// <param name="value">Associated value. Only valid if the method returns true.</param>
@@ -83,6 +83,15 @@ public interface IDataServices
     /// <exception cref="KeyNotFoundException">Thrown if the given key is not found.</exception>
     /// <exception cref="InvalidCastException">Thrown if the value cannot be converted to bool.</exception>
     bool TryGetGlobalBool(string key, out bool value);
+
+    /// <summary>
+    ///     Gets a key-value pair for the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    /// <param name="value">Value. Only meaningful if the method returns true.</param>
+    /// <returns>true if the key is found for the entity, false otherwise.</returns>
+    bool TryGetEntityKeyValue(ulong entityId, string key, [NotNullWhen(true)] out string? value);
 }
 
 /// <summary>
@@ -90,11 +99,13 @@ public interface IDataServices
 /// </summary>
 internal class DataServices : IDataServices
 {
+    private readonly EntityKeyValueStore entityStore;
     private readonly GlobalKeyValueStore globalStore;
 
-    public DataServices(GlobalKeyValueStore globalStore)
+    public DataServices(GlobalKeyValueStore globalStore, EntityKeyValueStore entityStore)
     {
         this.globalStore = globalStore;
+        this.entityStore = entityStore;
     }
 
     public bool HasGlobal(string key)
@@ -129,5 +140,10 @@ internal class DataServices : IDataServices
     {
         value = false;
         return TryGetGlobal(key, out var rawValue) && bool.TryParse(rawValue, out value);
+    }
+
+    public bool TryGetEntityKeyValue(ulong entityId, string key, [NotNullWhen(true)] out string? value)
+    {
+        return entityStore.TryGetValue(entityId, key, out value);
     }
 }

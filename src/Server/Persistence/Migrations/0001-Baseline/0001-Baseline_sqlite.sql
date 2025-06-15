@@ -108,6 +108,8 @@ CREATE TABLE Entity
 
 CREATE INDEX Entity_PC ON Entity (player_char);
 CREATE INDEX Entity_Pos ON Entity (pos_x, pos_y, pos_z);
+CREATE INDEX Entity_Parent ON Entity (parent_id);
+CREATE INDEX Entity_Account ON Entity (account_id);
 
 
 ------------------------------
@@ -132,6 +134,19 @@ CREATE TABLE GlobalKeyValue
 (
     key   TEXT PRIMARY KEY NOT NULL,
     value TEXT             NOT NULL
+);
+
+
+----------------------------
+-- Entity Key-Value Store --
+----------------------------
+
+CREATE TABLE EntityKeyValue
+(
+    entity_id INTEGER PRIMARY KEY NOT NULL,
+    key       TEXT                NOT NULL,
+    value     TEXT                NOT NULL,
+    FOREIGN KEY (entity_id) REFERENCES Entity (id) ON DELETE CASCADE
 );
 
 
@@ -241,4 +256,4 @@ VALUES (1, 'Baseline');
 
 -- Enable WAL.
 PRAGMA
-    journal_mode= WAL;
+journal_mode= WAL;
