@@ -16,11 +16,13 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Numerics;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Data;
 
 namespace Sovereign.Persistence.Entities;
 
@@ -30,7 +32,9 @@ namespace Sovereign.Persistence.Entities;
 public sealed class EntityProcessor
 {
     private const int IndexId = 0;
-    private const int IndexTemplateId = IndexId + 1;
+    private const int IndexKvKey = IndexId + 1;
+    private const int IndexKvValue = IndexKvKey + 1;
+    private const int IndexTemplateId = IndexKvValue + 1;
     private const int IndexPosX = IndexTemplateId + 1;
     private const int IndexPosY = IndexPosX + 1;
     private const int IndexPosZ = IndexPosY + 1;
@@ -60,16 +64,19 @@ public sealed class EntityProcessor
     private const int IndexBbSizeZ = IndexBbSizeY + 1;
     private const int IndexShadowRadius = IndexBbSizeZ + 1;
     private const int IndexEntityType = IndexShadowRadius + 1;
+    private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
     private readonly ILogger<EntityProcessor> logger;
     private readonly EntityMapper mapper;
+    private readonly HashSet<ulong> processedEntities = new();
 
     public EntityProcessor(IEntityFactory entityFactory, EntityMapper mapper,
-        ILogger<EntityProcessor> logger)
+        ILogger<EntityProcessor> logger, IDataController dataController)
     {
         this.entityFactory = entityFactory;
         this.mapper = mapper;
         this.logger = logger;
+        this.dataController = dataController;
     }
 
     /// <summary>
@@ -80,6 +87,7 @@ public sealed class EntityProcessor
     public int ProcessFromReader(IDataReader reader)
     {
         var count = 0;
+        processedEntities.Clear();
         while (reader.Read())
         {
             ProcessSingleEntity(reader);
@@ -98,31 +106,51 @@ public sealed class EntityProcessor
         /* Get the entity ID. */
         var entityId = (ulong)reader.GetInt64(IndexId);
 
-        /* Start loading the entity. */
-        mapper.MarkEntityAsLoaded(entityId);
-        var builder = entityFactory.GetBuilder(entityId, true);
+        // We will see duplicates for each entity key-value pair in the join, so only create the
+        // entity for the first row.
+        if (processedEntities.Add(entityId))
+        {
+            /* Start loading the entity. */
+            mapper.MarkEntityAsLoaded(entityId);
+            var builder = entityFactory.GetBuilder(entityId, true);
 
-        /* Process components. */
-        ProcessTemplate(reader, builder);
-        ProcessPosition(reader, builder);
-        ProcessMaterial(reader, builder);
-        ProcessPlayerCharacter(reader, builder);
-        ProcessName(reader, builder);
-        ProcessAccount(reader, builder, entityId);
-        ProcessParent(reader, builder);
-        ProcessDrawable(reader, builder);
-        ProcessAnimatedSprite(reader, builder);
-        ProcessOrientation(reader, builder);
-        ProcessAdmin(reader, builder);
-        ProcessCastBlockShadows(reader, builder);
-        ProcessPointLightSource(reader, builder);
-        ProcessPhysics(reader, builder);
-        ProcessBoundingBox(reader, builder);
-        ProcessCastShadows(reader, builder);
-        ProcessEntityType(reader, builder);
+            /* Process components. */
+            ProcessTemplate(reader, builder);
+            ProcessPosition(reader, builder);
+            ProcessMaterial(reader, builder);
+            ProcessPlayerCharacter(reader, builder);
+            ProcessName(reader, builder);
+            ProcessAccount(reader, builder, entityId);
+            ProcessParent(reader, builder);
+            ProcessDrawable(reader, builder);
+            ProcessAnimatedSprite(reader, builder);
+            ProcessOrientation(reader, builder);
+            ProcessAdmin(reader, builder);
+            ProcessCastBlockShadows(reader, builder);
+            ProcessPointLightSource(reader, builder);
+            ProcessPhysics(reader, builder);
+            ProcessBoundingBox(reader, builder);
+            ProcessCastShadows(reader, builder);
+            ProcessEntityType(reader, builder);
 
-        /* Complete the entity. */
-        builder.Build();
+            /* Complete the entity. */
+            builder.Build();
+        }
+
+        // Multiple key-value pairs are allowed per entity, so we process them separately.
+        ProcessKeyValue(reader, entityId);
+    }
+
+    /// <summary>
+    ///     Processes a key-value pair for the entity.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="entityId">Entity ID.</param>
+    private void ProcessKeyValue(IDataReader reader, ulong entityId)
+    {
+        if (reader.IsDBNull(IndexKvKey) || reader.IsDBNull(IndexKvValue)) return;
+
+        dataController.SetEntityKeyValueSync(entityId, reader.GetString(IndexKvKey), reader.GetString(IndexKvValue));
     }
 
     /// <summary>

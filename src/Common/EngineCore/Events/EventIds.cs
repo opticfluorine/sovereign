@@ -462,7 +462,7 @@ public enum EventId
     /// </summary>
     /// Associated details: GenericEventDetails(int)
     Client_WorldEdit_SetZOffset = 10500,
-    
+
     /// <summary>
     ///     Event sent to update the pen width for world editing.
     /// </summary>

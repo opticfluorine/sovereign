@@ -27,14 +27,16 @@ namespace Sovereign.EngineCore.Systems.Data;
 /// </summary>
 internal class DataSystem : ISystem
 {
+    private readonly EntityKeyValueStore entityStore;
     private readonly GlobalKeyValueStore globalStore;
     private readonly ILogger<DataSystem> logger;
 
     public DataSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop,
-        ILogger<DataSystem> logger, GlobalKeyValueStore globalStore)
+        ILogger<DataSystem> logger, GlobalKeyValueStore globalStore, EntityKeyValueStore entityStore)
     {
         this.logger = logger;
         this.globalStore = globalStore;
+        this.entityStore = entityStore;
         EventCommunicator = eventCommunicator;
         eventLoop.RegisterSystem(this);
     }
@@ -44,7 +46,8 @@ internal class DataSystem : ISystem
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
         EventId.Core_Data_SetGlobal,
-        EventId.Core_Data_RemoveGlobal
+        EventId.Core_Data_RemoveGlobal,
+        EventId.Server_Persistence_SynchronizeComplete
     };
 
     public int WorkloadEstimate => 40;
@@ -90,6 +93,10 @@ internal class DataSystem : ISystem
                     globalStore.RemoveGlobal(details.Value);
                     break;
                 }
+
+                case EventId.Server_Persistence_SynchronizeComplete:
+                    entityStore.OnSynchronizationComplete();
+                    break;
 
                 default:
                     logger.LogError("Unhandled event in DataSystem: {EventId}", ev.EventId);
