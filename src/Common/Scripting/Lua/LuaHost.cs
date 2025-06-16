@@ -47,7 +47,7 @@ public class LuaHost : IDisposable
         luaL_openlibs(LuaState);
         InstallUtilLibrary();
 
-        luaL_checkstack(LuaState, 3, null);
+        luaL_checkstack(LuaState, 4, null);
 
         // Install traceback error handler.
         lua_getglobal(LuaState, "debug");
@@ -62,6 +62,10 @@ public class LuaHost : IDisposable
         lua_pushnil(LuaState);
         lua_copy(LuaState, quickLookupStackPosition, -1);
         lua_setfield(LuaState, LUA_REGISTRYINDEX, QuickLookupKey);
+
+        // Remove unwanted default modules.
+        lua_pushnil(LuaState);
+        lua_setglobal(LuaState, "debug");
     }
 
     public ILogger Logger { get; }
@@ -86,6 +90,9 @@ public class LuaHost : IDisposable
         lock (opsLock)
         {
             lua_close(LuaState);
+            foreach (var binding in bindings)
+                if (binding.IsAllocated)
+                    binding.Free();
             IsDisposed = true;
         }
     }
