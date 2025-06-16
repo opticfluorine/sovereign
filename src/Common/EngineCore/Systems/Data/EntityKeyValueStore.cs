@@ -18,14 +18,17 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Events;
 
 namespace Sovereign.EngineCore.Systems.Data;
 
 /// <summary>
 ///     Per-entity key-value store.
 /// </summary>
-public class EntityKeyValueStore
+internal class EntityKeyValueStore
 {
+    private readonly IEventSender eventSender;
+    private readonly DataInternalController internalController;
     private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, string>> keyValueStores = new();
 
     /// <summary>
@@ -33,8 +36,11 @@ public class EntityKeyValueStore
     /// </summary>
     private readonly List<ulong> removedEntities = new();
 
-    public EntityKeyValueStore(EntityTable entityTable)
+    public EntityKeyValueStore(EntityTable entityTable, IEventSender eventSender,
+        DataInternalController internalController)
     {
+        this.eventSender = eventSender;
+        this.internalController = internalController;
         entityTable.OnNonBlockEntityRemoved += OnNonBlockEntityRemoved;
     }
 
@@ -77,7 +83,13 @@ public class EntityKeyValueStore
             keyValueStores[entityId] = store;
         }
 
-        store[key] = value.ToString() ?? string.Empty;
+        var stringValue = value.ToString() ?? string.Empty;
+        store[key] = stringValue;
+
+        lock (eventSender)
+        {
+            internalController.EntityKeyValueSet(eventSender, entityId, key, stringValue);
+        }
     }
 
     /// <summary>
@@ -88,7 +100,12 @@ public class EntityKeyValueStore
     public void RemoveKey(ulong entityId, string key)
     {
         if (!keyValueStores.TryGetValue(entityId, out var store)) return;
-        store.TryRemove(key, out _);
+        if (!store.TryRemove(key, out _)) return;
+
+        lock (eventSender)
+        {
+            internalController.EntityKeyValueRemoved(eventSender, entityId, key);
+        }
     }
 
     /// <summary>

@@ -74,6 +74,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<bool>> drawableUpdates = new(BufferSize);
 
     /// <summary>
+    ///     Entity key-value pairs to be synchronized.
+    /// </summary>
+    private readonly HashSet<(ulong, string)> entityKeyValuePairs = new();
+
+    /// <summary>
     ///     EntityType state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<EntityType>> entityTypeUpdates = new(BufferSize);
@@ -354,6 +359,16 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Flags an entity key-value pair for synchronization.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    public void EntityKeyValuePairChanged(ulong entityId, string key)
+    {
+        entityKeyValuePairs.Add((entityId, key));
+    }
+
+    /// <summary>
     ///     Resets the buffer.
     /// </summary>
     public void Reset()
@@ -379,6 +394,7 @@ public sealed class StateBuffer
         castShadowsUpdates.Clear();
         entityTypeUpdates.Clear();
         globalKeyValuePairs.Clear();
+        entityKeyValuePairs.Clear();
     }
 
     /// <summary>
@@ -523,6 +539,7 @@ public sealed class StateBuffer
                 worldSegmentPersister.SynchronizeWorldSegments(persistenceProvider, transaction);
 
                 SynchronizeGlobalKeyValuePairs(persistenceProvider, transaction);
+                SynchronizeEntityKeyValuePairs(persistenceProvider, transaction);
 
                 transaction.Commit();
             }
@@ -615,11 +632,26 @@ public sealed class StateBuffer
         var removeQuery = provider.RemoveGlobalKeyValuePairQuery;
 
         foreach (var key in globalKeyValuePairs)
-        {
             if (dataServices.TryGetGlobal(key, out var value))
                 updateQuery.UpdateGlobalKeyValuePair(key, value, transaction);
             else
                 removeQuery.RemoveGlobalKeyValuePair(key, transaction);
-        }
+    }
+
+    /// <summary>
+    ///     Synchronizes entity key-value pairs that have changed since the last synchronization.
+    /// </summary>
+    /// <param name="provider">Persistence provider.</param>
+    /// <param name="transaction">Transaction.</param>
+    private void SynchronizeEntityKeyValuePairs(IPersistenceProvider provider, IDbTransaction transaction)
+    {
+        var updateQuery = provider.UpdateEntityKeyValueQuery;
+        var removeQuery = provider.RemoveEntityKeyValueQuery;
+
+        foreach (var (entityId, key) in entityKeyValuePairs)
+            if (dataServices.TryGetEntityKeyValue(entityId, key, out var value))
+                updateQuery.UpdateEntityKeyValue(entityId, key, value, transaction);
+            else
+                removeQuery.RemoveEntityKeyValue(entityId, key, transaction);
     }
 }

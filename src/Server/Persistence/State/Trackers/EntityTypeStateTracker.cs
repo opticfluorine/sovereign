@@ -33,5 +33,6 @@ public class EntityTypeStateTracker : BaseStateTracker<EntityType>
 
     protected override void OnStateUpdate(ref StateUpdate<EntityType> update)
     {
+        stateManager.FrontBuffer.UpdateEntityType(ref update);
     }
 }
