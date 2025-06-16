@@ -46,14 +46,21 @@ public class ScriptingServices
     }
 
     /// <summary>
-    ///     Utility method that selects the appropriate logger for the given Lua state.
+    ///     Utility method that selects the appropriate logger for the given Lua state. Guaranteed no-throw.
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <param name="fallback">Fallback logger to use if the script logger cannot be found.</param>
     /// <returns>Logger.</returns>
     public ILogger GetScriptLogger(IntPtr luaState, ILogger fallback)
     {
-        return TryGetHostForState(luaState, out var host) ? host.Logger : fallback;
+        try
+        {
+            return TryGetHostForState(luaState, out var host) ? host.Logger : fallback;
+        }
+        catch
+        {
+            return fallback;
+        }
     }
 
     /// <summary>
