@@ -60,4 +60,40 @@ internal class DataInternalController
         var ev = new Event(EventId.Core_Data_GlobalRemoved, details);
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Announces an entity key-value pair update.
+    /// </summary>
+    /// <param name="localEventSender">Thread-local event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    /// <param name="value">Value.</param>
+    public void EntityKeyValueSet(IEventSender localEventSender, ulong entityId, string key, string value)
+    {
+        var details = new EntityKeyValueEventDetails
+        {
+            EntityId = entityId,
+            Key = key,
+            Value = value
+        };
+        var ev = new Event(EventId.Core_Data_EntityKeyValueSet, details);
+        localEventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Announces an entity key-value pair removal.
+    /// </summary>
+    /// <param name="localEventSender">Thread-local event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    public void EntityKeyValueRemoved(IEventSender localEventSender, ulong entityId, string key)
+    {
+        var details = new EntityStringEventDetails
+        {
+            EntityId = entityId,
+            Value = key
+        };
+        var ev = new Event(EventId.Core_Data_EntityKeyValueRemoved, details);
+        localEventSender.SendEvent(ev);
+    }
 }

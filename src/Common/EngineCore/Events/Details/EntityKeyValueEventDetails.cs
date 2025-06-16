@@ -14,26 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components.Types;
-
-namespace Sovereign.EngineCore.Components.Validators;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Validator for EntityType components.
+///     Event details carrying an entity key-value pair.
 /// </summary>
-public class EntityTypeComponentValidator
+public class EntityKeyValueEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Determines if the entity type is valid.
+    ///     Entity ID.
     /// </summary>
-    /// <param name="entityType">Entity type.</param>
-    /// <returns>true if valid, false otherwise.</returns>
-    public bool IsValid(EntityType entityType)
-    {
-        // Check if the entity type is valid
-        return entityType == EntityType.Npc ||
-               entityType == EntityType.Item ||
-               entityType == EntityType.Player ||
-               entityType == EntityType.Other;
-    }
+    public ulong EntityId { get; set; }
+
+    /// <summary>
+    ///     Key.
+    /// </summary>
+    public string Key { get; set; } = string.Empty;
+
+    /// <summary>
+    ///     Value.
+    /// </summary>
+    public string Value { get; set; } = string.Empty;
 }

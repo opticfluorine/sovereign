@@ -143,11 +143,14 @@ CREATE TABLE GlobalKeyValue
 
 CREATE TABLE EntityKeyValue
 (
-    entity_id INTEGER PRIMARY KEY NOT NULL,
-    key       TEXT                NOT NULL,
-    value     TEXT                NOT NULL,
+    entity_id INTEGER NOT NULL,
+    key       TEXT    NOT NULL,
+    value     TEXT    NOT NULL,
+    PRIMARY KEY (entity_id, key),
     FOREIGN KEY (entity_id) REFERENCES Entity (id) ON DELETE CASCADE
 );
+
+CREATE INDEX EntityKeyValue_Id ON EntityKeyValue (entity_id);
 
 
 --------------------------------------

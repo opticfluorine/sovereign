@@ -28,7 +28,7 @@ namespace Sovereign.Persistence.Database;
 public interface IPersistenceProvider : IDisposable
 {
     /// <summary>
-    // Database connection.
+    ///     Database connection.
     /// </summary>
     IDbConnection Connection { get; }
 
@@ -396,4 +396,14 @@ public interface IPersistenceProvider : IDisposable
     ///     IRemoveGlobalKeyValuePairQuery for this persistence provider.
     /// </summary>
     IRemoveGlobalKeyValuePairQuery RemoveGlobalKeyValuePairQuery { get; }
+
+    /// <summary>
+    ///     IUpdateEntityKeyValueQuery for this persistence provider.
+    /// </summary>
+    IUpdateEntityKeyValueQuery UpdateEntityKeyValueQuery { get; }
+
+    /// <summary>
+    ///     IRemoveEntityKeyValueQuery for this persistence provider.
+    /// </summary>
+    IRemoveEntityKeyValueQuery RemoveEntityKeyValueQuery { get; }
 }

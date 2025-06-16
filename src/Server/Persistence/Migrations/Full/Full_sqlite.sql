@@ -108,6 +108,8 @@ CREATE TABLE Entity
 
 CREATE INDEX Entity_PC ON Entity (player_char);
 CREATE INDEX Entity_Pos ON Entity (pos_x, pos_y, pos_z);
+CREATE INDEX Entity_Parent ON Entity (parent_id);
+CREATE INDEX Entity_Account ON Entity (account_id);
 
 
 ------------------------------
@@ -141,11 +143,14 @@ CREATE TABLE GlobalKeyValue
 
 CREATE TABLE EntityKeyValue
 (
-    entity_id INTEGER PRIMARY KEY NOT NULL,
-    key       TEXT                NOT NULL,
-    value     TEXT                NOT NULL,
-    FOREIGN KEY (entity_id) REFERENCES Entity (id)
+    entity_id INTEGER NOT NULL,
+    key       TEXT    NOT NULL,
+    value     TEXT    NOT NULL,
+    PRIMARY KEY (entity_id, key),
+    FOREIGN KEY (entity_id) REFERENCES Entity (id) ON DELETE CASCADE
 );
+
+CREATE INDEX EntityKeyValue_Id ON EntityKeyValue (entity_id);
 
 
 --------------------------------------

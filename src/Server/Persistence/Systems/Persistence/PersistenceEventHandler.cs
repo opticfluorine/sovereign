@@ -128,6 +128,30 @@ public sealed class PersistenceEventHandler
                 OnGlobalKeyValuePairChanged(details.Value);
                 break;
             }
+
+            case EventId.Core_Data_EntityKeyValueSet:
+            {
+                if (ev.EventDetails is not EntityKeyValueEventDetails details)
+                {
+                    logger.LogError("Received EntityKeyValueSet event with bad details.");
+                    break;
+                }
+
+                OnEntityKeyValuePairChanged(details.EntityId, details.Key);
+                break;
+            }
+
+            case EventId.Core_Data_EntityKeyValueRemoved:
+            {
+                if (ev.EventDetails is not EntityStringEventDetails details)
+                {
+                    logger.LogError("Received EntityKeyValueRemoved event with bad details.");
+                    break;
+                }
+
+                OnEntityKeyValuePairChanged(details.EntityId, details.Value);
+                break;
+            }
         }
     }
 
@@ -154,6 +178,16 @@ public sealed class PersistenceEventHandler
     private void OnGlobalKeyValuePairChanged(string key)
     {
         stateManager.FrontBuffer.GlobalKeyValuePairChanged(key);
+    }
+
+    /// <summary>
+    ///     Handles a change (create, update, delete) to an entity key-value pair.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    private void OnEntityKeyValuePairChanged(ulong entityId, string key)
+    {
+        stateManager.FrontBuffer.EntityKeyValuePairChanged(entityId, key);
     }
 
     /// <summary>

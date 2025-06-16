@@ -24,14 +24,16 @@ namespace Sovereign.EngineCore.Events.Details.Validators;
 /// </summary>
 public class EntityDefinitionValidator
 {
+    private readonly EntityTypeComponentValidator entityTypeComponentValidator;
     private readonly NameComponentValidator nameComponentValidator;
     private readonly ShadowComponentValidator shadowComponentValidator;
 
     public EntityDefinitionValidator(NameComponentValidator nameComponentValidator,
-        ShadowComponentValidator shadowComponentValidator)
+        ShadowComponentValidator shadowComponentValidator, EntityTypeComponentValidator entityTypeComponentValidator)
     {
         this.nameComponentValidator = nameComponentValidator;
         this.shadowComponentValidator = shadowComponentValidator;
+        this.entityTypeComponentValidator = entityTypeComponentValidator;
     }
 
     /// <summary>
@@ -62,6 +64,8 @@ public class EntityDefinitionValidator
 
         if (definition.CastShadows != null)
             valid = valid && shadowComponentValidator.IsValid(definition.CastShadows);
+
+        valid = valid && entityTypeComponentValidator.IsValid(definition.EntityType);
 
         return valid;
     }

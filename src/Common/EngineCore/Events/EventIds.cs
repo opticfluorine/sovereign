@@ -280,6 +280,18 @@ public enum EventId
     /// Associated details: StringEventDetails (specifying the key)
     Core_Data_GlobalRemoved = 904,
 
+    /// <summary>
+    ///     Announces that an entity key-value pair has been updated.
+    /// </summary>
+    /// Associated details: EntityKeyValueEventDetails
+    Core_Data_EntityKeyValueSet = 905,
+
+    /// <summary>
+    ///     Announces that an entity key-value pair has been removed.
+    /// </summary>
+    /// Associated details: EntityStringEventDetails
+    Core_Data_EntityKeyValueRemoved = 906,
+
     #endregion Data
 
     #region EntitySynchronization

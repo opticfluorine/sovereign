@@ -14,26 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components.Types;
+using System.Data;
 
-namespace Sovereign.EngineCore.Components.Validators;
+namespace Sovereign.Persistence.Database.Queries;
 
 /// <summary>
-///     Validator for EntityType components.
+///     Query for creating and updating key-value pairs for entities.
 /// </summary>
-public class EntityTypeComponentValidator
+public interface IUpdateEntityKeyValueQuery
 {
     /// <summary>
-    ///     Determines if the entity type is valid.
+    ///     Creates or updates a key-value pair for the given entity.
     /// </summary>
-    /// <param name="entityType">Entity type.</param>
-    /// <returns>true if valid, false otherwise.</returns>
-    public bool IsValid(EntityType entityType)
-    {
-        // Check if the entity type is valid
-        return entityType == EntityType.Npc ||
-               entityType == EntityType.Item ||
-               entityType == EntityType.Player ||
-               entityType == EntityType.Other;
-    }
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    /// <param name="value">Value.</param>
+    /// <param name="transaction">Current transaction.</param>
+    void UpdateEntityKeyValue(ulong entityId, string key, string value, IDbTransaction transaction);
 }

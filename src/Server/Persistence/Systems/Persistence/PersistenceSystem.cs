@@ -85,7 +85,9 @@ public sealed class PersistenceSystem : ISystem
         EventId.Server_Persistence_Synchronize,
         EventId.Server_Accounts_SelectPlayer,
         EventId.Core_Data_GlobalSet,
-        EventId.Core_Data_GlobalRemoved
+        EventId.Core_Data_GlobalRemoved,
+        EventId.Core_Data_EntityKeyValueSet,
+        EventId.Core_Data_EntityKeyValueRemoved
     };
 
     public int WorkloadEstimate => 20;
@@ -115,7 +117,7 @@ public sealed class PersistenceSystem : ISystem
     public void Cleanup()
     {
         logger.LogInformation("Stopping Persistence system.");
-        
+
         eventHandler.Cleanup();
 
         var provider = providerManager.PersistenceProvider;
