@@ -31,24 +31,28 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 public class ScriptingSystem : ISystem
 {
     private readonly ScriptingCallbackManager callbackManager;
+    private readonly EntityScriptCallbacks entityScriptCallbacks;
     private readonly ILogger<ScriptingSystem> logger;
     private readonly ScriptManager manager;
     private readonly ScriptLoader scriptLoader;
 
     public ScriptingSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, ScriptManager manager,
-        ScriptingCallbackManager callbackManager, ScriptLoader scriptLoader, ILogger<ScriptingSystem> logger)
+        ScriptingCallbackManager callbackManager, ScriptLoader scriptLoader, ILogger<ScriptingSystem> logger,
+        EntityScriptCallbacks entityScriptCallbacks)
     {
         this.manager = manager;
         this.callbackManager = callbackManager;
         this.scriptLoader = scriptLoader;
         this.logger = logger;
+        this.entityScriptCallbacks = entityScriptCallbacks;
         EventCommunicator = eventCommunicator;
 
         EventIdsOfInterest = new HashSet<EventId>(ScriptableEventSet.Events);
         EventIdsOfInterest.UnionWith([
             EventId.Server_Scripting_ReloadAll,
             EventId.Server_Scripting_Reload,
-            EventId.Server_Scripting_LoadNew
+            EventId.Server_Scripting_LoadNew,
+            EventId.Core_Tick
         ]);
 
         eventLoop.RegisterSystem(this);
@@ -77,6 +81,10 @@ public class ScriptingSystem : ISystem
 
             switch (ev.EventId)
             {
+                case EventId.Core_Tick:
+                    entityScriptCallbacks.ProcessCallbacks();
+                    break;
+
                 case EventId.Server_Scripting_ReloadAll:
                     OnReloadAll();
                     break;

@@ -27,6 +27,7 @@ namespace Sovereign.EngineCore.Systems.Data;
 /// </summary>
 internal class EntityKeyValueStore
 {
+    private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
     private readonly DataInternalController internalController;
     private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, string>> keyValueStores = new();
@@ -39,6 +40,7 @@ internal class EntityKeyValueStore
     public EntityKeyValueStore(EntityTable entityTable, IEventSender eventSender,
         DataInternalController internalController)
     {
+        this.entityTable = entityTable;
         this.eventSender = eventSender;
         this.internalController = internalController;
         entityTable.OnNonBlockEntityRemoved += OnNonBlockEntityRemoved;
@@ -55,7 +57,8 @@ internal class EntityKeyValueStore
     }
 
     /// <summary>
-    ///     Gets the value (if any) for the given entity ID and key.
+    ///     Gets the value (if any) for the given entity ID and key. Also checks the template entity (if any)
+    ///     if the key is not found.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="key">Key.</param>
@@ -64,7 +67,15 @@ internal class EntityKeyValueStore
     public bool TryGetValue(ulong entityId, string key, [NotNullWhen(true)] out string? value)
     {
         value = null;
-        if (!keyValueStores.TryGetValue(entityId, out var store)) return false;
+
+        // First try to get the key-value pair for the entity directly.
+        if (keyValueStores.TryGetValue(entityId, out var store))
+            if (store.TryGetValue(key, out value))
+                return true;
+
+        // If we didn't find it, check the entity's template as well.
+        if (!entityTable.TryGetTemplate(entityId, out var templateId)) return false;
+        if (!keyValueStores.TryGetValue(templateId, out store)) return false;
         return store.TryGetValue(key, out value);
     }
 
