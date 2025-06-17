@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Data;
-using Sovereign.Scripting.Lua;
 
 namespace Sovereign.ServerCore.Systems.Scripting;
 
@@ -35,13 +35,16 @@ public sealed class EntityScriptCallbacks
     private const string RemoveCallbackScriptKey = $"__{RemoveCallbackName}_Script";
     private const string RemoveCallbackFunctionKey = $"__{RemoveCallbackName}_Function";
 
-    private const string LoadCallbackName = "OnEntityLoad";
+    private const string LoadCallbackName = "OnEntityLoaded";
     private const string LoadCallbackScriptKey = $"__{LoadCallbackName}_Script";
     private const string LoadCallbackFunctionKey = $"__{LoadCallbackName}_Function";
 
-    private const string UnloadCallbackName = "OnEntityUnload";
+    private const string UnloadCallbackName = "OnEntityUnloaded";
     private const string UnloadCallbackScriptKey = $"__{UnloadCallbackName}_Script";
     private const string UnloadCallbackFunctionKey = $"__{UnloadCallbackName}_Function";
+
+    private const ulong ExcludeRangeStart = EntityConstants.FirstBlockEntityId;
+    private const ulong ExcludeRangeEnd = EntityConstants.FirstPersistedEntityId;
 
     private readonly IDataServices dataServices;
 
@@ -105,7 +108,7 @@ public sealed class EntityScriptCallbacks
                     return 1;
                 });
             }
-            catch (LuaException e)
+            catch (Exception e)
             {
                 host.Logger.LogError(e, "Error calling {CallbackName} callback {FunctionName} for entity {EntityId:X}.",
                     callbackName, functionName, entityId);
@@ -120,7 +123,10 @@ public sealed class EntityScriptCallbacks
     /// <param name="isLoad">Whether this is a load.</param>
     private void OnEntityAdded(ulong entityId, bool isLoad)
     {
-        (isLoad ? entityLoadQueue : entityAddQueue).Enqueue(entityId);
+        // Adds also get processed as loads.
+        if (entityId is >= ExcludeRangeStart and < ExcludeRangeEnd) return;
+        entityLoadQueue.Enqueue(entityId);
+        if (!isLoad) entityAddQueue.Enqueue(entityId);
     }
 
     /// <summary>
@@ -130,6 +136,9 @@ public sealed class EntityScriptCallbacks
     /// <param name="isUnload">Whether this is an unload.</param>
     private void OnEntityRemoved(ulong entityId, bool isUnload)
     {
-        (isUnload ? entityUnloadQueue : entityRemoveQueue).Enqueue(entityId);
+        // Removes also get processed as unloads.
+        if (entityId is >= ExcludeRangeStart and < ExcludeRangeEnd) return;
+        entityUnloadQueue.Enqueue(entityId);
+        if (!isUnload) entityRemoveQueue.Enqueue(entityId);
     }
 }
