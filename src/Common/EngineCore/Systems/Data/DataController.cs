@@ -15,9 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
-using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.EngineCore.Systems.Data;
 
@@ -27,21 +24,19 @@ namespace Sovereign.EngineCore.Systems.Data;
 public interface IDataController
 {
     /// <summary>
-    ///     Sets a global key-value pair.
+    ///     Synchronously sets a global key-value pair.
     /// </summary>
-    /// <param name="eventSender">Event sender.</param>
     /// <param name="key">Key.</param>
     /// <param name="value">Value.</param>
     /// <typeparam name="T">Value type.</typeparam>
     /// <exception cref="InvalidCastException">Thrown if the value cannot be converted to string.</exception>
-    void SetGlobal<T>(IEventSender eventSender, string key, T value) where T : notnull;
+    void SetGlobalSync<T>(string key, T value) where T : notnull;
 
     /// <summary>
-    ///     Removes a global key-value pair.
+    ///     Synchronously removes a global key-value pair.
     /// </summary>
-    /// <param name="eventSender">Event sender.</param>
     /// <param name="key">Key.</param>
-    void RemoveGlobal(IEventSender eventSender, string key);
+    void RemoveGlobalSync(string key);
 
     /// <summary>
     ///     Sets a key-value pair for an entity synchronously.
@@ -63,29 +58,9 @@ public interface IDataController
 /// <summary>
 ///     Implementation of the IDataController interface.
 /// </summary>
-internal class DataController(EntityKeyValueStore entityKeyValueStore) : IDataController
+internal class DataController(GlobalKeyValueStore globalStore, EntityKeyValueStore entityKeyValueStore)
+    : IDataController
 {
-    public void SetGlobal<T>(IEventSender eventSender, string key, T value) where T : notnull
-    {
-        var details = new KeyValueEventDetails
-        {
-            Key = key,
-            Value = value.ToString() ?? throw new InvalidCastException()
-        };
-        var ev = new Event(EventId.Core_Data_SetGlobal, details);
-        eventSender.SendEvent(ev);
-    }
-
-    public void RemoveGlobal(IEventSender eventSender, string key)
-    {
-        var details = new StringEventDetails
-        {
-            Value = key
-        };
-        var ev = new Event(EventId.Core_Data_RemoveGlobal, details);
-        eventSender.SendEvent(ev);
-    }
-
     public void SetEntityKeyValueSync<T>(ulong entityId, string key, T value) where T : notnull
     {
         entityKeyValueStore.SetValue(entityId, key, value);
@@ -94,5 +69,16 @@ internal class DataController(EntityKeyValueStore entityKeyValueStore) : IDataCo
     public void RemoveEntityKeyValueSync(ulong entityId, string key)
     {
         entityKeyValueStore.RemoveKey(entityId, key);
+    }
+
+    public void SetGlobalSync<T>(string key, T value) where T : notnull
+    {
+        var stringValue = value.ToString() ?? throw new InvalidCastException();
+        globalStore.SetGlobal(key, stringValue);
+    }
+
+    public void RemoveGlobalSync(string key)
+    {
+        globalStore.RemoveGlobal(key);
     }
 }

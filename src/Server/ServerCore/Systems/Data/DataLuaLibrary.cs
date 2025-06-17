@@ -17,7 +17,6 @@
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
-using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Systems.Scripting;
@@ -41,18 +40,16 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
     private readonly LuaCFunction entitySetCallback;
 
-    private readonly IEventSender eventSender;
     private readonly ILogger<DataLuaLibrary> logger;
     private readonly ScriptingServices scriptingServices;
     private GCHandle entityGetGcHandle;
     private GCHandle entitySetGcHandle;
 
-    public DataLuaLibrary(IDataController dataController, IEventSender eventSender,
+    public DataLuaLibrary(IDataController dataController,
         ScriptingServices scriptingServices, ILogger<DataLuaLibrary> logger,
         IDataServices dataServices)
     {
         this.dataController = dataController;
-        this.eventSender = eventSender;
         this.scriptingServices = scriptingServices;
         this.logger = logger;
         this.dataServices = dataServices;
@@ -180,23 +177,23 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             switch (valueType)
             {
                 case LuaType.String:
-                    dataController.SetGlobal(eventSender, key, lua_tostring(luaState, -1));
+                    dataController.SetGlobalSync(key, lua_tostring(luaState, -1));
                     break;
 
                 case LuaType.Number:
                     if (lua_isinteger(luaState, -1))
-                        dataController.SetGlobal(eventSender, key, lua_tointeger(luaState, -1));
+                        dataController.SetGlobalSync(key, lua_tointeger(luaState, -1));
                     else
-                        dataController.SetGlobal(eventSender, key, lua_tonumber(luaState, -1));
+                        dataController.SetGlobalSync(key, lua_tonumber(luaState, -1));
                     break;
 
                 case LuaType.Boolean:
-                    dataController.SetGlobal(eventSender, key, lua_toboolean(luaState, -1));
+                    dataController.SetGlobalSync(key, lua_toboolean(luaState, -1));
                     break;
 
                 case LuaType.Nil:
                     // Special case - nil assignment deletes the key-value pair.
-                    dataController.RemoveGlobal(eventSender, key);
+                    dataController.RemoveGlobalSync(key);
                     break;
 
                 default:

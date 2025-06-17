@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Persistence.Database;
 
@@ -28,11 +27,9 @@ public class GlobalKeyValueProcessor
     private const int IndexKey = 0;
     private const int IndexValue = 1;
     private readonly IDataController dataController;
-    private readonly IEventSender eventSender;
 
-    public GlobalKeyValueProcessor(IEventSender eventSender, IDataController dataController)
+    public GlobalKeyValueProcessor(IDataController dataController)
     {
-        this.eventSender = eventSender;
         this.dataController = dataController;
     }
 
@@ -55,7 +52,7 @@ public class GlobalKeyValueProcessor
             var key = reader.Reader.GetString(IndexKey);
             var value = reader.Reader.GetString(IndexValue);
 
-            dataController.SetGlobal(eventSender, key, value);
+            dataController.SetGlobalSync(key, value);
         }
 
         return count;

@@ -257,40 +257,28 @@ public enum EventId
     #region Data
 
     /// <summary>
-    ///     Sets a global key-value pair.
-    /// </summary>
-    /// Associated details: KeyValueEventDetails
-    Core_Data_SetGlobal = 900,
-
-    /// <summary>
-    ///     Removes a global key-value pair.
-    /// </summary>
-    /// Associated details: StringEventDetails (specifying the key)
-    Core_Data_RemoveGlobal = 902,
-
-    /// <summary>
     ///     Announces that a global key-value pair has been updated.
     /// </summary>
     /// Associated details: KeyValueEventDetails
-    Core_Data_GlobalSet = 903,
+    Core_Data_GlobalSet = 900,
 
     /// <summary>
     ///     Announces that a global key-value pair has been removed.
     /// </summary>
     /// Associated details: StringEventDetails (specifying the key)
-    Core_Data_GlobalRemoved = 904,
+    Core_Data_GlobalRemoved = 901,
 
     /// <summary>
     ///     Announces that an entity key-value pair has been updated.
     /// </summary>
     /// Associated details: EntityKeyValueEventDetails
-    Core_Data_EntityKeyValueSet = 905,
+    Core_Data_EntityKeyValueSet = 902,
 
     /// <summary>
     ///     Announces that an entity key-value pair has been removed.
     /// </summary>
     /// Associated details: EntityStringEventDetails
-    Core_Data_EntityKeyValueRemoved = 906,
+    Core_Data_EntityKeyValueRemoved = 903,
 
     #endregion Data
 

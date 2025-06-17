@@ -48,9 +48,7 @@ internal class GlobalKeyValueStore
     {
         logger.LogTrace("Global: Set {Key} = {Value}.", key, value);
 
-        var isNewKey = KeyValueStore.ContainsKey(key);
         KeyValueStore[key] = value;
-
         internalController.GlobalSet(key, value);
     }
 
