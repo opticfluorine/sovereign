@@ -159,7 +159,19 @@ public class ScriptLoader
         InstallCommonLibraries(host);
         InstallEventTable(host);
         InstallComponents(host);
-        foreach (var library in luaLibraries) library.Install(host);
+        foreach (var library in luaLibraries)
+        {
+            var startDepth = lua_gettop(host.LuaState);
+            library.Install(host);
+            var endDepth = lua_gettop(host.LuaState);
+
+            if (startDepth != endDepth)
+            {
+                hostLogger.LogError("Lua library {Library} did not leave the Lua stack unchanged. " +
+                                    "Expected {StartDepth} but got {EndDepth}.",
+                    library.GetType().Name, startDepth, endDepth);
+            }
+        }
 
         return host;
     }
