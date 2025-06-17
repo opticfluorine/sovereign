@@ -18,7 +18,6 @@ using System;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Configuration;
-using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineCore.Timing;
 
@@ -47,7 +46,6 @@ internal class GameClock(
     ISystemTimer timer,
     TimeInternalController controller,
     IOptions<TimeOptions> options,
-    IEventSender eventSender,
     IDataController dataController,
     IDataServices dataServices,
     ILogger<GameClock> logger) : IGameClock
@@ -93,7 +91,7 @@ internal class GameClock(
         if (delta > 0)
         {
             lastUpdateTimeUs += delta * SecondsToMicroseconds;
-            dataController.SetGlobal(eventSender, TimeConstants.ClockGlobalKey, Time);
+            dataController.SetGlobalSync(TimeConstants.ClockGlobalKey, Time);
         }
 
         // Send a sync event if enough ticks have passed.
