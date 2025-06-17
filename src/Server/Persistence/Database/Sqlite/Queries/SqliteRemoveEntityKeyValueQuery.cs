@@ -41,6 +41,12 @@ public class SqliteRemoveEntityKeyValueQuery : IRemoveEntityKeyValueQuery
         };
         cmd.Parameters.Add(pId);
 
+        var pKey = new SqliteParameter("Key", SqliteType.Text)
+        {
+            Value = key
+        };
+        cmd.Parameters.Add(pKey);
+
         cmd.ExecuteNonQuery();
     }
 }

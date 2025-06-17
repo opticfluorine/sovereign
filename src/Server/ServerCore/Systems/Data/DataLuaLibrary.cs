@@ -285,8 +285,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             {
                 scriptingServices.GetScriptLogger(luaState, logger)
                     .LogError("Entity KV access requires a string key.");
-                lua_pushnil(luaState);
-                return 1;
+                return 0;
             }
 
             // Retrieve the bound entity ID.
@@ -297,8 +296,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
                 scriptingServices.GetScriptLogger(luaState, logger)
                     .LogCritical(
                         "Possible Lua host corruption: Entity KV table has no bound entity ID. Script may have a security issue.");
-                lua_pushnil(luaState);
-                return 1;
+                return 0;
             }
 
             var entityId = (ulong)lua_tointeger(luaState, -1);
@@ -309,14 +307,13 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             if (dataServices.TryGetEntityKeyValue(entityId, key, out var value))
                 lua_pushstring(luaState, value);
             else
-                lua_pushnil(luaState);
+                return 0;
         }
         catch (Exception e)
         {
             scriptingServices.GetScriptLogger(luaState, logger)
                 .LogError(e, "Error in entity KV getter.");
-            luaL_checkstack(luaState, 1, null);
-            lua_pushnil(luaState);
+            return 0;
         }
 
         return 1;
@@ -348,7 +345,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
             // Retrieve the bound entity ID.
             lua_pushinteger(luaState, TableEntityIndex);
-            lua_rawget(luaState, -3);
+            lua_rawget(luaState, -4);
             if (!lua_isinteger(luaState, -1))
             {
                 scriptingServices.GetScriptLogger(luaState, logger)
