@@ -1,0 +1,135 @@
+// Sovereign Engine
+// Copyright (c) 2025 opticfluorine
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Data;
+using Sovereign.Scripting.Lua;
+
+namespace Sovereign.ServerCore.Systems.Scripting;
+
+/// <summary>
+///     Handles entity callbacks for scripts.
+/// </summary>
+public sealed class EntityScriptCallbacks
+{
+    private const string AddCallbackName = "OnEntityAdded";
+    private const string AddCallbackScriptKey = $"__{AddCallbackName}_Script";
+    private const string AddCallbackFunctionKey = $"__{AddCallbackName}_Function";
+
+    private const string RemoveCallbackName = "OnEntityRemoved";
+    private const string RemoveCallbackScriptKey = $"__{RemoveCallbackName}_Script";
+    private const string RemoveCallbackFunctionKey = $"__{RemoveCallbackName}_Function";
+
+    private const string LoadCallbackName = "OnEntityLoad";
+    private const string LoadCallbackScriptKey = $"__{LoadCallbackName}_Script";
+    private const string LoadCallbackFunctionKey = $"__{LoadCallbackName}_Function";
+
+    private const string UnloadCallbackName = "OnEntityUnload";
+    private const string UnloadCallbackScriptKey = $"__{UnloadCallbackName}_Script";
+    private const string UnloadCallbackFunctionKey = $"__{UnloadCallbackName}_Function";
+
+    private readonly IDataServices dataServices;
+
+    private readonly Queue<ulong> entityAddQueue = new();
+    private readonly Queue<ulong> entityLoadQueue = new();
+    private readonly Queue<ulong> entityRemoveQueue = new();
+    private readonly Queue<ulong> entityUnloadQueue = new();
+    private readonly ILogger<EntityScriptCallbacks> logger;
+    private readonly ScriptManager scriptManager;
+
+    public EntityScriptCallbacks(EntityTable entityTable, IDataServices dataServices, ScriptManager scriptManager,
+        ILogger<EntityScriptCallbacks> logger)
+    {
+        this.dataServices = dataServices;
+        this.scriptManager = scriptManager;
+        this.logger = logger;
+        entityTable.OnEntityAdded += OnEntityAdded;
+        entityTable.OnEntityRemoved += OnEntityRemoved;
+    }
+
+    /// <summary>
+    ///     Processes any pending callbacks for entity additions and removals.
+    /// </summary>
+    public void ProcessCallbacks()
+    {
+        ProcessCallbacks(entityAddQueue, AddCallbackScriptKey, AddCallbackFunctionKey, AddCallbackName);
+        ProcessCallbacks(entityRemoveQueue, RemoveCallbackScriptKey, RemoveCallbackFunctionKey, RemoveCallbackName);
+        ProcessCallbacks(entityLoadQueue, LoadCallbackScriptKey, LoadCallbackFunctionKey, LoadCallbackName);
+        ProcessCallbacks(entityUnloadQueue, UnloadCallbackScriptKey, UnloadCallbackFunctionKey, UnloadCallbackName);
+    }
+
+    /// <summary>
+    ///     Processes a set of pending callbacks.
+    /// </summary>
+    /// <param name="queue">Queue to process.</param>
+    /// <param name="scriptKey">Script name key.</param>
+    /// <param name="functionKey">Function name key.</param>
+    /// <param name="callbackName">Callback name.</param>
+    private void ProcessCallbacks(Queue<ulong> queue, string scriptKey, string functionKey, string callbackName)
+    {
+        while (queue.TryDequeue(out var entityId))
+        {
+            if (!dataServices.TryGetEntityKeyValue(entityId, scriptKey, out var scriptName)) continue;
+            if (!dataServices.TryGetEntityKeyValue(entityId, functionKey, out var functionName)) continue;
+
+            if (!scriptManager.TryGetHost(scriptName, out var host))
+            {
+                logger.LogError("Entity {EntityId:X} has unknown {CallbackName} callback script {ScriptName}.",
+                    entityId, callbackName, scriptName);
+                continue;
+            }
+
+            try
+            {
+                logger.LogTrace("Calling {CallbackName} callback {ScriptName}::{FunctionName} for entity {EntityId:X}.",
+                    callbackName, scriptName, functionName, entityId);
+                var currentEntityId = entityId;
+                host.CallNamedFunction(functionName, args =>
+                {
+                    args.AddInteger((long)currentEntityId);
+                    return 1;
+                });
+            }
+            catch (LuaException e)
+            {
+                host.Logger.LogError(e, "Error calling {CallbackName} callback {FunctionName} for entity {EntityId:X}.",
+                    callbackName, functionName, entityId);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Called when an entity is added.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="isLoad">Whether this is a load.</param>
+    private void OnEntityAdded(ulong entityId, bool isLoad)
+    {
+        (isLoad ? entityLoadQueue : entityAddQueue).Enqueue(entityId);
+    }
+
+    /// <summary>
+    ///     Called when an entity is removed.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="isUnload">Whether this is an unload.</param>
+    private void OnEntityRemoved(ulong entityId, bool isUnload)
+    {
+        (isUnload ? entityUnloadQueue : entityRemoveQueue).Enqueue(entityId);
+    }
+}

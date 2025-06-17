@@ -225,6 +225,35 @@ public class LuaHost : IDisposable
     }
 
     /// <summary>
+    ///     Calls a named function in the script.
+    /// </summary>
+    /// <param name="functionName">Function name.</param>
+    /// <param name="configureArgs">
+    ///     Function that sets up arguments using the given ArgumentBuilder and returns the number of
+    ///     arguments.
+    /// </param>
+    public void CallNamedFunction(string functionName, Func<ArgumentsBuilder, int> configureArgs)
+    {
+        lock (opsLock)
+        {
+            // Locate the function.
+            luaL_checkstack(LuaState, 2, null);
+            lua_getglobal(LuaState, functionName);
+            if (lua_type(LuaState, -1) != LuaType.Function)
+            {
+                lua_pop(LuaState, 1);
+                throw new LuaException($"Function '{functionName}' not found.");
+            }
+
+            // Configure arguments.
+            var nargs = configureArgs.Invoke(new ArgumentsBuilder(this));
+
+            // Call function.
+            Validate(lua_pcall(LuaState, nargs, 0, tracebackStackPosition));
+        }
+    }
+
+    /// <summary>
     ///     Loads and executes the given string of Lua code.
     /// </summary>
     /// <param name="luaCode">Code to execute.</param>
@@ -473,5 +502,28 @@ public class LuaHost : IDisposable
 
         var err = lua_tostring(LuaState, -1);
         throw new LuaException(err);
+    }
+
+    /// <summary>
+    ///     Builder class for adding arguments to a Lua function call.
+    /// </summary>
+    public readonly struct ArgumentsBuilder
+    {
+        private readonly LuaHost host;
+
+        public ArgumentsBuilder(LuaHost host)
+        {
+            this.host = host;
+        }
+
+        /// <summary>
+        ///     Pushes an integer orgument onto the function call.
+        /// </summary>
+        /// <param name="argument"></param>
+        public void AddInteger(long argument)
+        {
+            luaL_checkstack(host.LuaState, 1, null);
+            lua_pushinteger(host.LuaState, argument);
+        }
     }
 }

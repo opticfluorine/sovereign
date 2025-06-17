@@ -310,8 +310,9 @@ public class PerspectiveLineManager
     /// <summary>
     ///     Called when a new entity is added.
     /// </summary>
-    /// <param name="entityId"></param>
-    private void AddEntity(ulong entityId)
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="isLoad">Unused.</param>
+    private void AddEntity(ulong entityId, bool isLoad)
     {
         if (!drawables.HasTagForEntity(entityId)) return;
 
@@ -367,7 +368,8 @@ public class PerspectiveLineManager
     ///     Removes an entity from any overlapping perspective lines.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    private void RemoveEntity(ulong entityId)
+    /// <param name="isUnload">Unused.</param>
+    private void RemoveEntity(ulong entityId, bool isUnload)
     {
         if (!drawables.HasTagForEntity(entityId, true)) return;
 

@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Sovereign.EngineUtil.Collections;
 
@@ -51,7 +50,7 @@ public class EntityTable
     /// <summary>
     ///     Set of all entities that are enqueued to be removed from the table.
     /// </summary>
-    private readonly ConcurrentQueue<ulong> pendingRemoves = new();
+    private readonly StructBuffer<EntityRemove> pendingRemoves = new(InitialPendingBufferSize);
 
     private readonly object templateLockHandle = new();
 
@@ -118,10 +117,12 @@ public class EntityTable
     ///     Enqueues an entity to be removed from the table.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    public void Remove(ulong entityId)
+    /// <param name="isUnload">If true, this is an unload rather than a remove.</param>
+    public void Remove(ulong entityId, bool isUnload)
     {
         if (!Exists(entityId)) return;
-        pendingRemoves.Enqueue(entityId);
+        var newRemove = new EntityRemove { EntityId = entityId, IsUnload = isUnload };
+        pendingRemoves.Add(ref newRemove);
     }
 
     /// <summary>
@@ -143,16 +144,16 @@ public class EntityTable
                 OnNonBlockEntityAdded?.Invoke(entityId);
             }
 
-            OnEntityAdded?.Invoke(entityId);
+            OnEntityAdded?.Invoke(entityId, pendingAdd.IsLoad);
             if (!pendingAdd.IsLoad && pendingAdd.TemplateEntityId > 0)
                 OnTemplateSet?.Invoke(entityId, pendingAdd.TemplateEntityId);
         }
 
-        pendingAdds.Clear();
-
         // Removals.
-        while (pendingRemoves.TryDequeue(out var entityId))
+        for (var i = 0; i < pendingRemoves.Count; ++i)
         {
+            ref var pendingRemove = ref pendingRemoves[i];
+            var entityId = pendingRemove.EntityId;
             entities.Remove(entityId);
             if (nonBlockEntities.Contains(entityId))
             {
@@ -160,8 +161,11 @@ public class EntityTable
                 OnNonBlockEntityRemoved?.Invoke(entityId);
             }
 
-            OnEntityRemoved?.Invoke(entityId);
+            OnEntityRemoved?.Invoke(entityId, pendingRemove.IsUnload);
         }
+
+        pendingAdds.Clear();
+        pendingRemoves.Clear();
     }
 
     /// <summary>
@@ -191,15 +195,17 @@ public class EntityTable
 
     /// <summary>
     ///     Event invoked when an entity has been added.
-    ///     Parameter is entity ID.
+    ///     First parameter is entity ID.
+    ///     Seocnd parameter is true if this is a load, false if not.
     /// </summary>
-    public event Action<ulong>? OnEntityAdded;
+    public event Action<ulong, bool>? OnEntityAdded;
 
     /// <summary>
     ///     Event invoked when an entity has been removed.
     ///     Parameter is entity ID.
+    ///     Second parameter is true if this is an unload, false if not.
     /// </summary>
-    public event Action<ulong>? OnEntityRemoved;
+    public event Action<ulong, bool>? OnEntityRemoved;
 
     /// <summary>
     ///     Event invoked when a non-block entity has been added.
@@ -244,5 +250,21 @@ public class EntityTable
         ///     Flag indicating whether the new entity is loaded rather than created.
         /// </summary>
         public bool IsLoad;
+    }
+
+    /// <summary>
+    ///     Contains information for an entity to be removed.
+    /// </summary>
+    private struct EntityRemove
+    {
+        /// <summary>
+        ///     Entity ID.
+        /// </summary>
+        public ulong EntityId;
+
+        /// <summary>
+        ///     Flag indicating whether the entity is being unloaded rather than removed.
+        /// </summary>
+        public bool IsUnload;
     }
 }
