@@ -129,6 +129,7 @@ public class LuaHost : IDisposable
             bindings.Add(GCHandle.Alloc(func));
             lua_pushcfunction(LuaState, func);
             lua_setfield(LuaState, -2, name);
+            lua_pop(LuaState, 1);
         }
     }
 
@@ -161,6 +162,7 @@ public class LuaHost : IDisposable
             lua_getglobal(LuaState, library);
             lua_pushinteger(LuaState, value);
             lua_setfield(LuaState, -2, name);
+            lua_pop(LuaState, 1);
         }
     }
 
@@ -172,7 +174,6 @@ public class LuaHost : IDisposable
         lock (opsLock)
         {
             library = "";
-            lua_pop(LuaState, 1);
         }
     }
 
