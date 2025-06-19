@@ -599,6 +599,12 @@ public enum EventId
     /// Associated details: None
     Server_Scripting_LoadNew = 200702,
 
+    /// <summary>
+    ///     Event used to signal a timed callback. Details contain a unique identifier for the callback request.
+    /// </summary>
+    /// Associated details: IntEventDetails
+    Server_Scripting_TimedCallback = 200703,
+
     #endregion Server_Scripting
 
     #endregion Server

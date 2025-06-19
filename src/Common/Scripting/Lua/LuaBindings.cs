@@ -161,6 +161,11 @@ public static partial class LuaBindings
         return lua_type(luaState, idx) == LuaType.Table;
     }
 
+    public static bool lua_isfunction(IntPtr luaState, int idx)
+    {
+        return lua_type(luaState, idx) == LuaType.Function;
+    }
+
     [LibraryImport(LibName)]
     public static partial LuaType lua_type(IntPtr luaState, int idx);
 
@@ -375,6 +380,12 @@ public static partial class LuaBindings
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
     public static partial void luaL_checkstack(IntPtr luaState, int sz, string? msg);
+
+    [LibraryImport(LibName)]
+    public static partial int luaL_ref(IntPtr luaState, int t);
+
+    [LibraryImport(LibName)]
+    public static partial void luaL_unref(IntPtr luaState, int t, int r);
 
     //
     // A note on error functions:
