@@ -7,5 +7,6 @@ develop custom content for games made with Sovereign Engine.
 :maxdepth: 2
 getting-started.md
 tutorials/index.md
+callbacks/index.md
 api/index.md
 ```

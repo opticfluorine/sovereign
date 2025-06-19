@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Events.Details.Validators;
 using Sovereign.EngineCore.Lua;
 using Sovereign.EngineCore.Systems;
 using EventId = Sovereign.EngineCore.Events.EventId;
@@ -28,23 +29,25 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 /// <summary>
 ///     System responsible for managing server-side scripts.
 /// </summary>
-public class ScriptingSystem : ISystem
+internal class ScriptingSystem : ISystem
 {
     private readonly ScriptingCallbackManager callbackManager;
     private readonly EntityScriptCallbacks entityScriptCallbacks;
     private readonly ILogger<ScriptingSystem> logger;
     private readonly ScriptManager manager;
     private readonly ScriptLoader scriptLoader;
+    private readonly ITimedCallbackRunner timedCallbackRunner;
 
     public ScriptingSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, ScriptManager manager,
         ScriptingCallbackManager callbackManager, ScriptLoader scriptLoader, ILogger<ScriptingSystem> logger,
-        EntityScriptCallbacks entityScriptCallbacks)
+        EntityScriptCallbacks entityScriptCallbacks, ITimedCallbackRunner timedCallbackRunner)
     {
         this.manager = manager;
         this.callbackManager = callbackManager;
         this.scriptLoader = scriptLoader;
         this.logger = logger;
         this.entityScriptCallbacks = entityScriptCallbacks;
+        this.timedCallbackRunner = timedCallbackRunner;
         EventCommunicator = eventCommunicator;
 
         EventIdsOfInterest = new HashSet<EventId>(ScriptableEventSet.Events);
@@ -52,6 +55,7 @@ public class ScriptingSystem : ISystem
             EventId.Server_Scripting_ReloadAll,
             EventId.Server_Scripting_Reload,
             EventId.Server_Scripting_LoadNew,
+            EventId.Server_Scripting_TimedCallback,
             EventId.Core_Tick
         ]);
 
@@ -104,6 +108,18 @@ public class ScriptingSystem : ISystem
                 case EventId.Server_Scripting_LoadNew:
                     OnLoadNew();
                     break;
+
+                case EventId.Server_Scripting_TimedCallback:
+                {
+                    if (ev.EventDetails is not ScriptingCallbackEventDetails details)
+                    {
+                        logger.LogError("Received TimedCallback event without details.");
+                        break;
+                    }
+
+                    OnTimedCallback(details.LuaState, details.CallbackReference, details.ArgumentReference);
+                    break;
+                }
 
                 default:
                     ForwardEventToScripts(ev);
@@ -178,5 +194,16 @@ public class ScriptingSystem : ISystem
         manager.Load(scripts);
 
         logger.LogInformation("Loaded {Count} new scripts.", scripts.Count);
+    }
+
+    /// <summary>
+    ///     Called when a TimedCallback event is received.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="callbackRef">Lua callback reference.</param>
+    /// <param name="argRef">Lua argument reference.</param>
+    private void OnTimedCallback(IntPtr luaState, int callbackRef, int argRef)
+    {
+        timedCallbackRunner.RunTimedCallback(luaState, callbackRef, argRef);
     }
 }

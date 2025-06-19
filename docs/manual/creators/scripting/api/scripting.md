@@ -1,10 +1,12 @@
 (script-scripting)=
 # scripting Module
 
-The `scripting` module provides APIs for interacting with the server-side
-scripting engine. Primarily this takes the form of registering callbacks
-with which the scripting engine will invoke a script under certain
-conditions (e.g. a specific event is received).
+:::{contents}
+:local:
+:depth: 2
+:::
+
+The `scripting` module provides APIs for interacting with the server-side scripting engine. Primarily this takes the form of registering callbacks with which the scripting engine will invoke a script under certain conditions (e.g. a specific event is received, a timer has elapsed, etc.).
 
 ## Callback Registration Functions
 
@@ -29,7 +31,7 @@ conditions (e.g. a specific event is received).
 #### Example
 
 ```{code-block} lua
-:caption: Registering an event callback using `scripting.AddEventCallback(eventId, callback).
+:caption: Registering an event callback using `scripting.AddEventCallback(eventId, callback)`.
 :emphasize-lines: 6
 function on_player_entered(event)
     local playerEntityId = event.EntityId
@@ -37,4 +39,33 @@ function on_player_entered(event)
 end
 
 scripting.AddEventCallback(events.Server_Persistence_PlayerEnteredWorld, on_player_entered)
+```
+
+(script-scripting-addtimedcallback)=
+### AddTimedCallback(delaySeconds, callback, [argument])
+
+```{eval-rst}
+.. lua:function:: scripting.AddTimedCallback(delaySeconds, callback, [argument])
+
+   Registers a timed callback that will be triggered after a delay period.
+
+   :param delaySeconds: Delay in seconds before the callback is invoked. Must be positive and finite.
+   :type delaySeconds: number
+   :param callback: Callback function.
+   :type callback: function
+   :param argument: An argument to pass to the callback. (Optional, defaults to `nil`)
+   :type argument: any
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Registering a timed callback using `scripting.AddTimedCallback(delaySeconds, callback, argument)`.
+:emphasize-lines: 3,6
+function on_timer(count)
+    util.LogInfo("Callback " .. count)
+    scripting.AddTimedCallback(1.0, on_timer, count + 1)
+end
+
+scripting.AddTimedCallback(1.0, on_timer, 0)
 ```

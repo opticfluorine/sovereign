@@ -293,6 +293,18 @@ public class LuaHost : IDisposable
     }
 
     /// <summary>
+    ///     Executes some other scripting action in the context of this host.
+    /// </summary>
+    /// <param name="action">Action to execute.</param>
+    public void ExecuteOther(Action<ExecutionControls> action)
+    {
+        lock (opsLock)
+        {
+            action.Invoke(new ExecutionControls(this));
+        }
+    }
+
+    /// <summary>
     ///     Installs the per-script util library into the host.
     /// </summary>
     private void InstallUtilLibrary()
@@ -505,7 +517,7 @@ public class LuaHost : IDisposable
     }
 
     /// <summary>
-    ///     Builder class for adding arguments to a Lua function call.
+    ///     Builder for adding arguments to a Lua function call.
     /// </summary>
     public readonly struct ArgumentsBuilder
     {
@@ -524,6 +536,29 @@ public class LuaHost : IDisposable
         {
             luaL_checkstack(host.LuaState, 1, null);
             lua_pushinteger(host.LuaState, argument);
+        }
+    }
+
+    /// <summary>
+    ///     Controls for arbitrary Lua execution.
+    /// </summary>
+    public readonly struct ExecutionControls
+    {
+        private readonly LuaHost host;
+
+        public ExecutionControls(LuaHost host)
+        {
+            this.host = host;
+        }
+
+        /// <summary>
+        ///     Validating wrapper around lua_pcall.
+        /// </summary>
+        /// <param name="nargs">Argument count.</param>
+        /// <param name="nresults">Result count.</param>
+        public void PCall(int nargs, int nresults)
+        {
+            host.Validate(lua_pcall(host.LuaState, nargs, nresults, host.tracebackStackPosition));
         }
     }
 }

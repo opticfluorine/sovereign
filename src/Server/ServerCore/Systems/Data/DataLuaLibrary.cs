@@ -17,6 +17,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Systems.Scripting;
@@ -243,6 +244,12 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         }
 
         var entityId = (ulong)lua_tointeger(luaState, -1);
+        if (entityId >= EntityConstants.FirstBlockEntityId && entityId <= EntityConstants.LastBlockEntityId)
+        {
+            scriptingServices.GetScriptLogger(luaState, logger)
+                .LogError("data.GetEntityData(entityId) cannot be used on block entities.");
+            return 0;
+        }
 
         // Create an opaque object to act as a proxy to the global key-values.
         luaL_checkstack(luaState, 4, null);

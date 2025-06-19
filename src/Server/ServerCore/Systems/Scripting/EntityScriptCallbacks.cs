@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Data;
@@ -102,11 +103,11 @@ public sealed class EntityScriptCallbacks
                 logger.LogTrace("Calling {CallbackName} callback {ScriptName}::{FunctionName} for entity {EntityId:X}.",
                     callbackName, scriptName, functionName, entityId);
                 var currentEntityId = entityId;
-                host.CallNamedFunction(functionName, args =>
+                Task.Run(() => host.CallNamedFunction(functionName, args =>
                 {
                     args.AddInteger((long)currentEntityId);
                     return 1;
-                });
+                }));
             }
             catch (Exception e)
             {
