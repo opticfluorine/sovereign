@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems.Data;
 
 namespace Sovereign.ServerCore.Systems.TemplateEntity;
 
@@ -26,23 +27,23 @@ namespace Sovereign.ServerCore.Systems.TemplateEntity;
 /// </summary>
 public class TemplateEntityManager
 {
+    private readonly IDataController dataController;
     private readonly EntityDefinitionProcessor definitionProcessor;
-    private readonly IEntityFactory entityFactory;
     private readonly IEventSender eventSender;
     private readonly TemplateEntityInternalController internalController;
     private readonly ILogger<TemplateEntityManager> logger;
 
     private readonly List<ulong> pendingSync = new();
 
-    public TemplateEntityManager(IEntityFactory entityFactory, IEventSender eventSender,
+    public TemplateEntityManager(IEventSender eventSender,
         TemplateEntityInternalController internalController, EntityDefinitionProcessor definitionProcessor,
-        ILogger<TemplateEntityManager> logger)
+        ILogger<TemplateEntityManager> logger, IDataController dataController)
     {
-        this.entityFactory = entityFactory;
         this.eventSender = eventSender;
         this.internalController = internalController;
         this.definitionProcessor = definitionProcessor;
         this.logger = logger;
+        this.dataController = dataController;
     }
 
     /// <summary>
@@ -51,8 +52,7 @@ public class TemplateEntityManager
     /// <param name="definition">Entity definition.</param>
     public void UpdateExisting(EntityDefinition definition)
     {
-        if (definition.EntityId < EntityConstants.FirstTemplateEntityId ||
-            definition.EntityId > EntityConstants.LastTemplateEntityId)
+        if (definition.EntityId is < EntityConstants.FirstTemplateEntityId or > EntityConstants.LastTemplateEntityId)
         {
             logger.LogError("Received update for non-template entity ID {Id:X}; skipping.", definition.EntityId);
             return;
@@ -77,5 +77,26 @@ public class TemplateEntityManager
 
         pendingSync.Clear();
         return synced;
+    }
+
+    /// <summary>
+    ///     Creates or updates a template entity based on its definition and a set of key-value pairs.
+    /// </summary>
+    /// <param name="definition"></param>
+    /// <param name="keyValuePairs"></param>
+    public void UpdateKeyed(EntityDefinition definition, Dictionary<string, string> keyValuePairs)
+    {
+        if (definition.EntityId is < EntityConstants.FirstTemplateEntityId or > EntityConstants.LastTemplateEntityId)
+        {
+            logger.LogError("Received update for non-template entity ID {Id:X}; skipping.", definition.EntityId);
+            return;
+        }
+
+        definitionProcessor.ProcessDefinition(definition);
+        dataController.ClearEntityKeyValuesSync(definition.EntityId);
+        foreach (var kvp in keyValuePairs)
+            dataController.SetEntityKeyValueSync(definition.EntityId, kvp.Key, kvp.Value);
+
+        pendingSync.Add(definition.EntityId);
     }
 }

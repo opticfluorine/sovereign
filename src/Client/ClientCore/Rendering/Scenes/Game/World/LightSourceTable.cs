@@ -21,6 +21,7 @@ using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineUtil.Ranges;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
@@ -142,6 +143,8 @@ public class LightSourceTable
     /// <param name="isLoad">Unused.</param>
     private void OnLightAdded(ulong entityId, PointLight value, bool isLoad)
     {
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId) return;
+
         knownSources.Add(entityId);
     }
 
@@ -152,6 +155,8 @@ public class LightSourceTable
     /// <param name="isUnload">Unused.</param>
     private void OnLightRemoved(ulong entityId, bool isUnload)
     {
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId) return;
+
         knownSources.Remove(entityId);
     }
 }

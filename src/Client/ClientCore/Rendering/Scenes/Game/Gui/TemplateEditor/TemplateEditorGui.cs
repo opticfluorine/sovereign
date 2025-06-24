@@ -16,6 +16,7 @@
 
 using System.Numerics;
 using ImGuiNET;
+using Sovereign.ClientCore.Network.Infrastructure;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 
@@ -25,10 +26,15 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 public class TemplateEditorGui
 {
     private readonly BlockTemplateEditorTab blockTemplateEditor;
+    private readonly NpcTemplateEditorTab npcTemplateEditorTab;
+    private readonly ScriptInfoClient scriptInfoClient;
 
-    public TemplateEditorGui(BlockTemplateEditorTab blockTemplateEditor)
+    public TemplateEditorGui(BlockTemplateEditorTab blockTemplateEditor, NpcTemplateEditorTab npcTemplateEditorTab,
+        ScriptInfoClient scriptInfoClient)
     {
         this.blockTemplateEditor = blockTemplateEditor;
+        this.npcTemplateEditorTab = npcTemplateEditorTab;
+        this.scriptInfoClient = scriptInfoClient;
     }
 
     /// <summary>
@@ -38,15 +44,18 @@ public class TemplateEditorGui
     {
         var fontSize = ImGui.GetFontSize();
 
-        ImGui.SetNextWindowSize(fontSize * new Vector2(50.0f, 35.56f), ImGuiCond.Once);
+        ImGui.SetNextWindowSize(fontSize * new Vector2(64.0f, 44.0f), ImGuiCond.Once);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, fontSize * new Vector2(0.889f, 0.0f));
         if (!ImGui.Begin("Template Entity Editor")) return;
+
+        if (ImGui.IsWindowAppearing()) scriptInfoClient.FetchScriptInfo();
 
         ImGui.Spacing();
         ImGui.Spacing();
         if (ImGui.BeginTabBar("TemplateEditorTabs", ImGuiTabBarFlags.None))
         {
             blockTemplateEditor.Render();
+            npcTemplateEditorTab.Render();
             ImGui.EndTabBar();
         }
 

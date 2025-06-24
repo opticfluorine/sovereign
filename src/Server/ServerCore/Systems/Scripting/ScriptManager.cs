@@ -17,8 +17,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Scripting.Lua;
 
 namespace Sovereign.ServerCore.Systems.Scripting;
@@ -137,5 +139,32 @@ public class ScriptManager : IDisposable
     public IEnumerable<string> GetScriptNames()
     {
         return hostsByName.Keys;
+    }
+
+    /// <summary>
+    ///     Gets summary info for all currently loaded scripts.
+    /// </summary>
+    /// <returns>Current ScriptInfo object.</returns>
+    public ScriptInfo GetScriptInfo()
+    {
+        var scriptInfo = new ScriptInfo();
+        foreach (var host in scriptHosts)
+        {
+            var singleScriptInfo = new SingleScriptInfo
+            {
+                Name = host.Name,
+                Functions = host.FunctionNames
+                    .Select(f => new ScriptFunctionInfo
+                    {
+                        Name = f,
+                        EntityParameters = host.EntityParameterHintsByFunction.TryGetValue(f, out var hints)
+                            ? [..hints]
+                            : []
+                    }).ToList()
+            };
+            scriptInfo.Scripts.Add(singleScriptInfo);
+        }
+
+        return scriptInfo;
     }
 }

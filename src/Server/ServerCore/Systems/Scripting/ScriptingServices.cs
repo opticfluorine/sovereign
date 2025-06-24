@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
+using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Scripting.Lua;
 
 namespace Sovereign.ServerCore.Systems.Scripting;
@@ -80,5 +81,14 @@ public class ScriptingServices
     public IEnumerable<string> GetLoadedScripts()
     {
         return scriptManager.GetScriptNames();
+    }
+
+    /// <summary>
+    ///     Gets information for the currently loaded scripts.
+    /// </summary>
+    /// <returns>Current ScriptInfo object.</returns>
+    public ScriptInfo GetLoadedScriptInfo()
+    {
+        return scriptManager.GetScriptInfo();
     }
 }

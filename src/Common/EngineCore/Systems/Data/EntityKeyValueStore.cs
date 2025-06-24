@@ -120,6 +120,34 @@ internal class EntityKeyValueStore
     }
 
     /// <summary>
+    ///     Removes all key-value pairs for the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    public void ClearKeyValues(ulong entityId)
+    {
+        if (!keyValueStores.TryGetValue(entityId, out var store)) return;
+
+        lock (eventSender)
+        {
+            foreach (var key in store.Keys) internalController.EntityKeyValueRemoved(eventSender, entityId, key);
+        }
+
+        store.Clear();
+    }
+
+    /// <summary>
+    ///     Adds all key-values for the given entity to the provided dictionary.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="data">Dictionary to append with entity key-value pairs, if any.</param>
+    public void GetAllKeyValuePairs(ulong entityId, Dictionary<string, string> data)
+    {
+        if (!keyValueStores.TryGetValue(entityId, out var store)) return;
+        foreach (var kv in store)
+            data[kv.Key] = kv.Value;
+    }
+
+    /// <summary>
     ///     Called when a non-block entity is removed or unloaded.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>

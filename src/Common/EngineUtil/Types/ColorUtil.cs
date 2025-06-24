@@ -29,6 +29,28 @@ public static class ColorUtil
     private const uint AMask = 0x000000ff;
 
     /// <summary>
+    ///     Packs an RGB vector into a uint.
+    /// </summary>
+    /// <param name="color">RGB vector.</param>
+    /// <returns>Packed color.</returns>
+    public static uint PackColorRgb(Vector3 color)
+    {
+        return ((uint)(color.X * 0xFF) << 24) |
+               ((uint)(color.Y * 0xFF) << 16) |
+               ((uint)(color.Z * 0xFF) << 8);
+    }
+
+    /// <summary>
+    ///     Packs an RGBA vector into a uint.
+    /// </summary>
+    /// <param name="color">RGBA vector.</param>
+    /// <returns>Packed color.</returns>
+    public static uint PackColorRgba(Vector4 color)
+    {
+        return PackColorRgb(color.AsVector3()) | (uint)(color.W * 0xFF);
+    }
+
+    /// <summary>
     ///     Unpacks a color that was created with the 'colors.rgb' Lua function.
     /// </summary>
     /// <param name="packedColor">Packed color.</param>

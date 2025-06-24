@@ -73,6 +73,7 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
             luaHost.BeginLibrary("scripting");
             luaHost.AddLibraryFunction(nameof(AddEventCallback), AddEventCallback);
             luaHost.AddLibraryFunction(nameof(AddTimedCallback), AddTimedCallback);
+            luaHost.AddLibraryFunction(nameof(AddEntityParameterHint), AddEntityParameterHint);
         }
         finally
         {
@@ -202,13 +203,13 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
             }
 
             var delay = lua_tonumber(luaState, -3);
-            if (!Double.IsNormal(delay) || delay < 0.0)
+            if (!double.IsNormal(delay) || delay < 0.0)
             {
                 scriptingServices.GetScriptLogger(luaState, logger)
                     .LogError("AddTimedCallback delay must be a positive number.");
                 return 0;
             }
-            
+
             var eventTime = systemTimer.GetTime() + (ulong)(delay * UnitConversions.SToUs);
 
             var argumentRef = luaL_ref(luaState, LUA_REGISTRYINDEX);
@@ -230,6 +231,50 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
         {
             scriptingServices.GetScriptLogger(luaState, logger)
                 .LogError(e, "Error in AddTimedCallback.");
+        }
+
+        return 0;
+    }
+
+    /// <summary>
+    ///     Lua function that adds an entity parameter hint for a function.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int AddEntityParameterHint(IntPtr luaState)
+    {
+        try
+        {
+            if (lua_gettop(luaState) != 2)
+            {
+                scriptingServices.GetScriptLogger(luaState, logger)
+                    .LogError("AddEntityParameterHint requires 2 arguments.");
+                return 0;
+            }
+
+            if (!lua_isstring(luaState, -2) || !lua_isstring(luaState, -1))
+            {
+                scriptingServices.GetScriptLogger(luaState, logger)
+                    .LogError("AddEntityParameterHint requires two string arguments.");
+                return 0;
+            }
+
+            if (!scriptManager.TryGetHost(luaState, out var luaHost))
+            {
+                scriptingServices.GetScriptLogger(luaState, logger)
+                    .LogError("Unrecognized Lua host.");
+                return 0;
+            }
+
+            var functionName = lua_tostring(luaState, -2);
+            var parameterName = lua_tostring(luaState, -1);
+
+            luaHost.AddEntityParameterHint(functionName, parameterName);
+        }
+        catch (Exception e)
+        {
+            scriptingServices.GetScriptLogger(luaState, logger)
+                .LogError(e, "Error in AddEntityParameterHint.");
         }
 
         return 0;

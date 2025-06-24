@@ -103,8 +103,11 @@ public static class ServerNetworkServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, AuthenticationRestService>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, CreatePlayerRestService>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, DeletePlayerRestService>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, EntityDataRestService>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, ListPlayersRestService>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, ScriptInfoRestService>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, SelectPlayerRestService>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, SetTemplateEntityRestService>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, TemplateEntitiesRestService>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, WorldSegmentRestService>());
     }

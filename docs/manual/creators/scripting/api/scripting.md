@@ -69,3 +69,34 @@ end
 
 scripting.AddTimedCallback(1.0, on_timer, 0)
 ```
+
+### AddEntityParameterHint(callbackFunctionName, entityParameter)
+
+```{eval-rst}
+.. lua:function:: scripting.AddEntityParameterHint(callbackFunctionName, entityParameter)
+
+   Adds an entity parameter hint for the named callback function. A parameter hint is the name of a key in
+   the entity key-value store that is referenced by the given callback function. Registering a parameter hint
+   allows the editor GUIs to prompt the creator to specify a value for the parameter when binding the
+   callback to an entity or template entity.
+
+   :param callbackFunctionName: Callback function name.
+   :type callbackFunctionName: string
+   :param entityParameter: Name of a key in the entity key-value store.
+   :type entityParameter: string
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Registering an entity parameter hint.
+:emphasize-lines: 8
+function my_callback(entityId)
+    -- ...
+    local entityData = data.GetEntityData(entityId)
+    local myEntityParameter = entityData["MyEntityKey"]
+    -- ...
+end
+
+scripting.AddEntityParameterHint("my_callback", "MyEntityKey")
+```

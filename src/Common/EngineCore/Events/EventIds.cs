@@ -559,6 +559,12 @@ public enum EventId
     /// Associated details: EntityDefinitionEventDetails
     Server_TemplateEntity_Update = 200500,
 
+    /// <summary>
+    ///     Creates or updates a template entity with its key-value pairs.
+    /// </summary>
+    /// Associated details: KeyedEntityDefinitionEventDetails
+    Server_TemplateEntity_UpdateKeyed = 200501,
+
     #endregion Server_TemplateEntity
 
     #region Server_WorldEdit

@@ -46,7 +46,8 @@ public class GuiComponentEditors
     /// <param name="buffer">Input buffer to hold user input.</param>
     public void NameEdit(string id, ref string buffer)
     {
-        ImGui.SetNextItemWidth(160.0f);
+        var fontSize = ImGui.GetFontSize();
+        ImGui.SetNextItemWidth(fontSize * 16.0f);
         ImGui.InputText(id, ref buffer, EntityConstants.MaxNameLength);
     }
 

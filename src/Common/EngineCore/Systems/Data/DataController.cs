@@ -53,6 +53,12 @@ public interface IDataController
     /// <param name="entityId">Entity ID.</param>
     /// <param name="key">Key.</param>
     void RemoveEntityKeyValueSync(ulong entityId, string key);
+
+    /// <summary>
+    ///     Removes all key-value pairs for an entity synchronously.
+    /// </summary>
+    /// <param name="entityId"></param>
+    void ClearEntityKeyValuesSync(ulong entityId);
 }
 
 /// <summary>
@@ -69,6 +75,11 @@ internal class DataController(GlobalKeyValueStore globalStore, EntityKeyValueSto
     public void RemoveEntityKeyValueSync(ulong entityId, string key)
     {
         entityKeyValueStore.RemoveKey(entityId, key);
+    }
+
+    public void ClearEntityKeyValuesSync(ulong entityId)
+    {
+        entityKeyValueStore.ClearKeyValues(entityId);
     }
 
     public void SetGlobalSync<T>(string key, T value) where T : notnull

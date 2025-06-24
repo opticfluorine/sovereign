@@ -170,6 +170,8 @@ public static class ClientServiceCollectionExtensions
 
         services.TryAddSingleton<BlockTemplateEntityFilter>();
         services.TryAddSingleton<BlockTemplateEntityIndexer>();
+        services.TryAddSingleton<NpcTemplateEntityFilter>();
+        services.TryAddSingleton<NpcTemplateEntityIndexer>();
     }
 
     private static void AddEntities(IServiceCollection services)
@@ -181,8 +183,10 @@ public static class ClientServiceCollectionExtensions
     {
         services.TryAddSingleton<RestClient>();
         services.TryAddSingleton<AuthenticationClient>();
+        services.TryAddSingleton<EntityDataClient>();
         services.TryAddSingleton<PlayerManagementClient>();
         services.TryAddSingleton<RegistrationClient>();
+        services.TryAddSingleton<ScriptInfoClient>();
         services.TryAddSingleton<TemplateEntityDataClient>();
         services.TryAddSingleton<WorldSegmentDataClient>();
         services.TryAddSingleton<ClientNetworkInternalController>();
@@ -246,6 +250,11 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<SpritesheetSelector>();
         services.TryAddSingleton<TemplateEditorGui>();
         services.TryAddSingleton<BlockTemplateEditorTab>();
+        services.TryAddSingleton<NpcTemplateEditorTab>();
+        services.TryAddSingleton<BasicInformationControlGroup>();
+        services.TryAddSingleton<AppearanceControlGroup>();
+        services.TryAddSingleton<BehaviorControlGroup>();
+        services.TryAddSingleton<EntityDataControlGroup>();
         services.TryAddSingleton<TemplateEditorInternalController>();
         services.TryAddSingleton<WorldEditorGui>();
         services.TryAddSingleton<WorldVertexSequencer>();
