@@ -30,20 +30,28 @@ public struct PointLight
     /// <summary>
     ///     Radius of light source, in blocks.
     /// </summary>
-    [ScriptableField] [Key(0)] public float Radius;
+    [ScriptableField]
+    [Key(0)]
+    public float Radius { get; set; }
 
     /// <summary>
     ///     Intensity of the light source.
     /// </summary>
-    [ScriptableField] [Key(1)] public float Intensity;
+    [ScriptableField]
+    [Key(1)]
+    public float Intensity { get; set; }
 
     /// <summary>
     ///     Packed RGB color of light source.
     /// </summary>
-    [ScriptableField] [Key(2)] public uint Color;
+    [ScriptableField]
+    [Key(2)]
+    public uint Color { get; set; }
 
     /// <summary>
     ///     Percentage-based position offset relative to the position of the associated entity.
     /// </summary>
-    [ScriptableField] [Key(3)] public Vector3 PositionOffset;
+    [ScriptableField]
+    [Key(3)]
+    public Vector3 PositionOffset { get; set; }
 }

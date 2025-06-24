@@ -144,6 +144,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<TemplateEntityServices>();
         services.TryAddSingleton<TemplateEntityInternalController>();
         services.TryAddSingleton<TemplateEntityManager>();
+        services.TryAddSingleton<TemplateEntityController>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, TemplateEntitySystem>());
     }

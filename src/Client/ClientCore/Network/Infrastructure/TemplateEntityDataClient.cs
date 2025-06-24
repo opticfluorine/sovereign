@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using MessagePack;
@@ -24,6 +25,7 @@ using Sovereign.ClientCore.Network.Rest;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 
@@ -65,6 +67,29 @@ public class TemplateEntityDataClient
     public void LoadTemplateEntities()
     {
         Task.Run(RetrieveAndLoadTemplateEntities);
+    }
+
+    /// <summary>
+    ///     Asynchronously requests to create or update a template entity and its key-value pairs.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <param name="keyValuePairs">Entity key-value pairs.</param>
+    public void SetTemplateEntity(EntityDefinition definition, Dictionary<string, string> keyValuePairs)
+    {
+        Task.Run(async () =>
+        {
+            var request = new KeyedEntityDefinitionEventDetails
+            {
+                EntityDefinition = definition,
+                EntityKeyValuePairs = keyValuePairs
+            };
+
+            var response = await client.PostJson($"{RestEndpoints.TemplateEntities}/{definition.EntityId:X}", request,
+                true);
+            if (response.StatusCode != HttpStatusCode.OK)
+                logger.LogError("Failed to set template entity {EntityId} on server (status {StatusCode}).",
+                    definition.EntityId, response.StatusCode);
+        });
     }
 
     /// <summary>

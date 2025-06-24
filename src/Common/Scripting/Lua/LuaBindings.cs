@@ -87,6 +87,8 @@ public static partial class LuaBindings
     public const int LUA_MULTRET = -1;
 
     public const int LUA_REGISTRYINDEX = -1001000;
+    public const int LUA_RIDX_MAINTHREAD = 1;
+    public const int LUA_RIDX_GLOBALS = 2;
 
     private const string LibName = "lua5.4";
 

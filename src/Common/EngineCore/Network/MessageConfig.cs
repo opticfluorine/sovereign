@@ -56,7 +56,15 @@ public sealed class MessageConfig
     /// <summary>
     ///     JSON serializer options.
     /// </summary>
-    public static JsonSerializerOptions JsonOptions => new(JsonSerializerDefaults.Web);
+    public static JsonSerializerOptions JsonOptions { get; } = new(JsonSerializerDefaults.Web);
+
+    /// <summary>
+    ///     JSON serializer options that include fields.
+    /// </summary>
+    public static JsonSerializerOptions JsonOptionsWithFields { get; } = new(JsonSerializerDefaults.Web)
+    {
+        IncludeFields = true
+    };
 
     /// <summary>
     ///     Utility method that serializes an object using MessagePack.

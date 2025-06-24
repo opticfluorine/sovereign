@@ -32,12 +32,16 @@ public struct BoundingBox
     ///     Position of the bottom-front-left corner of the bounding box specified in
     ///     world coordinates relative to the upper-top-left corner of the entity.
     /// </summary>
-    [ScriptableField] [Key(0)] public Vector3 Position;
+    [ScriptableField]
+    [Key(0)]
+    public Vector3 Position { get; set; }
 
     /// <summary>
     ///     Size of the bounding box specified in world coordinates.
     /// </summary>
-    [ScriptableField] [Key(1)] public Vector3 Size;
+    [ScriptableField]
+    [Key(1)]
+    public Vector3 Size { get; set; }
 
     /// <summary>
     ///     Generates a new BoundingBox by applying a translation to the current BoundingBox.

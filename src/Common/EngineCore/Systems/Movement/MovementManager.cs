@@ -23,6 +23,7 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
@@ -400,6 +401,7 @@ public class MovementManager
     /// <param name="__">Unused.</param>
     private void OnPhysicsTagAdded(ulong entityId, bool _, bool __)
     {
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId) return;
         if (!kinematics.TryGetIndexForEntity(entityId, out var index))
         {
             logger.LogError("No kinematics component index for entity {EntityId:X} when adding physics tag.", entityId);
@@ -423,6 +425,7 @@ public class MovementManager
     /// <param name="_">Unused.</param>
     private void OnPhysicsTagRemoved(ulong entityId, bool _)
     {
+        if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId) return;
         if (!kinematics.TryGetIndexForEntity(entityId, out var index))
         {
             logger.LogError("No kinematics component index for entity {EntityId:X} when removing physics tag.",

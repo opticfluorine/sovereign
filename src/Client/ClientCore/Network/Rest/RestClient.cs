@@ -22,6 +22,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 using Sovereign.ClientCore.Configuration;
+using Sovereign.EngineCore.Network;
 using Sovereign.NetworkCore.Network;
 
 namespace Sovereign.ClientCore.Network.Rest;
@@ -106,13 +107,15 @@ public sealed class RestClient
     /// </summary>
     /// <param name="url">Relative URL of the REST endpoint.</param>
     /// <param name="content">Request content.</param>
+    /// <param name="includeFields">Whether to include fields.</param>
     /// <returns>Task awaiting the response.</returns>
     /// <exception cref="NetworkException">Thrown if the REST client is not in the connected state.</exception>
-    public Task<HttpResponseMessage> PostJson<T>(string url, T content)
+    public Task<HttpResponseMessage> PostJson<T>(string url, T content, bool includeFields = false)
     {
         if (!Connected) throw new NetworkException("REST client is not connected.");
         var uri = new Uri(baseUri, url);
-        var jsonContent = JsonContent.Create(content);
+        var jsonContent = JsonContent.Create(content, null,
+            includeFields ? MessageConfig.JsonOptionsWithFields : MessageConfig.JsonOptions);
         jsonContent.Headers.ContentLength = jsonContent.ReadAsStream().Length;
         return httpClient.PostAsync(uri, jsonContent);
     }

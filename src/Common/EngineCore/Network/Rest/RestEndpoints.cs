@@ -46,4 +46,14 @@ public sealed class RestEndpoints
     ///     Relative path to REST endpoint for template entities.
     /// </summary>
     public const string TemplateEntities = "/templates";
+
+    /// <summary>
+    ///     Script information endpoint.
+    /// </summary>
+    public const string ScriptInfo = "/scripts";
+
+    /// <summary>
+    ///     Entity data endpoint.
+    /// </summary>
+    public const string EntityData = "/entitydata";
 }

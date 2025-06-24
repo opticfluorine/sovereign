@@ -50,4 +50,74 @@ public static class EntityConstants
     ///     Maximum entity name length.
     /// </summary>
     public const int MaxNameLength = 32;
+
+    /// <summary>
+    ///     Callback name for entity added.
+    /// </summary>
+    public const string AddCallbackName = "OnEntityAdded";
+
+    /// <summary>
+    ///     Entity data key for entity added callback script name.
+    /// </summary>
+    public const string AddCallbackScriptKey = $"__{AddCallbackName}_Script";
+
+    /// <summary>
+    ///     Entity data key for entity added callback function name.
+    /// </summary>
+    public const string AddCallbackFunctionKey = $"__{AddCallbackName}_Function";
+
+    /// <summary>
+    ///     Callback name for entity removed.
+    /// </summary>
+    public const string RemoveCallbackName = "OnEntityRemoved";
+
+    /// <summary>
+    ///     Entity data key for entity removed callback script name.
+    /// </summary>
+    public const string RemoveCallbackScriptKey = $"__{RemoveCallbackName}_Script";
+
+    /// <summary>
+    ///     Entity data key for entity removed callback function name.
+    /// </summary>
+    public const string RemoveCallbackFunctionKey = $"__{RemoveCallbackName}_Function";
+
+    /// <summary>
+    ///     Callback name for entity loaded.
+    /// </summary>
+    public const string LoadCallbackName = "OnEntityLoaded";
+
+    /// <summary>
+    ///     Entity data key for entity loaded callback script name.
+    /// </summary>
+    public const string LoadCallbackScriptKey = $"__{LoadCallbackName}_Script";
+
+    /// <summary>
+    ///     Entity data key for entity loaded callback function name.
+    /// </summary>
+    public const string LoadCallbackFunctionKey = $"__{LoadCallbackName}_Function";
+
+    /// <summary>
+    ///     Callback name for entity unloaded.
+    /// </summary>
+    public const string UnloadCallbackName = "OnEntityUnloaded";
+
+    /// <summary>
+    ///     Entity data key for entity unloaded callback script name.
+    /// </summary>
+    public const string UnloadCallbackScriptKey = $"__{UnloadCallbackName}_Script";
+
+    /// <summary>
+    ///     Entity data key for entity unloaded callback function name.
+    /// </summary>
+    public const string UnloadCallbackFunctionKey = $"__{UnloadCallbackName}_Function";
+
+    /// <summary>
+    ///     Maximum length in bytes of an entity's key-value data key.
+    /// </summary>
+    public const int MaxEntityDataKeyLength = 64;
+
+    /// <summary>
+    ///     Maximum length in bytes of an entity's key-value data value.
+    /// </summary>
+    public const int MaxEntityDataValueLength = 128;
 }

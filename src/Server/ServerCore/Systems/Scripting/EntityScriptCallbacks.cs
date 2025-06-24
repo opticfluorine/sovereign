@@ -28,22 +28,6 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 /// </summary>
 public sealed class EntityScriptCallbacks
 {
-    private const string AddCallbackName = "OnEntityAdded";
-    private const string AddCallbackScriptKey = $"__{AddCallbackName}_Script";
-    private const string AddCallbackFunctionKey = $"__{AddCallbackName}_Function";
-
-    private const string RemoveCallbackName = "OnEntityRemoved";
-    private const string RemoveCallbackScriptKey = $"__{RemoveCallbackName}_Script";
-    private const string RemoveCallbackFunctionKey = $"__{RemoveCallbackName}_Function";
-
-    private const string LoadCallbackName = "OnEntityLoaded";
-    private const string LoadCallbackScriptKey = $"__{LoadCallbackName}_Script";
-    private const string LoadCallbackFunctionKey = $"__{LoadCallbackName}_Function";
-
-    private const string UnloadCallbackName = "OnEntityUnloaded";
-    private const string UnloadCallbackScriptKey = $"__{UnloadCallbackName}_Script";
-    private const string UnloadCallbackFunctionKey = $"__{UnloadCallbackName}_Function";
-
     private const ulong ExcludeRangeStart = EntityConstants.FirstBlockEntityId;
     private const ulong ExcludeRangeEnd = EntityConstants.FirstPersistedEntityId;
 
@@ -71,10 +55,14 @@ public sealed class EntityScriptCallbacks
     /// </summary>
     public void ProcessCallbacks()
     {
-        ProcessCallbacks(entityAddQueue, AddCallbackScriptKey, AddCallbackFunctionKey, AddCallbackName);
-        ProcessCallbacks(entityRemoveQueue, RemoveCallbackScriptKey, RemoveCallbackFunctionKey, RemoveCallbackName);
-        ProcessCallbacks(entityLoadQueue, LoadCallbackScriptKey, LoadCallbackFunctionKey, LoadCallbackName);
-        ProcessCallbacks(entityUnloadQueue, UnloadCallbackScriptKey, UnloadCallbackFunctionKey, UnloadCallbackName);
+        ProcessCallbacks(entityAddQueue, EntityConstants.AddCallbackScriptKey, EntityConstants.AddCallbackFunctionKey,
+            EntityConstants.AddCallbackName);
+        ProcessCallbacks(entityRemoveQueue, EntityConstants.RemoveCallbackScriptKey,
+            EntityConstants.RemoveCallbackFunctionKey, EntityConstants.RemoveCallbackName);
+        ProcessCallbacks(entityLoadQueue, EntityConstants.LoadCallbackScriptKey,
+            EntityConstants.LoadCallbackFunctionKey, EntityConstants.LoadCallbackName);
+        ProcessCallbacks(entityUnloadQueue, EntityConstants.UnloadCallbackScriptKey,
+            EntityConstants.UnloadCallbackFunctionKey, EntityConstants.UnloadCallbackName);
     }
 
     /// <summary>

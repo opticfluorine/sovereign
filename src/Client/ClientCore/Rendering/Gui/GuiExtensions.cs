@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Linq;
 using ImGuiNET;
+using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components.Types;
@@ -32,11 +34,14 @@ public class GuiExtensions
     /// </summary>
     public const float SpriteScaleFactor = 0.0833f;
 
+    private readonly ScriptInfoClient scriptInfoClient;
+
     private readonly GuiTextureMapper textureMapper;
 
-    public GuiExtensions(GuiTextureMapper textureMapper)
+    public GuiExtensions(GuiTextureMapper textureMapper, ScriptInfoClient scriptInfoClient)
     {
         this.textureMapper = textureMapper;
+        this.scriptInfoClient = scriptInfoClient;
     }
 
     /// <summary>
@@ -178,6 +183,75 @@ public class GuiExtensions
 
         // Render GUI component.
         ImGui.Image(texId, GetSpriteDimensions(texData));
+    }
+
+    /// <summary>
+    ///     Renders a component for selecting a script callback.
+    /// </summary>
+    /// <param name="id">Unique ID for this component.</param>
+    /// <param name="scriptName">Script name input buffer.</param>
+    /// <param name="functionName">Callback function name input buffer.</param>
+    public void ScriptFunctionSelector(string id, ref string scriptName, ref string functionName, out bool changed)
+    {
+        changed = false;
+
+        var scripts = scriptInfoClient.ScriptInfo.Scripts;
+        var fontSize = ImGui.GetFontSize();
+        ImGui.Text("Script:");
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(fontSize * 16.0f);
+        if (ImGui.BeginCombo($"##script_{id}", scriptName == string.Empty ? "[None]" : scriptName))
+        {
+            if (ImGui.Selectable("[None]", scriptName == string.Empty))
+            {
+                scriptName = string.Empty;
+                functionName = string.Empty;
+                changed = true;
+            }
+
+            foreach (var script in scripts.Where(s => s.Functions.Count > 0))
+            {
+                var selected = scriptName == script.Name;
+                if (ImGui.Selectable(script.Name, selected))
+                {
+                    scriptName = script.Name;
+                    functionName = script.Functions.First().Name;
+                    changed = true;
+                }
+
+                if (selected) ImGui.SetItemDefaultFocus();
+            }
+
+            ImGui.EndCombo();
+        }
+
+        ImGui.SameLine();
+
+        ImGui.BeginDisabled(scriptName == string.Empty);
+        ImGui.Text("Function:");
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(fontSize * 16.0f);
+        if (ImGui.BeginCombo($"##func_{id}", functionName))
+        {
+            var selectedScriptName = scriptName;
+            var script = scripts.First(s => s.Name == selectedScriptName);
+
+            foreach (var function in script.Functions)
+            {
+                var selected = functionName == function.Name;
+                if (ImGui.Selectable(function.Name, selected))
+                {
+                    functionName = function.Name;
+                    changed = true;
+                }
+
+                if (selected) ImGui.SetItemDefaultFocus();
+            }
+
+            ImGui.EndCombo();
+        }
+
+        ImGui.EndDisabled();
     }
 
     /// <summary>

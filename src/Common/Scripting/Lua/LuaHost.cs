@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using static Sovereign.Scripting.Lua.LuaBindings;
@@ -32,6 +33,7 @@ public class LuaHost : IDisposable
     private const int QuickLookupSizeHint = 32;
     private const string QuickLookupKey = "sovereign_ql";
     private readonly List<GCHandle> bindings = new();
+    private readonly List<string> functionNames = new();
     private readonly Lock opsLock = new();
     private readonly int quickLookupStackPosition;
     private readonly int tracebackStackPosition;
@@ -68,6 +70,19 @@ public class LuaHost : IDisposable
         lua_setglobal(LuaState, "debug");
     }
 
+    /// <summary>
+    ///     Entity parameter hints indexed by function name.
+    /// </summary>
+    public ConcurrentDictionary<string, List<string>> EntityParameterHintsByFunction { get; } = new();
+
+    /// <summary>
+    ///     List of global functions provided by the script.
+    /// </summary>
+    public IReadOnlyList<string> FunctionNames => functionNames;
+
+    /// <summary>
+    ///     Logger for this host.
+    /// </summary>
     public ILogger Logger { get; }
 
     /// <summary>
@@ -288,7 +303,18 @@ public class LuaHost : IDisposable
     {
         lock (opsLock)
         {
+            // Scan the global table for functions present before the script is executed.
+            var baselineFunctions = new HashSet<string>();
+            ScanFunctions(baselineFunctions);
+
             Validate(lua_pcall(LuaState, 0, LUA_MULTRET, tracebackStackPosition));
+
+            // Re-scan to find new functions added by the script.
+            var newFunctions = new HashSet<string>();
+            ScanFunctions(newFunctions);
+            functionNames.Clear();
+            functionNames.AddRange(newFunctions.Except(baselineFunctions));
+            functionNames.Sort();
         }
     }
 
@@ -301,6 +327,26 @@ public class LuaHost : IDisposable
         lock (opsLock)
         {
             action.Invoke(new ExecutionControls(this));
+        }
+    }
+
+    /// <summary>
+    ///     Adds an entity key-value parameter hint for the given function.
+    /// </summary>
+    /// <param name="functionName">Function name.</param>
+    /// <param name="parameterName">Parameter name.</param>
+    public void AddEntityParameterHint(string functionName, string parameterName)
+    {
+        lock (opsLock)
+        {
+            if (!EntityParameterHintsByFunction.TryGetValue(functionName, out var parameters))
+            {
+                parameters = new List<string>();
+                EntityParameterHintsByFunction[functionName] = parameters;
+            }
+
+            if (!parameters.Contains(parameterName))
+                parameters.Add(parameterName);
         }
     }
 
@@ -514,6 +560,28 @@ public class LuaHost : IDisposable
 
         var err = lua_tostring(LuaState, -1);
         throw new LuaException(err);
+    }
+
+    /// <summary>
+    ///     Scans the global table for functions.
+    /// </summary>
+    private void ScanFunctions(HashSet<string> nameSet)
+    {
+        nameSet.Clear();
+
+        luaL_checkstack(LuaState, 2, null);
+        lua_rawgeti(LuaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // push global table
+        lua_pushnil(LuaState); // init key for loop
+        while (lua_next(LuaState, -2) != 0)
+        {
+            if (lua_isfunction(LuaState, -1))
+                nameSet.Add(lua_tostring(LuaState, -2));
+            lua_pop(LuaState, 1); // pop value, keep key for next iteration
+        }
+
+        lua_pop(LuaState, 1); // pop global table
+
+        functionNames.Sort();
     }
 
     /// <summary>
