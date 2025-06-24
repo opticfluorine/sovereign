@@ -35,9 +35,6 @@ public class AppearanceControlGroup(GuiExtensions guiExtensions, AnimatedSpriteS
     private const float DefaultPointLightRadius = 1.0f;
     private const float DefaultShadowRadius = 0.1f;
 
-    private bool inputCastShadows;
-    private bool inputPointLightSource;
-
     /// <summary>
     ///     Renders the appearance control group and updates the given entity definition.
     /// </summary>
@@ -98,6 +95,7 @@ public class AppearanceControlGroup(GuiExtensions guiExtensions, AnimatedSpriteS
         ImGui.TableNextColumn();
         ImGui.Text("Cast Shadows:");
         ImGui.TableNextColumn();
+        var inputCastShadows = entityDefinition.CastShadows != null;
         ImGui.Checkbox("##castShadows", ref inputCastShadows);
 
         ImGui.TableNextColumn();
@@ -127,6 +125,7 @@ public class AppearanceControlGroup(GuiExtensions guiExtensions, AnimatedSpriteS
         ImGui.TableNextColumn();
         ImGui.Text("Point Light Source:");
         ImGui.TableNextColumn();
+        var inputPointLightSource = entityDefinition.PointLightSource != null;
         ImGui.Checkbox("##pointLightSource", ref inputPointLightSource);
 
         ImGui.TableNextColumn();

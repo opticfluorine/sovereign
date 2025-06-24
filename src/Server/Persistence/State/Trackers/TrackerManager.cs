@@ -26,6 +26,7 @@ public sealed class TrackerManager
     private readonly AdminStateTracker adminStateTracker;
     private readonly BoundingBoxStateTracker boundingBoxStateTracker;
     private readonly CastBlockShadowsStateTracker castBlockShadowsStateTracker;
+    private readonly CastShadowsStateTracker castShadowsStateTracker;
     private readonly EntityTypeStateTracker entityTypeStateTracker;
     private readonly PhysicsStateTracker physicsStateTracker;
     private readonly PointLightSourceStateTracker pointLightSourceStateTracker;
@@ -45,6 +46,7 @@ public sealed class TrackerManager
         TemplateStateTracker templateStateTracker,
         CastBlockShadowsStateTracker castBlockShadowsStateTracker,
         PointLightSourceStateTracker pointLightSourceStateTracker,
+        CastShadowsStateTracker castShadowsStateTracker,
         PhysicsStateTracker physicsStateTracker,
         BoundingBoxStateTracker boundingBoxStateTracker,
         EntityTypeStateTracker entityTypeStateTracker)
@@ -53,6 +55,7 @@ public sealed class TrackerManager
         this.templateStateTracker = templateStateTracker;
         this.castBlockShadowsStateTracker = castBlockShadowsStateTracker;
         this.pointLightSourceStateTracker = pointLightSourceStateTracker;
+        this.castShadowsStateTracker = castShadowsStateTracker;
         this.physicsStateTracker = physicsStateTracker;
         this.boundingBoxStateTracker = boundingBoxStateTracker;
         this.entityTypeStateTracker = entityTypeStateTracker;

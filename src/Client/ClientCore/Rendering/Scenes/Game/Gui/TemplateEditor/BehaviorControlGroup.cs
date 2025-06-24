@@ -27,8 +27,6 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 /// </summary>
 public sealed class BehaviorControlGroup
 {
-    private bool inputBoundingBox;
-
     /// <summary>
     ///     Renders the behavior control group and updates the given entity definition.
     /// </summary>
@@ -65,15 +63,11 @@ public sealed class BehaviorControlGroup
     /// <param name="entityDefinition">Entity definition.</param>
     private void BoundingBoxControls(EntityDefinition entityDefinition)
     {
+        var inputPhysics = entityDefinition.Physics;
         ImGui.TableNextColumn();
-        ImGui.Text("Bounding Box:");
+        ImGui.Text("Bounding Box Position:");
         ImGui.TableNextColumn();
-        ImGui.Checkbox("##boundingBox", ref inputBoundingBox);
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Position:");
-        ImGui.TableNextColumn();
-        ImGui.BeginDisabled(!inputBoundingBox);
+        ImGui.BeginDisabled(!inputPhysics);
         var fontSize = ImGui.GetFontSize();
         ImGui.SetNextItemWidth(fontSize * 8.0f);
         var inputBoundingBoxPosition = entityDefinition.BoundingBox?.Position ?? Vector3.Zero;
@@ -81,9 +75,9 @@ public sealed class BehaviorControlGroup
         ImGui.EndDisabled();
 
         ImGui.TableNextColumn();
-        ImGui.Text("Size:");
+        ImGui.Text("Bounding Box Size:");
         ImGui.TableNextColumn();
-        ImGui.BeginDisabled(!inputBoundingBox);
+        ImGui.BeginDisabled(!inputPhysics);
         ImGui.SetNextItemWidth(fontSize * 8.0f);
         var inputBoundingBoxSize = entityDefinition.BoundingBox?.Size ?? Vector3.One;
         ImGui.InputFloat3("##boundingBoxSize", ref inputBoundingBoxSize);
@@ -92,7 +86,7 @@ public sealed class BehaviorControlGroup
         inputBoundingBoxSize.Z = Math.Max(inputBoundingBoxSize.Z, 0.0f);
         ImGui.EndDisabled();
 
-        if (inputBoundingBox)
+        if (inputPhysics)
             entityDefinition.BoundingBox = new BoundingBox
             {
                 Position = inputBoundingBoxPosition,
