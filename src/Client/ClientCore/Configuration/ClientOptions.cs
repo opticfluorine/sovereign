@@ -72,6 +72,11 @@ public class DisplayOptions
     public string Font { get; set; } = "";
 
     /// <summary>
+    ///     Icon font.
+    /// </summary>
+    public string IconFont { get; set; } = "";
+
+    /// <summary>
     ///     Base font size.
     /// </summary>
     public float BaseFontSize { get; set; }
@@ -200,7 +205,7 @@ public sealed class DayNightOptions
     /// </summary>
     public List<GlobalLightStep> GlobalLightSteps { get; set; } = new()
     {
-        new GlobalLightStep()
+        new GlobalLightStep
         {
             SecondOfDay = 0,
             Red = 1.0f,

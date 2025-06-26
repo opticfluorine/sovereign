@@ -16,7 +16,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;

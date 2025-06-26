@@ -17,7 +17,7 @@
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
@@ -48,7 +48,7 @@ public class GuiRenderer : IDisposable
     /// <summary>
     ///     Last bound texture.
     /// </summary>
-    private IntPtr lastTexture = IntPtr.Zero;
+    private ImTextureID lastTexture = new(IntPtr.Zero);
 
     /// <summary>
     ///     Resource set for GUI rendering.
@@ -124,7 +124,7 @@ public class GuiRenderer : IDisposable
         CreateResourceSet();
 
         // Reset the last-used texture to invalidate the cached vertex shader constants.
-        lastTexture = IntPtr.Zero;
+        lastTexture = new ImTextureID(IntPtr.Zero);
     }
 
     /// <summary>
@@ -223,7 +223,7 @@ public class GuiRenderer : IDisposable
     /// <param name="indexOffset">Overall offset into GUI index buffer.</param>
     /// <param name="listIndexOffset">Current list relative offset into GUI index buffer.</param>
     /// <param name="vertexOffset">Overall offset into GUI vertex buffer.</param>
-    private void DrawTextureLayer(CommandList commandList, ImDrawCmdPtr curCmd, IntPtr texId, ulong systemTime,
+    private void DrawTextureLayer(CommandList commandList, ImDrawCmd curCmd, ImTextureID texId, ulong systemTime,
         int indexOffset,
         int listIndexOffset, int vertexOffset)
     {
@@ -249,7 +249,7 @@ public class GuiRenderer : IDisposable
     /// <returns>
     ///     true if vertex shader constants were updated, false otherwise.
     /// </returns>
-    private bool TryBindTexture(IntPtr texId, ulong systemTime)
+    private bool TryBindTexture(ImTextureID texId, ulong systemTime)
     {
         if (texId == IntPtr.Zero || texId == lastTexture) return false;
         if (atlasManager.TextureAtlas == null) throw new InvalidOperationException("Texture atlas is null.");
@@ -398,11 +398,11 @@ public class GuiRenderer : IDisposable
             var curList = drawData.CmdLists[i];
 
             // Grab buffers from ImGui.
-            var vertexIn = curList.VtxBuffer.Data.ToPointer();
+            var vertexIn = curList.VtxBuffer.Data;
             var vertexOut = (vertexBuf.BufferPtr + vertexOffset * vertexSize).ToPointer();
             var vertexBytes = curList.VtxBuffer.Size * vertexSize;
 
-            var indexIn = curList.IdxBuffer.Data.ToPointer();
+            var indexIn = curList.IdxBuffer.Data;
             var indexOut = (indexBuf.BufferPtr + indexOffset * indexSize).ToPointer();
             var indexBytes = curList.IdxBuffer.Size * indexSize;
 

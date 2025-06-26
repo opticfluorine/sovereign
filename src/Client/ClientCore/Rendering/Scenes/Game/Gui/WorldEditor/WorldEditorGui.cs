@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
@@ -31,6 +31,11 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
 /// </summary>
 public class WorldEditorGui
 {
+    /// <summary>
+    ///     Currently selected world edit tool.
+    /// </summary>
+    private readonly Tool currentTool = Tool.Block;
+
     private readonly IEventSender eventSender;
     private readonly GuiExtensions guiExtensions;
 
@@ -87,14 +92,34 @@ public class WorldEditorGui
     public void Render()
     {
         var fontSize = ImGui.GetFontSize();
-        ImGui.SetNextWindowSize(fontSize * new Vector2(15.0f, 13.5f));
+        ImGui.SetNextWindowSize(fontSize * new Vector2(15.0f, 15.5f));
         if (!ImGui.Begin("World Editor", ImGuiWindowFlags.NoResize)) return;
 
+        RenderToolSelection();
+
+        switch (currentTool)
+        {
+            case Tool.Block:
+                RenderBlockTool();
+                break;
+
+            case Tool.Npc:
+                RenderNpcTool();
+                break;
+        }
+
+        ImGui.End();
+    }
+
+    private void RenderToolSelection()
+    {
+    }
+
+    private void RenderBlockTool()
+    {
         RenderBlockTemplateControl();
         RenderDrawControls();
         RenderHelp();
-
-        ImGui.End();
     }
 
     /// <summary>
@@ -196,5 +221,25 @@ public class WorldEditorGui
         ImGui.TextColored(helpTextColor, "Scroll to change block template.");
         ImGui.TextColored(helpTextColor, "Ctrl+Scroll to change Z offset.");
         ImGui.TextColored(helpTextColor, "Shift+Scroll to change pen width.");
+    }
+
+    private void RenderNpcTool()
+    {
+    }
+
+    /// <summary>
+    ///     World edit tool types.
+    /// </summary>
+    private enum Tool
+    {
+        /// <summary>
+        ///     Block placement tool.
+        /// </summary>
+        Block,
+
+        /// <summary>
+        ///     NPC placement tool.
+        /// </summary>
+        Npc
     }
 }

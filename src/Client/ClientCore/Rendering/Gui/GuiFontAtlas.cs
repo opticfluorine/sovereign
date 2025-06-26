@@ -17,7 +17,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
@@ -31,10 +31,13 @@ namespace Sovereign.ClientCore.Rendering.Gui;
 /// </summary>
 public sealed class GuiFontAtlas : IDisposable
 {
+    private const ushort FirstIconCodePoint = 0xe000;
+    private const ushort LastIconCodePoint = 0xe0fe;
+
     /// <summary>
     ///     ImGui texture ID for the font atlas.
     /// </summary>
-    public static readonly IntPtr TextureId = 1;
+    public static readonly ImTextureID TextureId = 1;
 
     private readonly DisplayOptions displayOptions;
 
@@ -112,7 +115,7 @@ public sealed class GuiFontAtlas : IDisposable
     ///     Initializes the font atlas surface.
     /// </summary>
     [MemberNotNull("fontAtlasSurface")]
-    private void InitializeSurface()
+    private unsafe void InitializeSurface()
     {
         // Determine UI scaling with resolution.
         var scaleFactor = (float)mainDisplay.DisplayMode!.Height /
@@ -124,16 +127,38 @@ public sealed class GuiFontAtlas : IDisposable
             resourcePathBuilder.BuildPathToResource(ResourceType.Fonts, displayOptions.Font);
         var io = ImGui.GetIO();
         io.Fonts.AddFontFromFileTTF(fontPath, fontSize, null, io.Fonts.GetGlyphRangesDefault());
-        io.Fonts.Build();
+
+        // Load icon font.
+        // This assumes the use of OpenFontIcons (https://github.com/traverseda/OpenFontIcons).
+        // If you use a different icon font, adjust the code points accordingly (here and in IconCodePoints).
+        var iconRange = stackalloc uint[] { FirstIconCodePoint, LastIconCodePoint, 0 /* list terminator */ };
+        var iconFontPath =
+            resourcePathBuilder.BuildPathToResource(ResourceType.Fonts, displayOptions.IconFont);
+        var iconConfig = stackalloc ImFontConfig[1];
+        iconConfig[0] = new ImFontConfig
+        {
+            MergeMode = 1, // should be true, but ImGui.NET uses byte instead of bool here
+            GlyphMinAdvanceX = fontSize, // load font as monospace
+
+            // Following fields are normally set by the ImFontConfig constructor in C++, not in ImGUI.NET though.
+            FontDataOwnedByAtlas = 1,
+            OversampleH = 1,
+            OversampleV = 1,
+            GlyphMaxAdvanceX = float.MaxValue,
+            RasterizerMultiply = 1.0f,
+            RasterizerDensity = 1.0f,
+            EllipsisChar = 0
+        };
+
+        io.Fonts.AddFontFromFileTTF(iconFontPath, fontSize, iconConfig, iconRange);
 
         // Retrieve raw data from ImGui.
-        io.Fonts.GetTexDataAsRGBA32(out IntPtr outPixels,
-            out var outWidth, out var outHeight);
-        width = outWidth;
-        height = outHeight;
+        io.Fonts.Build();
+        var outPixels = stackalloc byte*[1];
+        io.Fonts.GetTexDataAsRGBA32(outPixels, ref width, ref height);
 
         // Create an SDL_Surface to hold the atlas.
-        fontAtlasSurface = Surface.CreateSurfaceFrom(outPixels, outWidth, outHeight,
+        fontAtlasSurface = Surface.CreateSurfaceFrom(new IntPtr(*outPixels), width, height,
             DisplayFormat.B8G8R8A8_UNorm);
 
         // Tag the font texture for later lookup.

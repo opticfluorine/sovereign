@@ -16,7 +16,7 @@
 
 using System;
 using System.Numerics;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;

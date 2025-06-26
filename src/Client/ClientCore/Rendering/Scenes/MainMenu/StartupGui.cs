@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
@@ -64,8 +64,8 @@ public class StartupGui
 
         if (ImGui.BeginTable("startup", 1))
         {
-            ImGui.TableNextColumn();
             ImGui.TableSetupColumn("##startupCol", ImGuiTableColumnFlags.WidthStretch);
+            ImGui.TableNextColumn();
             if (ImGui.Button(Login, fontSize * ButtonSize)) newState = MainMenuState.Login;
 
             ImGui.TableNextColumn();

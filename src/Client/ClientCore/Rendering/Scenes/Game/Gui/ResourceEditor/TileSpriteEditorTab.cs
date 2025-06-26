@@ -18,7 +18,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;

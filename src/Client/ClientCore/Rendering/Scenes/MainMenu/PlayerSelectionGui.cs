@@ -17,7 +17,7 @@
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;

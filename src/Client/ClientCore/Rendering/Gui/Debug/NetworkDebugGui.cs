@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Network.Infrastructure;
 
 namespace Sovereign.ClientCore.Rendering.Gui.Debug;
@@ -40,7 +40,7 @@ public class NetworkDebugGui(ClientNetworkManager networkManager)
             ImGui.Text("Data Sent:");
             ImGui.TableNextColumn();
             ImGui.Text($"{networkManager.NetStatistics.BytesSent} bytes");
-            
+
             ImGui.TableNextColumn();
             ImGui.Text("Data Received:");
             ImGui.TableNextColumn();
@@ -50,16 +50,17 @@ public class NetworkDebugGui(ClientNetworkManager networkManager)
             ImGui.Text("Packets Sent:");
             ImGui.TableNextColumn();
             ImGui.Text($"{networkManager.NetStatistics.PacketsSent}");
-            
+
             ImGui.TableNextColumn();
             ImGui.Text("Packets Received:");
             ImGui.TableNextColumn();
             ImGui.Text($"{networkManager.NetStatistics.PacketsReceived}");
-            
+
             ImGui.TableNextColumn();
             ImGui.Text("Packet Loss:");
             ImGui.TableNextColumn();
-            ImGui.Text($"{networkManager.NetStatistics.PacketLoss} ({networkManager.NetStatistics.PacketLossPercent}%)");
+            ImGui.Text(
+                $"{networkManager.NetStatistics.PacketLoss} ({networkManager.NetStatistics.PacketLossPercent}%)");
 
             ImGui.TableNextColumn();
             ImGui.Text("Ping:");
@@ -70,7 +71,7 @@ public class NetworkDebugGui(ClientNetworkManager networkManager)
             ImGui.Text("RTT:");
             ImGui.TableNextColumn();
             ImGui.Text($"{networkManager.RttMs} ms");
-            
+
             ImGui.EndTable();
         }
 

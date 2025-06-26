@@ -16,10 +16,11 @@
 
 using System.Numerics;
 using System.Threading.Tasks;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network.Infrastructure;
+using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Rest.Data;
@@ -133,22 +134,22 @@ public class RegistrationGui
                 setDefaultFocus = false;
             }
 
-            if (ImGui.InputText("##username", ref usernameInput, MaxFieldSize, ImGuiInputTextFlags.EnterReturnsTrue))
+            if (GuiWorkarounds.InputTextEnterReturns("##username", ref usernameInput, MaxFieldSize))
                 DoRegister();
-            ImGui.TableNextRow();
 
             ImGui.TableNextColumn();
             ImGui.Text(Password);
+
             ImGui.TableNextColumn();
-            if (ImGui.InputText("##password", ref passwordInput, MaxFieldSize,
-                    ImGuiInputTextFlags.Password | ImGuiInputTextFlags.EnterReturnsTrue)) DoRegister();
-            ImGui.TableNextRow();
+            if (GuiWorkarounds.InputTextEnterReturns("##password", ref passwordInput, MaxFieldSize,
+                    ImGuiInputTextFlags.Password)) DoRegister();
 
             ImGui.TableNextColumn();
             ImGui.Text(ConfirmPassword);
+
             ImGui.TableNextColumn();
-            if (ImGui.InputText("##confirm", ref confirmPasswordInput, MaxFieldSize,
-                    ImGuiInputTextFlags.Password | ImGuiInputTextFlags.EnterReturnsTrue)) DoRegister();
+            if (GuiWorkarounds.InputTextEnterReturns("##confirm", ref confirmPasswordInput, MaxFieldSize,
+                    ImGuiInputTextFlags.Password)) DoRegister();
 
             ImGui.PopItemWidth();
             ImGui.EndTable();

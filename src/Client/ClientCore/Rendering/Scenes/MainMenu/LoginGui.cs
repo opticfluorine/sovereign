@@ -15,11 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network;
 using Sovereign.ClientCore.Network.Infrastructure;
+using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
@@ -123,16 +124,16 @@ public class LoginGui
             setDefaultFocus = false;
         }
 
-        if (ImGui.InputText("##username", ref usernameInput, MaxFieldSize,
-                ImGuiInputTextFlags.EnterReturnsTrue)) DoLogin();
+        if (GuiWorkarounds.InputTextEnterReturns("##username"u8, ref usernameInput, MaxFieldSize)) DoLogin();
+
         ImGui.SetItemDefaultFocus();
 
         ImGui.TableNextColumn();
         ImGui.Text(Password);
 
         ImGui.TableNextColumn();
-        if (ImGui.InputText("##password", ref passwordInput, MaxFieldSize,
-                ImGuiInputTextFlags.Password | ImGuiInputTextFlags.EnterReturnsTrue)) DoLogin();
+        if (GuiWorkarounds.InputTextEnterReturns("##password"u8, ref passwordInput, MaxFieldSize,
+                ImGuiInputTextFlags.Password)) DoLogin();
 
         ImGui.PopItemWidth();
         ImGui.EndTable();

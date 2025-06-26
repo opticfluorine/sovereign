@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Updater;
