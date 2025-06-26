@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Components.Indexers;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Rendering.Gui;

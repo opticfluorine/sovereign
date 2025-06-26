@@ -16,8 +16,9 @@
 
 using System;
 using System.Numerics;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Microsoft.Extensions.Logging;
+using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Systems.ClientChat;
 using Sovereign.EngineCore.Events;
 
@@ -79,8 +80,7 @@ public class ChatGui
             ImGui.PushItemWidth(tableDims.X);
             if (ImGui.IsWindowFocused()) ImGui.SetKeyboardFocusHere();
 
-            if (ImGui.InputText("##chatInput", ref input, 128,
-                    ImGuiInputTextFlags.EnterReturnsTrue)) OnSubmit();
+            if (GuiWorkarounds.InputTextEnterReturns("##chatInput", ref input, 128)) OnSubmit();
             ImGui.PopItemWidth();
             ImGui.End();
         }
@@ -101,12 +101,12 @@ public class ChatGui
     /// <summary>
     ///     Called when the player submits a chat message.
     /// </summary>
-    private void OnSubmit()
+    private unsafe void OnSubmit()
     {
         // If no input, remove focus from the window.
         if (input.Length == 0)
         {
-            ImGui.SetWindowFocus(null);
+            ImGui.SetWindowFocus((byte*)null);
             return;
         }
 

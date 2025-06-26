@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Hexa.NET.ImGui;
 using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites;
@@ -137,9 +138,9 @@ public class GuiTextureMapper
     /// </summary>
     /// <param name="textureId"></param>
     /// <returns></returns>
-    public TextureData GetTextureDataForTextureId(IntPtr textureId)
+    public TextureData GetTextureDataForTextureId(ImTextureID textureId)
     {
-        return textures[(int)textureId - IndexOffset];
+        return textures[(int)textureId.Handle - IndexOffset];
     }
 
     /// <summary>
@@ -149,7 +150,8 @@ public class GuiTextureMapper
     /// <param name="orientation">Orientation.</param>
     /// <param name="phase">Animation phase.</param>
     /// <returns>ImGui texture ID.</returns>
-    public IntPtr GetTextureIdForAnimatedSprite(int animatedSpriteId, Orientation orientation, AnimationPhase phase)
+    public ImTextureID GetTextureIdForAnimatedSprite(int animatedSpriteId, Orientation orientation,
+        AnimationPhase phase)
     {
         var key = Tuple.Create(animatedSpriteId, orientation, phase);
         if (!animatedSpriteIndices.TryGetValue(key, out var index))
@@ -174,7 +176,7 @@ public class GuiTextureMapper
             animatedSpriteIndices[key] = index;
         }
 
-        return new IntPtr(index + IndexOffset);
+        return new ImTextureID(index + IndexOffset);
     }
 
     /// <summary>
@@ -185,7 +187,7 @@ public class GuiTextureMapper
     /// <param name="orientation">Orientation.</param>
     /// <param name="phase">Animation phase.</param>
     /// <returns>ImGui texture ID.</returns>
-    public IntPtr GetTextureIdForCustomAnimatedSprite(string customSpriteId, AnimatedSprite customSprite,
+    public ImTextureID GetTextureIdForCustomAnimatedSprite(string customSpriteId, AnimatedSprite customSprite,
         Orientation orientation, AnimationPhase phase)
     {
         if (!customIndices.TryGetValue(customSpriteId, out var index))
@@ -210,7 +212,7 @@ public class GuiTextureMapper
         texData.Width = width;
         texData.Height = height;
 
-        return new IntPtr(index + IndexOffset);
+        return new ImTextureID(index + IndexOffset);
     }
 
     /// <summary>
@@ -218,7 +220,7 @@ public class GuiTextureMapper
     /// </summary>
     /// <param name="spritesheet">Spritesheet name.</param>
     /// <returns>ImGui texture ID.</returns>
-    public IntPtr GetTextureIdForSpritesheet(string spritesheet)
+    public ImTextureID GetTextureIdForSpritesheet(string spritesheet)
     {
         if (!spritesheetIndices.TryGetValue(spritesheet, out var index))
         {
@@ -244,7 +246,7 @@ public class GuiTextureMapper
             spritesheetIndices[spritesheet] = index;
         }
 
-        return new IntPtr(index + IndexOffset);
+        return new ImTextureID(index + IndexOffset);
     }
 
     /// <summary>
@@ -252,7 +254,7 @@ public class GuiTextureMapper
     /// </summary>
     /// <param name="spriteId">Sprite ID.</param>
     /// <returns>ImGui texture ID.</returns>
-    public IntPtr GetTextureIdForSprite(int spriteId)
+    public ImTextureID GetTextureIdForSprite(int spriteId)
     {
         if (!spriteIndices.TryGetValue(spriteId, out var index))
         {
@@ -274,7 +276,7 @@ public class GuiTextureMapper
             spriteIndices[spriteId] = index;
         }
 
-        return new IntPtr(index + IndexOffset);
+        return new ImTextureID(index + IndexOffset);
     }
 
     /// <summary>
@@ -284,7 +286,7 @@ public class GuiTextureMapper
     /// <param name="contextKey">Tile context key.</param>
     /// <returns>ImGui texture ID.</returns>
     /// <exception cref="IndexOutOfRangeException">Thrown if the tile sprite ID is out of range.</exception>
-    public IntPtr GetTextureIdForTileSprite(int tileSpriteId, TileContextKey contextKey)
+    public ImTextureID GetTextureIdForTileSprite(int tileSpriteId, TileContextKey contextKey)
     {
         if (!tileSpriteIndices.TryGetValue(Tuple.Create(tileSpriteId, contextKey), out var index))
         {
@@ -313,7 +315,7 @@ public class GuiTextureMapper
             tileSpriteIndices[Tuple.Create(tileSpriteId, contextKey)] = index;
         }
 
-        return new IntPtr(index + IndexOffset);
+        return new ImTextureID(index + IndexOffset);
     }
 
     /// <summary>
@@ -323,7 +325,8 @@ public class GuiTextureMapper
     /// <param name="customSprite">Custom tile sprite.</param>
     /// <param name="contextKey">Tile sprite context key.</param>
     /// <returns>ImGui texture ID.</returns>
-    public IntPtr GetTextureIdForCustomTileSprite(string customId, TileSprite customSprite, TileContextKey contextKey)
+    public ImTextureID GetTextureIdForCustomTileSprite(string customId, TileSprite customSprite,
+        TileContextKey contextKey)
     {
         if (!customIndices.TryGetValue(customId, out var index))
         {
@@ -334,17 +337,17 @@ public class GuiTextureMapper
         // Update entire record in case there were any changes.
         var texData = textures[index];
         texData.SourceType = SourceType.Multiple;
-        texData.Layers ??= new List<IntPtr>();
+        texData.Layers ??= new List<ImTextureID>();
         texData.Layers.Clear();
         texData.Layers.AddRange(
             customSprite
                 .GetMatchingAnimatedSpriteIds(contextKey)
                 .Select(id => GetTextureIdForAnimatedSprite(id, Orientation.South, AnimationPhase.Default)));
-        var layerTexData = textures[(int)texData.Layers[0] - IndexOffset];
+        var layerTexData = textures[(int)texData.Layers[0].Handle - IndexOffset];
         texData.Width = layerTexData.Width;
         texData.Height = layerTexData.Height;
 
-        return new IntPtr(index + IndexOffset);
+        return new ImTextureID(index + IndexOffset);
     }
 
     /// <summary>
@@ -507,7 +510,7 @@ public class GuiTextureMapper
         /// <summary>
         ///     For SourceType "Multiple", the layers to be drawn.
         /// </summary>
-        public List<IntPtr>? Layers;
+        public List<ImTextureID>? Layers;
 
         /// <summary>
         ///     For SourceType "AnimatedSprite" and "CustomAnimatedSprite", orientation.

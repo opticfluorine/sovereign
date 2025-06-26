@@ -16,8 +16,9 @@
 
 using System.Numerics;
 using System.Threading.Tasks;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Network.Infrastructure;
+using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineUtil.Monads;
@@ -110,8 +111,8 @@ public class CreatePlayerGui
         }
 
         ImGui.SetNextItemWidth(fontSize * 13.33f);
-        if (ImGui.InputText("##playerName", ref playerNameInput, EntityConstants.MaxNameLength,
-                ImGuiInputTextFlags.EnterReturnsTrue)) OnCreate();
+        if (GuiWorkarounds.InputTextEnterReturns("##playerName", ref playerNameInput, EntityConstants.MaxNameLength))
+            OnCreate();
 
         ImGui.EndTable();
 

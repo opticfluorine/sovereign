@@ -19,7 +19,7 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using SDL2;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.EngineCore.Logging;
@@ -47,7 +47,7 @@ public sealed class CommonGuiManager : IDisposable
     ///     SDL cursor array.
     /// </summary>
     private readonly IntPtr[] mouseCursors =
-        new IntPtr[(int)ImGuiMouseCursor.COUNT];
+        new IntPtr[(int)ImGuiMouseCursor.Count];
 
     /// <summary>
     ///     Mouse press state array.
@@ -59,7 +59,7 @@ public sealed class CommonGuiManager : IDisposable
     /// <summary>
     ///     ImGui context.
     /// </summary>
-    private IntPtr context;
+    private ImGuiContextPtr context;
 
     private bool initialized;
 
@@ -113,16 +113,20 @@ public sealed class CommonGuiManager : IDisposable
             SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_IBEAM);
         mouseCursors[(int)ImGuiMouseCursor.ResizeAll] =
             SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZEALL);
-        mouseCursors[(int)ImGuiMouseCursor.ResizeNS] =
+        mouseCursors[(int)ImGuiMouseCursor.ResizeNs] =
             SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZENS);
-        mouseCursors[(int)ImGuiMouseCursor.ResizeEW] =
+        mouseCursors[(int)ImGuiMouseCursor.ResizeEw] =
             SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZEWE);
-        mouseCursors[(int)ImGuiMouseCursor.ResizeNESW] =
+        mouseCursors[(int)ImGuiMouseCursor.ResizeNesw] =
             SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZENESW);
-        mouseCursors[(int)ImGuiMouseCursor.ResizeNWSE] =
+        mouseCursors[(int)ImGuiMouseCursor.ResizeNwse] =
             SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZENWSE);
         mouseCursors[(int)ImGuiMouseCursor.Hand] =
             SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_HAND);
+        mouseCursors[(int)ImGuiMouseCursor.Wait] =
+            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_WAIT);
+        mouseCursors[(int)ImGuiMouseCursor.Progress] =
+            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_WAITARROW);
         mouseCursors[(int)ImGuiMouseCursor.NotAllowed] =
             SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_NO);
         foreach (var cursor in mouseCursors)
@@ -400,25 +404,25 @@ public sealed class CommonGuiManager : IDisposable
             case SDL.SDL_Keycode.SDLK_RGUI: return ImGuiKey.RightSuper;
             case SDL.SDL_Keycode.SDLK_APPLICATION: return ImGuiKey.Menu;
             case SDL.SDL_Keycode.SDLK_0:
-                return ImGuiKey._0;
+                return ImGuiKey.Key0;
             case SDL.SDL_Keycode.SDLK_1:
-                return ImGuiKey._1;
+                return ImGuiKey.Key1;
             case SDL.SDL_Keycode.SDLK_2:
-                return ImGuiKey._2;
+                return ImGuiKey.Key2;
             case SDL.SDL_Keycode.SDLK_3:
-                return ImGuiKey._3;
+                return ImGuiKey.Key3;
             case SDL.SDL_Keycode.SDLK_4:
-                return ImGuiKey._4;
+                return ImGuiKey.Key4;
             case SDL.SDL_Keycode.SDLK_5:
-                return ImGuiKey._5;
+                return ImGuiKey.Key5;
             case SDL.SDL_Keycode.SDLK_6:
-                return ImGuiKey._6;
+                return ImGuiKey.Key6;
             case SDL.SDL_Keycode.SDLK_7:
-                return ImGuiKey._7;
+                return ImGuiKey.Key7;
             case SDL.SDL_Keycode.SDLK_8:
-                return ImGuiKey._8;
+                return ImGuiKey.Key8;
             case SDL.SDL_Keycode.SDLK_9:
-                return ImGuiKey._9;
+                return ImGuiKey.Key9;
             case SDL.SDL_Keycode.SDLK_a: return ImGuiKey.A;
             case SDL.SDL_Keycode.SDLK_b: return ImGuiKey.B;
             case SDL.SDL_Keycode.SDLK_c: return ImGuiKey.C;
