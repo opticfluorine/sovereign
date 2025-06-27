@@ -18,6 +18,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using Hexa.NET.ImGui;
+using HexaGen.Runtime;
 
 namespace Sovereign.ClientCore.Rendering.Gui;
 
@@ -74,14 +75,13 @@ public static class GuiWorkarounds
         ImGuiInputTextFlags flags)
     {
         var bufPtr = stackalloc byte[(int)bufferSize];
-        var bytes = Encoding.UTF8.GetBytes(buffer);
-        var copyLen = Math.Min((int)bufferSize - 1, bytes.Length);
-        Marshal.Copy(bytes, 0, new IntPtr(bufPtr), copyLen);
-        bufPtr[copyLen] = 0;
+        var strLen = Utils.GetByteCountUTF8(buffer);
+        var strOffset = Utils.EncodeStringUTF8(buffer, bufPtr, Math.Min(strLen, (int)bufferSize - 1));
+        bufPtr[strOffset] = 0;
 
         var enterPressed = ImGui.InputText(label, bufPtr, bufferSize, flags);
 
-        if (ImGui.IsItemDeactivatedAfterEdit()) buffer = Marshal.PtrToStringUTF8(new IntPtr(bufPtr)) ?? "";
+        if (ImGui.IsItemDeactivatedAfterEdit()) buffer = Utils.DecodeStringUTF8(bufPtr);
 
         return enterPressed;
     }
@@ -98,14 +98,13 @@ public static class GuiWorkarounds
         ImGuiInputTextFlags flags)
     {
         var bufPtr = (byte*)Marshal.AllocHGlobal((int)bufferSize);
-        var bytes = Encoding.UTF8.GetBytes(buffer);
-        var copyLen = Math.Min((int)bufferSize - 1, bytes.Length);
-        Marshal.Copy(bytes, 0, new IntPtr(bufPtr), copyLen);
-        bufPtr[copyLen] = 0;
+        var strLen = Utils.GetByteCountUTF8(buffer);
+        var strOffset = Utils.EncodeStringUTF8(buffer, bufPtr, Math.Min(strLen, (int)bufferSize - 1));
+        bufPtr[strOffset] = 0;
 
         var enterPressed = ImGui.InputText(label, bufPtr, bufferSize, flags);
 
-        if (ImGui.IsItemDeactivatedAfterEdit()) buffer = Marshal.PtrToStringUTF8(new IntPtr(bufPtr)) ?? "";
+        if (ImGui.IsItemDeactivatedAfterEdit()) buffer = Utils.DecodeStringUTF8(bufPtr);
 
         Marshal.FreeHGlobal(new IntPtr(bufPtr));
         return enterPressed;
