@@ -31,8 +31,10 @@ namespace Sovereign.ClientCore.Rendering.Gui;
 /// </summary>
 public sealed class GuiFontAtlas : IDisposable
 {
-    private const ushort FirstIconCodePoint = 0xe000;
-    private const ushort LastIconCodePoint = 0xe0fe;
+    private const uint FirstIconCodePoint = 0xe000;
+    private const uint LastIconCodePoint = 0xe0fe;
+    private const uint FirstEmojiCodePoint = 0x1;
+    private const uint LastEmojiCodePoint = 0x1ffff;
 
     /// <summary>
     ///     ImGui texture ID for the font atlas.
@@ -74,8 +76,7 @@ public sealed class GuiFontAtlas : IDisposable
     {
         get
         {
-            if (fontAtlasSurface == null) InitializeSurface();
-
+            if (fontAtlasSurface == null) throw new InvalidOperationException("GUI font atlas not initialized.");
             return fontAtlasSurface;
         }
     }
@@ -87,8 +88,7 @@ public sealed class GuiFontAtlas : IDisposable
     {
         get
         {
-            if (fontAtlasSurface == null) InitializeSurface();
-
+            if (fontAtlasSurface == null) throw new InvalidOperationException("GUI font atlas not initialized.");
             return width;
         }
     }
@@ -100,8 +100,7 @@ public sealed class GuiFontAtlas : IDisposable
     {
         get
         {
-            if (fontAtlasSurface == null) InitializeSurface();
-
+            if (fontAtlasSurface == null) throw new InvalidOperationException("GUI font atlas not initialized.");
             return height;
         }
     }
@@ -109,6 +108,14 @@ public sealed class GuiFontAtlas : IDisposable
     public void Dispose()
     {
         fontAtlasSurface?.Dispose();
+    }
+
+    /// <summary>
+    ///     Initializes the font atlas.
+    /// </summary>
+    public void Initialize()
+    {
+        InitializeSurface();
     }
 
     /// <summary>
@@ -152,6 +159,28 @@ public sealed class GuiFontAtlas : IDisposable
 
         io.Fonts.AddFontFromFileTTF(iconFontPath, fontSize, iconConfig, iconRange);
 
+        // Load emojis.
+        var emojiRange = stackalloc uint[] { FirstEmojiCodePoint, LastEmojiCodePoint, 0 /* list terminator */ };
+        var emojiFontPath =
+            resourcePathBuilder.BuildPathToResource(ResourceType.Fonts, displayOptions.EmojiFont);
+        var emojiConfig = stackalloc ImFontConfig[1];
+        emojiConfig[0] = new ImFontConfig
+        {
+            MergeMode = 1,
+            FontBuilderFlags = (uint)ImGuiFreeTypeBuilderFlags.LoadColor,
+
+            // Following fields are normally set by the ImFontConfig constructor in C++, not in ImGUI.NET though.
+            FontDataOwnedByAtlas = 1,
+            OversampleH = 1,
+            OversampleV = 1,
+            GlyphMaxAdvanceX = float.MaxValue,
+            RasterizerMultiply = 1.0f,
+            RasterizerDensity = 1.0f,
+            EllipsisChar = 0
+        };
+
+        io.Fonts.AddFontFromFileTTF(emojiFontPath, fontSize, emojiConfig, emojiRange);
+
         // Retrieve raw data from ImGui.
         io.Fonts.Build();
         var outPixels = stackalloc byte*[1];
@@ -159,7 +188,7 @@ public sealed class GuiFontAtlas : IDisposable
 
         // Create an SDL_Surface to hold the atlas.
         fontAtlasSurface = Surface.CreateSurfaceFrom(new IntPtr(*outPixels), width, height,
-            DisplayFormat.B8G8R8A8_UNorm);
+            DisplayFormat.R8G8B8A8_UNorm);
 
         // Tag the font texture for later lookup.
         io.Fonts.SetTexID(TextureId);

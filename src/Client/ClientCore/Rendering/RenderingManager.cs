@@ -38,6 +38,7 @@ public class RenderingManager : IDisposable
     private readonly DisplayModeSelector displayModeSelector;
 
     private readonly DisplayOptions displayOptions;
+    private readonly GuiFontAtlas guiFontAtlas;
     private readonly CommonGuiManager guiManager;
     private readonly ILogger<RenderingManager> logger;
 
@@ -65,7 +66,7 @@ public class RenderingManager : IDisposable
         RenderingResourceManager resourceManager,
         CommonGuiManager guiManager, ClientStateServices stateServices,
         ILogger<RenderingManager> logger, SDLEventAdapter sdlEventAdapter,
-        DisplayViewport viewport, IOptions<DisplayOptions> displayOptions)
+        DisplayViewport viewport, IOptions<DisplayOptions> displayOptions, GuiFontAtlas guiFontAtlas)
     {
         this.mainDisplay = mainDisplay;
         this.adapterSelector = adapterSelector;
@@ -77,6 +78,7 @@ public class RenderingManager : IDisposable
         this.logger = logger;
         this.sdlEventAdapter = sdlEventAdapter;
         this.viewport = viewport;
+        this.guiFontAtlas = guiFontAtlas;
         this.displayOptions = displayOptions.Value;
     }
 
@@ -199,6 +201,7 @@ public class RenderingManager : IDisposable
         try
         {
             guiManager.Initialize();
+            guiFontAtlas.Initialize();
         }
         catch (Exception e)
         {

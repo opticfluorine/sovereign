@@ -77,6 +77,11 @@ public class DisplayOptions
     public string IconFont { get; set; } = "";
 
     /// <summary>
+    ///     Emoji font.
+    /// </summary>
+    public string EmojiFont { get; set; } = "";
+
+    /// <summary>
     ///     Base font size.
     /// </summary>
     public float BaseFontSize { get; set; }
