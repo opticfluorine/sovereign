@@ -44,7 +44,7 @@
         <Folder Include="Contrib\win-x64\"/>
     </ItemGroup>
 
-    <Target Name="CopyAfterBuild" AfterTargets="AfterBuild">
+    <Target Name="CopyAfterBuild" AfterTargets="Build">
         <ItemGroup>
             <DataFiles Include="Data/**/*"/>
             <LibFiles Include="Contrib/$(ContribSet)/*"/>
@@ -54,8 +54,14 @@
         <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(OutDir)"/>
     </Target>
 
+    <Target Name="CopySovereignRuntimes" AfterTargets="Build">
+        <ItemGroup>
+            <RuntimeFiles Include="runtimes/**/*"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(RuntimeFiles)" DestinationFolder="$(OutDir)runtimes/%(RecursiveDir)"/>
+    </Target>
+
     <Target Name="CopyAfterPublish" AfterTargets="Publish">
-        <Message Text="RuntimeIdentifier=$(RuntimeIdentifier)"/>
         <ItemGroup>
             <DataFiles Include="$(OutDir)Data/**/*"/>
             <LicenseFile Include="$(SolutionDir)../LICENSE"/>
@@ -64,6 +70,13 @@
         <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(PublishDir)Data/%(RecursiveDir)"/>
         <Copy SourceFiles="$(LicenseFile)" DestinationFolder="@(PublishDir)"/>
         <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(PublishDir)"/>
+    </Target>
+
+    <Target Name="CopyNativeLibraries" AfterTargets="Publish">
+        <ItemGroup>
+            <NativeLibs Include="runtimes\$(RuntimeIdentifier)\native\*.*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(NativeLibs)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="Exists('runtimes\$(RuntimeIdentifier)\native')" />
     </Target>
 
     <Target Name="CompileShaders" BeforeTargets="Build">
