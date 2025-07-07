@@ -50,6 +50,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         GridPositionEventDetailsValidator gridPositionValidator,
         TeleportNoticeEventDetailsValidator teleportNoticeValidator,
         IntEventDetailsValidator intValidator,
+        NpcAddEventDetailsValidator npcAddValidator,
+        NpcRemoveEventDetailsValidator npcRemoveValidator,
         ILogger<ValidationInboundPipelineStage> logger)
     {
         this.templateValidator = templateValidator;
@@ -80,6 +82,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Block_RemoveNotice, gridPositionValidator },
             { EventId.Server_WorldEdit_SetBlock, blockAddValidator },
             { EventId.Server_WorldEdit_RemoveBlock, gridPositionValidator },
+            { EventId.Server_WorldEdit_AddNpc, npcAddValidator },
+            { EventId.Server_WorldEdit_RemoveNpc, npcRemoveValidator },
             { EventId.Core_Time_Clock, intValidator }
         };
     }

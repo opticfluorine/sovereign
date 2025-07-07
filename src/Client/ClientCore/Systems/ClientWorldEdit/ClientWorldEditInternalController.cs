@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Numerics;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -54,6 +55,38 @@ public class ClientWorldEditInternalController
     {
         var details = new GridPositionEventDetails { GridPosition = position };
         var ev = new Event(EventId.Server_WorldEdit_RemoveBlock, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Requests the server to add an NPC at the given position with the specified template.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="position">NPC position.</param>
+    /// <param name="npcTemplateId">NPC template entity ID.</param>
+    public void AddNpc(IEventSender eventSender, Vector3 position, ulong npcTemplateId)
+    {
+        var details = new NpcAddEventDetails
+        {
+            Position = position,
+            NpcTemplateId = npcTemplateId
+        };
+        var ev = new Event(EventId.Server_WorldEdit_AddNpc, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Requests the server to remove an NPC by entity ID.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="npcEntityId">NPC entity ID.</param>
+    public void RemoveNpc(IEventSender eventSender, ulong npcEntityId)
+    {
+        var details = new NpcRemoveEventDetails
+        {
+            NpcEntityId = npcEntityId
+        };
+        var ev = new Event(EventId.Server_WorldEdit_RemoveNpc, details);
         eventSender.SendEvent(ev);
     }
 }

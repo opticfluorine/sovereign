@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Numerics;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
@@ -36,6 +37,10 @@ public class WorldEditSystem : ISystem
 
     private readonly BlockController blockController;
     private readonly IBlockServices blockServices;
+
+    // Add dependencies for IEntityFactory and EntityManager
+    private readonly IEntityFactory entityFactory;
+    private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
     private readonly ILogger<WorldEditSystem> logger;
@@ -46,13 +51,15 @@ public class WorldEditSystem : ISystem
 
     public WorldEditSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, BlockController blockController,
         IEventSender eventSender, LoggingUtil loggingUtil, IBlockServices blockServices, EntityTable entityTable,
-        ILogger<WorldEditSystem> logger)
+        IEntityFactory entityFactory, EntityManager entityManager, ILogger<WorldEditSystem> logger)
     {
         this.blockController = blockController;
         this.eventSender = eventSender;
         this.loggingUtil = loggingUtil;
         this.blockServices = blockServices;
         this.entityTable = entityTable;
+        this.entityFactory = entityFactory;
+        this.entityManager = entityManager;
         this.logger = logger;
         EventCommunicator = eventCommunicator;
 
@@ -65,7 +72,9 @@ public class WorldEditSystem : ISystem
     {
         EventId.Core_Tick,
         EventId.Server_WorldEdit_SetBlock,
-        EventId.Server_WorldEdit_RemoveBlock
+        EventId.Server_WorldEdit_RemoveBlock,
+        EventId.Server_WorldEdit_AddNpc,
+        EventId.Server_WorldEdit_RemoveNpc
     };
 
     public int WorkloadEstimate { get; } = 20;
@@ -89,7 +98,6 @@ public class WorldEditSystem : ISystem
                 case EventId.Core_Tick:
                     OnTick();
                     break;
-
                 case EventId.Server_WorldEdit_SetBlock:
                 {
                     if (ev.EventDetails is not BlockAddEventDetails details)
@@ -101,7 +109,6 @@ public class WorldEditSystem : ISystem
                     HandleSetBlock(details);
                     break;
                 }
-
                 case EventId.Server_WorldEdit_RemoveBlock:
                 {
                     if (ev.EventDetails is not GridPositionEventDetails details)
@@ -111,6 +118,28 @@ public class WorldEditSystem : ISystem
                     }
 
                     HandleRemoveBlock(details);
+                    break;
+                }
+                case EventId.Server_WorldEdit_AddNpc:
+                {
+                    if (ev.EventDetails is not NpcAddEventDetails details)
+                    {
+                        logger.LogError("Received AddNpc with no details.");
+                        break;
+                    }
+
+                    HandleAddNpc(details);
+                    break;
+                }
+                case EventId.Server_WorldEdit_RemoveNpc:
+                {
+                    if (ev.EventDetails is not NpcRemoveEventDetails details)
+                    {
+                        logger.LogError("Received RemoveNpc with no details.");
+                        break;
+                    }
+
+                    HandleRemoveNpc(details);
                     break;
                 }
             }
@@ -169,5 +198,28 @@ public class WorldEditSystem : ISystem
     {
         logger.LogDebug("Remove block at {Pos}.", details.GridPosition);
         blockController.RemoveBlockAtPosition(eventSender, details.GridPosition);
+    }
+
+    /// <summary>
+    ///     Handles an add NPC world edit request.
+    /// </summary>
+    /// <param name="details">Request details.</param>
+    private void HandleAddNpc(NpcAddEventDetails details)
+    {
+        logger.LogDebug("Add NPC with template {TemplateId} at {Position}.", details.NpcTemplateId, details.Position);
+        using var builder = entityFactory.GetBuilder();
+        builder.Template(details.NpcTemplateId)
+            .Positionable(details.Position, Vector3.Zero);
+        builder.Build();
+    }
+
+    /// <summary>
+    ///     Handles a remove NPC world edit request.
+    /// </summary>
+    /// <param name="details">Request details.</param>
+    private void HandleRemoveNpc(NpcRemoveEventDetails details)
+    {
+        logger.LogDebug("Remove NPC entity {EntityId}.", details.NpcEntityId);
+        entityManager.RemoveEntity(details.NpcEntityId);
     }
 }

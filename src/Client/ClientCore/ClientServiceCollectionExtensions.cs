@@ -257,6 +257,9 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<EntityDataControlGroup>();
         services.TryAddSingleton<TemplateEditorInternalController>();
         services.TryAddSingleton<WorldEditorGui>();
+        services.TryAddSingleton<BlockToolHandler>();
+        services.TryAddSingleton<NpcToolHandler>();
+        services.TryAddSingleton<ItemToolHandler>();
         services.TryAddSingleton<WorldVertexSequencer>();
         services.TryAddSingleton<WorldLayerGrouper>();
         services.TryAddSingleton<WorldLayerVertexSequencer>();

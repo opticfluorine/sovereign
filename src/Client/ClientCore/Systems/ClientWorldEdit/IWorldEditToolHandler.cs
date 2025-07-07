@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,34 +17,22 @@
 namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 
 /// <summary>
-///     Public read API for the client-side world editor system.
+///     Interface for world editor tool handlers.
 /// </summary>
-public class ClientWorldEditServices
+public interface IWorldEditToolHandler
 {
-    private readonly ClientWorldEditState state;
-
-    public ClientWorldEditServices(ClientWorldEditState state)
-    {
-        this.state = state;
-    }
+    /// <summary>
+    ///     Processes a draw action for the tool handler.
+    /// </summary>
+    void ProcessDraw();
 
     /// <summary>
-    ///     Block template entity ID to use for world editing.
+    ///     Processes an erase action for the tool handler.
     /// </summary>
-    public ulong BlockTemplateId => state.BlockTemplateId;
+    void ProcessErase();
 
     /// <summary>
-    ///     Z offset relative to camera to use for world editing.
+    ///     Resets the tool handler state.
     /// </summary>
-    public int ZOffset => state.ZOffset;
-
-    /// <summary>
-    ///     Pen width in blocks to use for world editing.
-    /// </summary>
-    public int PenWidth => state.PenWidth;
-
-    /// <summary>
-    ///     Tool to use for world editing.
-    /// </summary>
-    public WorldEditTool WorldEditTool => state.WorldEditTool;
+    void Reset();
 }

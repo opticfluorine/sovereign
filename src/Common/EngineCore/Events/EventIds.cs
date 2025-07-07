@@ -469,6 +469,12 @@ public enum EventId
     /// Associated details: GenericEventDetails(int)
     Client_WorldEdit_SetPenWidth = 10501,
 
+    /// <summary>
+    ///     Event sent to update the tool for world editing.
+    /// </summary>
+    /// Associated details: GenericEventDetails(Tool)
+    Client_WorldEdit_SetTool = 10502,
+
     #endregion
 
     #endregion Client
@@ -582,6 +588,18 @@ public enum EventId
     /// </summary>
     /// Associated details: GridPositionEventDetails
     Server_WorldEdit_RemoveBlock = 200601,
+
+    /// <summary>
+    ///     Requests that an NPC be added at a position using admin privileges. Sent by the client-side admin world editor.
+    /// </summary>
+    /// Associated details: NpcAddEventDetails
+    Server_WorldEdit_AddNpc = 200602,
+
+    /// <summary>
+    ///     Requests that an NPC be removed using admin privileges. Sent by the client-side admin world editor.
+    /// </summary>
+    /// Associated details: NpcRemoveEventDetails
+    Server_WorldEdit_RemoveNpc = 200603,
 
     #endregion
 

@@ -23,6 +23,7 @@ using Sovereign.ClientCore.Systems.ClientWorldEdit;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineUtil.Constants;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
 
@@ -31,10 +32,12 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
 /// </summary>
 public class WorldEditorGui
 {
-    /// <summary>
-    ///     Currently selected world edit tool.
-    /// </summary>
-    private readonly Tool currentTool = Tool.Block;
+    private const string BlockToolLabel = $"{Emoji.Mountain}";
+    private const string NpcToolLabel = $"{Emoji.BustInSilhouette}";
+    private const string ItemToolLabel = $"{Emoji.RedApple}";
+
+    private static readonly Vector4 SelectedColor = new(0.06f, 0.53f, 0.98f, 1.0f);
+    private static readonly Vector4 UnselectedColor = new(0.26f, 0.59f, 0.98f, 0.40f);
 
     private readonly IEventSender eventSender;
     private readonly GuiExtensions guiExtensions;
@@ -97,29 +100,78 @@ public class WorldEditorGui
 
         RenderToolSelection();
 
-        switch (currentTool)
+        switch (worldEditServices.WorldEditTool)
         {
-            case Tool.Block:
+            case WorldEditTool.Block:
                 RenderBlockTool();
                 break;
 
-            case Tool.Npc:
+            case WorldEditTool.Npc:
                 RenderNpcTool();
+                break;
+
+            case WorldEditTool.Item:
                 break;
         }
 
         ImGui.End();
     }
 
+    /// <summary>
+    ///     Renders the tool selection buttons for the world editor.
+    /// </summary>
     private void RenderToolSelection()
     {
+        PushToolButtonColor(WorldEditTool.Block);
+        if (ImGui.Button(BlockToolLabel)) worldEditController.SetTool(eventSender, WorldEditTool.Block);
+        ImGui.PopStyleColor();
+        if (ImGui.IsItemHovered() && ImGui.BeginTooltip())
+        {
+            ImGui.Text("Blocks");
+            ImGui.EndTooltip();
+        }
+
+        ImGui.SameLine();
+        PushToolButtonColor(WorldEditTool.Npc);
+        if (ImGui.Button(NpcToolLabel)) worldEditController.SetTool(eventSender, WorldEditTool.Npc);
+        ImGui.PopStyleColor();
+        if (ImGui.IsItemHovered() && ImGui.BeginTooltip())
+        {
+            ImGui.Text("NPCs");
+            ImGui.EndTooltip();
+        }
+
+        ImGui.SameLine();
+        PushToolButtonColor(WorldEditTool.Item);
+        if (ImGui.Button(ItemToolLabel)) worldEditController.SetTool(eventSender, WorldEditTool.Item);
+        ImGui.PopStyleColor();
+        if (ImGui.IsItemHovered() && ImGui.BeginTooltip())
+        {
+            ImGui.Text("Items");
+            ImGui.EndTooltip();
+        }
+
+        ImGui.Separator();
     }
 
+    /// <summary>
+    ///     Pushes the style color for the tool button based on whether it is selected or not.
+    /// </summary>
+    /// <param name="worldEditTool">Tool.</param>
+    private void PushToolButtonColor(WorldEditTool worldEditTool)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Button,
+            worldEditServices.WorldEditTool == worldEditTool ? SelectedColor : UnselectedColor);
+    }
+
+    /// <summary>
+    ///     Renders the block tool controls, including the block template selection,
+    /// </summary>
     private void RenderBlockTool()
     {
         RenderBlockTemplateControl();
-        RenderDrawControls();
-        RenderHelp();
+        RenderBlockDrawControls();
+        RenderBlockToolHelp();
     }
 
     /// <summary>
@@ -152,7 +204,7 @@ public class WorldEditorGui
     /// <summary>
     ///     Renders the z-offset selection control.
     /// </summary>
-    private void RenderDrawControls()
+    private void RenderBlockDrawControls()
     {
         // Sync input buffers with backend.
         if (zOffsetBuffer == worldEditServices.ZOffset)
@@ -215,7 +267,7 @@ public class WorldEditorGui
     /// <summary>
     ///     Renders the help text for the world editor GUI.
     /// </summary>
-    private void RenderHelp()
+    private void RenderBlockToolHelp()
     {
         ImGui.Separator();
         ImGui.TextColored(helpTextColor, "Scroll to change block template.");
@@ -223,23 +275,10 @@ public class WorldEditorGui
         ImGui.TextColored(helpTextColor, "Shift+Scroll to change pen width.");
     }
 
+    /// <summary>
+    ///     Renders the NPC tool controls, including the NPC template selection.
+    /// </summary>
     private void RenderNpcTool()
     {
-    }
-
-    /// <summary>
-    ///     World edit tool types.
-    /// </summary>
-    private enum Tool
-    {
-        /// <summary>
-        ///     Block placement tool.
-        /// </summary>
-        Block,
-
-        /// <summary>
-        ///     NPC placement tool.
-        /// </summary>
-        Npc
     }
 }

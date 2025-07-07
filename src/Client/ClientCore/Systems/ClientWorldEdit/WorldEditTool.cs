@@ -17,34 +17,22 @@
 namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 
 /// <summary>
-///     Public read API for the client-side world editor system.
+///     World editor tool types.
 /// </summary>
-public class ClientWorldEditServices
+public enum WorldEditTool
 {
-    private readonly ClientWorldEditState state;
-
-    public ClientWorldEditServices(ClientWorldEditState state)
-    {
-        this.state = state;
-    }
+    /// <summary>
+    ///     Block placement tool.
+    /// </summary>
+    Block,
 
     /// <summary>
-    ///     Block template entity ID to use for world editing.
+    ///     NPC placement tool.
     /// </summary>
-    public ulong BlockTemplateId => state.BlockTemplateId;
+    Npc,
 
     /// <summary>
-    ///     Z offset relative to camera to use for world editing.
+    ///     Item placement tool.
     /// </summary>
-    public int ZOffset => state.ZOffset;
-
-    /// <summary>
-    ///     Pen width in blocks to use for world editing.
-    /// </summary>
-    public int PenWidth => state.PenWidth;
-
-    /// <summary>
-    ///     Tool to use for world editing.
-    /// </summary>
-    public WorldEditTool WorldEditTool => state.WorldEditTool;
+    Item
 }

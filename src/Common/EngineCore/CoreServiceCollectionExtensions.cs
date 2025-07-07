@@ -192,6 +192,8 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<GenericChatEventDetailsValidator>();
         services.TryAddSingleton<TeleportNoticeEventDetailsValidator>();
         services.TryAddSingleton<IntEventDetailsValidator>();
+        services.TryAddSingleton<NpcAddEventDetailsValidator>();
+        services.TryAddSingleton<NpcRemoveEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)

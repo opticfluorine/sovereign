@@ -57,7 +57,8 @@ public class ClientWorldEditSystem : ISystem
         EventId.Client_Input_MouseWheelTick,
         EventId.Core_Tick,
         EventId.Client_WorldEdit_SetZOffset,
-        EventId.Client_WorldEdit_SetPenWidth
+        EventId.Client_WorldEdit_SetPenWidth,
+        EventId.Client_WorldEdit_SetTool
     };
 
     public int WorkloadEstimate { get; } = 5;
@@ -110,7 +111,7 @@ public class ClientWorldEditSystem : ISystem
                     state.SetZOffset(details.Value);
                     break;
                 }
-                
+
                 case EventId.Client_WorldEdit_SetPenWidth:
                 {
                     if (ev.EventDetails is not GenericEventDetails<int> details)
@@ -120,6 +121,18 @@ public class ClientWorldEditSystem : ISystem
                     }
 
                     state.SetPenWidth(details.Value);
+                    break;
+                }
+
+                case EventId.Client_WorldEdit_SetTool:
+                {
+                    if (ev.EventDetails is not GenericEventDetails<WorldEditTool> details)
+                    {
+                        logger.LogWarning("Received SetTool without details.");
+                        break;
+                    }
+
+                    state.SetTool(details.Value);
                     break;
                 }
 

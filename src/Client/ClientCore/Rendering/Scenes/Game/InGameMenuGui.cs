@@ -57,8 +57,8 @@ public class InGameMenuGui
 
         if (ImGui.BeginTable("gameMenu", 1))
         {
-            ImGui.TableNextColumn();
             ImGui.TableSetupColumn("##gameMenuCol", ImGuiTableColumnFlags.WidthStretch);
+            ImGui.TableNextColumn();
             if (ImGui.Button("Logout", fontSize * ButtonSize)) OnLogout();
 
             ImGui.TableNextColumn();

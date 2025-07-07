@@ -51,7 +51,9 @@ public class PlayerFilterInboundPipelineStage : IInboundPipelineStage
         mappers = new Dictionary<EventId, Func<ulong, bool>>
         {
             { EventId.Server_WorldEdit_SetBlock, RequireAdmin },
-            { EventId.Server_WorldEdit_RemoveBlock, RequireAdmin }
+            { EventId.Server_WorldEdit_RemoveBlock, RequireAdmin },
+            { EventId.Server_WorldEdit_AddNpc, RequireAdmin },
+            { EventId.Server_WorldEdit_RemoveNpc, RequireAdmin }
         };
     }
 

@@ -69,6 +69,11 @@ public class ClientWorldEditState
     public int PenWidth { get; private set; } = ClientWorldEditConstants.MinPenWidth;
 
     /// <summary>
+    ///     Currently selected tool for editing.
+    /// </summary>
+    public WorldEditTool WorldEditTool { get; private set; } = WorldEditTool.Block;
+
+    /// <summary>
     ///     Processes a scroll tick.
     /// </summary>
     /// <param name="isScrollUp">If true, scroll is up; if false, scroll is down.</param>
@@ -113,7 +118,7 @@ public class ClientWorldEditState
     {
         ZOffset = zOffset;
     }
-    
+
     /// <summary>
     ///     Sets the pen width. Does not perform any validation.
     /// </summary>
@@ -121,5 +126,14 @@ public class ClientWorldEditState
     public void SetPenWidth(int penWidth)
     {
         PenWidth = penWidth;
+    }
+
+    /// <summary>
+    ///     Sets the current tool. Does not perform any validation.
+    /// </summary>
+    /// <param name="worldEditTool">Tool.</param>
+    public void SetTool(WorldEditTool worldEditTool)
+    {
+        WorldEditTool = worldEditTool;
     }
 }

@@ -38,7 +38,7 @@ public class ClientWorldEditController
         var ev = new Event(EventId.Client_WorldEdit_SetZOffset, details);
         eventSender.SendEvent(ev);
     }
-    
+
     /// <summary>
     ///     Sets the pen width for the world editor.
     /// </summary>
@@ -51,6 +51,21 @@ public class ClientWorldEditController
             Value = penWidth
         };
         var ev = new Event(EventId.Client_WorldEdit_SetPenWidth, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Sets the tool for the world editor.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="worldEditTool">Tool.</param>
+    public void SetTool(IEventSender eventSender, WorldEditTool worldEditTool)
+    {
+        var details = new GenericEventDetails<WorldEditTool>
+        {
+            Value = worldEditTool
+        };
+        var ev = new Event(EventId.Client_WorldEdit_SetTool, details);
         eventSender.SendEvent(ev);
     }
 }
