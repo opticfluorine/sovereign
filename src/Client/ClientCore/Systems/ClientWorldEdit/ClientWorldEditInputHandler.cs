@@ -23,7 +23,7 @@ namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 /// <summary>
 ///     Handles user inputs for the world editor.
 /// </summary>
-public class ClientWorldEditInputHandler
+internal class ClientWorldEditInputHandler
 {
     /// <summary>
     ///     Mouse button for drawing.

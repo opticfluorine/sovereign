@@ -28,7 +28,7 @@ namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 /// <summary>
 ///     System that manages the client-side world editor function.
 /// </summary>
-public class ClientWorldEditSystem : ISystem
+internal class ClientWorldEditSystem : ISystem
 {
     private readonly ClientStateServices clientStateServices;
     private readonly ClientWorldEditInputHandler inputHandler;

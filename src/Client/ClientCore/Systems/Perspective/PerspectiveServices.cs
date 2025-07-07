@@ -46,6 +46,15 @@ public interface IPerspectiveServices
     bool TryGetHighestCoveringEntity(Vector3 position, out ulong entityId);
 
     /// <summary>
+    ///     Gets the highest visible (i.e. no overhead transparency) block covering a position in world coordinates.
+    /// </summary>
+    /// <param name="position">Position.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="entityType">Indicates which face of the block is overlapped.</param>
+    /// <returns>true if a visible block overlapped, false otherwise.</returns>
+    bool TryGetHighestVisibleCoveringBlock(Vector3 position, out long entityId, out PerspectiveEntityType entityType);
+
+    /// <summary>
     ///     Gets the perspective line (if any) on which the given block position sits.
     /// </summary>
     /// <param name="blockPosition">Block position on the perspective line.</param>
@@ -89,6 +98,33 @@ internal class PerspectiveServices : IPerspectiveServices
         var minZ = position.Z - viewport.HeightInTiles * 0.5f;
         var maxZ = position.Z + viewport.HeightInTiles * 0.5f;
         return TryGetHighestCoveringEntity(position, minZ, maxZ, out entityId);
+    }
+
+    public bool TryGetHighestVisibleCoveringBlock(Vector3 position, out long entityId,
+        out PerspectiveEntityType entityType)
+    {
+        entityId = 0;
+        entityType = default;
+
+        var blockPos = (GridPosition)position;
+        if (!lineManager.TryGetPerspectiveLine(blockPos, out var perspectiveLine)) return false;
+
+        foreach (var zSet in perspectiveLine.ZFloors)
+        foreach (var info in zSet.Entities)
+        {
+            if (info.PerspectiveEntityType != PerspectiveEntityType.BlockFrontFace &&
+                info.PerspectiveEntityType != PerspectiveEntityType.BlockTopFace)
+                continue;
+
+            if (overheadTransparency.GetOpacityForEntity(info.EntityId) < 1.0f)
+                continue;
+
+            entityId = (long)info.EntityId;
+            entityType = info.PerspectiveEntityType;
+            return true;
+        }
+
+        return false;
     }
 
     public bool TryGetPerspectiveLine(GridPosition blockPosition,

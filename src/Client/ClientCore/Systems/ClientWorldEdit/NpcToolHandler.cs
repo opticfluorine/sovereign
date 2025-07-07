@@ -15,22 +15,39 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using Sovereign.ClientCore.Systems.Camera;
+using Sovereign.ClientCore.Systems.Perspective;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 
 /// <summary>
 ///     World editor tool handler for NPC placement and removal.
 /// </summary>
-public class NpcToolHandler : IWorldEditToolHandler
+internal class NpcToolHandler(
+    CameraServices cameraServices,
+    PerspectiveServices perspectiveServices,
+    ClientWorldEditInternalController internalController,
+    IEventSender eventSender,
+    EntityTypeComponentCollection entityTypes)
+    : IWorldEditToolHandler
 {
     public void ProcessDraw()
     {
-        throw new NotImplementedException();
+        // Get highest overlapping visible block at the hovered position (hx, hy, hz).
+        // If a top face is found for a block at (bx, by, bz), place NPC at (hx, hy, bz).
+        // If a front face is found for a block at (bx, by, bz), place NPC at (hx, by, hz).
+        // If nothing is found, place NPC at (hx, hy, hz).
     }
 
     public void ProcessErase()
     {
-        throw new NotImplementedException();
+        var hoveredPos = cameraServices.GetMousePositionWorldCoordinates();
+        if (perspectiveServices.TryGetHighestCoveringEntity(hoveredPos, out var entityId))
+            if (entityTypes.TryGetValue(entityId, out var entityType) && entityType == EntityType.Npc)
+                internalController.RemoveNpc(eventSender, entityId);
     }
 
     public void Reset()
