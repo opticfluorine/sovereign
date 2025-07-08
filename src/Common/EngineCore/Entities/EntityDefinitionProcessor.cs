@@ -64,8 +64,8 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutAnimatedSprite();
 
-        if (definition.Drawable)
-            builder.Drawable();
+        if (definition.Drawable.HasValue)
+            builder.Drawable(definition.Drawable.Value);
         else
             builder.WithoutDrawable();
 

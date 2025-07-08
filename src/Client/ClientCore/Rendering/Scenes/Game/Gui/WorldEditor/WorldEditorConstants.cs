@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,24 +15,23 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using Sovereign.EngineCore.Components;
-using Sovereign.Persistence.Entities;
 
-namespace Sovereign.Persistence.State.Trackers;
+namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
 
-/// <summary>
-///     Persistence state tracker for the Drawable tag.
-/// </summary>
-public class DrawableStateTracker : BaseStateTracker<Vector2>
+public static class WorldEditorConstants
 {
-    public DrawableStateTracker(DrawableComponentCollection components,
-        EntityMapper entityMapper, StateManager stateManager) : base(components, Vector2.Zero,
-        entityMapper, stateManager)
-    {
-    }
+    /// <summary>
+    ///     Color used by help text.
+    /// </summary>
+    public static readonly Vector4 HelpTextColor = new(0.7f, 0.7f, 0.7f, 1.0f);
 
-    protected override void OnStateUpdate(ref StateUpdate<Vector2> update)
-    {
-        stateManager.FrontBuffer.UpdateDrawable(ref update);
-    }
+    /// <summary>
+    ///     Color used for selected buttons.
+    /// </summary>
+    public static readonly Vector4 SelectedColor = new(0.06f, 0.53f, 0.98f, 1.0f);
+
+    /// <summary>
+    ///     Color used for unselected buttons.
+    /// </summary>
+    public static readonly Vector4 UnselectedColor = new(0.26f, 0.59f, 0.98f, 0.40f);
 }

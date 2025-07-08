@@ -39,7 +39,7 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         NameComponentCollection names,
         AccountComponentCollection accounts,
         ParentComponentCollection parents,
-        DrawableTagCollection drawables,
+        DrawableComponentCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites,
         OrientationComponentCollection orientations,
         AdminTagCollection admins,

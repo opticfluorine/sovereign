@@ -16,12 +16,7 @@
 
 using System.Numerics;
 using Hexa.NET.ImGui;
-using Sovereign.ClientCore.Rendering.Gui;
-using Sovereign.ClientCore.Rendering.Materials;
-using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.ClientCore.Systems.ClientWorldEdit;
-using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineUtil.Constants;
 
@@ -35,58 +30,25 @@ public class WorldEditorGui
     private const string BlockToolLabel = $"{Emoji.Mountain}";
     private const string NpcToolLabel = $"{Emoji.BustInSilhouette}";
     private const string ItemToolLabel = $"{Emoji.RedApple}";
+    private const string BlockToolCaption = "Blocks";
+    private const string NpcToolCaption = "NPCs";
+    private const string ItemToolCaption = "Items";
 
-    private static readonly Vector4 SelectedColor = new(0.06f, 0.53f, 0.98f, 1.0f);
-    private static readonly Vector4 UnselectedColor = new(0.26f, 0.59f, 0.98f, 0.40f);
-
+    private readonly BlockWorldEditorGui blockWorldEditorGui;
     private readonly IEventSender eventSender;
-    private readonly GuiExtensions guiExtensions;
-
-    /// <summary>
-    ///     Color used by help text.
-    /// </summary>
-    private readonly Vector4 helpTextColor = new(0.7f, 0.7f, 0.7f, 1.0f);
-
-    private readonly MaterialManager materialManager;
-    private readonly MaterialModifierComponentCollection materialModifiers;
-    private readonly MaterialComponentCollection materials;
-    private readonly NameComponentCollection names;
+    private readonly NpcWorldEditorGui npcWorldEditorGui;
     private readonly ClientWorldEditController worldEditController;
     private readonly ClientWorldEditServices worldEditServices;
 
-    /// <summary>
-    ///     Backing buffer for pen width input field.
-    /// </summary>
-    private int penWidthBuffer;
-
-    /// <summary>
-    ///     Change flag for pen width.
-    /// </summary>
-    private bool penWidthChangeInProgress;
-
-    /// <summary>
-    ///     Backing buffer for Z offset input field.
-    /// </summary>
-    private int zOffsetBuffer;
-
-    /// <summary>
-    ///     Change flag for Z offset.
-    /// </summary>
-    private bool zOffsetChangeInProgress;
-
-    public WorldEditorGui(ClientWorldEditServices worldEditServices, MaterialManager materialManager,
-        GuiExtensions guiExtensions, IEventSender eventSender,
-        ClientWorldEditController worldEditController, NameComponentCollection names,
-        MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers)
+    public WorldEditorGui(ClientWorldEditServices worldEditServices, IEventSender eventSender,
+        ClientWorldEditController worldEditController, BlockWorldEditorGui blockWorldEditorGui,
+        NpcWorldEditorGui npcWorldEditorGui)
     {
         this.worldEditServices = worldEditServices;
-        this.materialManager = materialManager;
-        this.guiExtensions = guiExtensions;
         this.eventSender = eventSender;
         this.worldEditController = worldEditController;
-        this.names = names;
-        this.materials = materials;
-        this.materialModifiers = materialModifiers;
+        this.blockWorldEditorGui = blockWorldEditorGui;
+        this.npcWorldEditorGui = npcWorldEditorGui;
     }
 
     /// <summary>
@@ -103,11 +65,11 @@ public class WorldEditorGui
         switch (worldEditServices.WorldEditTool)
         {
             case WorldEditTool.Block:
-                RenderBlockTool();
+                blockWorldEditorGui.Render();
                 break;
 
             case WorldEditTool.Npc:
-                RenderNpcTool();
+                npcWorldEditorGui.Render();
                 break;
 
             case WorldEditTool.Item:
@@ -127,7 +89,7 @@ public class WorldEditorGui
         ImGui.PopStyleColor();
         if (ImGui.IsItemHovered() && ImGui.BeginTooltip())
         {
-            ImGui.Text("Blocks");
+            ImGui.Text(BlockToolCaption);
             ImGui.EndTooltip();
         }
 
@@ -137,7 +99,7 @@ public class WorldEditorGui
         ImGui.PopStyleColor();
         if (ImGui.IsItemHovered() && ImGui.BeginTooltip())
         {
-            ImGui.Text("NPCs");
+            ImGui.Text(NpcToolCaption);
             ImGui.EndTooltip();
         }
 
@@ -147,7 +109,7 @@ public class WorldEditorGui
         ImGui.PopStyleColor();
         if (ImGui.IsItemHovered() && ImGui.BeginTooltip())
         {
-            ImGui.Text("Items");
+            ImGui.Text(ItemToolCaption);
             ImGui.EndTooltip();
         }
 
@@ -161,124 +123,8 @@ public class WorldEditorGui
     private void PushToolButtonColor(WorldEditTool worldEditTool)
     {
         ImGui.PushStyleColor(ImGuiCol.Button,
-            worldEditServices.WorldEditTool == worldEditTool ? SelectedColor : UnselectedColor);
-    }
-
-    /// <summary>
-    ///     Renders the block tool controls, including the block template selection,
-    /// </summary>
-    private void RenderBlockTool()
-    {
-        RenderBlockTemplateControl();
-        RenderBlockDrawControls();
-        RenderBlockToolHelp();
-    }
-
-    /// <summary>
-    ///     Renders the material/material modifier selection control.
-    /// </summary>
-    private void RenderBlockTemplateControl()
-    {
-        if (!ImGui.BeginTable("WorldEditMaterial", 2, ImGuiTableFlags.SizingStretchProp)) return;
-        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed);
-
-        var templateName = names.HasComponentForEntity(worldEditServices.BlockTemplateId)
-            ? names[worldEditServices.BlockTemplateId]
-            : "[no name]";
-        var templateMaterialId = materials[worldEditServices.BlockTemplateId];
-        var templateMaterialModifier = materialModifiers[worldEditServices.BlockTemplateId];
-
-        var material = materialManager.Materials[templateMaterialId];
-        var tile = material.MaterialSubtypes[templateMaterialModifier];
-
-        ImGui.TableNextColumn();
-        guiExtensions.TileSprite(tile.TopFaceTileSpriteId, TileContextKey.AllWildcards);
-
-        ImGui.TableNextColumn();
-        var relId = worldEditServices.BlockTemplateId - EntityConstants.FirstTemplateEntityId;
-        ImGui.Text($"{templateName} (Block Template {relId})");
-
-        ImGui.EndTable();
-    }
-
-    /// <summary>
-    ///     Renders the z-offset selection control.
-    /// </summary>
-    private void RenderBlockDrawControls()
-    {
-        // Sync input buffers with backend.
-        if (zOffsetBuffer == worldEditServices.ZOffset)
-            zOffsetChangeInProgress = false;
-        else if (!zOffsetChangeInProgress)
-            zOffsetBuffer = worldEditServices.ZOffset;
-
-        if (penWidthBuffer == worldEditServices.PenWidth)
-            penWidthChangeInProgress = false;
-        else if (!penWidthChangeInProgress)
-            penWidthBuffer = worldEditServices.PenWidth;
-
-        if (!ImGui.BeginTable("WorldEditControls", 2, ImGuiTableFlags.SizingStretchProp)) return;
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Z Offset:");
-
-        ImGui.TableNextColumn();
-        ImGui.SetNextItemWidth(120.0f);
-        ImGui.InputInt("##zoff", ref zOffsetBuffer);
-
-        // Validate and update state if needed.
-        if (zOffsetBuffer != worldEditServices.ZOffset)
-        {
-            if (zOffsetBuffer is < ClientWorldEditConstants.MinZOffset or > ClientWorldEditConstants.MaxZOffset)
-            {
-                zOffsetBuffer = worldEditServices.ZOffset;
-            }
-            else
-            {
-                zOffsetChangeInProgress = true;
-                worldEditController.SetZOffset(eventSender, zOffsetBuffer);
-            }
-        }
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Pen Width:");
-
-        ImGui.TableNextColumn();
-        ImGui.SetNextItemWidth(120.0f);
-        ImGui.InputInt("##penwidth", ref penWidthBuffer);
-
-        // Validate and update state if needed.
-        if (penWidthBuffer != worldEditServices.PenWidth)
-        {
-            if (penWidthBuffer is < ClientWorldEditConstants.MinPenWidth or > ClientWorldEditConstants.MaxPenWidth)
-            {
-                penWidthBuffer = worldEditServices.PenWidth;
-            }
-            else
-            {
-                penWidthChangeInProgress = true;
-                worldEditController.SetPenWidth(eventSender, penWidthBuffer);
-            }
-        }
-
-        ImGui.EndTable();
-    }
-
-    /// <summary>
-    ///     Renders the help text for the world editor GUI.
-    /// </summary>
-    private void RenderBlockToolHelp()
-    {
-        ImGui.Separator();
-        ImGui.TextColored(helpTextColor, "Scroll to change block template.");
-        ImGui.TextColored(helpTextColor, "Ctrl+Scroll to change Z offset.");
-        ImGui.TextColored(helpTextColor, "Shift+Scroll to change pen width.");
-    }
-
-    /// <summary>
-    ///     Renders the NPC tool controls, including the NPC template selection.
-    /// </summary>
-    private void RenderNpcTool()
-    {
+            worldEditServices.WorldEditTool == worldEditTool
+                ? WorldEditorConstants.SelectedColor
+                : WorldEditorConstants.UnselectedColor);
     }
 }

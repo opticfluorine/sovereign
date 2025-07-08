@@ -36,6 +36,6 @@ public class ClientOutboundEventSet : IOutboundEventSet
         EventId.Server_WorldEdit_SetBlock,
         EventId.Server_WorldEdit_RemoveBlock,
         EventId.Server_WorldEdit_AddNpc,
-        EventId.Server_WorldEdit_RemoveNpc
+        EventId.Server_WorldEdit_RemoveNonBlock
     };
 }

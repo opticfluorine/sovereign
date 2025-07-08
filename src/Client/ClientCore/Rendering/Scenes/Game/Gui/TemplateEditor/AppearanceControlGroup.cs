@@ -44,9 +44,11 @@ public class AppearanceControlGroup(GuiExtensions guiExtensions, AnimatedSpriteS
         if (ImGui.CollapsingHeader("Appearance", ImGuiTreeNodeFlags.DefaultOpen))
             if (ImGui.BeginTable("Appearance", 2, ImGuiTableFlags.SizingFixedFit))
             {
-                AnimatedSpriteControls(entityDefinition);
-                DrawableControls(entityDefinition);
-                CastShadowsControls(entityDefinition);
+                var isBlock = entityDefinition.Material != null;
+
+                if (!isBlock) AnimatedSpriteControls(entityDefinition);
+                if (!isBlock) DrawableControls(entityDefinition);
+                if (!isBlock) CastShadowsControls(entityDefinition);
                 PointLightSourceControls(entityDefinition);
 
                 ImGui.EndTable();
@@ -76,14 +78,29 @@ public class AppearanceControlGroup(GuiExtensions guiExtensions, AnimatedSpriteS
     ///     Renders the Drawable controls.
     /// </summary>
     /// <param name="entityDefinition">Entity definition.</param>
-    private static void DrawableControls(EntityDefinition entityDefinition)
+    private static unsafe void DrawableControls(EntityDefinition entityDefinition)
     {
         ImGui.TableNextColumn();
         ImGui.Text("Drawable:");
         ImGui.TableNextColumn();
-        var drawable = entityDefinition.Drawable;
+        var drawable = entityDefinition.Drawable.HasValue;
         ImGui.Checkbox("##drawable", ref drawable);
-        entityDefinition.Drawable = drawable;
+
+        if (drawable)
+        {
+            ImGui.TableNextColumn();
+            ImGui.Text("Drawable Offset:");
+            ImGui.TableNextColumn();
+            var offsets = stackalloc float[2];
+            offsets[0] = entityDefinition.Drawable!.Value.X;
+            offsets[1] = entityDefinition.Drawable!.Value.Y;
+            ImGui.InputFloat2("##drawableOffset", offsets, "%.2f");
+            entityDefinition.Drawable = new Vector2(offsets[0], offsets[1]);
+        }
+        else
+        {
+            entityDefinition.Drawable = null;
+        }
     }
 
     /// <summary>

@@ -68,4 +68,19 @@ public class ClientWorldEditController
         var ev = new Event(EventId.Client_WorldEdit_SetTool, details);
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Sets the snap-to-grid value for the world editor.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="snapToGrid">Snap to grid value.</param>
+    public void SetSnapToGrid(IEventSender eventSender, bool snapToGrid)
+    {
+        var details = new BooleanEventDetails
+        {
+            Value = snapToGrid
+        };
+        var ev = new Event(EventId.Client_WorldEdit_SetSnapToGrid, details);
+        eventSender.SendEvent(ev);
+    }
 }

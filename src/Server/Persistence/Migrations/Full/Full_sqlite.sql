@@ -81,7 +81,8 @@ CREATE TABLE Entity
     name                TEXT,
     account_id          BLOB,
     parent_id           INTEGER,
-    drawable            BOOLEAN,
+    drawable_x          FLOAT,
+    drawable_y          FLOAT,
     animated_sprite     INTEGER,
     orientation         INTEGER,
     admin               BOOLEAN,
@@ -184,7 +185,8 @@ SELECT Entity.id                 AS id,
        Entity.name               AS name,
        Entity.account_id         AS account,
        Entity.parent_id          AS parent,
-       Entity.drawable           AS drawable,
+       Entity.drawable_x         AS drawableX,
+       Entity.drawable_y         AS drawableY,
        Entity.animated_sprite    AS animatedSprite,
        Entity.orientation        AS orientation,
        Entity.admin              AS admin,
@@ -212,32 +214,32 @@ FROM Entity;
 --------------------------------------
 
 -- Grass block template entity.
-INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
-VALUES (0x7FFE000000000000, 'Grass', 1, 0, 1, 1);
+INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
+VALUES (0x7FFE000000000000, 'Grass', 1, 0, 1);
 
 -- Water block template entity.
-INSERT INTO Entity (id, name, material, material_mod, drawable)
-VALUES (0x7FFE000000000001, 'Water', 2, 0, 1);
+INSERT INTO Entity (id, name, material, material_mod)
+VALUES (0x7FFE000000000001, 'Water', 2, 0);
 
 -- GrassRock block template entity (currently unused).
-INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
-VALUES (0x7FFE000000000002, 'GrassRock', 1, 0, 1, 1);
+INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
+VALUES (0x7FFE000000000002, 'GrassRock', 1, 0, 1);
 
 -- Dirt block template entity.
-INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
-VALUES (0x7FFE000000000003, 'Dirt', 3, 0, 1, 1);
+INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
+VALUES (0x7FFE000000000003, 'Dirt', 3, 0, 1);
 
 -- Sand block template entity.
-INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
-VALUES (0x7FFE000000000004, 'Sand', 4, 0, 1, 1);
+INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
+VALUES (0x7FFE000000000004, 'Sand', 4, 0, 1);
 
 -- Rock block template entity.
-INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
-VALUES (0x7FFE000000000005, 'Rock', 5, 0, 1, 1);
+INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
+VALUES (0x7FFE000000000005, 'Rock', 5, 0, 1);
 
 -- Cobblestone block template entity.
-INSERT INTO Entity (id, name, material, material_mod, drawable, cast_block_shadows)
-VALUES (0x7FFE000000000006, 'Cobblestone', 6, 0, 1, 1);
+INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
+VALUES (0x7FFE000000000006, 'Cobblestone', 6, 0, 1);
 
 -- Initial block data at origin.
 INSERT INTO WorldSegmentBlockData
@@ -259,4 +261,4 @@ VALUES (1, 'Baseline');
 
 -- Enable WAL.
 PRAGMA
-journal_mode= WAL;
+    journal_mode= WAL;

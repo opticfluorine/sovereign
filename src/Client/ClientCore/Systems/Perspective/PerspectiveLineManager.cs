@@ -48,7 +48,7 @@ public class PerspectiveLineManager
 {
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly DrawableLookup drawableLookup;
-    private readonly DrawableTagCollection drawables;
+    private readonly DrawableComponentCollection drawables;
 
     /// <summary>
     ///     Object pool of entity lists to minimize heap churn for vertically moving entities.
@@ -83,7 +83,7 @@ public class PerspectiveLineManager
 
     public PerspectiveLineManager(KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
-        EntityTable entityTable, DrawableLookup drawableLookup, DrawableTagCollection drawables,
+        EntityTable entityTable, DrawableLookup drawableLookup, DrawableComponentCollection drawables,
         ILogger<PerspectiveLineManager> logger)
     {
         this.kinematics = kinematics;
@@ -314,10 +314,13 @@ public class PerspectiveLineManager
     /// <param name="isLoad">Unused.</param>
     private void AddEntity(ulong entityId, bool isLoad)
     {
-        if (!drawables.HasTagForEntity(entityId)) return;
+        var isBlock = blockPositions.HasComponentForEntity(entityId);
+        if (!isBlock && !drawables.HasComponentForEntity(entityId)) return;
 
-        if (blockPositions.HasComponentForEntity(entityId)) AddBlockEntity(entityId, blockPositions[entityId]);
+        if (isBlock) AddBlockEntity(entityId, blockPositions[entityId]);
         else if (kinematics.HasComponentForEntity(entityId)) AddNonBlockEntity(entityId, kinematics[entityId].Position);
+        else
+            logger.LogWarning("Non-block entity {EntityId:X} is drawable but has no position.", entityId);
     }
 
     /// <summary>
@@ -371,7 +374,8 @@ public class PerspectiveLineManager
     /// <param name="isUnload">Unused.</param>
     private void RemoveEntity(ulong entityId, bool isUnload)
     {
-        if (!drawables.HasTagForEntity(entityId, true)) return;
+        var isBlock = blockPositions.HasComponentForEntity(entityId, true);
+        if (!isBlock && !drawables.HasComponentForEntity(entityId, true)) return;
 
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices)) return;
         if (!zFloorByEntity.TryGetValue(entityId, out var zFloor))
@@ -379,8 +383,6 @@ public class PerspectiveLineManager
             logger.LogError("No cached z value for entity {EntityId:X}; skipping removal.", entityId);
             return;
         }
-
-        var isBlock = blockPositions.HasComponentForEntity(entityId, true);
 
         foreach (var index in lineIndices)
         {

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Numerics;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
@@ -31,19 +32,46 @@ internal class NpcToolHandler(
     PerspectiveServices perspectiveServices,
     ClientWorldEditInternalController internalController,
     IEventSender eventSender,
-    EntityTypeComponentCollection entityTypes)
+    EntityTypeComponentCollection entityTypes,
+    BoundingBoxComponentCollection boundingBoxes,
+    ClientWorldEditState state)
     : IWorldEditToolHandler
 {
+    private bool actionAlreadyPerformed;
+
     public void ProcessDraw()
     {
-        // Get highest overlapping visible block at the hovered position (hx, hy, hz).
-        // If a top face is found for a block at (bx, by, bz), place NPC at (hx, hy, bz).
-        // If a front face is found for a block at (bx, by, bz), place NPC at (hx, by, hz).
-        // If nothing is found, place NPC at (hx, hy, hz).
+        if (actionAlreadyPerformed) return;
+        actionAlreadyPerformed = true;
+
+        var position = cameraServices.GetMousePositionWorldCoordinates();
+        if (perspectiveServices.TryGetHighestVisibleCoveringBlock(position, out _,
+                out var entityType, out var positionOnBlock))
+        {
+            // If the entity has physics, translate the new NPC out of the hovered block.
+            // It may still intersect other blocks, however the physics engine will handle that after it is added.
+            var yShift = 0.0f;
+            if (entityType == PerspectiveEntityType.BlockFrontFace &&
+                boundingBoxes.TryGetValue(state.NpcTemplateId, out var boundingBox))
+            {
+                yShift = boundingBox.Size.Y;
+            }
+
+            position = positionOnBlock with { Y = positionOnBlock.Y - yShift };
+        }
+
+        if (state.SnapToGrid)
+            position = new Vector3((float)Math.Floor(position.X), (float)Math.Floor(position.Y),
+                (float)Math.Floor(position.Z));
+
+        internalController.AddNpc(eventSender, position, state.NpcTemplateId);
     }
 
     public void ProcessErase()
     {
+        if (actionAlreadyPerformed) return;
+        actionAlreadyPerformed = true;
+
         var hoveredPos = cameraServices.GetMousePositionWorldCoordinates();
         if (perspectiveServices.TryGetHighestCoveringEntity(hoveredPos, out var entityId))
             if (entityTypes.TryGetValue(entityId, out var entityType) && entityType == EntityType.Npc)
@@ -52,6 +80,6 @@ internal class NpcToolHandler(
 
     public void Reset()
     {
-        throw new NotImplementedException();
+        actionAlreadyPerformed = false;
     }
 }

@@ -57,7 +57,6 @@ public class BlockTemplateEditorTab
     private readonly NameComponentCollection names;
     private bool initialized;
     private bool inputCastBlockShadows;
-    private bool inputDrawable;
     private int inputMaterial;
     private int inputMaterialModifier;
     private string inputName = "";
@@ -240,11 +239,6 @@ public class BlockTemplateEditorTab
             if (ImGui.BeginTable("Appearance", 2, ImGuiTableFlags.SizingFixedFit))
             {
                 ImGui.TableNextColumn();
-                ImGui.Text("Drawable:");
-                ImGui.TableNextColumn();
-                ImGui.Checkbox("##drawable", ref inputDrawable);
-
-                ImGui.TableNextColumn();
                 ImGui.Text("Cast Block Shadows:");
                 ImGui.TableNextColumn();
                 ImGui.Checkbox("##castBlockShadows", ref inputCastBlockShadows);
@@ -300,7 +294,6 @@ public class BlockTemplateEditorTab
         {
             EntityId = entityTable.TakeNextTemplateEntityId(),
             Material = new MaterialPair(1, 0),
-            Drawable = true,
             CastBlockShadows = true
         };
         SaveDefinition(emptyDef);
@@ -344,7 +337,6 @@ public class BlockTemplateEditorTab
     private void Save()
     {
         selectedDefinition.Name = inputName.Length > 0 ? inputName : null;
-        selectedDefinition.Drawable = inputDrawable;
         selectedDefinition.Material = new MaterialPair(inputMaterial, inputMaterialModifier);
         selectedDefinition.CastBlockShadows = inputCastBlockShadows;
         SaveDefinition(selectedDefinition);
@@ -379,7 +371,6 @@ public class BlockTemplateEditorTab
             selectedEntityId = sortedTemplateEntityIds[index];
             selectedDefinition = definitionGenerator.GenerateDefinition(selectedEntityId);
             inputName = selectedDefinition.Name ?? "";
-            inputDrawable = selectedDefinition.Drawable;
             inputCastBlockShadows = selectedDefinition.CastBlockShadows;
             if (selectedDefinition.Material != null)
             {

@@ -17,6 +17,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
@@ -42,6 +43,7 @@ public class WorldEditSystem : ISystem
     private readonly IEntityFactory entityFactory;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
+    private readonly EntityTypeComponentCollection entityTypes;
     private readonly IEventSender eventSender;
     private readonly ILogger<WorldEditSystem> logger;
     private readonly LoggingUtil loggingUtil;
@@ -51,7 +53,8 @@ public class WorldEditSystem : ISystem
 
     public WorldEditSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, BlockController blockController,
         IEventSender eventSender, LoggingUtil loggingUtil, IBlockServices blockServices, EntityTable entityTable,
-        IEntityFactory entityFactory, EntityManager entityManager, ILogger<WorldEditSystem> logger)
+        IEntityFactory entityFactory, EntityManager entityManager, ILogger<WorldEditSystem> logger,
+        EntityTypeComponentCollection entityTypes)
     {
         this.blockController = blockController;
         this.eventSender = eventSender;
@@ -61,6 +64,7 @@ public class WorldEditSystem : ISystem
         this.entityFactory = entityFactory;
         this.entityManager = entityManager;
         this.logger = logger;
+        this.entityTypes = entityTypes;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
@@ -74,7 +78,7 @@ public class WorldEditSystem : ISystem
         EventId.Server_WorldEdit_SetBlock,
         EventId.Server_WorldEdit_RemoveBlock,
         EventId.Server_WorldEdit_AddNpc,
-        EventId.Server_WorldEdit_RemoveNpc
+        EventId.Server_WorldEdit_RemoveNonBlock
     };
 
     public int WorkloadEstimate { get; } = 20;
@@ -131,15 +135,15 @@ public class WorldEditSystem : ISystem
                     HandleAddNpc(details);
                     break;
                 }
-                case EventId.Server_WorldEdit_RemoveNpc:
+                case EventId.Server_WorldEdit_RemoveNonBlock:
                 {
-                    if (ev.EventDetails is not NpcRemoveEventDetails details)
+                    if (ev.EventDetails is not NonBlockRemoveEventDetails details)
                     {
                         logger.LogError("Received RemoveNpc with no details.");
                         break;
                     }
 
-                    HandleRemoveNpc(details);
+                    HandleRemoveNonBlock(details);
                     break;
                 }
             }
@@ -206,20 +210,26 @@ public class WorldEditSystem : ISystem
     /// <param name="details">Request details.</param>
     private void HandleAddNpc(NpcAddEventDetails details)
     {
-        logger.LogDebug("Add NPC with template {TemplateId} at {Position}.", details.NpcTemplateId, details.Position);
-        using var builder = entityFactory.GetBuilder();
-        builder.Template(details.NpcTemplateId)
-            .Positionable(details.Position, Vector3.Zero);
-        builder.Build();
+        logger.LogDebug("Add NPC with template {TemplateId:X} at {Position}.", details.NpcTemplateId, details.Position);
+        entityFactory.GetBuilder()
+            .Template(details.NpcTemplateId)
+            .Positionable(details.Position, Vector3.Zero)
+            .Build();
     }
 
     /// <summary>
     ///     Handles a remove NPC world edit request.
     /// </summary>
     /// <param name="details">Request details.</param>
-    private void HandleRemoveNpc(NpcRemoveEventDetails details)
+    private void HandleRemoveNonBlock(NonBlockRemoveEventDetails details)
     {
-        logger.LogDebug("Remove NPC entity {EntityId}.", details.NpcEntityId);
-        entityManager.RemoveEntity(details.NpcEntityId);
+        logger.LogDebug("Remove non-block entity {EntityId:X}.", details.EntityId);
+        if (!entityTypes.TryGetValue(details.EntityId, out var entityType) ||
+            entityType is not (EntityType.Npc or EntityType.Item))
+        {
+            logger.LogWarning("Attempted to remove disallowed entity {EntityId:X}.", details.EntityId);
+        }
+
+        entityManager.RemoveEntity(details.EntityId);
     }
 }

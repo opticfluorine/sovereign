@@ -475,6 +475,12 @@ public enum EventId
     /// Associated details: GenericEventDetails(Tool)
     Client_WorldEdit_SetTool = 10502,
 
+    /// <summary>
+    ///     Event sent to update the snap-to-grid setting for world editing.
+    /// </summary>
+    /// Associated details: BooleanEventDetails
+    Client_WorldEdit_SetSnapToGrid = 10503,
+
     #endregion
 
     #endregion Client
@@ -599,7 +605,7 @@ public enum EventId
     ///     Requests that an NPC be removed using admin privileges. Sent by the client-side admin world editor.
     /// </summary>
     /// Associated details: NpcRemoveEventDetails
-    Server_WorldEdit_RemoveNpc = 200603,
+    Server_WorldEdit_RemoveNonBlock = 200603,
 
     #endregion
 

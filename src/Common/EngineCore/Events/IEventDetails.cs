@@ -42,6 +42,8 @@ namespace Sovereign.EngineCore.Events;
 [Union(15, typeof(GenericChatEventDetails))]
 [Union(16, typeof(TeleportNoticeEventDetails))]
 [Union(17, typeof(IntEventDetails))]
+[Union(18, typeof(NpcAddEventDetails))]
+[Union(19, typeof(NonBlockRemoveEventDetails))]
 [JsonPolymorphic]
 [JsonDerivedType(typeof(AutoPingEventDetails), nameof(AutoPingEventDetails))]
 [JsonDerivedType(typeof(BlockAddBatchEventDetails), nameof(BlockAddBatchEventDetails))]
@@ -78,6 +80,8 @@ namespace Sovereign.EngineCore.Events;
 [JsonDerivedType(typeof(VectorPairEventDetails), nameof(VectorPairEventDetails))]
 [JsonDerivedType(typeof(WorldSegmentEventDetails), nameof(WorldSegmentEventDetails))]
 [JsonDerivedType(typeof(WorldSegmentSubscriptionEventDetails), nameof(WorldSegmentSubscriptionEventDetails))]
+[JsonDerivedType(typeof(NpcAddEventDetails), nameof(NpcAddEventDetails))]
+[JsonDerivedType(typeof(NonBlockRemoveEventDetails), nameof(NonBlockRemoveEventDetails))]
 public interface IEventDetails
 {
 }

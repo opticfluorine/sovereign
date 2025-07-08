@@ -109,9 +109,10 @@ public interface IEntityBuilder : IDisposable
     /// <summary>
     ///     Makes the new entity drawable.
     /// </summary>
+    /// <param name="offsets">Offset from entity position to the drawable origin, in projected world units.</param>
     /// <returns>Builder.</returns>
     [ScriptableEntityBuilderAction("Drawable")]
-    IEntityBuilder Drawable();
+    IEntityBuilder Drawable(Vector2 offsets);
 
     /// <summary>
     ///     Removes drawable component if they are currently set.

@@ -30,7 +30,7 @@ public class EntityDefinitionGenerator
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
-    private readonly DrawableTagCollection drawables;
+    private readonly DrawableComponentCollection drawables;
     private readonly EntityTable entityTable;
     private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
@@ -47,7 +47,7 @@ public class EntityDefinitionGenerator
         KinematicsComponentCollection kinematics,
         MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
-        ParentComponentCollection parents, DrawableTagCollection drawables,
+        ParentComponentCollection parents, DrawableComponentCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations,
         AdminTagCollection admins, BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows, PointLightSourceComponentCollection pointLightSources,
@@ -92,7 +92,8 @@ public class EntityDefinitionGenerator
         if (kinematics.HasLocalComponentForEntity(entityId))
             def.Position = kinematics[entityId].Position;
 
-        def.Drawable = drawables.HasLocalTagForEntity(entityId);
+        if (drawables.HasComponentForEntity(entityId))
+            def.Drawable = drawables[entityId];
 
         if (animatedSprites.HasLocalComponentForEntity(entityId))
             def.AnimatedSpriteId = animatedSprites[entityId];

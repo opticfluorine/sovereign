@@ -176,7 +176,7 @@ public class CreatePlayerRestService : AuthenticatedRestService
                     .Name(request.PlayerName)
                     .PlayerCharacter()
                     .Positionable(new Vector3(0.0f, 0.0f, 1.0f)) // TODO Configurable start position
-                    .Drawable()
+                    .Drawable(Vector2.Zero)
                     .Physics()
                     .BoundingBox(new BoundingBox
                     {

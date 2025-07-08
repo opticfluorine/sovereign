@@ -38,14 +38,14 @@ public class NpcAddEventDetails : IEventDetails
 }
 
 /// <summary>
-///     Event details for removing an NPC by entity ID.
+///     Event details for removing a non-block entity by entity ID.
 /// </summary>
 [MessagePackObject]
-public class NpcRemoveEventDetails : IEventDetails
+public class NonBlockRemoveEventDetails : IEventDetails
 {
     /// <summary>
     ///     NPC entity ID.
     /// </summary>
     [Key(0)]
-    public ulong NpcEntityId { get; set; }
+    public ulong EntityId { get; set; }
 }

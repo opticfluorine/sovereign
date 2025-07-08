@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Numerics;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineUtil.Attributes;
 
@@ -24,12 +25,12 @@ namespace Sovereign.EngineCore.Components;
 ///     Describes a component tag that indicates whether an entity can be drawn.
 /// </summary>
 [ScriptableComponents("drawable")]
-public sealed class DrawableTagCollection : BaseTagCollection
+public sealed class DrawableComponentCollection : BaseComponentCollection<Vector2>
 {
     private const int BaseSize = 65536;
 
-    public DrawableTagCollection(EntityTable entityTable, ComponentManager componentManager)
-        : base(entityTable, componentManager, BaseSize, ComponentType.Drawable)
+    public DrawableComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, BaseSize, ComponentOperators.Vector2Operators, ComponentType.Drawable)
     {
     }
 }

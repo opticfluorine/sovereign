@@ -26,10 +26,10 @@ namespace Sovereign.ClientCore.Rendering.Components.Indexers;
 /// </summary>
 public sealed class DrawablePositionEventFilter : BaseComponentEventFilter<Kinematics>
 {
-    private readonly DrawableTagCollection drawableCollection;
+    private readonly DrawableComponentCollection drawableCollection;
 
     public DrawablePositionEventFilter(KinematicsComponentCollection kinematicsCollection,
-        DrawableTagCollection drawableCollection)
+        DrawableComponentCollection drawableCollection)
         : base(kinematicsCollection, kinematicsCollection)
     {
         this.drawableCollection = drawableCollection;
@@ -37,7 +37,7 @@ public sealed class DrawablePositionEventFilter : BaseComponentEventFilter<Kinem
 
     protected override bool ShouldAccept(ulong entityId)
     {
-        return drawableCollection.HasTagForEntity(entityId, true)
-               || drawableCollection.HasPendingTagForEntity(entityId);
+        return drawableCollection.HasComponentForEntity(entityId, true)
+               || drawableCollection.HasPendingComponentForEntity(entityId);
     }
 }

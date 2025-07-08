@@ -44,8 +44,9 @@ public sealed class EntityProcessor
     private const int IndexName = IndexPlayerCharacter + 1;
     private const int IndexAccount = IndexName + 1;
     private const int IndexParent = IndexAccount + 1;
-    private const int IndexDrawable = IndexParent + 1;
-    private const int IndexAnimatedSprite = IndexDrawable + 1;
+    private const int IndexDrawableX = IndexParent + 1;
+    private const int IndexDrawableY = IndexDrawableX + 1;
+    private const int IndexAnimatedSprite = IndexDrawableY + 1;
     private const int IndexOrientation = IndexAnimatedSprite + 1;
     private const int IndexAdmin = IndexOrientation + 1;
     private const int IndexCastBlockShadows = IndexAdmin + 1;
@@ -269,8 +270,8 @@ public sealed class EntityProcessor
     /// <param name="builder">Entity builder.</param>
     private void ProcessDrawable(IDataReader reader, IEntityBuilder builder)
     {
-        if (reader.IsDBNull(IndexDrawable)) return;
-        if (reader.GetBoolean(IndexDrawable)) builder.Drawable();
+        if (reader.IsDBNull(IndexDrawableX) || reader.IsDBNull(IndexDrawableY)) return;
+        builder.Drawable(new Vector2(reader.GetFloat(IndexDrawableX), reader.GetFloat(IndexDrawableY)));
     }
 
     /// <summary>

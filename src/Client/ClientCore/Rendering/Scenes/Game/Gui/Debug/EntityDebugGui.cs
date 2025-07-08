@@ -38,7 +38,7 @@ public class EntityDebugGui
     private readonly CameraServices cameraServices;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
-    private readonly DrawableTagCollection drawables;
+    private readonly DrawableComponentCollection drawables;
     private readonly EntityTable entityTable;
     private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
@@ -53,7 +53,7 @@ public class EntityDebugGui
     private string entityIdInput = "";
 
     public EntityDebugGui(AboveBlockComponentCollection aboveBlocks, AnimatedSpriteComponentCollection animatedSprites,
-        DrawableTagCollection drawables, MaterialComponentCollection materials,
+        DrawableComponentCollection drawables, MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers, NameComponentCollection names,
         OrientationComponentCollection orientations, ParentComponentCollection parents,
         KinematicsComponentCollection kinematics,

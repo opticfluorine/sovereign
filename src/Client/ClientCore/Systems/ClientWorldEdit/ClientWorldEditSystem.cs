@@ -58,7 +58,8 @@ internal class ClientWorldEditSystem : ISystem
         EventId.Core_Tick,
         EventId.Client_WorldEdit_SetZOffset,
         EventId.Client_WorldEdit_SetPenWidth,
-        EventId.Client_WorldEdit_SetTool
+        EventId.Client_WorldEdit_SetTool,
+        EventId.Client_WorldEdit_SetSnapToGrid
     };
 
     public int WorkloadEstimate { get; } = 5;
@@ -133,6 +134,18 @@ internal class ClientWorldEditSystem : ISystem
                     }
 
                     state.SetTool(details.Value);
+                    break;
+                }
+
+                case EventId.Client_WorldEdit_SetSnapToGrid:
+                {
+                    if (ev.EventDetails is not BooleanEventDetails details)
+                    {
+                        logger.LogWarning("Received SetSnapToGrid without details.");
+                        break;
+                    }
+
+                    state.SetSnapToGrid(details.Value);
                     break;
                 }
 

@@ -83,7 +83,7 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Server_WorldEdit_SetBlock, blockAddValidator },
             { EventId.Server_WorldEdit_RemoveBlock, gridPositionValidator },
             { EventId.Server_WorldEdit_AddNpc, npcAddValidator },
-            { EventId.Server_WorldEdit_RemoveNpc, npcRemoveValidator },
+            { EventId.Server_WorldEdit_RemoveNonBlock, npcRemoveValidator },
             { EventId.Core_Time_Clock, intValidator }
         };
     }

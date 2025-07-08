@@ -64,10 +64,20 @@ public static class ComponentOperators
         };
 
     /// <summary>
-    ///     Standard operators for vector-valued components.
+    ///     Standard operators for Vector2-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<Vector2, Vector2, Vector2>>
+        Vector2Operators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b },
+            { ComponentOperation.Add, Vector2.Add }
+        };
+
+    /// <summary>
+    ///     Standard operators for Vector3-valued components.
     /// </summary>
     public static readonly Dictionary<ComponentOperation, Func<Vector3, Vector3, Vector3>>
-        VectorOperators = new()
+        Vector3Operators = new()
         {
             { ComponentOperation.Set, (_, b) => b },
             { ComponentOperation.Add, Vector3.Add }

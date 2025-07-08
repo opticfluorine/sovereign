@@ -35,7 +35,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
-    protected readonly DrawableTagCollection drawables;
+    protected readonly DrawableComponentCollection drawables;
 
     protected readonly ulong entityId;
     protected readonly EntityTable entityTable;
@@ -66,7 +66,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         PlayerCharacterTagCollection playerCharacterTags,
         NameComponentCollection names,
         ParentComponentCollection parents,
-        DrawableTagCollection drawables,
+        DrawableComponentCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites,
         OrientationComponentCollection orientations,
         AdminTagCollection admins,
@@ -268,15 +268,15 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         return this;
     }
 
-    public IEntityBuilder Drawable()
+    public IEntityBuilder Drawable(Vector2 offsets)
     {
-        drawables.TagEntity(entityId, load);
+        drawables.AddOrUpdateComponent(entityId, offsets, load);
         return this;
     }
 
     public IEntityBuilder WithoutDrawable()
     {
-        drawables.UntagEntity(entityId, load);
+        drawables.RemoveComponent(entityId, load);
         return this;
     }
 

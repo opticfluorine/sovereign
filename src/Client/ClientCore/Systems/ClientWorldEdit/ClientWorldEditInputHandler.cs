@@ -50,7 +50,6 @@ internal class ClientWorldEditInputHandler
     /// </summary>
     private EditState currentState = EditState.Idle;
 
-
     public ClientWorldEditInputHandler(
         InputServices inputServices,
         ILogger<ClientWorldEditInputHandler> logger,
@@ -119,12 +118,7 @@ internal class ClientWorldEditInputHandler
                 break;
 
             case EditState.Draw:
-                if (inputServices.IsMouseButtonDown(DrawButton))
-                {
-                    logger.LogDebug("Enter Draw state.");
-                    currentState = EditState.Draw;
-                }
-
+                if (!inputServices.IsMouseButtonDown(DrawButton)) ResetToIdle();
                 break;
 
             case EditState.Erase:

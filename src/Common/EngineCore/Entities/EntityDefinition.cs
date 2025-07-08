@@ -49,7 +49,7 @@ public class EntityDefinition
     ///     Set to true if entity should be drawable, false otherwise.
     /// </summary>
     [Key(3)]
-    public bool Drawable { get; set; }
+    public Vector2? Drawable { get; set; }
 
     /// <summary>
     ///     Block material information if the entity is a block, or null if not a block.

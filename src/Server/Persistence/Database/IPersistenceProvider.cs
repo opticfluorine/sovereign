@@ -17,6 +17,7 @@
 
 using System;
 using System.Data;
+using System.Numerics;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.Persistence.Database.Queries;
 
@@ -195,12 +196,12 @@ public interface IPersistenceProvider : IDisposable
     /// <summary>
     ///     IAddComponentQuery for the Drawable tag.
     /// </summary>
-    IAddComponentQuery<bool> AddDrawableComponentQuery { get; }
+    IAddComponentQuery<Vector2> AddDrawableComponentQuery { get; }
 
     /// <summary>
     ///     IModifyComponentQuery for the Drawable tag.
     /// </summary>
-    IModifyComponentQuery<bool> ModifyDrawableComponentQuery { get; }
+    IModifyComponentQuery<Vector2> ModifyDrawableComponentQuery { get; }
 
     /// <summary>
     ///     IRemoveComponentQuery for the Drawable tag.

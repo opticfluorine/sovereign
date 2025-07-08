@@ -257,9 +257,8 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<EntityDataControlGroup>();
         services.TryAddSingleton<TemplateEditorInternalController>();
         services.TryAddSingleton<WorldEditorGui>();
-        services.TryAddSingleton<BlockToolHandler>();
-        services.TryAddSingleton<NpcToolHandler>();
-        services.TryAddSingleton<ItemToolHandler>();
+        services.TryAddSingleton<BlockWorldEditorGui>();
+        services.TryAddSingleton<NpcWorldEditorGui>();
         services.TryAddSingleton<WorldVertexSequencer>();
         services.TryAddSingleton<WorldLayerGrouper>();
         services.TryAddSingleton<WorldLayerVertexSequencer>();
@@ -340,6 +339,9 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<ClientWorldEditController>();
         services.TryAddSingleton<ClientWorldEditInputHandler>();
         services.TryAddSingleton<ClientWorldEditInternalController>();
+        services.TryAddSingleton<BlockToolHandler>();
+        services.TryAddSingleton<NpcToolHandler>();
+        services.TryAddSingleton<ItemToolHandler>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, EntityAnimationSystem>());
         services.TryAddSingleton<AnimationPhaseStateMachine>();

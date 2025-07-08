@@ -82,11 +82,11 @@ public class ClientWorldEditInternalController
     /// <param name="npcEntityId">NPC entity ID.</param>
     public void RemoveNpc(IEventSender eventSender, ulong npcEntityId)
     {
-        var details = new NpcRemoveEventDetails
+        var details = new NonBlockRemoveEventDetails
         {
-            NpcEntityId = npcEntityId
+            EntityId = npcEntityId
         };
-        var ev = new Event(EventId.Server_WorldEdit_RemoveNpc, details);
+        var ev = new Event(EventId.Server_WorldEdit_RemoveNonBlock, details);
         eventSender.SendEvent(ev);
     }
 }

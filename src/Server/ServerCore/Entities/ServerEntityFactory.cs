@@ -35,7 +35,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
-    private readonly DrawableTagCollection drawables;
+    private readonly DrawableComponentCollection drawables;
 
     private readonly EntityAssigner entityAssigner;
     private readonly EntityManager entityManager;
@@ -63,7 +63,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         NameComponentCollection names,
         AccountComponentCollection accounts,
         ParentComponentCollection parents,
-        DrawableTagCollection drawables,
+        DrawableComponentCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites,
         OrientationComponentCollection orientations,
         AdminTagCollection admins,

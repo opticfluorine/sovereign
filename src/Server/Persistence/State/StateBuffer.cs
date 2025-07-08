@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Numerics;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
@@ -71,7 +72,7 @@ public sealed class StateBuffer
     /// <summary>
     ///     Drawable state updates.
     /// </summary>
-    private readonly StructBuffer<StateUpdate<bool>> drawableUpdates = new(BufferSize);
+    private readonly StructBuffer<StateUpdate<Vector2>> drawableUpdates = new(BufferSize);
 
     /// <summary>
     ///     Entity key-value pairs to be synchronized.
@@ -263,7 +264,7 @@ public sealed class StateBuffer
     ///     Queues a drawable tag update.
     /// </summary>
     /// <param name="update"></param>
-    public void UpdateDrawable(ref StateUpdate<bool> update)
+    public void UpdateDrawable(ref StateUpdate<Vector2> update)
     {
         drawableUpdates.Add(ref update);
     }

@@ -23,6 +23,6 @@ public class NpcRemoveEventDetailsValidator : IEventDetailsValidator
 {
     public bool IsValid(IEventDetails? details)
     {
-        return details is NpcRemoveEventDetails;
+        return details is NonBlockRemoveEventDetails;
     }
 }

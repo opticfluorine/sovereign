@@ -17,7 +17,6 @@
 using System;
 using SDL2;
 using Sovereign.ClientCore.Components.Indexers;
-using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Systems.Input;
 using Sovereign.EngineCore.Entities;
 
@@ -30,16 +29,17 @@ public class ClientWorldEditState
 {
     private readonly BlockTemplateEntityIndexer blockTemplateIndexer;
     private readonly InputServices inputServices;
-    private readonly MaterialManager materialManager;
+    private readonly NpcTemplateEntityIndexer npcTemplateIndexer;
 
     private ulong blockTemplateId;
+    private ulong npcTemplateId;
 
-    public ClientWorldEditState(InputServices inputServices, MaterialManager materialManager,
-        BlockTemplateEntityIndexer blockTemplateIndexer)
+    public ClientWorldEditState(InputServices inputServices, BlockTemplateEntityIndexer blockTemplateIndexer,
+        NpcTemplateEntityIndexer npcTemplateIndexer)
     {
         this.inputServices = inputServices;
-        this.materialManager = materialManager;
         this.blockTemplateIndexer = blockTemplateIndexer;
+        this.npcTemplateIndexer = npcTemplateIndexer;
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ public class ClientWorldEditState
 
             return blockTemplateId;
         }
-        set => blockTemplateId = value;
+        private set => blockTemplateId = value;
     }
 
     /// <summary>
@@ -74,10 +74,88 @@ public class ClientWorldEditState
     public WorldEditTool WorldEditTool { get; private set; } = WorldEditTool.Block;
 
     /// <summary>
+    ///     Selected NPC template.
+    /// </summary>
+    public ulong NpcTemplateId
+    {
+        get
+        {
+            // Lazy load of first block template entity ID.
+            if (npcTemplateId < EntityConstants.FirstTemplateEntityId)
+                npcTemplateId = npcTemplateIndexer.First;
+
+            return npcTemplateId;
+        }
+
+        private set => npcTemplateId = value;
+    }
+
+    /// <summary>
+    ///     Whether world editing is snapped to grid.
+    /// </summary>
+    public bool SnapToGrid { get; private set; }
+
+    /// <summary>
+    ///     Sets the snap-to-grid value.
+    /// </summary>
+    /// <param name="snapToGrid">Snap to grid value.</param>
+    public void SetSnapToGrid(bool snapToGrid)
+    {
+        SnapToGrid = snapToGrid;
+    }
+
+    /// <summary>
     ///     Processes a scroll tick.
     /// </summary>
     /// <param name="isScrollUp">If true, scroll is up; if false, scroll is down.</param>
     public void OnScrollTick(bool isScrollUp)
+    {
+        switch (WorldEditTool)
+        {
+            case WorldEditTool.Block:
+                HandleScrollForBlockTool(isScrollUp);
+                break;
+            case WorldEditTool.Npc:
+                HandleScrollTickForNpcTool(isScrollUp);
+                break;
+            case WorldEditTool.Item:
+                HandleScrollTickForItemTool(isScrollUp);
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Sets the Z offset. Does not perform any validation.
+    /// </summary>
+    /// <param name="zOffset">Z-offset.</param>
+    public void SetZOffset(int zOffset)
+    {
+        ZOffset = zOffset;
+    }
+
+    /// <summary>
+    ///     Sets the pen width. Does not perform any validation.
+    /// </summary>
+    /// <param name="penWidth">Pen width.</param>
+    public void SetPenWidth(int penWidth)
+    {
+        PenWidth = penWidth;
+    }
+
+    /// <summary>
+    ///     Sets the current tool. Does not perform any validation.
+    /// </summary>
+    /// <param name="worldEditTool">Tool.</param>
+    public void SetTool(WorldEditTool worldEditTool)
+    {
+        WorldEditTool = worldEditTool;
+    }
+
+    /// <summary>
+    ///     Handles a scroll tick for the block tool.
+    /// </summary>
+    /// <param name="isScrollUp">If true, mouse wheel scrolled up; down otherwise.</param>
+    private void HandleScrollForBlockTool(bool isScrollUp)
     {
         // The following rules are applied in priority order:
         // Scroll while holding CTRL varies the z-offset.
@@ -111,29 +189,23 @@ public class ClientWorldEditState
     }
 
     /// <summary>
-    ///     Sets the Z offset. Does not perform any validation.
+    ///     Handles a scroll tick for the NPC tool.
     /// </summary>
-    /// <param name="zOffset">Z-offset.</param>
-    public void SetZOffset(int zOffset)
+    /// <param name="isScrollUp">If true, mouse wheel scrolled up; down otherwise.</param>
+    private void HandleScrollTickForNpcTool(bool isScrollUp)
     {
-        ZOffset = zOffset;
+        if (!(isScrollUp
+                ? npcTemplateIndexer.TryGetNextLarger(NpcTemplateId, out var next)
+                : npcTemplateIndexer.TryGetNextSmaller(NpcTemplateId, out next))) return;
+
+        NpcTemplateId = next;
     }
 
     /// <summary>
-    ///     Sets the pen width. Does not perform any validation.
+    ///     Handles a scroll tick for the item tool.
     /// </summary>
-    /// <param name="penWidth">Pen width.</param>
-    public void SetPenWidth(int penWidth)
+    /// <param name="isScrollUp">If true, mouse wheel scrolled up; down otherwise.</param>
+    private void HandleScrollTickForItemTool(bool isScrollUp)
     {
-        PenWidth = penWidth;
-    }
-
-    /// <summary>
-    ///     Sets the current tool. Does not perform any validation.
-    /// </summary>
-    /// <param name="worldEditTool">Tool.</param>
-    public void SetTool(WorldEditTool worldEditTool)
-    {
-        WorldEditTool = worldEditTool;
     }
 }

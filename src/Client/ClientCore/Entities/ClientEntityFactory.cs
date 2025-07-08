@@ -34,7 +34,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
-    private readonly DrawableTagCollection drawables;
+    private readonly DrawableComponentCollection drawables;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
     private readonly EntityTypeComponentCollection entityTypes;
@@ -55,7 +55,7 @@ public sealed class ClientEntityFactory : IEntityFactory
 
     public ClientEntityFactory(EntityManager entityManager,
         KinematicsComponentCollection kinematics,
-        DrawableTagCollection drawables,
+        DrawableComponentCollection drawables,
         MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers,
         AboveBlockComponentCollection aboveBlocks,
