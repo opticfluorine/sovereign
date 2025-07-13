@@ -50,6 +50,7 @@ public sealed class WorldEntityRetriever
     private readonly CameraServices camera;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castsShadows;
+    private readonly DrawableComponentCollection drawables;
     private readonly WorldLayerGrouper grouper;
 
     private readonly KinematicsComponentCollection kinematics;
@@ -86,7 +87,8 @@ public sealed class WorldEntityRetriever
         LightSourceTable lightSourceTable, PlayerCharacterTagCollection playerCharacters,
         WorldRangeSelector rangeSelector, AtlasMap atlasMap,
         ILogger<WorldEntityRetriever> logger, CastShadowsComponentCollection castsShadows,
-        NonBlockShadowPlanner shadowPlanner, IOptions<RendererOptions> rendererOptions)
+        NonBlockShadowPlanner shadowPlanner, IOptions<RendererOptions> rendererOptions,
+        DrawableComponentCollection drawables)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -108,6 +110,7 @@ public sealed class WorldEntityRetriever
         this.logger = logger;
         this.castsShadows = castsShadows;
         this.shadowPlanner = shadowPlanner;
+        this.drawables = drawables;
         this.rendererOptions = rendererOptions.Value;
     }
 
@@ -249,17 +252,20 @@ public sealed class WorldEntityRetriever
     {
         var opacity = perspectiveServices.GetOpacityForEntity(entityId);
         if (opacity < OpacityCullThreshold) return;
+        if (!drawables.HasComponentForEntity(entityId)) return;
 
         var entityKinematics = kinematics[entityId];
+        var posOffset = drawables[entityId];
+        var position = entityKinematics.Position - new Vector3(posOffset, 0.0f);
+
         var animatedSpriteId = animatedSprites[entityId];
         var orientation = orientations.HasComponentForEntity(entityId) ? orientations[entityId] : Orientation.South;
         var phase = phases.HasComponentForEntity(entityId) ? phases[entityId] : AnimationPhase.Default;
 
         var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
         var sprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(systemTime, orientation);
-        grouper.AddSprite(PerspectiveEntityType.NonBlock, entityKinematics.Position, entityKinematics.Velocity, sprite,
-            1.0f,
-            opacity);
+        grouper.AddSprite(PerspectiveEntityType.NonBlock, position, entityKinematics.Velocity, sprite,
+            1.0f, opacity);
 
         if (playerCharacters.HasTagForEntity(entityId))
             AddNameLabel(entityId, entityKinematics, sprite, timeSinceTick);

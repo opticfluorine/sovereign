@@ -97,8 +97,7 @@ public sealed class WorldLayerGrouper
     /// <param name="lightFactor">Light factor.</param>
     /// <param name="opacity">Opacity alpha factor.</param>
     public void AddSprite(PerspectiveEntityType perspectiveEntityType, Vector3 position, Vector3 velocity,
-        Sprite sprite,
-        float lightFactor, float opacity)
+        Sprite sprite, float lightFactor, float opacity)
     {
         if (activeLayer is null)
         {
