@@ -40,7 +40,9 @@ public class EntityDataControlGroup(
         EntityConstants.RemoveCallbackScriptKey,
         EntityConstants.RemoveCallbackFunctionKey,
         EntityConstants.UnloadCallbackScriptKey,
-        EntityConstants.UnloadCallbackFunctionKey
+        EntityConstants.UnloadCallbackFunctionKey,
+        EntityConstants.InteractScriptKey,
+        EntityConstants.InteractFunctionKey
     };
 
     private readonly List<string> keysToRemove = new();
@@ -57,6 +59,8 @@ public class EntityDataControlGroup(
     private string inputEntityRemovedScript = "";
     private string inputEntityUnloadedFunction = "";
     private string inputEntityUnloadedScript = "";
+    private string inputInteractFunction = "";
+    private string inputInteractScript = "";
     private string inputNewKey = "";
     private bool previousFrameEntityDataLoaded;
 
@@ -150,6 +154,14 @@ public class EntityDataControlGroup(
                     ImGui.TableNextColumn();
                     guiExtensions.ScriptFunctionSelector("unl", ref inputEntityUnloadedScript,
                         ref inputEntityUnloadedFunction, out changed);
+                    if (changed) OnChangeScripts();
+
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Interact:");
+                    ImGui.TableNextColumn();
+                    ImGui.TableNextColumn();
+                    guiExtensions.ScriptFunctionSelector("unl", ref inputInteractScript,
+                        ref inputInteractFunction, out changed);
                     if (changed) OnChangeScripts();
 
                     ImGui.EndTable();
@@ -296,6 +308,14 @@ public class EntityDataControlGroup(
         inputEntityUnloadedScript =
             entityData!.TryGetValue(EntityConstants.UnloadCallbackScriptKey, out var unloadScript)
                 ? unloadScript
+                : "";
+        inputInteractFunction =
+            entityData!.TryGetValue(EntityConstants.InteractFunctionKey, out var interacttFunction)
+                ? interacttFunction
+                : "";
+        inputInteractScript =
+            entityData!.TryGetValue(EntityConstants.InteractScriptKey, out var interactScript)
+                ? interactScript
                 : "";
 
         OnChangeScripts();

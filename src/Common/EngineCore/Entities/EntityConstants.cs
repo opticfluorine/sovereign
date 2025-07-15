@@ -112,6 +112,21 @@ public static class EntityConstants
     public const string UnloadCallbackFunctionKey = $"__{UnloadCallbackName}_Function";
 
     /// <summary>
+    ///     Callback name for entity interact.
+    /// </summary>
+    public const string InteractCallbackName = "OnInteract";
+
+    /// <summary>
+    ///     Entity data key for interact callback script name.
+    /// </summary>
+    public const string InteractScriptKey = $"__{InteractCallbackName}_Script";
+
+    /// <summary>
+    ///     Entity data key for interact callback function name.
+    /// </summary>
+    public const string InteractFunctionKey = $"__{InteractCallbackName}_Function";
+
+    /// <summary>
     ///     Maximum length in bytes of an entity's key-value data key.
     /// </summary>
     public const int MaxEntityDataKeyLength = 64;
