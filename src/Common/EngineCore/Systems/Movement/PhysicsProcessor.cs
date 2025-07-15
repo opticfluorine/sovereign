@@ -52,25 +52,33 @@ public class PhysicsProcessor
     /// </summary>
     private const ulong PostLoadProcessingDelayTicks = 3;
 
+    /// <summary>
+    ///     "Radius" in world segments of non-block collision mesh search.
+    /// </summary>
+    private const int NonBlockSearchRadius = 1;
+
     private readonly List<List<BoundingBox>> activeMeshes = [];
     private readonly HashSet<GridPosition> activeWorldSegments = new();
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<PhysicsProcessor> logger;
     private readonly CollisionMeshManager meshManager;
+    private readonly NonBlockCollisionMeshes nonBlockCollisionMeshes;
     private readonly Queue<Tuple<ulong, GridPosition>> pendingWorldSegments = new();
     private readonly WorldSegmentResolver resolver;
 
     private ulong tickCount;
 
     public PhysicsProcessor(CollisionMeshManager meshManager, KinematicsComponentCollection kinematics,
-        BoundingBoxComponentCollection boundingBoxes, WorldSegmentResolver resolver, ILogger<PhysicsProcessor> logger)
+        BoundingBoxComponentCollection boundingBoxes, WorldSegmentResolver resolver, ILogger<PhysicsProcessor> logger,
+        NonBlockCollisionMeshes nonBlockCollisionMeshes)
     {
         this.meshManager = meshManager;
         this.kinematics = kinematics;
         this.boundingBoxes = boundingBoxes;
         this.resolver = resolver;
         this.logger = logger;
+        this.nonBlockCollisionMeshes = nonBlockCollisionMeshes;
     }
 
     /// <summary>
@@ -141,7 +149,7 @@ public class PhysicsProcessor
             var entityMesh = sourceMesh.Translate(posVel.Position);
             SelectActiveMeshes(entityMesh);
 
-            changed = HandleCollisions(kinematicsIndex, entityMesh, posVel, out isSupportedBelow);
+            changed = HandleCollisions(kinematicsIndex, entityMesh, posVel, entityId, out isSupportedBelow);
         }
 
         if (changed)
@@ -195,37 +203,68 @@ public class PhysicsProcessor
     /// <param name="posVel">Current position and velocity data for entity.</param>
     /// <param name="supportedBelow">true if the entity has a surface contact with a mesh below, false otherwise.</param>
     /// <returns>true if the entity was moved to resolve a collision, false otherwise.</returns>
-    private bool HandleCollisions(int kinematicsIndex, BoundingBox entityMesh, Kinematics posVel,
+    private bool HandleCollisions(int kinematicsIndex, BoundingBox entityMesh, Kinematics posVel, ulong entityId,
         out bool supportedBelow)
     {
         supportedBelow = false;
 
+        // Block collisions.
         foreach (var layer in activeMeshes)
         foreach (var blockMesh in layer)
         {
-            if (!entityMesh.Intersects(blockMesh, out var resolvingTranslation, out var minAbsOverlap))
-                continue;
-
-            // This is an intersection or surface contact. They can be distinguished by the components
-            // of the resolving translation: a surface contact will have one or more zero-valued components.
-            var isSurfaceContact = minAbsOverlap < ContactTestEpsilon;
-            if (!isSurfaceContact)
-            {
-                // Collision! Stop movement and resolve to the nearest surface contact.
-                kinematics.Components[(ulong)kinematicsIndex] = new Kinematics
-                {
-                    Position = posVel.Position + resolvingTranslation,
-                    Velocity = AdjustVelocityForCollision(resolvingTranslation, posVel.Velocity)
-                };
-                return true;
-            }
-
-            // If the bottom of the entity has the same z as the top of the block mesh...
-            if (Math.Abs(entityMesh.Position.Z - (blockMesh.Position.Z + blockMesh.Size.Z)) < ContactTestEpsilon)
-                // This mesh supports the entity from below, so inhibit gravity processing later.
-                supportedBelow = true;
+            if (CheckSingleCollision(kinematicsIndex, entityMesh, posVel, ref supportedBelow, blockMesh)) return true;
         }
 
+        // Non-block collisions.
+        var centerIndex = resolver.GetWorldSegmentForPosition(posVel.Position);
+        for (var i = centerIndex.X - NonBlockSearchRadius; i < centerIndex.X + NonBlockSearchRadius + 1; ++i)
+        for (var j = centerIndex.Y - NonBlockSearchRadius; j < centerIndex.Y + NonBlockSearchRadius + 1; ++j)
+        for (var k = centerIndex.Z - NonBlockSearchRadius; k < centerIndex.Z + NonBlockSearchRadius + 1; ++k)
+        {
+            foreach (var nonBlockMesh in nonBlockCollisionMeshes.GetMeshesForWorldSegment(
+                         new GridPosition(i, j, k), entityId))
+            {
+                if (CheckSingleCollision(kinematicsIndex, entityMesh, posVel, ref supportedBelow, nonBlockMesh))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Checks for a single collision between a pair of meshes.
+    /// </summary>
+    /// <param name="kinematicsIndex"></param>
+    /// <param name="entityMesh"></param>
+    /// <param name="posVel"></param>
+    /// <param name="supportedBelow"></param>
+    /// <param name="otherMesh"></param>
+    /// <returns></returns>
+    private bool CheckSingleCollision(int kinematicsIndex, BoundingBox entityMesh, Kinematics posVel,
+        ref bool supportedBelow, BoundingBox otherMesh)
+    {
+        if (!entityMesh.Intersects(otherMesh, out var resolvingTranslation, out var minAbsOverlap))
+            return false;
+
+        // This is an intersection or surface contact. They can be distinguished by the components
+        // of the resolving translation: a surface contact will have one or more zero-valued components.
+        var isSurfaceContact = minAbsOverlap < ContactTestEpsilon;
+        if (!isSurfaceContact)
+        {
+            // Collision! Stop movement and resolve to the nearest surface contact.
+            kinematics.Components[(ulong)kinematicsIndex] = new Kinematics
+            {
+                Position = posVel.Position + resolvingTranslation,
+                Velocity = AdjustVelocityForCollision(resolvingTranslation, posVel.Velocity)
+            };
+            return true;
+        }
+
+        // If the bottom of the entity has the same z as the top of the block mesh...
+        if (Math.Abs(entityMesh.Position.Z - (otherMesh.Position.Z + otherMesh.Size.Z)) < ContactTestEpsilon)
+            // This mesh supports the entity from below, so inhibit gravity processing later.
+            supportedBelow = true;
         return false;
     }
 
