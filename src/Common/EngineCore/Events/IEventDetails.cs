@@ -44,6 +44,7 @@ namespace Sovereign.EngineCore.Events;
 [Union(17, typeof(IntEventDetails))]
 [Union(18, typeof(NpcAddEventDetails))]
 [Union(19, typeof(NonBlockRemoveEventDetails))]
+[Union(20, typeof(InteractEventDetails))]
 [JsonPolymorphic]
 [JsonDerivedType(typeof(AutoPingEventDetails), nameof(AutoPingEventDetails))]
 [JsonDerivedType(typeof(BlockAddBatchEventDetails), nameof(BlockAddBatchEventDetails))]
@@ -64,10 +65,13 @@ namespace Sovereign.EngineCore.Events;
 [JsonDerivedType(typeof(GlobalChatEventDetails), nameof(GlobalChatEventDetails))]
 [JsonDerivedType(typeof(GridPositionEventDetails), nameof(GridPositionEventDetails))]
 [JsonDerivedType(typeof(IntEventDetails), nameof(IntEventDetails))]
+[JsonDerivedType(typeof(InteractEventDetails), nameof(InteractEventDetails))]
 [JsonDerivedType(typeof(KeyValueEventDetails), nameof(KeyValueEventDetails))]
 [JsonDerivedType(typeof(LocalChatEventDetails), nameof(LocalChatEventDetails))]
 [JsonDerivedType(typeof(MaterialPairEventDetails), nameof(MaterialPairEventDetails))]
 [JsonDerivedType(typeof(MoveEventDetails), nameof(MoveEventDetails))]
+[JsonDerivedType(typeof(NpcAddEventDetails), nameof(NpcAddEventDetails))]
+[JsonDerivedType(typeof(NonBlockRemoveEventDetails), nameof(NonBlockRemoveEventDetails))]
 [JsonDerivedType(typeof(RequestMoveEventDetails), nameof(RequestMoveEventDetails))]
 [JsonDerivedType(typeof(SelectPlayerEventDetails), nameof(SelectPlayerEventDetails))]
 [JsonDerivedType(typeof(SequenceEventDetails), nameof(SequenceEventDetails))]
@@ -80,8 +84,6 @@ namespace Sovereign.EngineCore.Events;
 [JsonDerivedType(typeof(VectorPairEventDetails), nameof(VectorPairEventDetails))]
 [JsonDerivedType(typeof(WorldSegmentEventDetails), nameof(WorldSegmentEventDetails))]
 [JsonDerivedType(typeof(WorldSegmentSubscriptionEventDetails), nameof(WorldSegmentSubscriptionEventDetails))]
-[JsonDerivedType(typeof(NpcAddEventDetails), nameof(NpcAddEventDetails))]
-[JsonDerivedType(typeof(NonBlockRemoveEventDetails), nameof(NonBlockRemoveEventDetails))]
 public interface IEventDetails
 {
 }

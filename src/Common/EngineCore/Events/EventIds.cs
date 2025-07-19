@@ -318,6 +318,16 @@ public enum EventId
 
     #endregion Time
 
+    #region Interaction
+
+    /// <summary>
+    ///     Event sent to trigger an interaction between two entities, possibly with a tool.
+    /// </summary>
+    /// Associated details: InteractEventDetails
+    Core_Interaction_Interact = 1200,
+
+    #endregion Interaction
+
     #endregion Core
 
     #region Client

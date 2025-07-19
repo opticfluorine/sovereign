@@ -17,6 +17,7 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Events.Details.Validators;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using EventId = Sovereign.EngineCore.Events.EventId;
@@ -84,7 +85,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Server_WorldEdit_RemoveBlock, gridPositionValidator },
             { EventId.Server_WorldEdit_AddNpc, npcAddValidator },
             { EventId.Server_WorldEdit_RemoveNonBlock, npcRemoveValidator },
-            { EventId.Core_Time_Clock, intValidator }
+            { EventId.Core_Time_Clock, intValidator },
+            { EventId.Core_Interaction_Interact, new TypeCheckedEventDetailsValidator<InteractEventDetails>() }
         };
     }
 

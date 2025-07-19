@@ -14,15 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.Scripting.Lua;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerCore.Systems.Scripting;
 
 /// <summary>
 ///     Public controller class for the Scripting system.
 /// </summary>
-public class ScriptingController
+public class ScriptingController(ScriptManager scriptManager, ILogger<ScriptingController> logger)
 {
     /// <summary>
     ///     Requests that the Scripting system reloads all scripts.
@@ -54,5 +59,38 @@ public class ScriptingController
     {
         var ev = new Event(EventId.Server_Scripting_LoadNew);
         eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Asynchronously invokes a function from a loaded script.
+    /// </summary>
+    /// <param name="scriptName">Script name.</param>
+    /// <param name="functionName">Function name.</param>
+    /// <param name="args">Arguments.</param>
+    public void CallFunctionAsync(string scriptName, string functionName, params ulong[] args)
+    {
+        Task.Run(() =>
+        {
+            try
+            {
+                if (!scriptManager.TryGetHost(scriptName, out var host))
+                    throw new LuaException($"Script '{scriptName}' not found.");
+
+                host.CallNamedFunction(functionName, builder =>
+                {
+                    foreach (var arg in args) builder.AddInteger((long)arg);
+                    return args.Length;
+                });
+            }
+            catch (LuaException e)
+            {
+                logger.LogError(e, "Error calling {ScriptName}.{FunctionName}.", scriptName, functionName);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Unhandled exception calling {ScriptName}.{FunctionName}.", scriptName,
+                    functionName);
+            }
+        });
     }
 }
