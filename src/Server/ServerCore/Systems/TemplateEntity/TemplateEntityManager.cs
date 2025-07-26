@@ -95,7 +95,10 @@ public class TemplateEntityManager
         definitionProcessor.ProcessDefinition(definition);
         dataController.ClearEntityKeyValuesSync(definition.EntityId);
         foreach (var kvp in keyValuePairs)
+        {
+            if (kvp.Value == string.Empty) continue;
             dataController.SetEntityKeyValueSync(definition.EntityId, kvp.Key, kvp.Value);
+        }
 
         pendingSync.Add(definition.EntityId);
     }

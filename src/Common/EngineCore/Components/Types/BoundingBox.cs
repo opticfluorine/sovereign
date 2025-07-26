@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using MessagePack;
 using Sovereign.EngineUtil.Attributes;
@@ -42,6 +43,12 @@ public struct BoundingBox
     [ScriptableField]
     [Key(1)]
     public Vector3 Size { get; set; }
+
+    /// <summary>
+    ///     Range of the Z edges of the box.
+    /// </summary>
+    [IgnoreMember]
+    public Vector2 ZRange => new(Position.Z, Position.Z + Size.Z);
 
     /// <summary>
     ///     Generates a new BoundingBox by applying a translation to the current BoundingBox.
@@ -104,5 +111,53 @@ public struct BoundingBox
     private static float AbsMin(float a, float b)
     {
         return Math.Abs(a) <= Math.Abs(b) ? a : b;
+    }
+
+    /// <summary>
+    ///     Finds the point where the given vector intercepts the faces when marched forward
+    ///     from the center of the bounding box in the center z plane of the bounding box.
+    /// </summary>
+    /// <param name="aimVector">Non-zero vector to march from the box center.</param>
+    /// <returns>Intercept point.</returns>
+    /// <remarks>
+    ///     If the bounding box has any zero-length sides, those dimensions are ignored. The bounding box must
+    ///     have at least one side with a non-zero length.
+    /// </remarks>
+    public Vector3 FindInterceptFromCenter(Vector3 aimVector)
+    {
+        Debug.Assert(aimVector != Vector3.Zero);
+
+        if (Size == Vector3.Zero) return Position;
+
+        // If the entity has a bounding box, we should check the interaction by a forward-facing
+        // point on the box instead of the entity's point position. Note that if we start from the center
+        // of the box, the symmetry of the box means that the two intercepts are the same distance (opposite sign)
+        // from the center, so we only need to compute the absolute distance and apply a positive translation by
+        // that amount.
+        var p0 = Position;
+        var pC = p0 + 0.5f * Size;
+
+        var minAlpha = float.MaxValue;
+        if (float.IsNormal(aimVector.X) && float.IsNormal(Size.X))
+        {
+            // Intercept could be on a constant-x face.
+            minAlpha = Math.Abs((p0.X - pC.X) / aimVector.X);
+        }
+
+        if (float.IsNormal(aimVector.Y) && float.IsNormal(Size.Y))
+        {
+            // Intercept could be on a constant-y face.
+            var alpha = Math.Abs((p0.Y - pC.Y) / aimVector.Y);
+            minAlpha = Math.Min(alpha, minAlpha);
+        }
+
+        if (float.IsNormal(aimVector.Z) && float.IsNormal(Size.Z))
+        {
+            // Intercept could be on a constant-z face.
+            var alpha = Math.Abs((p0.Z - pC.Z) / aimVector.Z);
+            minAlpha = Math.Min(alpha, minAlpha);
+        }
+
+        return pC + minAlpha * aimVector;
     }
 }

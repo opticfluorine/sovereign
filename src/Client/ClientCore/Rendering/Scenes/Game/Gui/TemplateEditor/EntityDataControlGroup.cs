@@ -100,14 +100,37 @@ public class EntityDataControlGroup(
     {
         // Return a copy of the input data to avoid external modifications.
         var newEntityData = new Dictionary<string, string>(inputEntityData);
-        newEntityData[EntityConstants.AddCallbackScriptKey] = inputEntityAddedScript;
-        newEntityData[EntityConstants.AddCallbackFunctionKey] = inputEntityAddedFunction;
-        newEntityData[EntityConstants.LoadCallbackScriptKey] = inputEntityLoadedScript;
-        newEntityData[EntityConstants.LoadCallbackFunctionKey] = inputEntityLoadedFunction;
-        newEntityData[EntityConstants.RemoveCallbackScriptKey] = inputEntityRemovedScript;
-        newEntityData[EntityConstants.RemoveCallbackFunctionKey] = inputEntityRemovedFunction;
-        newEntityData[EntityConstants.UnloadCallbackScriptKey] = inputEntityUnloadedScript;
-        newEntityData[EntityConstants.UnloadCallbackFunctionKey] = inputEntityUnloadedFunction;
+
+        if (!string.IsNullOrEmpty(inputEntityAddedScript))
+            newEntityData[EntityConstants.AddCallbackScriptKey] = inputEntityAddedScript;
+
+        if (!string.IsNullOrEmpty(inputEntityAddedFunction))
+            newEntityData[EntityConstants.AddCallbackFunctionKey] = inputEntityAddedFunction;
+
+        if (!string.IsNullOrEmpty(inputEntityLoadedScript))
+            newEntityData[EntityConstants.LoadCallbackScriptKey] = inputEntityLoadedScript;
+
+        if (!string.IsNullOrEmpty(inputEntityLoadedFunction))
+            newEntityData[EntityConstants.LoadCallbackFunctionKey] = inputEntityLoadedFunction;
+
+        if (!string.IsNullOrEmpty(inputEntityRemovedScript))
+            newEntityData[EntityConstants.RemoveCallbackScriptKey] = inputEntityRemovedScript;
+
+        if (!string.IsNullOrEmpty(inputEntityRemovedFunction))
+            newEntityData[EntityConstants.RemoveCallbackFunctionKey] = inputEntityRemovedFunction;
+
+        if (!string.IsNullOrEmpty(inputEntityUnloadedScript))
+            newEntityData[EntityConstants.UnloadCallbackScriptKey] = inputEntityUnloadedScript;
+
+        if (!string.IsNullOrEmpty(inputEntityUnloadedFunction))
+            newEntityData[EntityConstants.UnloadCallbackFunctionKey] = inputEntityUnloadedFunction;
+
+        if (!string.IsNullOrEmpty(inputInteractScript))
+            newEntityData[EntityConstants.InteractScriptKey] = inputInteractScript;
+
+        if (!string.IsNullOrEmpty(inputInteractFunction))
+            newEntityData[EntityConstants.InteractFunctionKey] = inputInteractFunction;
+
         return newEntityData;
     }
 

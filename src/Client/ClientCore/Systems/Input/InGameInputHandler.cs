@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Microsoft.Extensions.Logging;
 using SDL2;
 using Sovereign.ClientCore.Events.Details;
 
@@ -23,17 +22,17 @@ namespace Sovereign.ClientCore.Systems.Input;
 public class InGameInputHandler : IInputHandler
 {
     private readonly InGameKeyboardShortcuts inGameKeyboardShortcuts;
+    private readonly PlayerInteractionHandler interactionHandler;
     private readonly KeyboardState keyboardState;
-    private readonly ILogger<InGameInputHandler> logger;
     private readonly PlayerInputMovementMapper playerInputMovementMapper;
 
     public InGameInputHandler(KeyboardState keyboardState, PlayerInputMovementMapper playerInputMovementMapper,
-        InGameKeyboardShortcuts inGameKeyboardShortcuts, ILogger<InGameInputHandler> logger)
+        InGameKeyboardShortcuts inGameKeyboardShortcuts, PlayerInteractionHandler interactionHandler)
     {
         this.keyboardState = keyboardState;
         this.playerInputMovementMapper = playerInputMovementMapper;
         this.inGameKeyboardShortcuts = inGameKeyboardShortcuts;
-        this.logger = logger;
+        this.interactionHandler = interactionHandler;
     }
 
     public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
@@ -53,9 +52,13 @@ public class InGameInputHandler : IInputHandler
             case SDL.SDL_Keycode.SDLK_d:
                 HandleDirectionKeyEvent(oldState, !isKeyUp);
                 break;
-            
+
             case SDL.SDL_Keycode.SDLK_SPACE:
                 HandleSpaceKeyEvent(oldState, !isKeyUp);
+                break;
+
+            case SDL.SDL_Keycode.SDLK_e:
+                HandleEKeyEvent(oldState, !isKeyUp);
                 break;
 
             /* Ignore keys that don't do anything for now. */
@@ -77,7 +80,7 @@ public class InGameInputHandler : IInputHandler
                 keyboardState[SDL.SDL_Keycode.SDLK_LEFT] || keyboardState[SDL.SDL_Keycode.SDLK_a],
                 keyboardState[SDL.SDL_Keycode.SDLK_RIGHT] || keyboardState[SDL.SDL_Keycode.SDLK_d]);
     }
-    
+
     /// <summary>
     ///     Handles space key events.
     /// </summary>
@@ -85,9 +88,16 @@ public class InGameInputHandler : IInputHandler
     /// <param name="newState">New state of the key.</param>
     private void HandleSpaceKeyEvent(bool oldState, bool newState)
     {
-        if (!oldState && newState)
-        {
-            playerInputMovementMapper.Jump();
-        }
+        if (!oldState && newState) playerInputMovementMapper.Jump();
+    }
+
+    /// <summary>
+    ///     Handles E key events.
+    /// </summary>
+    /// <param name="oldState">Old state of the key.</param>
+    /// <param name="newState">New state of the key.</param>
+    private void HandleEKeyEvent(bool oldState, bool newState)
+    {
+        if (!oldState && newState) interactionHandler.Interact();
     }
 }

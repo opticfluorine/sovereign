@@ -32,6 +32,7 @@ using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Data;
+using Sovereign.EngineCore.Systems.Interaction;
 using Sovereign.EngineCore.Systems.Movement;
 using Sovereign.EngineCore.Systems.Performance;
 using Sovereign.EngineCore.Systems.Time;
@@ -224,6 +225,7 @@ public static class CoreServiceCollectionExtensions
 
         AddBlockSystem(services);
         AddDataSystem(services);
+        AddInteractionSystem(services);
         AddMovementSystem(services);
         AddPerformanceSystem(services);
         AddTimeSystem(services);
@@ -250,6 +252,11 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<GlobalKeyValueStore>();
         services.TryAddSingleton<EntityKeyValueStore>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, DataSystem>());
+    }
+
+    private static void AddInteractionSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<InteractionController>();
     }
 
     private static void AddMovementSystem(IServiceCollection services)

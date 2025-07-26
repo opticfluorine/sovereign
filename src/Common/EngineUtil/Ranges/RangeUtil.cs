@@ -68,6 +68,17 @@ public static class RangeUtil
     }
 
     /// <summary>
+    ///     Determines whether two 1D ranges intersect.
+    /// </summary>
+    /// <param name="firstRange">First range (min, max).</param>
+    /// <param name="secondRange">Second range (min, max).</param>
+    /// <returns>true if intersect, false otherwise.</returns>
+    public static bool RangesIntersect(Vector2 firstRange, Vector2 secondRange)
+    {
+        return firstRange.X <= secondRange.Y && secondRange.X <= firstRange.Y;
+    }
+
+    /// <summary>
     ///     Determines whether two ranges intersect.
     /// </summary>
     /// <param name="firstRangeMin">Lower bound (inclusive) of first range.</param>

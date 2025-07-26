@@ -29,7 +29,7 @@ namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 /// </summary>
 internal class NpcToolHandler(
     CameraServices cameraServices,
-    PerspectiveServices perspectiveServices,
+    IPerspectiveServices perspectiveServices,
     ClientWorldEditInternalController internalController,
     IEventSender eventSender,
     EntityTypeComponentCollection entityTypes,
@@ -53,9 +53,7 @@ internal class NpcToolHandler(
             var yShift = 0.0f;
             if (entityType == PerspectiveEntityType.BlockFrontFace &&
                 boundingBoxes.TryGetValue(state.NpcTemplateId, out var boundingBox))
-            {
                 yShift = boundingBox.Size.Y;
-            }
 
             position = positionOnBlock with { Y = positionOnBlock.Y - yShift };
         }

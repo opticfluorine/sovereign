@@ -361,6 +361,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<InputInternalController>();
         services.TryAddSingleton<NullInputHandler>();
         services.TryAddSingleton<InGameInputHandler>();
+        services.TryAddSingleton<PlayerInteractionHandler>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PerspectiveSystem>());
         services.TryAddSingleton<PerspectiveLineManager>();
