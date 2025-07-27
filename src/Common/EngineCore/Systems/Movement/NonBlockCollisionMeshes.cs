@@ -57,7 +57,7 @@ public sealed class NonBlockCollisionMeshes
         if (!meshesByWorldSegment.TryGetValue(segmentIndex, out var segment)) return empty;
 
         var selfPresent = knownWorldSegments.TryGetValue(selfEntityId, out var selfSegment) &&
-                          segmentIndex != selfSegment;
+                          segmentIndex == selfSegment;
         return selfPresent ? FilteredMeshes(segment, selfEntityId) : segment.Values;
     }
 
@@ -100,9 +100,7 @@ public sealed class NonBlockCollisionMeshes
         if (knownWorldSegments.TryGetValue(entityId, out var oldSegmentIndex) &&
             segmentIndex != oldSegmentIndex &&
             meshesByWorldSegment.TryGetValue(oldSegmentIndex, out var oldSegment))
-        {
             oldSegment.Remove(entityId);
-        }
 
         // Grab a new dict if this is the first non-block entity in its world segment.
         if (!meshesByWorldSegment.TryGetValue(segmentIndex, out var segment))
@@ -112,7 +110,7 @@ public sealed class NonBlockCollisionMeshes
         }
 
         // Update mesh by translating the bounding box to the entity's new position.
-        segment[entityId] = boundingBox with { Position = componentValue.Position };
+        segment[entityId] = boundingBox.Translate(componentValue.Position);
         knownWorldSegments[entityId] = segmentIndex;
     }
 
@@ -125,8 +123,6 @@ public sealed class NonBlockCollisionMeshes
     {
         if (knownWorldSegments.Remove(entityId, out var segmentIndex) &&
             meshesByWorldSegment.TryGetValue(segmentIndex, out var segment))
-        {
             segment.Remove(entityId);
-        }
     }
 }
