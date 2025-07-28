@@ -136,3 +136,20 @@ public static class EntityConstants
     /// </summary>
     public const int MaxEntityDataValueLength = 128;
 }
+
+/// <summary>
+///     Helper functions for entities.
+/// </summary>
+public static class EntityUtil
+{
+    /// <summary>
+    ///     Checks whether the given entity is a template entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>true if template entity, false otherwise.</returns>
+    public static bool IsTemplateEntity(ulong entityId)
+    {
+        return entityId >= EntityConstants.FirstTemplateEntityId &&
+               entityId <= EntityConstants.LastTemplateEntityId;
+    }
+}

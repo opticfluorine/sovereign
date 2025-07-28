@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.EngineCore.Entities;
@@ -26,6 +27,11 @@ namespace Sovereign.EngineCore.Entities;
 public class EntityTable
 {
     private const int InitialPendingBufferSize = 16384;
+
+    /// <summary>
+    ///     Empty set of ulongs.
+    /// </summary>
+    private readonly HashSet<ulong> emptyUlongSet = new();
 
     /// <summary>
     ///     Set of all entities that are currently held in memory.
@@ -52,7 +58,12 @@ public class EntityTable
     /// </summary>
     private readonly StructBuffer<EntityRemove> pendingRemoves = new(InitialPendingBufferSize);
 
-    private readonly object templateLockHandle = new();
+    /// <summary>
+    ///     Map from template ID to all loaded instances of that template.
+    /// </summary>
+    private readonly Dictionary<ulong, HashSet<ulong>> templateInstances = new();
+
+    private readonly Lock templateLockHandle = new();
 
     /// <summary>
     ///     Set of all currently loaded entity IDs, including template entity IDs.
@@ -63,6 +74,16 @@ public class EntityTable
     ///     Next unused template entity ID.
     /// </summary>
     public ulong NextTemplateEntityId { get; private set; } = EntityConstants.FirstTemplateEntityId;
+
+    /// <summary>
+    ///     Gets the loaded instances of the given template.
+    /// </summary>
+    /// <param name="templateId">Template entity ID.</param>
+    /// <returns>Known instances, which may be an empty set.</returns>
+    public IReadOnlySet<ulong> GetInstancesOfTemplate(ulong templateId)
+    {
+        return templateInstances.TryGetValue(templateId, out var instances) ? instances : emptyUlongSet;
+    }
 
     /// <summary>
     ///     Marks the given template entity ID as used.
@@ -136,7 +157,17 @@ public class EntityTable
             ref var pendingAdd = ref pendingAdds[i];
             var entityId = pendingAdd.EntityId;
             entities.Add(entityId);
-            if (pendingAdd.TemplateEntityId > 0) entityTemplates[entityId] = pendingAdd.TemplateEntityId;
+            if (pendingAdd.TemplateEntityId > 0)
+            {
+                entityTemplates[entityId] = pendingAdd.TemplateEntityId;
+                if (!templateInstances.TryGetValue(pendingAdd.TemplateEntityId, out var instances))
+                {
+                    instances = new HashSet<ulong>();
+                    templateInstances[pendingAdd.TemplateEntityId] = instances;
+                }
+
+                instances.Add(entityId);
+            }
 
             if (!pendingAdd.IsBlock)
             {
@@ -160,6 +191,8 @@ public class EntityTable
                 nonBlockEntities.Remove(entityId);
                 OnNonBlockEntityRemoved?.Invoke(entityId);
             }
+
+            if (entityTemplates.Remove(entityId, out var templateId)) templateInstances[templateId].Remove(entityId);
 
             OnEntityRemoved?.Invoke(entityId, pendingRemove.IsUnload);
         }
@@ -186,10 +219,27 @@ public class EntityTable
     /// <param name="templateEntityId">Template entity ID, or 0 for no template.</param>
     public void SetTemplate(ulong entityId, ulong templateEntityId)
     {
+        // Remove instance of old template.
+        if (entityTemplates.TryGetValue(entityId, out var oldTemplateId))
+            templateInstances[oldTemplateId].Remove(entityId);
+
+        // Set new template.
         if (templateEntityId > 0)
+        {
+            if (!templateInstances.TryGetValue(templateEntityId, out var instances))
+            {
+                instances = new HashSet<ulong>();
+                templateInstances[templateEntityId] = instances;
+            }
+
             entityTemplates[entityId] = templateEntityId;
+            instances.Add(entityId);
+        }
         else
+        {
             entityTemplates.Remove(entityId);
+        }
+
         OnTemplateSet?.Invoke(entityId, templateEntityId);
     }
 
