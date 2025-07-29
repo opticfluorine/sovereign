@@ -80,10 +80,10 @@ public interface IPerspectiveServices
 /// </summary>
 internal class PerspectiveServices : IPerspectiveServices
 {
-    private readonly PerspectiveLineManager lineManager;
-    private readonly OverheadTransparency overheadTransparency;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly PerspectiveLineManager lineManager;
     private readonly ILogger<PerspectiveServices> logger;
+    private readonly OverheadTransparency overheadTransparency;
     private readonly DisplayViewport viewport;
 
     public PerspectiveServices(PerspectiveLineManager lineManager, DisplayViewport viewport,
@@ -122,19 +122,22 @@ internal class PerspectiveServices : IPerspectiveServices
         // Find the highest visible block face (if any).
         var found = false;
         foreach (var zSet in perspectiveLine.ZFloors)
-        foreach (var info in zSet.Entities)
         {
-            if (info.PerspectiveEntityType != PerspectiveEntityType.BlockFrontFace &&
-                info.PerspectiveEntityType != PerspectiveEntityType.BlockTopFace)
-                continue;
+            if (found) break;
+            foreach (var info in zSet.Entities)
+            {
+                if (info.PerspectiveEntityType != PerspectiveEntityType.BlockFrontFace &&
+                    info.PerspectiveEntityType != PerspectiveEntityType.BlockTopFace)
+                    continue;
 
-            if (overheadTransparency.GetOpacityForEntity(info.EntityId) < 1.0f)
-                continue;
+                if (overheadTransparency.GetOpacityForEntity(info.EntityId) < 1.0f)
+                    continue;
 
-            entityId = info.EntityId;
-            entityType = info.PerspectiveEntityType;
-            found = true;
-            break;
+                entityId = info.EntityId;
+                entityType = info.PerspectiveEntityType;
+                found = true;
+                break;
+            }
         }
 
         if (!found) return false;
@@ -145,6 +148,7 @@ internal class PerspectiveServices : IPerspectiveServices
             logger.LogError("Found block {EntityId:X} on perspective line with no position.", entityId);
             return true;
         }
+
         var delta = entityType == PerspectiveEntityType.BlockTopFace
             ? position.Z - gridPos.Z - 1.0f
             : gridPos.Y - position.Y;

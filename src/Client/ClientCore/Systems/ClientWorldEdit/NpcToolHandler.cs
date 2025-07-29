@@ -16,11 +16,13 @@
 
 using System;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Logging;
 
 namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 
@@ -34,7 +36,9 @@ internal class NpcToolHandler(
     IEventSender eventSender,
     EntityTypeComponentCollection entityTypes,
     BoundingBoxComponentCollection boundingBoxes,
-    ClientWorldEditState state)
+    ClientWorldEditState state,
+    ILogger<NpcToolHandler> logger,
+    LoggingUtil loggingUtil)
     : IWorldEditToolHandler
 {
     private bool actionAlreadyPerformed;
@@ -55,6 +59,7 @@ internal class NpcToolHandler(
                 boundingBoxes.TryGetValue(state.NpcTemplateId, out var boundingBox))
                 yShift = boundingBox.Size.Y;
 
+            logger.LogDebug("Apply Y shift of {YShift}.", yShift);
             position = positionOnBlock with { Y = positionOnBlock.Y - yShift };
         }
 
@@ -62,6 +67,7 @@ internal class NpcToolHandler(
             position = new Vector3((float)Math.Floor(position.X), (float)Math.Floor(position.Y),
                 (float)Math.Floor(position.Z));
 
+        logger.LogDebug("Add NPC {NpcName} at {Position}.", loggingUtil.FormatEntity(state.NpcTemplateId), position);
         internalController.AddNpc(eventSender, position, state.NpcTemplateId);
     }
 
