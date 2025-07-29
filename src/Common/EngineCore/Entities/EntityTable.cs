@@ -176,8 +176,8 @@ public class EntityTable
             }
 
             OnEntityAdded?.Invoke(entityId, pendingAdd.IsLoad);
-            if (!pendingAdd.IsLoad && pendingAdd.TemplateEntityId > 0)
-                OnTemplateSet?.Invoke(entityId, pendingAdd.TemplateEntityId);
+            if (pendingAdd.TemplateEntityId > 0)
+                OnTemplateSet?.Invoke(entityId, pendingAdd.TemplateEntityId, pendingAdd.IsLoad);
         }
 
         // Removals.
@@ -240,7 +240,7 @@ public class EntityTable
             entityTemplates.Remove(entityId);
         }
 
-        OnTemplateSet?.Invoke(entityId, templateEntityId);
+        OnTemplateSet?.Invoke(entityId, templateEntityId, false);
     }
 
     /// <summary>
@@ -272,9 +272,9 @@ public class EntityTable
 
     /// <summary>
     ///     Event invoked when a template is set to an entity.
-    ///     First parameter is entity ID, second parameter is template entity ID.
+    ///     First parameter is entity ID, second parameter is template entity ID, third is load flag.
     /// </summary>
-    public event Action<ulong, ulong>? OnTemplateSet;
+    public event Action<ulong, ulong, bool>? OnTemplateSet;
 
     /// <summary>
     ///     Contains information for an entity to be added.

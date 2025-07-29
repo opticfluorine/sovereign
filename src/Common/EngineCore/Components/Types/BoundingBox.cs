@@ -65,15 +65,22 @@ public struct BoundingBox
     ///     translation vector that resolves the intersection when applied to this BoundingBox.
     /// </summary>
     /// <param name="other">Other BoundingBox to test against.</param>
+    /// <param name="velocity">Velocity of the entity to which this BoundingBox is attached.</param>
     /// <param name="resolvingTranslation">
     ///     Smallest translation that resolves the intersection to zero overlap when applied
     ///     to this BoundingBox. Only valid if this method returns true.
     /// </param>
-    /// <param name="minimumAbsOverlap">Smallest </param>
+    /// <param name="minimumAbsOverlap">Smallest absolute overlap among all three axes.</param>
+    /// <param name="resolvedSurfaceNormal">
+    ///     If resolvingTranslation is nonzero, set to a normal vector to the collision
+    ///     surface.
+    /// </param>
     /// <returns>true if the boxes intersect (including touching), false otherwise.</returns>
-    public bool Intersects(BoundingBox other, out Vector3 resolvingTranslation, out float minimumAbsOverlap)
+    public bool Intersects(BoundingBox other, Vector3 velocity, out Vector3 resolvingTranslation,
+        out float minimumAbsOverlap, out Vector3 resolvedSurfaceNormal)
     {
         resolvingTranslation = Vector3.Zero;
+        resolvedSurfaceNormal = Vector3.Zero;
         minimumAbsOverlap = 0.0f;
 
         var amin = Position;
@@ -86,19 +93,63 @@ public struct BoundingBox
                                           && amin.Z <= bmax.Z && amax.Z >= bmin.Z;
         if (!intersects) return false;
 
-        var shifts = new Vector3(
-            AbsMin(bmax.X - amin.X, bmin.X - amax.X),
-            AbsMin(bmax.Y - amin.Y, bmin.Y - amax.Y),
-            AbsMin(bmax.Z - amin.Z, bmin.Z - amax.Z)
-        );
-
+        var a0Diff = amin - bmax;
+        var a1Diff = amax - bmin;
+        var shifts = Vector3.MinMagnitude(a0Diff, a1Diff);
         minimumAbsOverlap = Math.Abs(AbsMin(shifts.X, AbsMin(shifts.Y, shifts.Z)));
-        resolvingTranslation = new Vector3(
-            Math.Abs(shifts.X) > minimumAbsOverlap ? 0.0f : shifts.X,
-            Math.Abs(shifts.Y) > minimumAbsOverlap ? 0.0f : shifts.Y,
-            Math.Abs(shifts.Z) > minimumAbsOverlap ? 0.0f : shifts.Z
-        );
 
+        // If we have a static collision, leave the resolving vector as zero.
+        if (velocity == Vector3.Zero) return true;
+
+        // If we have a dynamic collision, find the reverse time delta (which I'm calling
+        // "alpha") that rewinds motion to the beginning of collision where the overlap
+        // volume is zero.
+        var a0Alpha = a0Diff / velocity;
+        var a1Alpha = a1Diff / velocity;
+
+        // The smallest non-negative alpha gives the correct rollback to the moment of collision.
+        // Some of the alpha may be +/- infinity if velocity has zero-valued components; this
+        // is OK, and they will be discarded by this logic. As long as the velocity is nonzero,
+        // there will always be at least two finite alpha, one of which will always be positive
+        // (or zero for a non-overlapping collision which does not require resolution).
+        var minNonNegativeAlpha = float.MaxValue;
+        if (a0Alpha.X >= 0.0f)
+        {
+            minNonNegativeAlpha = a0Alpha.X;
+            resolvedSurfaceNormal = new Vector3(1, 0, 0);
+        }
+
+        if (a0Alpha.Y >= 0.0f && a0Alpha.Y < minNonNegativeAlpha)
+        {
+            minNonNegativeAlpha = a0Alpha.Y;
+            resolvedSurfaceNormal = new Vector3(0, 1, 0);
+        }
+
+        if (a0Alpha.Z >= 0.0f && a0Alpha.Z < minNonNegativeAlpha)
+        {
+            minNonNegativeAlpha = a0Alpha.Z;
+            resolvedSurfaceNormal = new Vector3(0, 0, 1);
+        }
+
+        if (a1Alpha.X >= 0.0f && a1Alpha.X < minNonNegativeAlpha)
+        {
+            minNonNegativeAlpha = a1Alpha.X;
+            resolvedSurfaceNormal = new Vector3(1, 0, 0);
+        }
+
+        if (a1Alpha.Y >= 0.0f && a1Alpha.Y < minNonNegativeAlpha)
+        {
+            minNonNegativeAlpha = a1Alpha.Y;
+            resolvedSurfaceNormal = new Vector3(0, 1, 0);
+        }
+
+        if (a1Alpha.Z >= 0.0f && a1Alpha.Z < minNonNegativeAlpha)
+        {
+            minNonNegativeAlpha = a1Alpha.Z;
+            resolvedSurfaceNormal = new Vector3(0, 0, 1);
+        }
+
+        resolvingTranslation = -minNonNegativeAlpha * velocity;
         return true;
     }
 

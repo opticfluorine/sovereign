@@ -201,6 +201,7 @@ public class PhysicsProcessor
     /// <param name="kinematicsIndex">Kinematics component index.</param>
     /// <param name="entityMesh">Entity collision mesh.</param>
     /// <param name="posVel">Current position and velocity data for entity.</param>
+    /// <param name="entityId">Entity ID.</param>
     /// <param name="supportedBelow">true if the entity has a surface contact with a mesh below, false otherwise.</param>
     /// <returns>true if the entity was moved to resolve a collision, false otherwise.</returns>
     private bool HandleCollisions(int kinematicsIndex, BoundingBox entityMesh, Kinematics posVel, ulong entityId,
@@ -235,17 +236,17 @@ public class PhysicsProcessor
     /// <summary>
     ///     Checks for a single collision between a pair of meshes.
     /// </summary>
-    /// <param name="kinematicsIndex"></param>
-    /// <param name="entityMesh"></param>
-    /// <param name="posVel"></param>
-    /// <param name="supportedBelow"></param>
-    /// <param name="otherMesh"></param>
-    /// <returns></returns>
+    /// <param name="kinematicsIndex">Kinematics component index.</param>
+    /// <param name="entityMesh">Entity mesh.</param>
+    /// <param name="posVel">Kinematics for entity.</param>
+    /// <param name="supportedBelow">Whether the entity is directly supported by a mesh below.</param>
+    /// <param name="otherMesh">Collision mesh of other object.</param>
+    /// <returns>true if a collision is found, false otherwise.</returns>
     private bool CheckSingleCollision(int kinematicsIndex, BoundingBox entityMesh, Kinematics posVel,
         ref bool supportedBelow, BoundingBox otherMesh)
     {
-        if (!entityMesh.Intersects(otherMesh, out var resolvingTranslation, out var minAbsOverlap))
-            return false;
+        if (!entityMesh.Intersects(otherMesh, posVel.Velocity, out var resolvingTranslation,
+                out var minAbsOverlap, out var surfaceNormal)) return false;
 
         // This is an intersection or surface contact. They can be distinguished by the components
         // of the resolving translation: a surface contact will have one or more zero-valued components.
@@ -256,7 +257,7 @@ public class PhysicsProcessor
             kinematics.Components[(ulong)kinematicsIndex] = new Kinematics
             {
                 Position = posVel.Position + resolvingTranslation,
-                Velocity = AdjustVelocityForCollision(resolvingTranslation, posVel.Velocity)
+                Velocity = AdjustVelocityForCollision(surfaceNormal, posVel.Velocity)
             };
             return true;
         }
@@ -271,16 +272,16 @@ public class PhysicsProcessor
     /// <summary>
     ///     Adjusts entity velocity in response to a collision.
     /// </summary>
-    /// <param name="resolvingTranslation">Entity translation that resolves the collision.</param>
+    /// <param name="surfaceNormal">Normal to the collision surface.</param>
     /// <param name="velocity">Current entity velocity.</param>
     /// <returns>Adjusted entity velocity.</returns>
-    private Vector3 AdjustVelocityForCollision(Vector3 resolvingTranslation, Vector3 velocity)
+    private Vector3 AdjustVelocityForCollision(Vector3 surfaceNormal, Vector3 velocity)
     {
         return new Vector3
         {
-            X = Math.Abs(resolvingTranslation.X) > 0.0f ? 0.0f : velocity.X,
-            Y = Math.Abs(resolvingTranslation.Y) > 0.0f ? 0.0f : velocity.Y,
-            Z = Math.Abs(resolvingTranslation.Z) > 0.0f ? 0.0f : velocity.Z
+            X = Math.Abs(surfaceNormal.X) > 0.0f ? 0.0f : velocity.X,
+            Y = Math.Abs(surfaceNormal.Y) > 0.0f ? 0.0f : velocity.Y,
+            Z = Math.Abs(surfaceNormal.Z) > 0.0f ? 0.0f : velocity.Z
         };
     }
 

@@ -158,8 +158,7 @@ public sealed class WorldSegmentBlockDataManager
 
         // Immediately remove the segment from the data set, then schedule it for disposal.
         if (compressedDataProducers.TryRemove(segmentIndex, out var currentTask))
-            deletionTasks[segmentIndex] = currentTask.ContinueWith(
-                _ => DoRemoveWorldSegment(segmentIndex));
+            deletionTasks[segmentIndex] = currentTask.ContinueWith(_ => DoRemoveWorldSegment(segmentIndex));
         else
             logger.LogError("Tried to remove world segemnt data for {Index} before it was added.", segmentIndex);
     }
@@ -215,10 +214,10 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="templateEntityId">New template entity ID.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateEntityId)
+    private void OnTemplateSet(ulong entityId, ulong templateEntityId, bool isLoad)
     {
-        // Ignore if not a block entity.
-        if (!blockPositions.HasComponentForEntity(entityId)) return;
+        // Ignore if load or not a block entity.
+        if (isLoad || !blockPositions.HasComponentForEntity(entityId)) return;
 
         // Ensure that the bulk data for the affected world segment is updated on next request.
         changedBlocks.Enqueue(entityId);

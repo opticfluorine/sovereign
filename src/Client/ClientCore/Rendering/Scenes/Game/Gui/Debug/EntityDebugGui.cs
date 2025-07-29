@@ -105,7 +105,7 @@ public class EntityDebugGui
 
             if (ImGui.BeginTabItem("By ID"))
             {
-                ImGui.InputText("Entity ID", ref entityIdInput, 16, ImGuiInputTextFlags.CharsHexadecimal);
+                ImGui.InputText("Entity ID", ref entityIdInput, 17, ImGuiInputTextFlags.CharsHexadecimal);
                 valid = ulong.TryParse(entityIdInput, NumberStyles.HexNumber, null, out entityId);
                 ImGui.EndTabItem();
             }
