@@ -149,7 +149,11 @@ public static class EntityUtil
     /// <returns>true if template entity, false otherwise.</returns>
     public static bool IsTemplateEntity(ulong entityId)
     {
-        return entityId >= EntityConstants.FirstTemplateEntityId &&
-               entityId <= EntityConstants.LastTemplateEntityId;
+        return entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId;
+    }
+
+    public static bool IsBlockEntity(ulong entityId)
+    {
+        return entityId is >= EntityConstants.FirstBlockEntityId and <= EntityConstants.LastBlockEntityId;
     }
 }

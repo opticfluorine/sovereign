@@ -60,14 +60,11 @@ public class MovementManager
     private readonly List<PendingCheck>[] pendingChecks;
 
     /// <summary>
-    ///     Queue of entities needing move events sent.
-    /// </summary>
-    private readonly Queue<ulong> pendingMoveEvents = new();
-
-    /// <summary>
     ///     Queue of move requests received at beginning of tick before the check table is updated.
     /// </summary>
     private readonly Queue<RequestMoveEventDetails> pendingRequests = new();
+
+    private readonly PhysicsTagCollection physics;
 
     private readonly List<bool> physicsActiveFlags = new();
 
@@ -103,12 +100,14 @@ public class MovementManager
         OrientationComponentCollection orientations,
         PhysicsTagCollection physics, PhysicsProcessor physicsProcessor,
         ILogger<MovementManager> logger, NonBlockWorldSegmentIndexer worldSegmentIndexer,
-        IMovementNotifier movementNotifier, IOptions<MovementOptions> movementOptions)
+        IMovementNotifier movementNotifier, IOptions<MovementOptions> movementOptions,
+        EntityTable entityTable)
     {
         this.kinematics = kinematics;
         this.systemTimer = systemTimer;
         this.internalController = internalController;
         this.orientations = orientations;
+        this.physics = physics;
         this.physicsProcessor = physicsProcessor;
         this.logger = logger;
         this.worldSegmentIndexer = worldSegmentIndexer;
@@ -122,6 +121,7 @@ public class MovementManager
         kinematics.OnBeginDirectAccess += UpdatePositions;
         physics.OnComponentAdded += OnPhysicsTagAdded;
         physics.OnComponentRemoved += OnPhysicsTagRemoved;
+        entityTable.OnTemplateSet += OnTemplateSet;
     }
 
     /// <summary>
@@ -149,7 +149,6 @@ public class MovementManager
         kinematics.ModifyComponent(details.EntityId, ComponentOperation.SetVelocity,
             new Kinematics { Velocity = new Vector3(velocity, posVel.Velocity.Z) });
         sequenceCountsByEntity[details.EntityId] = details.Sequence;
-        pendingMoveEvents.Enqueue(details.EntityId);
 
         SetOrientation(details.EntityId, details.RelativeVelocity);
 
@@ -442,6 +441,27 @@ public class MovementManager
         kinematicsComponentIndexPhysicsTags[index] = false;
         physicsActiveFlags[index] = false;
         isJumping[index] = false;
+    }
+
+    /// <summary>
+    ///     Called when an entity's template changes.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="templateId">Template ID.</param>
+    /// <param name="isLoad">Load flag.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateId, bool isLoad)
+    {
+        if (EntityUtil.IsBlockEntity(entityId)) return;
+
+        // Clear any old state.
+        if (!kinematics.TryGetIndexForEntity(entityId, out var index)) return;
+        kinematicsComponentIndexPhysicsTags[index] = false;
+        physicsActiveFlags[index] = false;
+
+        // If the entity has physics under the new template, (re)activate.
+        if (!physics.HasTagForEntity(entityId)) return;
+        kinematicsComponentIndexPhysicsTags[index] = true;
+        physicsActiveFlags[index] = true;
     }
 
     /// <summary>

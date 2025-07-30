@@ -156,6 +156,7 @@ public sealed class NonBlockCollisionMeshes
             }
 
             meshes[entityId] = newBox.Translate(posVel.Position);
+            knownWorldSegments[entityId] = segmentIndex;
         }
     }
 
@@ -194,6 +195,7 @@ public sealed class NonBlockCollisionMeshes
             {
                 meshes = new Dictionary<ulong, BoundingBox>();
                 meshesByWorldSegment[segmentIndex] = meshes;
+                knownWorldSegments[entityId] = segmentIndex;
             }
 
             meshes[entityId] = newBox.Translate(posVel.Position);
@@ -212,6 +214,7 @@ public sealed class NonBlockCollisionMeshes
             var segmentIndex = resolver.GetWorldSegmentForPosition(posVel.Position);
             if (!meshesByWorldSegment.TryGetValue(segmentIndex, out var meshes)) continue;
             meshes.Remove(entityId);
+            knownWorldSegments.Remove(entityId);
         }
     }
 
@@ -246,12 +249,14 @@ public sealed class NonBlockCollisionMeshes
             }
 
             meshes[entityId] = boundingBox.Translate(posVel.Position);
+            knownWorldSegments[entityId] = segmentIndex;
         }
         else
         {
             // Entity no longer has an associated BoundingBox, remove collision mesh.
             if (!meshesByWorldSegment.TryGetValue(segmentIndex, out var meshes)) return;
             meshes.Remove(entityId);
+            knownWorldSegments.Remove(entityId);
         }
     }
 }
