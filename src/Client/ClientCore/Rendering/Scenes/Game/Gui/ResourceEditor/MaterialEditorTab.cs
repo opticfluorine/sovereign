@@ -220,7 +220,7 @@ public class MaterialEditorTab
 
             ImGui.TableNextColumn();
             ImGui.SetNextItemWidth(fontSize * 10.0f);
-            ImGui.InputText("##materialName", ref editingName, MaxNameLen);
+            ImGui.InputText("##materialName", ref editingName, MaxNameLen + 1);
 
             ImGui.TableNextColumn();
             if (ImGui.Button("Add New Subtype"))

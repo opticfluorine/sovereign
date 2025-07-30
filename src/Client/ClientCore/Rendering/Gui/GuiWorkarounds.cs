@@ -30,14 +30,14 @@ public static class GuiWorkarounds
     /// <summary>
     ///     Largest buffer that will be handled via stackalloc.
     /// </summary>
-    public const int StackallocMaxBufSize = 512;
+    private const int StackallocMaxBufSize = 512;
 
     /// <summary>
     ///     Workaround for ImGui.InputText() with the EnterReturnsTrue flag and ref string buffers.
     /// </summary>
     /// <param name="label">Label.</param>
     /// <param name="buffer">Buffer.</param>
-    /// <param name="bufferSize">Max buffer size.</param>
+    /// <param name="bufferSize">Max buffer size (excluding trailing \0).</param>
     /// <param name="otherFlags">Other flags (aside from EnterReturnsTrue) to use.</param>
     /// <returns>true if enter was pressed while the control was focused; false otherwise.</returns>
     public static bool InputTextEnterReturns(string label, ref string buffer, ulong bufferSize,
@@ -51,14 +51,14 @@ public static class GuiWorkarounds
     /// </summary>
     /// <param name="label">Label.</param>
     /// <param name="buffer">Buffer.</param>
-    /// <param name="bufferSize">Max buffer size.</param>
+    /// <param name="bufferSize">Max buffer size (excluding trailing \0).</param>
     /// <param name="otherFlags">Other flags (aside from EnterReturnsTrue) to use.</param>
     /// <returns>true if enter was pressed while the control was focused; false otherwise.</returns>
     public static bool InputTextEnterReturns(ReadOnlySpan<byte> label, ref string buffer, ulong bufferSize,
         ImGuiInputTextFlags otherFlags = ImGuiInputTextFlags.None)
     {
         var flags = otherFlags | ImGuiInputTextFlags.EnterReturnsTrue;
-        return bufferSize > StackallocMaxBufSize
+        return bufferSize + 1 > StackallocMaxBufSize
             ? InputTextEnterReturnsHeap(label, ref buffer, bufferSize, flags)
             : InputTextEnterReturnsStack(label, ref buffer, bufferSize, flags);
     }
@@ -68,18 +68,18 @@ public static class GuiWorkarounds
     /// </summary>
     /// <param name="label">Label.</param>
     /// <param name="buffer">Buffer.</param>
-    /// <param name="bufferSize">Max buffer size.</param>
+    /// <param name="bufferSize">Max buffer size (excluding trailing \0).</param>
     /// <param name="flags">Flags.</param>
     /// <returns>true if enter was pressed while control focused; false otherwise.</returns>
     private static unsafe bool InputTextEnterReturnsStack(ReadOnlySpan<byte> label, ref string buffer, ulong bufferSize,
         ImGuiInputTextFlags flags)
     {
-        var bufPtr = stackalloc byte[(int)bufferSize];
+        var bufPtr = stackalloc byte[(int)bufferSize + 1];
         var strLen = Utils.GetByteCountUTF8(buffer);
-        var strOffset = Utils.EncodeStringUTF8(buffer, bufPtr, Math.Min(strLen, (int)bufferSize - 1));
+        var strOffset = Utils.EncodeStringUTF8(buffer, bufPtr, Math.Min(strLen, (int)bufferSize));
         bufPtr[strOffset] = 0;
 
-        var enterPressed = ImGui.InputText(label, bufPtr, bufferSize, flags);
+        var enterPressed = ImGui.InputText(label, bufPtr, bufferSize + 1, flags);
 
         if (ImGui.IsItemDeactivatedAfterEdit()) buffer = Utils.DecodeStringUTF8(bufPtr);
 
@@ -91,18 +91,18 @@ public static class GuiWorkarounds
     /// </summary>
     /// <param name="label">Label.</param>
     /// <param name="buffer">Buffer.</param>
-    /// <param name="bufferSize">Max buffer size.</param>
+    /// <param name="bufferSize">Max buffer size (excluding trailing \0).</param>
     /// <param name="flags">Flags.</param>
     /// <returns>true if enter was pressed while control focused; false otherwise.</returns>
     private static unsafe bool InputTextEnterReturnsHeap(ReadOnlySpan<byte> label, ref string buffer, ulong bufferSize,
         ImGuiInputTextFlags flags)
     {
-        var bufPtr = (byte*)Marshal.AllocHGlobal((int)bufferSize);
+        var bufPtr = (byte*)Marshal.AllocHGlobal((int)bufferSize + 1);
         var strLen = Utils.GetByteCountUTF8(buffer);
-        var strOffset = Utils.EncodeStringUTF8(buffer, bufPtr, Math.Min(strLen, (int)bufferSize - 1));
+        var strOffset = Utils.EncodeStringUTF8(buffer, bufPtr, Math.Min(strLen, (int)bufferSize));
         bufPtr[strOffset] = 0;
 
-        var enterPressed = ImGui.InputText(label, bufPtr, bufferSize, flags);
+        var enterPressed = ImGui.InputText(label, bufPtr, bufferSize + 1, flags);
 
         if (ImGui.IsItemDeactivatedAfterEdit()) buffer = Utils.DecodeStringUTF8(bufPtr);
 

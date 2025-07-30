@@ -231,7 +231,7 @@ public class EntityDataControlGroup(
 
         ImGui.TableNextColumn();
         var currentValue = inputEntityData.TryGetValue(name, out var value) ? value : "";
-        ImGui.InputText($"##{name}", ref currentValue, EntityConstants.MaxEntityDataValueLength);
+        ImGui.InputText($"##{name}", ref currentValue, EntityConstants.MaxEntityDataValueLength + 1);
         inputEntityData[name] = currentValue;
     }
 
@@ -260,7 +260,7 @@ public class EntityDataControlGroup(
                 ImGui.TableNextColumn();
                 var fontSize = ImGui.GetFontSize();
                 ImGui.SetNextItemWidth(fontSize * 12.0f);
-                ImGui.InputText("##newKey", ref inputNewKey, EntityConstants.MaxEntityDataKeyLength);
+                ImGui.InputText("##newKey", ref inputNewKey, EntityConstants.MaxEntityDataKeyLength + 1);
                 ImGui.SameLine();
                 if (ImGui.Button("Add"))
                     if (inputNewKey.Length > 0 && inputEntityData.TryAdd(inputNewKey, ""))
@@ -288,7 +288,7 @@ public class EntityDataControlGroup(
         var currentValue = inputEntityData.TryGetValue(key, out var value) ? value : "";
         var fontSize = ImGui.GetFontSize();
         ImGui.SetNextItemWidth(fontSize * 12.0f);
-        ImGui.InputText($"##{key}", ref currentValue, EntityConstants.MaxEntityDataValueLength);
+        ImGui.InputText($"##{key}", ref currentValue, EntityConstants.MaxEntityDataValueLength + 1);
         inputEntityData[key] = currentValue;
         ImGui.SameLine();
         if (ImGui.Button($"Remove##{key}")) keysToRemove.Add(key);

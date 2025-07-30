@@ -48,7 +48,7 @@ public class GuiComponentEditors
     {
         var fontSize = ImGui.GetFontSize();
         ImGui.SetNextItemWidth(fontSize * 16.0f);
-        ImGui.InputText(id, ref buffer, EntityConstants.MaxNameLength);
+        ImGui.InputText(id, ref buffer, EntityConstants.MaxNameLength + 1);
     }
 
     /// <summary>
