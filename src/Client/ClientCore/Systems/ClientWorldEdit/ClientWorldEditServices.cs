@@ -37,9 +37,24 @@ public class ClientWorldEditServices
     ///     Z offset relative to camera to use for world editing.
     /// </summary>
     public int ZOffset => state.ZOffset;
-    
+
     /// <summary>
     ///     Pen width in blocks to use for world editing.
     /// </summary>
     public int PenWidth => state.PenWidth;
+
+    /// <summary>
+    ///     Tool to use for world editing.
+    /// </summary>
+    public WorldEditTool WorldEditTool => state.WorldEditTool;
+
+    /// <summary>
+    ///     Whether world editing is snapped to grid.
+    /// </summary>
+    public bool SnapToGrid => state.SnapToGrid;
+
+    /// <summary>
+    ///     NPC template entity ID to use for world editing.
+    /// </summary>
+    public ulong NpcTemplateId => state.NpcTemplateId;
 }

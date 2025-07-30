@@ -90,14 +90,14 @@ public sealed class WorldLayerGrouper
     /// <summary>
     ///     Adds sprites to the appropriate layer while grouping them by entity type.
     /// </summary>
-    /// <param name="entityType">Entity type.</param>
+    /// <param name="perspectiveEntityType">Entity type.</param>
     /// <param name="position">Entity position.</param>
     /// <param name="velocity">Entity velocity.</param>
     /// <param name="sprite">Sprite.</param>
     /// <param name="lightFactor">Light factor.</param>
     /// <param name="opacity">Opacity alpha factor.</param>
-    public void AddSprite(EntityType entityType, Vector3 position, Vector3 velocity, Sprite sprite,
-        float lightFactor, float opacity)
+    public void AddSprite(PerspectiveEntityType perspectiveEntityType, Vector3 position, Vector3 velocity,
+        Sprite sprite, float lightFactor, float opacity)
     {
         if (activeLayer is null)
         {
@@ -105,11 +105,11 @@ public sealed class WorldLayerGrouper
             return;
         }
 
-        var collection = entityType switch
+        var collection = perspectiveEntityType switch
         {
-            EntityType.NonBlock => activeLayer.FreeSprites,
-            EntityType.BlockTopFace => activeLayer.TopFaceTileSprites,
-            EntityType.BlockFrontFace => activeLayer.FrontFaceTileSprites,
+            PerspectiveEntityType.NonBlock => activeLayer.FreeSprites,
+            PerspectiveEntityType.BlockTopFace => activeLayer.TopFaceTileSprites,
+            PerspectiveEntityType.BlockFrontFace => activeLayer.FrontFaceTileSprites,
             _ => activeLayer.FreeSprites
         };
 

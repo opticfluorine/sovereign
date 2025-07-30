@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
@@ -57,8 +57,8 @@ public class InGameMenuGui
 
         if (ImGui.BeginTable("gameMenu", 1))
         {
-            ImGui.TableNextColumn();
             ImGui.TableSetupColumn("##gameMenuCol", ImGuiTableColumnFlags.WidthStretch);
+            ImGui.TableNextColumn();
             if (ImGui.Button("Logout", fontSize * ButtonSize)) OnLogout();
 
             ImGui.TableNextColumn();

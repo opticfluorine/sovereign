@@ -413,9 +413,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
             changedBlocks.Clear();
             removedBlocks.Clear();
 
-            //changedBlocks.UnionWith(templateChanges.Keys.Where(entityId =>
-            //    blockPositions.HasComponentForEntity(entityId) ||
-            //    blockPositions.HasPendingComponentForEntity(entityId)));
             changedBlocks.UnionWith(templateChanges.Keys.Where(entityId => topFaceCache.ContainsKey(entityId)));
             templateChanges.Clear();
         }
@@ -525,7 +522,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         Task.Run(RefreshCache);
     }
 
-    private void OnTemplateChange(ulong entityId, ulong templateEntityId)
+    private void OnTemplateChange(ulong entityId, ulong templateEntityId, bool isLoad)
     {
         templateChanges.TryAdd(entityId, 0);
     }

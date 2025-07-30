@@ -16,7 +16,7 @@
  */
 
 using System;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui.Debug;
 using Sovereign.ClientCore.Rendering.Scenes;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
@@ -31,8 +31,8 @@ namespace Sovereign.VeldridRenderer.Rendering;
 public class VeldridSceneConsumer : ISceneConsumer, IDisposable
 {
     private readonly GameResourceManager gameResMgr;
-    private readonly NetworkDebugGui networkDebugGui;
     private readonly GameSceneConsumer gameSceneConsumer;
+    private readonly NetworkDebugGui networkDebugGui;
     private readonly ResourceEditorGui resourceEditorGui;
     private readonly ClientStateServices stateServices;
 

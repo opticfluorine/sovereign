@@ -6,15 +6,11 @@
 :depth: 2
 :::
 
-All components and tags share a common API provided through the `components`
-module.
+All components and tags share a common API provided through the `components` module.
 
 ## Component Submodules
 
-Each component collection that is accessible through the scripting
-engine may be accessed through a submodule of the global `components`
-module. The following table lists the component submodules, their
-associated component collection, and the corresponding value type.
+Each component collection that is accessible through the scripting engine may be accessed through a submodule of the global `components` module. The following table lists the component submodules, their associated component collection, and the corresponding value type.
 
 |Submodule                      |Component Collection                 |Value Type    |
 |-------------------------------|-------------------------------------|--------------|
@@ -23,7 +19,8 @@ associated component collection, and the corresponding value type.
 |`components.block_position`    |`BlockPositionComponentCollection`   |`GridPosition`|
 |`components.cast_block_shadows`|`CastBlockShadowsTagCollection`      |`boolean`     |
 |`components.cast_shadows`      |`CastShadowsComponentCollection`     |`Shadow`      |
-|`components.drawable`          |`DrawableTagCollection`              |`boolean`     |
+|`components.drawable`          |`DrawableComponentCollection`        |`Vector2`     |
+|`components.entity_type`       |`EntityTypeComponentCollection`      |`EntityType`  |
 |`components.kinematics`        |`KinematicsComponentCollection`      |`Kinematics`  |
 |`components.material`          |`MaterialComponentCollection`        |`integer`     |
 |`components.material_modifier` |`MaterialModifierComponentCollection`|`integer`     |

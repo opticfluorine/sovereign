@@ -52,25 +52,33 @@ public class PhysicsProcessor
     /// </summary>
     private const ulong PostLoadProcessingDelayTicks = 3;
 
+    /// <summary>
+    ///     "Radius" in world segments of non-block collision mesh search.
+    /// </summary>
+    private const int NonBlockSearchRadius = 1;
+
     private readonly List<List<BoundingBox>> activeMeshes = [];
     private readonly HashSet<GridPosition> activeWorldSegments = new();
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<PhysicsProcessor> logger;
     private readonly CollisionMeshManager meshManager;
+    private readonly NonBlockCollisionMeshes nonBlockCollisionMeshes;
     private readonly Queue<Tuple<ulong, GridPosition>> pendingWorldSegments = new();
     private readonly WorldSegmentResolver resolver;
 
     private ulong tickCount;
 
     public PhysicsProcessor(CollisionMeshManager meshManager, KinematicsComponentCollection kinematics,
-        BoundingBoxComponentCollection boundingBoxes, WorldSegmentResolver resolver, ILogger<PhysicsProcessor> logger)
+        BoundingBoxComponentCollection boundingBoxes, WorldSegmentResolver resolver, ILogger<PhysicsProcessor> logger,
+        NonBlockCollisionMeshes nonBlockCollisionMeshes)
     {
         this.meshManager = meshManager;
         this.kinematics = kinematics;
         this.boundingBoxes = boundingBoxes;
         this.resolver = resolver;
         this.logger = logger;
+        this.nonBlockCollisionMeshes = nonBlockCollisionMeshes;
     }
 
     /// <summary>
@@ -141,7 +149,7 @@ public class PhysicsProcessor
             var entityMesh = sourceMesh.Translate(posVel.Position);
             SelectActiveMeshes(entityMesh);
 
-            changed = HandleCollisions(kinematicsIndex, entityMesh, posVel, out isSupportedBelow);
+            changed = HandleCollisions(kinematicsIndex, entityMesh, posVel, entityId, out isSupportedBelow);
         }
 
         if (changed)
@@ -193,55 +201,87 @@ public class PhysicsProcessor
     /// <param name="kinematicsIndex">Kinematics component index.</param>
     /// <param name="entityMesh">Entity collision mesh.</param>
     /// <param name="posVel">Current position and velocity data for entity.</param>
+    /// <param name="entityId">Entity ID.</param>
     /// <param name="supportedBelow">true if the entity has a surface contact with a mesh below, false otherwise.</param>
     /// <returns>true if the entity was moved to resolve a collision, false otherwise.</returns>
-    private bool HandleCollisions(int kinematicsIndex, BoundingBox entityMesh, Kinematics posVel,
+    private bool HandleCollisions(int kinematicsIndex, BoundingBox entityMesh, Kinematics posVel, ulong entityId,
         out bool supportedBelow)
     {
         supportedBelow = false;
 
+        // Block collisions.
         foreach (var layer in activeMeshes)
         foreach (var blockMesh in layer)
         {
-            if (!entityMesh.Intersects(blockMesh, out var resolvingTranslation, out var minAbsOverlap))
-                continue;
+            if (CheckSingleCollision(kinematicsIndex, entityMesh, posVel, ref supportedBelow, blockMesh)) return true;
+        }
 
-            // This is an intersection or surface contact. They can be distinguished by the components
-            // of the resolving translation: a surface contact will have one or more zero-valued components.
-            var isSurfaceContact = minAbsOverlap < ContactTestEpsilon;
-            if (!isSurfaceContact)
+        // Non-block collisions.
+        var centerIndex = resolver.GetWorldSegmentForPosition(posVel.Position);
+        for (var i = centerIndex.X - NonBlockSearchRadius; i < centerIndex.X + NonBlockSearchRadius + 1; ++i)
+        for (var j = centerIndex.Y - NonBlockSearchRadius; j < centerIndex.Y + NonBlockSearchRadius + 1; ++j)
+        for (var k = centerIndex.Z - NonBlockSearchRadius; k < centerIndex.Z + NonBlockSearchRadius + 1; ++k)
+        {
+            foreach (var nonBlockMesh in nonBlockCollisionMeshes.GetMeshesForWorldSegment(
+                         new GridPosition(i, j, k), entityId))
             {
-                // Collision! Stop movement and resolve to the nearest surface contact.
-                kinematics.Components[(ulong)kinematicsIndex] = new Kinematics
-                {
-                    Position = posVel.Position + resolvingTranslation,
-                    Velocity = AdjustVelocityForCollision(resolvingTranslation, posVel.Velocity)
-                };
-                return true;
+                if (CheckSingleCollision(kinematicsIndex, entityMesh, posVel, ref supportedBelow, nonBlockMesh))
+                    return true;
             }
-
-            // If the bottom of the entity has the same z as the top of the block mesh...
-            if (Math.Abs(entityMesh.Position.Z - (blockMesh.Position.Z + blockMesh.Size.Z)) < ContactTestEpsilon)
-                // This mesh supports the entity from below, so inhibit gravity processing later.
-                supportedBelow = true;
         }
 
         return false;
     }
 
     /// <summary>
+    ///     Checks for a single collision between a pair of meshes.
+    /// </summary>
+    /// <param name="kinematicsIndex">Kinematics component index.</param>
+    /// <param name="entityMesh">Entity mesh.</param>
+    /// <param name="posVel">Kinematics for entity.</param>
+    /// <param name="supportedBelow">Whether the entity is directly supported by a mesh below.</param>
+    /// <param name="otherMesh">Collision mesh of other object.</param>
+    /// <returns>true if a collision is found, false otherwise.</returns>
+    private bool CheckSingleCollision(int kinematicsIndex, BoundingBox entityMesh, Kinematics posVel,
+        ref bool supportedBelow, BoundingBox otherMesh)
+    {
+        if (!entityMesh.Intersects(otherMesh, posVel.Velocity, out var resolvingTranslation,
+                out var minAbsOverlap, out var surfaceNormal)) return false;
+
+        // This is an intersection or surface contact. They can be distinguished by the components
+        // of the resolving translation: a surface contact will have one or more zero-valued components.
+        var isSurfaceContact = minAbsOverlap < ContactTestEpsilon;
+        if (!isSurfaceContact)
+        {
+            // Collision! Stop movement and resolve to the nearest surface contact.
+            kinematics.Components[(ulong)kinematicsIndex] = new Kinematics
+            {
+                Position = posVel.Position + resolvingTranslation,
+                Velocity = AdjustVelocityForCollision(surfaceNormal, posVel.Velocity)
+            };
+            return true;
+        }
+
+        // If the bottom of the entity has the same z as the top of the block mesh...
+        if (Math.Abs(entityMesh.Position.Z - (otherMesh.Position.Z + otherMesh.Size.Z)) < ContactTestEpsilon)
+            // This mesh supports the entity from below, so inhibit gravity processing later.
+            supportedBelow = true;
+        return false;
+    }
+
+    /// <summary>
     ///     Adjusts entity velocity in response to a collision.
     /// </summary>
-    /// <param name="resolvingTranslation">Entity translation that resolves the collision.</param>
+    /// <param name="surfaceNormal">Normal to the collision surface.</param>
     /// <param name="velocity">Current entity velocity.</param>
     /// <returns>Adjusted entity velocity.</returns>
-    private Vector3 AdjustVelocityForCollision(Vector3 resolvingTranslation, Vector3 velocity)
+    private Vector3 AdjustVelocityForCollision(Vector3 surfaceNormal, Vector3 velocity)
     {
         return new Vector3
         {
-            X = Math.Abs(resolvingTranslation.X) > 0.0f ? 0.0f : velocity.X,
-            Y = Math.Abs(resolvingTranslation.Y) > 0.0f ? 0.0f : velocity.Y,
-            Z = Math.Abs(resolvingTranslation.Z) > 0.0f ? 0.0f : velocity.Z
+            X = Math.Abs(surfaceNormal.X) > 0.0f ? 0.0f : velocity.X,
+            Y = Math.Abs(surfaceNormal.Y) > 0.0f ? 0.0f : velocity.Y,
+            Z = Math.Abs(surfaceNormal.Z) > 0.0f ? 0.0f : velocity.Z
         };
     }
 

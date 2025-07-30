@@ -16,17 +16,14 @@
 
 using System;
 using Microsoft.Extensions.Logging;
-using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Input;
-using Sovereign.EngineCore.Components.Types;
-using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Systems.ClientWorldEdit;
 
 /// <summary>
 ///     Handles user inputs for the world editor.
 /// </summary>
-public class ClientWorldEditInputHandler
+internal class ClientWorldEditInputHandler
 {
     /// <summary>
     ///     Mouse button for drawing.
@@ -38,11 +35,14 @@ public class ClientWorldEditInputHandler
     /// </summary>
     private const MouseButton EraseButton = MouseButton.Right;
 
-    private readonly CameraServices cameraServices;
-    private readonly IEventSender eventSender;
+    private readonly IWorldEditToolHandler blockToolHandler;
+
     private readonly InputServices inputServices;
-    private readonly ClientWorldEditInternalController internalController;
+
+    private readonly IWorldEditToolHandler itemToolHandler;
     private readonly ILogger<ClientWorldEditInputHandler> logger;
+
+    private readonly IWorldEditToolHandler npcToolHandler;
     private readonly ClientWorldEditState userState;
 
     /// <summary>
@@ -50,27 +50,33 @@ public class ClientWorldEditInputHandler
     /// </summary>
     private EditState currentState = EditState.Idle;
 
-    /// <summary>
-    ///     Flag indicating whether the first block has been impacted by the current edit operation.
-    /// </summary>
-    private bool editStarted;
-
-    /// <summary>
-    ///     Block position last impacted by the current edit operation.
-    /// </summary>
-    private GridPosition lastPosition;
-
-    public ClientWorldEditInputHandler(InputServices inputServices, ClientWorldEditState userState,
-        CameraServices cameraServices, ClientWorldEditInternalController internalController, IEventSender eventSender,
-        ILogger<ClientWorldEditInputHandler> logger)
+    public ClientWorldEditInputHandler(
+        InputServices inputServices,
+        ILogger<ClientWorldEditInputHandler> logger,
+        ClientWorldEditState userState,
+        BlockToolHandler blockToolHandler,
+        NpcToolHandler npcToolHandler,
+        ItemToolHandler itemToolHandler)
     {
         this.inputServices = inputServices;
-        this.userState = userState;
-        this.cameraServices = cameraServices;
-        this.internalController = internalController;
-        this.eventSender = eventSender;
         this.logger = logger;
+        this.userState = userState;
+        this.blockToolHandler = blockToolHandler;
+        this.npcToolHandler = npcToolHandler;
+        this.itemToolHandler = itemToolHandler;
     }
+
+    /// <summary>
+    ///     Active tool handler.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if the world editor is in an invalid state.</exception>
+    private IWorldEditToolHandler ToolHandler => userState.WorldEditTool switch
+    {
+        WorldEditTool.Block => blockToolHandler,
+        WorldEditTool.Npc => npcToolHandler,
+        WorldEditTool.Item => itemToolHandler,
+        _ => throw new ArgumentOutOfRangeException(nameof(userState.WorldEditTool), "Invalid world edit tool selected.")
+    };
 
     /// <summary>
     ///     Handles input processing once per tick.
@@ -81,11 +87,11 @@ public class ClientWorldEditInputHandler
         switch (currentState)
         {
             case EditState.Draw:
-                ProcessDraw();
+                ToolHandler.ProcessDraw();
                 break;
 
             case EditState.Erase:
-                ProcessErase();
+                ToolHandler.ProcessErase();
                 break;
         }
     }
@@ -112,84 +118,22 @@ public class ClientWorldEditInputHandler
                 break;
 
             case EditState.Draw:
-                if (!inputServices.IsMouseButtonDown(DrawButton)) Reset();
+                if (!inputServices.IsMouseButtonDown(DrawButton)) ResetToIdle();
                 break;
 
             case EditState.Erase:
-                if (!inputServices.IsMouseButtonDown(EraseButton)) Reset();
+                if (!inputServices.IsMouseButtonDown(EraseButton)) ResetToIdle();
                 break;
         }
     }
 
     /// <summary>
-    ///     Resets the internal state of the editor.
+    ///     Resets the internal editor state to idle.
     /// </summary>
-    private void Reset()
+    private void ResetToIdle()
     {
-        logger.LogDebug("Entering Idle state.");
         currentState = EditState.Idle;
-        editStarted = false;
-    }
-
-    /// <summary>
-    ///     Processes latest inputs while in the Draw state.
-    /// </summary>
-    private void ProcessDraw()
-    {
-        var hoveredPos = GetHoveredBlockWithOffset();
-        if (!editStarted || !lastPosition.Equals(hoveredPos))
-        {
-            editStarted = true;
-            lastPosition = hoveredPos;
-            ApplyPen(hoveredPos, pos => internalController.SetBlock(eventSender, pos, userState.BlockTemplateId));
-        }
-    }
-
-    /// <summary>
-    ///     Processes latest inputs while in the Erase state.
-    /// </summary>
-    private void ProcessErase()
-    {
-        var hoveredPos = GetHoveredBlockWithOffset();
-        if (!editStarted || !lastPosition.Equals(hoveredPos))
-        {
-            editStarted = true;
-            lastPosition = hoveredPos;
-            ApplyPen(hoveredPos, pos => internalController.RemoveBlock(eventSender, pos));
-        }
-    }
-
-    /// <summary>
-    ///     Gets the block coordinate currently hovered by the mouse, taking Z offset into account.
-    /// </summary>
-    /// <returns>Hovered block coordinate.</returns>
-    private GridPosition GetHoveredBlockWithOffset()
-    {
-        // Select the block whose top face is hovered by the mouse.
-        var hoverPos = cameraServices.GetMousePositionWorldCoordinates();
-        var posWithOffset = hoverPos with
-        {
-            Y = hoverPos.Y - userState.ZOffset, Z = hoverPos.Z + userState.ZOffset - 1.0f
-        };
-        return (GridPosition)posWithOffset;
-    }
-
-    /// <summary>
-    ///     Applies the given action to each block under the current pen.
-    /// </summary>
-    /// <param name="center">Center of pen.</param>
-    /// <param name="action">Action to be applied.</param>
-    private void ApplyPen(GridPosition center, Action<GridPosition> action)
-    {
-        var rightStep = userState.PenWidth / 2;
-        var leftStep = userState.PenWidth % 2 == 0 ? rightStep - 1 : rightStep;
-
-        for (var x = -leftStep; x <= rightStep; ++x)
-        for (var y = -leftStep; y <= rightStep; ++y)
-        {
-            var pos = center with { X = center.X + x, Y = center.Y + y };
-            action(pos);
-        }
+        ToolHandler.Reset();
     }
 
     /// <summary>

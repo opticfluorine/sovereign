@@ -39,10 +39,13 @@ public class TestBoundingBox
     {
         var box1 = new BoundingBox { Position = Vector3.Zero, Size = new Vector3(2, 2, 2) };
         var box2 = new BoundingBox { Position = new Vector3(1.5f, 1, 1), Size = new Vector3(2, 2, 2) };
-        var result = box1.Intersects(box2, out var resolvingTranslation, out var minimumAbsOverlap);
+        var velocity = new Vector3(1.0f, 0.0f, 0.0f);
+        var result = box1.Intersects(box2, velocity, out var resolvingTranslation, out var minimumAbsOverlap,
+            out var surfaceNormal);
         Assert.True(result);
         Assert.Equal(0.5f, minimumAbsOverlap);
         Assert.Equal(new Vector3(-0.5f, 0, 0), resolvingTranslation);
+        Assert.Equal(new Vector3(1.0f, 0.0f, 0.0f), surfaceNormal);
     }
 
     [Fact]
@@ -50,7 +53,8 @@ public class TestBoundingBox
     {
         var box1 = new BoundingBox { Position = Vector3.Zero, Size = new Vector3(2, 2, 2) };
         var box2 = new BoundingBox { Position = new Vector3(3, 3, 3), Size = new Vector3(2, 2, 2) };
-        var result = box1.Intersects(box2, out var resolvingTranslation, out var minimumAbsOverlap);
+        var result = box1.Intersects(box2, Vector3.One, out var resolvingTranslation, out var minimumAbsOverlap,
+            out var surfaceNormal);
         Assert.False(result);
     }
 
@@ -59,7 +63,8 @@ public class TestBoundingBox
     {
         var box1 = new BoundingBox { Position = Vector3.Zero, Size = new Vector3(2, 2, 2) };
         var box2 = new BoundingBox { Position = new Vector3(2, 0, 0), Size = new Vector3(2, 2, 2) };
-        var result = box1.Intersects(box2, out var resolvingTranslation, out var minimumAbsOverlap);
+        var result = box1.Intersects(box2, Vector3.One, out var resolvingTranslation, out var minimumAbsOverlap,
+            out var surfaceNormal);
         Assert.True(result);
         Assert.Equal(Vector3.Zero, resolvingTranslation);
         Assert.Equal(0, minimumAbsOverlap);
@@ -70,7 +75,8 @@ public class TestBoundingBox
     {
         var box1 = new BoundingBox { Position = Vector3.Zero, Size = new Vector3(2, 2, 2) };
         var box2 = new BoundingBox { Position = new Vector3(0, 2, 0), Size = new Vector3(2, 2, 2) };
-        var result = box1.Intersects(box2, out var resolvingTranslation, out var minimumAbsOverlap);
+        var result = box1.Intersects(box2, Vector3.One, out var resolvingTranslation, out var minimumAbsOverlap,
+            out var surfaceNormal);
         Assert.True(result);
         Assert.Equal(Vector3.Zero, resolvingTranslation);
         Assert.Equal(0, minimumAbsOverlap);
@@ -81,7 +87,8 @@ public class TestBoundingBox
     {
         var box1 = new BoundingBox { Position = Vector3.Zero, Size = new Vector3(2, 2, 2) };
         var box2 = new BoundingBox { Position = new Vector3(0, 0, 2), Size = new Vector3(2, 2, 2) };
-        var result = box1.Intersects(box2, out var resolvingTranslation, out var minimumAbsOverlap);
+        var result = box1.Intersects(box2, Vector3.One, out var resolvingTranslation, out var minimumAbsOverlap,
+            out var surfaceNormal);
         Assert.True(result);
         Assert.Equal(Vector3.Zero, resolvingTranslation);
         Assert.Equal(0, minimumAbsOverlap);
@@ -92,7 +99,8 @@ public class TestBoundingBox
     {
         var box1 = new BoundingBox { Position = new Vector3(0, 0, 0), Size = new Vector3(2, 2, 2) };
         var box2 = new BoundingBox { Position = new Vector3(2, 1, 3), Size = new Vector3(2, 2, 2) };
-        var result = box1.Intersects(box2, out var resolvingTranslation, out var minimumAbsOverlap);
+        var result = box1.Intersects(box2, Vector3.One, out var resolvingTranslation, out var minimumAbsOverlap,
+            out var surfaceNormal);
         Assert.False(result);
     }
 
@@ -103,7 +111,8 @@ public class TestBoundingBox
         var box2 = new BoundingBox { Position = new Vector3(1, 1, 1), Size = new Vector3(2, 2, 2) };
 
         // Step 1: Check initial intersection
-        var initialResult = box1.Intersects(box2, out var resolvingTranslation, out var minimumAbsOverlap);
+        var initialResult = box1.Intersects(box2, Vector3.One, out var resolvingTranslation, out var minimumAbsOverlap,
+            out var surfaceNormal);
         Assert.True(initialResult);
 
         // Step 2: Translate box1 by the resolving translation
@@ -111,7 +120,8 @@ public class TestBoundingBox
 
         // Step 3: Check intersection after translation
         var finalResult =
-            translatedBox1.Intersects(box2, out var finalResolvingTranslation, out var finalMinimumAbsOverlap);
+            translatedBox1.Intersects(box2, Vector3.One, out var finalResolvingTranslation,
+                out var finalMinimumAbsOverlap, out var finalSurfaceNormal);
         Assert.True(finalResult);
         Assert.Equal(Vector3.Zero, finalResolvingTranslation);
     }
@@ -126,9 +136,13 @@ public class TestBoundingBox
         var box1 = new BoundingBox { Position = new Vector3(0, 0, 0.9f), Size = Vector3.One };
         var box2 = new BoundingBox { Position = Vector3.Zero, Size = Vector3.One };
 
-        // Step 1: Check initial intersection
-        var initialResult = box1.Intersects(box2, out var resolvingTranslation, out var minimumAbsOverlap);
+        // Step 1: Check initial intersection (using negative velocity to mimic gravity)
+        var velocity = new Vector3(0.0f, 0.0f, -1.0f);
+        var initialResult =
+            box1.Intersects(box2, velocity, out var resolvingTranslation, out var minimumAbsOverlap,
+                out var surfaceNormal);
         Assert.True(initialResult);
+        Assert.Equal(new Vector3(0, 0, 1), surfaceNormal);
 
         // Step 2: Translate box1 by the resolving translation
         var translatedBox1 = box1.Translate(resolvingTranslation);
@@ -142,7 +156,8 @@ public class TestBoundingBox
 
         // Step 5: Check that Intersects called on translatedBox1 with box2 gives zero minimumAbsOverlap
         var finalResult =
-            translatedBox1.Intersects(box2, out var finalResolvingTranslation, out var finalMinimumAbsOverlap);
+            translatedBox1.Intersects(box2, Vector3.One, out var finalResolvingTranslation,
+                out var finalMinimumAbsOverlap, out var finalSurfaceNormal);
         Assert.True(finalResult);
         Assert.Equal(0.0f, finalMinimumAbsOverlap);
     }

@@ -17,7 +17,6 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.EngineCore.Systems.Data;
@@ -27,14 +26,14 @@ namespace Sovereign.EngineCore.Systems.Data;
 /// </summary>
 internal class DataSystem : ISystem
 {
-    private readonly GlobalKeyValueStore globalStore;
+    private readonly EntityKeyValueStore entityStore;
     private readonly ILogger<DataSystem> logger;
 
     public DataSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop,
-        ILogger<DataSystem> logger, GlobalKeyValueStore globalStore)
+        ILogger<DataSystem> logger, EntityKeyValueStore entityStore)
     {
         this.logger = logger;
-        this.globalStore = globalStore;
+        this.entityStore = entityStore;
         EventCommunicator = eventCommunicator;
         eventLoop.RegisterSystem(this);
     }
@@ -43,8 +42,7 @@ internal class DataSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
-        EventId.Core_Data_SetGlobal,
-        EventId.Core_Data_RemoveGlobal
+        EventId.Server_Persistence_SynchronizeComplete
     };
 
     public int WorkloadEstimate => 40;
@@ -67,29 +65,9 @@ internal class DataSystem : ISystem
 
             switch (ev.EventId)
             {
-                case EventId.Core_Data_SetGlobal:
-                {
-                    if (ev.EventDetails is not KeyValueEventDetails details)
-                    {
-                        logger.LogError("Bad event details for SetGlobal.");
-                        break;
-                    }
-
-                    globalStore.SetGlobal(details.Key, details.Value);
+                case EventId.Server_Persistence_SynchronizeComplete:
+                    entityStore.OnSynchronizationComplete();
                     break;
-                }
-
-                case EventId.Core_Data_RemoveGlobal:
-                {
-                    if (ev.EventDetails is not StringEventDetails details)
-                    {
-                        logger.LogError("Bad event details for RemoveGlobal.");
-                        break;
-                    }
-
-                    globalStore.RemoveGlobal(details.Value);
-                    break;
-                }
 
                 default:
                     logger.LogError("Unhandled event in DataSystem: {EventId}", ev.EventId);

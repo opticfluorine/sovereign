@@ -21,6 +21,7 @@ using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineUtil.Ranges;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
@@ -56,7 +57,7 @@ public class LightSourceTable
     private readonly AtlasMap atlasMap;
     private readonly KinematicsComponentCollection kinematics;
 
-    private readonly List<ulong> knownSources = new();
+    private readonly HashSet<ulong> knownSources = new();
     private readonly ILogger<LightSourceTable> logger;
     private readonly ParentComponentCollection parents;
     private readonly PointLightSourceComponentCollection pointLightSources;
@@ -64,7 +65,7 @@ public class LightSourceTable
     public LightSourceTable(PointLightSourceComponentCollection pointLightSources,
         KinematicsComponentCollection kinematics, ParentComponentCollection parents,
         ILogger<LightSourceTable> logger, AnimatedSpriteComponentCollection animatedSprites,
-        AnimatedSpriteManager animatedSpriteManager, AtlasMap atlasMap)
+        AnimatedSpriteManager animatedSpriteManager, AtlasMap atlasMap, EntityTable entityTable)
     {
         this.pointLightSources = pointLightSources;
         this.kinematics = kinematics;
@@ -76,7 +77,11 @@ public class LightSourceTable
 
         pointLightSources.OnComponentAdded += OnLightAdded;
         pointLightSources.OnComponentRemoved += OnLightRemoved;
+
+        entityTable.OnTemplateSet += OnTemplateSet;
+        entityTable.OnEntityRemoved += OnEntityRemoved;
     }
+
 
     /// <summary>
     ///     Gets the point light sources whose emissions overlap the given range.
@@ -142,6 +147,8 @@ public class LightSourceTable
     /// <param name="isLoad">Unused.</param>
     private void OnLightAdded(ulong entityId, PointLight value, bool isLoad)
     {
+        if (EntityUtil.IsTemplateEntity(entityId)) return;
+
         knownSources.Add(entityId);
     }
 
@@ -151,6 +158,30 @@ public class LightSourceTable
     /// <param name="entityId">Entity ID.</param>
     /// <param name="isUnload">Unused.</param>
     private void OnLightRemoved(ulong entityId, bool isUnload)
+    {
+        if (EntityUtil.IsTemplateEntity(entityId)) return;
+
+        knownSources.Remove(entityId);
+    }
+
+    /// <summary>
+    ///     Called when a template is set to an entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="templateEntityId">Template entity ID.</param>
+    /// <param name="isLoad">Load flag.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateEntityId, bool isLoad)
+    {
+        knownSources.Remove(entityId);
+        if (pointLightSources.HasComponentForEntity(entityId)) knownSources.Add(entityId);
+    }
+
+    /// <summary>
+    ///     Called when an entity is removed or unloaded.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="isUnload">Unload flag.</param>
+    private void OnEntityRemoved(ulong entityId, bool isUnload)
     {
         knownSources.Remove(entityId);
     }

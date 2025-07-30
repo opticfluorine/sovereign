@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Logging;
@@ -54,7 +55,8 @@ public class TemplateEntitySystem : ISystem
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
         EventId.Core_Tick,
-        EventId.Server_TemplateEntity_Update
+        EventId.Server_TemplateEntity_Update,
+        EventId.Server_TemplateEntity_UpdateKeyed
     };
 
     public int WorkloadEstimate => 10;
@@ -78,6 +80,18 @@ public class TemplateEntitySystem : ISystem
                 case EventId.Server_TemplateEntity_Update:
                     OnUpdate(ev.EventDetails);
                     break;
+
+                case EventId.Server_TemplateEntity_UpdateKeyed:
+                {
+                    if (ev.EventDetails is not KeyedEntityDefinitionEventDetails details)
+                    {
+                        logger.LogError("Bad details for UpdateKeyed.");
+                        break;
+                    }
+
+                    OnUpdateKeyed(details.EntityDefinition, details.EntityKeyValuePairs);
+                    break;
+                }
 
                 case EventId.Core_Tick:
                     OnTick();
@@ -125,5 +139,10 @@ public class TemplateEntitySystem : ISystem
                 loggingUtil.FormatEntity(requestDetails.PlayerEntityId));
             manager.UpdateExisting(definition);
         }
+    }
+
+    private void OnUpdateKeyed(EntityDefinition definition, Dictionary<string, string> keyValuePairs)
+    {
+        manager.UpdateKeyed(definition, keyValuePairs);
     }
 }

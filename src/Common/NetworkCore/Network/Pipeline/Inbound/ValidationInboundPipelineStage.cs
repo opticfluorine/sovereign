@@ -17,6 +17,7 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Events.Details.Validators;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using EventId = Sovereign.EngineCore.Events.EventId;
@@ -50,6 +51,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         GridPositionEventDetailsValidator gridPositionValidator,
         TeleportNoticeEventDetailsValidator teleportNoticeValidator,
         IntEventDetailsValidator intValidator,
+        NpcAddEventDetailsValidator npcAddValidator,
+        NpcRemoveEventDetailsValidator npcRemoveValidator,
         ILogger<ValidationInboundPipelineStage> logger)
     {
         this.templateValidator = templateValidator;
@@ -80,7 +83,10 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Block_RemoveNotice, gridPositionValidator },
             { EventId.Server_WorldEdit_SetBlock, blockAddValidator },
             { EventId.Server_WorldEdit_RemoveBlock, gridPositionValidator },
-            { EventId.Core_Time_Clock, intValidator }
+            { EventId.Server_WorldEdit_AddNpc, npcAddValidator },
+            { EventId.Server_WorldEdit_RemoveNonBlock, npcRemoveValidator },
+            { EventId.Core_Time_Clock, intValidator },
+            { EventId.Core_Interaction_Interact, new TypeCheckedEventDetailsValidator<InteractEventDetails>() }
         };
     }
 

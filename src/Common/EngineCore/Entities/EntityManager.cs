@@ -108,7 +108,7 @@ public class EntityManager
     {
         componentManager.RemoveAllComponentsForEntity(entityId);
         entityNotifier.EnqueueRemove(entityId);
-        entityTable.Remove(entityId);
+        entityTable.Remove(entityId, false);
     }
 
     /// <summary>
@@ -119,7 +119,7 @@ public class EntityManager
     {
         componentManager.UnloadAllComponentsForEntity(entityId);
         entityNotifier.EnqueueUnload(entityId);
-        entityTable.Remove(entityId);
+        entityTable.Remove(entityId, true);
     }
 
     /// <summary>

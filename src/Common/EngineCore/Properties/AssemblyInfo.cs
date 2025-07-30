@@ -17,4 +17,5 @@
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Sovereign.TestEngineCore")]
+[assembly: InternalsVisibleTo("Sovereign.BenchmarkEngineCore")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

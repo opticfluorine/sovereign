@@ -16,7 +16,9 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Systems.Perspective;
@@ -46,6 +48,17 @@ public interface IPerspectiveServices
     bool TryGetHighestCoveringEntity(Vector3 position, out ulong entityId);
 
     /// <summary>
+    ///     Gets the highest visible (i.e. no overhead transparency) block covering a position in world coordinates.
+    /// </summary>
+    /// <param name="position">Position.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="entityType">Indicates which face of the block is overlapped.</param>
+    /// <param name="positionOnBlock">Exact hovered position on the block face.</param>
+    /// <returns>true if a visible block overlapped, false otherwise.</returns>
+    bool TryGetHighestVisibleCoveringBlock(Vector3 position, out ulong entityId, out PerspectiveEntityType entityType,
+        out Vector3 positionOnBlock);
+
+    /// <summary>
     ///     Gets the perspective line (if any) on which the given block position sits.
     /// </summary>
     /// <param name="blockPosition">Block position on the perspective line.</param>
@@ -67,16 +80,21 @@ public interface IPerspectiveServices
 /// </summary>
 internal class PerspectiveServices : IPerspectiveServices
 {
+    private readonly BlockPositionComponentCollection blockPositions;
     private readonly PerspectiveLineManager lineManager;
+    private readonly ILogger<PerspectiveServices> logger;
     private readonly OverheadTransparency overheadTransparency;
     private readonly DisplayViewport viewport;
 
     public PerspectiveServices(PerspectiveLineManager lineManager, DisplayViewport viewport,
-        OverheadTransparency overheadTransparency)
+        OverheadTransparency overheadTransparency, BlockPositionComponentCollection blockPositions,
+        ILogger<PerspectiveServices> logger)
     {
         this.lineManager = lineManager;
         this.viewport = viewport;
         this.overheadTransparency = overheadTransparency;
+        this.blockPositions = blockPositions;
+        this.logger = logger;
     }
 
     public bool TryGetHighestCoveringEntity(Vector3 position, float minimumZ, float maximumZ, out ulong entityId)
@@ -89,6 +107,53 @@ internal class PerspectiveServices : IPerspectiveServices
         var minZ = position.Z - viewport.HeightInTiles * 0.5f;
         var maxZ = position.Z + viewport.HeightInTiles * 0.5f;
         return TryGetHighestCoveringEntity(position, minZ, maxZ, out entityId);
+    }
+
+    public bool TryGetHighestVisibleCoveringBlock(Vector3 position, out ulong entityId,
+        out PerspectiveEntityType entityType, out Vector3 positionOnBlock)
+    {
+        entityId = 0;
+        entityType = default;
+        positionOnBlock = position;
+
+        var gridPos = (GridPosition)position;
+        if (!lineManager.TryGetPerspectiveLine(gridPos, out var perspectiveLine)) return false;
+
+        // Find the highest visible block face (if any).
+        var found = false;
+        foreach (var zSet in perspectiveLine.ZFloors)
+        {
+            if (found) break;
+            foreach (var info in zSet.Entities)
+            {
+                if (info.PerspectiveEntityType != PerspectiveEntityType.BlockFrontFace &&
+                    info.PerspectiveEntityType != PerspectiveEntityType.BlockTopFace)
+                    continue;
+
+                if (overheadTransparency.GetOpacityForEntity(info.EntityId) < 1.0f)
+                    continue;
+
+                entityId = info.EntityId;
+                entityType = info.PerspectiveEntityType;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) return false;
+
+        // Locate hovered position on the block face.
+        if (!blockPositions.TryGetValue(entityId, out var blockPos))
+        {
+            logger.LogError("Found block {EntityId:X} on perspective line with no position.", entityId);
+            return true;
+        }
+
+        var delta = entityType == PerspectiveEntityType.BlockTopFace
+            ? gridPos.Z - blockPos.Z - 1.0f
+            : gridPos.Y - position.Y;
+        positionOnBlock = position with { Y = position.Y + delta, Z = position.Z - delta };
+        return true;
     }
 
     public bool TryGetPerspectiveLine(GridPosition blockPosition,

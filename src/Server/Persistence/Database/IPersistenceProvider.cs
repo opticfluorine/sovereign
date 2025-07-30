@@ -17,6 +17,7 @@
 
 using System;
 using System.Data;
+using System.Numerics;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.Persistence.Database.Queries;
 
@@ -28,7 +29,7 @@ namespace Sovereign.Persistence.Database;
 public interface IPersistenceProvider : IDisposable
 {
     /// <summary>
-    // Database connection.
+    ///     Database connection.
     /// </summary>
     IDbConnection Connection { get; }
 
@@ -195,12 +196,12 @@ public interface IPersistenceProvider : IDisposable
     /// <summary>
     ///     IAddComponentQuery for the Drawable tag.
     /// </summary>
-    IAddComponentQuery<bool> AddDrawableComponentQuery { get; }
+    IAddComponentQuery<Vector2> AddDrawableComponentQuery { get; }
 
     /// <summary>
     ///     IModifyComponentQuery for the Drawable tag.
     /// </summary>
-    IModifyComponentQuery<bool> ModifyDrawableComponentQuery { get; }
+    IModifyComponentQuery<Vector2> ModifyDrawableComponentQuery { get; }
 
     /// <summary>
     ///     IRemoveComponentQuery for the Drawable tag.
@@ -328,6 +329,21 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveCastShadowsComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for EntityType component.
+    /// </summary>
+    IAddComponentQuery<EntityType> AddEntityTypeComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for EntityType component.
+    /// </summary>
+    IModifyComponentQuery<EntityType> ModifyEntityTypeComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for EntityType component.
+    /// </summary>
+    IRemoveComponentQuery RemoveEntityTypeComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }
@@ -381,4 +397,14 @@ public interface IPersistenceProvider : IDisposable
     ///     IRemoveGlobalKeyValuePairQuery for this persistence provider.
     /// </summary>
     IRemoveGlobalKeyValuePairQuery RemoveGlobalKeyValuePairQuery { get; }
+
+    /// <summary>
+    ///     IUpdateEntityKeyValueQuery for this persistence provider.
+    /// </summary>
+    IUpdateEntityKeyValueQuery UpdateEntityKeyValueQuery { get; }
+
+    /// <summary>
+    ///     IRemoveEntityKeyValueQuery for this persistence provider.
+    /// </summary>
+    IRemoveEntityKeyValueQuery RemoveEntityKeyValueQuery { get; }
 }

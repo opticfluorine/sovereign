@@ -17,7 +17,7 @@
 using System;
 using System.Globalization;
 using System.Numerics;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
@@ -38,8 +38,9 @@ public class EntityDebugGui
     private readonly CameraServices cameraServices;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
-    private readonly DrawableTagCollection drawables;
+    private readonly DrawableComponentCollection drawables;
     private readonly EntityTable entityTable;
+    private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
@@ -52,7 +53,7 @@ public class EntityDebugGui
     private string entityIdInput = "";
 
     public EntityDebugGui(AboveBlockComponentCollection aboveBlocks, AnimatedSpriteComponentCollection animatedSprites,
-        DrawableTagCollection drawables, MaterialComponentCollection materials,
+        DrawableComponentCollection drawables, MaterialComponentCollection materials,
         MaterialModifierComponentCollection materialModifiers, NameComponentCollection names,
         OrientationComponentCollection orientations, ParentComponentCollection parents,
         KinematicsComponentCollection kinematics,
@@ -64,7 +65,8 @@ public class EntityDebugGui
         PointLightSourceComponentCollection pointLightSources,
         PhysicsTagCollection physics,
         BoundingBoxComponentCollection boundingBoxes,
-        CastShadowsComponentCollection castShadows)
+        CastShadowsComponentCollection castShadows,
+        EntityTypeComponentCollection entityTypes)
     {
         this.aboveBlocks = aboveBlocks;
         this.animatedSprites = animatedSprites;
@@ -84,6 +86,7 @@ public class EntityDebugGui
         this.physics = physics;
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
+        this.entityTypes = entityTypes;
     }
 
     /// <summary>
@@ -92,7 +95,7 @@ public class EntityDebugGui
     public void Render()
     {
         var fontSize = ImGui.GetFontSize();
-        ImGui.SetNextWindowSize(fontSize * new Vector2(26.0f, 28.0f), ImGuiCond.Once);
+        ImGui.SetNextWindowSize(fontSize * new Vector2(26.0f, 37.0f), ImGuiCond.Once);
         if (!ImGui.Begin("Entity Debug")) return;
 
         if (ImGui.BeginTabBar("entityDebugTabs", ImGuiTabBarFlags.None))
@@ -102,7 +105,7 @@ public class EntityDebugGui
 
             if (ImGui.BeginTabItem("By ID"))
             {
-                ImGui.InputText("Entity ID", ref entityIdInput, 16, ImGuiInputTextFlags.CharsHexadecimal);
+                ImGui.InputText("Entity ID", ref entityIdInput, 17, ImGuiInputTextFlags.CharsHexadecimal);
                 valid = ulong.TryParse(entityIdInput, NumberStyles.HexNumber, null, out entityId);
                 ImGui.EndTabItem();
             }
@@ -113,7 +116,7 @@ public class EntityDebugGui
                 valid = perspectiveServices.TryGetHighestCoveringEntity(mousePosWorld, out entityId);
 
                 ImGui.Text($"Hovered Position: {mousePosWorld}");
-                if (valid) ImGui.Text($"Hovered Entity ID: {entityId:x16}");
+                if (valid) ImGui.Text($"Hovered Entity ID: {entityId:X16}");
                 else ImGui.TextColored(new Vector4(0.7f), "No entity hovered");
                 ImGui.EndTabItem();
             }
@@ -125,8 +128,10 @@ public class EntityDebugGui
             {
                 if (ImGui.BeginTable("entityInfo", 2))
                 {
-                    AddValueRow("In EntityTable:", entityTable.Exists(entityId));
-                    AddComponentRow("AboveBlock:", entityId, aboveBlocks, x => $"{x:X}");
+                    AddValueRow("Template:",
+                        entityTable.TryGetTemplate(entityId, out var templateId) ? $"{templateId:X16}" : "None");
+                    AddComponentRow("EntityType:", entityId, entityTypes);
+                    AddComponentRow("AboveBlock:", entityId, aboveBlocks, x => $"{x:X16}");
                     AddComponentRow("AnimatedSprite:", entityId, animatedSprites);
                     AddComponentRow("Drawable:", entityId, drawables);
                     AddComponentRow("Material:", entityId, materials);

@@ -48,7 +48,7 @@ public class PerspectiveLineManager
 {
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly DrawableLookup drawableLookup;
-    private readonly DrawableTagCollection drawables;
+    private readonly DrawableComponentCollection drawables;
 
     /// <summary>
     ///     Object pool of entity lists to minimize heap churn for vertically moving entities.
@@ -83,7 +83,7 @@ public class PerspectiveLineManager
 
     public PerspectiveLineManager(KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
-        EntityTable entityTable, DrawableLookup drawableLookup, DrawableTagCollection drawables,
+        EntityTable entityTable, DrawableLookup drawableLookup, DrawableComponentCollection drawables,
         ILogger<PerspectiveLineManager> logger)
     {
         this.kinematics = kinematics;
@@ -225,22 +225,23 @@ public class PerspectiveLineManager
             var foundAny = false;
             foreach (var entityInfo in zSet.Entities)
             {
-                if (!EntityOverlapsProjectedPoint(entityInfo.EntityId, entityInfo.EntityType, projectedPoint)) continue;
+                if (!EntityOverlapsProjectedPoint(entityInfo.EntityId, entityInfo.PerspectiveEntityType,
+                        projectedPoint)) continue;
 
                 foundAny = true;
-                switch (entityInfo.EntityType)
+                switch (entityInfo.PerspectiveEntityType)
                 {
-                    case EntityType.NonBlock:
+                    case PerspectiveEntityType.NonBlock:
                         // Always wins.
                         entityId = entityInfo.EntityId;
                         return true;
 
-                    case EntityType.BlockFrontFace:
+                    case PerspectiveEntityType.BlockFrontFace:
                         foundFrontFace = true;
                         entityId = entityInfo.EntityId;
                         break;
 
-                    case EntityType.BlockTopFace:
+                    case PerspectiveEntityType.BlockTopFace:
                         if (!foundFrontFace) entityId = entityInfo.EntityId;
                         break;
                 }
@@ -268,30 +269,31 @@ public class PerspectiveLineManager
     ///     Determines whether the given projected point overlaps the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    /// <param name="entityType">Entity type.</param>
+    /// <param name="perspectiveEntityType">Entity type.</param>
     /// <param name="projectedPoint">Point projected onto the z=0 plane.</param>
     /// <returns>true if the projected point overlaps the entity, false otherwise.</returns>
-    private bool EntityOverlapsProjectedPoint(ulong entityId, EntityType entityType, Vector2 projectedPoint)
+    private bool EntityOverlapsProjectedPoint(ulong entityId, PerspectiveEntityType perspectiveEntityType,
+        Vector2 projectedPoint)
     {
         var entityPosition = Vector2.Zero;
         var entityExtent = Vector2.One;
 
-        switch (entityType)
+        switch (perspectiveEntityType)
         {
-            case EntityType.NonBlock:
+            case PerspectiveEntityType.NonBlock:
                 var fullPos = kinematics[entityId].Position;
                 entityPosition = new Vector2(fullPos.X, fullPos.Y + fullPos.Z);
                 entityExtent = drawableLookup.GetEntityDrawableSizeWorld(entityId);
                 break;
 
-            case EntityType.BlockTopFace:
+            case PerspectiveEntityType.BlockTopFace:
             {
                 var blockPos = blockPositions[entityId];
                 entityPosition = new Vector2(blockPos.X, blockPos.Y + blockPos.Z + 1);
                 break;
             }
 
-            case EntityType.BlockFrontFace:
+            case PerspectiveEntityType.BlockFrontFace:
             {
                 var blockPos = blockPositions[entityId];
                 entityPosition = new Vector2(blockPos.X, blockPos.Y + blockPos.Z);
@@ -308,13 +310,17 @@ public class PerspectiveLineManager
     /// <summary>
     ///     Called when a new entity is added.
     /// </summary>
-    /// <param name="entityId"></param>
-    private void AddEntity(ulong entityId)
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="isLoad">Unused.</param>
+    private void AddEntity(ulong entityId, bool isLoad)
     {
-        if (!drawables.HasTagForEntity(entityId)) return;
+        var isBlock = blockPositions.HasComponentForEntity(entityId);
+        if (!isBlock && !drawables.HasComponentForEntity(entityId)) return;
 
-        if (blockPositions.HasComponentForEntity(entityId)) AddBlockEntity(entityId, blockPositions[entityId]);
+        if (isBlock) AddBlockEntity(entityId, blockPositions[entityId]);
         else if (kinematics.HasComponentForEntity(entityId)) AddNonBlockEntity(entityId, kinematics[entityId].Position);
+        else
+            logger.LogWarning("Non-block entity {EntityId:X} is drawable but has no position.", entityId);
     }
 
     /// <summary>
@@ -329,8 +335,9 @@ public class PerspectiveLineManager
         // coordinate and therefore fall on two different perspective lines.
         var indexTopFace = GetIndexForBlockPosition(blockPosition with { Z = blockPosition.Z + 1 });
         var indexFrontFace = GetIndexForBlockPosition(blockPosition);
-        AddEntityToLine(entityId, indexTopFace, blockPosition.Z + 1, EntityType.BlockTopFace, indexTopFace.OriginFlag);
-        AddEntityToLine(entityId, indexFrontFace, blockPosition.Z, EntityType.BlockFrontFace,
+        AddEntityToLine(entityId, indexTopFace, blockPosition.Z + 1, PerspectiveEntityType.BlockTopFace,
+            indexTopFace.OriginFlag);
+        AddEntityToLine(entityId, indexFrontFace, blockPosition.Z, PerspectiveEntityType.BlockFrontFace,
             indexFrontFace.OriginFlag);
 
         zFloorByEntity[entityId] = blockPosition.Z;
@@ -349,7 +356,7 @@ public class PerspectiveLineManager
         {
             GetNonBlockOverlappingLines(entityId, indices);
             foreach (var index in indices)
-                AddEntityToLine(entityId, index, position.Z, EntityType.NonBlock, index.OriginFlag);
+                AddEntityToLine(entityId, index, position.Z, PerspectiveEntityType.NonBlock, index.OriginFlag);
         }
         finally
         {
@@ -364,9 +371,11 @@ public class PerspectiveLineManager
     ///     Removes an entity from any overlapping perspective lines.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    private void RemoveEntity(ulong entityId)
+    /// <param name="isUnload">Unused.</param>
+    private void RemoveEntity(ulong entityId, bool isUnload)
     {
-        if (!drawables.HasTagForEntity(entityId, true)) return;
+        var isBlock = blockPositions.HasComponentForEntity(entityId, true);
+        if (!isBlock && !drawables.HasComponentForEntity(entityId, true)) return;
 
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices)) return;
         if (!zFloorByEntity.TryGetValue(entityId, out var zFloor))
@@ -374,8 +383,6 @@ public class PerspectiveLineManager
             logger.LogError("No cached z value for entity {EntityId:X}; skipping removal.", entityId);
             return;
         }
-
-        var isBlock = blockPositions.HasComponentForEntity(entityId, true);
 
         foreach (var index in lineIndices)
         {
@@ -442,7 +449,7 @@ public class PerspectiveLineManager
             }
 
             foreach (var newIndex in newIndices)
-                AddEntityToLine(entityId, newIndex, position.Z, EntityType.NonBlock, newIndex.OriginFlag);
+                AddEntityToLine(entityId, newIndex, position.Z, PerspectiveEntityType.NonBlock, newIndex.OriginFlag);
 
             // Update state.
             zFloorByEntity[entityId] = (int)Math.Floor(position.Z);
@@ -460,9 +467,10 @@ public class PerspectiveLineManager
     /// <param name="entityId">Entity ID.</param>
     /// <param name="lineIndex">Perspective line index.</param>
     /// <param name="z">z position of entity.</param>
-    /// <param name="entityType">Entity type.</param>
+    /// <param name="perspectiveEntityType">Entity type.</param>
     /// <param name="originOnLine">Whether the sprite origin is on this perspective line.</param>
-    private void AddEntityToLine(ulong entityId, PerspectiveLineKey lineIndex, float z, EntityType entityType,
+    private void AddEntityToLine(ulong entityId, PerspectiveLineKey lineIndex, float z,
+        PerspectiveEntityType perspectiveEntityType,
         bool originOnLine)
     {
         if (!perspectiveLines.TryGetValue(lineIndex, out var line))
@@ -486,7 +494,7 @@ public class PerspectiveLineManager
         entityList.AddEntity(new EntityInfo
         {
             EntityId = entityId,
-            EntityType = entityType,
+            PerspectiveEntityType = perspectiveEntityType,
             OriginOnLine = originOnLine,
             Z = z
         });

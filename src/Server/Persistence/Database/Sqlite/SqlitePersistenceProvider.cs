@@ -18,6 +18,7 @@
 using System;
 using System.Data;
 using System.IO;
+using System.Numerics;
 using System.Text;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
@@ -53,8 +54,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const SqliteType ParentParamType = SqliteType.Integer;
     private const string ParentParamName = "parent_id";
 
-    private const SqliteType DrawableParamType = SqliteType.Integer;
-    private const string DrawableParamName = "drawable";
+    private const string DrawableColumnPrefix = "drawable_";
 
     private const SqliteType AnimatedSpriteParamType = SqliteType.Integer;
     private const string AnimatedSpriteParamName = "animated_sprite";
@@ -71,6 +71,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
 
     private const SqliteType PhysicsParamType = SqliteType.Integer;
     private const string PhysicsParamName = "physics";
+
+    private const string EntityTypeName = "entity_type";
+    private const SqliteType EntityTypeType = SqliteType.Integer;
 
     private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
@@ -117,6 +120,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         GetGlobalKeyValuePairsQuery = new SqliteGetGlobalKeyValuePairsQuery(conn);
         UpdateGlobalKeyValuePairQuery = new SqliteUpdateGlobalKeyValuePairQuery(conn);
         RemoveGlobalKeyValuePairQuery = new SqliteRemoveGlobalKeyValuePairQuery(conn);
+        UpdateEntityKeyValueQuery = new SqliteUpdateEntityKeyValueQuery(conn);
+        RemoveEntityKeyValueQuery = new SqliteRemoveEntityKeyValueQuery(conn);
 
         /* Position component. */
         AddPositionQuery = new SqliteAddPositionComponentQuery(conn);
@@ -175,13 +180,10 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             new SimpleSqliteRemoveComponentQuery(ParentParamName, conn);
 
         // Drawable component.
-        AddDrawableComponentQuery = new SimpleSqliteAddComponentQuery<bool>(DrawableParamName,
-            DrawableParamType, conn);
-        ModifyDrawableComponentQuery = new SimpleSqliteModifyComponentQuery<bool>(
-            DrawableParamName,
-            DrawableParamType, conn);
-        RemoveDrawableComponentQuery =
-            new SimpleSqliteRemoveComponentQuery(DrawableParamName, conn);
+        var drawableQueries = new Vector2SqliteComponentQueries(DrawableColumnPrefix, conn);
+        AddDrawableComponentQuery = drawableQueries;
+        ModifyDrawableComponentQuery = drawableQueries;
+        RemoveDrawableComponentQuery = drawableQueries;
 
         // AnimatedSprite component.
         AddAnimatedSpriteComponentQuery = new SimpleSqliteAddComponentQuery<int>(
@@ -243,6 +245,13 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         AddCastShadowsComponentQuery = castShadowsQueries;
         ModifyCastShadowsComponentQuery = castShadowsQueries;
         RemoveCastShadowsComponentQuery = castShadowsQueries;
+
+        // EntityType component.
+        AddEntityTypeComponentQuery = new SimpleSqliteAddComponentQuery<EntityType>(
+            EntityTypeName, EntityTypeType, conn);
+        ModifyEntityTypeComponentQuery = new SimpleSqliteModifyComponentQuery<EntityType>(
+            EntityTypeName, EntityTypeType, conn);
+        RemoveEntityTypeComponentQuery = new SimpleSqliteRemoveComponentQuery(EntityTypeName, conn);
     }
 
     public ISetTemplateQuery SetTemplateQuery { get; }
@@ -290,8 +299,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<ulong> AddParentComponentQuery { get; }
     public IModifyComponentQuery<ulong> ModifyParentComponentQuery { get; }
     public IRemoveComponentQuery RemoveParentComponentQuery { get; }
-    public IAddComponentQuery<bool> AddDrawableComponentQuery { get; }
-    public IModifyComponentQuery<bool> ModifyDrawableComponentQuery { get; }
+    public IAddComponentQuery<Vector2> AddDrawableComponentQuery { get; }
+    public IModifyComponentQuery<Vector2> ModifyDrawableComponentQuery { get; }
     public IRemoveComponentQuery RemoveDrawableComponentQuery { get; }
     public IAddComponentQuery<int> AddAnimatedSpriteComponentQuery { get; }
     public IModifyComponentQuery<int> ModifyAnimatedSpriteComponentQuery { get; }
@@ -304,6 +313,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<bool> AddCastBlockShadowsComponentQuery { get; }
     public IModifyComponentQuery<bool> ModifyCastBlockShadowsComponentQuery { get; }
     public IRemoveComponentQuery RemoveCastBlockShadowsComponentQuery { get; }
+    public IRemoveComponentQuery RemoveEntityTypeComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }
@@ -324,9 +334,13 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<Shadow> AddCastShadowsComponentQuery { get; }
     public IModifyComponentQuery<Shadow> ModifyCastShadowsComponentQuery { get; }
     public IRemoveComponentQuery RemoveCastShadowsComponentQuery { get; }
+    public IAddComponentQuery<EntityType> AddEntityTypeComponentQuery { get; }
+    public IModifyComponentQuery<EntityType> ModifyEntityTypeComponentQuery { get; }
     public IGetGlobalKeyValuePairsQuery GetGlobalKeyValuePairsQuery { get; }
     public IUpdateGlobalKeyValuePairQuery UpdateGlobalKeyValuePairQuery { get; }
     public IRemoveGlobalKeyValuePairQuery RemoveGlobalKeyValuePairQuery { get; }
+    public IUpdateEntityKeyValueQuery UpdateEntityKeyValueQuery { get; }
+    public IRemoveEntityKeyValueQuery RemoveEntityKeyValueQuery { get; }
 
     public void Dispose()
     {

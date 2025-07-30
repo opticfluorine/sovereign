@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
@@ -46,8 +46,9 @@ public class GuiComponentEditors
     /// <param name="buffer">Input buffer to hold user input.</param>
     public void NameEdit(string id, ref string buffer)
     {
-        ImGui.SetNextItemWidth(160.0f);
-        ImGui.InputText(id, ref buffer, EntityConstants.MaxNameLength);
+        var fontSize = ImGui.GetFontSize();
+        ImGui.SetNextItemWidth(fontSize * 16.0f);
+        ImGui.InputText(id, ref buffer, EntityConstants.MaxNameLength + 1);
     }
 
     /// <summary>

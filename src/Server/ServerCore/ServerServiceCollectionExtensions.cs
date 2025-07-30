@@ -32,6 +32,7 @@ using Sovereign.ServerCore.Entities;
 using Sovereign.ServerCore.Logging;
 using Sovereign.ServerCore.Resources;
 using Sovereign.ServerCore.Systems.Data;
+using Sovereign.ServerCore.Systems.Interaction;
 using Sovereign.ServerCore.Systems.Movement;
 using Sovereign.ServerCore.Systems.Persistence;
 using Sovereign.ServerCore.Systems.Scripting;
@@ -83,6 +84,7 @@ public static class ServerServiceCollectionExtensions
         AddComponents(services);
         AddServerImplementations(services);
         AddDataSystem(services);
+        AddInteractionSystem(services);
         AddPersistenceSystem(services);
         AddServerChatSystem(services);
         AddServerManagementSystem(services);
@@ -115,6 +117,13 @@ public static class ServerServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, DataLuaLibrary>());
     }
 
+    private static void AddInteractionSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<InteractionHandler>();
+        services.TryAddSingleton<InteractionValidator>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, InteractionSystem>());
+    }
+
     private static void AddPersistenceSystem(IServiceCollection services)
     {
         services.TryAddSingleton<PersistenceController>();
@@ -144,6 +153,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<TemplateEntityServices>();
         services.TryAddSingleton<TemplateEntityInternalController>();
         services.TryAddSingleton<TemplateEntityManager>();
+        services.TryAddSingleton<TemplateEntityController>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, TemplateEntitySystem>());
     }
@@ -184,7 +194,12 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<ScriptingCallbackManager>();
         services.TryAddSingleton<ScriptingServices>();
         services.TryAddSingleton<ScriptingController>();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, ScriptingLuaLibrary>());
+        services.TryAddSingleton<EntityScriptCallbacks>();
+        services.TryAddSingleton<ScriptingLuaLibrary>();
+        services.TryAddSingleton<ITimedCallbackRunner>(s => s.GetRequiredService<ScriptingLuaLibrary>());
+        services.TryAddEnumerable(
+            ServiceDescriptor.Singleton<ILuaLibrary, ScriptingLuaLibrary>(s =>
+                s.GetRequiredService<ScriptingLuaLibrary>()));
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, ServerEntityBuilderLuaLibrary>());
     }
 }

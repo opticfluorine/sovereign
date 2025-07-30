@@ -2,6 +2,31 @@
 
 ## 2025
 
+### July
+
+#### 30 July 2025
+
+* Lots of updates in the last month, comulatively adding basic NPC support to the engine. Specific
+  changes follow:
+* Added an NPC editor tab to the template editor.
+* Added an NPC placement tool to the World Editor with a snap-to-grid option.
+* Added an entity key-value store. This behaves very similarly to the global key-value store
+  scoped to a specific entity instead of globally. Entity key-value data also respects template
+  inheritance, so you can set data on a template and inherit or override it in a specific
+  entity.
+* Added scriptable entity lifecycle triggers. This allows you to configure entities to call
+  a specific Lua function whenever an entity lifecycle transition occurs (add, load, unload,
+  remove).
+* Updated the physics engine to handle collisions between non-block entities.
+* Switched the Drawable tag to a Drawable component which specifies an offset in projected world
+  space for sprite rendering.
+* Added NPC interactions using the E key. These are also scriptable.
+* Fixed issue where point light sources were not respected when set in templates.
+* Fixed issue where collision resolution was not correctly calculated.
+* Migrated ImGui bindings from `ImGui.NET` to `Hexa.NET.ImGui`. Added a custom build of the cimgui
+  binary to add support for emojis.
+* Added client-side support for emojis.
+
 ### June
 
 #### 12 June 2025

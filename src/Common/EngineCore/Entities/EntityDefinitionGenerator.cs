@@ -30,8 +30,9 @@ public class EntityDefinitionGenerator
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
-    private readonly DrawableTagCollection drawables;
+    private readonly DrawableComponentCollection drawables;
     private readonly EntityTable entityTable;
+    private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
@@ -46,12 +47,12 @@ public class EntityDefinitionGenerator
         KinematicsComponentCollection kinematics,
         MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
-        ParentComponentCollection parents, DrawableTagCollection drawables,
+        ParentComponentCollection parents, DrawableComponentCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations,
         AdminTagCollection admins, BlockPositionComponentCollection blockPositions,
         CastBlockShadowsTagCollection castBlockShadows, PointLightSourceComponentCollection pointLightSources,
         PhysicsTagCollection physics, BoundingBoxComponentCollection boundingBoxes,
-        CastShadowsComponentCollection castShadows,
+        CastShadowsComponentCollection castShadows, EntityTypeComponentCollection entityTypes,
         EntityTable entityTable)
     {
         this.kinematics = kinematics;
@@ -70,6 +71,7 @@ public class EntityDefinitionGenerator
         this.physics = physics;
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
+        this.entityTypes = entityTypes;
         this.entityTable = entityTable;
     }
 
@@ -90,7 +92,8 @@ public class EntityDefinitionGenerator
         if (kinematics.HasLocalComponentForEntity(entityId))
             def.Position = kinematics[entityId].Position;
 
-        def.Drawable = drawables.HasLocalTagForEntity(entityId);
+        if (drawables.HasComponentForEntity(entityId))
+            def.Drawable = drawables[entityId];
 
         if (animatedSprites.HasLocalComponentForEntity(entityId))
             def.AnimatedSpriteId = animatedSprites[entityId];
@@ -126,6 +129,8 @@ public class EntityDefinitionGenerator
 
         if (castShadows.HasLocalComponentForEntity(entityId))
             def.CastShadows = castShadows[entityId];
+
+        def.EntityType = entityTypes.HasLocalComponentForEntity(entityId) ? entityTypes[entityId] : EntityType.Other;
 
         return def;
     }

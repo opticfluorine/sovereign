@@ -25,10 +25,10 @@ public interface IEntityFactory
     /// <summary>
     ///     Gets an entity builder.
     /// </summary>
-    /// <param name="entityType">Entity type.</param>
+    /// <param name="entityCategory">Entity category.</param>
     /// <param name="load">If true, loads rather than creates the entity.</param>
     /// <returns>Entity builder.</returns>
-    IEntityBuilder GetBuilder(EntityType entityType = EntityType.Standard, bool load = false);
+    IEntityBuilder GetBuilder(EntityCategory entityCategory = EntityCategory.Standard, bool load = false);
 
     /// <summary>
     ///     Gets an entity builder for the given entity ID.

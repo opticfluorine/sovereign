@@ -15,9 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Events.Details;
-using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.EngineCore.Systems.Data;
 
@@ -27,46 +24,72 @@ namespace Sovereign.EngineCore.Systems.Data;
 public interface IDataController
 {
     /// <summary>
-    ///     Sets a global key-value pair.
+    ///     Synchronously sets a global key-value pair.
     /// </summary>
-    /// <param name="eventSender">Event sender.</param>
     /// <param name="key">Key.</param>
     /// <param name="value">Value.</param>
     /// <typeparam name="T">Value type.</typeparam>
     /// <exception cref="InvalidCastException">Thrown if the value cannot be converted to string.</exception>
-    void SetGlobal<T>(IEventSender eventSender, string key, T value) where T : notnull;
+    void SetGlobalSync<T>(string key, T value) where T : notnull;
 
     /// <summary>
-    ///     Removes a global key-value pair.
+    ///     Synchronously removes a global key-value pair.
     /// </summary>
-    /// <param name="eventSender">Event sender.</param>
     /// <param name="key">Key.</param>
-    void RemoveGlobal(IEventSender eventSender, string key);
+    void RemoveGlobalSync(string key);
+
+    /// <summary>
+    ///     Sets a key-value pair for an entity synchronously.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    /// <param name="value">Value.</param>
+    /// <typeparam name="T">Value type.</typeparam>
+    void SetEntityKeyValueSync<T>(ulong entityId, string key, T value) where T : notnull;
+
+    /// <summary>
+    ///     Removes a key-value pair from an entity synchronously.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    void RemoveEntityKeyValueSync(ulong entityId, string key);
+
+    /// <summary>
+    ///     Removes all key-value pairs for an entity synchronously.
+    /// </summary>
+    /// <param name="entityId"></param>
+    void ClearEntityKeyValuesSync(ulong entityId);
 }
 
 /// <summary>
 ///     Implementation of the IDataController interface.
 /// </summary>
-internal class DataController : IDataController
+internal class DataController(GlobalKeyValueStore globalStore, EntityKeyValueStore entityKeyValueStore)
+    : IDataController
 {
-    public void SetGlobal<T>(IEventSender eventSender, string key, T value) where T : notnull
+    public void SetEntityKeyValueSync<T>(ulong entityId, string key, T value) where T : notnull
     {
-        var details = new KeyValueEventDetails
-        {
-            Key = key,
-            Value = value.ToString() ?? throw new InvalidCastException()
-        };
-        var ev = new Event(EventId.Core_Data_SetGlobal, details);
-        eventSender.SendEvent(ev);
+        entityKeyValueStore.SetValue(entityId, key, value);
     }
 
-    public void RemoveGlobal(IEventSender eventSender, string key)
+    public void RemoveEntityKeyValueSync(ulong entityId, string key)
     {
-        var details = new StringEventDetails
-        {
-            Value = key
-        };
-        var ev = new Event(EventId.Core_Data_RemoveGlobal, details);
-        eventSender.SendEvent(ev);
+        entityKeyValueStore.RemoveKey(entityId, key);
+    }
+
+    public void ClearEntityKeyValuesSync(ulong entityId)
+    {
+        entityKeyValueStore.ClearKeyValues(entityId);
+    }
+
+    public void SetGlobalSync<T>(string key, T value) where T : notnull
+    {
+        var stringValue = value.ToString() ?? throw new InvalidCastException();
+        globalStore.SetGlobal(key, stringValue);
+    }
+
+    public void RemoveGlobalSync(string key)
+    {
+        globalStore.RemoveGlobal(key);
     }
 }

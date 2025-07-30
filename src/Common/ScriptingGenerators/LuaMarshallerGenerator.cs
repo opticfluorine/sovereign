@@ -258,6 +258,29 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     lua_pop(luaState, 1);
                 }}
 
+                public static int Marshal(IntPtr luaState, Vector2 value)
+                {{
+                    luaL_checkstack(luaState, 2, null);
+                    lua_createtable(luaState, 0, 2);
+                    Marshal(luaState, value.X);
+                    lua_setfield(luaState, -2, ""x"");
+                    Marshal(luaState, value.Y);
+                    lua_setfield(luaState, -2, ""y"");
+                    return 1;
+                }}
+
+                public static void Unmarshal(IntPtr luaState, out Vector2 value)
+                {{
+                    value = new Vector2();
+                    if (!lua_istable(luaState, -1)) {throwTypeError};
+                    luaL_checkstack(luaState, 1, null);
+                    if (lua_getfield(luaState, -1, ""x"") != LuaType.Number) {throwTypeError};
+                    Unmarshal(luaState, out value.X);
+                    if (lua_getfield(luaState, -1, ""y"") != LuaType.Number) {throwTypeError};
+                    Unmarshal(luaState, out value.Y);
+                    lua_pop(luaState, 1);
+                }}
+
                 public static int Marshal(IntPtr luaState, Vector3 value)
                 {{
                     luaL_checkstack(luaState, 2, null);

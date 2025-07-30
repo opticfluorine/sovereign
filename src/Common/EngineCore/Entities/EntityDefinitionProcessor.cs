@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events.Details.Validators;
 
 namespace Sovereign.EngineCore.Entities;
@@ -63,8 +64,8 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutAnimatedSprite();
 
-        if (definition.Drawable)
-            builder.Drawable();
+        if (definition.Drawable.HasValue)
+            builder.Drawable(definition.Drawable.Value);
         else
             builder.WithoutDrawable();
 
@@ -127,6 +128,11 @@ public class EntityDefinitionProcessor
             builder.CastShadows(definition.CastShadows.Value);
         else
             builder.WithoutCastShadows();
+
+        if (definition.EntityType != EntityType.Other)
+            builder.EntityType(definition.EntityType);
+        else
+            builder.WithoutEntityType();
 
         var entityId = builder.Build();
         logger.LogDebug("Processed entity ID {Id:X}.", entityId);

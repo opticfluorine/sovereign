@@ -91,22 +91,23 @@ prompt to download the latest game data files.
 
 #### Controls
 
-| Key        | Action                                                      |
-|------------|-------------------------------------------------------------|
-| Esc        | Open in-game menu                                           |
-| Arrow keys | Move player                                                 |
-| Space      | Jump                                                        |
-| Enter      | Toggle chat                                                 |
-| \`         | Toggle Resource Editor Window                               |
-| Insert     | Toggle Template Entity Editor Window (must be admin player) |
-| Del        | Toggle World Editor Window (must be admin player)           |
-| F2         | Toggle Player Debug Window                                  |
-| F3         | Toggle Entity Debug Window                                  |
-| F7         | Toggle Network Debug Window                                 |
-| F8         | Toggle Dear ImGui Debug Log                                 |
-| F9         | Toggle Dear ImGui Demo Window                               |
-| F10        | Toggle Dear ImGui ID Stack Tool                             |
-| F11        | Toggle Dear ImGui Metrics/Debug Window                      |
+| Key             | Action                                                      |
+|-----------------|-------------------------------------------------------------|
+| Esc             | Open in-game menu                                           |
+| Arrow keys/WASD | Move player                                                 |
+| E               | Interact                                                    |
+| Space           | Jump                                                        |
+| Enter           | Toggle chat                                                 |
+| \`              | Toggle Resource Editor Window                               |
+| Insert          | Toggle Template Entity Editor Window (must be admin player) |
+| Del             | Toggle World Editor Window (must be admin player)           |
+| F2              | Toggle Player Debug Window                                  |
+| F3              | Toggle Entity Debug Window                                  |
+| F7              | Toggle Network Debug Window                                 |
+| F8              | Toggle Dear ImGui Debug Log                                 |
+| F9              | Toggle Dear ImGui Demo Window                               |
+| F10             | Toggle Dear ImGui ID Stack Tool                             |
+| F11             | Toggle Dear ImGui Metrics/Debug Window                      |
 
 #### Chat Commands
 

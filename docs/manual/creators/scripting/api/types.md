@@ -1,9 +1,7 @@
 (script-types)=
 # Data Types
 
-The scripting engine uses Lua tables with specific entries to communicate
-information through function calls. This section defines the table structures
-to be used in scripts.
+The scripting engine uses Lua tables with specific entries to communicate information through function calls. This section defines the table structures to be used in scripts.
 
 :::{contents}
 :local:
@@ -117,6 +115,23 @@ to be used in scripts.
     .. lua:attribute:: Radius: number
 
         Radius of the shadow as a multiple of the block size.
+```
+
+(script-types-vector2)=
+## Vector2
+
+```{eval-rst}
+.. lua:class:: Vector2
+
+    2D vector type.
+   
+    .. lua:attribute:: X: number
+   
+        The X value of the vector.
+      
+    .. lua:attribute:: Y: number
+   
+        The Y value of the vector.
 ```
 
 (script-types-vector3)=

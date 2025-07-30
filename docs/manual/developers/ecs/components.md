@@ -1,14 +1,8 @@
 # Components
 
-Sovereign Engine uses an Entity-Component-System (ECS) architecture to provide
-a flexible way to compose in-game entities such as players, NPCs, items, and
-the voxels (blocks) that comprise the structure of the world. This document
-outlines the available component types and their roles.
+Sovereign Engine uses an Entity-Component-System (ECS) architecture to provide a flexible way to compose in-game entities such as players, NPCs, items, and the voxels (blocks) that comprise the structure of the world. This document outlines the available component types and their roles.
 
-In addition to components, Sovereign Engine allows *tags* to be associated with entities.
-Tags are essentially components with no value; they impart meaning onto an entity by
-their presence alone. For example, the `PlayerCharacter` tag designates an entity as
-a player character.
+In addition to components, Sovereign Engine allows *tags* to be associated with entities. Tags are essentially components with no value; they impart meaning onto an entity by their presence alone. For example, the `PlayerCharacter` tag designates an entity as a player character.
 
 ## Core Components
 
@@ -23,7 +17,8 @@ Core components are available in both the client and server.
 | `BoundingBox`      | `BoundingBoxComponentCollection`      | For non-block entities, specifies the bounding box used for physics calculations.                                      |
 | `CastBlockShadows` | `CastBlockShadowsTagCollection`       | For block entities, indicates that the block should be included for calculating shadows.                               |
 | `CastShadows`      | `CastShadowsComponentCollection`      | For non-block entities, specifies the shape of the shadow cast by the entity.                                          |
-| `Drawable`         | `DrawableTagCollection`               | The existence of this component indicates that the entity should be considered for rendering.                          |
+| `Drawable`         | `DrawableComponentCollection`         | For non-block entities, specifies that the entity should be drawn.                                                     |
+| `EntityType`       | `EntityTypeComponentCollection`       | Denotes that the entity is a special type (e.g. item, NPC, player).                                                    |
 | `Kinematics`       | `KinematicsComponentCollection`       | For non-block positioned entities, contains the position and velocity of the entity.                                   |
 | `Material`         | `MaterialComponentCollection`         | Indicates that the entity is a block of the given material ID.                                                         |
 | `MaterialModifier` | `MaterialModifierComponentCollection` | For material block entities (see `Material` component), denotes the material modifier of the block.                    |

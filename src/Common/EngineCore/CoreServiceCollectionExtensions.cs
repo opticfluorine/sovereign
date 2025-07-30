@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2018 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,6 +13,7 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// (at your option) any later version.
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +32,7 @@ using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Data;
+using Sovereign.EngineCore.Systems.Interaction;
 using Sovereign.EngineCore.Systems.Movement;
 using Sovereign.EngineCore.Systems.Performance;
 using Sovereign.EngineCore.Systems.Time;
@@ -113,7 +115,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<AnimatedSpriteComponentCollection>();
         services.TryAddComponentCollection<BlockPositionComponentCollection>();
         services.TryAddComponentCollection<CastBlockShadowsTagCollection>();
-        services.TryAddComponentCollection<DrawableTagCollection>();
+        services.TryAddComponentCollection<DrawableComponentCollection>();
         services.TryAddComponentCollection<KinematicsComponentCollection>();
         services.TryAddComponentCollection<MaterialComponentCollection>();
         services.TryAddComponentCollection<MaterialModifierComponentCollection>();
@@ -125,6 +127,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<PhysicsTagCollection>();
         services.TryAddComponentCollection<BoundingBoxComponentCollection>();
         services.TryAddComponentCollection<CastShadowsComponentCollection>();
+        services.TryAddComponentCollection<EntityTypeComponentCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)
@@ -148,6 +151,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<NameComponentValidator>();
         services.TryAddSingleton<PointLightComponentValidator>();
         services.TryAddSingleton<ShadowComponentValidator>();
+        services.TryAddSingleton<EntityTypeComponentValidator>();
     }
 
     private static void AddEntities(IServiceCollection services)
@@ -190,6 +194,8 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<GenericChatEventDetailsValidator>();
         services.TryAddSingleton<TeleportNoticeEventDetailsValidator>();
         services.TryAddSingleton<IntEventDetailsValidator>();
+        services.TryAddSingleton<NpcAddEventDetailsValidator>();
+        services.TryAddSingleton<NpcRemoveEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)
@@ -219,6 +225,7 @@ public static class CoreServiceCollectionExtensions
 
         AddBlockSystem(services);
         AddDataSystem(services);
+        AddInteractionSystem(services);
         AddMovementSystem(services);
         AddPerformanceSystem(services);
         AddTimeSystem(services);
@@ -243,7 +250,13 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<IDataController, DataController>();
         services.TryAddSingleton<DataInternalController>();
         services.TryAddSingleton<GlobalKeyValueStore>();
+        services.TryAddSingleton<EntityKeyValueStore>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, DataSystem>());
+    }
+
+    private static void AddInteractionSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<InteractionController>();
     }
 
     private static void AddMovementSystem(IServiceCollection services)
@@ -254,6 +267,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<MovementInternalController>();
         services.TryAddSingleton<CollisionMeshFactory>();
         services.TryAddSingleton<CollisionMeshManager>();
+        services.TryAddSingleton<NonBlockCollisionMeshes>();
         services.TryAddSingleton<PhysicsProcessor>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, MovementSystem>());
     }

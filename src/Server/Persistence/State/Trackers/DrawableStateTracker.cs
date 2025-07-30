@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Numerics;
 using Sovereign.EngineCore.Components;
 using Sovereign.Persistence.Entities;
 
@@ -22,15 +23,15 @@ namespace Sovereign.Persistence.State.Trackers;
 /// <summary>
 ///     Persistence state tracker for the Drawable tag.
 /// </summary>
-public class DrawableStateTracker : BaseStateTracker<bool>
+public class DrawableStateTracker : BaseStateTracker<Vector2>
 {
-    public DrawableStateTracker(DrawableTagCollection tags,
-        EntityMapper entityMapper, StateManager stateManager) : base(tags, false,
+    public DrawableStateTracker(DrawableComponentCollection components,
+        EntityMapper entityMapper, StateManager stateManager) : base(components, Vector2.Zero,
         entityMapper, stateManager)
     {
     }
 
-    protected override void OnStateUpdate(ref StateUpdate<bool> update)
+    protected override void OnStateUpdate(ref StateUpdate<Vector2> update)
     {
         stateManager.FrontBuffer.UpdateDrawable(ref update);
     }

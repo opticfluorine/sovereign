@@ -257,28 +257,28 @@ public enum EventId
     #region Data
 
     /// <summary>
-    ///     Sets a global key-value pair.
-    /// </summary>
-    /// Associated details: KeyValueEventDetails
-    Core_Data_SetGlobal = 900,
-
-    /// <summary>
-    ///     Removes a global key-value pair.
-    /// </summary>
-    /// Associated details: StringEventDetails (specifying the key)
-    Core_Data_RemoveGlobal = 902,
-
-    /// <summary>
     ///     Announces that a global key-value pair has been updated.
     /// </summary>
     /// Associated details: KeyValueEventDetails
-    Core_Data_GlobalSet = 903,
+    Core_Data_GlobalSet = 900,
 
     /// <summary>
     ///     Announces that a global key-value pair has been removed.
     /// </summary>
     /// Associated details: StringEventDetails (specifying the key)
-    Core_Data_GlobalRemoved = 904,
+    Core_Data_GlobalRemoved = 901,
+
+    /// <summary>
+    ///     Announces that an entity key-value pair has been updated.
+    /// </summary>
+    /// Associated details: EntityKeyValueEventDetails
+    Core_Data_EntityKeyValueSet = 902,
+
+    /// <summary>
+    ///     Announces that an entity key-value pair has been removed.
+    /// </summary>
+    /// Associated details: EntityStringEventDetails
+    Core_Data_EntityKeyValueRemoved = 903,
 
     #endregion Data
 
@@ -317,6 +317,16 @@ public enum EventId
     Core_Time_Clock = 1100,
 
     #endregion Time
+
+    #region Interaction
+
+    /// <summary>
+    ///     Event sent to trigger an interaction between two entities, possibly with a tool.
+    /// </summary>
+    /// Associated details: InteractEventDetails
+    Core_Interaction_Interact = 1200,
+
+    #endregion Interaction
 
     #endregion Core
 
@@ -462,12 +472,24 @@ public enum EventId
     /// </summary>
     /// Associated details: GenericEventDetails(int)
     Client_WorldEdit_SetZOffset = 10500,
-    
+
     /// <summary>
     ///     Event sent to update the pen width for world editing.
     /// </summary>
     /// Associated details: GenericEventDetails(int)
     Client_WorldEdit_SetPenWidth = 10501,
+
+    /// <summary>
+    ///     Event sent to update the tool for world editing.
+    /// </summary>
+    /// Associated details: GenericEventDetails(Tool)
+    Client_WorldEdit_SetTool = 10502,
+
+    /// <summary>
+    ///     Event sent to update the snap-to-grid setting for world editing.
+    /// </summary>
+    /// Associated details: BooleanEventDetails
+    Client_WorldEdit_SetSnapToGrid = 10503,
 
     #endregion
 
@@ -559,6 +581,12 @@ public enum EventId
     /// Associated details: EntityDefinitionEventDetails
     Server_TemplateEntity_Update = 200500,
 
+    /// <summary>
+    ///     Creates or updates a template entity with its key-value pairs.
+    /// </summary>
+    /// Associated details: KeyedEntityDefinitionEventDetails
+    Server_TemplateEntity_UpdateKeyed = 200501,
+
     #endregion Server_TemplateEntity
 
     #region Server_WorldEdit
@@ -576,6 +604,18 @@ public enum EventId
     /// </summary>
     /// Associated details: GridPositionEventDetails
     Server_WorldEdit_RemoveBlock = 200601,
+
+    /// <summary>
+    ///     Requests that an NPC be added at a position using admin privileges. Sent by the client-side admin world editor.
+    /// </summary>
+    /// Associated details: NpcAddEventDetails
+    Server_WorldEdit_AddNpc = 200602,
+
+    /// <summary>
+    ///     Requests that an NPC be removed using admin privileges. Sent by the client-side admin world editor.
+    /// </summary>
+    /// Associated details: NpcRemoveEventDetails
+    Server_WorldEdit_RemoveNonBlock = 200603,
 
     #endregion
 
@@ -598,6 +638,12 @@ public enum EventId
     /// </summary>
     /// Associated details: None
     Server_Scripting_LoadNew = 200702,
+
+    /// <summary>
+    ///     Event used to signal a timed callback. Details contain a unique identifier for the callback request.
+    /// </summary>
+    /// Associated details: IntEventDetails
+    Server_Scripting_TimedCallback = 200703,
 
     #endregion Server_Scripting
 

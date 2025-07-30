@@ -51,3 +51,7 @@ the server.
 Block Template Entities may not be deleted. This is by design to prevent blocks from referencing a
 template that no longer exists. If a template is no longer needed, the recommended best practice is
 to deprecate the template by changing its Name component to an appropriate value (e.g. *Deprecated*).
+
+### Creating and Modifying NPC Template Entities
+
+TBD

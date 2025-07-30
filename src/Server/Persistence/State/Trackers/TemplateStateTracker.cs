@@ -39,8 +39,10 @@ public class TemplateStateTracker
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="templateEntityId">Template entity ID, or 0 for no template.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateEntityId)
+    /// <param name="isLoad">Load flag.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateEntityId, bool isLoad)
     {
+        if (isLoad) return;
         var persistedId = GetPersistedId(entityId);
         var update = new StateUpdate<ulong>
             { EntityId = persistedId, StateUpdateType = StateUpdateType.Modify, Value = templateEntityId };

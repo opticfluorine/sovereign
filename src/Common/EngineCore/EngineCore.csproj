@@ -6,6 +6,7 @@
         <RootNamespace>Sovereign.EngineCore</RootNamespace>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <NoWarn>CS0162</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

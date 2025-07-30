@@ -35,11 +35,12 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
-    private readonly DrawableTagCollection drawables;
+    private readonly DrawableComponentCollection drawables;
 
     private readonly EntityAssigner entityAssigner;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
+    private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
@@ -62,7 +63,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         NameComponentCollection names,
         AccountComponentCollection accounts,
         ParentComponentCollection parents,
-        DrawableTagCollection drawables,
+        DrawableComponentCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites,
         OrientationComponentCollection orientations,
         AdminTagCollection admins,
@@ -72,6 +73,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         PhysicsTagCollection physics,
         BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows,
+        EntityTypeComponentCollection entityTypes,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -93,16 +95,17 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.physics = physics;
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
+        this.entityTypes = entityTypes;
         this.entityTable = entityTable;
         entityAssigner = entityManager.GetNewAssigner();
     }
 
-    public IEntityBuilder GetBuilder(EntityType entityType, bool load = false)
+    public IEntityBuilder GetBuilder(EntityCategory entityCategory, bool load = false)
     {
-        return entityType switch
+        return entityCategory switch
         {
-            EntityType.Block => GetBuilder(Interlocked.Increment(ref nextBlockEntityId), load),
-            EntityType.Template => GetBuilder(entityTable.TakeNextTemplateEntityId(), load),
+            EntityCategory.Block => GetBuilder(Interlocked.Increment(ref nextBlockEntityId), load),
+            EntityCategory.Template => GetBuilder(entityTable.TakeNextTemplateEntityId(), load),
             _ => GetBuilder(entityAssigner.GetNextId(), load)
         };
     }
@@ -131,6 +134,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             physics,
             boundingBoxes,
             castShadows,
+            entityTypes,
             entityTable);
     }
 }

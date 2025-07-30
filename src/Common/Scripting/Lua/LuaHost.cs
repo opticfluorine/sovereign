@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using static Sovereign.Scripting.Lua.LuaBindings;
@@ -32,6 +33,7 @@ public class LuaHost : IDisposable
     private const int QuickLookupSizeHint = 32;
     private const string QuickLookupKey = "sovereign_ql";
     private readonly List<GCHandle> bindings = new();
+    private readonly List<string> functionNames = new();
     private readonly Lock opsLock = new();
     private readonly int quickLookupStackPosition;
     private readonly int tracebackStackPosition;
@@ -47,7 +49,7 @@ public class LuaHost : IDisposable
         luaL_openlibs(LuaState);
         InstallUtilLibrary();
 
-        luaL_checkstack(LuaState, 3, null);
+        luaL_checkstack(LuaState, 4, null);
 
         // Install traceback error handler.
         lua_getglobal(LuaState, "debug");
@@ -62,8 +64,25 @@ public class LuaHost : IDisposable
         lua_pushnil(LuaState);
         lua_copy(LuaState, quickLookupStackPosition, -1);
         lua_setfield(LuaState, LUA_REGISTRYINDEX, QuickLookupKey);
+
+        // Remove unwanted default modules.
+        lua_pushnil(LuaState);
+        lua_setglobal(LuaState, "debug");
     }
 
+    /// <summary>
+    ///     Entity parameter hints indexed by function name.
+    /// </summary>
+    public ConcurrentDictionary<string, List<string>> EntityParameterHintsByFunction { get; } = new();
+
+    /// <summary>
+    ///     List of global functions provided by the script.
+    /// </summary>
+    public IReadOnlyList<string> FunctionNames => functionNames;
+
+    /// <summary>
+    ///     Logger for this host.
+    /// </summary>
     public ILogger Logger { get; }
 
     /// <summary>
@@ -86,6 +105,9 @@ public class LuaHost : IDisposable
         lock (opsLock)
         {
             lua_close(LuaState);
+            foreach (var binding in bindings)
+                if (binding.IsAllocated)
+                    binding.Free();
             IsDisposed = true;
         }
     }
@@ -122,6 +144,7 @@ public class LuaHost : IDisposable
             bindings.Add(GCHandle.Alloc(func));
             lua_pushcfunction(LuaState, func);
             lua_setfield(LuaState, -2, name);
+            lua_pop(LuaState, 1);
         }
     }
 
@@ -154,6 +177,7 @@ public class LuaHost : IDisposable
             lua_getglobal(LuaState, library);
             lua_pushinteger(LuaState, value);
             lua_setfield(LuaState, -2, name);
+            lua_pop(LuaState, 1);
         }
     }
 
@@ -165,7 +189,6 @@ public class LuaHost : IDisposable
         lock (opsLock)
         {
             library = "";
-            lua_pop(LuaState, 1);
         }
     }
 
@@ -217,6 +240,35 @@ public class LuaHost : IDisposable
     }
 
     /// <summary>
+    ///     Calls a named function in the script.
+    /// </summary>
+    /// <param name="functionName">Function name.</param>
+    /// <param name="configureArgs">
+    ///     Function that sets up arguments using the given ArgumentBuilder and returns the number of
+    ///     arguments.
+    /// </param>
+    public void CallNamedFunction(string functionName, Func<ArgumentsBuilder, int> configureArgs)
+    {
+        lock (opsLock)
+        {
+            // Locate the function.
+            luaL_checkstack(LuaState, 2, null);
+            lua_getglobal(LuaState, functionName);
+            if (lua_type(LuaState, -1) != LuaType.Function)
+            {
+                lua_pop(LuaState, 1);
+                throw new LuaException($"Function '{functionName}' not found.");
+            }
+
+            // Configure arguments.
+            var nargs = configureArgs.Invoke(new ArgumentsBuilder(this));
+
+            // Call function.
+            Validate(lua_pcall(LuaState, nargs, 0, tracebackStackPosition));
+        }
+    }
+
+    /// <summary>
     ///     Loads and executes the given string of Lua code.
     /// </summary>
     /// <param name="luaCode">Code to execute.</param>
@@ -251,7 +303,50 @@ public class LuaHost : IDisposable
     {
         lock (opsLock)
         {
+            // Scan the global table for functions present before the script is executed.
+            var baselineFunctions = new HashSet<string>();
+            ScanFunctions(baselineFunctions);
+
             Validate(lua_pcall(LuaState, 0, LUA_MULTRET, tracebackStackPosition));
+
+            // Re-scan to find new functions added by the script.
+            var newFunctions = new HashSet<string>();
+            ScanFunctions(newFunctions);
+            functionNames.Clear();
+            functionNames.AddRange(newFunctions.Except(baselineFunctions));
+            functionNames.Sort();
+        }
+    }
+
+    /// <summary>
+    ///     Executes some other scripting action in the context of this host.
+    /// </summary>
+    /// <param name="action">Action to execute.</param>
+    public void ExecuteOther(Action<ExecutionControls> action)
+    {
+        lock (opsLock)
+        {
+            action.Invoke(new ExecutionControls(this));
+        }
+    }
+
+    /// <summary>
+    ///     Adds an entity key-value parameter hint for the given function.
+    /// </summary>
+    /// <param name="functionName">Function name.</param>
+    /// <param name="parameterName">Parameter name.</param>
+    public void AddEntityParameterHint(string functionName, string parameterName)
+    {
+        lock (opsLock)
+        {
+            if (!EntityParameterHintsByFunction.TryGetValue(functionName, out var parameters))
+            {
+                parameters = new List<string>();
+                EntityParameterHintsByFunction[functionName] = parameters;
+            }
+
+            if (!parameters.Contains(parameterName))
+                parameters.Add(parameterName);
         }
     }
 
@@ -465,5 +560,73 @@ public class LuaHost : IDisposable
 
         var err = lua_tostring(LuaState, -1);
         throw new LuaException(err);
+    }
+
+    /// <summary>
+    ///     Scans the global table for functions.
+    /// </summary>
+    private void ScanFunctions(HashSet<string> nameSet)
+    {
+        nameSet.Clear();
+
+        luaL_checkstack(LuaState, 2, null);
+        lua_rawgeti(LuaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // push global table
+        lua_pushnil(LuaState); // init key for loop
+        while (lua_next(LuaState, -2) != 0)
+        {
+            if (lua_isfunction(LuaState, -1))
+                nameSet.Add(lua_tostring(LuaState, -2));
+            lua_pop(LuaState, 1); // pop value, keep key for next iteration
+        }
+
+        lua_pop(LuaState, 1); // pop global table
+
+        functionNames.Sort();
+    }
+
+    /// <summary>
+    ///     Builder for adding arguments to a Lua function call.
+    /// </summary>
+    public readonly struct ArgumentsBuilder
+    {
+        private readonly LuaHost host;
+
+        public ArgumentsBuilder(LuaHost host)
+        {
+            this.host = host;
+        }
+
+        /// <summary>
+        ///     Pushes an integer orgument onto the function call.
+        /// </summary>
+        /// <param name="argument"></param>
+        public void AddInteger(long argument)
+        {
+            luaL_checkstack(host.LuaState, 1, null);
+            lua_pushinteger(host.LuaState, argument);
+        }
+    }
+
+    /// <summary>
+    ///     Controls for arbitrary Lua execution.
+    /// </summary>
+    public readonly struct ExecutionControls
+    {
+        private readonly LuaHost host;
+
+        public ExecutionControls(LuaHost host)
+        {
+            this.host = host;
+        }
+
+        /// <summary>
+        ///     Validating wrapper around lua_pcall.
+        /// </summary>
+        /// <param name="nargs">Argument count.</param>
+        /// <param name="nresults">Result count.</param>
+        public void PCall(int nargs, int nresults)
+        {
+            host.Validate(lua_pcall(host.LuaState, nargs, nresults, host.tracebackStackPosition));
+        }
     }
 }

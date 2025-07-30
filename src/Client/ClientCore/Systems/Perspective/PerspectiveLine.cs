@@ -22,7 +22,7 @@ namespace Sovereign.ClientCore.Systems.Perspective;
 /// <summary>
 ///     Entity types that can be found on a perspective line.
 /// </summary>
-public enum EntityType
+public enum PerspectiveEntityType
 {
     /// <summary>
     ///     Non-block entity.
@@ -53,7 +53,7 @@ public struct EntityInfo
     /// <summary>
     ///     Entity type.
     /// </summary>
-    public EntityType EntityType;
+    public PerspectiveEntityType PerspectiveEntityType;
 
     /// <summary>
     ///     Z coordinate.
@@ -226,11 +226,11 @@ public class PerspectiveLine
             var layer = ZFloors[i];
             if (layer.ZFloor <= baseZFloor) continue;
             foreach (var entity in layer.Entities)
-                if (entity.EntityType == EntityType.BlockTopFace ||
-                    entity.EntityType == EntityType.BlockFrontFace)
+                if (entity.PerspectiveEntityType == PerspectiveEntityType.BlockTopFace ||
+                    entity.PerspectiveEntityType == PerspectiveEntityType.BlockFrontFace)
                 {
                     nextZFloor = layer.ZFloor;
-                    if (entity.EntityType == EntityType.BlockTopFace)
+                    if (entity.PerspectiveEntityType == PerspectiveEntityType.BlockTopFace)
                     {
                         hasTopFace = true;
                         return true;

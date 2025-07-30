@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
+using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Scripting.Lua;
 
 namespace Sovereign.ServerCore.Systems.Scripting;
@@ -46,14 +47,21 @@ public class ScriptingServices
     }
 
     /// <summary>
-    ///     Utility method that selects the appropriate logger for the given Lua state.
+    ///     Utility method that selects the appropriate logger for the given Lua state. Guaranteed no-throw.
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <param name="fallback">Fallback logger to use if the script logger cannot be found.</param>
     /// <returns>Logger.</returns>
     public ILogger GetScriptLogger(IntPtr luaState, ILogger fallback)
     {
-        return TryGetHostForState(luaState, out var host) ? host.Logger : fallback;
+        try
+        {
+            return TryGetHostForState(luaState, out var host) ? host.Logger : fallback;
+        }
+        catch
+        {
+            return fallback;
+        }
     }
 
     /// <summary>
@@ -73,5 +81,14 @@ public class ScriptingServices
     public IEnumerable<string> GetLoadedScripts()
     {
         return scriptManager.GetScriptNames();
+    }
+
+    /// <summary>
+    ///     Gets information for the currently loaded scripts.
+    /// </summary>
+    /// <returns>Current ScriptInfo object.</returns>
+    public ScriptInfo GetLoadedScriptInfo()
+    {
+        return scriptManager.GetScriptInfo();
     }
 }

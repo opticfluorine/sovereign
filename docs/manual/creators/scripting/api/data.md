@@ -7,63 +7,74 @@
 
 The `data` module provides support for reading and writing non-component data such as global key-value pairs.
 
-## Global Key-Value Data
+(script-data-keyvaluedata)=
+## Key-Value Data
 
-:::{caution}
-Global key-value data is intended for long-term persisted storage of data,
-not for rapid updates and frequent computations. There are performance
-considerations that must be taken into account when using global key-value
-data. Try to minimize the amount of global key-value data access (both read
-and write) in your scripts.
-:::
-
-Sovereign provides a global key-value data store that can be used for
+Sovereign provides key-value data stores that can be used for
 long-term storage of arbitrary data. This data store is persisted to the
-database and is also kept in memory by the server; as such, the global
+database and is also kept in memory by the server; as such, the key-value
 store supports read and write operations without any (immediate) round trip
-to the database and back.
+to the database and back. Sovereign provides a global key-value store as well
+as entity-scoped key-value stores. Entity-scoped key-value stores are only
+available for non-block entities.
 
-All global keys and values are stored internally as strings. When writing
-to the global store, the conversion of values to string format is handled
+All keys and values are stored internally as strings. When writing
+to the key-value store, the conversion of values to string format is handled
 automatically. When reading from the global store, the calling script is
 responsible for converting the string to the appropriate type. Many
 conversions (including conversion from string to number) can be done
 implicitly; others (such as booleans) require explicit conversion.
 
-The global key-value data store is exposed to scripts via the
-`data.global` table. This table behaves mostly like any other Lua table
-with the exception that writing to a key is an asynchronous operation; as
-such, the table may not immediately reflect the updated value after it
-is written to the appropriate field. This is because behind the scenes the
-write operation sends an asynchronous event to the `DataSystem` to make
-the update.
+### Accessing Key-Value Stores
 
-The `data.RemoveGlobal` method is provided for removing a global key-value
-pair. As with writes to `data.global`, this operation is asynchronous and
-the result may not be immediately reflected in the `data.global` table.
+The global key-value store is provided to every script as the `data.global` table.
+
+Entity-scoped key-value stores may be retrieved using the `data.GetEntityData(entityId)` function.
+
+```{eval-rst}
+.. lua:function:: data.GetEntityData(entityId)
+
+   Gets the key-value store associated with the given entity.
+   
+   :param entityId: Entity ID.
+   :type entityId: integer
+
+   :return: Key-value store for the requested entity.
+   :rtype: table
+```
 
 ### Reading Global Key-Value Pairs
 
-A key-value pair may be read from the global store by indexing into the
-`data.global` table with the key. This returns the string representation of
+A key-value pair may be read from the key-value store by indexing into the
+appropriate table with the key. This returns the string representation of
 the value if the key-value pair is present, or `nil` if the key-value pair
-is not present.
+is not present. 
+
+For entity key-value stores, if the key is not found, the key
+for the template entity (if any) is also checked; this allows entities to inherit
+key-value pairs held by their template entities.
 
 #### Example
 
 ```{code-block} lua
-:caption: Reading a global key-value pair.
-:emphasize-lines: 1
-local MyValue = data.global["MyValue"]  -- MyValue is string if key exists, nil otherwise.
+:caption: Reading key-value pairs.
+:emphasize-lines: 1,4
+local MyValue = data.global["MyKey"]              -- MyValue is string if key exists, nil otherwise.
+-- ...
+local MyEntityData = data.GetEntityData(entityId)
+local MyEntityValue = MyEntityData["MyEntityKey"] -- MyEntityValue is string if key exists for entity or its template, nil otherwise.
 ```
 
-### Writing Global Key-Value Pairs
+### Writing Key-Value Pairs
 
-A key-value pair may be created or updated in the global store by assigning
-a value to `data.global[key]`. Fields in `data.global` may be assigned
+A key-value pair may be created or updated in the key-value store by assigning
+a value to the appropriate table. Fields in the key-value store may be assigned
 strings, integers, numbers, or booleans; all input values will be converted
-to strings. Note that this is an asynchronous operation, and there may be
-a delay before the new value is reflected in subsequent reads.
+to strings.
+
+For entity key-value stores, this will only ever modify the key-value pair for the
+entity itself. Unlike with reading values, writing values will not affect the
+template entity.
 
 :::{note}
 Keys that start with two underscores (`__`) are considered special reserved 
@@ -74,28 +85,25 @@ values from a script will fail with an error.
 #### Example
 
 ```{code-block} lua
-:caption: Writing a global key-value pair.
-:emphasize-lines: 1
+:caption: Writing key-value pairs.
+:emphasize-lines: 1,4
 data.global["MyValue"] = 12345
-print(data.global["MyValue"])   -- warning: may not show the latest value
+-- ...
+local MyEntityData = data.GetEntityData(entityId)
+MyEntityData["MyEntityKey"] = 3.14159
 ```
 
-### RemoveGlobal(key)
+### Deleting Key-Value Pairs
 
-```{eval-rst}
-.. lua:function:: data.RemoveGlobal(key)
-
-    Removes the given key from the global key-value store, or does nothing
-    if the key is not currently in the global key-value store.
-
-    :param key: Global key.
-    :type key: string
-```
+To delete a key-value pair, assign the value `nil` to the key.
 
 #### Example
 
 ```{code-block} lua
-:caption: Using `RemoveGlobal` to remove a global key-value pair.
+:caption: Deleting key-value pairs.
 :emphasise-lines: 1
-data.RemoveGlobal("MyKey")  -- removes "MyKey" from the global key-value store
+data.global["MyKey"] = nil         -- removes "MyKey" from the global key-value store
+-- ...
+local MyEntityData = data.GetEntityData(entityId)
+MyEntityData["MyEntityKey"] = nil  -- removes "MyEntityKey" from the entity key-value store
 ```

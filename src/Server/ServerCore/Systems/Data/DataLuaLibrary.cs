@@ -15,8 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
-using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Systems.Scripting;
@@ -27,26 +28,43 @@ namespace Sovereign.ServerCore.Systems.Data;
 /// <summary>
 ///     Lua library that provides access to DataSystem data.
 /// </summary>
-public class DataLuaLibrary : ILuaLibrary
+public class DataLuaLibrary : ILuaLibrary, IDisposable
 {
     private const string LibraryName = "data";
+    private const long TableEntityIndex = 0;
 
     private const string ReadOnlyKeyPrefix = "__";
     private readonly IDataController dataController;
     private readonly IDataServices dataServices;
-    private readonly IEventSender eventSender;
+
+    private readonly LuaCFunction entityGetCallback;
+
+    private readonly LuaCFunction entitySetCallback;
+
     private readonly ILogger<DataLuaLibrary> logger;
     private readonly ScriptingServices scriptingServices;
+    private GCHandle entityGetGcHandle;
+    private GCHandle entitySetGcHandle;
 
-    public DataLuaLibrary(IDataController dataController, IEventSender eventSender,
+    public DataLuaLibrary(IDataController dataController,
         ScriptingServices scriptingServices, ILogger<DataLuaLibrary> logger,
         IDataServices dataServices)
     {
         this.dataController = dataController;
-        this.eventSender = eventSender;
         this.scriptingServices = scriptingServices;
         this.logger = logger;
         this.dataServices = dataServices;
+
+        entityGetCallback = EntityKvGet;
+        entityGetGcHandle = GCHandle.Alloc(entityGetCallback);
+        entitySetCallback = EntityKvSet;
+        entitySetGcHandle = GCHandle.Alloc(entityGetCallback);
+    }
+
+    public void Dispose()
+    {
+        entityGetGcHandle.Free();
+        entitySetGcHandle.Free();
     }
 
     public void Install(LuaHost luaHost)
@@ -56,6 +74,7 @@ public class DataLuaLibrary : ILuaLibrary
             luaHost.BeginLibrary(LibraryName);
 
             InstallGlobalKeyValues(luaHost);
+            InstallEntityKeyValues(luaHost);
         }
         finally
         {
@@ -86,8 +105,6 @@ public class DataLuaLibrary : ILuaLibrary
         lua_setmetatable(luaHost.LuaState, -2);
         lua_setfield(luaHost.LuaState, -2, "global");
         lua_pop(luaHost.LuaState, 1);
-
-        luaHost.AddLibraryFunction("RemoveGlobal", GlobalKvRemove);
     }
 
     /// <summary>
@@ -161,18 +178,23 @@ public class DataLuaLibrary : ILuaLibrary
             switch (valueType)
             {
                 case LuaType.String:
-                    dataController.SetGlobal(eventSender, key, lua_tostring(luaState, -1));
+                    dataController.SetGlobalSync(key, lua_tostring(luaState, -1));
                     break;
 
                 case LuaType.Number:
                     if (lua_isinteger(luaState, -1))
-                        dataController.SetGlobal(eventSender, key, lua_tointeger(luaState, -1));
+                        dataController.SetGlobalSync(key, lua_tointeger(luaState, -1));
                     else
-                        dataController.SetGlobal(eventSender, key, lua_tonumber(luaState, -1));
+                        dataController.SetGlobalSync(key, lua_tonumber(luaState, -1));
                     break;
 
                 case LuaType.Boolean:
-                    dataController.SetGlobal(eventSender, key, lua_toboolean(luaState, -1));
+                    dataController.SetGlobalSync(key, lua_toboolean(luaState, -1));
+                    break;
+
+                case LuaType.Nil:
+                    // Special case - nil assignment deletes the key-value pair.
+                    dataController.RemoveGlobalSync(key);
                     break;
 
                 default:
@@ -191,47 +213,189 @@ public class DataLuaLibrary : ILuaLibrary
     }
 
     /// <summary>
-    ///     data.RemoveGlobal(key) Lua function. Asynchronously removes a global key-value pair
-    ///     if it exists, or does nothing otherwise.
+    ///     Installs the entity key-value store API into a Lua host.
     /// </summary>
-    /// <param name="luaState"></param>
-    /// <returns></returns>
-    private int GlobalKvRemove(IntPtr luaState)
+    /// <param name="luaHost">Lua host.</param>
+    private void InstallEntityKeyValues(LuaHost luaHost)
     {
-        // First argument: data.global
+        luaL_checkstack(luaHost.LuaState, 2, null);
+        lua_getglobal(luaHost.LuaState, LibraryName); // <-- data
+
+        luaHost.PushFunction(GetEntityData);
+        lua_setfield(luaHost.LuaState, -2, nameof(GetEntityData));
+
+        lua_pop(luaHost.LuaState, 1);
+    }
+
+    /// <summary>
+    ///     Implementation of data.GetEntityTable(entityId). Creates a Lua table for accessing
+    ///     per-entity key-value data.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of values returned.</returns>
+    private int GetEntityData(IntPtr luaState)
+    {
+        // First argument: entity ID
+        if (lua_gettop(luaState) < 1 || !lua_isinteger(luaState, -1))
+        {
+            scriptingServices.GetScriptLogger(luaState, logger)
+                .LogError("data.GetEntityData(entityId) requires entity ID as the first argument.");
+            return 0;
+        }
+
+        var entityId = (ulong)lua_tointeger(luaState, -1);
+        if (entityId >= EntityConstants.FirstBlockEntityId && entityId <= EntityConstants.LastBlockEntityId)
+        {
+            scriptingServices.GetScriptLogger(luaState, logger)
+                .LogError("data.GetEntityData(entityId) cannot be used on block entities.");
+            return 0;
+        }
+
+        // Create an opaque object to act as a proxy to the global key-values.
+        luaL_checkstack(luaState, 4, null);
+        lua_createtable(luaState, 1, 0); // <-- returned table
+        lua_createtable(luaState, 0, 2); // <-- metatable for returned table
+
+        // Bind new table to entity.
+        lua_pushinteger(luaState, TableEntityIndex);
+        lua_pushinteger(luaState, (long)entityId);
+        lua_rawset(luaState, -4);
+
+        // Populate metatable.
+        lua_pushcfunction(luaState, entityGetCallback);
+        lua_setfield(luaState, -2, "__index");
+        lua_pushcfunction(luaState, entitySetCallback);
+        lua_setfield(luaState, -2, "__newindex");
+        lua_setmetatable(luaState, -2);
+
+        return 1;
+    }
+
+    /// <summary>
+    ///     Lua metamethod on an entity KV table that indexes into the global key-value store.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of return values (always 1).</returns>
+    private int EntityKvGet(IntPtr luaState)
+    {
+        // First argument: entity KV table
         // Second argument: key
 
         try
         {
-            if (lua_gettop(luaState) != 1)
-            {
-                scriptingServices.GetScriptLogger(luaState, logger)
-                    .LogError("data.RemoveGlobal(key) requires 1 argument.");
-                return 0;
-            }
+            luaL_checkstack(luaState, 2, null);
 
             if (!lua_isstring(luaState, -1))
             {
                 scriptingServices.GetScriptLogger(luaState, logger)
-                    .LogError("data.RemoveGlobal(key) requires a string key.");
+                    .LogError("Entity KV access requires a string key.");
                 return 0;
             }
 
-            var key = lua_tostring(luaState, -1);
-
-            if (IsKeyReadOnly(key))
+            // Retrieve the bound entity ID.
+            lua_pushinteger(luaState, TableEntityIndex);
+            lua_rawget(luaState, -3);
+            if (!lua_isinteger(luaState, -1))
             {
                 scriptingServices.GetScriptLogger(luaState, logger)
-                    .LogError("data.RemoveGlobal(key): key {Key} is read-only.", key);
+                    .LogCritical(
+                        "Possible Lua host corruption: Entity KV table has no bound entity ID. Script may have a security issue.");
                 return 0;
             }
 
-            dataController.RemoveGlobal(eventSender, key);
+            var entityId = (ulong)lua_tointeger(luaState, -1);
+            lua_pop(luaState, 1);
+
+            // Fetch value for key if it exists.
+            var key = lua_tostring(luaState, -1);
+            if (dataServices.TryGetEntityKeyValue(entityId, key, out var value))
+                lua_pushstring(luaState, value);
+            else
+                return 0;
         }
         catch (Exception e)
         {
             scriptingServices.GetScriptLogger(luaState, logger)
-                .LogError(e, "Error in data.RemoveGlobal(key).");
+                .LogError(e, "Error in entity KV getter.");
+            return 0;
+        }
+
+        return 1;
+    }
+
+    /// <summary>
+    ///     Sets a key-value pair in the entity's key-value store.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int EntityKvSet(IntPtr luaState)
+    {
+        // First argument: entity KV table
+        // Second argument: key
+        // Third argument: value
+
+        try
+        {
+            luaL_checkstack(luaState, 1, null);
+
+            var key = lua_tostring(luaState, -2);
+
+            if (IsKeyReadOnly(key))
+            {
+                scriptingServices.GetScriptLogger(luaState, logger)
+                    .LogError("Entity KV set: key {Key} is read-only.", key);
+                return 0;
+            }
+
+            // Retrieve the bound entity ID.
+            lua_pushinteger(luaState, TableEntityIndex);
+            lua_rawget(luaState, -4);
+            if (!lua_isinteger(luaState, -1))
+            {
+                scriptingServices.GetScriptLogger(luaState, logger)
+                    .LogCritical(
+                        "Possible Lua host corruption: Entity KV table has no bound entity ID. Script may have a security issue.");
+                lua_pushnil(luaState);
+                return 1;
+            }
+
+            var entityId = (ulong)lua_tointeger(luaState, -1);
+            lua_pop(luaState, 1);
+
+            // Handle the set or delete if the type is supported.
+            var valueType = lua_type(luaState, -1);
+            switch (valueType)
+            {
+                case LuaType.String:
+                    dataController.SetEntityKeyValueSync(entityId, key, lua_tostring(luaState, -1));
+                    break;
+
+                case LuaType.Number:
+                    if (lua_isinteger(luaState, -1))
+                        dataController.SetEntityKeyValueSync(entityId, key, lua_tointeger(luaState, -1));
+                    else
+                        dataController.SetEntityKeyValueSync(entityId, key, lua_tonumber(luaState, -1));
+                    break;
+
+                case LuaType.Boolean:
+                    dataController.SetEntityKeyValueSync(entityId, key, lua_toboolean(luaState, -1));
+                    break;
+
+                case LuaType.Nil:
+                    // Special case - nil assignment is idiomatic for deleting a key-value pair.
+                    dataController.RemoveEntityKeyValueSync(entityId, key);
+                    break;
+
+                default:
+                    scriptingServices.GetScriptLogger(luaState, logger)
+                        .LogError("Unsupported value type for entity key-value pair.");
+                    return 0;
+            }
+        }
+        catch (Exception e)
+        {
+            scriptingServices.GetScriptLogger(luaState, logger)
+                .LogError(e, "Error in entity KV setter.");
         }
 
         return 0;

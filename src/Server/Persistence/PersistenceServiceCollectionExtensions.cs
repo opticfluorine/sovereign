@@ -95,8 +95,10 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<TemplateStateTracker>();
         services.TryAddSingleton<CastBlockShadowsStateTracker>();
         services.TryAddSingleton<PointLightSourceStateTracker>();
+        services.TryAddSingleton<CastShadowsStateTracker>();
         services.TryAddSingleton<PhysicsStateTracker>();
         services.TryAddSingleton<BoundingBoxStateTracker>();
+        services.TryAddSingleton<EntityTypeStateTracker>();
     }
 
     private static void AddPersistenceSystem(IServiceCollection services)

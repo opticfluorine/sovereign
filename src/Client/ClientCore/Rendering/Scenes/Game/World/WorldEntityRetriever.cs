@@ -50,6 +50,7 @@ public sealed class WorldEntityRetriever
     private readonly CameraServices camera;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castsShadows;
+    private readonly DrawableComponentCollection drawables;
     private readonly WorldLayerGrouper grouper;
 
     private readonly KinematicsComponentCollection kinematics;
@@ -86,7 +87,8 @@ public sealed class WorldEntityRetriever
         LightSourceTable lightSourceTable, PlayerCharacterTagCollection playerCharacters,
         WorldRangeSelector rangeSelector, AtlasMap atlasMap,
         ILogger<WorldEntityRetriever> logger, CastShadowsComponentCollection castsShadows,
-        NonBlockShadowPlanner shadowPlanner, IOptions<RendererOptions> rendererOptions)
+        NonBlockShadowPlanner shadowPlanner, IOptions<RendererOptions> rendererOptions,
+        DrawableComponentCollection drawables)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -108,6 +110,7 @@ public sealed class WorldEntityRetriever
         this.logger = logger;
         this.castsShadows = castsShadows;
         this.shadowPlanner = shadowPlanner;
+        this.drawables = drawables;
         this.rendererOptions = rendererOptions.Value;
     }
 
@@ -198,13 +201,13 @@ public sealed class WorldEntityRetriever
             for (var j = zSet.Entities.Count - 1; j >= 0; j--)
             {
                 var entity = zSet.Entities[j];
-                switch (entity.EntityType)
+                switch (entity.PerspectiveEntityType)
                 {
-                    case EntityType.BlockFrontFace:
+                    case PerspectiveEntityType.BlockFrontFace:
                         frontFaceId = entity.EntityId;
                         break;
 
-                    case EntityType.BlockTopFace:
+                    case PerspectiveEntityType.BlockTopFace:
                         topFaceId = entity.EntityId;
                         break;
                 }
@@ -227,7 +230,7 @@ public sealed class WorldEntityRetriever
             {
                 // Skip block faces since they were already handled above.
                 var entity = zSet.Entities[j];
-                if (entity.EntityType != EntityType.NonBlock) continue;
+                if (entity.PerspectiveEntityType != PerspectiveEntityType.NonBlock) continue;
                 if (entity.OriginOnLine) ProcessSprite(entity.EntityId, systemTime, timeSinceTick, renderPlan);
             }
 
@@ -249,16 +252,20 @@ public sealed class WorldEntityRetriever
     {
         var opacity = perspectiveServices.GetOpacityForEntity(entityId);
         if (opacity < OpacityCullThreshold) return;
+        if (!drawables.HasComponentForEntity(entityId)) return;
 
         var entityKinematics = kinematics[entityId];
+        var posOffset = drawables[entityId];
+        var position = entityKinematics.Position - new Vector3(posOffset, 0.0f);
+
         var animatedSpriteId = animatedSprites[entityId];
         var orientation = orientations.HasComponentForEntity(entityId) ? orientations[entityId] : Orientation.South;
         var phase = phases.HasComponentForEntity(entityId) ? phases[entityId] : AnimationPhase.Default;
 
         var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
         var sprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(systemTime, orientation);
-        grouper.AddSprite(EntityType.NonBlock, entityKinematics.Position, entityKinematics.Velocity, sprite, 1.0f,
-            opacity);
+        grouper.AddSprite(PerspectiveEntityType.NonBlock, position, entityKinematics.Velocity, sprite,
+            1.0f, opacity);
 
         if (playerCharacters.HasTagForEntity(entityId))
             AddNameLabel(entityId, entityKinematics, sprite, timeSinceTick);
@@ -310,7 +317,7 @@ public sealed class WorldEntityRetriever
         {
             var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)
                 .GetSpriteForTime(systemTime, Orientation.South);
-            grouper.AddSprite(EntityType.BlockFrontFace, facePosition, Vector3.Zero, sprite,
+            grouper.AddSprite(PerspectiveEntityType.BlockFrontFace, facePosition, Vector3.Zero, sprite,
                 firstLayer ? 1.0f : 0.0f, opacity);
             isOpaque = isOpaque || sprite.Opaque;
             firstLayer = false;
@@ -340,7 +347,7 @@ public sealed class WorldEntityRetriever
         {
             var sprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId].GetPhaseData(AnimationPhase.Default)
                 .GetSpriteForTime(systemTime, Orientation.South);
-            grouper.AddSprite(EntityType.BlockTopFace, facePosition, Vector3.Zero, sprite,
+            grouper.AddSprite(PerspectiveEntityType.BlockTopFace, facePosition, Vector3.Zero, sprite,
                 firstLayer ? 1.0f : 0.0f, opacity);
             isOpaque = isOpaque || sprite.Opaque;
             firstLayer = false;

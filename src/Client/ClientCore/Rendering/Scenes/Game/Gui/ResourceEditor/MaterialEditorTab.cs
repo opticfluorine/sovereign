@@ -16,7 +16,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
@@ -220,7 +220,7 @@ public class MaterialEditorTab
 
             ImGui.TableNextColumn();
             ImGui.SetNextItemWidth(fontSize * 10.0f);
-            ImGui.InputText("##materialName", ref editingName, MaxNameLen);
+            ImGui.InputText("##materialName", ref editingName, MaxNameLen + 1);
 
             ImGui.TableNextColumn();
             if (ImGui.Button("Add New Subtype"))
