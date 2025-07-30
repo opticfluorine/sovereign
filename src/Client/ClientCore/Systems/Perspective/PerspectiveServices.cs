@@ -150,7 +150,7 @@ internal class PerspectiveServices : IPerspectiveServices
         }
 
         var delta = entityType == PerspectiveEntityType.BlockTopFace
-            ? position.Z - gridPos.Z - 1.0f
+            ? gridPos.Z - blockPos.Z - 1.0f
             : gridPos.Y - position.Y;
         positionOnBlock = position with { Y = position.Y + delta, Z = position.Z - delta };
         return true;
