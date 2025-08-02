@@ -227,7 +227,9 @@ public class GuiExtensions
 
         ImGui.SameLine();
 
-        ImGui.BeginDisabled(scriptName == string.Empty);
+        var shouldDisable = string.IsNullOrEmpty(scriptName);
+        if (shouldDisable) functionName = "";
+        ImGui.BeginDisabled(shouldDisable);
         ImGui.Text("Function:");
         ImGui.SameLine();
         ImGui.SetNextItemWidth(fontSize * 16.0f);

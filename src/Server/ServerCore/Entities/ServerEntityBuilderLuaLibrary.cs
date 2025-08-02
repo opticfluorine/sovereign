@@ -64,7 +64,8 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
     /// <returns>Number of results pushed to the Lua stack.</returns>
     private int RemoveEntity(IntPtr luaState)
     {
-        var localLogger = scriptingServices.GetScriptLogger(luaState, logger);
+        var mainState = LuaUtil.GetMainThread(luaState);
+        var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
         try
         {
             if (lua_gettop(luaState) != 1)
@@ -91,10 +92,11 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
     /// <returns>Number of results pushed to the Lua stack.</returns>
     private int BuildEntity(IntPtr luaState)
     {
+        var mainState = LuaUtil.GetMainThread(luaState);
         IEntityBuilder? builder = null;
         try
         {
-            var localLogger = scriptingServices.GetScriptLogger(luaState, logger);
+            var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
 
             luaL_checkstack(luaState, 2, null);
 

@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Data;
+using Sovereign.EngineUtil.Collections;
 
 namespace Sovereign.ServerCore.Systems.TemplateEntity;
 
@@ -28,7 +29,10 @@ namespace Sovereign.ServerCore.Systems.TemplateEntity;
 public class TemplateEntityManager
 {
     private readonly IDataController dataController;
+    private readonly IDataServices dataServices;
     private readonly EntityDefinitionProcessor definitionProcessor;
+
+    private readonly ObjectPool<Dictionary<string, string>> dictPool = new(4);
     private readonly IEventSender eventSender;
     private readonly TemplateEntityInternalController internalController;
     private readonly ILogger<TemplateEntityManager> logger;
@@ -37,13 +41,14 @@ public class TemplateEntityManager
 
     public TemplateEntityManager(IEventSender eventSender,
         TemplateEntityInternalController internalController, EntityDefinitionProcessor definitionProcessor,
-        ILogger<TemplateEntityManager> logger, IDataController dataController)
+        ILogger<TemplateEntityManager> logger, IDataController dataController, IDataServices dataServices)
     {
         this.eventSender = eventSender;
         this.internalController = internalController;
         this.definitionProcessor = definitionProcessor;
         this.logger = logger;
         this.dataController = dataController;
+        this.dataServices = dataServices;
     }
 
     /// <summary>
@@ -92,6 +97,7 @@ public class TemplateEntityManager
             return;
         }
 
+        // Apply updates.
         definitionProcessor.ProcessDefinition(definition);
         dataController.ClearEntityKeyValuesSync(definition.EntityId);
         foreach (var kvp in keyValuePairs)
@@ -99,6 +105,18 @@ public class TemplateEntityManager
             if (kvp.Value == string.Empty) continue;
             dataController.SetEntityKeyValueSync(definition.EntityId, kvp.Key, kvp.Value);
         }
+
+        // Remove any existing keys that aren't present in the new set.
+        var existing = dictPool.TakeObject();
+        dataServices.GetEntityData(definition.EntityId, existing);
+        foreach (var key in existing.Keys)
+        {
+            if (keyValuePairs.ContainsKey(key)) continue;
+            dataController.RemoveEntityKeyValueSync(definition.EntityId, key);
+        }
+
+        existing.Clear();
+        dictPool.ReturnObject(existing);
 
         pendingSync.Add(definition.EntityId);
     }

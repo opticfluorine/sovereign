@@ -262,7 +262,7 @@ public class WorldSegmentSubscriptionManager
         foreach (var segment in newSubscriptionSet)
             if (!unchangedSet.Contains(segment))
             {
-                logger.LogDebug("Subscribe {Id:X} to {Index}.", playerEntityId, segment);
+                logger.LogTrace("Subscribe {Id:X} to {Index}.", playerEntityId, segment);
                 internalController.PushSubscribe(eventSender, playerEntityId, segment);
                 currentSubscriptionSet.Add(segment);
                 if (!playersByWorldSegments.ContainsKey(segment))

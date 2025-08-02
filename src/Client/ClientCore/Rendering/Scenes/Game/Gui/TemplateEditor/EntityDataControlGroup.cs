@@ -103,33 +103,53 @@ public class EntityDataControlGroup(
 
         if (!string.IsNullOrEmpty(inputEntityAddedScript))
             newEntityData[EntityConstants.AddCallbackScriptKey] = inputEntityAddedScript;
+        else
+            newEntityData.Remove(EntityConstants.AddCallbackScriptKey);
 
         if (!string.IsNullOrEmpty(inputEntityAddedFunction))
             newEntityData[EntityConstants.AddCallbackFunctionKey] = inputEntityAddedFunction;
+        else
+            newEntityData.Remove(EntityConstants.AddCallbackFunctionKey);
 
         if (!string.IsNullOrEmpty(inputEntityLoadedScript))
             newEntityData[EntityConstants.LoadCallbackScriptKey] = inputEntityLoadedScript;
+        else
+            newEntityData.Remove(EntityConstants.LoadCallbackScriptKey);
 
         if (!string.IsNullOrEmpty(inputEntityLoadedFunction))
             newEntityData[EntityConstants.LoadCallbackFunctionKey] = inputEntityLoadedFunction;
+        else
+            newEntityData.Remove(EntityConstants.LoadCallbackFunctionKey);
 
         if (!string.IsNullOrEmpty(inputEntityRemovedScript))
             newEntityData[EntityConstants.RemoveCallbackScriptKey] = inputEntityRemovedScript;
+        else
+            newEntityData.Remove(EntityConstants.RemoveCallbackScriptKey);
 
         if (!string.IsNullOrEmpty(inputEntityRemovedFunction))
             newEntityData[EntityConstants.RemoveCallbackFunctionKey] = inputEntityRemovedFunction;
+        else
+            newEntityData.Remove(EntityConstants.RemoveCallbackFunctionKey);
 
         if (!string.IsNullOrEmpty(inputEntityUnloadedScript))
             newEntityData[EntityConstants.UnloadCallbackScriptKey] = inputEntityUnloadedScript;
+        else
+            newEntityData.Remove(EntityConstants.UnloadCallbackScriptKey);
 
         if (!string.IsNullOrEmpty(inputEntityUnloadedFunction))
             newEntityData[EntityConstants.UnloadCallbackFunctionKey] = inputEntityUnloadedFunction;
+        else
+            newEntityData.Remove(EntityConstants.UnloadCallbackFunctionKey);
 
         if (!string.IsNullOrEmpty(inputInteractScript))
             newEntityData[EntityConstants.InteractScriptKey] = inputInteractScript;
+        else
+            newEntityData.Remove(EntityConstants.InteractScriptKey);
 
         if (!string.IsNullOrEmpty(inputInteractFunction))
             newEntityData[EntityConstants.InteractFunctionKey] = inputInteractFunction;
+        else
+            newEntityData.Remove(EntityConstants.InteractFunctionKey);
 
         return newEntityData;
     }
@@ -183,7 +203,7 @@ public class EntityDataControlGroup(
                     ImGui.Text("Interact:");
                     ImGui.TableNextColumn();
                     ImGui.TableNextColumn();
-                    guiExtensions.ScriptFunctionSelector("unl", ref inputInteractScript,
+                    guiExtensions.ScriptFunctionSelector("int", ref inputInteractScript,
                         ref inputInteractFunction, out changed);
                     if (changed) OnChangeScripts();
 

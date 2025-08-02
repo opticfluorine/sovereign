@@ -81,6 +81,12 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
         }
     }
 
+    /// <summary>
+    ///     Executes a timed callback.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="callbackRef">Callback reference index.</param>
+    /// <param name="argRef">Argument reference index.</param>
     public void RunTimedCallback(IntPtr luaState, int callbackRef, int argRef)
     {
         if (!scriptManager.TryGetHost(luaState, out var host))
@@ -105,7 +111,7 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
             }
             catch (Exception e)
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(LuaUtil.GetMainThread(luaState), logger)
                     .LogError(e, "Error executing timed callback.");
             }
         }));
@@ -120,9 +126,12 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
     {
         // arg 0 = event ID
         // arg 1 (top of stack) = callback function
+
+        var mainState = LuaUtil.GetMainThread(luaState);
+
         try
         {
-            if (!scriptManager.TryGetHost(luaState, out var luaHost))
+            if (!scriptManager.TryGetHost(mainState, out var luaHost))
             {
                 logger.LogError("Unrecognized Lua host.");
                 return 0;
@@ -154,7 +163,7 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
         }
         catch (Exception e)
         {
-            scriptingServices.GetScriptLogger(luaState, logger)
+            scriptingServices.GetScriptLogger(mainState, logger)
                 .LogError(e, "Error in AddEventCallback.");
         }
 
@@ -172,11 +181,13 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
         // arg 1 = callback function
         // arg 2 = argument to callback function (optional)
 
+        var mainState = LuaUtil.GetMainThread(luaState);
+
         try
         {
             if (lua_gettop(luaState) < 2 || lua_gettop(luaState) > 3)
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("AddTimedCallback requires 2 or 3 arguments.");
                 return 0;
             }
@@ -190,14 +201,14 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
 
             if (!lua_isnumber(luaState, -3))
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("AddTimedCallback first argument must be a number.");
                 return 0;
             }
 
             if (!lua_isfunction(luaState, -2))
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("AddTimedCallback second argument must be a function.");
                 return 0;
             }
@@ -205,7 +216,7 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
             var delay = lua_tonumber(luaState, -3);
             if (!double.IsNormal(delay) || delay < 0.0)
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("AddTimedCallback delay must be a positive number.");
                 return 0;
             }
@@ -217,7 +228,7 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
 
             var details = new ScriptingCallbackEventDetails
             {
-                LuaState = luaState,
+                LuaState = mainState,
                 CallbackReference = callbackRef,
                 ArgumentReference = argumentRef
             };
@@ -229,7 +240,7 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
         }
         catch (Exception e)
         {
-            scriptingServices.GetScriptLogger(luaState, logger)
+            scriptingServices.GetScriptLogger(mainState, logger)
                 .LogError(e, "Error in AddTimedCallback.");
         }
 
@@ -243,25 +254,27 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
     /// <returns>Always 0.</returns>
     private int AddEntityParameterHint(IntPtr luaState)
     {
+        var mainState = LuaUtil.GetMainThread(luaState);
+
         try
         {
             if (lua_gettop(luaState) != 2)
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("AddEntityParameterHint requires 2 arguments.");
                 return 0;
             }
 
             if (!lua_isstring(luaState, -2) || !lua_isstring(luaState, -1))
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("AddEntityParameterHint requires two string arguments.");
                 return 0;
             }
 
             if (!scriptManager.TryGetHost(luaState, out var luaHost))
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("Unrecognized Lua host.");
                 return 0;
             }
@@ -273,7 +286,7 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
         }
         catch (Exception e)
         {
-            scriptingServices.GetScriptLogger(luaState, logger)
+            scriptingServices.GetScriptLogger(mainState, logger)
                 .LogError(e, "Error in AddEntityParameterHint.");
         }
 

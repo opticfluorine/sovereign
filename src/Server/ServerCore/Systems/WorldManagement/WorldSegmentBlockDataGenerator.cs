@@ -65,7 +65,7 @@ public sealed class WorldSegmentBlockDataGenerator
         var positionedBlocks = blocks
             .Select(entityId => Tuple.Create(entityId, blockPositions[entityId])).ToList();
 
-        logger.LogDebug("Segment {Index} has {Count} blocks.", segmentIndex, blocks.Count);
+        logger.LogTrace("Segment {Index} has {Count} blocks.", segmentIndex, blocks.Count);
 
         // Retrieve material data, group into depth planes.
         var basePoint = resolver.GetRangeForWorldSegment(segmentIndex).Item1;

@@ -91,11 +91,23 @@ public sealed class EntityScriptCallbacks
                 logger.LogTrace("Calling {CallbackName} callback {ScriptName}::{FunctionName} for entity {EntityId:X}.",
                     callbackName, scriptName, functionName, entityId);
                 var currentEntityId = entityId;
-                Task.Run(() => host.CallNamedFunction(functionName, args =>
+                Task.Run(() =>
                 {
-                    args.AddInteger((long)currentEntityId);
-                    return 1;
-                }));
+                    try
+                    {
+                        host.CallNamedFunction(functionName, args =>
+                        {
+                            args.AddInteger((long)currentEntityId);
+                            return 1;
+                        });
+                    }
+                    catch (Exception e)
+                    {
+                        host.Logger.LogError(e,
+                            "Error calling {CallbackName} callback {FunctionName} for entity {EntityId:X}.",
+                            callbackName, functionName, currentEntityId);
+                    }
+                });
             }
             catch (Exception e)
             {

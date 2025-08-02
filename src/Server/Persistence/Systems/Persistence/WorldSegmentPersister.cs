@@ -70,7 +70,7 @@ public class WorldSegmentPersister
     /// </remarks>
     public void LoadWorldSegmentBlockData(IPersistenceProvider provider, GridPosition segmentIndex)
     {
-        logger.LogDebug("Get block data for {Index} from DB.", segmentIndex);
+        logger.LogTrace("Get block data for {Index} from DB.", segmentIndex);
         var blockDataBuffer = bufferPool.TakeObject();
         WorldSegmentBlockData? blockData;
         try

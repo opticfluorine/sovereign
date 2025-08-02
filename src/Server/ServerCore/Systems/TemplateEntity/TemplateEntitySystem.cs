@@ -141,6 +141,11 @@ public class TemplateEntitySystem : ISystem
         }
     }
 
+    /// <summary>
+    ///     Handles an UpdateKeyed event.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <param name="keyValuePairs">Complete entity key-value dzta.</param>
     private void OnUpdateKeyed(EntityDefinition definition, Dictionary<string, string> keyValuePairs)
     {
         manager.UpdateKeyed(definition, keyValuePairs);

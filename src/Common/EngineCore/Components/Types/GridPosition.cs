@@ -43,18 +43,21 @@ public struct GridPosition : IEquatable<GridPosition>
     ///     X position.
     /// </summary>
     [Key(0)]
+    [ScriptableField]
     public int X { get; set; }
 
     /// <summary>
     ///     Y position.
     /// </summary>
     [Key(1)]
+    [ScriptableField]
     public int Y { get; set; }
 
     /// <summary>
     ///     Z position.
     /// </summary>
     [Key(2)]
+    [ScriptableField]
     public int Z { get; set; }
 
     /// <summary>

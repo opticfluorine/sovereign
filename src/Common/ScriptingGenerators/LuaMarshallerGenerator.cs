@@ -263,9 +263,9 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     luaL_checkstack(luaState, 2, null);
                     lua_createtable(luaState, 0, 2);
                     Marshal(luaState, value.X);
-                    lua_setfield(luaState, -2, ""x"");
+                    lua_setfield(luaState, -2, ""X"");
                     Marshal(luaState, value.Y);
-                    lua_setfield(luaState, -2, ""y"");
+                    lua_setfield(luaState, -2, ""Y"");
                     return 1;
                 }}
 
@@ -274,9 +274,9 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     value = new Vector2();
                     if (!lua_istable(luaState, -1)) {throwTypeError};
                     luaL_checkstack(luaState, 1, null);
-                    if (lua_getfield(luaState, -1, ""x"") != LuaType.Number) {throwTypeError};
+                    if (lua_getfield(luaState, -1, ""X"") != LuaType.Number) {throwTypeError};
                     Unmarshal(luaState, out value.X);
-                    if (lua_getfield(luaState, -1, ""y"") != LuaType.Number) {throwTypeError};
+                    if (lua_getfield(luaState, -1, ""Y"") != LuaType.Number) {throwTypeError};
                     Unmarshal(luaState, out value.Y);
                     lua_pop(luaState, 1);
                 }}
@@ -286,11 +286,11 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     luaL_checkstack(luaState, 2, null);
                     lua_createtable(luaState, 0, 3);
                     Marshal(luaState, value.X);
-                    lua_setfield(luaState, -2, ""x"");
+                    lua_setfield(luaState, -2, ""X"");
                     Marshal(luaState, value.Y);
-                    lua_setfield(luaState, -2, ""y"");
+                    lua_setfield(luaState, -2, ""Y"");
                     Marshal(luaState, value.Z);
-                    lua_setfield(luaState, -2, ""z"");
+                    lua_setfield(luaState, -2, ""Z"");
                     return 1;
                 }}
 
@@ -299,11 +299,11 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     value = new Vector3();
                     if (!lua_istable(luaState, -1)) {throwTypeError};
                     luaL_checkstack(luaState, 1, null);
-                    if (lua_getfield(luaState, -1, ""x"") != LuaType.Number) {throwTypeError};
+                    if (lua_getfield(luaState, -1, ""X"") != LuaType.Number) {throwTypeError};
                     Unmarshal(luaState, out value.X);
-                    if (lua_getfield(luaState, -1, ""y"") != LuaType.Number) {throwTypeError};
+                    if (lua_getfield(luaState, -1, ""Y"") != LuaType.Number) {throwTypeError};
                     Unmarshal(luaState, out value.Y);
-                    if (lua_getfield(luaState, -1, ""z"") != LuaType.Number) {throwTypeError};
+                    if (lua_getfield(luaState, -1, ""Z"") != LuaType.Number) {throwTypeError};
                     Unmarshal(luaState, out value.Z);
                     lua_pop(luaState, 1);
                 }}

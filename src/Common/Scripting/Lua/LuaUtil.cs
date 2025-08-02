@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2025 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,24 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
-using Sovereign.EngineUtil.Attributes;
+using static Sovereign.Scripting.Lua.LuaBindings;
 
-namespace Sovereign.EngineCore.Components.Types;
+namespace Sovereign.Scripting.Lua;
 
-/// <summary>
-///     Combined structure for kinematic component data.
-/// </summary>
-[Scriptable]
-public struct Kinematics
+public static class LuaUtil
 {
     /// <summary>
-    ///     Position.
+    ///     Gets the LuaState of the main thread for the given state.
     /// </summary>
-    [ScriptableField] public Vector3 Position;
-
-    /// <summary>
-    ///     Velocity in tiles per second.
-    /// </summary>
-    [ScriptableField] public Vector3 Velocity;
+    /// <param name="luaState">Any LuaState belonging to the same instance as the main thread.</param>
+    /// <returns>LuaState for the main thread of the same instance.</returns>
+    public static IntPtr GetMainThread(IntPtr luaState)
+    {
+        luaL_checkstack(luaState, 1, null);
+        lua_geti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_MAINTHREAD);
+        var mainThread = lua_topointer(luaState, -1);
+        lua_pop(luaState, 1);
+        return mainThread;
+    }
 }

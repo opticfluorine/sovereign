@@ -65,9 +65,11 @@ public class LuaHost : IDisposable
         lua_copy(LuaState, quickLookupStackPosition, -1);
         lua_setfield(LuaState, LUA_REGISTRYINDEX, QuickLookupKey);
 
+#if !DEBUG
         // Remove unwanted default modules.
         lua_pushnil(LuaState);
         lua_setglobal(LuaState, "debug");
+#endif
     }
 
     /// <summary>

@@ -117,13 +117,15 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         // First argument: data.global
         // Second argument: key
 
+        var mainState = LuaUtil.GetMainThread(luaState);
+
         try
         {
             luaL_checkstack(luaState, 1, null);
 
             if (!lua_isstring(luaState, -1))
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("data.global[key] requires a string key.");
                 lua_pushnil(luaState);
                 return 1;
@@ -156,11 +158,13 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         // Second argument: key
         // Third argument: value
 
+        var mainState = LuaUtil.GetMainThread(luaState);
+
         try
         {
             if (!lua_isstring(luaState, -2))
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("data.global[key] requires a string key.");
                 return 0;
             }
@@ -169,7 +173,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
             if (IsKeyReadOnly(key))
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("data.global[key]: key {Key} is read-only.", key);
                 return 0;
             }
@@ -198,14 +202,14 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
                     break;
 
                 default:
-                    scriptingServices.GetScriptLogger(luaState, logger)
+                    scriptingServices.GetScriptLogger(mainState, logger)
                         .LogError("Unsupported value type for data.global[key].");
                     return 0;
             }
         }
         catch (Exception e)
         {
-            scriptingServices.GetScriptLogger(luaState, logger)
+            scriptingServices.GetScriptLogger(mainState, logger)
                 .LogError(e, "Error setting data.global[key].");
         }
 
@@ -235,10 +239,12 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     /// <returns>Number of values returned.</returns>
     private int GetEntityData(IntPtr luaState)
     {
+        var mainState = LuaUtil.GetMainThread(luaState);
+
         // First argument: entity ID
         if (lua_gettop(luaState) < 1 || !lua_isinteger(luaState, -1))
         {
-            scriptingServices.GetScriptLogger(luaState, logger)
+            scriptingServices.GetScriptLogger(mainState, logger)
                 .LogError("data.GetEntityData(entityId) requires entity ID as the first argument.");
             return 0;
         }
@@ -246,7 +252,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         var entityId = (ulong)lua_tointeger(luaState, -1);
         if (entityId >= EntityConstants.FirstBlockEntityId && entityId <= EntityConstants.LastBlockEntityId)
         {
-            scriptingServices.GetScriptLogger(luaState, logger)
+            scriptingServices.GetScriptLogger(mainState, logger)
                 .LogError("data.GetEntityData(entityId) cannot be used on block entities.");
             return 0;
         }
@@ -281,13 +287,15 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         // First argument: entity KV table
         // Second argument: key
 
+        var mainState = LuaUtil.GetMainThread(luaState);
+
         try
         {
             luaL_checkstack(luaState, 2, null);
 
             if (!lua_isstring(luaState, -1))
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("Entity KV access requires a string key.");
                 return 0;
             }
@@ -297,7 +305,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             lua_rawget(luaState, -3);
             if (!lua_isinteger(luaState, -1))
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogCritical(
                         "Possible Lua host corruption: Entity KV table has no bound entity ID. Script may have a security issue.");
                 return 0;
@@ -315,7 +323,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         }
         catch (Exception e)
         {
-            scriptingServices.GetScriptLogger(luaState, logger)
+            scriptingServices.GetScriptLogger(mainState, logger)
                 .LogError(e, "Error in entity KV getter.");
             return 0;
         }
@@ -334,6 +342,8 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         // Second argument: key
         // Third argument: value
 
+        var mainState = LuaUtil.GetMainThread(luaState);
+
         try
         {
             luaL_checkstack(luaState, 1, null);
@@ -342,7 +352,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
             if (IsKeyReadOnly(key))
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("Entity KV set: key {Key} is read-only.", key);
                 return 0;
             }
@@ -352,7 +362,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             lua_rawget(luaState, -4);
             if (!lua_isinteger(luaState, -1))
             {
-                scriptingServices.GetScriptLogger(luaState, logger)
+                scriptingServices.GetScriptLogger(mainState, logger)
                     .LogCritical(
                         "Possible Lua host corruption: Entity KV table has no bound entity ID. Script may have a security issue.");
                 lua_pushnil(luaState);
@@ -387,14 +397,14 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
                     break;
 
                 default:
-                    scriptingServices.GetScriptLogger(luaState, logger)
+                    scriptingServices.GetScriptLogger(mainState, logger)
                         .LogError("Unsupported value type for entity key-value pair.");
                     return 0;
             }
         }
         catch (Exception e)
         {
-            scriptingServices.GetScriptLogger(luaState, logger)
+            scriptingServices.GetScriptLogger(mainState, logger)
                 .LogError(e, "Error in entity KV setter.");
         }
 
