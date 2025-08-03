@@ -160,7 +160,49 @@ $scriptsAcl.AddAccessRule($serviceUserReadRule)
 
 Set-Acl -Path $scriptsDir -AclObject $scriptsAcl
 
-# Restrict permissions on the Logs directory.
+####
+## Restrict permissions on the Data\Packages directory
+####
+
+$packagesDir = Join-Path -Path $dataDir -ChildPath "Packages"
+if (-not (Test-Path -Path $packagesDir)) {
+    Write-Host "Packages directory does not exist: $packagesDir"
+    exit 1
+}
+
+$packagesAcl = Get-Acl -Path $packagesDir
+if ($RestrictPermissions) {
+    $packagesAcl.SetAccessRuleProtection($true, $false) | Out-Null # Disable inheritance
+    $packagesAcl.Access | ForEach-Object { $packagesAcl.RemoveAccessRule($_) } | Out-Null # Remove existing rules
+
+    # Administrators: full control
+    $adminPackagesRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+        "Administrators",
+        "FullControl",
+        "ContainerInherit,ObjectInherit",
+        "None",
+        "Allow"
+    )
+    $packagesAcl.AddAccessRule($adminPackagesRule)
+}
+
+# Service user: read-only
+# (Mitigate any vulnerabilities that would allow writing and executing malicious packages)
+$serviceUserReadRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+    $sid,
+    "ReadAndExecute",
+    "ContainerInherit,ObjectInherit",
+    "None",
+    "Allow"
+)
+$packagesAcl.AddAccessRule($serviceUserReadRule)
+
+Set-Acl -Path $packagesDir -AclObject $packagesAcl
+
+####
+## Restrict permissions on the Logs directory.
+####
+
 $logsDir = Join-Path -Path (Get-Location) -ChildPath "Logs"
 if (-not (Test-Path -Path $logsDir)) {
     Write-Host "Logs directory does not exist: $logsDir"
