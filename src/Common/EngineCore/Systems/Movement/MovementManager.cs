@@ -302,8 +302,9 @@ public class MovementManager
 
                 // If this is the server, make sure a move event is sent in the next update batch.
                 // This also schedules an event in the following batch to ensure that an event is
-                // also sent when motion stops.
-                movementNotifier.ScheduleEntity(entityId);
+                // also sent when motion stops. If we aren't already doing physics processing for this
+                // entity, then it just started moving and we should send the update immediately.
+                movementNotifier.ScheduleEntity(entityId, !physicsActiveFlags[i]);
             }
             else if (physicsActiveFlags[i])
             {
@@ -319,6 +320,9 @@ public class MovementManager
                 physicsProcessor.DoPhysicsForEntity(i, entityId, out var isActive, out var isSupportedBelow);
                 physicsActiveFlags[i] = isActive;
                 if (isSupportedBelow) isJumping[i] = false;
+
+                // If physics processing stopped, immediately send an update.
+                if (!isActive) movementNotifier.ScheduleEntity(entityId, true);
             }
 
         lastUpdateSystemTime = currentSystemTime;
