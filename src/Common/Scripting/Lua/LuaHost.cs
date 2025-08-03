@@ -46,6 +46,7 @@ public class LuaHost : IDisposable
 
         // Create basic Lua environment.
         LuaState = luaL_newstate();
+        lua_gc(LuaState, LuaGcWhat.Gen, GcDefaultMinorMul, GcDefaultMajorMul);
         luaL_openlibs(LuaState);
         InstallUtilLibrary();
 

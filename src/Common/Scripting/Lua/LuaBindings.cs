@@ -60,6 +60,21 @@ public static partial class LuaBindings
         Le = 2
     }
 
+    public enum LuaGcWhat
+    {
+        Stop = 0,
+        Restart = 1,
+        Collect = 2,
+        Count = 3,
+        CountB = 4,
+        Step = 5,
+        SetPause = 6,
+        SetStepMul = 7,
+        IsRunning = 9,
+        Gen = 10,
+        Inc = 11
+    }
+
     public enum LuaResult
     {
         Ok = 0,
@@ -89,6 +104,9 @@ public static partial class LuaBindings
     public const int LUA_REGISTRYINDEX = -1001000;
     public const int LUA_RIDX_MAINTHREAD = 1;
     public const int LUA_RIDX_GLOBALS = 2;
+
+    public const int GcDefaultMinorMul = 20;
+    public const int GcDefaultMajorMul = 100;
 
     private const string LibName = "lua5.4";
 
@@ -371,6 +389,26 @@ public static partial class LuaBindings
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
     public static partial LuaResult luaL_loadfilex(IntPtr luaState, string filename, string? mode);
+
+    //
+    // Garbage Collection
+    //
+
+    [LibraryImport(LibName)]
+    public static partial int lua_gc(IntPtr luaState, LuaGcWhat what);
+
+    [LibraryImport(LibName)]
+    public static partial int lua_gc(IntPtr luaState, LuaGcWhat what, int stepsize);
+
+    [LibraryImport(LibName)]
+    public static partial int lua_gc(IntPtr luaState, LuaGcWhat what, int minormul, int majormul);
+
+    [LibraryImport(LibName)]
+    public static partial int lua_gc(IntPtr luaState, LuaGcWhat what, int pause, int stepmul, int stepsize);
+
+    //
+    // Auxiliary Library Functions
+    //
 
     public static LuaResult luaL_loadfile(IntPtr luaState, string filename)
     {
