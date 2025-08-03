@@ -155,10 +155,15 @@ public sealed class ScriptingOptions
     public string ScriptDirectory { get; set; } = "Data/Scripts";
 
     /// <summary>
+    ///     Base directory where Lua packages are located.
+    /// </summary>
+    public string PackageDirectory { get; set; } = "Data/Packages";
+
+    /// <summary>
     ///     Maximum number of directories (including the base directory) to recurse into when
     ///     searching for scripts.
     /// </summary>
-    public uint MaxDirectoryDepth { get; set; } = 5;
+    public uint MaxScriptDirectoryDepth { get; set; } = 5;
 }
 
 /// <summary>

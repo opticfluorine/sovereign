@@ -114,7 +114,7 @@ public class ScriptLoader
                 MatchCasing = MatchCasing.CaseInsensitive,
                 IgnoreInaccessible = true,
                 RecurseSubdirectories = true,
-                MaxRecursionDepth = (int)config.MaxDirectoryDepth
+                MaxRecursionDepth = (int)config.MaxScriptDirectoryDepth
             });
     }
 
@@ -155,7 +155,7 @@ public class ScriptLoader
         var loggerCat = $".Script ({scriptName})"; // first dot is to help with Serilog context expressions
         var hostLogger = loggerFactory.CreateLogger(loggerCat);
 
-        var host = new LuaHost(hostLogger);
+        var host = new LuaHost(hostLogger, config.PackageDirectory);
         InstallCommonLibraries(host);
         InstallEventTable(host);
         InstallComponents(host);

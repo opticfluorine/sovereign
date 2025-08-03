@@ -40,7 +40,12 @@ public class LuaHost : IDisposable
     private string library = "";
     private uint nextQuickLookupIndex = 1;
 
-    public LuaHost(ILogger logger)
+    /// <summary>
+    ///     Creates a new Lua host.
+    /// </summary>
+    /// <param name="logger">Logger.</param>
+    /// <param name="packagePath">Package directory.</param>
+    public LuaHost(ILogger logger, string packagePath)
     {
         Logger = logger;
 
@@ -48,6 +53,7 @@ public class LuaHost : IDisposable
         LuaState = luaL_newstate();
         lua_gc(LuaState, LuaGcWhat.Gen, GcDefaultMinorMul, GcDefaultMajorMul);
         luaL_openlibs(LuaState);
+        ConfigurePackagePath(packagePath);
         InstallUtilLibrary();
 
         luaL_checkstack(LuaState, 4, null);
@@ -351,6 +357,30 @@ public class LuaHost : IDisposable
             if (!parameters.Contains(parameterName))
                 parameters.Add(parameterName);
         }
+    }
+
+    /// <summary>
+    ///     Configures package.path to support loading packages from the Data/Packages directory.
+    /// </summary>
+    /// <param name="packagePath">Package path.</param>
+    private void ConfigurePackagePath(string packagePath)
+    {
+        var fullPath = Path.GetFullPath(packagePath);
+        var filePackagePattern = Path.Join(fullPath, "?.lua");
+        var dirPackagePattern = Path.Join(fullPath, "?", "init.lua");
+
+        // Get default path.
+        luaL_checkstack(LuaState, 2, null);
+        lua_getglobal(LuaState, "package");
+        lua_getfield(LuaState, -1, "path");
+        var defaultPath = lua_tostring(LuaState, -1);
+        lua_pop(LuaState, 1);
+
+        // Update path.
+        var newPath = $"{filePackagePattern};{dirPackagePattern};{defaultPath}";
+        lua_pushstring(LuaState, newPath);
+        lua_setfield(LuaState, -2, "path");
+        lua_pop(LuaState, 1);
     }
 
     /// <summary>
