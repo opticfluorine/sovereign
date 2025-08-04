@@ -100,6 +100,7 @@ public sealed class PlayerInteractionHandler(
         foreach (var segmentIndex in searchSegments)
         foreach (var entityId in indexer.GetEntitiesInWorldSegment(segmentIndex))
         {
+            if (entityId == sourceEntityId) continue;
             if (!kinematics.TryGetValue(entityId, out var tgtPosVel) ||
                 !boundingBoxes.TryGetValue(entityId, out var targetBoundingBox)) continue;
             targetBoundingBox = targetBoundingBox.Translate(tgtPosVel.Position);

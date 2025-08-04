@@ -29,11 +29,13 @@ internal sealed class InteractionSystem : ISystem
     private readonly ILogger<InteractionSystem> logger;
 
     public InteractionSystem(EventCommunicator eventCommunicator, ILogger<InteractionSystem> logger,
-        InteractionHandler handler)
+        InteractionHandler handler, IEventLoop eventLoop)
     {
         this.logger = logger;
         this.handler = handler;
         EventCommunicator = eventCommunicator;
+
+        eventLoop.RegisterSystem(this);
     }
 
     public EventCommunicator EventCommunicator { get; }
