@@ -100,9 +100,13 @@ function Wander.RunAsync(behavior, entityId)
     local ok, wanderTime, wanderDelay, wanderSpeed = Wander.LoadParams(entityId)
     if not ok then return end
 
+    -- Start at a random time within the movement period.
+    -- This decorrelates the motion between entities that are loaded at the same time.
+    behavior:WaitAsync(entityId, math.random() * wanderDelay)
+
     while true do
         -- Wait until time for the next movement.
-        local nextDelay = wanderDelay + (math.random() - 0.5) * DelayRandomScale
+        local nextDelay = wanderDelay + (math.random() - 0.5) * DelayRandomScale * wanderDelay
         behavior:WaitAsync(entityId, nextDelay)
 
         -- Get current position and velocity.
