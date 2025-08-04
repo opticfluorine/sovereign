@@ -20,31 +20,27 @@ using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.ClientCore.Systems.Camera;
+using Sovereign.ClientCore.Systems.ClientState;
+using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 
 /// <summary>
 ///     Overlay GUI used for displaying information to the player.
 /// </summary>
-public class OverlayGui
+public class OverlayGui(
+    DisplayViewport viewport,
+    AtlasMap atlasMap,
+    CameraServices cameraServices,
+    IPerspectiveServices perspectiveServices,
+    ClientStateServices clientStateServices,
+    NameComponentCollection names,
+    EntityTypeComponentCollection entityTypes,
+    ILogger<OverlayGui> logger)
 {
-    private readonly AtlasMap atlasMap;
-    private readonly CameraServices cameraServices;
-    private readonly ILogger<OverlayGui> logger;
-    private readonly NameComponentCollection names;
-    private readonly DisplayViewport viewport;
-
-    public OverlayGui(DisplayViewport viewport, AtlasMap atlasMap, CameraServices cameraServices,
-        NameComponentCollection names, ILogger<OverlayGui> logger)
-    {
-        this.viewport = viewport;
-        this.atlasMap = atlasMap;
-        this.cameraServices = cameraServices;
-        this.names = names;
-        this.logger = logger;
-    }
-
     /// <summary>
     ///     Renders the overlay GUI.
     /// </summary>
@@ -54,7 +50,7 @@ public class OverlayGui
         var io = ImGui.GetIO();
         var screenSize = io.DisplaySize;
 
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0.0f));
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
         try
         {
             ImGui.SetNextWindowPos(new Vector2(0.0f), ImGuiCond.Always);
@@ -62,15 +58,59 @@ public class OverlayGui
             if (!ImGui.Begin("Overlay",
                     ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs)) return;
 
+            // Draw name labels.
             var tileScale = new Vector2(screenSize.X / viewport.WidthInTiles,
                 screenSize.Y / viewport.HeightInTiles);
             for (var i = 0; i < renderPlan.NameLabelCount; ++i) DrawNameLabel(renderPlan.NameLabels[i], tileScale);
+
+            DrawHoverTooltip();
 
             ImGui.End();
         }
         finally
         {
             ImGui.PopStyleVar();
+        }
+    }
+
+    /// <summary>
+    ///     Draws the tooltip for the hovered entity if appropriate.
+    /// </summary>
+    private void DrawHoverTooltip()
+    {
+        // Get hovered entity.
+        var hoverPos = cameraServices.GetMousePositionWorldCoordinates();
+        var zStep = viewport.HeightInTiles * 0.5f;
+        if (!perspectiveServices.TryGetHighestCoveringEntity(hoverPos, hoverPos.Z - zStep,
+                hoverPos.Z + zStep, out var entityId) || EntityUtil.IsBlockEntity(entityId)) return;
+        if (clientStateServices.TryGetSelectedPlayer(out var playerId) && entityId == playerId) return;
+        if (!entityTypes.TryGetValue(entityId, out var entityType)) return;
+
+        switch (entityType)
+        {
+            case EntityType.Npc:
+                DrawNpcTooltip(entityId);
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Draws the hover tooltip for an NPC.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    private void DrawNpcTooltip(ulong entityId)
+    {
+        if (!ImGui.BeginTooltip()) return;
+        ImGui.PopStyleVar();
+
+        try
+        {
+            ImGui.Text(names.TryGetValue(entityId, out var name) ? name : "[No Name]");
+        }
+        finally
+        {
+            ImGui.EndTooltip();
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
         }
     }
 
