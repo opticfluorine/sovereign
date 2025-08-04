@@ -41,7 +41,7 @@ end
 --- @param entityId integer # Entity ID.
 function EntityBehavior:OnLoad(entityId)
     if self._coroutines[entityId] ~= nil then
-        util.LogWarn(string.format("Behavior for entity %A already exists; replacing.", entityId))
+        util.LogWarn(string.format("Behavior for entity %X already exists; replacing.", entityId))
         coroutine.close(self._coroutines[entityId])
         self._coroutines[entityId] = nil
     end
@@ -50,7 +50,7 @@ function EntityBehavior:OnLoad(entityId)
     self._coroutines[entityId] = thread
     local ok, err = coroutine.resume(thread, self, entityId, table.unpack(self._startArgs))
     if not ok then
-        util.LogError(string.format("Failed to add behavior for %A: %s", entityId, err))
+        util.LogError(string.format("Failed to add behavior for %X: %s", entityId, err))
     end
 end
 
@@ -59,7 +59,7 @@ end
 function EntityBehavior:OnUnload(entityId)
     local thread = self._coroutines[entityId]
     if thread == nil then
-        util.LogError(string.format("Cannot unload behavior for entity %A without loading behavior first.", entityId))
+        util.LogError(string.format("Cannot unload behavior for entity %X without loading behavior first.", entityId))
         return
     end
 
@@ -73,13 +73,13 @@ end
 function EntityBehavior:Resume(entityId, ...)
     local thread = self._coroutines[entityId]
     if thread == nil then
-        util.LogError(string.format("Error resuming behavior for entity %A: behavior not loaded.", entityId))
+        util.LogError(string.format("Error resuming behavior for entity %X: behavior not loaded.", entityId))
         return
     end
 
     local ok, err = coroutine.resume(thread, ...)
     if not ok then
-        util.LogError(string.format("Error resuming behavior for entity %A: %s", entityId, err))
+        util.LogError(string.format("Error resuming behavior for entity %X: %s", entityId, err))
     end
 end
 
