@@ -110,94 +110,16 @@ if ($RestrictPermissions) {
     $dataAcl.AddAccessRule($adminRule)
 }
 
-# Service: full control
+# Service: read only
 $serviceUserRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
     $sid, 
-    "FullControl", 
+    "ReadAndExecute",
     "ContainerInherit,ObjectInherit", 
     "None", 
     "Allow")
 $dataAcl.AddAccessRule($serviceUserRule)
 
 Set-Acl -Path $dataDir -AclObject $dataAcl
-
-####
-## Restrict permissions on the Data\Scripts directory
-####
-
-$scriptsDir = Join-Path -Path $dataDir -ChildPath "Scripts"
-if (-not (Test-Path -Path $scriptsDir)) {
-    Write-Host "Scripts directory does not exist: $scriptsDir"
-    exit 1
-}
-
-$scriptsAcl = Get-Acl -Path $scriptsDir
-if ($RestrictPermissions) {
-    $scriptsAcl.SetAccessRuleProtection($true, $false) | Out-Null # Disable inheritance
-    $scriptsAcl.Access | ForEach-Object { $scriptsAcl.RemoveAccessRule($_) } | Out-Null # Remove existing rules
-
-    # Administrators: full control
-    $adminScriptsRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-        "Administrators",
-        "FullControl",
-        "ContainerInherit,ObjectInherit",
-        "None",
-        "Allow"
-    )
-    $scriptsAcl.AddAccessRule($adminScriptsRule)
-}
-
-# Service user: read-only
-# (Mitigate any vulnerabilities that would allow writing and executing malicious scripts)
-$serviceUserReadRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-    $sid,
-    "ReadAndExecute",
-    "ContainerInherit,ObjectInherit",
-    "None",
-    "Allow"
-)
-$scriptsAcl.AddAccessRule($serviceUserReadRule)
-
-Set-Acl -Path $scriptsDir -AclObject $scriptsAcl
-
-####
-## Restrict permissions on the Data\Packages directory
-####
-
-$packagesDir = Join-Path -Path $dataDir -ChildPath "Packages"
-if (-not (Test-Path -Path $packagesDir)) {
-    Write-Host "Packages directory does not exist: $packagesDir"
-    exit 1
-}
-
-$packagesAcl = Get-Acl -Path $packagesDir
-if ($RestrictPermissions) {
-    $packagesAcl.SetAccessRuleProtection($true, $false) | Out-Null # Disable inheritance
-    $packagesAcl.Access | ForEach-Object { $packagesAcl.RemoveAccessRule($_) } | Out-Null # Remove existing rules
-
-    # Administrators: full control
-    $adminPackagesRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-        "Administrators",
-        "FullControl",
-        "ContainerInherit,ObjectInherit",
-        "None",
-        "Allow"
-    )
-    $packagesAcl.AddAccessRule($adminPackagesRule)
-}
-
-# Service user: read-only
-# (Mitigate any vulnerabilities that would allow writing and executing malicious packages)
-$serviceUserReadRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-    $sid,
-    "ReadAndExecute",
-    "ContainerInherit,ObjectInherit",
-    "None",
-    "Allow"
-)
-$packagesAcl.AddAccessRule($serviceUserReadRule)
-
-Set-Acl -Path $packagesDir -AclObject $packagesAcl
 
 ####
 ## Restrict permissions on the Logs directory.
