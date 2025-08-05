@@ -398,6 +398,7 @@ public class LuaHost : IDisposable
         lua_pushinteger(LuaState, a);
         lua_pushinteger(LuaState, b);
         Validate(lua_pcall(LuaState, 2, 0, tracebackStackPosition));
+        lua_pop(LuaState, 1);
     }
 
     /// <summary>
