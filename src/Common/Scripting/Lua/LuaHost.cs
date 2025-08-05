@@ -17,6 +17,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineUtil.Numerics;
 using static Sovereign.Scripting.Lua.LuaBindings;
 
 namespace Sovereign.Scripting.Lua;
@@ -54,6 +55,7 @@ public class LuaHost : IDisposable
         lua_gc(LuaState, LuaGcWhat.Gen, GcDefaultMinorMul, GcDefaultMajorMul);
         luaL_openlibs(LuaState);
         ConfigurePackagePath(packagePath);
+        ConfigureRng();
         InstallUtilLibrary();
 
         luaL_checkstack(LuaState, 4, null);
@@ -381,6 +383,21 @@ public class LuaHost : IDisposable
         lua_pushstring(LuaState, newPath);
         lua_setfield(LuaState, -2, "path");
         lua_pop(LuaState, 1);
+    }
+
+    /// <summary>
+    ///     Configures Lua's fast PRNG (math.random) to have a unique state for this host.
+    /// </summary>
+    private void ConfigureRng()
+    {
+        // Use the CSPRNG to uniquely seed Lua's xoshiro256** fast PRNG for this host.
+        var (a, b) = Rng.NextInt64PairSecure();
+        luaL_checkstack(LuaState, 4, null);
+        lua_getglobal(LuaState, "math");
+        lua_getfield(LuaState, -1, "randomseed");
+        lua_pushinteger(LuaState, a);
+        lua_pushinteger(LuaState, b);
+        Validate(lua_pcall(LuaState, 2, 0, tracebackStackPosition));
     }
 
     /// <summary>
