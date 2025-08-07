@@ -42,7 +42,6 @@ public sealed class GuiFontAtlas : IDisposable
     public static readonly ImTextureID TextureId = 1;
 
     private readonly DisplayOptions displayOptions;
-
     private readonly MainDisplay mainDisplay;
     private readonly IResourcePathBuilder resourcePathBuilder;
 
@@ -68,6 +67,16 @@ public sealed class GuiFontAtlas : IDisposable
         this.mainDisplay = mainDisplay;
         this.displayOptions = displayOptions.Value;
     }
+
+    /// <summary>
+    ///     ImGui font for dialogue subject.
+    /// </summary>
+    public ImFontPtr DialogueSubjectFont { get; private set; }
+
+    /// <summary>
+    ///     ImGui font for dialogue text.
+    /// </summary>
+    public ImFontPtr DialogueFont { get; private set; }
 
     /// <summary>
     ///     Gets a pointer to the SDL surface containing the font atlas.
@@ -128,6 +137,7 @@ public sealed class GuiFontAtlas : IDisposable
         var scaleFactor = (float)mainDisplay.DisplayMode!.Height /
                           displayOptions.BaseScalingHeight;
         var fontSize = scaleFactor * displayOptions.BaseFontSize;
+        var dialogueFontSize = scaleFactor * displayOptions.DialogueFontSize;
 
         // Load font.
         var fontPath =
@@ -180,6 +190,12 @@ public sealed class GuiFontAtlas : IDisposable
         };
 
         io.Fonts.AddFontFromFileTTF(emojiFontPath, fontSize, emojiConfig, emojiRange);
+
+        // Load larger font for dialogue, etc.
+        var boldFontPath = resourcePathBuilder.BuildPathToResource(ResourceType.Fonts, displayOptions.BoldFont);
+        DialogueFont = io.Fonts.AddFontFromFileTTF(fontPath, dialogueFontSize, null, io.Fonts.GetGlyphRangesDefault());
+        DialogueSubjectFont =
+            io.Fonts.AddFontFromFileTTF(boldFontPath, dialogueFontSize, null, io.Fonts.GetGlyphRangesDefault());
 
         // Retrieve raw data from ImGui.
         io.Fonts.Build();

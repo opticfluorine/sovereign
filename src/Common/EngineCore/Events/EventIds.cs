@@ -448,7 +448,6 @@ public enum EventId
 
     #endregion Client_Network
 
-
     #region Client_State
 
     /// <summary>
@@ -492,6 +491,22 @@ public enum EventId
     Client_WorldEdit_SetSnapToGrid = 10503,
 
     #endregion
+
+    #region Client_Dialogue
+
+    /// <summary>
+    ///     Event sent to enqueue a dialogue for display.
+    /// </summary>
+    /// Associated details: DialogueEventDetails
+    Client_Dialogue_Enqueue = 10600,
+
+    /// <summary>
+    ///     Event sent to advance the current dialogue state.
+    /// </summary>
+    /// Associated details: None
+    Client_Dialogue_Advance = 10601,
+
+    #endregion Client_Dialogue
 
     #endregion Client
 

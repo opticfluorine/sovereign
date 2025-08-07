@@ -56,6 +56,7 @@ using Sovereign.ClientCore.Systems.ClientChat;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.ClientCore.Systems.ClientWorldEdit;
+using Sovereign.ClientCore.Systems.Dialogue;
 using Sovereign.ClientCore.Systems.EntityAnimation;
 using Sovereign.ClientCore.Systems.EntitySynchronization;
 using Sovereign.ClientCore.Systems.Input;
@@ -216,6 +217,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<GuiComponentEditors>();
         services.TryAddSingleton<OverlayGui>();
         services.TryAddSingleton<NetworkDebugGui>();
+        services.TryAddSingleton<DialogueGui>();
     }
 
     private static void AddResources(IServiceCollection services)
@@ -342,6 +344,10 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<BlockToolHandler>();
         services.TryAddSingleton<NpcToolHandler>();
         services.TryAddSingleton<ItemToolHandler>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, DialogueSystem>());
+        services.TryAddSingleton<DialogueQueue>();
+        services.TryAddSingleton<IDialogueServices, DialogueServices>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, EntityAnimationSystem>());
         services.TryAddSingleton<AnimationPhaseStateMachine>();

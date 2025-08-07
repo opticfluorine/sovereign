@@ -29,6 +29,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 public class GameGui
 {
     private readonly ChatGui chatGui;
+    private readonly DialogueGui dialogueGui;
     private readonly EntityDebugGui entityDebugGui;
     private readonly InGameMenuGui menuGui;
     private readonly OverlayGui overlayGui;
@@ -40,7 +41,7 @@ public class GameGui
 
     public GameGui(ClientStateServices stateServices, PlayerDebugGui playerDebugGui, EntityDebugGui entityDebugGui,
         InGameMenuGui menuGui, ChatGui chatGui, TemplateEditorGui templateEditorGui, PlayerRoleCheck roleCheck,
-        WorldEditorGui worldEditorGui, OverlayGui overlayGui)
+        WorldEditorGui worldEditorGui, OverlayGui overlayGui, DialogueGui dialogueGui)
     {
         this.stateServices = stateServices;
         this.playerDebugGui = playerDebugGui;
@@ -51,6 +52,7 @@ public class GameGui
         this.roleCheck = roleCheck;
         this.worldEditorGui = worldEditorGui;
         this.overlayGui = overlayGui;
+        this.dialogueGui = dialogueGui;
     }
 
     /// <summary>
@@ -66,6 +68,7 @@ public class GameGui
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowChat)) chatGui.Render();
 
         overlayGui.Render(renderPlan);
+        dialogueGui.Render();
 
         // Clear window focus when first entering the game so that controls aren't absorbed by the GUI.
         if (stateServices.CheckAndClearFlagValue(ClientStateFlag.NewLogin))

@@ -59,7 +59,8 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Server_WorldEdit_AddNpc, DeliveryMethod.ReliableUnordered },
         { EventId.Server_WorldEdit_RemoveNonBlock, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Time_Clock, DeliveryMethod.Unreliable },
-        { EventId.Core_Interaction_Interact, DeliveryMethod.Unreliable }
+        { EventId.Core_Interaction_Interact, DeliveryMethod.Unreliable },
+        { EventId.Client_Dialogue_Enqueue, DeliveryMethod.ReliableOrdered }
     };
 
     public DeliveryMethodOutboundPipelineStage(ILogger<DeliveryMethodOutboundPipelineStage> logger)

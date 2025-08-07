@@ -32,6 +32,7 @@ using Sovereign.ServerCore.Entities;
 using Sovereign.ServerCore.Logging;
 using Sovereign.ServerCore.Resources;
 using Sovereign.ServerCore.Systems.Data;
+using Sovereign.ServerCore.Systems.Dialogue;
 using Sovereign.ServerCore.Systems.Interaction;
 using Sovereign.ServerCore.Systems.Movement;
 using Sovereign.ServerCore.Systems.Persistence;
@@ -84,6 +85,7 @@ public static class ServerServiceCollectionExtensions
         AddComponents(services);
         AddServerImplementations(services);
         AddDataSystem(services);
+        AddDialogueSystem(services);
         AddInteractionSystem(services);
         AddPersistenceSystem(services);
         AddServerChatSystem(services);
@@ -115,6 +117,11 @@ public static class ServerServiceCollectionExtensions
     private static void AddDataSystem(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, DataLuaLibrary>());
+    }
+
+    private static void AddDialogueSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<DialogueScripting>();
     }
 
     private static void AddInteractionSystem(IServiceCollection services)

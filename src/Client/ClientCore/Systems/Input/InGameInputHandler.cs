@@ -98,6 +98,6 @@ public class InGameInputHandler : IInputHandler
     /// <param name="newState">New state of the key.</param>
     private void HandleEKeyEvent(bool oldState, bool newState)
     {
-        if (!oldState && newState) interactionHandler.Interact();
+        if (oldState && !newState) interactionHandler.Interact();
     }
 }

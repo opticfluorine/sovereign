@@ -53,6 +53,7 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         IntEventDetailsValidator intValidator,
         NpcAddEventDetailsValidator npcAddValidator,
         NpcRemoveEventDetailsValidator npcRemoveValidator,
+        DialogueEventDetailsValidator dialogueValidator,
         ILogger<ValidationInboundPipelineStage> logger)
     {
         this.templateValidator = templateValidator;
@@ -86,7 +87,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Server_WorldEdit_AddNpc, npcAddValidator },
             { EventId.Server_WorldEdit_RemoveNonBlock, npcRemoveValidator },
             { EventId.Core_Time_Clock, intValidator },
-            { EventId.Core_Interaction_Interact, new TypeCheckedEventDetailsValidator<InteractEventDetails>() }
+            { EventId.Core_Interaction_Interact, new TypeCheckedEventDetailsValidator<InteractEventDetails>() },
+            { EventId.Client_Dialogue_Enqueue, dialogueValidator }
         };
     }
 

@@ -72,6 +72,11 @@ public class DisplayOptions
     public string Font { get; set; } = "";
 
     /// <summary>
+    ///     Bold font.
+    /// </summary>
+    public string BoldFont { get; set; } = "";
+
+    /// <summary>
     ///     Icon font.
     /// </summary>
     public string IconFont { get; set; } = "";
@@ -85,6 +90,11 @@ public class DisplayOptions
     ///     Base font size.
     /// </summary>
     public float BaseFontSize { get; set; }
+
+    /// <summary>
+    ///     Base dialogue font size.
+    /// </summary>
+    public float DialogueFontSize { get; set; }
 
     /// <summary>
     ///     Base height for determining the UI scaling factor.

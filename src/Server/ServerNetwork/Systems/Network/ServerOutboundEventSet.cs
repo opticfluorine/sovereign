@@ -42,6 +42,7 @@ public class ServerOutboundEventSet : IOutboundEventSet
         EventId.Core_Chat_Generic,
         EventId.Core_Block_ModifyNotice,
         EventId.Core_Block_RemoveNotice,
-        EventId.Core_Time_Clock
+        EventId.Core_Time_Clock,
+        EventId.Client_Dialogue_Enqueue
     };
 }

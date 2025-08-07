@@ -116,6 +116,12 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             return new Maybe<GridPosition>(details.FromWorldSegment);
         });
 
+        var dialogueMapepr = singleConnMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not DialogueEventDetails details) return new Maybe<int>();
+            return accountServices.GetConnectionIdForPlayer(details.TargetEntityId);
+        });
+
         // Configure specific connection mappers.
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
@@ -133,6 +139,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Core_Block_ModifyNotice] = blockAddMapper;
         specificMappers[EventId.Core_Block_RemoveNotice] = blockPosMapper;
         specificMappers[EventId.Core_Time_Clock] = globalMapper;
+        specificMappers[EventId.Client_Dialogue_Enqueue] = dialogueMapepr;
     }
 
     public void Process(OutboundEventInfo evInfo)

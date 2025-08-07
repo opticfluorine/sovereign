@@ -212,6 +212,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
             using System;
             using Microsoft.Extensions.Logging;
             using Sovereign.Scripting.Lua;
+            using static Sovereign.Scripting.Lua.LuaBindings;
 
             namespace {libraryModel.LibraryNamespace};
 
@@ -248,7 +249,9 @@ public class LuaLibraryGenerator : IIncrementalGenerator
                 public int {function.MethodName}_Lua(IntPtr luaState)
                 {{
                     int returnCount = 0;
-                    try {{");
+                    try {{
+                        if (lua_gettop(luaState) != {function.ParameterModels.List.Count})
+                            throw new LuaException(""{libraryModel.LibraryName}.{function.MethodName} requires {function.ParameterModels.List.Count} arguments."");");
 
             for (var i = function.ParameterModels.List.Count - 1; i >= 0; --i)
             {

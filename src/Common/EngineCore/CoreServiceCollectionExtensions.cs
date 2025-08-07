@@ -32,6 +32,7 @@ using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Data;
+using Sovereign.EngineCore.Systems.Dialogue;
 using Sovereign.EngineCore.Systems.Interaction;
 using Sovereign.EngineCore.Systems.Movement;
 using Sovereign.EngineCore.Systems.Performance;
@@ -196,6 +197,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<IntEventDetailsValidator>();
         services.TryAddSingleton<NpcAddEventDetailsValidator>();
         services.TryAddSingleton<NpcRemoveEventDetailsValidator>();
+        services.TryAddSingleton<DialogueEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)
@@ -225,6 +227,7 @@ public static class CoreServiceCollectionExtensions
 
         AddBlockSystem(services);
         AddDataSystem(services);
+        AddDialogueSystem(services);
         AddInteractionSystem(services);
         AddMovementSystem(services);
         AddPerformanceSystem(services);
@@ -252,6 +255,11 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<GlobalKeyValueStore>();
         services.TryAddSingleton<EntityKeyValueStore>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, DataSystem>());
+    }
+
+    private static void AddDialogueSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<IDialogueController, DialogueController>();
     }
 
     private static void AddInteractionSystem(IServiceCollection services)
