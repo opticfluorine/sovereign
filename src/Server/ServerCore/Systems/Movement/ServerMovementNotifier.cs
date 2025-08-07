@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Components;
@@ -29,12 +30,12 @@ public class ServerMovementNotifier : IMovementNotifier
 {
     private readonly MovementInternalController controller;
     private readonly KinematicsComponentCollection kinematics;
-    private readonly Dictionary<ulong, ulong> scheduledCountByEntityId = new();
+    private readonly MovementOptions movementOptions;
+    private readonly ConcurrentDictionary<ulong, ulong> scheduledCountByEntityId = new();
     private readonly List<ulong> toRemove = new();
     private ulong sendCount;
-    private readonly MovementOptions movementOptions;
 
-    public ServerMovementNotifier(KinematicsComponentCollection kinematics, MovementInternalController controller, 
+    public ServerMovementNotifier(KinematicsComponentCollection kinematics, MovementInternalController controller,
         IOptions<MovementOptions> movementOptions)
     {
         this.kinematics = kinematics;
@@ -72,7 +73,7 @@ public class ServerMovementNotifier : IMovementNotifier
 
         foreach (var entityId in toRemove)
         {
-            scheduledCountByEntityId.Remove(entityId);
+            scheduledCountByEntityId.TryRemove(entityId, out _);
         }
 
         sendCount++;
