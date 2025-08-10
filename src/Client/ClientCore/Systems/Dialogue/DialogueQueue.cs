@@ -17,6 +17,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Options;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.EngineCore.Timing;
 
 namespace Sovereign.ClientCore.Systems.Dialogue;
@@ -24,10 +26,9 @@ namespace Sovereign.ClientCore.Systems.Dialogue;
 /// <summary>
 ///     Manages the client-side dialogue queue and state.
 /// </summary>
-internal sealed class DialogueQueue(ISystemTimer systemTimer)
+internal sealed class DialogueQueue(ISystemTimer systemTimer, IOptions<DisplayOptions> options)
 {
-    private const ulong MicrosecondsPerCharacter = 40000; // 25 chars per second
-
+    private readonly ulong MessageRate = 1000000UL / options.Value.TextSpeedCharsPerSecond;
     private readonly ConcurrentQueue<DialogueItem> queue = new();
     private ulong lastItemStartTime;
 
@@ -50,7 +51,7 @@ internal sealed class DialogueQueue(ISystemTimer systemTimer)
         subject = item.Subject;
         message = item.Message;
         var timeElapsed = systemTimer.GetTime() - lastItemStartTime;
-        charsShown = Math.Min((int)(timeElapsed / MicrosecondsPerCharacter), message.Length);
+        charsShown = Math.Min((int)(timeElapsed / MessageRate), message.Length);
         return true;
     }
 

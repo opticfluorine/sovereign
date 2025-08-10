@@ -17,8 +17,6 @@
 using System.Numerics;
 using System.Text.RegularExpressions;
 using Hexa.NET.ImGui;
-using Microsoft.Extensions.Options;
-using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Systems.Dialogue;
 using Sovereign.EngineCore.Events;
@@ -32,11 +30,15 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 public class DialogueGui(
     IDialogueServices dialogueServices,
     GuiFontAtlas fontAtlas,
-    IOptions<DisplayOptions> options,
     IEventSender eventSender,
     IDialogueController dialogueController)
 {
     private const string DownArrow = "\ue02e";
+    private const float RelX = 0.5f;
+    private const float RelY = 0.75f;
+    private const float BaseW = 32.0f;
+    private const float BaseH = 14.0f;
+
     private string cachedMessage = string.Empty;
     private int charsCached;
     private bool wasOpenLastFrame;
@@ -49,18 +51,13 @@ public class DialogueGui(
         if (!dialogueServices.TryGetDialogue(out var subject, out var message, out var charsShown)) return;
         if (charsShown != charsCached) UpdateMessageCache(message, charsShown);
 
-        // promote these to constants after tuning
-        var relX = 0.5f;
-        var relY = 0.75f;
-        var baseW = 38.0f;
-        var baseH = 14.0f;
-
         var io = ImGui.GetIO();
-        var pos = new Vector2(relX, relY) * io.DisplaySize;
-        var size = new Vector2(baseW, baseH) * options.Value.DialogueFontSize;
+        var fontSize = ImGui.GetFontSize();
+        var pos = new Vector2(RelX, RelY) * io.DisplaySize;
+        var size = new Vector2(BaseW, BaseH) * fontSize;
 
         ImGui.SetNextWindowSize(size);
-        ImGui.SetNextWindowPos(pos, ImGuiCond.Always, new Vector2(0.5f));
+        ImGui.SetNextWindowPos(pos, ImGuiCond.Always, new Vector2(RelX));
         if (!ImGui.Begin("Dialogue",
                 ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse |
                 ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoResize))
@@ -84,8 +81,8 @@ public class DialogueGui(
             ImGui.PopFont();
 
             // Down arrow symbol at bottom of window.
-            var arrowOffset = 0.5f * ImGui.CalcTextSize(DownArrow);
-            ImGui.SetCursorPos(new Vector2(0.5f * size.X, size.Y - options.Value.BaseFontSize) - arrowOffset);
+            var arrowOffset = RelX * ImGui.CalcTextSize(DownArrow);
+            ImGui.SetCursorPos(new Vector2(RelX * size.X, size.Y - fontSize) - arrowOffset);
             ImGui.Text(DownArrow);
 
             ImGui.SetNextFrameWantCaptureKeyboard(true);

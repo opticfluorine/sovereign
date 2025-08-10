@@ -100,6 +100,11 @@ public class DisplayOptions
     ///     Base height for determining the UI scaling factor.
     /// </summary>
     public int BaseScalingHeight { get; set; }
+
+    /// <summary>
+    ///     Dialogue text speed in chars per second.
+    /// </summary>
+    public ulong TextSpeedCharsPerSecond { get; set; }
 }
 
 /// <summary>
