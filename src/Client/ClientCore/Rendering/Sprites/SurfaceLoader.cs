@@ -15,8 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Microsoft.Extensions.Logging;
-using SDL2;
+using SDL3;
 using Sovereign.ClientCore.Rendering.Display;
 
 namespace Sovereign.ClientCore.Rendering.Sprites;
@@ -27,17 +26,14 @@ namespace Sovereign.ClientCore.Rendering.Sprites;
 /// </summary>
 public class SurfaceLoader
 {
-    private readonly ILogger<SurfaceLoader> logger;
-
     /// <summary>
     ///     Main display.
     /// </summary>
     private readonly MainDisplay mainDisplay;
 
-    public SurfaceLoader(MainDisplay mainDisplay, ILogger<SurfaceLoader> logger)
+    public SurfaceLoader(MainDisplay mainDisplay)
     {
         this.mainDisplay = mainDisplay;
-        this.logger = logger;
     }
 
     /// <summary>
@@ -63,8 +59,8 @@ public class SurfaceLoader
     /// <returns></returns>
     private Surface LoadSurfaceFromFile(string filename)
     {
-        var surface = new Surface(SDL_image.IMG_Load(filename));
-        if (!surface.IsValid) throw new SurfaceException(SDL.SDL_GetError());
+        var surface = new Surface(Image.Load(filename));
+        if (!surface.IsValid) throw new SurfaceException(SDL.GetError());
         return surface;
     }
 
@@ -79,7 +75,7 @@ public class SurfaceLoader
             throw new SurfaceException("Tried to create surface without display format.");
         var targetFormat = mainDisplay.DisplayMode.DisplayFormat;
         var converted = new Surface(original, targetFormat);
-        if (!converted.IsValid) throw new SurfaceException(SDL.SDL_GetError());
+        if (!converted.IsValid) throw new SurfaceException(SDL.GetError());
         return converted;
     }
 }

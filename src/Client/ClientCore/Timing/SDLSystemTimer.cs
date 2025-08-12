@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using SDL2;
+using SDL3;
 using Sovereign.EngineCore.Timing;
 
 namespace Sovereign.ClientCore.Timing;
@@ -23,7 +23,7 @@ namespace Sovereign.ClientCore.Timing;
 /// <summary>
 ///     SFML-backed implementation of ISystemTimer.
 /// </summary>
-public class SDLSystemTimer : ISystemTimer
+public class SdlSystemTimer : ISystemTimer
 {
     /// <summary>
     ///     Initial value of the counter.
@@ -35,10 +35,10 @@ public class SDLSystemTimer : ISystemTimer
     /// </summary>
     private readonly ulong performanceFrequency;
 
-    public SDLSystemTimer()
+    public SdlSystemTimer()
     {
-        performanceFrequency = SDL.SDL_GetPerformanceFrequency();
-        baseCount = SDL.SDL_GetPerformanceCounter();
+        performanceFrequency = SDL.GetPerformanceFrequency();
+        baseCount = SDL.GetPerformanceCounter();
     }
 
     /// <summary>
@@ -47,7 +47,6 @@ public class SDLSystemTimer : ISystemTimer
     /// <returns>Current system time in us.</returns>
     public ulong GetTime()
     {
-        return 1000000 * (SDL.SDL_GetPerformanceCounter() - baseCount)
-               / performanceFrequency;
+        return 1000000 * (SDL.GetPerformanceCounter() - baseCount) / performanceFrequency;
     }
 }

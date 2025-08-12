@@ -81,28 +81,11 @@ public class DisplayModeSelector
             select mode;
         if (preferredModes.Count() > 0 &&
             Math.Abs((double)desiredWidth / desiredHeight - AspectRatio) < AspectRatioTolerance)
-        {
             /* Preferred mode found and has the correct aspect ratio, use the first matching mode. */
             selectedMode = preferredModes.First();
-        }
         else
-        {
-            /* Preferred mode not found, use the highest resolution mode that matches the aspect ratio. */
-            var resSortedModes = from mode in availableModes
-                where Math.Abs((double)mode.Width / mode.Height - AspectRatio) < AspectRatioTolerance
-                orderby mode.Width * mode.Height descending
-                select mode;
-            try
-            {
-                selectedMode = resSortedModes.First();
-                logger.LogWarning("Requested display size {ReqW}x{ReqH} not supported, falling back to {W}x{H}.",
-                    desiredWidth, desiredHeight, selectedMode.Width, selectedMode.Height);
-            }
-            catch
-            {
-                throw new VideoAdapterException("No display modes found for selected video adapter.");
-            }
-        }
+            // No matching mode found; just try the user-requested mode and hope for the best.
+            selectedMode = new SDLDisplayMode(desiredWidth, desiredHeight, DisplayFormat.B8G8R8A8_UNorm);
 
         /* Log the decision and return. */
         logger.LogInformation(CreateLogMessageForMode(selectedMode));

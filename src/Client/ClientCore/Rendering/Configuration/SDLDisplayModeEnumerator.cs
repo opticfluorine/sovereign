@@ -17,7 +17,7 @@
 
 using System;
 using System.Collections.Generic;
-using SDL2;
+using SDL3;
 
 namespace Sovereign.ClientCore.Rendering.Configuration;
 
@@ -29,22 +29,23 @@ public class SDLDisplayModeEnumerator : IDisplayModeEnumerator
     public IEnumerable<IDisplayMode> EnumerateDisplayModes(IVideoAdapter adapter)
     {
         // Query display modes from all displays.
-        var displayCount = SDL.SDL_GetNumVideoDisplays();
+        var displays = SDL.GetDisplays(out var displayCount) ?? throw new Exception("No displays found.");
         var modes = new List<SDLDisplayMode>();
-        for (var i = 0; i < displayCount; ++i)
+        for (var i = 0U; i < displayCount; ++i)
         {
-            var modeCount = SDL.SDL_GetNumDisplayModes(i);
+            var sdlModes = SDL.GetFullscreenDisplayModes(displays[i], out var modeCount);
+            if (modeCount == 0) continue;
+            if (sdlModes == null) throw new Exception("Null modes.");
             for (var j = 0; j < modeCount; ++j)
             {
-                SDL.SDL_GetDisplayMode(i, j, out var mode);
-
                 // Reject mode if we don't like the format.
-                if (mode.format != SDL.SDL_PIXELFORMAT_RGB888) continue;
+                var mode = sdlModes[j];
+                if (mode.Format != SDL.PixelFormat.XRGB8888) continue;
 
                 // Otherwise add it to the list.
                 modes.Add(new SDLDisplayMode(
-                    mode.w,
-                    mode.h,
+                    mode.W,
+                    mode.H,
                     DisplayFormat.B8G8R8A8_UNorm
                 ));
             }

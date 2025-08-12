@@ -18,7 +18,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using SDL2;
+using SDL3;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
@@ -108,18 +108,21 @@ public class VeldridDevice : IDisposable
     /// <returns>VkSurfaceSource for the main display.</returns>
     private VkSurfaceSource CreateVkSurfaceSource()
     {
-        var wmInfo = mainDisplay.WMinfo;
-        switch (wmInfo.subsystem)
+        var props = SDL.GetWindowProperties(mainDisplay.WindowHandle);
+        switch (SDL.GetPlatform())
         {
-            case SDL.SDL_SYSWM_TYPE.SDL_SYSWM_WINDOWS:
-                return VkSurfaceSource.CreateWin32(wmInfo.info.win.hinstance,
-                    wmInfo.info.win.window);
+            case "Windows":
+                var hinstance = SDL.GetPointerProperty(props, SDL.Props.WindowWin32InstancePointer, IntPtr.Zero);
+                var hwnd = SDL.GetPointerProperty(props, SDL.Props.WindowWin32HWNDPointer, IntPtr.Zero);
+                return VkSurfaceSource.CreateWin32(hinstance, hwnd);
 
-            case SDL.SDL_SYSWM_TYPE.SDL_SYSWM_X11:
+            case "Linux":
                 unsafe
                 {
-                    var display = (Display*)wmInfo.info.x11.display;
-                    var window = new Window { Value = wmInfo.info.x11.window };
+                    var display =
+                        (Display*)SDL.GetPointerProperty(props, SDL.Props.WindowX11DisplayPointer, IntPtr.Zero);
+                    var window = new Window
+                        { Value = (IntPtr)SDL.GetNumberProperty(props, SDL.Props.WindowX11WindowNumber, 0L) };
                     return VkSurfaceSource.CreateXlib(display, window);
                 }
 

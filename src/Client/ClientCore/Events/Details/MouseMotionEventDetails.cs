@@ -26,10 +26,10 @@ public class MouseMotionEventDetails : IEventDetails
     /// <summary>
     ///     Mouse X coordinate relative to window.
     /// </summary>
-    public int X;
+    public float X;
 
     /// <summary>
     ///     Mouse Y coordinate relative to window.
     /// </summary>
-    public int Y;
+    public float Y;
 }

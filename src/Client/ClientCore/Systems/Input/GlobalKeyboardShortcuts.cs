@@ -16,7 +16,7 @@
 
 using System;
 using System.Collections.Generic;
-using SDL2;
+using SDL3;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 
@@ -32,7 +32,7 @@ public class GlobalKeyboardShortcuts
     /// <summary>
     ///     Map from keycodes to shortcut actions.
     /// </summary>
-    private readonly Dictionary<SDL.SDL_Keycode, Action> shortcutTable = new();
+    private readonly Dictionary<SDL.Keycode, Action> shortcutTable = new();
 
     private readonly ClientStateController stateController;
     private readonly ClientStateServices stateServices;
@@ -45,20 +45,20 @@ public class GlobalKeyboardShortcuts
         this.stateController = stateController;
 
         // For now the shortcuts are hardcoded.
-        shortcutTable[SDL.SDL_Keycode.SDLK_F7] = () => Toggle(ClientStateFlag.ShowNetworkDebug);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F8] = () => Toggle(ClientStateFlag.ShowImGuiDebugLog);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F9] = () => Toggle(ClientStateFlag.ShowImGuiDemo);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F10] = () => Toggle(ClientStateFlag.ShowImGuiIdStackTool);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F11] = () => Toggle(ClientStateFlag.ShowImGuiMetrics);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F12] = () => Toggle(ClientStateFlag.DebugFrame);
-        shortcutTable[SDL.SDL_Keycode.SDLK_BACKQUOTE] = () => Toggle(ClientStateFlag.ShowResourceEditor);
+        shortcutTable[SDL.Keycode.F7] = () => Toggle(ClientStateFlag.ShowNetworkDebug);
+        shortcutTable[SDL.Keycode.F8] = () => Toggle(ClientStateFlag.ShowImGuiDebugLog);
+        shortcutTable[SDL.Keycode.F9] = () => Toggle(ClientStateFlag.ShowImGuiDemo);
+        shortcutTable[SDL.Keycode.F10] = () => Toggle(ClientStateFlag.ShowImGuiIdStackTool);
+        shortcutTable[SDL.Keycode.F11] = () => Toggle(ClientStateFlag.ShowImGuiMetrics);
+        shortcutTable[SDL.Keycode.F12] = () => Toggle(ClientStateFlag.DebugFrame);
+        shortcutTable[SDL.Keycode.Grave] = () => Toggle(ClientStateFlag.ShowResourceEditor);
     }
 
     /// <summary>
     ///     Processes shortcuts when a key is pressed.
     /// </summary>
     /// <param name="key">Released key.</param>
-    public void OnKeyDown(SDL.SDL_Keycode key)
+    public void OnKeyDown(SDL.Keycode key)
     {
         if (shortcutTable.TryGetValue(key, out var action))
             action.Invoke();

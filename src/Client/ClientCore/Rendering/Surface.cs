@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using SDL2;
+using SDL3;
 using Sovereign.ClientCore.Rendering.Configuration;
 
 namespace Sovereign.ClientCore.Rendering;
@@ -33,21 +33,20 @@ public class Surface : IDisposable
     /// <summary>
     ///     Map from DisplayFormat to SDL pixel formats.
     /// </summary>
-    private static readonly IDictionary<DisplayFormat, uint> formatMap
-        = new Dictionary<DisplayFormat, uint>
-        {
-            { DisplayFormat.R8G8B8A8_UNorm, SDL.SDL_PIXELFORMAT_ABGR8888 },
-            { DisplayFormat.B8G8R8A8_UNorm, SDL.SDL_PIXELFORMAT_ARGB8888 }
-        };
+    private static readonly Dictionary<DisplayFormat, SDL.PixelFormat> FormatMap = new()
+    {
+        { DisplayFormat.R8G8B8A8_UNorm, SDL.PixelFormat.ABGR8888 },
+        { DisplayFormat.B8G8R8A8_UNorm, SDL.PixelFormat.ARGB8888 }
+    };
 
     /// <summary>
     ///     Inverse map of formatMap.
     /// </summary>
-    private static readonly IDictionary<uint, DisplayFormat> invFormatMap
-        = new Dictionary<uint, DisplayFormat>
+    private static readonly Dictionary<SDL.PixelFormat, DisplayFormat> InvFormatMap
+        = new()
         {
-            { SDL.SDL_PIXELFORMAT_ABGR8888, DisplayFormat.R8G8B8A8_UNorm },
-            { SDL.SDL_PIXELFORMAT_ARGB8888, DisplayFormat.B8G8R8A8_UNorm }
+            { SDL.PixelFormat.ABGR8888, DisplayFormat.R8G8B8A8_UNorm },
+            { SDL.PixelFormat.ARGB8888, DisplayFormat.B8G8R8A8_UNorm }
         };
 
     /// <summary>
@@ -74,10 +73,10 @@ public class Surface : IDisposable
     /// <param name="original">Original surface.</param>
     /// <param name="newFormat">New pixel format.</param>
     public Surface(Surface original, DisplayFormat newFormat)
-        : this(SDL.SDL_ConvertSurfaceFormat(original.SurfacePointer, formatMap[newFormat], 0))
+        : this(SDL.ConvertSurface(original.SurfacePointer, FormatMap[newFormat]))
     {
         /* Check that surface creation was successful. */
-        if (!IsValid) throw new SurfaceException(SDL.SDL_GetError());
+        if (!IsValid) throw new SurfaceException(SDL.GetError());
     }
 
     /// <summary>
@@ -124,7 +123,7 @@ public class Surface : IDisposable
     {
         if (IsValid)
         {
-            SDL.SDL_FreeSurface(SurfacePointer);
+            SDL.Free(SurfacePointer);
             SurfacePointer = IntPtr.Zero;
         }
 
@@ -143,15 +142,8 @@ public class Surface : IDisposable
     /// </exception>
     public static Surface CreateSurface(int width, int height, DisplayFormat format)
     {
-        /* Look up the format. */
-        if (SDL.SDL_PixelFormatEnumToMasks(formatMap[format], out var bpp, out var rmask, out var gmask,
-                out var bmask, out var amask) == SDL.SDL_bool.SDL_FALSE)
-            throw new SurfaceException(SDL.SDL_GetError());
-
-        /* Create the surface. */
-        var surface = new Surface(SDL.SDL_CreateRGBSurface(0, width, height, bpp,
-            rmask, gmask, bmask, amask));
-        if (!surface.IsValid) throw new SurfaceException(SDL.SDL_GetError());
+        var surface = new Surface(SDL.CreateSurface(width, height, FormatMap[format]));
+        if (!surface.IsValid) throw new SurfaceException(SDL.GetError());
         return surface;
     }
 
@@ -165,17 +157,15 @@ public class Surface : IDisposable
     /// <returns>New surface containing a copy of the pixel data in the source format.</returns>
     public static Surface CreateSurfaceFrom(IntPtr pixelData, int width, int height, DisplayFormat format)
     {
-        /* Look up the format. */
-        if (SDL.SDL_PixelFormatEnumToMasks(formatMap[format], out var bpp, out var rmask, out var gmask,
-                out var bmask, out var amask) == SDL.SDL_bool.SDL_FALSE)
-            throw new SurfaceException(SDL.SDL_GetError());
+        var bpp = 0;
+        uint rmask = 0, gmask = 0, bmask = 0, amask = 0;
+        if (!SDL.GetMasksForPixelFormat(FormatMap[format], ref bpp, ref rmask, ref gmask, ref bmask, ref amask))
+            throw new SurfaceException(SDL.GetError());
 
-        /* Create the surface. */
         var pitch = bpp / 8 * width;
-        var sdlSurface = SDL.SDL_CreateRGBSurfaceFrom(pixelData, width, height, bpp,
-            pitch, rmask, gmask, bmask, amask);
+        var sdlSurface = SDL.CreateSurfaceFrom(width, height, FormatMap[format], pixelData, pitch);
         var surface = new Surface(sdlSurface);
-        if (!surface.IsValid) throw new SurfaceException(SDL.SDL_GetError());
+        if (!surface.IsValid) throw new SurfaceException(SDL.GetError());
 
         return surface;
     }
@@ -216,25 +206,24 @@ public class Surface : IDisposable
             throw new InvalidOperationException("Destination surface is not valid.");
 
         /* Prepare blit structures. */
-        var srcRect = new SDL.SDL_Rect
+        var srcRect = new SDL.Rect
         {
-            x = srcX,
-            y = srcY,
-            w = width,
-            h = height
+            X = srcX,
+            Y = srcY,
+            W = width,
+            H = height
         };
-        var dstRect = new SDL.SDL_Rect
+        var dstRect = new SDL.Rect
         {
-            x = destX,
-            y = destY,
-            w = width,
-            h = height
+            X = destX,
+            Y = destY,
+            W = width,
+            H = height
         };
 
         /* Blit. */
-        var res = SDL.SDL_BlitSurface(SurfacePointer, ref srcRect,
-            dest.SurfacePointer, ref dstRect);
-        if (res < 0) throw new SurfaceException(SDL.SDL_GetError());
+        if (!SDL.BlitSurface(SurfacePointer, srcRect, dest.SurfacePointer, dstRect))
+            throw new SurfaceException(SDL.GetError());
     }
 
     /// <summary>
@@ -254,9 +243,8 @@ public class Surface : IDisposable
             throw new InvalidOperationException("Surface is not valid.");
 
         /* Save the surface to a file. */
-        var status = SDL_image.IMG_SavePNG(surfacePointer, filename);
-        if (status < 0)
-            throw new SurfaceException(SDL.SDL_GetError());
+        if (!Image.SavePNG(surfacePointer, filename))
+            throw new SurfaceException(SDL.GetError());
     }
 
     /// <summary>
@@ -267,44 +255,47 @@ public class Surface : IDisposable
         /// <summary>
         ///     Underlying surface.
         /// </summary>
-        private readonly SDL.SDL_Surface surface;
+        private readonly SDL.Surface surface;
 
         internal SurfaceProperties(IntPtr surfacePtr)
         {
             // Grab the surface.
-            surface = Marshal.PtrToStructure<SDL.SDL_Surface>(surfacePtr);
+            surface = Marshal.PtrToStructure<SDL.Surface>(surfacePtr);
 
             // Determine surface format.
-            var format = Marshal.PtrToStructure<SDL.SDL_PixelFormat>(surface.format);
-            var sdlFormatEnum = SDL.SDL_MasksToPixelFormatEnum(format.BitsPerPixel,
-                format.Rmask, format.Gmask, format.Bmask, format.Amask);
-            if (invFormatMap.ContainsKey(sdlFormatEnum))
-                Format = invFormatMap[sdlFormatEnum];
+            if (InvFormatMap.ContainsKey(surface.Format))
+                Format = InvFormatMap[surface.Format];
             else
                 // Intermediate format - mark as not supported for GPU use.
                 Format = DisplayFormat.CpuUseOnly;
-            BytesPerPixel = format.BytesPerPixel;
+
+            var bpp = 0;
+            uint rmask = 0, gmask = 0, bmask = 0, amask = 0;
+            if (!SDL.GetMasksForPixelFormat(surface.Format, ref bpp, ref rmask, ref gmask, ref bmask, ref amask))
+                throw new SurfaceException(SDL.GetError());
+
+            BytesPerPixel = (uint)bpp;
         }
 
         /// <summary>
         ///     Surface width.
         /// </summary>
-        public int Width => surface.w;
+        public int Width => surface.Width;
 
         /// <summary>
         ///     Surface height.
         /// </summary>
-        public int Height => surface.h;
+        public int Height => surface.Height;
 
         /// <summary>
         ///     Pitch of the surface.
         /// </summary>
-        public int Pitch => surface.pitch;
+        public int Pitch => surface.Pitch;
 
         /// <summary>
         ///     Pointer to pixel data.
         /// </summary>
-        public IntPtr Data => surface.pixels;
+        public IntPtr Data => surface.Pixels;
 
         /// <summary>
         ///     Pixel format.

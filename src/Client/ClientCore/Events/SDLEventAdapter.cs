@@ -16,7 +16,7 @@
  */
 
 using System.Diagnostics.CodeAnalysis;
-using SDL2;
+using SDL3;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Systems.Input;
@@ -27,11 +27,11 @@ namespace Sovereign.ClientCore.Events;
 /// <summary>
 ///     Converts SDL events into engine events.
 /// </summary>
-public class SDLEventAdapter : IEventAdapter
+public class SdlEventAdapter : IEventAdapter
 {
     private readonly CommonGuiManager guiManager;
 
-    public SDLEventAdapter(EventAdapterManager adapterManager, CommonGuiManager guiManager)
+    public SdlEventAdapter(EventAdapterManager adapterManager, CommonGuiManager guiManager)
     {
         this.guiManager = guiManager;
 
@@ -50,7 +50,7 @@ public class SDLEventAdapter : IEventAdapter
          * or no events remain.
          */
         ev = null;
-        while (ev == null && SDL.SDL_PollEvent(out var sdlEv) == 1)
+        while (ev == null && SDL.PollEvent(out var sdlEv))
         {
             /*
              * Occasionally the GUI system will entirely consume keyboard
@@ -60,33 +60,33 @@ public class SDLEventAdapter : IEventAdapter
             guiManager.ProcessEvent(ref sdlEv, out var shouldDispatch);
             if (!shouldDispatch) continue;
 
-            switch (sdlEv.type)
+            switch ((SDL.EventType)sdlEv.Type)
             {
-                case SDL.SDL_EventType.SDL_QUIT:
-                    ev = AdaptSdlQuit(sdlEv);
+                case SDL.EventType.Quit:
+                    ev = AdaptSdlQuit();
                     break;
 
-                case SDL.SDL_EventType.SDL_KEYDOWN:
+                case SDL.EventType.KeyDown:
                     ev = AdaptSdlKeyDown(sdlEv);
                     break;
 
-                case SDL.SDL_EventType.SDL_KEYUP:
+                case SDL.EventType.KeyUp:
                     ev = AdaptSdlKeyUp(sdlEv);
                     break;
 
-                case SDL.SDL_EventType.SDL_MOUSEMOTION:
+                case SDL.EventType.MouseMotion:
                     ev = AdaptSdlMouseMotion(sdlEv);
                     break;
 
-                case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                case SDL.EventType.MouseButtonDown:
                     ev = AdaptSdlMouseDown(sdlEv);
                     break;
 
-                case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
+                case SDL.EventType.MouseButtonUp:
                     ev = AdaptSdlMouseUp(sdlEv);
                     break;
 
-                case SDL.SDL_EventType.SDL_MOUSEWHEEL:
+                case SDL.EventType.MouseWheel:
                     ev = AdaptSdlMouseWheel(sdlEv);
                     break;
             }
@@ -98,9 +98,8 @@ public class SDLEventAdapter : IEventAdapter
     /// <summary>
     ///     Adapts an SDL_QUIT event.
     /// </summary>
-    /// <param name="sdlEv">SDL event.</param>
     /// <returns>Internal event.</returns>
-    private Event AdaptSdlQuit(SDL.SDL_Event sdlEv)
+    private Event AdaptSdlQuit()
     {
         return new Event(EventId.Core_Quit);
     }
@@ -110,9 +109,9 @@ public class SDLEventAdapter : IEventAdapter
     /// </summary>
     /// <param name="sdlEv">SDL event.</param>
     /// <returns>Internal event.</returns>
-    private Event AdaptSdlKeyDown(SDL.SDL_Event sdlEv)
+    private Event AdaptSdlKeyDown(SDL.Event sdlEv)
     {
-        var details = new KeyEventDetails { Key = sdlEv.key.keysym.sym };
+        var details = new KeyEventDetails { Key = sdlEv.Key.Key };
         return new Event(EventId.Client_Input_KeyDown, details);
     }
 
@@ -121,9 +120,9 @@ public class SDLEventAdapter : IEventAdapter
     /// </summary>
     /// <param name="sdlEv">SDL event.</param>
     /// <returns>Internal event.</returns>
-    private Event AdaptSdlKeyUp(SDL.SDL_Event sdlEv)
+    private Event AdaptSdlKeyUp(SDL.Event sdlEv)
     {
-        var details = new KeyEventDetails { Key = sdlEv.key.keysym.sym };
+        var details = new KeyEventDetails { Key = sdlEv.Key.Key };
         return new Event(EventId.Client_Input_KeyUp, details);
     }
 
@@ -132,12 +131,12 @@ public class SDLEventAdapter : IEventAdapter
     /// </summary>
     /// <param name="sdlEv">SDL event.</param>
     /// <returns>Internal event.</returns>
-    private Event AdaptSdlMouseMotion(SDL.SDL_Event sdlEv)
+    private Event AdaptSdlMouseMotion(SDL.Event sdlEv)
     {
         var details = new MouseMotionEventDetails
         {
-            X = sdlEv.motion.x,
-            Y = sdlEv.motion.y
+            X = sdlEv.Motion.X,
+            Y = sdlEv.Motion.Y
         };
         return new Event(EventId.Client_Input_MouseMotion, details);
     }
@@ -147,11 +146,11 @@ public class SDLEventAdapter : IEventAdapter
     /// </summary>
     /// <param name="sdlEv">SDL event.</param>
     /// <returns>Internal event.</returns>
-    private Event AdaptSdlMouseDown(SDL.SDL_Event sdlEv)
+    private Event AdaptSdlMouseDown(SDL.Event sdlEv)
     {
         var details = new MouseButtonEventDetails
         {
-            Button = MapMouseButton(sdlEv.button.button)
+            Button = MapMouseButton(sdlEv.Button.Button)
         };
         return new Event(EventId.Client_Input_MouseDown, details);
     }
@@ -161,11 +160,11 @@ public class SDLEventAdapter : IEventAdapter
     /// </summary>
     /// <param name="sdlEv">SDL event.</param>
     /// <returns>Internal event.</returns>
-    private Event AdaptSdlMouseUp(SDL.SDL_Event sdlEv)
+    private Event AdaptSdlMouseUp(SDL.Event sdlEv)
     {
         var details = new MouseButtonEventDetails
         {
-            Button = MapMouseButton(sdlEv.button.button)
+            Button = MapMouseButton(sdlEv.Button.Button)
         };
         return new Event(EventId.Client_Input_MouseUp, details);
     }
@@ -175,11 +174,11 @@ public class SDLEventAdapter : IEventAdapter
     /// </summary>
     /// <param name="sdlEv">SDL event.</param>
     /// <returns>Internal event.</returns>
-    private Event AdaptSdlMouseWheel(SDL.SDL_Event sdlEv)
+    private Event AdaptSdlMouseWheel(SDL.Event sdlEv)
     {
         var details = new MouseWheelEventDetails
         {
-            ScrollAmount = sdlEv.wheel.preciseY
+            ScrollAmount = sdlEv.Wheel.Y
         };
         return new Event(EventId.Client_Input_MouseWheel, details);
     }
@@ -193,9 +192,9 @@ public class SDLEventAdapter : IEventAdapter
     {
         return button switch
         {
-            SDL.SDL_BUTTON_LEFT => MouseButton.Left,
-            SDL.SDL_BUTTON_MIDDLE => MouseButton.Middle,
-            SDL.SDL_BUTTON_RIGHT => MouseButton.Right,
+            SDL.ButtonLeft => MouseButton.Left,
+            SDL.ButtonMiddle => MouseButton.Middle,
+            SDL.ButtonRight => MouseButton.Right,
             _ => MouseButton.Other
         };
     }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using SDL2;
+using SDL3;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Events.Details;
@@ -28,5 +28,5 @@ public class KeyEventDetails : IEventDetails
     /// <summary>
     ///     Key whose state changed.
     /// </summary>
-    public SDL.SDL_Keycode Key { get; set; }
+    public SDL.Keycode Key { get; set; }
 }

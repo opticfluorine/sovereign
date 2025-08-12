@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using SDL2;
+using SDL3;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -76,7 +76,7 @@ public class InputServices
     /// </summary>
     /// <param name="keycode">Key.</param>
     /// <returns>true if key is pressed, false otherwise.</returns>
-    public bool IsKeyDown(SDL.SDL_Keycode keycode)
+    public bool IsKeyDown(SDL.Keycode keycode)
     {
         return keyboardState[keycode];
     }

@@ -136,7 +136,7 @@ public static class ClientServiceCollectionExtensions
 
     private static void AddEvents(IServiceCollection services)
     {
-        services.TryAddSingleton<SDLEventAdapter>();
+        services.TryAddSingleton<SdlEventAdapter>();
     }
 
     private static void AddClientImplementations(IServiceCollection services)
@@ -145,7 +145,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<IEntityFactory, ClientEntityFactory>();
         services.TryAddSingleton<IEngineConfiguration, ClientEngineConfiguration>();
         services.TryAddSingleton<IResourcePathBuilder, ClientResourcePathBuilder>();
-        services.TryAddSingleton<ISystemTimer, SDLSystemTimer>();
+        services.TryAddSingleton<ISystemTimer, SdlSystemTimer>();
         services.TryAddSingleton<ClientNetworkManager>();
         services.TryAddSingleton<INetworkManager>(x => x.GetService<ClientNetworkManager>()!);
         services

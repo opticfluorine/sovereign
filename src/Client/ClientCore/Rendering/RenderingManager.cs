@@ -45,7 +45,7 @@ public class RenderingManager : IDisposable
     private readonly MainDisplay mainDisplay;
     private readonly IRenderer renderer;
     private readonly RenderingResourceManager resourceManager;
-    private readonly SDLEventAdapter sdlEventAdapter;
+    private readonly SdlEventAdapter sdlEventAdapter;
     private readonly ClientStateServices stateServices;
     private readonly DisplayViewport viewport;
 
@@ -65,7 +65,7 @@ public class RenderingManager : IDisposable
         DisplayModeSelector displayModeSelector, IRenderer renderer,
         RenderingResourceManager resourceManager,
         CommonGuiManager guiManager, ClientStateServices stateServices,
-        ILogger<RenderingManager> logger, SDLEventAdapter sdlEventAdapter,
+        ILogger<RenderingManager> logger, SdlEventAdapter sdlEventAdapter,
         DisplayViewport viewport, IOptions<DisplayOptions> displayOptions, GuiFontAtlas guiFontAtlas)
     {
         this.mainDisplay = mainDisplay;

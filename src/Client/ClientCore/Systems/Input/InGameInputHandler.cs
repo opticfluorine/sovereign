@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using SDL2;
+using SDL3;
 using Sovereign.ClientCore.Events.Details;
 
 namespace Sovereign.ClientCore.Systems.Input;
@@ -42,22 +42,22 @@ public class InGameInputHandler : IInputHandler
         switch (details.Key)
         {
             /* Direction keys. */
-            case SDL.SDL_Keycode.SDLK_UP:
-            case SDL.SDL_Keycode.SDLK_DOWN:
-            case SDL.SDL_Keycode.SDLK_LEFT:
-            case SDL.SDL_Keycode.SDLK_RIGHT:
-            case SDL.SDL_Keycode.SDLK_w:
-            case SDL.SDL_Keycode.SDLK_a:
-            case SDL.SDL_Keycode.SDLK_s:
-            case SDL.SDL_Keycode.SDLK_d:
+            case SDL.Keycode.Up:
+            case SDL.Keycode.Down:
+            case SDL.Keycode.Left:
+            case SDL.Keycode.Right:
+            case SDL.Keycode.W:
+            case SDL.Keycode.A:
+            case SDL.Keycode.S:
+            case SDL.Keycode.D:
                 HandleDirectionKeyEvent(oldState, !isKeyUp);
                 break;
 
-            case SDL.SDL_Keycode.SDLK_SPACE:
+            case SDL.Keycode.Space:
                 HandleSpaceKeyEvent(oldState, !isKeyUp);
                 break;
 
-            case SDL.SDL_Keycode.SDLK_e:
+            case SDL.Keycode.E:
                 HandleEKeyEvent(oldState, !isKeyUp);
                 break;
 
@@ -75,10 +75,10 @@ public class InGameInputHandler : IInputHandler
         /* Only update movement if the state has changed. */
         if (oldState != newState)
             playerInputMovementMapper.UpdateMovement(
-                keyboardState[SDL.SDL_Keycode.SDLK_UP] || keyboardState[SDL.SDL_Keycode.SDLK_w],
-                keyboardState[SDL.SDL_Keycode.SDLK_DOWN] || keyboardState[SDL.SDL_Keycode.SDLK_s],
-                keyboardState[SDL.SDL_Keycode.SDLK_LEFT] || keyboardState[SDL.SDL_Keycode.SDLK_a],
-                keyboardState[SDL.SDL_Keycode.SDLK_RIGHT] || keyboardState[SDL.SDL_Keycode.SDLK_d]);
+                keyboardState[SDL.Keycode.Up] || keyboardState[SDL.Keycode.W],
+                keyboardState[SDL.Keycode.Down] || keyboardState[SDL.Keycode.S],
+                keyboardState[SDL.Keycode.Left] || keyboardState[SDL.Keycode.A],
+                keyboardState[SDL.Keycode.Right] || keyboardState[SDL.Keycode.D]);
     }
 
     /// <summary>

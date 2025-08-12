@@ -10,14 +10,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Common\EngineCore\EngineCore.csproj"/>
-        <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj"/>
-        <ProjectReference Include="..\..\Common\UpdaterCore\UpdaterCore.csproj"/>
+        <ProjectReference Include="..\..\Common\EngineCore\EngineCore.csproj" />
+        <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj" />
+        <ProjectReference Include="..\..\Common\UpdaterCore\UpdaterCore.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7"/>
-        <PackageReference Include="ppy.SDL2-CS" Version="1.0.693-alpha"/>
+        <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7" />
+        <PackageReference Include="SDL3-CS" Version="3.2.20" />
+        <PackageReference Include="SDL3-CS.Native" Version="3.2.20" />
+        <PackageReference Include="SDL3-CS.Native.Image" Version="3.2.4" />
+        <PackageReference Include="SDL3-CS.Native.Mixer" Version="2.8.1.1" />
     </ItemGroup>
 
 </Project>

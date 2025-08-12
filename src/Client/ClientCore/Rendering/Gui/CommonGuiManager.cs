@@ -20,7 +20,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Hexa.NET.ImGui;
-using SDL2;
+using SDL3;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Main;
@@ -83,7 +83,7 @@ public sealed class CommonGuiManager : IDisposable
     {
         foreach (var cursor in mouseCursors)
             if (cursor != IntPtr.Zero)
-                SDL.SDL_FreeCursor(cursor);
+                SDL.Free(cursor);
     }
 
     /// <summary>
@@ -108,34 +108,34 @@ public sealed class CommonGuiManager : IDisposable
 
         // Mouse data.
         mouseCursors[(int)ImGuiMouseCursor.Arrow] =
-            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_ARROW);
+            SDL.CreateSystemCursor(SDL.SystemCursor.Default);
         mouseCursors[(int)ImGuiMouseCursor.TextInput] =
-            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_IBEAM);
+            SDL.CreateSystemCursor(SDL.SystemCursor.Text);
         mouseCursors[(int)ImGuiMouseCursor.ResizeAll] =
-            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZEALL);
+            SDL.CreateSystemCursor(SDL.SystemCursor.Crosshair);
         mouseCursors[(int)ImGuiMouseCursor.ResizeNs] =
-            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZENS);
+            SDL.CreateSystemCursor(SDL.SystemCursor.NSResize);
         mouseCursors[(int)ImGuiMouseCursor.ResizeEw] =
-            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZEWE);
+            SDL.CreateSystemCursor(SDL.SystemCursor.EWResize);
         mouseCursors[(int)ImGuiMouseCursor.ResizeNesw] =
-            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZENESW);
+            SDL.CreateSystemCursor(SDL.SystemCursor.NESWResize);
         mouseCursors[(int)ImGuiMouseCursor.ResizeNwse] =
-            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZENWSE);
+            SDL.CreateSystemCursor(SDL.SystemCursor.NWSEResize);
         mouseCursors[(int)ImGuiMouseCursor.Hand] =
-            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_HAND);
+            SDL.CreateSystemCursor(SDL.SystemCursor.Pointer);
         mouseCursors[(int)ImGuiMouseCursor.Wait] =
-            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_WAIT);
+            SDL.CreateSystemCursor(SDL.SystemCursor.Wait);
         mouseCursors[(int)ImGuiMouseCursor.Progress] =
-            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_WAITARROW);
+            SDL.CreateSystemCursor(SDL.SystemCursor.Progress);
         mouseCursors[(int)ImGuiMouseCursor.NotAllowed] =
-            SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_NO);
+            SDL.CreateSystemCursor(SDL.SystemCursor.NotAllowed);
         foreach (var cursor in mouseCursors)
             if (cursor == IntPtr.Zero)
             {
                 // Fatal error.
                 var sb = new StringBuilder();
                 sb.Append("Error creating cursors: ")
-                    .Append(SDL.SDL_GetError());
+                    .Append(SDL.GetError());
                 errorHandler.Error(sb.ToString());
                 fatalErrorHandler.FatalError();
             }
@@ -189,78 +189,79 @@ public sealed class CommonGuiManager : IDisposable
     ///     Based on the ImGui_ImplSDL2_ProcessEvent() function in the
     ///     C++ imgui library.
     /// </remarks>
-    public void ProcessEvent(ref SDL.SDL_Event ev, out bool shouldDispatch)
+    public void ProcessEvent(ref SDL.Event ev, out bool shouldDispatch)
     {
         shouldDispatch = true;
         if (!initialized) return;
 
         var io = ImGui.GetIO();
-        switch (ev.type)
+        switch ((SDL.EventType)ev.Type)
         {
-            case SDL.SDL_EventType.SDL_MOUSEMOTION:
-                io.AddMouseSourceEvent(ev.motion.which == SDL.SDL_TOUCH_MOUSEID
+            case SDL.EventType.MouseMotion:
+                io.AddMouseSourceEvent(ev.Motion.Which == SDL.TouchMouseID
                     ? ImGuiMouseSource.TouchScreen
                     : ImGuiMouseSource.Mouse);
-                io.AddMousePosEvent(ev.motion.x, ev.motion.y);
+                io.AddMousePosEvent(ev.Motion.X, ev.Motion.Y);
                 shouldDispatch = !io.WantCaptureMouse;
                 break;
 
-            case SDL.SDL_EventType.SDL_MOUSEWHEEL:
-                io.AddMouseSourceEvent(ev.motion.which == SDL.SDL_TOUCH_MOUSEID
+            case SDL.EventType.MouseWheel:
+                io.AddMouseSourceEvent(ev.Motion.Which == SDL.TouchMouseID
                     ? ImGuiMouseSource.TouchScreen
                     : ImGuiMouseSource.Mouse);
-                io.AddMouseWheelEvent(ev.wheel.preciseX, ev.wheel.preciseY);
+                io.AddMouseWheelEvent(ev.Wheel.X, ev.Wheel.Y);
                 shouldDispatch = !io.WantCaptureMouse;
                 break;
 
-            case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
-            case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
+            case SDL.EventType.MouseButtonDown:
+            case SDL.EventType.MouseButtonUp:
             {
-                var button = (uint)ev.button.button switch
+                var button = ev.Button.Button switch
                 {
-                    SDL.SDL_BUTTON_LEFT => 0,
-                    SDL.SDL_BUTTON_RIGHT => 1,
-                    SDL.SDL_BUTTON_MIDDLE => 2,
-                    SDL.SDL_BUTTON_X1 => 3,
-                    SDL.SDL_BUTTON_X2 => 4,
+                    SDL.ButtonLeft => 0,
+                    SDL.ButtonRight => 1,
+                    SDL.ButtonMiddle => 2,
+                    SDL.ButtonX1 => 3,
+                    SDL.ButtonX2 => 4,
                     _ => -1
                 };
                 if (button != -1)
                 {
-                    io.AddMouseSourceEvent(ev.motion.which == SDL.SDL_TOUCH_MOUSEID
+                    io.AddMouseSourceEvent(ev.Motion.Which == SDL.TouchMouseID
                         ? ImGuiMouseSource.TouchScreen
                         : ImGuiMouseSource.Mouse);
-                    io.AddMouseButtonEvent(button, ev.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN);
+                    io.AddMouseButtonEvent(button, ev.Type == (uint)SDL.EventType.MouseButtonDown);
                 }
             }
                 shouldDispatch = !io.WantCaptureMouse;
                 break;
 
-            case SDL.SDL_EventType.SDL_TEXTINPUT:
+            case SDL.EventType.TextInput:
                 HandleTextInput(ref ev, io);
                 break;
 
-            case SDL.SDL_EventType.SDL_KEYDOWN:
-            case SDL.SDL_EventType.SDL_KEYUP:
+            case SDL.EventType.KeyDown:
+            case SDL.EventType.KeyUp:
             {
-                var key = MapSdlKeyToImGui(ev.key.keysym.sym);
-                var mod = ev.key.keysym.mod;
-                io.AddKeyEvent(ImGuiKey.ModCtrl, mod.HasFlag(SDL.SDL_Keymod.KMOD_CTRL));
-                io.AddKeyEvent(ImGuiKey.ModShift, mod.HasFlag(SDL.SDL_Keymod.KMOD_SHIFT));
-                io.AddKeyEvent(ImGuiKey.ModAlt, mod.HasFlag(SDL.SDL_Keymod.KMOD_ALT));
-                io.AddKeyEvent(ImGuiKey.ModSuper, mod.HasFlag(SDL.SDL_Keymod.KMOD_GUI));
-                io.AddKeyEvent(key, ev.type == SDL.SDL_EventType.SDL_KEYDOWN);
-                io.SetKeyEventNativeData(key, (int)ev.key.keysym.sym, (int)ev.key.keysym.scancode,
-                    (int)ev.key.keysym.scancode);
+                var key = MapSdlKeyToImGui(ev.Key.Key);
+                var mod = ev.Key.Mod;
+                io.AddKeyEvent(ImGuiKey.ModCtrl, mod.HasFlag(SDL.Keymod.Ctrl));
+                io.AddKeyEvent(ImGuiKey.ModShift, mod.HasFlag(SDL.Keymod.Shift));
+                io.AddKeyEvent(ImGuiKey.ModAlt, mod.HasFlag(SDL.Keymod.Alt));
+                io.AddKeyEvent(ImGuiKey.ModSuper, mod.HasFlag(SDL.Keymod.GUI));
+                io.AddKeyEvent(key, ev.Type == (uint)SDL.EventType.KeyDown);
+                io.SetKeyEventNativeData(key, (int)ev.Key.Key, (int)ev.Key.Scancode,
+                    (int)ev.Key.Scancode);
             }
                 shouldDispatch = !io.WantCaptureKeyboard;
                 break;
 
-            case SDL.SDL_EventType.SDL_WINDOWEVENT:
-                if (ev.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED)
-                    io.AddFocusEvent(true);
-                else if (ev.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST)
-                    io.AddFocusEvent(false);
+            case SDL.EventType.WindowFocusGained:
+                io.AddFocusEvent(true);
+                break;
+
+            case SDL.EventType.WindowFocusLost:
+                io.AddFocusEvent(false);
                 break;
         }
     }
@@ -270,13 +271,11 @@ public sealed class CommonGuiManager : IDisposable
     /// </summary>
     /// <param name="ev">Event.</param>
     /// <param name="io">ImGui IO object.</param>
-    private unsafe void HandleTextInput(ref SDL.SDL_Event ev, ImGuiIOPtr io)
+    private unsafe void HandleTextInput(ref SDL.Event ev, ImGuiIOPtr io)
     {
-        fixed (byte* ptr = ev.text.text)
-        {
-            var str = Marshal.PtrToStringUTF8(new IntPtr(ptr));
-            if (str != null) io.AddInputCharactersUTF8(str);
-        }
+        var ptr = (byte*)ev.Text.Text;
+        var str = Marshal.PtrToStringUTF8(new IntPtr(ptr));
+        if (str != null) io.AddInputCharactersUTF8(str);
     }
 
     /// <summary>
@@ -294,12 +293,12 @@ public sealed class CommonGuiManager : IDisposable
         var imguiCursor = ImGui.GetMouseCursor();
         if (io.MouseDrawCursor || imguiCursor == ImGuiMouseCursor.None)
         {
-            SDL.SDL_ShowCursor(0);
+            SDL.HideCursor();
         }
         else
         {
-            SDL.SDL_SetCursor(mouseCursors[(int)imguiCursor]);
-            SDL.SDL_ShowCursor(1);
+            SDL.SetCursor(mouseCursors[(int)imguiCursor]);
+            SDL.ShowCursor();
         }
     }
 
@@ -316,19 +315,19 @@ public sealed class CommonGuiManager : IDisposable
 
         // Initialize mouse position.
         if (io.WantSetMousePos)
-            SDL.SDL_WarpMouseInWindow(mainDisplay.WindowHandle,
+            SDL.WarpMouseInWindow(mainDisplay.WindowHandle,
                 (int)io.MousePos.X, (int)io.MousePos.Y);
         else
             io.MousePos = Vector2.One * float.MaxValue;
 
         // Check mouse buttons.
-        var mouseButtons = SDL.SDL_GetMouseState(out var mx, out var my);
+        var mouseButtons = SDL.GetMouseState(out var mx, out var my);
         io.MouseDown[0] = mousePressed[0] ||
-                          (mouseButtons & SDL.SDL_BUTTON(SDL.SDL_BUTTON_LEFT)) != 0;
+                          (mouseButtons & SDL.MouseButtonFlags.Left) != 0;
         io.MouseDown[1] = mousePressed[1] ||
-                          (mouseButtons & SDL.SDL_BUTTON(SDL.SDL_BUTTON_RIGHT)) != 0;
+                          (mouseButtons & SDL.MouseButtonFlags.Right) != 0;
         io.MouseDown[2] = mousePressed[2] ||
-                          (mouseButtons & SDL.SDL_BUTTON(SDL.SDL_BUTTON_MIDDLE)) != 0;
+                          (mouseButtons & SDL.MouseButtonFlags.Middle) != 0;
         mousePressed[0] = false;
         mousePressed[1] = false;
         mousePressed[2] = false;
@@ -342,139 +341,139 @@ public sealed class CommonGuiManager : IDisposable
     /// </summary>
     /// <param name="keycode">SDL keycode.</param>
     /// <returns>ImGui keycode.</returns>
-    private static ImGuiKey MapSdlKeyToImGui(SDL.SDL_Keycode keycode)
+    private static ImGuiKey MapSdlKeyToImGui(SDL.Keycode keycode)
     {
         switch (keycode)
         {
-            case SDL.SDL_Keycode.SDLK_TAB: return ImGuiKey.Tab;
-            case SDL.SDL_Keycode.SDLK_LEFT: return ImGuiKey.LeftArrow;
-            case SDL.SDL_Keycode.SDLK_RIGHT: return ImGuiKey.RightArrow;
-            case SDL.SDL_Keycode.SDLK_UP: return ImGuiKey.UpArrow;
-            case SDL.SDL_Keycode.SDLK_DOWN: return ImGuiKey.DownArrow;
-            case SDL.SDL_Keycode.SDLK_PAGEUP: return ImGuiKey.PageUp;
-            case SDL.SDL_Keycode.SDLK_PAGEDOWN: return ImGuiKey.PageDown;
-            case SDL.SDL_Keycode.SDLK_HOME: return ImGuiKey.Home;
-            case SDL.SDL_Keycode.SDLK_END: return ImGuiKey.End;
-            case SDL.SDL_Keycode.SDLK_INSERT: return ImGuiKey.Insert;
-            case SDL.SDL_Keycode.SDLK_DELETE: return ImGuiKey.Delete;
-            case SDL.SDL_Keycode.SDLK_BACKSPACE: return ImGuiKey.Backspace;
-            case SDL.SDL_Keycode.SDLK_SPACE: return ImGuiKey.Space;
-            case SDL.SDL_Keycode.SDLK_RETURN: return ImGuiKey.Enter;
-            case SDL.SDL_Keycode.SDLK_ESCAPE: return ImGuiKey.Escape;
-            case SDL.SDL_Keycode.SDLK_QUOTE: return ImGuiKey.Apostrophe;
-            case SDL.SDL_Keycode.SDLK_COMMA: return ImGuiKey.Comma;
-            case SDL.SDL_Keycode.SDLK_MINUS: return ImGuiKey.Minus;
-            case SDL.SDL_Keycode.SDLK_PERIOD: return ImGuiKey.Period;
-            case SDL.SDL_Keycode.SDLK_SLASH: return ImGuiKey.Slash;
-            case SDL.SDL_Keycode.SDLK_SEMICOLON: return ImGuiKey.Semicolon;
-            case SDL.SDL_Keycode.SDLK_EQUALS: return ImGuiKey.Equal;
-            case SDL.SDL_Keycode.SDLK_LEFTBRACKET: return ImGuiKey.LeftBracket;
-            case SDL.SDL_Keycode.SDLK_BACKSLASH: return ImGuiKey.Backslash;
-            case SDL.SDL_Keycode.SDLK_RIGHTBRACKET: return ImGuiKey.RightBracket;
-            case SDL.SDL_Keycode.SDLK_BACKQUOTE: return ImGuiKey.GraveAccent;
-            case SDL.SDL_Keycode.SDLK_CAPSLOCK: return ImGuiKey.CapsLock;
-            case SDL.SDL_Keycode.SDLK_SCROLLLOCK: return ImGuiKey.ScrollLock;
-            case SDL.SDL_Keycode.SDLK_NUMLOCKCLEAR: return ImGuiKey.NumLock;
-            case SDL.SDL_Keycode.SDLK_PRINTSCREEN: return ImGuiKey.PrintScreen;
-            case SDL.SDL_Keycode.SDLK_PAUSE: return ImGuiKey.Pause;
-            case SDL.SDL_Keycode.SDLK_KP_0: return ImGuiKey.Keypad0;
-            case SDL.SDL_Keycode.SDLK_KP_1: return ImGuiKey.Keypad1;
-            case SDL.SDL_Keycode.SDLK_KP_2: return ImGuiKey.Keypad2;
-            case SDL.SDL_Keycode.SDLK_KP_3: return ImGuiKey.Keypad3;
-            case SDL.SDL_Keycode.SDLK_KP_4: return ImGuiKey.Keypad4;
-            case SDL.SDL_Keycode.SDLK_KP_5: return ImGuiKey.Keypad5;
-            case SDL.SDL_Keycode.SDLK_KP_6: return ImGuiKey.Keypad6;
-            case SDL.SDL_Keycode.SDLK_KP_7: return ImGuiKey.Keypad7;
-            case SDL.SDL_Keycode.SDLK_KP_8: return ImGuiKey.Keypad8;
-            case SDL.SDL_Keycode.SDLK_KP_9: return ImGuiKey.Keypad9;
-            case SDL.SDL_Keycode.SDLK_KP_PERIOD: return ImGuiKey.KeypadDecimal;
-            case SDL.SDL_Keycode.SDLK_KP_DIVIDE: return ImGuiKey.KeypadDivide;
-            case SDL.SDL_Keycode.SDLK_KP_MULTIPLY: return ImGuiKey.KeypadMultiply;
-            case SDL.SDL_Keycode.SDLK_KP_MINUS: return ImGuiKey.KeypadSubtract;
-            case SDL.SDL_Keycode.SDLK_KP_PLUS: return ImGuiKey.KeypadAdd;
-            case SDL.SDL_Keycode.SDLK_KP_ENTER: return ImGuiKey.KeypadEnter;
-            case SDL.SDL_Keycode.SDLK_KP_EQUALS: return ImGuiKey.KeypadEqual;
-            case SDL.SDL_Keycode.SDLK_LCTRL: return ImGuiKey.LeftCtrl;
-            case SDL.SDL_Keycode.SDLK_LSHIFT: return ImGuiKey.LeftShift;
-            case SDL.SDL_Keycode.SDLK_LALT: return ImGuiKey.LeftAlt;
-            case SDL.SDL_Keycode.SDLK_LGUI: return ImGuiKey.LeftSuper;
-            case SDL.SDL_Keycode.SDLK_RCTRL: return ImGuiKey.RightCtrl;
-            case SDL.SDL_Keycode.SDLK_RSHIFT: return ImGuiKey.RightShift;
-            case SDL.SDL_Keycode.SDLK_RALT: return ImGuiKey.RightAlt;
-            case SDL.SDL_Keycode.SDLK_RGUI: return ImGuiKey.RightSuper;
-            case SDL.SDL_Keycode.SDLK_APPLICATION: return ImGuiKey.Menu;
-            case SDL.SDL_Keycode.SDLK_0:
+            case SDL.Keycode.Tab: return ImGuiKey.Tab;
+            case SDL.Keycode.Left: return ImGuiKey.LeftArrow;
+            case SDL.Keycode.Right: return ImGuiKey.RightArrow;
+            case SDL.Keycode.Up: return ImGuiKey.UpArrow;
+            case SDL.Keycode.Down: return ImGuiKey.DownArrow;
+            case SDL.Keycode.Pageup: return ImGuiKey.PageUp;
+            case SDL.Keycode.Pagedown: return ImGuiKey.PageDown;
+            case SDL.Keycode.Home: return ImGuiKey.Home;
+            case SDL.Keycode.End: return ImGuiKey.End;
+            case SDL.Keycode.Insert: return ImGuiKey.Insert;
+            case SDL.Keycode.Delete: return ImGuiKey.Delete;
+            case SDL.Keycode.Backspace: return ImGuiKey.Backspace;
+            case SDL.Keycode.Space: return ImGuiKey.Space;
+            case SDL.Keycode.Return: return ImGuiKey.Enter;
+            case SDL.Keycode.Escape: return ImGuiKey.Escape;
+            case SDL.Keycode.Apostrophe: return ImGuiKey.Apostrophe;
+            case SDL.Keycode.Comma: return ImGuiKey.Comma;
+            case SDL.Keycode.Minus: return ImGuiKey.Minus;
+            case SDL.Keycode.Period: return ImGuiKey.Period;
+            case SDL.Keycode.Slash: return ImGuiKey.Slash;
+            case SDL.Keycode.Semicolon: return ImGuiKey.Semicolon;
+            case SDL.Keycode.Equals: return ImGuiKey.Equal;
+            case SDL.Keycode.LeftBracket: return ImGuiKey.LeftBracket;
+            case SDL.Keycode.Backslash: return ImGuiKey.Backslash;
+            case SDL.Keycode.RightBracket: return ImGuiKey.RightBracket;
+            case SDL.Keycode.Grave: return ImGuiKey.GraveAccent;
+            case SDL.Keycode.Capslock: return ImGuiKey.CapsLock;
+            case SDL.Keycode.ScrollLock: return ImGuiKey.ScrollLock;
+            case SDL.Keycode.NumLockClear: return ImGuiKey.NumLock;
+            case SDL.Keycode.PrintScreen: return ImGuiKey.PrintScreen;
+            case SDL.Keycode.Pause: return ImGuiKey.Pause;
+            case SDL.Keycode.Kp0: return ImGuiKey.Keypad0;
+            case SDL.Keycode.Kp1: return ImGuiKey.Keypad1;
+            case SDL.Keycode.Kp2: return ImGuiKey.Keypad2;
+            case SDL.Keycode.Kp3: return ImGuiKey.Keypad3;
+            case SDL.Keycode.Kp4: return ImGuiKey.Keypad4;
+            case SDL.Keycode.Kp5: return ImGuiKey.Keypad5;
+            case SDL.Keycode.Kp6: return ImGuiKey.Keypad6;
+            case SDL.Keycode.Kp7: return ImGuiKey.Keypad7;
+            case SDL.Keycode.Kp8: return ImGuiKey.Keypad8;
+            case SDL.Keycode.Kp9: return ImGuiKey.Keypad9;
+            case SDL.Keycode.KpPeriod: return ImGuiKey.KeypadDecimal;
+            case SDL.Keycode.KpDivide: return ImGuiKey.KeypadDivide;
+            case SDL.Keycode.KpMultiply: return ImGuiKey.KeypadMultiply;
+            case SDL.Keycode.KpMinus: return ImGuiKey.KeypadSubtract;
+            case SDL.Keycode.KpPlus: return ImGuiKey.KeypadAdd;
+            case SDL.Keycode.KpEnter: return ImGuiKey.KeypadEnter;
+            case SDL.Keycode.KpEquals: return ImGuiKey.KeypadEqual;
+            case SDL.Keycode.LCtrl: return ImGuiKey.LeftCtrl;
+            case SDL.Keycode.LShift: return ImGuiKey.LeftShift;
+            case SDL.Keycode.LAlt: return ImGuiKey.LeftAlt;
+            case SDL.Keycode.LGui: return ImGuiKey.LeftSuper;
+            case SDL.Keycode.RCtrl: return ImGuiKey.RightCtrl;
+            case SDL.Keycode.RShift: return ImGuiKey.RightShift;
+            case SDL.Keycode.RAlt: return ImGuiKey.RightAlt;
+            case SDL.Keycode.RGUI: return ImGuiKey.RightSuper;
+            case SDL.Keycode.Application: return ImGuiKey.Menu;
+            case SDL.Keycode.Alpha0:
                 return ImGuiKey.Key0;
-            case SDL.SDL_Keycode.SDLK_1:
+            case SDL.Keycode.Alpha1:
                 return ImGuiKey.Key1;
-            case SDL.SDL_Keycode.SDLK_2:
+            case SDL.Keycode.Alpha2:
                 return ImGuiKey.Key2;
-            case SDL.SDL_Keycode.SDLK_3:
+            case SDL.Keycode.Alpha3:
                 return ImGuiKey.Key3;
-            case SDL.SDL_Keycode.SDLK_4:
+            case SDL.Keycode.Alpha4:
                 return ImGuiKey.Key4;
-            case SDL.SDL_Keycode.SDLK_5:
+            case SDL.Keycode.Alpha5:
                 return ImGuiKey.Key5;
-            case SDL.SDL_Keycode.SDLK_6:
+            case SDL.Keycode.Alpha6:
                 return ImGuiKey.Key6;
-            case SDL.SDL_Keycode.SDLK_7:
+            case SDL.Keycode.Alpha7:
                 return ImGuiKey.Key7;
-            case SDL.SDL_Keycode.SDLK_8:
+            case SDL.Keycode.Alpha8:
                 return ImGuiKey.Key8;
-            case SDL.SDL_Keycode.SDLK_9:
+            case SDL.Keycode.Alpha9:
                 return ImGuiKey.Key9;
-            case SDL.SDL_Keycode.SDLK_a: return ImGuiKey.A;
-            case SDL.SDL_Keycode.SDLK_b: return ImGuiKey.B;
-            case SDL.SDL_Keycode.SDLK_c: return ImGuiKey.C;
-            case SDL.SDL_Keycode.SDLK_d: return ImGuiKey.D;
-            case SDL.SDL_Keycode.SDLK_e: return ImGuiKey.E;
-            case SDL.SDL_Keycode.SDLK_f: return ImGuiKey.F;
-            case SDL.SDL_Keycode.SDLK_g: return ImGuiKey.G;
-            case SDL.SDL_Keycode.SDLK_h: return ImGuiKey.H;
-            case SDL.SDL_Keycode.SDLK_i: return ImGuiKey.I;
-            case SDL.SDL_Keycode.SDLK_j: return ImGuiKey.J;
-            case SDL.SDL_Keycode.SDLK_k: return ImGuiKey.K;
-            case SDL.SDL_Keycode.SDLK_l: return ImGuiKey.L;
-            case SDL.SDL_Keycode.SDLK_m: return ImGuiKey.M;
-            case SDL.SDL_Keycode.SDLK_n: return ImGuiKey.N;
-            case SDL.SDL_Keycode.SDLK_o: return ImGuiKey.O;
-            case SDL.SDL_Keycode.SDLK_p: return ImGuiKey.P;
-            case SDL.SDL_Keycode.SDLK_q: return ImGuiKey.Q;
-            case SDL.SDL_Keycode.SDLK_r: return ImGuiKey.R;
-            case SDL.SDL_Keycode.SDLK_s: return ImGuiKey.S;
-            case SDL.SDL_Keycode.SDLK_t: return ImGuiKey.T;
-            case SDL.SDL_Keycode.SDLK_u: return ImGuiKey.U;
-            case SDL.SDL_Keycode.SDLK_v: return ImGuiKey.V;
-            case SDL.SDL_Keycode.SDLK_w: return ImGuiKey.W;
-            case SDL.SDL_Keycode.SDLK_x: return ImGuiKey.X;
-            case SDL.SDL_Keycode.SDLK_y: return ImGuiKey.Y;
-            case SDL.SDL_Keycode.SDLK_z: return ImGuiKey.Z;
-            case SDL.SDL_Keycode.SDLK_F1: return ImGuiKey.F1;
-            case SDL.SDL_Keycode.SDLK_F2: return ImGuiKey.F2;
-            case SDL.SDL_Keycode.SDLK_F3: return ImGuiKey.F3;
-            case SDL.SDL_Keycode.SDLK_F4: return ImGuiKey.F4;
-            case SDL.SDL_Keycode.SDLK_F5: return ImGuiKey.F5;
-            case SDL.SDL_Keycode.SDLK_F6: return ImGuiKey.F6;
-            case SDL.SDL_Keycode.SDLK_F7: return ImGuiKey.F7;
-            case SDL.SDL_Keycode.SDLK_F8: return ImGuiKey.F8;
-            case SDL.SDL_Keycode.SDLK_F9: return ImGuiKey.F9;
-            case SDL.SDL_Keycode.SDLK_F10: return ImGuiKey.F10;
-            case SDL.SDL_Keycode.SDLK_F11: return ImGuiKey.F11;
-            case SDL.SDL_Keycode.SDLK_F12: return ImGuiKey.F12;
-            case SDL.SDL_Keycode.SDLK_F13: return ImGuiKey.F13;
-            case SDL.SDL_Keycode.SDLK_F14: return ImGuiKey.F14;
-            case SDL.SDL_Keycode.SDLK_F15: return ImGuiKey.F15;
-            case SDL.SDL_Keycode.SDLK_F16: return ImGuiKey.F16;
-            case SDL.SDL_Keycode.SDLK_F17: return ImGuiKey.F17;
-            case SDL.SDL_Keycode.SDLK_F18: return ImGuiKey.F18;
-            case SDL.SDL_Keycode.SDLK_F19: return ImGuiKey.F19;
-            case SDL.SDL_Keycode.SDLK_F20: return ImGuiKey.F20;
-            case SDL.SDL_Keycode.SDLK_F21: return ImGuiKey.F21;
-            case SDL.SDL_Keycode.SDLK_F22: return ImGuiKey.F22;
-            case SDL.SDL_Keycode.SDLK_F23: return ImGuiKey.F23;
-            case SDL.SDL_Keycode.SDLK_F24: return ImGuiKey.F24;
-            case SDL.SDL_Keycode.SDLK_AC_BACK: return ImGuiKey.AppBack;
-            case SDL.SDL_Keycode.SDLK_AC_FORWARD: return ImGuiKey.AppForward;
+            case SDL.Keycode.A: return ImGuiKey.A;
+            case SDL.Keycode.B: return ImGuiKey.B;
+            case SDL.Keycode.C: return ImGuiKey.C;
+            case SDL.Keycode.D: return ImGuiKey.D;
+            case SDL.Keycode.E: return ImGuiKey.E;
+            case SDL.Keycode.F: return ImGuiKey.F;
+            case SDL.Keycode.G: return ImGuiKey.G;
+            case SDL.Keycode.H: return ImGuiKey.H;
+            case SDL.Keycode.I: return ImGuiKey.I;
+            case SDL.Keycode.J: return ImGuiKey.J;
+            case SDL.Keycode.K: return ImGuiKey.K;
+            case SDL.Keycode.L: return ImGuiKey.L;
+            case SDL.Keycode.M: return ImGuiKey.M;
+            case SDL.Keycode.N: return ImGuiKey.N;
+            case SDL.Keycode.O: return ImGuiKey.O;
+            case SDL.Keycode.P: return ImGuiKey.P;
+            case SDL.Keycode.Q: return ImGuiKey.Q;
+            case SDL.Keycode.R: return ImGuiKey.R;
+            case SDL.Keycode.S: return ImGuiKey.S;
+            case SDL.Keycode.T: return ImGuiKey.T;
+            case SDL.Keycode.U: return ImGuiKey.U;
+            case SDL.Keycode.V: return ImGuiKey.V;
+            case SDL.Keycode.W: return ImGuiKey.W;
+            case SDL.Keycode.X: return ImGuiKey.X;
+            case SDL.Keycode.Y: return ImGuiKey.Y;
+            case SDL.Keycode.Z: return ImGuiKey.Z;
+            case SDL.Keycode.F1: return ImGuiKey.F1;
+            case SDL.Keycode.F2: return ImGuiKey.F2;
+            case SDL.Keycode.F3: return ImGuiKey.F3;
+            case SDL.Keycode.F4: return ImGuiKey.F4;
+            case SDL.Keycode.F5: return ImGuiKey.F5;
+            case SDL.Keycode.F6: return ImGuiKey.F6;
+            case SDL.Keycode.F7: return ImGuiKey.F7;
+            case SDL.Keycode.F8: return ImGuiKey.F8;
+            case SDL.Keycode.F9: return ImGuiKey.F9;
+            case SDL.Keycode.F10: return ImGuiKey.F10;
+            case SDL.Keycode.F11: return ImGuiKey.F11;
+            case SDL.Keycode.F12: return ImGuiKey.F12;
+            case SDL.Keycode.F13: return ImGuiKey.F13;
+            case SDL.Keycode.F14: return ImGuiKey.F14;
+            case SDL.Keycode.F15: return ImGuiKey.F15;
+            case SDL.Keycode.F16: return ImGuiKey.F16;
+            case SDL.Keycode.F17: return ImGuiKey.F17;
+            case SDL.Keycode.F18: return ImGuiKey.F18;
+            case SDL.Keycode.F19: return ImGuiKey.F19;
+            case SDL.Keycode.F20: return ImGuiKey.F20;
+            case SDL.Keycode.F21: return ImGuiKey.F21;
+            case SDL.Keycode.F22: return ImGuiKey.F22;
+            case SDL.Keycode.F23: return ImGuiKey.F23;
+            case SDL.Keycode.F24: return ImGuiKey.F24;
+            case SDL.Keycode.AcBack: return ImGuiKey.AppBack;
+            case SDL.Keycode.AcForward: return ImGuiKey.AppForward;
         }
 
         return ImGuiKey.None;

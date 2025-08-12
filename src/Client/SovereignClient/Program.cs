@@ -3,7 +3,7 @@
 using System;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SDL2;
+using SDL3;
 using Serilog;
 using Sovereign.ClientCore;
 using Sovereign.EngineCore;
@@ -21,11 +21,10 @@ builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(dispose: true);
 
 // Initialize SDL.
-SDL.SDL_SetHint("SDL_WINDOWS_DPI_AWARENESS", "permonitorv2");
-var err = SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
-if (err < 0)
+SDL.SetHint("SDL_WINDOWS_DPI_AWARENESS", "permonitorv2");
+if (!SDL.Init(SDL.InitFlags.Video | SDL.InitFlags.Audio | SDL.InitFlags.Events))
 {
-    Log.Logger.Fatal("Error initializing SDL: {Error}", SDL.SDL_GetError());
+    Log.Logger.Fatal("Error initializing SDL: {Error}", SDL.GetError());
     Environment.Exit(1);
 }
 
@@ -48,5 +47,4 @@ var host = builder.Build();
 host.Run();
 
 // Clean up SDL.
-SDL_image.IMG_Quit();
-SDL.SDL_Quit();
+SDL.Quit();

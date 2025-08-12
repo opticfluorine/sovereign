@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using SDL2;
+using SDL3;
 using Sovereign.ClientCore.Components.Indexers;
 using Sovereign.ClientCore.Systems.Input;
 using Sovereign.EngineCore.Entities;
@@ -161,10 +161,10 @@ public class ClientWorldEditState
         // Scroll while holding CTRL varies the z-offset.
         // Scroll while holding SHIFT varies the pen width.
         // Scrolling without holding keys varies the material and material modifier.
-        var ctrlPressed = inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_LCTRL)
-                          || inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_RCTRL);
-        var shiftPressed = inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_LSHIFT)
-                           || inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_RSHIFT);
+        var ctrlPressed = inputServices.IsKeyDown(SDL.Keycode.LCtrl)
+                          || inputServices.IsKeyDown(SDL.Keycode.RCtrl);
+        var shiftPressed = inputServices.IsKeyDown(SDL.Keycode.LShift)
+                           || inputServices.IsKeyDown(SDL.Keycode.RShift);
         if (ctrlPressed)
         {
             // Z offset scroll.

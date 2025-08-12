@@ -80,7 +80,7 @@ public class MouseState
     /// </summary>
     /// <param name="x">Mouse x position relative to window.</param>
     /// <param name="y">Mouse y position relative to window.</param>
-    public void UpdateMousePosition(int x, int y)
+    public void UpdateMousePosition(float x, float y)
     {
         MousePosition = new Vector2(x, y);
     }

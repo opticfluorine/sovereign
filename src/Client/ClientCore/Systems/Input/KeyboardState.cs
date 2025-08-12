@@ -16,7 +16,7 @@
  */
 
 using System.Collections.Generic;
-using SDL2;
+using SDL3;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -28,21 +28,21 @@ public class KeyboardState
     /// <summary>
     ///     Keys that are currently pressed.
     /// </summary>
-    private IDictionary<SDL.SDL_Keycode, bool> keysDown { get; }
-        = new Dictionary<SDL.SDL_Keycode, bool>();
+    private IDictionary<SDL.Keycode, bool> keysDown { get; }
+        = new Dictionary<SDL.Keycode, bool>();
 
     /// <summary>
     ///     Indicates whether the given key is currently pressed.
     /// </summary>
     /// <param name="key">Key.</param>
     /// <returns>true if pressed, false otherwise.</returns>
-    public bool this[SDL.SDL_Keycode key] => keysDown.ContainsKey(key) ? keysDown[key] : false;
+    public bool this[SDL.Keycode key] => keysDown.ContainsKey(key) ? keysDown[key] : false;
 
     /// <summary>
     ///     Registers that a key has been pressed.
     /// </summary>
     /// <param name="key">Key that was pressed.</param>
-    public void KeyDown(SDL.SDL_Keycode key)
+    public void KeyDown(SDL.Keycode key)
     {
         keysDown[key] = true;
     }
@@ -51,7 +51,7 @@ public class KeyboardState
     ///     Registers that a key has been released.
     /// </summary>
     /// <param name="key">Key that was released.</param>
-    public void KeyUp(SDL.SDL_Keycode key)
+    public void KeyUp(SDL.Keycode key)
     {
         keysDown[key] = false;
     }

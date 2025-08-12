@@ -16,7 +16,7 @@
  */
 
 using System;
-using SDL2;
+using SDL3;
 using Sovereign.ClientCore.Rendering.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Display;
@@ -29,26 +29,12 @@ public class MainDisplay
     /// <summary>
     ///     Window title.
     /// </summary>
-    private const string TITLE = "Sovereign";
+    private const string Title = "Sovereign";
 
     /// <summary>
     ///     Main window handle.
     /// </summary>
     public IntPtr WindowHandle { get; private set; }
-
-    /// <summary>
-    ///     Gets the window manager info associated with the main display.
-    /// </summary>
-    public SDL.SDL_SysWMinfo WMinfo
-    {
-        get
-        {
-            var info = new SDL.SDL_SysWMinfo();
-            SDL.SDL_VERSION(out info.version);
-            SDL.SDL_GetWindowWMInfo(WindowHandle, ref info);
-            return info;
-        }
-    }
 
     /// <summary>
     ///     Display mode in use. Only valid after calling Show(), null otherwise.
@@ -64,8 +50,7 @@ public class MainDisplay
     ///     Whether the window currently has input focus.
     /// </summary>
     public bool IsInputFocus =>
-        (SDL.SDL_GetWindowFlags(WindowHandle)
-         & (uint)SDL.SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS) != 0;
+        (SDL.GetWindowFlags(WindowHandle) & SDL.WindowFlags.InputFocus) != 0;
 
     /// <summary>
     ///     Shows the main window.
@@ -79,10 +64,8 @@ public class MainDisplay
 
         /* Create the main window. */
         DisplayMode = displayMode;
-        WindowHandle = SDL.SDL_CreateWindow(TITLE,
-            SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
-            displayMode.Width, displayMode.Height,
-            GetWindowFlags());
+        WindowHandle = SDL.CreateWindow(Title, displayMode.Width, displayMode.Height, GetWindowFlags());
+        SDL.SetWindowPosition(WindowHandle, (int)SDL.WindowPosCentered(), (int)SDL.WindowPosCentered());
     }
 
     /// <summary>
@@ -90,13 +73,17 @@ public class MainDisplay
     /// </summary>
     public void Close()
     {
-        SDL.SDL_DestroyWindow(WindowHandle);
+        SDL.DestroyWindow(WindowHandle);
     }
 
-    private SDL.SDL_WindowFlags GetWindowFlags()
+    /// <summary>
+    ///     Gets the window flags to use.
+    /// </summary>
+    /// <returns></returns>
+    private SDL.WindowFlags GetWindowFlags()
     {
-        var flags = SDL.SDL_WindowFlags.SDL_WINDOW_VULKAN;
-        if (IsFullscreen) flags |= SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP;
+        var flags = SDL.WindowFlags.Vulkan;
+        if (IsFullscreen) flags |= SDL.WindowFlags.Fullscreen;
         return flags;
     }
 }
