@@ -77,7 +77,7 @@ public sealed class AuthenticationClient
 
             switch (response.StatusCode)
             {
-                case HttpStatusCode.Created:
+                case HttpStatusCode.OK:
                     // Successful login.
                     logger.LogInformation("Login successful.");
                     result = new Option<LoginResponse, string>((await ProcessSuccessfulLogin(response)).Value);

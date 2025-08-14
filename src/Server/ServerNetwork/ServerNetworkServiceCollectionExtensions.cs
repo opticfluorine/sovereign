@@ -100,7 +100,7 @@ public static class ServerNetworkServiceCollectionExtensions
         services.TryAddSingleton<CreatePlayerRequestValidator>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, AccountRegistrationRestService>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, AuthenticationRestService>());
+        services.TryAddSingleton<AuthenticationRestService>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, CreatePlayerRestService>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, DeletePlayerRestService>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, EntityDataRestService>());
@@ -110,6 +110,8 @@ public static class ServerNetworkServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, SetTemplateEntityRestService>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, TemplateEntitiesRestService>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, WorldSegmentRestService>());
+
+        services.TryAddSingleton<RestServiceProvider>();
     }
 
     private static void AddServerNetworkSystem(IServiceCollection services)
