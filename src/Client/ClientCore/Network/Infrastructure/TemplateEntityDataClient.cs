@@ -84,8 +84,7 @@ public class TemplateEntityDataClient
                 EntityKeyValuePairs = keyValuePairs
             };
 
-            var response = await client.PostJson($"{RestEndpoints.TemplateEntities}/{definition.EntityId:X}", request,
-                true);
+            var response = await client.PostJson(RestEndpoints.TemplateEntities, request, true);
             if (response.StatusCode != HttpStatusCode.OK)
                 logger.LogError("Failed to set template entity {EntityId} on server (status {StatusCode}).",
                     definition.EntityId, response.StatusCode);

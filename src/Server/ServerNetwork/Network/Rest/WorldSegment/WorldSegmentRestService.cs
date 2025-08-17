@@ -16,13 +16,14 @@
  */
 
 using System;
+using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components.Types;
-using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerCore.Systems.WorldManagement;
-using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment;
 
@@ -30,82 +31,54 @@ namespace Sovereign.ServerNetwork.Network.Rest.WorldSegment;
 ///     REST service providing batch transfer of world segment block data from
 ///     server to client.
 /// </summary>
-public sealed class WorldSegmentRestService : AuthenticatedRestService
+public sealed class WorldSegmentRestService(
+    WorldManagementServices worldManagementServices,
+    AccountServices accountServices,
+    ILogger<WorldSegmentRestService> logger)
 {
-    private readonly AccountServices accountServices;
-    private readonly WorldManagementServices worldManagementServices;
+    //public override string Path => RestEndpoints.WorldSegment + "/{x}/{y}/{z}";
 
-    public WorldSegmentRestService(RestAuthenticator authenticator,
-        WorldManagementServices worldManagementServices, AccountServices accountServices,
-        ILogger<WorldSegmentRestService> logger)
-        : base(authenticator, logger)
+    /// <summary>
+    ///     GET endpoint for retrieving world segment block data.
+    /// </summary>
+    /// <param name="x">World segment index X coordinate.</param>
+    /// <param name="y">World segment index Y coordinate.</param>
+    /// <param name="z">World segment index Z coordinate.</param>
+    /// <param name="context">Context.</param>
+    /// <returns>Result.</returns>
+    public async Task<IResult> WorldSegmentGet([FromRoute] int x, [FromRoute] int y, [FromRoute] int z,
+        HttpContext context)
     {
-        this.worldManagementServices = worldManagementServices;
-        this.accountServices = accountServices;
-    }
+        // Successful parse, try to fulfill the request if the player is subscribed.
+        var accountId = Guid.Parse(context.User.FindFirst(RestAuthentication.ClaimTypes.AccountId)?.Value ??
+                                   throw new Exception("No AccountId claim for user."));
+        var segmentIndex = new GridPosition(x, y, z);
+        var canAccess = accountServices.TryGetPlayerForAccount(accountId, out var playerEntityId)
+                        && worldManagementServices.IsPlayerSubscribedToWorldSegment(segmentIndex, playerEntityId);
 
-    public override string Path => RestEndpoints.WorldSegment + "/{x}/{y}/{z}";
+        if (!canAccess) return Results.Forbid();
 
-    public override RestPathType PathType => RestPathType.Parameter;
-
-    public override HttpMethod RequestType => HttpMethod.GET;
-
-    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
-    {
-        // Parse parameters.
-        int x, y, z;
-        if (int.TryParse(ctx.Request.Url.Parameters["x"], out x)
-            && int.TryParse(ctx.Request.Url.Parameters["y"], out y)
-            && int.TryParse(ctx.Request.Url.Parameters["z"], out z))
+        // First check whether the world segment has been fully loaded.
+        // If not, tell the client to try again later.
+        if (!worldManagementServices.IsWorldSegmentLoaded(segmentIndex))
         {
-            // Successful parse, try to fulfill the request if the player is subscribed.
-            var segmentIndex = new GridPosition(x, y, z);
-            var canAccess = accountServices.TryGetPlayerForAccount(accountId, out var playerEntityId)
-                            && worldManagementServices.IsPlayerSubscribedToWorldSegment(segmentIndex, playerEntityId);
+            logger.LogDebug("Delaying response for segment {Index} while load in progress. (Request ID: {Id})",
+                segmentIndex, context.TraceIdentifier);
 
-            if (canAccess)
-            {
-                // First check whether the world segment has been fully loaded.
-                // If not, tell the client to try again later.
-                if (!worldManagementServices.IsWorldSegmentLoaded(segmentIndex))
-                {
-                    logger.LogDebug("Delaying response for segment {Index} while load in progress.", segmentIndex);
-                    ctx.Response.StatusCode = 503;
-                    await ctx.Response.Send();
-                    return;
-                }
-
-                // Get the data and send it over.
-                var dataTask = worldManagementServices.GetWorldSegmentBlockData(segmentIndex);
-
-                // Get the latest version of the block data and encode it for transfer.
-                var blockData = await dataTask;
-                var blockDataBytes = blockData.Item2;
-                if (blockDataBytes.Length == 0)
-                {
-                    // Segment data was processed but is empty.     
-                    logger.LogError("Got empty block data for world segment {Index}.", segmentIndex);
-                    ctx.Response.StatusCode = 500;
-                    await ctx.Response.Send();
-                    return;
-                }
-
-                ctx.Response.ContentType = "application/octet-stream";
-                ctx.Response.ContentLength = blockDataBytes.Length;
-                await ctx.Response.Send(blockDataBytes);
-            }
-            else
-            {
-                // User isn't subscribed to this world segment, deny access.
-                ctx.Response.StatusCode = 403;
-                await ctx.Response.Send();
-            }
+            return Results.StatusCode((int)HttpStatusCode.ServiceUnavailable);
         }
-        else
+
+        // Get the latest version of the block data and encode it for transfer.
+        var blockData = await worldManagementServices.GetWorldSegmentBlockData(segmentIndex);
+        var blockDataBytes = blockData.Item2;
+        if (blockDataBytes.Length == 0)
         {
-            // Invalid coordinates.
-            ctx.Response.StatusCode = 404;
-            await ctx.Response.Send();
+            // Segment data was processed but is empty.     
+            logger.LogError("Got empty block data for world segment {Index}. (Request ID: {Id})", segmentIndex,
+                context.TraceIdentifier);
+            return Results.InternalServerError();
         }
+
+        return Results.Bytes(blockDataBytes, "application/octet-stream");
     }
 }

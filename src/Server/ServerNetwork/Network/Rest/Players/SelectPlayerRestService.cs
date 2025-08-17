@@ -15,95 +15,56 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Text.Json;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.Accounts.Systems.Accounts;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Network.Rest;
-using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Database;
-using Sovereign.Persistence.Players;
-using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
 
 /// <summary>
 ///     REST service for selecting a player character for use.
 /// </summary>
-public class SelectPlayerRestService : AuthenticatedRestService
+public class SelectPlayerRestService(
+    AccountsController accountsController,
+    IEventSender eventSender,
+    AccountServices accountServices,
+    PersistenceProviderManager persistenceProviderManager,
+    ILogger<SelectPlayerRestService> logger)
 {
     /// <summary>
-    ///     Maximum request length, in bytes.
+    ///     POST endpoint for selecting a player and entering the world.
     /// </summary>
-    private const int MaxRequestLength = 0;
-
-    private readonly AccountsController accountsController;
-    private readonly AccountServices accountServices;
-    private readonly IEventSender eventSender;
-    private readonly PersistenceProviderManager persistenceProviderManager;
-    private readonly PersistencePlayerServices playerServices;
-
-    public SelectPlayerRestService(RestAuthenticator authenticator, PersistencePlayerServices playerServices,
-        AccountsController accountsController, IEventSender eventSender, AccountServices accountServices,
-        PersistenceProviderManager persistenceProviderManager, ILogger<SelectPlayerRestService> logger) :
-        base(authenticator, logger)
-    {
-        this.playerServices = playerServices;
-        this.accountsController = accountsController;
-        this.eventSender = eventSender;
-        this.accountServices = accountServices;
-        this.persistenceProviderManager = persistenceProviderManager;
-    }
-
-    public override string Path => RestEndpoints.Player + "/{id}";
-    public override RestPathType PathType => RestPathType.Parameter;
-    public override HttpMethod RequestType => HttpMethod.POST;
-
-    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
+    /// <param name="playerId">Player entity ID.</param>
+    /// <param name="context">Context.</param>
+    /// <returns>Result.</returns>
+    public Task<IResult> SelectPlayerPost([FromRoute] ulong playerId, HttpContext context)
     {
         try
         {
-            // Safety check.
-            if (ctx.Request.ContentLength > MaxRequestLength)
-            {
-                await SendResponse(ctx, 413, "Request too large.");
-                return;
-            }
-
-            // Decode and validate input.
-            // Validation checks that the requested player character is a player
-            // character belonging to the currently authenticated account.
-            var idParam = ctx.Request.Url.Parameters["id"];
-            ulong playerEntityId;
-            try
-            {
-                playerEntityId = Convert.ToUInt64(idParam);
-            }
-            catch (FormatException)
-            {
-                logger.LogError("Account {AccountId} tried to select invalid player entity {EntityId:X}.", accountId,
-                    idParam);
-                await SendResponse(ctx, 400, "Invalid player entity ID.");
-                return;
-            }
+            var accountId = Guid.Parse(context.User.FindFirst(RestAuthentication.ClaimTypes.AccountId)?.Value ??
+                                       throw new Exception("User has no AccountId claim."));
 
             // Verify tha the entity is a player belonging to the logged in account.
             if (!persistenceProviderManager.PersistenceProvider.GetAccountForPlayerQuery.TryGetAccountForPlayer(
-                    playerEntityId, out var trueAccountId))
+                    playerId, out var trueAccountId))
             {
-                logger.LogError("No account found for player {EntityId:X}.", playerEntityId);
-                await SendResponse(ctx, 400, "No account found for player.");
-                return;
+                logger.LogError("No account found for player {EntityId:X}. (Request ID: {Id})",
+                    playerId, context.TraceIdentifier);
+                return Task.FromResult(Results.BadRequest("Bad player ID."));
             }
 
             if (!trueAccountId.Equals(accountId))
             {
-                logger.LogError("Entity {EntityId:X} is not a player assigned to account {AccountId}.", playerEntityId,
-                    accountId);
-                await SendResponse(ctx, 400, "Selected player dues not belong to this account.");
-                return;
+                logger.LogError(
+                    "Entity {EntityId:X} is not a player assigned to account {AccountId}. (Request ID: {Id})",
+                    playerId, accountId, context.TraceIdentifier);
+                return Task.FromResult(Results.BadRequest("Selected player dues not belong to this account."));
             }
 
             // Verify that the player is not in cooldown.
@@ -111,47 +72,19 @@ public class SelectPlayerRestService : AuthenticatedRestService
             // Otherwise a player could "roll back" the state of their player to the last synchronization point by
             // logging out and back in, triggering a load from the database before the latest changes have been
             // committed.
-            if (accountServices.IsPlayerInCooldown(playerEntityId))
-            {
-                await SendResponse(ctx, 503, "Player is in cooldown.");
-                return;
-            }
+            if (accountServices.IsPlayerInCooldown(playerId))
+                return Task.FromResult(Results.Text("Player is in cooldown.", null, Encoding.UTF8, 503));
 
             // Select player.
             const bool newPlayer = false;
-            accountsController.SelectPlayer(eventSender, accountId, playerEntityId, newPlayer);
-            await SendResponse(ctx, 200, "Success.");
+            accountsController.SelectPlayer(eventSender, accountId, playerId, newPlayer);
+            return Task.FromResult(Results.Ok());
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error handling select player request.");
-            try
-            {
-                await SendResponse(ctx, 500, "Error processing request.");
-            }
-            catch (Exception e2)
-            {
-                logger.LogError(e2, "Error sending error response.");
-            }
+            logger.LogError(e, "Error handling select player request. (Request ID: {Id})",
+                context.TraceIdentifier);
+            return Task.FromResult(Results.InternalServerError());
         }
-    }
-
-    /// <summary>
-    ///     Sends a response.
-    /// </summary>
-    /// <param name="ctx">HTTP context.</param>
-    /// <param name="status">Response status code.</param>
-    /// <param name="result">Human-readable result string.</param>
-    private async Task SendResponse(HttpContextBase ctx, int status, string result)
-    {
-        ctx.Response.StatusCode = status;
-
-        var responseData = new SelectPlayerResponse
-        {
-            Result = result
-        };
-        var responseJson = JsonSerializer.Serialize(responseData);
-
-        await ctx.Response.Send(responseJson);
     }
 }

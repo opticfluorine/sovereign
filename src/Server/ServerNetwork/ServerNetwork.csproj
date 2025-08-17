@@ -15,8 +15,4 @@
         <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Watson" Version="6.1.9"/>
-    </ItemGroup>
-
 </Project>

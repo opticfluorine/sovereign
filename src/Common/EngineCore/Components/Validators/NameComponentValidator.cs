@@ -23,12 +23,9 @@ namespace Sovereign.EngineCore.Components.Validators;
 /// <summary>
 ///     Provides validation of name components.
 /// </summary>
-public class NameComponentValidator
+public partial class NameComponentValidator
 {
-    /// <summary>
-    ///     Regular expression for name validation.
-    /// </summary>
-    private readonly Regex validNameRegex = new(@"^[A-Za-z][\w- ]+$");
+    private readonly Regex validNameRegex = ValidNameRegex();
 
     /// <summary>
     ///     Checks the validity of a given name.
@@ -39,4 +36,7 @@ public class NameComponentValidator
     {
         return name is { Length: > 0 and <= EntityConstants.MaxNameLength } && validNameRegex.IsMatch(name);
     }
+
+    [GeneratedRegex(@"^[\d\w](?: ?[\d\w-_.]+)*$")]
+    private static partial Regex ValidNameRegex();
 }

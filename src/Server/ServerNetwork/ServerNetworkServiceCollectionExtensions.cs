@@ -94,22 +94,19 @@ public static class ServerNetworkServiceCollectionExtensions
 
     private static void AddRest(IServiceCollection services)
     {
-        services.TryAddSingleton<RestServer>();
-        services.TryAddSingleton<RestAuthenticator>();
-
         services.TryAddSingleton<CreatePlayerRequestValidator>();
 
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, AccountRegistrationRestService>());
+        services.TryAddSingleton<AccountRegistrationRestService>();
         services.TryAddSingleton<AuthenticationRestService>();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, CreatePlayerRestService>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, DeletePlayerRestService>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, EntityDataRestService>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, ListPlayersRestService>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, ScriptInfoRestService>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, SelectPlayerRestService>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, SetTemplateEntityRestService>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, TemplateEntitiesRestService>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IRestService, WorldSegmentRestService>());
+        services.TryAddSingleton<CreatePlayerRestService>();
+        services.TryAddSingleton<DeletePlayerRestService>();
+        services.TryAddSingleton<EntityDataRestService>();
+        services.TryAddSingleton<ListPlayersRestService>();
+        services.TryAddSingleton<ScriptInfoRestService>();
+        services.TryAddSingleton<SelectPlayerRestService>();
+        services.TryAddSingleton<SetTemplateEntityRestService>();
+        services.TryAddSingleton<TemplateEntitiesRestService>();
+        services.TryAddSingleton<WorldSegmentRestService>();
 
         services.TryAddSingleton<RestServiceProvider>();
     }

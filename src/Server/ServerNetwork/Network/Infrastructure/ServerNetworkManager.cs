@@ -31,7 +31,6 @@ using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerNetwork.Network.Connections;
-using Sovereign.ServerNetwork.Network.Rest;
 using Sovereign.ServerNetwork.Network.ServerNetwork;
 
 namespace Sovereign.ServerNetwork.Network.Infrastructure;
@@ -66,15 +65,11 @@ public sealed class ServerNetworkManager : INetworkManager
     /// </summary>
     private readonly ConcurrentQueue<OutboundEventInfo> outboundEventQueue = new();
 
-    private readonly RestServer restServer;
     private readonly NetworkSerializer serializer;
-
-    public NetStatistics NetStatistics => netManager.Statistics;
 
     public ServerNetworkManager(IOptions<NetworkOptions> networkOptions,
         NetworkConnectionManager connectionManager,
         NetworkSerializer serializer,
-        RestServer restServer,
         NewConnectionProcessor newConnectionProcessor,
         ServerNetworkController networkController,
         IEventSender eventSender,
@@ -86,7 +81,6 @@ public sealed class ServerNetworkManager : INetworkManager
         this.networkOptions = networkOptions.Value;
         this.connectionManager = connectionManager;
         this.serializer = serializer;
-        this.restServer = restServer;
         this.newConnectionProcessor = newConnectionProcessor;
         this.networkController = networkController;
         this.eventSender = eventSender;
@@ -112,6 +106,8 @@ public sealed class ServerNetworkManager : INetworkManager
 #endif
     }
 
+    public NetStatistics NetStatistics => netManager.Statistics;
+
     public event OnNetworkReceive? OnNetworkReceive;
 
     public void Initialize()
@@ -128,16 +124,10 @@ public sealed class ServerNetworkManager : INetworkManager
             throw new NetworkException("Failed to bind socket.");
 
         logger.LogInformation("Server started.");
-
-        // Start the REST server.
-        restServer.Initialize();
     }
 
     public void Dispose()
     {
-        // Stop the REST server.
-        restServer.Dispose();
-
         /* Clean up the network manager. */
         logger.LogInformation("Stopping server.");
         netManager.Stop();

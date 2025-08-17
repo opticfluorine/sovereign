@@ -17,13 +17,27 @@
 using Microsoft.AspNetCore.Builder;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerNetwork.Network.Rest.Accounts;
+using Sovereign.ServerNetwork.Network.Rest.Players;
+using Sovereign.ServerNetwork.Network.Rest.TemplateEntities;
+using Sovereign.ServerNetwork.Network.Rest.WorldSegment;
 
 namespace Sovereign.ServerNetwork.Network.Rest;
 
 /// <summary>
 ///     Supports installing Sovereign's REST endpoints into an ASP.NET Core WebApplication.
 /// </summary>
-public sealed class RestServiceProvider(AuthenticationRestService authentication)
+public sealed class RestServiceProvider(
+    AuthenticationRestService authentication,
+    AccountRegistrationRestService accountRegistration,
+    ListPlayersRestService listPlayers,
+    CreatePlayerRestService createPlayer,
+    DeletePlayerRestService deletePlayer,
+    SelectPlayerRestService selectPlayer,
+    EntityDataRestService entityData,
+    ScriptInfoRestService scriptInfo,
+    SetTemplateEntityRestService setTemplateEntity,
+    TemplateEntitiesRestService templateEntities,
+    WorldSegmentRestService worldSegments)
 {
     /// <summary>
     ///     Adds Sovereign endpoints to a WebApplication.
@@ -31,6 +45,33 @@ public sealed class RestServiceProvider(AuthenticationRestService authentication
     /// <param name="app">Web application.</param>
     public void AddEndpoints(WebApplication app)
     {
-        app.MapPost(RestEndpoints.Authentication, authentication.PostLogin);
+        // Login and registration.
+        app.MapPost(RestEndpoints.Authentication, authentication.PostLogin)
+            .AllowAnonymous();
+        app.MapPost(RestEndpoints.AccountRegistration, accountRegistration.PostRegister)
+            .AllowAnonymous();
+
+        // Player management.
+        app.MapGet(RestEndpoints.Player, handler: listPlayers.ListPlayersGet)
+            .RequireAuthorization(RestAuthorization.Policies.RequireOutOfGame);
+        app.MapPost(RestEndpoints.Player, createPlayer.CreatePlayerPost)
+            .RequireAuthorization(RestAuthorization.Policies.RequireOutOfGame);
+        app.MapDelete($"{RestEndpoints.Player}/{{playerId}}", deletePlayer.PlayerDelete)
+            .RequireAuthorization(RestAuthorization.Policies.RequireOutOfGame);
+        app.MapPost($"{RestEndpoints.Player}/{{playerId}}", selectPlayer.SelectPlayerPost)
+            .RequireAuthorization(RestAuthorization.Policies.RequireOutOfGame);
+
+        // Template entities.
+        app.MapGet(RestEndpoints.TemplateEntities, templateEntities.TemplateEntitiesGet);
+        app.MapGet($"{RestEndpoints.TemplateEntities}/{{entityId}}", entityData.EntityDataGet)
+            .RequireAuthorization(RestAuthorization.Policies.AdminOnly);
+        app.MapPost(RestEndpoints.TemplateEntities, setTemplateEntity.SetTemplateEntityPost)
+            .RequireAuthorization(RestAuthorization.Policies.AdminOnly);
+        app.MapGet(RestEndpoints.ScriptInfo, scriptInfo.ScriptInfoGet)
+            .RequireAuthorization(RestAuthorization.Policies.AdminOnly);
+
+        // World segments.
+        app.MapGet($"{RestEndpoints.WorldSegment}/{{x}}/{{y}}/{{z}}", worldSegments.WorldSegmentGet)
+            .RequireAuthorization(RestAuthorization.Policies.RequirePlayer);
     }
 }

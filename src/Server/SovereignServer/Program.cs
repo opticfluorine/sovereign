@@ -16,6 +16,7 @@
 
 using System;
 using System.IO;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -65,6 +66,14 @@ builder.Services
 builder.Services
     .AddSovereignCoreOptions(builder.Configuration)
     .AddSovereignServerOptions(builder.Configuration);
+
+// Authentication and authorization for REST APIs.
+builder.Services
+    .AddAuthentication()
+    .AddScheme<AuthenticationSchemeOptions, RestAuthenticationHandler>(RestAuthenticationHandler.SchemeName,
+        options => { });
+builder.Services.AddAuthorizationBuilder()
+    .AddSovereignPolicies();
 
 // Load server runtime options.
 var runtimeOptions = builder.Configuration
