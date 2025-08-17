@@ -23,6 +23,7 @@ using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.Accounts.Systems.Accounts;
 using Sovereign.EngineCore.Events;
+using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Database;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
@@ -78,7 +79,10 @@ public class SelectPlayerRestService(
             // Select player.
             const bool newPlayer = false;
             accountsController.SelectPlayer(eventSender, accountId, playerId, newPlayer);
-            return Task.FromResult(Results.Ok());
+            return Task.FromResult(Results.Ok(new SelectPlayerResponse
+            {
+                Result = "OK"
+            }));
         }
         catch (Exception e)
         {
