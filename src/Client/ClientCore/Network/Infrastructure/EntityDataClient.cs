@@ -51,7 +51,7 @@ public class EntityDataClient(RestClient restClient, ILogger<EntityDataClient> l
         {
             try
             {
-                var response = await restClient.Get($"{RestEndpoints.EntityData}/{entityId:X}");
+                var response = await restClient.Get($"{RestEndpoints.EntityData}/{entityId}");
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     logger.LogError("Failed to refresh entity data for ID {EntityId:X}: {StatusCode}",
