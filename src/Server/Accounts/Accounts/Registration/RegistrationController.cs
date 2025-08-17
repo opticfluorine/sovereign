@@ -25,7 +25,7 @@ namespace Sovereign.Accounts.Accounts.Registration;
 /// <summary>
 ///     Responsible for performing registrations.
 /// </summary>
-public sealed class RegistrationController
+public sealed class RegistrationController(PersistenceProviderManager providerManager)
 {
     /// <summary>
     ///     Argon2 opslimit.
@@ -46,13 +46,6 @@ public sealed class RegistrationController
     /// </remarks>
     private const int MEMLIMIT = 33554432;
 
-    private readonly PersistenceProviderManager providerManager;
-
-    public RegistrationController(PersistenceProviderManager providerManager)
-    {
-        this.providerManager = providerManager;
-    }
-
     /// <summary>
     ///     Registers the given username and password.
     /// </summary>
@@ -67,9 +60,17 @@ public sealed class RegistrationController
             out var opsLimit, out var memLimit);
 
         /* Create account. */
-        var query = providerManager.PersistenceProvider.AddAccountQuery;
-        return query.AddAccount(Guid.NewGuid(), username,
-            salt, hash, opsLimit, memLimit);
+        providerManager.PersistenceProvider.TransactionLock.Acquire();
+        try
+        {
+            var query = providerManager.PersistenceProvider.AddAccountQuery;
+            return query.AddAccount(Guid.NewGuid(), username,
+                salt, hash, opsLimit, memLimit);
+        }
+        finally
+        {
+            providerManager.PersistenceProvider.TransactionLock.Release();
+        }
     }
 
     /// <summary>

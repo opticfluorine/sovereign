@@ -254,6 +254,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         RemoveEntityTypeComponentQuery = new SimpleSqliteRemoveComponentQuery(EntityTypeName, conn);
     }
 
+    public ITransactionLock TransactionLock { get; } = new SingleWriterTransactionLock();
+
     public ISetTemplateQuery SetTemplateQuery { get; }
     public IRemoveComponentQuery RemoveAdminComponentQuery { get; }
     public IAddComponentQuery<string> AddNameQuery { get; }

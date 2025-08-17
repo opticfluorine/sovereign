@@ -408,6 +408,8 @@ public sealed class StateBuffer
     /// <param name="persistenceProvider">Persistence provider.</param>
     public void Synchronize(IPersistenceProvider persistenceProvider)
     {
+        persistenceProvider.TransactionLock.Acquire();
+
         try
         {
             using (var transaction = persistenceProvider.Connection.BeginTransaction())
@@ -555,6 +557,10 @@ public sealed class StateBuffer
         {
             logger.LogCritical(e, "Error while synchronizing database.");
             fatalErrorHandler.FatalError();
+        }
+        finally
+        {
+            persistenceProvider.TransactionLock.Release();
         }
     }
 
