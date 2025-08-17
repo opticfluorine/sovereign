@@ -59,7 +59,7 @@ public sealed class RegistrationController
     /// <param name="username">Username.</param>
     /// <param name="password">Password.</param>
     /// <returns>true if successful, false otherwise.</returns>
-    public bool Register(string username, string password)
+    public bool RegisterSync(string username, string password)
     {
         /* Generate authentication details. */
         var salt = GenerateSalt();

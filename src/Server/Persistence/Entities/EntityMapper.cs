@@ -38,8 +38,6 @@ public sealed class EntityMapper
     /// </summary>
     private bool initialized;
 
-    private INextPersistedIdQuery? nextIdQuery;
-
     /// <summary>
     ///     Next available persisted ID.
     /// </summary>
@@ -50,7 +48,6 @@ public sealed class EntityMapper
     /// </summary>
     public void InitializeMapper(INextPersistedIdQuery nextIdQuery)
     {
-        this.nextIdQuery = nextIdQuery;
         NextPersistedId = nextIdQuery.GetNextPersistedEntityId();
 
         initialized = true;
@@ -83,8 +80,8 @@ public sealed class EntityMapper
         if (!initialized) throw new InvalidOperationException("Not initialized");
 
         needToCreate = false;
-        if (volatileEntityId is >= EntityConstants.FirstPersistedEntityId 
-            or (>= EntityConstants.FirstBlockEntityId and <= EntityConstants.LastBlockEntityId)) 
+        if (volatileEntityId is >= EntityConstants.FirstPersistedEntityId
+            or >= EntityConstants.FirstBlockEntityId and <= EntityConstants.LastBlockEntityId)
             return volatileEntityId;
 
         if (volatileToPersisted.TryGetValue(volatileEntityId, out var id)) return id;
