@@ -67,13 +67,16 @@ public sealed class AccountRegistrationRestService(
 
             logger.LogInformation("Registration for user '{Username}' returned status {Result}. (Request ID: {ID})",
                 request.Username, result, context.TraceIdentifier);
-            var message = resultToString[result];
+            var response = new RegistrationResponse
+            {
+                Result = resultToString[result]
+            };
             return Task.FromResult(result switch
             {
-                RegistrationResult.Successful => Results.Ok(message),
-                RegistrationResult.InvalidInput => Results.BadRequest(message),
-                RegistrationResult.UsernameTaken => Results.BadRequest(message),
-                _ => Results.InternalServerError(message)
+                RegistrationResult.Successful => Results.Ok(response),
+                RegistrationResult.InvalidInput => Results.BadRequest(response),
+                RegistrationResult.UsernameTaken => Results.BadRequest(response),
+                _ => Results.InternalServerError(response)
             });
         }
         catch (JsonException)

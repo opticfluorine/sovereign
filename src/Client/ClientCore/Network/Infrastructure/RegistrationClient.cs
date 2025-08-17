@@ -92,7 +92,7 @@ public sealed class RegistrationClient
                 return new Option<RegistrationResponse, string>(msg);
             }
 
-            if (httpResponse.StatusCode == HttpStatusCode.Created)
+            if (httpResponse.StatusCode == HttpStatusCode.OK)
             {
                 logger.LogInformation("Registration successful.");
                 result = new Option<RegistrationResponse, string>(response);
