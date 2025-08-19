@@ -19,28 +19,26 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Services;
-using Sovereign.EngineCore.Network;
-using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.ServerCore.Configuration;
-using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Accounts;
 
 /// <summary>
 ///     REST service for client authentication.
 /// </summary>
-public sealed class AuthenticationRestService : IRestService
+public sealed class AuthenticationRestService
 {
     /// <summary>
     ///     Maximum request length, in bytes.
     /// </summary>
-    private const int MaxRequestLength = 1024;
+    public const int MaxRequestLength = 1024;
 
     private readonly AccountServices accountServices;
     private readonly ILogger<AuthenticationRestService> logger;
@@ -87,31 +85,19 @@ public sealed class AuthenticationRestService : IRestService
         this.logger = logger;
     }
 
-    public string Path => RestEndpoints.Authentication;
-
-    public RestPathType PathType => RestPathType.Static;
-
-    public HttpMethod RequestType => HttpMethod.POST;
-
-    public async Task OnRequest(HttpContextBase ctx)
+    /// <summary>
+    ///     Login POST endpoint.
+    /// </summary>
+    /// <param name="requestData">Request.</param>
+    /// <returns>Result.</returns>
+    public IResult PostLogin([FromBody] LoginRequest requestData)
     {
         try
         {
-            // Safety check.
-            if (ctx.Request.ContentLength > MaxRequestLength)
-            {
-                await SendResponse(ctx, 413, "Request too large.");
-                return;
-            }
-
             // Decode and validate input.
-            var requestJson = ctx.Request.DataAsString;
-            var requestData = JsonSerializer.Deserialize<LoginRequest>(requestJson,
-                MessageConfig.JsonOptions);
-            if (requestData == null || requestData.Username == null || requestData.Password == null)
+            if (requestData.Username == null || requestData.Password == null)
             {
-                await SendResponse(ctx, 400, "Incomplete input.");
-                return;
+                return Results.BadRequest("Incomplete input.");
             }
 
             // Attempt login.
@@ -121,63 +107,28 @@ public sealed class AuthenticationRestService : IRestService
             if (result != AuthenticationResult.Successful)
             {
                 // Report error.
-                await SendResponse(ctx, resultToStatus[result], resultToString[result]);
-                return;
+                return Results.Text(resultToString[result], null, Encoding.UTF8, resultToStatus[result]);
             }
 
             // Register handoff and return connection information.
-            await SendResponse(ctx,
-                resultToStatus[result],
-                resultToString[result],
-                guid.ToString(),
-                loginTracker.GetApiKey(guid),
-                secret,
-                networkOptions.Host,
-                networkOptions.Port);
+            return Results.Ok(new LoginResponse
+            {
+                Result = resultToString[result],
+                UserId = guid.ToString(),
+                RestApiKey = loginTracker.GetApiKey(guid),
+                SharedSecret = secret,
+                ServerHost = networkOptions.Host,
+                ServerPort = networkOptions.Port
+            });
         }
         catch (JsonException)
         {
-            try
-            {
-                await SendResponse(ctx, 400, "Malformed input.");
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error sending malformed input response.");
-            }
+            return Results.BadRequest("Malformed input.");
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error handling login.");
-            try
-            {
-                await SendResponse(ctx, 500, "Error processing login request.");
-            }
-            catch (Exception e2)
-            {
-                logger.LogError(e2, "Error sending error response.");
-            }
+            return Results.InternalServerError("Error processing login request.");
         }
-    }
-
-    private async Task SendResponse(HttpContextBase ctx,
-        int status, string result, string id = "", string apiKey = "",
-        string secret = "", string host = "",
-        ushort port = 0)
-    {
-        ctx.Response.StatusCode = status;
-
-        var responseData = new LoginResponse
-        {
-            Result = result,
-            UserId = id,
-            RestApiKey = apiKey,
-            SharedSecret = secret,
-            ServerHost = host,
-            ServerPort = port
-        };
-        var responseJson = JsonSerializer.Serialize(responseData);
-
-        await ctx.Response.Send(Encoding.UTF8.GetBytes(responseJson));
     }
 }

@@ -34,6 +34,11 @@ public interface IPersistenceProvider : IDisposable
     IDbConnection Connection { get; }
 
     /// <summary>
+    ///     Transaction lock.
+    /// </summary>
+    ITransactionLock TransactionLock { get; }
+
+    /// <summary>
     ///     IMigrationQuery for this persistence provider.
     /// </summary>
     IMigrationQuery MigrationQuery { get; }

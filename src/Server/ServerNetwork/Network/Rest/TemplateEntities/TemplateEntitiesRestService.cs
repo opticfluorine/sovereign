@@ -14,57 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Sovereign.EngineCore.Network.Rest;
+using Microsoft.AspNetCore.Http;
 using Sovereign.ServerCore.Systems.TemplateEntity;
-using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.TemplateEntities;
 
 /// <summary>
 ///     REST service that provides a list of all template entities.
 /// </summary>
-public class TemplateEntitiesRestService : AuthenticatedRestService
+public class TemplateEntitiesRestService(TemplateEntityServices templateEntityServices)
 {
-    private readonly TemplateEntityServices templateEntityServices;
-
-    public TemplateEntitiesRestService(RestAuthenticator authenticator, TemplateEntityServices templateEntityServices,
-        ILogger<TemplateEntitiesRestService> logger)
-        : base(authenticator, logger)
+    /// <summary>
+    ///     GET endpoint for retrieving the list of template entities.
+    /// </summary>
+    /// <returns>List of template entities.</returns>
+    public async Task<IResult> TemplateEntitiesGet()
     {
-        this.templateEntityServices = templateEntityServices;
-    }
-
-    public override string Path => RestEndpoints.TemplateEntities;
-    public override RestPathType PathType => RestPathType.Static;
-    public override HttpMethod RequestType => HttpMethod.GET;
-
-    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
-    {
-        logger.LogInformation("Received template entity data request from account {AccountId}.", accountId);
-
-        try
-        {
-            var data = await templateEntityServices.GetLatestTemplateEntityData();
-            ctx.Response.StatusCode = 200;
-            ctx.Response.ContentType = "application/octet-stream";
-            ctx.Response.ContentLength = data.Length;
-            await ctx.Response.Send(data);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error when sending template entity data.");
-            try
-            {
-                ctx.Response.StatusCode = 500;
-                await ctx.Response.Send();
-            }
-            catch (Exception e2)
-            {
-                logger.LogError(e2, "Error when sending error response.");
-            }
-        }
+        return Results.Bytes(await templateEntityServices.GetLatestTemplateEntityData(),
+            "application/octet-stream");
     }
 }

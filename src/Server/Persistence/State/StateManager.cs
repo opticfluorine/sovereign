@@ -50,9 +50,9 @@ public sealed class StateManager : IDisposable
         WorldSegmentPersister worldSegmentPersister, IDataServices dataServices)
     {
         FrontBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
-            stateBufferLogger, dataServices);
+            stateBufferLogger, dataServices, entityMapper);
         backBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
-            stateBufferLogger, dataServices);
+            stateBufferLogger, dataServices, entityMapper);
 
         this.entityManager = entityManager;
         this.persistenceProviderManager = persistenceProviderManager;

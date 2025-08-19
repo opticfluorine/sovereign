@@ -17,43 +17,37 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.Accounts.Systems.Accounts;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
-using Sovereign.EngineCore.Network;
-using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Players;
 using Sovereign.ServerCore.Configuration;
-using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
 
 /// <summary>
 ///     REST service for creating new player characters.
 /// </summary>
-public class CreatePlayerRestService : AuthenticatedRestService
+public sealed class CreatePlayerRestService
 {
-    /// <summary>
-    ///     Maximum request length, in bytes.
-    /// </summary>
-    private const int MaxRequestLength = 1024;
-
     private readonly AccountsController accountsController;
 
     /// <summary>
     ///     Object used as a lock to avoid name duplication due to a race condition.
     /// </summary>
-    private readonly object creationLock = new();
+    private readonly Lock creationLock = new();
 
     private readonly IEntityFactory entityFactory;
     private readonly IEventSender eventSender;
+    private readonly ILogger<CreatePlayerRestService> logger;
     private readonly NewPlayersOptions newPlayersOptions;
     private readonly PersistencePlayerServices playerServices;
 
@@ -64,85 +58,53 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
     private readonly CreatePlayerRequestValidator requestValidator;
 
-    public CreatePlayerRestService(RestAuthenticator authenticator, IEntityFactory entityFactory,
+    public CreatePlayerRestService(IEntityFactory entityFactory,
         CreatePlayerRequestValidator requestValidator, PersistencePlayerServices playerServices,
         AccountsController accountsController, IEventSender eventSender, IOptions<NewPlayersOptions> newPlayersOptions,
         ILogger<CreatePlayerRestService> logger)
-        : base(authenticator, logger)
     {
         this.entityFactory = entityFactory;
         this.requestValidator = requestValidator;
         this.playerServices = playerServices;
         this.accountsController = accountsController;
         this.eventSender = eventSender;
+        this.logger = logger;
         this.newPlayersOptions = newPlayersOptions.Value;
     }
 
-    public override string Path => RestEndpoints.Player;
-    public override RestPathType PathType => RestPathType.Static;
-    public override HttpMethod RequestType => HttpMethod.POST;
-
-    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
+    /// <summary>
+    ///     POST endpoint for creating players.
+    /// </summary>
+    /// <param name="request">Request body.</param>
+    /// <param name="context">Context.</param>
+    /// <returns>Result.</returns>
+    public Task<IResult> CreatePlayerPost([FromBody] CreatePlayerRequest request, HttpContext context)
     {
         try
         {
-            // Safety check.
-            if (ctx.Request.ContentLength > MaxRequestLength)
-            {
-                await SendResponse(ctx, 413, "Request too large.");
-                return;
-            }
+            if (!requestValidator.IsValid(request))
+                return Task.FromResult(Results.BadRequest("Malformed input."));
 
-            // Decode and validate input.
-            var requestJson = ctx.Request.DataAsString;
-            var requestData = JsonSerializer.Deserialize<CreatePlayerRequest>(requestJson,
-                MessageConfig.JsonOptions);
-            if (!requestValidator.IsValid(requestData))
-            {
-                await SendResponse(ctx, 400, "Incomplete input.");
-                return;
-            }
+            var accountClaim = context.User.FindFirst(RestAuthentication.ClaimTypes.AccountId) ??
+                               throw new Exception("No AccountId claim for user.");
+            var accountId = Guid.Parse(accountClaim.Value);
 
             // Attempt player creation.
-            var result = CreatePlayer(requestData, accountId, out var playerId);
-            if (result)
-                await SendResponse(ctx, 201, "Success.", playerId);
-            else
-                await SendResponse(ctx, 409, "Failed.");
+            if (CreatePlayer(request, accountId, out var playerId))
+                return Task.FromResult(Results.Created($"{context.Request.Path}/{playerId}",
+                    new CreatePlayerResponse
+                    {
+                        Result = "Success.",
+                        PlayerId = playerId
+                    }));
+
+            return Task.FromResult(Results.Conflict("Failed."));
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error handling create player request.");
-            try
-            {
-                await SendResponse(ctx, 500, "Error processing request.");
-            }
-            catch (Exception e2)
-            {
-                logger.LogError(e2, "Error sending error response.");
-            }
+            return Task.FromResult(Results.InternalServerError("An error occurred."));
         }
-    }
-
-    /// <summary>
-    ///     Sends a response.
-    /// </summary>
-    /// <param name="ctx">HTTP context.</param>
-    /// <param name="status">Response status code.</param>
-    /// <param name="result">Human-readable string describing the result.</param>
-    /// <param name="playerId">Entity ID of newly created player. Only relevant for successful requests.</param>
-    private async Task SendResponse(HttpContextBase ctx, int status, string result, ulong playerId = 0)
-    {
-        ctx.Response.StatusCode = status;
-
-        var responseData = new CreatePlayerResponse
-        {
-            Result = result,
-            PlayerId = playerId
-        };
-        var responseJson = JsonSerializer.Serialize(responseData);
-
-        await ctx.Response.Send(Encoding.UTF8.GetBytes(responseJson));
     }
 
     /// <summary>
@@ -167,7 +129,8 @@ public class CreatePlayerRestService : AuthenticatedRestService
 
         lock (creationLock)
         {
-            if (request.PlayerName != null && !recentNames.Contains(request.PlayerName) &&
+            if (!string.IsNullOrEmpty(request.PlayerName) &&
+                !recentNames.Contains(request.PlayerName) &&
                 !playerServices.IsPlayerNameTaken(request.PlayerName))
             {
                 // Name is available and wasn't created recently - let's take it.

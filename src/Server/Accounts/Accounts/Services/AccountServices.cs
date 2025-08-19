@@ -130,7 +130,7 @@ public sealed class AccountServices
                 return RegistrationResult.InvalidInput;
 
             // Attempt registration.
-            if (!registrationController.Register(username, password))
+            if (!registrationController.RegisterSync(username, password))
                 // Interpret failure as username being taken. It could also
                 // be caused by other database failures, but in practice
                 // violating the unique constraint is likely to be at

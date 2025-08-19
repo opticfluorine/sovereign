@@ -27,6 +27,7 @@ using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineUtil.Collections;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Database.Queries;
+using Sovereign.Persistence.Entities;
 using Sovereign.Persistence.Systems.Persistence;
 
 namespace Sovereign.Persistence.State;
@@ -78,6 +79,8 @@ public sealed class StateBuffer
     ///     Entity key-value pairs to be synchronized.
     /// </summary>
     private readonly HashSet<(ulong, string)> entityKeyValuePairs = new();
+
+    private readonly EntityMapper entityMapper;
 
     /// <summary>
     ///     EntityType state updates.
@@ -160,7 +163,7 @@ public sealed class StateBuffer
 
     public StateBuffer(FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
         PersistenceInternalController internalController, WorldSegmentPersister worldSegmentPersister,
-        ILogger<StateBuffer> logger, IDataServices dataServices)
+        ILogger<StateBuffer> logger, IDataServices dataServices, EntityMapper entityMapper)
     {
         this.fatalErrorHandler = fatalErrorHandler;
         this.eventSender = eventSender;
@@ -168,6 +171,7 @@ public sealed class StateBuffer
         this.worldSegmentPersister = worldSegmentPersister;
         this.logger = logger;
         this.dataServices = dataServices;
+        this.entityMapper = entityMapper;
     }
 
     /// <summary>
@@ -404,6 +408,8 @@ public sealed class StateBuffer
     /// <param name="persistenceProvider">Persistence provider.</param>
     public void Synchronize(IPersistenceProvider persistenceProvider)
     {
+        persistenceProvider.TransactionLock.Acquire();
+
         try
         {
             using (var transaction = persistenceProvider.Connection.BeginTransaction())
@@ -552,6 +558,10 @@ public sealed class StateBuffer
             logger.LogCritical(e, "Error while synchronizing database.");
             fatalErrorHandler.FatalError();
         }
+        finally
+        {
+            persistenceProvider.TransactionLock.Release();
+        }
     }
 
     /// <summary>
@@ -650,9 +660,12 @@ public sealed class StateBuffer
         var removeQuery = provider.RemoveEntityKeyValueQuery;
 
         foreach (var (entityId, key) in entityKeyValuePairs)
+        {
+            var mappedEntityId = entityMapper.GetPersistedId(entityId, out _);
             if (dataServices.TryGetEntityKeyValue(entityId, key, out var value))
-                updateQuery.UpdateEntityKeyValue(entityId, key, value, transaction);
+                updateQuery.UpdateEntityKeyValue(mappedEntityId, key, value, transaction);
             else
-                removeQuery.RemoveEntityKeyValue(entityId, key, transaction);
+                removeQuery.RemoveEntityKeyValue(mappedEntityId, key, transaction);
+        }
     }
 }

@@ -14,64 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Sovereign.Accounts.Accounts.Services;
-using Sovereign.EngineCore.Network;
-using Sovereign.EngineCore.Network.Rest;
-using Sovereign.EngineCore.Player;
+using Microsoft.AspNetCore.Http;
 using Sovereign.ServerCore.Systems.Scripting;
-using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.TemplateEntities;
 
 /// <summary>
 ///     REST endpoint for providing ScriptInfo data.
 /// </summary>
-public class ScriptInfoRestService : AuthenticatedRestService
+public sealed class ScriptInfoRestService(ScriptingServices scriptingServices)
 {
-    private readonly AccountServices accountServices;
-    private readonly PlayerRoleCheck roleCheck;
-    private readonly ScriptingServices scriptingServices;
-
-    public ScriptInfoRestService(RestAuthenticator authenticator, ILogger<ScriptInfoRestService> logger,
-        PlayerRoleCheck roleCheck, AccountServices accountServices, ScriptingServices scriptingServices)
-        : base(authenticator, logger)
-    {
-        this.roleCheck = roleCheck;
-        this.accountServices = accountServices;
-        this.scriptingServices = scriptingServices;
-    }
-
-    public override string Path => RestEndpoints.ScriptInfo;
-    public override RestPathType PathType => RestPathType.Static;
-    public override HttpMethod RequestType => HttpMethod.GET;
-
-    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
-    {
-        if (!accountServices.TryGetPlayerForAccount(accountId, out var playerId) || !roleCheck.IsPlayerAdmin(playerId))
-        {
-            await SendAccessDenied(ctx);
-            return;
-        }
-
-        var scriptInfo = scriptingServices.GetLoadedScriptInfo();
-        var scriptInfoJson = JsonSerializer.Serialize(scriptInfo, MessageConfig.JsonOptions);
-
-        ctx.Response.StatusCode = 200;
-        ctx.Response.ContentType = "application/json";
-        await ctx.Response.Send(scriptInfoJson);
-    }
-
     /// <summary>
-    ///     Sends an access denied response.
+    ///     GET endpoint for retrieving ScriptInfo data.
     /// </summary>
-    /// <param name="ctx">Response context.</param>
-    private async Task SendAccessDenied(HttpContextBase ctx)
+    /// <returns>Result.</returns>
+    public Task<IResult> ScriptInfoGet()
     {
-        ctx.Response.StatusCode = 403; // Forbidden
-        await ctx.Response.Send("Access denied.");
+        return Task.FromResult(Results.Ok(scriptingServices.GetLoadedScriptInfo()));
     }
 }

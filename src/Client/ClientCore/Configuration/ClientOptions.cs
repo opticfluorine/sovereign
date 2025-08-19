@@ -143,44 +143,30 @@ public sealed class ConnectionOptions
 
     public const bool DefaultRestTls = false;
 
-    public ConnectionOptions() : this(DefaultHost, DefaultPort, DefaultRestHost,
-        DefaultRestPort, DefaultRestTls)
-    {
-    }
-
-    public ConnectionOptions(string host, ushort port, string restHost, ushort restPort, bool restTls)
-    {
-        Host = host;
-        Port = port;
-        RestHost = restHost;
-        RestPort = restPort;
-        RestTls = restTls;
-    }
-
     /// <summary>
     ///     Server hostname.
     /// </summary>
-    public string Host { get; private set; }
+    public string Host { get; set; } = DefaultHost;
 
     /// <summary>
     ///     Server port.
     /// </summary>
-    public ushort Port { get; private set; }
+    public ushort Port { get; set; } = DefaultPort;
 
     /// <summary>
     ///     REST server hostname. Typically the same as Host.
     /// </summary>
-    public string RestHost { get; private set; }
+    public string RestHost { get; set; } = DefaultRestHost;
 
     /// <summary>
     ///     REST server port.
     /// </summary>
-    public ushort RestPort { get; private set; }
+    public ushort RestPort { get; set; } = DefaultRestPort;
 
     /// <summary>
     ///     Whether the REST server is using a TLS-encrypted connection.
     /// </summary>
-    public bool RestTls { get; private set; }
+    public bool RestTls { get; set; } = DefaultRestTls;
 }
 
 /// <summary>

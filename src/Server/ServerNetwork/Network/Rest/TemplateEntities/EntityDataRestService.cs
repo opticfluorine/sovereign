@@ -16,73 +16,39 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Sovereign.Accounts.Accounts.Services;
-using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Network;
-using Sovereign.EngineCore.Network.Rest;
-using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineUtil.Collections;
 using Sovereign.NetworkCore.Network.Rest.Data;
-using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.TemplateEntities;
 
-public class EntityDataRestService : AuthenticatedRestService
+/// <summary>
+///     REST endpoint for retrieving entity data.
+/// </summary>
+public sealed class EntityDataRestService(
+    ILogger<EntityDataRestService> logger,
+    IDataServices dataServices)
 {
-    private readonly AccountServices accountServices;
     private readonly ObjectPool<Dictionary<string, string>> dataPool = new();
-    private readonly IDataServices dataServices;
-    private readonly LoggingUtil loggingUtil;
-    private readonly PlayerRoleCheck roleCheck;
 
-    public EntityDataRestService(RestAuthenticator authenticator, ILogger<EntityDataRestService> logger,
-        AccountServices accountServices, PlayerRoleCheck roleCheck, LoggingUtil loggingUtil, IDataServices dataServices)
-        : base(authenticator, logger)
-    {
-        this.accountServices = accountServices;
-        this.roleCheck = roleCheck;
-        this.loggingUtil = loggingUtil;
-        this.dataServices = dataServices;
-    }
-
-    public override string Path => RestEndpoints.EntityData + "/{id}";
-    public override RestPathType PathType => RestPathType.Parameter;
-    public override HttpMethod RequestType => HttpMethod.GET;
-
-    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
+    /// <summary>
+    ///     GET endpoint for retrieving entity data.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="context">Context.</param>
+    /// <returns>Result.</returns>
+    public Task<IResult> EntityDataGet([FromRoute] ulong entityId, HttpContext context)
     {
         try
         {
-            var hasPlayer = accountServices.TryGetPlayerForAccount(accountId, out var playerId);
-            if (!hasPlayer || !roleCheck.IsPlayerAdmin(playerId))
-            {
-                if (hasPlayer)
-                    logger.LogError("403 Forbidden - Bad access attempt by player {Player}.",
-                        loggingUtil.FormatEntity(playerId));
-                else
-                    logger.LogError("403 Forbidden - Bad access attempt by account {AccountId}.", accountId);
-
-                ctx.Response.StatusCode = 403; // Forbidden
-                await ctx.Response.Send();
-                return;
-            }
-
-            if (!ulong.TryParse(ctx.Request.Url.Parameters["id"], NumberStyles.HexNumber, null, out var entityId))
-            {
-                logger.LogError("Bad entity ID {EntityId} from player {Player}.", ctx.Request.Url.Parameters["id"],
-                    loggingUtil.FormatEntity(playerId));
-                ctx.Response.StatusCode = 400; // Bad Request
-                await ctx.Response.Send();
-                return;
-            }
-
-            Dictionary<string, string> data = dataPool.TakeObject();
-            var responseJson = string.Empty;
+            var data = dataPool.TakeObject();
+            string responseJson;
             try
             {
                 dataServices.GetEntityData(entityId, data);
@@ -97,23 +63,13 @@ public class EntityDataRestService : AuthenticatedRestService
                 dataPool.ReturnObject(data);
             }
 
-            ctx.Response.StatusCode = 200; // OK
-            ctx.Response.ContentType = "application/json";
-            await ctx.Response.Send(responseJson);
+            return Task.FromResult(Results.Ok(responseJson));
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error processing entity data request for entity ID {EntityId} and account {AccountId}.",
-                ctx.Request.Url.Parameters["id"] ?? "[None]", accountId);
-            ctx.Response.StatusCode = 500; // Internal Server Error
-            try
-            {
-                await ctx.Response.Send();
-            }
-            catch (Exception e2)
-            {
-                logger.LogError(e2, "Error sending response for entity data request.");
-            }
+            logger.LogError(e, "Error processing entity data request for entity ID {EntityId:X}. (Request ID: {Id})",
+                entityId, context.TraceIdentifier);
+            return Task.FromResult(Results.InternalServerError());
         }
     }
 }

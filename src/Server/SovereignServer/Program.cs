@@ -16,7 +16,10 @@
 
 using System;
 using System.IO;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -29,12 +32,14 @@ using Sovereign.Server;
 using Sovereign.ServerCore;
 using Sovereign.ServerCore.Lua;
 using Sovereign.ServerNetwork;
+using Sovereign.ServerNetwork.Network.Rest;
 
 // Pin working directory to the executable location.
 // This is needed for running as a Windows Service.
 Environment.CurrentDirectory = Path.GetFullPath(AppContext.BaseDirectory);
 
-var builder = Host.CreateApplicationBuilder(args);
+//var builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 // Configure logging.
 Log.Logger = new LoggerConfiguration()
@@ -62,6 +67,14 @@ builder.Services
     .AddSovereignCoreOptions(builder.Configuration)
     .AddSovereignServerOptions(builder.Configuration);
 
+// Authentication and authorization for REST APIs.
+builder.Services
+    .AddAuthentication()
+    .AddScheme<AuthenticationSchemeOptions, RestAuthenticationHandler>(RestAuthenticationHandler.SchemeName,
+        options => { });
+builder.Services.AddAuthorizationBuilder()
+    .AddSovereignPolicies();
+
 // Load server runtime options.
 var runtimeOptions = builder.Configuration
     .GetSection($"Sovereign:{nameof(RuntimeOptions)}")
@@ -72,5 +85,9 @@ builder.Services.AddSystemd();
 builder.Services.AddWindowsService(options => { options.ServiceName = runtimeOptions.WindowsServiceName; });
 
 // Run application.
-var host = builder.Build();
-host.Run();
+var app = builder.Build();
+
+var restProvider = app.Services.GetService<RestServiceProvider>() ?? throw new Exception("No REST provider resolved.");
+restProvider.AddEndpoints(app);
+
+app.Run();

@@ -15,59 +15,46 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Players;
-using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
 
 /// <summary>
 ///     REST service for listing player characters.
 /// </summary>
-public class ListPlayersRestService : AuthenticatedRestService
+public class ListPlayersRestService
 {
+    private readonly ILogger<ListPlayersRestService> logger;
     private readonly PersistencePlayerServices playerServices;
 
-    public ListPlayersRestService(RestAuthenticator authenticator, PersistencePlayerServices playerServices,
-        ILogger<ListPlayersRestService> logger) :
-        base(authenticator, logger)
+    public ListPlayersRestService(PersistencePlayerServices playerServices, ILogger<ListPlayersRestService> logger)
     {
         this.playerServices = playerServices;
+        this.logger = logger;
     }
 
-    public override string Path => RestEndpoints.Player;
-    public override RestPathType PathType => RestPathType.Static;
-    public override HttpMethod RequestType => HttpMethod.GET;
-
-    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
+    /// <summary>
+    ///     GET endpoint for listing players belonging to the logged in account.
+    /// </summary>
+    /// <param name="context">Context.</param>
+    /// <returns>Result.</returns>
+    public Task<IResult> ListPlayersGet(HttpContext context)
     {
-        logger.LogDebug("ListPlayers requested for account ID {AccountId}.", accountId);
         try
         {
+            var accountId = Guid.Parse(context.User.FindFirst(RestAuthentication.ClaimTypes.AccountId)?.Value ??
+                                       throw new Exception("User is missing AccountId claim."));
             var players = playerServices.GetPlayersForAccount(accountId);
-            var response = new ListPlayersResponse { Players = players };
-            var responseJson = JsonSerializer.Serialize(response);
-            ctx.Response.StatusCode = 200;
-            await ctx.Response.Send(Encoding.UTF8.GetBytes(responseJson));
+            return Task.FromResult(Results.Ok(new ListPlayersResponse { Players = players }));
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception while handling ListPlayers for account ID {Id}.", accountId);
-            try
-            {
-                ctx.Response.StatusCode = 500;
-                await ctx.Response.Send();
-            }
-            catch (Exception e2)
-            {
-                logger.LogError(e2, "Exception while sending error 500 during ListPlayers for account ID {Id}.",
-                    accountId);
-            }
+            logger.LogError(e, "Exception while handling ListPlayers. (Request ID: {Id})", context.TraceIdentifier);
+            return Task.FromResult(Results.InternalServerError());
         }
     }
 }

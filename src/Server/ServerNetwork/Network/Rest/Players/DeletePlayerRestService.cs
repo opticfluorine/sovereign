@@ -15,119 +15,50 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Sovereign.EngineCore.Network.Rest;
-using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.Persistence.Players;
-using WatsonWebserver.Core;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
 
 /// <summary>
 ///     REST service for deleting existing player characters.
 /// </summary>
-public class DeletePlayerRestService : AuthenticatedRestService
+public sealed class DeletePlayerRestService(
+    PersistencePlayerServices playerServices,
+    ILogger<DeletePlayerRestService> logger)
 {
     /// <summary>
-    ///     Maximum request length in bytes.
+    ///     DELETE endpoint for players.
     /// </summary>
-    private const int MaxRequestLength = 128;
-
-    private readonly PersistencePlayerServices playerServices;
-
-    public DeletePlayerRestService(RestAuthenticator authenticator, PersistencePlayerServices playerServices,
-        ILogger<DeletePlayerRestService> logger) :
-        base(authenticator, logger)
-    {
-        this.playerServices = playerServices;
-    }
-
-    public override string Path => RestEndpoints.Player + "/{id}";
-    public override RestPathType PathType => RestPathType.Parameter;
-    public override HttpMethod RequestType => HttpMethod.DELETE;
-
-    protected override async Task OnAuthenticatedRequest(HttpContextBase ctx, Guid accountId)
+    /// <param name="playerId">Player entity ID.</param>
+    /// <param name="context">Context.</param>
+    /// <returns>Result.</returns>
+    public Task<IResult> PlayerDelete([FromRoute] ulong playerId, HttpContext context)
     {
         try
         {
-            // Safety check.
-            if (ctx.Request.ContentLength > MaxRequestLength)
-            {
-                await SendResponse(ctx, 413, "Request too large.");
-                return;
-            }
-
-            // Decode and validate input.
-            var idParam = ctx.Request.Url.Parameters["id"];
-            ulong playerEntityId;
-            try
-            {
-                playerEntityId = Convert.ToUInt64(idParam);
-            }
-            catch (FormatException)
-            {
-                logger.LogError("Account {AccountId} tried to delete invalid player entity {EntityId:X}.", accountId,
-                    idParam);
-                await SendResponse(ctx, 400, "Invalid player entity ID.");
-                return;
-            }
-
             // Verify that the player belongs to the authenticated account.
-            if (!playerServices.ValidatePlayerAccountPair(playerEntityId, accountId))
+            var accountId = Guid.Parse(context.User.FindFirst(RestAuthentication.ClaimTypes.AccountId)?.Value ??
+                                       throw new Exception("User missing AccountId claim."));
+            if (!playerServices.ValidatePlayerAccountPair(playerId, accountId))
             {
-                logger.LogError("Entity {EntityId:X} is not a player assigned to account {AccountId}.", playerEntityId,
-                    accountId);
-                await SendResponse(ctx, 400, "Player does not belong to account.");
-                return;
+                logger.LogError(
+                    "Entity {EntityId:X} is not a player assigned to account {AccountId}. (Request ID: {Id})",
+                    playerId, accountId, context.TraceIdentifier);
+                return Task.FromResult(Results.Forbid());
             }
 
             // Logically delete the player.
-            try
-            {
-                playerServices.DeletePlayer(playerEntityId);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error deleting player {EntityId:X}.", playerEntityId);
-                await SendResponse(ctx, 500, "Error deleting player.");
-                return;
-            }
-
-            // Success.
-            await SendResponse(ctx, 200, "Success.");
+            playerServices.DeletePlayer(playerId);
+            return Task.FromResult(Results.Ok());
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error handling delete player request.");
-            try
-            {
-                await SendResponse(ctx, 500, "Error processing request.");
-            }
-            catch (Exception e2)
-            {
-                logger.LogError(e2, "Error sending error response.");
-            }
+            logger.LogError(e, "Error handling delete player request. (Request ID: {Id}", context.TraceIdentifier);
+            return Task.FromResult(Results.InternalServerError());
         }
-    }
-
-    /// <summary>
-    ///     Sends a response.
-    /// </summary>
-    /// <param name="ctx">HTTP context.</param>
-    /// <param name="status">Response status code.</param>
-    /// <param name="result">Human-readable result string.</param>
-    private async Task SendResponse(HttpContextBase ctx, int status, string result)
-    {
-        ctx.Response.StatusCode = status;
-
-        var responseData = new DeletePlayerResponse
-        {
-            Result = result
-        };
-        var responseJson = JsonSerializer.Serialize(responseData);
-
-        await ctx.Response.Send(responseJson);
     }
 }
