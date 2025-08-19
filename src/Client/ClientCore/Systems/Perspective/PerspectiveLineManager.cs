@@ -314,6 +314,8 @@ public class PerspectiveLineManager
     /// <param name="isLoad">Unused.</param>
     private void AddEntity(ulong entityId, bool isLoad)
     {
+        if (EntityUtil.IsTemplateEntity(entityId)) return;
+
         var isBlock = blockPositions.HasComponentForEntity(entityId);
         if (!isBlock && !drawables.HasComponentForEntity(entityId)) return;
 
@@ -374,6 +376,8 @@ public class PerspectiveLineManager
     /// <param name="isUnload">Unused.</param>
     private void RemoveEntity(ulong entityId, bool isUnload)
     {
+        if (EntityUtil.IsTemplateEntity(entityId)) return;
+
         var isBlock = blockPositions.HasComponentForEntity(entityId, true);
         if (!isBlock && !drawables.HasComponentForEntity(entityId, true)) return;
 
