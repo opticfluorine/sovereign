@@ -17,6 +17,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
+using LiteNetLib;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.IntegrationTests.Fixtures;
 using Sovereign.NetworkCore.Network.Rest.Data;
@@ -119,5 +120,92 @@ public class AuthTests : IClassFixture<ServerFixture>
         request.Headers.Add("Authorization", $"Basic {garbageToken}");
         var response = await client.SendAsync(request);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    /// <summary>
+    ///     Verifies that a non-admin user cannot access an admin-only endpoint.
+    /// </summary>
+    [Fact]
+    public async Task AdminEndpoint_WithNonAdminToken_ReturnsUnauthorized()
+    {
+        var username = "nonadminuser";
+        var password = "nonadminpass";
+        await RegisterTestAccount(username, password);
+        var loginRequest = new LoginRequest { Username = username, Password = password };
+        var loginResponse = await (await client.PostAsJsonAsync(RestEndpoints.Authentication, loginRequest))
+            .Content.ReadFromJsonAsync<LoginResponse>();
+        Assert.False(string.IsNullOrEmpty(loginResponse?.RestApiKey));
+        Assert.False(string.IsNullOrEmpty(loginResponse?.UserId));
+
+        // Attempt to access admin-only endpoint
+        var basicToken =
+            Convert.ToBase64String(Encoding.UTF8.GetBytes($"{loginResponse.UserId}:{loginResponse.RestApiKey}"));
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{RestEndpoints.TemplateEntities}/1");
+        request.Headers.Add("Authorization", $"Basic {basicToken}");
+        var response = await client.SendAsync(request);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    /// <summary>
+    ///     Tests that the connection handoff to the event server after a successful login works.
+    /// </summary>
+    [Fact]
+    public async Task EventServerHandoff_ValidLogin_Successful()
+    {
+        // Create account and log in.
+        var username = "testuser_evh";
+        var password = "testpass_evh";
+        await RegisterTestAccount(username, password);
+        var loginRequest = new LoginRequest { Username = username, Password = password };
+        var loginResponse = await (await client.PostAsJsonAsync(RestEndpoints.Authentication, loginRequest))
+            .Content.ReadFromJsonAsync<LoginResponse>();
+        Assert.False(string.IsNullOrEmpty(loginResponse?.RestApiKey));
+        Assert.False(string.IsNullOrEmpty(loginResponse?.UserId));
+        var basicToken =
+            Convert.ToBase64String(Encoding.UTF8.GetBytes($"{loginResponse.UserId}:{loginResponse.RestApiKey}"));
+        var request = new HttpRequestMessage(HttpMethod.Get, RestEndpoints.Player);
+        request.Headers.Add("Authorization", $"Basic {basicToken}");
+        var response = await client.SendAsync(request);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        // Now attempt connection to the event server using the handoff info.
+        var listener = new EventBasedNetListener();
+        var evClient = new NetManager(listener);
+        evClient.Start();
+        var peer = evClient.Connect("127.0.0.1", 12820, loginResponse.UserId);
+        await Task.Delay(500);
+        Assert.Equal(ConnectionState.Connected, peer.ConnectionState);
+    }
+
+    /// <summary>
+    ///     Tests that event server connections are rejected if a bad account ID is used while the server is
+    ///     tracking a pending handoff.
+    /// </summary>
+    [Fact]
+    public async Task EventServerHandoff_ValidLogin_BadKey_Rejected()
+    {
+        // Create account and log in.
+        var username = "testuser_evh2";
+        var password = "testpass_evh2";
+        await RegisterTestAccount(username, password);
+        var loginRequest = new LoginRequest { Username = username, Password = password };
+        var loginResponse = await (await client.PostAsJsonAsync(RestEndpoints.Authentication, loginRequest))
+            .Content.ReadFromJsonAsync<LoginResponse>();
+        Assert.False(string.IsNullOrEmpty(loginResponse?.RestApiKey));
+        Assert.False(string.IsNullOrEmpty(loginResponse?.UserId));
+        var basicToken =
+            Convert.ToBase64String(Encoding.UTF8.GetBytes($"{loginResponse.UserId}:{loginResponse.RestApiKey}"));
+        var request = new HttpRequestMessage(HttpMethod.Get, RestEndpoints.Player);
+        request.Headers.Add("Authorization", $"Basic {basicToken}");
+        var response = await client.SendAsync(request);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        // Now attempt connection to the event server using the handoff info.
+        var listener = new EventBasedNetListener();
+        var evClient = new NetManager(listener);
+        evClient.Start();
+        var peer = evClient.Connect("127.0.0.1", 12820, Guid.NewGuid().ToString());
+        await Task.Delay(500);
+        Assert.Equal(ConnectionState.Disconnected, peer.ConnectionState);
     }
 }

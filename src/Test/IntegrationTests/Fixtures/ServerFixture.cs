@@ -70,11 +70,18 @@ public sealed class ServerFixture : IDisposable
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                Arguments = "--Sovereign:NewPlayerOptions:AdminByDefault=false"
             }
         };
         serverProcess.Start();
         Thread.Sleep(2000);
+
+        // Attempt a request to confirm that the server is up.
+        var client = new HttpClient { BaseAddress = new Uri("http://localhost:5000") };
+        var task = client.GetAsync("/");
+        task.Wait(5000);
+        if (!task.IsCompletedSuccessfully) throw new Exception("Server did not come up in time.");
     }
 
     public void Dispose()
@@ -89,7 +96,6 @@ public sealed class ServerFixture : IDisposable
         }
         catch
         {
-            /* ignore */
         }
 
         try
@@ -99,7 +105,6 @@ public sealed class ServerFixture : IDisposable
         }
         catch
         {
-            /* ignore */
         }
     }
 
