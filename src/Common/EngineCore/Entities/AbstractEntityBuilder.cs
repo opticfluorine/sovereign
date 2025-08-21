@@ -55,6 +55,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
     private bool isBlock;
     private bool isDisposed;
+    private bool isPersisted = true;
 
     private ulong templateEntityId;
 
@@ -121,7 +122,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
 
     public ulong Build()
     {
-        if (!entityTable.Exists(entityId)) entityTable.Add(entityId, templateEntityId, isBlock, load);
+        if (!entityTable.Exists(entityId)) entityTable.Add(entityId, templateEntityId, isBlock, load, isPersisted);
         Dispose();
 
         return entityId;
@@ -130,6 +131,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder Template(ulong templateEntityId)
     {
         this.templateEntityId = templateEntityId;
+        return this;
+    }
+
+    public IEntityBuilder WithNonPersistence()
+    {
+        isPersisted = false;
+        return this;
+    }
+
+    public IEntityBuilder WithoutNonPersistence()
+    {
+        isPersisted = true;
         return this;
     }
 

@@ -16,6 +16,7 @@
  */
 
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
@@ -26,8 +27,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public sealed class MaterialModifierStateTracker : BaseStateTracker<int>
 {
     public MaterialModifierStateTracker(MaterialModifierComponentCollection materialModifiers,
-        EntityMapper entityMapper, StateManager stateManager)
-        : base(materialModifiers, 0, entityMapper, stateManager)
+        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
+        : base(materialModifiers, 0, entityMapper, stateManager, entityTable)
     {
     }
 

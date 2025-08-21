@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
@@ -22,8 +23,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class ParentStateTracker : BaseStateTracker<ulong>
 {
     public ParentStateTracker(ParentComponentCollection components,
-        EntityMapper entityMapper, StateManager stateManager)
-        : base(components, 0, entityMapper, stateManager)
+        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
+        : base(components, 0, entityMapper, stateManager, entityTable)
     {
     }
 

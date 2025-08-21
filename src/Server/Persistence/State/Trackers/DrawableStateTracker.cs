@@ -16,6 +16,7 @@
 
 using System.Numerics;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
@@ -26,8 +27,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class DrawableStateTracker : BaseStateTracker<Vector2>
 {
     public DrawableStateTracker(DrawableComponentCollection components,
-        EntityMapper entityMapper, StateManager stateManager) : base(components, Vector2.Zero,
-        entityMapper, stateManager)
+        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable) : base(components, Vector2.Zero,
+        entityMapper, stateManager, entityTable)
     {
     }
 

@@ -42,6 +42,19 @@ public interface IEntityBuilder : IDisposable
     IEntityBuilder Template(ulong templateEntityId);
 
     /// <summary>
+    ///     Flags the entity as not being persisted.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("NonPersistent")]
+    IEntityBuilder WithNonPersistence();
+
+    /// <summary>
+    ///     Flags the entity as being persisted (the default behavior).
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutNonPersistence();
+
+    /// <summary>
     ///     Assigns an entity type to the entity.
     /// </summary>
     /// <param name="entityType">Entity type.</param>

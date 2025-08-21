@@ -25,10 +25,12 @@ namespace Sovereign.Persistence.State.Trackers;
 public class TemplateStateTracker
 {
     private readonly EntityMapper entityMapper;
+    private readonly EntityTable entityTable;
     private readonly StateManager stateManager;
 
     public TemplateStateTracker(EntityTable entityTable, StateManager stateManager, EntityMapper entityMapper)
     {
+        this.entityTable = entityTable;
         this.stateManager = stateManager;
         this.entityMapper = entityMapper;
         entityTable.OnTemplateSet += OnTemplateSet;
@@ -42,7 +44,7 @@ public class TemplateStateTracker
     /// <param name="isLoad">Load flag.</param>
     private void OnTemplateSet(ulong entityId, ulong templateEntityId, bool isLoad)
     {
-        if (isLoad) return;
+        if (isLoad || !entityTable.IsPersisted(entityId)) return;
         var persistedId = GetPersistedId(entityId);
         var update = new StateUpdate<ulong>
             { EntityId = persistedId, StateUpdateType = StateUpdateType.Modify, Value = templateEntityId };

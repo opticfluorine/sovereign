@@ -16,6 +16,7 @@
 
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
@@ -28,8 +29,8 @@ public class CastShadowsStateTracker : BaseStateTracker<Shadow>
     };
 
     public CastShadowsStateTracker(CastShadowsComponentCollection components, EntityMapper entityMapper,
-        StateManager stateManager)
-        : base(components, DefaultShadow, entityMapper, stateManager)
+        StateManager stateManager, EntityTable entityTable)
+        : base(components, DefaultShadow, entityMapper, stateManager, entityTable)
     {
     }
 

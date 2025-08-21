@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
@@ -24,8 +25,9 @@ namespace Sovereign.Persistence.State.Trackers;
 /// </summary>
 public class AdminStateTracker : BaseStateTracker<bool>
 {
-    public AdminStateTracker(AdminTagCollection tags, EntityMapper entityMapper, StateManager stateManager)
-        : base(tags, false, entityMapper, stateManager)
+    public AdminStateTracker(AdminTagCollection tags, EntityMapper entityMapper, StateManager stateManager,
+        EntityTable entityTable)
+        : base(tags, false, entityMapper, stateManager, entityTable)
     {
     }
 

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 using Sovereign.ServerCore.Components;
 
@@ -22,9 +23,9 @@ namespace Sovereign.Persistence.State.Trackers;
 
 public class AccountStateTracker : BaseStateTracker<Guid>
 {
-    public AccountStateTracker(AccountComponentCollection components, EntityMapper entityMapper,
-        StateManager stateManager)
-        : base(components, Guid.Empty, entityMapper, stateManager)
+    public AccountStateTracker(AccountComponentCollection accounts,
+        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
+        : base(accounts, Guid.Empty, entityMapper, stateManager, entityTable)
     {
     }
 

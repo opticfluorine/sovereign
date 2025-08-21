@@ -15,15 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
 
 public class NameStateTracker : BaseStateTracker<string>
 {
-    public NameStateTracker(NameComponentCollection components, EntityMapper entityMapper,
-        StateManager stateManager)
-        : base(components, string.Empty, entityMapper, stateManager)
+    public NameStateTracker(NameComponentCollection names,
+        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
+        : base(names, string.Empty, entityMapper, stateManager, entityTable)
     {
     }
 

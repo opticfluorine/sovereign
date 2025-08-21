@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
@@ -25,8 +26,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class CastBlockShadowsStateTracker : BaseStateTracker<bool>
 {
     public CastBlockShadowsStateTracker(CastBlockShadowsTagCollection castBlockShadows,
-        EntityMapper entityMapper, StateManager stateManager)
-        : base(castBlockShadows, false, entityMapper, stateManager)
+        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
+        : base(castBlockShadows, false, entityMapper, stateManager, entityTable)
     {
     }
 

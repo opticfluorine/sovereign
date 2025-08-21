@@ -17,6 +17,7 @@
 using System.Numerics;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
@@ -27,8 +28,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class BoundingBoxStateTracker : BaseStateTracker<BoundingBox>
 {
     public BoundingBoxStateTracker(BoundingBoxComponentCollection boundingBoxes,
-        EntityMapper entityMapper, StateManager stateManager) : base(boundingBoxes,
-        new BoundingBox { Position = Vector3.Zero, Size = Vector3.Zero }, entityMapper, stateManager)
+        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable) : base(boundingBoxes,
+        new BoundingBox { Position = Vector3.Zero, Size = Vector3.Zero }, entityMapper, stateManager, entityTable)
     {
     }
 

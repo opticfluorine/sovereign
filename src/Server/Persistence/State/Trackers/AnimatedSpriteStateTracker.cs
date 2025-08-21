@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
@@ -24,8 +25,9 @@ namespace Sovereign.Persistence.State.Trackers;
 /// </summary>
 public class AnimatedSpriteStateTracker : BaseStateTracker<int>
 {
-    public AnimatedSpriteStateTracker(AnimatedSpriteComponentCollection animatedSprites, EntityMapper entityMapper,
-        StateManager stateManager) : base(animatedSprites, 0, entityMapper, stateManager)
+    public AnimatedSpriteStateTracker(AnimatedSpriteComponentCollection animatedSprites,
+        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
+        : base(animatedSprites, 0, entityMapper, stateManager, entityTable)
     {
     }
 

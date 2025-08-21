@@ -26,6 +26,7 @@ namespace Sovereign.EngineCore.Entities;
 /// </summary>
 public class EntityTable
 {
+    private const int InitialEntitySetSize = 65536;
     private const int InitialPendingBufferSize = 16384;
 
     /// <summary>
@@ -36,17 +37,17 @@ public class EntityTable
     /// <summary>
     ///     Set of all entities that are currently held in memory.
     /// </summary>
-    private readonly HashSet<ulong> entities = new();
+    private readonly HashSet<ulong> entities = new(InitialEntitySetSize);
 
     /// <summary>
     ///     Map from entity ID to its template entity ID.
     /// </summary>
-    private readonly Dictionary<ulong, ulong> entityTemplates = new();
+    private readonly Dictionary<ulong, ulong> entityTemplates = new(InitialEntitySetSize);
 
     /// <summary>
-    ///     Set of non-block entities that are currently held in memory.
+    ///     Subset of entities that are non-block entities.
     /// </summary>
-    private readonly HashSet<ulong> nonBlockEntities = new();
+    private readonly HashSet<ulong> nonBlockEntities = new(InitialEntitySetSize);
 
     /// <summary>
     ///     Set of all entities that are enqueued to be added to the table.
@@ -57,6 +58,11 @@ public class EntityTable
     ///     Set of all entities that are enqueued to be removed from the table.
     /// </summary>
     private readonly StructBuffer<EntityRemove> pendingRemoves = new(InitialPendingBufferSize);
+
+    /// <summary>
+    ///     Subset of entities that are persisted entities.
+    /// </summary>
+    private readonly HashSet<ulong> persistedEntities = new(InitialEntitySetSize);
 
     /// <summary>
     ///     Map from template ID to all loaded instances of that template.
@@ -120,18 +126,34 @@ public class EntityTable
     }
 
     /// <summary>
+    ///     Checks whether the given entity should be persisted.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>true if persisted, false otherwise.</returns>
+    public bool IsPersisted(ulong entityId)
+    {
+        return persistedEntities.Contains(entityId);
+    }
+
+    /// <summary>
     ///     Enqueues an entity to be added to the table.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="templateEntityId">Template entity ID, or 0 for no template.</param>
     /// <param name="isBlock">If true, indicates the entity is a block entity.</param>
     /// <param name="isLoad">If true, treat the entity as loaded rather than newly added.</param>
-    public void Add(ulong entityId, ulong templateEntityId, bool isBlock, bool isLoad)
+    /// <param name="isPersisted">If true, ensure that the entity is persisted if applicable.</param>
+    public void Add(ulong entityId, ulong templateEntityId, bool isBlock, bool isLoad, bool isPersisted)
     {
         if (Exists(entityId)) return;
         var newAdd = new EntityAdd
-            { EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock, IsLoad = isLoad };
+        {
+            EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock, IsLoad = isLoad
+        };
         pendingAdds.Add(ref newAdd);
+
+        // Set the persistence flag immediately so that it can be looked up as component changes are committed.
+        if (isPersisted) persistedEntities.Add(entityId);
     }
 
     /// <summary>
@@ -186,9 +208,9 @@ public class EntityTable
             ref var pendingRemove = ref pendingRemoves[i];
             var entityId = pendingRemove.EntityId;
             entities.Remove(entityId);
-            if (nonBlockEntities.Contains(entityId))
+            persistedEntities.Remove(entityId);
+            if (nonBlockEntities.Remove(entityId))
             {
-                nonBlockEntities.Remove(entityId);
                 OnNonBlockEntityRemoved?.Invoke(entityId);
             }
 

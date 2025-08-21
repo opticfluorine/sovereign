@@ -16,6 +16,7 @@
 
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
@@ -26,8 +27,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class EntityTypeStateTracker : BaseStateTracker<EntityType>
 {
     public EntityTypeStateTracker(EntityTypeComponentCollection components, EntityMapper entityMapper,
-        StateManager stateManager)
-        : base(components, EntityType.Other, entityMapper, stateManager)
+        StateManager stateManager, EntityTable entityTable)
+        : base(components, EntityType.Other, entityMapper, stateManager, entityTable)
     {
     }
 

@@ -18,6 +18,7 @@
 using System.Numerics;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
@@ -28,9 +29,9 @@ namespace Sovereign.Persistence.State.Trackers;
 public sealed class KinematicsStateTracker : BaseStateTracker<Kinematics>
 {
     public KinematicsStateTracker(KinematicsComponentCollection kinematics,
-        EntityMapper entityMapper, StateManager stateManager)
+        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
         : base(kinematics, new Kinematics { Position = Vector3.Zero, Velocity = Vector3.Zero }, entityMapper,
-            stateManager)
+            stateManager, entityTable)
     {
     }
 

@@ -17,6 +17,7 @@
 
 using System;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State;
@@ -31,6 +32,7 @@ public abstract class BaseStateTracker<T> : IDisposable
     private readonly BaseComponentCollection<T> components;
     private readonly T defaultElement;
     protected readonly EntityMapper entityMapper;
+    private readonly EntityTable entityTable;
     protected readonly StateManager stateManager;
 
     /// <summary>
@@ -42,12 +44,13 @@ public abstract class BaseStateTracker<T> : IDisposable
     /// <param name="stateManager">State manager.</param>
     public BaseStateTracker(BaseComponentCollection<T> components,
         T defaultElement, EntityMapper entityMapper,
-        StateManager stateManager)
+        StateManager stateManager, EntityTable entityTable)
     {
         this.components = components;
         this.defaultElement = defaultElement;
         this.entityMapper = entityMapper;
         this.stateManager = stateManager;
+        this.entityTable = entityTable;
 
         RegisterCallbacks();
     }
@@ -72,7 +75,7 @@ public abstract class BaseStateTracker<T> : IDisposable
     private void OnComponentAdded(ulong entityId, T componentValue, bool isLoad)
     {
         // Skip component loads - these are already in the database (that's where they were loaded from).
-        if (isLoad) return;
+        if (isLoad || !entityTable.IsPersisted(entityId)) return;
 
         /* Map the entity ID. */
         var persistedId = GetPersistedId(entityId);
@@ -94,6 +97,8 @@ public abstract class BaseStateTracker<T> : IDisposable
     /// <param name="componentValue">Component value.</param>
     private void OnComponentModified(ulong entityId, T componentValue)
     {
+        if (!entityTable.IsPersisted(entityId)) return;
+
         /* Map the entity ID. */
         var persistedId = GetPersistedId(entityId);
 
@@ -115,7 +120,7 @@ public abstract class BaseStateTracker<T> : IDisposable
     private void OnComponentRemoved(ulong entityId, bool isUnload)
     {
         // Skip unloads.
-        if (isUnload) return;
+        if (isUnload || !entityTable.IsPersisted(entityId)) return;
 
         /* Map the entity ID. */
         var persistedId = GetPersistedId(entityId);
