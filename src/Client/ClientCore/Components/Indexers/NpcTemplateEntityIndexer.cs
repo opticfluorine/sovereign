@@ -104,8 +104,10 @@ public class NpcTemplateEntityIndexer : BaseComponentIndexer<EntityType>
         }
 
         nextTemplateEntityId = npcTemplateEntities
-            .GetViewBetween(EntityConstants.FirstTemplateEntityId, templateEntityId - 1).Reverse().First();
-        return true;
+            .GetViewBetween(EntityConstants.FirstTemplateEntityId, templateEntityId - 1)
+            .Reverse()
+            .FirstOrDefault(0UL);
+        return nextTemplateEntityId > 0UL;
     }
 
     protected override void ComponentAddedCallback(ulong entityId, EntityType componentValue, bool isLoad)
