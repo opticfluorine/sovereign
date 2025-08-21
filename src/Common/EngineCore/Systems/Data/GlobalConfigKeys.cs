@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Systems.Time;
+namespace Sovereign.EngineCore.Systems.Data;
 
-internal static class TimeConstants
+/// <summary>
+///     Global data keys for configuration constants.
+/// </summary>
+public static class GlobalConfigKeys
 {
-    /// <summary>
-    ///     Global key used to persist the in-game clock.
-    /// </summary>
-    public const string ClockGlobalKey = "__Sovereign.Clock";
+    private const string ConfigPrefix = "__Sovereign.Config";
 
     /// <summary>
-    ///     Seasons per year.
+    ///     Minimum Z coordinate allowed for entities; lower entities will be destroyed or respawned.
     /// </summary>
-    public const uint SeasonsPerYear = 4;
+    public const string MinimumZ = $"{ConfigPrefix}.MinimumZ";
 }

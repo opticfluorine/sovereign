@@ -152,6 +152,7 @@ public static class ClientServiceCollectionExtensions
             .TryAddSingleton<IConnectionMappingOutboundPipelineStage, ClientConnectionMappingOutboundPipelineStage>();
         services.TryAddSingleton<IOutboundEventSet, ClientOutboundEventSet>();
         services.TryAddSingleton<IMovementNotifier, ClientMovementNotifier>();
+        services.TryAddSingleton<IMovementZCuller, NullMovementZCuller>();
     }
 
     private static void AddMain(IServiceCollection services)

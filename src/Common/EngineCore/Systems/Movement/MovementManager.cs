@@ -25,6 +25,7 @@ using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
 
@@ -35,6 +36,12 @@ namespace Sovereign.EngineCore.Systems.Movement;
 /// </summary>
 public class MovementManager
 {
+    /// <summary>
+    ///     Default minimum Z cutoff.
+    /// </summary>
+    private const float DefaultMinZ = -1024.0f;
+
+    private readonly IDataServices dataServices;
     private readonly MovementInternalController internalController;
 
     /// <summary>
@@ -51,7 +58,6 @@ public class MovementManager
 
     private readonly ILogger<MovementManager> logger;
     private readonly IMovementNotifier movementNotifier;
-
     private readonly OrientationComponentCollection orientations;
 
     /// <summary>
@@ -66,9 +72,13 @@ public class MovementManager
 
     private readonly PhysicsTagCollection physics;
 
+    /// <summary>
+    ///     Flags for active (per-tick) physics processing, indexed by Kinematics component index.
+    /// </summary>
     private readonly List<bool> physicsActiveFlags = new();
 
     private readonly PhysicsProcessor physicsProcessor;
+
     private readonly List<int> physicsUpdates = new();
 
     /// <summary>
@@ -77,7 +87,9 @@ public class MovementManager
     private readonly Dictionary<ulong, byte> sequenceCountsByEntity = new();
 
     private readonly ISystemTimer systemTimer;
+    private readonly List<ulong> toZCull = new();
     private readonly NonBlockWorldSegmentIndexer worldSegmentIndexer;
+    private readonly IMovementZCuller zCuller;
 
     /// <summary>
     ///     Flag indicating whether the pending check table has been updated for the current tick.
@@ -101,7 +113,7 @@ public class MovementManager
         PhysicsTagCollection physics, PhysicsProcessor physicsProcessor,
         ILogger<MovementManager> logger, NonBlockWorldSegmentIndexer worldSegmentIndexer,
         IMovementNotifier movementNotifier, IOptions<MovementOptions> movementOptions,
-        EntityTable entityTable)
+        EntityTable entityTable, IDataServices dataServices, IMovementZCuller zCuller)
     {
         this.kinematics = kinematics;
         this.systemTimer = systemTimer;
@@ -112,6 +124,8 @@ public class MovementManager
         this.logger = logger;
         this.worldSegmentIndexer = worldSegmentIndexer;
         this.movementNotifier = movementNotifier;
+        this.dataServices = dataServices;
+        this.zCuller = zCuller;
 
         pendingChecks = new List<PendingCheck>[movementOptions.Value.MoveExpirationTicks];
         for (var i = 0; i < pendingChecks.Length; ++i)
@@ -232,9 +246,10 @@ public class MovementManager
     /// </summary>
     public void HandleTick()
     {
-        // Send move events for any newly processed move requests.
+        // Handle deferred actions from the main update loop.
         ProcessChecks();
         movementNotifier.SendScheduled();
+        ProcessZCulls();
     }
 
     /// <summary>
@@ -269,6 +284,8 @@ public class MovementManager
         var componentList = kinematics.Components;
         var directMods = 0;
 
+        var minZ = dataServices.TryGetGlobalFloat(GlobalConfigKeys.MinimumZ, out var mz) ? mz : DefaultMinZ;
+
         // Ensure flags exist for all components.
         while (kinematicsComponentIndexPhysicsTags.Count <= kinematics.Components.Length)
         {
@@ -288,6 +305,13 @@ public class MovementManager
                 // Using + instead of += shows a ~ 6.6% speedup with Release builds in EcsBenchmark.
                 componentList[i].Position = componentList[i].Position + delta * componentList[i].Velocity;
                 modifiedIndices[directMods++] = i;
+
+                // If the entity falls below the global Z cutoff, flag for later culling and stop processing.
+                if (componentList[i].Position.Z < minZ)
+                {
+                    toZCull.Add(entityId);
+                    continue;
+                }
 
                 // We always process physics for moving entities (if they have the Physics tag).
                 if (kinematicsComponentIndexPhysicsTags[i]) physicsUpdates.Add(i);
@@ -350,6 +374,19 @@ public class MovementManager
 
         // Process any move requests that arrived this tick before the pending checks were processed.
         while (checkTableReady && pendingRequests.TryDequeue(out var details)) HandleRequestMove(details);
+    }
+
+    /// <summary>
+    ///     Processes any pending Z culls.
+    /// </summary>
+    private void ProcessZCulls()
+    {
+        foreach (var entityId in toZCull)
+        {
+            zCuller.Cull(entityId);
+        }
+
+        toZCull.Clear();
     }
 
     /// <summary>

@@ -112,6 +112,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<IResourcePathBuilder, ServerResourcePathBuilder>();
         services.TryAddSingleton<ISystemTimer, ServerSystemTimer>();
         services.TryAddSingleton<IMovementNotifier, ServerMovementNotifier>();
+        services.TryAddSingleton<IMovementZCuller, MovementZCuller>();
     }
 
     private static void AddDataSystem(IServiceCollection services)
