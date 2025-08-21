@@ -129,5 +129,9 @@ public class EntityDefinition
     [Key(16)]
     public Shadow? CastShadows { get; set; }
 
-    [Key(17)] public EntityType EntityType { get; set; }
+    /// <summary>
+    ///     Entity type.
+    /// </summary>
+    [Key(17)]
+    public EntityType EntityType { get; set; } = EntityType.Other;
 }

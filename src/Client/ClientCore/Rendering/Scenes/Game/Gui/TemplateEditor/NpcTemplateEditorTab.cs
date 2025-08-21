@@ -262,6 +262,7 @@ public class NpcTemplateEditorTab
         var emptyDef = new EntityDefinition
         {
             EntityId = entityTable.TakeNextTemplateEntityId(),
+            EntityType = EntityType.Npc,
             AnimatedSpriteId = DefaultAnimatedSprite,
             Drawable = Vector2.Zero,
             CastShadows = new Shadow

@@ -63,11 +63,13 @@ public sealed class RestServiceProvider(
 
         // Template entities.
         app.MapGet(RestEndpoints.TemplateEntities, templateEntities.TemplateEntitiesGet);
-        app.MapGet($"{RestEndpoints.TemplateEntities}/{{entityId}}", entityData.EntityDataGet)
-            .RequireAuthorization(RestAuthorization.Policies.AdminOnly);
         app.MapPost(RestEndpoints.TemplateEntities, setTemplateEntity.SetTemplateEntityPost)
             .RequireAuthorization(RestAuthorization.Policies.AdminOnly);
         app.MapGet(RestEndpoints.ScriptInfo, scriptInfo.ScriptInfoGet)
+            .RequireAuthorization(RestAuthorization.Policies.AdminOnly);
+
+        // Entity data.
+        app.MapGet($"{RestEndpoints.EntityData}/{{entityId}}", entityData.EntityDataGet)
             .RequireAuthorization(RestAuthorization.Policies.AdminOnly);
 
         // World segments.

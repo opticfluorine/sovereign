@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -63,7 +64,7 @@ public sealed class EntityDataRestService(
                 dataPool.ReturnObject(data);
             }
 
-            return Task.FromResult(Results.Ok(responseJson));
+            return Task.FromResult(Results.Text(responseJson, "application/json", Encoding.UTF8, 200));
         }
         catch (Exception e)
         {
