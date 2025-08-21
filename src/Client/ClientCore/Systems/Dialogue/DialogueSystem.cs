@@ -76,7 +76,7 @@ internal class DialogueSystem : ISystem
                         break;
                     }
 
-                    dialogueQueue.Enqueue(details.Subject, details.Message);
+                    dialogueQueue.Enqueue(details.Subject, details.Message, details.ProfileSpriteId);
                     break;
                 }
 

@@ -37,19 +37,22 @@ internal sealed class DialogueQueue(ISystemTimer systemTimer, IOptions<DisplayOp
     /// </summary>
     /// <param name="subject">Subject (e.g. who is talking).</param>
     /// <param name="message">Message.</param>
+    /// <param name="profileSpriteId">Profile sprite ID. Negative means no profile sprite.</param>
     /// <param name="charsShown">Number of characters to currently display.</param>
     /// <returns>true if a dialogue is active, false otherwise.</returns>
     public bool TryGetDialogue([NotNullWhen(true)] out string? subject,
-        [NotNullWhen(true)] out string? message, out int charsShown)
+        [NotNullWhen(true)] out string? message, out int profileSpriteId, out int charsShown)
     {
         subject = null;
         message = null;
+        profileSpriteId = 0;
         charsShown = 0;
 
         if (!queue.TryPeek(out var item)) return false;
 
         subject = item.Subject;
         message = item.Message;
+        profileSpriteId = item.ProfileSpriteId;
         var timeElapsed = systemTimer.GetTime() - lastItemStartTime;
         charsShown = Math.Min((int)(timeElapsed / MessageRate), message.Length);
         return true;
@@ -60,10 +63,11 @@ internal sealed class DialogueQueue(ISystemTimer systemTimer, IOptions<DisplayOp
     /// </summary>
     /// <param name="subject">Subject.</param>
     /// <param name="message">Message.</param>
-    public void Enqueue(string subject, string message)
+    /// <param name="profileSpriteId">Profile sprite ID. Negative for no profile sprite.</param>
+    public void Enqueue(string subject, string message, int profileSpriteId)
     {
         if (queue.IsEmpty) lastItemStartTime = systemTimer.GetTime();
-        queue.Enqueue(new DialogueItem(subject, message));
+        queue.Enqueue(new DialogueItem(subject, message, profileSpriteId));
     }
 
     /// <summary>
@@ -71,7 +75,7 @@ internal sealed class DialogueQueue(ISystemTimer systemTimer, IOptions<DisplayOp
     /// </summary>
     public void Advance()
     {
-        if (!TryGetDialogue(out _, out var message, out var charsShown)) return;
+        if (!TryGetDialogue(out _, out var message, out _, out var charsShown)) return;
 
         if (charsShown < message.Length)
         {
@@ -98,7 +102,7 @@ internal sealed class DialogueQueue(ISystemTimer systemTimer, IOptions<DisplayOp
     /// </summary>
     /// <param name="subject">Subject (e.g. who is talking).</param>
     /// <param name="message">Message.</param>
-    private struct DialogueItem(string subject, string message)
+    private struct DialogueItem(string subject, string message, int profileSpriteId)
     {
         /// <summary>
         ///     Dialogue subject (e.g. who is talking).
@@ -109,5 +113,10 @@ internal sealed class DialogueQueue(ISystemTimer systemTimer, IOptions<DisplayOp
         ///     Dialogue message.
         /// </summary>
         public string Message { get; } = message;
+
+        /// <summary>
+        ///     Profile sprite ID. Negative means no profile sprite.
+        /// </summary>
+        public int ProfileSpriteId { get; } = profileSpriteId;
     }
 }

@@ -44,6 +44,12 @@ public class DialogueEventDetails : IEventDetails
     public string Message { get; set; } = string.Empty;
 
     /// <summary>
+    ///     Profile sprite ID. Negative value for no profile.
+    /// </summary>
+    [Key(2)]
+    public int ProfileSpriteId { get; set; } = -1;
+
+    /// <summary>
     ///     Event ID of recipient. Only used on the server side.
     /// </summary>
     [IgnoreMember]

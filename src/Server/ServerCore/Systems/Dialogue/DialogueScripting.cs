@@ -43,4 +43,20 @@ public class DialogueScripting(IDialogueController controller, IEventSender even
             controller.AddDialogue(eventSender, targetEntityId, subject, message);
         }
     }
+
+    /// <summary>
+    ///     Scripting API for adding a dialogue item with profile sprite for the given player.
+    /// </summary>
+    /// <param name="targetEntityId">Player to receive the dialogue.</param>
+    /// <param name="profileSpriteId">Profile sprite ID.</param>
+    /// <param name="subject">Dialogue subject (e.g. who is speaking).</param>
+    /// <param name="message">Dialogue message.</param>
+    [ScriptableFunction("ShowProfile")]
+    public void ShowProfile(ulong targetEntityId, int profileSpriteId, string subject, string message)
+    {
+        lock (eventLock)
+        {
+            controller.AddDialogue(eventSender, targetEntityId, subject, message, profileSpriteId);
+        }
+    }
 }

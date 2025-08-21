@@ -31,7 +31,9 @@ public interface IDialogueController
     /// <param name="targetEntityId">Player to receive the dialogue.</param>
     /// <param name="subject">Dialogue subject (e.g. who is speaking).</param>
     /// <param name="message">Dialogue message.</param>
-    void AddDialogue(IEventSender eventSender, ulong targetEntityId, string subject, string message);
+    /// <param name="profileSpriteId">Profile sprite ID. Negative for no profile sprite.</param>
+    void AddDialogue(IEventSender eventSender, ulong targetEntityId, string subject, string message,
+        int profileSpriteId = -1);
 
     /// <summary>
     ///     Advances the current dialogue.
@@ -45,13 +47,15 @@ public interface IDialogueController
 /// </summary>
 internal class DialogueController : IDialogueController
 {
-    public void AddDialogue(IEventSender eventSender, ulong targetEntityId, string subject, string message)
+    public void AddDialogue(IEventSender eventSender, ulong targetEntityId, string subject, string message,
+        int profileSpriteId)
     {
         var details = new DialogueEventDetails
         {
             TargetEntityId = targetEntityId,
             Subject = subject,
-            Message = message
+            Message = message,
+            ProfileSpriteId = profileSpriteId
         };
         var ev = new Event(EventId.Client_Dialogue_Enqueue, details);
         eventSender.SendEvent(ev);

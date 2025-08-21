@@ -31,7 +31,8 @@ public class DialogueGui(
     IDialogueServices dialogueServices,
     GuiFontAtlas fontAtlas,
     IEventSender eventSender,
-    IDialogueController dialogueController)
+    IDialogueController dialogueController,
+    GuiExtensions guiExtensions)
 {
     private const string DownArrow = "\ue02e";
     private const float RelX = 0.5f;
@@ -48,7 +49,8 @@ public class DialogueGui(
     /// </summary>
     public void Render()
     {
-        if (!dialogueServices.TryGetDialogue(out var subject, out var message, out var charsShown)) return;
+        if (!dialogueServices.TryGetDialogue(out var subject, out var message,
+                out var profileSpriteId, out var charsShown)) return;
         if (charsShown != charsCached) UpdateMessageCache(message, charsShown);
 
         var io = ImGui.GetIO();
@@ -66,35 +68,48 @@ public class DialogueGui(
             return;
         }
 
-        try
+        var hasProfile = profileSpriteId >= 0;
+        if (ImGui.BeginTable("dialogue", hasProfile ? 2 : 1, ImGuiTableFlags.SizingStretchProp))
         {
-            ImGui.PushTextWrapPos(0.0f);
+            try
+            {
+                if (hasProfile)
+                {
+                    ImGui.TableSetupColumn("profile", ImGuiTableColumnFlags.WidthFixed);
+                    ImGui.TableNextColumn();
+                    guiExtensions.Sprite(profileSpriteId);
+                }
 
-            // Subject.
-            ImGui.PushFont(fontAtlas.DialogueSubjectFont);
-            ImGui.Text(subject);
-            ImGui.PopFont();
+                // Subject.
+                ImGui.TableNextColumn();
+                ImGui.PushTextWrapPos(0.0f);
+                ImGui.PushFont(fontAtlas.DialogueSubjectFont);
+                ImGui.Text(subject);
+                ImGui.PopFont();
 
-            // Message.
-            ImGui.PushFont(fontAtlas.DialogueFont);
-            ImGui.Text(cachedMessage);
-            ImGui.PopFont();
+                // Message.
+                ImGui.PushFont(fontAtlas.DialogueFont);
+                ImGui.Text(cachedMessage);
+                ImGui.PopFont();
 
-            // Down arrow symbol at bottom of window.
-            var arrowOffset = RelX * ImGui.CalcTextSize(DownArrow);
-            ImGui.SetCursorPos(new Vector2(RelX * size.X, size.Y - fontSize) - arrowOffset);
-            ImGui.Text(DownArrow);
+                // Down arrow symbol at bottom of window.
+                var arrowOffset = RelX * ImGui.CalcTextSize(DownArrow);
+                ImGui.SetCursorPos(new Vector2(RelX * size.X, size.Y - fontSize) - arrowOffset);
+                ImGui.Text(DownArrow);
 
-            ImGui.SetNextFrameWantCaptureKeyboard(true);
-            if (wasOpenLastFrame && (ImGui.IsKeyReleased(ImGuiKey.Enter) || ImGui.IsKeyReleased(ImGuiKey.E) ||
-                                     ImGui.IsKeyReleased(ImGuiKey.Space)))
-                dialogueController.AdvanceDialogue(eventSender);
+                ImGui.SetNextFrameWantCaptureKeyboard(true);
+                if (wasOpenLastFrame && (ImGui.IsKeyReleased(ImGuiKey.Enter) || ImGui.IsKeyReleased(ImGuiKey.E) ||
+                                         ImGui.IsKeyReleased(ImGuiKey.Space)))
+                    dialogueController.AdvanceDialogue(eventSender);
+            }
+            finally
+            {
+                ImGui.EndTable();
+            }
         }
-        finally
-        {
-            ImGui.End();
-            wasOpenLastFrame = true;
-        }
+
+        wasOpenLastFrame = true;
+        ImGui.End();
     }
 
     /// <summary>

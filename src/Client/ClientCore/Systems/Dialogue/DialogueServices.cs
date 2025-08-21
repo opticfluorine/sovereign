@@ -25,10 +25,11 @@ public interface IDialogueServices
     /// </summary>
     /// <param name="subject">Subject (e.g. who is talking).</param>
     /// <param name="message">Message.</param>
+    /// <param name="profileSpriteId">Profile sprite ID. Negative means no profile sprite.</param>
     /// <param name="charsShown">Number of characters to currently display.</param>
     /// <returns>true if a dialogue is active, false otherwise.</returns>
     bool TryGetDialogue([NotNullWhen(true)] out string? subject,
-        [NotNullWhen(true)] out string? message, out int charsShown);
+        [NotNullWhen(true)] out string? message, out int profileSpriteId, out int charsShown);
 }
 
 /// <summary>
@@ -37,8 +38,8 @@ public interface IDialogueServices
 internal class DialogueServices(DialogueQueue dialogueQueue) : IDialogueServices
 {
     public bool TryGetDialogue([NotNullWhen(true)] out string? subject, [NotNullWhen(true)] out string? message,
-        out int charsShown)
+        out int profileSpriteId, out int charsShown)
     {
-        return dialogueQueue.TryGetDialogue(out subject, out message, out charsShown);
+        return dialogueQueue.TryGetDialogue(out subject, out message, out profileSpriteId, out charsShown);
     }
 }
