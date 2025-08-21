@@ -50,6 +50,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly PhysicsTagCollection physics;
     private readonly PlayerCharacterTagCollection playerCharacterTags;
     private readonly PointLightSourceComponentCollection pointLightSources;
+    private readonly ServerOnlyTagCollection serverOnly;
 
     private ulong nextBlockEntityId = EntityConstants.FirstBlockEntityId;
 
@@ -74,6 +75,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows,
         EntityTypeComponentCollection entityTypes,
+        ServerOnlyTagCollection serverOnly,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -96,6 +98,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
         this.entityTypes = entityTypes;
+        this.serverOnly = serverOnly;
         this.entityTable = entityTable;
         entityAssigner = entityManager.GetNewAssigner();
     }
@@ -135,6 +138,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             boundingBoxes,
             castShadows,
             entityTypes,
+            serverOnly,
             entityTable);
     }
 }

@@ -19,7 +19,9 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using Hexa.NET.ImGui;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Components.Indexers;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
@@ -42,6 +44,7 @@ public class BlockTemplateEditorTab
     private const uint SelectionColor = 0xFF773333;
 
     private readonly EntityDefinitionGenerator definitionGenerator;
+    private readonly EditorOptions editorOptions;
 
     private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
@@ -70,7 +73,7 @@ public class BlockTemplateEditorTab
         NameComponentCollection names, MaterialManager materialManager, EntityTable entityTable,
         TemplateEditorInternalController internalController, IEventSender eventSender,
         EntityDefinitionGenerator definitionGenerator, NameComponentValidator nameComponentValidator,
-        GuiComponentEditors guiComponentEditors)
+        GuiComponentEditors guiComponentEditors, IOptions<EditorOptions> editorOptions)
     {
         this.indexer = indexer;
         this.guiExtensions = guiExtensions;
@@ -84,6 +87,7 @@ public class BlockTemplateEditorTab
         this.definitionGenerator = definitionGenerator;
         this.nameComponentValidator = nameComponentValidator;
         this.guiComponentEditors = guiComponentEditors;
+        this.editorOptions = editorOptions.Value;
 
         indexer.OnIndexModified += RefreshList;
     }
@@ -290,11 +294,10 @@ public class BlockTemplateEditorTab
         // Save a new template entity to the server with default values.
         // Once the server accepts this, it will synchronize the template with all clients,
         // and the template will appear in the editor on the following tick.
-        var emptyDef = new EntityDefinition
+        var emptyDef = new EntityDefinition(editorOptions.DefaultNewBlockTemplate)
         {
             EntityId = entityTable.TakeNextTemplateEntityId(),
-            Material = new MaterialPair(1, 0),
-            CastBlockShadows = true
+            EntityType = EntityType.Other
         };
         SaveDefinition(emptyDef);
     }

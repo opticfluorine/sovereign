@@ -42,6 +42,7 @@ public class EntityDefinitionGenerator
     private readonly PhysicsTagCollection physics;
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly PointLightSourceComponentCollection pointLightSources;
+    private readonly ServerOnlyTagCollection serverOnly;
 
     public EntityDefinitionGenerator(
         KinematicsComponentCollection kinematics,
@@ -53,6 +54,7 @@ public class EntityDefinitionGenerator
         CastBlockShadowsTagCollection castBlockShadows, PointLightSourceComponentCollection pointLightSources,
         PhysicsTagCollection physics, BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows, EntityTypeComponentCollection entityTypes,
+        ServerOnlyTagCollection serverOnly,
         EntityTable entityTable)
     {
         this.kinematics = kinematics;
@@ -72,6 +74,7 @@ public class EntityDefinitionGenerator
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
         this.entityTypes = entityTypes;
+        this.serverOnly = serverOnly;
         this.entityTable = entityTable;
     }
 
@@ -129,6 +132,9 @@ public class EntityDefinitionGenerator
 
         if (castShadows.HasLocalComponentForEntity(entityId))
             def.CastShadows = castShadows[entityId];
+
+        if (serverOnly.HasLocalComponentForEntity(entityId))
+            def.ServerOnly = serverOnly[entityId];
 
         def.EntityType = entityTypes.HasLocalComponentForEntity(entityId) ? entityTypes[entityId] : EntityType.Other;
 

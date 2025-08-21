@@ -48,7 +48,6 @@ public class PerspectiveLineManager
 {
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly DrawableLookup drawableLookup;
-    private readonly DrawableComponentCollection drawables;
 
     /// <summary>
     ///     Object pool of entity lists to minimize heap churn for vertically moving entities.
@@ -83,14 +82,12 @@ public class PerspectiveLineManager
 
     public PerspectiveLineManager(KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
-        EntityTable entityTable, DrawableLookup drawableLookup, DrawableComponentCollection drawables,
-        ILogger<PerspectiveLineManager> logger)
+        EntityTable entityTable, DrawableLookup drawableLookup, ILogger<PerspectiveLineManager> logger)
     {
         this.kinematics = kinematics;
         this.blockPositions = blockPositions;
         this.resolver = resolver;
         this.drawableLookup = drawableLookup;
-        this.drawables = drawables;
         this.logger = logger;
 
         entityTable.OnEntityAdded += AddEntity;
@@ -317,7 +314,6 @@ public class PerspectiveLineManager
         if (EntityUtil.IsTemplateEntity(entityId)) return;
 
         var isBlock = blockPositions.HasComponentForEntity(entityId);
-        if (!isBlock && !drawables.HasComponentForEntity(entityId)) return;
 
         if (isBlock) AddBlockEntity(entityId, blockPositions[entityId]);
         else if (kinematics.HasComponentForEntity(entityId)) AddNonBlockEntity(entityId, kinematics[entityId].Position);
@@ -379,7 +375,6 @@ public class PerspectiveLineManager
         if (EntityUtil.IsTemplateEntity(entityId)) return;
 
         var isBlock = blockPositions.HasComponentForEntity(entityId, true);
-        if (!isBlock && !drawables.HasComponentForEntity(entityId, true)) return;
 
         if (!linesByEntity.TryGetValue(entityId, out var lineIndices)) return;
         if (!zFloorByEntity.TryGetValue(entityId, out var zFloor))

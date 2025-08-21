@@ -14,12 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using Hexa.NET.ImGui;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Components.Indexers;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -40,21 +43,20 @@ public class NpcTemplateEditorTab
     /// </summary>
     private const uint SelectionColor = 0xFF773333;
 
-    private const int DefaultAnimatedSprite = 0;
-    private const float DefaultShadowRadius = 0.1f;
-    private const string DefaultName = "New NPC";
-
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly AppearanceControlGroup appearanceControlGroup;
     private readonly BasicInformationControlGroup basicInformationControlGroup;
     private readonly BehaviorControlGroup behaviorControlGroup;
     private readonly EntityDefinitionGenerator definitionGenerator;
+    private readonly DrawableComponentCollection drawables;
+    private readonly EditorOptions editorOptions;
     private readonly EntityDataControlGroup entityDataControlGroup;
     private readonly EntityTable entityTable;
     private readonly GuiExtensions guiExtensions;
     private readonly NpcTemplateEntityIndexer indexer;
     private readonly NameComponentValidator nameComponentValidator;
     private readonly NameComponentCollection names;
+    private readonly RendererOptions rendererOptions;
     private readonly TemplateEntityDataClient templateEntityDataClient;
 
     private bool initialized;
@@ -68,7 +70,9 @@ public class NpcTemplateEditorTab
         EntityDefinitionGenerator definitionGenerator, NameComponentValidator nameComponentValidator,
         AnimatedSpriteComponentCollection animatedSprites, TemplateEntityDataClient templateEntityDataClient,
         BasicInformationControlGroup basicInformationControlGroup, AppearanceControlGroup appearanceControlGroup,
-        EntityDataControlGroup entityDataControlGroup, BehaviorControlGroup behaviorControlGroup)
+        EntityDataControlGroup entityDataControlGroup, BehaviorControlGroup behaviorControlGroup,
+        IOptions<RendererOptions> rendererOptions, DrawableComponentCollection drawables,
+        IOptions<EditorOptions> editorOptions)
     {
         this.indexer = indexer;
         this.guiExtensions = guiExtensions;
@@ -82,6 +86,9 @@ public class NpcTemplateEditorTab
         this.templateEntityDataClient = templateEntityDataClient;
         this.entityDataControlGroup = entityDataControlGroup;
         this.behaviorControlGroup = behaviorControlGroup;
+        this.drawables = drawables;
+        this.rendererOptions = rendererOptions.Value;
+        this.editorOptions = editorOptions.Value;
 
         indexer.OnIndexModified += RefreshList;
     }
@@ -141,17 +148,26 @@ public class NpcTemplateEditorTab
             {
                 // Gather data.
                 var templateEntityId = sortedTemplateEntityIds[i];
+                var isHidden = drawables.HasComponentForEntity(templateEntityId);
                 var animatedSprite = animatedSprites.HasComponentForEntity(templateEntityId)
                     ? animatedSprites[templateEntityId]
-                    : DefaultAnimatedSprite;
+                    : -1;
                 var name = names.HasComponentForEntity(templateEntityId)
                     ? names[templateEntityId]
                     : $"Block {templateEntityId - EntityConstants.FirstTemplateEntityId}";
 
                 // Animated Sprite column.
                 ImGui.TableNextColumn();
-                if (guiExtensions.AnimatedSpriteButton($"##animSprButton{i}", animatedSprite, Orientation.South,
-                        AnimationPhase.Default)) Select(i);
+                if (isHidden && animatedSprite < 0)
+                {
+                    if (guiExtensions.SpriteButton($"##sprButton{i}", rendererOptions.DefaultHiddenPlaceholderSprite))
+                        Select(i);
+                }
+                else
+                {
+                    if (guiExtensions.AnimatedSpriteButton($"##animSprButton{i}", Math.Max(animatedSprite, 0),
+                            Orientation.South, AnimationPhase.Default)) Select(i);
+                }
 
                 // Name column.
                 ImGui.TableNextColumn();
@@ -259,17 +275,10 @@ public class NpcTemplateEditorTab
         // Save a new template entity to the server with default values.
         // Once the server accepts this, it will synchronize the template with all clients,
         // and the template will appear in the editor on the following tick.
-        var emptyDef = new EntityDefinition
+        var emptyDef = new EntityDefinition(editorOptions.DefaultNewNpcTemplate)
         {
             EntityId = entityTable.TakeNextTemplateEntityId(),
-            EntityType = EntityType.Npc,
-            AnimatedSpriteId = DefaultAnimatedSprite,
-            Drawable = Vector2.Zero,
-            CastShadows = new Shadow
-            {
-                Radius = DefaultShadowRadius
-            },
-            Name = DefaultName
+            EntityType = EntityType.Npc
         };
         Save(emptyDef, new Dictionary<string, string>());
     }

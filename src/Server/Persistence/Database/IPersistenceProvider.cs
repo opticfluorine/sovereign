@@ -349,6 +349,21 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveEntityTypeComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for ServerOnly tag.
+    /// </summary>
+    IAddComponentQuery<bool> AddServerOnlyComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for ServerOnly tag.
+    /// </summary>
+    IModifyComponentQuery<bool> ModifyServerOnlyComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for ServerOnly tag.
+    /// </summary>
+    IRemoveComponentQuery RemoveServerOnlyComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }

@@ -43,7 +43,6 @@ public sealed class SetTemplateEntityRestService(
     ///     POST endpoint for setting template entity data.
     /// </summary>
     /// <param name="request">Request.</param>
-    /// <param name="templateId">Template ID.</param>
     /// <param name="context">Context.</param>
     /// <returns>Result.</returns>
     public Task<IResult> SetTemplateEntityPost([FromBody] KeyedEntityDefinitionEventDetails request,

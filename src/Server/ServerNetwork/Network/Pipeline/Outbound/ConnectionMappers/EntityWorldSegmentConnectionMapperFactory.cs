@@ -18,6 +18,7 @@ using System;
 using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.World;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Infrastructure;
@@ -36,6 +37,8 @@ public class EntityWorldSegmentConnectionMapperFactory
     private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<EntityWorldSegmentConnectionMapperFactory> logger;
     private readonly WorldSegmentResolver resolver;
+    private readonly PlayerRoleCheck roleCheck;
+    private readonly ServerOnlyTagCollection serverOnly;
     private readonly WorldManagementServices worldManagementServices;
 
     public EntityWorldSegmentConnectionMapperFactory(
@@ -44,6 +47,8 @@ public class EntityWorldSegmentConnectionMapperFactory
         WorldManagementServices worldManagementServices,
         NetworkConnectionManager connectionManager,
         AccountServices accountServices,
+        ServerOnlyTagCollection serverOnly,
+        PlayerRoleCheck roleCheck,
         ILogger<EntityWorldSegmentConnectionMapperFactory> logger)
     {
         this.kinematics = kinematics;
@@ -51,6 +56,8 @@ public class EntityWorldSegmentConnectionMapperFactory
         this.worldManagementServices = worldManagementServices;
         this.connectionManager = connectionManager;
         this.accountServices = accountServices;
+        this.serverOnly = serverOnly;
+        this.roleCheck = roleCheck;
         this.logger = logger;
     }
 
@@ -64,6 +71,6 @@ public class EntityWorldSegmentConnectionMapperFactory
     {
         return new EntityWorldSegmentConnectionMapper(
             kinematics, resolver, worldManagementServices, connectionManager,
-            accountServices, logger, entitySelector);
+            accountServices, serverOnly, roleCheck, logger, entitySelector);
     }
 }

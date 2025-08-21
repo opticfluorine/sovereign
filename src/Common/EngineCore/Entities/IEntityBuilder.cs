@@ -329,4 +329,17 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutCastShadows();
+
+    /// <summary>
+    ///     Adds a ServerOnly tag to the entity.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("ServerOnly")]
+    IEntityBuilder ServerOnly();
+
+    /// <summary>
+    ///     Removes the ServerOnly tag if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutServerOnly();
 }

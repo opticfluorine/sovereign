@@ -93,5 +93,10 @@ public enum ClientStateFlag
     /// <summary>
     ///     Flag indicating that the next frame should be traced for debugging.
     /// </summary>
-    DebugFrame
+    DebugFrame,
+
+    /// <summary>
+    ///     Flag indicating that hidden entities should be drawn with a placeholder.
+    /// </summary>
+    ShowHiddenEntities
 }

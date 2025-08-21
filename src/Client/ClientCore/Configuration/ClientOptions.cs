@@ -17,6 +17,8 @@
 
 using System.Collections.Generic;
 using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.ClientCore.Configuration;
 
@@ -39,6 +41,16 @@ public sealed class RendererOptions
     ///     Extra tiles to search for renderable entities along the y axis.
     /// </summary>
     public float RenderSearchSpacerY { get; set; } = 8.0f;
+
+    /// <summary>
+    ///     Default sprite ID to use as a placeholder for hidden entities when they are shown.
+    /// </summary>
+    public int DefaultHiddenPlaceholderSprite { get; set; } = 1;
+
+    /// <summary>
+    ///     Default opacity for placeholder sprites used when drawing hidden entities.
+    /// </summary>
+    public float DefaultHiddenPlaceholderOpacity { get; set; } = 0.8f;
 }
 
 /// <summary>
@@ -218,5 +230,35 @@ public sealed class DayNightOptions
             Green = 1.0f,
             Blue = 1.0f
         }
+    };
+}
+
+/// <summary>
+///     User-configurable options for game editor functions.
+/// </summary>
+public sealed class EditorOptions
+{
+    /// <summary>
+    ///     Default definition for newly added block template entities.
+    /// </summary>
+    public EntityDefinition DefaultNewBlockTemplate { get; set; } = new()
+    {
+        Material = new MaterialPair(1, 0),
+        CastBlockShadows = true,
+        Name = "New Block"
+    };
+
+    /// <summary>
+    ///     Default definition for newly added NPC template entities.
+    /// </summary>
+    public EntityDefinition DefaultNewNpcTemplate { get; set; } = new()
+    {
+        AnimatedSpriteId = 0,
+        Drawable = Vector2.Zero,
+        CastShadows = new Shadow
+        {
+            Radius = 0.1f
+        },
+        Name = "New NPC"
     };
 }

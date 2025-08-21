@@ -75,6 +75,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const string EntityTypeName = "entity_type";
     private const SqliteType EntityTypeType = SqliteType.Integer;
 
+    private const SqliteType ServerOnlyParamType = SqliteType.Integer;
+    private const string ServerOnlyParamName = "server_only";
+
     private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
 
@@ -252,6 +255,13 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         ModifyEntityTypeComponentQuery = new SimpleSqliteModifyComponentQuery<EntityType>(
             EntityTypeName, EntityTypeType, conn);
         RemoveEntityTypeComponentQuery = new SimpleSqliteRemoveComponentQuery(EntityTypeName, conn);
+
+        // ServerOnly tag.
+        AddServerOnlyComponentQuery = new SimpleSqliteAddComponentQuery<bool>(ServerOnlyParamName, ServerOnlyParamType,
+            conn);
+        ModifyServerOnlyComponentQuery = new SimpleSqliteModifyComponentQuery<bool>(ServerOnlyParamName,
+            ServerOnlyParamType, conn);
+        RemoveServerOnlyComponentQuery = new SimpleSqliteRemoveComponentQuery(ServerOnlyParamName, conn);
     }
 
     public ITransactionLock TransactionLock { get; } = new SingleWriterTransactionLock();
@@ -316,6 +326,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IModifyComponentQuery<bool> ModifyCastBlockShadowsComponentQuery { get; }
     public IRemoveComponentQuery RemoveCastBlockShadowsComponentQuery { get; }
     public IRemoveComponentQuery RemoveEntityTypeComponentQuery { get; }
+    public IAddComponentQuery<bool> AddServerOnlyComponentQuery { get; }
+    public IModifyComponentQuery<bool> ModifyServerOnlyComponentQuery { get; }
+    public IRemoveComponentQuery RemoveServerOnlyComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

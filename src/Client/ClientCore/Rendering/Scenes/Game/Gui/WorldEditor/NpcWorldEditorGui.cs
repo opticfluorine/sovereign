@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Hexa.NET.ImGui;
+using Microsoft.Extensions.Options;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Systems.ClientWorldEdit;
@@ -31,7 +33,9 @@ public class NpcWorldEditorGui(
     AnimatedSpriteComponentCollection animatedSprites,
     GuiExtensions guiExtensions,
     ClientWorldEditController worldEditController,
-    IEventSender eventSender)
+    IEventSender eventSender,
+    DrawableComponentCollection drawables,
+    IOptions<RendererOptions> rendererOptions)
 {
     private const string NoSpriteLabel = "[no sprite]";
     private const string NoNameLabel = "[no name]";
@@ -76,9 +80,10 @@ public class NpcWorldEditorGui(
     /// </summary>
     private void RenderSpritePreview()
     {
-        if (!animatedSprites.HasComponentForEntity(worldEditServices.NpcTemplateId))
+        if (!drawables.HasComponentForEntity(worldEditServices.NpcTemplateId) &&
+            !animatedSprites.HasComponentForEntity(worldEditServices.NpcTemplateId))
         {
-            ImGui.Text(NoSpriteLabel);
+            guiExtensions.Sprite(rendererOptions.Value.DefaultHiddenPlaceholderSprite);
             return;
         }
 

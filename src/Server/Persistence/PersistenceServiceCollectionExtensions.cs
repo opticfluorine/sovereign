@@ -99,6 +99,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<PhysicsStateTracker>();
         services.TryAddSingleton<BoundingBoxStateTracker>();
         services.TryAddSingleton<EntityTypeStateTracker>();
+        services.TryAddSingleton<ServerOnlyStateTracker>();
     }
 
     private static void AddPersistenceSystem(IServiceCollection services)

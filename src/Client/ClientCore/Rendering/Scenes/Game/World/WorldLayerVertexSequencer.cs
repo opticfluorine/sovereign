@@ -56,15 +56,14 @@ public sealed class WorldLayerVertexSequencer
     public void AddLayer(WorldLayer layer, RenderPlan renderPlan, ulong systemTime)
     {
         // Blocks. These only need to be handled at the current layer.
-        spriteSequencer.SequenceSprites(layer.TopFaceTileSprites, renderPlan, SpritePlane.Xy, out var topBaseIndex,
-            out var topIndexCount);
-        spriteSequencer.SequenceSprites(layer.FrontFaceTileSprites, renderPlan, SpritePlane.Xz,
-            out var frontBaseIndex,
-            out var frontIndexCount);
+        spriteSequencer.SequenceSprites(layer.TopFaceTileSprites, renderPlan, SpritePlane.Xy, false,
+            out var topBaseIndex, out var topIndexCount);
+        spriteSequencer.SequenceSprites(layer.FrontFaceTileSprites, renderPlan, SpritePlane.Xz, false,
+            out var frontBaseIndex, out var frontIndexCount);
 
         // Free sprites. These must be handled at the current layer plus any future layers with which they overlap.
-        spriteSequencer.SequenceSprites(layer.FreeSprites, renderPlan, SpritePlane.Xz, out var spriteBaseIndex,
-            out var spriteIndexCount);
+        spriteSequencer.SequenceSprites(layer.FreeSprites, renderPlan, SpritePlane.Xz, true,
+            out var spriteBaseIndex, out var spriteIndexCount);
 
         renderPlan.PushDebugGroup($"Layer {layer.ZFloor}");
 
@@ -103,7 +102,7 @@ public sealed class WorldLayerVertexSequencer
             if (sprite.MaxLayer < zFloor) continue;
             toDraw.Add(sprite.Data);
 
-            spriteSequencer.SequenceSprites(toDraw, renderPlan, SpritePlane.Xz, out var baseIndex,
+            spriteSequencer.SequenceSprites(toDraw, renderPlan, SpritePlane.Xz, true, out var baseIndex,
                 out var indexCount);
             renderPlan.DrawSprites(baseIndex, indexCount, false);
         }

@@ -47,6 +47,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly PhysicsTagCollection physics;
     private readonly PlayerCharacterTagCollection playerCharacterTags;
     private readonly PointLightSourceComponentCollection pointLightSources;
+    private readonly ServerOnlyTagCollection serverOnly;
 
     /// <summary>
     ///     Next available block entity ID.
@@ -72,6 +73,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows,
         EntityTypeComponentCollection entityTypes,
+        ServerOnlyTagCollection serverOnly,
         EntityTable entityTable)
     {
         this.entityManager = entityManager;
@@ -93,6 +95,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
         this.entityTypes = entityTypes;
+        this.serverOnly = serverOnly;
         this.entityTable = entityTable;
 
         assigner = entityManager.GetNewAssigner();
@@ -114,6 +117,6 @@ public sealed class ClientEntityFactory : IEntityFactory
             entityManager, kinematics, drawables, materials,
             materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources,
-            physics, boundingBoxes, castShadows, entityTypes, entityTable);
+            physics, boundingBoxes, castShadows, entityTypes, serverOnly, entityTable);
     }
 }

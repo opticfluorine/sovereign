@@ -134,6 +134,11 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutEntityType();
 
+        if (definition.ServerOnly)
+            builder.ServerOnly();
+        else
+            builder.WithoutServerOnly();
+
         var entityId = builder.Build();
         logger.LogDebug("Processed entity ID {Id:X}.", entityId);
     }

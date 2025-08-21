@@ -37,6 +37,11 @@ public class PlayerRoleCheck
     /// <returns>true if admin, false otherwise.</returns>
     public bool IsPlayerAdmin(ulong playerEntityId)
     {
-        return admins.HasComponentForEntity(playerEntityId) && admins[playerEntityId];
+        // It's possible that this gives a false positive if the tag is pending and has the value 'false'
+        // in the database. Tags should be removed from the database by setting the value to NULL rather
+        // than false. The engine will always remove the admin tag by setting to null - the only way this
+        // can happen is if some other external tool modifies the database, which is not recommended.
+        // Accordingly, this is an acceptable tradeoff.
+        return admins.HasTagForEntity(playerEntityId) || admins.HasPendingTagForEntity(playerEntityId);
     }
 }

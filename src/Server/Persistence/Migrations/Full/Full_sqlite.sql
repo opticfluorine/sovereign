@@ -102,6 +102,7 @@ CREATE TABLE Entity
     bb_size_z           FLOAT,
     shadow_radius       FLOAT,
     entity_type         INTEGER,
+    server_only         BOOLEAN,
     FOREIGN KEY (template_id) REFERENCES Entity (id),
     FOREIGN KEY (parent_id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
@@ -205,7 +206,8 @@ SELECT Entity.id                 AS id,
        Entity.bb_size_y          AS bbSizeY,
        Entity.bb_size_z          AS bbSizeZ,
        Entity.shadow_radius      AS shadowRadius,
-       Entity.entity_type        AS entityType
+       Entity.entity_type        AS entityType,
+       Entity.server_only        AS serverOnly
 FROM Entity;
 
 

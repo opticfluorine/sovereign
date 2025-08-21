@@ -83,6 +83,17 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
         return new HashSet<ulong>();
     }
 
+    /// <summary>
+    ///     Adds the set of all descendants of an entity to the given list.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="descendants">List to populate with descendants.</param>
+    public void GetAllDescendants(ulong entityId, List<ulong> descendants)
+    {
+        if (!allDescendants.TryGetValue(entityId, out var children)) return;
+        descendants.AddRange(children);
+    }
+
     protected override void ComponentAddedCallback(ulong entityId, ulong parentId, bool isLoad)
     {
         AddEntity(entityId, parentId);

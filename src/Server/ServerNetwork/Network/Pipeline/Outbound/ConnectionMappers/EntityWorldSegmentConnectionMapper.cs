@@ -18,6 +18,7 @@ using System;
 using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.World;
 using Sovereign.EngineUtil.Monads;
 using Sovereign.NetworkCore.Network.Infrastructure;
@@ -40,6 +41,8 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
     private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger logger;
     private readonly WorldSegmentResolver resolver;
+    private readonly PlayerRoleCheck roleCheck;
+    private readonly ServerOnlyTagCollection serverOnly;
     private readonly WorldManagementServices worldManagementServices;
 
     /// <summary>
@@ -52,6 +55,8 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
         WorldManagementServices worldManagementServices,
         NetworkConnectionManager connectionManager,
         AccountServices accountServices,
+        ServerOnlyTagCollection serverOnly,
+        PlayerRoleCheck roleCheck,
         ILogger logger,
         Func<OutboundEventInfo, Maybe<ulong>> entitySelector)
     {
@@ -60,6 +65,8 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
         this.worldManagementServices = worldManagementServices;
         this.connectionManager = connectionManager;
         this.accountServices = accountServices;
+        this.serverOnly = serverOnly;
+        this.roleCheck = roleCheck;
         this.logger = logger;
         this.entitySelector = entitySelector;
     }
@@ -77,16 +84,20 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
 
         if (!kinematics.HasComponentForEntity(entityId.Value))
         {
-            logger.LogError("Can't broadcast to world segment for non-positioned entity {Id:X}.", entityId);
+            logger.LogError("Can't broadcast to world segment for non-positioned entity {Id:X}.", entityId.Value);
             return;
         }
 
+        var isServerOnly = serverOnly.HasTagForEntity(entityId.Value);
         var segmentIndex = resolver.GetWorldSegmentForPosition(kinematics[entityId.Value].Position);
 
         // Send the event to each player subscribed to the same world segment.
         var subscribedPlayers = worldManagementServices.GetPlayersSubscribedToWorldSegment(segmentIndex);
         foreach (var playerEntityId in subscribedPlayers)
         {
+            // Avoid sending updates for server-only entities to subscribers who can't see them.
+            if (isServerOnly && !roleCheck.IsPlayerAdmin(playerEntityId)) continue;
+
             var connectionId = accountServices.GetConnectionIdForPlayer(playerEntityId);
             if (connectionId.HasValue)
             {

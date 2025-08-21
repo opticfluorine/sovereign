@@ -33,26 +33,26 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
         @"WITH RECURSIVE EntityTree(id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, 
                 parent, drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
                 plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ,
-                shadowRadius, entityType)
+                shadowRadius, entityType, serverOnly)
 	        AS (
 		        SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
                         drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
                         plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ,
-                        shadowRadius, entityType
+                        shadowRadius, entityType, serverOnly
 			        FROM EntityWithComponents WHERE id = @Id
 		        UNION ALL
             		SELECT ec.id, ec.template_id, ec.x, ec.y, ec.z, ec.material, ec.materialModifier, ec.playerCharacter,
                         ec.name, ec.account, ec.parent, ec.drawableX, ec.drawableY, ec.animatedSprite, ec.orientation, ec.admin,
                         ec.castBlockShadows, ec.plsRadius, ec.plsIntensity, ec.plsColor,
                         ec.plsPosX, ec.plsPosY, ec.plsPosZ, ec.physics, ec.bbPosX, ec.bbPosY, ec.bbPosZ,
-                        ec.bbSizeX, ec.bbSizeY, ec.bbSizeZ, ec.shadowRadius, ec.entityType
+                        ec.bbSizeX, ec.bbSizeY, ec.bbSizeZ, ec.shadowRadius, ec.entityType, ec.serverOnly
 			        FROM EntityWithComponents ec, EntityTree et
         			WHERE ec.parent = et.id
 	        )
             SELECT et.id, kv.key, kv.value, et.template_id, et.x, et.y, et.z, et.material, et.materialModifier, et.playerCharacter, et.name, 
                 et.account, et.parent, et.drawableX, et.drawableY, et.animatedSprite, et.orientation, et.admin, et.castBlockShadows, et.plsRadius, 
                 et.plsIntensity, et.plsColor, et.plsPosX, et.plsPosY, et.plsPosZ, et.physics, et.bbPosX, et.bbPosY, et.bbPosZ, 
-                et.bbSizeX, et.bbSizeY, et.bbSizeZ, et.shadowRadius, et.entityType
+                et.bbSizeX, et.bbSizeY, et.bbSizeZ, et.shadowRadius, et.entityType, et.serverOnly
             FROM EntityTree et
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = et.id
             ORDER BY et.parent NULLS LAST";

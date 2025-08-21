@@ -50,11 +50,12 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows,
         EntityTypeComponentCollection entityTypes,
+        ServerOnlyTagCollection serverOnly,
         EntityTable entityTable)
         : base(entityId, load, entityManager, kinematics, materials,
             materialModifiers, aboveBlocks, playerCharacterTags, names, parents,
             drawables, animatedSprites, orientations, admins, blockPositions, castBlockShadows, pointLightSources,
-            physics, boundingBoxes, castShadows, entityTypes, entityTable)
+            physics, boundingBoxes, castShadows, entityTypes, serverOnly, entityTable)
     {
         this.accounts = accounts;
     }

@@ -28,6 +28,40 @@ namespace Sovereign.EngineCore.Entities;
 public class EntityDefinition
 {
     /// <summary>
+    ///     Default constructor.
+    /// </summary>
+    public EntityDefinition()
+    {
+    }
+
+    /// <summary>
+    ///     Copy constructor.
+    /// </summary>
+    /// <param name="other">EntityDefinition to copy.</param>
+    public EntityDefinition(EntityDefinition other)
+    {
+        EntityId = other.EntityId;
+        Position = other.Position;
+        AnimatedSpriteId = other.AnimatedSpriteId;
+        Drawable = other.Drawable;
+        Material = other.Material;
+        PlayerCharacter = other.PlayerCharacter;
+        Name = other.Name;
+        Parent = other.Parent;
+        Orientation = other.Orientation;
+        Admin = other.Admin;
+        BlockPosition = other.BlockPosition;
+        TemplateEntityId = other.TemplateEntityId;
+        CastBlockShadows = other.CastBlockShadows;
+        PointLightSource = other.PointLightSource;
+        Physics = other.Physics;
+        BoundingBox = other.BoundingBox;
+        CastShadows = other.CastShadows;
+        EntityType = other.EntityType;
+        ServerOnly = other.ServerOnly;
+    }
+
+    /// <summary>
     ///     Entity ID. Required.
     /// </summary>
     [Key(0)]
@@ -134,4 +168,10 @@ public class EntityDefinition
     /// </summary>
     [Key(17)]
     public EntityType EntityType { get; set; } = EntityType.Other;
+
+    /// <summary>
+    ///     Server only tag.
+    /// </summary>
+    [Key(18)]
+    public bool ServerOnly { get; set; }
 }

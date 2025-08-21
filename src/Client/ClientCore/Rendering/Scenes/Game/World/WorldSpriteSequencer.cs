@@ -50,14 +50,17 @@ public sealed class WorldSpriteSequencer
     private const int IndicesPerSprite = 6;
     private readonly AtlasMap atlasMap;
     private readonly ILogger<WorldSpriteSequencer> logger;
+    private readonly OpacityTables opacityTables;
 
     private readonly SpriteManager spriteManager;
 
-    public WorldSpriteSequencer(AtlasMap atlasMap, SpriteManager spriteManager, ILogger<WorldSpriteSequencer> logger)
+    public WorldSpriteSequencer(AtlasMap atlasMap, SpriteManager spriteManager, ILogger<WorldSpriteSequencer> logger,
+        OpacityTables opacityTables)
     {
         this.atlasMap = atlasMap;
         this.spriteManager = spriteManager;
         this.logger = logger;
+        this.opacityTables = opacityTables;
     }
 
     /// <summary>
@@ -66,9 +69,10 @@ public sealed class WorldSpriteSequencer
     /// <param name="sprites">Sprites to sequence.</param>
     /// <param name="renderPlan">Rendering plan to populate.</param>
     /// <param name="spritePlane">Sprite plane.</param>
+    /// <param name="overdraw">Whether the sprites will be subject to overdraw.</param>
     /// <param name="baseIndex">First index corresponding to the sequenced sprites.</param>
     /// <param name="indexCount">Number of indices added for these sprites.</param>
-    public void SequenceSprites(List<PosVelId> sprites, RenderPlan renderPlan, SpritePlane spritePlane,
+    public void SequenceSprites(List<PosVelId> sprites, RenderPlan renderPlan, SpritePlane spritePlane, bool overdraw,
         out uint baseIndex, out uint indexCount)
     {
         baseIndex = 0;
@@ -93,9 +97,18 @@ public sealed class WorldSpriteSequencer
             var pos = positionedAnimatedSprite.Position;
             var vel = positionedAnimatedSprite.Velocity;
             var lightFactor = positionedAnimatedSprite.LightFactor;
-            var opacity = positionedAnimatedSprite.Opacity;
             var spriteId = positionedAnimatedSprite.Id;
             var sprite = spriteManager.Sprites[spriteId];
+
+            // Sprite overdraw will cause alpha transparency to build up layer-by-layer.
+            // To account for this, reduce the opacity so that the cumulative effect equals the desired opacity.
+            var opacity = positionedAnimatedSprite.Opacity;
+            if (overdraw)
+            {
+                var spriteInfo = atlasMap.MapElements[sprite.Id];
+                var drawCount = (int)Math.Floor(pos.Z + spriteInfo.HeightInTiles) - (int)Math.Floor(pos.Z) + 1;
+                opacity = opacityTables.GetAlpha(drawCount, opacity);
+            }
 
             switch (spritePlane)
             {

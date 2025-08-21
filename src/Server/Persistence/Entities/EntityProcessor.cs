@@ -65,6 +65,7 @@ public sealed class EntityProcessor
     private const int IndexBbSizeZ = IndexBbSizeY + 1;
     private const int IndexShadowRadius = IndexBbSizeZ + 1;
     private const int IndexEntityType = IndexShadowRadius + 1;
+    private const int IndexServerOnly = IndexEntityType + 1;
     private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
     private readonly ILogger<EntityProcessor> logger;
@@ -133,6 +134,7 @@ public sealed class EntityProcessor
             ProcessBoundingBox(reader, builder);
             ProcessCastShadows(reader, builder);
             ProcessEntityType(reader, builder);
+            ProcessServerOnly(reader, builder);
 
             /* Complete the entity. */
             builder.Build();
@@ -384,6 +386,17 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexEntityType)) return;
         builder.EntityType((EntityType)reader.GetByte(IndexEntityType));
+    }
+
+    /// <summary>
+    ///     Processes the ServerOnly tag.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessServerOnly(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexServerOnly)) return;
+        if (reader.GetBoolean(IndexServerOnly)) builder.ServerOnly();
     }
 
     /// <summary>

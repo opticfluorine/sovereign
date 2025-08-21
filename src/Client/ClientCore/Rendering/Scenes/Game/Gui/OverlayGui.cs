@@ -39,7 +39,8 @@ public class OverlayGui(
     ClientStateServices clientStateServices,
     NameComponentCollection names,
     EntityTypeComponentCollection entityTypes,
-    ILogger<OverlayGui> logger)
+    ILogger<OverlayGui> logger,
+    DrawableComponentCollection drawables)
 {
     /// <summary>
     ///     Renders the overlay GUI.
@@ -85,6 +86,8 @@ public class OverlayGui(
                 hoverPos.Z + zStep, out var entityId) || EntityUtil.IsBlockEntity(entityId)) return;
         if (clientStateServices.TryGetSelectedPlayer(out var playerId) && entityId == playerId) return;
         if (!entityTypes.TryGetValue(entityId, out var entityType)) return;
+        if (!drawables.HasComponentForEntity(entityId) &&
+            !clientStateServices.GetStateFlagValue(ClientStateFlag.ShowHiddenEntities)) return;
 
         switch (entityType)
         {

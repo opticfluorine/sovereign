@@ -28,6 +28,7 @@ using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Sovereign.ClientCore.Systems.Block.Caches;
 using Sovereign.ClientCore.Systems.Camera;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
@@ -50,6 +51,7 @@ public sealed class WorldEntityRetriever
     private readonly CameraServices camera;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castsShadows;
+    private readonly ClientStateServices clientStateServices;
     private readonly DrawableComponentCollection drawables;
     private readonly WorldLayerGrouper grouper;
 
@@ -69,7 +71,10 @@ public sealed class WorldEntityRetriever
 
     private readonly RendererOptions rendererOptions;
     private readonly NonBlockShadowPlanner shadowPlanner;
+    private readonly SpriteManager spriteManager;
     private readonly DisplayViewport viewport;
+
+    private bool showHidden;
 
     /// <summary>
     ///     Number of solid blocks added so far in a frame.
@@ -88,7 +93,8 @@ public sealed class WorldEntityRetriever
         WorldRangeSelector rangeSelector, AtlasMap atlasMap,
         ILogger<WorldEntityRetriever> logger, CastShadowsComponentCollection castsShadows,
         NonBlockShadowPlanner shadowPlanner, IOptions<RendererOptions> rendererOptions,
-        DrawableComponentCollection drawables)
+        DrawableComponentCollection drawables, ClientStateServices clientStateServices,
+        SpriteManager spriteManager)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -111,6 +117,8 @@ public sealed class WorldEntityRetriever
         this.castsShadows = castsShadows;
         this.shadowPlanner = shadowPlanner;
         this.drawables = drawables;
+        this.clientStateServices = clientStateServices;
+        this.spriteManager = spriteManager;
         this.rendererOptions = rendererOptions.Value;
     }
 
@@ -125,6 +133,7 @@ public sealed class WorldEntityRetriever
         grouper.ResetLayers();
         NameLabels.Clear();
         solidBlockIndex = 0;
+        showHidden = clientStateServices.GetStateFlagValue(ClientStateFlag.ShowHiddenEntities);
 
         perspectiveController.BeginFrameSync(timeSinceTick);
 
@@ -255,7 +264,11 @@ public sealed class WorldEntityRetriever
     {
         var opacity = perspectiveServices.GetOpacityForEntity(entityId);
         if (opacity < OpacityCullThreshold) return;
-        if (!drawables.HasComponentForEntity(entityId)) return;
+        if (!drawables.HasComponentForEntity(entityId))
+        {
+            if (showHidden) ProcessHidden(entityId);
+            return;
+        }
 
         var entityKinematics = kinematics[entityId];
         var posOffset = drawables[entityId];
@@ -274,6 +287,35 @@ public sealed class WorldEntityRetriever
             AddNameLabel(entityId, entityKinematics, sprite, timeSinceTick);
         if (castsShadows.TryGetValue(entityId, out var shadow))
             shadowPlanner.AddNonBlockShadow(renderPlan, shadow, entityKinematics, sprite.Id);
+    }
+
+    /// <summary>
+    ///     Processes a hidden entity when hidden placeholders are enabled.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    private void ProcessHidden(ulong entityId)
+    {
+        var entityKinematics = kinematics[entityId];
+        Sprite sprite;
+        if (animatedSprites.TryGetValue(entityId, out var animIdx))
+        {
+            var animSprite = animatedSpriteManager.AnimatedSprites[animIdx];
+            sprite = animSprite.GetDefaultSprite();
+        }
+        else
+        {
+            if (rendererOptions.DefaultHiddenPlaceholderSprite >= spriteManager.Sprites.Count)
+            {
+                logger.LogError("Default hidden placeholder sprite {SpriteId} is out of range.",
+                    rendererOptions.DefaultHiddenPlaceholderSprite);
+                return;
+            }
+
+            sprite = spriteManager.Sprites[rendererOptions.DefaultHiddenPlaceholderSprite];
+        }
+
+        grouper.AddSprite(PerspectiveEntityType.NonBlock, entityKinematics.Position, entityKinematics.Velocity,
+            sprite, 1.0f, rendererOptions.DefaultHiddenPlaceholderOpacity);
     }
 
     /// <summary>

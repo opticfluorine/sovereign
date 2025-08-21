@@ -51,6 +51,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly PhysicsTagCollection physics;
     protected readonly PlayerCharacterTagCollection playerCharacterTags;
     private readonly PointLightSourceComponentCollection pointLightSources;
+    private readonly ServerOnlyTagCollection serverOnly;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
     private bool isBlock;
@@ -78,6 +79,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows,
         EntityTypeComponentCollection entityTypes,
+        ServerOnlyTagCollection serverOnly,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -101,6 +103,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
         this.entityTypes = entityTypes;
+        this.serverOnly = serverOnly;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -393,6 +396,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutCastShadows()
     {
         castShadows.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder ServerOnly()
+    {
+        serverOnly.TagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutServerOnly()
+    {
+        serverOnly.UntagEntity(entityId, load);
         return this;
     }
 }

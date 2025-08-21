@@ -36,11 +36,26 @@ public sealed class BehaviorControlGroup
         if (ImGui.CollapsingHeader("Behavior", ImGuiTreeNodeFlags.DefaultOpen))
             if (ImGui.BeginTable("Behavior", 2, ImGuiTableFlags.SizingFixedFit))
             {
+                ServerOnlyControls(entityDefinition);
                 PhysicsControls(entityDefinition);
                 BoundingBoxControls(entityDefinition);
 
                 ImGui.EndTable();
             }
+    }
+
+    /// <summary>
+    ///     Renders the ServerOnly tag control.
+    /// </summary>
+    /// <param name="entityDefinition">Entity definition.</param>
+    private static void ServerOnlyControls(EntityDefinition entityDefinition)
+    {
+        ImGui.TableNextColumn();
+        ImGui.Text("Server Only:");
+        ImGui.TableNextColumn();
+        var inputServerOnly = entityDefinition.ServerOnly;
+        ImGui.Checkbox("##serverOnly", ref inputServerOnly);
+        entityDefinition.ServerOnly = inputServerOnly;
     }
 
     /// <summary>

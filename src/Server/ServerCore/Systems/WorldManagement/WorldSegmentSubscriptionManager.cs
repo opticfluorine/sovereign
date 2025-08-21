@@ -39,6 +39,7 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </remarks>
 public class WorldSegmentSubscriptionManager
 {
+    private const int DefaultSyncBufferSize = 128;
     private readonly WorldSegmentActivationManager activationManager;
 
     /// <summary>
@@ -65,6 +66,8 @@ public class WorldSegmentSubscriptionManager
     /// </summary>
     private readonly Dictionary<ulong, GridPosition> pendingDesyncs = new();
 
+    private readonly List<ulong> playerBuffer = new(DefaultSyncBufferSize);
+
     /// <summary>
     ///     Map from world segment index to the set of players subscribed to that world segment.
     /// </summary>
@@ -78,6 +81,8 @@ public class WorldSegmentSubscriptionManager
     ///     Dictionary mapping player entity IDs to subscribed world segments.
     /// </summary>
     private readonly Dictionary<ulong, HashSet<GridPosition>> subscriptions = new();
+
+    private readonly List<ulong> syncBuffer = new(DefaultSyncBufferSize);
 
     private readonly EntitySynchronizer synchronizer;
 
@@ -125,6 +130,17 @@ public class WorldSegmentSubscriptionManager
         return playersByWorldSegments.TryGetValue(segmentIndex, out var players)
             ? players
             : new HashSet<ulong>();
+    }
+
+    /// <summary>
+    ///     Adds the players subscribed to a world segment to a list.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <param name="playerIds">List to append with subscribed player IDs.</param>
+    public void GetSubscribersForWorldSegment(GridPosition segmentIndex, List<ulong> playerIds)
+    {
+        if (!playersByWorldSegments.TryGetValue(segmentIndex, out var players)) return;
+        playerIds.AddRange(players);
     }
 
     /// <summary>
@@ -313,13 +329,15 @@ public class WorldSegmentSubscriptionManager
 
         // Skip if there are no subscribers to the relevant world segment.
         var segmentIndex = resolver.GetWorldSegmentForPosition(kinematics[entityId].Position);
-        var playerEntityIds = GetSubscribersForWorldSegment(segmentIndex);
-        if (playerEntityIds.Count == 0) return;
+        playerBuffer.Clear();
+        GetSubscribersForWorldSegment(segmentIndex, playerBuffer);
+        if (playerBuffer.Count == 0) return;
 
         // Identify the new entity tree.
-        var entitiesToSync = hierarchyIndexer.GetAllDescendants(entityId);
-        entitiesToSync.Add(entityId);
-        synchronizer.Synchronize(playerEntityIds, entitiesToSync);
+        syncBuffer.Clear();
+        hierarchyIndexer.GetAllDescendants(entityId, syncBuffer);
+        syncBuffer.Add(entityId);
+        synchronizer.Synchronize(playerBuffer, syncBuffer);
     }
 
     /// <summary>

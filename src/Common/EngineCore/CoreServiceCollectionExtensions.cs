@@ -129,6 +129,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<BoundingBoxComponentCollection>();
         services.TryAddComponentCollection<CastShadowsComponentCollection>();
         services.TryAddComponentCollection<EntityTypeComponentCollection>();
+        services.TryAddComponentCollection<ServerOnlyTagCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)

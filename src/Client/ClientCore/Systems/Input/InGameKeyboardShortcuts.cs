@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using SDL2;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Player;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
@@ -35,7 +36,7 @@ public class InGameKeyboardShortcuts
     private readonly ClientStateServices stateServices;
 
     public InGameKeyboardShortcuts(IEventSender eventSender, ClientStateServices stateServices,
-        ClientStateController stateController)
+        ClientStateController stateController, PlayerRoleCheck roleCheck)
     {
         this.eventSender = eventSender;
         this.stateServices = stateServices;
@@ -47,7 +48,14 @@ public class InGameKeyboardShortcuts
         shortcutTable[SDL.SDL_Keycode.SDLK_F2] = () => Toggle(ClientStateFlag.ShowPlayerDebug);
         shortcutTable[SDL.SDL_Keycode.SDLK_F3] = () => Toggle(ClientStateFlag.ShowEntityDebug);
         shortcutTable[SDL.SDL_Keycode.SDLK_INSERT] = () => Toggle(ClientStateFlag.ShowTemplateEntityEditor);
-        shortcutTable[SDL.SDL_Keycode.SDLK_DELETE] = () => Toggle(ClientStateFlag.WorldEditMode);
+        shortcutTable[SDL.SDL_Keycode.SDLK_DELETE] = () =>
+        {
+            if (stateServices.TryGetSelectedPlayer(out var playerId) && roleCheck.IsPlayerAdmin(playerId))
+            {
+                Toggle(ClientStateFlag.WorldEditMode);
+                Toggle(ClientStateFlag.ShowHiddenEntities);
+            }
+        };
     }
 
     /// <summary>

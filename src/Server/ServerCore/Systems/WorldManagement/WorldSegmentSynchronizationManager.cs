@@ -15,9 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Extensions.Logging;
-using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 
@@ -28,7 +26,9 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public class WorldSegmentSynchronizationManager
 {
+    private const int DefaultEntityBufferSize = 1024;
     private readonly WorldSegmentActivationManager activationManager;
+    private readonly List<ulong> entityBuffer = new(DefaultEntityBufferSize);
     private readonly EntityHierarchyIndexer hierarchyIndexer;
     private readonly ILogger<WorldSegmentSynchronizationManager> logger;
     private readonly NonBlockWorldSegmentIndexer nonBlockSegmentIndexer;
@@ -38,20 +38,16 @@ public class WorldSegmentSynchronizationManager
     /// </summary>
     private readonly Dictionary<GridPosition, Queue<ulong>> pendingPlayersBySegment = new();
 
-    private readonly PlayerCharacterTagCollection playerCharacters;
-
     private readonly EntitySynchronizer synchronizer;
 
     public WorldSegmentSynchronizationManager(WorldSegmentActivationManager activationManager,
         EntitySynchronizer synchronizer, NonBlockWorldSegmentIndexer nonBlockSegmentIndexer,
-        EntityHierarchyIndexer hierarchyIndexer, PlayerCharacterTagCollection playerCharacters,
-        ILogger<WorldSegmentSynchronizationManager> logger)
+        EntityHierarchyIndexer hierarchyIndexer, ILogger<WorldSegmentSynchronizationManager> logger)
     {
         this.activationManager = activationManager;
         this.synchronizer = synchronizer;
         this.nonBlockSegmentIndexer = nonBlockSegmentIndexer;
         this.hierarchyIndexer = hierarchyIndexer;
-        this.playerCharacters = playerCharacters;
         this.logger = logger;
     }
 
@@ -102,15 +98,15 @@ public class WorldSegmentSynchronizationManager
     private void SendSynchronizationEvents(ulong playerEntityId, GridPosition segmentIndex)
     {
         // Fill in the hierarchy beneath the entities.
-        var allEntities = nonBlockSegmentIndexer.GetEntitiesInWorldSegment(segmentIndex)
-            .SelectMany(entityId =>
-            {
-                var all = hierarchyIndexer.GetAllDescendants(entityId);
-                all.Add(entityId);
-                return all;
-            });
+        entityBuffer.Clear();
+        var rootEntities = nonBlockSegmentIndexer.GetEntitiesInWorldSegment(segmentIndex);
+        foreach (var rootId in rootEntities)
+        {
+            entityBuffer.Add(rootId);
+            hierarchyIndexer.GetAllDescendants(rootId, entityBuffer);
+        }
 
         // Synchronize all entities.
-        synchronizer.Synchronize(playerEntityId, allEntities);
+        synchronizer.Synchronize(playerEntityId, entityBuffer);
     }
 }

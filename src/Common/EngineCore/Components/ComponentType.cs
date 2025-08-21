@@ -114,6 +114,11 @@ public enum ComponentType
     /// </summary>
     EntityType = 0x0012,
 
+    /// <summary>
+    ///     ServerOnly tag.
+    /// </summary>
+    ServerOnly = 0x0013,
+
     #endregion Common
 
     #region Client

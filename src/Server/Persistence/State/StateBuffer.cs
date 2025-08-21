@@ -155,6 +155,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<ulong> removedEntities = new(BufferSize);
 
     /// <summary>
+    ///     ServerOnly tag updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<bool>> serverOnlyUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Template state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<ulong>> templateUpdates = new(BufferSize);
@@ -355,6 +360,15 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Enqueues an update to the ServerOnly component.
+    /// </summary>
+    /// <param name="update">Update.</param>
+    public void UpdateServerOnly(ref StateUpdate<bool> update)
+    {
+        serverOnlyUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -400,6 +414,7 @@ public sealed class StateBuffer
         entityTypeUpdates.Clear();
         globalKeyValuePairs.Clear();
         entityKeyValuePairs.Clear();
+        serverOnlyUpdates.Clear();
     }
 
     /// <summary>
@@ -539,6 +554,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddEntityTypeComponentQuery,
                     persistenceProvider.ModifyEntityTypeComponentQuery,
                     persistenceProvider.RemoveEntityTypeComponentQuery,
+                    transaction);
+
+                // ServerOnly.
+                SynchronizeComponent(serverOnlyUpdates,
+                    persistenceProvider.AddServerOnlyComponentQuery,
+                    persistenceProvider.ModifyServerOnlyComponentQuery,
+                    persistenceProvider.RemoveServerOnlyComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

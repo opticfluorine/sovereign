@@ -50,6 +50,7 @@ public class EntityDebugGui
     private readonly IPerspectiveServices perspectiveServices;
     private readonly PhysicsTagCollection physics;
     private readonly PointLightSourceComponentCollection pointLightSources;
+    private readonly ServerOnlyTagCollection serverOnly;
     private string entityIdInput = "";
 
     public EntityDebugGui(AboveBlockComponentCollection aboveBlocks, AnimatedSpriteComponentCollection animatedSprites,
@@ -66,6 +67,7 @@ public class EntityDebugGui
         PhysicsTagCollection physics,
         BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows,
+        ServerOnlyTagCollection serverOnly,
         EntityTypeComponentCollection entityTypes)
     {
         this.aboveBlocks = aboveBlocks;
@@ -86,6 +88,7 @@ public class EntityDebugGui
         this.physics = physics;
         this.boundingBoxes = boundingBoxes;
         this.castShadows = castShadows;
+        this.serverOnly = serverOnly;
         this.entityTypes = entityTypes;
     }
 
@@ -160,6 +163,7 @@ public class EntityDebugGui
                         });
                     AddCompoundRows("Cast Shadows:", entityId, castShadows,
                         shadow => { AddValueRow("Shadow Radius:", shadow.Radius); });
+                    AddComponentRow("Server Only:", entityId, serverOnly);
                     ImGui.EndTable();
                 }
             }

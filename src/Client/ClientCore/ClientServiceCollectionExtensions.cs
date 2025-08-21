@@ -105,6 +105,8 @@ public static class ClientServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(RendererOptions)}"));
         services.Configure<DayNightOptions>(
             configuration.GetSection($"Sovereign:{nameof(DayNightOptions)}"));
+        services.Configure<EditorOptions>(
+            configuration.GetSection($"Sovereign:{nameof(EditorOptions)}"));
 
         return services;
     }
@@ -270,6 +272,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<WorldSpriteSequencer>();
         services.TryAddSingleton<LightSourceTable>();
         services.TryAddSingleton<NonBlockShadowPlanner>();
+        services.TryAddSingleton<OpacityTables>();
 
         services.TryAddSingleton<MainMenuScene>();
         services.TryAddSingleton<StartupGui>();
