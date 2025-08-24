@@ -52,8 +52,7 @@ public sealed class RestServiceProvider(
             .AllowAnonymous();
 
         // Player management.
-        app.MapGet(RestEndpoints.Player, handler: listPlayers.ListPlayersGet)
-            .RequireAuthorization(RestAuthorization.Policies.RequireOutOfGame);
+        app.MapGet(RestEndpoints.Player, handler: listPlayers.ListPlayersGet); // default auth
         app.MapPost(RestEndpoints.Player, createPlayer.CreatePlayerPost)
             .RequireAuthorization(RestAuthorization.Policies.RequireOutOfGame);
         app.MapDelete($"{RestEndpoints.Player}/{{playerId}}", deletePlayer.PlayerDelete)
