@@ -237,7 +237,7 @@ public class MovementManager
             Position = newPosition,
             Velocity = Vector3.Zero
         });
-        physicsActiveFlags[componentIndex] = true;
+        physicsActiveFlags[componentIndex] = kinematicsComponentIndexPhysicsTags[componentIndex];
         movementNotifier.ScheduleEntity(entityId);
     }
 
@@ -267,7 +267,7 @@ public class MovementManager
             foreach (var entityId in entities)
             {
                 if (!kinematics.TryGetIndexForEntity(entityId, out var kinematicsIndex)) continue;
-                physicsActiveFlags[kinematicsIndex] = true;
+                physicsActiveFlags[kinematicsIndex] = kinematicsComponentIndexPhysicsTags[kinematicsIndex];
             }
         }
     }
