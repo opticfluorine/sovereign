@@ -37,13 +37,31 @@ function EntityBehavior.Create(f, ...)
     return obj
 end
 
+--- Cleans up resources for an entity after behavior completes.
+function EntityBehavior:_CleanupEntity(entityId)
+    local thread, isMain = coroutine.running()
+    if isMain and self._coroutines[entityId] then
+        coroutine.close(self._coroutines[entityId])
+        self._coroutines[entityId] = nil
+    end
+    self._templateIds[entityId] = nil
+end
+
 --- Entity load life cycle hook. Starts behavior for newly loaded entity.
 --- @param entityId integer # Entity ID.
 function EntityBehavior:OnLoad(entityId)
     if self._coroutines[entityId] ~= nil then
         util.LogWarn(string.format("Behavior for entity %X already exists; replacing.", entityId))
-        coroutine.close(self._coroutines[entityId])
-        self._coroutines[entityId] = nil
+        self._CleanupEntity(entityId)
+    end
+
+    -- Only track the template ID if we're not following template changes.
+    -- Otherwise we can reduce the memory footprint.
+    if not self.followTemplateChanges then
+        local templateId = entities.GetTemplate(entityId)
+        if templateId then
+            self._templateIds[entityId] = templateId
+        end
     end
 
     local thread = coroutine.create(self._main)
@@ -63,8 +81,7 @@ function EntityBehavior:OnUnload(entityId)
         return
     end
 
-    coroutine.close(thread)
-    self._coroutines[entityId] = nil
+    self._CleanupEntity(entityId)
 end
 
 --- Resumes the behavior for the given entity.
@@ -74,6 +91,12 @@ function EntityBehavior:Resume(entityId, ...)
     local thread = self._coroutines[entityId]
     if thread == nil then
         util.LogError(string.format("Error resuming behavior for entity %X: behavior not loaded.", entityId))
+        return
+    end
+
+    if not self.followTemplateChanges and self._templateIds[entityId] ~= entities.GetTemplate(entityId) then
+        -- Template has changed and we are not following changes, so end the current behavior.
+        self._CleanupEntity(entityId)
         return
     end
 
