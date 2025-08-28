@@ -68,7 +68,7 @@ public class NpcWorldEditorGui(
         RenderSpritePreview();
 
         ImGui.TableNextColumn();
-        var relId = worldEditServices.BlockTemplateId - EntityConstants.FirstTemplateEntityId;
+        var relId = worldEditServices.NpcTemplateId - EntityConstants.FirstTemplateEntityId;
         ImGui.Text(templateName);
         ImGui.Text($"NPC Template {relId}");
 
