@@ -41,8 +41,9 @@ public class TemplateStateTracker
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="templateEntityId">Template entity ID, or 0 for no template.</param>
+    /// <param name="oldTemplateId">Old template ID, or zero for no old template.</param>
     /// <param name="isLoad">Load flag.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateEntityId, bool isLoad)
+    private void OnTemplateSet(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad)
     {
         if (isLoad || !entityTable.IsPersisted(entityId)) return;
         var persistedId = GetPersistedId(entityId);

@@ -1,4 +1,4 @@
-// Sovereign Engine
+                                    // Sovereign Engine
 // Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -169,8 +169,9 @@ public class LightSourceTable
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="templateEntityId">Template entity ID.</param>
+    /// <param name="oldTemplateId">Old template, or zero if there is no old template.</param>
     /// <param name="isLoad">Load flag.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateEntityId, bool isLoad)
+    private void OnTemplateSet(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad)
     {
         knownSources.Remove(entityId);
         if (pointLightSources.HasComponentForEntity(entityId)) knownSources.Add(entityId);

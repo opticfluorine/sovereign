@@ -214,7 +214,9 @@ public sealed class WorldSegmentBlockDataManager
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="templateEntityId">New template entity ID.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateEntityId, bool isLoad)
+    /// <param name="oldTemplateId">Old template entity ID, or 0 for no old template ID.</param>
+    /// <param name="isLoad">Load flag.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad)
     {
         // Ignore if load or not a block entity.
         if (isLoad || !blockPositions.HasComponentForEntity(entityId)) return;

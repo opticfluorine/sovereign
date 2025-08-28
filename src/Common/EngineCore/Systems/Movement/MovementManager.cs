@@ -381,10 +381,7 @@ public class MovementManager
     /// </summary>
     private void ProcessZCulls()
     {
-        foreach (var entityId in toZCull)
-        {
-            zCuller.Cull(entityId);
-        }
+        foreach (var entityId in toZCull) zCuller.Cull(entityId);
 
         toZCull.Clear();
     }
@@ -481,8 +478,9 @@ public class MovementManager
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="templateId">Template ID.</param>
+    /// <param name="oldTemplateId">Old template ID, or zero for no old ID.</param>
     /// <param name="isLoad">Load flag.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateId, bool isLoad)
+    private void OnTemplateSet(ulong entityId, ulong templateId, ulong oldTemplateId, bool isLoad)
     {
         if (EntityUtil.IsBlockEntity(entityId)) return;
 

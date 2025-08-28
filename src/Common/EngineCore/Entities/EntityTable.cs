@@ -179,8 +179,10 @@ public class EntityTable
             ref var pendingAdd = ref pendingAdds[i];
             var entityId = pendingAdd.EntityId;
             entities.Add(entityId);
+            var oldTemplateId = 0UL;
             if (pendingAdd.TemplateEntityId > 0)
             {
+                if (!entityTemplates.TryGetValue(entityId, out oldTemplateId)) oldTemplateId = 0UL;
                 entityTemplates[entityId] = pendingAdd.TemplateEntityId;
                 if (!templateInstances.TryGetValue(pendingAdd.TemplateEntityId, out var instances))
                 {
@@ -199,7 +201,7 @@ public class EntityTable
 
             OnEntityAdded?.Invoke(entityId, pendingAdd.IsLoad);
             if (pendingAdd.TemplateEntityId > 0)
-                OnTemplateSet?.Invoke(entityId, pendingAdd.TemplateEntityId, pendingAdd.IsLoad);
+                OnTemplateSet?.Invoke(entityId, pendingAdd.TemplateEntityId, oldTemplateId, pendingAdd.IsLoad);
         }
 
         // Removals.
@@ -209,10 +211,7 @@ public class EntityTable
             var entityId = pendingRemove.EntityId;
             entities.Remove(entityId);
             persistedEntities.Remove(entityId);
-            if (nonBlockEntities.Remove(entityId))
-            {
-                OnNonBlockEntityRemoved?.Invoke(entityId);
-            }
+            if (nonBlockEntities.Remove(entityId)) OnNonBlockEntityRemoved?.Invoke(entityId);
 
             if (entityTemplates.Remove(entityId, out var templateId)) templateInstances[templateId].Remove(entityId);
 
@@ -244,6 +243,8 @@ public class EntityTable
         // Remove instance of old template.
         if (entityTemplates.TryGetValue(entityId, out var oldTemplateId))
             templateInstances[oldTemplateId].Remove(entityId);
+        else
+            oldTemplateId = 0UL;
 
         // Set new template.
         if (templateEntityId > 0)
@@ -262,7 +263,7 @@ public class EntityTable
             entityTemplates.Remove(entityId);
         }
 
-        OnTemplateSet?.Invoke(entityId, templateEntityId, false);
+        OnTemplateSet?.Invoke(entityId, templateEntityId, oldTemplateId, false);
     }
 
     /// <summary>
@@ -294,9 +295,10 @@ public class EntityTable
 
     /// <summary>
     ///     Event invoked when a template is set to an entity.
-    ///     First parameter is entity ID, second parameter is template entity ID, third is load flag.
+    ///     First parameter is entity ID, second parameter is template entity ID,
+    ///     third is prior template entity ID (or zero for no prior template), fourth is load flag.
     /// </summary>
-    public event Action<ulong, ulong, bool>? OnTemplateSet;
+    public event Action<ulong, ulong, ulong, bool>? OnTemplateSet;
 
     /// <summary>
     ///     Contains information for an entity to be added.

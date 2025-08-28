@@ -522,7 +522,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         Task.Run(RefreshCache);
     }
 
-    private void OnTemplateChange(ulong entityId, ulong templateEntityId, bool isLoad)
+    private void OnTemplateChange(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad)
     {
         templateChanges.TryAdd(entityId, 0);
     }

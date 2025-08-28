@@ -234,8 +234,9 @@ public sealed class NonBlockCollisionMeshes
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="templateId">Template ID.</param>
+    /// <param name="oldTemplateId">Old template ID, or zero for no old template.</param>
     /// <param name="isLoad">Load flag.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateId, bool isLoad)
+    private void OnTemplateSet(ulong entityId, ulong templateId, ulong oldTemplateId, bool isLoad)
     {
         if (!kinematics.TryGetValue(entityId, out var posVel)) return;
 
