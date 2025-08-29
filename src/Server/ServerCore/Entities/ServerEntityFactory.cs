@@ -76,7 +76,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         CastShadowsComponentCollection castShadows,
         EntityTypeComponentCollection entityTypes,
         ServerOnlyTagCollection serverOnly,
-        EntityTable entityTable)
+        EntityTable entityTable, EntityAssigner entityAssigner)
     {
         this.entityManager = entityManager;
         this.kinematics = kinematics;
@@ -100,7 +100,7 @@ public sealed class ServerEntityFactory : IEntityFactory
         this.entityTypes = entityTypes;
         this.serverOnly = serverOnly;
         this.entityTable = entityTable;
-        entityAssigner = entityManager.GetNewAssigner();
+        this.entityAssigner = entityAssigner;
     }
 
     public IEntityBuilder GetBuilder(EntityCategory entityCategory, bool load = false)

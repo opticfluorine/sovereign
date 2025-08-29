@@ -80,14 +80,14 @@ public sealed class StateBuffer
     /// </summary>
     private readonly HashSet<(ulong, string)> entityKeyValuePairs = new();
 
-    private readonly EntityMapper entityMapper;
-
     /// <summary>
     ///     EntityType state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<EntityType>> entityTypeUpdates = new(BufferSize);
 
     private readonly IEventSender eventSender;
+
+    private readonly ExistingEntitySet existingEntitySet;
     private readonly FatalErrorHandler fatalErrorHandler;
 
     /// <summary>
@@ -168,7 +168,7 @@ public sealed class StateBuffer
 
     public StateBuffer(FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
         PersistenceInternalController internalController, WorldSegmentPersister worldSegmentPersister,
-        ILogger<StateBuffer> logger, IDataServices dataServices, EntityMapper entityMapper)
+        ILogger<StateBuffer> logger, IDataServices dataServices, ExistingEntitySet existingEntitySet)
     {
         this.fatalErrorHandler = fatalErrorHandler;
         this.eventSender = eventSender;
@@ -176,7 +176,7 @@ public sealed class StateBuffer
         this.worldSegmentPersister = worldSegmentPersister;
         this.logger = logger;
         this.dataServices = dataServices;
-        this.entityMapper = entityMapper;
+        this.existingEntitySet = existingEntitySet;
     }
 
     /// <summary>
@@ -683,11 +683,10 @@ public sealed class StateBuffer
 
         foreach (var (entityId, key) in entityKeyValuePairs)
         {
-            var mappedEntityId = entityMapper.GetPersistedId(entityId, out _);
             if (dataServices.TryGetEntityKeyValue(entityId, key, out var value))
-                updateQuery.UpdateEntityKeyValue(mappedEntityId, key, value, transaction);
+                updateQuery.UpdateEntityKeyValue(entityId, key, value, transaction);
             else
-                removeQuery.RemoveEntityKeyValue(mappedEntityId, key, transaction);
+                removeQuery.RemoveEntityKeyValue(entityId, key, transaction);
         }
     }
 }

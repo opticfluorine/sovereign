@@ -28,8 +28,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class BoundingBoxStateTracker : BaseStateTracker<BoundingBox>
 {
     public BoundingBoxStateTracker(BoundingBoxComponentCollection boundingBoxes,
-        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable) : base(boundingBoxes,
-        new BoundingBox { Position = Vector3.Zero, Size = Vector3.Zero }, entityMapper, stateManager, entityTable)
+        ExistingEntitySet existingEntitySet, StateManager stateManager, EntityTable entityTable) : base(boundingBoxes,
+        new BoundingBox { Position = Vector3.Zero, Size = Vector3.Zero }, existingEntitySet, stateManager, entityTable)
     {
     }
 

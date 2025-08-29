@@ -29,12 +29,12 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
-    private readonly EntityAssigner assigner;
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
     private readonly DrawableComponentCollection drawables;
+    private readonly EntityAssigner entityAssigner;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
     private readonly EntityTypeComponentCollection entityTypes;
@@ -74,7 +74,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         CastShadowsComponentCollection castShadows,
         EntityTypeComponentCollection entityTypes,
         ServerOnlyTagCollection serverOnly,
-        EntityTable entityTable)
+        EntityTable entityTable, EntityAssigner entityAssigner)
     {
         this.entityManager = entityManager;
         this.kinematics = kinematics;
@@ -97,8 +97,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         this.entityTypes = entityTypes;
         this.serverOnly = serverOnly;
         this.entityTable = entityTable;
-
-        assigner = entityManager.GetNewAssigner();
+        this.entityAssigner = entityAssigner;
     }
 
     public IEntityBuilder GetBuilder(EntityCategory entityCategory, bool load = false)
@@ -107,7 +106,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         {
             EntityCategory.Block => GetBuilder(Interlocked.Increment(ref nextBlockId), load),
             EntityCategory.Template => GetBuilder(entityTable.TakeNextTemplateEntityId(), load),
-            _ => GetBuilder(assigner.GetNextId(), load)
+            _ => GetBuilder(entityAssigner.GetNextId(), load)
         };
     }
 

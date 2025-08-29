@@ -210,13 +210,14 @@ public sealed class WorldSegmentBlockDataManager
     }
 
     /// <summary>
-    ///     Called when the template of an entity is changed (excluding entity loads).
+    ///     Called when the template of an entity is changed.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="templateEntityId">New template entity ID.</param>
     /// <param name="oldTemplateId">Old template entity ID, or 0 for no old template ID.</param>
     /// <param name="isLoad">Load flag.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad)
+    /// <param name="isNew">New flag.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad, bool isNew)
     {
         // Ignore if load or not a block entity.
         if (isLoad || !blockPositions.HasComponentForEntity(entityId)) return;

@@ -188,8 +188,13 @@ public sealed class EntityScriptCallbacks
     /// <param name="templateId">Template ID.</param>
     /// <param name="oldTemplateId">Old template ID, or 0 if there was no previous template.</param>
     /// <param name="isUnload">Unused.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateId, ulong oldTemplateId, bool isUnload)
+    /// <param name="isNew">If true, entity is newly added; false otherwise.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateId, ulong oldTemplateId, bool isUnload, bool isNew)
     {
+        // If the entity is newly added, its callbacks will be enqueued through OnEntityAdded. Don't do anything
+        // here in order to avoid double-invoking the lifecycle callbacks.
+        if (isNew) return;
+        
         entityLoadQueue.Enqueue(entityId);
         if (oldTemplateId > 0) entityTemplateUnloadQueue.Enqueue((entityId, oldTemplateId));
     }

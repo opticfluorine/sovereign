@@ -33,8 +33,9 @@ namespace Sovereign.Persistence.State;
 public sealed class StateManager : IDisposable
 {
     private readonly EntityManager entityManager;
-    private readonly EntityMapper entityMapper;
     private readonly EntityNotifier entityNotifier;
+    private readonly EntityTable entityTable;
+    private readonly ExistingEntitySet existingEntitySet;
     private readonly PersistenceProviderManager persistenceProviderManager;
 
     /// <summary>
@@ -45,22 +46,23 @@ public sealed class StateManager : IDisposable
     public StateManager(EntityManager entityManager,
         PersistenceProviderManager persistenceProviderManager,
         ILogger<StateBuffer> stateBufferLogger, FatalErrorHandler fatalErrorHandler,
-        EntityNotifier entityNotifier, EntityMapper entityMapper,
+        EntityNotifier entityNotifier, ExistingEntitySet existingEntitySet,
         IEventSender eventSender, PersistenceInternalController internalController,
-        WorldSegmentPersister worldSegmentPersister, IDataServices dataServices)
+        WorldSegmentPersister worldSegmentPersister, IDataServices dataServices,
+        EntityTable entityTable)
     {
         FrontBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
-            stateBufferLogger, dataServices, entityMapper);
+            stateBufferLogger, dataServices, existingEntitySet);
         backBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
-            stateBufferLogger, dataServices, entityMapper);
+            stateBufferLogger, dataServices, existingEntitySet);
 
         this.entityManager = entityManager;
         this.persistenceProviderManager = persistenceProviderManager;
         this.entityNotifier = entityNotifier;
-        this.entityMapper = entityMapper;
+        this.existingEntitySet = existingEntitySet;
+        this.entityTable = entityTable;
 
         entityNotifier.OnRemoveEntity += OnRemoveEntity;
-        entityNotifier.OnUnloadEntity += OnUnloadEntity;
     }
 
     /// <summary>
@@ -70,7 +72,6 @@ public sealed class StateManager : IDisposable
 
     public void Dispose()
     {
-        entityNotifier.OnUnloadEntity -= OnUnloadEntity;
         entityNotifier.OnRemoveEntity -= OnRemoveEntity;
     }
 
@@ -93,7 +94,7 @@ public sealed class StateManager : IDisposable
     private void SwapBuffers()
     {
         /* Acquire strong lock to prevent component updates during swap. */
-        using (var strongLock = entityManager.UpdateGuard.AcquireStrongLock())
+        using (entityManager.UpdateGuard.AcquireStrongLock())
         {
             /* Swap the buffers. */
             (backBuffer, FrontBuffer) = (FrontBuffer, backBuffer);
@@ -109,17 +110,6 @@ public sealed class StateManager : IDisposable
     /// <param name="entityId">Removed entity ID.</param>
     private void OnRemoveEntity(ulong entityId)
     {
-        var persistedId = entityMapper.GetPersistedId(entityId, out var needToCreate);
-        if (!needToCreate) FrontBuffer.RemoveEntity(persistedId);
-        entityMapper.UnloadId(entityId);
-    }
-
-    /// <summary>
-    ///     Called when an entity is unloaded.
-    /// </summary>
-    /// <param name="entityId">Unloaded entity ID.</param>
-    private void OnUnloadEntity(ulong entityId)
-    {
-        entityMapper.UnloadId(entityId);
+        if (existingEntitySet.Exists(entityId) && entityTable.IsPersisted(entityId)) FrontBuffer.RemoveEntity(entityId);
     }
 }

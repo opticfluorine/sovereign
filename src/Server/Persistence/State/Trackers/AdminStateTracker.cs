@@ -25,9 +25,9 @@ namespace Sovereign.Persistence.State.Trackers;
 /// </summary>
 public class AdminStateTracker : BaseStateTracker<bool>
 {
-    public AdminStateTracker(AdminTagCollection tags, EntityMapper entityMapper, StateManager stateManager,
+    public AdminStateTracker(AdminTagCollection tags, ExistingEntitySet existingEntitySet, StateManager stateManager,
         EntityTable entityTable)
-        : base(tags, false, entityMapper, stateManager, entityTable)
+        : base(tags, false, existingEntitySet, stateManager, entityTable)
     {
     }
 

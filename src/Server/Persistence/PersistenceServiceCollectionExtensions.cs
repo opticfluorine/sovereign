@@ -68,7 +68,7 @@ public static class PersistenceServiceCollectionExtensions
 
     private static void AddEntities(IServiceCollection services)
     {
-        services.TryAddSingleton<EntityMapper>();
+        services.TryAddSingleton<ExistingEntitySet>();
         services.TryAddSingleton<EntityProcessor>();
     }
 

@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Systems;
@@ -35,7 +36,7 @@ namespace Sovereign.Persistence.Systems.Persistence;
 public sealed class PersistenceSystem : ISystem
 {
     private readonly DatabaseValidator databaseValidator;
-    private readonly EntityMapper entityMapper;
+    private readonly EntityAssigner entityAssigner;
     private readonly EntityProcessor entityProcessor;
     private readonly PersistenceEventHandler eventHandler;
     private readonly GlobalKeyValueProcessor globalKeyValueProcessor;
@@ -51,22 +52,22 @@ public sealed class PersistenceSystem : ISystem
         PersistenceScheduler scheduler,
         EventCommunicator eventCommunicator,
         IEventLoop eventLoop,
-        EntityMapper entityMapper,
         EntityProcessor entityProcessor,
         TrackerManager trackerManager,
         ILogger<PersistenceSystem> logger,
-        GlobalKeyValueProcessor globalKeyValueProcessor)
+        GlobalKeyValueProcessor globalKeyValueProcessor,
+        EntityAssigner entityAssigner)
     {
         /* Dependency injection. */
         this.providerManager = providerManager;
         this.databaseValidator = databaseValidator;
         this.eventHandler = eventHandler;
         this.scheduler = scheduler;
-        this.entityMapper = entityMapper;
         this.entityProcessor = entityProcessor;
         this.trackerManager = trackerManager;
         this.logger = logger;
         this.globalKeyValueProcessor = globalKeyValueProcessor;
+        this.entityAssigner = entityAssigner;
         EventCommunicator = eventCommunicator;
 
         /* Register system. */
@@ -137,10 +138,9 @@ public sealed class PersistenceSystem : ISystem
         /* Set up the entity mapper. */
         try
         {
-            entityMapper.InitializeMapper(providerManager.PersistenceProvider.NextPersistedIdQuery!);
-
-            logger.LogDebug("First available persisted entity ID is {Id:X}.",
-                entityMapper.NextPersistedId);
+            var nextId = providerManager.PersistenceProvider.NextPersistedIdQuery.GetNextPersistedEntityId();
+            entityAssigner.NextEntityId = nextId;
+            logger.LogDebug("First available persisted entity ID is {Id:X}.", nextId);
         }
         catch (Exception e)
         {

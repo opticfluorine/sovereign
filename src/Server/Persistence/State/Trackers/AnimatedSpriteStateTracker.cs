@@ -26,8 +26,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class AnimatedSpriteStateTracker : BaseStateTracker<int>
 {
     public AnimatedSpriteStateTracker(AnimatedSpriteComponentCollection animatedSprites,
-        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
-        : base(animatedSprites, 0, entityMapper, stateManager, entityTable)
+        ExistingEntitySet existingEntitySet, StateManager stateManager, EntityTable entityTable)
+        : base(animatedSprites, 0, existingEntitySet, stateManager, entityTable)
     {
     }
 

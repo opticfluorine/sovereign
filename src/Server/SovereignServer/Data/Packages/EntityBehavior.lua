@@ -50,9 +50,9 @@ end
 --- Entity load life cycle hook. Starts behavior for newly loaded entity.
 --- @param entityId integer # Entity ID.
 function EntityBehavior:OnLoad(entityId)
-    if self._coroutines[entityId] ~= nil then
+    if self._coroutines[entityId] then
         util.LogWarn(string.format("Behavior for entity %X already exists; replacing.", entityId))
-        self._CleanupEntity(entityId)
+        self:_CleanupEntity(entityId)
     end
 
     -- Only track the template ID if we're not following template changes.

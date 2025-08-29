@@ -25,10 +25,10 @@ namespace Sovereign.Persistence.State.Trackers;
 /// </summary>
 public class ServerOnlyStateTracker : BaseStateTracker<bool>
 {
-    public ServerOnlyStateTracker(ServerOnlyTagCollection serverOnly, EntityMapper entityMapper,
+    public ServerOnlyStateTracker(ServerOnlyTagCollection serverOnly, ExistingEntitySet existingEntitySet,
         StateManager stateManager,
         EntityTable entityTable)
-        : base(serverOnly, false, entityMapper, stateManager, entityTable)
+        : base(serverOnly, false, existingEntitySet, stateManager, entityTable)
     {
     }
 

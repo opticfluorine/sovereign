@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Threading;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineUtil.Threading;
 
@@ -28,25 +27,9 @@ namespace Sovereign.EngineCore.Entities;
 /// The methods exposed by this class are thread-safe.
 public class EntityManager
 {
-    /// <summary>
-    ///     First block reserved for use by automatic assignment.
-    /// </summary>
-    public const uint FirstReservedBlock = 0;
-
-    /// <summary>
-    ///     First block not reserved for use by automatic assignment.
-    /// </summary>
-    public const uint FirstUnreservedBlock = 16777216;
-
     private readonly ComponentManager componentManager;
     private readonly EntityNotifier entityNotifier;
-
     private readonly EntityTable entityTable;
-
-    /// <summary>
-    ///     Next block identifier.
-    /// </summary>
-    private int nextBlock = (int)FirstReservedBlock;
 
     public EntityManager(ComponentManager componentManager,
         EntityNotifier entityNotifier,
@@ -73,31 +56,6 @@ public class EntityManager
         componentManager.UpdateAllComponents();
         entityTable.UpdateAllEntities();
         OnUpdatesComplete?.Invoke();
-    }
-
-    /// <summary>
-    ///     Gets a new EntityAssigner.
-    /// </summary>
-    /// This method is thread-safe.
-    /// <returns>New EntityAssigner over the next available block.</returns>
-    public EntityAssigner GetNewAssigner()
-    {
-        var block = Interlocked.Increment(ref nextBlock);
-        return GetNewAssigner((uint)block);
-    }
-
-    /// <summary>
-    ///     Gets a new EntityAssigner for the given block.
-    /// </summary>
-    /// No checking of whether the block is already in use is performed. If
-    /// the block is already in use, this may lead to entity ID collisions.
-    /// 
-    /// This method is thread-safe.
-    /// <param name="block">Block identifier.</param>
-    /// <returns>New EntityAssigner over the given block.</returns>
-    public EntityAssigner GetNewAssigner(uint block)
-    {
-        return new EntityAssigner(block);
     }
 
     /// <summary>

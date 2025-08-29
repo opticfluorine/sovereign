@@ -68,15 +68,15 @@ public sealed class EntityProcessor
     private const int IndexServerOnly = IndexEntityType + 1;
     private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
+    private readonly ExistingEntitySet existingEntitySet;
     private readonly ILogger<EntityProcessor> logger;
-    private readonly EntityMapper mapper;
     private readonly HashSet<ulong> processedEntities = new();
 
-    public EntityProcessor(IEntityFactory entityFactory, EntityMapper mapper,
+    public EntityProcessor(IEntityFactory entityFactory, ExistingEntitySet existingEntitySet,
         ILogger<EntityProcessor> logger, IDataController dataController)
     {
         this.entityFactory = entityFactory;
-        this.mapper = mapper;
+        this.existingEntitySet = existingEntitySet;
         this.logger = logger;
         this.dataController = dataController;
     }
@@ -113,7 +113,7 @@ public sealed class EntityProcessor
         if (processedEntities.Add(entityId))
         {
             /* Start loading the entity. */
-            mapper.MarkEntityAsLoaded(entityId);
+            existingEntitySet.MarkAsExists(entityId);
             var builder = entityFactory.GetBuilder(entityId, true);
 
             /* Process components. */

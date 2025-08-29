@@ -25,9 +25,10 @@ namespace Sovereign.Persistence.State.Trackers;
 /// </summary>
 public class PhysicsStateTracker : BaseStateTracker<bool>
 {
-    public PhysicsStateTracker(PhysicsTagCollection physics, EntityMapper entityMapper, StateManager stateManager,
+    public PhysicsStateTracker(PhysicsTagCollection physics, ExistingEntitySet existingEntitySet,
+        StateManager stateManager,
         EntityTable entityTable)
-        : base(physics, false, entityMapper, stateManager, entityTable)
+        : base(physics, false, existingEntitySet, stateManager, entityTable)
     {
     }
 

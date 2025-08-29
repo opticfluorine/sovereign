@@ -15,39 +15,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Threading;
+
 namespace Sovereign.EngineCore.Entities;
 
 /// <summary>
-///     Responsible for assigning entity IDs within a block.
+///     Responsible for assigning entity IDs to new entities.
 /// </summary>
-/// This class is not thread-safe. Consider using one or more unique
-/// assigners for each ISystem.
-public class EntityAssigner
+public sealed class EntityAssigner
 {
-    /// <summary>
-    ///     Block ID shifted to the upper dword
-    /// </summary>
-    private readonly ulong shiftBlock;
+    private ulong nextEntityId;
 
     /// <summary>
-    ///     Counter for the local segment of the id.
+    ///     Next free entity ID.
     /// </summary>
-    private ulong localIdCounter = 1;
-
-    /// <summary>
-    ///     Creates an assigner for the given block.
-    /// </summary>
-    /// <param name="block">Block.</param>
-    public EntityAssigner(ulong block)
+    public ulong NextEntityId
     {
-        Block = block;
-        shiftBlock = block << 32;
+        get => nextEntityId;
+        set => Interlocked.Exchange(ref nextEntityId, value);
     }
-
-    /// <summary>
-    ///     Entity block assigned to this assigner.
-    /// </summary>
-    public ulong Block { get; private set; }
 
     /// <summary>
     ///     Gets the next ID from this assigner.
@@ -55,6 +41,6 @@ public class EntityAssigner
     /// <returns>Next ID.</returns>
     public ulong GetNextId()
     {
-        return shiftBlock | localIdCounter++;
+        return Interlocked.Increment(ref nextEntityId);
     }
 }

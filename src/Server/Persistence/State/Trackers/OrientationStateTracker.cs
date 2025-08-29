@@ -26,8 +26,8 @@ namespace Sovereign.Persistence.State.Trackers;
 /// </summary>
 public class OrientationStateTracker : BaseStateTracker<Orientation>
 {
-    public OrientationStateTracker(OrientationComponentCollection orientations, EntityMapper entityMapper,
-        StateManager stateManager, EntityTable entityTable) : base(orientations, Orientation.South, entityMapper,
+    public OrientationStateTracker(OrientationComponentCollection orientations, ExistingEntitySet existingEntitySet,
+        StateManager stateManager, EntityTable entityTable) : base(orientations, Orientation.South, existingEntitySet,
         stateManager, entityTable)
     {
     }

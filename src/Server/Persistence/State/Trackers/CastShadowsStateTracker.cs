@@ -28,9 +28,9 @@ public class CastShadowsStateTracker : BaseStateTracker<Shadow>
         Radius = 0.0f
     };
 
-    public CastShadowsStateTracker(CastShadowsComponentCollection components, EntityMapper entityMapper,
+    public CastShadowsStateTracker(CastShadowsComponentCollection components, ExistingEntitySet existingEntitySet,
         StateManager stateManager, EntityTable entityTable)
-        : base(components, DefaultShadow, entityMapper, stateManager, entityTable)
+        : base(components, DefaultShadow, existingEntitySet, stateManager, entityTable)
     {
     }
 

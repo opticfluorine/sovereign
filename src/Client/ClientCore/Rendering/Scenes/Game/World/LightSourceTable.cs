@@ -171,7 +171,8 @@ public class LightSourceTable
     /// <param name="templateEntityId">Template entity ID.</param>
     /// <param name="oldTemplateId">Old template, or zero if there is no old template.</param>
     /// <param name="isLoad">Load flag.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad)
+    /// <param name="isNew">New flag.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad, bool isNew)
     {
         knownSources.Remove(entityId);
         if (pointLightSources.HasComponentForEntity(entityId)) knownSources.Add(entityId);

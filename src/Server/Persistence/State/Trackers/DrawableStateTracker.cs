@@ -27,8 +27,9 @@ namespace Sovereign.Persistence.State.Trackers;
 public class DrawableStateTracker : BaseStateTracker<Vector2>
 {
     public DrawableStateTracker(DrawableComponentCollection components,
-        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable) : base(components, Vector2.Zero,
-        entityMapper, stateManager, entityTable)
+        ExistingEntitySet existingEntitySet, StateManager stateManager, EntityTable entityTable) : base(components,
+        Vector2.Zero,
+        existingEntitySet, stateManager, entityTable)
     {
     }
 

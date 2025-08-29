@@ -23,7 +23,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class PlayerCharacterStateTracker : BaseStateTracker<bool>
 {
     public PlayerCharacterStateTracker(PlayerCharacterTagCollection tags,
-        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable) : base(tags, false, entityMapper,
+        ExistingEntitySet existingEntitySet, StateManager stateManager, EntityTable entityTable) : base(tags, false,
+        existingEntitySet,
         stateManager, entityTable)
     {
     }

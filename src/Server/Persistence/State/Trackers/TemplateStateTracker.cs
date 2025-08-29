@@ -24,15 +24,15 @@ namespace Sovereign.Persistence.State.Trackers;
 /// </summary>
 public class TemplateStateTracker
 {
-    private readonly EntityMapper entityMapper;
     private readonly EntityTable entityTable;
+    private readonly ExistingEntitySet existingEntitySet;
     private readonly StateManager stateManager;
 
-    public TemplateStateTracker(EntityTable entityTable, StateManager stateManager, EntityMapper entityMapper)
+    public TemplateStateTracker(EntityTable entityTable, StateManager stateManager, ExistingEntitySet existingEntitySet)
     {
         this.entityTable = entityTable;
         this.stateManager = stateManager;
-        this.entityMapper = entityMapper;
+        this.existingEntitySet = existingEntitySet;
         entityTable.OnTemplateSet += OnTemplateSet;
     }
 
@@ -43,7 +43,8 @@ public class TemplateStateTracker
     /// <param name="templateEntityId">Template entity ID, or 0 for no template.</param>
     /// <param name="oldTemplateId">Old template ID, or zero for no old template.</param>
     /// <param name="isLoad">Load flag.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad)
+    /// <param name="isNew">New flag.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad, bool isNew)
     {
         if (isLoad || !entityTable.IsPersisted(entityId)) return;
         var persistedId = GetPersistedId(entityId);
@@ -60,9 +61,7 @@ public class TemplateStateTracker
     /// <returns>Persisted entity ID.</returns>
     private ulong GetPersistedId(ulong entityId)
     {
-        var persistedId = entityMapper.GetPersistedId(entityId,
-            out var needToCreate);
-        if (needToCreate) stateManager.FrontBuffer.AddEntity(persistedId);
-        return persistedId;
+        if (existingEntitySet.MarkAsExists(entityId)) stateManager.FrontBuffer.AddEntity(entityId);
+        return entityId;
     }
 }

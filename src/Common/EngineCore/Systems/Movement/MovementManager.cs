@@ -480,7 +480,8 @@ public class MovementManager
     /// <param name="templateId">Template ID.</param>
     /// <param name="oldTemplateId">Old template ID, or zero for no old ID.</param>
     /// <param name="isLoad">Load flag.</param>
-    private void OnTemplateSet(ulong entityId, ulong templateId, ulong oldTemplateId, bool isLoad)
+    /// <param name="isNew">If true, entity is newly added or loaded.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateId, ulong oldTemplateId, bool isLoad, bool isNew)
     {
         if (EntityUtil.IsBlockEntity(entityId)) return;
 

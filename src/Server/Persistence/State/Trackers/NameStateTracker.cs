@@ -23,8 +23,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class NameStateTracker : BaseStateTracker<string>
 {
     public NameStateTracker(NameComponentCollection names,
-        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
-        : base(names, string.Empty, entityMapper, stateManager, entityTable)
+        ExistingEntitySet existingEntitySet, StateManager stateManager, EntityTable entityTable)
+        : base(names, string.Empty, existingEntitySet, stateManager, entityTable)
     {
     }
 

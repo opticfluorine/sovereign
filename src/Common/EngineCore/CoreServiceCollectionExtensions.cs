@@ -163,6 +163,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<EntityTable>();
         services.TryAddSingleton<EntityDefinitionProcessor>();
         services.TryAddSingleton<EntityDefinitionGenerator>();
+        services.TryAddSingleton<EntityAssigner>();
     }
 
     private static void AddEvents(IServiceCollection services)

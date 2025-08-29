@@ -31,8 +31,8 @@ public abstract class BaseStateTracker<T> : IDisposable
 {
     private readonly BaseComponentCollection<T> components;
     private readonly T defaultElement;
-    protected readonly EntityMapper entityMapper;
     private readonly EntityTable entityTable;
+    private readonly ExistingEntitySet existingEntitySet;
     protected readonly StateManager stateManager;
 
     /// <summary>
@@ -40,17 +40,17 @@ public abstract class BaseStateTracker<T> : IDisposable
     /// </summary>
     /// <param name="components">Component collection.</param>
     /// <param name="defaultElement">Default value for elements.</param>
-    /// <param name="entityMapper">Entity mapper.</param>
     /// <param name="stateManager">State manager.</param>
+    /// <param name="entityTable">Entity table.</param>
+    /// <param name="existingEntitySet">Existing entity set.</param>
     public BaseStateTracker(BaseComponentCollection<T> components,
-        T defaultElement, EntityMapper entityMapper,
-        StateManager stateManager, EntityTable entityTable)
+        T defaultElement, ExistingEntitySet existingEntitySet, StateManager stateManager, EntityTable entityTable)
     {
         this.components = components;
         this.defaultElement = defaultElement;
-        this.entityMapper = entityMapper;
         this.stateManager = stateManager;
         this.entityTable = entityTable;
+        this.existingEntitySet = existingEntitySet;
 
         RegisterCallbacks();
     }
@@ -74,16 +74,13 @@ public abstract class BaseStateTracker<T> : IDisposable
     /// <param name="isLoad">If true, this is a loaded component that should not be re-added to the database.</param>
     private void OnComponentAdded(ulong entityId, T componentValue, bool isLoad)
     {
-        // Skip component loads - these are already in the database (that's where they were loaded from).
-        if (isLoad || !entityTable.IsPersisted(entityId)) return;
+        if (!entityTable.IsPersisted(entityId)) return;
+        CreateIfNeeded(entityId, isLoad);
+        if (isLoad) return;
 
-        /* Map the entity ID. */
-        var persistedId = GetPersistedId(entityId);
-
-        /* Create the update. */
         var update = new StateUpdate<T>
         {
-            EntityId = persistedId,
+            EntityId = entityId,
             StateUpdateType = StateUpdateType.Add,
             Value = componentValue
         };
@@ -98,14 +95,11 @@ public abstract class BaseStateTracker<T> : IDisposable
     private void OnComponentModified(ulong entityId, T componentValue)
     {
         if (!entityTable.IsPersisted(entityId)) return;
+        CreateIfNeeded(entityId, false);
 
-        /* Map the entity ID. */
-        var persistedId = GetPersistedId(entityId);
-
-        /* Create the update. */
         var update = new StateUpdate<T>
         {
-            EntityId = persistedId,
+            EntityId = entityId,
             StateUpdateType = StateUpdateType.Modify,
             Value = componentValue
         };
@@ -119,16 +113,13 @@ public abstract class BaseStateTracker<T> : IDisposable
     /// <param name="isUnload">If true, this is just an unload from memory - do not modify the database.</param>
     private void OnComponentRemoved(ulong entityId, bool isUnload)
     {
-        // Skip unloads.
-        if (isUnload || !entityTable.IsPersisted(entityId)) return;
+        if (!entityTable.IsPersisted(entityId)) return;
+        CreateIfNeeded(entityId, isUnload);
+        if (isUnload) return;
 
-        /* Map the entity ID. */
-        var persistedId = GetPersistedId(entityId);
-
-        /* Create the update. */
         var update = new StateUpdate<T>
         {
-            EntityId = persistedId,
+            EntityId = entityId,
             StateUpdateType = StateUpdateType.Remove,
             Value = defaultElement
         };
@@ -156,16 +147,12 @@ public abstract class BaseStateTracker<T> : IDisposable
     }
 
     /// <summary>
-    ///     Gets the persisted ID for the given entity ID, queueing an entity
-    ///     creation in the database if needed.
+    ///     Marks the entity for creation if needed.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    /// <returns>Persisted entity ID.</returns>
-    private ulong GetPersistedId(ulong entityId)
+    /// <param name="isLoad">Load flag.</param>
+    private void CreateIfNeeded(ulong entityId, bool isLoad)
     {
-        var persistedId = entityMapper.GetPersistedId(entityId,
-            out var needToCreate);
-        if (needToCreate) stateManager.FrontBuffer.AddEntity(persistedId);
-        return persistedId;
+        if (existingEntitySet.MarkAsExists(entityId) && !isLoad) stateManager.FrontBuffer.AddEntity(entityId);
     }
 }

@@ -522,8 +522,18 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         Task.Run(RefreshCache);
     }
 
-    private void OnTemplateChange(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad)
+    /// <summary>
+    ///     Called when an entity's template is set.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="templateEntityId">Template entity ID.</param>
+    /// <param name="oldTemplateId">Prior template entity ID.</param>
+    /// <param name="isLoad">Load flag.</param>
+    /// <param name="isNew">New entity flag.</param>
+    private void OnTemplateChange(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad, bool isNew)
     {
+        if (isNew) return;
+        
         templateChanges.TryAdd(entityId, 0);
     }
 

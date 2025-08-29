@@ -27,8 +27,9 @@ namespace Sovereign.Persistence.State.Trackers;
 public class PointLightSourceStateTracker : BaseStateTracker<PointLight>
 {
     public PointLightSourceStateTracker(PointLightSourceComponentCollection pointLightSources,
-        EntityMapper entityMapper,
-        StateManager stateManager, EntityTable entityTable) : base(pointLightSources, new PointLight(), entityMapper,
+        ExistingEntitySet existingEntitySet,
+        StateManager stateManager, EntityTable entityTable) : base(pointLightSources, new PointLight(),
+        existingEntitySet,
         stateManager, entityTable)
     {
     }

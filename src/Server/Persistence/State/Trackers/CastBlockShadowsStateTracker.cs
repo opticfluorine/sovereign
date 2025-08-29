@@ -26,8 +26,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class CastBlockShadowsStateTracker : BaseStateTracker<bool>
 {
     public CastBlockShadowsStateTracker(CastBlockShadowsTagCollection castBlockShadows,
-        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
-        : base(castBlockShadows, false, entityMapper, stateManager, entityTable)
+        ExistingEntitySet existingEntitySet, StateManager stateManager, EntityTable entityTable)
+        : base(castBlockShadows, false, existingEntitySet, stateManager, entityTable)
     {
     }
 

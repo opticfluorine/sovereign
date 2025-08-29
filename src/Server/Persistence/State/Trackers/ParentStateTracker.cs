@@ -23,8 +23,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class ParentStateTracker : BaseStateTracker<ulong>
 {
     public ParentStateTracker(ParentComponentCollection components,
-        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
-        : base(components, 0, entityMapper, stateManager, entityTable)
+        ExistingEntitySet existingEntitySet, StateManager stateManager, EntityTable entityTable)
+        : base(components, 0, existingEntitySet, stateManager, entityTable)
     {
     }
 

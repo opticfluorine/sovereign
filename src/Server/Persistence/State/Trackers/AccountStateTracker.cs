@@ -24,8 +24,8 @@ namespace Sovereign.Persistence.State.Trackers;
 public class AccountStateTracker : BaseStateTracker<Guid>
 {
     public AccountStateTracker(AccountComponentCollection accounts,
-        EntityMapper entityMapper, StateManager stateManager, EntityTable entityTable)
-        : base(accounts, Guid.Empty, entityMapper, stateManager, entityTable)
+        ExistingEntitySet existingEntitySet, StateManager stateManager, EntityTable entityTable)
+        : base(accounts, Guid.Empty, existingEntitySet, stateManager, entityTable)
     {
     }
 
