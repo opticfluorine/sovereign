@@ -2,6 +2,46 @@
 
 ## 2025
 
+### August
+
+#### 29 August 2025
+
+* Lots of updates in August, mainly related to building out NPC support in the engine. Specific
+  changes follow:
+* Add support for interacting with entities by walking up to them and pressing the 'E' key.
+* Add support for NPC dialogue boxes with scrolling text and optional profile sprite. There are some
+  minor issues related to word wrapping with the scrolling text that will be addressed in the future.
+* Add `Data/Packages` directory to server where the Sovereign Scripting SDK (Lua library) is stored.
+  This directory is automatically added to the package path for each loaded script.
+* Add a new `EntityBehavior` class to the Sovereign Scripting SDK which provides a basic framework for
+  implementing per-entity behaviors in Lua scripts.
+* Add the `Sovereign/Npc/Common/Wander` Lua script which can be used to make NPCs wander around the world.
+* Entity lifecycle callbacks are now properly invoked when an entity's template changes. The unload function
+  for the previous template is invoked followed by the load function for the new template.
+* Added non-persisted entities which are never saved to the database. This is useful for e.g. spawning
+  mobs from a spawner NPC where you don't want to bother with saving the spawned mobs to the database.
+* Added server-only entities which are not shared with the client by default. This is useful for entities such
+  as mob spawners where you need an entity to anchor a behavior script (e.g. a mob spawning script), but you
+  don't want the entity to be visible to the clients. Server-only entities are still sent to Admin players so
+  that they can be viewed and manipulated with the world editor.
+* Added support for partial transparency of non-block entities. This is a bit tricky to do in combination with
+  the way the renderer handles depth. A tradeoff was made to sacrifice some accuracy in certain edge cases
+  in order to avoid overcomplicating the rest of the renderer in order to accomodate this effect. A similar
+  change to support this at the per-pixel level (i.e. intermediate alpha values in the sprite itself) will be
+  forthcoming.
+* Replaced the Watson web server with Kestrel and ASP.NET Core for the REST API. This eliminates a
+  significant amount of technical debt in the server since ASP.NET Core has a significantly more stable
+  API than Watson. It also sets the stage to eventually add OAuth2 support for login.
+* Minor scripting engine improvements: seed Lua's RNG with a random seed per script, enabled
+  generational garbage collection for all scripts by default, and added new APIs for getting and setting
+  an entity's template.
+* Fixed issue where non-block entities were drawn in the wrong depth order under certain conditions.
+* Fixed issue where the sprite selector GUI was too tall by default.
+* Fixed issue where a foreign key constraint in the database was violated under certain conditions
+  involving entity key-value data and scripting.
+* Fixed issue where the SQLite backend could potentially crash when an account registration occurred at the
+  same time as a persistence synchronization (i.e. when two transactions overlap on different threads).
+
 ### July
 
 #### 30 July 2025
