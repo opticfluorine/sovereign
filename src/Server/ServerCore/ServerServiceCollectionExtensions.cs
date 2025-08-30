@@ -208,6 +208,6 @@ public static class ServerServiceCollectionExtensions
         services.TryAddEnumerable(
             ServiceDescriptor.Singleton<ILuaLibrary, ScriptingLuaLibrary>(s =>
                 s.GetRequiredService<ScriptingLuaLibrary>()));
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, ServerEntityBuilderLuaLibrary>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, EntitiesLuaLibrary>());
     }
 }

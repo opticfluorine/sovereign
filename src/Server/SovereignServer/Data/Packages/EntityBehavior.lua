@@ -14,11 +14,19 @@
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 --
 
+--- Name of default entity load hook for EntityBehavior.
+local DefaultLoadFunction = "OnLoad"
+
+--- Name of default entity unload hook for EntityBehavior.
+local DefaultUnloadFunction = "OnUnload"
+
 --- Wraps an asynchronous function into a per-entity behavior with life cycle hooks.
 ---@class EntityBehavior
+---@field followTemplateChanges boolean Whether the behavior should follow an entity's template change.
 ---@field private _main fun(behavior: table, entityId: integer, ...: any) Behavior function.
 ---@field private _coroutines table Coroutines indexed by entity ID.
 ---@field private _startArgs any[] Additional arguments to pass to behavior function at start.
+---@field private _templateIds table Table of template IDs. Only used if followTemplateChanges is false.
 local EntityBehavior = {}
 EntityBehavior.__index = EntityBehavior
 setmetatable(EntityBehavior, EntityBehavior)
@@ -33,6 +41,9 @@ function EntityBehavior.Create(f, ...)
     obj._main = f
     obj._coroutines = {}
     obj._startArgs = {...}
+
+    obj.followTemplateChanges = false
+    obj._templateIds = {}
 
     return obj
 end
@@ -61,6 +72,15 @@ function EntityBehavior:OnLoad(entityId)
         local templateId = entities.GetTemplate(entityId)
         if templateId then
             self._templateIds[entityId] = templateId
+        end
+    end
+
+    if not self.followTemplateChanges then
+        local templateId = entities.GetTemplate(entityId)
+        if templateId then
+            self._templateIds[entityId] = templateId
+        else
+            self._templateIds[entityId] = nil
         end
     end
 
@@ -125,4 +145,9 @@ function EntityBehavior:WaitAsync(entityId, delaySeconds)
     coroutine.yield()
 end
 
-return { EntityBehavior = EntityBehavior, Create = EntityBehavior.Create }
+return {
+    EntityBehavior = EntityBehavior,
+    Create = EntityBehavior.Create,
+    DefaultLoadFunction = DefaultLoadFunction,
+    DefaultUnloadFunction = DefaultUnloadFunction
+}

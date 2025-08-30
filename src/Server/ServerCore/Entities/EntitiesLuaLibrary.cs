@@ -27,20 +27,22 @@ namespace Sovereign.ServerCore.Entities;
 /// <summary>
 ///     Lua binding for ServerEntityBuilder.
 /// </summary>
-public class ServerEntityBuilderLuaLibrary : ILuaLibrary
+public class EntitiesLuaLibrary : ILuaLibrary
 {
     private readonly IEntityFactory entityFactory;
     private readonly EntityManager entityManager;
-    private readonly ILogger<ServerEntityBuilderLuaLibrary> logger;
+    private readonly EntityTable entityTable;
+    private readonly ILogger<EntitiesLuaLibrary> logger;
     private readonly ScriptingServices scriptingServices;
 
-    public ServerEntityBuilderLuaLibrary(IEntityFactory entityFactory, ScriptingServices scriptingServices,
-        ILogger<ServerEntityBuilderLuaLibrary> logger, EntityManager entityManager)
+    public EntitiesLuaLibrary(IEntityFactory entityFactory, ScriptingServices scriptingServices,
+        ILogger<EntitiesLuaLibrary> logger, EntityManager entityManager, EntityTable entityTable)
     {
         this.entityFactory = entityFactory;
         this.scriptingServices = scriptingServices;
         this.logger = logger;
         this.entityManager = entityManager;
+        this.entityTable = entityTable;
     }
 
     public void Install(LuaHost luaHost)
@@ -48,8 +50,20 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
         luaHost.BeginLibrary("entities");
         try
         {
-            luaHost.AddLibraryFunction("Create", BuildEntity);
-            luaHost.AddLibraryFunction("Remove", RemoveEntity);
+            luaHost.AddLibraryFunction(nameof(Create), Create);
+            luaHost.AddLibraryFunction(nameof(Remove), Remove);
+            luaHost.AddLibraryFunction(nameof(GetTemplate), GetTemplate);
+            luaHost.AddLibraryFunction(nameof(SetTemplate), SetTemplate);
+            luaHost.AddLibraryConstant(nameof(EntityConstants.FirstTemplateEntityId),
+                (long)EntityConstants.FirstTemplateEntityId);
+            luaHost.AddLibraryConstant(nameof(EntityConstants.LastTemplateEntityId),
+                (long)EntityConstants.LastTemplateEntityId);
+            luaHost.AddLibraryConstant(nameof(EntityConstants.FirstBlockEntityId),
+                (long)EntityConstants.FirstBlockEntityId);
+            luaHost.AddLibraryConstant(nameof(EntityConstants.LastBlockEntityId),
+                (long)EntityConstants.LastBlockEntityId);
+            luaHost.AddLibraryConstant(nameof(EntityConstants.FirstPersistedEntityId),
+                (long)EntityConstants.FirstPersistedEntityId);
         }
         finally
         {
@@ -62,7 +76,7 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <returns>Number of results pushed to the Lua stack.</returns>
-    private int RemoveEntity(IntPtr luaState)
+    private int Remove(IntPtr luaState)
     {
         var mainState = LuaUtil.GetMainThread(luaState);
         var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
@@ -86,11 +100,11 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
     }
 
     /// <summary>
-    ///     Implementation of Lua function entities.Build.
+    ///     Implementation of Lua function entities.Create.
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <returns>Number of results pushed to the Lua stack.</returns>
-    private int BuildEntity(IntPtr luaState)
+    private int Create(IntPtr luaState)
     {
         var mainState = LuaUtil.GetMainThread(luaState);
         IEntityBuilder? builder = null;
@@ -189,5 +203,96 @@ public class ServerEntityBuilderLuaLibrary : ILuaLibrary
         if (key == "EntityId") return true; // Already handled when builder was selected.
 
         return LuaEntityBuilderSupport.HandleKeyValuePair(luaState, builder, localLogger, key);
+    }
+
+    /// <summary>
+    ///     Implementation of Lua function entities.GetTemplate(entityId).
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of return values.</returns>
+    private int GetTemplate(IntPtr luaState)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
+
+        try
+        {
+            if (lua_gettop(luaState) != 1)
+            {
+                localLogger.LogError($"entities.{nameof(GetTemplate)}() requires one argument.");
+                return 0;
+            }
+
+            if (!lua_isinteger(luaState, -1))
+            {
+                localLogger.LogError($"entities.{nameof(GetTemplate)}(): argument must be integer.");
+                return 0;
+            }
+
+            var entityId = (ulong)lua_tointeger(luaState, -1);
+            lua_pop(luaState, 1);
+
+            if (!entityTable.TryGetTemplate(entityId, out var templateId)) return 0;
+
+            lua_pushinteger(luaState, (long)templateId);
+            return 1;
+        }
+        catch (Exception e)
+        {
+            localLogger.LogError(e, $"Error in entities.{nameof(GetTemplate)}().");
+            return 0;
+        }
+    }
+
+    /// <summary>
+    ///     Implementation of Lua function entities.SetTemplate(entityId, templateId).
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int SetTemplate(IntPtr luaState)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
+
+        try
+        {
+            if (lua_gettop(luaState) != 2)
+            {
+                localLogger.LogError($"entities.{nameof(SetTemplate)} requires two arguments.");
+                return 0;
+            }
+
+            if (!lua_isinteger(luaState, -2) || !lua_isinteger(luaState, -1))
+            {
+                localLogger.LogError($"entities.{nameof(SetTemplate)}: arguments must be integers.");
+                return 0;
+            }
+
+            var entityId = (ulong)lua_tointeger(luaState, -2);
+            var templateId = (ulong)lua_tointeger(luaState, -1);
+
+            if (EntityUtil.IsTemplateEntity(entityId))
+            {
+                localLogger.LogError(
+                    $"entities.{nameof(SetTemplate)}: {{EntityId:X}} is a template and may not have its own template.",
+                    entityId);
+                return 0;
+            }
+
+            if (!EntityUtil.IsTemplateEntity(templateId))
+            {
+                localLogger.LogError($"entities.{nameof(SetTemplate)}: {{TemplateId:X}} is not a valid template ID.",
+                    templateId);
+                return 0;
+            }
+
+            entityTable.SetTemplate(entityId, templateId);
+            return 0;
+        }
+        catch (Exception e)
+        {
+            localLogger.LogError(e, $"Error in entities.{nameof(SetTemplate)}.");
+            return 0;
+        }
     }
 }
