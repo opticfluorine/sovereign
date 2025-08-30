@@ -140,7 +140,7 @@ public class AuthTests : IClassFixture<ServerFixture>
         // Attempt to access admin-only endpoint
         var basicToken =
             Convert.ToBase64String(Encoding.UTF8.GetBytes($"{loginResponse.UserId}:{loginResponse.RestApiKey}"));
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{RestEndpoints.TemplateEntities}/1");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{RestEndpoints.EntityData}/1");
         request.Headers.Add("Authorization", $"Basic {basicToken}");
         var response = await client.SendAsync(request);
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);

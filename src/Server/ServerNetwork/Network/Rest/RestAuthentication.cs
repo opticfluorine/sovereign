@@ -62,6 +62,11 @@ public static class RestAuthorization
         ///     Require Out of Game policy. Requires that the user has not yet entered the world.
         /// </summary>
         public const string RequireOutOfGame = nameof(RequireOutOfGame);
+
+        /// <summary>
+        ///     Default authentication policy. Requires account authentication.
+        /// </summary>
+        public const string Default = nameof(Default);
     }
 
     /// <summary>

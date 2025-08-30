@@ -36,6 +36,8 @@ public static class RestAuthorizationPolicyProvider
             .AddPolicy(RestAuthorization.Policies.RequirePlayer,
                 policy => policy.RequireRole(RestAuthorization.Roles.Player))
             .AddPolicy(RestAuthorization.Policies.RequireOutOfGame,
-                policy => policy.RequireRole(RestAuthorization.Roles.OutOfGame));
+                policy => policy.RequireRole(RestAuthorization.Roles.OutOfGame))
+            .AddDefaultPolicy(RestAuthorization.Policies.Default,
+                policy => policy.RequireClaim(RestAuthentication.ClaimTypes.AccountId));
     }
 }
