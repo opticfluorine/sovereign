@@ -66,6 +66,11 @@ function (behavior, spawnerEntityId)
         return
     end
     templateId = templateId + entities.FirstTemplateEntityId
+    local templateType = components.entity_type.Get(templateId)
+    if templateType ~= EntityType.Npc then
+        util.LogError(string.format("Entity %X has non-NPC spawn template.", spawnerEntityId))
+        return
+    end
 
     local delay = tonumber(spawnData[ParamDelay])
     if not delay then
@@ -91,15 +96,14 @@ function (behavior, spawnerEntityId)
             return
         end
 
-        -- Remove any entities that were destroyed since the last check.
-        local removedIndices = {}
+        -- Check if a spawned entity has been destroyed so that we can open a slot.
+        -- Don't need to remove all of the destroyed entities, one is sufficient to
+        -- allow a respawn to proceed.
         for index, entityId in ipairs(spawnedIds) do
             if not components.kinematics.Get(entityId) then
-                table.insert(removedIndices, index)
+                table.remove(spawnedIds, index)
+                break
             end
-        end
-        for i = #removedIndices, 1, -1 do
-            table.remove(spawnedIds, removedIndices[i])
         end
 
         -- Spawn a new entity if we haven't reached the spawn count yet.
