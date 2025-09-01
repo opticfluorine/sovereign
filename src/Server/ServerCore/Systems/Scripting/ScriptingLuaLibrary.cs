@@ -22,6 +22,7 @@ using Sovereign.EngineCore.Events.Details.Validators;
 using Sovereign.EngineCore.Lua;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Numerics;
+using Sovereign.Scripting;
 using Sovereign.Scripting.Lua;
 using static Sovereign.Scripting.Lua.LuaBindings;
 using EventId = Sovereign.EngineCore.Events.EventId;
@@ -258,17 +259,17 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
 
         try
         {
-            if (lua_gettop(luaState) != 2)
+            if (lua_gettop(luaState) != 3)
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("AddEntityParameterHint requires 2 arguments.");
+                    .LogError("AddEntityParameterHint requires 3 arguments: functionName, parameterName, type.");
                 return 0;
             }
 
-            if (!lua_isstring(luaState, -2) || !lua_isstring(luaState, -1))
+            if (!lua_isstring(luaState, -3) || !lua_isstring(luaState, -2) || !lua_isstring(luaState, -1))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("AddEntityParameterHint requires two string arguments.");
+                    .LogError("AddEntityParameterHint requires three string arguments.");
                 return 0;
             }
 
@@ -279,10 +280,18 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
                 return 0;
             }
 
-            var functionName = lua_tostring(luaState, -2);
-            var parameterName = lua_tostring(luaState, -1);
+            var functionName = lua_tostring(luaState, -3);
+            var parameterName = lua_tostring(luaState, -2);
+            var typeString = lua_tostring(luaState, -1);
 
-            luaHost.AddEntityParameterHint(functionName, parameterName);
+            if (!Enum.TryParse<EntityParameterType>(typeString, true, out var type))
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogWarning("Invalid EntityParameterType: {TypeString}; defaulting to String.", typeString);
+                type = EntityParameterType.String;
+            }
+
+            luaHost.AddEntityParameterHint(functionName, parameterName, type);
         }
         catch (Exception e)
         {

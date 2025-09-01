@@ -14,9 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
+namespace Sovereign.Scripting;
 
-namespace Sovereign.NetworkCore.Network.Rest.Data;
+/// <summary>
+///     Enum describing the type of an entity parameter.
+/// </summary>
+public enum EntityParameterType
+{
+    String,
+    Int,
+    Float,
+    Bool
+}
 
 /// <summary>
 ///     Data class describing the interfaces exposed by the currently loaded scripts.
@@ -58,5 +67,14 @@ public sealed class ScriptFunctionInfo
     /// <summary>
     ///     Hints for entity key-value pairs that the function references.
     /// </summary>
-    public List<string> EntityParameters { get; set; } = new();
+    public List<EntityParameterHint> EntityParameters { get; set; } = new();
+}
+
+/// <summary>
+///     Describes a single entity parameter hint, including name and type.
+/// </summary>
+public sealed class EntityParameterHint
+{
+    public string Name { get; set; } = string.Empty;
+    public EntityParameterType Type { get; set; } = EntityParameterType.String;
 }

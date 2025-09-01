@@ -14,12 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.EngineCore.Entities;
+using Sovereign.Scripting;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 
@@ -46,7 +48,7 @@ public class EntityDataControlGroup(
     };
 
     private readonly List<string> keysToRemove = new();
-    private readonly List<string> scriptParameters = new();
+    private readonly List<EntityParameterHint> scriptParameters = new();
     private Dictionary<string, string>? entityData = new();
 
     private bool entityDataLoaded;
@@ -243,16 +245,40 @@ public class EntityDataControlGroup(
     /// <summary>
     ///     Renders a single parameter row in the scripting section.
     /// </summary>
-    /// <param name="name">Parameter name (key).</param>
-    private void InputParameter(string name)
+    /// <param name="hint">Parameter hint.</param>
+    private void InputParameter(EntityParameterHint hint)
     {
         ImGui.TableNextColumn();
-        ImGui.Text($"{name}:");
+        ImGui.Text($"{hint.Name}:");
 
         ImGui.TableNextColumn();
-        var currentValue = inputEntityData.TryGetValue(name, out var value) ? value : "";
-        ImGui.InputText($"##{name}", ref currentValue, EntityConstants.MaxEntityDataValueLength + 1);
-        inputEntityData[name] = currentValue;
+        var currentValue = inputEntityData.TryGetValue(hint.Name, out var value) ? value : "";
+        switch (hint.Type)
+        {
+            case EntityParameterType.Int:
+                var intValue = int.TryParse(currentValue, out var i) ? i : 0;
+                if (ImGui.InputInt($"##{hint.Name}", ref intValue))
+                    inputEntityData[hint.Name] = intValue.ToString();
+                break;
+
+            case EntityParameterType.Float:
+                var floatValue = float.TryParse(currentValue, EntityConstants.EntityDataCulture, out var f) ? f : 0f;
+                if (ImGui.InputFloat($"##{hint.Name}", ref floatValue))
+                    inputEntityData[hint.Name] = floatValue.ToString(EntityConstants.EntityDataCulture);
+                break;
+
+            case EntityParameterType.Bool:
+                var boolValue = currentValue == "true";
+                if (ImGui.Checkbox($"##{hint.Name}", ref boolValue))
+                    inputEntityData[hint.Name] = boolValue ? "true" : "false";
+                break;
+
+            case EntityParameterType.String:
+            default:
+                ImGui.InputText($"##{hint.Name}", ref currentValue, EntityConstants.MaxEntityDataValueLength + 1);
+                inputEntityData[hint.Name] = currentValue;
+                break;
+        }
     }
 
     /// <summary>
@@ -270,7 +296,7 @@ public class EntityDataControlGroup(
                 keysToRemove.Clear();
                 foreach (var key in inputEntityData.Keys.Order())
                 {
-                    if (callbackKeys.Contains(key) || scriptParameters.Contains(key)) continue;
+                    if (callbackKeys.Contains(key) || scriptParameters.Select(p => p.Name).Contains(key)) continue;
                     InputKeyValue(key);
                 }
 
@@ -390,7 +416,7 @@ public class EntityDataControlGroup(
     {
         scriptParameters.Clear();
         var scriptInfo = scriptInfoClient.ScriptInfo;
-        var parameters = new HashSet<string>();
+        var parameters = new Dictionary<string, EntityParameterHint>();
 
         var scriptFunctionPairs = new List<(string, string)>
         {
@@ -407,10 +433,12 @@ public class EntityDataControlGroup(
             var function = script.Functions.Find(f => f.Name == functionName);
             if (function == null) continue;
 
-            foreach (var param in function.EntityParameters) parameters.Add(param);
+            foreach (var param in function.EntityParameters)
+                if (!parameters.ContainsKey(param.Name))
+                    parameters[param.Name] = param;
         }
 
-        scriptParameters.AddRange(parameters);
-        scriptParameters.Sort();
+        scriptParameters.AddRange(parameters.Values);
+        scriptParameters.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
     }
 }

@@ -146,7 +146,7 @@ function (behavior, spawnerEntityId)
 end
 ):InstallGlobalHooks()
 
-scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamTemplateId)
-scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamDelay)
-scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamRadius)
-scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamCount)
+scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamTemplateId, "Int")
+scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamDelay, "Float")
+scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamRadius, "Float")
+scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamCount, "Int")

@@ -84,7 +84,7 @@ public class LuaHost : IDisposable
     /// <summary>
     ///     Entity parameter hints indexed by function name.
     /// </summary>
-    public ConcurrentDictionary<string, List<string>> EntityParameterHintsByFunction { get; } = new();
+    public ConcurrentDictionary<string, List<EntityParameterHint>> EntityParameterHintsByFunction { get; } = new();
 
     /// <summary>
     ///     List of global functions provided by the script.
@@ -346,18 +346,18 @@ public class LuaHost : IDisposable
     /// </summary>
     /// <param name="functionName">Function name.</param>
     /// <param name="parameterName">Parameter name.</param>
-    public void AddEntityParameterHint(string functionName, string parameterName)
+    /// <param name="type">Parameter type.</param>
+    public void AddEntityParameterHint(string functionName, string parameterName, EntityParameterType type)
     {
         lock (opsLock)
         {
-            if (!EntityParameterHintsByFunction.TryGetValue(functionName, out var parameters))
+            if (!EntityParameterHintsByFunction.TryGetValue(functionName, out var hints))
             {
-                parameters = new List<string>();
-                EntityParameterHintsByFunction[functionName] = parameters;
+                hints = new List<EntityParameterHint>();
+                EntityParameterHintsByFunction[functionName] = hints;
             }
 
-            if (!parameters.Contains(parameterName))
-                parameters.Add(parameterName);
+            hints.Add(new EntityParameterHint { Name = parameterName, Type = type });
         }
     }
 
@@ -681,3 +681,4 @@ public class LuaHost : IDisposable
         }
     }
 }
+

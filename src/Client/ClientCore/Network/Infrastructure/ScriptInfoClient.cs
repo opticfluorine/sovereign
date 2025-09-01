@@ -23,6 +23,7 @@ using Sovereign.ClientCore.Network.Rest;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
 using Sovereign.NetworkCore.Network.Rest.Data;
+using Sovereign.Scripting;
 
 namespace Sovereign.ClientCore.Network.Infrastructure;
 

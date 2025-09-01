@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Globalization;
+
 namespace Sovereign.EngineCore.Entities;
 
 /// <summary>
@@ -135,6 +137,11 @@ public static class EntityConstants
     ///     Maximum length in bytes of an entity's key-value data value.
     /// </summary>
     public const int MaxEntityDataValueLength = 128;
+
+    /// <summary>
+    ///     CultureInfo for formatting and parsing entity data when string conversions are necessary.
+    /// </summary>
+    public static readonly CultureInfo EntityDataCulture = new("en-us");
 }
 
 /// <summary>
