@@ -173,6 +173,10 @@ public class NpcTemplateEditorTab
                 ImGui.TableNextColumn();
                 ImGui.Text(name);
 
+                // Show relative template entity ID below the name.
+                var relativeId = templateEntityId - EntityConstants.FirstTemplateEntityId;
+                ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1.0f), $"ID: {relativeId}");
+
                 // Highlight if selected.
                 if (i == selectedIndex)
                 {
