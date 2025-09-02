@@ -156,6 +156,20 @@ end
 
 EntityBehavior.Create(Wander.RunAsync):InstallGlobalHooks()
 
-scripting.AddEntityParameterHint("OnLoad", ParamWanderStep, "Float")
-scripting.AddEntityParameterHint("OnLoad", ParamWanderDelay, "Float")
-scripting.AddEntityParameterHint("OnLoad", ParamWanderSpeed, "Float")
+scripting.AddEntityParameterHint(
+    "OnLoad",
+    ParamWanderStep,
+    "Float",
+    "Distance in world units to travel per step.")
+
+scripting.AddEntityParameterHint(
+    "OnLoad",
+    ParamWanderDelay,
+    "Float",
+    "Average time in seconds between movements.")
+
+scripting.AddEntityParameterHint(
+    "OnLoad",
+    ParamWanderSpeed,
+    "Float",
+    "Movement speed in world units per second.")

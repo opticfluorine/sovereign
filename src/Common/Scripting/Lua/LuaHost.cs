@@ -347,7 +347,9 @@ public class LuaHost : IDisposable
     /// <param name="functionName">Function name.</param>
     /// <param name="parameterName">Parameter name.</param>
     /// <param name="type">Parameter type.</param>
-    public void AddEntityParameterHint(string functionName, string parameterName, EntityParameterType type)
+    /// <param name="tooltip">Tooltip text.</param>
+    public void AddEntityParameterHint(string functionName, string parameterName, EntityParameterType type,
+        string tooltip)
     {
         lock (opsLock)
         {
@@ -357,7 +359,7 @@ public class LuaHost : IDisposable
                 EntityParameterHintsByFunction[functionName] = hints;
             }
 
-            hints.Add(new EntityParameterHint { Name = parameterName, Type = type });
+            hints.Add(new EntityParameterHint { Name = parameterName, Type = type, Tooltip = tooltip });
         }
     }
 
@@ -681,4 +683,3 @@ public class LuaHost : IDisposable
         }
     }
 }
-

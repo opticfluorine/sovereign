@@ -259,17 +259,19 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
 
         try
         {
-            if (lua_gettop(luaState) != 3)
+            if (lua_gettop(luaState) != 4)
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("AddEntityParameterHint requires 3 arguments: functionName, parameterName, type.");
+                    .LogError(
+                        "AddEntityParameterHint requires 4 arguments: functionName, parameterName, type, tooltip.");
                 return 0;
             }
 
-            if (!lua_isstring(luaState, -3) || !lua_isstring(luaState, -2) || !lua_isstring(luaState, -1))
+            if (!lua_isstring(luaState, -4) || !lua_isstring(luaState, -3) || !lua_isstring(luaState, -2) ||
+                !lua_isstring(luaState, -1))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("AddEntityParameterHint requires three string arguments.");
+                    .LogError("AddEntityParameterHint requires four string arguments.");
                 return 0;
             }
 
@@ -280,9 +282,10 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
                 return 0;
             }
 
-            var functionName = lua_tostring(luaState, -3);
-            var parameterName = lua_tostring(luaState, -2);
-            var typeString = lua_tostring(luaState, -1);
+            var functionName = lua_tostring(luaState, -4);
+            var parameterName = lua_tostring(luaState, -3);
+            var typeString = lua_tostring(luaState, -2);
+            var tooltip = lua_tostring(luaState, -1);
 
             if (!Enum.TryParse<EntityParameterType>(typeString, true, out var type))
             {
@@ -291,7 +294,7 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
                 type = EntityParameterType.String;
             }
 
-            luaHost.AddEntityParameterHint(functionName, parameterName, type);
+            luaHost.AddEntityParameterHint(functionName, parameterName, type, tooltip);
         }
         catch (Exception e)
         {

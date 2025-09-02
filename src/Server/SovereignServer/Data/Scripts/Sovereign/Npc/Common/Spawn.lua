@@ -146,7 +146,26 @@ function (behavior, spawnerEntityId)
 end
 ):InstallGlobalHooks()
 
-scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamTemplateId, "Int")
-scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamDelay, "Float")
-scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamRadius, "Float")
-scripting.AddEntityParameterHint(EntityBehavior.DefaultLoadFunction, ParamCount, "Int")
+scripting.AddEntityParameterHint(
+    EntityBehavior.DefaultLoadFunction,
+    ParamTemplateId,
+    "Int",
+    "Template to use for spawned NPCs.")
+
+scripting.AddEntityParameterHint(
+    EntityBehavior.DefaultLoadFunction,
+    ParamDelay,
+    "Float",
+    string.format("Delay time in seconds between spawns (default: %.1f).", DefaultDelay))
+
+scripting.AddEntityParameterHint(
+    EntityBehavior.DefaultLoadFunction,
+    ParamRadius,
+    "Float",
+    string.format("Spawn radius (default: %.1f).", DefaultRadius))
+
+scripting.AddEntityParameterHint(
+    EntityBehavior.DefaultLoadFunction,
+    ParamCount,
+    "Int",
+    string.format("Maximum number of spawned NPCs (default: %d).", DefaultCount))

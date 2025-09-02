@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Rendering.Gui;
@@ -250,6 +251,11 @@ public class EntityDataControlGroup(
     {
         ImGui.TableNextColumn();
         ImGui.Text($"{hint.Name}:");
+        if (ImGui.BeginItemTooltip())
+        {
+            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1.0f), hint.Tooltip);
+            ImGui.EndTooltip();
+        }
 
         ImGui.TableNextColumn();
         var currentValue = inputEntityData.TryGetValue(hint.Name, out var value) ? value : "";

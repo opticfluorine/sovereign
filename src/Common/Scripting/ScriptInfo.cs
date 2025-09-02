@@ -71,10 +71,22 @@ public sealed class ScriptFunctionInfo
 }
 
 /// <summary>
-///     Describes a single entity parameter hint, including name and type.
+///     Describes a single entity parameter hint.
 /// </summary>
 public sealed class EntityParameterHint
 {
+    /// <summary>
+    ///     Parameter name.
+    /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    ///     Parameter type.
+    /// </summary>
     public EntityParameterType Type { get; set; } = EntityParameterType.String;
+
+    /// <summary>
+    ///     Parameter tooltip.
+    /// </summary>
+    public string Tooltip { get; set; } = string.Empty;
 }
