@@ -33,7 +33,7 @@
 -- 2. Set the template's load callback to Sovereign/Npc/Common/Spawn::OnLoad.
 -- 3. Set the template's unload callback to Sovereign/Npc/Common/Spawn::OnUnload.
 -- 4. Set parameters as appropriate:
---    * Sovereign.Spawn.TemplateId (required) - Relative template ID for the spawned NPCs.
+--    * Sovereign.Spawn.TemplateId (required) - Absolute template ID for the spawned NPCs.
 --    * Sovereign.Spawn.Delay      (optional) - Delay between spawns in seconds.
 --    * Sovereign.Spawn.Radius     (optional) - Spawn radius in world units.
 --    * Sovereign.Spawn.Count      (optional) - Maximum number of spawned NPCs at one time.
@@ -60,12 +60,11 @@ function (behavior, spawnerEntityId)
     local spawnData = data.GetEntityData(spawnerEntityId)
 
     local templateId = tonumber(spawnData[ParamTemplateId])
-    if not templateId then
+    if not templateId or not entities.IsTemplate(templateId) then
         util.LogError(string.format("Entity %X is missing required parameter %s.", 
             spawnerEntityId, ParamTemplateId))
         return
     end
-    templateId = templateId + entities.FirstTemplateEntityId
     local templateType = components.entity_type.Get(templateId)
     if templateType ~= EntityType.Npc then
         util.LogError(string.format("Entity %X has non-NPC spawn template.", spawnerEntityId))

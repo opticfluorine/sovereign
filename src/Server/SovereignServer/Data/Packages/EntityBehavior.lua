@@ -90,6 +90,10 @@ function EntityBehavior:OnLoad(entityId)
     if not ok then
         util.LogError(string.format("Failed to add behavior for %X: %s", entityId, err))
     end
+    if coroutine.status(thread) == "dead" then
+        -- Coroutine terminated.
+        self:_CleanupEntity(entityId)
+    end
 end
 
 --- Entity unload life cycle hook. Stops behavior for unloaded entity and frees resources.
@@ -101,7 +105,7 @@ function EntityBehavior:OnUnload(entityId)
         return
     end
 
-    self._CleanupEntity(entityId)
+    self:_CleanupEntity(entityId)
 end
 
 --- Resumes the behavior for the given entity.
@@ -116,13 +120,17 @@ function EntityBehavior:Resume(entityId, ...)
 
     if not self.followTemplateChanges and self._templateIds[entityId] ~= entities.GetTemplate(entityId) then
         -- Template has changed and we are not following changes, so end the current behavior.
-        self._CleanupEntity(entityId)
+        self:_CleanupEntity(entityId)
         return
     end
 
     local ok, err = coroutine.resume(thread, ...)
     if not ok then
         util.LogError(string.format("Error resuming behavior for entity %X: %s", entityId, err))
+    end
+    if coroutine.status(thread) == "dead" then
+        -- Coroutine has finished.
+        self:_CleanupEntity(entityId)
     end
 end
 
