@@ -9,6 +9,7 @@ chat.md
 color.md
 components.md
 data.md
+dialogue.md
 entities.md
 events.md
 scripting.md

@@ -101,7 +101,7 @@ To delete a key-value pair, assign the value `nil` to the key.
 
 ```{code-block} lua
 :caption: Deleting key-value pairs.
-:emphasise-lines: 1
+:emphasize-lines: 1
 data.global["MyKey"] = nil         -- removes "MyKey" from the global key-value store
 -- ...
 local MyEntityData = data.GetEntityData(entityId)

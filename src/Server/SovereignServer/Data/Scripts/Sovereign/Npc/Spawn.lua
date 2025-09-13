@@ -1,4 +1,4 @@
--- Spawn.lua (Sovereign/Npc/Common/Spawn)
+-- Spawn.lua (Sovereign/Npc/Spawn)
 -- Generic behavior script for spawning NPCs in the area around a spawner.
 --
 -- Sovereign Engine 
@@ -20,7 +20,7 @@
 --   BEHAVIOR:
 -- ================
 --
--- The Sovereign/Npc/Common/Spawn behavior provides a basic NPC spawner.
+-- The Sovereign/Npc/Spawn behavior provides a basic NPC spawner.
 -- Each spawner will spawn up to a specific number of NPCs (default 1) somewhere within
 -- a fixed radius (default 8.0 world units) of the spawner location. NPCs are spawned one
 -- at a time every Sovereign.Spawn.Delay seconds (default 30.0).
@@ -30,8 +30,8 @@
 -- ================
 --
 -- 1. Create an NPC template entity to act as the spawner.
--- 2. Set the template's load callback to Sovereign/Npc/Common/Spawn::OnLoad.
--- 3. Set the template's unload callback to Sovereign/Npc/Common/Spawn::OnUnload.
+-- 2. Set the template's load callback to Sovereign/Npc/Spawn::OnLoad.
+-- 3. Set the template's unload callback to Sovereign/Npc/Spawn::OnUnload.
 -- 4. Set parameters as appropriate:
 --    * Sovereign.Spawn.TemplateId (required) - Absolute template ID for the spawned NPCs.
 --    * Sovereign.Spawn.Delay      (optional) - Delay between spawns in seconds.

@@ -70,10 +70,10 @@ end
 scripting.AddTimedCallback(1.0, on_timer, 0)
 ```
 
-### AddEntityParameterHint(callbackFunctionName, entityParameter)
+### AddEntityParameterHint(callbackFunctionName, parameterName, type, tooltip)
 
 ```{eval-rst}
-.. lua:function:: scripting.AddEntityParameterHint(callbackFunctionName, entityParameter)
+.. lua:function:: scripting.AddEntityParameterHint(callbackFunctionName, parameterName, type, tooltip)
 
    Adds an entity parameter hint for the named callback function. A parameter hint is the name of a key in
    the entity key-value store that is referenced by the given callback function. Registering a parameter hint
@@ -82,14 +82,29 @@ scripting.AddTimedCallback(1.0, on_timer, 0)
 
    :param callbackFunctionName: Callback function name.
    :type callbackFunctionName: string
-   :param entityParameter: Name of a key in the entity key-value store.
-   :type entityParameter: string
+   :param parameterName: Name of a key in the entity key-value store.
+   :type parameterName: string
+   :param type: Parameter type (see table below).
+   :type type: string
+   :param tooltip: Tooltip text for the parameter.
+   :type tooltip: string
 ```
+
+#### Supported Types for AddEntityParameterHint
+
+The `type` argument for `scripting.AddEntityParameterHint` must be one of the following values:
+
+| Type       | Description              |
+|------------|--------------------------|
+| `"String"` | String-valued parameter  |
+| `"Int"`    | Integer-valued parameter |
+| `"Float"`  | Float-valued parameter   |
+| `"Bool"`   | Boolean-valued parameter |
 
 #### Example
 
 ```{code-block} lua
-:caption: Registering an entity parameter hint.
+:caption: Registering an entity parameter hint with type and tooltip.
 :emphasize-lines: 8
 function my_callback(entityId)
     -- ...
@@ -98,5 +113,5 @@ function my_callback(entityId)
     -- ...
 end
 
-scripting.AddEntityParameterHint("my_callback", "MyEntityKey")
+scripting.AddEntityParameterHint("my_callback", "MyEntityKey", "String", "This is my entity parameter.")
 ```

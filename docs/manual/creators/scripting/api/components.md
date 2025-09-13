@@ -27,8 +27,10 @@ Each component collection that is accessible through the scripting engine may be
 |`components.name`              |`NameComponentCollection`            |`string`      |
 |`components.orientation`       |`OrientationComponentCollection`     |`integer`     |
 |`components.parent`            |`ParentComponentCollection`          |`integer`     |
+|`components.physics`           |`PhysicsTagCollection`               |`boolean`     |
 |`components.player_character`  |`PlayerCharacterTagCollection`       |`boolean`     |
 |`components.point_light`       |`PointLightSourceComponentCollection`|`PointLight`  |
+|`components.server_only`       |`ServerOnlyTagCollection`            |`boolean`     |
 
 ## General Component Functions
 

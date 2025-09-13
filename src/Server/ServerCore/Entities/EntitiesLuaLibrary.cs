@@ -29,6 +29,11 @@ namespace Sovereign.ServerCore.Entities;
 /// </summary>
 public class EntitiesLuaLibrary : ILuaLibrary
 {
+    private const string IsTemplate =
+        @"function entities.IsTemplate(entityId) 
+              return entities.FirstTemplateEntityId <= entityId and entityId <= entities.LastTemplateEntityId 
+          end";
+
     private readonly IEntityFactory entityFactory;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
@@ -64,6 +69,7 @@ public class EntitiesLuaLibrary : ILuaLibrary
                 (long)EntityConstants.LastBlockEntityId);
             luaHost.AddLibraryConstant(nameof(EntityConstants.FirstPersistedEntityId),
                 (long)EntityConstants.FirstPersistedEntityId);
+            luaHost.LoadAndExecuteString(IsTemplate);
         }
         finally
         {

@@ -28,6 +28,7 @@ Core components are available in both the client and server.
 | `Physics`          | `PhysicsTagCollection`                | Indicates that a non-block entity has physics effects.                                                                 |
 | `PlayerCharacter`  | `PlayerCharacterTagCollection`        | Indicates that an entity is a player character.                                                                        |
 | `PointLightSource` | `PointLightSourceComponentCollection` | Specifies the properties of a point light source attached to the entity.                                               |
+| `ServerOnly`       | `ServerOnlyComponentCollection`       | Specifies that the entity is server-only and should not be shared with players (except admins).                        |
 
 ## Client Components
 

@@ -7,6 +7,7 @@ This section contains everything you need to know about creating games using Sov
 config/index.md
 world/index.md
 resources/index.md
+entities.md
 templates/index.md
 admin/index.md
 scripting/index.md

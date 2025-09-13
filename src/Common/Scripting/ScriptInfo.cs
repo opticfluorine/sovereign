@@ -21,9 +21,24 @@ namespace Sovereign.Scripting;
 /// </summary>
 public enum EntityParameterType
 {
+    /// <summary>
+    ///     String-valued parameter.
+    /// </summary>
     String,
+
+    /// <summary>
+    ///     Integer-valued parameter.
+    /// </summary>
     Int,
+
+    /// <summary>
+    ///     Float-valued parameter.
+    /// </summary>
     Float,
+
+    /// <summary>
+    ///     Boolean-valued parameter.
+    /// </summary>
     Bool
 }
 

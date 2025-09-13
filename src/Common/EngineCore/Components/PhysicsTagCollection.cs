@@ -15,12 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     Tag collection for the Physics tag which tags a non-block entity for physics processing.
 /// </summary>
+[ScriptableComponents("physics")]
 public class PhysicsTagCollection : BaseTagCollection
 {
     private const int InitialSize = 32768;

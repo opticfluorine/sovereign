@@ -36,19 +36,21 @@ if one is not provided.
 |------------------|----------------------------------------------|--------------------------------------------------|
 | EntityId         | integer                                      | Entity ID                                        |
 | Template         | integer                                      | Template entity ID                               |
+| NonPersistent    | boolean                                      | Whether entity is nonpersistent                  |
 | AnimatedSprite   | integer                                      | Animated sprite ID                               |
 | BlockPosition    | [GridPosition](#script-types-gridposition)   | Position (block entities)                        |
 | BoundingBox      | [BoundingBox](#script-types-boundingbox)     | Bounding box for physics effects                 |
 | CastBlockShadows | boolean                                      | Whether entity casts block shadows when rendered |
 | CastShadows      | [Shadow](#script-types-shadow)               | Shadow cast by a non-block entity                |
-| Drawable         | boolean                                      | Whether entity is visible when rendered          |
-| EntityType       | [EntityType](#script-constants-entitytype)   | Special type of entity (NPC/item/etc.), if any.  |
+| Drawable         | [Vector2](#script-types-vector2)             | Draw entity; value specifies offset              |
+| EntityType       | [EntityType](#script-constants-entitytype)   | Special type of entity (NPC/item/etc.), if any   |
 | Kinematics       | [Kinematics](#script-types-kinematics)       | Position and velocity (non-block entities)       |
 | Name             | string                                       | Name                                             |
 | Orientation      | [Orientation](#script-constants-orientation) | Orientation                                      |
 | Parent           | integer                                      | Entity ID of parent entity                       |
 | Physics          | boolean                                      | Whether entity has physics effects               |
 | PointLightSource | [PointLight](#script-types-pointlight)       | Point light source                               |
+| ServerOnly       | boolean                                      | Whether entity is server-only                    |
 
 #### Example
 
@@ -92,3 +94,86 @@ end
 :emphasize-lines: 1
 entities.Remove(targetEntityId)
 ```
+
+### GetTemplate(entityId)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: entities.GetTemplate(entityId)
+
+   Gets the template entity ID for the given entity, if any.
+   
+   :param entityId: Entity to query.
+   :type entityId: integer
+   :return: Template entity ID, or nil if not set.
+   :rtype: integer or nil
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Getting the template entity ID for an entity
+:emphasize-lines: 1
+local templateId = entities.GetTemplate(entityId)
+```
+
+### SetTemplate(entityId, templateId)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: entities.SetTemplate(entityId, templateId)
+
+   Sets the template entity ID for the given entity.
+   
+   :param entityId: Entity to modify.
+   :type entityId: integer
+   :param templateId: Template entity ID to assign.
+   :type templateId: integer
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Setting the template entity ID for an entity
+:emphasize-lines: 1
+entities.SetTemplate(entityId, templateId)
+```
+
+### IsTemplate(entityId)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: entities.IsTemplate(entityId)
+
+   Returns true if the given entity ID is a template entity.
+   
+   :param entityId: Entity ID to check.
+   :type entityId: integer
+   :return: True if entity is a template, false otherwise.
+   :rtype: boolean
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Checking if an entity is a template entity
+:emphasize-lines: 1
+if entities.IsTemplate(entityId) then
+    print("Entity is a template.")
+end
+```
+
+### Constants
+
+The following constants are available in the `entities` module:
+
+| Constant                      | Value Type   | Description                                 |
+|-------------------------------|--------------|---------------------------------------------|
+| `FirstTemplateEntityId`       | `integer`    | First template entity ID                    |
+| `LastTemplateEntityId`        | `integer`    | Last template entity ID                     |
+| `FirstBlockEntityId`          | `integer`    | First block entity ID                       |
+| `LastBlockEntityId`           | `integer`    | Last block entity ID                        |
+| `FirstPersistedEntityId`      | `integer`    | First persisted entity ID                   |

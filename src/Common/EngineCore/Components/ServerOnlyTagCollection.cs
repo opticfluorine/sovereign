@@ -15,12 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components;
 
 /// <summary>
 ///     ServerOnly tag designates an entity to not be replicated to clients (except for Admin role players).
 /// </summary>
+[ScriptableComponents("server_only")]
 public class ServerOnlyTagCollection(EntityTable entityTable, ComponentManager componentManager)
     : BaseTagCollection(entityTable, componentManager, InitialSize, ComponentType.ServerOnly)
 {

@@ -16,6 +16,31 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 --
+-- ================
+--   BEHAVIOR:
+-- ================
+--
+-- The Sovereign/Npc/Wander behavior allows an NPC to randomly wander about the world.
+-- The NPC will take a step in a random cardinal direction with a random delay between
+-- steps. The initial delay to the first step after load is randomized to minimize the
+-- correlation of movement between entities that are loaded at the same time.
+--
+-- This behavior does not stay within a certain area or avoid obstacles (including drops).
+--
+-- ================
+--   HOW TO USE:
+-- ================
+--
+-- 1. Create an NPC template entity.
+-- 2. Set the template's load callback to Sovereign/Npc/Wander::OnLoad.
+-- 3. Set the template's unload callback to Sovereign/Npc/Wander::OnUnload.
+-- 4. Set parameters as appropriate:
+--    * Sovereign.Wander.WanderStep  (required) - Distance per step in world units.
+--    * Sovereign.Wander.WanderDelay (required) - Average delay between steps in seconds.
+--    * Sovereign.Wander.WanderSpeed (required) - Movement speed in world units per second.
+-- 5. Place an NPC and watch it wander around.
+--
+-- ================
 
 local EntityBehavior = require("EntityBehavior")
 
