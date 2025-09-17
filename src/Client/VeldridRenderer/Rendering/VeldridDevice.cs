@@ -18,7 +18,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using Microsoft.Extensions.Options;
 using SDL2;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
@@ -34,6 +36,8 @@ namespace Sovereign.VeldridRenderer.Rendering;
 /// </summary>
 public class VeldridDevice : IDisposable
 {
+    private readonly DisplayOptions displayOptions;
+
     /// <summary>
     ///     Main display.
     /// </summary>
@@ -41,10 +45,12 @@ public class VeldridDevice : IDisposable
 
     private readonly IResourcePathBuilder pathBuilder;
 
-    public VeldridDevice(MainDisplay mainDisplay, IResourcePathBuilder pathBuilder)
+    public VeldridDevice(MainDisplay mainDisplay, IResourcePathBuilder pathBuilder,
+        IOptions<DisplayOptions> displayOptions)
     {
         this.mainDisplay = mainDisplay;
         this.pathBuilder = pathBuilder;
+        this.displayOptions = displayOptions.Value;
     }
 
     /// <summary>
@@ -72,7 +78,9 @@ public class VeldridDevice : IDisposable
     [MemberNotNull("Device")]
     public void CreateDevice()
     {
-        var options = new GraphicsDeviceOptions(false, PixelFormat.R32_Float, false);
+        var options = new GraphicsDeviceOptions(displayOptions.UseGraphicsDebug, PixelFormat.R32_Float,
+            displayOptions.UseVSync, ResourceBindingModel.Improved, true, false,
+            displayOptions.UseSrgb);
 
         // We use the Vulkan renderer since it is reasonably cross-platform
         // and more stable than the OpenGL renderer on Linux.

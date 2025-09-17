@@ -69,6 +69,21 @@ public class DisplayOptions
     public int ResolutionHeight { get; set; }
 
     /// <summary>
+    ///     Whether to sync to vertical blank.
+    /// </summary>
+    public bool UseVSync { get; set; }
+
+    /// <summary>
+    ///     Whether to use the SRGB color profile.
+    /// </summary>
+    public bool UseSrgb { get; set; }
+
+    /// <summary>
+    ///     Whether to enable debug options for the graphics API.
+    /// </summary>
+    public bool UseGraphicsDebug { get; set; }
+
+    /// <summary>
     ///     Fullscreen flag.
     /// </summary>
     public bool Fullscreen { get; set; }
