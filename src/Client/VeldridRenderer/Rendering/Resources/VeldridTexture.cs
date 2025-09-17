@@ -45,24 +45,39 @@ public class VeldridTexture : IDisposable
     /// <summary>
     ///     Map from internal pixel format to Veldrid pixel format.
     /// </summary>
-    private static readonly IDictionary<DisplayFormat, PixelFormat> formatMap
-        = new Dictionary<DisplayFormat, PixelFormat>
+    private static readonly Dictionary<DisplayFormat, PixelFormat> formatMap
+        = new()
         {
             { DisplayFormat.R8G8B8A8_UNorm, PixelFormat.R8_G8_B8_A8_UNorm },
             { DisplayFormat.B8G8R8A8_UNorm, PixelFormat.B8_G8_R8_A8_UNorm }
         };
+
+    private static readonly Dictionary<DisplayFormat, PixelFormat> srgbFormatMap = new()
+    {
+        { DisplayFormat.R8G8B8A8_UNorm, PixelFormat.R8_G8_B8_A8_UNorm_SRgb },
+        { DisplayFormat.B8G8R8A8_UNorm, PixelFormat.B8_G8_R8_A8_UNorm_SRgb }
+    };
+
+    private static readonly Dictionary<PixelFormat, PixelFormat> stripSrgbMap = new()
+    {
+        { PixelFormat.B8_G8_R8_A8_UNorm_SRgb, PixelFormat.B8_G8_R8_A8_UNorm },
+        { PixelFormat.B8_G8_R8_A8_UNorm, PixelFormat.B8_G8_R8_A8_UNorm },
+        { PixelFormat.R8_G8_B8_A8_UNorm_SRgb, PixelFormat.R8_G8_B8_A8_UNorm },
+        { PixelFormat.R8_G8_B8_A8_UNorm, PixelFormat.R8_G8_B8_A8_UNorm }
+    };
 
     /// <summary>
     ///     Creates a new texture from an existing surface.
     /// </summary>
     /// <param name="device">Device.</param>
     /// <param name="surface">Source surface.</param>
-    public VeldridTexture(VeldridDevice device, Surface surface)
+    /// <param name="srgb">Whether to use a sRGB format.</param>
+    public VeldridTexture(VeldridDevice device, Surface surface, bool srgb = false)
     {
         if (device.Device == null)
             throw new InvalidOperationException("Device not ready.");
 
-        Texture = CreateTexture(device, surface);
+        Texture = CreateTexture(device, surface, srgb);
 
         var desc = new TextureViewDescription(Texture);
         TextureView = device.Device.ResourceFactory.CreateTextureView(desc);
@@ -107,15 +122,17 @@ public class VeldridTexture : IDisposable
     /// </summary>
     /// <param name="device">Device.</param>
     /// <param name="surface">Source surface.</param>
+    /// <param name="srgb">Whether to use a sRGB format.</param>
     /// <returns>Texture.</returns>
-    private Texture CreateTexture(VeldridDevice device, Surface surface)
+    private Texture CreateTexture(VeldridDevice device, Surface surface, bool srgb)
     {
         if (device.Device == null)
             throw new InvalidOperationException("Device not ready.");
 
         /* Allocate a texture on the GPU. */
         var desc = TextureDescription.Texture2D((uint)surface.Properties.Width,
-            (uint)surface.Properties.Height, 1, 1, formatMap[surface.Properties.Format],
+            (uint)surface.Properties.Height, 1, 1,
+            srgb ? srgbFormatMap[surface.Properties.Format] : formatMap[surface.Properties.Format],
             TextureUsage.Sampled);
 
         var texture = device.Device.ResourceFactory.CreateTexture(desc);
@@ -146,7 +163,8 @@ public class VeldridTexture : IDisposable
 
         var format = purpose switch
         {
-            TexturePurpose.RenderTexture => device.Device!.SwapchainFramebuffer.ColorTargets[0].Target.Format,
+            TexturePurpose.RenderTexture => stripSrgbMap[
+                device.Device!.SwapchainFramebuffer.ColorTargets[0].Target.Format],
             TexturePurpose.DepthBuffer => PixelFormat.R32_Float,
             _ => PixelFormat.B8_G8_R8_A8_UNorm
         };

@@ -17,6 +17,8 @@
 
 using System;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
 using Veldrid;
 
@@ -37,14 +39,17 @@ public class VeldridResourceManager : IDisposable
     /// </summary>
     private readonly VeldridDevice device;
 
+    private readonly DisplayOptions displayOptions;
+
     private readonly ILogger<VeldridResourceManager> logger;
 
     public VeldridResourceManager(VeldridDevice device, TextureAtlasManager atlasManager,
-        ILogger<VeldridResourceManager> logger)
+        ILogger<VeldridResourceManager> logger, IOptions<DisplayOptions> displayOptions)
     {
         this.device = device;
         this.atlasManager = atlasManager;
         this.logger = logger;
+        this.displayOptions = displayOptions.Value;
     }
 
     /// <summary>
@@ -103,7 +108,6 @@ public class VeldridResourceManager : IDisposable
     {
         if (atlasManager.TextureAtlas == null)
             throw new InvalidOperationException("Tried to create Vulkan texture atlas without data.");
-        AtlasTexture = new VeldridTexture(device,
-            atlasManager.TextureAtlas.AtlasSurface);
+        AtlasTexture = new VeldridTexture(device, atlasManager.TextureAtlas.AtlasSurface, displayOptions.UseSrgb);
     }
 }
