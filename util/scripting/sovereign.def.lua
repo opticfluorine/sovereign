@@ -631,6 +631,16 @@ end
 function entities.IsTemplate(entityId)
 end
 
+---Synchronizes the given entity or entities with subscribed clients.
+---@param entityId integer|table Entity ID(s) to sync.
+function entities.Sync(entityId)
+end
+
+---Synchronizes the given entity or entities and all descendants with subscribed clients.
+---@param entityId integer|table Parent entity ID(s) to sync.
+function entities.SyncTree(entityId)
+end
+
 ---First template entity ID.
 entities.FirstTemplateEntityId  = 0x7FFE000000000000
 ---Last template entity ID.

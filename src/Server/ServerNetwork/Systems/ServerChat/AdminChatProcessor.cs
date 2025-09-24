@@ -207,7 +207,7 @@ public class AdminChatProcessor : IChatProcessor
         {
             // Modify the player directly in memory, then trigger a resync to update the client role states.
             admins.TagEntity(playerEntityId);
-            worldManagementController.ResyncPositionedEntity(eventSender, playerEntityId);
+            worldManagementController.ResyncEntityTree(eventSender, playerEntityId);
             internalController.SendSystemMessage("You are now an admin.", playerEntityId);
         }
         else if (!persistencePlayerServices.TryAddAdminForPlayer(playerName))
@@ -251,7 +251,7 @@ public class AdminChatProcessor : IChatProcessor
         {
             // Modify the player directly in memory, then trigger a resync to update the client role states.
             admins.UntagEntity(playerEntityId);
-            worldManagementController.ResyncPositionedEntity(eventSender, playerEntityId);
+            worldManagementController.ResyncEntityTree(eventSender, playerEntityId);
             internalController.SendSystemMessage("You are no longer an admin.", playerEntityId);
         }
         else

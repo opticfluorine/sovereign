@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Data;
 using Microsoft.Data.Sqlite;
 using Sovereign.Persistence.Database.Queries;
@@ -33,7 +34,7 @@ public class SqliteSetTemplateQuery(SqliteConnection connection) : ISetTemplateQ
         cmd.Parameters.Add(pId);
 
         var pTemplateId = new SqliteParameter("TemplateId", SqliteType.Integer);
-        pTemplateId.Value = templateEntityId > 0 ? templateEntityId : null;
+        pTemplateId.Value = templateEntityId > 0 ? templateEntityId : DBNull.Value;
         cmd.Parameters.Add(pTemplateId);
 
         cmd.ExecuteNonQuery();

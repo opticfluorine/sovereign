@@ -154,7 +154,6 @@ public sealed class EntityScriptCallbacks
     /// <param name="entityId">Entity ID.</param>
     private static void RunCallback(string callbackName, string functionName, LuaHost host, ulong entityId)
     {
-        host.Logger.LogDebug("ELC Callback: {CallbackName}", callbackName);
         try
         {
             host.CallNamedFunction(functionName, args =>

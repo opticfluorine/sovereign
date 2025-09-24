@@ -88,17 +88,29 @@ public sealed class WorldManagementEventHandler
             }
                 break;
 
-            case EventId.Server_WorldManagement_ResyncPositionedEntity:
+            case EventId.Server_WorldManagement_ResyncEntityTree:
             {
                 if (ev.EventDetails is not EntityEventDetails details)
                 {
-                    logger.LogError("Received ResyncPositionedEntity without details.");
+                    logger.LogError("Received ResyncEntityTree without details.");
                     break;
                 }
 
-                subscriptionManager.OnResyncRequest(details.EntityId);
+                subscriptionManager.OnResyncTreeRequest(details.EntityId);
             }
                 break;
+
+            case EventId.Server_WorldManagement_ResyncEntity:
+            {
+                if (ev.EventDetails is not EntityEventDetails details)
+                {
+                    logger.LogError("Received ResyncEntity without details.");
+                    break;
+                }
+
+                subscriptionManager.OnResyncSingleRequest(details.EntityId);
+                break;
+            }
 
             default:
                 logger.LogError("Unhandled event ID {Id}.", ev.EventId);

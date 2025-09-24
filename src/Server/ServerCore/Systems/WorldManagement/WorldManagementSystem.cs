@@ -55,7 +55,8 @@ public sealed class WorldManagementSystem : ISystem
         EventId.Core_Tick,
         EventId.Core_WorldManagement_WorldSegmentLoaded,
         EventId.Core_WorldManagement_EntityLeaveWorldSegment,
-        EventId.Server_WorldManagement_ResyncPositionedEntity
+        EventId.Server_WorldManagement_ResyncEntityTree,
+        EventId.Server_WorldManagement_ResyncEntity
     };
 
     public int WorkloadEstimate => 80;

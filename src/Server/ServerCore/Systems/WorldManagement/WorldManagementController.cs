@@ -25,20 +25,44 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 public class WorldManagementController
 {
     /// <summary>
-    ///     Requests a resynchronization of the given positioned entity, and all of its descendents,
-    ///     to any subscribers.
+    ///     Requests a resynchronization of the given entity to any subscribers. If the entity is not positioned,
+    ///     its parent/ancestors will be checked for the nearest position in the tree; if no position is found,
+    ///     there will be no effect.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
-    /// <param name="entityId">Positioned entity ID.</param>
+    /// <param name="entityId">Entity ID.</param>
     /// <remarks>
     ///     The synchronization will not occur earlier than the beginning of the next server tick
     ///     to allow time for any recent component updates to be applied prior to synchronization.
     /// </remarks>
-    public void ResyncPositionedEntity(IEventSender eventSender, ulong entityId)
+    public void ResyncEntity(IEventSender eventSender, ulong entityId)
     {
         var details = new EntityEventDetails { EntityId = entityId };
-        var ev = new Event(EventId.Server_WorldManagement_ResyncPositionedEntity, details);
-        ev.SyncToTick = true;
+        var ev = new Event(EventId.Server_WorldManagement_ResyncEntity, details)
+        {
+            SyncToTick = true
+        };
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Requests a resynchronization of the given entity, and of all of its descendents,
+    ///     to any subscribers. If the entity is not positioned, its parent/ancestors will be checked
+    ///     for the nearest position in the tree; if no position is found, there will be no effect.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <remarks>
+    ///     The synchronization will not occur earlier than the beginning of the next server tick
+    ///     to allow time for any recent component updates to be applied prior to synchronization.
+    /// </remarks>
+    public void ResyncEntityTree(IEventSender eventSender, ulong entityId)
+    {
+        var details = new EntityEventDetails { EntityId = entityId };
+        var ev = new Event(EventId.Server_WorldManagement_ResyncEntityTree, details)
+        {
+            SyncToTick = true
+        };
         eventSender.SendEvent(ev);
     }
 }

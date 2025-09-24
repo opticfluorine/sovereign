@@ -166,6 +166,60 @@ if entities.IsTemplate(entityId) then
 end
 ```
 
+### Sync(entityId)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: entities.Sync(entityId)
+
+   Synchronizes the given entity or entities to any subscribed clients.
+
+   :param entityId: Entity ID or table of multiple entity IDs to synchronize.
+   :type entityId: integer|table
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Synchronizing entities
+:emphasize-lines: 3,7
+-- Single entity.
+local singleId = 0x7FFF000000000000
+entities.Sync(singleId)
+
+-- Multiple entities.
+local multipleIds = { 0x7FFF000000000000, 0x7FFF000000000001 }
+entities.Sync(multipleIds)
+```
+
+### SyncTree(entityId)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: entities.SyncTree(entityId)
+
+   Synchronizes the given entity or entities and all descendants to any subscribed clients.
+
+   :param entityId: Entity ID or table of multiple entity IDs to synchronize.
+   :type entityId: integer|table
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Synchronizing entities
+:emphasize-lines: 3,7
+-- Single entity and its descendants.
+local singleId = 0x7FFF000000000000
+entities.SyncTree(singleId)
+
+-- Multiple entities and their descendants.
+local multipleIds = { 0x7FFF000000000000, 0x7FFF000000000001 }
+entities.SyncTree(multipleIds)
+```
+
 ### Constants
 
 The following constants are available in the `entities` module:

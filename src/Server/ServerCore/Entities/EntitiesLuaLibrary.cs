@@ -15,11 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Lua;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Systems.Scripting;
+using Sovereign.ServerCore.Systems.WorldManagement;
 using static Sovereign.Scripting.Lua.LuaBindings;
 
 namespace Sovereign.ServerCore.Entities;
@@ -37,17 +40,23 @@ public class EntitiesLuaLibrary : ILuaLibrary
     private readonly IEntityFactory entityFactory;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
+    private readonly Lock eventLock = new();
+    private readonly IEventSender eventSender;
     private readonly ILogger<EntitiesLuaLibrary> logger;
     private readonly ScriptingServices scriptingServices;
+    private readonly WorldManagementController worldManagementController;
 
     public EntitiesLuaLibrary(IEntityFactory entityFactory, ScriptingServices scriptingServices,
-        ILogger<EntitiesLuaLibrary> logger, EntityManager entityManager, EntityTable entityTable)
+        ILogger<EntitiesLuaLibrary> logger, EntityManager entityManager, EntityTable entityTable,
+        WorldManagementController worldManagementController, IEventSender eventSender)
     {
         this.entityFactory = entityFactory;
         this.scriptingServices = scriptingServices;
         this.logger = logger;
         this.entityManager = entityManager;
         this.entityTable = entityTable;
+        this.worldManagementController = worldManagementController;
+        this.eventSender = eventSender;
     }
 
     public void Install(LuaHost luaHost)
@@ -59,6 +68,8 @@ public class EntitiesLuaLibrary : ILuaLibrary
             luaHost.AddLibraryFunction(nameof(Remove), Remove);
             luaHost.AddLibraryFunction(nameof(GetTemplate), GetTemplate);
             luaHost.AddLibraryFunction(nameof(SetTemplate), SetTemplate);
+            luaHost.AddLibraryFunction(nameof(Sync), Sync);
+            luaHost.AddLibraryFunction(nameof(SyncTree), SyncTree);
             luaHost.AddLibraryConstant(nameof(EntityConstants.FirstTemplateEntityId),
                 (long)EntityConstants.FirstTemplateEntityId);
             luaHost.AddLibraryConstant(nameof(EntityConstants.LastTemplateEntityId),
@@ -299,6 +310,144 @@ public class EntitiesLuaLibrary : ILuaLibrary
         {
             localLogger.LogError(e, $"Error in entities.{nameof(SetTemplate)}.");
             return 0;
+        }
+    }
+
+    /// <summary>
+    ///     Implementation of Lua function entities.Sync(entities).
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int Sync(IntPtr luaState)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
+
+        try
+        {
+            if (lua_gettop(luaState) != 1)
+            {
+                localLogger.LogError($"entities.{nameof(Sync)} requires one argument.");
+                return 0;
+            }
+
+            if (lua_isinteger(luaState, -1))
+            {
+                // Request single entity sync.
+                var entityId = (ulong)lua_tointeger(luaState, -1);
+                DoSyncSingle(entityId);
+            }
+            else if (lua_istable(luaState, -1))
+            {
+                // Request sync of list of entities.
+                luaL_checkstack(luaState, 2, null);
+                lua_pushnil(luaState);
+                while (lua_next(luaState, 1) != 0)
+                {
+                    if (!lua_isinteger(luaState, -1))
+                    {
+                        localLogger.LogWarning(
+                            $"found non-integer item in table passed to entities.{nameof(Sync)}; skipping.");
+                        lua_pop(luaState, 1);
+                        continue;
+                    }
+
+                    var entityId = (ulong)lua_tointeger(luaState, -1);
+                    DoSyncSingle(entityId);
+                    lua_pop(luaState, 1);
+                }
+            }
+            else
+            {
+                localLogger.LogError($"entities.{nameof(Sync)} requires integer or table argument.");
+            }
+        }
+        catch (Exception e)
+        {
+            localLogger.LogError(e, $"Error in entities.{nameof(Sync)}.");
+        }
+
+        return 0;
+    }
+
+    /// <summary>
+    ///     Synchronizes a single entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    private void DoSyncSingle(ulong entityId)
+    {
+        lock (eventLock)
+        {
+            worldManagementController.ResyncEntity(eventSender, entityId);
+        }
+    }
+
+    /// <summary>
+    ///     Implementation of Lua function entities.SyncTree(entities).
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int SyncTree(IntPtr luaState)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
+
+        try
+        {
+            if (lua_gettop(luaState) != 1)
+            {
+                localLogger.LogError($"entities.{nameof(SyncTree)} requires one argument.");
+                return 0;
+            }
+
+            if (lua_isinteger(luaState, -1))
+            {
+                // Request single entity sync.
+                var entityId = (ulong)lua_tointeger(luaState, -1);
+                DoSyncTreeSingle(entityId);
+            }
+            else if (lua_istable(luaState, -1))
+            {
+                // Request sync of list of entities.
+                luaL_checkstack(luaState, 2, null);
+                lua_pushnil(luaState);
+                while (lua_next(luaState, 1) != 0)
+                {
+                    if (!lua_isinteger(luaState, -1))
+                    {
+                        localLogger.LogWarning(
+                            $"found non-integer item in table passed to entities.{nameof(SyncTree)}; skipping.");
+                        lua_pop(luaState, 1);
+                        continue;
+                    }
+
+                    var entityId = (ulong)lua_tointeger(luaState, -1);
+                    DoSyncTreeSingle(entityId);
+                    lua_pop(luaState, 1);
+                }
+            }
+            else
+            {
+                localLogger.LogError($"entities.{nameof(SyncTree)} requires integer or table argument.");
+            }
+        }
+        catch (Exception e)
+        {
+            localLogger.LogError(e, $"Error in entities.{nameof(SyncTree)}.");
+        }
+
+        return 0;
+    }
+
+    /// <summary>
+    ///     Synchronizes a single entity tree.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    private void DoSyncTreeSingle(ulong entityId)
+    {
+        lock (eventLock)
+        {
+            worldManagementController.ResyncEntityTree(eventSender, entityId);
         }
     }
 }

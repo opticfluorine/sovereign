@@ -162,14 +162,24 @@ public class WorldSegmentSubscriptionManager
 
     /// <summary>
     ///     Called when the WorldManagement system receives a request to resynchronize the given
-    ///     positioned entity with any subscribers.
+    ///     entity tree with any subscribers.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    public void OnResyncRequest(ulong entityId)
+    public void OnResyncTreeRequest(ulong entityId)
     {
         // Treat this entity as if it were newly added to the world segment that it just entered,
         // as this will trigger all of the necessary synchronization logic.
         OnNonBlockEntityAdded(entityId);
+    }
+
+    /// <summary>
+    ///     Called when the WorldManagement system receives a request to resynchronize the given single
+    ///     entity with any subscribers.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    public void OnResyncSingleRequest(ulong entityId)
+    {
+        SyncSingle(entityId);
     }
 
     /// <summary>
@@ -329,11 +339,11 @@ public class WorldSegmentSubscriptionManager
     /// <param name="entityId">Entity.</param>
     private void OnNonBlockEntityAdded(ulong entityId)
     {
-        // Skip if not a positioned entity.
-        if (!kinematics.HasComponentForEntity(entityId)) return;
+        // Skip if not a positioned entity (or not descended from one).
+        if (!kinematics.TryFindNearest(entityId, parents, out var posVel, out _)) return;
 
         // Skip if there are no subscribers to the relevant world segment.
-        var segmentIndex = resolver.GetWorldSegmentForPosition(kinematics[entityId].Position);
+        var segmentIndex = resolver.GetWorldSegmentForPosition(posVel.Position);
         playerBuffer.Clear();
         GetSubscribersForWorldSegment(segmentIndex, playerBuffer);
         if (playerBuffer.Count == 0) return;
@@ -381,7 +391,17 @@ public class WorldSegmentSubscriptionManager
     /// <param name="isNew">New flag.</param>
     private void OnTemplateSet(ulong entityId, ulong templateId, ulong oldTemplateId, bool isLoad, bool isNew)
     {
-        if (isNew || !kinematics.TryFindNearest(entityId, parents, out var posVel, out _)) return;
+        if (isNew) return;
+        SyncSingle(entityId);
+    }
+
+    /// <summary>
+    ///     Synchronizes a single entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    private void SyncSingle(ulong entityId)
+    {
+        if (!kinematics.TryFindNearest(entityId, parents, out var posVel, out _)) return;
         var segmentIndex = resolver.GetWorldSegmentForPosition(posVel.Position);
         playerBuffer.Clear();
         GetSubscribersForWorldSegment(segmentIndex, playerBuffer);

@@ -1,4 +1,4 @@
-                                    // Sovereign Engine
+// Sovereign Engine
 // Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
@@ -61,6 +62,7 @@ public class LightSourceTable
     private readonly ILogger<LightSourceTable> logger;
     private readonly ParentComponentCollection parents;
     private readonly PointLightSourceComponentCollection pointLightSources;
+    private readonly Lock sourcesLock = new();
 
     public LightSourceTable(PointLightSourceComponentCollection pointLightSources,
         KinematicsComponentCollection kinematics, ParentComponentCollection parents,
@@ -94,48 +96,52 @@ public class LightSourceTable
         List<PositionedLight> lights)
     {
         var nextIndex = 0;
-        foreach (var lightEntityId in knownSources)
+        lock (sourcesLock)
         {
-            if (!kinematics.TryFindNearest(lightEntityId, parents, out var posVel, out var parentEntityId))
+            foreach (var lightEntityId in knownSources)
             {
-                logger.LogWarning("Entity {EntityId:X} has unpositioned light source.", lightEntityId);
-                continue;
+                if (!kinematics.TryFindNearest(lightEntityId, parents, out var posVel, out var parentEntityId))
+                {
+                    logger.LogWarning("Entity {EntityId:X} has unpositioned light source.", lightEntityId);
+                    continue;
+                }
+
+                if (!pointLightSources.TryGetValue(lightEntityId, out var details))
+                {
+                    logger.LogWarning("Entity {EntityId:X} in light list without light data.", lightEntityId);
+                    continue;
+                }
+
+                // Ignore lights with no emission.
+                if (details.Intensity <= 0.0f) continue;
+
+                // Determine true center of light.
+                var basePos = posVel.Position + timeSinceTick * posVel.Velocity;
+                var offset = Vector3.Zero;
+                if (animatedSprites.HasComponentForEntity(parentEntityId))
+                {
+                    // Compute a relative offset based on the sprite size.
+                    // Assume the sprite size is constant across all phases, orientations, and frames.
+                    var sprite = animatedSpriteManager.AnimatedSprites[animatedSprites[parentEntityId]]
+                        .GetDefaultSprite();
+                    var spriteInfo = atlasMap.MapElements[sprite.Id];
+                    offset = details.PositionOffset * new Vector3(spriteInfo.WidthInTiles, spriteInfo.HeightInTiles,
+                        spriteInfo.HeightInTiles);
+                }
+
+                var lightCenter = basePos + offset;
+
+                // Expand the search range by the radius of the light, then check whether the true
+                // center lies within this expanded range. If so, the light needs to be considered
+                // for rendering.
+                var radiusVector = new Vector3(details.Radius);
+                var adjMinExtent = minExtent - radiusVector;
+                var adjMaxExtent = maxExtent + radiusVector;
+                if (!RangeUtil.IsPointInRange(adjMinExtent, adjMaxExtent, lightCenter)) continue;
+
+                // If we get here, we need to include the light when rendering.
+                lights.Add(new PositionedLight(nextIndex++, lightCenter, details));
             }
-
-            if (!pointLightSources.TryGetValue(lightEntityId, out var details))
-            {
-                logger.LogWarning("Entity {EntityId:X} in light list without light data.", lightEntityId);
-                continue;
-            }
-
-            // Ignore lights with no emission.
-            if (details.Intensity <= 0.0f) continue;
-
-            // Determine true center of light.
-            var basePos = posVel.Position + timeSinceTick * posVel.Velocity;
-            var offset = Vector3.Zero;
-            if (animatedSprites.HasComponentForEntity(parentEntityId))
-            {
-                // Compute a relative offset based on the sprite size.
-                // Assume the sprite size is constant across all phases, orientations, and frames.
-                var sprite = animatedSpriteManager.AnimatedSprites[animatedSprites[parentEntityId]].GetDefaultSprite();
-                var spriteInfo = atlasMap.MapElements[sprite.Id];
-                offset = details.PositionOffset * new Vector3(spriteInfo.WidthInTiles, spriteInfo.HeightInTiles,
-                    spriteInfo.HeightInTiles);
-            }
-
-            var lightCenter = basePos + offset;
-
-            // Expand the search range by the radius of the light, then check whether the true
-            // center lies within this expanded range. If so, the light needs to be considered
-            // for rendering.
-            var radiusVector = new Vector3(details.Radius);
-            var adjMinExtent = minExtent - radiusVector;
-            var adjMaxExtent = maxExtent + radiusVector;
-            if (!RangeUtil.IsPointInRange(adjMinExtent, adjMaxExtent, lightCenter)) continue;
-
-            // If we get here, we need to include the light when rendering.
-            lights.Add(new PositionedLight(nextIndex++, lightCenter, details));
         }
     }
 
@@ -149,7 +155,10 @@ public class LightSourceTable
     {
         if (EntityUtil.IsTemplateEntity(entityId)) return;
 
-        knownSources.Add(entityId);
+        lock (sourcesLock)
+        {
+            knownSources.Add(entityId);
+        }
     }
 
     /// <summary>
@@ -161,7 +170,10 @@ public class LightSourceTable
     {
         if (EntityUtil.IsTemplateEntity(entityId)) return;
 
-        knownSources.Remove(entityId);
+        lock (sourcesLock)
+        {
+            knownSources.Remove(entityId);
+        }
     }
 
     /// <summary>
@@ -174,8 +186,11 @@ public class LightSourceTable
     /// <param name="isNew">New flag.</param>
     private void OnTemplateSet(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad, bool isNew)
     {
-        knownSources.Remove(entityId);
-        if (pointLightSources.HasComponentForEntity(entityId)) knownSources.Add(entityId);
+        lock (sourcesLock)
+        {
+            knownSources.Remove(entityId);
+            if (pointLightSources.HasComponentForEntity(entityId)) knownSources.Add(entityId);
+        }
     }
 
     /// <summary>
@@ -185,6 +200,9 @@ public class LightSourceTable
     /// <param name="isUnload">Unload flag.</param>
     private void OnEntityRemoved(ulong entityId, bool isUnload)
     {
-        knownSources.Remove(entityId);
+        lock (sourcesLock)
+        {
+            knownSources.Remove(entityId);
+        }
     }
 }

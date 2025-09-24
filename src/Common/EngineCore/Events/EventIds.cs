@@ -580,10 +580,16 @@ public enum EventId
     #region Server_WorldManagement
 
     /// <summary>
-    ///     Requests the WorldManagement system to resynchronize a positioned entity with subscribers.
+    ///     Requests to resynchronize an entity and its descendants to their subscribers.
     /// </summary>
     /// Associated details: EntityEventDetails
-    Server_WorldManagement_ResyncPositionedEntity = 200401,
+    Server_WorldManagement_ResyncEntityTree = 200401,
+
+    /// <summary>
+    ///     Requests to resynchronize of an entity to its subscribers.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Server_WorldManagement_ResyncEntity = 200402,
 
     #endregion Server_WorldManagement
 
