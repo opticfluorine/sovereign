@@ -126,6 +126,8 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public ulong Build()
     {
         if (!entityTable.Exists(entityId)) entityTable.Add(entityId, templateEntityId, isBlock, load, isPersisted);
+        else if (!entityTable.TryGetTemplate(entityId, out var oldTemplateId) || oldTemplateId != templateEntityId)
+            entityTable.SetTemplate(entityId, templateEntityId);
         Dispose();
 
         return entityId;

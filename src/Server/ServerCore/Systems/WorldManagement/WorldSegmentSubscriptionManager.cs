@@ -60,6 +60,7 @@ public class WorldSegmentSubscriptionManager
     private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<WorldSegmentSubscriptionManager> logger;
     private readonly NonBlockPositionEventFilter nonBlockPositionEventFilter;
+    private readonly ParentComponentCollection parents;
 
     /// <summary>
     ///     Map of entity ID to last known world segment for entities that are expected to desynchronize soon.
@@ -94,6 +95,7 @@ public class WorldSegmentSubscriptionManager
         WorldSegmentSynchronizationManager syncManager, KinematicsComponentCollection kinematics,
         EntitySynchronizer synchronizer, EntityHierarchyIndexer hierarchyIndexer,
         EntityTable entityTable, NonBlockPositionEventFilter nonBlockPositionEventFilter,
+        ParentComponentCollection parents,
         ILogger<WorldSegmentSubscriptionManager> logger)
     {
         this.positionEventFilter = positionEventFilter;
@@ -107,6 +109,7 @@ public class WorldSegmentSubscriptionManager
         this.hierarchyIndexer = hierarchyIndexer;
         this.entityTable = entityTable;
         this.nonBlockPositionEventFilter = nonBlockPositionEventFilter;
+        this.parents = parents;
         this.logger = logger;
 
         // Register event handlers.
@@ -117,8 +120,10 @@ public class WorldSegmentSubscriptionManager
         this.positionEventFilter.OnComponentRemoved += OnPlayerRemoved;
         this.entityTable.OnNonBlockEntityAdded += OnNonBlockEntityAdded;
         this.entityTable.OnNonBlockEntityRemoved += OnNonBlockEntityRemoved;
+        this.entityTable.OnTemplateSet += OnTemplateSet;
         this.nonBlockPositionEventFilter.OnComponentRemoved += OnNonBlockPositionRemoved;
     }
+
 
     /// <summary>
     ///     Gets the players who are currently subscribed to the given world segment.
@@ -364,5 +369,24 @@ public class WorldSegmentSubscriptionManager
         var kinematicsData = kinematics.GetComponentWithLookback(entityId);
         var segmentIndex = resolver.GetWorldSegmentForPosition(kinematicsData.Position);
         pendingDesyncs[entityId] = segmentIndex;
+    }
+
+    /// <summary>
+    ///     Called when an entity's template is changed, triggering a resync if needed.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="templateId">New template ID.</param>
+    /// <param name="oldTemplateId">Old template ID.</param>
+    /// <param name="isLoad">Load flag.</param>
+    /// <param name="isNew">New flag.</param>
+    private void OnTemplateSet(ulong entityId, ulong templateId, ulong oldTemplateId, bool isLoad, bool isNew)
+    {
+        if (isNew || !kinematics.TryFindNearest(entityId, parents, out var posVel, out _)) return;
+        var segmentIndex = resolver.GetWorldSegmentForPosition(posVel.Position);
+        playerBuffer.Clear();
+        GetSubscribersForWorldSegment(segmentIndex, playerBuffer);
+        syncBuffer.Clear();
+        syncBuffer.Add(entityId);
+        synchronizer.Synchronize(playerBuffer, syncBuffer);
     }
 }
