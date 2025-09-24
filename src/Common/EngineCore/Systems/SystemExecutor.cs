@@ -31,6 +31,7 @@ namespace Sovereign.EngineCore.Systems;
 /// </summary>
 public class SystemExecutor
 {
+    private const string ThreadName = "System Loop";
     private readonly IEngineConfiguration engineConfiguration;
 
     /// <summary>
@@ -40,12 +41,12 @@ public class SystemExecutor
 
     private readonly ILogger<SystemExecutor> logger;
 
+    private readonly PerformanceOptions performanceOptions;
+
     /// <summary>
     ///     Systems managed by this executor.
     /// </summary>
     private readonly List<ISystem> systems = new();
-
-    private readonly PerformanceOptions performanceOptions;
 
     public SystemExecutor(IEventLoop eventLoop, IEngineConfiguration engineConfiguration,
         ILogger<SystemExecutor> logger, IOptions<PerformanceOptions> runtimeOptions)
@@ -53,7 +54,7 @@ public class SystemExecutor
         this.eventLoop = eventLoop;
         this.engineConfiguration = engineConfiguration;
         this.logger = logger;
-        this.performanceOptions = runtimeOptions.Value;
+        performanceOptions = runtimeOptions.Value;
     }
 
     /// <summary>
@@ -70,6 +71,8 @@ public class SystemExecutor
     /// </summary>
     public void Execute(CancellationToken cancellationToken)
     {
+        Thread.CurrentThread.Name = ThreadName;
+
         /* Ensure that at least one system is being managed. */
         if (systems.Count == 0)
         {

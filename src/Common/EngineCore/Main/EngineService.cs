@@ -32,6 +32,8 @@ namespace Sovereign.EngineCore.Main;
 /// </summary>
 public class EngineService : BackgroundService
 {
+    private const string ThreadName = "Event Loop";
+
     /// <summary>
     ///     Event loop.
     /// </summary>
@@ -40,6 +42,8 @@ public class EngineService : BackgroundService
     private readonly ILogger<EngineService> logger;
 
     private readonly List<IMainLoopAction> mainLoopActions;
+
+    private readonly PerformanceOptions performanceOptions;
 
     /// <summary>
     ///     Time manager.
@@ -51,16 +55,14 @@ public class EngineService : BackgroundService
     /// </summary>
     private ulong cycleCount;
 
-    private readonly PerformanceOptions performanceOptions;
-
     public EngineService(IEventLoop eventLoop, TimeManager timeManager, IEnumerable<IMainLoopAction> mainLoopActions,
-        ILogger<EngineService> logger, IOptions<PerformanceOptions> runtimeOptions)
+        ILogger<EngineService> logger, IOptions<PerformanceOptions> performanceOptions)
     {
         this.eventLoop = eventLoop;
         this.timeManager = timeManager;
         this.logger = logger;
         this.mainLoopActions = new List<IMainLoopAction>(mainLoopActions);
-        this.performanceOptions = runtimeOptions.Value;
+        this.performanceOptions = performanceOptions.Value;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -74,6 +76,8 @@ public class EngineService : BackgroundService
     /// <param name="stoppingToken">Cancellation token.</param>
     private void Run(CancellationToken stoppingToken)
     {
+        Thread.CurrentThread.Name = ThreadName;
+
         /* Output diagnostic info. */
         LogDiagnostics();
 
@@ -153,5 +157,7 @@ public class EngineService : BackgroundService
         ThreadPool.GetMaxThreads(out var workerThreads, out var completionPortThreads);
         logger.LogDebug("Maximum worker threads = {Threads}.", workerThreads);
         logger.LogDebug("Maximum I/O completion threads = {Threads}.", completionPortThreads);
+        logger.LogDebug("Yield system loop: {Yield}", performanceOptions.YieldSystemLoop);
+        logger.LogDebug("Yield event loop: {Yield}", performanceOptions.YieldEventLoop);
     }
 }

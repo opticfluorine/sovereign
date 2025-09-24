@@ -31,6 +31,10 @@
         </None>
     </ItemGroup>
 
+    <Target Name="CleanScriptsDir" BeforeTargets="AfterBuild">
+        <RemoveDir Directories="$(OutDir)Data/Scripts"/>
+    </Target>
+
     <Target Name="CopyAfterBuild" AfterTargets="AfterBuild">
         <ItemGroup>
             <MigrationFiles Include="$(SolutionDir)Server/Persistence/Migrations/**/*"/>
