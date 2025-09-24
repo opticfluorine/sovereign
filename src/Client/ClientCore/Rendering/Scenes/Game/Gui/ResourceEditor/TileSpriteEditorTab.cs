@@ -22,6 +22,7 @@ using Hexa.NET.ImGui;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components.Types;

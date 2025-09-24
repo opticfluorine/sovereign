@@ -14,45 +14,42 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Numerics;
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui;
-using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
-using Sovereign.EngineCore.Components.Types;
+using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 
-namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
+namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 
 /// <summary>
-///     Reusable popup window for visually selecting an Animated Sprite.
+///     Reusable popup window for visually selecting a Tile Sprite.
 /// </summary>
-public class AnimatedSpriteSelectorPopup
+public class TileSpriteSelectorPopup
 {
-    private const string PopupName = "Select Animated Sprite";
+    private const string PopupName = "Select Tile Sprite";
 
     private const int ColumnCount = 5;
-    private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly GuiExtensions guiExtensions;
-
-    private readonly Vector2 preferredSize = new(500.0f, 400.0f);
-    private Vector2 basePos = Vector2.Zero;
+    private readonly TileSpriteManager tileSpriteManager;
+    private bool allowSpecial;
     private bool isSelected;
     private int selection;
 
-    public AnimatedSpriteSelectorPopup(AnimatedSpriteManager animatedSpriteManager, GuiExtensions guiExtensions)
+    public TileSpriteSelectorPopup(GuiExtensions guiExtensions,
+        TileSpriteManager tileSpriteManager)
     {
-        this.animatedSpriteManager = animatedSpriteManager;
         this.guiExtensions = guiExtensions;
+        this.tileSpriteManager = tileSpriteManager;
     }
 
     /// <summary>
     ///     Opens the selector popup.
     /// </summary>
-    public void Open()
+    /// <param name="allowAny">Whether to include an "Any" option.</param>
+    public void Open(bool allowAny)
     {
         isSelected = false;
         selection = 0;
-        basePos = ImGui.GetMousePos();
+        allowSpecial = allowAny;
 
         ImGui.OpenPopup(PopupName);
     }
@@ -64,17 +61,32 @@ public class AnimatedSpriteSelectorPopup
     {
         if (!ImGui.BeginPopup(PopupName)) return;
 
-        var screenSize = ImGui.GetIO().DisplaySize;
-        var maxSize = new Vector2(screenSize.X - basePos.X - 16, screenSize.Y - basePos.Y - 128);
-        var realSize = new Vector2(Math.Min(preferredSize.X, maxSize.X), Math.Min(preferredSize.Y, maxSize.Y));
-
-        if (ImGui.BeginTable("animSprTbl", ColumnCount,
-                ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingFixedFit, realSize))
+        if (ImGui.BeginTable("tileSprTbl", ColumnCount,
+                ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingFixedFit))
         {
-            for (var i = 0; i < animatedSpriteManager.AnimatedSprites.Count; ++i)
+            if (allowSpecial)
             {
                 ImGui.TableNextColumn();
-                if (guiExtensions.AnimatedSpriteButton($"btn{i}", i, Orientation.South, AnimationPhase.Default))
+                if (ImGui.Button("Any"))
+                {
+                    selection = TileSprite.Wildcard;
+                    isSelected = true;
+                    ImGui.CloseCurrentPopup();
+                }
+
+                ImGui.TableNextColumn();
+                if (ImGui.Button("Empty"))
+                {
+                    selection = TileSprite.Empty;
+                    isSelected = true;
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+
+            for (var i = 0; i < tileSpriteManager.TileSprites.Count; ++i)
+            {
+                ImGui.TableNextColumn();
+                if (guiExtensions.TileSpriteButton($"btn{i}", i, TileContextKey.AllWildcards))
                 {
                     selection = i;
                     isSelected = true;
@@ -84,7 +96,7 @@ public class AnimatedSpriteSelectorPopup
                 if (ImGui.IsItemHovered())
                     if (ImGui.BeginTooltip())
                     {
-                        ImGui.Text($"Animated Sprite {i}");
+                        ImGui.Text($"Tile Sprite {i}");
                         ImGui.EndTooltip();
                     }
             }
@@ -98,11 +110,11 @@ public class AnimatedSpriteSelectorPopup
     /// <summary>
     ///     Tries to get the latest selection.
     /// </summary>
-    /// <param name="animatedSpriteId">Set to the selected animated sprite ID if returns true.</param>
+    /// <param name="tileSpriteId">Set to the selected tile sprite ID if returns true.</param>
     /// <returns>true if a selection has been made since the last call to Open(); false otherwise.</returns>
-    public bool TryGetSelection(out int animatedSpriteId)
+    public bool TryGetSelection(out int tileSpriteId)
     {
-        animatedSpriteId = selection;
+        tileSpriteId = selection;
         var result = isSelected;
         isSelected = false;
         return result;

@@ -22,7 +22,7 @@ using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites;
 
-namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
+namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 
 /// <summary>
 ///     Reusable popup window for visually selecting a Sprite.

@@ -21,6 +21,10 @@ using System.Numerics;
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.Scripting;
 
@@ -32,7 +36,11 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 public class EntityDataControlGroup(
     GuiExtensions guiExtensions,
     EntityDataClient entityDataClient,
-    ScriptInfoClient scriptInfoClient)
+    ScriptInfoClient scriptInfoClient,
+    NpcTemplateSelectorPopup npcTemplateSelectorPopup,
+    NameComponentCollection names,
+    EntityTypeComponentCollection entityTypes,
+    AnimatedSpriteComponentCollection animatedSprites)
 {
     private readonly List<string> callbackKeys = new()
     {
@@ -68,6 +76,7 @@ public class EntityDataControlGroup(
     private bool previousFrameEntityDataLoaded;
 
     private ulong selectedEntityId;
+    private EntityType selectedEntityType;
 
     /// <summary>
     ///     Renders the entity data control groups. Must be called within a two-column table.
@@ -86,6 +95,7 @@ public class EntityDataControlGroup(
     public void SelectEntity(ulong entityId)
     {
         selectedEntityId = entityId;
+        if (!entityTypes.TryGetValue(entityId, out selectedEntityType)) selectedEntityType = EntityType.Other;
         entityDataClient.RefreshEntity(selectedEntityId);
 
         inputNewKey = "";
@@ -233,6 +243,7 @@ public class EntityDataControlGroup(
                 ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed);
 
                 foreach (var param in scriptParameters) InputParameter(param);
+                npcTemplateSelectorPopup.Render();
 
                 ImGui.EndTable();
             }
@@ -279,11 +290,52 @@ public class EntityDataControlGroup(
                     inputEntityData[hint.Name] = boolValue ? "true" : "false";
                 break;
 
+            case EntityParameterType.NpcTemplate:
+                ShowNpcTemplateSelect(hint, currentValue);
+                break;
+
+            case EntityParameterType.SameTypeTemplate:
+                switch (selectedEntityType)
+                {
+                    case EntityType.Npc:
+                        ShowNpcTemplateSelect(hint, currentValue);
+                        break;
+                }
+
+                break;
+
             case EntityParameterType.String:
             default:
                 ImGui.InputText($"##{hint.Name}", ref currentValue, EntityConstants.MaxEntityDataValueLength + 1);
                 inputEntityData[hint.Name] = currentValue;
                 break;
+        }
+    }
+
+    /// <summary>
+    ///     Shows controls specific to NPC template selection.
+    /// </summary>
+    /// <param name="hint">Parameter hint.</param>
+    /// <param name="currentValue">Current value as string.</param>
+    private void ShowNpcTemplateSelect(EntityParameterHint hint, string currentValue)
+    {
+        if (!ulong.TryParse(currentValue, out var npcId)) npcId = 0;
+        if (npcId > 0)
+        {
+            if (!animatedSprites.TryGetValue(npcId, out var animSpriteId)) animSpriteId = 0;
+
+            guiExtensions.AnimatedSprite(animSpriteId, Orientation.South, AnimationPhase.Default);
+            ImGui.SameLine();
+            ImGui.Text(names.TryGetValue(npcId, out var name) ? name : "[No Name]");
+            ImGui.SameLine();
+        }
+
+        if (ImGui.Button("...")) npcTemplateSelectorPopup.Open(hint.Name);
+
+        if (npcTemplateSelectorPopup.TryGetSelection(hint.Name, out var newNpcId))
+        {
+            if (newNpcId > 0) inputEntityData[hint.Name] = newNpcId.ToString();
+            else inputEntityData.Remove(hint.Name);
         }
     }
 

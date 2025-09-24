@@ -38,6 +38,7 @@ using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Scenes;
 using Sovereign.ClientCore.Rendering.Scenes.Game;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
@@ -273,6 +274,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<LightSourceTable>();
         services.TryAddSingleton<NonBlockShadowPlanner>();
         services.TryAddSingleton<OpacityTables>();
+        services.TryAddSingleton<NpcTemplateSelectorPopup>();
 
         services.TryAddSingleton<MainMenuScene>();
         services.TryAddSingleton<StartupGui>();

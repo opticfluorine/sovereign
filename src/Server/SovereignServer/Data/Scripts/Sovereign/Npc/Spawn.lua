@@ -148,7 +148,7 @@ end
 scripting.AddEntityParameterHint(
     EntityBehavior.DefaultLoadFunction,
     ParamTemplateId,
-    "Int",
+    "NpcTemplate",
     "Template to use for spawned NPCs.")
 
 scripting.AddEntityParameterHint(

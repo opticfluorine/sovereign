@@ -16,7 +16,7 @@
 
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Materials;
-using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Entities;
 

@@ -16,12 +16,12 @@ The scripting engine uses Lua tables with specific entries to communicate inform
 
     Bounding box used for physics calculations.
 
-    .. lua:attribute:: Position: [#script-types-vector3](Vector3)```
+    .. lua:attribute:: Position: Vector3
 
         The position relative to the upper-top-left corner of the entity at which
         the bounding box starts.
 
-    .. lua:attribute:: Size
+    .. lua:attribute:: Size: Vector3
 
         The size of the bounding box.
 ```

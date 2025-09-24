@@ -19,6 +19,7 @@ using System.Numerics;
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;

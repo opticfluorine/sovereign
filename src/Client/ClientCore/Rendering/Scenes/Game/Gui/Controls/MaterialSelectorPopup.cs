@@ -19,7 +19,7 @@ using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 
-namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
+namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 
 /// <summary>
 ///     Popup selector for materials.

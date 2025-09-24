@@ -39,7 +39,17 @@ public enum EntityParameterType
     /// <summary>
     ///     Boolean-valued parameter.
     /// </summary>
-    Bool
+    Bool,
+
+    /// <summary>
+    ///     NPC template entity ID-valued parameter.
+    /// </summary>
+    NpcTemplate,
+
+    /// <summary>
+    ///     Template entity ID parameter where the template has the same EntityType as the target.
+    /// </summary>
+    SameTypeTemplate
 }
 
 /// <summary>

@@ -107,3 +107,17 @@ function (behavior, entityId)
 
 end
 ):InstallGlobalHooks()
+
+scripting.AddEntityParameterHint(
+    EntityBehavior.DefaultLoadFunction,
+    ParamNextId,
+    "SameTypeTemplate",
+    "Template ID to which the entity will change."
+)
+
+scripting.AddEntityParameterHint(
+    EntityBehavior.DefaultLoadFunction,
+    ParamChangeTime,
+    "Float",
+    "In-game time after which the entity's template will change."
+)
