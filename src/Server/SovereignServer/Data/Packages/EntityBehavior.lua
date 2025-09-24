@@ -101,7 +101,7 @@ end
 function EntityBehavior:OnUnload(entityId)
     local thread = self._coroutines[entityId]
     if thread == nil then
-        util.LogError(string.format("Cannot unload behavior for entity %X without loading behavior first.", entityId))
+        -- Already unloaded or never initially loaded.
         return
     end
 

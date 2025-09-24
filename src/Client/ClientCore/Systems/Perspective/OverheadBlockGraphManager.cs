@@ -18,6 +18,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
@@ -40,6 +41,8 @@ internal class OverheadBlockGraphManager
     private readonly ILogger<OverheadBlockGraphManager> logger;
     private readonly List<(int, int)> newGraphPoints = new();
     private readonly PerspectiveLineManager perspectiveLineManager;
+
+    private readonly Lock setLock = new();
 
     /// <summary>
     ///     Back buffer for dirty lattice points. Used to drive graph updates.
@@ -84,12 +87,15 @@ internal class OverheadBlockGraphManager
     /// </summary>
     public void OnTick()
     {
-        if (ticksSinceChange >= MinimumScheduleDelay && dirtyLatticePointsFront.Count > 0 &&
-            (graphUpdateTask is null || graphUpdateTask.IsCompleted))
+        lock (setLock)
         {
-            (dirtyLatticePointsFront, dirtyLatticePointsBack) = (dirtyLatticePointsBack, dirtyLatticePointsFront);
-            dirtyLatticePointsFront.Clear();
-            graphUpdateTask = Task.Run(UpdateGraphs);
+            if (ticksSinceChange >= MinimumScheduleDelay && dirtyLatticePointsFront.Count > 0 &&
+                (graphUpdateTask is null || graphUpdateTask.IsCompleted))
+            {
+                (dirtyLatticePointsFront, dirtyLatticePointsBack) = (dirtyLatticePointsBack, dirtyLatticePointsFront);
+                dirtyLatticePointsFront.Clear();
+                graphUpdateTask = Task.Run(UpdateGraphs);
+            }
         }
 
         ticksSinceChange++;
@@ -188,7 +194,11 @@ internal class OverheadBlockGraphManager
     /// <param name="unused">Unused.</param>
     private void OnBlockAdded(ulong entityId, GridPosition blockPosition, bool unused)
     {
-        dirtyLatticePointsFront.Add((blockPosition.X, blockPosition.Y + blockPosition.Z));
+        lock (setLock)
+        {
+            dirtyLatticePointsFront.Add((blockPosition.X, blockPosition.Y + blockPosition.Z));
+        }
+
         if (blockPosition.Z < minZ) minZ = blockPosition.Z;
         if (blockPosition.Z > maxZ) maxZ = blockPosition.Z;
         ticksSinceChange = 0;

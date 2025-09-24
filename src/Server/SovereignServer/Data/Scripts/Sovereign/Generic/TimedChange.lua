@@ -101,7 +101,15 @@ function (behavior, entityId)
             local prevTime = tonumber(entityData[DataPrevTime]) or now
             nextTime = prevTime + changeTime
             entityData[key] = nextTime
-            behavior:WaitAsync(entityId, nextTime - now)
+            if now >= nextTime then
+                -- Newest change is already elapsed - apply the transformation.  
+                entityData[key] = nil
+                entityData[DataPrevTime] = nextTime
+                entities.SetTemplate(entityId, nextId)
+                return
+            else
+                behavior:WaitAsync(entityId, nextTime - now)
+            end
         end
     end
 

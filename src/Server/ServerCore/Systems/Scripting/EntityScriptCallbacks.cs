@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Data;
+using Sovereign.Scripting.Lua;
 
 namespace Sovereign.ServerCore.Systems.Scripting;
 
@@ -36,6 +37,7 @@ public sealed class EntityScriptCallbacks
     private readonly Queue<ulong> entityAddQueue = new();
     private readonly Queue<ulong> entityLoadQueue = new();
     private readonly Queue<ulong> entityRemoveQueue = new();
+    private readonly Dictionary<ulong, Task> entityTasks = new();
     private readonly Queue<(ulong, ulong)> entityTemplateUnloadQueue = new();
     private readonly Queue<ulong> entityUnloadQueue = new();
     private readonly ILogger<EntityScriptCallbacks> logger;
@@ -60,6 +62,7 @@ public sealed class EntityScriptCallbacks
         // Note that ProcessPriorTemplateUnloadCallbacks() must be called prior to the load callbacks, because
         // the new template entity could have callbacks into the same script but with different parameters - the
         // script needs a chance to clean up the prior template state before attaching the new template.
+        entityTasks.Clear();
         ProcessCallbacks(entityAddQueue, EntityConstants.AddCallbackScriptKey, EntityConstants.AddCallbackFunctionKey,
             EntityConstants.AddCallbackName);
         ProcessCallbacks(entityRemoveQueue, EntityConstants.RemoveCallbackScriptKey,
@@ -129,28 +132,41 @@ public sealed class EntityScriptCallbacks
         {
             logger.LogTrace("Calling {CallbackName} callback {ScriptName}::{FunctionName} for entity {EntityId:X}.",
                 callbackName, scriptName, functionName, entityId);
-            var currentEntityId = entityId;
-            Task.Run(() =>
-            {
-                try
-                {
-                    host.CallNamedFunction(functionName, args =>
-                    {
-                        args.AddInteger((long)currentEntityId);
-                        return 1;
-                    });
-                }
-                catch (Exception e)
-                {
-                    host.Logger.LogError(e,
-                        "Error calling {CallbackName} callback {FunctionName} for entity {EntityId:X}.",
-                        callbackName, functionName, currentEntityId);
-                }
-            });
+            if (!entityTasks.TryGetValue(entityId, out var prevTask))
+                entityTasks[entityId] = Task.Run(() => RunCallback(callbackName, functionName, host, entityId));
+            else
+                entityTasks[entityId] =
+                    prevTask.ContinueWith(_ => RunCallback(callbackName, functionName, host, entityId));
         }
         catch (Exception e)
         {
             host.Logger.LogError(e, "Error calling {CallbackName} callback {FunctionName} for entity {EntityId:X}.",
+                callbackName, functionName, entityId);
+        }
+    }
+
+    /// <summary>
+    ///     Runs a callback.
+    /// </summary>
+    /// <param name="callbackName">Callback name.</param>
+    /// <param name="functionName">Function name.</param>
+    /// <param name="host">Script host.</param>
+    /// <param name="entityId">Entity ID.</param>
+    private static void RunCallback(string callbackName, string functionName, LuaHost host, ulong entityId)
+    {
+        host.Logger.LogDebug("ELC Callback: {CallbackName}", callbackName);
+        try
+        {
+            host.CallNamedFunction(functionName, args =>
+            {
+                args.AddInteger((long)entityId);
+                return 1;
+            });
+        }
+        catch (Exception e)
+        {
+            host.Logger.LogError(e,
+                "Error calling {CallbackName} callback {FunctionName} for entity {EntityId:X}.",
                 callbackName, functionName, entityId);
         }
     }
@@ -194,7 +210,7 @@ public sealed class EntityScriptCallbacks
         // If the entity is newly added, its callbacks will be enqueued through OnEntityAdded. Don't do anything
         // here in order to avoid double-invoking the lifecycle callbacks.
         if (isNew) return;
-        
+
         entityLoadQueue.Enqueue(entityId);
         if (oldTemplateId > 0) entityTemplateUnloadQueue.Enqueue((entityId, oldTemplateId));
     }
