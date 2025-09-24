@@ -324,10 +324,18 @@ public class EntityDataControlGroup(
         {
             if (!animatedSprites.TryGetValue(npcId, out var animSpriteId)) animSpriteId = 0;
 
+            if (!names.TryGetValue(npcId, out var name)) name = "[No Name]";
+            var textSize = ImGui.CalcTextSize(name);
+            var spriteSize =
+                guiExtensions.CalcAnimatedSpriteSize(animSpriteId, Orientation.South, AnimationPhase.Default);
+
             guiExtensions.AnimatedSprite(animSpriteId, Orientation.South, AnimationPhase.Default);
+            var shift = 0.5f * (spriteSize.Y - textSize.Y);
             ImGui.SameLine();
-            ImGui.Text(names.TryGetValue(npcId, out var name) ? name : "[No Name]");
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + shift);
+            ImGui.Text(name);
             ImGui.SameLine();
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + shift);
         }
 
         if (ImGui.Button("...")) npcTemplateSelectorPopup.Open(hint.Name);

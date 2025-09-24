@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Hexa.NET.ImGui;
@@ -36,6 +37,7 @@ public class NpcTemplateSelectorPopup
 {
     private const string PopupName = "Select NPC Template Entity";
     private readonly AnimatedSpriteComponentCollection animatedSprites;
+    private readonly List<(ulong, string)> filtered = new();
     private readonly GuiExtensions guiExtensions;
     private readonly NameComponentCollection nameComponentCollection;
     private readonly NpcTemplateEntityIndexer npcTemplateEntityIndexer;
@@ -44,6 +46,7 @@ public class NpcTemplateSelectorPopup
     private Vector2 basePos = Vector2.Zero;
     private string instanceKey = string.Empty;
     private bool isSelected;
+    private string newSearch = string.Empty;
     private string search = string.Empty;
     private ulong selection;
 
@@ -70,6 +73,8 @@ public class NpcTemplateSelectorPopup
         isSelected = false;
         selection = 0;
         search = string.Empty;
+        newSearch = string.Empty;
+        UpdateFiltered();
         basePos = ImGui.GetMousePos();
         var scaledSize = ImGui.GetFontSize() * preferredSize;
         if (basePos.Y + scaledSize.Y > 0.95f * ImGui.GetIO().DisplaySize.Y)
@@ -99,32 +104,32 @@ public class NpcTemplateSelectorPopup
 
         ImGui.SetNextWindowSize(realSize, ImGuiCond.Always);
 
-        // Search box
-        ImGui.InputText("\U0001f50d##Search", ref search, 64);
+        ImGui.InputText("\U0001f50d##Search", ref newSearch, 64);
+        ImGui.SetItemDefaultFocus();
+        if (newSearch != search)
+        {
+            search = newSearch;
+            UpdateFiltered();
+        }
 
-        // Filtered list
+        // Matching template list.
         ImGui.BeginChild("npcList", new Vector2(realSize.X, realSize.Y - 40));
-        var lowerSearch = search.ToLower();
-        var filtered = npcTemplateEntityIndexer.NpcTemplateEntities
-            .Select(entityId => (EntityId: entityId,
-                Name: nameComponentCollection.TryGetValue(entityId, out var name) ? name : "[No Name]"))
-            .Where(pair => string.IsNullOrEmpty(search) || pair.Name.ToLower().Contains(lowerSearch))
-            .OrderBy(pair => pair.EntityId)
-            .ToList();
-
         foreach (var (entityId, name) in filtered)
         {
             ImGui.PushID((int)(entityId & 0xFFFFFFFF));
             ImGui.BeginGroup();
             ImGui.AlignTextToFramePadding();
-            guiExtensions.AnimatedSprite(animatedSprites.TryGetValue(entityId, out var animatedSpriteId)
-                    ? animatedSpriteId
-                    : rendererOptions.DefaultHiddenPlaceholderSprite,
-                Orientation.South,
-                AnimationPhase.Default);
+            if (!animatedSprites.TryGetValue(entityId, out var animatedSpriteId)) animatedSpriteId = 0;
+            guiExtensions.AnimatedSprite(animatedSpriteId, Orientation.South, AnimationPhase.Default);
+
+            var spriteSize =
+                guiExtensions.CalcAnimatedSpriteSize(animatedSpriteId, Orientation.South, AnimationPhase.Default);
+            var label = $"{name} [{entityId - EntityConstants.FirstTemplateEntityId}]";
+            var textSize = ImGui.CalcTextSize(label);
 
             ImGui.SameLine();
-            if (ImGui.Selectable($"{name} [{entityId - EntityConstants.FirstTemplateEntityId}]", false))
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 0.5f * (spriteSize.Y - textSize.Y));
+            if (ImGui.Selectable(label, false))
             {
                 selection = entityId;
                 isSelected = true;
@@ -155,5 +160,21 @@ public class NpcTemplateSelectorPopup
         var result = isSelected;
         isSelected = false;
         return result;
+    }
+
+    /// <summary>
+    ///     Updates the filtered list of NPC templates.
+    /// </summary>
+    private void UpdateFiltered()
+    {
+        var update = npcTemplateEntityIndexer.NpcTemplateEntities
+            .Select(entityId => (EntityId: entityId,
+                Name: nameComponentCollection.TryGetValue(entityId, out var name) ? name : "[No Name]"))
+            .Where(pair =>
+                string.IsNullOrEmpty(search) || pair.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase))
+            .OrderBy(pair => pair.EntityId);
+
+        filtered.Clear();
+        filtered.AddRange(update);
     }
 }

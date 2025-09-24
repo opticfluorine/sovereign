@@ -91,6 +91,21 @@ public class GuiExtensions
     }
 
     /// <summary>
+    ///     Calculates the screen space size of an animated sprite.
+    /// </summary>
+    /// <param name="animatedSpriteId">Animated sprite ID.</param>
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Phase.</param>
+    /// <returns>Sprite size in GUI units.</returns>
+    public Vector2 CalcAnimatedSpriteSize(int animatedSpriteId, Orientation orientation, AnimationPhase phase)
+    {
+        var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId, orientation, phase);
+        var texData = textureMapper.GetTextureDataForTextureId(texId);
+
+        return GetSpriteDimensions(texData);
+    }
+
+    /// <summary>
     ///     Renders an animated sprite to the GUI.
     /// </summary>
     /// <param name="customId">Unique identifier for custom animated sprite.</param>
