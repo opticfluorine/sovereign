@@ -33,6 +33,8 @@ public sealed class WorldManagementEventHandler
     private readonly WorldSegmentSubscriptionManager subscriptionManager;
     private readonly WorldSegmentSynchronizationManager syncManager;
 
+    private bool initialized;
+
     public WorldManagementEventHandler(WorldSegmentActivationManager activationManager,
         WorldSegmentSynchronizationManager syncManager,
         WorldSegmentBlockDataManager blockDataManager,
@@ -54,6 +56,12 @@ public sealed class WorldManagementEventHandler
     {
         switch (ev.EventId)
         {
+            case EventId.Core_Tick:
+                if (initialized) break;
+                initialized = true;
+                activationManager.Initialize();
+                break;
+
             case EventId.Core_WorldManagement_WorldSegmentLoaded:
             {
                 if (ev.EventDetails is not WorldSegmentEventDetails details)

@@ -71,6 +71,8 @@ public static class ServerServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(AccountsOptions)}"));
         services.Configure<ScriptingOptions>(
             configuration.GetSection($"Sovereign:{nameof(ScriptingOptions)}"));
+        services.Configure<WorldOptions>(
+            configuration.GetSection($"Sovereign:{nameof(WorldOptions)}"));
 
         return services;
     }

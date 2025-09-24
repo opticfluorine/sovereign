@@ -15,8 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.ServerCore.Systems.Persistence;
@@ -44,17 +46,31 @@ public class WorldSegmentActivationManager
     /// </summary>
     private readonly Dictionary<GridPosition, int> segmentRefCounts = new();
 
+    private readonly WorldOptions worldOptions;
+
     /// <summary>
     ///     Spin lock for protecting loadedSegments.
     /// </summary>
     private SpinLock loadedSegmentsSpinLock;
 
     public WorldSegmentActivationManager(IEventSender eventSender, PersistenceController persistenceController,
-        ILogger<WorldSegmentActivationManager> logger)
+        ILogger<WorldSegmentActivationManager> logger, IOptions<WorldOptions> worldOptions)
     {
         this.eventSender = eventSender;
         this.persistenceController = persistenceController;
         this.logger = logger;
+        this.worldOptions = worldOptions.Value;
+    }
+
+    /// <summary>
+    ///     Activates any world segments configured to load automatically at startup.
+    /// </summary>
+    public void Initialize()
+    {
+        // Permanently activate all autoload segments by forcing the reference count to stay above zero.
+        ProcessChanges(worldOptions.AutoLoadWorldSegments
+            .Select(segmentIndex => (segmentIndex, 1))
+            .ToDictionary());
     }
 
     /// <summary>
