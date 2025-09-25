@@ -15,6 +15,7 @@
 
 One way to think about entities is as a collection of data and behaviors with a unique ID number. An entity with no data has no meaning or behavior; an entity's presence in the game world comes from its data and associated behaviors. As such, entities are a sort of "blank slate" on which all types of game content can be created.
 
+(entity-lifecycle)=
 ## Entity Lifecycle
 
 Every non-template entity has a *lifecycle* through which it progresses:
@@ -23,7 +24,7 @@ Every non-template entity has a *lifecycle* through which it progresses:
 stateDiagram-v2
   direction LR
   TC: Template Changing
-  [*] --> Created: Create
+  [*] --> Created: Add
   Created --> Active: Load
   Active --> Unloaded: Unload
   Unloaded --> Active: Load
@@ -33,7 +34,7 @@ stateDiagram-v2
   Removing --> [*]: Remove
 ```
 
-When an entity is first created, it enters the **Created** state through the *Created* transition. It then immediately undergoes a *Load* transition to enter the **Active** state, at which point the entity is loaded in memory and is continuously processed by the engine.
+When an entity is first created, it enters the **Created** state through the *Add* transition. It then immediately undergoes a *Load* transition to enter the **Active** state, at which point the entity is loaded in memory and is continuously processed by the engine.
 
 After some time, the entity may undergo an *Unload* transition to enter the **Unloaded** state. An entity in the Unloaded state is released from the engine's memory, but it continues to exist in the server's database. The *Unload* transition can occur for several reasosns including:
 * The entity is located in a world segment which has been unloaded due to a lack of players in its vicinity.
@@ -54,8 +55,8 @@ Some transitions appear between multiple pairs of states in the above diagram. T
 Custom behaviors may be attached to any entity through the four lifecycle transitions using [behavior scripts](scripting/behaviors). This is typically done by setting the lifecycle hooks for [template entities](templates/index). The recommended pattern for attaching behaviors to entities through the lifecycle transitions is summarized in the table below.
 
 | Transition  | Behavior Actions                                                                                                                                                    |
-| ----------  | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Create      | Perform any one-time entity configuration (e.g. randomize stats, randomize inventory, etc.)                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Add         | Perform any one-time entity configuration (e.g. randomize stats, randomize inventory, etc.)                                                                         |
 | Load/Unload | Start/stop behavior processing, typically via a [standard behavior](scripting/standard_behaviors/index) or a custom [EntityBehavior](scripting/sdk/entity_behavior) |
 | Remove      | Perform any one-time entity cleanup (e.g. updating global counters, etc.)                                                                                           |
 
@@ -90,29 +91,29 @@ Every entity has three associated pieces of metadata:
 
 Components are data values associated with an entity that serve a specific purpose and are stored in memory in such a way that the engine's systems can process updates to them very quickly. The full list of component types and their purposes are as follows:
 
-| Component          | Description                                                                                                            |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Component        | Description                                                                                                          |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
 | AboveBlock       | For material block entities (see Material component), denotes the entity ID of the block that sits atop this entity. |
-| Account          | Associates an entity (typically a player character) to a specific account.                                             |
-| Admin            | Denotes a player character as an admin.                                                                                |
-| AnimationPhase   | Animation phase for the entity (e.g. static, moving, etc.).                                                            |
+| Account          | Associates an entity (typically a player character) to a specific account.                                           |
+| Admin            | Denotes a player character as an admin.                                                                              |
+| AnimationPhase   | Animation phase for the entity (e.g. static, moving, etc.).                                                          |
 | AnimatedSprite   | For non-block drawable entities (see Drawable component), denotes the animated sprite ID to use for rendering.       |
-| BlockPosition    | Grid-aligned position of a block entity.                                                                               |
-| BoundingBox      | For non-block entities, specifies the bounding box used for physics calculations.                                      |
-| CastBlockShadows | For block entities, indicates that the block should be included for calculating shadows.                               |
-| CastShadows      | For non-block entities, specifies the shape of the shadow cast by the entity.                                          |
-| Drawable         | For non-block entities, specifies that the entity should be drawn.                                                     |
-| EntityType       | Denotes that the entity is a special type (e.g. item, NPC, player).                                                    |
-| Kinematics       | For non-block positioned entities, contains the position and velocity of the entity.                                   |
-| Material         | Indicates that the entity is a block of the given material ID.                                                         |
+| BlockPosition    | Grid-aligned position of a block entity.                                                                             |
+| BoundingBox      | For non-block entities, specifies the bounding box used for physics calculations.                                    |
+| CastBlockShadows | For block entities, indicates that the block should be included for calculating shadows.                             |
+| CastShadows      | For non-block entities, specifies the shape of the shadow cast by the entity.                                        |
+| Drawable         | For non-block entities, specifies that the entity should be drawn.                                                   |
+| EntityType       | Denotes that the entity is a special type (e.g. item, NPC, player).                                                  |
+| Kinematics       | For non-block positioned entities, contains the position and velocity of the entity.                                 |
+| Material         | Indicates that the entity is a block of the given material ID.                                                       |
 | MaterialModifier | For material block entities (see Material component), denotes the material modifier of the block.                    |
-| Name             | Gives the name of the entity.                                                                                          |
-| Orientation      | Specifies the directional orientation of the entity.                                                                   |
-| Parent           | Maps an entity to its parent entity.                                                                                   |
-| Physics          | Indicates that a non-block entity has physics effects.                                                                 |
-| PlayerCharacter  | Indicates that an entity is a player character.                                                                        |
-| PointLightSource | Specifies the properties of a point light source attached to the entity.                                               |
-| ServerOnly       | Specifies that the entity is server-only and should not be shared with players (except admins).                        |
+| Name             | Gives the name of the entity.                                                                                        |
+| Orientation      | Specifies the directional orientation of the entity.                                                                 |
+| Parent           | Maps an entity to its parent entity.                                                                                 |
+| Physics          | Indicates that a non-block entity has physics effects.                                                               |
+| PlayerCharacter  | Indicates that an entity is a player character.                                                                      |
+| PointLightSource | Specifies the properties of a point light source attached to the entity.                                             |
+| ServerOnly       | Specifies that the entity is server-only and should not be shared with players (except admins).                      |
 
 :::{note}
 The component types are built into the engine and cannot be extended without modifying the source code. Advanced creators who want to add new components should follow [this guide](/developers/ecs/adding_components).
