@@ -14,39 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineUtil.Attributes;
+using Sovereign.EngineCore.Components.Types;
 
-namespace Sovereign.EngineCore.Components.Types;
+namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
-///     Entity type for non-block entities.
+///     Event filter that only accepts events from Slot-typed entities.
 /// </summary>
-[Scriptable]
-[ScriptableEnum]
-public enum EntityType
+public class SlotComponentEventFilter : BaseComponentEventFilter<EntityType>
 {
-    /// <summary>
-    ///     Entity is an NPC.
-    /// </summary>
-    Npc = 0,
+    private readonly EntityTypeComponentCollection entityTypes;
 
-    /// <summary>
-    ///     Entity is an item.
-    /// </summary>
-    Item = 1,
+    public SlotComponentEventFilter(EntityTypeComponentCollection entityTypes) : base(entityTypes, entityTypes)
+    {
+        this.entityTypes = entityTypes;
+    }
 
-    /// <summary>
-    ///     Entity is a player.
-    /// </summary>
-    Player = 2,
-
-    /// <summary>
-    ///     Entity is a slot (e.g. inventory slot).
-    /// </summary>
-    Slot = 3,
-
-    /// <summary>
-    ///     Entity has no special type. Not explicitly stored; only used in EntityDefinition.
-    /// </summary>
-    Other = 0x7F
+    protected override bool ShouldAccept(ulong entityId)
+    {
+        return entityTypes.TryGetValue(entityId, out var entityType) && entityType == EntityType.Slot;
+    }
 }

@@ -34,6 +34,7 @@ using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineCore.Systems.Dialogue;
 using Sovereign.EngineCore.Systems.Interaction;
+using Sovereign.EngineCore.Systems.Inventory;
 using Sovereign.EngineCore.Systems.Movement;
 using Sovereign.EngineCore.Systems.Performance;
 using Sovereign.EngineCore.Systems.Time;
@@ -146,6 +147,8 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<BlockWorldSegmentIndexer>();
         services.TryAddSingleton<BlockTemplateNameComponentFilter>();
         services.TryAddSingleton<BlockTemplateNameComponentIndexer>();
+        services.TryAddSingleton<SlotComponentEventFilter>();
+        services.TryAddSingleton<SlotIndexer>();
     }
 
     private static void AddComponentValidators(IServiceCollection services)
@@ -231,6 +234,7 @@ public static class CoreServiceCollectionExtensions
         AddDataSystem(services);
         AddDialogueSystem(services);
         AddInteractionSystem(services);
+        AddInventorySystem(services);
         AddMovementSystem(services);
         AddPerformanceSystem(services);
         AddTimeSystem(services);
@@ -267,6 +271,11 @@ public static class CoreServiceCollectionExtensions
     private static void AddInteractionSystem(IServiceCollection services)
     {
         services.TryAddSingleton<InteractionController>();
+    }
+
+    private static void AddInventorySystem(IServiceCollection services)
+    {
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, InventorySystem>());
     }
 
     private static void AddMovementSystem(IServiceCollection services)

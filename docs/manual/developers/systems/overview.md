@@ -12,11 +12,12 @@ Core systems are present in both the client and server.
 |---------------|---------------------|--------------------------------------------------------------------|
 | `Block`       | `BlockSystem`       | Responsible for managing the lifecycle of block entities.          |
 | `Data`        | `DataSystem`        | Responsible for managing non-component data.                       |
+| `Inventory`   | `InventorySystem`   | Responsible for managing inventories.                              |
 | `Movement`    | `MovementSystem`    | Responsible for controlling the movement of positionable entities. |
 | `Network`     | `NetworkSystem`     | Responsible for replicating local events onto the network.         |
 | `Performance` | `PerformanceSystem` | Responsible for monitoring engine performance.                     |
 | `Ping`        | `PingSystem`        | Responsible for periodic and aperiodic network ping.               |
-| `Time`        | `TimeSystem`        | Responsible for tracking and synchronizing in-game time.          |
+| `Time`        | `TimeSystem`        | Responsible for tracking and synchronizing in-game time.           |
 
 ## Client Systems
 
@@ -41,6 +42,7 @@ Server systems are only present in the server.
 | System             | System Class             | Description                                                       |
 |--------------------|--------------------------|-------------------------------------------------------------------|
 | `Accounts`         | `AccountsSystem`         | Responsible for managing the locked account list.                 |
+| `Interaction`      | `InteractionSystem`      | Responsible for processing player interactions with entities.     |
 | `Persistence`      | `PersistenceSystem`      | Responsible for managing the database.                            |
 | `Scripting`        | `ScriptingSystem`        | Responsible for managing server-side scripts.                     |
 | `ServerChat`       | `ServerChatSystem`       | Responsible for managing chat functions in the server.            |
