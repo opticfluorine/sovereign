@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
@@ -23,6 +24,8 @@ namespace Sovereign.EngineCore.Components.Indexers;
 /// </summary>
 public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
 {
+    private readonly Lock accessLock = new();
+
     /// <summary>
     ///     Map from entity to all of its descendants.
     /// </summary>
@@ -57,10 +60,49 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
     /// </remarks>
     public HashSet<ulong> GetDirectChildren(ulong entityId)
     {
-        if (directChildren.TryGetValue(entityId, out var children))
-            return new HashSet<ulong>(children);
+        lock (accessLock)
+        {
+            if (directChildren.TryGetValue(entityId, out var children))
+                return new HashSet<ulong>(children);
+        }
 
         return new HashSet<ulong>();
+    }
+
+    /// <summary>
+    ///     Adds the set of direct children of an entity to the given list.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="children">List to populate with direct children.</param>
+    public void GetDirectChildren(ulong entityId, List<ulong> children)
+    {
+        lock (accessLock)
+        {
+            if (!directChildren.TryGetValue(entityId, out var knownSet)) return;
+            children.AddRange(knownSet);
+        }
+    }
+
+    /// <summary>
+    ///     Gets the "first" direct child of an entity if it exists.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="childId">Child entity ID. Only meaningful if method returns true.</param>
+    /// <returns>true if a child entity was found, false otherwise.</returns>
+    public bool TryGetFirstDirectChild(ulong entityId, out ulong childId)
+    {
+        childId = 0;
+        lock (accessLock)
+        {
+            if (!directChildren.TryGetValue(entityId, out var knownSet)) return false;
+            foreach (var firstId in knownSet)
+            {
+                childId = firstId;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -77,8 +119,11 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
     /// </remarks>
     public HashSet<ulong> GetAllDescendants(ulong entityId)
     {
-        if (allDescendants.TryGetValue(entityId, out var children))
-            return new HashSet<ulong>(children);
+        lock (accessLock)
+        {
+            if (allDescendants.TryGetValue(entityId, out var children))
+                return new HashSet<ulong>(children);
+        }
 
         return new HashSet<ulong>();
     }
@@ -90,8 +135,21 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
     /// <param name="descendants">List to populate with descendants.</param>
     public void GetAllDescendants(ulong entityId, List<ulong> descendants)
     {
-        if (!allDescendants.TryGetValue(entityId, out var children)) return;
-        descendants.AddRange(children);
+        lock (accessLock)
+        {
+            if (!allDescendants.TryGetValue(entityId, out var children)) return;
+            descendants.AddRange(children);
+        }
+    }
+
+    protected override void StartUpdatesCallback()
+    {
+        accessLock.Enter();
+    }
+
+    protected override void EndUpdatesCallback()
+    {
+        accessLock.Exit();
     }
 
     protected override void ComponentAddedCallback(ulong entityId, ulong parentId, bool isLoad)

@@ -60,7 +60,11 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Server_WorldEdit_RemoveNonBlock, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Time_Clock, DeliveryMethod.Unreliable },
         { EventId.Core_Interaction_Interact, DeliveryMethod.Unreliable },
-        { EventId.Client_Dialogue_Enqueue, DeliveryMethod.ReliableOrdered }
+        { EventId.Client_Dialogue_Enqueue, DeliveryMethod.ReliableOrdered },
+        { EventId.Core_Inventory_PickUp, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Inventory_Drop, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Inventory_DropAtPosition, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Inventory_Swap, DeliveryMethod.ReliableUnordered }
     };
 
     public DeliveryMethodOutboundPipelineStage(ILogger<DeliveryMethodOutboundPipelineStage> logger)

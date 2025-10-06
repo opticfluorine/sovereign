@@ -46,6 +46,8 @@ namespace Sovereign.EngineCore.Events;
 [Union(19, typeof(NonBlockRemoveEventDetails))]
 [Union(20, typeof(InteractEventDetails))]
 [Union(21, typeof(DialogueEventDetails))]
+[Union(22, typeof(IntPairEventDetails))]
+[Union(23, typeof(IntVectorEventDetails))]
 [JsonPolymorphic]
 [JsonDerivedType(typeof(AutoPingEventDetails), nameof(AutoPingEventDetails))]
 [JsonDerivedType(typeof(BlockAddBatchEventDetails), nameof(BlockAddBatchEventDetails))]
@@ -55,6 +57,7 @@ namespace Sovereign.EngineCore.Events;
 [JsonDerivedType(typeof(BooleanEventDetails), nameof(BooleanEventDetails))]
 [JsonDerivedType(typeof(ChatEventDetails), nameof(ChatEventDetails))]
 [JsonDerivedType(typeof(ConnectionIdEventDetails), nameof(ConnectionIdEventDetails))]
+[JsonDerivedType(typeof(DialogueEventDetails), nameof(DialogueEventDetails))]
 [JsonDerivedType(typeof(EntityChangeWorldSegmentEventDetails), nameof(EntityChangeWorldSegmentEventDetails))]
 [JsonDerivedType(typeof(EntityDefinitionEventDetails), nameof(EntityDefinitionEventDetails))]
 [JsonDerivedType(typeof(EntityDesyncEventDetails), nameof(EntityDesyncEventDetails))]
@@ -66,6 +69,8 @@ namespace Sovereign.EngineCore.Events;
 [JsonDerivedType(typeof(GlobalChatEventDetails), nameof(GlobalChatEventDetails))]
 [JsonDerivedType(typeof(GridPositionEventDetails), nameof(GridPositionEventDetails))]
 [JsonDerivedType(typeof(IntEventDetails), nameof(IntEventDetails))]
+[JsonDerivedType(typeof(IntPairEventDetails), nameof(IntPairEventDetails))]
+[JsonDerivedType(typeof(IntVectorEventDetails), nameof(IntVectorEventDetails))]
 [JsonDerivedType(typeof(InteractEventDetails), nameof(InteractEventDetails))]
 [JsonDerivedType(typeof(KeyValueEventDetails), nameof(KeyValueEventDetails))]
 [JsonDerivedType(typeof(LocalChatEventDetails), nameof(LocalChatEventDetails))]
@@ -85,7 +90,6 @@ namespace Sovereign.EngineCore.Events;
 [JsonDerivedType(typeof(VectorPairEventDetails), nameof(VectorPairEventDetails))]
 [JsonDerivedType(typeof(WorldSegmentEventDetails), nameof(WorldSegmentEventDetails))]
 [JsonDerivedType(typeof(WorldSegmentSubscriptionEventDetails), nameof(WorldSegmentSubscriptionEventDetails))]
-[JsonDerivedType(typeof(DialogueEventDetails), nameof(DialogueEventDetails))]
 public interface IEventDetails
 {
 }

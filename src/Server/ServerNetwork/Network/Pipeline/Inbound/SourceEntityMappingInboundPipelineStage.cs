@@ -57,10 +57,14 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
 
     public void ProcessEvent(Event ev, NetworkConnection connection)
     {
+        // Event-level mapping.
+        var playerEntityId = accountServices.GetPlayerForConnectionId(connection.Id);
+        if (playerEntityId.HasValue) ev.FromPlayerId = playerEntityId.Value;
+
+        // Per-details mapping.
         if (mappers.TryGetValue(ev.EventId, out var mapper))
         {
             // Mapper found, only process the event if it can be mapped back to a player.
-            var playerEntityId = accountServices.GetPlayerForConnectionId(connection.Id);
             if (!playerEntityId.HasValue || ev.EventDetails == null) return;
             mapper(ev.EventDetails, playerEntityId.Value);
         }

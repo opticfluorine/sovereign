@@ -45,7 +45,11 @@ public class ServerAllowedEventsInboundPipelineStage : IInboundPipelineStage
         EventId.Server_WorldEdit_SetBlock,
         EventId.Server_WorldEdit_RemoveBlock,
         EventId.Server_WorldEdit_AddNpc,
-        EventId.Server_WorldEdit_RemoveNonBlock
+        EventId.Server_WorldEdit_RemoveNonBlock,
+        EventId.Core_Inventory_PickUp,
+        EventId.Core_Inventory_Drop,
+        EventId.Core_Inventory_DropAtPosition,
+        EventId.Core_Inventory_Swap
     };
 
     private readonly IEventSender eventSender;

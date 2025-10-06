@@ -61,6 +61,12 @@ public struct BoundingBox
     }
 
     /// <summary>
+    ///     Gets the center point in the XY plane at the Z depth of the base of the box.
+    /// </summary>
+    [IgnoreMember]
+    public Vector3 CenterXy => (Position + 0.5f * Size) with { Z = Position.Z };
+
+    /// <summary>
     ///     Determines whether this bounding box intersects another. If it does, determines the
     ///     translation vector that resolves the intersection when applied to this BoundingBox.
     /// </summary>

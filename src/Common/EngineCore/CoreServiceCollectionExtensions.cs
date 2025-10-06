@@ -66,6 +66,8 @@ public static class CoreServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(MovementOptions)}"));
         services.Configure<PerformanceOptions>(
             configuration.GetSection($"Sovereign:{nameof(PerformanceOptions)}"));
+        services.Configure<InventoryOptions>(
+            configuration.GetSection($"Sovereign:{nameof(InventoryOptions)}"));
 
         return services;
     }
@@ -203,6 +205,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<NpcAddEventDetailsValidator>();
         services.TryAddSingleton<NpcRemoveEventDetailsValidator>();
         services.TryAddSingleton<DialogueEventDetailsValidator>();
+        services.TryAddSingleton<IntVectorEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)
@@ -275,6 +278,8 @@ public static class CoreServiceCollectionExtensions
 
     private static void AddInventorySystem(IServiceCollection services)
     {
+        services.TryAddSingleton<InventoryManager>();
+        services.TryAddSingleton<IInventoryController, InventoryController>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, InventorySystem>());
     }
 

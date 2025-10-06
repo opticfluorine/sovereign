@@ -328,6 +328,33 @@ public enum EventId
 
     #endregion Interaction
 
+    #region Inventory
+
+    /// <summary>
+    ///     Event sent to pick up an item.
+    /// </summary>
+    /// Associated details: EntityEventDetails (item ID to pick up)
+    Core_Inventory_PickUp = 1300,
+
+    /// <summary>
+    ///     Event sent to drop an item.
+    /// </summary>
+    /// Associated details: IntEventDetails (slot index to drop)
+    Core_Inventory_Drop = 1301,
+
+    /// <summary>
+    ///     Event sent to drop an item at a specific position.
+    /// </summary>
+    Core_Inventory_DropAtPosition = 1302,
+
+    /// <summary>
+    ///     Event sent to swap the contents of two slots attached to the same entity.
+    /// </summary>
+    /// Associated details: IntPairEventDetails (values are slot indices to swap)
+    Core_Inventory_Swap = 1303,
+
+    #endregion Inventory
+
     #endregion Core
 
     #region Client

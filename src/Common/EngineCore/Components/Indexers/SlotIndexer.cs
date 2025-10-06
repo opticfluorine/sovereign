@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// ReSharper disable InconsistentlySynchronizedField
+// -- Disabled as ReSharper doesn't understand our pattern of taking/releasing the lock when
+// -- component updates are in progress to avoid many redundant lock/unlock cycles
+
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Extensions.Logging;
@@ -32,6 +36,8 @@ public sealed class SlotIndexer : BaseComponentIndexer<EntityType>
 {
     private const int DefaultSize = 8192;
     private readonly Lock accessLock = new();
+    private readonly HashSet<ulong> entitiesWithPendingSlot = new();
+    private readonly EntityHierarchyIndexer hierarchyIndexer;
     private readonly ILogger<SlotIndexer> logger;
 
     private readonly ParentComponentCollection parents;
@@ -39,11 +45,13 @@ public sealed class SlotIndexer : BaseComponentIndexer<EntityType>
     private readonly Dictionary<ulong, List<ulong>> slotsByParent = new(DefaultSize);
 
     public SlotIndexer(EntityTypeComponentCollection entityTypes, SlotComponentEventFilter filter,
-        ParentComponentCollection parents, ILogger<SlotIndexer> logger, EntityTable entityTable)
+        ParentComponentCollection parents, ILogger<SlotIndexer> logger, EntityTable entityTable,
+        EntityHierarchyIndexer hierarchyIndexer)
         : base(entityTypes, filter)
     {
         this.parents = parents;
         this.logger = logger;
+        this.hierarchyIndexer = hierarchyIndexer;
 
         entityTable.OnEntityRemoved += OnEntityUnloaded;
     }
@@ -52,7 +60,7 @@ public sealed class SlotIndexer : BaseComponentIndexer<EntityType>
     ///     Gets the IDs of any slots attached directly to the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    /// <param name="slots">List to which slot IDs will be added.</param>
+    /// <param name="slots">List to which slot IDs will be added in ascending order.</param>
     public void GetSlotsForEntity(ulong entityId, List<ulong> slots)
     {
         lock (accessLock)
@@ -62,6 +70,58 @@ public sealed class SlotIndexer : BaseComponentIndexer<EntityType>
         }
     }
 
+    /// <summary>
+    ///     Gets a specific slot attached to an entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="slotIndex">Slot index.</param>
+    /// <param name="slotId">Slot entity ID. Only meaningful if method returns true.</param>
+    /// <returns>true if the slot was found, false otherwise.</returns>
+    public bool TryGetSlotForEntity(ulong entityId, int slotIndex, out ulong slotId)
+    {
+        slotId = 0;
+        if (slotIndex < 0) return false;
+
+        lock (accessLock)
+        {
+            if (!slotsByParent.TryGetValue(entityId, out var knownSlots)) return false;
+            if (slotIndex >= knownSlots.Count) return false;
+            slotId = knownSlots[slotIndex];
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Finds the first empty slot on an entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="slotId">Slot ID. Only meaningful if method returns true.</param>
+    /// <returns>Whether an empty slot was found on the entity.</returns>
+    /// <remarks>
+    ///     This method will only return a slot for a given entity once per tick. This is because if a free slot
+    ///     is filled with an item during a tick, the parent-child relationship will not be committed until the
+    ///     end of a tick. In this case, the method will return false even if another free slot exists.
+    /// </remarks>
+    public bool TryFindEmptySlot(ulong entityId, out ulong slotId)
+    {
+        slotId = 0;
+
+        lock (accessLock)
+        {
+            if (!entitiesWithPendingSlot.Add(entityId)) return false;
+            if (!slotsByParent.TryGetValue(entityId, out var slotList)) return false;
+            foreach (var checkId in slotList)
+                if (!hierarchyIndexer.TryGetFirstDirectChild(checkId, out _))
+                {
+                    slotId = checkId;
+                    return true;
+                }
+        }
+
+        return false;
+    }
+
     protected override void StartUpdatesCallback()
     {
         accessLock.Enter();
@@ -69,6 +129,7 @@ public sealed class SlotIndexer : BaseComponentIndexer<EntityType>
 
     protected override void EndUpdatesCallback()
     {
+        entitiesWithPendingSlot.Clear();
         accessLock.Exit();
     }
 
@@ -88,7 +149,14 @@ public sealed class SlotIndexer : BaseComponentIndexer<EntityType>
             slotsByParent[parentId] = slotList;
         }
 
-        slotList.Add(entityId);
+        var where = ~slotList.BinarySearch(entityId);
+        if (where < 0)
+        {
+            logger.LogWarning("Duplicate slot ID {Id:X} for entity {PId:X}.", entityId, parentId);
+            return;
+        }
+
+        slotList.Insert(where, entityId);
     }
 
     protected override void ComponentRemovedCallback(ulong entityId, bool isUnload)
