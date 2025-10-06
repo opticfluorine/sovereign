@@ -25,6 +25,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.Accounts.Systems.Accounts;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Rest.Data;
@@ -47,6 +48,7 @@ public sealed class CreatePlayerRestService
 
     private readonly IEntityFactory entityFactory;
     private readonly IEventSender eventSender;
+    private readonly InventoryOptions inventoryOptions;
     private readonly ILogger<CreatePlayerRestService> logger;
     private readonly NewPlayersOptions newPlayersOptions;
     private readonly PersistencePlayerServices playerServices;
@@ -61,7 +63,7 @@ public sealed class CreatePlayerRestService
     public CreatePlayerRestService(IEntityFactory entityFactory,
         CreatePlayerRequestValidator requestValidator, PersistencePlayerServices playerServices,
         AccountsController accountsController, IEventSender eventSender, IOptions<NewPlayersOptions> newPlayersOptions,
-        ILogger<CreatePlayerRestService> logger)
+        IOptions<InventoryOptions> inventoryOptions, ILogger<CreatePlayerRestService> logger)
     {
         this.entityFactory = entityFactory;
         this.requestValidator = requestValidator;
@@ -70,6 +72,7 @@ public sealed class CreatePlayerRestService
         this.eventSender = eventSender;
         this.logger = logger;
         this.newPlayersOptions = newPlayersOptions.Value;
+        this.inventoryOptions = inventoryOptions.Value;
     }
 
     /// <summary>
@@ -157,6 +160,7 @@ public sealed class CreatePlayerRestService
                 }
 
                 playerEntityId = builder.Build();
+                AddInventorySlots(playerEntityId);
 
                 recentNames.Add(request.PlayerName);
                 result = true;
@@ -168,5 +172,21 @@ public sealed class CreatePlayerRestService
         }
 
         return result;
+    }
+
+    /// <summary>
+    ///     Adds initial inventory slots for a player.
+    /// </summary>
+    /// <param name="playerId">Player ID.</param>
+    private void AddInventorySlots(ulong playerId)
+    {
+        for (var i = 0; i < inventoryOptions.NewPlayerDefaultSlots; i++)
+        {
+            var builder = entityFactory.GetBuilder();
+            builder
+                .EntityType(EntityType.Slot)
+                .Parent(playerId)
+                .Build();
+        }
     }
 }

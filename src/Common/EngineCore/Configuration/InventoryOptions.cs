@@ -30,4 +30,9 @@ public sealed class InventoryOptions
     ///     Maximum allowed distance in world units between player and item when dropping an item.
     /// </summary>
     public float MaxDropDistance { get; set; } = 4.0f;
+
+    /// <summary>
+    ///     Default number of inventory slots for new players.
+    /// </summary>
+    public int NewPlayerDefaultSlots { get; set; } = 64;
 }
