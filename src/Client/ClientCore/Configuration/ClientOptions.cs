@@ -124,6 +124,11 @@ public class DisplayOptions
     public float DialogueFontSize { get; set; }
 
     /// <summary>
+    ///     Base item label font size.
+    /// </summary>
+    public float ItemLabelFontSize { get; set; }
+
+    /// <summary>
     ///     Base height for determining the UI scaling factor.
     /// </summary>
     public int BaseScalingHeight { get; set; }

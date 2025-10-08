@@ -33,6 +33,7 @@ public class ClientStateSystem : ISystem
     private readonly AutoUpdaterEndDetector autoUpdaterEndDetector;
     private readonly EntityManager entityManager;
     private readonly ClientStateFlagManager flagManager;
+    private readonly InventoryStateManager inventoryStateManager;
     private readonly ILogger<ClientStateSystem> logger;
     private readonly MainMenuStateMachine mainMenuStateMachine;
     private readonly PlayerStateManager playerStateManager;
@@ -43,7 +44,8 @@ public class ClientStateSystem : ISystem
         WorldEntryDetector worldEntryDetector, ClientStateFlagManager flagManager,
         PlayerStateManager playerStateManager, ClientStateMachine stateMachine,
         MainMenuStateMachine mainMenuStateMachine, EntityManager entityManager,
-        AutoUpdaterEndDetector autoUpdaterEndDetector, ILogger<ClientStateSystem> logger)
+        AutoUpdaterEndDetector autoUpdaterEndDetector, InventoryStateManager inventoryStateManager,
+        ILogger<ClientStateSystem> logger)
     {
         this.worldEntryDetector = worldEntryDetector;
         this.flagManager = flagManager;
@@ -52,6 +54,7 @@ public class ClientStateSystem : ISystem
         this.mainMenuStateMachine = mainMenuStateMachine;
         this.entityManager = entityManager;
         this.autoUpdaterEndDetector = autoUpdaterEndDetector;
+        this.inventoryStateManager = inventoryStateManager;
         this.logger = logger;
         EventCommunicator = eventCommunicator;
 
@@ -62,13 +65,14 @@ public class ClientStateSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest => new HashSet<EventId>
     {
+        EventId.Client_State_SetFlag,
+        EventId.Client_State_SetMainMenuState,
+        EventId.Client_State_SelectItem,
         EventId.Client_Network_BeginConnection,
         EventId.Client_Network_PlayerEntitySelected,
         EventId.Core_WorldManagement_Subscribe,
         EventId.Core_WorldManagement_WorldSegmentLoaded,
-        EventId.Client_State_SetFlag,
         EventId.Core_Network_Logout,
-        EventId.Client_State_SetMainMenuState,
         EventId.Client_Network_ConnectionLost,
         EventId.Core_Tick
     };
@@ -138,8 +142,8 @@ public class ClientStateSystem : ISystem
                     }
 
                     flagManager.SetStateFlagValue(details.Flag, details.NewValue);
-                }
                     break;
+                }
 
                 case EventId.Client_State_SetMainMenuState:
                 {
@@ -150,8 +154,22 @@ public class ClientStateSystem : ISystem
                     }
 
                     mainMenuStateMachine.SetState(details.MainMenuState);
-                }
                     break;
+                }
+
+                case EventId.Client_State_SelectItem:
+                {
+                    if (ev.EventDetails is not IntEventDetails details)
+                    {
+                        logger.LogError("Received SelectItem event without details.");
+                        break;
+                    }
+
+                    var slotIndex = (int)details.Value;
+                    if (slotIndex >= 0) inventoryStateManager.Select(slotIndex);
+                    else inventoryStateManager.Deselect();
+                    break;
+                }
             }
         }
 

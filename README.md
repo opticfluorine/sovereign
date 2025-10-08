@@ -96,6 +96,9 @@ prompt to download the latest game data files.
 | Esc             | Open in-game menu                                           |
 | Arrow keys/WASD | Move player                                                 |
 | E               | Interact                                                    |
+| I               | Toggle Inventory Window                                     |
+| 0-9             | Select Inventory Quickslot 0-9                              |
+| ,               | Pick Up Item Under Player                                   |
 | Space           | Jump                                                        |
 | Enter           | Toggle chat                                                 |
 | \`              | Toggle Resource Editor Window                               |

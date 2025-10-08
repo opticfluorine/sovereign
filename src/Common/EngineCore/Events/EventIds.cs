@@ -489,6 +489,12 @@ public enum EventId
     /// Associated details: MainMenuStateEventDetails
     Client_State_SetMainMenuState = 100401,
 
+    /// <summary>
+    ///     Event sent to select an item in the GUI.
+    /// </summary>
+    /// Associated details: IntEventDetails (value is slot index, -1 to deselect)
+    Client_State_SelectItem = 100402,
+
     #endregion Client_State
 
     #region Client_WorldEdit

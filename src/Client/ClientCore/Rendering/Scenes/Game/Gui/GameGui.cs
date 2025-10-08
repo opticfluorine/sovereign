@@ -16,6 +16,7 @@
 
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Inventory;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
 using Sovereign.ClientCore.Systems.ClientState;
@@ -31,6 +32,7 @@ public class GameGui
     private readonly ChatGui chatGui;
     private readonly DialogueGui dialogueGui;
     private readonly EntityDebugGui entityDebugGui;
+    private readonly InventoryGui inventoryGui;
     private readonly InGameMenuGui menuGui;
     private readonly OverlayGui overlayGui;
     private readonly PlayerDebugGui playerDebugGui;
@@ -41,7 +43,7 @@ public class GameGui
 
     public GameGui(ClientStateServices stateServices, PlayerDebugGui playerDebugGui, EntityDebugGui entityDebugGui,
         InGameMenuGui menuGui, ChatGui chatGui, TemplateEditorGui templateEditorGui, PlayerRoleCheck roleCheck,
-        WorldEditorGui worldEditorGui, OverlayGui overlayGui, DialogueGui dialogueGui)
+        WorldEditorGui worldEditorGui, OverlayGui overlayGui, DialogueGui dialogueGui, InventoryGui inventoryGui)
     {
         this.stateServices = stateServices;
         this.playerDebugGui = playerDebugGui;
@@ -53,6 +55,7 @@ public class GameGui
         this.worldEditorGui = worldEditorGui;
         this.overlayGui = overlayGui;
         this.dialogueGui = dialogueGui;
+        this.inventoryGui = inventoryGui;
     }
 
     /// <summary>
@@ -66,6 +69,7 @@ public class GameGui
 
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowInGameMenu)) menuGui.Render();
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowChat)) chatGui.Render();
+        if (stateServices.GetStateFlagValue(ClientStateFlag.ShowInventory)) inventoryGui.Render();
 
         overlayGui.Render(renderPlan);
         dialogueGui.Render();

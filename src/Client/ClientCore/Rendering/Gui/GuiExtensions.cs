@@ -91,6 +91,22 @@ public class GuiExtensions
     }
 
     /// <summary>
+    ///     Renders an animated sprite to the GUI scaled to the given size.
+    /// </summary>
+    /// <param name="animatedSpriteId">Animated sprite ID.</param>
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Animation phase.</param>
+    /// <param name="drawSize">Draw size in pixels.</param>
+    public void AnimatedSprite(int animatedSpriteId, Orientation orientation, AnimationPhase phase,
+        Vector2 drawSize)
+    {
+        var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId, orientation, phase);
+
+        // Render GUI component.
+        ImGui.Image(texId, drawSize);
+    }
+
+    /// <summary>
     ///     Calculates the screen space size of an animated sprite.
     /// </summary>
     /// <param name="animatedSpriteId">Animated sprite ID.</param>
@@ -139,6 +155,23 @@ public class GuiExtensions
         ImGui.PopStyleVar();
 
         return result;
+    }
+
+    /// <summary>
+    ///     Renders an animated sprite to the GUI's foreground layer in front of all other GUI elements.
+    /// </summary>
+    /// <param name="animatedSpriteId">Animated sprite ID.</param>
+    /// <param name="orientation">Orientation.</param>
+    /// <param name="phase">Animation phase.</param>
+    /// <param name="position">Top-left screen space position in pixels.</param>
+    public void AnimatedSpriteForeground(int animatedSpriteId, Orientation orientation, AnimationPhase phase,
+        Vector2 position)
+    {
+        var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId, orientation, phase);
+        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var end = position + GetSpriteDimensions(texData);
+
+        ImGui.GetForegroundDrawList().AddImage(texId, position, end);
     }
 
     /// <summary>
@@ -269,6 +302,17 @@ public class GuiExtensions
         }
 
         ImGui.EndDisabled();
+    }
+
+    /// <summary>
+    ///     Converts world unit dimensions to GUI-friendly pixel dimensions.
+    /// </summary>
+    /// <param name="worldUnits">Size in world units.</param>
+    /// <returns>Size in pixels.</returns>
+    public Vector2 WorldUnitsToPixels(Vector2 worldUnits)
+    {
+        var fontSize = ImGui.GetFontSize();
+        return fontSize * SpriteScaleFactor * worldUnits;
     }
 
     /// <summary>

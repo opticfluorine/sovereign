@@ -40,6 +40,7 @@ using Sovereign.ClientCore.Rendering.Scenes.Game;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Inventory;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
@@ -222,6 +223,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<OverlayGui>();
         services.TryAddSingleton<NetworkDebugGui>();
         services.TryAddSingleton<DialogueGui>();
+        services.TryAddSingleton<InventoryGui>();
     }
 
     private static void AddResources(IServiceCollection services)
@@ -340,6 +342,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<PlayerStateManager>();
         services.TryAddSingleton<MainMenuStateMachine>();
         services.TryAddSingleton<AutoUpdaterEndDetector>();
+        services.TryAddSingleton<InventoryStateManager>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ClientWorldEditSystem>());
         services.TryAddSingleton<ClientWorldEditState>();

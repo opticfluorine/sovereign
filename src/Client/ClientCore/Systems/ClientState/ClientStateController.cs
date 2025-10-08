@@ -16,6 +16,7 @@
 
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 
 namespace Sovereign.ClientCore.Systems.ClientState;
 
@@ -54,5 +55,26 @@ public class ClientStateController
         };
         var ev = new Event(EventId.Client_State_SetMainMenuState, details);
         eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Selects an item from the inventory for GUI operations.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="slotIndex">Inventory slot index.</param>
+    public void SelectItem(IEventSender eventSender, int slotIndex)
+    {
+        var details = new IntEventDetails { Value = (uint)slotIndex };
+        var ev = new Event(EventId.Client_State_SelectItem, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Deselects any currently selected item for GUI operations.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    public void DeselectItem(IEventSender eventSender)
+    {
+        SelectItem(eventSender, -1);
     }
 }

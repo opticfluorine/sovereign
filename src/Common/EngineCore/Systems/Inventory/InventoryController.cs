@@ -35,8 +35,8 @@ public interface IInventoryController
     ///     Drops the given item.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
-    /// <param name="itemId">Item ID.</param>
-    void Drop(IEventSender eventSender, ulong itemId);
+    /// <param name="slotIndex">Inventory slot index.</param>
+    void Drop(IEventSender eventSender, int slotIndex);
 
     /// <summary>
     ///     Swaps the contents of two inventory slots.
@@ -59,9 +59,9 @@ internal class InventoryController : IInventoryController
         eventSender.SendEvent(ev);
     }
 
-    public void Drop(IEventSender eventSender, ulong itemId)
+    public void Drop(IEventSender eventSender, int slotIndex)
     {
-        var details = new EntityEventDetails { EntityId = itemId };
+        var details = new IntEventDetails { Value = (uint)slotIndex };
         var ev = new Event(EventId.Core_Inventory_Drop, details);
         eventSender.SendEvent(ev);
     }

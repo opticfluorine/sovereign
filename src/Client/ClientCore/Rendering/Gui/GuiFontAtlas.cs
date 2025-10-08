@@ -78,6 +78,8 @@ public sealed class GuiFontAtlas : IDisposable
     /// </summary>
     public ImFontPtr DialogueFont { get; private set; }
 
+    public ImFontPtr ItemLabelFont { get; private set; }
+
     /// <summary>
     ///     Gets a pointer to the SDL surface containing the font atlas.
     /// </summary>
@@ -138,6 +140,7 @@ public sealed class GuiFontAtlas : IDisposable
                           displayOptions.BaseScalingHeight;
         var fontSize = scaleFactor * displayOptions.BaseFontSize;
         var dialogueFontSize = scaleFactor * displayOptions.DialogueFontSize;
+        var itemLabelFontSize = scaleFactor * displayOptions.ItemLabelFontSize;
 
         // Load font.
         var fontPath =
@@ -196,6 +199,10 @@ public sealed class GuiFontAtlas : IDisposable
         DialogueFont = io.Fonts.AddFontFromFileTTF(fontPath, dialogueFontSize, null, io.Fonts.GetGlyphRangesDefault());
         DialogueSubjectFont =
             io.Fonts.AddFontFromFileTTF(boldFontPath, dialogueFontSize, null, io.Fonts.GetGlyphRangesDefault());
+
+        // Load item label font.
+        ItemLabelFont =
+            io.Fonts.AddFontFromFileTTF(fontPath, itemLabelFontSize, null, io.Fonts.GetGlyphRangesDefault());
 
         // Retrieve raw data from ImGui.
         io.Fonts.Build();
