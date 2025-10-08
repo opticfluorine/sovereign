@@ -22,6 +22,7 @@ using Sovereign.NetworkCore.Network.Pipeline.Inbound;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.NetworkCore.Systems.Network;
 using Sovereign.ServerCore.Systems.ServerChat;
+using Sovereign.ServerNetwork.Entities.Players;
 using Sovereign.ServerNetwork.Network.Connections;
 using Sovereign.ServerNetwork.Network.Infrastructure;
 using Sovereign.ServerNetwork.Network.Pipeline.Inbound;
@@ -44,6 +45,7 @@ public static class ServerNetworkServiceCollectionExtensions
     public static IServiceCollection AddSovereignServerNetwork(this IServiceCollection services)
     {
         AddServerImplementations(services);
+        AddEntities(services);
         AddInboundPipeline(services);
         AddChat(services);
         AddConnections(services);
@@ -60,6 +62,11 @@ public static class ServerNetworkServiceCollectionExtensions
         services
             .TryAddSingleton<IConnectionMappingOutboundPipelineStage, ServerConnectionMappingOutboundPipelineStage>();
         services.TryAddSingleton<IOutboundEventSet, ServerOutboundEventSet>();
+    }
+
+    private static void AddEntities(IServiceCollection services)
+    {
+        services.TryAddSingleton<PlayerBuilder>();
     }
 
     private static void AddInboundPipeline(IServiceCollection services)
