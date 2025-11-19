@@ -25,6 +25,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Services;
+using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Rest.Data;
 using Sovereign.ServerCore.Configuration;
 
@@ -41,6 +42,7 @@ public sealed class AuthenticationRestService
     public const int MaxRequestLength = 1024;
 
     private readonly AccountServices accountServices;
+    private readonly NetworkConnectionManager connectionManager;
     private readonly ILogger<AuthenticationRestService> logger;
 
     private readonly AccountLoginTracker loginTracker;
@@ -77,11 +79,13 @@ public sealed class AuthenticationRestService
     public AuthenticationRestService(AccountServices accountServices,
         IOptions<NetworkOptions> networkOptions,
         AccountLoginTracker loginTracker,
+        NetworkConnectionManager connectionManager,
         ILogger<AuthenticationRestService> logger)
     {
         this.accountServices = accountServices;
         this.networkOptions = networkOptions.Value;
         this.loginTracker = loginTracker;
+        this.connectionManager = connectionManager;
         this.logger = logger;
     }
 
@@ -94,6 +98,12 @@ public sealed class AuthenticationRestService
     {
         try
         {
+            // Enforce connection limit if present.
+            if (networkOptions.MaxConnections > 0 && connectionManager.ConnectionCount >= networkOptions.MaxConnections)
+            {
+                return Results.Text("Server is full.", null, Encoding.UTF8, 503);
+            }
+
             // Decode and validate input.
             if (requestData.Username == null || requestData.Password == null)
             {

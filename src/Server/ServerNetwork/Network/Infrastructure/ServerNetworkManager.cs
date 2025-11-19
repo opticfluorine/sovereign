@@ -209,6 +209,15 @@ public sealed class ServerNetworkManager : INetworkManager
         try
         {
             logger.LogInformation("New connection request from {Ip}.", request.RemoteEndPoint);
+
+            if (networkOptions.MaxConnections > 0 && connectionManager.ConnectionCount >= networkOptions.MaxConnections)
+            {
+                // Server is at limit.
+                logger.LogWarning("Rejecting new connection from {Ip} due to connection count limit.",
+                    request.RemoteEndPoint);
+                return;
+            }
+
             newConnectionProcessor.ProcessConnectionRequest(request);
         }
         catch (Exception e)
