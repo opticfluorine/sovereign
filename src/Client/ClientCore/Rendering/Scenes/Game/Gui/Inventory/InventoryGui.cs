@@ -47,10 +47,10 @@ public sealed class InventoryGui(
     private const float QuickSlotLabelOffset = 1.1f;
     private readonly GuiLabelCache gridLabels = new("invg");
     private readonly GuiLabelCache gridPopups = new("invp");
-    private readonly Vector2 itemSize = guiExtensions.WorldUnitsToPixels(Vector2.One);
 
     private readonly List<string> quickSlotLabels = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
     private readonly List<ulong> slotList = new(128);
+    private Vector2 itemSize = Vector2.Zero;
 
     /// <summary>
     ///     Renders the inventory GUI.
@@ -59,6 +59,7 @@ public sealed class InventoryGui(
     {
         if (!stateServices.TryGetSelectedPlayer(out var playerId)) return;
         if (!ImGui.Begin("Inventory")) return;
+        itemSize = guiExtensions.WorldUnitsToPixels(Vector2.One);
 
         slotList.Clear();
         slotIndexer.GetSlotsForEntity(playerId, slotList);
@@ -83,7 +84,7 @@ public sealed class InventoryGui(
                 if (!hierarchyIndexer.TryGetFirstDirectChild(slotId, out var itemId))
                 {
                     // Empty slot
-                    RenderBlank(gridLabels[i]);
+                    RenderEmpty(i, hasSelection, selectedSlotIndex);
                     continue;
                 }
 
@@ -116,7 +117,7 @@ public sealed class InventoryGui(
         }
         else
         {
-            RenderBlank(gridLabels[slotIndex]);
+            DrawBlank(gridLabels[slotIndex]);
         }
 
         // Handle interactions.
@@ -210,9 +211,37 @@ public sealed class InventoryGui(
     }
 
     /// <summary>
-    ///     Draws a blank item slot.
+    ///     Renders an empty item slot.
     /// </summary>
-    private void RenderBlank(string id)
+    /// <param name="slotIndex">Slot index.</param>
+    /// <param name="isAnySelected">Whether any item is actively selected.</param>
+    /// <param name="selectedSlotIndex">Actively selected slot index. Only meaningful if isAnySelected is true.</param>
+    private void RenderEmpty(int slotIndex, bool isAnySelected, int selectedSlotIndex)
+    {
+        DrawBlank(gridLabels[slotIndex]);
+
+        if (ImGui.IsItemClicked(ImGuiMouseButton.Left)) OnLeftClickEmpty(slotIndex, isAnySelected, selectedSlotIndex);
+    }
+
+    /// <summary>
+    ///     Called when an empty item slot is left-clicked.
+    /// </summary>
+    /// <param name="slotIndex">Slot index.</param>
+    /// <param name="isAnySelected">Whether any item is actively selected.</param>
+    /// <param name="selectedSlotIndex">Actively selected slot index. Only meaningful if isAnySelected is true.</param>
+    private void OnLeftClickEmpty(int slotIndex, bool isAnySelected, int selectedSlotIndex)
+    {
+        if (!isAnySelected) return;
+
+        inventoryController.Swap(eventSender, slotIndex, selectedSlotIndex);
+        stateController.DeselectItem(eventSender);
+    }
+
+    /// <summary>
+    ///     Draws a blank item slot (draw only, no behavior).
+    /// </summary>
+    /// <param name="id">Unique ID for grid cell.</param>
+    private void DrawBlank(string id)
     {
         ImGui.InvisibleButton(id, itemSize);
     }
