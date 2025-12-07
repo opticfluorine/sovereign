@@ -178,6 +178,8 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<BlockTemplateEntityIndexer>();
         services.TryAddSingleton<NpcTemplateEntityFilter>();
         services.TryAddSingleton<NpcTemplateEntityIndexer>();
+        services.TryAddSingleton<ItemTemplateEntityFilter>();
+        services.TryAddSingleton<ItemTemplateEntityIndexer>();
     }
 
     private static void AddEntities(IServiceCollection services)
@@ -259,6 +261,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<TemplateEditorGui>();
         services.TryAddSingleton<BlockTemplateEditorTab>();
         services.TryAddSingleton<NpcTemplateEditorTab>();
+        services.TryAddSingleton<ItemTemplateEditorTab>();
         services.TryAddSingleton<BasicInformationControlGroup>();
         services.TryAddSingleton<AppearanceControlGroup>();
         services.TryAddSingleton<BehaviorControlGroup>();

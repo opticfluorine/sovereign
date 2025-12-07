@@ -26,14 +26,16 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 public class TemplateEditorGui
 {
     private readonly BlockTemplateEditorTab blockTemplateEditor;
+    private readonly ItemTemplateEditorTab itemTemplateEditorTab;
     private readonly NpcTemplateEditorTab npcTemplateEditorTab;
     private readonly ScriptInfoClient scriptInfoClient;
 
     public TemplateEditorGui(BlockTemplateEditorTab blockTemplateEditor, NpcTemplateEditorTab npcTemplateEditorTab,
-        ScriptInfoClient scriptInfoClient)
+        ItemTemplateEditorTab itemTemplateEditorTab, ScriptInfoClient scriptInfoClient)
     {
         this.blockTemplateEditor = blockTemplateEditor;
         this.npcTemplateEditorTab = npcTemplateEditorTab;
+        this.itemTemplateEditorTab = itemTemplateEditorTab;
         this.scriptInfoClient = scriptInfoClient;
     }
 
@@ -56,6 +58,7 @@ public class TemplateEditorGui
         {
             blockTemplateEditor.Render();
             npcTemplateEditorTab.Render();
+            itemTemplateEditorTab.Render();
             ImGui.EndTabBar();
         }
 
