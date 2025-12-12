@@ -96,8 +96,9 @@ public sealed class WorldLayerGrouper
     /// <param name="sprite">Sprite.</param>
     /// <param name="lightFactor">Light factor.</param>
     /// <param name="opacity">Opacity alpha factor.</param>
+    /// <param name="spritePlane">For non-block sprites, specifies the plane in which the sprite lies.</param>
     public void AddSprite(PerspectiveEntityType perspectiveEntityType, Vector3 position, Vector3 velocity,
-        Sprite sprite, float lightFactor, float opacity)
+        Sprite sprite, float lightFactor, float opacity, SpritePlane spritePlane = SpritePlane.Xy)
     {
         if (activeLayer is null)
         {
@@ -119,7 +120,8 @@ public sealed class WorldLayerGrouper
             Velocity = velocity,
             Id = sprite.Id,
             LightFactor = lightFactor,
-            Opacity = opacity
+            Opacity = opacity,
+            SpritePlane = spritePlane
         });
     }
 

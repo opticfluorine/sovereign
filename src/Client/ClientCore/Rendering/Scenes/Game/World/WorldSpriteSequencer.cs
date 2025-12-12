@@ -38,7 +38,12 @@ public enum SpritePlane
     /// <summary>
     ///     Sprite lies in the XZ plane.
     /// </summary>
-    Xz
+    Xz,
+
+    /// <summary>
+    ///     Flag to indicate that the sprite plane should be retrieved from the per-sprite data.
+    /// </summary>
+    Dynamic
 }
 
 /// <summary>
@@ -110,7 +115,13 @@ public sealed class WorldSpriteSequencer
                 opacity = opacityTables.GetAlpha(drawCount, opacity);
             }
 
-            switch (spritePlane)
+            var curSpritePlane = spritePlane switch
+            {
+                SpritePlane.Dynamic => positionedAnimatedSprite.SpritePlane,
+                _ => spritePlane
+            };
+
+            switch (curSpritePlane)
             {
                 case SpritePlane.Xy:
                     AddVerticesForSpriteXY(sprite, pos, vel, lightFactor, opacity,

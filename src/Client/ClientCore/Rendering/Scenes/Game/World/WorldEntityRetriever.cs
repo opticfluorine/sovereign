@@ -53,6 +53,7 @@ public sealed class WorldEntityRetriever
     private readonly CastShadowsComponentCollection castsShadows;
     private readonly ClientStateServices clientStateServices;
     private readonly DrawableComponentCollection drawables;
+    private readonly EntityTypeComponentCollection entityTypes;
     private readonly WorldLayerGrouper grouper;
 
     private readonly KinematicsComponentCollection kinematics;
@@ -94,7 +95,7 @@ public sealed class WorldEntityRetriever
         ILogger<WorldEntityRetriever> logger, CastShadowsComponentCollection castsShadows,
         NonBlockShadowPlanner shadowPlanner, IOptions<RendererOptions> rendererOptions,
         DrawableComponentCollection drawables, ClientStateServices clientStateServices,
-        SpriteManager spriteManager)
+        SpriteManager spriteManager, EntityTypeComponentCollection entityTypes)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -119,6 +120,7 @@ public sealed class WorldEntityRetriever
         this.drawables = drawables;
         this.clientStateServices = clientStateServices;
         this.spriteManager = spriteManager;
+        this.entityTypes = entityTypes;
         this.rendererOptions = rendererOptions.Value;
     }
 
@@ -280,8 +282,13 @@ public sealed class WorldEntityRetriever
 
         var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
         var sprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(systemTime, orientation);
+
+        var spritePlane = SpritePlane.Xz;
+        if (entityTypes.TryGetValue(entityId, out var entityType) && entityType == EntityType.Item)
+            spritePlane = SpritePlane.Xy;
+
         grouper.AddSprite(PerspectiveEntityType.NonBlock, position, entityKinematics.Velocity, sprite,
-            1.0f, opacity);
+            1.0f, opacity, spritePlane);
 
         if (playerCharacters.HasTagForEntity(entityId))
             AddNameLabel(entityId, entityKinematics, sprite, timeSinceTick);
