@@ -254,12 +254,24 @@ public class PerspectiveLineManager
     /// <summary>
     ///     Iterates all current perspective lines.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>IEnumerable over all perspective lines.</returns>
     public IEnumerable<(int, int, PerspectiveLine)> GetAllLines()
     {
         // Take a snapshot before iterating in case the lines change during iteration.
         var copy = new Dictionary<PerspectiveLineKey, PerspectiveLine>(perspectiveLines);
         foreach (var kvp in copy) yield return (kvp.Key.X, kvp.Key.Yz, kvp.Value);
+    }
+
+    /// <summary>
+    ///     Iterates all perspective lines overlapped by the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>IEnumerable over the overlapped perspective lines.</returns>
+    public IEnumerable<(int, int, PerspectiveLine)> GetLineForEntity(ulong entityId)
+    {
+        if (!linesByEntity.TryGetValue(entityId, out var entityLines)) yield break;
+        var copy = new HashSet<PerspectiveLineKey>(entityLines);
+        foreach (var key in copy) yield return (key.X, key.Yz, perspectiveLines[key]);
     }
 
     /// <summary>

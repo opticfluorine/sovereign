@@ -16,23 +16,27 @@
 
 using SDL2;
 using Sovereign.ClientCore.Events.Details;
+using Sovereign.ClientCore.Systems.Player;
+using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
 public class InGameInputHandler : IInputHandler
 {
+    private readonly IEventSender eventSender;
     private readonly InGameKeyboardShortcuts inGameKeyboardShortcuts;
-    private readonly PlayerInteractionHandler interactionHandler;
     private readonly KeyboardState keyboardState;
+    private readonly PlayerController playerController;
     private readonly PlayerInputMovementMapper playerInputMovementMapper;
 
     public InGameInputHandler(KeyboardState keyboardState, PlayerInputMovementMapper playerInputMovementMapper,
-        InGameKeyboardShortcuts inGameKeyboardShortcuts, PlayerInteractionHandler interactionHandler)
+        InGameKeyboardShortcuts inGameKeyboardShortcuts, PlayerController playerController, IEventSender eventSender)
     {
         this.keyboardState = keyboardState;
         this.playerInputMovementMapper = playerInputMovementMapper;
         this.inGameKeyboardShortcuts = inGameKeyboardShortcuts;
-        this.interactionHandler = interactionHandler;
+        this.playerController = playerController;
+        this.eventSender = eventSender;
     }
 
     public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
@@ -59,6 +63,10 @@ public class InGameInputHandler : IInputHandler
 
             case SDL.SDL_Keycode.SDLK_e:
                 HandleEKeyEvent(oldState, !isKeyUp);
+                break;
+
+            case SDL.SDL_Keycode.SDLK_COMMA:
+                HandleCommaKeyEvent(oldState, !isKeyUp);
                 break;
 
             /* Ignore keys that don't do anything for now. */
@@ -98,6 +106,16 @@ public class InGameInputHandler : IInputHandler
     /// <param name="newState">New state of the key.</param>
     private void HandleEKeyEvent(bool oldState, bool newState)
     {
-        if (oldState && !newState) interactionHandler.Interact();
+        if (oldState && !newState) playerController.Interact(eventSender);
+    }
+
+    /// <summary>
+    ///     Handles ',' key events.
+    /// </summary>
+    /// <param name="oldState">Old state of the key (true = key down).</param>
+    /// <param name="newState">New state of the key (true = key down).</param>
+    private void HandleCommaKeyEvent(bool oldState, bool newState)
+    {
+        if (!oldState && newState) playerController.PickUpItemUnder(eventSender);
     }
 }

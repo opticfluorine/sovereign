@@ -17,6 +17,7 @@
 using System;
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using MessagePack;
 using Sovereign.EngineUtil.Attributes;
 
@@ -29,6 +30,15 @@ namespace Sovereign.EngineCore.Components.Types;
 [MessagePackObject]
 public struct BoundingBox
 {
+    /// <summary>
+    ///     BoundingBox with zero position and zero size.
+    /// </summary>
+    public static readonly BoundingBox Zero = new()
+    {
+        Position = Vector3.Zero,
+        Size = Vector3.Zero
+    };
+
     /// <summary>
     ///     Position of the bottom-front-left corner of the bounding box specified in
     ///     world coordinates relative to the upper-top-left corner of the entity.
@@ -157,6 +167,33 @@ public struct BoundingBox
 
         resolvingTranslation = -minNonNegativeAlpha * velocity;
         return true;
+    }
+
+    /// <summary>
+    ///     Computes the overlap of the XY planes of this BoundingBox and another.
+    /// </summary>
+    /// <param name="other">Other BoundingBox.</param>
+    /// <returns>Overlap, or 0.0f if there is no overlap.</returns>
+    public float OverlapXy(BoundingBox other)
+    {
+        var o = GetOverlap(other);
+        return o.X * o.Y;
+    }
+
+    /// <summary>
+    ///     Gets a vector corresponding to the overlap of each axis of this box with another.
+    /// </summary>
+    /// <param name="other">Other box.</param>
+    /// <returns>Overlap vector.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private Vector3 GetOverlap(BoundingBox other)
+    {
+        var a = Position;
+        var b = a + Size;
+        var c = other.Position;
+        var d = c + other.Size;
+
+        return Vector3.Max(Vector3.Zero, Vector3.Min(b, d) - Vector3.Max(a, c));
     }
 
     /// <summary>

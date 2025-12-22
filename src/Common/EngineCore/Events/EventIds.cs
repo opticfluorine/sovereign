@@ -541,6 +541,22 @@ public enum EventId
 
     #endregion Client_Dialogue
 
+    #region Client_Player
+
+    /// <summary>
+    ///     Event sent to make the player pick up an item underneath them.
+    /// </summary>
+    /// Associated details: None
+    Client_Player_PickUpItemUnder = 10700,
+
+    /// <summary>
+    ///     Event sent to make the player interact with a nearby entity.
+    /// </summary>
+    /// Associated details: None
+    Client_Player_Interact = 10701,
+
+    #endregion Client_Player
+
     #endregion Client
 
     #region Server

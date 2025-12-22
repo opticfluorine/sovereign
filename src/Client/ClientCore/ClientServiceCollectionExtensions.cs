@@ -65,6 +65,7 @@ using Sovereign.ClientCore.Systems.Input;
 using Sovereign.ClientCore.Systems.Movement;
 using Sovereign.ClientCore.Systems.Network;
 using Sovereign.ClientCore.Systems.Perspective;
+using Sovereign.ClientCore.Systems.Player;
 using Sovereign.ClientCore.Timing;
 using Sovereign.ClientCore.Updater;
 using Sovereign.EngineCore.Components;
@@ -280,6 +281,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<NonBlockShadowPlanner>();
         services.TryAddSingleton<OpacityTables>();
         services.TryAddSingleton<NpcTemplateSelectorPopup>();
+        services.TryAddSingleton<ItemTemplateSelectorPopup>();
 
         services.TryAddSingleton<MainMenuScene>();
         services.TryAddSingleton<StartupGui>();
@@ -308,6 +310,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<AnimatedSpriteDefinitionsLoader>();
         services.TryAddSingleton<AnimatedSpriteDefinitionsValidator>();
         services.TryAddSingleton<AnimatedSpriteManager>();
+        services.TryAddSingleton<AnimatedSpriteUtil>();
 
         services.TryAddSingleton<TextureAtlasManager>();
         services.TryAddSingleton<AtlasMap>();
@@ -379,7 +382,6 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<InputInternalController>();
         services.TryAddSingleton<NullInputHandler>();
         services.TryAddSingleton<InGameInputHandler>();
-        services.TryAddSingleton<PlayerInteractionHandler>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PerspectiveSystem>());
         services.TryAddSingleton<PerspectiveLineManager>();
@@ -387,6 +389,11 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<IPerspectiveController, PerspectiveController>();
         services.TryAddSingleton<OverheadTransparency>();
         services.TryAddSingleton<OverheadBlockGraphManager>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PlayerSystem>());
+        services.TryAddSingleton<PlayerInventoryActions>();
+        services.TryAddSingleton<PlayerInteractionHandler>();
+        services.TryAddSingleton<PlayerController>();
     }
 
     private static void AddUpdater(IServiceCollection services)

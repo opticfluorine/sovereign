@@ -31,14 +31,14 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 /// <summary>
 ///     Popup for selecting a NPC template entity.
 /// </summary>
-public class NpcTemplateSelectorPopup
+public class ItemTemplateSelectorPopup
 {
     private const string PopupName = "Select NPC Template Entity";
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly List<(ulong, string)> filtered = new();
     private readonly GuiExtensions guiExtensions;
+    private readonly ItemTemplateEntityIndexer itemTemplateEntityIndexer;
     private readonly NameComponentCollection nameComponentCollection;
-    private readonly NpcTemplateEntityIndexer npcTemplateEntityIndexer;
     private readonly Vector2 preferredSize = new(15.0f, 20.0f);
     private Vector2 basePos = Vector2.Zero;
     private string instanceKey = string.Empty;
@@ -47,13 +47,13 @@ public class NpcTemplateSelectorPopup
     private string search = string.Empty;
     private ulong selection;
 
-    public NpcTemplateSelectorPopup(
-        NpcTemplateEntityIndexer npcTemplateEntityIndexer,
+    public ItemTemplateSelectorPopup(
+        ItemTemplateEntityIndexer itemTemplateEntityIndexer,
         GuiExtensions guiExtensions,
         NameComponentCollection nameComponentCollection,
         AnimatedSpriteComponentCollection animatedSprites)
     {
-        this.npcTemplateEntityIndexer = npcTemplateEntityIndexer;
+        this.itemTemplateEntityIndexer = itemTemplateEntityIndexer;
         this.guiExtensions = guiExtensions;
         this.nameComponentCollection = nameComponentCollection;
         this.animatedSprites = animatedSprites;
@@ -162,7 +162,7 @@ public class NpcTemplateSelectorPopup
     /// </summary>
     private void UpdateFiltered()
     {
-        var update = npcTemplateEntityIndexer.NpcTemplateEntities
+        var update = itemTemplateEntityIndexer.ItemTemplateEntities
             .Select(entityId => (EntityId: entityId,
                 Name: nameComponentCollection.TryGetValue(entityId, out var name) ? name : "[No Name]"))
             .Where(pair =>

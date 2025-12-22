@@ -47,6 +47,11 @@ public enum EntityParameterType
     NpcTemplate,
 
     /// <summary>
+    ///     Item template entity ID-valued parameter.
+    /// </summary>
+    ItemTemplate,
+
+    /// <summary>
     ///     Template entity ID parameter where the template has the same EntityType as the target.
     /// </summary>
     SameTypeTemplate
