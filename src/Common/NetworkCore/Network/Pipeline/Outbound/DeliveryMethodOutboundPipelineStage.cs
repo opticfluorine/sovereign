@@ -56,7 +56,7 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Core_Block_RemoveNotice, DeliveryMethod.ReliableOrdered },
         { EventId.Server_WorldEdit_SetBlock, DeliveryMethod.ReliableUnordered },
         { EventId.Server_WorldEdit_RemoveBlock, DeliveryMethod.ReliableUnordered },
-        { EventId.Server_WorldEdit_AddNpc, DeliveryMethod.ReliableUnordered },
+        { EventId.Server_WorldEdit_AddNonBlock, DeliveryMethod.ReliableUnordered },
         { EventId.Server_WorldEdit_RemoveNonBlock, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Time_Clock, DeliveryMethod.Unreliable },
         { EventId.Core_Interaction_Interact, DeliveryMethod.Unreliable },

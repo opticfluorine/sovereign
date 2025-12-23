@@ -85,7 +85,7 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Block_RemoveNotice, gridPositionValidator },
             { EventId.Server_WorldEdit_SetBlock, blockAddValidator },
             { EventId.Server_WorldEdit_RemoveBlock, gridPositionValidator },
-            { EventId.Server_WorldEdit_AddNpc, npcAddValidator },
+            { EventId.Server_WorldEdit_AddNonBlock, npcAddValidator },
             { EventId.Server_WorldEdit_RemoveNonBlock, npcRemoveValidator },
             { EventId.Core_Time_Clock, intValidator },
             { EventId.Core_Interaction_Interact, new TypeCheckedEventDetailsValidator<InteractEventDetails>() },

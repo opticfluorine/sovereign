@@ -59,28 +59,28 @@ public class ClientWorldEditInternalController
     }
 
     /// <summary>
-    ///     Requests the server to add an NPC at the given position with the specified template.
+    ///     Requests the server to add a non-block entity at the given position with the specified template.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
-    /// <param name="position">NPC position.</param>
-    /// <param name="npcTemplateId">NPC template entity ID.</param>
-    public void AddNpc(IEventSender eventSender, Vector3 position, ulong npcTemplateId)
+    /// <param name="position">Position.</param>
+    /// <param name="templateId">Non-block template entity ID.</param>
+    public void AddNonBlock(IEventSender eventSender, Vector3 position, ulong templateId)
     {
-        var details = new NpcAddEventDetails
+        var details = new NonBlockAddEventDetails
         {
             Position = position,
-            NpcTemplateId = npcTemplateId
+            TemplateId = templateId
         };
-        var ev = new Event(EventId.Server_WorldEdit_AddNpc, details);
+        var ev = new Event(EventId.Server_WorldEdit_AddNonBlock, details);
         eventSender.SendEvent(ev);
     }
 
     /// <summary>
-    ///     Requests the server to remove an NPC by entity ID.
+    ///     Requests the server to remove a non-block entity by entity ID.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
-    /// <param name="npcEntityId">NPC entity ID.</param>
-    public void RemoveNpc(IEventSender eventSender, ulong npcEntityId)
+    /// <param name="npcEntityId">Non-block entity ID.</param>
+    public void RemoveNonBlock(IEventSender eventSender, ulong npcEntityId)
     {
         var details = new NonBlockRemoveEventDetails
         {

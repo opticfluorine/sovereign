@@ -271,6 +271,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<WorldEditorGui>();
         services.TryAddSingleton<BlockWorldEditorGui>();
         services.TryAddSingleton<NpcWorldEditorGui>();
+        services.TryAddSingleton<ItemWorldEditorGui>();
         services.TryAddSingleton<WorldVertexSequencer>();
         services.TryAddSingleton<WorldLayerGrouper>();
         services.TryAddSingleton<WorldLayerVertexSequencer>();

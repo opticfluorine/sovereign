@@ -77,7 +77,7 @@ public class WorldEditSystem : ISystem
         EventId.Core_Tick,
         EventId.Server_WorldEdit_SetBlock,
         EventId.Server_WorldEdit_RemoveBlock,
-        EventId.Server_WorldEdit_AddNpc,
+        EventId.Server_WorldEdit_AddNonBlock,
         EventId.Server_WorldEdit_RemoveNonBlock
     };
 
@@ -124,22 +124,22 @@ public class WorldEditSystem : ISystem
                     HandleRemoveBlock(details);
                     break;
                 }
-                case EventId.Server_WorldEdit_AddNpc:
+                case EventId.Server_WorldEdit_AddNonBlock:
                 {
-                    if (ev.EventDetails is not NpcAddEventDetails details)
+                    if (ev.EventDetails is not NonBlockAddEventDetails details)
                     {
-                        logger.LogError("Received AddNpc with no details.");
+                        logger.LogError("Received AddNonBlock with no details.");
                         break;
                     }
 
-                    HandleAddNpc(details);
+                    HandleAddNonBlock(details);
                     break;
                 }
                 case EventId.Server_WorldEdit_RemoveNonBlock:
                 {
                     if (ev.EventDetails is not NonBlockRemoveEventDetails details)
                     {
-                        logger.LogError("Received RemoveNpc with no details.");
+                        logger.LogError("Received RemoveNonBlock with no details.");
                         break;
                     }
 
@@ -205,20 +205,20 @@ public class WorldEditSystem : ISystem
     }
 
     /// <summary>
-    ///     Handles an add NPC world edit request.
+    ///     Handles an add non-block entity world edit request.
     /// </summary>
     /// <param name="details">Request details.</param>
-    private void HandleAddNpc(NpcAddEventDetails details)
+    private void HandleAddNonBlock(NonBlockAddEventDetails details)
     {
-        logger.LogDebug("Add NPC with template {TemplateId:X} at {Position}.", details.NpcTemplateId, details.Position);
+        logger.LogDebug("Add entity with template {TemplateId:X} at {Position}.", details.TemplateId, details.Position);
         entityFactory.GetBuilder()
-            .Template(details.NpcTemplateId)
+            .Template(details.TemplateId)
             .Positionable(details.Position, Vector3.Zero)
             .Build();
     }
 
     /// <summary>
-    ///     Handles a remove NPC world edit request.
+    ///     Handles a remove non-block entity world edit request.
     /// </summary>
     /// <param name="details">Request details.</param>
     private void HandleRemoveNonBlock(NonBlockRemoveEventDetails details)

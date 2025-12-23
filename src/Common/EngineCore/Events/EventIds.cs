@@ -676,10 +676,11 @@ public enum EventId
     Server_WorldEdit_RemoveBlock = 200601,
 
     /// <summary>
-    ///     Requests that an NPC be added at a position using admin privileges. Sent by the client-side admin world editor.
+    ///     Requests that a non-block entity be added at a position using admin privileges. Sent by the client-side
+    ///     admin world editor.
     /// </summary>
     /// Associated details: NpcAddEventDetails
-    Server_WorldEdit_AddNpc = 200602,
+    Server_WorldEdit_AddNonBlock = 200602,
 
     /// <summary>
     ///     Requests that an NPC be removed using admin privileges. Sent by the client-side admin world editor.

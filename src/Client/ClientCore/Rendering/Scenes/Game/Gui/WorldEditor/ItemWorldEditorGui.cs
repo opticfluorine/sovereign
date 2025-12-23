@@ -27,7 +27,10 @@ using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
 
-public class NpcWorldEditorGui(
+/// <summary>
+///     World editor tab for item placement/deletion.
+/// </summary>
+public class ItemWorldEditorGui(
     NameComponentCollection names,
     ClientWorldEditServices worldEditServices,
     AnimatedSpriteComponentCollection animatedSprites,
@@ -43,57 +46,58 @@ public class NpcWorldEditorGui(
     private bool snapToGridChangeInProgress;
 
     /// <summary>
-    ///     Renders the NPC world editor controls.
+    ///     Renders the Item world editor controls.
     /// </summary>
     public void Render()
     {
-        RenderNpcTemplateControl();
-        RenderNpcDrawControls();
+        RenderItemTemplateControl();
+        RenderItemDrawControls();
+        RenderItemToolHelp();
     }
 
     /// <summary>
-    ///     Render the control for selecting and displaying the NPC template.
+    ///     Render the control for selecting and displaying the Item template.
     /// </summary>
-    private void RenderNpcTemplateControl()
+    private void RenderItemTemplateControl()
     {
-        if (!ImGui.BeginTable("WorldEditNpcTemplate", 2, ImGuiTableFlags.SizingStretchProp)) return;
+        if (!ImGui.BeginTable("WorldEditItemTemplate", 2, ImGuiTableFlags.SizingStretchProp)) return;
         ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed);
 
-        var templateName = names.HasComponentForEntity(worldEditServices.NpcTemplateId)
-            ? names[worldEditServices.NpcTemplateId]
+        var templateName = names.HasComponentForEntity(worldEditServices.ItemTemplateId)
+            ? names[worldEditServices.ItemTemplateId]
             : NoNameLabel;
 
         ImGui.TableNextColumn();
         RenderSpritePreview();
 
         ImGui.TableNextColumn();
-        var relId = worldEditServices.NpcTemplateId - EntityConstants.FirstTemplateEntityId;
+        var relId = worldEditServices.ItemTemplateId - EntityConstants.FirstTemplateEntityId;
         ImGui.Text(templateName);
-        ImGui.Text($"NPC Template {relId}");
+        ImGui.Text($"Item Template {relId}");
 
         ImGui.EndTable();
     }
 
     /// <summary>
-    ///     Renders the sprite preview for the currently selected NPC template.
+    ///     Renders the sprite preview for the currently selected Item template.
     /// </summary>
     private void RenderSpritePreview()
     {
-        if (!drawables.HasComponentForEntity(worldEditServices.NpcTemplateId) &&
-            !animatedSprites.HasComponentForEntity(worldEditServices.NpcTemplateId))
+        if (!drawables.HasComponentForEntity(worldEditServices.ItemTemplateId) &&
+            !animatedSprites.HasComponentForEntity(worldEditServices.ItemTemplateId))
         {
             guiExtensions.Sprite(rendererOptions.Value.DefaultHiddenPlaceholderSprite);
             return;
         }
 
-        var spriteId = animatedSprites[worldEditServices.NpcTemplateId];
+        var spriteId = animatedSprites[worldEditServices.ItemTemplateId];
         guiExtensions.AnimatedSprite(spriteId, Orientation.South, AnimationPhase.Default);
     }
 
     /// <summary>
-    ///     Renders the controls for drawing NPCs.
+    ///     Renders the controls for drawing Items.
     /// </summary>
-    private void RenderNpcDrawControls()
+    private void RenderItemDrawControls()
     {
         // Update snap-to-grid state if changed.
         if (snapToGridBuffer == worldEditServices.SnapToGrid) snapToGridChangeInProgress = false;
@@ -108,12 +112,12 @@ public class NpcWorldEditorGui(
     }
 
     /// <summary>
-    ///     Renders the help text for the NPC tool.
+    ///     Renders the help text for the Item tool.
     /// </summary>
-    private void RenderNpcToolHelp()
+    private void RenderItemToolHelp()
     {
         ImGui.Separator();
-        ImGui.Text("Left click to place NPC.");
-        ImGui.Text("Right click to remove NPC.");
+        ImGui.Text("Left click to place item.");
+        ImGui.Text("Right click to remove item.");
     }
 }
