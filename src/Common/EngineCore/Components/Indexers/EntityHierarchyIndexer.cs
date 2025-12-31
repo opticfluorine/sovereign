@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
@@ -36,14 +37,17 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
     /// </summary>
     private readonly Dictionary<ulong, HashSet<ulong>> directChildren = new();
 
+    private readonly ILogger<EntityHierarchyIndexer> logger;
+
     /// <summary>
     ///     Map from entity to the currently tracked parent entity.
     /// </summary>
     private readonly Dictionary<ulong, ulong> trackedParent = new();
 
-    public EntityHierarchyIndexer(ParentComponentCollection parents)
+    public EntityHierarchyIndexer(ParentComponentCollection parents, ILogger<EntityHierarchyIndexer> logger)
         : base(parents, parents)
     {
+        this.logger = logger;
     }
 
     /// <summary>
@@ -187,6 +191,7 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
 
         directChildren[parentId].Add(entityId);
         allDescendants[parentId].Add(entityId);
+        logger.LogDebug("Link {ChildId:X} to {ParentId:X}.", entityId, parentId);
 
         // Add the entity to the full span of any entities above the parent.
         // Also add any children of the entity to the full span in case a
@@ -200,6 +205,7 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
 
             allDescendants[currentId].Add(entityId);
             allDescendants[currentId].UnionWith(childSpan);
+            logger.LogDebug("Link {ChildId:X} plus children to {ParentId:X}.", entityId, currentId);
         }
 
         trackedParent[entityId] = parentId;

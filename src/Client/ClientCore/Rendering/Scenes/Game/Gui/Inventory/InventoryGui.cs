@@ -91,6 +91,8 @@ public sealed class InventoryGui(
                 // Occupied slot - show item.
                 RenderItem(i, itemId, hasSelection, selectedSlotIndex);
             }
+
+            ImGui.EndTable();
         }
 
         ImGui.End();

@@ -227,6 +227,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<NetworkDebugGui>();
         services.TryAddSingleton<DialogueGui>();
         services.TryAddSingleton<InventoryGui>();
+        services.TryAddSingleton<ItemContextGui>();
     }
 
     private static void AddResources(IServiceCollection services)
@@ -383,6 +384,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<InputInternalController>();
         services.TryAddSingleton<NullInputHandler>();
         services.TryAddSingleton<InGameInputHandler>();
+        services.TryAddSingleton<EntityClickHandler>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PerspectiveSystem>());
         services.TryAddSingleton<PerspectiveLineManager>();

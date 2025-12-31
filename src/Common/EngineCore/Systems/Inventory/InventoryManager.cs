@@ -51,10 +51,20 @@ internal sealed class InventoryManager(
     /// <param name="itemId">Item entity ID.</param>
     public void PickUpItem(ulong playerId, ulong itemId)
     {
-        if (!IsValidItem(playerId, itemId)) return;
-        if (!IsInRangeForPickup(playerId, itemId)) return;
+        if (!IsPickUpAllowed(playerId, itemId)) return;
 
         DoPickupToFirstSlot(playerId, itemId);
+    }
+
+    /// <summary>
+    ///     Determines whether the given entity is allowed to pick up the given item.
+    /// </summary>
+    /// <param name="entityId">Entity ID of the entity that is picking up.</param>
+    /// <param name="itemId">Item entity ID.</param>
+    /// <returns>true if allowed, false otherwise.</returns>
+    public bool IsPickUpAllowed(ulong entityId, ulong itemId)
+    {
+        return IsValidItem(entityId, itemId) && IsInRangeForPickup(entityId, itemId);
     }
 
     /// <summary>

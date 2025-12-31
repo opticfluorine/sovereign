@@ -122,6 +122,27 @@ public sealed class SlotIndexer : BaseComponentIndexer<EntityType>
         return false;
     }
 
+    /// <summary>
+    ///     Gets the slot index on an entity which holds the given item.
+    /// </summary>
+    /// <param name="entityId">Parent entity ID.</param>
+    /// <param name="itemId">Item entity ID.</param>
+    /// <param name="slotIndex">Slot index. Only meaningful if method returns true.</param>
+    /// <returns>true if the slot was found, false otherwise.</returns>
+    public bool TryGetSlotIndex(ulong entityId, ulong itemId, out int slotIndex)
+    {
+        slotIndex = 0;
+
+        lock (accessLock)
+        {
+            if (!slotsByParent.TryGetValue(entityId, out var slots) ||
+                !parents.TryGetValue(itemId, out var slotId)) return false;
+
+            slotIndex = slots.BinarySearch(slotId);
+            return slotIndex >= 0;
+        }
+    }
+
     protected override void StartUpdatesCallback()
     {
         accessLock.Enter();

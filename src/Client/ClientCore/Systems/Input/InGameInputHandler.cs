@@ -16,6 +16,8 @@
 
 using SDL2;
 using Sovereign.ClientCore.Events.Details;
+using Sovereign.ClientCore.Systems.Camera;
+using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.ClientCore.Systems.Player;
 using Sovereign.EngineCore.Events;
 
@@ -23,20 +25,27 @@ namespace Sovereign.ClientCore.Systems.Input;
 
 public class InGameInputHandler : IInputHandler
 {
+    private readonly CameraServices cameraServices;
+    private readonly EntityClickHandler entityClickHandler;
     private readonly IEventSender eventSender;
     private readonly InGameKeyboardShortcuts inGameKeyboardShortcuts;
     private readonly KeyboardState keyboardState;
+    private readonly IPerspectiveServices perspectiveServices;
     private readonly PlayerController playerController;
     private readonly PlayerInputMovementMapper playerInputMovementMapper;
 
     public InGameInputHandler(KeyboardState keyboardState, PlayerInputMovementMapper playerInputMovementMapper,
-        InGameKeyboardShortcuts inGameKeyboardShortcuts, PlayerController playerController, IEventSender eventSender)
+        InGameKeyboardShortcuts inGameKeyboardShortcuts, PlayerController playerController, IEventSender eventSender,
+        IPerspectiveServices perspectiveServices, CameraServices cameraServices, EntityClickHandler entityClickHandler)
     {
         this.keyboardState = keyboardState;
         this.playerInputMovementMapper = playerInputMovementMapper;
         this.inGameKeyboardShortcuts = inGameKeyboardShortcuts;
         this.playerController = playerController;
         this.eventSender = eventSender;
+        this.perspectiveServices = perspectiveServices;
+        this.cameraServices = cameraServices;
+        this.entityClickHandler = entityClickHandler;
     }
 
     public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
@@ -71,6 +80,16 @@ public class InGameInputHandler : IInputHandler
 
             /* Ignore keys that don't do anything for now. */
         }
+    }
+
+    public void HandleMouseButtonEvent(MouseButtonEventDetails details, bool isButtonDown)
+    {
+        if (!isButtonDown) return;
+
+        // What did the player just click?
+        var clickPos = cameraServices.GetMousePositionWorldCoordinates();
+        if (perspectiveServices.TryGetHighestCoveringEntity(clickPos, out var entityId))
+            entityClickHandler.OnEntityClicked(entityId, details.Button);
     }
 
     /// <summary>

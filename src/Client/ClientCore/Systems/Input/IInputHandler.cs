@@ -30,4 +30,11 @@ public interface IInputHandler
     /// <param name="isKeyUp">If true, key up event; key down otherwise.</param>
     /// <param name="oldState">Previous state of the affected key.</param>
     void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState);
+
+    /// <summary>
+    ///     Handles a mouse button event.
+    /// </summary>
+    /// <param name="details">Mouse button event details.</param>
+    /// <param name="isButtonDown">Whether the mouse button is down.</param>
+    void HandleMouseButtonEvent(MouseButtonEventDetails details, bool isButtonDown);
 }

@@ -280,6 +280,7 @@ public static class CoreServiceCollectionExtensions
     {
         services.TryAddSingleton<InventoryManager>();
         services.TryAddSingleton<IInventoryController, InventoryController>();
+        services.TryAddSingleton<IInventoryServices, InventoryServices>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, InventorySystem>());
     }
 

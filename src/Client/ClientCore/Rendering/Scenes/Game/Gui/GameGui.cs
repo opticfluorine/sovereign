@@ -33,6 +33,7 @@ public class GameGui
     private readonly DialogueGui dialogueGui;
     private readonly EntityDebugGui entityDebugGui;
     private readonly InventoryGui inventoryGui;
+    private readonly ItemContextGui itemContextGui;
     private readonly InGameMenuGui menuGui;
     private readonly OverlayGui overlayGui;
     private readonly PlayerDebugGui playerDebugGui;
@@ -43,7 +44,8 @@ public class GameGui
 
     public GameGui(ClientStateServices stateServices, PlayerDebugGui playerDebugGui, EntityDebugGui entityDebugGui,
         InGameMenuGui menuGui, ChatGui chatGui, TemplateEditorGui templateEditorGui, PlayerRoleCheck roleCheck,
-        WorldEditorGui worldEditorGui, OverlayGui overlayGui, DialogueGui dialogueGui, InventoryGui inventoryGui)
+        WorldEditorGui worldEditorGui, OverlayGui overlayGui, DialogueGui dialogueGui, InventoryGui inventoryGui,
+        ItemContextGui itemContextGui)
     {
         this.stateServices = stateServices;
         this.playerDebugGui = playerDebugGui;
@@ -56,6 +58,7 @@ public class GameGui
         this.overlayGui = overlayGui;
         this.dialogueGui = dialogueGui;
         this.inventoryGui = inventoryGui;
+        this.itemContextGui = itemContextGui;
     }
 
     /// <summary>
@@ -73,6 +76,7 @@ public class GameGui
 
         overlayGui.Render(renderPlan);
         dialogueGui.Render();
+        itemContextGui.Render();
 
         // Clear window focus when first entering the game so that controls aren't absorbed by the GUI.
         if (stateServices.CheckAndClearFlagValue(ClientStateFlag.NewLogin))

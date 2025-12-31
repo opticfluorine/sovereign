@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2025 opticfluorine
+// Copyright (c) 2026 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,27 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components.Types;
+using System.Numerics;
 
-namespace Sovereign.EngineCore.Components.Validators;
+namespace Sovereign.ClientCore.Rendering.Gui;
 
 /// <summary>
-///     Validator for EntityType components.
+///     Common colors for GUI elements.
 /// </summary>
-public class EntityTypeComponentValidator
+public static class GuiColors
 {
     /// <summary>
-    ///     Determines if the entity type is valid.
+    ///     Text color for disabled/greyed-out text.
     /// </summary>
-    /// <param name="entityType">Entity type.</param>
-    /// <returns>true if valid, false otherwise.</returns>
-    public bool IsValid(EntityType entityType)
-    {
-        // Check if the entity type is valid
-        return entityType == EntityType.Npc ||
-               entityType == EntityType.Item ||
-               entityType == EntityType.Player ||
-               entityType == EntityType.Slot ||
-               entityType == EntityType.Other;
-    }
+    public static readonly Vector4 DisabledText = new(0.7f, 0.7f, 0.7f, 1.0f);
 }

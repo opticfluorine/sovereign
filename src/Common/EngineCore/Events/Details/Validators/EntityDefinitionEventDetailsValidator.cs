@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace Sovereign.EngineCore.Events.Details.Validators;
 
@@ -26,10 +27,13 @@ public class EntityDefinitionEventDetailsValidator : IEventDetailsValidator
     private const int MAX_DEFINITIONS = 256;
 
     private readonly EntityDefinitionValidator definitionValidator;
+    private readonly ILogger<EntityDefinitionEventDetailsValidator> logger;
 
-    public EntityDefinitionEventDetailsValidator(EntityDefinitionValidator definitionValidator)
+    public EntityDefinitionEventDetailsValidator(EntityDefinitionValidator definitionValidator,
+        ILogger<EntityDefinitionEventDetailsValidator> logger)
     {
         this.definitionValidator = definitionValidator;
+        this.logger = logger;
     }
 
     public bool IsValid(IEventDetails? details)
@@ -37,9 +41,14 @@ public class EntityDefinitionEventDetailsValidator : IEventDetailsValidator
         if (details == null || details.GetType() != typeof(EntityDefinitionEventDetails)) return false;
 
         var castDetails = (EntityDefinitionEventDetails)details;
-        return castDetails.EntityDefinitions.Count <= MAX_DEFINITIONS
-               && !castDetails.EntityDefinitions
-                   .Select(def => definitionValidator.Validate(def))
-                   .Contains(false);
+        if (castDetails.EntityDefinitions.Count > MAX_DEFINITIONS)
+        {
+            logger.LogError("Received event with too many details ({Count}).", castDetails.EntityDefinitions.Count);
+            return false;
+        }
+
+        return !castDetails.EntityDefinitions
+            .Select(def => definitionValidator.Validate(def))
+            .Contains(false);
     }
 }
