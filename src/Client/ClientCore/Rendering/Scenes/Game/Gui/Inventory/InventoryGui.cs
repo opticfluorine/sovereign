@@ -57,9 +57,18 @@ public sealed class InventoryGui(
     /// </summary>
     public void Render()
     {
-        if (!stateServices.TryGetSelectedPlayer(out var playerId)) return;
-        if (!ImGui.Begin("Inventory")) return;
         itemSize = guiExtensions.WorldUnitsToPixels(Vector2.One);
+
+        if (!stateServices.TryGetSelectedPlayer(out var playerId)) return;
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+        ImGui.SetNextWindowSize(new Vector2(itemSize.X * GridWidthItems + GridWidthItems - 5.0f, 0.0f));
+        if (!ImGui.Begin("Inventory", ImGuiWindowFlags.NoResize))
+        {
+            ImGui.PopStyleVar();
+            ImGui.PopStyleVar();
+            return;
+        }
 
         slotList.Clear();
         slotIndexer.GetSlotsForEntity(playerId, slotList);
@@ -74,7 +83,9 @@ public sealed class InventoryGui(
                 ImGui.GetMousePos());
         }
 
-        if (ImGui.BeginTable("invGrid", GridWidthItems, ImGuiTableFlags.SizingFixedSame))
+        if (ImGui.BeginTable("invGrid", GridWidthItems,
+                ImGuiTableFlags.SizingFixedSame | ImGuiTableFlags.BordersInner | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.NoHostExtendX |
+                ImGuiTableFlags.NoPadInnerX | ImGuiTableFlags.NoPadOuterX))
         {
             for (var i = 0; i < slotList.Count; ++i)
             {
@@ -96,6 +107,8 @@ public sealed class InventoryGui(
         }
 
         ImGui.End();
+        ImGui.PopStyleVar();
+        ImGui.PopStyleVar();
     }
 
     /// <summary>

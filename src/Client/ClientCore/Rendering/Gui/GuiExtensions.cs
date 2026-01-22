@@ -16,6 +16,8 @@
 
 using System.Linq;
 using Hexa.NET.ImGui;
+using Microsoft.Extensions.Options;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
@@ -34,14 +36,18 @@ public class GuiExtensions
     /// </summary>
     public const float SpriteScaleFactor = 0.0833f;
 
+    private readonly RendererOptions rendererOptions;
+
     private readonly ScriptInfoClient scriptInfoClient;
 
     private readonly GuiTextureMapper textureMapper;
 
-    public GuiExtensions(GuiTextureMapper textureMapper, ScriptInfoClient scriptInfoClient)
+    public GuiExtensions(GuiTextureMapper textureMapper, ScriptInfoClient scriptInfoClient,
+        IOptions<RendererOptions> rendererOptions)
     {
         this.textureMapper = textureMapper;
         this.scriptInfoClient = scriptInfoClient;
+        this.rendererOptions = rendererOptions.Value;
     }
 
     /// <summary>
@@ -312,7 +318,7 @@ public class GuiExtensions
     public Vector2 WorldUnitsToPixels(Vector2 worldUnits)
     {
         var fontSize = ImGui.GetFontSize();
-        return fontSize * SpriteScaleFactor * worldUnits;
+        return fontSize * SpriteScaleFactor * worldUnits * rendererOptions.TileWidth;
     }
 
     /// <summary>
