@@ -204,16 +204,16 @@ public class PlayerManagementClient
                 return result;
             }
 
-            var response = await httpResponse.Content.ReadFromJsonAsync<SelectPlayerResponse>();
-            if (response == null)
-            {
-                var msg = "Null response received from server.";
-                logger.LogError(msg);
-                return new Option<SelectPlayerResponse, string>(msg);
-            }
-
             if (httpResponse.StatusCode == HttpStatusCode.OK)
             {
+                var response = await httpResponse.Content.ReadFromJsonAsync<SelectPlayerResponse>();
+                if (response == null)
+                {
+                    var msg = "Null response received from server.";
+                    logger.LogError(msg);
+                    return new Option<SelectPlayerResponse, string>(msg);
+                }
+
                 // Success
                 logger.LogInformation("Selected player ID {EntityId:X}.", playerEntityId);
                 internalController.SetPlayerEntityId(eventSender, playerEntityId);
@@ -222,16 +222,9 @@ public class PlayerManagementClient
             else
             {
                 // Failed
-                if (response.Result != null)
-                {
-                    logger.LogError("Failed to select player {EntityId:X}: {Result}", playerEntityId, response.Result);
-                    result = new Option<SelectPlayerResponse, string>(response.Result);
-                }
-                else
-                {
-                    logger.LogError("Failed to select player {EntityId:X}: Unknown error", playerEntityId);
-                    result = new Option<SelectPlayerResponse, string>("Unknown error.");
-                }
+                var response = await httpResponse.Content.ReadAsStringAsync();
+                logger.LogError("Failed to select player {EntityId:X}: {Result}", playerEntityId, response);
+                result = new Option<SelectPlayerResponse, string>(response);
             }
         }
         catch (Exception e)
