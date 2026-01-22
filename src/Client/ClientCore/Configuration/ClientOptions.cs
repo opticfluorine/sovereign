@@ -281,4 +281,18 @@ public sealed class EditorOptions
         },
         Name = "New NPC"
     };
+
+    /// <summary>
+    ///     Default definition for newly added item template entities.
+    /// </summary>
+    public EntityDefinition DefaultNewItemTemplate { get; set; } = new()
+    {
+        AnimatedSpriteId = 0,
+        Drawable = Vector2.Zero,
+        CastShadows = new Shadow
+        {
+            Radius = 0.1f
+        },
+        Name = "New Item"
+    };
 }

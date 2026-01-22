@@ -276,7 +276,7 @@ public class ItemTemplateEditorTab
         // Save a new template entity to the server with default values.
         // Once the server accepts this, it will synchronize the template with all clients,
         // and the template will appear in the editor on the following tick.
-        var emptyDef = new EntityDefinition(editorOptions.DefaultNewNpcTemplate)
+        var emptyDef = new EntityDefinition(editorOptions.DefaultNewItemTemplate)
         {
             EntityId = entityTable.TakeNextTemplateEntityId(),
             EntityType = EntityType.Item
