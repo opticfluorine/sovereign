@@ -29,5 +29,7 @@ public struct Shadow
     /// <summary>
     ///     Shadow radius.
     /// </summary>
-    [ScriptableField] [Key(0)] public float Radius;
+    [ScriptableField]
+    [Key(0)]
+    public float Radius { get; set; }
 }

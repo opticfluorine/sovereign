@@ -75,6 +75,10 @@ builder.Services
 builder.Services.AddAuthorizationBuilder()
     .AddSovereignPolicies();
 
+// JSON configuration for REST server.
+builder.Services
+    .ConfigureHttpJsonOptions(options => { options.SerializerOptions.IncludeFields = true; });
+
 // Load server runtime options.
 var runtimeOptions = builder.Configuration
     .GetSection($"Sovereign:{nameof(RuntimeOptions)}")
