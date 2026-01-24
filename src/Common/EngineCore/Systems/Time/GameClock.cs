@@ -90,6 +90,13 @@ internal class GameClock(
         Time += (uint)delta;
         if (delta > 0)
         {
+            if (delta > 1)
+            {
+                logger.LogWarning("Game clock did not keep up (delta = {Delta}).", delta);
+                logger.LogTrace("New clock time: {Time} (ST = {ST}, LU = {LU}, D = {D})", Time, systemTime,
+                    lastUpdateTimeUs, delta);
+            }
+
             lastUpdateTimeUs += delta * SecondsToMicroseconds;
             dataController.SetGlobalSync(TimeConstants.ClockGlobalKey, Time);
         }
