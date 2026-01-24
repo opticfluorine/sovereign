@@ -198,6 +198,10 @@ public class LuaComponentsGenerator : IIncrementalGenerator
 
                         resultCount = {model.MarshallerAssemblyName}.Lua.LuaMarshaller.Marshal(luaState, value);
                     }}
+                    catch (KeyNotFoundException)
+                    {{
+                        lua_pushnil(luaState);
+                    }}
                     catch (Exception e)
                     {{
                         logger.LogError(e, ""Error in components.{model.LuaName}.Get()."");
