@@ -208,7 +208,7 @@ public sealed class EntityScriptCallbacks
     {
         // If the entity is newly added, its callbacks will be enqueued through OnEntityAdded. Don't do anything
         // here in order to avoid double-invoking the lifecycle callbacks.
-        if (isNew) return;
+        if (isNew || entityId is >= ExcludeRangeStart and < ExcludeRangeEnd) return;
 
         entityLoadQueue.Enqueue(entityId);
         if (oldTemplateId > 0) entityTemplateUnloadQueue.Enqueue((entityId, oldTemplateId));
