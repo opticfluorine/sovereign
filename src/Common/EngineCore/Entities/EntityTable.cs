@@ -263,7 +263,8 @@ public class EntityTable
             entityTemplates.Remove(entityId);
         }
 
-        OnTemplateSet?.Invoke(entityId, templateEntityId, oldTemplateId, false, false);
+        if (templateEntityId != oldTemplateId)
+            OnTemplateSet?.Invoke(entityId, templateEntityId, oldTemplateId, false, false);
     }
 
     /// <summary>

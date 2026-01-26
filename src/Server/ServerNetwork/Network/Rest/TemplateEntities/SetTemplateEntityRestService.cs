@@ -36,9 +36,6 @@ public sealed class SetTemplateEntityRestService(
     ILogger<SetTemplateEntityRestService> logger,
     TemplateEntityController templateEntityController)
 {
-    //public override string Path => RestEndpoints.TemplateEntities + "/{id}";
-    //public override HttpMethod RequestType => HttpMethod.POST;
-
     /// <summary>
     ///     POST endpoint for setting template entity data.
     /// </summary>
