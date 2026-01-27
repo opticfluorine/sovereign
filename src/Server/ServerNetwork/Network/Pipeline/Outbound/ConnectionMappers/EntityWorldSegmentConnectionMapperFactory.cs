@@ -18,6 +18,7 @@ using System;
 using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.World;
 using Sovereign.EngineUtil.Monads;
@@ -34,8 +35,10 @@ public class EntityWorldSegmentConnectionMapperFactory
 {
     private readonly AccountServices accountServices;
     private readonly NetworkConnectionManager connectionManager;
+    private readonly EntityTable entityTable;
     private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<EntityWorldSegmentConnectionMapperFactory> logger;
+    private readonly ParentComponentCollection parents;
     private readonly WorldSegmentResolver resolver;
     private readonly PlayerRoleCheck roleCheck;
     private readonly ServerOnlyTagCollection serverOnly;
@@ -43,6 +46,8 @@ public class EntityWorldSegmentConnectionMapperFactory
 
     public EntityWorldSegmentConnectionMapperFactory(
         KinematicsComponentCollection kinematics,
+        ParentComponentCollection parents,
+        EntityTable entityTable,
         WorldSegmentResolver resolver,
         WorldManagementServices worldManagementServices,
         NetworkConnectionManager connectionManager,
@@ -52,6 +57,8 @@ public class EntityWorldSegmentConnectionMapperFactory
         ILogger<EntityWorldSegmentConnectionMapperFactory> logger)
     {
         this.kinematics = kinematics;
+        this.parents = parents;
+        this.entityTable = entityTable;
         this.resolver = resolver;
         this.worldManagementServices = worldManagementServices;
         this.connectionManager = connectionManager;
@@ -70,7 +77,7 @@ public class EntityWorldSegmentConnectionMapperFactory
         Func<OutboundEventInfo, Maybe<ulong>> entitySelector)
     {
         return new EntityWorldSegmentConnectionMapper(
-            kinematics, resolver, worldManagementServices, connectionManager,
+            kinematics, parents, entityTable, resolver, worldManagementServices, connectionManager,
             accountServices, serverOnly, roleCheck, logger, entitySelector);
     }
 }
