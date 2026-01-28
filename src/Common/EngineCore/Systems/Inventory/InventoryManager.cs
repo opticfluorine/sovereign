@@ -157,10 +157,9 @@ internal sealed class InventoryManager(
         if (!slotIndexer.TryFindEmptySlot(playerId, out var slotId)) return;
         kinematics.RemoveComponent(itemId);
         parents.AddComponent(itemId, slotId);
-        logger.LogInformation("{Player} picked up item {Item}.", loggingUtil.FormatEntity(playerId),
-            loggingUtil.FormatEntity(itemId));
+        logger.LogInformation("{Player} picked up item {Item} ({Id:X}).", loggingUtil.FormatEntity(playerId),
+            loggingUtil.FormatEntity(itemId), itemId);
     }
-
 
     /// <summary>
     ///     Processes an item drop.
@@ -171,8 +170,8 @@ internal sealed class InventoryManager(
     private void DoDrop(ulong playerId, ulong itemId, Vector3 position)
     {
         // Drop item: break link to slot, then position at same location as player.
-        logger.LogInformation("{Player} dropped item {Item}.", loggingUtil.FormatEntity(playerId),
-            loggingUtil.FormatEntity(itemId));
+        logger.LogInformation("{Player} dropped item {Item} ({Id:X}).", loggingUtil.FormatEntity(playerId),
+            loggingUtil.FormatEntity(itemId), itemId);
         parents.RemoveComponent(itemId);
         kinematics.AddComponent(itemId, new Kinematics { Position = position, Velocity = Vector3.Zero });
     }
