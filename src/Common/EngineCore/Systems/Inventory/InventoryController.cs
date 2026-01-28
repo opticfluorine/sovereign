@@ -28,8 +28,9 @@ public interface IInventoryController
     ///     Picks up the given item.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
+    /// <param name="playerId">Player ID.</param>
     /// <param name="itemId">Item ID.</param>
-    void PickUp(IEventSender eventSender, ulong itemId);
+    void PickUp(IEventSender eventSender, ulong playerId, ulong itemId);
 
     /// <summary>
     ///     Drops the given item.
@@ -52,10 +53,13 @@ public interface IInventoryController
 /// </summary>
 internal class InventoryController : IInventoryController
 {
-    public void PickUp(IEventSender eventSender, ulong itemId)
+    public void PickUp(IEventSender eventSender, ulong playerId, ulong itemId)
     {
         var details = new EntityEventDetails { EntityId = itemId };
-        var ev = new Event(EventId.Core_Inventory_PickUp, details);
+        var ev = new Event(EventId.Core_Inventory_PickUp, details)
+        {
+            FromPlayerId = playerId
+        };
         eventSender.SendEvent(ev);
     }
 

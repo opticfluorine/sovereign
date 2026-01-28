@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -69,7 +70,7 @@ public struct EntityInfo
 /// <summary>
 ///     Represents a list of entities at a common z-depth.
 /// </summary>
-public class EntityList(int z, List<EntityInfo> entities)
+public class EntityList(int z, List<EntityInfo> entities) : IComparable<EntityList>
 {
     /// <summary>
     ///     Comparer for EntityLists.
@@ -101,6 +102,11 @@ public class EntityList(int z, List<EntityInfo> entities)
     /// <param name="zFloor">Z floor.</param>
     private EntityList(int zFloor) : this(zFloor, EmptyList)
     {
+    }
+
+    public int CompareTo(EntityList? other)
+    {
+        return Comparer.Compare(this, other);
     }
 
     /// <summary>

@@ -84,7 +84,7 @@ function (behavior, spawnerEntityId)
         -- Check if a spawned item is in the spawn position.
         if itemId then
             local itemPosVel = components.kinematics.Get(itemId)
-            if Vectors.Equal(spawnPosVel.Position, itemPosVel.Position) then
+            if itemPosVel and Vectors.Equal(spawnPosVel.Position, itemPosVel.Position) then
                 -- Spawned item is still in original location, no action needed.
                 goto waiting
             end

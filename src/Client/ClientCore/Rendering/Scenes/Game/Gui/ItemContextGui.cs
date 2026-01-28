@@ -110,7 +110,13 @@ public sealed class ItemContextGui(
     /// </summary>
     private void DoPickUp()
     {
-        inventoryController.PickUp(eventSender, itemId);
+        if (!clientStateServices.TryGetSelectedPlayer(out var playerId))
+        {
+            logger.LogError("No player ID.");
+            return;
+        }
+
+        inventoryController.PickUp(eventSender, playerId, itemId);
     }
 
     /// <summary>

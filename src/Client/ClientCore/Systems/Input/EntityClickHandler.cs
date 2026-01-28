@@ -79,7 +79,7 @@ public sealed class EntityClickHandler(
         if (!clientStateServices.TryGetSelectedPlayer(out var playerId) ||
             !inventoryServices.CanPickUp(playerId, itemId)) return;
 
-        inventoryController.PickUp(eventSender, itemId);
+        inventoryController.PickUp(eventSender, playerId, itemId);
     }
 
     /// <summary>
