@@ -96,8 +96,7 @@ function (behavior, spawnerEntityId)
             Kinematics = {
                 Position = spawnPosVel.Position,
                 Velocity = Vectors.Vector3.Zero
-            },
-            NonPersistent = true
+            }
         })
         if not itemId then
             util.LogError(string.format("Spawner %X has failed; disabling until reload.", spawnerEntityId))
