@@ -92,7 +92,9 @@ public class PerspectiveLineManager
 
         entityTable.OnEntityAdded += AddEntity;
         entityTable.OnEntityRemoved += RemoveEntity;
+        kinematics.OnComponentAdded += (id, _, _) => AddNonBlockEntity(id, kinematics[id].Position);
         kinematics.OnComponentModified += (entityId, k) => NonBlockEntityMoved(entityId, k.Position);
+        kinematics.OnComponentRemoved += RemoveEntity;
     }
 
     /// <summary>
