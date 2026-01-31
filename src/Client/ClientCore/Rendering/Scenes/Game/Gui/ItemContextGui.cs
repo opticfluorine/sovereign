@@ -132,6 +132,6 @@ public sealed class ItemContextGui(
 
         if (!slotIndexer.TryGetSlotIndex(playerId, itemId, out var slotIndex)) return;
 
-        inventoryController.Drop(eventSender, slotIndex);
+        inventoryController.Drop(eventSender, playerId, slotIndex);
     }
 }

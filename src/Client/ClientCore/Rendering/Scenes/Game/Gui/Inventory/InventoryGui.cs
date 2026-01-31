@@ -224,7 +224,8 @@ public sealed class InventoryGui(
     /// <param name="slotIndex">Slot index.</param>
     private void OnDrop(int slotIndex)
     {
-        inventoryController.Drop(eventSender, slotIndex);
+        if (!stateServices.TryGetSelectedPlayer(out var playerId)) return;
+        inventoryController.Drop(eventSender, playerId, slotIndex);
         ImGui.CloseCurrentPopup();
     }
 
