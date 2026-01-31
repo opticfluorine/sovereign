@@ -44,7 +44,7 @@ public sealed class InventoryGui(
     ClientStateController stateController)
 {
     private const int GridWidthItems = 10;
-    private const float QuickSlotLabelOffset = 1.1f;
+    private const float QuickSlotLabelOffset = 1.5f;
     private readonly GuiLabelCache gridLabels = new("invg");
     private readonly GuiLabelCache gridPopups = new("invp");
 
@@ -77,14 +77,13 @@ public sealed class InventoryGui(
         if (hasSelection &&
             hierarchyIndexer.TryGetFirstDirectChild(slotList[selectedSlotIndex], out var selectedItemId) &&
             animatedSprites.TryGetValue(selectedItemId, out var selectedSpriteId))
-        {
             // Show the selected item being dragged at the mouse position.
             guiExtensions.AnimatedSpriteForeground(selectedSpriteId, Orientation.South, AnimationPhase.Default,
                 ImGui.GetMousePos());
-        }
 
         if (ImGui.BeginTable("invGrid", GridWidthItems,
-                ImGuiTableFlags.SizingFixedSame | ImGuiTableFlags.BordersInner | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.NoHostExtendX |
+                ImGuiTableFlags.SizingFixedSame | ImGuiTableFlags.BordersInner | ImGuiTableFlags.BordersOuterV |
+                ImGuiTableFlags.NoHostExtendX |
                 ImGuiTableFlags.NoPadInnerX | ImGuiTableFlags.NoPadOuterX))
         {
             for (var i = 0; i < slotList.Count; ++i)
@@ -120,20 +119,16 @@ public sealed class InventoryGui(
     /// <param name="selectedSlotIndex">Actively selected slot index. Only meaningful if isAnySelected is true.</param>
     private void RenderItem(int slotIndex, ulong itemId, bool isAnySelected, int selectedSlotIndex)
     {
-        var startPos = ImGui.GetCursorPos();
         var isSelected = isAnySelected && selectedSlotIndex == slotIndex;
+        var startPos = ImGui.GetCursorPos();
 
         // If the item has a sprite and isn't actively selected, draw it in its grid cell.
         // Otherwise, if it's selected, it will be floating with the mouse cursor.
         // Always blank if there is no sprite to draw.
         if (!isSelected && animatedSprites.TryGetValue(itemId, out var spriteId))
-        {
             guiExtensions.AnimatedSprite(spriteId, Orientation.South, AnimationPhase.Default, itemSize);
-        }
         else
-        {
             DrawBlank(gridLabels[slotIndex]);
-        }
 
         // Handle interactions.
         if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
@@ -146,18 +141,26 @@ public sealed class InventoryGui(
 
         // If this is the first row of the inventory...
         if (slotIndex / GridWidthItems == 0)
-        {
             // ...then draw the quickslot label at top right.
-            ImGui.PushFont(fontAtlas.ItemLabelFont);
-            var label = quickSlotLabels[slotIndex];
-            var labelSize = ImGui.CalcTextSize(label);
-
-            ImGui.SetCursorPos(startPos with { X = startPos.X + itemSize.X - QuickSlotLabelOffset * labelSize.X });
-            ImGui.Text(label);
-            ImGui.PopFont();
-        }
+            DrawQuickSlotLabel(slotIndex, startPos);
 
         RenderContextMenu(slotIndex, itemId);
+    }
+
+    /// <summary>
+    ///     Draws a quickslot label.
+    /// </summary>
+    /// <param name="slotIndex">Slot index.</param>
+    /// <param name="startPos">Position of top-left corner of inventory grid cell.</param>
+    private void DrawQuickSlotLabel(int slotIndex, Vector2 startPos)
+    {
+        ImGui.PushFont(fontAtlas.ItemLabelFont);
+        var label = quickSlotLabels[slotIndex];
+        var labelSize = ImGui.CalcTextSize(label);
+
+        ImGui.SetCursorPos(startPos with { X = startPos.X + itemSize.X - QuickSlotLabelOffset * labelSize.X });
+        ImGui.Text(label);
+        ImGui.PopFont();
     }
 
 
@@ -233,9 +236,11 @@ public sealed class InventoryGui(
     /// <param name="selectedSlotIndex">Actively selected slot index. Only meaningful if isAnySelected is true.</param>
     private void RenderEmpty(int slotIndex, bool isAnySelected, int selectedSlotIndex)
     {
+        var startPos = ImGui.GetCursorPos();
         DrawBlank(gridLabels[slotIndex]);
-
         if (ImGui.IsItemClicked(ImGuiMouseButton.Left)) OnLeftClickEmpty(slotIndex, isAnySelected, selectedSlotIndex);
+
+        if (slotIndex / GridWidthItems == 0) DrawQuickSlotLabel(slotIndex, startPos);
     }
 
     /// <summary>
