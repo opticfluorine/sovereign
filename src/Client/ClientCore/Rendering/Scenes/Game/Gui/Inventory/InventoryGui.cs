@@ -172,10 +172,12 @@ public sealed class InventoryGui(
     /// <param name="selectedSlotIndex">Currently selected slot index.</param>
     private void OnLeftClickItem(int slotIndex, bool isAnySelected, int selectedSlotIndex)
     {
+        if (!stateServices.TryGetSelectedPlayer(out var playerId)) return;
+
         var isSelected = isAnySelected && slotIndex == selectedSlotIndex;
         if (isAnySelected)
         {
-            if (!isSelected) inventoryController.Swap(eventSender, slotIndex, selectedSlotIndex);
+            if (!isSelected) inventoryController.Swap(eventSender, playerId, slotIndex, selectedSlotIndex);
             stateController.DeselectItem(eventSender);
         }
         else
@@ -252,9 +254,9 @@ public sealed class InventoryGui(
     /// <param name="selectedSlotIndex">Actively selected slot index. Only meaningful if isAnySelected is true.</param>
     private void OnLeftClickEmpty(int slotIndex, bool isAnySelected, int selectedSlotIndex)
     {
-        if (!isAnySelected) return;
+        if (!isAnySelected || !stateServices.TryGetSelectedPlayer(out var playerId)) return;
 
-        inventoryController.Swap(eventSender, slotIndex, selectedSlotIndex);
+        inventoryController.Swap(eventSender, playerId, slotIndex, selectedSlotIndex);
         stateController.DeselectItem(eventSender);
     }
 

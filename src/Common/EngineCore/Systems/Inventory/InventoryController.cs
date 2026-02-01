@@ -44,9 +44,10 @@ public interface IInventoryController
     ///     Swaps the contents of two inventory slots.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
+    /// <param name="playerId">Player ID.</param>
     /// <param name="firstSlotIdx">First slot index.</param>
     /// <param name="secondSlotIdx">Second slot index.</param>
-    void Swap(IEventSender eventSender, int firstSlotIdx, int secondSlotIdx);
+    void Swap(IEventSender eventSender, ulong playerId, int firstSlotIdx, int secondSlotIdx);
 }
 
 /// <summary>
@@ -74,10 +75,13 @@ internal class InventoryController : IInventoryController
         eventSender.SendEvent(ev);
     }
 
-    public void Swap(IEventSender eventSender, int firstSlotIdx, int secondSlotIdx)
+    public void Swap(IEventSender eventSender, ulong playerId, int firstSlotIdx, int secondSlotIdx)
     {
         var details = new IntPairEventDetails { First = firstSlotIdx, Second = secondSlotIdx };
-        var ev = new Event(EventId.Core_Inventory_Swap, details);
+        var ev = new Event(EventId.Core_Inventory_Swap, details)
+        {
+            FromPlayerId = playerId
+        };
         eventSender.SendEvent(ev);
     }
 }
