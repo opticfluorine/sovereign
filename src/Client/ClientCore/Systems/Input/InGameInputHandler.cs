@@ -17,6 +17,7 @@
 using SDL2;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Systems.Camera;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.ClientCore.Systems.Player;
 using Sovereign.EngineCore.Events;
@@ -29,14 +30,19 @@ public class InGameInputHandler : IInputHandler
     private readonly EntityClickHandler entityClickHandler;
     private readonly IEventSender eventSender;
     private readonly InGameKeyboardShortcuts inGameKeyboardShortcuts;
+    private readonly InventoryClickHandler inventoryClickHandler;
     private readonly KeyboardState keyboardState;
     private readonly IPerspectiveServices perspectiveServices;
     private readonly PlayerController playerController;
     private readonly PlayerInputMovementMapper playerInputMovementMapper;
+    private readonly ClientStateController stateController;
+    private readonly ClientStateServices stateServices;
 
     public InGameInputHandler(KeyboardState keyboardState, PlayerInputMovementMapper playerInputMovementMapper,
         InGameKeyboardShortcuts inGameKeyboardShortcuts, PlayerController playerController, IEventSender eventSender,
-        IPerspectiveServices perspectiveServices, CameraServices cameraServices, EntityClickHandler entityClickHandler)
+        IPerspectiveServices perspectiveServices, CameraServices cameraServices, EntityClickHandler entityClickHandler,
+        ClientStateServices stateServices, InventoryClickHandler inventoryClickHandler,
+        ClientStateController stateController)
     {
         this.keyboardState = keyboardState;
         this.playerInputMovementMapper = playerInputMovementMapper;
@@ -46,6 +52,9 @@ public class InGameInputHandler : IInputHandler
         this.perspectiveServices = perspectiveServices;
         this.cameraServices = cameraServices;
         this.entityClickHandler = entityClickHandler;
+        this.stateServices = stateServices;
+        this.inventoryClickHandler = inventoryClickHandler;
+        this.stateController = stateController;
     }
 
     public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
@@ -82,9 +91,20 @@ public class InGameInputHandler : IInputHandler
         }
     }
 
+    /// <summary>
+    ///     Handles mouse button events.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    /// <param name="isButtonDown">true if mouse button is down, false otherwise.</param>
     public void HandleMouseButtonEvent(MouseButtonEventDetails details, bool isButtonDown)
     {
         if (!isButtonDown) return;
+
+        if (stateServices.TryGetSelectedInventorySlot(out var slotIndex))
+        {
+            inventoryClickHandler.DropSelectedItem(slotIndex, keyboardState[SDL.SDL_Keycode.SDLK_LCTRL]);
+            stateController.DeselectItem(eventSender);
+        }
 
         // What did the player just click?
         var clickPos = cameraServices.GetMousePositionWorldCoordinates();

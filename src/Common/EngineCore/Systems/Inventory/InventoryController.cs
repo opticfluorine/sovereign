@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Numerics;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
@@ -39,6 +40,15 @@ public interface IInventoryController
     /// <param name="playerId">Player ID.</param>
     /// <param name="slotIndex">Inventory slot index.</param>
     void Drop(IEventSender eventSender, ulong playerId, int slotIndex);
+
+    /// <summary>
+    ///     Drops the given item at the specified position.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="playerId">Player ID.</param>
+    /// <param name="slotIndex">Inventory slot index.</param>
+    /// <param name="position">Requested drop position.</param>
+    void Drop(IEventSender eventSender, ulong playerId, int slotIndex, Vector3 position);
 
     /// <summary>
     ///     Swaps the contents of two inventory slots.
@@ -69,6 +79,20 @@ internal class InventoryController : IInventoryController
     {
         var details = new IntEventDetails { Value = (uint)slotIndex };
         var ev = new Event(EventId.Core_Inventory_Drop, details)
+        {
+            FromPlayerId = playerId
+        };
+        eventSender.SendEvent(ev);
+    }
+
+    public void Drop(IEventSender eventSender, ulong playerId, int slotIndex, Vector3 position)
+    {
+        var details = new IntVectorEventDetails
+        {
+            IntValue = slotIndex,
+            VectorValue = position
+        };
+        var ev = new Event(EventId.Core_Inventory_DropAtPosition, details)
         {
             FromPlayerId = playerId
         };

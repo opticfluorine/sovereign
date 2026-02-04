@@ -385,6 +385,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<NullInputHandler>();
         services.TryAddSingleton<InGameInputHandler>();
         services.TryAddSingleton<EntityClickHandler>();
+        services.TryAddSingleton<InventoryClickHandler>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PerspectiveSystem>());
         services.TryAddSingleton<PerspectiveLineManager>();

@@ -23,6 +23,7 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Systems.Inventory;
 
 namespace Sovereign.ClientCore.Systems.Player;
@@ -38,7 +39,8 @@ public sealed class PlayerInventoryActions(
     IEventSender eventSender,
     IInventoryController inventoryController,
     AnimatedSpriteUtil animatedSpriteUtil,
-    ILogger<PlayerInventoryActions> logger)
+    ILogger<PlayerInventoryActions> logger,
+    LoggingUtil loggingUtil)
 {
     private const int MaxItemsChecked = 16;
 
@@ -92,6 +94,8 @@ public sealed class PlayerInventoryActions(
             }
         }
 
+        logger.LogDebug("Selected item {Name} ({Id:X}, overlap = {Overlap}).", loggingUtil.FormatEntity(maxOverlapId),
+            maxOverlapId, maxOverlap);
         return maxOverlapId;
     }
 
