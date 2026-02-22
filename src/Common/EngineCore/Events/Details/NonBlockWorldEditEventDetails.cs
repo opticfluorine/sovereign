@@ -22,7 +22,7 @@ namespace Sovereign.EngineCore.Events.Details;
 ///     Event details for adding an NPC at a position with a template.
 /// </summary>
 [MessagePackObject]
-public class NpcAddEventDetails : IEventDetails
+public class NonBlockAddEventDetails : IEventDetails
 {
     /// <summary>
     ///     NPC position.
@@ -31,10 +31,10 @@ public class NpcAddEventDetails : IEventDetails
     public Vector3 Position { get; set; }
 
     /// <summary>
-    ///     NPC template ID.
+    ///     Non-block template ID.
     /// </summary>
     [Key(1)]
-    public ulong NpcTemplateId { get; set; }
+    public ulong TemplateId { get; set; }
 }
 
 /// <summary>

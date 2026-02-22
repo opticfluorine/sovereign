@@ -19,9 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Hexa.NET.ImGui;
-using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Components.Indexers;
-using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.EngineCore.Components;
@@ -42,7 +40,6 @@ public class NpcTemplateSelectorPopup
     private readonly NameComponentCollection nameComponentCollection;
     private readonly NpcTemplateEntityIndexer npcTemplateEntityIndexer;
     private readonly Vector2 preferredSize = new(15.0f, 20.0f);
-    private readonly RendererOptions rendererOptions;
     private Vector2 basePos = Vector2.Zero;
     private string instanceKey = string.Empty;
     private bool isSelected;
@@ -54,14 +51,12 @@ public class NpcTemplateSelectorPopup
         NpcTemplateEntityIndexer npcTemplateEntityIndexer,
         GuiExtensions guiExtensions,
         NameComponentCollection nameComponentCollection,
-        AnimatedSpriteComponentCollection animatedSprites,
-        IOptions<RendererOptions> rendererOptions)
+        AnimatedSpriteComponentCollection animatedSprites)
     {
         this.npcTemplateEntityIndexer = npcTemplateEntityIndexer;
         this.guiExtensions = guiExtensions;
         this.nameComponentCollection = nameComponentCollection;
         this.animatedSprites = animatedSprites;
-        this.rendererOptions = rendererOptions.Value;
     }
 
     /// <summary>

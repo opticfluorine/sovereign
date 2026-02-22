@@ -48,6 +48,7 @@ public class PerspectiveLineManager
 {
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly DrawableLookup drawableLookup;
+    private readonly Queue<ulong> entityAddQueue = new();
 
     /// <summary>
     ///     Object pool of entity lists to minimize heap churn for vertically moving entities.
@@ -68,6 +69,8 @@ public class PerspectiveLineManager
 
     private readonly ILogger<PerspectiveLineManager> logger;
 
+    private readonly Queue<(ulong, Vector3)> nonBlockAddQueue = new();
+
     /// <summary>
     ///     Active perspective lines indexed by their z-intercept (x, y) coordinates.
     /// </summary>
@@ -82,7 +85,8 @@ public class PerspectiveLineManager
 
     public PerspectiveLineManager(KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions, WorldSegmentResolver resolver,
-        EntityTable entityTable, DrawableLookup drawableLookup, ILogger<PerspectiveLineManager> logger)
+        EntityTable entityTable, DrawableLookup drawableLookup, ILogger<PerspectiveLineManager> logger,
+        EntityManager entityManager)
     {
         this.kinematics = kinematics;
         this.blockPositions = blockPositions;
@@ -90,9 +94,13 @@ public class PerspectiveLineManager
         this.drawableLookup = drawableLookup;
         this.logger = logger;
 
-        entityTable.OnEntityAdded += AddEntity;
+        entityTable.OnEntityAdded += EnqueueAddEntity;
         entityTable.OnEntityRemoved += RemoveEntity;
+        kinematics.OnComponentAdded += (id, _, _) => EnqueueAddNonBlock(id, kinematics[id].Position);
         kinematics.OnComponentModified += (entityId, k) => NonBlockEntityMoved(entityId, k.Position);
+        kinematics.OnComponentRemoved += RemoveEntity;
+        entityManager.OnUpdatesComplete += DispatchAddNonBlock;
+        entityManager.OnUpdatesComplete += DispatchAddEntity;
     }
 
     /// <summary>
@@ -254,12 +262,24 @@ public class PerspectiveLineManager
     /// <summary>
     ///     Iterates all current perspective lines.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>IEnumerable over all perspective lines.</returns>
     public IEnumerable<(int, int, PerspectiveLine)> GetAllLines()
     {
         // Take a snapshot before iterating in case the lines change during iteration.
         var copy = new Dictionary<PerspectiveLineKey, PerspectiveLine>(perspectiveLines);
         foreach (var kvp in copy) yield return (kvp.Key.X, kvp.Key.Yz, kvp.Value);
+    }
+
+    /// <summary>
+    ///     Iterates all perspective lines overlapped by the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>IEnumerable over the overlapped perspective lines.</returns>
+    public IEnumerable<(int, int, PerspectiveLine)> GetLineForEntity(ulong entityId)
+    {
+        if (!linesByEntity.TryGetValue(entityId, out var entityLines)) yield break;
+        var copy = new HashSet<PerspectiveLineKey>(entityLines);
+        foreach (var key in copy) yield return (key.X, key.Yz, perspectiveLines[key]);
     }
 
     /// <summary>
@@ -304,12 +324,21 @@ public class PerspectiveLineManager
         return RangeUtil.IsPointInRange(entityRangeMin, entityRangeMax, projectedPoint);
     }
 
+    private void EnqueueAddEntity(ulong entityId, bool isLoad)
+    {
+        entityAddQueue.Enqueue(entityId);
+    }
+
+    private void DispatchAddEntity()
+    {
+        while (entityAddQueue.TryDequeue(out var entityId)) AddEntity(entityId);
+    }
+
     /// <summary>
     ///     Called when a new entity is added.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    /// <param name="isLoad">Unused.</param>
-    private void AddEntity(ulong entityId, bool isLoad)
+    private void AddEntity(ulong entityId)
     {
         if (EntityUtil.IsTemplateEntity(entityId)) return;
 
@@ -317,8 +346,7 @@ public class PerspectiveLineManager
 
         if (isBlock) AddBlockEntity(entityId, blockPositions[entityId]);
         else if (kinematics.HasComponentForEntity(entityId)) AddNonBlockEntity(entityId, kinematics[entityId].Position);
-        else
-            logger.LogWarning("Non-block entity {EntityId:X} is drawable but has no position.", entityId);
+        // If no position - silently ignore, this is likely a drawable entity that is inside an inventory or container.
     }
 
     /// <summary>
@@ -339,6 +367,24 @@ public class PerspectiveLineManager
             indexFrontFace.OriginFlag);
 
         zFloorByEntity[entityId] = blockPosition.Z;
+    }
+
+    /// <summary>
+    ///     Enqueues a newly positioned non-block entity for processing.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="position">Position.</param>
+    private void EnqueueAddNonBlock(ulong entityId, Vector3 position)
+    {
+        nonBlockAddQueue.Enqueue((entityId, position));
+    }
+
+    /// <summary>
+    ///     Processes all enqueued newly positioned non-block entities.
+    /// </summary>
+    private void DispatchAddNonBlock()
+    {
+        while (nonBlockAddQueue.TryDequeue(out var info)) AddNonBlockEntity(info.Item1, info.Item2);
     }
 
     /// <summary>

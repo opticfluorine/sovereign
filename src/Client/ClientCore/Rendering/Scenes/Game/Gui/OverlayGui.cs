@@ -92,16 +92,17 @@ public class OverlayGui(
         switch (entityType)
         {
             case EntityType.Npc:
-                DrawNpcTooltip(entityId);
+            case EntityType.Item:
+                DrawEntityTooltip(entityId);
                 break;
         }
     }
 
     /// <summary>
-    ///     Draws the hover tooltip for an NPC.
+    ///     Draws the hover tooltip for an NPC or item.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    private void DrawNpcTooltip(ulong entityId)
+    private void DrawEntityTooltip(ulong entityId)
     {
         if (!ImGui.BeginTooltip()) return;
         ImGui.PopStyleVar();

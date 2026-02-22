@@ -16,23 +16,45 @@
 
 using SDL2;
 using Sovereign.ClientCore.Events.Details;
+using Sovereign.ClientCore.Systems.Camera;
+using Sovereign.ClientCore.Systems.ClientState;
+using Sovereign.ClientCore.Systems.Perspective;
+using Sovereign.ClientCore.Systems.Player;
+using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
 public class InGameInputHandler : IInputHandler
 {
+    private readonly CameraServices cameraServices;
+    private readonly EntityClickHandler entityClickHandler;
+    private readonly IEventSender eventSender;
     private readonly InGameKeyboardShortcuts inGameKeyboardShortcuts;
-    private readonly PlayerInteractionHandler interactionHandler;
+    private readonly InventoryClickHandler inventoryClickHandler;
     private readonly KeyboardState keyboardState;
+    private readonly IPerspectiveServices perspectiveServices;
+    private readonly PlayerController playerController;
     private readonly PlayerInputMovementMapper playerInputMovementMapper;
+    private readonly ClientStateController stateController;
+    private readonly ClientStateServices stateServices;
 
     public InGameInputHandler(KeyboardState keyboardState, PlayerInputMovementMapper playerInputMovementMapper,
-        InGameKeyboardShortcuts inGameKeyboardShortcuts, PlayerInteractionHandler interactionHandler)
+        InGameKeyboardShortcuts inGameKeyboardShortcuts, PlayerController playerController, IEventSender eventSender,
+        IPerspectiveServices perspectiveServices, CameraServices cameraServices, EntityClickHandler entityClickHandler,
+        ClientStateServices stateServices, InventoryClickHandler inventoryClickHandler,
+        ClientStateController stateController)
     {
         this.keyboardState = keyboardState;
         this.playerInputMovementMapper = playerInputMovementMapper;
         this.inGameKeyboardShortcuts = inGameKeyboardShortcuts;
-        this.interactionHandler = interactionHandler;
+        this.playerController = playerController;
+        this.eventSender = eventSender;
+        this.perspectiveServices = perspectiveServices;
+        this.cameraServices = cameraServices;
+        this.entityClickHandler = entityClickHandler;
+        this.stateServices = stateServices;
+        this.inventoryClickHandler = inventoryClickHandler;
+        this.stateController = stateController;
     }
 
     public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
@@ -61,8 +83,33 @@ public class InGameInputHandler : IInputHandler
                 HandleEKeyEvent(oldState, !isKeyUp);
                 break;
 
+            case SDL.SDL_Keycode.SDLK_COMMA:
+                HandleCommaKeyEvent(oldState, !isKeyUp);
+                break;
+
             /* Ignore keys that don't do anything for now. */
         }
+    }
+
+    /// <summary>
+    ///     Handles mouse button events.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    /// <param name="isButtonDown">true if mouse button is down, false otherwise.</param>
+    public void HandleMouseButtonEvent(MouseButtonEventDetails details, bool isButtonDown)
+    {
+        if (!isButtonDown) return;
+
+        if (stateServices.TryGetSelectedInventorySlot(out var slotIndex))
+        {
+            inventoryClickHandler.DropSelectedItem(slotIndex, keyboardState[SDL.SDL_Keycode.SDLK_LCTRL]);
+            stateController.DeselectItem(eventSender);
+        }
+
+        // What did the player just click?
+        var clickPos = cameraServices.GetMousePositionWorldCoordinates();
+        if (perspectiveServices.TryGetHighestCoveringEntity(clickPos, out var entityId))
+            entityClickHandler.OnEntityClicked(entityId, details.Button);
     }
 
     /// <summary>
@@ -98,6 +145,16 @@ public class InGameInputHandler : IInputHandler
     /// <param name="newState">New state of the key.</param>
     private void HandleEKeyEvent(bool oldState, bool newState)
     {
-        if (oldState && !newState) interactionHandler.Interact();
+        if (oldState && !newState) playerController.Interact(eventSender);
+    }
+
+    /// <summary>
+    ///     Handles ',' key events.
+    /// </summary>
+    /// <param name="oldState">Old state of the key (true = key down).</param>
+    /// <param name="newState">New state of the key (true = key down).</param>
+    private void HandleCommaKeyEvent(bool oldState, bool newState)
+    {
+        if (!oldState && newState) playerController.PickUpItemUnder(eventSender);
     }
 }

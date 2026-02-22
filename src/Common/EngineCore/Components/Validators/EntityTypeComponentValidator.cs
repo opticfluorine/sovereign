@@ -34,6 +34,7 @@ public class EntityTypeComponentValidator
         return entityType == EntityType.Npc ||
                entityType == EntityType.Item ||
                entityType == EntityType.Player ||
+               entityType == EntityType.Slot ||
                entityType == EntityType.Other;
     }
 }

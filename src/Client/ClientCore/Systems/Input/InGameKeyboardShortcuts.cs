@@ -43,6 +43,7 @@ public class InGameKeyboardShortcuts
         this.stateController = stateController;
 
         // For now the shortcuts are hardcoded.
+        shortcutTable[SDL.SDL_Keycode.SDLK_i] = () => Toggle(ClientStateFlag.ShowInventory);
         shortcutTable[SDL.SDL_Keycode.SDLK_RETURN] = () => Toggle(ClientStateFlag.ShowChat);
         shortcutTable[SDL.SDL_Keycode.SDLK_ESCAPE] = () => Toggle(ClientStateFlag.ShowInGameMenu);
         shortcutTable[SDL.SDL_Keycode.SDLK_F2] = () => Toggle(ClientStateFlag.ShowPlayerDebug);

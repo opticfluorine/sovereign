@@ -57,4 +57,9 @@ public class ClientWorldEditServices
     ///     NPC template entity ID to use for world editing.
     /// </summary>
     public ulong NpcTemplateId => state.NpcTemplateId;
+
+    /// <summary>
+    ///     Item template entity ID to use for world editing.
+    /// </summary>
+    public ulong ItemTemplateId => state.ItemTemplateId;
 }

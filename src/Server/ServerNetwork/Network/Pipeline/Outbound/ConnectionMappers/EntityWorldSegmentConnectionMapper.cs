@@ -18,6 +18,7 @@ using System;
 using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.World;
 using Sovereign.EngineUtil.Monads;
@@ -38,8 +39,10 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
     private readonly AccountServices accountServices;
     private readonly NetworkConnectionManager connectionManager;
     private readonly Func<OutboundEventInfo, Maybe<ulong>> entitySelector;
+    private readonly EntityTable entityTable;
     private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger logger;
+    private readonly ParentComponentCollection parents;
     private readonly WorldSegmentResolver resolver;
     private readonly PlayerRoleCheck roleCheck;
     private readonly ServerOnlyTagCollection serverOnly;
@@ -51,6 +54,8 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
     /// <param name="entitySelector">Function that gets the associated entity for the event.</param>
     internal EntityWorldSegmentConnectionMapper(
         KinematicsComponentCollection kinematics,
+        ParentComponentCollection parents,
+        EntityTable entityTable,
         WorldSegmentResolver resolver,
         WorldManagementServices worldManagementServices,
         NetworkConnectionManager connectionManager,
@@ -61,6 +66,8 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
         Func<OutboundEventInfo, Maybe<ulong>> entitySelector)
     {
         this.kinematics = kinematics;
+        this.parents = parents;
+        this.entityTable = entityTable;
         this.resolver = resolver;
         this.worldManagementServices = worldManagementServices;
         this.connectionManager = connectionManager;
@@ -82,14 +89,17 @@ public class EntityWorldSegmentConnectionMapper : ISpecificConnectionMapper
             return;
         }
 
-        if (!kinematics.HasComponentForEntity(entityId.Value))
+        // Skip if the source entity no longer exists.
+        if (!entityTable.Exists(entityId.Value)) return;
+
+        if (!kinematics.TryFindNearest(entityId.Value, parents, out var posVel, out _))
         {
             logger.LogError("Can't broadcast to world segment for non-positioned entity {Id:X}.", entityId.Value);
             return;
         }
 
         var isServerOnly = serverOnly.HasTagForEntity(entityId.Value);
-        var segmentIndex = resolver.GetWorldSegmentForPosition(kinematics[entityId.Value].Position);
+        var segmentIndex = resolver.GetWorldSegmentForPosition(posVel.Position);
 
         // Send the event to each player subscribed to the same world segment.
         var subscribedPlayers = worldManagementServices.GetPlayersSubscribedToWorldSegment(segmentIndex);

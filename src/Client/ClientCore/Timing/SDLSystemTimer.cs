@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using SDL2;
 using Sovereign.EngineCore.Timing;
 
@@ -37,8 +38,11 @@ public class SDLSystemTimer : ISystemTimer
 
     public SDLSystemTimer()
     {
-        performanceFrequency = SDL.SDL_GetPerformanceFrequency();
+        performanceFrequency = SDL.SDL_GetPerformanceFrequency() / 1000000;
         baseCount = SDL.SDL_GetPerformanceCounter();
+
+        if (performanceFrequency == 0)
+            throw new ApplicationException("System timer has insufficient precision.");
     }
 
     /// <summary>
@@ -47,7 +51,6 @@ public class SDLSystemTimer : ISystemTimer
     /// <returns>Current system time in us.</returns>
     public ulong GetTime()
     {
-        return 1000000 * (SDL.SDL_GetPerformanceCounter() - baseCount)
-               / performanceFrequency;
+        return (SDL.SDL_GetPerformanceCounter() - baseCount) / performanceFrequency;
     }
 }

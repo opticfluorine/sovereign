@@ -15,21 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Sovereign.Accounts.Systems.Accounts;
-using Sovereign.EngineCore.Components.Types;
-using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.NetworkCore.Network.Rest.Data;
-using Sovereign.Persistence.Players;
-using Sovereign.ServerCore.Configuration;
+using Sovereign.ServerNetwork.Entities.Players;
 
 namespace Sovereign.ServerNetwork.Network.Rest.Players;
 
@@ -39,37 +32,22 @@ namespace Sovereign.ServerNetwork.Network.Rest.Players;
 public sealed class CreatePlayerRestService
 {
     private readonly AccountsController accountsController;
-
-    /// <summary>
-    ///     Object used as a lock to avoid name duplication due to a race condition.
-    /// </summary>
-    private readonly Lock creationLock = new();
-
-    private readonly IEntityFactory entityFactory;
     private readonly IEventSender eventSender;
     private readonly ILogger<CreatePlayerRestService> logger;
-    private readonly NewPlayersOptions newPlayersOptions;
-    private readonly PersistencePlayerServices playerServices;
+    private readonly PlayerBuilder playerBuilder;
 
-    /// <summary>
-    ///     Tracks which names have been used recently in order to avoid duplication.
-    /// </summary>
-    private readonly HashSet<string> recentNames = new();
 
     private readonly CreatePlayerRequestValidator requestValidator;
 
-    public CreatePlayerRestService(IEntityFactory entityFactory,
-        CreatePlayerRequestValidator requestValidator, PersistencePlayerServices playerServices,
-        AccountsController accountsController, IEventSender eventSender, IOptions<NewPlayersOptions> newPlayersOptions,
-        ILogger<CreatePlayerRestService> logger)
+    public CreatePlayerRestService(CreatePlayerRequestValidator requestValidator,
+        AccountsController accountsController, IEventSender eventSender,
+        ILogger<CreatePlayerRestService> logger, PlayerBuilder playerBuilder)
     {
-        this.entityFactory = entityFactory;
         this.requestValidator = requestValidator;
-        this.playerServices = playerServices;
         this.accountsController = accountsController;
         this.eventSender = eventSender;
         this.logger = logger;
-        this.newPlayersOptions = newPlayersOptions.Value;
+        this.playerBuilder = playerBuilder;
     }
 
     /// <summary>
@@ -116,56 +94,11 @@ public sealed class CreatePlayerRestService
     /// <returns>true on success, false otherwise.</returns>
     private bool CreatePlayer(CreatePlayerRequest request, Guid accountId, out ulong playerEntityId)
     {
-        // Lock to avoid creating new player characters in parallel.
-        // The persistence scheme for the entity-component-system implementation forces a tradeoff
-        // between good component design and the ability to enforce a unique player name constraint
-        // in the database. To enforce a unique player name constraint, the player name component
-        // would have to be its own component separate from Name - not ideal. Instead we opt to
-        // not enforce a constraint in the database, and instead use a mutex to ensure that we don't
-        // have a race condition leading to the creation of multiple player characters with the smae
-        // name.
-        var result = false;
-        playerEntityId = 0;
+        var result = playerBuilder.TryCreatePlayer(request.PlayerName, accountId, out playerEntityId);
 
-        lock (creationLock)
-        {
-            if (!string.IsNullOrEmpty(request.PlayerName) &&
-                !recentNames.Contains(request.PlayerName) &&
-                !playerServices.IsPlayerNameTaken(request.PlayerName))
-            {
-                // Name is available and wasn't created recently - let's take it.
-                var builder = entityFactory.GetBuilder()
-                    .Account(accountId)
-                    .Name(request.PlayerName)
-                    .PlayerCharacter()
-                    .Positionable(new Vector3(0.0f, 0.0f, 1.0f)) // TODO Configurable start position
-                    .Drawable(Vector2.Zero)
-                    .Physics()
-                    .BoundingBox(new BoundingBox
-                    {
-                        Position = Vector3.Zero,
-                        Size = Vector3.One
-                    })
-                    .CastShadows(new Shadow { Radius = 0.2f })
-                    .AnimatedSprite(221); // TODO Configurable appearance
-
-                if (newPlayersOptions.AdminByDefault)
-                {
-                    logger.LogWarning("Player {Name} defaulting to admin; edit server configuration if unintended.",
-                        request.PlayerName);
-                    builder.Admin();
-                }
-
-                playerEntityId = builder.Build();
-
-                recentNames.Add(request.PlayerName);
-                result = true;
-
-                // Select the newly created character to continue login.
-                const bool newPlayer = true;
-                accountsController.SelectPlayer(eventSender, accountId, playerEntityId, newPlayer);
-            }
-        }
+        // Select the newly created character to continue login.
+        const bool newPlayer = true;
+        accountsController.SelectPlayer(eventSender, accountId, playerEntityId, newPlayer);
 
         return result;
     }

@@ -24,6 +24,11 @@ namespace Sovereign.EngineCore.Entities;
 public static class EntityConstants
 {
     /// <summary>
+    ///     Special entity ID meaning no entity.
+    /// </summary>
+    public const ulong NoEntity = 0;
+
+    /// <summary>
     ///     Entity ID of the first template entity.
     /// </summary>
     public const ulong FirstTemplateEntityId = 0x7ffe000000000000;

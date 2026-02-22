@@ -29,17 +29,20 @@ public class ClientWorldEditState
 {
     private readonly BlockTemplateEntityIndexer blockTemplateIndexer;
     private readonly InputServices inputServices;
+    private readonly ItemTemplateEntityIndexer itemTemplateIndexer;
     private readonly NpcTemplateEntityIndexer npcTemplateIndexer;
 
     private ulong blockTemplateId;
+    private ulong itemTemplateId;
     private ulong npcTemplateId;
 
     public ClientWorldEditState(InputServices inputServices, BlockTemplateEntityIndexer blockTemplateIndexer,
-        NpcTemplateEntityIndexer npcTemplateIndexer)
+        NpcTemplateEntityIndexer npcTemplateIndexer, ItemTemplateEntityIndexer itemTemplateIndexer)
     {
         this.inputServices = inputServices;
         this.blockTemplateIndexer = blockTemplateIndexer;
         this.npcTemplateIndexer = npcTemplateIndexer;
+        this.itemTemplateIndexer = itemTemplateIndexer;
     }
 
     /// <summary>
@@ -88,6 +91,23 @@ public class ClientWorldEditState
         }
 
         private set => npcTemplateId = value;
+    }
+
+    /// <summary>
+    ///     Selected item template.
+    /// </summary>
+    public ulong ItemTemplateId
+    {
+        get
+        {
+            // Lazy load of first item template entity ID.
+            if (itemTemplateId < EntityConstants.FirstTemplateEntityId)
+                itemTemplateId = itemTemplateIndexer.First;
+
+            return itemTemplateId;
+        }
+
+        private set => itemTemplateId = value;
     }
 
     /// <summary>
@@ -207,5 +227,10 @@ public class ClientWorldEditState
     /// <param name="isScrollUp">If true, mouse wheel scrolled up; down otherwise.</param>
     private void HandleScrollTickForItemTool(bool isScrollUp)
     {
+        if (!(isScrollUp
+                ? itemTemplateIndexer.TryGetNextLarger(ItemTemplateId, out var next)
+                : itemTemplateIndexer.TryGetNextSmaller(ItemTemplateId, out next))) return;
+
+        ItemTemplateId = next;
     }
 }

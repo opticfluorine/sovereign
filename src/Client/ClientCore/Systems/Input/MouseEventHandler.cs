@@ -16,6 +16,7 @@
 
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Events.Details;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
@@ -24,17 +25,13 @@ namespace Sovereign.ClientCore.Systems.Input;
 /// <summary>
 ///     Handles mouse-related input events.
 /// </summary>
-public class MouseEventHandler
+public class MouseEventHandler(
+    MouseState mouseState,
+    ILogger<MouseEventHandler> logger,
+    ClientStateServices stateServices,
+    InGameInputHandler inGameHandler,
+    NullInputHandler nullHandler)
 {
-    private readonly ILogger<MouseEventHandler> logger;
-    private readonly MouseState mouseState;
-
-    public MouseEventHandler(MouseState mouseState, ILogger<MouseEventHandler> logger)
-    {
-        this.mouseState = mouseState;
-        this.logger = logger;
-    }
-
     /// <summary>
     ///     Handles a mouse-related event.
     /// </summary>
@@ -109,6 +106,7 @@ public class MouseEventHandler
     private void HandleMouseButtonDownEvent(MouseButtonEventDetails details)
     {
         mouseState.SetButtonState(details.Button, true);
+        DoButtonStateSpecificProcessing(details, true);
     }
 
     /// <summary>
@@ -118,6 +116,7 @@ public class MouseEventHandler
     private void HandleMouseButtonUpEvent(MouseButtonEventDetails details)
     {
         mouseState.SetButtonState(details.Button, false);
+        DoButtonStateSpecificProcessing(details, false);
     }
 
     /// <summary>
@@ -127,5 +126,21 @@ public class MouseEventHandler
     private void HandleMouseWheelEvent(MouseWheelEventDetails details)
     {
         mouseState.UpdateWheel(details.ScrollAmount);
+    }
+
+    /// <summary>
+    ///     Dispatches state-specific mouse button event processing.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    /// <param name="isDown">Whether the mouse button is down.</param>
+    private void DoButtonStateSpecificProcessing(MouseButtonEventDetails details, bool isDown)
+    {
+        IInputHandler handler = stateServices.State switch
+        {
+            MainClientState.InGame => inGameHandler,
+            _ => nullHandler
+        };
+
+        handler.HandleMouseButtonEvent(details, isDown);
     }
 }

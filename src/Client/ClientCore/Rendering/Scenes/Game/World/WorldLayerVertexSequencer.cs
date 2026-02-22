@@ -62,7 +62,7 @@ public sealed class WorldLayerVertexSequencer
             out var frontBaseIndex, out var frontIndexCount);
 
         // Free sprites. These must be handled at the current layer plus any future layers with which they overlap.
-        spriteSequencer.SequenceSprites(layer.FreeSprites, renderPlan, SpritePlane.Xz, true,
+        spriteSequencer.SequenceSprites(layer.FreeSprites, renderPlan, SpritePlane.Dynamic, true,
             out var spriteBaseIndex, out var spriteIndexCount);
 
         renderPlan.PushDebugGroup($"Layer {layer.ZFloor}");

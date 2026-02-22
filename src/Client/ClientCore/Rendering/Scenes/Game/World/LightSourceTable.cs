@@ -56,6 +56,7 @@ public class LightSourceTable
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly AtlasMap atlasMap;
+    private readonly EntityTable entityTable;
     private readonly KinematicsComponentCollection kinematics;
 
     private readonly HashSet<ulong> knownSources = new();
@@ -76,6 +77,7 @@ public class LightSourceTable
         this.animatedSprites = animatedSprites;
         this.animatedSpriteManager = animatedSpriteManager;
         this.atlasMap = atlasMap;
+        this.entityTable = entityTable;
 
         pointLightSources.OnComponentAdded += OnLightAdded;
         pointLightSources.OnComponentRemoved += OnLightRemoved;
@@ -153,7 +155,19 @@ public class LightSourceTable
     /// <param name="isLoad">Unused.</param>
     private void OnLightAdded(ulong entityId, PointLight value, bool isLoad)
     {
-        if (EntityUtil.IsTemplateEntity(entityId)) return;
+        if (EntityUtil.IsTemplateEntity(entityId))
+        {
+            // If a template entity received a new light source, its instances need to be added to the table.
+            lock (sourcesLock)
+            {
+                foreach (var instanceId in entityTable.GetInstancesOfTemplate(entityId))
+                {
+                    knownSources.Add(instanceId);
+                }
+            }
+
+            return;
+        }
 
         lock (sourcesLock)
         {
@@ -168,7 +182,21 @@ public class LightSourceTable
     /// <param name="isUnload">Unused.</param>
     private void OnLightRemoved(ulong entityId, bool isUnload)
     {
-        if (EntityUtil.IsTemplateEntity(entityId)) return;
+        if (EntityUtil.IsTemplateEntity(entityId))
+        {
+            // If a template entity lost a light source, then its instances need to be removed if they do not
+            // have their own light source.
+            lock (sourcesLock)
+            {
+                foreach (var instanceId in entityTable.GetInstancesOfTemplate(entityId))
+                {
+                    if (pointLightSources.HasLocalComponentForEntity(instanceId)) continue;
+                    knownSources.Remove(instanceId);
+                }
+            }
+
+            return;
+        }
 
         lock (sourcesLock)
         {

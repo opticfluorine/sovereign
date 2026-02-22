@@ -38,6 +38,7 @@ public class EntityDataControlGroup(
     EntityDataClient entityDataClient,
     ScriptInfoClient scriptInfoClient,
     NpcTemplateSelectorPopup npcTemplateSelectorPopup,
+    ItemTemplateSelectorPopup itemTemplateSelectorPopup,
     NameComponentCollection names,
     EntityTypeComponentCollection entityTypes,
     AnimatedSpriteComponentCollection animatedSprites)
@@ -244,6 +245,7 @@ public class EntityDataControlGroup(
 
                 foreach (var param in scriptParameters) InputParameter(param);
                 npcTemplateSelectorPopup.Render();
+                itemTemplateSelectorPopup.Render();
 
                 ImGui.EndTable();
             }
@@ -294,11 +296,19 @@ public class EntityDataControlGroup(
                 ShowNpcTemplateSelect(hint, currentValue);
                 break;
 
+            case EntityParameterType.ItemTemplate:
+                ShowItemTemplateSelect(hint, currentValue);
+                break;
+
             case EntityParameterType.SameTypeTemplate:
                 switch (selectedEntityType)
                 {
                     case EntityType.Npc:
                         ShowNpcTemplateSelect(hint, currentValue);
+                        break;
+
+                    case EntityType.Item:
+                        ShowItemTemplateSelect(hint, currentValue);
                         break;
                 }
 
@@ -346,6 +356,42 @@ public class EntityDataControlGroup(
             else inputEntityData.Remove(hint.Name);
         }
     }
+
+    /// <summary>
+    ///     Shows controls specific to item template selection.
+    /// </summary>
+    /// <param name="hint">Parameter hint.</param>
+    /// <param name="currentValue">Current value as string.</param>
+    private void ShowItemTemplateSelect(EntityParameterHint hint, string currentValue)
+    {
+        if (!ulong.TryParse(currentValue, out var npcId)) npcId = 0;
+        if (npcId > 0)
+        {
+            if (!animatedSprites.TryGetValue(npcId, out var animSpriteId)) animSpriteId = 0;
+
+            if (!names.TryGetValue(npcId, out var name)) name = "[No Name]";
+            var textSize = ImGui.CalcTextSize(name);
+            var spriteSize =
+                guiExtensions.CalcAnimatedSpriteSize(animSpriteId, Orientation.South, AnimationPhase.Default);
+
+            guiExtensions.AnimatedSprite(animSpriteId, Orientation.South, AnimationPhase.Default);
+            var shift = 0.5f * (spriteSize.Y - textSize.Y);
+            ImGui.SameLine();
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + shift);
+            ImGui.Text(name);
+            ImGui.SameLine();
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + shift);
+        }
+
+        if (ImGui.Button("...")) itemTemplateSelectorPopup.Open(hint.Name);
+
+        if (itemTemplateSelectorPopup.TryGetSelection(hint.Name, out var newNpcId))
+        {
+            if (newNpcId > 0) inputEntityData[hint.Name] = newNpcId.ToString();
+            else inputEntityData.Remove(hint.Name);
+        }
+    }
+
 
     /// <summary>
     ///     Renders the remaining entity data (i.e. not callbacks or script parameters).

@@ -26,7 +26,7 @@ using Sovereign.EngineCore.Systems.Interaction;
 using Sovereign.EngineCore.World;
 using Sovereign.EngineUtil.Ranges;
 
-namespace Sovereign.ClientCore.Systems.Input;
+namespace Sovereign.ClientCore.Systems.Player;
 
 /// <summary>
 ///     Responsible for processing entity interactions as the result of player input.

@@ -19,20 +19,23 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 /// <summary>
 ///     Exports public services from the ClientState system to the rest of the client.
 /// </summary>
-public class ClientStateServices
+public sealed class ClientStateServices
 {
     private readonly ClientStateFlagManager flagManager;
+    private readonly InventoryStateManager inventoryStateManager;
     private readonly MainMenuStateMachine mainMenuStateMachine;
     private readonly PlayerStateManager playerStateManager;
     private readonly ClientStateMachine stateMachine;
 
     public ClientStateServices(ClientStateMachine stateMachine, ClientStateFlagManager flagManager,
-        PlayerStateManager playerStateManager, MainMenuStateMachine mainMenuStateMachine)
+        PlayerStateManager playerStateManager, MainMenuStateMachine mainMenuStateMachine,
+        InventoryStateManager inventoryStateManager)
     {
         this.stateMachine = stateMachine;
         this.flagManager = flagManager;
         this.playerStateManager = playerStateManager;
         this.mainMenuStateMachine = mainMenuStateMachine;
+        this.inventoryStateManager = inventoryStateManager;
     }
 
     /// <summary>
@@ -86,5 +89,15 @@ public class ClientStateServices
         var value = mainMenuStateMachine.NeedReset;
         mainMenuStateMachine.ClearReset();
         return value;
+    }
+
+    /// <summary>
+    ///     Gets the currently selected inventory slot, if any.
+    /// </summary>
+    /// <param name="slotIndex">Selected slot index. Only meaningful if method returns true.</param>
+    /// <returns>true if a slot is currently selected, false otherwise.</returns>
+    public bool TryGetSelectedInventorySlot(out int slotIndex)
+    {
+        return inventoryStateManager.TryGetSelectedSlot(out slotIndex);
     }
 }

@@ -37,7 +37,6 @@ public class NpcWorldEditorGui(
     DrawableComponentCollection drawables,
     IOptions<RendererOptions> rendererOptions)
 {
-    private const string NoSpriteLabel = "[no sprite]";
     private const string NoNameLabel = "[no name]";
 
     private bool snapToGridBuffer;

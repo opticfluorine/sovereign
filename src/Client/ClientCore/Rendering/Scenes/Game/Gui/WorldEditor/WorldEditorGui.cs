@@ -36,19 +36,21 @@ public class WorldEditorGui
 
     private readonly BlockWorldEditorGui blockWorldEditorGui;
     private readonly IEventSender eventSender;
+    private readonly ItemWorldEditorGui itemWorldEditorGui;
     private readonly NpcWorldEditorGui npcWorldEditorGui;
     private readonly ClientWorldEditController worldEditController;
     private readonly ClientWorldEditServices worldEditServices;
 
     public WorldEditorGui(ClientWorldEditServices worldEditServices, IEventSender eventSender,
         ClientWorldEditController worldEditController, BlockWorldEditorGui blockWorldEditorGui,
-        NpcWorldEditorGui npcWorldEditorGui)
+        NpcWorldEditorGui npcWorldEditorGui, ItemWorldEditorGui itemWorldEditorGui)
     {
         this.worldEditServices = worldEditServices;
         this.eventSender = eventSender;
         this.worldEditController = worldEditController;
         this.blockWorldEditorGui = blockWorldEditorGui;
         this.npcWorldEditorGui = npcWorldEditorGui;
+        this.itemWorldEditorGui = itemWorldEditorGui;
     }
 
     /// <summary>
@@ -73,6 +75,7 @@ public class WorldEditorGui
                 break;
 
             case WorldEditTool.Item:
+                itemWorldEditorGui.Render();
                 break;
         }
 

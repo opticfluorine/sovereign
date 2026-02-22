@@ -26,4 +26,8 @@ public class NullInputHandler : IInputHandler
     public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
     {
     }
+
+    public void HandleMouseButtonEvent(MouseButtonEventDetails details, bool isButtonDown)
+    {
+    }
 }

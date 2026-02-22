@@ -328,6 +328,33 @@ public enum EventId
 
     #endregion Interaction
 
+    #region Inventory
+
+    /// <summary>
+    ///     Event sent to pick up an item.
+    /// </summary>
+    /// Associated details: EntityEventDetails (item ID to pick up)
+    Core_Inventory_PickUp = 1300,
+
+    /// <summary>
+    ///     Event sent to drop an item.
+    /// </summary>
+    /// Associated details: IntEventDetails (slot index to drop)
+    Core_Inventory_Drop = 1301,
+
+    /// <summary>
+    ///     Event sent to drop an item at a specific position.
+    /// </summary>
+    Core_Inventory_DropAtPosition = 1302,
+
+    /// <summary>
+    ///     Event sent to swap the contents of two slots attached to the same entity.
+    /// </summary>
+    /// Associated details: IntPairEventDetails (values are slot indices to swap)
+    Core_Inventory_Swap = 1303,
+
+    #endregion Inventory
+
     #endregion Core
 
     #region Client
@@ -462,6 +489,12 @@ public enum EventId
     /// Associated details: MainMenuStateEventDetails
     Client_State_SetMainMenuState = 100401,
 
+    /// <summary>
+    ///     Event sent to select an item in the GUI.
+    /// </summary>
+    /// Associated details: IntEventDetails (value is slot index, -1 to deselect)
+    Client_State_SelectItem = 100402,
+
     #endregion Client_State
 
     #region Client_WorldEdit
@@ -507,6 +540,22 @@ public enum EventId
     Client_Dialogue_Advance = 10601,
 
     #endregion Client_Dialogue
+
+    #region Client_Player
+
+    /// <summary>
+    ///     Event sent to make the player pick up an item underneath them.
+    /// </summary>
+    /// Associated details: None
+    Client_Player_PickUpItemUnder = 10700,
+
+    /// <summary>
+    ///     Event sent to make the player interact with a nearby entity.
+    /// </summary>
+    /// Associated details: None
+    Client_Player_Interact = 10701,
+
+    #endregion Client_Player
 
     #endregion Client
 
@@ -627,10 +676,11 @@ public enum EventId
     Server_WorldEdit_RemoveBlock = 200601,
 
     /// <summary>
-    ///     Requests that an NPC be added at a position using admin privileges. Sent by the client-side admin world editor.
+    ///     Requests that a non-block entity be added at a position using admin privileges. Sent by the client-side
+    ///     admin world editor.
     /// </summary>
     /// Associated details: NpcAddEventDetails
-    Server_WorldEdit_AddNpc = 200602,
+    Server_WorldEdit_AddNonBlock = 200602,
 
     /// <summary>
     ///     Requests that an NPC be removed using admin privileges. Sent by the client-side admin world editor.

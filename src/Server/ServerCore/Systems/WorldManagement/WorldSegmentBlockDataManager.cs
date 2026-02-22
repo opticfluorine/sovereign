@@ -38,6 +38,7 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 /// </summary>
 public sealed class WorldSegmentBlockDataManager
 {
+    private const int AddWorldSegmentRetryCount = 3;
     private readonly BlockController blockController;
     private readonly BlockPositionComponentCollection blockPositions;
 
@@ -185,18 +186,24 @@ public sealed class WorldSegmentBlockDataManager
     /// <param name="segmentIndex">World segment index.</param>
     private Tuple<WorldSegmentBlockData, byte[]> DoAddWorldSegment(GridPosition segmentIndex)
     {
-        try
-        {
-            logger.LogTrace("Adding summary block data for world segment {Index}.", segmentIndex);
-            var blockData = generator.Create(segmentIndex);
-            var bytes = MessagePackSerializer.Serialize(blockData, MessageConfig.CompressedUntrustedMessagePackOptions);
-            return Tuple.Create(blockData, bytes);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error adding summary block data for world segment {Index}.", segmentIndex);
-            return Tuple.Create(new WorldSegmentBlockData(), Array.Empty<byte>());
-        }
+        // Retry on failure up to a certain number of times in case the task runs before all of the block
+        // component updates have committed.
+        for (var i = 0; i < AddWorldSegmentRetryCount; ++i)
+            try
+            {
+                logger.LogTrace("Adding summary block data for world segment {Index}.", segmentIndex);
+                var blockData = generator.Create(segmentIndex);
+                var bytes = MessagePackSerializer.Serialize(blockData,
+                    MessageConfig.CompressedUntrustedMessagePackOptions);
+                return Tuple.Create(blockData, bytes);
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Error adding summary block data for world segment {Index}.", segmentIndex);
+            }
+
+        logger.LogError("Failed to build summary block data for world segment {Index}.", segmentIndex);
+        return Tuple.Create(new WorldSegmentBlockData(), Array.Empty<byte>());
     }
 
     /// <summary>

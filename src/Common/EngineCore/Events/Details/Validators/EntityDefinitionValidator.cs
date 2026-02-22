@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Validators;
 using Sovereign.EngineCore.Entities;
 
@@ -22,19 +23,13 @@ namespace Sovereign.EngineCore.Events.Details.Validators;
 /// <summary>
 ///     Validates EntityDefinitionEventDetails objects.
 /// </summary>
-public class EntityDefinitionValidator
+public class EntityDefinitionValidator(
+    NameComponentValidator nameComponentValidator,
+    ShadowComponentValidator shadowComponentValidator,
+    EntityTypeComponentValidator entityTypeComponentValidator,
+    ILogger<EntityDefinitionValidator> logger)
 {
-    private readonly EntityTypeComponentValidator entityTypeComponentValidator;
-    private readonly NameComponentValidator nameComponentValidator;
-    private readonly ShadowComponentValidator shadowComponentValidator;
-
-    public EntityDefinitionValidator(NameComponentValidator nameComponentValidator,
-        ShadowComponentValidator shadowComponentValidator, EntityTypeComponentValidator entityTypeComponentValidator)
-    {
-        this.nameComponentValidator = nameComponentValidator;
-        this.shadowComponentValidator = shadowComponentValidator;
-        this.entityTypeComponentValidator = entityTypeComponentValidator;
-    }
+    private readonly ILogger<EntityDefinitionValidator> logger = logger;
 
     /// <summary>
     ///     Validates a single entity definition.
@@ -56,8 +51,8 @@ public class EntityDefinitionValidator
     /// <returns>true if valid, false otherwise.</returns>
     private bool AreComponentsValid(EntityDefinition definition)
     {
-        var valid = definition.TemplateEntityId is 0 or (>= EntityConstants.FirstTemplateEntityId
-            and <= EntityConstants.LastTemplateEntityId);
+        var valid = definition.TemplateEntityId is 0 or >= EntityConstants.FirstTemplateEntityId
+            and <= EntityConstants.LastTemplateEntityId;
 
         if (definition.Name != null)
             valid = valid && nameComponentValidator.IsValid(definition.Name);
@@ -66,6 +61,9 @@ public class EntityDefinitionValidator
             valid = valid && shadowComponentValidator.IsValid(definition.CastShadows);
 
         valid = valid && entityTypeComponentValidator.IsValid(definition.EntityType);
+
+        if (!valid)
+            logger.LogError("Definition for {Id:X} has invalid components.", definition.EntityId);
 
         return valid;
     }
@@ -77,8 +75,11 @@ public class EntityDefinitionValidator
     /// <returns>true if definition is valid for this rule, false otherwise.</returns>
     private bool IsNotPositionedChildEntity(EntityDefinition definition)
     {
-        return definition is not { Position: not null, Parent: not null }
-               && definition is not { BlockPosition: not null, Parent: not null };
+        var result = definition is not { Position: not null, Parent: not null }
+                     && definition is not { BlockPosition: not null, Parent: not null };
+
+        if (!result) logger.LogError("Definition for {Id:X} is a positioned child entity.", definition.EntityId);
+        return result;
     }
 
     /// <summary>
@@ -89,12 +90,15 @@ public class EntityDefinitionValidator
     /// <returns>true if valid for this rule, false otherwise.</returns>
     private bool IsCompleteIfPlayerCharacter(EntityDefinition definition)
     {
-        return !definition.PlayerCharacter ||
-               definition is
-               {
-                   Position: not null,
-                   Name: not null
-               };
+        var result = !definition.PlayerCharacter ||
+                     definition is
+                     {
+                         Position: not null,
+                         Name: not null
+                     };
+
+        if (!result) logger.LogError("Definition for {Id:X} is an incomplete player character.", definition.EntityId);
+        return result;
     }
 
     /// <summary>
@@ -104,6 +108,8 @@ public class EntityDefinitionValidator
     /// <returns>true if valid for this rule, false otherwise.</returns>
     private bool IsNotDoublePositioned(EntityDefinition definition)
     {
-        return definition is not { Position: not null, BlockPosition: not null };
+        var result = definition is not { Position: not null, BlockPosition: not null };
+        if (!result) logger.LogError("Definition for {Id:X} is dual-positioned.", definition.EntityId);
+        return result;
     }
 }

@@ -127,6 +127,14 @@ public class Event
     public int FromConnectionId { get; set; }
 
     /// <summary>
+    ///     Player ID that this originated from, or 0 if connection does not have an active player.
+    ///     For the client, this must be set by the originating Controller if needed.
+    ///     For the server, only meaningful if Local is false.
+    /// </summary>
+    [IgnoreMember]
+    public ulong FromPlayerId { get; set; }
+
+    /// <summary>
     ///     Details associated with the event.
     /// </summary>
     [Key(1)]

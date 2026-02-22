@@ -49,4 +49,9 @@ public struct PosVelId
     ///     Opacity alpha factor.
     /// </summary>
     public float Opacity;
+
+    /// <summary>
+    ///     For free sprites, indicates the plane in which the sprite lies.
+    /// </summary>
+    public SpritePlane SpritePlane;
 }

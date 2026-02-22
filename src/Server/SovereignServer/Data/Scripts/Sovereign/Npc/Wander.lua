@@ -81,15 +81,15 @@ function Wander.LoadParams(entityId)
     -- Validate per-entity parameters.
     local paramsValid = true
     if not wanderStep then
-        util.LogError(string.format("Entity %A requires parameter %s of type number.", entityId, ParamWanderStep))
+        util.LogError(string.format("Entity %X requires parameter %s of type number.", entityId, ParamWanderStep))
         paramsValid = false
     end
     if not wanderDelay then
-        util.LogError(string.format("Entity %A requires parameter %s of type number.", entityId, ParamWanderDelay))
+        util.LogError(string.format("Entity %X requires parameter %s of type number.", entityId, ParamWanderDelay))
         paramsValid = false
     end
     if not wanderSpeed then
-        util.LogError(string.format("Entity %A requires parameter %s of type number.", entityId, ParamWanderSpeed))
+        util.LogError(string.format("Entity %X requires parameter %s of type number.", entityId, ParamWanderSpeed))
         paramsValid = false
     end
     if not paramsValid then
@@ -97,15 +97,15 @@ function Wander.LoadParams(entityId)
     end
 
     if wanderStep <= 0 then
-        util.LogError(string.format("Entity %A has invalid wander step.", entityId))
+        util.LogError(string.format("Entity %X has invalid wander step.", entityId))
         paramsValid = false
     end
     if wanderDelay < 0 then
-        util.LogError(string.format("Entity %A has invalid wander delay.", entityId))
+        util.LogError(string.format("Entity %X has invalid wander delay.", entityId))
         paramsValid = false
     end
     if wanderSpeed <= 0 then
-        util.LogError(string.format("Entity %A has invalid wander speed.", entityId))
+        util.LogError(string.format("Entity %X has invalid wander speed.", entityId))
         paramsValid = false
     end
     if not paramsValid then
@@ -137,7 +137,7 @@ function Wander.RunAsync(behavior, entityId)
         -- Get current position and velocity.
         local posVel = components.kinematics.Get(entityId)
         if posVel == nil then
-            util.LogError(string.format("No Kinematics data for entity %A.", entityId))
+            util.LogError(string.format("No Kinematics data for entity %X.", entityId))
             return
         end
 
@@ -153,7 +153,7 @@ function Wander.RunAsync(behavior, entityId)
         -- Movement complete, so stop motion (leave Z axis alone for gravity).
         posVel = components.kinematics.Get(entityId)
         if posVel == nil then
-            util.LogError(string.format("No Kinematics data for entity %A.", entityId))
+            util.LogError(string.format("No Kinematics data for entity %X.", entityId))
             return
         end
 

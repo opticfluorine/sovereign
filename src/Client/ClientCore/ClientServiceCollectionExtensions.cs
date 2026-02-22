@@ -40,6 +40,7 @@ using Sovereign.ClientCore.Rendering.Scenes.Game;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Inventory;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
@@ -64,6 +65,7 @@ using Sovereign.ClientCore.Systems.Input;
 using Sovereign.ClientCore.Systems.Movement;
 using Sovereign.ClientCore.Systems.Network;
 using Sovereign.ClientCore.Systems.Perspective;
+using Sovereign.ClientCore.Systems.Player;
 using Sovereign.ClientCore.Timing;
 using Sovereign.ClientCore.Updater;
 using Sovereign.EngineCore.Components;
@@ -177,6 +179,8 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<BlockTemplateEntityIndexer>();
         services.TryAddSingleton<NpcTemplateEntityFilter>();
         services.TryAddSingleton<NpcTemplateEntityIndexer>();
+        services.TryAddSingleton<ItemTemplateEntityFilter>();
+        services.TryAddSingleton<ItemTemplateEntityIndexer>();
     }
 
     private static void AddEntities(IServiceCollection services)
@@ -222,6 +226,8 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<OverlayGui>();
         services.TryAddSingleton<NetworkDebugGui>();
         services.TryAddSingleton<DialogueGui>();
+        services.TryAddSingleton<InventoryGui>();
+        services.TryAddSingleton<ItemContextGui>();
     }
 
     private static void AddResources(IServiceCollection services)
@@ -257,6 +263,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<TemplateEditorGui>();
         services.TryAddSingleton<BlockTemplateEditorTab>();
         services.TryAddSingleton<NpcTemplateEditorTab>();
+        services.TryAddSingleton<ItemTemplateEditorTab>();
         services.TryAddSingleton<BasicInformationControlGroup>();
         services.TryAddSingleton<AppearanceControlGroup>();
         services.TryAddSingleton<BehaviorControlGroup>();
@@ -265,6 +272,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<WorldEditorGui>();
         services.TryAddSingleton<BlockWorldEditorGui>();
         services.TryAddSingleton<NpcWorldEditorGui>();
+        services.TryAddSingleton<ItemWorldEditorGui>();
         services.TryAddSingleton<WorldVertexSequencer>();
         services.TryAddSingleton<WorldLayerGrouper>();
         services.TryAddSingleton<WorldLayerVertexSequencer>();
@@ -275,6 +283,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<NonBlockShadowPlanner>();
         services.TryAddSingleton<OpacityTables>();
         services.TryAddSingleton<NpcTemplateSelectorPopup>();
+        services.TryAddSingleton<ItemTemplateSelectorPopup>();
 
         services.TryAddSingleton<MainMenuScene>();
         services.TryAddSingleton<StartupGui>();
@@ -303,6 +312,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<AnimatedSpriteDefinitionsLoader>();
         services.TryAddSingleton<AnimatedSpriteDefinitionsValidator>();
         services.TryAddSingleton<AnimatedSpriteManager>();
+        services.TryAddSingleton<AnimatedSpriteUtil>();
 
         services.TryAddSingleton<TextureAtlasManager>();
         services.TryAddSingleton<AtlasMap>();
@@ -340,6 +350,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<PlayerStateManager>();
         services.TryAddSingleton<MainMenuStateMachine>();
         services.TryAddSingleton<AutoUpdaterEndDetector>();
+        services.TryAddSingleton<InventoryStateManager>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ClientWorldEditSystem>());
         services.TryAddSingleton<ClientWorldEditState>();
@@ -373,7 +384,8 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<InputInternalController>();
         services.TryAddSingleton<NullInputHandler>();
         services.TryAddSingleton<InGameInputHandler>();
-        services.TryAddSingleton<PlayerInteractionHandler>();
+        services.TryAddSingleton<EntityClickHandler>();
+        services.TryAddSingleton<InventoryClickHandler>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PerspectiveSystem>());
         services.TryAddSingleton<PerspectiveLineManager>();
@@ -381,6 +393,11 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<IPerspectiveController, PerspectiveController>();
         services.TryAddSingleton<OverheadTransparency>();
         services.TryAddSingleton<OverheadBlockGraphManager>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PlayerSystem>());
+        services.TryAddSingleton<PlayerInventoryActions>();
+        services.TryAddSingleton<PlayerInteractionHandler>();
+        services.TryAddSingleton<PlayerController>();
     }
 
     private static void AddUpdater(IServiceCollection services)

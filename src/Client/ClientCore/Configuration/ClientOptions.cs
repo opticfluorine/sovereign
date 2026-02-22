@@ -124,6 +124,11 @@ public class DisplayOptions
     public float DialogueFontSize { get; set; }
 
     /// <summary>
+    ///     Base item label font size.
+    /// </summary>
+    public float ItemLabelFontSize { get; set; }
+
+    /// <summary>
     ///     Base height for determining the UI scaling factor.
     /// </summary>
     public int BaseScalingHeight { get; set; }
@@ -275,5 +280,19 @@ public sealed class EditorOptions
             Radius = 0.1f
         },
         Name = "New NPC"
+    };
+
+    /// <summary>
+    ///     Default definition for newly added item template entities.
+    /// </summary>
+    public EntityDefinition DefaultNewItemTemplate { get; set; } = new()
+    {
+        AnimatedSpriteId = 0,
+        Drawable = Vector2.Zero,
+        CastShadows = new Shadow
+        {
+            Radius = 0.1f
+        },
+        Name = "New Item"
     };
 }

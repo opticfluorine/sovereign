@@ -68,7 +68,7 @@ internal class NpcToolHandler(
                 (float)Math.Floor(position.Z));
 
         logger.LogDebug("Add NPC {NpcName} at {Position}.", loggingUtil.FormatEntity(state.NpcTemplateId), position);
-        internalController.AddNpc(eventSender, position, state.NpcTemplateId);
+        internalController.AddNonBlock(eventSender, position, state.NpcTemplateId);
     }
 
     public void ProcessErase()
@@ -79,7 +79,7 @@ internal class NpcToolHandler(
         var hoveredPos = cameraServices.GetMousePositionWorldCoordinates();
         if (perspectiveServices.TryGetHighestCoveringEntity(hoveredPos, out var entityId))
             if (entityTypes.TryGetValue(entityId, out var entityType) && entityType == EntityType.Npc)
-                internalController.RemoveNpc(eventSender, entityId);
+                internalController.RemoveNonBlock(eventSender, entityId);
     }
 
     public void Reset()

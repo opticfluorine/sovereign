@@ -76,6 +76,11 @@ public enum ClientStateFlag
     ShowTemplateEntityEditor,
 
     /// <summary>
+    ///     Flag indicating that the inventory GUI should be displayed.
+    /// </summary>
+    ShowInventory,
+
+    /// <summary>
     ///     Flag indicating that the game is in world edit mode.
     /// </summary>
     WorldEditMode,

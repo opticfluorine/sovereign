@@ -25,9 +25,9 @@ public class NpcAddEventDetailsValidator : IEventDetailsValidator
 {
     public bool IsValid(IEventDetails? details)
     {
-        if (details is not NpcAddEventDetails npcAdd)
+        if (details is not NonBlockAddEventDetails npcAdd)
             return false;
-        return npcAdd.NpcTemplateId is >= EntityConstants.FirstTemplateEntityId
+        return npcAdd.TemplateId is >= EntityConstants.FirstTemplateEntityId
             and <= EntityConstants.LastTemplateEntityId;
     }
 }

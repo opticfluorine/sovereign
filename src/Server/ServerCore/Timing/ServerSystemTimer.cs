@@ -29,24 +29,30 @@ public sealed class ServerSystemTimer : ISystemTimer
     /// <summary>
     ///     Conversion from seconds to microseconds.
     /// </summary>
-    private const long SecondsToMicroseconds = 1000000;
+    private const ulong SecondsToMicroseconds = 1000000;
 
     /// <summary>
     ///     High resolution stopwatch.
     /// </summary>
     private readonly Stopwatch stopwatch = new();
 
+    /// <summary>
+    ///     Conversion factor from stopwatch ticks to microseconds.
+    /// </summary>
+    private readonly ulong stopwatchToUs = (ulong)Stopwatch.Frequency / SecondsToMicroseconds;
+
     public ServerSystemTimer()
     {
         if (!Stopwatch.IsHighResolution)
             throw new ApplicationException("No high resolution timer available.");
+        if (stopwatchToUs == 0)
+            throw new ApplicationException("Insufficient timer resolution available.");
 
         stopwatch.Start();
     }
 
     public ulong GetTime()
     {
-        return (ulong)(SecondsToMicroseconds * stopwatch.ElapsedTicks
-                       / Stopwatch.Frequency);
+        return (ulong)stopwatch.ElapsedTicks / stopwatchToUs;
     }
 }

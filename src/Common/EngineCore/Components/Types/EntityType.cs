@@ -41,6 +41,11 @@ public enum EntityType
     Player = 2,
 
     /// <summary>
+    ///     Entity is a slot (e.g. inventory slot).
+    /// </summary>
+    Slot = 3,
+
+    /// <summary>
     ///     Entity has no special type. Not explicitly stored; only used in EntityDefinition.
     /// </summary>
     Other = 0x7F

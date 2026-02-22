@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Numerics;
 
 namespace Sovereign.EngineUtil.Numerics;
@@ -93,5 +94,15 @@ public static class Vector3Extensions
     public static bool IsFinite(this Vector3 v)
     {
         return float.IsFinite(v.X) && float.IsFinite(v.Y) && float.IsFinite(v.Z);
+    }
+
+    /// <summary>
+    ///     Returns the vector whose components are the floor of each component of this vector.
+    /// </summary>
+    /// <param name="orig">This vector.</param>
+    /// <returns>Floor of the input vector.</returns>
+    public static Vector3 Floor(this Vector3 orig)
+    {
+        return new Vector3((float)Math.Floor(orig.X), (float)Math.Floor(orig.Y), (float)Math.Floor(orig.Z));
     }
 }
