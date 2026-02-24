@@ -8,6 +8,8 @@
 
 * Updated the tile sprite editor to allow selecting animated sprites by clicking on the corresponding sprite in a spritesheet. This makes it much easier to work with large numbers of sprites - the old GUI just didn't scale to thousands of sprites.
 * Added a zoom tool to GUI controls for viewing spritesheets. This makes it easier to work with large spritesheets.
+* Fix various maintenance issues with the CI/CD pipeline.
+* Add a search functionality to the Animated Sprite Editor that allows you to jump to an animated sprite definition by clicking on one of its sprites in a spritesheet. Again, the goal here is to make it easier to work with large numbers of sprites.
 
 #### 23 February 2026
 

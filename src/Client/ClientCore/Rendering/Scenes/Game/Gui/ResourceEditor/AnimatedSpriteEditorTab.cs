@@ -44,6 +44,7 @@ public class AnimatedSpriteEditorTab
 
 
     private readonly AnimatedSpriteManager animatedSpriteManager;
+    private readonly AnimatedSpriteSheetSelectorPopup animatedSpriteSelectorPopup;
     private readonly GenerateAnimatedSpritesPopup generateAnimatedSpritesPopup;
     private readonly GuiExtensions guiExtensions;
     private readonly ILogger<AnimatedSpriteEditorTab> logger;
@@ -124,7 +125,8 @@ public class AnimatedSpriteEditorTab
 
     public AnimatedSpriteEditorTab(AnimatedSpriteManager animatedSpriteManager, GuiExtensions guiExtensions,
         SpriteSelectorPopup spriteSelectorPopup, SpriteManager spriteManager, TileSpriteManager tileSpriteManager,
-        GenerateAnimatedSpritesPopup generateAnimatedSpritesPopup, ILogger<AnimatedSpriteEditorTab> logger)
+        GenerateAnimatedSpritesPopup generateAnimatedSpritesPopup, ILogger<AnimatedSpriteEditorTab> logger,
+        AnimatedSpriteSheetSelectorPopup animatedSpriteSelectorPopup)
     {
         this.animatedSpriteManager = animatedSpriteManager;
         this.guiExtensions = guiExtensions;
@@ -133,6 +135,7 @@ public class AnimatedSpriteEditorTab
         this.tileSpriteManager = tileSpriteManager;
         this.generateAnimatedSpritesPopup = generateAnimatedSpritesPopup;
         this.logger = logger;
+        this.animatedSpriteSelectorPopup = animatedSpriteSelectorPopup;
 
         tileSpriteManager.OnTileSpriteAdded += RefreshDependencies;
         tileSpriteManager.OnTileSpriteUpdated += RefreshDependencies;
@@ -224,9 +227,16 @@ public class AnimatedSpriteEditorTab
             ImGui.EndTable();
 
             // Bottom control row.
-            if (ImGui.BeginTable("browserControls", 3, ImGuiTableFlags.SizingFixedFit))
+            if (ImGui.BeginTable("browserControls", 4, ImGuiTableFlags.SizingFixedFit))
             {
+                ImGui.TableSetupColumn("##0", ImGuiTableColumnFlags.WidthFixed);
                 ImGui.TableSetupColumn("##Span", ImGuiTableColumnFlags.WidthStretch);
+
+                // Search button.
+                ImGui.TableNextColumn();
+                if (ImGui.Button("\U0001f50d##Search")) animatedSpriteSelectorPopup.Open();
+                animatedSpriteSelectorPopup.Render();
+                if (animatedSpriteSelectorPopup.TryGetSelection(out var animSpriteId)) Select(animSpriteId);
 
                 ImGui.TableNextColumn();
 

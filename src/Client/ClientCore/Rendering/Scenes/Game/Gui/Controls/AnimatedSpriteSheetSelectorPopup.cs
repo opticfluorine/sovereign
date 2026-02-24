@@ -46,7 +46,7 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
     /// <summary>
     ///     Preferred size of selector if sufficient space is available.
     /// </summary>
-    private readonly Vector2 preferredSize = new(500.0f, 400.0f);
+    private readonly Vector2 preferredSize = 1.2f * new Vector2(500.0f, 400.0f);
 
     /// <summary>
     ///     Popup base position.
