@@ -1,5 +1,24 @@
 # Sovereign Engine Changelog
 
+## 2026
+
+### February
+
+#### 24 February 2026
+
+* Updated the tile sprite editor to allow selecting animated sprites by clicking on the corresponding sprite in a spritesheet. This makes it much easier to work with large numbers of sprites - the old GUI just didn't scale to thousands of sprites.
+* Added a zoom tool to GUI controls for viewing spritesheets. This makes it easier to work with large spritesheets.
+
+#### 23 February 2026
+
+* Fell way behind on maintaining this changelog. Progress slowed down over the past few months due to various life events, but still some big highlights from that time.
+* Wrapped up most work on NPCs for now. Made various bugfixes to NPCs, primarily around the handling of script callbacks.
+* Made a lot of progress on items and inventory. Items can now be created in the Item Template Editor (new tab in the Template Entity Editor) and placed using the world editor tool. Also added a standard reusable script for creating item spawns.
+* Added a basic inventory GUI with variable number of slots. Slots can be added or removed by adding/removing Slot entities as children of the player entity.
+* Added support for picking up items under the player using the `,` key.
+* Added support for dropping items from inventory by either right-clicking the item and selecting Drop, or by clicking the item to pick it up and then clicking a location to drop it.
+* Many bugfixes, including an issue where the in-game clock would unexpectedly jump ahead by very large amounts of time.
+
 ## 2025
 
 ### August
