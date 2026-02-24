@@ -27,7 +27,7 @@ jobs:
         with:
           dotnet-version: 9.0.x
       - name: Setup glslc
-        run: curl https://storage.googleapis.com/shaderc/artifacts/prod/graphics_shader_compiler/shaderc/linux/continuous_clang_release/418/20230531-104531/install.tgz -o install.tgz && tar -xzf install.tgz && sudo cp -r install/bin/* /usr/local/bin && sudo cp -r install/include/* /usr/local/include && sudo cp -r install/lib/* /usr/local/lib && sudo ldconfig
+        run: curl https://storage.googleapis.com/shaderc/artifacts/prod/graphics_shader_compiler/shaderc/linux/continuous_clang_release/515/20260126-070936/install.tgz -o install.tgz && tar -xzf install.tgz && sudo cp -r install/bin/* /usr/local/bin && sudo cp -r install/include/* /usr/local/include && sudo cp -r install/lib/* /usr/local/lib && sudo ldconfig
       - name: Restore dependencies
         run: dotnet restore
         working-directory: src
