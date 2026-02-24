@@ -34,7 +34,7 @@ public class GuiResourceManager : IDisposable
     /// <summary>
     ///     Size of GUI index buffer.
     /// </summary>
-    private const int GuiIndexBufferSize = 65536;
+    private const int GuiIndexBufferSize = 128 * 1024;
 
     /// <summary>
     ///     Size of GUI uniform buffer.

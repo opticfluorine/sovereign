@@ -39,6 +39,7 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
     private const string AnimSpritePopupName = "Select##animSheet";
     private const string ErrorPopupName = "Error##animSheet";
     private const int AnimSpriteGridWidth = 5;
+    private const int MaxZoomStep = 9;
 
     private readonly GuiLabelCache animButtonLabels = new("##animSpr");
 
@@ -83,6 +84,8 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
     ///     Selected animated sprite.
     /// </summary>
     private int selection;
+
+    private int zoomStep;
 
     /// <summary>
     ///     Opens the selector popup.
@@ -164,11 +167,14 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
         var maxSize = new Vector2(screenSize.X - basePos.X - 16, screenSize.Y - basePos.Y - 128);
         var realSize = new Vector2(Math.Min(preferredSize.X, maxSize.X), Math.Min(preferredSize.Y, maxSize.Y));
 
+        DrawZoomControls();
+
         if (ImGui.BeginTable("spriteSelectorView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, realSize))
         {
+            var zoom = 1.0f - zoomStep * 0.1f;
             ImGui.TableNextColumn();
             var sheetName = orderedSpriteSheets[currentSheetIdx];
-            guiExtensions.Spritesheet(sheetName);
+            guiExtensions.Spritesheet(sheetName, zoom);
             var spriteHovered = ImGui.IsItemHovered();
 
             var drawList = ImGui.GetWindowDrawList();
@@ -180,7 +186,7 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
             var start = ImGui.GetWindowPos() - new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
 
             var fontSize = ImGui.GetFontSize();
-            var scale = GuiExtensions.SpriteScaleFactor * fontSize;
+            var scale = GuiExtensions.SpriteScaleFactor * fontSize * zoom;
 
             for (var i = 0; i < rows; ++i)
             for (var j = 0; j < cols; ++j)
@@ -223,6 +229,24 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
 
             ImGui.EndTable();
         }
+    }
+
+    /// <summary>
+    ///     Draws controls for zooming the spritesheet view.
+    /// </summary>
+    private void DrawZoomControls()
+    {
+        var startStep = zoomStep;
+
+        if (startStep == 0) ImGui.BeginDisabled();
+        if (ImGui.Button("\ue0fd##zoomIn")) zoomStep--;
+        if (startStep == 0) ImGui.EndDisabled();
+
+        ImGui.SameLine();
+
+        if (startStep == MaxZoomStep) ImGui.BeginDisabled();
+        if (ImGui.Button("\ue0fe##zoomOut")) zoomStep++;
+        if (startStep == MaxZoomStep) ImGui.EndDisabled();
     }
 
     /// <summary>

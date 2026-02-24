@@ -230,13 +230,14 @@ public class GuiExtensions
     ///     Renders a full spritesheet to the GUI.
     /// </summary>
     /// <param name="spritesheet">Spritesheet name.</param>
-    public void Spritesheet(string spritesheet)
+    /// <param name="zoom">Zoom scaling factor.</param>
+    public void Spritesheet(string spritesheet, float zoom = 1.0f)
     {
         var texId = textureMapper.GetTextureIdForSpritesheet(spritesheet);
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         // Render GUI component.
-        ImGui.Image(texId, GetSpriteDimensions(texData));
+        ImGui.Image(texId, GetSpriteDimensions(texData) * new Vector2(zoom));
     }
 
     /// <summary>
