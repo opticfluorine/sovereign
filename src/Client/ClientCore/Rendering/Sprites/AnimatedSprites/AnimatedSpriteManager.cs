@@ -49,6 +49,11 @@ public sealed class AnimatedSpriteManager
     public readonly List<AnimatedSprite> AnimatedSprites = new();
 
     /// <summary>
+    ///     Map from sprite ID to a list of all animated sprite IDs which reference the sprite.
+    /// </summary>
+    public readonly Dictionary<int, List<int>> AnimatedSpritesContainingSprite = new();
+
+    /// <summary>
     ///     Animated sprite definitions loader.
     /// </summary>
     private readonly AnimatedSpriteDefinitionsLoader loader;
@@ -103,6 +108,7 @@ public sealed class AnimatedSpriteManager
             new List<Sprite> { spriteManager.Sprites[0] };
         AnimatedSprites.Insert(id, newSprite);
         SaveDefinitions();
+        UpdateSpriteMap();
         OnAnimatedSpriteAdded?.Invoke(id);
     }
 
@@ -121,6 +127,7 @@ public sealed class AnimatedSpriteManager
 
         AnimatedSprites[id] = new AnimatedSprite(newValue);
         SaveDefinitions();
+        UpdateSpriteMap();
     }
 
     /// <summary>
@@ -139,6 +146,7 @@ public sealed class AnimatedSpriteManager
 
         AnimatedSprites.RemoveAt(id);
         SaveDefinitions();
+        UpdateSpriteMap();
         OnAnimatedSpriteRemoved?.Invoke(id);
     }
 
@@ -177,6 +185,42 @@ public sealed class AnimatedSpriteManager
         AnimatedSprites.Clear();
         foreach (var def in definitions.AnimatedSprites.OrderBy(def => def.Id))
             AnimatedSprites.Add(new AnimatedSprite(def, spriteManager));
+
+        UpdateSpriteMap();
+    }
+
+    /// <summary>
+    ///     Updates the sprite-to-animated-sprite mapping.
+    /// </summary>
+    private void UpdateSpriteMap()
+    {
+        // This is a rare event (only once at startup unless the player is modifying animated sprites), so let's
+        // keep the logic simple and just rebuild the entire mapping whenever there is a change.
+        AnimatedSpritesContainingSprite.Clear();
+
+        for (var i = 0; i < AnimatedSprites.Count; ++i)
+        {
+            var animSprite = AnimatedSprites[i];
+            var sprites = animSprite.Phases.Values
+                .SelectMany(phase => phase.Frames.Values)
+                .SelectMany(frames => frames)
+                .Select(sprite => sprite.Id)
+                .Distinct();
+
+            foreach (var spriteId in sprites)
+            {
+                if (!AnimatedSpritesContainingSprite.TryGetValue(spriteId, out var dependentIds))
+                {
+                    dependentIds = new List<int>();
+                    dependentIds.Add(i);
+                    AnimatedSpritesContainingSprite[spriteId] = dependentIds;
+                    continue;
+                }
+
+                var index = dependentIds.BinarySearch(i);
+                if (index < 0) dependentIds.Insert(~index, i);
+            }
+        }
     }
 
     /// <summary>
@@ -192,19 +236,18 @@ public sealed class AnimatedSpriteManager
             var def = new AnimatedSpriteDefinitions.AnimatedSpriteDefinition
             {
                 Id = i,
-                Phases = animSprite.Phases.Select(
-                    p => Tuple.Create(p.Key,
-                        new AnimatedSpriteDefinitions.AnimatedSpritePhaseDefinition
-                        {
-                            AnimationTimestep = p.Value.FrameTime,
-                            Faces = p.Value.Frames
-                                .Select(f => Tuple.Create(f.Key,
-                                    new AnimatedSpriteDefinitions.AnimatedSpriteFaceDefinition
-                                    {
-                                        SpriteIds = f.Value.Select(sprite => sprite.Id).ToList()
-                                    }))
-                                .ToDictionary(t => t.Item1, t => t.Item2)
-                        })).ToDictionary(t => t.Item1, t => t.Item2)
+                Phases = animSprite.Phases.Select(p => Tuple.Create(p.Key,
+                    new AnimatedSpriteDefinitions.AnimatedSpritePhaseDefinition
+                    {
+                        AnimationTimestep = p.Value.FrameTime,
+                        Faces = p.Value.Frames
+                            .Select(f => Tuple.Create(f.Key,
+                                new AnimatedSpriteDefinitions.AnimatedSpriteFaceDefinition
+                                {
+                                    SpriteIds = f.Value.Select(sprite => sprite.Id).ToList()
+                                }))
+                            .ToDictionary(t => t.Item1, t => t.Item2)
+                    })).ToDictionary(t => t.Item1, t => t.Item2)
             };
             defs.AnimatedSprites.Add(def);
         }

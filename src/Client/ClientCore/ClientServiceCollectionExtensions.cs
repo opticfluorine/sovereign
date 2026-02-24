@@ -256,6 +256,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<MaterialEditorTab>();
         services.TryAddSingleton<SpriteSelectorPopup>();
         services.TryAddSingleton<AnimatedSpriteSelectorPopup>();
+        services.TryAddSingleton<AnimatedSpriteSheetSelectorPopup>();
         services.TryAddSingleton<TileSpriteSelectorPopup>();
         services.TryAddSingleton<MaterialSelectorPopup>();
         services.TryAddSingleton<GenerateAnimatedSpritesPopup>();

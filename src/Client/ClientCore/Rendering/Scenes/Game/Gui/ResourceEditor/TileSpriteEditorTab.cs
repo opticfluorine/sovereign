@@ -39,7 +39,7 @@ public class TileSpriteEditorTab
     /// </summary>
     private const uint SelectionColor = 0xFF773333;
 
-    private readonly AnimatedSpriteSelectorPopup animatedSpriteSelector;
+    private readonly AnimatedSpriteSheetSelectorPopup animatedSpriteSelector;
 
     private readonly GuiExtensions guiExtensions;
     private readonly ILogger<TileSpriteEditorTab> logger;
@@ -62,7 +62,7 @@ public class TileSpriteEditorTab
     private bool initialized;
 
     public TileSpriteEditorTab(TileSpriteManager tileSpriteManager, GuiExtensions guiExtensions,
-        MaterialManager materialManager, AnimatedSpriteSelectorPopup animatedSpriteSelector,
+        MaterialManager materialManager, AnimatedSpriteSheetSelectorPopup animatedSpriteSelector,
         TileSpriteSelectorPopup tileSpriteSelector, ILogger<TileSpriteEditorTab> logger)
     {
         this.tileSpriteManager = tileSpriteManager;
@@ -247,7 +247,7 @@ public class TileSpriteEditorTab
         {
             ImGui.TableSetupColumn(""); // Discard button
             ImGui.TableSetupColumn(""); // Preview
-            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, fontSize * 0.889f); // Spacer
+            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, fontSize * 0.889f); // Spacer
             ImGui.TableSetupColumn("N");
             ImGui.TableSetupColumn("NE");
             ImGui.TableSetupColumn("E");

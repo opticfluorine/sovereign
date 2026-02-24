@@ -21,24 +21,31 @@ using System.Numerics;
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 
 /// <summary>
-///     Reusable popup window for visually selecting a Sprite.
+///     Reusable popup window for selecting an Animated Sprite by clicking an associated Sprite in its sheet.
 /// </summary>
-public class SpriteSelectorPopup
+public sealed class AnimatedSpriteSheetSelectorPopup(
+    SpriteSheetManager spriteSheetManager,
+    GuiExtensions guiExtensions,
+    SpriteManager spriteManager,
+    AnimatedSpriteManager animatedSpriteManager)
 {
-    private const string PopupName = "Select Sprite";
-    private readonly GuiExtensions guiExtensions;
+    private const string PopupName = "Select Animated Sprite##animSheet";
+    private const string AnimSpritePopupName = "Select##animSheet";
+    private const string ErrorPopupName = "Error##animSheet";
+    private const int AnimSpriteGridWidth = 5;
+
+    private readonly GuiLabelCache animButtonLabels = new("##animSpr");
 
     /// <summary>
     ///     Preferred size of selector if sufficient space is available.
     /// </summary>
     private readonly Vector2 preferredSize = new(500.0f, 400.0f);
-
-    private readonly SpriteManager spriteManager;
-    private readonly SpriteSheetManager spriteSheetManager;
 
     /// <summary>
     ///     Popup base position.
@@ -70,18 +77,12 @@ public class SpriteSelectorPopup
     /// </summary>
     private List<string> orderedSpriteSheets = new();
 
+    private int selectedSprite;
+
     /// <summary>
-    ///     Selected sprite.
+    ///     Selected animated sprite.
     /// </summary>
     private int selection;
-
-    public SpriteSelectorPopup(SpriteSheetManager spriteSheetManager, GuiExtensions guiExtensions,
-        SpriteManager spriteManager)
-    {
-        this.spriteSheetManager = spriteSheetManager;
-        this.guiExtensions = guiExtensions;
-        this.spriteManager = spriteManager;
-    }
 
     /// <summary>
     ///     Opens the selector popup.
@@ -90,6 +91,7 @@ public class SpriteSelectorPopup
     {
         isSelected = false;
         selection = 0;
+        selectedSprite = 0;
         basePos = ImGui.GetMousePos();
 
         ImGui.OpenPopup(PopupName);
@@ -106,18 +108,24 @@ public class SpriteSelectorPopup
         {
             DrawTopBar();
             DrawSpritesheetView();
+
+            if (isSelected) ImGui.CloseCurrentPopup();
+
             ImGui.EndPopup();
         }
+
+        DrawAnimatedSpritePopup();
+        DrawErrorModal();
     }
 
     /// <summary>
     ///     Tries to get the latest selection.
     /// </summary>
-    /// <param name="spriteId">Set to the selected sprite ID if returns true.</param>
+    /// <param name="animatedSpriteId">Set to the selected sprite ID if returns true.</param>
     /// <returns>true if a selection has been made since the last call to Open(); false otherwise.</returns>
-    public bool TryGetSelection(out int spriteId)
+    public bool TryGetSelection(out int animatedSpriteId)
     {
-        spriteId = selection;
+        animatedSpriteId = selection;
         var result = isSelected;
         isSelected = false;
         return result;
@@ -210,15 +218,96 @@ public class SpriteSelectorPopup
                 // If a sprite is clicked, select it and close the popup.
                 if (spriteHovered && !isSheetComboOpen && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                     if (sprite != null)
-                    {
-                        selection = sprite.Id;
-                        isSelected = true;
-                        ImGui.CloseCurrentPopup();
-                    }
+                        OnSpriteClicked(sprite.Id);
             }
 
             ImGui.EndTable();
         }
+    }
+
+    /// <summary>
+    ///     Draws the popup for selecting a specific animated sprite.
+    /// </summary>
+    private void DrawAnimatedSpritePopup()
+    {
+        if (!ImGui.BeginPopup(AnimSpritePopupName)) return;
+
+        if (!animatedSpriteManager.AnimatedSpritesContainingSprite.TryGetValue(selectedSprite, out var animSpriteIds))
+        {
+            // No longer any choices available - shouldn't happen, but easy to handle gracefully.
+            ImGui.CloseCurrentPopup();
+            ImGui.EndPopup();
+            return;
+        }
+
+        if (ImGui.BeginTable("animSpriteChoices", AnimSpriteGridWidth,
+                ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollY))
+            for (var i = 0; i < animSpriteIds.Count; ++i)
+            {
+                var id = animSpriteIds[i];
+                ImGui.TableNextColumn();
+                if (guiExtensions.AnimatedSpriteButton(animButtonLabels[i], id, Orientation.South,
+                        AnimationPhase.Default))
+                    SelectAnimatedSprite(id);
+
+                if (ImGui.BeginItemTooltip())
+                {
+                    ImGui.Text($"Animated Sprite {id}");
+                    ImGui.EndTooltip();
+                }
+            }
+
+        if (!ImGui.IsWindowFocused()) ImGui.CloseCurrentPopup();
+        if (isSelected) ImGui.CloseCurrentPopup();
+        ImGui.EndPopup();
+    }
+
+    /// <summary>
+    ///     Draws the error message modal popup if it is open.
+    /// </summary>
+    private void DrawErrorModal()
+    {
+        if (!ImGui.BeginPopupModal(ErrorPopupName)) return;
+
+        ImGui.Text("No animated sprites available.");
+        if (ImGui.Button("OK")) ImGui.CloseCurrentPopup();
+
+        ImGui.EndPopup();
+    }
+
+    /// <summary>
+    ///     Called when the player clicks a defined sprite.
+    /// </summary>
+    /// <param name="spriteId">Sprite ID.</param>
+    private void OnSpriteClicked(int spriteId)
+    {
+        if (!animatedSpriteManager.AnimatedSpritesContainingSprite.TryGetValue(spriteId, out var animSpriteIds))
+        {
+            // No animated sprites available for this sprite.
+            ImGui.OpenPopup(ErrorPopupName);
+            return;
+        }
+
+        if (animSpriteIds.Count == 1)
+        {
+            // If only one animated sprite is available, select it without prompting the player.
+            SelectAnimatedSprite(animSpriteIds[0]);
+            return;
+        }
+
+        // Otherwise, we need to prompt the player to select from a list of animated sprites.
+        selectedSprite = spriteId;
+        ImGui.OpenPopup(AnimSpritePopupName);
+    }
+
+    /// <summary>
+    ///     Selects an animated sprite.
+    /// </summary>
+    /// <param name="animSpriteId">Animated sprite ID.</param>
+    private void SelectAnimatedSprite(int animSpriteId)
+    {
+        isSelected = true;
+        selection = animSpriteId;
     }
 
     /// <summary>
