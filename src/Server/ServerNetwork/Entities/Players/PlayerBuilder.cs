@@ -77,7 +77,7 @@ public sealed class PlayerBuilder(
                     Size = Vector3.One
                 })
                 .CastShadows(new Shadow { Radius = 0.2f })
-                .AnimatedSprite(221); // TODO Configurable appearance
+                .AnimatedSprite(newPlayersOptions.Value.AnimatedSprite);
 
             if (newPlayersOptions.Value.AdminByDefault)
             {

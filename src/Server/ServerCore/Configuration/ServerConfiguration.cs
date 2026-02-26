@@ -139,6 +139,14 @@ public sealed class NetworkOptions
 public sealed class NewPlayersOptions
 {
     /// <summary>
+    ///     Animated sprite ID for new players.
+    /// </summary>
+    /// <remarks>
+    ///     This is a temporary solution that will be phased out in favor of player template entities.
+    /// </remarks>
+    public int AnimatedSprite { get; set; }
+
+    /// <summary>
     ///     Whether to grant the admin role to new players by default.
     /// </summary>
     public bool AdminByDefault { get; set; } = false;
