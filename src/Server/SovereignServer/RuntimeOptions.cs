@@ -22,7 +22,12 @@ namespace Sovereign.Server;
 public sealed class RuntimeOptions
 {
     /// <summary>
+    ///     Whether to pin the working directory to the server executable location.
+    /// </summary>
+    public bool PinWorkingDirectory { get; set; } = true;
+
+    /// <summary>
     ///     Name to use when running as a Windows Service.
     /// </summary>
-    public string WindowsServiceName = "Sovereign Server";
+    public string WindowsServiceName { get; set; } = "Sovereign Server";
 }

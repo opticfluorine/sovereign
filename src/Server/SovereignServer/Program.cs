@@ -34,12 +34,16 @@ using Sovereign.ServerCore.Lua;
 using Sovereign.ServerNetwork;
 using Sovereign.ServerNetwork.Network.Rest;
 
+var builder = WebApplication.CreateBuilder(args);
+
+// Load server runtime options.
+var runtimeOptions = builder.Configuration
+    .GetSection($"Sovereign:{nameof(RuntimeOptions)}")
+    .Get<RuntimeOptions>() ?? throw new ApplicationException("bad config");
+
 // Pin working directory to the executable location.
 // This is needed for running as a Windows Service.
-Environment.CurrentDirectory = Path.GetFullPath(AppContext.BaseDirectory);
-
-//var builder = Host.CreateApplicationBuilder(args);
-var builder = WebApplication.CreateBuilder(args);
+if (runtimeOptions.PinWorkingDirectory) Environment.CurrentDirectory = Path.GetFullPath(AppContext.BaseDirectory);
 
 // Configure logging.
 Log.Logger = new LoggerConfiguration()
@@ -71,18 +75,13 @@ builder.Services
 builder.Services
     .AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, RestAuthenticationHandler>(RestAuthenticationHandler.SchemeName,
-        options => { });
+        _ => { });
 builder.Services.AddAuthorizationBuilder()
     .AddSovereignPolicies();
 
 // JSON configuration for REST server.
 builder.Services
     .ConfigureHttpJsonOptions(options => { options.SerializerOptions.IncludeFields = true; });
-
-// Load server runtime options.
-var runtimeOptions = builder.Configuration
-    .GetSection($"Sovereign:{nameof(RuntimeOptions)}")
-    .Get<RuntimeOptions>() ?? new RuntimeOptions();
 
 // Configure runtime modes.
 builder.Services.AddSystemd();
