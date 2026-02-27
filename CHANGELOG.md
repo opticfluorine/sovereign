@@ -7,7 +7,7 @@
 #### 27 February 2026
 
 * Add new tool to the Animated Sprite Editor to allow for automated creation of animated sprites from character sheets.
-* Various usability improvements to the Animated Sprite Editor.
+* Various usability improvements to the resource editors. Most notably, removed the ability to delete resources, and made it so that resource IDs are monotonically increasing when added. This should make it much easier to keep resources synchronized with server definitions (e.g. templates).
 * Change default texture atlas maximum size to 8192x8192. This should improve compatibility with certain integrated graphics chipsets, particularly for Linux builds. If this atlas size ends up being too small, we'll go back to 16384px with a new fallback option of swapping between multiple 8192px atlases.
 * Add client options for configuring the engine's branding (i.e. the name displayed in the title bar, etc.).
 

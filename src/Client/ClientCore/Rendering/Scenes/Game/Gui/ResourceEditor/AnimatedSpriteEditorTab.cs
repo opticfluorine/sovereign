@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 using Hexa.NET.ImGui;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Gui;
@@ -267,7 +266,7 @@ public class AnimatedSpriteEditorTab
             ImGui.EndTable();
 
             // Bottom control row.
-            if (ImGui.BeginTable("browserControls", 4, ImGuiTableFlags.SizingFixedFit))
+            if (ImGui.BeginTable("browserControls", 3, ImGuiTableFlags.SizingFixedFit))
             {
                 ImGui.TableSetupColumn("##0", ImGuiTableColumnFlags.WidthFixed);
                 ImGui.TableSetupColumn("##Span", ImGuiTableColumnFlags.WidthStretch);
@@ -293,19 +292,6 @@ public class AnimatedSpriteEditorTab
                     if (ImGui.BeginTooltip())
                     {
                         ImGui.Text("Insert New");
-                        ImGui.EndTooltip();
-                    }
-
-                // Remove selected sprite button.
-                ImGui.TableNextColumn();
-                var canRemove = CanRemoveSprite(out var reason);
-                if (!canRemove) ImGui.BeginDisabled();
-                if (ImGui.Button("-")) RemoveSelectedAnimatedSprite();
-                if (!canRemove) ImGui.EndDisabled();
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                    if (ImGui.BeginTooltip())
-                    {
-                        ImGui.Text(canRemove ? "Remove Selected" : reason);
                         ImGui.EndTooltip();
                     }
 
@@ -604,44 +590,6 @@ public class AnimatedSpriteEditorTab
     {
         animatedSpriteManager.InsertNew(animatedSpriteManager.AnimatedSprites.Count);
         Select(animatedSpriteManager.AnimatedSprites.Count - 1);
-    }
-
-    /// <summary>
-    ///     Removes the currently selected animated sprite.
-    /// </summary>
-    private void RemoveSelectedAnimatedSprite()
-    {
-        animatedSpriteManager.Remove(selectedId);
-        Select(selectedId >= animatedSpriteManager.AnimatedSprites.Count
-            ? animatedSpriteManager.AnimatedSprites.Count - 1
-            : selectedId);
-    }
-
-    /// <summary>
-    ///     Checks whether the selected animated sprite may be removed.
-    /// </summary>
-    /// <param name="reason">Reason the sprite may not be removed. Only valid when returning false.</param>
-    /// <returns></returns>
-    private bool CanRemoveSprite([NotNullWhen(false)] out string? reason)
-    {
-        if (animatedSpriteManager.AnimatedSprites.Count <= 1)
-        {
-            reason = "Cannot remove last animated sprite.";
-            return false;
-        }
-
-        if (tileSpriteDependencies.Count > 0)
-        {
-            var sb = new StringBuilder();
-            sb.Append("Cannot remove with dependencies:");
-            foreach (var tileSpriteId in tileSpriteDependencies) sb.Append($"\nTile Sprite {tileSpriteId}");
-
-            reason = sb.ToString();
-            return false;
-        }
-
-        reason = null;
-        return true;
     }
 
     /// <summary>

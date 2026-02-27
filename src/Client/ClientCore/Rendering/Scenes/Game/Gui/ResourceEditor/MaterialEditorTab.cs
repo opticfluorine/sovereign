@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui;
@@ -155,7 +154,7 @@ public class MaterialEditorTab
             ImGui.EndTable();
 
             // Bottom control row.
-            if (ImGui.BeginTable("browserControls", 3, ImGuiTableFlags.SizingFixedFit))
+            if (ImGui.BeginTable("browserControls", 2, ImGuiTableFlags.SizingFixedFit))
             {
                 ImGui.TableSetupColumn("##Span", ImGuiTableColumnFlags.WidthStretch);
 
@@ -168,19 +167,6 @@ public class MaterialEditorTab
                     if (ImGui.BeginTooltip())
                     {
                         ImGui.Text("Insert New");
-                        ImGui.EndTooltip();
-                    }
-
-                // Remove selected sprite button.
-                ImGui.TableNextColumn();
-                var canRemove = CanRemoveMaterial(out var reason);
-                if (!canRemove) ImGui.BeginDisabled();
-                if (ImGui.Button("-")) RemoveSelectedMaterial();
-                if (!canRemove) ImGui.EndDisabled();
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                    if (ImGui.BeginTooltip())
-                    {
-                        ImGui.Text(canRemove ? "Remove Selected" : reason);
                         ImGui.EndTooltip();
                     }
 
@@ -293,13 +279,11 @@ public class MaterialEditorTab
         if (!canRemove) ImGui.BeginDisabled();
         if (ImGui.Button($"-##{rowIndex}")) RemoveSubtype(rowIndex);
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-        {
             if (ImGui.BeginTooltip())
             {
                 ImGui.Text(canRemove ? "Remove Subtype" : "Cannot remove last subtype");
                 ImGui.EndTooltip();
             }
-        }
 
         if (!canRemove) ImGui.EndDisabled();
     }
@@ -388,40 +372,13 @@ public class MaterialEditorTab
     }
 
     /// <summary>
-    ///     Inserts a new material after the currently selected material.
+    ///     Inserts a new material at the end of the list.
     /// </summary>
     private void InsertNewMaterial()
     {
-        materialManager.InsertNew(editingMaterial.Id + 1);
-    }
-
-    /// <summary>
-    ///     Removes the currently selected material.
-    /// </summary>
-    private void RemoveSelectedMaterial()
-    {
-        materialManager.Remove(editingMaterial.Id);
-        Select(editingMaterial.Id >= materialManager.Materials.Count
-            ? materialManager.Materials.Count - 1
-            : editingMaterial.Id);
-    }
-
-    /// <summary>
-    ///     Checks whether the currently selected material can be removed.
-    /// </summary>
-    /// <param name="reason">Reason why the material cannot be removed. Only set if method returns false.</param>
-    /// <returns>true if the material can be removed, false otherwise.</returns>
-    private bool CanRemoveMaterial([NotNullWhen(false)] out string? reason)
-    {
-        reason = null;
-
-        if (materialManager.Materials.Count <= 2)
-        {
-            reason = "Cannot remove last material.";
-            return false;
-        }
-
-        return true;
+        var newId = materialManager.Materials.Count;
+        materialManager.InsertNew(newId);
+        Select(newId);
     }
 
     /// <summary>

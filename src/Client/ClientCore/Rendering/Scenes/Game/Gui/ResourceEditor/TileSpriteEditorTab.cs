@@ -14,14 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 using Hexa.NET.ImGui;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Gui;
-using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
@@ -43,7 +40,6 @@ public class TileSpriteEditorTab
 
     private readonly GuiExtensions guiExtensions;
     private readonly ILogger<TileSpriteEditorTab> logger;
-    private readonly MaterialManager materialManager;
 
     private readonly TileSpriteManager tileSpriteManager;
     private readonly TileSpriteSelectorPopup tileSpriteSelector;
@@ -62,12 +58,11 @@ public class TileSpriteEditorTab
     private bool initialized;
 
     public TileSpriteEditorTab(TileSpriteManager tileSpriteManager, GuiExtensions guiExtensions,
-        MaterialManager materialManager, AnimatedSpriteSheetSelectorPopup animatedSpriteSelector,
+        AnimatedSpriteSheetSelectorPopup animatedSpriteSelector,
         TileSpriteSelectorPopup tileSpriteSelector, ILogger<TileSpriteEditorTab> logger)
     {
         this.tileSpriteManager = tileSpriteManager;
         this.guiExtensions = guiExtensions;
-        this.materialManager = materialManager;
         this.animatedSpriteSelector = animatedSpriteSelector;
         this.tileSpriteSelector = tileSpriteSelector;
         this.logger = logger;
@@ -148,7 +143,7 @@ public class TileSpriteEditorTab
             ImGui.EndTable();
 
             // Bottom control row.
-            if (ImGui.BeginTable("browserControls", 3, ImGuiTableFlags.SizingFixedFit))
+            if (ImGui.BeginTable("browserControls", 2, ImGuiTableFlags.SizingFixedFit))
             {
                 ImGui.TableSetupColumn("##Span", ImGuiTableColumnFlags.WidthStretch);
 
@@ -163,20 +158,6 @@ public class TileSpriteEditorTab
                         ImGui.Text("Insert New");
                         ImGui.EndTooltip();
                     }
-
-                // Remove selected sprite button.
-                ImGui.TableNextColumn();
-                var canRemove = CanRemoveSprite(out var reason);
-                if (!canRemove) ImGui.BeginDisabled();
-                if (ImGui.Button("-")) RemoveSelectedTileSprite();
-                if (!canRemove) ImGui.EndDisabled();
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                    if (ImGui.BeginTooltip())
-                    {
-                        ImGui.Text(canRemove ? "Remove Selected" : reason);
-                        ImGui.EndTooltip();
-                    }
-
 
                 ImGui.EndTable();
             }
@@ -651,7 +632,7 @@ public class TileSpriteEditorTab
     }
 
     /// <summary>
-    ///     Inserts a new tile sprite after the currently selected tile sprite.
+    ///     Inserts a new tile sprite at the end of the list.
     /// </summary>
     private void InsertNewTileSprite()
     {
@@ -661,64 +642,8 @@ public class TileSpriteEditorTab
             return;
         }
 
-        tileSpriteManager.InsertNew(editingSprite.Id + 1);
-    }
-
-    /// <summary>
-    ///     Removes the currently selected tile sprite.
-    /// </summary>
-    private void RemoveSelectedTileSprite()
-    {
-        if (editingSprite == null)
-        {
-            logger.LogError("RemoveSelectedTileSprite(): editingSprite is null.");
-            return;
-        }
-
-        tileSpriteManager.Remove(editingSprite.Id);
-        Select(editingSprite.Id >= tileSpriteManager.TileSprites.Count
-            ? tileSpriteManager.TileSprites.Count - 1
-            : editingSprite.Id);
-    }
-
-    /// <summary>
-    ///     Determines whether the currently selected tile sprite can be removed.
-    /// </summary>
-    /// <param name="reason">Reason that the sprite cannot be removed. Only set if the method returns false.</param>
-    /// <returns>true if the tile sprite can be removed, false otherwise.</returns>
-    private bool CanRemoveSprite([NotNullWhen(false)] out string? reason)
-    {
-        reason = null;
-        if (editingSprite == null)
-        {
-            logger.LogError("CanRemoveSprite(): editingSprite is null.");
-            reason = "Internal error.";
-            return false;
-        }
-
-        // Prevent removal of last tile sprite.
-        if (tileSpriteManager.TileSprites.Count <= 1)
-        {
-            reason = "Cannot remove last tile sprite.";
-            return false;
-        }
-
-        // Prevent removal of any tile sprite depended on by one or more materials.
-        var dependentMaterials = materialManager.Materials
-            .Where(material => material.MaterialSubtypes
-                .Any(subtype => subtype.SideFaceTileSpriteId == editingSprite.Id
-                                || subtype.TopFaceTileSpriteId == editingSprite.Id
-                                || subtype.ObscuredTopFaceTileSpriteId == editingSprite.Id))
-            .Select(material => material.Id);
-        if (dependentMaterials.Any())
-        {
-            var sb = new StringBuilder("Cannot remove with dependencies:");
-            foreach (var materialId in dependentMaterials) sb.Append($"\nMaterial {materialId}");
-
-            reason = sb.ToString();
-            return false;
-        }
-
-        return true;
+        var newId = tileSpriteManager.TileSprites.Count;
+        tileSpriteManager.InsertNew(newId);
+        Select(newId);
     }
 }
