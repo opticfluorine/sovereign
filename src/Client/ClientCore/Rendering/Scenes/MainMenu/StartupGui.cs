@@ -16,6 +16,8 @@
 
 using System.Numerics;
 using Hexa.NET.ImGui;
+using Microsoft.Extensions.Options;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
@@ -25,22 +27,16 @@ namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
 /// <summary>
 ///     Initial GUI displayed at startup.
 /// </summary>
-public class StartupGui
+public sealed class StartupGui(
+    IEventSender eventSender,
+    CoreController coreController,
+    IOptions<BrandingOptions> brandingOptions)
 {
-    private const string Title = "Sovereign Engine";
     private const string Login = "Login";
     private const string Register = "Register";
     private const string Exit = "Exit";
 
     private static readonly Vector2 ButtonSize = new(7.11f, 1.33f);
-    private readonly CoreController coreController;
-    private readonly IEventSender eventSender;
-
-    public StartupGui(IEventSender eventSender, CoreController coreController)
-    {
-        this.eventSender = eventSender;
-        this.coreController = coreController;
-    }
 
     /// <summary>
     ///     Renders the startup GUI.
@@ -60,7 +56,7 @@ public class StartupGui
         ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
         ImGui.SetNextWindowSize(fontSize * new Vector2(8.89f, 0.0f), ImGuiCond.Always);
         ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
-        ImGui.Begin(Title);
+        ImGui.Begin(brandingOptions.Value.StartupGuiName);
 
         if (ImGui.BeginTable("startup", 1))
         {

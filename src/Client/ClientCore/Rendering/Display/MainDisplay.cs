@@ -16,7 +16,9 @@
  */
 
 using System;
+using Microsoft.Extensions.Options;
 using SDL2;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Display;
@@ -24,13 +26,8 @@ namespace Sovereign.ClientCore.Rendering.Display;
 /// <summary>
 ///     Manages the main display window.
 /// </summary>
-public class MainDisplay
+public sealed class MainDisplay(IOptions<BrandingOptions> brandingOptions)
 {
-    /// <summary>
-    ///     Window title.
-    /// </summary>
-    private const string TITLE = "Sovereign";
-
     /// <summary>
     ///     Main window handle.
     /// </summary>
@@ -79,7 +76,7 @@ public class MainDisplay
 
         /* Create the main window. */
         DisplayMode = displayMode;
-        WindowHandle = SDL.SDL_CreateWindow(TITLE,
+        WindowHandle = SDL.SDL_CreateWindow(brandingOptions.Value.TitleBarName,
             SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
             displayMode.Width, displayMode.Height,
             GetWindowFlags());

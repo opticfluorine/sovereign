@@ -301,3 +301,19 @@ public sealed class EditorOptions
     /// </summary>
     public ulong ImportCharacterSpriteFrameTimeUs { get; set; } = 200 * 1000;
 }
+
+/// <summary>
+///     Client options related to engine branding.
+/// </summary>
+public sealed class BrandingOptions
+{
+    /// <summary>
+    ///     Name to show in the client window title bar.
+    /// </summary>
+    public string TitleBarName { get; set; } = "Sovereign";
+
+    /// <summary>
+    ///     Name to show in the startup window title bar.
+    /// </summary>
+    public string StartupGuiName { get; set; } = "Sovereign Engine";
+}

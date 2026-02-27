@@ -110,6 +110,8 @@ public static class ClientServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(DayNightOptions)}"));
         services.Configure<EditorOptions>(
             configuration.GetSection($"Sovereign:{nameof(EditorOptions)}"));
+        services.Configure<BrandingOptions>(
+            configuration.GetSection($"Sovereign:{nameof(BrandingOptions)}"));
 
         return services;
     }
