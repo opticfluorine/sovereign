@@ -7,6 +7,7 @@
 #### 27 February 2026
 
 * Add new tool to the Animated Sprite Editor to allow for automated creation of animated sprites from character sheets.
+* Various usability improvements to the Animated Sprite Editor.
 
 #### 26 February 2026
 

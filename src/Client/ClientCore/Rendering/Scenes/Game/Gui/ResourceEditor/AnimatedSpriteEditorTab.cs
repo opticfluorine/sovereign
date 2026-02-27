@@ -598,11 +598,12 @@ public class AnimatedSpriteEditorTab
     }
 
     /// <summary>
-    ///     Inserts a new animated sprite after the currently selected sprite.
+    ///     Inserts a new animated sprite at the end of the list.
     /// </summary>
     private void InsertNewAnimatedSprite()
     {
-        animatedSpriteManager.InsertNew(selectedId + 1);
+        animatedSpriteManager.InsertNew(animatedSpriteManager.AnimatedSprites.Count);
+        Select(animatedSpriteManager.AnimatedSprites.Count - 1);
     }
 
     /// <summary>
@@ -705,6 +706,7 @@ public class AnimatedSpriteEditorTab
         {
             logger.LogInformation("Import character sprite from sprite ID {Id}.", topLeftSpriteId);
             characterSpriteImporter.Import(topLeftSpriteId);
+            Select(animatedSpriteManager.AnimatedSprites.Count - 1);
         }
         catch (Exception e)
         {
