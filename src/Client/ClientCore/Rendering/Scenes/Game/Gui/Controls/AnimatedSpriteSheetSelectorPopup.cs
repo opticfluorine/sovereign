@@ -53,6 +53,8 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
     /// </summary>
     private Vector2 basePos;
 
+    private string currentPrompt = string.Empty;
+
     /// <summary>
     ///     Index of currently selected spritesheet.
     /// </summary>
@@ -92,10 +94,19 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
     /// </summary>
     public void Open()
     {
+        Open(string.Empty);
+    }
+
+    /// <summary>
+    ///     Opens the selector popup.
+    /// </summary>
+    public void Open(string prompt)
+    {
         isSelected = false;
         selection = 0;
         selectedSprite = 0;
         basePos = ImGui.GetMousePos();
+        currentPrompt = prompt;
 
         ImGui.OpenPopup(PopupName);
     }
@@ -116,9 +127,6 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
 
             ImGui.EndPopup();
         }
-
-        DrawAnimatedSpritePopup();
-        DrawErrorModal();
     }
 
     /// <summary>
@@ -139,6 +147,12 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
     /// </summary>
     private void DrawTopBar()
     {
+        if (!string.IsNullOrEmpty(currentPrompt))
+        {
+            ImGui.Text(currentPrompt);
+            ImGui.Separator();
+        }
+
         // Combo box for selecting the current spritesheet.
         ImGui.Text("Spritesheet:");
         ImGui.SameLine();
@@ -226,6 +240,9 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
                     if (sprite != null)
                         OnSpriteClicked(sprite.Id);
             }
+
+            DrawAnimatedSpritePopup();
+            DrawErrorModal();
 
             ImGui.EndTable();
         }

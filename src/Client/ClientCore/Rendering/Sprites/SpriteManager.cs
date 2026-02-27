@@ -50,8 +50,7 @@ public sealed class SpriteManager
     private readonly SpriteSheetManager spriteSheetManager;
 
     /// <summary>
-    ///     Map from spritesheet names to a 2D array of booleans indicating whether a sprite exists for
-    ///     the given row and column.
+    ///     Map from spritesheet names to a 2D array of (possibly null) sprites by row and column.
     /// </summary>
     public Dictionary<string, Sprite?[,]> SpriteSheetCoverage = new();
 
@@ -176,10 +175,8 @@ public sealed class SpriteManager
             coverageMap[sprite.Row, sprite.Column] = sprite;
 
             if (isNew)
-            {
                 // Sprite is newly added, do any post-processing needed.
                 CheckOpacity(sprite);
-            }
         }
     }
 

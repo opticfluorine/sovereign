@@ -295,4 +295,9 @@ public sealed class EditorOptions
         },
         Name = "New Item"
     };
+
+    /// <summary>
+    ///     Frame time for imported character sprite animated sprites.
+    /// </summary>
+    public ulong ImportCharacterSpriteFrameTimeUs { get; set; } = 200 * 1000;
 }

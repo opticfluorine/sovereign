@@ -46,6 +46,10 @@ public class SpriteSelectorPopup
     /// </summary>
     private Vector2 basePos;
 
+    private string currentId = string.Empty;
+
+    private string currentPrompt = string.Empty;
+
     /// <summary>
     ///     Index of currently selected spritesheet.
     /// </summary>
@@ -89,11 +93,15 @@ public class SpriteSelectorPopup
     /// <summary>
     ///     Opens the selector popup.
     /// </summary>
-    public void Open()
+    /// <param name="id">ID to disambiguate from other popups.</param>
+    /// <param name="prompt">Prompt to display to the player. Empty string hides the prompt.</param>
+    public void Open(string id = "", string prompt = "")
     {
         isSelected = false;
         selection = 0;
         basePos = ImGui.GetMousePos();
+        currentId = id;
+        currentPrompt = prompt;
 
         ImGui.OpenPopup(PopupName);
     }
@@ -117,10 +125,13 @@ public class SpriteSelectorPopup
     ///     Tries to get the latest selection.
     /// </summary>
     /// <param name="spriteId">Set to the selected sprite ID if returns true.</param>
+    /// <param name="id">ID to disambiguate between popup calls. Empty string bypasses the ID check.</param>
     /// <returns>true if a selection has been made since the last call to Open(); false otherwise.</returns>
-    public bool TryGetSelection(out int spriteId)
+    public bool TryGetSelection(out int spriteId, string id = "")
     {
         spriteId = selection;
+        if (!string.IsNullOrEmpty(id) && id != currentId) return false;
+
         var result = isSelected;
         isSelected = false;
         return result;
@@ -131,6 +142,13 @@ public class SpriteSelectorPopup
     /// </summary>
     private void DrawTopBar()
     {
+        if (!string.IsNullOrEmpty(currentPrompt))
+        {
+            ImGui.Text(currentPrompt);
+            ImGui.Separator();
+            ImGui.Spacing();
+        }
+
         // Combo box for selecting the current spritesheet.
         ImGui.Text("Spritesheet:");
         ImGui.SameLine();

@@ -42,9 +42,13 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     private const uint SelectionColor = 0xFF773333;
 
+    private const string ErrorModal = "Error";
+    private const string SpritePopupImport = "importChar";
+    private const string SpritePopupSprite = "sprite";
 
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly AnimatedSpriteSheetSelectorPopup animatedSpriteSelectorPopup;
+    private readonly CharacterSpriteImporter characterSpriteImporter;
     private readonly GenerateAnimatedSpritesPopup generateAnimatedSpritesPopup;
     private readonly GuiExtensions guiExtensions;
     private readonly ILogger<AnimatedSpriteEditorTab> logger;
@@ -103,6 +107,8 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     private AnimatedSprite? editingSprite;
 
+    private string error = string.Empty;
+
     /// <summary>
     ///     Initialization flag.
     /// </summary>
@@ -113,10 +119,14 @@ public class AnimatedSpriteEditorTab
     /// </summary>
     private float inputTimestepMs;
 
+    private bool openError;
+
     /// <summary>
     ///     Currently selected animated sprite ID.
     /// </summary>
     private int selectedId;
+
+    private SelectorMode selectorMode;
 
     /// <summary>
     ///     Tile sprites that depend on the currently selected animated sprite.
@@ -126,7 +136,7 @@ public class AnimatedSpriteEditorTab
     public AnimatedSpriteEditorTab(AnimatedSpriteManager animatedSpriteManager, GuiExtensions guiExtensions,
         SpriteSelectorPopup spriteSelectorPopup, SpriteManager spriteManager, TileSpriteManager tileSpriteManager,
         GenerateAnimatedSpritesPopup generateAnimatedSpritesPopup, ILogger<AnimatedSpriteEditorTab> logger,
-        AnimatedSpriteSheetSelectorPopup animatedSpriteSelectorPopup)
+        AnimatedSpriteSheetSelectorPopup animatedSpriteSelectorPopup, CharacterSpriteImporter characterSpriteImporter)
     {
         this.animatedSpriteManager = animatedSpriteManager;
         this.guiExtensions = guiExtensions;
@@ -136,6 +146,7 @@ public class AnimatedSpriteEditorTab
         this.generateAnimatedSpritesPopup = generateAnimatedSpritesPopup;
         this.logger = logger;
         this.animatedSpriteSelectorPopup = animatedSpriteSelectorPopup;
+        this.characterSpriteImporter = characterSpriteImporter;
 
         tileSpriteManager.OnTileSpriteAdded += RefreshDependencies;
         tileSpriteManager.OnTileSpriteUpdated += RefreshDependencies;
@@ -148,14 +159,30 @@ public class AnimatedSpriteEditorTab
     public void MenuBar()
     {
         var openGenAnimSprites = false;
+        var openImportCharacter = false;
         if (active && ImGui.BeginMenu("Animated Sprite Tools"))
         {
             openGenAnimSprites = ImGui.MenuItem("Generate from Spritesheet...");
+            openImportCharacter = ImGui.MenuItem("Import Character...");
             ImGui.EndMenu();
         }
 
-        if (openGenAnimSprites) generateAnimatedSpritesPopup.Open();
+        if (openGenAnimSprites)
+        {
+            generateAnimatedSpritesPopup.Open();
+        }
+        else if (openImportCharacter)
+        {
+            selectorMode = SelectorMode.Character;
+            spriteSelectorPopup.Open(SpritePopupImport, "Select the top-left sprite of the character to import.");
+        }
+
+        if (selectorMode == SelectorMode.Character &&
+            spriteSelectorPopup.TryGetSelection(out var topLeftSpriteId, SpritePopupImport))
+            ImportCharacterSprite(topLeftSpriteId);
+
         generateAnimatedSpritesPopup.Render();
+        spriteSelectorPopup.Render();
     }
 
     /// <summary>
@@ -186,6 +213,19 @@ public class AnimatedSpriteEditorTab
                 RenderEditor();
 
                 ImGui.EndTable();
+            }
+
+            if (openError)
+            {
+                ImGui.OpenPopup(ErrorModal);
+                openError = false;
+            }
+
+            if (ImGui.BeginPopupModal(ErrorModal))
+            {
+                ImGui.Text(error);
+                if (ImGui.Button("OK")) ImGui.CloseCurrentPopup();
+                ImGui.EndPopup();
             }
 
             ImGui.EndTabItem();
@@ -234,9 +274,15 @@ public class AnimatedSpriteEditorTab
 
                 // Search button.
                 ImGui.TableNextColumn();
-                if (ImGui.Button("\U0001f50d##Search")) animatedSpriteSelectorPopup.Open();
+                if (ImGui.Button("\U0001f50d##Search"))
+                {
+                    selectorMode = SelectorMode.Search;
+                    animatedSpriteSelectorPopup.Open();
+                }
+
                 animatedSpriteSelectorPopup.Render();
-                if (animatedSpriteSelectorPopup.TryGetSelection(out var animSpriteId)) Select(animSpriteId);
+                if (selectorMode == SelectorMode.Search &&
+                    animatedSpriteSelectorPopup.TryGetSelection(out var animSpriteId)) Select(animSpriteId);
 
                 ImGui.TableNextColumn();
 
@@ -391,7 +437,7 @@ public class AnimatedSpriteEditorTab
                         {
                             editingOrientation = orientation;
                             editingFrame = i;
-                            spriteSelectorPopup.Open();
+                            spriteSelectorPopup.Open(SpritePopupSprite);
                         }
                 }
             }
@@ -501,7 +547,7 @@ public class AnimatedSpriteEditorTab
         }
 
         spriteSelectorPopup.Render();
-        if (spriteSelectorPopup.TryGetSelection(out var newSpriteId))
+        if (spriteSelectorPopup.TryGetSelection(out var newSpriteId, SpritePopupSprite))
             // Selection made, update the working record.
             editingSprite.Phases[currentPhase].Frames[editingOrientation][editingFrame] =
                 spriteManager.Sprites[newSpriteId];
@@ -650,11 +696,36 @@ public class AnimatedSpriteEditorTab
     }
 
     /// <summary>
+    ///     Imports the character sprite that begins with the given sprite ID.
+    /// </summary>
+    /// <param name="topLeftSpriteId">Top left sprite ID for character sprite.</param>
+    private void ImportCharacterSprite(int topLeftSpriteId)
+    {
+        try
+        {
+            logger.LogInformation("Import character sprite from sprite ID {Id}.", topLeftSpriteId);
+            characterSpriteImporter.Import(topLeftSpriteId);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error importing character sprite from sprite ID {Id}.", topLeftSpriteId);
+            error = e.Message;
+            openError = true;
+        }
+    }
+
+    /// <summary>
     ///     Refreshes the dependency list in response to a change in dependent resources.
     /// </summary>
     /// <param name="_">Unused.</param>
     private void RefreshDependencies(int _)
     {
         Select(selectedId);
+    }
+
+    private enum SelectorMode
+    {
+        Search,
+        Character
     }
 }

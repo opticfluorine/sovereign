@@ -4,6 +4,19 @@
 
 ### February
 
+#### 27 February 2026
+
+* Add new tool to the Animated Sprite Editor to allow for automated creation of animated sprites from character sheets.
+
+#### 26 February 2026
+
+* Add server option for configuring the default animated sprite of new players.
+
+#### 25 February 2026
+
+* Fix a bug in server startup where certain runtime configuration options were ignored.
+* Added an option to pin the server's working directory to the directory where the executable was located. Previously this was always done, but making it optional allows for better IDE integration when debugging with an out-of-tree server instance.
+
 #### 24 February 2026
 
 * Updated the tile sprite editor to allow selecting animated sprites by clicking on the corresponding sprite in a spritesheet. This makes it much easier to work with large numbers of sprites - the old GUI just didn't scale to thousands of sprites.

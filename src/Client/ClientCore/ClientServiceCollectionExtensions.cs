@@ -252,6 +252,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<ResourceEditorGui>();
         services.TryAddSingleton<SpriteEditorTab>();
         services.TryAddSingleton<AnimatedSpriteEditorTab>();
+        services.TryAddSingleton<CharacterSpriteImporter>();
         services.TryAddSingleton<TileSpriteEditorTab>();
         services.TryAddSingleton<MaterialEditorTab>();
         services.TryAddSingleton<SpriteSelectorPopup>();
