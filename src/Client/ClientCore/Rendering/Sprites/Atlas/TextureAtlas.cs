@@ -32,12 +32,12 @@ public class TextureAtlas : IDisposable
     /// <summary>
     ///     Maximum width of the texture atlas.
     /// </summary>
-    private const int MaxWidth = 16384;
+    private const int MaxWidth = 8192;
 
     /// <summary>
     ///     Maximum height of the texture atlas.
     /// </summary>
-    private const int MaxHeight = 16384;
+    private const int MaxHeight = 8192;
 
     /// <summary>
     ///     Maps spritesheet names to top-left coordinate in the atlas.
