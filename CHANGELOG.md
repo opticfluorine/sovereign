@@ -4,6 +4,10 @@
 
 ### February
 
+#### 28 February 2026
+
+* Fix bug where tile sprite contexts were prioritized incorrectly when they contained an empty neighbor. Note that this requires a manual update to any existing tile sprite definitions: the values -1 and -2 must be swapped everywhere in the file.
+
 #### 27 February 2026
 
 * Add new tool to the Animated Sprite Editor to allow for automated creation of animated sprites from character sheets.

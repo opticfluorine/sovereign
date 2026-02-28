@@ -154,7 +154,7 @@ public sealed class TileSpriteManager
         {
             /* Log and throw a fatal error. */
             var msg = "Failed to load the tile sprite definitions.";
-            logger.LogCritical(msg, e);
+            logger.LogCritical(e, msg);
 
             ErrorHandler.Error("Failed to load the tile sprite definitions.\n"
                                + "Refer to the error log for details.");

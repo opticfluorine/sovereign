@@ -31,12 +31,12 @@ public sealed class TileSprite
     /// <summary>
     ///     Indicates a wildcard neighboring tile sprite.
     /// </summary>
-    public const int Wildcard = -1;
+    public const int Wildcard = -2;
 
     /// <summary>
     ///     Indicates that there is no neighboring tile sprite.
     /// </summary>
-    public const int Empty = -2;
+    public const int Empty = -1;
 
     /// <summary>
     ///     Cache of previously resolved tile contexts.

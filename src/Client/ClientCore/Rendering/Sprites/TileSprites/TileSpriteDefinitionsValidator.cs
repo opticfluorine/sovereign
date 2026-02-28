@@ -227,14 +227,14 @@ public sealed class TileSpriteDefinitionsValidator
     /// <returns>true if out of range, false otherwise.</returns>
     private bool TileContextHasOutOfRangeIds(TileContext context)
     {
-        return context.NorthTileSpriteId < TileSprite.Empty
-               || context.EastTileSpriteId < TileSprite.Empty
-               || context.SouthTileSpriteId < TileSprite.Empty
-               || context.WestTileSpriteId < TileSprite.Empty
-               || context.NortheastTileSpriteId < TileSprite.Empty
-               || context.SoutheastTileSpriteId < TileSprite.Empty
-               || context.SouthwestTileSpriteId < TileSprite.Empty
-               || context.NorthwestTileSpriteId < TileSprite.Empty;
+        return context.NorthTileSpriteId < TileSprite.Wildcard
+               || context.EastTileSpriteId < TileSprite.Wildcard
+               || context.SouthTileSpriteId < TileSprite.Wildcard
+               || context.WestTileSpriteId < TileSprite.Wildcard
+               || context.NortheastTileSpriteId < TileSprite.Wildcard
+               || context.SoutheastTileSpriteId < TileSprite.Wildcard
+               || context.SouthwestTileSpriteId < TileSprite.Wildcard
+               || context.NorthwestTileSpriteId < TileSprite.Wildcard;
     }
 
     /// <summary>
