@@ -2,6 +2,12 @@
 
 ## 2026
 
+### March
+
+#### 01 March 2026
+
+* Add new "Obscured" flag to tile sprite contexts to match cases where a neighboring sprite is occluded by another block. This allows better tile transitions at right angles. Note that a manual update is required for existing tile sprite definitions: wildcard has changed from -2 to -3, and -2 now denotes Obscured, so all wildcards must be updated in the JSON file accordingly.
+
 ### February
 
 #### 28 February 2026

@@ -75,6 +75,14 @@ public class TileSpriteSelectorPopup
                 }
 
                 ImGui.TableNextColumn();
+                if (ImGui.Button("Obsc"))
+                {
+                    selection = TileSprite.Obscured;
+                    isSelected = true;
+                    ImGui.CloseCurrentPopup();
+                }
+
+                ImGui.TableNextColumn();
                 if (ImGui.Button("Empty"))
                 {
                     selection = TileSprite.Empty;

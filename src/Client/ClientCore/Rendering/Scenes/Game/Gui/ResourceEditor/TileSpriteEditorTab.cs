@@ -474,6 +474,11 @@ public class TileSpriteEditorTab
             for (var i = 0; i < 3; ++i) ImGui.Spacing();
             clicked = ImGui.Button($"Any##{rowIndex}{orientation}");
         }
+        else if (neighborId == TileSprite.Obscured)
+        {
+            for (var i = 0; i < 3; ++i) ImGui.Spacing();
+            clicked = ImGui.Button($"Obsc##{rowIndex}{orientation}");
+        }
         else if (neighborId == TileSprite.Empty)
         {
             for (var i = 0; i < 3; ++i) ImGui.Spacing();

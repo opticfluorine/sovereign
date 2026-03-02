@@ -31,7 +31,12 @@ public sealed class TileSprite
     /// <summary>
     ///     Indicates a wildcard neighboring tile sprite.
     /// </summary>
-    public const int Wildcard = -2;
+    public const int Wildcard = -3;
+
+    /// <summary>
+    ///     Indicates that the neighboring tile sprite is an obscured face.
+    /// </summary>
+    public const int Obscured = -2;
 
     /// <summary>
     ///     Indicates that there is no neighboring tile sprite.

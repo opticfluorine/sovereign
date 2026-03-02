@@ -339,6 +339,12 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         var blockIds = blockIndexer.GetEntitiesAtPosition(gridPosition);
         if (blockIds == null || blockIds.Count == 0) return TileSprite.Empty;
 
+        // If the tile isn't empty, then check if it is obscured.
+        var coveringBlock = isTopFace ? gridPosition + GridPosition.OneZ : gridPosition - GridPosition.OneY;
+        var coveringBlockIds = blockIndexer.GetEntitiesAtPosition(coveringBlock);
+        if (coveringBlockIds is { Count: > 0 }) return TileSprite.Obscured;
+
+        // Finally, if it's neither empty or obscured, then get the actual tile value.
         return GetTileSpriteIdForBlock(blockIds.Keys.First(), isTopFace);
     }
 
@@ -533,7 +539,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private void OnTemplateChange(ulong entityId, ulong templateEntityId, ulong oldTemplateId, bool isLoad, bool isNew)
     {
         if (isNew) return;
-        
+
         templateChanges.TryAdd(entityId, 0);
     }
 
