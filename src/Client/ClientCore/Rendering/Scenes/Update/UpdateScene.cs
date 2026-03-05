@@ -73,10 +73,12 @@ public class UpdateScene : IScene
         globalLightPhiRad = 0.0f;
     }
 
-    public void PopulateWorldFragmentConstants(out Vector4 ambientLightColor, out Vector4 globalLightColor)
+    public void PopulateWorldFragmentConstants(out Vector4 ambientLightColor, out Vector4 globalLightColor,
+        out Vector2 globalLightShift)
     {
         ambientLightColor = Vector4.One;
         globalLightColor = Vector4.One;
+        globalLightShift = Vector2.Zero;
     }
 
     public void UpdateGui(RenderPlan renderPlan)

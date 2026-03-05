@@ -16,6 +16,8 @@
  */
 
 using System.Numerics;
+using Microsoft.Extensions.Options;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 using Sovereign.ClientCore.Rendering.Scenes.Game.World;
@@ -35,6 +37,8 @@ public sealed class GameScene : IScene
     private readonly IEngineConfiguration engineConfiguration;
     private readonly GameGui gameGui;
     private readonly GlobalLightTable globalLightTable;
+
+    private readonly RendererOptions rendererOptions;
     private readonly ISystemTimer systemTimer;
     private readonly ITimeServices timeServices;
     private readonly DisplayViewport viewport;
@@ -58,7 +62,8 @@ public sealed class GameScene : IScene
 
     public GameScene(ISystemTimer systemTimer, IEngineConfiguration engineConfiguration,
         RenderCamera camera, DisplayViewport viewport, ITimeServices timeServices,
-        WorldVertexSequencer worldVertexSequencer, GameGui gameGui, GlobalLightTable globalLightTable)
+        WorldVertexSequencer worldVertexSequencer, GameGui gameGui, GlobalLightTable globalLightTable,
+        IOptions<RendererOptions> rendererOptions)
     {
         this.systemTimer = systemTimer;
         this.engineConfiguration = engineConfiguration;
@@ -68,6 +73,7 @@ public sealed class GameScene : IScene
         this.worldVertexSequencer = worldVertexSequencer;
         this.gameGui = gameGui;
         this.globalLightTable = globalLightTable;
+        this.rendererOptions = rendererOptions.Value;
     }
 
     public SceneType SceneType => SceneType.Game;
@@ -107,14 +113,16 @@ public sealed class GameScene : IScene
         heightInTiles = viewport.HeightInTiles;
         cameraPos = this.cameraPos;
         timeSinceTick = this.timeSinceTick;
-        globalLightThetaRad = -0.1f;
-        globalLightPhiRad = 0.00f;
+        globalLightThetaRad = rendererOptions.GlobalLightThetaRad;
+        globalLightPhiRad = rendererOptions.GlobalLightPhiRad;
     }
 
-    public void PopulateWorldFragmentConstants(out Vector4 ambientLightColor, out Vector4 globalLightColor)
+    public void PopulateWorldFragmentConstants(out Vector4 ambientLightColor, out Vector4 globalLightColor,
+        out Vector2 globalLightShift)
     {
         ambientLightColor = new Vector4(0.2f, 0.2f, 0.2f, 1.0f);
         globalLightColor = globalLightTable.GetGlobalLightColor(timeServices.SecondOfDay);
+        globalLightShift = new Vector2(rendererOptions.GlobalLightShiftX, rendererOptions.GlobalLightShiftY);
     }
 
     public void UpdateGui(RenderPlan renderPlan)

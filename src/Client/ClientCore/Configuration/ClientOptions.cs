@@ -51,6 +51,28 @@ public sealed class RendererOptions
     ///     Default opacity for placeholder sprites used when drawing hidden entities.
     /// </summary>
     public float DefaultHiddenPlaceholderOpacity { get; set; } = 0.8f;
+
+    /// <summary>
+    ///     Rotation angle in the XY plane about the camera position of the global light source, in radians.
+    /// </summary>
+    public float GlobalLightThetaRad { get; set; } = -0.1f;
+
+    /// <summary>
+    ///     Rotation angle in the YZ plane about the camera position of the global light source, in radians.
+    /// </summary>
+    public float GlobalLightPhiRad { get; set; } = 0.0f;
+
+    /// <summary>
+    ///     Translation along X applied when sampling global shadow textures, in world units.
+    ///     Can be used to offset self-shadowing effects with transparent block edges.
+    /// </summary>
+    public float GlobalLightShiftX { get; set; } = 0.0f;
+
+    /// <summary>
+    ///     Translation along Y applied when sampling global shadow textures, in world units.
+    ///     Can be used to offset self-shadowing effects with transparent block edges.
+    /// </summary>
+    public float GlobalLightShiftY { get; set; } = 0.0f;
 }
 
 /// <summary>

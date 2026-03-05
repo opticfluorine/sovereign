@@ -41,7 +41,7 @@ layout (set = 0, binding = 10) uniform ShaderConstants
     vec4 g_ambientLightColor; /* ambient light color; appears in shadows */
     vec4 g_globalLightColor;  /* global light color (e.g. sun, moon) */
     vec2 g_viewportSize;      /* viewport size in pixels */
-    vec2 g_unused;            /* unused */
+    vec2 g_shadowShift;       /* global shadow map sample shift */
 };
 
 const vec3 blockShadowBias = vec3(0.0f, 0.0f, 0.001f);
@@ -51,7 +51,7 @@ void main()
 {
     // Sample shadow map for this fragment.
     float bs = texture(sampler2DShadow(g_blockShadowMap, g_blockShadowMapSampler),
-                       shadowPosition.xyz + blockShadowBias);
+                       shadowPosition.xyz + vec3(g_shadowShift, 0.0) + blockShadowBias);
     float nbs = max(texture(sampler2DShadow(g_nonBlockShadowMap, g_nonBlockShadowMapSampler),
                             nonBlockShadowPosition.xyz + nonBlockShadowBias), shadowFloor);
 

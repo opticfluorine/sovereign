@@ -75,7 +75,9 @@ public interface IScene
     /// </summary>
     /// <param name="ambientLightColor">Ambient light color (e.g. shadows, areas without lighting).</param>
     /// <param name="globalLightColor">Global light color (e.g. sun, moon when outdoors).</param>
-    void PopulateWorldFragmentConstants(out Vector4 ambientLightColor, out Vector4 globalLightColor);
+    /// <param name="globalLightShift">Global light sampling offset (world units).</param>
+    void PopulateWorldFragmentConstants(out Vector4 ambientLightColor, out Vector4 globalLightColor,
+        out Vector2 globalLightShift);
 
     /// <summary>
     ///     Called to update the GUI for the scene.

@@ -41,7 +41,7 @@ public struct WorldFragmentShaderConstants
     public Vector2 ViewportSize;
 
     /// <summary>
-    ///     Unused.
+    ///     Global shadow map sample shift in texels.
     /// </summary>
-    public Vector2 Unused;
+    public Vector2 ShadowShift;
 }

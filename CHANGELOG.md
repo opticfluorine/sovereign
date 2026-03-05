@@ -4,7 +4,12 @@
 
 ### March
 
-#### 01 March 2026
+#### 05 March 2026
+
+* Make block shadow parameters configurable from client appsettings.json.
+* Add a translation offset for sampling the global block shadow map, configurable via appsettings.json. This allows shadows to be adjusted to avoid self-shadowing effects when sprites with transparent leading edges are used for block faces.
+
+#### 02 March 2026
 
 * Add new "Obscured" flag to tile sprite contexts to match cases where a neighboring sprite is occluded by another block. This allows better tile transitions at right angles. Note that a manual update is required for existing tile sprite definitions: wildcard has changed from -2 to -3, and -2 now denotes Obscured, so all wildcards must be updated in the JSON file accordingly.
 

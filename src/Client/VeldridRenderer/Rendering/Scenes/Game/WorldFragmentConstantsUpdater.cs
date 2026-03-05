@@ -43,12 +43,16 @@ public class WorldFragmentConstantsUpdater
         if (gameResMgr.FragmentUniformBuffer == null)
             throw new InvalidOperationException("Fragment uniform buffer not ready.");
 
-        scene.PopulateWorldFragmentConstants(out var ambientLightColor, out var globalLightColor);
+        scene.PopulateWorldFragmentConstants(out var ambientLightColor, out var globalLightColor,
+            out var globalLightShift);
+
+        var shadowTransform = gameResMgr.VertexUniformBuffer!.Buffer[0].ShadowWorldViewTransform;
 
         var buf = gameResMgr.FragmentUniformBuffer.Buffer;
         buf[0].AmbientLightColor = ambientLightColor;
         buf[0].GlobalLightColor = globalLightColor;
         buf[0].ViewportSize = new Vector2(device.Device!.SwapchainFramebuffer.Width,
             device.Device!.SwapchainFramebuffer.Height);
+        buf[0].ShadowShift = Vector4.Transform(globalLightShift.AsVector4(), shadowTransform).AsVector2();
     }
 }
