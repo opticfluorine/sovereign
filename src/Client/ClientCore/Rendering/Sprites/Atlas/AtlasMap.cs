@@ -88,10 +88,10 @@ public sealed class AtlasMap
         var atlasHeight = atlasManager.TextureAtlas.Height;
 
         /* Compute sprite coordinates in atlas. */
-        var tlx = (float)(stlx + sprite.Column * spriteWidth);
-        var tly = (float)(stly + sprite.Row * spriteHeight);
-        var brx = tlx + spriteWidth;
-        var bry = tly + spriteHeight;
+        var tlx = stlx + sprite.Column * spriteWidth + 0.5f;
+        var tly = stly + sprite.Row * spriteHeight + 0.5f;
+        var brx = tlx + spriteWidth - 1.0f;
+        var bry = tly + spriteHeight - 1.0f;
 
         /* Add record to map. */
         MapElements.Add(new AtlasMapElement
