@@ -36,6 +36,8 @@ public class TileSpriteEditorTab
     /// </summary>
     private const uint SelectionColor = 0xFF773333;
 
+    private const uint MaxNameLen = 32;
+
     private readonly AnimatedSpriteSheetSelectorPopup animatedSpriteSelector;
 
     private readonly GuiExtensions guiExtensions;
@@ -44,6 +46,7 @@ public class TileSpriteEditorTab
     private readonly TileSpriteManager tileSpriteManager;
     private readonly TileSpriteSelectorPopup tileSpriteSelector;
     private int editingCol;
+    private string editingName = string.Empty;
     private Orientation editingNeighbor;
     private int editingRow;
 
@@ -116,12 +119,13 @@ public class TileSpriteEditorTab
 
         // Browser selector.
         var maxSize = ImGui.GetWindowSize();
-        if (ImGui.BeginTable("tileSprBrowser", 2,
+        if (ImGui.BeginTable("tileSprBrowser", 3,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter |
                 ImGuiTableFlags.RowBg, new Vector2 { X = fontSize * 12.33f, Y = maxSize.Y - fontSize * 7.25f }))
         {
             ImGui.TableSetupColumn("ID");
-            ImGui.TableSetupColumn("Tile Sprite");
+            ImGui.TableSetupColumn("Tile");
+            ImGui.TableSetupColumn("Name");
             ImGui.TableSetupScrollFreeze(0, 1);
             ImGui.TableHeadersRow();
 
@@ -129,9 +133,13 @@ public class TileSpriteEditorTab
             {
                 ImGui.TableNextColumn();
                 ImGui.Text($"{i}");
+
                 ImGui.TableNextColumn();
                 if (guiExtensions.TileSpriteButton($"##spriteButton{i}", i,
                         TileContextKey.AllWildcards)) Select(i);
+
+                ImGui.TableNextColumn();
+                ImGui.Text(tileSpriteManager.TileSprites[i].Name);
 
                 if (i == editingSprite.Id)
                 {
@@ -185,7 +193,9 @@ public class TileSpriteEditorTab
             return;
         }
 
-        if (ImGui.BeginTable("Header", 4, ImGuiTableFlags.SizingFixedFit))
+        var fontSize = ImGui.GetFontSize();
+
+        if (ImGui.BeginTable("Header", 6, ImGuiTableFlags.SizingFixedFit))
         {
             ImGui.TableSetupColumn("");
             ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
@@ -194,6 +204,14 @@ public class TileSpriteEditorTab
             ImGui.Text($"Tile Sprite {editingSprite.Id}");
 
             ImGui.TableNextColumn();
+
+            ImGui.TableNextColumn();
+            ImGui.Text("Name:");
+
+            ImGui.TableNextColumn();
+            ImGui.SetNextItemWidth(fontSize * 10.0f);
+            ImGui.InputText("##tileSpriteName", ref editingName, MaxNameLen + 1);
+
             ImGui.TableNextColumn();
             if (ImGui.Button("Add New Context")) editingSprite.TileContexts.Insert(0, new TileContext());
 
@@ -605,6 +623,7 @@ public class TileSpriteEditorTab
     private void Select(int tileSpriteId)
     {
         editingSprite = new TileSprite(tileSpriteManager.TileSprites[tileSpriteId]);
+        editingName = editingSprite.Name;
     }
 
     /// <summary>
@@ -619,6 +638,7 @@ public class TileSpriteEditorTab
         }
 
         editingSprite.ReSortContexts();
+        editingSprite.Name = editingName;
         tileSpriteManager.Update(editingSprite);
     }
 

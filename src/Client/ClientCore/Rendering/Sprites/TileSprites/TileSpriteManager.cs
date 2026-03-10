@@ -186,6 +186,7 @@ public sealed class TileSpriteManager
             TileSprites = TileSprites.Select(ts => new TileSpriteDefinitions.TileSpriteRecord
             {
                 Id = ts.Id,
+                Name = ts.Name,
                 TileContexts = ts.TileContexts
             }).ToList()
         };

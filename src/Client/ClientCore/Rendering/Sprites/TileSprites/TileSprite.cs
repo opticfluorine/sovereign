@@ -44,6 +44,11 @@ public sealed class TileSprite
     public const int Empty = -1;
 
     /// <summary>
+    ///     Default tile sprite name.
+    /// </summary>
+    private const string DefaultName = "New Tile Sprite";
+
+    /// <summary>
     ///     Cache of previously resolved tile contexts.
     /// </summary>
     private readonly ConcurrentDictionary<TileContextKey, TileContext> lookupCache = new();
@@ -56,6 +61,7 @@ public sealed class TileSprite
     public TileSprite(int id)
     {
         Id = id;
+        Name = DefaultName;
         TileContexts = new List<TileContext>
         {
             new()
@@ -76,6 +82,7 @@ public sealed class TileSprite
     public TileSprite(TileSpriteRecord definition)
     {
         Id = definition.Id;
+        Name = definition.Name;
         TileContexts = SortContexts(definition.TileContexts);
     }
 
@@ -86,6 +93,7 @@ public sealed class TileSprite
     public TileSprite(TileSprite other)
     {
         Id = other.Id;
+        Name = other.Name;
         TileContexts = other.TileContexts
             .Select(context => new TileContext(context))
             .ToList();
@@ -95,6 +103,11 @@ public sealed class TileSprite
     ///     Tile sprite ID.
     /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    ///     Tile sprite name.
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Finds the animated sprites for the tile context that matches

@@ -4,6 +4,10 @@
 
 ### March
 
+#### 10 March 2026
+
+* Add names to tile sprites.
+
 #### 08 March 2026
 
 * Fix an issue with texture sampling from the texture atlas. Texture coordinates were set to edges of texels and so were subject to off-by-one rounding errors at higher screen resolutions and when moving.

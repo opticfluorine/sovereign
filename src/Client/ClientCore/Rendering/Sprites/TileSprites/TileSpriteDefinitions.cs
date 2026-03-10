@@ -40,6 +40,11 @@ public sealed class TileSpriteDefinitions
         public int Id { get; set; }
 
         /// <summary>
+        ///     Tile sprite name.
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>
         ///     Tile contexts.
         /// </summary>
         public List<TileContext> TileContexts { get; set; } = new();
