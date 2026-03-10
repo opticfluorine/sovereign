@@ -104,7 +104,7 @@ public class TileSpriteSelectorPopup
                 if (ImGui.IsItemHovered())
                     if (ImGui.BeginTooltip())
                     {
-                        ImGui.Text($"Tile Sprite {i}");
+                        ImGui.Text($"{tileSpriteManager.TileSprites[i].Name} ({i})");
                         ImGui.EndTooltip();
                     }
             }
