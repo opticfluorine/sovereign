@@ -65,7 +65,6 @@ public sealed class TileSpriteManager
         this.logger = logger;
 
         animatedSpriteManager.OnAnimatedSpriteAdded += OnAnimatedSpriteAdded;
-        animatedSpriteManager.OnAnimatedSpriteRemoved += OnAnimatedSpriteRemoved;
     }
 
     public IErrorHandler ErrorHandler { private get; set; } = NullErrorHandler.Instance;
@@ -219,30 +218,6 @@ public sealed class TileSpriteManager
         if (animatedSpriteId == animatedSpriteManager.AnimatedSprites.Count - 1) return;
 
         foreach (var tileSprite in TileSprites) tileSprite.OnAnimatedSpriteAdded(animatedSpriteId);
-
-        SaveDefinitions();
-    }
-
-    /// <summary>
-    ///     Called when an animated sprite is removed at runtime.
-    /// </summary>
-    /// <param name="animatedSpriteId">Animated sprite ID.</param>
-    private void OnAnimatedSpriteRemoved(int animatedSpriteId)
-    {
-        // When an animated sprite is removed, any existing animated sprites with id > animatedSpriteId
-        // are decremented by one. We need to scan the tile sprite table and adjust any existing
-        // upstream references to match the new IDs.
-
-        // We assume that the removed animated sprite is not present in any tile sprite, based on the
-        // assumptions in AnimatedSpriteManager's Remove method. Any tile sprite dependencies on the
-        // removed animated sprite should have been manually resolved by the user before the call was
-        // allowed to be made.
-
-        // If the animated sprite was removed from the end of the table, no IDs were impacted and no
-        // updates need to be made.
-        if (animatedSpriteId == animatedSpriteManager.AnimatedSprites.Count) return;
-
-        foreach (var tileSprite in TileSprites) tileSprite.OnAnimatedSpriteRemoved(animatedSpriteId);
 
         SaveDefinitions();
     }

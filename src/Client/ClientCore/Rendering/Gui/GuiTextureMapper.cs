@@ -127,7 +127,6 @@ public class GuiTextureMapper
         this.rendererOptions = rendererOptions.Value;
 
         animatedSpriteManager.OnAnimatedSpriteAdded += OnAnimatedSpriteAdded;
-        animatedSpriteManager.OnAnimatedSpriteRemoved += OnAnimatedSpriteRemoved;
         tileSpriteManager.OnTileSpriteAdded += OnTileSpriteChange;
         tileSpriteManager.OnTileSpriteRemoved += OnTileSpriteChange;
         tileSpriteManager.OnTileSpriteUpdated += OnTileSpriteChange;
@@ -411,63 +410,13 @@ public class GuiTextureMapper
     }
 
     /// <summary>
-    ///     Updates cached entries when a new animated sprite is removed.
-    /// </summary>
-    /// <param name="animatedSpriteId">ID of removed animated sprite.</param>
-    private void OnAnimatedSpriteRemoved(int animatedSpriteId)
-    {
-        // For removed animated sprites, any sprites with id > animatedSpriteId will be decremented.
-        // Smaller IDs are not affected.
-        // We don't remove the corresponding texture record to avoid a reordering of higher texture IDs.
-        var affectedRows = new List<Tuple<Tuple<int, Orientation, AnimationPhase>, int>>();
-        var rowsToRemove = new List<Tuple<int, Orientation, AnimationPhase>>();
-
-        // First pass, update the IDs in the records.
-        foreach (var key in animatedSpriteIndices.Keys)
-        {
-            var oldId = key.Item1;
-            if (oldId < animatedSpriteId) continue;
-            if (oldId == animatedSpriteId)
-            {
-                rowsToRemove.Add(key);
-                continue;
-            }
-
-            var newId = oldId - 1;
-
-            var index = animatedSpriteIndices[key];
-            textures[index].Id = newId;
-            affectedRows.Add(Tuple.Create(key, index));
-        }
-
-        // Second pass, remove the affected IDs.
-        foreach (var key in rowsToRemove)
-        {
-            reclaimableIndices.Enqueue(animatedSpriteIndices[key]);
-            animatedSpriteIndices.Remove(key);
-        }
-
-        foreach (var oldRow in affectedRows) animatedSpriteIndices.Remove(oldRow.Item1);
-
-        // Third pass, add new rows for affected IDs to the index cache.
-        foreach (var oldRow in affectedRows)
-        {
-            var newKey = Tuple.Create(oldRow.Item1.Item1 - 1, oldRow.Item1.Item2, oldRow.Item1.Item3);
-            animatedSpriteIndices[newKey] = oldRow.Item2;
-        }
-    }
-
-    /// <summary>
     ///     Called when the tile sprites are changed (added, updated, removed).
     /// </summary>
     /// <param name="tileSpriteId">Tile sprite ID.</param>
     public void OnTileSpriteChange(int tileSpriteId)
     {
         // Invalidate all tile sprite texture caches, flagging the texture indices to be reclaimed.
-        foreach (var texId in tileSpriteIndices.Values)
-        {
-            reclaimableIndices.Enqueue(texId);
-        }
+        foreach (var texId in tileSpriteIndices.Values) reclaimableIndices.Enqueue(texId);
 
         tileSpriteIndices.Clear();
     }

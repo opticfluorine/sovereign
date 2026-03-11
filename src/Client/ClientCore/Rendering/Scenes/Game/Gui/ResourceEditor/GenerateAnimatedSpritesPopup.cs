@@ -72,10 +72,7 @@ public class GenerateAnimatedSpritesPopup
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Cancel"))
-                {
-                    ImGui.CloseCurrentPopup();
-                }
+                if (ImGui.Button("Cancel")) ImGui.CloseCurrentPopup();
 
                 ImGui.EndTable();
             }
@@ -96,13 +93,23 @@ public class GenerateAnimatedSpritesPopup
             .OrderBy(sprite => sprite.Row)
             .ThenBy(sprite => sprite.Column);
 
-        foreach (var sourceSprite in sprites)
+        animatedSpriteManager.SetAutoSave(false);
+        try
         {
-            var index = animatedSpriteManager.AnimatedSprites.Count;
-            animatedSpriteManager.InsertNew(index);
-            var animatedSprite = new AnimatedSprite(animatedSpriteManager.AnimatedSprites[index]);
-            animatedSprite.Phases[AnimationPhase.Default].Frames[Orientation.South][0] = sourceSprite;
-            animatedSpriteManager.Update(index, animatedSprite);
+            foreach (var sourceSprite in sprites)
+            {
+                var index = animatedSpriteManager.AnimatedSprites.Count;
+                animatedSpriteManager.InsertNew(index);
+                var animatedSprite = new AnimatedSprite(animatedSpriteManager.AnimatedSprites[index]);
+                animatedSprite.Phases[AnimationPhase.Default].Frames[Orientation.South][0] = sourceSprite;
+                animatedSpriteManager.Update(index, animatedSprite);
+            }
+
+            animatedSpriteManager.SaveDefinitions();
+        }
+        finally
+        {
+            animatedSpriteManager.SetAutoSave(true);
         }
     }
 }

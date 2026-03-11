@@ -8,6 +8,7 @@
 
 * Add names to tile sprites.
 * Fix bug where updated sprite definitions would result in a corrupt JSON file if the file was formatted into multiple lines externally.
+* Improve performance of animated sprite generation from spritesheets.
 
 #### 08 March 2026
 

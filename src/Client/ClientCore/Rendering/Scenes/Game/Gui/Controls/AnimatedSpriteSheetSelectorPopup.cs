@@ -46,7 +46,7 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
     /// <summary>
     ///     Preferred size of selector if sufficient space is available.
     /// </summary>
-    private readonly Vector2 preferredSize = 1.2f * new Vector2(500.0f, 400.0f);
+    private readonly Vector2 preferredSize = new(500.0f, 400.0f);
 
     /// <summary>
     ///     Popup base position.
@@ -178,8 +178,9 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
     {
         // Wrap the view in a single-cell table to get scrollbars for larger spritesheets.
         var screenSize = ImGui.GetIO().DisplaySize;
+        var targetSize = 1.5f * preferredSize;
         var maxSize = new Vector2(screenSize.X - basePos.X - 16, screenSize.Y - basePos.Y - 128);
-        var realSize = new Vector2(Math.Min(preferredSize.X, maxSize.X), Math.Min(preferredSize.Y, maxSize.Y));
+        var realSize = new Vector2(Math.Min(targetSize.X, maxSize.X), Math.Min(targetSize.Y, maxSize.Y));
 
         DrawZoomControls();
 
