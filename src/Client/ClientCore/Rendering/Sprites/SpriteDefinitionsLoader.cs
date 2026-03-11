@@ -80,7 +80,7 @@ public sealed class SpriteDefinitionsLoader
         // Serialize to JSON.
         try
         {
-            using var stream = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write);
+            using var stream = new FileStream(filename, FileMode.Create, FileAccess.Write);
             JsonSerializer.Serialize(stream, defs);
         }
         catch (Exception e)
