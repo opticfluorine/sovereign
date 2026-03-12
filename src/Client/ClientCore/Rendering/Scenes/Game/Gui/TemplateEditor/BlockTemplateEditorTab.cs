@@ -14,11 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using Hexa.NET.ImGui;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Components.Indexers;
 using Sovereign.ClientCore.Configuration;
@@ -53,6 +55,7 @@ public class BlockTemplateEditorTab
     private readonly GuiExtensions guiExtensions;
     private readonly BlockTemplateEntityIndexer indexer;
     private readonly TemplateEditorInternalController internalController;
+    private readonly ILogger<BlockTemplateEditorTab> logger;
     private readonly MaterialManager materialManager;
     private readonly MaterialModifierComponentCollection materialModifiers;
     private readonly MaterialComponentCollection materials;
@@ -73,7 +76,8 @@ public class BlockTemplateEditorTab
         NameComponentCollection names, MaterialManager materialManager, EntityTable entityTable,
         TemplateEditorInternalController internalController, IEventSender eventSender,
         EntityDefinitionGenerator definitionGenerator, NameComponentValidator nameComponentValidator,
-        GuiComponentEditors guiComponentEditors, IOptions<EditorOptions> editorOptions)
+        GuiComponentEditors guiComponentEditors, IOptions<EditorOptions> editorOptions,
+        ILogger<BlockTemplateEditorTab> logger)
     {
         this.indexer = indexer;
         this.guiExtensions = guiExtensions;
@@ -87,6 +91,7 @@ public class BlockTemplateEditorTab
         this.definitionGenerator = definitionGenerator;
         this.nameComponentValidator = nameComponentValidator;
         this.guiComponentEditors = guiComponentEditors;
+        this.logger = logger;
         this.editorOptions = editorOptions.Value;
 
         indexer.OnIndexModified += RefreshList;
@@ -146,40 +151,47 @@ public class BlockTemplateEditorTab
             {
                 // Gather data.
                 var templateEntityId = sortedTemplateEntityIds[i];
-                var name = names.HasComponentForEntity(templateEntityId)
-                    ? names[templateEntityId]
-                    : $"Block {templateEntityId - EntityConstants.FirstTemplateEntityId}";
-                var materialId = materials[templateEntityId];
-                var materialModifier = materialModifiers[templateEntityId];
-                var mat = materialManager.Materials[materialId];
-
-                // Material column
-                ImGui.TableNextColumn();
-                if (guiExtensions.TileSpriteButton($"##matButtonFront{i}",
-                        mat.MaterialSubtypes[materialModifier].SideFaceTileSpriteId,
-                        TileContextKey.AllWildcards)) Select(i);
-                ImGui.SameLine();
-                if (guiExtensions.TileSpriteButton($"##matButtonTop{i}",
-                        mat.MaterialSubtypes[materialModifier].TopFaceTileSpriteId,
-                        TileContextKey.AllWildcards)) Select(i);
-                ImGui.SameLine();
-                if (guiExtensions.TileSpriteButton($"##matButtonObsc{i}",
-                        mat.MaterialSubtypes[materialModifier].ObscuredTopFaceTileSpriteId,
-                        TileContextKey.AllWildcards)) Select(i);
-
-                // Name column.
-                ImGui.TableNextColumn();
-                ImGui.Text(name);
-                
-                // Show relative template entity ID below the name.
-                var relativeId = templateEntityId - EntityConstants.FirstTemplateEntityId;
-                ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1.0f), $"ID: {relativeId}");
-
-                // Highlight if selected.
-                if (i == selectedIndex)
+                try
                 {
-                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, SelectionColor);
-                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, SelectionColor);
+                    var name = names.HasComponentForEntity(templateEntityId)
+                        ? names[templateEntityId]
+                        : $"Block {templateEntityId - EntityConstants.FirstTemplateEntityId}";
+                    var materialId = materials[templateEntityId];
+                    var materialModifier = materialModifiers[templateEntityId];
+                    var mat = materialManager.Materials[materialId];
+
+                    // Material column
+                    ImGui.TableNextColumn();
+                    if (guiExtensions.TileSpriteButton($"##matButtonFront{i}",
+                            mat.MaterialSubtypes[materialModifier].SideFaceTileSpriteId,
+                            TileContextKey.AllWildcards)) Select(i);
+                    ImGui.SameLine();
+                    if (guiExtensions.TileSpriteButton($"##matBMaterialManauttonTop{i}",
+                            mat.MaterialSubtypes[materialModifier].TopFaceTileSpriteId,
+                            TileContextKey.AllWildcards)) Select(i);
+                    ImGui.SameLine();
+                    if (guiExtensions.TileSpriteButton($"##matButtonObsc{i}",
+                            mat.MaterialSubtypes[materialModifier].ObscuredTopFaceTileSpriteId,
+                            TileContextKey.AllWildcards)) Select(i);
+
+                    // Name column.
+                    ImGui.TableNextColumn();
+                    ImGui.Text(name);
+
+                    // Show relative template entity ID below the name.
+                    var relativeId = templateEntityId - EntityConstants.FirstTemplateEntityId;
+                    ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1.0f), $"ID: {relativeId}");
+
+                    // Highlight if selected.
+                    if (i == selectedIndex)
+                    {
+                        ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, SelectionColor);
+                        ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, SelectionColor);
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Error rendering block template {EntityId:X} in browser.", templateEntityId);
                 }
             }
 

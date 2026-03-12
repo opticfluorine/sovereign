@@ -4,6 +4,10 @@
 
 ### March
 
+#### 12 March 2026
+
+* Add support for duplicating existing tile sprites in the tile sprite editor.
+
 #### 10 March 2026
 
 * Add names to tile sprites.

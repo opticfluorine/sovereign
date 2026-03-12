@@ -178,7 +178,7 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
     {
         // Wrap the view in a single-cell table to get scrollbars for larger spritesheets.
         var screenSize = ImGui.GetIO().DisplaySize;
-        var targetSize = 1.5f * preferredSize;
+        var targetSize = 1.8f * preferredSize;
         var maxSize = new Vector2(screenSize.X - basePos.X - 16, screenSize.Y - basePos.Y - 128);
         var realSize = new Vector2(Math.Min(targetSize.X, maxSize.X), Math.Min(targetSize.Y, maxSize.Y));
 

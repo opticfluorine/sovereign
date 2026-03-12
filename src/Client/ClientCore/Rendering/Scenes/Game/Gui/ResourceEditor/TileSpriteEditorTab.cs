@@ -151,7 +151,7 @@ public class TileSpriteEditorTab
             ImGui.EndTable();
 
             // Bottom control row.
-            if (ImGui.BeginTable("browserControls", 2, ImGuiTableFlags.SizingFixedFit))
+            if (ImGui.BeginTable("browserControls", 3, ImGuiTableFlags.SizingFixedFit))
             {
                 ImGui.TableSetupColumn("##Span", ImGuiTableColumnFlags.WidthStretch);
 
@@ -166,6 +166,15 @@ public class TileSpriteEditorTab
                         ImGui.Text("Insert New");
                         ImGui.EndTooltip();
                     }
+
+                // Copy sprite button.
+                ImGui.TableNextColumn();
+                if (ImGui.Button("\ue042")) DuplicateTileSprite();
+                if (ImGui.BeginItemTooltip())
+                {
+                    ImGui.Text("Duplicate");
+                    ImGui.EndTooltip();
+                }
 
                 ImGui.EndTable();
             }
@@ -661,14 +670,28 @@ public class TileSpriteEditorTab
     /// </summary>
     private void InsertNewTileSprite()
     {
+        var newId = tileSpriteManager.TileSprites.Count;
+        tileSpriteManager.InsertNew(newId);
+        Select(newId);
+    }
+
+    /// <summary>
+    ///     Duplicates the selected tile sprite to the end of the list.
+    /// </summary>
+    private void DuplicateTileSprite()
+    {
         if (editingSprite == null)
         {
-            logger.LogError("InsertNewTileSprite(): editingSprite is null.");
+            logger.LogError("DuplicateTileSprite(): editingSprite is null.");
             return;
         }
 
         var newId = tileSpriteManager.TileSprites.Count;
         tileSpriteManager.InsertNew(newId);
+        var newSprite = new TileSprite(tileSpriteManager.TileSprites[editingSprite.Id]);
+        newSprite.Id = newId;
+        tileSpriteManager.Update(newSprite);
+
         Select(newId);
     }
 }
