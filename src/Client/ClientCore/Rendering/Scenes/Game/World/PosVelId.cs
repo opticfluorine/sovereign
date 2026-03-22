@@ -20,6 +20,15 @@ using System.Numerics;
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.World;
 
 /// <summary>
+///     Sprite highlighting states.
+/// </summary>
+public enum Highlight
+{
+    None,
+    Green
+}
+
+/// <summary>
 ///     Pairs entity metadata with an ID (e.g. tile sprite ID,
 ///     animated sprite ID, etc.).
 /// </summary>
@@ -54,4 +63,9 @@ public struct PosVelId
     ///     For free sprites, indicates the plane in which the sprite lies.
     /// </summary>
     public SpritePlane SpritePlane;
+
+    /// <summary>
+    ///     Highlight state for this sprite.
+    /// </summary>
+    public Highlight Highlight;
 }

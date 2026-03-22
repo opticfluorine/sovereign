@@ -14,30 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using Sovereign.ClientCore.Rendering.Scenes.Game.World;
+using Sovereign.EngineCore.Components.Types;
+
 namespace Sovereign.ClientCore.Systems.ClientState;
 
 /// <summary>
 ///     Exports public services from the ClientState system to the rest of the client.
 /// </summary>
-public sealed class ClientStateServices
+public sealed class ClientStateServices(
+    ClientStateMachine stateMachine,
+    ClientStateFlagManager flagManager,
+    PlayerStateManager playerStateManager,
+    MainMenuStateMachine mainMenuStateMachine,
+    InventoryStateManager inventoryStateManager,
+    HighlightManager highlightManager)
 {
-    private readonly ClientStateFlagManager flagManager;
-    private readonly InventoryStateManager inventoryStateManager;
-    private readonly MainMenuStateMachine mainMenuStateMachine;
-    private readonly PlayerStateManager playerStateManager;
-    private readonly ClientStateMachine stateMachine;
-
-    public ClientStateServices(ClientStateMachine stateMachine, ClientStateFlagManager flagManager,
-        PlayerStateManager playerStateManager, MainMenuStateMachine mainMenuStateMachine,
-        InventoryStateManager inventoryStateManager)
-    {
-        this.stateMachine = stateMachine;
-        this.flagManager = flagManager;
-        this.playerStateManager = playerStateManager;
-        this.mainMenuStateMachine = mainMenuStateMachine;
-        this.inventoryStateManager = inventoryStateManager;
-    }
-
     /// <summary>
     ///     Current state of the top-level client state machine.
     /// </summary>
@@ -47,6 +40,11 @@ public sealed class ClientStateServices
     ///     Current state of the main menu.
     /// </summary>
     public MainMenuState MainMenuState => mainMenuStateMachine.State;
+
+    /// <summary>
+    ///     Current block highlight state.
+    /// </summary>
+    public Highlight BlockHighlightState => highlightManager.BlockHighlightState;
 
     /// <summary>
     ///     Gets the current value of a state flag.
@@ -99,5 +97,14 @@ public sealed class ClientStateServices
     public bool TryGetSelectedInventorySlot(out int slotIndex)
     {
         return inventoryStateManager.TryGetSelectedSlot(out slotIndex);
+    }
+
+    /// <summary>
+    ///     Copies the block highlight set into a destination buffer. The buffer is not cleared before copy.
+    /// </summary>
+    /// <param name="destination">Destination buffer.</param>
+    public void GetBlockHighlights(HashSet<GridPosition> destination)
+    {
+        highlightManager.GetBlockHighlights(destination);
     }
 }

@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Components;
@@ -46,6 +47,7 @@ public sealed class WorldEntityRetriever
     private readonly AnimatedSpriteManager animatedSpriteManager;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly AtlasMap atlasMap;
+    private readonly HashSet<GridPosition> blockHighlights = new();
     private readonly BlockPositionComponentCollection blockPositions;
     private readonly IBlockAnimatedSpriteCache blockSpriteCache;
     private readonly CameraServices camera;
@@ -74,6 +76,11 @@ public sealed class WorldEntityRetriever
     private readonly NonBlockShadowPlanner shadowPlanner;
     private readonly SpriteManager spriteManager;
     private readonly DisplayViewport viewport;
+    private Sprite highlightFrontSprite = new();
+    private float highlightOpacity;
+
+    private Highlight highlightState;
+    private Sprite highlightTopSprite = new();
 
     private bool showHidden;
 
@@ -139,6 +146,17 @@ public sealed class WorldEntityRetriever
 
         perspectiveController.BeginFrameSync(timeSinceTick);
 
+        // Grab snapshot of block highlighting state to use for rendeirng.
+        highlightState = clientStateServices.BlockHighlightState;
+        if (highlightState != Highlight.None)
+        {
+            blockHighlights.Clear();
+            clientStateServices.GetBlockHighlights(blockHighlights);
+            SelectHighlightSprites(systemTime);
+        }
+
+        if (clientStateServices.GetStateFlagValue(ClientStateFlag.DebugFrame)) OutputDebugInfo();
+
         var halfY = viewport.HeightInTiles * 0.5f;
 
         var cameraPos = camera.Position.InterpolateByTime(camera.Velocity, timeSinceTick);
@@ -167,7 +185,7 @@ public sealed class WorldEntityRetriever
             if (!perspectiveServices.TryGetPerspectiveLine(intersectingPos, out var line))
                 continue;
 
-            ProcessPerspectiveLine(line, zMin, zMax, systemTime, timeSinceTick, renderPlan, cameraPos);
+            ProcessPerspectiveLine(line, zMin, zMax, systemTime, timeSinceTick, renderPlan, cameraPos, intersectingPos);
         }
     }
 
@@ -181,15 +199,28 @@ public sealed class WorldEntityRetriever
     /// <param name="timeSinceTick">Time since last tick, in seconds.</param>
     /// <param name="renderPlan">Render plan.</param>
     /// <param name="cameraPos">Camera position.</param>
+    /// <param name="intersectingPos">Block position intersecting the line.</param>
     private void ProcessPerspectiveLine(PerspectiveLine perspectiveLine, EntityList zMin, EntityList zMax,
-        ulong systemTime, float timeSinceTick, RenderPlan renderPlan, Vector3 cameraPos)
+        ulong systemTime, float timeSinceTick, RenderPlan renderPlan, Vector3 cameraPos, GridPosition intersectingPos)
     {
         var foundOpaqueBlock = false;
+        var lastZ = zMin.ZFloor - 1;
         for (var i = 0; i < perspectiveLine.ZFloors.Count; ++i)
         {
             var zSet = perspectiveLine.ZFloors[i];
             if (zSet.ZFloor > zMax.ZFloor) continue;
             if (zSet.ZFloor < zMin.ZFloor) break;
+
+            // Check any empty Z sets we passed in case a block highlight needs to be drawn.
+            // On the first iteration, this will include any Z between zMin and the first Z set on the p-line.
+            if (highlightState != Highlight.None)
+            {
+                for (var k = lastZ + 1; k < zSet.ZFloor; ++k)
+                {
+                    grouper.SelectZDepth(k);
+                    DrawBlockHighlights(intersectingPos, k);
+                }
+            }
 
             grouper.SelectZDepth(zSet.ZFloor);
 
@@ -236,6 +267,10 @@ public sealed class WorldEntityRetriever
             if (((!foundOpaqueBlock && !opaqueThisDepth) || disableOcclusionCulling) && topFaceId < ulong.MaxValue)
                 ProcessBlockTopFace(topFaceId, systemTime, out opaqueThisDepth);
 
+            // Block highlighting comes immediately after the faces (if any). Note that we can have highlighting
+            // in the absence of faces if an empty space is being highlighted.
+            if (highlightState != Highlight.None) DrawBlockHighlights(intersectingPos, zSet.ZFloor);
+
             // If a top face was found, mark the block for solid geometry rendering.
             if (topFaceId < ulong.MaxValue) ProcessSolidBlock(topFaceId);
 
@@ -252,6 +287,42 @@ public sealed class WorldEntityRetriever
             // can both appear at the same z-depth, but the order in which they appear in zSet is
             // arbitrary.
             foundOpaqueBlock = opaqueThisDepth;
+            lastZ = zSet.ZFloor;
+        }
+
+        // Handle any block highlights between the last Z set and the viewport's maximum Z if needed.
+        if (highlightState != Highlight.None)
+        {
+            for (var z = lastZ + 1; z < zMax.ZFloor; ++z)
+            {
+                grouper.SelectZDepth(z);
+                DrawBlockHighlights(intersectingPos, z);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Draws block highlights for a perspective line at the given depth.
+    /// </summary>
+    /// <param name="intersectingPos">Intersecting position on the perspective line.</param>
+    /// <param name="z">Block highlight front face Z coordinate.</param>
+    private void DrawBlockHighlights(GridPosition intersectingPos, int z)
+    {
+        // Layer z contains top face for block at (z-1) and front face for block at (z).
+        var dz = intersectingPos.Z - z;
+        var frontPos = new GridPosition(intersectingPos.X, intersectingPos.Y + dz, z);
+        var topPos = frontPos with { Z = frontPos.Z - 1 };
+
+        if (blockHighlights.Contains(topPos))
+        {
+            grouper.AddSprite(PerspectiveEntityType.BlockTopFace, (Vector3)frontPos, Vector3.Zero,
+                highlightTopSprite, 0.0f, highlightOpacity);
+        }
+
+        if (blockHighlights.Contains(frontPos))
+        {
+            grouper.AddSprite(PerspectiveEntityType.BlockFrontFace, (Vector3)frontPos, Vector3.Zero,
+                highlightFrontSprite, 0.0f, highlightOpacity, SpritePlane.Xz);
         }
     }
 
@@ -439,5 +510,53 @@ public sealed class WorldEntityRetriever
         }
 
         solidBlockIndex++;
+    }
+
+    /// <summary>
+    ///     Selects sprites for block highlights.
+    /// </summary>
+    /// <param name="systemTime">System time of current frame.</param>
+    private void SelectHighlightSprites(ulong systemTime)
+    {
+        var frontId = highlightState switch
+        {
+            Highlight.Green => rendererOptions.BlockHoverFrontGreenAnimSprite,
+            _ => 0
+        };
+        var topId = highlightState switch
+        {
+            Highlight.Green => rendererOptions.BlockHoverTopGreenAnimSprite,
+            _ => 0
+        };
+
+        highlightFrontSprite = animatedSpriteManager.AnimatedSprites[frontId].GetPhaseData(AnimationPhase.Default)
+            .GetSpriteForTime(systemTime, Orientation.South);
+        highlightTopSprite = animatedSpriteManager.AnimatedSprites[topId].GetPhaseData(AnimationPhase.Default)
+            .GetSpriteForTime(systemTime, Orientation.South);
+
+        highlightOpacity = highlightState switch
+        {
+            Highlight.Green => rendererOptions.BlockHoverGreenOpacity,
+            _ => 1.0f
+        };
+    }
+
+    /// <summary>
+    ///     Outputs debug frame info.
+    /// </summary>
+    private void OutputDebugInfo()
+    {
+        logger.LogDebug("Block highlighting: {Flag}", highlightState);
+        if (highlightState != Highlight.None)
+        {
+            var sb = new StringBuilder();
+            sb.Append($"Block highlights ({blockHighlights.Count}): ");
+            foreach (var pos in blockHighlights)
+            {
+                sb.Append(pos.ToString()).Append(' ');
+            }
+
+            logger.LogDebug(sb.ToString().TrimEnd());
+        }
     }
 }

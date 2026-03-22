@@ -17,7 +17,9 @@
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Materials;
+using Sovereign.ClientCore.Rendering.Scenes.Game.World;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.ClientCore.Systems.ClientWorldEdit;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Entities;
@@ -33,7 +35,9 @@ public class BlockWorldEditorGui(
     MaterialManager materialManager,
     GuiExtensions guiExtensions,
     ClientWorldEditController worldEditController,
-    IEventSender eventSender)
+    IEventSender eventSender,
+    BlockToolUtil blockToolUtil,
+    ClientStateController stateController)
 {
     /// <summary>
     ///     Backing buffer for pen width input field.
@@ -63,6 +67,7 @@ public class BlockWorldEditorGui(
         RenderBlockTemplateControl();
         RenderBlockDrawControls();
         RenderBlockToolHelp();
+        SetupBlockHighlights();
     }
 
     /// <summary>
@@ -162,5 +167,16 @@ public class BlockWorldEditorGui(
         ImGui.TextColored(WorldEditorConstants.HelpTextColor, "Scroll to change block template.");
         ImGui.TextColored(WorldEditorConstants.HelpTextColor, "Ctrl+Scroll to change Z offset.");
         ImGui.TextColored(WorldEditorConstants.HelpTextColor, "Shift+Scroll to change pen width.");
+    }
+
+    /// <summary>
+    ///     Configures block highlights for the current frame based on the block editor tool.
+    /// </summary>
+    private void SetupBlockHighlights()
+    {
+        stateController.SetBlockHighlightState(Highlight.Green);
+
+        var centerPos = blockToolUtil.GetHoveredBlockWithOffset();
+        stateController.AddBlockHighlightSquare(centerPos, (uint)worldEditServices.PenWidth);
     }
 }

@@ -73,6 +73,21 @@ public sealed class RendererOptions
     ///     Can be used to offset self-shadowing effects with transparent block edges.
     /// </summary>
     public float GlobalLightShiftY { get; set; } = 0.0f;
+
+    /// <summary>
+    ///     Animated sprite ID to use for the green hover effect on block top faces.
+    /// </summary>
+    public int BlockHoverTopGreenAnimSprite { get; set; } = 1;
+
+    /// <summary>
+    ///     Animated sprite ID to use for the green hover effect on block front faces.
+    /// </summary>
+    public int BlockHoverFrontGreenAnimSprite { get; set; } = 2;
+
+    /// <summary>
+    ///     Opacity factor for the green hover effect on blocks.
+    /// </summary>
+    public float BlockHoverGreenOpacity { get; set; } = 0.7f;
 }
 
 /// <summary>

@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 
@@ -28,7 +27,7 @@ public class BlockToolHandler(
     IEventSender eventSender,
     ClientWorldEditInternalController internalController,
     ClientWorldEditState userState,
-    CameraServices cameraServices) : IWorldEditToolHandler
+    BlockToolUtil blockToolUtil) : IWorldEditToolHandler
 {
     /// <summary>
     ///     Flag indicating whether the first block has been impacted by the current edit operation.
@@ -42,7 +41,7 @@ public class BlockToolHandler(
 
     public void ProcessDraw()
     {
-        var hoveredPos = GetHoveredBlockWithOffset();
+        var hoveredPos = blockToolUtil.GetHoveredBlockWithOffset();
         if (!editStarted || !lastPosition.Equals(hoveredPos))
         {
             editStarted = true;
@@ -53,7 +52,7 @@ public class BlockToolHandler(
 
     public void ProcessErase()
     {
-        var hoveredPos = GetHoveredBlockWithOffset();
+        var hoveredPos = blockToolUtil.GetHoveredBlockWithOffset();
         if (!editStarted || !lastPosition.Equals(hoveredPos))
         {
             editStarted = true;
@@ -84,20 +83,5 @@ public class BlockToolHandler(
             var pos = center with { X = center.X + x, Y = center.Y + y };
             action(pos);
         }
-    }
-
-    /// <summary>
-    ///     Gets the block coordinate currently hovered by the mouse, taking Z offset into account.
-    /// </summary>
-    /// <returns>Hovered block coordinate.</returns>
-    private GridPosition GetHoveredBlockWithOffset()
-    {
-        // Select the block whose top face is hovered by the mouse.
-        var hoverPos = cameraServices.GetMousePositionWorldCoordinates();
-        var posWithOffset = hoverPos with
-        {
-            Y = hoverPos.Y - userState.ZOffset, Z = hoverPos.Z + userState.ZOffset - 1.0f
-        };
-        return (GridPosition)posWithOffset;
     }
 }

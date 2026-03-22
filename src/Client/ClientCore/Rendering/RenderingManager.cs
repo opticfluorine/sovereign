@@ -32,22 +32,25 @@ namespace Sovereign.ClientCore.Rendering;
 /// <summary>
 ///     Manages rendering services on the main thread.
 /// </summary>
-public class RenderingManager : IDisposable
+public class RenderingManager(
+    MainDisplay mainDisplay,
+    AdapterSelector adapterSelector,
+    DisplayModeSelector displayModeSelector,
+    IRenderer renderer,
+    RenderingResourceManager resourceManager,
+    CommonGuiManager guiManager,
+    ClientStateServices stateServices,
+    ILogger<RenderingManager> logger,
+    SDLEventAdapter sdlEventAdapter,
+    DisplayViewport viewport,
+    IOptions<DisplayOptions> displayOptions,
+    GuiFontAtlas guiFontAtlas,
+    ClientStateController stateController)
+    : IDisposable
 {
-    private readonly AdapterSelector adapterSelector;
-    private readonly DisplayModeSelector displayModeSelector;
+    private readonly DisplayOptions displayOptions = displayOptions.Value;
 
-    private readonly DisplayOptions displayOptions;
-    private readonly GuiFontAtlas guiFontAtlas;
-    private readonly CommonGuiManager guiManager;
-    private readonly ILogger<RenderingManager> logger;
-
-    private readonly MainDisplay mainDisplay;
-    private readonly IRenderer renderer;
-    private readonly RenderingResourceManager resourceManager;
-    private readonly SDLEventAdapter sdlEventAdapter;
-    private readonly ClientStateServices stateServices;
-    private readonly DisplayViewport viewport;
+    private readonly SDLEventAdapter sdlEventAdapter = sdlEventAdapter;
 
     private bool initialized;
 
@@ -60,27 +63,6 @@ public class RenderingManager : IDisposable
     ///     Selected display mode.
     /// </summary>
     private IDisplayMode? selectedDisplayMode;
-
-    public RenderingManager(MainDisplay mainDisplay, AdapterSelector adapterSelector,
-        DisplayModeSelector displayModeSelector, IRenderer renderer,
-        RenderingResourceManager resourceManager,
-        CommonGuiManager guiManager, ClientStateServices stateServices,
-        ILogger<RenderingManager> logger, SDLEventAdapter sdlEventAdapter,
-        DisplayViewport viewport, IOptions<DisplayOptions> displayOptions, GuiFontAtlas guiFontAtlas)
-    {
-        this.mainDisplay = mainDisplay;
-        this.adapterSelector = adapterSelector;
-        this.displayModeSelector = displayModeSelector;
-        this.renderer = renderer;
-        this.resourceManager = resourceManager;
-        this.guiManager = guiManager;
-        this.stateServices = stateServices;
-        this.logger = logger;
-        this.sdlEventAdapter = sdlEventAdapter;
-        this.viewport = viewport;
-        this.guiFontAtlas = guiFontAtlas;
-        this.displayOptions = displayOptions.Value;
-    }
 
     /// <summary>
     ///     Error handler.
@@ -134,8 +116,17 @@ public class RenderingManager : IDisposable
             renderer.ReloadResources();
         }
 
-        guiManager.NewFrame();
+        StartNewFrame();
         renderer.Render();
+    }
+
+    /// <summary>
+    ///     Starts a new frame.
+    /// </summary>
+    private void StartNewFrame()
+    {
+        guiManager.NewFrame();
+        stateController.ClearBlockHighlights();
     }
 
     /// <summary>

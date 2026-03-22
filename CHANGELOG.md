@@ -4,6 +4,11 @@
 
 ### March
 
+#### 22 March 2026
+
+* Add general support for highlighting certain blocks per frame.
+* Update world block editor to highlight blocks that would be affected based on mouse position.
+
 #### 12 March 2026
 
 * Add support for duplicating existing tile sprites in the tile sprite editor.

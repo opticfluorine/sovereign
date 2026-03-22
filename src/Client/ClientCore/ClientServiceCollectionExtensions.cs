@@ -355,6 +355,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<MainMenuStateMachine>();
         services.TryAddSingleton<AutoUpdaterEndDetector>();
         services.TryAddSingleton<InventoryStateManager>();
+        services.TryAddSingleton<HighlightManager>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ClientWorldEditSystem>());
         services.TryAddSingleton<ClientWorldEditState>();
@@ -363,6 +364,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<ClientWorldEditInputHandler>();
         services.TryAddSingleton<ClientWorldEditInternalController>();
         services.TryAddSingleton<BlockToolHandler>();
+        services.TryAddSingleton<BlockToolUtil>();
         services.TryAddSingleton<NpcToolHandler>();
         services.TryAddSingleton<ItemToolHandler>();
 

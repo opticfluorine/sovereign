@@ -62,14 +62,6 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
 
     public void ConsumeScene(IScene scene)
     {
-        /* Dispatch to scene-specific consumers. */
-        switch (scene.SceneType)
-        {
-            case SceneType.Game:
-                gameSceneConsumer.ConsumeScene(scene);
-                break;
-        }
-
         // General processing.
         if (scene.RenderGui)
         {
@@ -85,6 +77,14 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
 
             // State specific updates.
             scene.UpdateGui(gameResMgr.RenderPlan!);
+        }
+
+        /* Dispatch to scene-specific consumers. */
+        switch (scene.SceneType)
+        {
+            case SceneType.Game:
+                gameSceneConsumer.ConsumeScene(scene);
+                break;
         }
     }
 
