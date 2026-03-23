@@ -54,6 +54,7 @@ public sealed class WorldEntityRetriever
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castsShadows;
     private readonly ClientStateServices clientStateServices;
+    private readonly DebugState debugState;
     private readonly DrawableComponentCollection drawables;
     private readonly EntityTypeComponentCollection entityTypes;
     private readonly WorldLayerGrouper grouper;
@@ -76,6 +77,8 @@ public sealed class WorldEntityRetriever
     private readonly NonBlockShadowPlanner shadowPlanner;
     private readonly SpriteManager spriteManager;
     private readonly DisplayViewport viewport;
+
+    private int debugZCutoff;
     private Sprite highlightFrontSprite = new();
     private float highlightOpacity;
 
@@ -102,7 +105,8 @@ public sealed class WorldEntityRetriever
         ILogger<WorldEntityRetriever> logger, CastShadowsComponentCollection castsShadows,
         NonBlockShadowPlanner shadowPlanner, IOptions<RendererOptions> rendererOptions,
         DrawableComponentCollection drawables, ClientStateServices clientStateServices,
-        SpriteManager spriteManager, EntityTypeComponentCollection entityTypes)
+        SpriteManager spriteManager, EntityTypeComponentCollection entityTypes,
+        DebugState debugState)
     {
         this.camera = camera;
         this.viewport = viewport;
@@ -128,6 +132,7 @@ public sealed class WorldEntityRetriever
         this.clientStateServices = clientStateServices;
         this.spriteManager = spriteManager;
         this.entityTypes = entityTypes;
+        this.debugState = debugState;
         this.rendererOptions = rendererOptions.Value;
     }
 
@@ -160,6 +165,7 @@ public sealed class WorldEntityRetriever
         var halfY = viewport.HeightInTiles * 0.5f;
 
         var cameraPos = camera.Position.InterpolateByTime(camera.Velocity, timeSinceTick);
+        debugZCutoff = (int)(cameraPos.Z + debugState.ZLayerCapOffset);
 
         rangeSelector.DetermineExtents(out var minExtent, out var maxExtent, cameraPos);
 
@@ -209,6 +215,7 @@ public sealed class WorldEntityRetriever
         {
             var zSet = perspectiveLine.ZFloors[i];
             if (zSet.ZFloor > zMax.ZFloor) continue;
+            if (debugState.EnableZLayerCap && zSet.ZFloor > debugZCutoff) continue;
             if (zSet.ZFloor < zMin.ZFloor) break;
 
             // Check any empty Z sets we passed in case a block highlight needs to be drawn.

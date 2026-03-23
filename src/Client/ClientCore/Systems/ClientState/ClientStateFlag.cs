@@ -66,6 +66,11 @@ public enum ClientStateFlag
     ShowEntityDebug,
 
     /// <summary>
+    ///     Flag indicating that the in-game renderer debug window should be displayed.
+    /// </summary>
+    ShowRendererDebug,
+
+    /// <summary>
     ///     Flag indicating that the in-game resource editor window should be displayed.
     /// </summary>
     ShowResourceEditor,

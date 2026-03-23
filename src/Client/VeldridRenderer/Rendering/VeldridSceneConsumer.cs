@@ -19,6 +19,7 @@ using System;
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui.Debug;
 using Sovereign.ClientCore.Rendering.Scenes;
+using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.VeldridRenderer.Rendering.Scenes.Game;
@@ -33,6 +34,7 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
     private readonly GameResourceManager gameResMgr;
     private readonly GameSceneConsumer gameSceneConsumer;
     private readonly NetworkDebugGui networkDebugGui;
+    private readonly RendererDebugGui rendererDebugGui;
     private readonly ResourceEditorGui resourceEditorGui;
     private readonly ClientStateServices stateServices;
 
@@ -42,13 +44,15 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
     private bool isDisposed;
 
     public VeldridSceneConsumer(GameSceneConsumer gameSceneConsumer, ClientStateServices stateServices,
-        ResourceEditorGui resourceEditorGui, GameResourceManager gameResMgr, NetworkDebugGui networkDebugGui)
+        ResourceEditorGui resourceEditorGui, GameResourceManager gameResMgr, NetworkDebugGui networkDebugGui,
+        RendererDebugGui rendererDebugGui)
     {
         this.gameSceneConsumer = gameSceneConsumer;
         this.stateServices = stateServices;
         this.resourceEditorGui = resourceEditorGui;
         this.gameResMgr = gameResMgr;
         this.networkDebugGui = networkDebugGui;
+        this.rendererDebugGui = rendererDebugGui;
     }
 
     public void Dispose()
@@ -66,6 +70,7 @@ public class VeldridSceneConsumer : ISceneConsumer, IDisposable
         if (scene.RenderGui)
         {
             // Global debug menus.
+            if (stateServices.GetStateFlagValue(ClientStateFlag.ShowRendererDebug)) rendererDebugGui.Render();
             if (stateServices.GetStateFlagValue(ClientStateFlag.ShowNetworkDebug)) networkDebugGui.Render();
             if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiMetrics)) ImGui.ShowMetricsWindow();
             if (stateServices.GetStateFlagValue(ClientStateFlag.ShowImGuiDebugLog)) ImGui.ShowDebugLogWindow();

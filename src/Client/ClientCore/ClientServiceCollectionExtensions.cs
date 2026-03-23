@@ -230,6 +230,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<DialogueGui>();
         services.TryAddSingleton<InventoryGui>();
         services.TryAddSingleton<ItemContextGui>();
+        services.TryAddSingleton<RendererDebugGui>();
     }
 
     private static void AddResources(IServiceCollection services)
@@ -356,6 +357,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<AutoUpdaterEndDetector>();
         services.TryAddSingleton<InventoryStateManager>();
         services.TryAddSingleton<HighlightManager>();
+        services.TryAddSingleton<DebugState>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ClientWorldEditSystem>());
         services.TryAddSingleton<ClientWorldEditState>();
