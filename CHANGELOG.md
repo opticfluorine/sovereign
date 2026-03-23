@@ -4,6 +4,10 @@
 
 ### March
 
+#### 23 March 2026
+
+* Fix bug where block entities were directly persisted to the database. Blocks are only persisted indirectly through the world segment block data table. Since block IDs are treated as volatile and are reused between server runs, this leads to crashes caused by duplicate entity IDs.
+
 #### 22 March 2026
 
 * Add general support for highlighting certain blocks per frame.

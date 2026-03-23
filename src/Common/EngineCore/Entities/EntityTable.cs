@@ -153,7 +153,7 @@ public class EntityTable
         pendingAdds.Add(ref newAdd);
 
         // Set the persistence flag immediately so that it can be looked up as component changes are committed.
-        if (isPersisted) persistedEntities.Add(entityId);
+        if (isPersisted && !isBlock) persistedEntities.Add(entityId);
     }
 
     /// <summary>
