@@ -7,6 +7,7 @@
 #### 24 March 2026
 
 * Fix bug where renderer debug would crash when all z layers were omitted.
+* Add color coding to special tiles (wildcard, empty, obscured) to improve readability of tile sprite editor.
 
 #### 23 March 2026
 

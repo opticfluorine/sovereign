@@ -504,12 +504,24 @@ public class TileSpriteEditorTab
         else if (neighborId == TileSprite.Obscured)
         {
             for (var i = 0; i < 3; ++i) ImGui.Spacing();
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.4f, 0.2f, 0.2f, 1.0f));
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.6f, 0.2f, 0.2f, 1.0f));
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.8f, 0.2f, 0.2f, 1.0f));
             clicked = ImGui.Button($"Obsc##{rowIndex}{orientation}");
+            ImGui.PopStyleColor();
+            ImGui.PopStyleColor();
+            ImGui.PopStyleColor();
         }
         else if (neighborId == TileSprite.Empty)
         {
             for (var i = 0; i < 3; ++i) ImGui.Spacing();
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.4f, 0.2f, 1.0f));
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.2f, 0.6f, 0.2f, 1.0f));
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.2f, 0.8f, 0.2f, 1.0f));
             clicked = ImGui.Button($"Empty##{rowIndex}{orientation}");
+            ImGui.PopStyleColor();
+            ImGui.PopStyleColor();
+            ImGui.PopStyleColor();
         }
         else
         {
