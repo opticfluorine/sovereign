@@ -139,6 +139,7 @@ public class VeldridRenderer : IRenderer
             scene.EndScene();
 
             // GUI rendering from Dear ImGui.
+            commandList.SetFramebuffer(device.Device.SwapchainFramebuffer);
             guiRenderer.RenderGui(commandList);
         }
         catch (Exception e)

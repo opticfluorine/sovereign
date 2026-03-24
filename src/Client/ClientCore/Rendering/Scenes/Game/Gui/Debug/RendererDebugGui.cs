@@ -29,7 +29,7 @@ public sealed class RendererDebugGui(DebugState debugState)
     /// </summary>
     public void Render()
     {
-        if (!ImGui.Begin("Renderer Debug")) return;
+        if (!ImGui.Begin("Renderer Debug", ImGuiWindowFlags.AlwaysAutoResize)) return;
         var fontSize = ImGui.GetFontSize();
 
         var enableZCap = debugState.EnableZLayerCap;

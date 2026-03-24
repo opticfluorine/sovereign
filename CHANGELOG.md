@@ -4,6 +4,10 @@
 
 ### March
 
+#### 24 March 2026
+
+* Fix bug where renderer debug would crash when all z layers were omitted.
+
 #### 23 March 2026
 
 * Fix bug where block entities were directly persisted to the database. Blocks are only persisted indirectly through the world segment block data table. Since block IDs are treated as volatile and are reused between server runs, this leads to crashes caused by duplicate entity IDs.
