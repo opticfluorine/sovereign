@@ -34,4 +34,19 @@ public sealed class DebugState
     ///     Z offset from player position to use for the Z layer cap. Only meaningful if EnableZLayerCap is true.
     /// </summary>
     public int ZLayerCapOffset { get; set; }
+
+    /// <summary>
+    ///     Whether to inhibit rendering of block front faces.
+    /// </summary>
+    public bool InhibitBlockFrontFaces { get; set; }
+
+    /// <summary>
+    ///     Whether to inhibit rendering of block top faces.
+    /// </summary>
+    public bool InhibitBlockTopFaces { get; set; }
+
+    /// <summary>
+    ///     Whether to inhibit rendering of non-block sprites.
+    /// </summary>
+    public bool InhibitNonBlocks { get; set; }
 }

@@ -4,6 +4,10 @@
 
 ### March
 
+#### 27 March 2026
+
+* Add renderer debug flags for inhibiting draw of certain types of sprites (front faces/top faces/non-block sprites).
+
 #### 24 March 2026
 
 * Fix bug where renderer debug would crash when all z layers were omitted.

@@ -268,10 +268,12 @@ public sealed class WorldEntityRetriever
             }
 
             // Between passes, handle the faces.
-            if ((!foundOpaqueBlock || disableOcclusionCulling) && frontFaceId < ulong.MaxValue)
+            if ((!foundOpaqueBlock || disableOcclusionCulling) && frontFaceId < ulong.MaxValue &&
+                !debugState.InhibitBlockFrontFaces)
                 ProcessBlockFrontFace(frontFaceId, systemTime, out opaqueThisDepth);
 
-            if (((!foundOpaqueBlock && !opaqueThisDepth) || disableOcclusionCulling) && topFaceId < ulong.MaxValue)
+            if (((!foundOpaqueBlock && !opaqueThisDepth) || disableOcclusionCulling) && topFaceId < ulong.MaxValue &&
+                !debugState.InhibitBlockTopFaces)
                 ProcessBlockTopFace(topFaceId, systemTime, out opaqueThisDepth);
 
             // Block highlighting comes immediately after the faces (if any). Note that we can have highlighting
@@ -282,6 +284,7 @@ public sealed class WorldEntityRetriever
             if (topFaceId < ulong.MaxValue) ProcessSolidBlock(topFaceId);
 
             // Second pass, sending entities to the layer grouper.
+            if (debugState.InhibitNonBlocks) continue;
             for (var j = zSet.Entities.Count - 1; j >= 0; j--)
             {
                 // Skip block faces since they were already handled above.

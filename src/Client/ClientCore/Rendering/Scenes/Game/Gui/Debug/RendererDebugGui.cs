@@ -30,8 +30,38 @@ public sealed class RendererDebugGui(DebugState debugState)
     public void Render()
     {
         if (!ImGui.Begin("Renderer Debug", ImGuiWindowFlags.AlwaysAutoResize)) return;
-        var fontSize = ImGui.GetFontSize();
 
+        DepthControl();
+        SpriteControl();
+
+        ImGui.End();
+    }
+
+    /// <summary>
+    ///     Renders sprite control debug options.
+    /// </summary>
+    private void SpriteControl()
+    {
+        ImGui.SeparatorText("Sprite Control");
+        var inhibitFront = debugState.InhibitBlockFrontFaces;
+        var inhibitTop = debugState.InhibitBlockTopFaces;
+        var inhibitNonBlock = debugState.InhibitNonBlocks;
+
+        ImGui.Checkbox("Inhibit Block Front Faces", ref inhibitFront);
+        ImGui.Checkbox("Inhibit Block Top Faces", ref inhibitTop);
+        ImGui.Checkbox("Inhibit Non-Block Sprites", ref inhibitNonBlock);
+
+        debugState.InhibitBlockFrontFaces = inhibitFront;
+        debugState.InhibitBlockTopFaces = inhibitTop;
+        debugState.InhibitNonBlocks = inhibitNonBlock;
+    }
+
+    /// <summary>
+    ///     Renders depth control debug options.
+    /// </summary>
+    private void DepthControl()
+    {
+        ImGui.SeparatorText("Depth Control");
         var enableZCap = debugState.EnableZLayerCap;
         ImGui.Checkbox("Enable Z Layer Cap", ref enableZCap);
         debugState.EnableZLayerCap = enableZCap;
@@ -39,10 +69,9 @@ public sealed class RendererDebugGui(DebugState debugState)
         var zCapOffset = debugState.ZLayerCapOffset;
         ImGui.Text("Z Layer Cap Offset:");
         ImGui.SameLine();
+        var fontSize = ImGui.GetFontSize();
         ImGui.SetNextItemWidth(fontSize * 4.0f);
         ImGui.InputInt("##zOff", ref zCapOffset);
         debugState.ZLayerCapOffset = zCapOffset;
-
-        ImGui.End();
     }
 }
