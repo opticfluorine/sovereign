@@ -7,6 +7,7 @@
 #### 27 March 2026
 
 * Add renderer debug flags for inhibiting draw of certain types of sprites (front faces/top faces/non-block sprites).
+* Add debug option to refresh tile sprite cache for a block and log the resolved contexts. Useful for debugging unexpected tilings.
 
 #### 24 March 2026
 

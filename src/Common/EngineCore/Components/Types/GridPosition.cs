@@ -84,6 +84,20 @@ public struct GridPosition : IEquatable<GridPosition>
         Z = (int)Math.Floor(position.Z);
     }
 
+    /// <summary>
+    ///     Creates a grid position from an integer array [x, y, z].
+    /// </summary>
+    /// <param name="coords">Array of length 3.</param>
+    /// <exception cref="ArgumentException">Thrown if the array length is not exactly 3.</exception>
+    public GridPosition(int[] coords)
+    {
+        if (coords.Length != 3) throw new ArgumentException("coords must have exactly 3 elements.");
+
+        X = coords[0];
+        Y = coords[1];
+        Z = coords[2];
+    }
+
     public static explicit operator Vector3(GridPosition gridPosition)
     {
         return new Vector3(gridPosition.X, gridPosition.Y, gridPosition.Z);

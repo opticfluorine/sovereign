@@ -14,16 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Runtime.InteropServices;
 using Hexa.NET.ImGui;
+using Sovereign.ClientCore.Systems.Block.Caches;
 using Sovereign.ClientCore.Systems.ClientState;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 
 /// <summary>
 ///     Debug GUI for renderer debugging.
 /// </summary>
-public sealed class RendererDebugGui(DebugState debugState)
+public sealed class RendererDebugGui(DebugState debugState, IBlockAnimatedSpriteCache tileCache)
 {
+    private const int GridPosSize = 3;
+    private readonly int[] tileCoords = new int[GridPosSize];
+    private bool tileSpriteLogContext = true;
+    private bool tileSpriteSelf = true;
+
     /// <summary>
     ///     Renders the renderer debug GUI.
     /// </summary>
@@ -33,6 +42,7 @@ public sealed class RendererDebugGui(DebugState debugState)
 
         DepthControl();
         SpriteControl();
+        TileSpriteControl();
 
         ImGui.End();
     }
@@ -73,5 +83,36 @@ public sealed class RendererDebugGui(DebugState debugState)
         ImGui.SetNextItemWidth(fontSize * 4.0f);
         ImGui.InputInt("##zOff", ref zCapOffset);
         debugState.ZLayerCapOffset = zCapOffset;
+    }
+
+    /// <summary>
+    ///     Renders tile sprite control debug options.
+    /// </summary>
+    private void TileSpriteControl()
+    {
+        ImGui.SeparatorText("Tile Sprite Control");
+
+        InputTileCoords();
+        ImGui.Checkbox("Include Self", ref tileSpriteSelf);
+        ImGui.SameLine();
+        ImGui.Checkbox("Log Tile Contexts", ref tileSpriteLogContext);
+
+        if (ImGui.Button("Refresh Tile Cache for Block"))
+        {
+            debugState.LogTileSpriteContexts = tileSpriteLogContext;
+            tileCache.UpdateCacheForBlock(new GridPosition(tileCoords), tileSpriteSelf);
+            debugState.LogTileSpriteContexts = false;
+        }
+    }
+
+    /// <summary>
+    ///     Renders control for input of the tile sprite refresh block position.
+    /// </summary>
+    private unsafe void InputTileCoords()
+    {
+        var buf = stackalloc int[GridPosSize];
+        Marshal.Copy(tileCoords, 0, (IntPtr)buf, GridPosSize);
+        ImGui.InputInt3("Block Position", buf);
+        Marshal.Copy((IntPtr)buf, tileCoords, 0, GridPosSize);
     }
 }

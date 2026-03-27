@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
+using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
@@ -55,6 +56,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     ///     Block set pool.
     /// </summary>
     private readonly ObjectPool<HashSet<ulong>> blockSetPool = new(4);
+
+    private readonly DebugState debugState;
 
     /// <summary>
     ///     Read-only empty list to return when no sprites are cached.
@@ -120,6 +123,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         AboveBlockComponentCollection aboveBlocks,
         TileSpriteManager tileSpriteManager,
         EntityManager entityManager, EntityTable entityTable,
+        DebugState debugState,
         ILogger<BlockAnimatedSpriteCache> logger)
     {
         this.materials = materials;
@@ -131,6 +135,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         this.tileSpriteManager = tileSpriteManager;
         this.entityManager = entityManager;
         this.entityTable = entityTable;
+        this.debugState = debugState;
         this.logger = logger;
 
         RegisterEventHandlers();
@@ -145,6 +150,46 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     {
         return topFaceCache.TryGetValue(blockId, out var spriteIds) ? spriteIds : emptyList;
     }
+
+    public void UpdateCacheForBlock(GridPosition gridPosition, bool updateSelf)
+    {
+        /* Update cache. */
+        var isTopFace = true;
+        for (var i = 0; i < 2; ++i)
+        {
+            // Determine the orientation of the world-space plane on which the tile sprites are positioned.
+            // This ensures that matching is done across the same surface (e.g. walls with walls, floors with
+            // floors).
+            var basisEast = GridPosition.OneX;
+            var basisNorth = isTopFace ? GridPosition.OneY : GridPosition.OneZ;
+
+            /* Identify neighbors. */
+            var below = gridPosition - GridPosition.OneZ;
+            var north = gridPosition + basisNorth;
+            var south = gridPosition - basisNorth;
+            var east = gridPosition + basisEast;
+            var west = gridPosition - basisEast;
+            var northEast = north + basisEast;
+            var southEast = south + basisEast;
+            var southWest = south - basisEast;
+            var northWest = north - basisEast;
+
+            // Update cache for all neighbors in the plane.
+            UpdateCacheAtPosition(north, isTopFace);
+            UpdateCacheAtPosition(south, isTopFace);
+            UpdateCacheAtPosition(east, isTopFace);
+            UpdateCacheAtPosition(west, isTopFace);
+            UpdateCacheAtPosition(northEast, isTopFace);
+            UpdateCacheAtPosition(southEast, isTopFace);
+            UpdateCacheAtPosition(southWest, isTopFace);
+            UpdateCacheAtPosition(northWest, isTopFace);
+            if (isTopFace) UpdateCacheAtPosition(below, true);
+            if (updateSelf) UpdateCacheAtPosition(gridPosition, isTopFace);
+
+            isTopFace = !isTopFace;
+        }
+    }
+
 
     public void Dispose()
     {
@@ -231,50 +276,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     }
 
     /// <summary>
-    ///     Updates the cache for a change to a given block.
-    /// </summary>
-    /// <param name="gridPosition">Grid position of the block.</param>
-    /// <param name="updateSelf">Whether to update the cache entry for the block itself.</param>
-    private void UpdateCacheForBlock(GridPosition gridPosition, bool updateSelf)
-    {
-        /* Update cache. */
-        var isTopFace = true;
-        for (var i = 0; i < 2; ++i)
-        {
-            // Determine the orientation of the world-space plane on which the tile sprites are positioned.
-            // This ensures that matching is done across the same surface (e.g. walls with walls, floors with
-            // floors).
-            var basisEast = GridPosition.OneX;
-            var basisNorth = isTopFace ? GridPosition.OneY : GridPosition.OneZ;
-
-            /* Identify neighbors. */
-            var below = gridPosition - GridPosition.OneZ;
-            var north = gridPosition + basisNorth;
-            var south = gridPosition - basisNorth;
-            var east = gridPosition + basisEast;
-            var west = gridPosition - basisEast;
-            var northEast = north + basisEast;
-            var southEast = south + basisEast;
-            var southWest = south - basisEast;
-            var northWest = north - basisEast;
-
-            // Update cache for all neighbors in the plane.
-            UpdateCacheAtPosition(north, isTopFace);
-            UpdateCacheAtPosition(south, isTopFace);
-            UpdateCacheAtPosition(east, isTopFace);
-            UpdateCacheAtPosition(west, isTopFace);
-            UpdateCacheAtPosition(northEast, isTopFace);
-            UpdateCacheAtPosition(southEast, isTopFace);
-            UpdateCacheAtPosition(southWest, isTopFace);
-            UpdateCacheAtPosition(northWest, isTopFace);
-            if (isTopFace) UpdateCacheAtPosition(below, true);
-            if (updateSelf) UpdateCacheAtPosition(gridPosition, isTopFace);
-
-            isTopFace = !isTopFace;
-        }
-    }
-
-    /// <summary>
     ///     Updates the cache entry for the block at the given position, if any.
     /// </summary>
     /// <param name="gridPosition">Position to update.</param>
@@ -316,6 +317,14 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         var southEastId = GetTileSpriteIdForPosition(southEast, isTopFace);
         var southWestId = GetTileSpriteIdForPosition(southWest, isTopFace);
         var northWestId = GetTileSpriteIdForPosition(northWest, isTopFace);
+
+        if (debugState.LogTileSpriteContexts)
+        {
+            logger.LogDebug("=> Resolve at {Pos} ({Face}) <=", gridPosition, isTopFace ? "Top" : "Front");
+            logger.LogDebug("Self {Self}", centerId);
+            logger.LogDebug("N {N} | NE {NE} | E {E} | SE {SE} | S {S} | SW {SW} | W {W} | NW {NW}",
+                northId, northEastId, eastId, southEastId, southId, southWestId, westId, northWestId);
+        }
 
         /* Resolve tile sprite to animated sprites. */
         var tileSprite = tileSpriteManager.TileSprites[centerId];

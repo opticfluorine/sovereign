@@ -49,4 +49,9 @@ public sealed class DebugState
     ///     Whether to inhibit rendering of non-block sprites.
     /// </summary>
     public bool InhibitNonBlocks { get; set; }
+
+    /// <summary>
+    ///     Whether to log tile sprite contexts when updating the tile sprite cache.
+    /// </summary>
+    public bool LogTileSpriteContexts { get; set; }
 }

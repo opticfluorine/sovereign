@@ -16,6 +16,7 @@
  */
 
 using System.Collections.Generic;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Systems.Block.Caches;
 
@@ -37,4 +38,11 @@ public interface IBlockAnimatedSpriteCache
     /// <param name="blockId">Block entity ID.</param>
     /// <returns>Top face animated sprite IDs.</returns>
     List<int> GetTopFaceAnimatedSpriteIds(ulong blockId);
+
+    /// <summary>
+    ///     Updates the cache for a change to a given block.
+    /// </summary>
+    /// <param name="gridPosition">Grid position of the block.</param>
+    /// <param name="updateSelf">Whether to update the cache entry for the block itself.</param>
+    void UpdateCacheForBlock(GridPosition gridPosition, bool updateSelf);
 }
