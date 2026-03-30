@@ -7,6 +7,7 @@
 #### 30 March 2026
 
 * Fix issue in tiling engine where obscured tiles were not properly compared against patterns which explicitly reference the tile sprite.
+* Fix flickering effect with opaque sprites that are moving along the z axis.
 
 #### 27 March 2026
 

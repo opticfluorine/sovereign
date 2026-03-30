@@ -35,6 +35,8 @@ public sealed class OpacityTables
 
     private const float BinWidth = 1.0f / BinCount;
 
+    private const float Bias = 1.0f / 500.0f;
+
     private readonly float[,] tables = new float[MaxDraws, BinCount];
 
     public OpacityTables()
@@ -67,6 +69,6 @@ public sealed class OpacityTables
     private float ComputeFactor(int drawCount, int bin)
     {
         var alphaBin = bin * BinWidth;
-        return 1.0f - (float)Math.Pow(1.0f - alphaBin, 1.0f / drawCount);
+        return 1.0f - (float)Math.Pow(1.0f - alphaBin, 1.0f / drawCount) + Bias;
     }
 }
