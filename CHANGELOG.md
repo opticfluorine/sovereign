@@ -4,6 +4,10 @@
 
 ### March
 
+#### 30 March 2026
+
+* Fix issue in tiling engine where obscured tiles were not properly compared against patterns which explicitly reference the tile sprite.
+
 #### 27 March 2026
 
 * Add renderer debug flags for inhibiting draw of certain types of sprites (front faces/top faces/non-block sprites).

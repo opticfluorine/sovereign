@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites;
@@ -98,31 +99,32 @@ public sealed class TileContext
     /// </summary>
     public TileContextKey TileContextKey => new(NorthTileSpriteId, NortheastTileSpriteId,
         EastTileSpriteId, SoutheastTileSpriteId, SouthTileSpriteId, SouthwestTileSpriteId, WestTileSpriteId,
-        NorthwestTileSpriteId);
+        NorthwestTileSpriteId, 0);
 
     /// <summary>
     ///     Determines whether the context matches the given neighboring tile IDs.
     /// </summary>
-    /// <param name="northId">North neighbor tile ID.</param>
-    /// <param name="northEastId">Northeast neighbor tile ID.</param>
-    /// <param name="eastId">East neighbor tile ID.</param>
-    /// <param name="southEastId">Southeast neighbor tile ID.</param>
-    /// <param name="southId">South neighbor tile ID.</param>
-    /// <param name="southWestId">Southwest neighbor tile ID.</param>
-    /// <param name="westId">West neighbor tile ID.</param>
-    /// <param name="northWestId">Northwest neighbor tile ID.</param>
-    /// <returns></returns>
-    public bool IsMatch(int northId, int northEastId, int eastId, int southEastId, int southId, int southWestId,
-        int westId, int northWestId)
+    /// <param name="context">Tile context.</param>
+    /// <returns>true if a match, false otherwise.</returns>
+    public bool IsMatch(TileContextKey context)
     {
-        return (NorthTileSpriteId == TileSprite.Wildcard || NorthTileSpriteId == northId)
-               && (EastTileSpriteId == TileSprite.Wildcard || EastTileSpriteId == eastId)
-               && (SouthTileSpriteId == TileSprite.Wildcard || SouthTileSpriteId == southId)
-               && (WestTileSpriteId == TileSprite.Wildcard || WestTileSpriteId == westId)
-               && (NortheastTileSpriteId == TileSprite.Wildcard || NortheastTileSpriteId == northEastId)
-               && (SoutheastTileSpriteId == TileSprite.Wildcard || SoutheastTileSpriteId == southEastId)
-               && (SouthwestTileSpriteId == TileSprite.Wildcard || SouthwestTileSpriteId == southWestId)
-               && (NorthwestTileSpriteId == TileSprite.Wildcard || NorthwestTileSpriteId == northWestId);
+        return
+            DirectionMatches(NorthTileSpriteId, context.NorthId,
+                (context.ObscuredNeighbors & DirectionFlag.North) > 0) &&
+            DirectionMatches(NortheastTileSpriteId, context.NortheastId,
+                (context.ObscuredNeighbors & DirectionFlag.Northeast) > 0) &&
+            DirectionMatches(EastTileSpriteId, context.EastId,
+                (context.ObscuredNeighbors & DirectionFlag.East) > 0) &&
+            DirectionMatches(SoutheastTileSpriteId, context.SoutheastId,
+                (context.ObscuredNeighbors & DirectionFlag.Southeast) > 0) &&
+            DirectionMatches(SouthTileSpriteId, context.SouthId,
+                (context.ObscuredNeighbors & DirectionFlag.South) > 0) &&
+            DirectionMatches(SouthwestTileSpriteId, context.SouthwestId,
+                (context.ObscuredNeighbors & DirectionFlag.Southwest) > 0) &&
+            DirectionMatches(WestTileSpriteId, context.WestId,
+                (context.ObscuredNeighbors & DirectionFlag.West) > 0) &&
+            DirectionMatches(NorthwestTileSpriteId, context.NorthwestId,
+                (context.ObscuredNeighbors & DirectionFlag.Northwest) > 0);
     }
 
     /// <summary>
@@ -161,5 +163,19 @@ public sealed class TileContext
             Orientation.West => WestTileSpriteId,
             _ => throw new ArgumentOutOfRangeException(nameof(orientation))
         };
+    }
+
+    /// <summary>
+    ///     Checks whether a pattern matches a tile along a single direction.
+    /// </summary>
+    /// <param name="patternId">Tile ID from the pattern rule.</param>
+    /// <param name="tileId">Tile ID of the neighboring tile in the direction being checked.</param>
+    /// <param name="obscured">If true, indicates the neighboring tile is obscured.</param>
+    /// <returns>true if the pattern matches, false otherwise.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool DirectionMatches(int patternId, int tileId, bool obscured)
+    {
+        return patternId == TileSprite.Wildcard || (patternId == TileSprite.Obscured && obscured) ||
+               patternId == tileId;
     }
 }

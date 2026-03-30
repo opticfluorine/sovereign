@@ -559,7 +559,7 @@ public class TileSpriteEditorTab
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     editingSprite.Id, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
-                    TileSprite.Wildcard);
+                    TileSprite.Wildcard, 0);
                 guiExtensions.TileSprite(context.NorthwestTileSpriteId, key);
             }
 
@@ -568,7 +568,7 @@ public class TileSpriteEditorTab
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard, editingSprite.Id, TileSprite.Wildcard, TileSprite.Wildcard,
-                    TileSprite.Wildcard);
+                    TileSprite.Wildcard, 0);
                 guiExtensions.TileSprite(context.NorthTileSpriteId, key);
             }
 
@@ -577,7 +577,7 @@ public class TileSpriteEditorTab
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard, TileSprite.Wildcard, editingSprite.Id, TileSprite.Wildcard,
-                    TileSprite.Wildcard);
+                    TileSprite.Wildcard, 0);
                 guiExtensions.TileSprite(context.NortheastTileSpriteId, key);
             }
 
@@ -587,7 +587,7 @@ public class TileSpriteEditorTab
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, editingSprite.Id,
                     TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
-                    TileSprite.Wildcard);
+                    TileSprite.Wildcard, 0);
                 guiExtensions.TileSprite(context.WestTileSpriteId, key);
             }
 
@@ -599,7 +599,7 @@ public class TileSpriteEditorTab
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, editingSprite.Id,
-                    TileSprite.Wildcard);
+                    TileSprite.Wildcard, 0);
                 guiExtensions.TileSprite(context.EastTileSpriteId, key);
             }
 
@@ -609,7 +609,7 @@ public class TileSpriteEditorTab
             {
                 var key = new TileContextKey(TileSprite.Wildcard, editingSprite.Id, TileSprite.Wildcard,
                     TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
-                    TileSprite.Wildcard);
+                    TileSprite.Wildcard, 0);
                 guiExtensions.TileSprite(context.SouthwestTileSpriteId, key);
             }
 
@@ -618,7 +618,7 @@ public class TileSpriteEditorTab
             {
                 var key = new TileContextKey(editingSprite.Id, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
-                    TileSprite.Wildcard);
+                    TileSprite.Wildcard, 0);
                 guiExtensions.TileSprite(context.SouthTileSpriteId, key);
             }
 
@@ -627,7 +627,7 @@ public class TileSpriteEditorTab
             {
                 var key = new TileContextKey(TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
                     TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
-                    editingSprite.Id);
+                    editingSprite.Id, 0);
                 guiExtensions.TileSprite(context.SoutheastTileSpriteId, key);
             }
 

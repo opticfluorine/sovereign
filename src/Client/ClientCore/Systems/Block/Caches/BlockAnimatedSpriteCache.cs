@@ -288,8 +288,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
         /* Resolve to the tile sprite level. */
         var blockId = blockIds.Keys.First();
-        var centerId = GetTileSpriteIdForBlock(blockId, isTopFace);
-        if (centerId < 0)
+        var centerId = GetTileSpriteIdForBlock(blockId, isTopFace, true);
+        if (centerId == TileSprite.Empty)
             // Block isn't ready yet, return at a later pass.
             return;
 
@@ -309,14 +309,19 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         var southWest = south - basisEast;
         var northWest = north - basisEast;
 
-        var northId = GetTileSpriteIdForPosition(north, isTopFace);
-        var southId = GetTileSpriteIdForPosition(south, isTopFace);
-        var eastId = GetTileSpriteIdForPosition(east, isTopFace);
-        var westId = GetTileSpriteIdForPosition(west, isTopFace);
-        var northEastId = GetTileSpriteIdForPosition(northEast, isTopFace);
-        var southEastId = GetTileSpriteIdForPosition(southEast, isTopFace);
-        var southWestId = GetTileSpriteIdForPosition(southWest, isTopFace);
-        var northWestId = GetTileSpriteIdForPosition(northWest, isTopFace);
+        DirectionFlag obscuredNeighbors = 0;
+        var northId = GetTileSpriteIdForPosition(north, isTopFace, DirectionFlag.North, ref obscuredNeighbors);
+        var southId = GetTileSpriteIdForPosition(south, isTopFace, DirectionFlag.South, ref obscuredNeighbors);
+        var eastId = GetTileSpriteIdForPosition(east, isTopFace, DirectionFlag.East, ref obscuredNeighbors);
+        var westId = GetTileSpriteIdForPosition(west, isTopFace, DirectionFlag.West, ref obscuredNeighbors);
+        var northEastId =
+            GetTileSpriteIdForPosition(northEast, isTopFace, DirectionFlag.Northeast, ref obscuredNeighbors);
+        var southEastId =
+            GetTileSpriteIdForPosition(southEast, isTopFace, DirectionFlag.Southeast, ref obscuredNeighbors);
+        var southWestId =
+            GetTileSpriteIdForPosition(southWest, isTopFace, DirectionFlag.Southwest, ref obscuredNeighbors);
+        var northWestId =
+            GetTileSpriteIdForPosition(northWest, isTopFace, DirectionFlag.Northwest, ref obscuredNeighbors);
 
         if (debugState.LogTileSpriteContexts)
         {
@@ -329,7 +334,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         /* Resolve tile sprite to animated sprites. */
         var tileSprite = tileSpriteManager.TileSprites[centerId];
         var contextKey = new TileContextKey(northId, northEastId, eastId, southEastId, southId, southWestId, westId,
-            northWestId);
+            northWestId, obscuredNeighbors);
         var resolvedSprites = tileSprite.GetMatchingAnimatedSpriteIds(contextKey);
 
         /* Retrieve and populate cache. */
@@ -342,8 +347,11 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     /// <param name="gridPosition">Grid position.</param>
     /// <param name="isTopFace">Whether to resolve the top face.</param>
-    /// <returns>Resolved tile sprite ID, or TileSprite.Wildcard if no valid block.</returns>
-    private int GetTileSpriteIdForPosition(GridPosition gridPosition, bool isTopFace)
+    /// <param name="neighbor">Neighbor direction of this block.</param>
+    /// <param name="obscuredNeighbors">Accumulates obscured neighbor flagsflags.</param>
+    /// <returns>Resolved tile sprite ID, or TileSprite.Empty if no valid block.</returns>
+    private int GetTileSpriteIdForPosition(GridPosition gridPosition, bool isTopFace, DirectionFlag neighbor,
+        ref DirectionFlag obscuredNeighbors)
     {
         var blockIds = blockIndexer.GetEntitiesAtPosition(gridPosition);
         if (blockIds == null || blockIds.Count == 0) return TileSprite.Empty;
@@ -351,7 +359,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         // If the tile isn't empty, then check if it is obscured.
         var coveringBlock = isTopFace ? gridPosition + GridPosition.OneZ : gridPosition - GridPosition.OneY;
         var coveringBlockIds = blockIndexer.GetEntitiesAtPosition(coveringBlock);
-        if (coveringBlockIds is { Count: > 0 }) return TileSprite.Obscured;
+        if (coveringBlockIds is { Count: > 0 }) obscuredNeighbors |= neighbor;
 
         // Finally, if it's neither empty or obscured, then get the actual tile value.
         return GetTileSpriteIdForBlock(blockIds.Keys.First(), isTopFace);
@@ -362,8 +370,9 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     /// <param name="blockId">Block entity ID.</param>
     /// <param name="isTopFace">If true, resolve the top face; otherwise resolve the front face.</param>
+    /// <param name="allowObscured">Whether to allow reporting the special "Obscured" tile ID.</param>
     /// <returns>Resolved tile sprite ID.</returns>
-    private int GetTileSpriteIdForBlock(ulong blockId, bool isTopFace)
+    private int GetTileSpriteIdForBlock(ulong blockId, bool isTopFace, bool allowObscured = false)
     {
         if (!materials.HasComponentForEntity(blockId) || !materialModifiers.HasComponentForEntity(blockId))
             return TileSprite.Empty;
@@ -376,7 +385,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
             if (isTopFace)
             {
-                var obscured = aboveBlocks.HasComponentForEntity(blockId);
+                var obscured = allowObscured && aboveBlocks.HasComponentForEntity(blockId);
                 return obscured
                     ? subtype.ObscuredTopFaceTileSpriteId
                     : subtype.TopFaceTileSpriteId;

@@ -19,6 +19,23 @@ using System;
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 
 /// <summary>
+///     Flags indicating possible directions in a plane with North defined as the positive direction of the second axis,
+///     East defined as positive along the first axis.
+/// </summary>
+[Flags]
+public enum DirectionFlag
+{
+    North,
+    Northeast,
+    East,
+    Southeast,
+    South,
+    Southwest,
+    West,
+    Northwest
+}
+
+/// <summary>
 ///     Internal lookup key type for cached neighbor sets.
 /// </summary>
 public readonly struct TileContextKey : IEquatable<TileContextKey>
@@ -31,19 +48,21 @@ public readonly struct TileContextKey : IEquatable<TileContextKey>
     public readonly int SouthwestId;
     public readonly int WestId;
     public readonly int NorthwestId;
+    public readonly DirectionFlag ObscuredNeighbors;
 
     /// <summary>
     ///     Context key containing all wildcards.
     /// </summary>
     public static readonly TileContextKey AllWildcards = new(TileSprite.Wildcard, TileSprite.Wildcard,
         TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard, TileSprite.Wildcard,
-        TileSprite.Wildcard);
+        TileSprite.Wildcard, 0);
 
     public bool Equals(TileContextKey other)
     {
         return NorthId == other.NorthId && NortheastId == other.NortheastId && EastId == other.EastId &&
                SoutheastId == other.SoutheastId && SouthId == other.SouthId && SouthwestId == other.SouthwestId &&
-               WestId == other.WestId && NorthwestId == other.NorthwestId;
+               WestId == other.WestId && NorthwestId == other.NorthwestId &&
+               ObscuredNeighbors == other.ObscuredNeighbors;
     }
 
     public override bool Equals(object? obj)
@@ -53,8 +72,9 @@ public readonly struct TileContextKey : IEquatable<TileContextKey>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(NorthId, NortheastId, EastId, SoutheastId, SouthId, SouthwestId, WestId,
-            NorthwestId);
+        return HashCode.Combine(
+            HashCode.Combine(NorthId, NortheastId, EastId, SoutheastId, SouthId, SouthwestId, WestId, NorthwestId),
+            (int)ObscuredNeighbors);
     }
 
     public static bool operator ==(TileContextKey left, TileContextKey right)
@@ -68,7 +88,7 @@ public readonly struct TileContextKey : IEquatable<TileContextKey>
     }
 
     public TileContextKey(int northId, int northeastId, int eastId, int southeastId, int southId, int southwestId,
-        int westId, int northwestId)
+        int westId, int northwestId, DirectionFlag obscuredNeighbors)
     {
         NorthId = northId;
         NortheastId = northeastId;
@@ -78,5 +98,6 @@ public readonly struct TileContextKey : IEquatable<TileContextKey>
         SouthwestId = southwestId;
         WestId = westId;
         NorthwestId = northwestId;
+        ObscuredNeighbors = obscuredNeighbors;
     }
 }

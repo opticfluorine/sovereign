@@ -153,27 +153,6 @@ public sealed class TileSprite
     }
 
     /// <summary>
-    ///     Called when an animated sprite is removed resulting in a change in indices.
-    /// </summary>
-    /// <param name="animatedSpriteId">ID of removed animated sprite.</param>
-    public void OnAnimatedSpriteRemoved(int animatedSpriteId)
-    {
-        // IDs of any aniamted sprites wtih old id > animatedSpriteId are decremented by one.
-        // The removal assumes no tile sprite dependencies, so we will ignore any that exist.
-        // Update affected IDs.
-        foreach (var context in TileContexts)
-            for (var i = 0; i < context.AnimatedSpriteIds.Count; ++i)
-            {
-                var oldId = context.AnimatedSpriteIds[i];
-                if (oldId > animatedSpriteId)
-                {
-                    context.AnimatedSpriteIds.RemoveAt(i);
-                    context.AnimatedSpriteIds.Insert(i, oldId - 1);
-                }
-            }
-    }
-
-    /// <summary>
     ///     Clears the sprite lookup cache.
     /// </summary>
     public void ClearCache()
@@ -202,9 +181,9 @@ public sealed class TileSprite
     {
         /* Since the contexts are sorted in priority order, iterate until match. */
         foreach (var context in TileContexts)
-            if (context.IsMatch(key.NorthId, key.NortheastId, key.EastId, key.SoutheastId,
-                    key.SouthId, key.SouthwestId, key.WestId, key.NorthwestId))
-                return context;
+        {
+            if (context.IsMatch(key)) return context;
+        }
 
         /* We should at least match the default context, so throw an exception. */
         throw new KeyNotFoundException("No matching context found.");
