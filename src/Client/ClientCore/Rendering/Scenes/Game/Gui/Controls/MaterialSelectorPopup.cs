@@ -80,10 +80,6 @@ public class MaterialSelectorPopup
                 ImGui.SameLine();
                 if (guiExtensions.TileSpriteButton($"##matButtonTop{i}", mat.MaterialSubtypes[0].TopFaceTileSpriteId,
                         TileContextKey.AllWildcards)) Select(i);
-                ImGui.SameLine();
-                if (guiExtensions.TileSpriteButton($"##matButtonObsc{i}",
-                        mat.MaterialSubtypes[0].ObscuredTopFaceTileSpriteId,
-                        TileContextKey.AllWildcards)) Select(i);
 
                 // Name column.
                 ImGui.TableNextColumn();

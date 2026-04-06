@@ -1,1 +1,26 @@
-{"TileSprites":[{"Id":0,"TileContexts":[{"NorthTileSpriteId":-3,"EastTileSpriteId":-3,"SouthTileSpriteId":-3,"WestTileSpriteId":-3,"NortheastTileSpriteId":-3,"SoutheastTileSpriteId":-3,"SouthwestTileSpriteId":-3,"NorthwestTileSpriteId":-3,"AnimatedSpriteIds":[0],"TileContextKey":{}}]}]}
+{
+  "TileSprites": [
+    {
+      "Id": 0,
+      "TileContexts": [
+        {
+          "NorthTileSpriteId": -3,
+          "EastTileSpriteId": -3,
+          "SouthTileSpriteId": -3,
+          "WestTileSpriteId": -3,
+          "NortheastTileSpriteId": -3,
+          "SoutheastTileSpriteId": -3,
+          "SouthwestTileSpriteId": -3,
+          "NorthwestTileSpriteId": -3,
+          "AnimatedSpriteIds": [
+            0
+          ],
+          "ObscuredAnimatedSpriteIds": [
+            0
+          ],
+          "TileContextKey": {}
+        }
+      ]
+    }
+  ]
+}

@@ -55,6 +55,8 @@ public class TileSpriteEditorTab
     /// </summary>
     private TileSprite? editingSprite;
 
+    private TileState editingState;
+
     /// <summary>
     ///     Initialization flag.
     /// </summary>
@@ -202,6 +204,20 @@ public class TileSpriteEditorTab
             return;
         }
 
+        MetadataRow();
+        StateSelectRow();
+
+        ImGui.Separator();
+    }
+
+    private void MetadataRow()
+    {
+        if (editingSprite == null)
+        {
+            logger.LogError("RenderTopBar(): editingSprite is null.");
+            return;
+        }
+
         var fontSize = ImGui.GetFontSize();
 
         if (ImGui.BeginTable("Header", 6, ImGuiTableFlags.SizingFixedFit))
@@ -229,8 +245,29 @@ public class TileSpriteEditorTab
 
             ImGui.EndTable();
         }
+    }
 
-        ImGui.Separator();
+    private void StateSelectRow()
+    {
+        var fontSize = ImGui.GetFontSize();
+        if (ImGui.BeginTable("Header0", 2, ImGuiTableFlags.SizingFixedFit))
+        {
+            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+
+            ImGui.TableNextColumn();
+            ImGui.TableNextColumn();
+            ImGui.Text("State:");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(fontSize * 5.2f);
+            if (ImGui.BeginCombo("##tsState", editingState.ToString()))
+            {
+                if (ImGui.Selectable(nameof(TileState.Normal))) editingState = TileState.Normal;
+                if (ImGui.Selectable(nameof(TileState.Obscured))) editingState = TileState.Obscured;
+                ImGui.EndCombo();
+            }
+
+            ImGui.EndTable();
+        }
     }
 
     /// <summary>
@@ -249,12 +286,13 @@ public class TileSpriteEditorTab
         var maxSize = ImGui.GetWindowSize();
         var maxLayers = editingSprite.TileContexts
             .Select(ctx => ctx.AnimatedSpriteIds.Count).Max();
-        if (ImGui.BeginTable("contextTable", maxLayers + 12,
+        if (ImGui.BeginTable("contextTable", maxLayers + 13,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
                 new Vector2 { X = maxSize.X - fontSize * 15.33f, Y = maxSize.Y - fontSize * 9.05f }))
         {
             ImGui.TableSetupColumn(""); // Discard button
             ImGui.TableSetupColumn(""); // Preview
+            ImGui.TableSetupColumn(""); // Obscured preview
             ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, fontSize * 0.889f); // Spacer
             ImGui.TableSetupColumn("N");
             ImGui.TableSetupColumn("NE");
@@ -316,7 +354,14 @@ public class TileSpriteEditorTab
 
         animatedSpriteSelector.Render();
         if (animatedSpriteSelector.TryGetSelection(out var selectedId))
-            editingSprite.TileContexts[editingRow].AnimatedSpriteIds[editingCol] = selectedId;
+        {
+            var layers = editingState switch
+            {
+                TileState.Obscured => editingSprite.TileContexts[editingRow].ObscuredAnimatedSpriteIds,
+                _ => editingSprite.TileContexts[editingCol].AnimatedSpriteIds
+            };
+            layers[editingCol] = selectedId;
+        }
 
         editingSprite.ClearCache();
     }
@@ -389,7 +434,11 @@ public class TileSpriteEditorTab
             return;
         }
 
-        var layers = context.AnimatedSpriteIds;
+        var layers = editingState switch
+        {
+            TileState.Obscured => context.ObscuredAnimatedSpriteIds,
+            _ => context.AnimatedSpriteIds
+        };
 
         ImGui.TableNextColumn();
         var canRemoveContext = rowIndex < editingSprite.TileContexts.Count - 1;
@@ -412,6 +461,11 @@ public class TileSpriteEditorTab
         ImGui.TableNextColumn();
         guiExtensions.TileSprite($"tsPrevCtx{rowIndex}", editingSprite, context.TileContextKey);
         if (ImGui.IsItemHovered()) RenderPreviewTooltip(context, rowIndex);
+
+        ImGui.TableNextColumn();
+        guiExtensions.TileSprite($"tsPrevCtx{rowIndex}obsc", editingSprite, context.TileContextKey, true);
+        if (ImGui.IsItemHovered()) RenderPreviewTooltip(context, rowIndex);
+
         ImGui.TableNextColumn();
 
         ImGui.TableNextColumn();
@@ -474,9 +528,9 @@ public class TileSpriteEditorTab
         for (var i = 0; i < maxLayers; ++i)
         {
             ImGui.TableNextColumn();
-            if (i >= context.AnimatedSpriteIds.Count) continue;
+            if (i >= layers.Count) continue;
 
-            if (guiExtensions.AnimatedSpriteButton($"ctx{rowIndex}l{i}", context.AnimatedSpriteIds[i],
+            if (guiExtensions.AnimatedSpriteButton($"ctx{rowIndex}l{i}", layers[i],
                     Orientation.South, AnimationPhase.Default))
             {
                 editingRow = rowIndex;
@@ -705,5 +759,11 @@ public class TileSpriteEditorTab
         tileSpriteManager.Update(newSprite);
 
         Select(newId);
+    }
+
+    private enum TileState
+    {
+        Normal,
+        Obscured
     }
 }

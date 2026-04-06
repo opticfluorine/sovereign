@@ -29,7 +29,6 @@ public sealed class TileContext
 {
     public TileContext()
     {
-        AnimatedSpriteIds.Add(0);
     }
 
     /// <summary>
@@ -47,6 +46,7 @@ public sealed class TileContext
         SouthwestTileSpriteId = other.SouthwestTileSpriteId;
         NorthwestTileSpriteId = other.NorthwestTileSpriteId;
         AnimatedSpriteIds = new List<int>(other.AnimatedSpriteIds);
+        ObscuredAnimatedSpriteIds = new List<int>(other.ObscuredAnimatedSpriteIds);
     }
 
     /// <summary>
@@ -92,7 +92,12 @@ public sealed class TileContext
     /// <summary>
     ///     List of animated sprite IDs to be drawn in order if the context matches.
     /// </summary>
-    public List<int> AnimatedSpriteIds { get; set; } = new();
+    public List<int> AnimatedSpriteIds { get; set; } = [0];
+
+    /// <summary>
+    ///     List of animated sprite IDs to be drawn if the tile is obscured and the context matches.
+    /// </summary>
+    public List<int> ObscuredAnimatedSpriteIds { get; set; } = [0];
 
     /// <summary>
     ///     Tile context key associated with this tile context.

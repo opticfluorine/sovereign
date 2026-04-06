@@ -115,21 +115,22 @@ public sealed class TileSprite
     /// </summary>
     /// This method should only be called from the rendering thread.
     /// <param name="contextKey">Tile context key.</param>
+    /// <param name="obscured">Whether the block face is obscured.</param>
     /// <returns>Matching tile context.</returns>
     /// <exception cref="KeyNotFoundException">
     ///     Thrown if no matching tile context is found. This should not typically occur as
     ///     there should always be a default context that matches all ID patterns.
     /// </exception>
-    public List<int> GetMatchingAnimatedSpriteIds(TileContextKey contextKey)
+    public List<int> GetMatchingAnimatedSpriteIds(TileContextKey contextKey, bool obscured)
     {
         /* Check if the context is already in the cache. */
         if (lookupCache.TryGetValue(contextKey, out var cachedValues))
-            return cachedValues.AnimatedSpriteIds;
+            return obscured ? cachedValues.ObscuredAnimatedSpriteIds : cachedValues.AnimatedSpriteIds;
 
         /* Context not found in cache - resolve. */
         var context = ResolveContext(contextKey);
         lookupCache[contextKey] = context;
-        return context.AnimatedSpriteIds;
+        return obscured ? context.ObscuredAnimatedSpriteIds : context.AnimatedSpriteIds;
     }
 
     /// <summary>

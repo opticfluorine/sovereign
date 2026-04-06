@@ -288,7 +288,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
 
         /* Resolve to the tile sprite level. */
         var blockId = blockIds.Keys.First();
-        var centerId = GetTileSpriteIdForBlock(blockId, isTopFace, true);
+        var centerId = GetTileSpriteIdForBlock(blockId, isTopFace);
         if (centerId == TileSprite.Empty)
             // Block isn't ready yet, return at a later pass.
             return;
@@ -335,7 +335,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         var tileSprite = tileSpriteManager.TileSprites[centerId];
         var contextKey = new TileContextKey(northId, northEastId, eastId, southEastId, southId, southWestId, westId,
             northWestId, obscuredNeighbors);
-        var resolvedSprites = tileSprite.GetMatchingAnimatedSpriteIds(contextKey);
+        var obscured = isTopFace && aboveBlocks.HasComponentForEntity(blockId);
+        var resolvedSprites = tileSprite.GetMatchingAnimatedSpriteIds(contextKey, obscured);
 
         /* Retrieve and populate cache. */
         var dict = isTopFace ? topFaceCache : frontFaceCache;
@@ -370,9 +371,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     /// <param name="blockId">Block entity ID.</param>
     /// <param name="isTopFace">If true, resolve the top face; otherwise resolve the front face.</param>
-    /// <param name="allowObscured">Whether to allow reporting the special "Obscured" tile ID.</param>
     /// <returns>Resolved tile sprite ID.</returns>
-    private int GetTileSpriteIdForBlock(ulong blockId, bool isTopFace, bool allowObscured = false)
+    private int GetTileSpriteIdForBlock(ulong blockId, bool isTopFace)
     {
         if (!materials.HasComponentForEntity(blockId) || !materialModifiers.HasComponentForEntity(blockId))
             return TileSprite.Empty;
@@ -382,16 +382,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         {
             var material = materialManager.Materials[materials[blockId]];
             var subtype = material.MaterialSubtypes[materialModifiers[blockId]];
-
-            if (isTopFace)
-            {
-                var obscured = allowObscured && aboveBlocks.HasComponentForEntity(blockId);
-                return obscured
-                    ? subtype.ObscuredTopFaceTileSpriteId
-                    : subtype.TopFaceTileSpriteId;
-            }
-
-            return subtype.SideFaceTileSpriteId;
+            return isTopFace ? subtype.TopFaceTileSpriteId : subtype.SideFaceTileSpriteId;
         }
         catch
         {

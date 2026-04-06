@@ -174,7 +174,6 @@ public class MaterialManager
                 new()
                 {
                     MaterialModifier = 0,
-                    ObscuredTopFaceTileSpriteId = 0,
                     SideFaceTileSpriteId = 0,
                     TopFaceTileSpriteId = 0
                 }
@@ -217,7 +216,6 @@ public class MaterialManager
         {
             if (subtype.SideFaceTileSpriteId >= tileSpriteId) subtype.SideFaceTileSpriteId++;
             if (subtype.TopFaceTileSpriteId >= tileSpriteId) subtype.TopFaceTileSpriteId++;
-            if (subtype.ObscuredTopFaceTileSpriteId >= tileSpriteId) subtype.ObscuredTopFaceTileSpriteId++;
         }
 
         SaveDefinitions();
@@ -234,7 +232,6 @@ public class MaterialManager
         {
             if (subtype.SideFaceTileSpriteId > tileSpriteId) subtype.SideFaceTileSpriteId--;
             if (subtype.TopFaceTileSpriteId > tileSpriteId) subtype.TopFaceTileSpriteId--;
-            if (subtype.ObscuredTopFaceTileSpriteId > tileSpriteId) subtype.ObscuredTopFaceTileSpriteId--;
         }
 
         SaveDefinitions();

@@ -111,7 +111,7 @@ public class GuiTextureMapper
     /// <summary>
     ///     Map from tilesprite ID (and neighbors) to corresponding texture list entry (front face).
     /// </summary>
-    private readonly Dictionary<Tuple<int, TileContextKey>, int> tileSpriteIndices = new();
+    private readonly Dictionary<Tuple<int, TileContextKey, bool>, int> tileSpriteIndices = new();
 
     private readonly TileSpriteManager tileSpriteManager;
 
@@ -283,17 +283,18 @@ public class GuiTextureMapper
     /// </summary>
     /// <param name="tileSpriteId">Tile sprite ID.</param>
     /// <param name="contextKey">Tile context key.</param>
+    /// <param name="obscured">Whether the tile sprite is obscured.</param>
     /// <returns>ImGui texture ID.</returns>
     /// <exception cref="IndexOutOfRangeException">Thrown if the tile sprite ID is out of range.</exception>
-    public ImTextureID GetTextureIdForTileSprite(int tileSpriteId, TileContextKey contextKey)
+    public ImTextureID GetTextureIdForTileSprite(int tileSpriteId, TileContextKey contextKey, bool obscured = false)
     {
-        if (!tileSpriteIndices.TryGetValue(Tuple.Create(tileSpriteId, contextKey), out var index))
+        if (!tileSpriteIndices.TryGetValue(Tuple.Create(tileSpriteId, contextKey, obscured), out var index))
         {
             if (tileSpriteId >= tileSpriteManager.TileSprites.Count)
                 throw new IndexOutOfRangeException($"Tile sprite {tileSpriteId} does not exist.");
 
             // Resolve tile sprite through its context to a list of animated sprite layers.
-            var layers = tileSpriteManager.TileSprites[tileSpriteId].GetMatchingAnimatedSpriteIds(contextKey);
+            var layers = tileSpriteManager.TileSprites[tileSpriteId].GetMatchingAnimatedSpriteIds(contextKey, obscured);
             if (layers.Count == 0)
                 throw new IndexOutOfRangeException($"Tile sprite {tileSpriteId} contains no layers.");
 
@@ -311,7 +312,7 @@ public class GuiTextureMapper
                 Width = firstLayerTexData.Width,
                 Height = firstLayerTexData.Height
             });
-            tileSpriteIndices[Tuple.Create(tileSpriteId, contextKey)] = index;
+            tileSpriteIndices[Tuple.Create(tileSpriteId, contextKey, obscured)] = index;
         }
 
         return new ImTextureID(index + IndexOffset);
@@ -323,9 +324,10 @@ public class GuiTextureMapper
     /// <param name="customId">Unique identifier for the custom sprite.</param>
     /// <param name="customSprite">Custom tile sprite.</param>
     /// <param name="contextKey">Tile sprite context key.</param>
+    /// <param name="obscured">Whether the tile sprite is obscured.</param>
     /// <returns>ImGui texture ID.</returns>
     public ImTextureID GetTextureIdForCustomTileSprite(string customId, TileSprite customSprite,
-        TileContextKey contextKey)
+        TileContextKey contextKey, bool obscured = false)
     {
         if (!customIndices.TryGetValue(customId, out var index))
         {
@@ -340,7 +342,7 @@ public class GuiTextureMapper
         texData.Layers.Clear();
         texData.Layers.AddRange(
             customSprite
-                .GetMatchingAnimatedSpriteIds(contextKey)
+                .GetMatchingAnimatedSpriteIds(contextKey, obscured)
                 .Select(id => GetTextureIdForAnimatedSprite(id, Orientation.South, AnimationPhase.Default)));
         var layerTexData = textures[(int)texData.Layers[0].Handle - IndexOffset];
         texData.Width = layerTexData.Width;

@@ -63,9 +63,33 @@ public sealed class TileSpriteDefinitionsLoader
             throw new TileSpriteDefinitionsException("Tile sprite definitions empty or malformed.");
 
         /* Validate the definitions. */
+        PatchDefinitions(definitions);
         validator.Validate(definitions);
 
         /* Done. */
         return definitions;
+    }
+
+    /// <summary>
+    ///     Patches missing data in tile sprite definitions.
+    /// </summary>
+    /// <param name="definitions">Definitions.</param>
+    private void PatchDefinitions(TileSpriteDefinitions definitions)
+    {
+        foreach (var tileSprite in definitions.TileSprites)
+        {
+            foreach (var context in tileSprite.TileContexts)
+            {
+                if (context.AnimatedSpriteIds == null || context.AnimatedSpriteIds.Count == 0)
+                {
+                    context.AnimatedSpriteIds = [0];
+                }
+
+                if (context.ObscuredAnimatedSpriteIds == null || context.ObscuredAnimatedSpriteIds.Count == 0)
+                {
+                    context.ObscuredAnimatedSpriteIds = [0];
+                }
+            }
+        }
     }
 }

@@ -33,11 +33,6 @@ public class MaterialSubtype
     public int TopFaceTileSpriteId { get; set; }
 
     /// <summary>
-    ///     The ID of the tile sprite used for the top face if a face is obscured.
-    /// </summary>
-    public int ObscuredTopFaceTileSpriteId { get; set; }
-
-    /// <summary>
     ///     The ID of the tile sprite used for the side face.
     /// </summary>
     public int SideFaceTileSpriteId { get; set; }

@@ -188,6 +188,7 @@ public sealed class TileSpriteDefinitionsValidator
         var badIds = definitions.TileSprites
             .Where(sprite => sprite.TileContexts
                 .Any(context => context.AnimatedSpriteIds
+                    .Union(context.ObscuredAnimatedSpriteIds)
                     .Any(id => id >= animatedSpriteManager.AnimatedSprites.Count)))
             .Select(sprite => sprite.Id);
         var valid = !badIds.Any();

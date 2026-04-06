@@ -217,9 +217,7 @@ public sealed class MaterialDefinitionsValidator
         var limit = tileSpriteManager.TileSprites.Count;
         var badIds = materials
             .Where(material => material.MaterialSubtypes.Any(subtype => subtype.TopFaceTileSpriteId >= limit
-                                                                        || subtype.SideFaceTileSpriteId >= limit
-                                                                        || subtype.ObscuredTopFaceTileSpriteId >=
-                                                                        limit))
+                                                                        || subtype.SideFaceTileSpriteId >= limit))
             .Select(material => material.Id)
             .ToList();
         var valid = badIds.Count == 0;

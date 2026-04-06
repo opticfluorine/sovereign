@@ -96,9 +96,6 @@ public class GuiComponentEditors
         ImGui.SameLine();
         needToOpenPopup = needToOpenPopup || guiExtensions.TileSpriteButton("##matButtonTop",
             mat.MaterialSubtypes[modifier].TopFaceTileSpriteId, TileContextKey.AllWildcards);
-        ImGui.SameLine();
-        needToOpenPopup = needToOpenPopup || guiExtensions.TileSpriteButton("##matButtonObsc",
-            mat.MaterialSubtypes[modifier].ObscuredTopFaceTileSpriteId, TileContextKey.AllWildcards);
 
         if (needToOpenPopup) materialSelectorPopup.Open();
         materialSelectorPopup.Render();

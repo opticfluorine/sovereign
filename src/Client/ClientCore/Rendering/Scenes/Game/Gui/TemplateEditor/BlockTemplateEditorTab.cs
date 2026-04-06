@@ -169,10 +169,6 @@ public class BlockTemplateEditorTab
                     if (guiExtensions.TileSpriteButton($"##matBMaterialManauttonTop{i}",
                             mat.MaterialSubtypes[materialModifier].TopFaceTileSpriteId,
                             TileContextKey.AllWildcards)) Select(i);
-                    ImGui.SameLine();
-                    if (guiExtensions.TileSpriteButton($"##matButtonObsc{i}",
-                            mat.MaterialSubtypes[materialModifier].ObscuredTopFaceTileSpriteId,
-                            TileContextKey.AllWildcards)) Select(i);
 
                     // Name column.
                     ImGui.TableNextColumn();

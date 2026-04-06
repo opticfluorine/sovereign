@@ -2,6 +2,12 @@
 
 ## 2026
 
+### April
+
+#### 6 April 2026
+
+* Move obscured tile information from the Materials editor to the Tile Sprite editor. Obscured tile data is now part of the tile sprite defintion instead of being separate. This clears up some edge cases for the tile sprite resolver involving obscured tiles.
+
 ### March
 
 #### 30 March 2026

@@ -199,9 +199,10 @@ public class GuiExtensions
     /// <param name="customId">Unique identifier for the custom sprite.</param>
     /// <param name="customSprite">Custom tile sprite.</param>
     /// <param name="contextKey">Tile context key.</param>
-    public void TileSprite(string customId, TileSprite customSprite, TileContextKey contextKey)
+    /// <param name="obscured">Whether the tile is obscured.</param>
+    public void TileSprite(string customId, TileSprite customSprite, TileContextKey contextKey, bool obscured = false)
     {
-        var texId = textureMapper.GetTextureIdForCustomTileSprite(customId, customSprite, contextKey);
+        var texId = textureMapper.GetTextureIdForCustomTileSprite(customId, customSprite, contextKey, obscured);
         var texData = textureMapper.GetTextureDataForTextureId(texId);
 
         ImGui.Image(texId, GetSpriteDimensions(texData));

@@ -134,10 +134,6 @@ public class MaterialEditorTab
                 ImGui.SameLine();
                 if (guiExtensions.TileSpriteButton($"##matButtonTop{i}", mat.MaterialSubtypes[0].TopFaceTileSpriteId,
                         TileContextKey.AllWildcards)) Select(i);
-                ImGui.SameLine();
-                if (guiExtensions.TileSpriteButton($"##matButtonObsc{i}",
-                        mat.MaterialSubtypes[0].ObscuredTopFaceTileSpriteId,
-                        TileContextKey.AllWildcards)) Select(i);
 
                 // Name column.
                 ImGui.TableNextColumn();
@@ -227,14 +223,13 @@ public class MaterialEditorTab
     {
         var fontSize = ImGui.GetFontSize();
         var maxSize = ImGui.GetWindowSize();
-        if (!ImGui.BeginTable("subtypeTable", 5,
+        if (!ImGui.BeginTable("subtypeTable", 4,
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg,
                 new Vector2 { X = maxSize.X - fontSize * 15.33f, Y = maxSize.Y - fontSize * 9.1f })) return;
 
         ImGui.TableSetupColumn("Modifier ID");
         ImGui.TableSetupColumn("Front Face");
         ImGui.TableSetupColumn("Top Face");
-        ImGui.TableSetupColumn("Obscured Top Face");
         ImGui.TableSetupColumn("");
 
         ImGui.TableSetupScrollFreeze(1, 1);
@@ -270,11 +265,6 @@ public class MaterialEditorTab
             OpenFaceEditor(rowIndex, Face.Top);
 
         ImGui.TableNextColumn();
-        if (guiExtensions.TileSpriteButton($"##obsc{rowIndex}", subtype.ObscuredTopFaceTileSpriteId,
-                TileContextKey.AllWildcards))
-            OpenFaceEditor(rowIndex, Face.ObscuredTop);
-
-        ImGui.TableNextColumn();
         var canRemove = editingMaterial.MaterialSubtypes.Count > 1;
         if (!canRemove) ImGui.BeginDisabled();
         if (ImGui.Button($"-##{rowIndex}")) RemoveSubtype(rowIndex);
@@ -305,10 +295,6 @@ public class MaterialEditorTab
 
                 case Face.Top:
                     subtype.TopFaceTileSpriteId = selectedId;
-                    break;
-
-                case Face.ObscuredTop:
-                    subtype.ObscuredTopFaceTileSpriteId = selectedId;
                     break;
             }
         }
@@ -396,7 +382,6 @@ public class MaterialEditorTab
     private enum Face
     {
         Front,
-        Top,
-        ObscuredTop
+        Top
     }
 }
