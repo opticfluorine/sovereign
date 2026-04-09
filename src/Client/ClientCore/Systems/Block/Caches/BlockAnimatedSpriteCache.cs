@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components;
@@ -57,6 +56,8 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     private readonly ObjectPool<HashSet<ulong>> blockSetPool = new(4);
 
+    private readonly BlockTileComponentCollection blockTiles;
+
     private readonly DebugState debugState;
 
     /// <summary>
@@ -78,10 +79,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     private readonly ConcurrentDictionary<ulong, GridPosition> knownPositions = new();
 
     private readonly ILogger<BlockAnimatedSpriteCache> logger;
-
-    private readonly MaterialManager materialManager;
-    private readonly MaterialModifierComponentCollection materialModifiers;
-    private readonly MaterialComponentCollection materials;
 
     /// <summary>
     ///     Block entity IDs whose templates have changed since the last cache update.
@@ -115,22 +112,18 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     private int updateCount;
 
-    public BlockAnimatedSpriteCache(MaterialComponentCollection materials,
-        MaterialModifierComponentCollection materialModifiers,
+    public BlockAnimatedSpriteCache(BlockTileComponentCollection blockTiles,
         BlockPositionComponentCollection blockPositions,
         BlockGridPositionIndexer blockIndexer,
-        MaterialManager materialManager,
         AboveBlockComponentCollection aboveBlocks,
         TileSpriteManager tileSpriteManager,
         EntityManager entityManager, EntityTable entityTable,
         DebugState debugState,
         ILogger<BlockAnimatedSpriteCache> logger)
     {
-        this.materials = materials;
-        this.materialModifiers = materialModifiers;
+        this.blockTiles = blockTiles;
         this.blockPositions = blockPositions;
         this.blockIndexer = blockIndexer;
-        this.materialManager = materialManager;
         this.aboveBlocks = aboveBlocks;
         this.tileSpriteManager = tileSpriteManager;
         this.entityManager = entityManager;
@@ -374,15 +367,13 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <returns>Resolved tile sprite ID.</returns>
     private int GetTileSpriteIdForBlock(ulong blockId, bool isTopFace)
     {
-        if (!materials.HasComponentForEntity(blockId) || !materialModifiers.HasComponentForEntity(blockId))
+        if (!blockTiles.TryGetValue(blockId, out var blockTile))
             return TileSprite.Empty;
 
         /* Retrieve the tile sprite information. */
         try
         {
-            var material = materialManager.Materials[materials[blockId]];
-            var subtype = material.MaterialSubtypes[materialModifiers[blockId]];
-            return isTopFace ? subtype.TopFaceTileSpriteId : subtype.SideFaceTileSpriteId;
+            return isTopFace ? blockTile.TopFaceId : blockTile.FrontFaceId;
         }
         catch
         {
@@ -468,7 +459,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="componentValue">Not used.</param>
     /// <param name="isLoad">Not used.</param>
-    private void OnComponentAdded(ulong entityId, int componentValue, bool isLoad)
+    private void OnComponentAdded(ulong entityId, BlockTile componentValue, bool isLoad)
     {
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
             refreshAll = true;
@@ -481,7 +472,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     /// <param name="entityId">Block entity ID.</param>
     /// <param name="componentValue">Not used.</param>
-    private void OnComponentModified(ulong entityId, int componentValue)
+    private void OnComponentModified(ulong entityId, BlockTile componentValue)
     {
         // Treat it as an add.
         OnComponentAdded(entityId, componentValue, false);
@@ -505,7 +496,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="isLoad">Not used.</param>
     private void OnPositionAdded(ulong entityId, GridPosition componentValue, bool isLoad)
     {
-        OnComponentModified(entityId, 0);
+        OnComponentModified(entityId, new BlockTile());
     }
 
     /// <summary>
@@ -515,7 +506,7 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// <param name="componentValue">Not used.</param>
     private void OnPositionModified(ulong entityId, GridPosition componentValue)
     {
-        OnComponentModified(entityId, 0);
+        OnComponentModified(entityId, new BlockTile());
     }
 
     /// <summary>
@@ -557,10 +548,9 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     private void RegisterEventHandlers()
     {
-        materials.OnComponentAdded += OnComponentAdded;
-        materials.OnComponentModified += OnComponentModified;
-        materials.OnComponentRemoved += OnComponentRemoved;
-        materialModifiers.OnComponentModified += OnComponentModified;
+        blockTiles.OnComponentAdded += OnComponentAdded;
+        blockTiles.OnComponentModified += OnComponentModified;
+        blockTiles.OnComponentRemoved += OnComponentRemoved;
         blockPositions.OnComponentAdded += OnPositionAdded;
         blockPositions.OnComponentModified += OnPositionModified;
         blockPositions.OnComponentRemoved += OnPositionRemoved;
@@ -569,9 +559,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         tileSpriteManager.OnTileSpriteAdded += OnResourceChange;
         tileSpriteManager.OnTileSpriteUpdated += OnResourceChange;
         tileSpriteManager.OnTileSpriteRemoved += OnResourceChange;
-        materialManager.OnMaterialAdded += OnResourceChange;
-        materialManager.OnMaterialUpdated += OnResourceChange;
-        materialManager.OnMaterialRemoved += OnResourceChange;
         entityTable.OnTemplateSet += OnTemplateChange;
     }
 
@@ -580,10 +567,9 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
     /// </summary>
     private void DeregisterEventHandlers()
     {
-        materials.OnComponentAdded -= OnComponentAdded;
-        materials.OnComponentModified -= OnComponentModified;
-        materials.OnComponentRemoved -= OnComponentRemoved;
-        materialModifiers.OnComponentModified -= OnComponentModified;
+        blockTiles.OnComponentAdded -= OnComponentAdded;
+        blockTiles.OnComponentModified -= OnComponentModified;
+        blockTiles.OnComponentRemoved -= OnComponentRemoved;
         blockPositions.OnComponentAdded -= OnPositionAdded;
         blockPositions.OnComponentModified -= OnPositionModified;
         blockPositions.OnComponentRemoved -= OnPositionRemoved;
@@ -591,9 +577,6 @@ public sealed class BlockAnimatedSpriteCache : IBlockAnimatedSpriteCache, IDispo
         tileSpriteManager.OnTileSpriteAdded -= OnResourceChange;
         tileSpriteManager.OnTileSpriteUpdated -= OnResourceChange;
         tileSpriteManager.OnTileSpriteRemoved -= OnResourceChange;
-        materialManager.OnMaterialAdded -= OnResourceChange;
-        materialManager.OnMaterialUpdated -= OnResourceChange;
-        materialManager.OnMaterialRemoved -= OnResourceChange;
         entityTable.OnTemplateSet -= OnTemplateChange;
     }
 }

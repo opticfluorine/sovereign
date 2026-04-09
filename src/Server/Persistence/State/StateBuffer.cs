@@ -58,6 +58,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<int>> animatedSpriteUpdates = new(BufferSize);
 
     /// <summary>
+    ///     Material state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<BlockTile>> blockTileUpdates = new(BufferSize);
+
+    /// <summary>
     ///     BoundingBox state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<BoundingBox>> boundingBoxUpdates = new(BufferSize);
@@ -103,16 +108,6 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<Kinematics>> kinematicsUpdates = new(BufferSize);
 
     private readonly ILogger<StateBuffer> logger;
-
-    /// <summary>
-    ///     Material modifier state updates.
-    /// </summary>
-    private readonly StructBuffer<StateUpdate<int>> materialModifierUpdates = new(BufferSize);
-
-    /// <summary>
-    ///     Material state updates.
-    /// </summary>
-    private readonly StructBuffer<StateUpdate<int>> materialUpdates = new(BufferSize);
 
     /// <summary>
     ///     Name component updates.
@@ -216,21 +211,12 @@ public sealed class StateBuffer
     }
 
     /// <summary>
-    ///     Queues a material update.
+    ///     Queues a BlockTile update.
     /// </summary>
     /// <param name="update">State update.</param>
-    public void UpdateMaterial(ref StateUpdate<int> update)
+    public void UpdateBlockTile(ref StateUpdate<BlockTile> update)
     {
-        materialUpdates.Add(ref update);
-    }
-
-    /// <summary>
-    ///     Queues a material modifier update.
-    /// </summary>
-    /// <param name="update">State update.</param>
-    public void UpdateMaterialModifier(ref StateUpdate<int> update)
-    {
-        materialModifierUpdates.Add(ref update);
+        blockTileUpdates.Add(ref update);
     }
 
     /// <summary>
@@ -396,8 +382,7 @@ public sealed class StateBuffer
         removedEntities.Clear();
         templateUpdates.Clear();
         kinematicsUpdates.Clear();
-        materialUpdates.Clear();
-        materialModifierUpdates.Clear();
+        blockTileUpdates.Clear();
         playerCharacterUpdates.Clear();
         nameUpdates.Clear();
         accountUpdates.Clear();
@@ -444,18 +429,11 @@ public sealed class StateBuffer
                     persistenceProvider.RemovePositionQuery,
                     transaction);
 
-                /* Material. */
-                SynchronizeComponent(materialUpdates,
-                    persistenceProvider.AddMaterialQuery,
-                    persistenceProvider.ModifyMaterialQuery,
-                    persistenceProvider.RemoveMaterialQuery,
-                    transaction);
-
-                /* MaterialModifier. */
-                SynchronizeComponent(materialModifierUpdates,
-                    persistenceProvider.AddMaterialModifierQuery,
-                    persistenceProvider.ModifyMaterialModifierQuery,
-                    persistenceProvider.RemoveMaterialModifierQuery,
+                /* BlockTile. */
+                SynchronizeComponent(blockTileUpdates,
+                    persistenceProvider.AddBlockTileQuery,
+                    persistenceProvider.ModifyBlockTileQuery,
+                    persistenceProvider.RemoveBlockTileQuery,
                     transaction);
 
                 /* PlayerCharacter. */

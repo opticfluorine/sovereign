@@ -83,8 +83,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<AccountStateTracker>();
         services.TryAddSingleton<TrackerManager>();
         services.TryAddSingleton<KinematicsStateTracker>();
-        services.TryAddSingleton<MaterialStateTracker>();
-        services.TryAddSingleton<MaterialModifierStateTracker>();
+        services.TryAddSingleton<BlockTileStateTracker>();
         services.TryAddSingleton<PlayerCharacterStateTracker>();
         services.TryAddSingleton<NameStateTracker>();
         services.TryAddSingleton<ParentStateTracker>();

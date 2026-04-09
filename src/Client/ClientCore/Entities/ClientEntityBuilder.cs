@@ -30,8 +30,7 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         EntityManager entityManager,
         KinematicsComponentCollection kinematics,
         DrawableComponentCollection drawables,
-        MaterialComponentCollection materials,
-        MaterialModifierComponentCollection materialModifiers,
+        BlockTileComponentCollection blockTiles,
         AboveBlockComponentCollection aboveBlocks,
         AnimatedSpriteComponentCollection animatedSprites,
         PlayerCharacterTagCollection playerCharacterTags,
@@ -48,8 +47,8 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         EntityTypeComponentCollection entityTypes,
         ServerOnlyTagCollection serverOnly,
         EntityTable entityTable)
-        : base(entityId, isLoad, entityManager, kinematics, materials,
-            materialModifiers, aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
+        : base(entityId, isLoad, entityManager, kinematics, blockTiles,
+            aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources, physics, boundingBoxes,
             castShadows, entityTypes, serverOnly, entityTable)
     {

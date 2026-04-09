@@ -34,8 +34,7 @@ public class BlockAddBenchmarkInstance
     private const int MeasuredCycleCount = 100;
 
     private readonly BlockPositionComponentCollection blockPositions;
-    private readonly MaterialModifierComponentCollection materialModifiers;
-    private readonly MaterialComponentCollection materials;
+    private readonly BlockTileComponentCollection blockTiles;
 
     private readonly List<ulong> runtimesUs = new(MeasuredCycleCount);
     private readonly int size;
@@ -49,8 +48,7 @@ public class BlockAddBenchmarkInstance
         var entityNotifier = new EntityNotifier();
         var componentManager = new ComponentManager(entityNotifier);
         blockPositions = new BlockPositionComponentCollection(entityTable, componentManager);
-        materials = new MaterialComponentCollection(entityTable, componentManager);
-        materialModifiers = new MaterialModifierComponentCollection(entityTable, componentManager);
+        blockTiles = new BlockTileComponentCollection(entityTable, componentManager);
     }
 
     public RuntimeStatistics Run()
@@ -95,8 +93,7 @@ public class BlockAddBenchmarkInstance
     private void Reset()
     {
         blockPositions.Clear();
-        materials.Clear();
-        materialModifiers.Clear();
+        blockTiles.Clear();
     }
 
     private void DoRun()
@@ -104,12 +101,10 @@ public class BlockAddBenchmarkInstance
         for (var i = 0; i < size; ++i)
         {
             blockPositions.AddComponent((ulong)i, new GridPosition { X = i, Y = 0, Z = 0 });
-            materials.AddComponent((ulong)i, 1);
-            materialModifiers.AddComponent((ulong)i, 0);
+            blockTiles.AddComponent((ulong)i, new BlockTile());
 
             blockPositions.ApplyComponentUpdates();
-            materials.ApplyComponentUpdates();
-            materialModifiers.ApplyComponentUpdates();
+            blockTiles.ApplyComponentUpdates();
         }
     }
 

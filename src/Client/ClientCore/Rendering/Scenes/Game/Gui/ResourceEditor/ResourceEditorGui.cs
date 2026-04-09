@@ -25,17 +25,15 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.ResourceEditor;
 public class ResourceEditorGui
 {
     private readonly AnimatedSpriteEditorTab animatedSpriteEditorTab;
-    private readonly MaterialEditorTab materialEditorTab;
     private readonly SpriteEditorTab spriteEditorTab;
     private readonly TileSpriteEditorTab tileSpriteEditorTab;
 
     public ResourceEditorGui(SpriteEditorTab spriteEditorTab, AnimatedSpriteEditorTab animatedSpriteEditorTab,
-        TileSpriteEditorTab tileSpriteEditorTab, MaterialEditorTab materialEditorTab)
+        TileSpriteEditorTab tileSpriteEditorTab)
     {
         this.spriteEditorTab = spriteEditorTab;
         this.animatedSpriteEditorTab = animatedSpriteEditorTab;
         this.tileSpriteEditorTab = tileSpriteEditorTab;
-        this.materialEditorTab = materialEditorTab;
     }
 
     /// <summary>
@@ -58,7 +56,6 @@ public class ResourceEditorGui
                 spriteEditorTab.Render();
                 animatedSpriteEditorTab.Render();
                 tileSpriteEditorTab.Render();
-                materialEditorTab.Render();
                 ImGui.EndTabBar();
             }
 

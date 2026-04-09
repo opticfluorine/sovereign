@@ -71,8 +71,8 @@ CREATE TABLE Entity
 (
     id                  INTEGER PRIMARY KEY NOT NULL,
     template_id         INTEGER,
-    material            INTEGER,
-    material_mod        INTEGER,
+    front_tile_id       INTEGER,
+    top_tile_id         INTEGER,
     pos_x               FLOAT,
     pos_y               FLOAT,
     pos_z               FLOAT,
@@ -180,8 +180,8 @@ SELECT Entity.id                 AS id,
        Entity.pos_x              AS x,
        Entity.pos_y              AS y,
        Entity.pos_z              AS z,
-       Entity.material           AS material,
-       Entity.material_mod       AS materialModifier,
+       Entity.front_tile_id      AS frontTileId,
+       Entity.top_tile_id        AS topTileId,
        Entity.player_char        AS playerCharacter,
        Entity.name               AS name,
        Entity.account_id         AS account,
@@ -220,27 +220,27 @@ INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
 VALUES (0x7FFE000000000000, 'Grass', 1, 0, 1);
 
 -- Water block template entity.
-INSERT INTO Entity (id, name, material, material_mod)
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id)
 VALUES (0x7FFE000000000001, 'Water', 2, 0);
 
 -- GrassRock block template entity (currently unused).
-INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
 VALUES (0x7FFE000000000002, 'GrassRock', 1, 0, 1);
 
 -- Dirt block template entity.
-INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
 VALUES (0x7FFE000000000003, 'Dirt', 3, 0, 1);
 
 -- Sand block template entity.
-INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
 VALUES (0x7FFE000000000004, 'Sand', 4, 0, 1);
 
 -- Rock block template entity.
-INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
 VALUES (0x7FFE000000000005, 'Rock', 5, 0, 1);
 
 -- Cobblestone block template entity.
-INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
 VALUES (0x7FFE000000000006, 'Cobblestone', 6, 0, 1);
 
 -- Initial block data at origin.

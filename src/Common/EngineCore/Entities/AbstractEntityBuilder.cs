@@ -32,6 +32,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly AdminTagCollection admins;
     protected readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly BlockTileComponentCollection blockTiles;
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
@@ -43,8 +44,6 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     protected readonly bool isTemplate;
     protected readonly KinematicsComponentCollection Kinematics;
     protected readonly bool load;
-    protected readonly MaterialModifierComponentCollection materialModifiers;
-    protected readonly MaterialComponentCollection materials;
     protected readonly NameComponentCollection names;
     protected readonly OrientationComponentCollection orientations;
     protected readonly ParentComponentCollection parents;
@@ -62,8 +61,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
 
     protected AbstractEntityBuilder(ulong entityId, bool load,
         EntityManager entityManager, KinematicsComponentCollection kinematics,
-        MaterialComponentCollection materials,
-        MaterialModifierComponentCollection materialModifiers,
+        BlockTileComponentCollection blockTiles,
         AboveBlockComponentCollection aboveBlocks,
         PlayerCharacterTagCollection playerCharacterTags,
         NameComponentCollection names,
@@ -85,8 +83,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.entityId = entityId;
         this.load = load;
         Kinematics = kinematics;
-        this.materials = materials;
-        this.materialModifiers = materialModifiers;
+        this.blockTiles = blockTiles;
         this.aboveBlocks = aboveBlocks;
         this.playerCharacterTags = playerCharacterTags;
         this.names = names;
@@ -210,22 +207,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         return this;
     }
 
-    public IEntityBuilder Material(int materialId, int materialModifier)
+    public IEntityBuilder BlockTile(int frontTileId, int topTileId)
     {
-        materials.AddOrUpdateComponent(entityId, materialId, load);
-        materialModifiers.AddOrUpdateComponent(entityId, materialModifier, load);
-        return this;
+        return BlockTile(new BlockTile
+        {
+            FrontFaceId = frontTileId,
+            TopFaceId = topTileId
+        });
     }
 
-    public IEntityBuilder Material(MaterialPair material)
+    public IEntityBuilder WithoutBlockTile()
     {
-        return Material(material.MaterialId, material.MaterialModifier);
-    }
-
-    public IEntityBuilder WithoutMaterial()
-    {
-        materials.RemoveComponent(entityId, load);
-        materialModifiers.RemoveComponent(entityId, load);
+        blockTiles.RemoveComponent(entityId, load);
         return this;
     }
 
@@ -410,6 +403,12 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutServerOnly()
     {
         serverOnly.UntagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder BlockTile(BlockTile blockTile)
+    {
+        blockTiles.AddOrUpdateComponent(entityId, blockTile, load);
         return this;
     }
 }

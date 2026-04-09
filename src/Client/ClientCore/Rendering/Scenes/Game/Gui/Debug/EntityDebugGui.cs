@@ -34,6 +34,7 @@ public class EntityDebugGui
     private readonly AboveBlockComponentCollection aboveBlocks;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly BlockTileComponentCollection blockTiles;
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CameraServices cameraServices;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
@@ -42,8 +43,6 @@ public class EntityDebugGui
     private readonly EntityTable entityTable;
     private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
-    private readonly MaterialModifierComponentCollection materialModifiers;
-    private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
@@ -54,8 +53,8 @@ public class EntityDebugGui
     private string entityIdInput = "";
 
     public EntityDebugGui(AboveBlockComponentCollection aboveBlocks, AnimatedSpriteComponentCollection animatedSprites,
-        DrawableComponentCollection drawables, MaterialComponentCollection materials,
-        MaterialModifierComponentCollection materialModifiers, NameComponentCollection names,
+        DrawableComponentCollection drawables, BlockTileComponentCollection blockTiles,
+        NameComponentCollection names,
         OrientationComponentCollection orientations, ParentComponentCollection parents,
         KinematicsComponentCollection kinematics,
         BlockPositionComponentCollection blockPositions,
@@ -73,8 +72,7 @@ public class EntityDebugGui
         this.aboveBlocks = aboveBlocks;
         this.animatedSprites = animatedSprites;
         this.drawables = drawables;
-        this.materials = materials;
-        this.materialModifiers = materialModifiers;
+        this.blockTiles = blockTiles;
         this.names = names;
         this.orientations = orientations;
         this.parents = parents;
@@ -137,8 +135,12 @@ public class EntityDebugGui
                     AddComponentRow("AboveBlock:", entityId, aboveBlocks, x => $"{x:X16}");
                     AddComponentRow("AnimatedSprite:", entityId, animatedSprites);
                     AddComponentRow("Drawable:", entityId, drawables);
-                    AddComponentRow("Material:", entityId, materials);
-                    AddComponentRow("Material Modifier:", entityId, materialModifiers);
+                    AddCompoundRows("Block Tile:", entityId, blockTiles,
+                        tile =>
+                        {
+                            AddValueRow("Block Front Tile:", tile.FrontFaceId);
+                            AddValueRow("Block Top Tile:", tile.TopFaceId);
+                        });
                     AddComponentRow("Name:", entityId, names);
                     AddComponentRow("Orientation:", entityId, orientations);
                     AddComponentRow("Parent:", entityId, parents, x => $"{x:X}");

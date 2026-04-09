@@ -4,6 +4,10 @@
 
 ### April
 
+#### 9 April 2026
+
+* Removed "Material" resources and replaced them with the `BlockTile` component. Block templates now specify their tilings directly through the `BlockTile` component.
+
 #### 6 April 2026
 
 * Move obscured tile information from the Materials editor to the Tile Sprite editor. Obscured tile data is now part of the tile sprite defintion instead of being separate. This clears up some edge cases for the tile sprite resolver involving obscured tiles.

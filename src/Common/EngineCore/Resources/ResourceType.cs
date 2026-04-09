@@ -43,11 +43,6 @@ public enum ResourceType
     Spritesheet,
 
     /// <summary>
-    ///     World definition files.
-    /// </summary>
-    World,
-
-    /// <summary>
     ///     Fonts.
     /// </summary>
     Fonts

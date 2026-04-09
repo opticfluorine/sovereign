@@ -37,12 +37,6 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
 {
     private const string FullMigrationFilename = "Migrations/Full/Full_sqlite.sql";
 
-    private const string MaterialParamName = "material";
-    private const SqliteType MaterialParamType = SqliteType.Integer;
-
-    private const string MaterialModifierParamName = "material_mod";
-    private const SqliteType MaterialModifierParamType = SqliteType.Integer;
-
     private const string PlayerCharacterParamName = "player_char";
     private const SqliteType PlayerCharacterParamType = SqliteType.Integer;
 
@@ -131,25 +125,11 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         ModifyPositionQuery = new SqliteModifyPositionComponentQuery(conn);
         RemovePositionQuery = new Vector3SqliteRemoveComponentQuery(PositionColumnPrefix, conn);
 
-        /* Material component. */
-        AddMaterialQuery = new SimpleSqliteAddComponentQuery<int>(
-            MaterialParamName, MaterialParamType,
-            conn);
-        ModifyMaterialQuery = new SimpleSqliteModifyComponentQuery<int>(
-            MaterialParamName, MaterialParamType,
-            conn);
-        RemoveMaterialQuery = new SimpleSqliteRemoveComponentQuery(MaterialParamName,
-            conn);
-
-        /* MaterialModifier component. */
-        AddMaterialModifierQuery = new SimpleSqliteAddComponentQuery<int>(
-            MaterialModifierParamName,
-            MaterialModifierParamType, conn);
-        ModifyMaterialModifierQuery = new SimpleSqliteModifyComponentQuery<int>(
-            MaterialModifierParamName,
-            MaterialModifierParamType, conn);
-        RemoveMaterialModifierQuery = new SimpleSqliteRemoveComponentQuery(MaterialModifierParamName,
-            conn);
+        /* BlockTile component. */
+        var blockTileQuery = new SqliteBlockTileQuery(conn);
+        AddBlockTileQuery = blockTileQuery;
+        ModifyBlockTileQuery = blockTileQuery;
+        RemoveBlockTileQuery = blockTileQuery;
 
         /* PlayerCharacter tag. */
         AddPlayerCharacterQuery = new SimpleSqliteAddComponentQuery<bool>(
@@ -264,6 +244,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         RemoveServerOnlyComponentQuery = new SimpleSqliteRemoveComponentQuery(ServerOnlyParamName, conn);
     }
 
+    public IAddComponentQuery<BlockTile> AddBlockTileQuery { get; }
+    public IModifyComponentQuery<BlockTile> ModifyBlockTileQuery { get; }
+
     public ITransactionLock TransactionLock { get; } = new SingleWriterTransactionLock();
 
     public ISetTemplateQuery SetTemplateQuery { get; }
@@ -296,12 +279,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<Kinematics> AddPositionQuery { get; }
     public IModifyComponentQuery<Kinematics> ModifyPositionQuery { get; }
     public IRemoveComponentQuery RemovePositionQuery { get; }
-    public IAddComponentQuery<int> AddMaterialQuery { get; }
-    public IModifyComponentQuery<int> ModifyMaterialQuery { get; }
-    public IRemoveComponentQuery RemoveMaterialQuery { get; }
-    public IAddComponentQuery<int> AddMaterialModifierQuery { get; }
-    public IModifyComponentQuery<int> ModifyMaterialModifierQuery { get; }
-    public IRemoveComponentQuery RemoveMaterialModifierQuery { get; }
+    public IRemoveComponentQuery RemoveBlockTileQuery { get; }
     public IAddComponentQuery<bool> AddPlayerCharacterQuery { get; }
     public IModifyComponentQuery<bool> ModifyPlayerCharacterQuery { get; }
     public IRemoveComponentQuery RemovePlayerCharacterQuery { get; }

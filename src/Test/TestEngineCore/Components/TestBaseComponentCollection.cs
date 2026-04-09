@@ -30,7 +30,7 @@ public class TestBaseComponentCollection
         var componentManager = new ComponentManager(entityNotifier);
         collection =
             new DummyComponentCollection<int>(entityTable, componentManager, 10, ComponentOperators.IntOperators,
-                ComponentType.Material);
+                ComponentType.BlockTile);
     }
 
     [Fact]
@@ -269,7 +269,7 @@ public class TestBaseComponentCollection
         collection.ApplyComponentUpdates();
 
         var parentCollection = new DummyComponentCollection<ulong>(new EntityTable(),
-            new ComponentManager(new EntityNotifier()), 10, ComponentOperators.UlongOperators, ComponentType.Material);
+            new ComponentManager(new EntityNotifier()), 10, ComponentOperators.UlongOperators, ComponentType.BlockTile);
         parentCollection.AddComponent(childEntityId, parentEntityId);
         parentCollection.ApplyComponentUpdates();
 
@@ -280,7 +280,7 @@ public class TestBaseComponentCollection
         Assert.Equal(childValue, nearestValue);
         Assert.Equal(childEntityId, owningEntityId);
     }
-    
+
     [Fact]
     public void TryFindNearest_ReturnsParentComponentIfNearest()
     {
@@ -292,7 +292,7 @@ public class TestBaseComponentCollection
         collection.ApplyComponentUpdates();
 
         var parentCollection = new DummyComponentCollection<ulong>(new EntityTable(),
-            new ComponentManager(new EntityNotifier()), 10, ComponentOperators.UlongOperators, ComponentType.Material);
+            new ComponentManager(new EntityNotifier()), 10, ComponentOperators.UlongOperators, ComponentType.BlockTile);
         parentCollection.AddComponent(childEntityId, parentEntityId);
         parentCollection.ApplyComponentUpdates();
 
@@ -316,7 +316,7 @@ public class TestBaseComponentCollection
         collection.ApplyComponentUpdates();
 
         var parentCollection = new DummyComponentCollection<ulong>(new EntityTable(),
-            new ComponentManager(new EntityNotifier()), 10, ComponentOperators.UlongOperators, ComponentType.Material);
+            new ComponentManager(new EntityNotifier()), 10, ComponentOperators.UlongOperators, ComponentType.BlockTile);
         parentCollection.AddComponent(parentEntityId, grandparentEntityId);
         parentCollection.AddComponent(childEntityId, parentEntityId);
         parentCollection.ApplyComponentUpdates();
@@ -336,7 +336,7 @@ public class TestBaseComponentCollection
         ulong childEntityId = 2;
 
         var parentCollection = new DummyComponentCollection<ulong>(new EntityTable(),
-            new ComponentManager(new EntityNotifier()), 10, ComponentOperators.UlongOperators, ComponentType.Material);
+            new ComponentManager(new EntityNotifier()), 10, ComponentOperators.UlongOperators, ComponentType.BlockTile);
         parentCollection.AddComponent(childEntityId, parentEntityId);
         parentCollection.ApplyComponentUpdates();
 

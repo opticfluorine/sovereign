@@ -35,8 +35,6 @@ public class PlayerDebugGui
     private readonly BlockGridPositionIndexer blocks;
     private readonly DrawableComponentCollection drawables;
     private readonly KinematicsComponentCollection kinematics;
-    private readonly MaterialModifierComponentCollection materialModifiers;
-    private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly PlayerCharacterTagCollection players;
@@ -48,7 +46,6 @@ public class PlayerDebugGui
         AnimatedSpriteComponentCollection animatedSprites, WorldSegmentResolver worldSegmentResolver,
         DrawableComponentCollection drawables, PlayerCharacterTagCollection players,
         OrientationComponentCollection orientations, BlockGridPositionIndexer blocks,
-        MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
         AdminTagCollection admins)
     {
         this.stateServices = stateServices;
@@ -60,8 +57,6 @@ public class PlayerDebugGui
         this.players = players;
         this.orientations = orientations;
         this.blocks = blocks;
-        this.materials = materials;
-        this.materialModifiers = materialModifiers;
         this.admins = admins;
     }
 
@@ -121,8 +116,6 @@ public class PlayerDebugGui
         foreach (var block in blocksBelow.Keys)
         {
             AddValueRow("Below Block ID:", $"{block:X}");
-            AddComponentRow("Below Block Material:", block, materials);
-            AddComponentRow("Below Block Material Mod:", block, materialModifiers);
         }
     }
 

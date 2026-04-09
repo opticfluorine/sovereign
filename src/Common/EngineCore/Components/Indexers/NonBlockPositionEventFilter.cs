@@ -23,18 +23,18 @@ namespace Sovereign.EngineCore.Components.Indexers;
 /// </summary>
 public class NonBlockPositionEventFilter : BaseComponentEventFilter<Kinematics>
 {
-    private readonly MaterialComponentCollection materials;
+    private readonly BlockTileComponentCollection blockTiles;
 
     public NonBlockPositionEventFilter(KinematicsComponentCollection kinematics,
-        MaterialComponentCollection materials)
+        BlockTileComponentCollection blockTiles)
         : base(kinematics, kinematics)
     {
-        this.materials = materials;
+        this.blockTiles = blockTiles;
     }
 
     protected override bool ShouldAccept(ulong entityId)
     {
-        return !(materials.HasComponentForEntity(entityId, true)
-                 || materials.HasPendingComponentForEntity(entityId));
+        return !(blockTiles.HasComponentForEntity(entityId, true)
+                 || blockTiles.HasPendingComponentForEntity(entityId));
     }
 }

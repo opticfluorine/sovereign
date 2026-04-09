@@ -25,7 +25,6 @@ using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Components.Indexers;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Rendering.Gui;
-using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
@@ -45,6 +44,8 @@ public class BlockTemplateEditorTab
     /// </summary>
     private const uint SelectionColor = 0xFF773333;
 
+    private readonly BlockTileComponentCollection blockTiles;
+
     private readonly EntityDefinitionGenerator definitionGenerator;
     private readonly EditorOptions editorOptions;
 
@@ -56,24 +57,21 @@ public class BlockTemplateEditorTab
     private readonly BlockTemplateEntityIndexer indexer;
     private readonly TemplateEditorInternalController internalController;
     private readonly ILogger<BlockTemplateEditorTab> logger;
-    private readonly MaterialManager materialManager;
-    private readonly MaterialModifierComponentCollection materialModifiers;
-    private readonly MaterialComponentCollection materials;
     private readonly NameComponentValidator nameComponentValidator;
     private readonly NameComponentCollection names;
     private bool initialized;
     private bool inputCastBlockShadows;
-    private int inputMaterial;
-    private int inputMaterialModifier;
+    private int inputFrontTileId;
     private string inputName = "";
+    private int inputTopTileId;
     private EntityDefinition selectedDefinition = new();
     private ulong selectedEntityId;
     private int selectedIndex;
     private List<ulong> sortedTemplateEntityIds = new();
 
     public BlockTemplateEditorTab(BlockTemplateEntityIndexer indexer, GuiExtensions guiExtensions,
-        MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
-        NameComponentCollection names, MaterialManager materialManager, EntityTable entityTable,
+        BlockTileComponentCollection blockTiles,
+        NameComponentCollection names, EntityTable entityTable,
         TemplateEditorInternalController internalController, IEventSender eventSender,
         EntityDefinitionGenerator definitionGenerator, NameComponentValidator nameComponentValidator,
         GuiComponentEditors guiComponentEditors, IOptions<EditorOptions> editorOptions,
@@ -81,10 +79,8 @@ public class BlockTemplateEditorTab
     {
         this.indexer = indexer;
         this.guiExtensions = guiExtensions;
-        this.materials = materials;
-        this.materialModifiers = materialModifiers;
+        this.blockTiles = blockTiles;
         this.names = names;
-        this.materialManager = materialManager;
         this.entityTable = entityTable;
         this.internalController = internalController;
         this.eventSender = eventSender;
@@ -142,7 +138,7 @@ public class BlockTemplateEditorTab
                 ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter |
                 ImGuiTableFlags.RowBg, new Vector2 { X = fontSize * 14.11f, Y = maxSize.Y - fontSize * 5.3f }))
         {
-            ImGui.TableSetupColumn("Material");
+            ImGui.TableSetupColumn("Tile Sprite");
             ImGui.TableSetupColumn("Name");
             ImGui.TableSetupScrollFreeze(0, 1);
             ImGui.TableHeadersRow();
@@ -156,18 +152,16 @@ public class BlockTemplateEditorTab
                     var name = names.HasComponentForEntity(templateEntityId)
                         ? names[templateEntityId]
                         : $"Block {templateEntityId - EntityConstants.FirstTemplateEntityId}";
-                    var materialId = materials[templateEntityId];
-                    var materialModifier = materialModifiers[templateEntityId];
-                    var mat = materialManager.Materials[materialId];
+                    var blockTile = blockTiles[templateEntityId];
 
                     // Material column
                     ImGui.TableNextColumn();
-                    if (guiExtensions.TileSpriteButton($"##matButtonFront{i}",
-                            mat.MaterialSubtypes[materialModifier].SideFaceTileSpriteId,
+                    if (guiExtensions.TileSpriteButton($"##btButtonFront{i}",
+                            blockTile.FrontFaceId,
                             TileContextKey.AllWildcards)) Select(i);
                     ImGui.SameLine();
-                    if (guiExtensions.TileSpriteButton($"##matBMaterialManauttonTop{i}",
-                            mat.MaterialSubtypes[materialModifier].TopFaceTileSpriteId,
+                    if (guiExtensions.TileSpriteButton($"##btButtonTop{i}",
+                            blockTile.TopFaceId,
                             TileContextKey.AllWildcards)) Select(i);
 
                     // Name column.
@@ -262,7 +256,7 @@ public class BlockTemplateEditorTab
                 ImGui.EndTable();
             }
 
-            guiComponentEditors.MaterialEdit(ref inputMaterial, ref inputMaterialModifier);
+            guiComponentEditors.BlockTileEdit(ref inputFrontTileId, ref inputTopTileId);
         }
 
         ImGui.EndTable();
@@ -330,18 +324,6 @@ public class BlockTemplateEditorTab
             valid = false;
         }
 
-        if (inputMaterial < 1 || inputMaterial >= materialManager.Materials.Count)
-        {
-            sb.Append("Material ID is invalid.\n");
-            valid = false;
-        }
-        else if (inputMaterialModifier < 0 ||
-                 inputMaterialModifier >= materialManager.Materials[inputMaterial].MaterialSubtypes.Count)
-        {
-            sb.Append("Material modifier is invalid.\n");
-            valid = false;
-        }
-
         reason = sb.ToString().TrimEnd();
         return valid;
     }
@@ -352,7 +334,11 @@ public class BlockTemplateEditorTab
     private void Save()
     {
         selectedDefinition.Name = inputName.Length > 0 ? inputName : null;
-        selectedDefinition.Material = new MaterialPair(inputMaterial, inputMaterialModifier);
+        selectedDefinition.BlockTile = new BlockTile
+        {
+            FrontFaceId = inputFrontTileId,
+            TopFaceId = inputTopTileId
+        };
         selectedDefinition.CastBlockShadows = inputCastBlockShadows;
         SaveDefinition(selectedDefinition);
     }
@@ -387,10 +373,10 @@ public class BlockTemplateEditorTab
             selectedDefinition = definitionGenerator.GenerateDefinition(selectedEntityId);
             inputName = selectedDefinition.Name ?? "";
             inputCastBlockShadows = selectedDefinition.CastBlockShadows;
-            if (selectedDefinition.Material != null)
+            if (selectedDefinition.BlockTile.HasValue)
             {
-                inputMaterial = selectedDefinition.Material.MaterialId;
-                inputMaterialModifier = selectedDefinition.Material.MaterialModifier;
+                inputFrontTileId = selectedDefinition.BlockTile.Value.FrontFaceId;
+                inputTopTileId = selectedDefinition.BlockTile.Value.TopFaceId;
             }
         }
     }

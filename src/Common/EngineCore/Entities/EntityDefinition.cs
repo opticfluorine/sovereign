@@ -44,7 +44,7 @@ public class EntityDefinition
         Position = other.Position;
         AnimatedSpriteId = other.AnimatedSpriteId;
         Drawable = other.Drawable;
-        Material = other.Material;
+        BlockTile = other.BlockTile;
         PlayerCharacter = other.PlayerCharacter;
         Name = other.Name;
         Parent = other.Parent;
@@ -86,10 +86,10 @@ public class EntityDefinition
     public Vector2? Drawable { get; set; }
 
     /// <summary>
-    ///     Block material information if the entity is a block, or null if not a block.
+    ///     Block tiling if the entity is a block, or null if not a block.
     /// </summary>
     [Key(4)]
-    public MaterialPair? Material { get; set; }
+    public BlockTile? BlockTile { get; set; }
 
     /// <summary>
     ///     Set to true if entity is a player character, false otherwise.

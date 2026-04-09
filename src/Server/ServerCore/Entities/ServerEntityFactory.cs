@@ -32,6 +32,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly BlockTileComponentCollection blockTiles;
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
@@ -42,8 +43,6 @@ public sealed class ServerEntityFactory : IEntityFactory
     private readonly EntityTable entityTable;
     private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
-    private readonly MaterialModifierComponentCollection materialModifiers;
-    private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
@@ -57,8 +56,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     public ServerEntityFactory(
         EntityManager entityManager,
         KinematicsComponentCollection kinematics,
-        MaterialComponentCollection materials,
-        MaterialModifierComponentCollection materialModifiers,
+        BlockTileComponentCollection blockTiles,
         AboveBlockComponentCollection aboveBlocks,
         PlayerCharacterTagCollection playerCharacterTags,
         NameComponentCollection names,
@@ -80,8 +78,7 @@ public sealed class ServerEntityFactory : IEntityFactory
     {
         this.entityManager = entityManager;
         this.kinematics = kinematics;
-        this.materials = materials;
-        this.materialModifiers = materialModifiers;
+        this.blockTiles = blockTiles;
         this.aboveBlocks = aboveBlocks;
         this.playerCharacterTags = playerCharacterTags;
         this.names = names;
@@ -120,8 +117,7 @@ public sealed class ServerEntityFactory : IEntityFactory
             load,
             entityManager,
             kinematics,
-            materials,
-            materialModifiers,
+            blockTiles,
             aboveBlocks,
             playerCharacterTags,
             names,

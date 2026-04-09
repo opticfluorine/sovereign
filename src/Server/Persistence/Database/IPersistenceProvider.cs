@@ -109,34 +109,19 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemovePositionQuery { get; }
 
     /// <summary>
-    ///     IAddComponentQuery for the Material component.
+    ///     IAddComponentQuery for the BlockTile component.
     /// </summary>
-    IAddComponentQuery<int> AddMaterialQuery { get; }
+    IAddComponentQuery<BlockTile> AddBlockTileQuery { get; }
 
     /// <summary>
-    ///     IModifyComponentQuery for the Material component.
+    ///     IModifyComponentQuery for the BlockTile component.
     /// </summary>
-    IModifyComponentQuery<int> ModifyMaterialQuery { get; }
+    IModifyComponentQuery<BlockTile> ModifyBlockTileQuery { get; }
 
     /// <summary>
-    ///     IRemoveComponentQuery for the Material component.
+    ///     IRemoveComponentQuery for the BlockTile component.
     /// </summary>
-    IRemoveComponentQuery RemoveMaterialQuery { get; }
-
-    /// <summary>
-    ///     IAddComponentQuery for the MaterialModifier component.
-    /// </summary>
-    IAddComponentQuery<int> AddMaterialModifierQuery { get; }
-
-    /// <summary>
-    ///     IModifyComponentQuery for the MaterialModifier component.
-    /// </summary>
-    IModifyComponentQuery<int> ModifyMaterialModifierQuery { get; }
-
-    /// <summary>
-    ///     IRemoveComponentQuery for the MaterialModifier component.
-    /// </summary>
-    IRemoveComponentQuery RemoveMaterialModifierQuery { get; }
+    IRemoveComponentQuery RemoveBlockTileQuery { get; }
 
     /// <summary>
     ///     IAddComponentQuery for the PlayerCharacter tag.

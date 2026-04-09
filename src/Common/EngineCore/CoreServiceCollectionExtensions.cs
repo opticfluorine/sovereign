@@ -121,8 +121,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<CastBlockShadowsTagCollection>();
         services.TryAddComponentCollection<DrawableComponentCollection>();
         services.TryAddComponentCollection<KinematicsComponentCollection>();
-        services.TryAddComponentCollection<MaterialComponentCollection>();
-        services.TryAddComponentCollection<MaterialModifierComponentCollection>();
+        services.TryAddComponentCollection<BlockTileComponentCollection>();
         services.TryAddComponentCollection<NameComponentCollection>();
         services.TryAddComponentCollection<OrientationComponentCollection>();
         services.TryAddComponentCollection<ParentComponentCollection>();

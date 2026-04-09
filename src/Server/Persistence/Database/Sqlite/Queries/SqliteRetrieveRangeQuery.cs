@@ -32,12 +32,12 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
     /// </summary>
     private const string Query =
         @"WITH RECURSIVE 
-            EntityTree(id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent, 
+            EntityTree(id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent, 
                 drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
                 plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius,
                 entityType, serverOnly)
 	        AS (
-	        	SELECT id, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
+	        	SELECT id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
                         drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
                         plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ,
                         shadowRadius, entityType, serverOnly
@@ -47,7 +47,7 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
 	        		  AND z >= @Z1 AND z < @Z2
 	        		  AND playerCharacter IS NULL
 	        	UNION ALL
-	        	SELECT ec.id, ec.template_id, NULL, NULL, NULL, ec.material, ec.materialModifier, ec.playerCharacter, 
+	        	SELECT ec.id, ec.template_id, NULL, NULL, NULL, ec.frontTileId, ec.topTileId, ec.playerCharacter, 
                         ec.name, ec.account, ec.parent, ec.drawableX, ec.drawableY, ec.animatedSprite, ec.orientation, ec.admin,
                         ec.castBlockShadows, ec.plsRadius, ec.plsIntensity, ec.plsColor,
                         ec.plsPosX, ec.plsPosY, ec.plsPosZ, ec.physics, ec.bbPosX, ec.bbPosY, ec.bbPosZ,
@@ -56,7 +56,7 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
 	        		WHERE ec.parent = et.id 
                       AND ec.playerCharacter IS NULL
 	        )
-            SELECT id, kv.key, kv.value, template_id, x, y, z, material, materialModifier, playerCharacter, name, account, parent,
+            SELECT id, kv.key, kv.value, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
                 drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
                 plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius,
                 entityType, serverOnly

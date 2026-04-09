@@ -69,10 +69,10 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutDrawable();
 
-        if (definition.Material != null)
-            builder.Material(definition.Material);
+        if (definition.BlockTile != null)
+            builder.BlockTile(definition.BlockTile.Value);
         else
-            builder.WithoutMaterial();
+            builder.WithoutBlockTile();
 
         if (definition.PlayerCharacter)
             builder.PlayerCharacter();

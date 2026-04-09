@@ -27,6 +27,7 @@ public class EntityDefinitionGenerator
     private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly BlockTileComponentCollection blockTiles;
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
@@ -34,8 +35,6 @@ public class EntityDefinitionGenerator
     private readonly EntityTable entityTable;
     private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
-    private readonly MaterialModifierComponentCollection materialModifiers;
-    private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
@@ -46,7 +45,7 @@ public class EntityDefinitionGenerator
 
     public EntityDefinitionGenerator(
         KinematicsComponentCollection kinematics,
-        MaterialComponentCollection materials, MaterialModifierComponentCollection materialModifiers,
+        BlockTileComponentCollection blockTiles,
         PlayerCharacterTagCollection playerCharacters, NameComponentCollection names,
         ParentComponentCollection parents, DrawableComponentCollection drawables,
         AnimatedSpriteComponentCollection animatedSprites, OrientationComponentCollection orientations,
@@ -58,8 +57,7 @@ public class EntityDefinitionGenerator
         EntityTable entityTable)
     {
         this.kinematics = kinematics;
-        this.materials = materials;
-        this.materialModifiers = materialModifiers;
+        this.blockTiles = blockTiles;
         this.playerCharacters = playerCharacters;
         this.names = names;
         this.parents = parents;
@@ -101,8 +99,8 @@ public class EntityDefinitionGenerator
         if (animatedSprites.HasLocalComponentForEntity(entityId))
             def.AnimatedSpriteId = animatedSprites[entityId];
 
-        if (materials.HasLocalComponentForEntity(entityId))
-            def.Material = new MaterialPair(materials[entityId], materialModifiers[entityId]);
+        if (blockTiles.HasLocalComponentForEntity(entityId))
+            def.BlockTile = blockTiles[entityId];
 
         def.PlayerCharacter = playerCharacters.HasLocalTagForEntity(entityId);
 

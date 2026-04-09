@@ -93,8 +93,7 @@ public partial class AutoUpdater
     private readonly List<ResourceType> allowedResourceTypes = new()
     {
         ResourceType.Sprite,
-        ResourceType.Spritesheet,
-        ResourceType.World
+        ResourceType.Spritesheet
     };
 
     private readonly AutoUpdaterOptions autoUpdaterOptions;

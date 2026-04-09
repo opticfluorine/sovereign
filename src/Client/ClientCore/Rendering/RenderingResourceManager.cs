@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Sprites;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Rendering.Sprites.Atlas;
@@ -32,8 +31,6 @@ public class RenderingResourceManager
 
     private readonly AtlasMap atlasMap;
 
-    private readonly MaterialManager materialManager;
-
     private readonly SpriteManager spriteManager;
 
     private readonly SpriteSheetManager spriteSheetManager;
@@ -47,8 +44,7 @@ public class RenderingResourceManager
         TileSpriteManager tileSpriteManager,
         AnimatedSpriteManager animatedSpriteManager,
         SpriteManager spriteManager,
-        AtlasMap atlasMap,
-        MaterialManager materialManager)
+        AtlasMap atlasMap)
     {
         this.spriteSheetManager = spriteSheetManager;
         this.textureAtlasManager = textureAtlasManager;
@@ -56,7 +52,6 @@ public class RenderingResourceManager
         this.animatedSpriteManager = animatedSpriteManager;
         this.spriteManager = spriteManager;
         this.atlasMap = atlasMap;
-        this.materialManager = materialManager;
     }
 
     /// <summary>
@@ -73,9 +68,6 @@ public class RenderingResourceManager
         animatedSpriteManager.InitializeAnimatedSprites();
         tileSpriteManager.InitializeTileSprites();
         atlasMap.InitializeAtlasMap();
-
-        /* Initialize materials. */
-        materialManager.InitializeMaterials();
     }
 
     /// <summary>

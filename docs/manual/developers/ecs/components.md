@@ -14,14 +14,13 @@ Core components are available in both the client and server.
 | `Admin`            | `AdminTagCollection`                  | Denotes a player character as an admin.                                                                                |
 | `AnimatedSprite`   | `AnimatedSpriteComponentCollection`   | For non-block drawable entities (see `Drawable` component), denotes the animated sprite ID to use for rendering.       |
 | `BlockPosition`    | `BlockPositionComponentCollection`    | Grid-aligned position of a block entity.                                                                               |
+| `BlockTile`        | `BlockTileComponentCollection`        | Specifies the tile sprites of a block entity.                                                                          |
 | `BoundingBox`      | `BoundingBoxComponentCollection`      | For non-block entities, specifies the bounding box used for physics calculations.                                      |
 | `CastBlockShadows` | `CastBlockShadowsTagCollection`       | For block entities, indicates that the block should be included for calculating shadows.                               |
 | `CastShadows`      | `CastShadowsComponentCollection`      | For non-block entities, specifies the shape of the shadow cast by the entity.                                          |
 | `Drawable`         | `DrawableComponentCollection`         | For non-block entities, specifies that the entity should be drawn.                                                     |
 | `EntityType`       | `EntityTypeComponentCollection`       | Denotes that the entity is a special type (e.g. item, NPC, player).                                                    |
 | `Kinematics`       | `KinematicsComponentCollection`       | For non-block positioned entities, contains the position and velocity of the entity.                                   |
-| `Material`         | `MaterialComponentCollection`         | Indicates that the entity is a block of the given material ID.                                                         |
-| `MaterialModifier` | `MaterialModifierComponentCollection` | For material block entities (see `Material` component), denotes the material modifier of the block.                    |
 | `Name`             | `NameComponentCollection`             | Gives the name of the entity.                                                                                          |
 | `Orientation`      | `OrientationComponentCollection`      | Specifies the directional orientation of the entity.                                                                   |
 | `Parent`           | `ParentComponentCollection`           | Maps an entity to its parent entity.                                                                                   |

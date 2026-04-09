@@ -148,25 +148,25 @@ public interface IEntityBuilder : IDisposable
     IEntityBuilder WithoutAnimatedSprite();
 
     /// <summary>
-    ///     Makes the new entity a block of the given material.
+    ///     Makes the new entity a block with the given tiling.
     /// </summary>
-    /// <param name="materialId">Material ID.</param>
-    /// <param name="materialModifier">Material modifier.</param>
+    /// <param name="frontTileId">Front face tile sprite ID.</param>
+    /// <param name="topTileId">Top face tile sprite ID.</param>
     /// <returns>Builder.</returns>
-    IEntityBuilder Material(int materialId, int materialModifier);
+    IEntityBuilder BlockTile(int frontTileId, int topTileId);
 
     /// <summary>
-    ///     Makes the new entity a block of the given material.
+    ///     Makes the new entity a block with the given tiling.
     /// </summary>
-    /// <param name="material">Material.</param>
+    /// <param name="blockTile">Block tiling.</param>
     /// <returns>Builder.</returns>
-    IEntityBuilder Material(MaterialPair material);
+    IEntityBuilder BlockTile(BlockTile blockTile);
 
     /// <summary>
     ///     Removes material components if currently set.
     /// </summary>
     /// <returns>Builder.</returns>
-    IEntityBuilder WithoutMaterial();
+    IEntityBuilder WithoutBlockTile();
 
     /// <summary>
     ///     Records the entity ID of the block above this block.

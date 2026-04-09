@@ -30,7 +30,7 @@ public class SqliteRetrieveAllTemplatesQuery : IRetrieveAllTemplatesQuery
     ///     with EntityProcessor.
     /// </summary>
     private const string query =
-        @"SELECT id, kv.key, kv.value, NULL, NULL, NULL, NULL, material, materialModifier, NULL, name, NULL, 
+        @"SELECT id, kv.key, kv.value, NULL, NULL, NULL, NULL, frontTileId, topTileId, NULL, name, NULL, 
                 NULL, drawableX, drawableY, animatedSprite, orientation, NULL, castBlockShadows,
                 plsRadius, plsIntensity, plsColor, plsPosX, plsPosY, plsPosZ,
                 physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius, entityType, serverOnly

@@ -60,19 +60,19 @@ public sealed class RendererOptions
     /// <summary>
     ///     Rotation angle in the YZ plane about the camera position of the global light source, in radians.
     /// </summary>
-    public float GlobalLightPhiRad { get; set; } = 0.0f;
+    public float GlobalLightPhiRad { get; set; }
 
     /// <summary>
     ///     Translation along X applied when sampling global shadow textures, in world units.
     ///     Can be used to offset self-shadowing effects with transparent block edges.
     /// </summary>
-    public float GlobalLightShiftX { get; set; } = 0.0f;
+    public float GlobalLightShiftX { get; set; }
 
     /// <summary>
     ///     Translation along Y applied when sampling global shadow textures, in world units.
     ///     Can be used to offset self-shadowing effects with transparent block edges.
     /// </summary>
-    public float GlobalLightShiftY { get; set; } = 0.0f;
+    public float GlobalLightShiftY { get; set; }
 
     /// <summary>
     ///     Animated sprite ID to use for the green hover effect on block top faces.
@@ -300,7 +300,7 @@ public sealed class EditorOptions
     /// </summary>
     public EntityDefinition DefaultNewBlockTemplate { get; set; } = new()
     {
-        Material = new MaterialPair(1, 0),
+        BlockTile = new BlockTile { FrontFaceId = 1, TopFaceId = 0 },
         CastBlockShadows = true,
         Name = "New Block"
     };

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.ClientCore.Components.Indexers;
@@ -26,13 +27,13 @@ namespace Sovereign.ClientCore.Components.Indexers;
 /// <summary>
 ///     Indexer which identifies block template entities.
 /// </summary>
-public class BlockTemplateEntityIndexer : BaseComponentIndexer<int>
+public class BlockTemplateEntityIndexer : BaseComponentIndexer<BlockTile>
 {
     private readonly SortedSet<ulong> blockTemplateEntities = new();
     private bool modified;
 
-    public BlockTemplateEntityIndexer(MaterialComponentCollection materials, BlockTemplateEntityFilter filter)
-        : base(materials, filter)
+    public BlockTemplateEntityIndexer(BlockTileComponentCollection blockTiles, BlockTemplateEntityFilter filter)
+        : base(blockTiles, filter)
     {
     }
 
@@ -87,7 +88,7 @@ public class BlockTemplateEntityIndexer : BaseComponentIndexer<int>
         return true;
     }
 
-    protected override void ComponentAddedCallback(ulong entityId, int componentValue, bool isLoad)
+    protected override void ComponentAddedCallback(ulong entityId, BlockTile componentValue, bool isLoad)
     {
         blockTemplateEntities.Add(entityId);
         modified = true;

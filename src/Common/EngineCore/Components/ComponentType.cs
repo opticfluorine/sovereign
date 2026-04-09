@@ -32,7 +32,7 @@ public enum ComponentType
     /// <summary>
     ///     Material component.
     /// </summary>
-    Material = 0x0002,
+    BlockTile = 0x0002,
 
     /// <summary>
     ///     Material modifier component.

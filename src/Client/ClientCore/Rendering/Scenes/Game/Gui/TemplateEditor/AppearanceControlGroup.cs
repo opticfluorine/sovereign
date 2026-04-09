@@ -44,7 +44,7 @@ public class AppearanceControlGroup(GuiExtensions guiExtensions, AnimatedSpriteS
         if (ImGui.CollapsingHeader("Appearance", ImGuiTreeNodeFlags.DefaultOpen))
             if (ImGui.BeginTable("Appearance", 2, ImGuiTableFlags.SizingFixedFit))
             {
-                var isBlock = entityDefinition.Material != null;
+                var isBlock = entityDefinition.BlockTile != null;
 
                 if (!isBlock) AnimatedSpriteControls(entityDefinition);
                 if (!isBlock) DrawableControls(entityDefinition);

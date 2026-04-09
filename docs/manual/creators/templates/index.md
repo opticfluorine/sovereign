@@ -22,6 +22,7 @@ into the Sovereign Engine client. To open the editor, first log into the server 
 the Admin role, then press the `Ins` key. The Template Entity Editor should be displayed.
 
 ### Creating and Modifying Block Template Entities
+(block-templates)=
 
 **Block Template Entities** are template entities which specify the properties of a block entity.
 They can be created and modified through the Template Entity Editor using the *Blocks* tab.
@@ -41,7 +42,7 @@ Entity:
 | ----------------- | ----------------------------------------------------- | --------------------- |
 | Name              | Name for the Block Template Entity. Should be unique. | *(blank)*             |
 | Drawable          | Whether the block can be drawn. Usually true.         | Checked               |
-| Material/Modifier | Material and modifier for the block.                  | Material 1/Modifier 0 |
+| BlockTile         | Tile sprites for the block.                           | Front ID 1/Top ID 0   |
 
 Clicking the *Save* button at the bottom of the editor will send the updated values to the server, and
 the updated Block Template Entity will be sent to all connected clients. Clicking the *Cancel* button

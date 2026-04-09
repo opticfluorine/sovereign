@@ -15,17 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System.Collections.Generic;
+using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
-namespace Sovereign.ClientCore.Rendering.Materials;
+namespace Sovereign.EngineCore.Components;
 
 /// <summary>
-///     Contains the definitions of the materials.
+///     The Material component specifies the material index for a block entity.
 /// </summary>
-public class MaterialDefinitions
+[ScriptableComponents("block_tile")]
+public sealed class BlockTileComponentCollection : BaseComponentCollection<BlockTile>
 {
     /// <summary>
-    ///     Materials.
+    ///     Initial size of component collection.
     /// </summary>
-    public List<Material> Materials { get; set; } = new();
+    public const int InitialSize = 65536;
+
+    public BlockTileComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, InitialSize, ComponentOperators.BlockTileOperators,
+            ComponentType.BlockTile)
+    {
+    }
 }

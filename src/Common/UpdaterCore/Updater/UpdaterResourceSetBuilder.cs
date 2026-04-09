@@ -43,7 +43,6 @@ public partial class UpdaterResourceSetBuilder
 
         AddSprites(resourceSet, pathBuilder);
         AddSpritesheet(resourceSet, pathBuilder);
-        AddWorld(resourceSet, pathBuilder);
 
         return resourceSet;
     }
@@ -67,16 +66,6 @@ public partial class UpdaterResourceSetBuilder
     {
         AddFiles(resourceSet, pathBuilder, ResourceType.Spritesheet,
             f => IsPngRegex().IsMatch(f) || IsYamlRegex().IsMatch(f));
-    }
-
-    /// <summary>
-    ///     Adds all World resources to the resource set.
-    /// </summary>
-    /// <param name="resourceSet">Resource set.</param>
-    /// <param name="pathBuilder">Path builder.</param>
-    private void AddWorld(UpdaterResourceSet resourceSet, IResourcePathBuilder pathBuilder)
-    {
-        AddFiles(resourceSet, pathBuilder, ResourceType.World, f => IsJsonRegex().IsMatch(f));
     }
 
     /// <summary>

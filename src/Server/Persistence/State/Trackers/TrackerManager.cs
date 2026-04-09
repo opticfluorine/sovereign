@@ -34,8 +34,7 @@ public sealed class TrackerManager
     private readonly TemplateStateTracker templateStateTracker;
 
     public TrackerManager(KinematicsStateTracker kinematicsStateTracker,
-        MaterialStateTracker materialStateTracker,
-        MaterialModifierStateTracker materialModifierStateTracker,
+        BlockTileStateTracker blockTileStateTracker,
         PlayerCharacterStateTracker playerCharacterStateTracker,
         NameStateTracker nameStateTracker,
         AccountStateTracker accountStateTracker,
@@ -64,8 +63,7 @@ public sealed class TrackerManager
         this.serverOnlyStateTracker = serverOnlyStateTracker;
         OrientationStateTracker = orientationStateTracker;
         KinematicsStateTracker = kinematicsStateTracker;
-        MaterialStateTracker = materialStateTracker;
-        MaterialModifierStateTracker = materialModifierStateTracker;
+        BlockTileStateTracker = blockTileStateTracker;
         PlayerCharacterStateTracker = playerCharacterStateTracker;
         NameStateTracker = nameStateTracker;
         AccountStateTracker = accountStateTracker;
@@ -87,12 +85,7 @@ public sealed class TrackerManager
     /// <summary>
     ///     Material state tracker.
     /// </summary>
-    public MaterialStateTracker MaterialStateTracker { get; }
-
-    /// <summary>
-    ///     Material modifier state tracker.
-    /// </summary>
-    public MaterialModifierStateTracker MaterialModifierStateTracker { get; }
+    public BlockTileStateTracker BlockTileStateTracker { get; }
 
     /// <summary>
     ///     Player character state tracker.

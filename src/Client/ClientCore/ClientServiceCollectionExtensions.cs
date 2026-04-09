@@ -34,7 +34,6 @@ using Sovereign.ClientCore.Rendering.Configuration;
 using Sovereign.ClientCore.Rendering.Display;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Gui.Debug;
-using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Scenes;
 using Sovereign.ClientCore.Rendering.Scenes.Game;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
@@ -132,7 +131,6 @@ public static class ClientServiceCollectionExtensions
         AddClientNetwork(services);
         AddRendering(services);
         AddGui(services);
-        AddResources(services);
         AddScenes(services);
         AddSprites(services);
         AddSystems(services);
@@ -233,13 +231,6 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<RendererDebugGui>();
     }
 
-    private static void AddResources(IServiceCollection services)
-    {
-        services.TryAddSingleton<MaterialManager>();
-        services.TryAddSingleton<MaterialDefinitionsValidator>();
-        services.TryAddSingleton<MaterialDefinitionsLoader>();
-    }
-
     private static void AddScenes(IServiceCollection services)
     {
         services.TryAddSingleton<SceneManager>();
@@ -257,12 +248,10 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<AnimatedSpriteEditorTab>();
         services.TryAddSingleton<CharacterSpriteImporter>();
         services.TryAddSingleton<TileSpriteEditorTab>();
-        services.TryAddSingleton<MaterialEditorTab>();
         services.TryAddSingleton<SpriteSelectorPopup>();
         services.TryAddSingleton<AnimatedSpriteSelectorPopup>();
         services.TryAddSingleton<AnimatedSpriteSheetSelectorPopup>();
         services.TryAddSingleton<TileSpriteSelectorPopup>();
-        services.TryAddSingleton<MaterialSelectorPopup>();
         services.TryAddSingleton<GenerateAnimatedSpritesPopup>();
         services.TryAddSingleton<SpritesheetSelector>();
         services.TryAddSingleton<TemplateEditorGui>();

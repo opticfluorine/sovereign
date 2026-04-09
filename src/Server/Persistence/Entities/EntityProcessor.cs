@@ -38,9 +38,9 @@ public sealed class EntityProcessor
     private const int IndexPosX = IndexTemplateId + 1;
     private const int IndexPosY = IndexPosX + 1;
     private const int IndexPosZ = IndexPosY + 1;
-    private const int IndexMaterial = IndexPosZ + 1;
-    private const int IndexMaterialModifier = IndexMaterial + 1;
-    private const int IndexPlayerCharacter = IndexMaterialModifier + 1;
+    private const int IndexFrontTileId = IndexPosZ + 1;
+    private const int IndexTopTileId = IndexFrontTileId + 1;
+    private const int IndexPlayerCharacter = IndexTopTileId + 1;
     private const int IndexName = IndexPlayerCharacter + 1;
     private const int IndexAccount = IndexName + 1;
     private const int IndexParent = IndexAccount + 1;
@@ -119,7 +119,7 @@ public sealed class EntityProcessor
             /* Process components. */
             ProcessTemplate(reader, builder);
             ProcessPosition(reader, builder);
-            ProcessMaterial(reader, builder);
+            ProcessBlockTile(reader, builder);
             ProcessPlayerCharacter(reader, builder);
             ProcessName(reader, builder);
             ProcessAccount(reader, builder, entityId);
@@ -222,18 +222,18 @@ public sealed class EntityProcessor
     }
 
     /// <summary>
-    ///     Processes the material and material modifier components, if any.
+    ///     Processes the BlockTile component, if any.
     /// </summary>
     /// <param name="reader">Reader.</param>
     /// <param name="builder">Entity builder.</param>
-    private void ProcessMaterial(IDataReader reader, IEntityBuilder builder)
+    private void ProcessBlockTile(IDataReader reader, IEntityBuilder builder)
     {
         /* Check for existence. */
-        if (reader.IsDBNull(IndexMaterial)) return;
+        if (reader.IsDBNull(IndexFrontTileId)) return;
 
         /* Process. */
-        builder.Material(reader.GetInt32(IndexMaterial),
-            reader.GetInt32(IndexMaterialModifier));
+        builder.BlockTile(reader.GetInt32(IndexFrontTileId),
+            reader.GetInt32(IndexTopTileId));
     }
 
     /// <summary>

@@ -32,8 +32,7 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
     public ServerEntityBuilder(ulong entityId, bool load,
         EntityManager entityManager,
         KinematicsComponentCollection kinematics,
-        MaterialComponentCollection materials,
-        MaterialModifierComponentCollection materialModifiers,
+        BlockTileComponentCollection blockTiles,
         AboveBlockComponentCollection aboveBlocks,
         PlayerCharacterTagCollection playerCharacterTags,
         NameComponentCollection names,
@@ -52,8 +51,8 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         EntityTypeComponentCollection entityTypes,
         ServerOnlyTagCollection serverOnly,
         EntityTable entityTable)
-        : base(entityId, load, entityManager, kinematics, materials,
-            materialModifiers, aboveBlocks, playerCharacterTags, names, parents,
+        : base(entityId, load, entityManager, kinematics, blockTiles,
+            aboveBlocks, playerCharacterTags, names, parents,
             drawables, animatedSprites, orientations, admins, blockPositions, castBlockShadows, pointLightSources,
             physics, boundingBoxes, castShadows, entityTypes, serverOnly, entityTable)
     {

@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Hexa.NET.ImGui;
-using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Controls;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.EngineCore.Entities;
@@ -28,15 +27,17 @@ namespace Sovereign.ClientCore.Rendering.Gui;
 public class GuiComponentEditors
 {
     private readonly GuiExtensions guiExtensions;
-    private readonly MaterialManager materialManager;
-    private readonly MaterialSelectorPopup materialSelectorPopup;
+    private readonly TileSpriteManager tileSpriteManager;
+    private readonly TileSpriteSelectorPopup tileSpriteSelectorPopup;
 
-    public GuiComponentEditors(MaterialSelectorPopup materialSelectorPopup, GuiExtensions guiExtensions,
-        MaterialManager materialManager)
+    private PopupTarget popupTarget;
+
+    public GuiComponentEditors(GuiExtensions guiExtensions,
+        TileSpriteManager tileSpriteManager, TileSpriteSelectorPopup tileSpriteSelectorPopup)
     {
-        this.materialSelectorPopup = materialSelectorPopup;
         this.guiExtensions = guiExtensions;
-        this.materialManager = materialManager;
+        this.tileSpriteManager = tileSpriteManager;
+        this.tileSpriteSelectorPopup = tileSpriteSelectorPopup;
     }
 
     /// <summary>
@@ -52,59 +53,62 @@ public class GuiComponentEditors
     }
 
     /// <summary>
-    ///     Renders an input control for the Material and MaterialModifier components.
+    ///     Renders an input control for the BlockTile component.
     /// </summary>
-    /// <param name="material">Selected material ID.</param>
-    /// <param name="modifier">Selected material modifier.</param>
-    public void MaterialEdit(ref int material, ref int modifier)
+    /// <param name="frontTileId">Selected front face tile ID.</param>
+    /// <param name="topTileId">Selected top face tile ID.</param>
+    public void BlockTileEdit(ref int frontTileId, ref int topTileId)
     {
-        if (!ImGui.BeginTable("materialEditLayout", 5, ImGuiTableFlags.SizingFixedFit)) return;
+        if (!ImGui.BeginTable("blockTileEditLayout", 4, ImGuiTableFlags.SizingFixedFit)) return;
 
         // Clamp selection variables to limits.
-        if (material < 1 || material >= materialManager.Materials.Count)
-            material = 1;
+        if (frontTileId < 0 || frontTileId >= tileSpriteManager.TileSprites.Count)
+            frontTileId = 0;
 
-        if (modifier < 0 || modifier >= materialManager.Materials[material].MaterialSubtypes.Count)
-            modifier = 0;
-
-        var mat = materialManager.Materials[material];
+        if (topTileId < 0 || topTileId >= tileSpriteManager.TileSprites.Count)
+            topTileId = 0;
 
         ImGui.TableNextColumn();
-        ImGui.Text("Material:");
+        ImGui.Text("Front Tile Sprite:");
 
         ImGui.TableNextColumn();
-        ImGui.SetNextItemWidth(120.0f);
-        ImGui.InputInt("##matIntSelect", ref material);
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Modifier:");
-
-        ImGui.TableNextColumn();
-        ImGui.SetNextItemWidth(120.0f);
-        ImGui.InputInt("##matMod", ref modifier);
-
-        // Reclamp selection variables to limits in case something was modified.
-        if (material < 1 || material >= materialManager.Materials.Count)
-            material = 1;
-
-        if (modifier < 0 || modifier >= materialManager.Materials[material].MaterialSubtypes.Count)
-            modifier = 0;
-
-        ImGui.TableNextColumn();
-        var needToOpenPopup = guiExtensions.TileSpriteButton("##matButtonFront",
-            mat.MaterialSubtypes[modifier].SideFaceTileSpriteId, TileContextKey.AllWildcards);
-        ImGui.SameLine();
-        needToOpenPopup = needToOpenPopup || guiExtensions.TileSpriteButton("##matButtonTop",
-            mat.MaterialSubtypes[modifier].TopFaceTileSpriteId, TileContextKey.AllWildcards);
-
-        if (needToOpenPopup) materialSelectorPopup.Open();
-        materialSelectorPopup.Render();
-        if (materialSelectorPopup.TryGetSelection(out var newMaterial))
+        if (guiExtensions.TileSpriteButton("##tileButtonFront", frontTileId, TileContextKey.AllWildcards))
         {
-            material = newMaterial;
-            modifier = 0;
+            tileSpriteSelectorPopup.Open(false);
+            popupTarget = PopupTarget.FrontFace;
+        }
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Top Tile Sprite:");
+
+        ImGui.TableNextColumn();
+        if (guiExtensions.TileSpriteButton("##tileButtonTop", topTileId, TileContextKey.AllWildcards))
+        {
+            tileSpriteSelectorPopup.Open(false);
+            popupTarget = PopupTarget.TopFace;
+        }
+
+        tileSpriteSelectorPopup.Render();
+        if (tileSpriteSelectorPopup.TryGetSelection(out var newTileId))
+        {
+            switch (popupTarget)
+            {
+                case PopupTarget.FrontFace:
+                    frontTileId = newTileId;
+                    break;
+
+                case PopupTarget.TopFace:
+                    topTileId = newTileId;
+                    break;
+            }
         }
 
         ImGui.EndTable();
+    }
+
+    private enum PopupTarget
+    {
+        FrontFace,
+        TopFace
     }
 }

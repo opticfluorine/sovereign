@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2026 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,18 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Components.Types;
+using MessagePack;
+using Sovereign.EngineUtil.Attributes;
 
-namespace Sovereign.ClientCore.Components.Indexers;
+namespace Sovereign.EngineCore.Components.Types;
 
 /// <summary>
-///     Component filter that selects for block template entities.
+///     Component type that specifies tilings of a block.
 /// </summary>
-public class BlockTemplateEntityFilter : TemplateEntityComponentFilter<BlockTile>
+[MessagePackObject]
+[Scriptable]
+public struct BlockTile
 {
-    public BlockTemplateEntityFilter(BlockTileComponentCollection blockTiles) : base(blockTiles, blockTiles)
-    {
-    }
+    /// <summary>
+    ///     Tile sprite ID of the front face.
+    /// </summary>
+    [Key(0)]
+    [ScriptableField]
+    public int FrontFaceId { get; set; }
+
+    /// <summary>
+    ///     Tile sprite ID of the top face.
+    /// </summary>
+    [Key(1)]
+    [ScriptableField]
+    public int TopFaceId { get; set; }
 }

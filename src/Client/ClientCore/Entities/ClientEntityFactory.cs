@@ -30,6 +30,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly AdminTagCollection admins;
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockPositionComponentCollection blockPositions;
+    private readonly BlockTileComponentCollection blockTiles;
     private readonly BoundingBoxComponentCollection boundingBoxes;
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
@@ -39,8 +40,6 @@ public sealed class ClientEntityFactory : IEntityFactory
     private readonly EntityTable entityTable;
     private readonly EntityTypeComponentCollection entityTypes;
     private readonly KinematicsComponentCollection kinematics;
-    private readonly MaterialModifierComponentCollection materialModifiers;
-    private readonly MaterialComponentCollection materials;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
@@ -57,8 +56,7 @@ public sealed class ClientEntityFactory : IEntityFactory
     public ClientEntityFactory(EntityManager entityManager,
         KinematicsComponentCollection kinematics,
         DrawableComponentCollection drawables,
-        MaterialComponentCollection materials,
-        MaterialModifierComponentCollection materialModifiers,
+        BlockTileComponentCollection blockTiles,
         AboveBlockComponentCollection aboveBlocks,
         AnimatedSpriteComponentCollection animatedSprites,
         PlayerCharacterTagCollection playerCharacterTags,
@@ -79,8 +77,7 @@ public sealed class ClientEntityFactory : IEntityFactory
         this.entityManager = entityManager;
         this.kinematics = kinematics;
         this.drawables = drawables;
-        this.materials = materials;
-        this.materialModifiers = materialModifiers;
+        this.blockTiles = blockTiles;
         this.aboveBlocks = aboveBlocks;
         this.animatedSprites = animatedSprites;
         this.playerCharacterTags = playerCharacterTags;
@@ -113,8 +110,8 @@ public sealed class ClientEntityFactory : IEntityFactory
     public IEntityBuilder GetBuilder(ulong entityId, bool isLoad = false)
     {
         return new ClientEntityBuilder(entityId, isLoad,
-            entityManager, kinematics, drawables, materials,
-            materialModifiers, aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
+            entityManager, kinematics, drawables, blockTiles,
+            aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources,
             physics, boundingBoxes, castShadows, entityTypes, serverOnly, entityTable);
     }

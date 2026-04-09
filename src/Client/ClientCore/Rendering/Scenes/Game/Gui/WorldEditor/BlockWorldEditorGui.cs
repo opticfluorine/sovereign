@@ -16,7 +16,6 @@
 
 using Hexa.NET.ImGui;
 using Sovereign.ClientCore.Rendering.Gui;
-using Sovereign.ClientCore.Rendering.Materials;
 using Sovereign.ClientCore.Rendering.Scenes.Game.World;
 using Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 using Sovereign.ClientCore.Systems.ClientState;
@@ -30,9 +29,7 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.WorldEditor;
 public class BlockWorldEditorGui(
     NameComponentCollection names,
     ClientWorldEditServices worldEditServices,
-    MaterialComponentCollection materials,
-    MaterialModifierComponentCollection materialModifiers,
-    MaterialManager materialManager,
+    BlockTileComponentCollection blockTiles,
     GuiExtensions guiExtensions,
     ClientWorldEditController worldEditController,
     IEventSender eventSender,
@@ -81,14 +78,10 @@ public class BlockWorldEditorGui(
         var templateName = names.HasComponentForEntity(worldEditServices.BlockTemplateId)
             ? names[worldEditServices.BlockTemplateId]
             : "[no name]";
-        var templateMaterialId = materials[worldEditServices.BlockTemplateId];
-        var templateMaterialModifier = materialModifiers[worldEditServices.BlockTemplateId];
-
-        var material = materialManager.Materials[templateMaterialId];
-        var tile = material.MaterialSubtypes[templateMaterialModifier];
+        var blockTile = blockTiles[worldEditServices.BlockTemplateId];
 
         ImGui.TableNextColumn();
-        guiExtensions.TileSprite(tile.TopFaceTileSpriteId, TileContextKey.AllWildcards);
+        guiExtensions.TileSprite(blockTile.TopFaceId, TileContextKey.AllWildcards);
 
         ImGui.TableNextColumn();
         var relId = worldEditServices.BlockTemplateId - EntityConstants.FirstTemplateEntityId;

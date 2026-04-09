@@ -68,19 +68,20 @@ public class BlockServices : IBlockServices
 {
     private readonly BlockGridPositionIndexer blockGridPositionIndexer;
     private readonly BlockGridTracker blockGridTracker;
-    private readonly MaterialComponentCollection materials;
+    private readonly BlockTileComponentCollection blockTiles;
 
-    public BlockServices(MaterialComponentCollection materials, BlockGridPositionIndexer blockGridPositionIndexer,
+    public BlockServices(BlockTileComponentCollection blockTiles, BlockGridPositionIndexer blockGridPositionIndexer,
         BlockGridTracker blockGridTracker)
     {
-        this.materials = materials;
+        this.blockTiles = blockTiles;
         this.blockGridPositionIndexer = blockGridPositionIndexer;
         this.blockGridTracker = blockGridTracker;
     }
 
     public bool IsEntityBlock(ulong entityId, bool lookback = false)
     {
-        return materials.HasComponentForEntity(entityId, lookback) || materials.HasPendingComponentForEntity(entityId);
+        return blockTiles.HasComponentForEntity(entityId, lookback) ||
+               blockTiles.HasPendingComponentForEntity(entityId);
     }
 
     public bool BlockExistsAtPosition(GridPosition blockPosition)

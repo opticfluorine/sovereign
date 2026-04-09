@@ -16,24 +16,26 @@
  */
 
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.Persistence.Entities;
 
 namespace Sovereign.Persistence.State.Trackers;
 
 /// <summary>
-///     Persistence state tracker for MaterialModifier components.
+///     Persistence state tracker for BlockTile components.
 /// </summary>
-public sealed class MaterialModifierStateTracker : BaseStateTracker<int>
+public sealed class BlockTileStateTracker : BaseStateTracker<BlockTile>
 {
-    public MaterialModifierStateTracker(MaterialModifierComponentCollection materialModifiers,
-        StateManager stateManager, EntityTable entityTable, ExistingEntitySet existingEntitySet)
-        : base(materialModifiers, 0, existingEntitySet, stateManager, entityTable)
+    public BlockTileStateTracker(BlockTileComponentCollection blockTiles,
+        ExistingEntitySet existingEntitySet, StateManager stateManager, EntityTable entityTable)
+        : base(blockTiles, new BlockTile { FrontFaceId = 0, TopFaceId = 0 }, existingEntitySet, stateManager,
+            entityTable)
     {
     }
 
-    protected override void OnStateUpdate(ref StateUpdate<int> update)
+    protected override void OnStateUpdate(ref StateUpdate<BlockTile> update)
     {
-        stateManager.FrontBuffer.UpdateMaterialModifier(ref update);
+        stateManager.FrontBuffer.UpdateBlockTile(ref update);
     }
 }
