@@ -41,11 +41,6 @@ public class SpriteSelectorPopup
     private readonly SpriteManager spriteManager;
     private readonly SpriteSheetManager spriteSheetManager;
 
-    /// <summary>
-    ///     Popup base position.
-    /// </summary>
-    private Vector2 basePos;
-
     private string currentId = string.Empty;
 
     private string currentPrompt = string.Empty;
@@ -99,7 +94,6 @@ public class SpriteSelectorPopup
     {
         isSelected = false;
         selection = 0;
-        basePos = ImGui.GetMousePos();
         currentId = id;
         currentPrompt = prompt;
 
@@ -172,14 +166,9 @@ public class SpriteSelectorPopup
     /// </summary>
     private void DrawSpritesheetView()
     {
-        // Wrap the view in a single-cell table to get scrollbars for larger spritesheets.
-        var screenSize = ImGui.GetIO().DisplaySize;
-        var maxSize = new Vector2(screenSize.X - basePos.X - 16, screenSize.Y - basePos.Y - 128);
-        var realSize = new Vector2(Math.Min(preferredSize.X, maxSize.X), Math.Min(preferredSize.Y, maxSize.Y));
-
         DrawZoomControls();
 
-        if (ImGui.BeginTable("spriteSelectorView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, realSize))
+        if (ImGui.BeginTable("spriteSelectorView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, preferredSize))
         {
             var zoom = 1.0f - zoomStep * 0.1f;
 

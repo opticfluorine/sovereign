@@ -8,6 +8,7 @@
 
 * Fix bug in tile sprite editor where the wrong tile contexts were edited in the normal editor state.
 * Push some documentation updates that were missed in the 9 April commit.
+* Fix sizing of resource selector popups opened near the edge of the screen.
 
 #### 9 April 2026
 

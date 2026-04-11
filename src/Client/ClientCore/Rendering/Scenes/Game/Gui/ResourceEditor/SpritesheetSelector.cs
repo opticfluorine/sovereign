@@ -113,13 +113,7 @@ public class SpritesheetSelector
     {
         var fontSize = ImGui.GetFontSize();
 
-        // Wrap the view in a single-cell table to get scrollbars for larger spritesheets.
-        var screenSize = ImGui.GetIO().DisplaySize;
-        var basePos = ImGui.GetCursorPos();
-        var maxSize = new Vector2(screenSize.X - basePos.X - 16, screenSize.Y - basePos.Y - 128);
-        var realSize = new Vector2(Math.Min(preferredSize.X, maxSize.X), Math.Min(preferredSize.Y, maxSize.Y));
-
-        if (ImGui.BeginTable("spriteSelectorView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, realSize))
+        if (ImGui.BeginTable("spriteSelectorView", 1, ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY, preferredSize))
         {
             ImGui.TableNextColumn();
             var sheetName = orderedSpriteSheets[currentSheetIdx];
