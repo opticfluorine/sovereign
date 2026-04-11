@@ -17,13 +17,12 @@ Each component collection that is accessible through the scripting engine may be
 |`components.admin`             |`AdminTagCollection`                 |`boolean`     |
 |`components.animated_sprite`   |`AnimatedSpriteComponentCollection`  |`integer`     |
 |`components.block_position`    |`BlockPositionComponentCollection`   |`GridPosition`|
+|`components.block_tile`        |`BlockTileComponentCollection`       |`BlockTile`   |
 |`components.cast_block_shadows`|`CastBlockShadowsTagCollection`      |`boolean`     |
 |`components.cast_shadows`      |`CastShadowsComponentCollection`     |`Shadow`      |
 |`components.drawable`          |`DrawableComponentCollection`        |`Vector2`     |
 |`components.entity_type`       |`EntityTypeComponentCollection`      |`EntityType`  |
 |`components.kinematics`        |`KinematicsComponentCollection`      |`Kinematics`  |
-|`components.material`          |`MaterialComponentCollection`        |`integer`     |
-|`components.material_modifier` |`MaterialModifierComponentCollection`|`integer`     |
 |`components.name`              |`NameComponentCollection`            |`string`      |
 |`components.orientation`       |`OrientationComponentCollection`     |`integer`     |
 |`components.parent`            |`ParentComponentCollection`          |`integer`     |

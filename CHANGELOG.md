@@ -4,6 +4,11 @@
 
 ### April
 
+#### 11 April 2026
+
+* Fix bug in tile sprite editor where the wrong tile contexts were edited in the normal editor state.
+* Push some documentation updates that were missed in the 9 April commit.
+
 #### 9 April 2026
 
 * Removed "Material" resources and replaced them with the `BlockTile` component. Block templates now specify their tilings directly through the `BlockTile` component.

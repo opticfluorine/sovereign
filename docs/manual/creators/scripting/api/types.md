@@ -8,6 +8,23 @@ The scripting engine uses Lua tables with specific entries to communicate inform
 :depth: 2
 :::
 
+(script-types-blocktile)=
+## BlockTile
+
+```{eval-rst}
+.. lua:class:: BlockTile
+
+    Specifies the tile sprites applied to a block entity.
+
+    .. lua:attribute:: FrontFaceId: int
+
+        Tile sprite ID applied to the front face of the block.
+
+    .. lua:attribute:: TopFaceId: int
+
+        Tile sprite ID applied to the top face of the block.
+```
+
 (script-types-boundingbox)=
 ## BoundingBox
 

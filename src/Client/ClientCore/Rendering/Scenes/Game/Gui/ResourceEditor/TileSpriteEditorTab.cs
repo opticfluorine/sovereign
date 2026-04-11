@@ -358,7 +358,7 @@ public class TileSpriteEditorTab
             var layers = editingState switch
             {
                 TileState.Obscured => editingSprite.TileContexts[editingRow].ObscuredAnimatedSpriteIds,
-                _ => editingSprite.TileContexts[editingCol].AnimatedSpriteIds
+                _ => editingSprite.TileContexts[editingRow].AnimatedSpriteIds
             };
             layers[editingCol] = selectedId;
         }
