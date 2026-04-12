@@ -145,7 +145,7 @@ public sealed class TileContext
                + (NortheastTileSpriteId == TileSprite.Wildcard ? 1 : 0)
                + (SoutheastTileSpriteId == TileSprite.Wildcard ? 1 : 0)
                + (SouthwestTileSpriteId == TileSprite.Wildcard ? 1 : 0)
-               + (NortheastTileSpriteId == TileSprite.Wildcard ? 1 : 0);
+               + (NorthwestTileSpriteId == TileSprite.Wildcard ? 1 : 0);
     }
 
     /// <summary>

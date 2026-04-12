@@ -4,6 +4,10 @@
 
 ### April
 
+#### 12 April 2026
+
+* Fix bug where tile contexts were not sorted by wildcard count correctly.
+
 #### 11 April 2026
 
 * Fix bug in tile sprite editor where the wrong tile contexts were edited in the normal editor state.
