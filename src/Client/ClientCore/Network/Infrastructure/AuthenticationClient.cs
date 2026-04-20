@@ -111,6 +111,13 @@ public sealed class AuthenticationClient
                     result = new Option<LoginResponse, string>(invalidRequest);
                     break;
 
+                case HttpStatusCode.ServiceUnavailable:
+                    // Failed: Server is full.
+                    const string serverFull = "Login failed: Server is full. Please try again later.";
+                    logger.LogError(serverFull);
+                    result = new Option<LoginResponse, string>(serverFull);
+                    break;
+
                 case HttpStatusCode.InternalServerError:
                     // Failed: Server error.
                     const string serverError = "Login failed: server error.";

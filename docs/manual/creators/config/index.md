@@ -59,6 +59,7 @@ interpolating the two steps around the point in time.
 - **Port**: The port number for the event server.
 - **RestHostname**: The hostname for the REST API server.
 - **RestPort**: The port number for the REST API server.
+- **MaxConnections**: The maximum number of concurrent connections. 0 indicates no limit.
 - **PingIntervalMs**: The interval in milliseconds for sending ping messages.
 - **ConnectionTimeoutMs**: The timeout in milliseconds for client connections.
 - **EntitySyncBatchSize**: The batch size for entity synchronization. Larger batches have less overhead per batch but may be more likely to be dropped (especially on low-MTU networks).

@@ -116,6 +116,11 @@ public sealed class NetworkOptions
     public ushort RestPort { get; set; } = 8080;
 
     /// <summary>
+    ///     Maximum number of concurrent connections. 0 indicates no limit.
+    /// </summary>
+    public uint MaxConnections { get; set; } = 0;
+
+    /// <summary>
     ///     Automatic ping interval, in milliseconds.
     /// </summary>
     public uint PingIntervalMs { get; set; } = 10000;
