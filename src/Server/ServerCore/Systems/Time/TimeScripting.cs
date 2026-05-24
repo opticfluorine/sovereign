@@ -15,16 +15,30 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Systems.Time;
+using Sovereign.EngineCore.Timing;
 using Sovereign.EngineUtil.Attributes;
+using Sovereign.EngineUtil.Numerics;
 
 namespace Sovereign.ServerCore.Systems.Time;
 
 /// <summary>
-///     Provides the "time" Lua module for reading the game clock.
+///     Provides the "time" Lua module for reading the game clock and system clock.
 /// </summary>
 [ScriptableLibrary("time")]
-public class TimeScripting(ITimeServices timeServices)
+public class TimeScripting(ITimeServices timeServices, ISystemTimer systemTimer)
 {
+    [ScriptableFunction("GetSystemTime")]
+    public ulong GetSystemTime()
+    {
+        return systemTimer.GetTime();
+    }
+
+    [ScriptableFunction("FutureSystemTime")]
+    public ulong FutureSystemTime(float delaySeconds)
+    {
+        return systemTimer.GetTime() + (ulong)(UnitConversions.SToUs * delaySeconds);
+    }
+
     [ScriptableFunction("GetAbsoluteTime")]
     public uint GetAbsoluteTime()
     {

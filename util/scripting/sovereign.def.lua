@@ -691,6 +691,12 @@ end
 function scripting.AddTimedCallback(delaySeconds, callback, argument)
 end
 
+function scripting.AddCollisionCallback(entityId, callback)
+end
+
+function scripting.RemoveCollisionCallback(entityId, callbackHandle)
+end
+
 ---Adds an entity parameter hint for the named callback function. A parameter hint is the name of a key in the entity key-value store that is referenced by the given callback function. Registering a parameter hint allows the editor GUIs to prompt the creator to specify a value for the parameter when binding the callback to an entity or template entity.
 ---@param functionName string Callback function name.
 ---@param parameterName string Parameter name.
@@ -707,6 +713,17 @@ end
 
 ---@class time
 time = {}
+
+---Gets the system time in microseconds since an arbitrary reference point.
+---@return integer systemTime System time in microseconds.
+function time.GetSystemTime()
+end
+
+---Gets a system time (in microseconds) delaySeconds seconds in the future.
+---@param delaySeconds number Seconds to add to the current system time.
+---@return integer futureTime Future time in microseconds.
+function time.FutureSystemTime(delaySeconds)
+end
 
 ---Gets the absolute time in the game world measured in seconds since the game started.
 ---@return integer absoluteTime Absolute time.

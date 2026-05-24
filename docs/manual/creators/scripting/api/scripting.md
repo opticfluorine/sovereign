@@ -70,6 +70,61 @@ end
 scripting.AddTimedCallback(1.0, on_timer, 0)
 ```
 
+### AddCollisionCallback(entityId, callback)
+
+```{eval-rst}
+.. lua:function:: scripting.AddCollisionCallback(entityId, callback)
+
+   Registers a callback that is called whenever the given entity collides with another object (either a block or non-block entity). The callback will be called whenever the entity stops moving as a result of collision; it is not called if the entity is not moving and another object collides with it.
+
+   :param entityId: Entity ID to listen for collisions on.
+   :type entityId: number
+   :param callback: Callback function, which may accept the entity ID as its first argument.
+   :type callback: function
+   
+   :return: Callback handle (needed for removing the callback later).
+   :rtype: number
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Adding an entity collision callback using `scripting.AddCollisionCallback(entityId, callback)`.
+:emphasize_lines: 5
+function on_collision(entityId)
+    -- ...
+end
+
+local collisionHandle = scripting.AddCollisionCallback(entityId, on_collision)
+```
+
+### RemoveCollisionCallback(entityId, callbackHandle)
+
+```{eval-rst}
+.. lua:function:: scripting.RemoveCollisionCallback(entityId, callbackHandle)
+   
+   Removes a collision callback that was previously registered by the same script. If no such callback is found, this function logs an error and otherwise does nothing.
+
+   :param entityId: Entity ID on which the callback was registered.
+   :type entityId: number
+   :param callbackHandle: Callback handle returned by the corresponding call to `scripting.AddCollisionCallback(entityId, callback)`.
+   :type callbacHanle: number
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Removing an entity collision callback using `scripting.RemoveCollisionCallback(entityId, callbackHandle)`.
+:emphasize_lines: 7
+function on_collision(entityId)
+    -- ...
+end
+
+local collisionHandle = scripting.AddCollisionCallback(entityId, on_collision)
+-- ...
+scripting.RemoveCollisionCallback(entityId, collisionHandle)
+```
+
 ### AddEntityParameterHint(callbackFunctionName, parameterName, type, tooltip)
 
 ```{eval-rst}

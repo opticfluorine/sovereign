@@ -32,6 +32,7 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 internal class ScriptingSystem : ISystem
 {
     private readonly ScriptingCallbackManager callbackManager;
+    private readonly EntityCallbacks entityCallbacks;
     private readonly EntityScriptCallbacks entityScriptCallbacks;
     private readonly ILogger<ScriptingSystem> logger;
     private readonly ScriptManager manager;
@@ -40,7 +41,8 @@ internal class ScriptingSystem : ISystem
 
     public ScriptingSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, ScriptManager manager,
         ScriptingCallbackManager callbackManager, ScriptLoader scriptLoader, ILogger<ScriptingSystem> logger,
-        EntityScriptCallbacks entityScriptCallbacks, ITimedCallbackRunner timedCallbackRunner)
+        EntityScriptCallbacks entityScriptCallbacks, ITimedCallbackRunner timedCallbackRunner,
+        EntityCallbacks entityCallbacks)
     {
         this.manager = manager;
         this.callbackManager = callbackManager;
@@ -48,6 +50,7 @@ internal class ScriptingSystem : ISystem
         this.logger = logger;
         this.entityScriptCallbacks = entityScriptCallbacks;
         this.timedCallbackRunner = timedCallbackRunner;
+        this.entityCallbacks = entityCallbacks;
         EventCommunicator = eventCommunicator;
 
         EventIdsOfInterest = new HashSet<EventId>(ScriptableEventSet.Events);
@@ -56,7 +59,9 @@ internal class ScriptingSystem : ISystem
             EventId.Server_Scripting_Reload,
             EventId.Server_Scripting_LoadNew,
             EventId.Server_Scripting_TimedCallback,
-            EventId.Core_Tick
+            EventId.Core_Tick,
+            EventId.Core_Movement_EntityCollision,
+            EventId.Core_Movement_ScheduledStop
         ]);
 
         eventLoop.RegisterSystem(this);
@@ -118,6 +123,30 @@ internal class ScriptingSystem : ISystem
                     }
 
                     OnTimedCallback(details.LuaState, details.CallbackReference, details.ArgumentReference);
+                    break;
+                }
+
+                case EventId.Core_Movement_EntityCollision:
+                {
+                    if (ev.EventDetails is not EntityEventDetails details)
+                    {
+                        logger.LogError("Received EntityCollision event without details.");
+                        break;
+                    }
+
+                    entityCallbacks.Collisions.OnEvent(details.EntityId);
+                    break;
+                }
+
+                case EventId.Core_Movement_ScheduledStop:
+                {
+                    if (ev.EventDetails is not EntityEventDetails details)
+                    {
+                        logger.LogError("Received EntityCollision event without details.");
+                        break;
+                    }
+
+                    entityCallbacks.ScheduledStops.OnEvent(details.EntityId);
                     break;
                 }
 

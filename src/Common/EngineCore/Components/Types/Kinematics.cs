@@ -34,4 +34,9 @@ public struct Kinematics
     ///     Velocity in tiles per second.
     /// </summary>
     [ScriptableField] public Vector3 Velocity;
+
+    /// <summary>
+    ///     If non-zero, specifies the system time at which motion should stop.
+    /// </summary>
+    [ScriptableField] public ulong StopSystemTime;
 }

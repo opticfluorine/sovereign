@@ -136,7 +136,10 @@ public static class ComponentOperators
         KinematicsOperators = new()
         {
             { ComponentOperation.Set, (_, b) => b },
-            { ComponentOperation.SetVelocity, (a, b) => a with { Velocity = b.Velocity } },
+            {
+                ComponentOperation.SetVelocity,
+                (a, b) => a with { Velocity = b.Velocity, StopSystemTime = b.StopSystemTime }
+            },
             { ComponentOperation.AddPosition, (a, b) => a with { Position = a.Position + b.Position } }
         };
 

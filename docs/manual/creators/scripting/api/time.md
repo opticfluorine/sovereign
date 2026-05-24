@@ -34,6 +34,49 @@ All numeric time values start at zero (e.g. `GetMonthOfYear` runs from
 
 ## Time Functions
 
+### GetSystemTime()
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: time.GetSystemTime()
+
+   Gets the current system time in microseconds since an arbitrary reference point.
+   
+   :return: System time in microseconds.
+   :rtype: integer
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Getting the system time using time.GetSystemTime.
+:emphasize-lines: 1
+local systemTime = time.GetSystemTime()
+```
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: time.FutureSystemTime(delaySeconds)
+
+   Gets a future system time in microseconds since an arbitrary reference point.
+   
+   :param delaySeconds: Time in seconds to add to the current system time.
+   :type delaySeconds: number
+   
+   :return: Future system time in microseconds.
+   :rtype: integer
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Getting a future system time using time.FutureSystemTime.
+:emphasize-lines: 1
+local futureTime = time.FutureSystemTime(1.0) -- system time 1 second in the future
+```
+
 ### GetAbsoluteTime()
 
 #### Definition

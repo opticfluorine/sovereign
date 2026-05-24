@@ -29,7 +29,14 @@ namespace Sovereign.EngineCore.Systems.Movement;
 /// <summary>
 ///     Detects and handles collisions between physics-enabled entities and blocks.
 /// </summary>
-public class PhysicsProcessor
+public class PhysicsProcessor(
+    CollisionMeshManager meshManager,
+    KinematicsComponentCollection kinematics,
+    BoundingBoxComponentCollection boundingBoxes,
+    WorldSegmentResolver resolver,
+    ILogger<PhysicsProcessor> logger,
+    NonBlockCollisionMeshes nonBlockCollisionMeshes,
+    MovementInternalController internalController)
 {
     /// <summary>
     ///     Maximum number of collision passes per entity before collision resolution is abandoned.
@@ -59,27 +66,10 @@ public class PhysicsProcessor
 
     private readonly List<List<BoundingBox>> activeMeshes = [];
     private readonly HashSet<GridPosition> activeWorldSegments = new();
-    private readonly BoundingBoxComponentCollection boundingBoxes;
-    private readonly KinematicsComponentCollection kinematics;
-    private readonly ILogger<PhysicsProcessor> logger;
-    private readonly CollisionMeshManager meshManager;
-    private readonly NonBlockCollisionMeshes nonBlockCollisionMeshes;
+    private readonly List<ulong> collidedEntities = [];
     private readonly Queue<Tuple<ulong, GridPosition>> pendingWorldSegments = new();
-    private readonly WorldSegmentResolver resolver;
 
     private ulong tickCount;
-
-    public PhysicsProcessor(CollisionMeshManager meshManager, KinematicsComponentCollection kinematics,
-        BoundingBoxComponentCollection boundingBoxes, WorldSegmentResolver resolver, ILogger<PhysicsProcessor> logger,
-        NonBlockCollisionMeshes nonBlockCollisionMeshes)
-    {
-        this.meshManager = meshManager;
-        this.kinematics = kinematics;
-        this.boundingBoxes = boundingBoxes;
-        this.resolver = resolver;
-        this.logger = logger;
-        this.nonBlockCollisionMeshes = nonBlockCollisionMeshes;
-    }
 
     /// <summary>
     ///     Called when a world segment has been loaded.
@@ -111,6 +101,14 @@ public class PhysicsProcessor
             activeWorldSegments.Add(segmentInfo.Item2);
             pendingWorldSegments.Dequeue();
         }
+
+        // Announce any collisions that occured in the previous tick.
+        foreach (var collidedEntityId in collidedEntities)
+        {
+            internalController.NotifyEntityCollision(collidedEntityId);
+        }
+
+        collidedEntities.Clear();
     }
 
     /// <summary>
@@ -141,6 +139,7 @@ public class PhysicsProcessor
 
         var passes = 0;
         var changed = true;
+        var collisionRecorded = false;
         while (changed && passes < MaxCollisionPasses)
         {
             passes++;
@@ -150,6 +149,11 @@ public class PhysicsProcessor
             SelectActiveMeshes(entityMesh);
 
             changed = HandleCollisions(kinematicsIndex, entityMesh, posVel, entityId, out isSupportedBelow);
+            if (changed && !collisionRecorded)
+            {
+                collidedEntities.Add(entityId);
+                collisionRecorded = true;
+            }
         }
 
         if (changed)

@@ -80,6 +80,18 @@ public enum EventId
     /// Associated details:
     Core_Movement_TeleportNotice = 104,
 
+    /// <summary>
+    ///     Announces that an entity has experienced a physics collision.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Core_Movement_EntityCollision = 105,
+
+    /// <summary>
+    ///     Sent when an entity stops its motion based on a scheduled time.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Core_Movement_ScheduledStop = 106,
+
     #endregion Movement
 
     #region Blocks

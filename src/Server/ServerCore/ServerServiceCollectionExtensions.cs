@@ -202,6 +202,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<ScriptLoader>();
         services.TryAddSingleton<ScriptManager>();
         services.TryAddSingleton<ScriptingCallbackManager>();
+        services.TryAddSingleton<EntityCallbacks>();
         services.TryAddSingleton<ScriptingServices>();
         services.TryAddSingleton<ScriptingController>();
         services.TryAddSingleton<EntityScriptCallbacks>();

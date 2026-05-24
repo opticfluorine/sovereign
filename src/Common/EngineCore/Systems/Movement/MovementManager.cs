@@ -300,11 +300,26 @@ public class MovementManager
         {
             if (!kinematics.TryGetEntityForIndex(i, out var entityId)) continue;
 
+            var curKinematics = componentList[i];
             if (componentList[i].Velocity != Vector3.Zero)
             {
                 // Using + instead of += shows a ~ 6.6% speedup with Release builds in EcsBenchmark.
                 componentList[i].Position = componentList[i].Position + delta * componentList[i].Velocity;
                 modifiedIndices[directMods++] = i;
+
+                // Roll back the entity's movement to the scheduled stop time if needed.
+                if (componentList[i].StopSystemTime > 0 && componentList[i].StopSystemTime <= currentSystemTime)
+                {
+                    var dt = componentList[i].StopSystemTime - currentSystemTime;
+                    componentList[i].Position =
+                        componentList[i].Position - dt * componentList[i].Velocity * UnitConversions.UsToS;
+
+                    // Stop motion in the XY plane (leave Z motion for gravity/jumping/etc.)
+                    componentList[i].Velocity.X = 0.0f;
+                    componentList[i].Velocity.Y = 0.0f;
+                    componentList[i].StopSystemTime = 0;
+                    internalController.NotifyScheduledStop(entityId);
+                }
 
                 // If the entity falls below the global Z cutoff, flag for later culling and stop processing.
                 if (componentList[i].Position.Z < minZ)

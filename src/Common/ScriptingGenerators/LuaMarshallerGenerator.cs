@@ -376,8 +376,9 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     var dataModel = record.DataModels.List[i];
                     sb.Append($@"
                     {{
-                        lua_getfield(luaState, -1, ""{dataModel.Name}"");
-                        Unmarshal(luaState, out {dataModel.NativeType} tval);
+                        {dataModel.NativeType} tval = default;
+                        var lt = lua_getfield(luaState, -1, ""{dataModel.Name}"");
+                        if (lt != LuaType.Nil) Unmarshal(luaState, out tval);
                         tmp.{dataModel.Name} = tval;
                     }}
                 ");

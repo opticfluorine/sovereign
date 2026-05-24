@@ -46,27 +46,16 @@ internal interface ITimedCallbackRunner
 /// <summary>
 ///     Lua library that provides support for registering callbacks with the scripting system.
 /// </summary>
-public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
+public class ScriptingLuaLibrary(
+    ScriptingCallbackManager callbackManager,
+    ILogger<ScriptingLuaLibrary> logger,
+    ScriptManager scriptManager,
+    IEventSender eventSender,
+    ScriptingServices scriptingServices,
+    ISystemTimer systemTimer,
+    EntityCallbacks entityCallbacks)
+    : ILuaLibrary, ITimedCallbackRunner
 {
-    private readonly ScriptingCallbackManager callbackManager;
-    private readonly IEventSender eventSender;
-    private readonly ILogger<ScriptingLuaLibrary> logger;
-    private readonly ScriptingServices scriptingServices;
-    private readonly ScriptManager scriptManager;
-    private readonly ISystemTimer systemTimer;
-
-    public ScriptingLuaLibrary(ScriptingCallbackManager callbackManager, ILogger<ScriptingLuaLibrary> logger,
-        ScriptManager scriptManager, IEventSender eventSender, ScriptingServices scriptingServices,
-        ISystemTimer systemTimer)
-    {
-        this.callbackManager = callbackManager;
-        this.logger = logger;
-        this.scriptManager = scriptManager;
-        this.eventSender = eventSender;
-        this.scriptingServices = scriptingServices;
-        this.systemTimer = systemTimer;
-    }
-
     public void Install(LuaHost luaHost)
     {
         try
@@ -74,6 +63,10 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
             luaHost.BeginLibrary("scripting");
             luaHost.AddLibraryFunction(nameof(AddEventCallback), AddEventCallback);
             luaHost.AddLibraryFunction(nameof(AddTimedCallback), AddTimedCallback);
+            luaHost.AddLibraryFunction(nameof(AddCollisionCallback), AddCollisionCallback);
+            luaHost.AddLibraryFunction(nameof(RemoveCollisionCallback), RemoveCollisionCallback);
+            luaHost.AddLibraryFunction(nameof(AddScheduledStopCallback), AddScheduledStopCallback);
+            luaHost.AddLibraryFunction(nameof(RemoveScheduledStopCallback), RemoveScheduledStopCallback);
             luaHost.AddLibraryFunction(nameof(AddEntityParameterHint), AddEntityParameterHint);
         }
         finally
@@ -249,6 +242,58 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
     }
 
     /// <summary>
+    ///     Registers an entity collision callback with the scripting engine.
+    /// </summary>
+    /// <remarks>
+    ///     Lua usage: handle = AddCollisionCallback(entityId, callback)
+    /// </remarks>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of results.</returns>
+    private int AddCollisionCallback(IntPtr luaState)
+    {
+        return DoAddEntityCallback(luaState, nameof(AddCollisionCallback), entityCallbacks.Collisions);
+    }
+
+    /// <summary>
+    ///     Unregisters an entity collision callback with the scripting engine.
+    /// </summary>
+    /// <remarks>
+    ///     Lua usage: RemoveCollisionCallback(entityId, callbackHandle)
+    /// </remarks>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int RemoveCollisionCallback(IntPtr luaState)
+    {
+        return DoRemoveEntityCallback(luaState, nameof(RemoveCollisionCallback), entityCallbacks.Collisions);
+    }
+
+    /// <summary>
+    ///     Registers a scheduled stop callback with the scripting engine.
+    /// </summary>
+    /// <remarks>
+    ///     Lua usage: AddScheduledStopCallback(entityId, callback)
+    /// </remarks>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of return values.</returns>
+    private int AddScheduledStopCallback(IntPtr luaState)
+    {
+        return DoAddEntityCallback(luaState, nameof(AddCollisionCallback), entityCallbacks.ScheduledStops);
+    }
+
+    /// <summary>
+    ///     Unregisters a scheduled stop callback with the scripting engine.
+    /// </summary>
+    /// <remarks>
+    ///     Lua usage: RemoveScheduledStopCallback(entityId, callbackHandle)
+    /// </remarks>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always 0.</returns>
+    private int RemoveScheduledStopCallback(IntPtr luaState)
+    {
+        return DoRemoveEntityCallback(luaState, nameof(RemoveScheduledStopCallback), entityCallbacks.ScheduledStops);
+    }
+
+    /// <summary>
     ///     Lua function that adds an entity parameter hint for a function.
     /// </summary>
     /// <param name="luaState">Lua state.</param>
@@ -300,6 +345,111 @@ public class ScriptingLuaLibrary : ILuaLibrary, ITimedCallbackRunner
         {
             scriptingServices.GetScriptLogger(mainState, logger)
                 .LogError(e, "Error in AddEntityParameterHint.");
+        }
+
+        return 0;
+    }
+
+    /// <summary>
+    ///     Adds an entity callback.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="luaFunctionName">Lua function name to use for errors.</param>
+    /// <param name="cbMgr">Specific entity callback manager.</param>
+    /// <returns>Number of return values pushed onto the Lua stack.</returns>
+    private int DoAddEntityCallback(IntPtr luaState, string luaFunctionName, EntityCallbackManager cbMgr)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        if (!scriptManager.TryGetHost(mainState, out var luaHost))
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError("No Lua host found for {LuaFunctionName}.", luaFunctionName);
+            return 0;
+        }
+
+        try
+        {
+            if (lua_gettop(luaState) != 2)
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("{LuaFunctionName} takes two arguments.", luaFunctionName);
+                return 0;
+            }
+
+            if (!lua_isinteger(luaState, -2))
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("Argument 1 to {LuaFunctionName} must be an integer.", luaFunctionName);
+                return 0;
+            }
+
+            if (lua_isfunction(luaState, -1))
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("Argument 2 to {LuaFunctionName} must be a Lua function.", luaFunctionName);
+                return 0;
+            }
+
+            var entityId = (ulong)lua_tointeger(luaState, -2);
+            var refIndex = luaL_ref(luaState, -1);
+
+            cbMgr.AddCallback(luaHost, entityId, refIndex);
+
+            // Return the reference index as a handle to the registered callback.
+            luaL_checkstack(luaState, 1, null);
+            lua_pushinteger(luaState, refIndex);
+            return 1;
+        }
+        catch (Exception e)
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError(e, "Error in {LuaFunctionName}.", luaFunctionName);
+            return 0;
+        }
+    }
+
+    /// <summary>
+    ///     Removes an entity callback.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="functionName">Function name for error reporting.</param>
+    /// <param name="cbMgr">Specific callback manager.</param>
+    /// <returns>Number of return values pushed onto the Lua stack.</returns>
+    private int DoRemoveEntityCallback(IntPtr luaState, string functionName, EntityCallbackManager cbMgr)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        if (!scriptManager.TryGetHost(mainState, out var luaHost))
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError("No Lua host found for {FunctionName}.", functionName);
+            return 0;
+        }
+
+        try
+        {
+            if (lua_gettop(luaState) != 2)
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("{FunctionName} takes two arguments.", functionName);
+                return 0;
+            }
+
+            if (!lua_isinteger(luaState, -1) || !lua_isinteger(luaState, -2))
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("{FunctionName} requires integer arguments.", functionName);
+                return 0;
+            }
+
+            var entityId = (ulong)lua_tointeger(luaState, -2);
+            var refIndex = (int)lua_tointeger(luaState, -1);
+
+            cbMgr.RemoveCallback(luaHost, entityId, refIndex);
+        }
+        catch (Exception e)
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError(e, "Error in {FunctionName}.", functionName);
         }
 
         return 0;

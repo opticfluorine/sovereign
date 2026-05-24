@@ -251,6 +251,33 @@ public class LuaHost : IDisposable
     }
 
     /// <summary>
+    ///     Calls a no-argument callback function that was pushed into the Lua registry as a Lua reference.
+    /// </summary>
+    /// <param name="refIndex">Reference index in the Lua registry.</param>
+    public void CallRefFunction(int refIndex)
+    {
+        lock (opsLock)
+        {
+            DoRefFunctionCall(refIndex, 0);
+        }
+    }
+
+    /// <summary>
+    ///     Calls a one-argument callback function that was pushed into the Lua registry as a Lua reference.
+    /// </summary>
+    /// <param name="refIndex">Reference index in the Lua registry.</param>
+    /// <param name="arg">Argument.</param>
+    public void CallRefFunction(int refIndex, long arg)
+    {
+        lock (opsLock)
+        {
+            luaL_checkstack(LuaState, 1, null);
+            lua_pushinteger(LuaState, arg);
+            DoRefFunctionCall(refIndex, 1);
+        }
+    }
+
+    /// <summary>
     ///     Calls a named function in the script.
     /// </summary>
     /// <param name="functionName">Function name.</param>
@@ -362,6 +389,27 @@ public class LuaHost : IDisposable
             hints.Add(new EntityParameterHint { Name = parameterName, Type = type, Tooltip = tooltip });
         }
     }
+
+    /// <summary>
+    ///     Calls a reference callback with the given number of arguments already pushed onto the Lua stack.
+    /// </summary>
+    /// <param name="refIndex">Reference index.</param>
+    /// <param name="argCount">Argument count.</param>
+    private void DoRefFunctionCall(int refIndex, int argCount)
+    {
+        // Attempt retrieval of callback function from Lua reference table.
+        luaL_checkstack(LuaState, 2, null);
+        var refType = lua_rawgeti(LuaState, LUA_REGISTRYINDEX, refIndex);
+
+        if (refType != LuaType.Function)
+        {
+            Logger.LogError("Callback reference is not a Lua function.");
+            return;
+        }
+
+        Validate(lua_pcall(LuaState, argCount, 0, tracebackStackPosition));
+    }
+
 
     /// <summary>
     ///     Configures package.path to support loading packages from the Data/Packages directory.

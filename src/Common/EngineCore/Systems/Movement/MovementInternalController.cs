@@ -73,4 +73,32 @@ public class MovementInternalController
         var ev = new Event(EventId.Core_Movement_TeleportNotice, details);
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Announces that the given entity has experienced a physics collision.
+    /// </summary>
+    /// <param name="entityId">Collided entity ID.</param>
+    public void NotifyEntityCollision(ulong entityId)
+    {
+        var details = new EntityEventDetails
+        {
+            EntityId = entityId
+        };
+        var ev = new Event(EventId.Core_Movement_EntityCollision, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Announces that the given entity has stopped due to a scheduled time.
+    /// </summary>
+    /// <param name="entityId">Stopped entity ID.</param>
+    public void NotifyScheduledStop(ulong entityId)
+    {
+        var details = new EntityEventDetails
+        {
+            EntityId = entityId
+        };
+        var ev = new Event(EventId.Core_Movement_ScheduledStop, details);
+        eventSender.SendEvent(ev);
+    }
 }
