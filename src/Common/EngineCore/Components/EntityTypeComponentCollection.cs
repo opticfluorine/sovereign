@@ -23,7 +23,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Component that denotes whether an entity is of a special type.
 /// </summary>
-[ScriptableComponents("entity_type")]
+[ScriptableComponents]
 public class EntityTypeComponentCollection : BaseComponentCollection<EntityType>
 {
     private const int InitialSize = 65536;

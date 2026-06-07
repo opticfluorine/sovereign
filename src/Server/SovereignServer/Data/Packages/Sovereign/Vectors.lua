@@ -14,10 +14,14 @@
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 --
 
+-------------------------------------
+
 --- Utility functions for working with vector types.
 local Vectors = {}
 
 local DefaultTol = 0.00001
+
+-------------------------------------
 
 --- Checks whether two vectors are equal within a given tolerance.
 --- @param a Vector2|Vector3 First vector to compare.
@@ -52,6 +56,8 @@ function Vectors.Equal(a, b, tol)
     return true
 end
 
+-------------------------------------
+
 --- Utilities for Vector2 objects.
 Vectors.Vector2 = {}
 
@@ -66,6 +72,39 @@ Vectors.Vector2.One = {
     X = 1.0,
     Y = 1.0
 }
+
+--- Scales a vector by a scalar.
+--- @param a Vector2 Vector to scale.
+--- @param scale number Scale factor.
+--- @return Vector2 # Scaled vector.
+function Vectors.Vector2.Scale(a, scale)
+    return { X = a.X * scale, Y = a.Y * scale }
+end
+
+--- Calculates the length of a vector.
+--- @param a Vector2 Vector.
+--- @return number # Length of vector.
+function Vectors.Vector2.Length(a)
+    return math.sqrt(a.X * a.X + a.Y * a.Y)
+end
+
+--- Calculates the sum of two vectors.
+--- @param a Vector2 First vector.
+--- @param b Vector2 Second vector.
+--- @return Vector2 # a + b
+function Vectors.Vector2.Sum(a, b)
+    return { X = a.X + b.X, Y = a.Y + b.Y }
+end
+
+--- Calculates the difference of two vectors.
+--- @param a Vector2 First vector.
+--- @param b Vector2 Second vector.
+--- @return Vector2 # a - b
+function Vectors.Vector2.Difference(a, b)
+    return { X = a.X - b.X, Y = a.Y - b.Y }
+end
+
+-------------------------------------
 
 --- Utilities for Vector3 objects.
 Vectors.Vector3 = {}
@@ -83,6 +122,37 @@ Vectors.Vector3.One = {
     Y = 0.0,
     Z = 0.0
 }
+
+--- Scales a vector by a scalar.
+--- @param a Vector3 Vector to scale.
+--- @param scale number Scale factor.
+--- @return Vector3 # Scaled vector.
+function Vectors.Vector3.Scale(a, scale)
+    return { X = a.X * scale, Y = a.Y * scale, Z = a.Z * scale }
+end
+
+--- Calculates the length of a vector.
+--- @param a Vector3 Vector.
+--- @return number # Length of vector.
+function Vectors.Vector3.Length(a)
+    return math.sqrt(a.X * a.X + a.Y * a.Y + a.Z * a.Z)
+end
+
+--- Calculates the sum of two vectors.
+--- @param a Vector3 First vector.
+--- @param b Vector3 Second vector.
+--- @return Vector3 # a + b
+function Vectors.Vector3.Sum(a, b)
+    return { X = a.X + b.X, Y = a.Y + b.Y, Z = a.Z + b.Z }
+end
+
+--- Calculates the difference of two vectors.
+--- @param a Vector3 First vector.
+--- @param b Vector3 Second vector.
+--- @return Vector3 # a - b
+function Vectors.Vector3.Difference(a, b)
+    return { X = a.X - b.X, Y = a.Y - b.Y, Z = a.Z - b.Z }
+end
 
 --------------
 

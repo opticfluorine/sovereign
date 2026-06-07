@@ -22,7 +22,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Tag that designates a player as an administrator (admin).
 /// </summary>
-[ScriptableComponents("admin")]
+[ScriptableComponents]
 public class AdminTagCollection : BaseTagCollection
 {
     /// <summary>

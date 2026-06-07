@@ -1,11 +1,11 @@
-# data Module
+# Data Module
 
 :::{contents}
 :local:
 :depth: 2
 :::
 
-The `data` module provides support for reading and writing non-component data such as global key-value pairs.
+The `Data` module provides support for reading and writing non-component data such as global key-value pairs.
 
 (script-data-keyvaluedata)=
 ## Key-Value Data
@@ -27,12 +27,12 @@ implicitly; others (such as booleans) require explicit conversion.
 
 ### Accessing Key-Value Stores
 
-The global key-value store is provided to every script as the `data.global` table.
+The global key-value store is provided to every script as the `Data.global` table.
 
-Entity-scoped key-value stores may be retrieved using the `data.GetEntityData(entityId)` function.
+Entity-scoped key-value stores may be retrieved using the `Data.GetEntityData(entityId)` function.
 
 ```{eval-rst}
-.. lua:function:: data.GetEntityData(entityId)
+.. lua:function:: Data.GetEntityData(entityId)
 
    Gets the key-value store associated with the given entity.
    
@@ -59,9 +59,9 @@ key-value pairs held by their template entities.
 ```{code-block} lua
 :caption: Reading key-value pairs.
 :emphasize-lines: 1,4
-local MyValue = data.global["MyKey"]              -- MyValue is string if key exists, nil otherwise.
+local MyValue = Data.Global["MyKey"]              -- MyValue is string if key exists, nil otherwise.
 -- ...
-local MyEntityData = data.GetEntityData(entityId)
+local MyEntityData = Data.GetEntityData(entityId)
 local MyEntityValue = MyEntityData["MyEntityKey"] -- MyEntityValue is string if key exists for entity or its template, nil otherwise.
 ```
 
@@ -87,9 +87,9 @@ values from a script will fail with an error.
 ```{code-block} lua
 :caption: Writing key-value pairs.
 :emphasize-lines: 1,4
-data.global["MyValue"] = 12345
+Data.Global["MyValue"] = 12345
 -- ...
-local MyEntityData = data.GetEntityData(entityId)
+local MyEntityData = Data.GetEntityData(entityId)
 MyEntityData["MyEntityKey"] = 3.14159
 ```
 
@@ -102,8 +102,8 @@ To delete a key-value pair, assign the value `nil` to the key.
 ```{code-block} lua
 :caption: Deleting key-value pairs.
 :emphasize-lines: 1
-data.global["MyKey"] = nil         -- removes "MyKey" from the global key-value store
+Data.Global["MyKey"] = nil         -- removes "MyKey" from the global key-value store
 -- ...
-local MyEntityData = data.GetEntityData(entityId)
+local MyEntityData = Data.GetEntityData(entityId)
 MyEntityData["MyEntityKey"] = nil  -- removes "MyEntityKey" from the entity key-value store
 ```

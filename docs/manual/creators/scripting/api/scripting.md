@@ -1,12 +1,12 @@
 (script-scripting)=
-# scripting Module
+# Scripting Module
 
 :::{contents}
 :local:
 :depth: 2
 :::
 
-The `scripting` module provides APIs for interacting with the server-side scripting engine. Primarily this takes the form of registering callbacks with which the scripting engine will invoke a script under certain conditions (e.g. a specific event is received, a timer has elapsed, etc.).
+The `Scripting` module provides APIs for interacting with the server-side scripting engine. Primarily this takes the form of registering callbacks with which the scripting engine will invoke a script under certain conditions (e.g. a specific event is received, a timer has elapsed, etc.).
 
 ## Callback Registration Functions
 
@@ -16,7 +16,7 @@ The `scripting` module provides APIs for interacting with the server-side script
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: scripting.AddEventCallback(eventId, callback)
+.. lua:function:: Scripting.AddEventCallback(eventId, callback)
 
    Registers a callback to handle the given type of event.
    
@@ -31,21 +31,21 @@ The `scripting` module provides APIs for interacting with the server-side script
 #### Example
 
 ```{code-block} lua
-:caption: Registering an event callback using `scripting.AddEventCallback(eventId, callback)`.
+:caption: Registering an event callback using `Scripting.AddEventCallback(eventId, callback)`.
 :emphasize-lines: 6
 function on_player_entered(event)
     local playerEntityId = event.EntityId
-    util.LogInfo(string.format("Player ID %s has logged in.", playerEntityId))
+    Util.LogInfo(string.format("Player ID %s has logged in.", playerEntityId))
 end
 
-scripting.AddEventCallback(events.Server_Persistence_PlayerEnteredWorld, on_player_entered)
+Scripting.AddEventCallback(events.Server_Persistence_PlayerEnteredWorld, on_player_entered)
 ```
 
 (script-scripting-addtimedcallback)=
 ### AddTimedCallback(delaySeconds, callback, [argument])
 
 ```{eval-rst}
-.. lua:function:: scripting.AddTimedCallback(delaySeconds, callback, [argument])
+.. lua:function:: Scripting.AddTimedCallback(delaySeconds, callback, [argument])
 
    Registers a timed callback that will be triggered after a delay period.
 
@@ -60,20 +60,20 @@ scripting.AddEventCallback(events.Server_Persistence_PlayerEnteredWorld, on_play
 #### Example
 
 ```{code-block} lua
-:caption: Registering a timed callback using `scripting.AddTimedCallback(delaySeconds, callback, argument)`.
+:caption: Registering a timed callback using `Scripting.AddTimedCallback(delaySeconds, callback, argument)`.
 :emphasize-lines: 3,6
 function on_timer(count)
-    util.LogInfo("Callback " .. count)
-    scripting.AddTimedCallback(1.0, on_timer, count + 1)
+    Util.LogInfo("Callback " .. count)
+    Scripting.AddTimedCallback(1.0, on_timer, count + 1)
 end
 
-scripting.AddTimedCallback(1.0, on_timer, 0)
+Scripting.AddTimedCallback(1.0, on_timer, 0)
 ```
 
 ### AddCollisionCallback(entityId, callback)
 
 ```{eval-rst}
-.. lua:function:: scripting.AddCollisionCallback(entityId, callback)
+.. lua:function:: Scripting.AddCollisionCallback(entityId, callback)
 
    Registers a callback that is called whenever the given entity collides with another object (either a block or non-block entity). The callback will be called whenever the entity stops moving as a result of collision; it is not called if the entity is not moving and another object collides with it.
 
@@ -89,46 +89,46 @@ scripting.AddTimedCallback(1.0, on_timer, 0)
 #### Example
 
 ```{code-block} lua
-:caption: Adding an entity collision callback using `scripting.AddCollisionCallback(entityId, callback)`.
+:caption: Adding an entity collision callback using `Scripting.AddCollisionCallback(entityId, callback)`.
 :emphasize_lines: 5
 function on_collision(entityId)
     -- ...
 end
 
-local collisionHandle = scripting.AddCollisionCallback(entityId, on_collision)
+local collisionHandle = Scripting.AddCollisionCallback(entityId, on_collision)
 ```
 
 ### RemoveCollisionCallback(entityId, callbackHandle)
 
 ```{eval-rst}
-.. lua:function:: scripting.RemoveCollisionCallback(entityId, callbackHandle)
+.. lua:function:: Scripting.RemoveCollisionCallback(entityId, callbackHandle)
    
    Removes a collision callback that was previously registered by the same script. If no such callback is found, this function logs an error and otherwise does nothing.
 
    :param entityId: Entity ID on which the callback was registered.
    :type entityId: number
-   :param callbackHandle: Callback handle returned by the corresponding call to `scripting.AddCollisionCallback(entityId, callback)`.
+   :param callbackHandle: Callback handle returned by the corresponding call to `Scripting.AddCollisionCallback(entityId, callback)`.
    :type callbacHanle: number
 ```
 
 #### Example
 
 ```{code-block} lua
-:caption: Removing an entity collision callback using `scripting.RemoveCollisionCallback(entityId, callbackHandle)`.
+:caption: Removing an entity collision callback using `Scripting.RemoveCollisionCallback(entityId, callbackHandle)`.
 :emphasize_lines: 7
 function on_collision(entityId)
     -- ...
 end
 
-local collisionHandle = scripting.AddCollisionCallback(entityId, on_collision)
+local collisionHandle = Scripting.AddCollisionCallback(entityId, on_collision)
 -- ...
-scripting.RemoveCollisionCallback(entityId, collisionHandle)
+Scripting.RemoveCollisionCallback(entityId, collisionHandle)
 ```
 
 ### AddEntityParameterHint(callbackFunctionName, parameterName, type, tooltip)
 
 ```{eval-rst}
-.. lua:function:: scripting.AddEntityParameterHint(callbackFunctionName, parameterName, type, tooltip)
+.. lua:function:: Scripting.AddEntityParameterHint(callbackFunctionName, parameterName, type, tooltip)
 
    Adds an entity parameter hint for the named callback function. A parameter hint is the name of a key in
    the entity key-value store that is referenced by the given callback function. Registering a parameter hint
@@ -147,7 +147,7 @@ scripting.RemoveCollisionCallback(entityId, collisionHandle)
 
 #### Supported Types for AddEntityParameterHint
 
-The `type` argument for `scripting.AddEntityParameterHint` must be one of the following values:
+The `type` argument for `Scripting.AddEntityParameterHint` must be one of the following values:
 
 | Type       | Description              |
 |------------|--------------------------|
@@ -168,5 +168,5 @@ function my_callback(entityId)
     -- ...
 end
 
-scripting.AddEntityParameterHint("my_callback", "MyEntityKey", "String", "This is my entity parameter.")
+Scripting.AddEntityParameterHint("my_callback", "MyEntityKey", "String", "This is my entity parameter.")
 ```

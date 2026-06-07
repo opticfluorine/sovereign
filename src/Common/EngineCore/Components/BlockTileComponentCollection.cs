@@ -24,7 +24,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     The Material component specifies the material index for a block entity.
 /// </summary>
-[ScriptableComponents("block_tile")]
+[ScriptableComponents]
 public sealed class BlockTileComponentCollection : BaseComponentCollection<BlockTile>
 {
     /// <summary>

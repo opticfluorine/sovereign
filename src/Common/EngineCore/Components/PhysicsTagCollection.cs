@@ -22,7 +22,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Tag collection for the Physics tag which tags a non-block entity for physics processing.
 /// </summary>
-[ScriptableComponents("physics")]
+[ScriptableComponents]
 public class PhysicsTagCollection : BaseTagCollection
 {
     private const int InitialSize = 32768;

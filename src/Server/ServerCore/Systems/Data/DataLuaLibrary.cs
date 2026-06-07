@@ -30,7 +30,7 @@ namespace Sovereign.ServerCore.Systems.Data;
 /// </summary>
 public class DataLuaLibrary : ILuaLibrary, IDisposable
 {
-    private const string LibraryName = "data";
+    private const string LibraryName = "Data";
     private const long TableEntityIndex = 0;
 
     private const string ReadOnlyKeyPrefix = "__";
@@ -103,7 +103,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         lua_setfield(luaHost.LuaState, -2, "__newindex");
 
         lua_setmetatable(luaHost.LuaState, -2);
-        lua_setfield(luaHost.LuaState, -2, "global");
+        lua_setfield(luaHost.LuaState, -2, "Global");
         lua_pop(luaHost.LuaState, 1);
     }
 

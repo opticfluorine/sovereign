@@ -30,23 +30,14 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 /// <summary>
 ///     Responsible for loading scripts.
 /// </summary>
-public class ScriptLoader
+public class ScriptLoader(
+    ILogger<ScriptLoader> logger,
+    IOptions<ScriptingOptions> scriptingOptions,
+    IEnumerable<ILuaLibrary> luaLibraries,
+    ILoggerFactory loggerFactory,
+    IEnumerable<ILuaComponents> luaComponents)
 {
-    private readonly ScriptingOptions config;
-    private readonly ILogger<ScriptLoader> logger;
-    private readonly ILoggerFactory loggerFactory;
-    private readonly IEnumerable<ILuaComponents> luaComponents;
-    private readonly IEnumerable<ILuaLibrary> luaLibraries;
-
-    public ScriptLoader(ILogger<ScriptLoader> logger, IOptions<ScriptingOptions> scriptingOptions,
-        IEnumerable<ILuaLibrary> luaLibraries, ILoggerFactory loggerFactory, IEnumerable<ILuaComponents> luaComponents)
-    {
-        this.logger = logger;
-        this.luaLibraries = luaLibraries;
-        this.loggerFactory = loggerFactory;
-        this.luaComponents = luaComponents;
-        config = scriptingOptions.Value;
-    }
+    private readonly ScriptingOptions config = scriptingOptions.Value;
 
     /// <summary>
     ///     Loads and hosts all scripts.
@@ -191,7 +182,7 @@ public class ScriptLoader
             lua_setfield(host.LuaState, -2, eventId.ToString());
         }
 
-        lua_setglobal(host.LuaState, "events");
+        lua_setglobal(host.LuaState, "Events");
     }
 
     /// <summary>
@@ -208,7 +199,7 @@ public class ScriptLoader
             component.Install(host);
         }
 
-        lua_setglobal(host.LuaState, "components");
+        lua_setglobal(host.LuaState, "Components");
     }
 
     /// <summary>

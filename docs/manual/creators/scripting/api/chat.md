@@ -1,6 +1,6 @@
-# chat Module
+# Chat Module
 
-The `chat` module provides APIs for sending chat messages to players.
+The `Chat` module provides APIs for sending chat messages to players.
 
 ## Chat Message Functions
 
@@ -9,7 +9,7 @@ The `chat` module provides APIs for sending chat messages to players.
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: chat.SendSystemMessage(playerEntityId, message)
+.. lua:function:: Chat.SendSystemMessage(playerEntityId, message)
 
    Sends a system message to a specific player. System messages are
    informational text intended to communicate the result of a chat
@@ -24,9 +24,9 @@ The `chat` module provides APIs for sending chat messages to players.
 #### Example
 
 ```{code-block} lua
-:caption: Sending a system chat message to a player using chat.SendSystemMessage.
+:caption: Sending a system chat message to a player using Chat.SendSystemMessage.
 :emphasize-lines: 1
-chat.SendSystemMessage(playerEntityId, "This is a system message.")
+Chat.SendSystemMessage(playerEntityId, "This is a system message.")
 ```
 
 (script-chat-sendtoplayer)=
@@ -35,7 +35,7 @@ chat.SendSystemMessage(playerEntityId, "This is a system message.")
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: chat.SendToPlayer(playerEntityId, color, message)
+.. lua:function:: Chat.SendToPlayer(playerEntityId, color, message)
 
    Sends a generic chat message to a specific player.
    
@@ -50,9 +50,9 @@ chat.SendSystemMessage(playerEntityId, "This is a system message.")
 #### Example
 
 ```{code-block} lua
-:caption: Sending a chat message to a player using chat.SendToPlayer.
+:caption: Sending a chat message to a player using Chat.SendToPlayer.
 :emphasize-lines: 1, 2
-chat.SendToPlayer(playerEntityId, color.Rgb(210, 210, 0),
+Chat.SendToPlayer(playerEntityId, Color.Rgb(210, 210, 0),
     "This is a message sent with SendToPlayer.")
 ```
 
@@ -61,7 +61,7 @@ chat.SendToPlayer(playerEntityId, color.Rgb(210, 210, 0),
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: chat.SendToAll(color, message)
+.. lua:function:: Chat.SendToAll(color, message)
 
    Sends a generic chat message to all players.
    
@@ -74,7 +74,7 @@ chat.SendToPlayer(playerEntityId, color.Rgb(210, 210, 0),
 #### Example
 
 ```{code-block} lua
-:caption: Sending a chat message to all players using chat.SendToAll.
+:caption: Sending a chat message to all players using Chat.SendToAll.
 :emphasize-lines: 1
-chat.SendToAll(color.Rgb(210, 210, 0), "This is a message sent with SendToAll.")
+Chat.SendToAll(Color.Rgb(210, 210, 0), "This is a message sent with SendToAll.")
 ```

@@ -42,7 +42,8 @@
 -- ================
 --
 
-local EntityBehavior = require("EntityBehavior")
+local EntityBehavior = require("Sovereign.EntityBehavior")
+local WaitType = EntityBehavior.WaitType
 
 local ParamTemplateId = "Sovereign.Spawn.TemplateId"
 local ParamDelay = "Sovereign.Spawn.Delay"
@@ -53,35 +54,35 @@ local DefaultDelay = 30.0
 local DefaultRadius = 8.0
 local DefaultCount = 1
 
-EntityBehavior.Create(
-function (behavior, spawnerEntityId)
+local spawn = EntityBehavior.Create(
+---@param behavior EntityBehavior
+---@param spawnerEntity Entity
+function (behavior, spawnerEntity)
 
     -- Load parameters for this spawner.
-    local spawnData = data.GetEntityData(spawnerEntityId)
-
-    local templateId = tonumber(spawnData[ParamTemplateId])
-    if not templateId or not entities.IsTemplate(templateId) then
-        util.LogError(string.format("Entity %X is missing required parameter %s.", 
-            spawnerEntityId, ParamTemplateId))
+    local templateId = tonumber(spawnerEntity.Data[ParamTemplateId])
+    if not templateId or not Entities.IsTemplate(templateId) then
+        Util.LogError(string.format("Entity %X is missing required parameter %s.",
+            spawnerEntity.EntityId, ParamTemplateId))
         return
     end
-    local templateType = components.entity_type.Get(templateId)
+    local templateType = Components.EntityType.Get(templateId)
     if templateType ~= EntityType.Npc then
-        util.LogError(string.format("Entity %X has non-NPC spawn template.", spawnerEntityId))
+        Util.LogError(string.format("Entity %X has non-NPC spawn template.", spawnerEntity.EntityId))
         return
     end
 
-    local delay = tonumber(spawnData[ParamDelay])
+    local delay = tonumber(spawnerEntity.Data[ParamDelay])
     if not delay then
         delay = DefaultDelay
     end
 
-    local radius = tonumber(spawnData[ParamRadius])
+    local radius = tonumber(spawnerEntity.Data[ParamRadius])
     if not radius then
         radius = DefaultRadius
     end
 
-    local maxSpawns = tonumber(spawnData[ParamCount])
+    local maxSpawns = tonumber(spawnerEntity.Data[ParamCount])
     if not maxSpawns then
         maxSpawns = DefaultCount
     end
@@ -90,7 +91,7 @@ function (behavior, spawnerEntityId)
     local spawnedIds = {}
     while true do
         -- Bail out if the spawner was destroyed.
-        local spawnPosVel = components.kinematics.Get(spawnerEntityId)
+        local spawnPosVel = spawnerEntity.Components.Kinematics
         if not spawnPosVel then
             return
         end
@@ -99,7 +100,7 @@ function (behavior, spawnerEntityId)
         -- Don't need to remove all of the destroyed entities, one is sufficient to
         -- allow a respawn to proceed.
         for index, entityId in ipairs(spawnedIds) do
-            if not components.kinematics.Get(entityId) then
+            if not Components.Kinematics.Get(entityId) then
                 table.remove(spawnedIds, index)
                 break
             end
@@ -114,7 +115,7 @@ function (behavior, spawnerEntityId)
             local y = r * math.sin(theta)
 
             -- Spawn new entity.
-            local newId = entities.Create({
+            local newId = Entities.Create({
                 Template = templateId,
                 Kinematics = {
                     Position = {
@@ -132,39 +133,39 @@ function (behavior, spawnerEntityId)
             })
 
             if not newId then
-                util.LogError(string.format("Spawner %X has failed; disabling until reload.", spawnerEntityId))
+                Util.LogError(string.format("Spawner %X has failed; disabling until reload.", spawnerEntity.EntityId))
                 return
             end
 
             table.insert(spawnedIds, newId)
         end
 
-        behavior:WaitAsync(spawnerEntityId, delay)
+        behavior:Wait(spawnerEntity.EntityId, WaitType.Time, delay)
     end
 
 end
-):InstallGlobalHooks()
+)
 
-scripting.AddEntityParameterHint(
-    EntityBehavior.DefaultLoadFunction,
+Scripting.AddEntityParameterHint(
+    spawn.LoadHookName,
     ParamTemplateId,
     "NpcTemplate",
     "Template to use for spawned NPCs.")
 
-scripting.AddEntityParameterHint(
-    EntityBehavior.DefaultLoadFunction,
+Scripting.AddEntityParameterHint(
+    spawn.LoadHookName,
     ParamDelay,
     "Float",
     string.format("Delay time in seconds between spawns (default: %.1f).", DefaultDelay))
 
-scripting.AddEntityParameterHint(
-    EntityBehavior.DefaultLoadFunction,
+Scripting.AddEntityParameterHint(
+    spawn.LoadHookName,
     ParamRadius,
     "Float",
     string.format("Spawn radius (default: %.1f).", DefaultRadius))
 
-scripting.AddEntityParameterHint(
-    EntityBehavior.DefaultLoadFunction,
+Scripting.AddEntityParameterHint(
+    spawn.LoadHookName,
     ParamCount,
     "Int",
     string.format("Maximum number of spawned NPCs (default: %d).", DefaultCount))

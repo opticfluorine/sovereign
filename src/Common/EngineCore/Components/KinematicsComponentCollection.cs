@@ -24,7 +24,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Manages the kinematic data of all non-block positionable entities.
 /// </summary>
-[ScriptableComponents("kinematics")]
+[ScriptableComponents]
 public sealed class KinematicsComponentCollection : BaseComponentCollection<Kinematics>
 {
     /// <summary>

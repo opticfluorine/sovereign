@@ -22,7 +22,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Component collection for Parent component which maps an entity to its parent entity.
 /// </summary>
-[ScriptableComponents("parent")]
+[ScriptableComponents]
 public class ParentComponentCollection : BaseComponentCollection<ulong>
 {
     private const int INITIAL_SIZE = 65536;

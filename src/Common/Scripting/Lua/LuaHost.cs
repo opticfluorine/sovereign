@@ -458,7 +458,7 @@ public class LuaHost : IDisposable
     {
         try
         {
-            BeginLibrary("util");
+            BeginLibrary("Util");
             AddLibraryFunction("LogTrace", UtilLogTrace);
             AddLibraryFunction("LogDebug", UtilLogDebug);
             AddLibraryFunction("LogInfo", UtilLogInformation);

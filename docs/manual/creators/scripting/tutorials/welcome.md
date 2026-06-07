@@ -34,7 +34,7 @@ found in [Supported Event Types](#script-api-event-types).
 ```{code-block} lua
 :lineno-start: 2
     if event and event.EntityId then
-        chat.SendToPlayer(event.EntityId, color.MOTD, "Welcome back!")
+        Chat.SendToPlayer(event.EntityId, color.MOTD, "Welcome back!")
 ```
 
 Generally, it is considered a best practice to check for existence of the details fields before accessing them.
@@ -55,7 +55,7 @@ values in the string.
 ```{code-block} lua
 :lineno-start: 4
     else
-        util.LogError("Bad event data in callback.")
+        Util.LogError("Bad event data in callback.")
     end
 end
 ```
@@ -70,9 +70,9 @@ Putting it all together, we get this callback function:
 :lineno-start: 1
 function send_welcome_message(event)
     if event and event.EntityId then
-        chat.SendToPlayer(event.EntityId, color.MOTD, "Welcome back!")
+        Chat.SendToPlayer(event.EntityId, color.MOTD, "Welcome back!")
     else
-        util.LogError("Bad event data in callback.")
+        Util.LogError("Bad event data in callback.")
     end
 end
 ```
@@ -100,13 +100,13 @@ Here's the complete code for our welcome script:
 :lineno-start: 1
 function send_welcome_message(event)
     if event and event.EntityId then
-        chat.SendToPlayer(event.EntityId, color.MOTD, "Welcome back!")
+        Chat.SendToPlayer(event.EntityId, color.MOTD, "Welcome back!")
     else
-        util.LogError("Bad event data in callback.")
+        Util.LogError("Bad event data in callback.")
     end
 end
 
-scripting.AddEventCallback(events.Server_Persistence_PlayerEnteredWorld, send_welcome_message)
+Scripting.AddEventCallback(Events.Server_Persistence_PlayerEnteredWorld, send_welcome_message)
 ```
 
 To load this script, you can do one of several options:

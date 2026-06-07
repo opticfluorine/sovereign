@@ -68,6 +68,7 @@ GridPosition = {}
 ---@class Kinematics
 ---@field Position Vector3 Entity position in world coordinates.
 ---@field Velocity Vector3 Entity velocity in world coordinates per second.
+---@field StopSystemTime? integer System time at which movement should stop (0 or nil to disable scheduled stop).
 Kinematics = {}
 
 ---Specifies a point light source attached to an entity.
@@ -119,26 +120,26 @@ Orientation = {
 --------------------
 
 --
--- chat Module
+-- Chat Module
 --
 
----@class chat
-chat = {}
+---@class Chat
+Chat = {}
 
 ---@param playerEntityId integer
 ---@param message string
-function chat.SendSystemMessage(playerEntityId, message)
+function Chat.SendSystemMessage(playerEntityId, message)
 end
 
 ---@param playerEntityId integer
 ---@param color integer
 ---@param message string
-function chat.SendToPlayer(playerEntityId, color, message)
+function Chat.SendToPlayer(playerEntityId, color, message)
 end
 
 ---@param color integer
 ---@param message string
-function chat.SendToAll(color, message)
+function Chat.SendToAll(color, message)
 end
 
 --------------------
@@ -147,30 +148,30 @@ end
 -- color Module
 --
 
----@class color
-color = {}
+---@class Color
+Color = {}
 
 ---White color.
-color.WHITE = 0xFFFFFF
+Color.WHITE = 0xFFFFFF
 ---Black color.
-color.BLACK = 0x000000
+Color.BLACK = 0x000000
 ---Red color.
-color.RED = 0xFF0000
+Color.RED = 0xFF0000
 ---Green color.
-color.GREEN = 0x00FF00
+Color.GREEN = 0x00FF00
 ---Blue color.
-color.BLUE = 0x0000FF
+Color.BLUE = 0x0000FF
 
 ---Color normally used for MOTD messages.
-color.MOTD = 0xFFFFFF
+Color.MOTD = 0xFFFFFF
 ---Color normally used for alert messages.
-color.ALERT = 0xD20000
----Color normally used for local chat messages.
-color.CHAT_LOCAL = 0xB3B3B3
----Color normally used for global chat messages.
-color.CHAT_GLOBAL = 0xFFFFFF
----Color normally used for system chat messages.
-color.CHAT_SYSTEM = 0x808080
+Color.ALERT = 0xD20000
+---Color normally used for local Chat messages.
+Color.CHAT_LOCAL = 0xB3B3B3
+---Color normally used for global Chat messages.
+Color.CHAT_GLOBAL = 0xFFFFFF
+---Color normally used for system Chat messages.
+Color.CHAT_SYSTEM = 0x808080
 
 ---Creates a color with the given red, green, and blue linear components. The alpha component is
 ---set to 255.
@@ -178,7 +179,7 @@ color.CHAT_SYSTEM = 0x808080
 ---@param g integer Green component (0 - 255 inclusive).
 ---@param b integer Blue component (0 - 255 inclusive).
 ---@return integer color Packed color.
-function color.Rgb(r, g, b)
+function Color.Rgb(r, g, b)
 end
 
 ---Creates a color with the given red, green, blue, and alpha linear components.
@@ -187,7 +188,7 @@ end
 ---@param b integer Blue component (0 - 255 inclusive).
 ---@param a integer Alpha component (0 - 255 inclusive).
 ---@return integer color Packed color.
-function color.Rgba(r,g,b,a)
+function Color.Rgba(r,g,b,a)
 end
 
 --------------------
@@ -197,356 +198,336 @@ end
 --
 
 ---Provides access to component data.
----@class components
-components = {}
+---@class Components
+Components = {}
 
 ---Admin component.
----@class components.admin
-components.admin = {}
+---@class Components.Admin
+Components.Admin = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.admin.Exists = function (entityId) end
+Components.Admin.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return boolean?
-components.admin.Get = function(entityId, lookback) end
+Components.Admin.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.admin.Remove = function (entityId) end
+Components.Admin.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value boolean Value.
-components.admin.Set = function (entityId, value) end
+Components.Admin.Set = function (entityId, value) end
 
 ---AnimatedSprite component.
----@class components.animated_sprite
-components.animated_sprite = {}
+---@class Components.AnimatedSprite
+Components.AnimatedSprite = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.animated_sprite.Exists = function (entityId) end
+Components.AnimatedSprite.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return integer? 
-components.animated_sprite.Get = function(entityId, lookback) end
+Components.AnimatedSprite.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.animated_sprite.Remove = function (entityId) end
+Components.AnimatedSprite.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value integer Value.
-components.animated_sprite.Set = function (entityId, value) end
+Components.AnimatedSprite.Set = function (entityId, value) end
 
 ---BlockPosition component.
----@class components.block_position
-components.block_position = {}
+---@class Components.BlockPosition
+Components.BlockPosition = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.block_position.Exists = function (entityId) end
+Components.BlockPosition.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return GridPosition?
-components.block_position.Get = function(entityId, lookback) end
+Components.BlockPosition.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.block_position.Remove = function (entityId) end
+Components.BlockPosition.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value GridPosition Value.
-components.block_position.Set = function (entityId, value) end
+Components.BlockPosition.Set = function (entityId, value) end
 
 ---CastBlockShadows tag.
----@class components.cast_block_shadows
-components.cast_block_shadows = {}
+---@class Components.CastBlockShadows
+Components.CastBlockShadows = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.cast_block_shadows.Exists = function (entityId) end
+Components.CastBlockShadows.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return boolean?
-components.cast_block_shadows.Get = function(entityId, lookback) end
+Components.CastBlockShadows.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.cast_block_shadows.Remove = function (entityId) end
+Components.CastBlockShadows.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value boolean Value.
-components.cast_block_shadows.Set = function (entityId, value) end
+Components.CastBlockShadows.Set = function (entityId, value) end
 
 ---CastShadows component.
----@class components.cast_shadows 
-components.cast_shadows = {}
+---@class Components.CastShadows 
+Components.CastShadows = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.cast_shadows.Exists = function (entityId) end
+Components.CastShadows.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return Shadow?
-components.cast_shadows.Get = function(entityId, lookback) end
+Components.CastShadows.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.cast_shadows.Remove = function (entityId) end
+Components.CastShadows.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value Shadow Value.
-components.cast_shadows.Set = function (entityId, value) end
+Components.CastShadows.Set = function (entityId, value) end
 
 ---Drawable component.
----@class components.drawable 
-components.drawable = {}
+---@class Components.Drawable 
+Components.Drawable = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.drawable.Exists = function (entityId) end
+Components.Drawable.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return Vector2?
-components.drawable.Get = function(entityId, lookback) end
+Components.Drawable.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.drawable.Remove = function (entityId) end
+Components.Drawable.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value Vector2 Value.
-components.drawable.Set = function (entityId, value) end
+Components.Drawable.Set = function (entityId, value) end
 
 ---EntityType component.
----@class components.entity_type 
-components.entity_type = {}
+---@class Components.EntityType 
+Components.EntityType = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.entity_type.Exists = function (entityId) end
+Components.EntityType.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return EntityType?
-components.entity_type.Get = function(entityId, lookback) end
+Components.EntityType.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.entity_type.Remove = function (entityId) end
+Components.EntityType.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value EntityType Value.
-components.entity_type.Set = function (entityId, value) end
+Components.EntityType.Set = function (entityId, value) end
 
 ---Kinematics component.
----@class components.kinematics 
-components.kinematics = {}
+---@class Components.Kinematics 
+Components.Kinematics = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.kinematics.Exists = function (entityId) end
+Components.Kinematics.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return Kinematics?
-components.kinematics.Get = function(entityId, lookback) end
+Components.Kinematics.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.kinematics.Remove = function (entityId) end
+Components.Kinematics.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value Kinematics Value.
-components.kinematics.Set = function (entityId, value) end
+Components.Kinematics.Set = function (entityId, value) end
 ---Sets the velocity without modifying the position.
 ---@param entityId integer Entity ID.
 ---@param value Kinematics Kinematics object with velocity to use.
-components.kinematics.SetVelocity = function (entityId, value) end
+Components.Kinematics.SetVelocity = function (entityId, value) end
 ---Adds to the position without modifying the velocity.
 ---@param entityId integer Entity ID.
 ---@param value Kinematics Kinematics object with position increment to use.
-components.kinematics.AddPosition = function (entityId, value) end
+Components.Kinematics.AddPosition = function (entityId, value) end
 
 ---Material component.
----@class components.material 
-components.material = {}
+---@class Components.BlockTile 
+Components.BlockTile = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.material.Exists = function (entityId) end
+Components.BlockTile.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return integer?
-components.material.Get = function(entityId, lookback) end
+Components.BlockTile.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.material.Remove = function (entityId) end
+Components.BlockTile.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value integer Value.
-components.material.Set = function (entityId, value) end
-
----MaterialModifier component.
----@class components.material_modifier 
-components.material_modifier = {}
----Checks whether the component exists for an entity.
----@param entityId integer Entity ID.
----@return boolean true if exists, false otherwise.
-components.material_modifier.Exists = function (entityId) end
----Gets the value of the component for the entity.
----@param entityId integer Entity ID.
----@param lookback boolean? If true, enable lookback at components from the last tick.
----@return integer?
-components.material_modifier.Get = function(entityId, lookback) end
----Removes the component for the entity if it exists.
----@param entityId integer Entity ID.
-components.material_modifier.Remove = function (entityId) end
----Sets the value of the component for the entity.
----@param entityId integer Entity ID.
----@param value integer Value.
-components.material_modifier.Set = function (entityId, value) end
+Components.BlockTile.Set = function (entityId, value) end
 
 ---Name component.
----@class components.name 
-components.name = {}
+---@class Components.Name 
+Components.Name = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.name.Exists = function (entityId) end
+Components.Name.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return string?
-components.name.Get = function(entityId, lookback) end
+Components.Name.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.name.Remove = function (entityId) end
+Components.Name.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value string Value.
-components.name.Set = function (entityId, value) end
+Components.Name.Set = function (entityId, value) end
 
 ---Orientation component.
----@class components.orientation 
-components.orientation = {}
+---@class Components.Orientation 
+Components.Orientation = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.orientation.Exists = function (entityId) end
+Components.Orientation.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return Orientation?
-components.orientation.Get = function(entityId, lookback) end
+Components.Orientation.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.orientation.Remove = function (entityId) end
+Components.Orientation.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value Orientation Value.
-components.orientation.Set = function (entityId, value) end
+Components.Orientation.Set = function (entityId, value) end
 
 ---Parent component.
----@class components.parent 
-components.parent = {}
+---@class Components.Parent 
+Components.Parent = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.parent.Exists = function (entityId) end
+Components.Parent.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return integer?
-components.parent.Get = function(entityId, lookback) end
+Components.Parent.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.parent.Remove = function (entityId) end
+Components.Parent.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value integer Value.
-components.parent.Set = function (entityId, value) end
+Components.Parent.Set = function (entityId, value) end
 
 ---Physics tag.
----@class components.physics 
-components.physics = {}
+---@class Components.Physics 
+Components.Physics = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.physics.Exists = function (entityId) end
+Components.Physics.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return boolean?
-components.physics.Get = function(entityId, lookback) end
+Components.Physics.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.physics.Remove = function (entityId) end
+Components.Physics.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value boolean Value.
-components.physics.Set = function (entityId, value) end
+Components.Physics.Set = function (entityId, value) end
 
 ---PlayerCharacter tag.
----@class components.player_character 
-components.player_character = {}
+---@class Components.PlayerCharacter 
+Components.PlayerCharacter = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.player_character.Exists = function (entityId) end
+Components.PlayerCharacter.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return boolean?
-components.player_character.Get = function(entityId, lookback) end
+Components.PlayerCharacter.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.player_character.Remove = function (entityId) end
+Components.PlayerCharacter.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value boolean Value.
-components.player_character.Set = function (entityId, value) end
+Components.PlayerCharacter.Set = function (entityId, value) end
 
----PointLight component.
----@class components.point_light 
-components.point_light = {}
+---PointLightSource component.
+---@class Components.PointLightSource 
+Components.PointLightSource = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.point_light.Exists = function (entityId) end
+Components.PointLightSource.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return PointLight?
-components.point_light.Get = function(entityId, lookback) end
+Components.PointLightSource.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.point_light.Remove = function (entityId) end
+Components.PointLightSource.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value PointLight Value.
-components.point_light.Set = function (entityId, value) end
+Components.PointLightSource.Set = function (entityId, value) end
 
 ---ServerOnly tag.
----@class components.server_only 
-components.server_only = {}
+---@class Components.ServerOnly 
+Components.ServerOnly = {}
 ---Checks whether the component exists for an entity.
 ---@param entityId integer Entity ID.
 ---@return boolean true if exists, false otherwise.
-components.server_only.Exists = function (entityId) end
+Components.ServerOnly.Exists = function (entityId) end
 ---Gets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param lookback boolean? If true, enable lookback at components from the last tick.
 ---@return boolean?
-components.server_only.Get = function(entityId, lookback) end
+Components.ServerOnly.Get = function(entityId, lookback) end
 ---Removes the component for the entity if it exists.
 ---@param entityId integer Entity ID.
-components.server_only.Remove = function (entityId) end
+Components.ServerOnly.Remove = function (entityId) end
 ---Sets the value of the component for the entity.
 ---@param entityId integer Entity ID.
 ---@param value boolean Value.
-components.server_only.Set = function (entityId, value) end
+Components.ServerOnly.Set = function (entityId, value) end
 
 --------------------
 
@@ -555,16 +536,16 @@ components.server_only.Set = function (entityId, value) end
 --
 
 ---Provides access to global and per-entity key-value data.
----@class data
-data = {}
+---@class Data
+Data = {}
 
 ---Global key-value data table.
-data.global = {}
+Data.Global = {}
 
 ---Gets the per-entity key-value data table for the given entity.
 ---@param entityId integer Entity ID.
 ---@return table? entityData Per-entity data table, or nil if the entity does not exist or is unloaded.
-function data.GetEntityData(entityId)
+function Data.GetEntityData(entityId)
 end
 
 --------------------
@@ -574,14 +555,14 @@ end
 --
 
 ---Provides functions for displaying dialogue to players.
----@class dialogue
-dialogue = {}
+---@class Dialogue
+Dialogue = {}
 
 ---Shows a dialogue message to a specific player.
 ---@param targetEntityId integer Entity ID of the target player.
 ---@param subject string Dialogue subject (e.g. who is speaking).
 ---@param message string Dialogue message.
-function dialogue.Show(targetEntityId, subject, message)
+function Dialogue.Show(targetEntityId, subject, message)
 end
 
 ---Shows a dialogue message with a profile sprite to a specific player.
@@ -589,78 +570,78 @@ end
 ---@param profileSpriteId integer Profile sprite ID.
 ---@param subject string Dialogue subject (e.g. who is speaking).
 ---@param message string Dialogue message.
-function dialogue.ShowProfile(targetEntityId, profileSpriteId, subject, message)
+function Dialogue.ShowProfile(targetEntityId, profileSpriteId, subject, message)
 end
 
 --------------------
 
 --
--- entities Module
+-- Entities Module
 --
 
 ---Provides functions for working with entities.
----@class entities
-entities = {}
+---@class Entities
+Entities = {}
 
 ---Creates a new entity according to the provided specification.
 ---@param spec EntitySpecification Specification for new entity.
 ---@return integer? Entity ID of the newly created entity, or nil on error.
-function entities.Create(spec)
+function Entities.Create(spec)
 end
 
 ---Removes the given entity if it exists and is loaded in the game world.
 ---@param entityId integer ID of entity to remove.
-function entities.Remove(entityId)
+function Entities.Remove(entityId)
 end
 
 ---Gets the template associated with the given entity, if any.
 ---@param entityId integer Entity ID.
 ---@return integer? templateId Template entity ID, or nil if no template entity.
-function entities.GetTemplate(entityId)
+function Entities.GetTemplate(entityId)
 end
 
 ---Sets the template associated with the given entity.
 ---@param entityId integer Entity ID.
 ---@param templateId integer Template entity ID.
-function entities.SetTemplate(entityId, templateId)
+function Entities.SetTemplate(entityId, templateId)
 end
 
 ---Checks whether the given entity is a template entity.
 ---@param entityId integer Entity ID to check.
 ---@return boolean isTemplate true if the entity is a template entity, false otherwise.
-function entities.IsTemplate(entityId)
+function Entities.IsTemplate(entityId)
 end
 
 ---Synchronizes the given entity or entities with subscribed clients.
 ---@param entityId integer|table Entity ID(s) to sync.
-function entities.Sync(entityId)
+function Entities.Sync(entityId)
 end
 
 ---Synchronizes the given entity or entities and all descendants with subscribed clients.
 ---@param entityId integer|table Parent entity ID(s) to sync.
-function entities.SyncTree(entityId)
+function Entities.SyncTree(entityId)
 end
 
 ---First template entity ID.
-entities.FirstTemplateEntityId  = 0x7FFE000000000000
+Entities.FirstTemplateEntityId  = 0x7FFE000000000000
 ---Last template entity ID.
-entities.LastTemplateEntityId   = 0x7FFEFFFFFFFFFFFF
+Entities.LastTemplateEntityId   = 0x7FFEFFFFFFFFFFFF
 ---First block entity ID.
-entities.FirstBlockEntityId     = 0x6FFF000000000000
+Entities.FirstBlockEntityId     = 0x6FFF000000000000
 ---Last block entity ID.
-entities.LastBlockEntityId      = 0x6FFFFFFFFFFFFFFF
+Entities.LastBlockEntityId      = 0x6FFFFFFFFFFFFFFF
 ---First persisted entity ID.
-entities.FirstPersistedEntityId = 0x7FFF000000000000
+Entities.FirstPersistedEntityId = 0x7FFF000000000000
 
 --------------------
 
 --
--- events Module
+-- Events Module
 --
 
 ---Event types supported in scripts.
----@enum events
-events = {
+---@enum Events
+Events = {
     ---Event emitted once per tick.
     Core_Tick = 1,
     ---Event emitted when a logout occurs.
@@ -672,29 +653,49 @@ events = {
 --------------------
 
 --
--- scripting Module
+-- Scripting Module
 --
 
----@class scripting
-scripting = {}
+---@class Scripting
+Scripting = {}
 
 ---Registers a callback to handle the given type of event.
----@param eventId events Event ID that this callback should respond to.
+---@param eventId Events Event ID that this callback should respond to.
 ---@param callback function Callback function. Must accept a single argument having the event details type, or zero arguments for event types without details.
-function scripting.AddEventCallback(eventId, callback)
+function Scripting.AddEventCallback(eventId, callback)
 end
 
 ---Registers a timed callback that will be triggered after a delay period.
 ---@param delaySeconds number Delay in seconds before the callback is invoked.
 ---@param callback fun(argument: any?): nil Callback function.
 ---@param argument any? An optional argument to pass to the callback.
-function scripting.AddTimedCallback(delaySeconds, callback, argument)
+function Scripting.AddTimedCallback(delaySeconds, callback, argument)
 end
 
-function scripting.AddCollisionCallback(entityId, callback)
+---Adds a callback to be called when the given entity collides with another object.
+---@param entityId integer Entity ID to subscribe to.
+---@param callback function Callback function. May accept the entity ID as a single argument.
+---@return integer callbackHandle Callback handle.
+function Scripting.AddCollisionCallback(entityId, callback)
 end
 
-function scripting.RemoveCollisionCallback(entityId, callbackHandle)
+---Removes a collision callback previously added with scripting.AddCollisionCallback.
+---@param entityId integer Entity ID.
+---@param callbackHandle integer Callback handle previously returned by scripting.AddCollisionCallback.
+function Scripting.RemoveCollisionCallback(entityId, callbackHandle)
+end
+
+---Adds a callback to be called when the given entity stops moving due to a scheduled motion timeout.
+---@param entityId integer Entity ID to subscribe to.
+---@param callback function Callback function. May accept the entity ID as a single argument.
+---@return integer callbackHandle Callback handle.
+function Scripting.AddScheduledStopCallback(entityId, callback)
+end
+
+---Removes a collision callback previously added with scripting.AddScheduledStopCallback.
+---@param entityId integer Entity ID.
+---@param callbackHandle integer Callback handle previously returned by scripting.AddScheduledStopCallback.
+function Scripting.RemoveScheduledStopCallback(entityId, callbackHandle)
 end
 
 ---Adds an entity parameter hint for the named callback function. A parameter hint is the name of a key in the entity key-value store that is referenced by the given callback function. Registering a parameter hint allows the editor GUIs to prompt the creator to specify a value for the parameter when binding the callback to an entity or template entity.
@@ -702,129 +703,129 @@ end
 ---@param parameterName string Parameter name.
 ---@param type string Parameter type (one of "String", "Bool", "Int", "Float", "NpcTemplate", "SameTypeTemplate").
 ---@param tooltip string Tooltip text for the parameter.
-function scripting.AddEntityParameterHint(functionName, parameterName, type, tooltip)
+function Scripting.AddEntityParameterHint(functionName, parameterName, type, tooltip)
 end
 
 --------------------
 
 --
--- time Module
+-- Time Module
 --
 
----@class time
-time = {}
+---@class Time
+Time = {}
 
 ---Gets the system time in microseconds since an arbitrary reference point.
 ---@return integer systemTime System time in microseconds.
-function time.GetSystemTime()
+function Time.GetSystemTime()
 end
 
 ---Gets a system time (in microseconds) delaySeconds seconds in the future.
 ---@param delaySeconds number Seconds to add to the current system time.
 ---@return integer futureTime Future time in microseconds.
-function time.FutureSystemTime(delaySeconds)
+function Time.FutureSystemTime(delaySeconds)
 end
 
 ---Gets the absolute time in the game world measured in seconds since the game started.
 ---@return integer absoluteTime Absolute time.
-function time.GetAbsoluteTime()
+function Time.GetAbsoluteTime()
 end
 
 ---Gets the current year in the game world.
 ---@return integer year Current year.
-function time.GetYear()
+function Time.GetYear()
 end
 
 ---Gets the current season in the game world.
 ---@return string season Current season.
-function time.GetSeason()
+function Time.GetSeason()
 end
 
 ---Gets the current month in the game world.
 ---@return integer month Current month.
-function time.GetMonth()
+function Time.GetMonth()
 end
 
 ---Gets the current month of year in the game world.
 ---@return integer monthOfYear Current month of year.
-function time.GetMonthOfYear()
+function Time.GetMonthOfYear()
 end
 
 ---Gets the current week of the month in the game world.
 ---@return integer weekOfMonth Current week of month.
-function time.GetWeekOfMonth()
+function Time.GetWeekOfMonth()
 end
 
 ---Gets the current day of the month in the game world.
 ---@return integer dayOfMonth Current day of month.
-function time.GetDayOfMonth()
+function Time.GetDayOfMonth()
 end
 
 ---Gets the current week in the game world.
 ---@return integer week Current week.
-function time.GetWeek()
+function Time.GetWeek()
 end
 
 ---Gets the current day of week in the game world.
 ---@return integer dayOfWeek Current day of week.
-function time.GetDayOfWeek()
+function Time.GetDayOfWeek()
 end
 
 ---Gets the current day in the game world.
 ---@return integer day Current day.
-function time.GetDay()
+function Time.GetDay()
 end
 
 ---Gets the current hour of the day in the game world.
 ---@return integer hourOfDay Current hour of day.
-function time.GetHourOfDay()
+function Time.GetHourOfDay()
 end
 
 ---Gets the current second of the day in theg ame world.
 ---@return integer secondOfDay Current second of day.
-function time.GetSecondOfDay()
+function Time.GetSecondOfDay()
 end
 
 --------------------
 
----The util global module provides common utility functions for scripts.
----@class util
-util = {}
+---The Util global module provides common Utility functions for scripts.
+---@class Util
+Util = {}
 
 ---Writes an informational message to the log.
 ---@param message string Message.
-function util.LogInfo(message)
+function Util.LogInfo(message)
 end
 
 ---Writes a warning message to the log.
 ---@param message string Message.
-function util.LogWarn(message)
+function Util.LogWarn(message)
 end
 
 ---Writes an error message to the log.
 ---@param message string Message.
-function util.LogError(message)
+function Util.LogError(message)
 end
 
 ---Writes a critical message to the log.
 ---@param message string Message.
-function util.LogCrit(message)
+function Util.LogCrit(message)
 end
 
 ---Writes a debug message to the log.
 ---@param message string Message.
-function util.LogDebug(message)
+function Util.LogDebug(message)
 end
 
 ---Writes a trace message to the log.
 ---@param message string Message.
-function util.LogTrace(message)
+function Util.LogTrace(message)
 end
 
 ---Converts a string to a boolean value.
 ---@param value string String to convert.
 ---@return boolean? converted Converted value, or nil if no conversion was possible.
-function util.ToBool(value)
+function Util.ToBool(value)
 end
 
 --------------------

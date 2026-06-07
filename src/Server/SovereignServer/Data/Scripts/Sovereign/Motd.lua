@@ -16,27 +16,27 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-function on_player_entered(event)
+local function OnPlayerEntered(event)
     local playerEntityId = event.EntityId
-    util.LogDebug(string.format("playerEntityId = %s (type %s)", playerEntityId, type(playerEntityId)))
-    local playerName = components.name.Get(playerEntityId)
-    chat.SendToPlayer(playerEntityId, color.MOTD,
+    Util.LogDebug(string.format("playerEntityId = %s (type %s)", playerEntityId, type(playerEntityId)))
+    local playerName = Components.Name.Get(playerEntityId)
+    Chat.SendToPlayer(playerEntityId, Color.MOTD,
             string.format("Welcome to Sovereign Engine, %s!", playerName))
-    chat.SendToAll(color.CHAT_GLOBAL,
+    Chat.SendToAll(Color.CHAT_GLOBAL,
             string.format("%s has entered the world.", playerName))
 
-    local isAdmin = components.admin.Get(playerEntityId)
+    local isAdmin = Components.Admin.Get(playerEntityId)
     if (isAdmin) then
-        chat.SendToPlayer(playerEntityId, color.ALERT, "You are an admin.")
+        Chat.SendToPlayer(playerEntityId, Color.ALERT, "You are an admin.")
     end
 end
 
-function on_player_logout(event)
+local function OnPlayerLogout(event)
     local playerEntityId = event.EntityId
-    local playerName = components.name.Get(playerEntityId, true)
-    chat.SendToAll(color.CHAT_GLOBAL,
+    local playerName = Components.Name.Get(playerEntityId, true)
+    Chat.SendToAll(Color.CHAT_GLOBAL,
             string.format("%s has left the world.", playerName))
 end
 
-scripting.AddEventCallback(events.Server_Persistence_PlayerEnteredWorld, on_player_entered)
-scripting.AddEventCallback(events.Core_Network_Logout, on_player_logout)
+Scripting.AddEventCallback(Events.Server_Persistence_PlayerEnteredWorld, OnPlayerEntered)
+Scripting.AddEventCallback(Events.Core_Network_Logout, OnPlayerLogout)

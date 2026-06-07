@@ -24,7 +24,7 @@ namespace Sovereign.EngineCore.Components;
 ///     The AnimatedSprite component denotes the animated sprite ID to use for
 ///     rendering general (non-block) drawable entities.
 /// </summary>
-[ScriptableComponents("animated_sprite")]
+[ScriptableComponents]
 public sealed class AnimatedSpriteComponentCollection : BaseComponentCollection<int>
 {
     /// <summary>

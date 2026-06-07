@@ -49,82 +49,83 @@
 --
 -- ================
 
-local EntityBehavior = require("EntityBehavior")
+local EntityBehavior = require("Sovereign.EntityBehavior")
+local WaitType = EntityBehavior.WaitType
 
 local ParamNextId = "Sovereign.TimedChange.NextId"
 local ParamChangeTime = "Sovereign.TimedChange.ChangeTime"
 local DataNextTime = "Sovereign.TimedChange.%s.NextTime"
 local DataPrevTime = "Sovereign.TimedChange.PrevTime"
 
-EntityBehavior.Create(
-function (behavior, entityId)
+local timedChange = EntityBehavior.Create(
+---@param behavior EntityBehavior
+---@param entity Entity
+function (behavior, entity)
 
     -- Retrieve and validate parameters.
-    local entityData = data.GetEntityData(entityId)
-    
-    local nextId = tonumber(entityData[ParamNextId])
-    if not nextId or not entities.IsTemplate(nextId) then
-        util.LogError(string.format("Entity %X has invalid or missing parameter %s.",
-            entityId, ParamNextId))
+    local nextId = tonumber(entity.Data[ParamNextId])
+    if not nextId or not Entities.IsTemplate(nextId) then
+        Util.LogError(string.format("Entity %X has invalid or missing parameter %s.",
+            entity.EntityId, ParamNextId))
         return
     end
 
-    local changeTime = tonumber(entityData[ParamChangeTime])
+    local changeTime = tonumber(entity.Data[ParamChangeTime])
     if not changeTime or changeTime < 0 then
-        util.LogError(string.format("Entity %X has invalid or missing parameter %s.",
-            entityId, ParamChangeTime))
+        Util.LogError(string.format("Entity %X has invalid or missing parameter %s.",
+            entity.EntityId, ParamChangeTime))
         return
     end
 
-    local templateId = entities.GetTemplate(entityId)
-    local selfIdStr = templateId and tostring(templateId - entities.FirstTemplateEntityId) or "Self"
+    local templateId = entity.Properties.TemplateId
+    local selfIdStr = templateId and tostring(templateId - Entities.FirstTemplateEntityId) or "Self"
     local key = string.format(DataNextTime, selfIdStr)
 
     while true do
         -- Check if a timed change is already in process.
-        local nextTime = tonumber(entityData[key])
-        local now = time.GetAbsoluteTime()
+        local nextTime = tonumber(entity.Data[key])
+        local now = Time.GetAbsoluteTime()
         if nextTime then
             -- Did the time elapse?
             if now >= nextTime then
                 -- Elapsed - time to update the entity's template and end processing.
-                entityData[key] = nil
-                entityData[DataPrevTime] = nextTime
-                entities.SetTemplate(entityId, nextId)
+                entity.Data[key] = nil
+                entity.Data[DataPrevTime] = nextTime
+                entity.Properties.TemplateId = nextId
                 return
             else
                 -- Wait until ready.
-                behavior:WaitAsync(entityId, nextTime - now)
+                behavior:Wait(entity.EntityId, WaitType.Time, nextTime - now)
             end
         else
             -- Schedule transformation.
-            local prevTime = tonumber(entityData[DataPrevTime]) or now
+            local prevTime = tonumber(entity.Data[DataPrevTime]) or now
             nextTime = prevTime + changeTime
-            entityData[key] = nextTime
+            entity.Data[key] = nextTime
             if now >= nextTime then
                 -- Newest change is already elapsed - apply the transformation.  
-                entityData[key] = nil
-                entityData[DataPrevTime] = nextTime
-                entities.SetTemplate(entityId, nextId)
+                entity.Data[key] = nil
+                entity.Data[DataPrevTime] = nextTime
+                entity.Properties.TemplateId = nextId
                 return
             else
-                behavior:WaitAsync(entityId, nextTime - now)
+                behavior:Wait(entity.EntityId, WaitType.Time, nextTime - now)
             end
         end
     end
 
 end
-):InstallGlobalHooks()
+)
 
-scripting.AddEntityParameterHint(
-    EntityBehavior.DefaultLoadFunction,
+Scripting.AddEntityParameterHint(
+    timedChange.LoadHookName,
     ParamNextId,
     "SameTypeTemplate",
     "Template ID to which the entity will change."
 )
 
-scripting.AddEntityParameterHint(
-    EntityBehavior.DefaultLoadFunction,
+Scripting.AddEntityParameterHint(
+    timedChange.LoadHookName,
     ParamChangeTime,
     "Float",
     "In-game time after which the entity's template will change."

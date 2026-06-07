@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -39,25 +38,23 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     if (context.SemanticModel.GetDeclaredSymbol(context.TargetNode, cToken) is not
                         INamedTypeSymbol clsSymbol) throw new Exception("not a named type");
 
-                    var luaName = clsSymbol.GetAttributes()
-                        .Where(a => a.AttributeClass!.Name == "ScriptableComponents")
-                        .Select(a => a.ConstructorArguments[0].Value)
-                        .OfType<string>()
-                        .First();
-
                     if (clsSymbol.BaseType!.Name == "BaseTagCollection")
+                    {
+                        var luaTagName = clsSymbol.Name.Replace("TagCollection", "");
                         return new Model
                         {
                             Name = clsSymbol.Name,
                             FullNamespace = SyntaxUtil.GetFullNamespace(clsSymbol.ContainingNamespace),
                             BindingName = $"{clsSymbol.Name}LuaComponents",
-                            LuaName = luaName,
+                            LuaName = luaTagName,
                             ValueType = "Boolean",
                             ValueTypeFullNamespace = "System",
                             MarshallerAssemblyName = "Sovereign.EngineCore",
                             IsTag = true
                         };
+                    }
 
+                    var luaComponentName = clsSymbol.Name.Replace("ComponentCollection", "");
                     var valueTypeSym = clsSymbol.BaseType!.TypeArguments[0];
                     var valueTypeName = valueTypeSym.Name;
                     var isSystemType = valueTypeSym.ContainingNamespace == null || // intrinsics
@@ -73,7 +70,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                         Name = clsSymbol.Name,
                         FullNamespace = SyntaxUtil.GetFullNamespace(clsSymbol.ContainingNamespace),
                         BindingName = $"{clsSymbol.Name}LuaComponents",
-                        LuaName = luaName,
+                        LuaName = luaComponentName,
                         ValueType = valueTypeName,
                         ValueTypeFullNamespace = valueTypeFullNs,
                         MarshallerAssemblyName = marshallerAssemblyName,

@@ -1,12 +1,12 @@
 (script-entities)=
-# entities Module
+# Entities Module
 
 :::{contents}
 :local:
 :depth: 2
 :::
 
-The `entities` module provides functions for creating and removing entities.
+The `Entities` module provides functions for creating and removing entities.
 
 ## Entity Management Functions
 
@@ -15,7 +15,7 @@ The `entities` module provides functions for creating and removing entities.
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: entities.Create(spec)
+.. lua:function:: Entities.Create(spec)
 
    Creates a new entity according to the provided specification.
    
@@ -55,9 +55,9 @@ if one is not provided.
 #### Example
 
 ```{code-block} lua
-:caption: Creating an entity using entities.Create(spec)
+:caption: Creating an entity using Entities.Create(spec)
 :emphasize-lines: 1,2,3,4,5,6,7,8,9
-local entityId = entities.Create({
+local entityId = Entities.Create({
     Name = "Test Entity",
     Kinematics = {
         Position = {X = 0.0, Y = 0.0, Z = 0.0},
@@ -68,9 +68,9 @@ local entityId = entities.Create({
 })
 
 if (entityId) then
-    util.LogDebug(string.format("Created new entity with ID %x.", entityId))
+    Util.LogDebug(string.format("Created new entity with ID %x.", entityId))
 else
-    util.LogError("Error while creating entity.")
+    Util.LogError("Error while creating entity.")
 end
 ```
 
@@ -79,7 +79,7 @@ end
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: entities.Remove(entityId)
+.. lua:function:: Entities.Remove(entityId)
 
    Removes the given entity from the game world.
    
@@ -90,9 +90,9 @@ end
 #### Example
 
 ```{code-block} lua
-:caption: Removing an entity using entities.Remove(entityId)
+:caption: Removing an entity using Entities.Remove(entityId)
 :emphasize-lines: 1
-entities.Remove(targetEntityId)
+Entities.Remove(targetEntityId)
 ```
 
 ### GetTemplate(entityId)
@@ -100,7 +100,7 @@ entities.Remove(targetEntityId)
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: entities.GetTemplate(entityId)
+.. lua:function:: Entities.GetTemplate(entityId)
 
    Gets the template entity ID for the given entity, if any.
    
@@ -115,7 +115,7 @@ entities.Remove(targetEntityId)
 ```{code-block} lua
 :caption: Getting the template entity ID for an entity
 :emphasize-lines: 1
-local templateId = entities.GetTemplate(entityId)
+local templateId = Entities.GetTemplate(entityId)
 ```
 
 ### SetTemplate(entityId, templateId)
@@ -123,7 +123,7 @@ local templateId = entities.GetTemplate(entityId)
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: entities.SetTemplate(entityId, templateId)
+.. lua:function:: Entities.SetTemplate(entityId, templateId)
 
    Sets the template entity ID for the given entity.
    
@@ -138,7 +138,7 @@ local templateId = entities.GetTemplate(entityId)
 ```{code-block} lua
 :caption: Setting the template entity ID for an entity
 :emphasize-lines: 1
-entities.SetTemplate(entityId, templateId)
+Entities.SetTemplate(entityId, templateId)
 ```
 
 ### IsTemplate(entityId)
@@ -146,7 +146,7 @@ entities.SetTemplate(entityId, templateId)
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: entities.IsTemplate(entityId)
+.. lua:function:: Entities.IsTemplate(entityId)
 
    Returns true if the given entity ID is a template entity.
    
@@ -161,7 +161,7 @@ entities.SetTemplate(entityId, templateId)
 ```{code-block} lua
 :caption: Checking if an entity is a template entity
 :emphasize-lines: 1
-if entities.IsTemplate(entityId) then
+if Entities.IsTemplate(entityId) then
     print("Entity is a template.")
 end
 ```
@@ -171,7 +171,7 @@ end
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: entities.Sync(entityId)
+.. lua:function:: Entities.Sync(entityId)
 
    Synchronizes the given entity or entities to any subscribed clients.
 
@@ -186,11 +186,11 @@ end
 :emphasize-lines: 3,7
 -- Single entity.
 local singleId = 0x7FFF000000000000
-entities.Sync(singleId)
+Entities.Sync(singleId)
 
--- Multiple entities.
+-- Multiple Entities.
 local multipleIds = { 0x7FFF000000000000, 0x7FFF000000000001 }
-entities.Sync(multipleIds)
+Entities.Sync(multipleIds)
 ```
 
 ### SyncTree(entityId)
@@ -198,7 +198,7 @@ entities.Sync(multipleIds)
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: entities.SyncTree(entityId)
+.. lua:function:: Entities.SyncTree(entityId)
 
    Synchronizes the given entity or entities and all descendants to any subscribed clients.
 
@@ -213,16 +213,16 @@ entities.Sync(multipleIds)
 :emphasize-lines: 3,7
 -- Single entity and its descendants.
 local singleId = 0x7FFF000000000000
-entities.SyncTree(singleId)
+Entities.SyncTree(singleId)
 
 -- Multiple entities and their descendants.
 local multipleIds = { 0x7FFF000000000000, 0x7FFF000000000001 }
-entities.SyncTree(multipleIds)
+Entities.SyncTree(multipleIds)
 ```
 
 ### Constants
 
-The following constants are available in the `entities` module:
+The following constants are available in the `Entities` module:
 
 | Constant                      | Value Type   | Description                                 |
 |-------------------------------|--------------|---------------------------------------------|

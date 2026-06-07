@@ -24,7 +24,7 @@ namespace Sovereign.ServerCore.Systems.Time;
 /// <summary>
 ///     Provides the "time" Lua module for reading the game clock and system clock.
 /// </summary>
-[ScriptableLibrary("time")]
+[ScriptableLibrary("Time")]
 public class TimeScripting(ITimeServices timeServices, ISystemTimer systemTimer)
 {
     [ScriptableFunction("GetSystemTime")]

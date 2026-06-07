@@ -1,6 +1,6 @@
 # util Module
 
-The `util` global module provides common utility functions for scripts.
+The `Util` global module provides common utility functions for scripts.
 
 ## Logging Functions
 
@@ -9,7 +9,7 @@ The `util` global module provides common utility functions for scripts.
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: util.LogInfo(message)
+.. lua:function:: Util.LogInfo(message)
 
     Writes an informational message to the log.
     
@@ -20,9 +20,9 @@ The `util` global module provides common utility functions for scripts.
 #### Example
 
 ```{code-block} lua
-:caption: Logging using the util.LogInfo(message) function.
+:caption: Logging using the Util.LogInfo(message) function.
 :emphasize-lines: 1
-util.LogInfo("Hello World!")
+Util.LogInfo("Hello World!")
 ```
 
 ### LogWarn(message)
@@ -30,7 +30,7 @@ util.LogInfo("Hello World!")
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: util.LogWarn(message)
+.. lua:function:: Util.LogWarn(message)
 
     Writes a warning message to the log.
     
@@ -41,9 +41,9 @@ util.LogInfo("Hello World!")
 #### Example
 
 ```{code-block} lua
-:caption: Logging using the util.LogWarn(message) function.
+:caption: Logging using the Util.LogWarn(message) function.
 :emphasize-lines: 1
-util.LogWarn("Hello World!")
+Util.LogWarn("Hello World!")
 ```
 
 (script-util-logerror)=
@@ -52,7 +52,7 @@ util.LogWarn("Hello World!")
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: util.LogError(message)
+.. lua:function:: Util.LogError(message)
 
     Writes an error message to the log.
     
@@ -63,9 +63,9 @@ util.LogWarn("Hello World!")
 #### Example
 
 ```{code-block} lua
-:caption: Logging using the util.LogError(message) function.
+:caption: Logging using the Util.LogError(message) function.
 :emphasize-lines: 1
-util.LogError("Hello World!")
+Util.LogError("Hello World!")
 ```
 
 ### LogCrit(message)
@@ -73,7 +73,7 @@ util.LogError("Hello World!")
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: util.LogCrit(message)
+.. lua:function:: Util.LogCrit(message)
 
     Writes a critical/fatal error message to the log.
     
@@ -84,9 +84,9 @@ util.LogError("Hello World!")
 #### Example
 
 ```{code-block} lua
-:caption: Logging using the util.LogCrit(message) function.
+:caption: Logging using the Util.LogCrit(message) function.
 :emphasize-lines: 1
-util.LogCrit("Hello World!")
+Util.LogCrit("Hello World!")
 ```
 
 ### LogDebug(message)
@@ -94,7 +94,7 @@ util.LogCrit("Hello World!")
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: util.LogDebug(message)
+.. lua:function:: Util.LogDebug(message)
 
     Writes a debug message to the log.
     
@@ -105,9 +105,9 @@ util.LogCrit("Hello World!")
 #### Example
 
 ```{code-block} lua
-:caption: Logging using the util.LogDebug(message) function.
+:caption: Logging using the Util.LogDebug(message) function.
 :emphasize-lines: 1
-util.LogDebug("Hello World!")
+Util.LogDebug("Hello World!")
 ```
 
 ### LogTrace(message)
@@ -115,7 +115,7 @@ util.LogDebug("Hello World!")
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: util.LogTrace(message)
+.. lua:function:: Util.LogTrace(message)
 
     Writes a trace debug message to the log.
     
@@ -126,9 +126,9 @@ util.LogDebug("Hello World!")
 #### Example
 
 ```{code-block} lua
-:caption: Logging using the util.LogTrace(message) function.
+:caption: Logging using the Util.LogTrace(message) function.
 :emphasize-lines: 1
-util.LogTrace("Hello World!")
+Util.LogTrace("Hello World!")
 ```
 
 ### ToBool(value)
@@ -136,7 +136,7 @@ util.LogTrace("Hello World!")
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: util.ToBool(value)
+.. lua:function:: Util.ToBool(value)
 
     Tries to convert the given string to a boolean.
 
@@ -150,9 +150,9 @@ util.LogTrace("Hello World!")
 #### Example
 
 ```{code-block} lua
-:caption: Converting a string to boolean using the util.ToBool(value) function.
+:caption: Converting a string to boolean using the Util.ToBool(value) function.
 :emphasize-lines: 1,2,3
-util.ToBool("True")          -- returns true
-util.ToBool("False")         -- returns false
-util.ToBool("Hello World!")  -- returns nil
+Util.ToBool("True")          -- returns true
+Util.ToBool("False")         -- returns false
+Util.ToBool("Hello World!")  -- returns nil
 ```

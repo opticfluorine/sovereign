@@ -1,11 +1,11 @@
-# time Module
+# Time Module
 
 :::{contents}
 :local:
 :depth: 2
 :::
 
-The `time` module provides APIs for reading the game clock. The game clock
+The `Time` module provides APIs for reading the game clock. The game clock
 is a persisted clock that begins at zero when the server is started for the
 first time. The game clock is monotonic (always increases - never goes
 backwards) and is persisted across server runs.
@@ -39,7 +39,7 @@ All numeric time values start at zero (e.g. `GetMonthOfYear` runs from
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetSystemTime()
+.. lua:function:: Time.GetSystemTime()
 
    Gets the current system time in microseconds since an arbitrary reference point.
    
@@ -50,15 +50,15 @@ All numeric time values start at zero (e.g. `GetMonthOfYear` runs from
 #### Example
 
 ```{code-block} lua
-:caption: Getting the system time using time.GetSystemTime.
+:caption: Getting the system time using Time.GetSystemTime.
 :emphasize-lines: 1
-local systemTime = time.GetSystemTime()
+local systemTime = Time.GetSystemTime()
 ```
 
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.FutureSystemTime(delaySeconds)
+.. lua:function:: Time.FutureSystemTime(delaySeconds)
 
    Gets a future system time in microseconds since an arbitrary reference point.
    
@@ -72,9 +72,9 @@ local systemTime = time.GetSystemTime()
 #### Example
 
 ```{code-block} lua
-:caption: Getting a future system time using time.FutureSystemTime.
+:caption: Getting a future system time using Time.FutureSystemTime.
 :emphasize-lines: 1
-local futureTime = time.FutureSystemTime(1.0) -- system time 1 second in the future
+local futureTime = Time.FutureSystemTime(1.0) -- system time 1 second in the future
 ```
 
 ### GetAbsoluteTime()
@@ -82,7 +82,7 @@ local futureTime = time.FutureSystemTime(1.0) -- system time 1 second in the fut
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetAbsoluteTime()
+.. lua:function:: Time.GetAbsoluteTime()
 
    Gets the absolute time in the game world, measured in seconds since the game started.
    
@@ -93,9 +93,9 @@ local futureTime = time.FutureSystemTime(1.0) -- system time 1 second in the fut
 #### Example
 
 ```{code-block} lua
-:caption: Getting the absolute time using time.GetAbsoluteTime.
+:caption: Getting the absolute time using Time.GetAbsoluteTime.
 :emphasize-lines: 1
-local absoluteTime = time.GetAbsoluteTime()
+local absoluteTime = Time.GetAbsoluteTime()
 ```
 
 ### GetYear()
@@ -103,7 +103,7 @@ local absoluteTime = time.GetAbsoluteTime()
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetYear()
+.. lua:function:: Time.GetYear()
 
    Gets the current year in the game world.
    
@@ -114,9 +114,9 @@ local absoluteTime = time.GetAbsoluteTime()
 #### Example
 
 ```{code-block} lua
-:caption: Getting the current year using time.GetYear.
+:caption: Getting the current year using Time.GetYear.
 :emphasize-lines: 1
-local year = time.GetYear()
+local year = Time.GetYear()
 ```
 
 ### GetSeason()
@@ -124,7 +124,7 @@ local year = time.GetYear()
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetSeason()
+.. lua:function:: Time.GetSeason()
 
    Gets the current season in the game world.
    
@@ -135,9 +135,9 @@ local year = time.GetYear()
 #### Example
 
 ```{code-block} lua
-:caption: Getting the current season using time.GetSeason.
+:caption: Getting the current season using Time.GetSeason.
 :emphasize-lines: 1
-local season = time.GetSeason()
+local season = Time.GetSeason()
 ```
 
 ### GetMonth()
@@ -145,7 +145,7 @@ local season = time.GetSeason()
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetMonth()
+.. lua:function:: Time.GetMonth()
 
    Gets the current month in the game world.
    
@@ -156,9 +156,9 @@ local season = time.GetSeason()
 #### Example
 
 ```{code-block} lua
-:caption: Getting the current month using time.GetMonth.
+:caption: Getting the current month using Time.GetMonth.
 :emphasize-lines: 1
-local month = time.GetMonth()
+local month = Time.GetMonth()
 ```
 
 ### GetMonthOfYear()
@@ -166,7 +166,7 @@ local month = time.GetMonth()
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetMonthOfYear()
+.. lua:function:: Time.GetMonthOfYear()
 
    Gets the current month of the year in the game world.
    
@@ -177,9 +177,9 @@ local month = time.GetMonth()
 #### Example
 
 ```{code-block} lua
-:caption: Getting the current month of the year using time.GetMonthOfYear.
+:caption: Getting the current month of the year using Time.GetMonthOfYear.
 :emphasize-lines: 1
-local monthOfYear = time.GetMonthOfYear()
+local monthOfYear = Time.GetMonthOfYear()
 ```
 
 ### GetWeekOfMonth()
@@ -187,7 +187,7 @@ local monthOfYear = time.GetMonthOfYear()
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetWeekOfMonth()
+.. lua:function:: Time.GetWeekOfMonth()
 
    Gets the current week of the month in the game world.
    
@@ -198,9 +198,9 @@ local monthOfYear = time.GetMonthOfYear()
 #### Example
 
 ```{code-block} lua
-:caption: Getting the current week of the month using time.GetWeekOfMonth.
+:caption: Getting the current week of the month using Time.GetWeekOfMonth.
 :emphasize-lines: 1
-local weekOfMonth = time.GetWeekOfMonth()
+local weekOfMonth = Time.GetWeekOfMonth()
 ```
 
 ### GetDayOfMonth()
@@ -208,7 +208,7 @@ local weekOfMonth = time.GetWeekOfMonth()
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetDayOfMonth()
+.. lua:function:: Time.GetDayOfMonth()
 
    Gets the current day of the month in the game world.
    
@@ -219,9 +219,9 @@ local weekOfMonth = time.GetWeekOfMonth()
 #### Example
 
 ```{code-block} lua
-:caption: Getting the current day of the month using time.GetDayOfMonth.
+:caption: Getting the current day of the month using Time.GetDayOfMonth.
 :emphasize-lines: 1
-local dayOfMonth = time.GetDayOfMonth()
+local dayOfMonth = Time.GetDayOfMonth()
 ```
 
 ### GetWeek()
@@ -229,7 +229,7 @@ local dayOfMonth = time.GetDayOfMonth()
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetWeek()
+.. lua:function:: Time.GetWeek()
 
    Gets the current week in the game world.
    
@@ -240,9 +240,9 @@ local dayOfMonth = time.GetDayOfMonth()
 #### Example
 
 ```{code-block} lua
-:caption: Getting the current week using time.GetWeek.
+:caption: Getting the current week using Time.GetWeek.
 :emphasize-lines: 1
-local week = time.GetWeek()
+local week = Time.GetWeek()
 ```
 
 ### GetDayOfWeek()
@@ -250,7 +250,7 @@ local week = time.GetWeek()
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetDayOfWeek()
+.. lua:function:: Time.GetDayOfWeek()
 
    Gets the current day of the week in the game world.
    
@@ -261,9 +261,9 @@ local week = time.GetWeek()
 #### Example
 
 ```{code-block} lua
-:caption: Getting the current day of the week using time.GetDayOfWeek.
+:caption: Getting the current day of the week using Time.GetDayOfWeek.
 :emphasize-lines: 1
-local dayOfWeek = time.GetDayOfWeek()
+local dayOfWeek = Time.GetDayOfWeek()
 ```
 
 ### GetDay()
@@ -271,7 +271,7 @@ local dayOfWeek = time.GetDayOfWeek()
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetDay()
+.. lua:function:: Time.GetDay()
 
    Gets the current day in the game world.
    
@@ -282,9 +282,9 @@ local dayOfWeek = time.GetDayOfWeek()
 #### Example
 
 ```{code-block} lua
-:caption: Getting the current day using time.GetDay.
+:caption: Getting the current day using Time.GetDay.
 :emphasize-lines: 1
-local day = time.GetDay()
+local day = Time.GetDay()
 ```
 
 ### GetHourOfDay()
@@ -292,7 +292,7 @@ local day = time.GetDay()
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetHourOfDay()
+.. lua:function:: Time.GetHourOfDay()
 
    Gets the current hour of the day in the game world.
    
@@ -303,9 +303,9 @@ local day = time.GetDay()
 #### Example
 
 ```{code-block} lua
-:caption: Getting the current hour of the day using time.GetHourOfDay.
+:caption: Getting the current hour of the day using Time.GetHourOfDay.
 :emphasize-lines: 1
-local hourOfDay = time.GetHourOfDay()
+local hourOfDay = Time.GetHourOfDay()
 ```
 
 ### GetSecondOfDay()
@@ -313,7 +313,7 @@ local hourOfDay = time.GetHourOfDay()
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: time.GetSecondOfDay()
+.. lua:function:: Time.GetSecondOfDay()
 
    Gets the current second of the day in the game world.
    
@@ -324,7 +324,7 @@ local hourOfDay = time.GetHourOfDay()
 #### Example
 
 ```{code-block} lua
-:caption: Getting the current second of the day using time.GetSecondOfDay.
+:caption: Getting the current second of the day using Time.GetSecondOfDay.
 :emphasize-lines: 1
-local secondOfDay = time.GetSecondOfDay()
+local secondOfDay = Time.GetSecondOfDay()
 ```

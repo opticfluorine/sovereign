@@ -22,7 +22,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Tag collection for the PlayerCharacter tag, used to indicate that an entity is a player character.
 /// </summary>
-[ScriptableComponents("player_character")]
+[ScriptableComponents]
 public class PlayerCharacterTagCollection : BaseTagCollection
 {
     /// <summary>

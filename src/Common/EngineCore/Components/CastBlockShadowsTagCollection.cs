@@ -22,7 +22,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Tag collection for the CastBlockShadows component.
 /// </summary>
-[ScriptableComponents("cast_block_shadows")]
+[ScriptableComponents]
 public class CastBlockShadowsTagCollection : BaseTagCollection
 {
     private const int InitialSize = 1024;

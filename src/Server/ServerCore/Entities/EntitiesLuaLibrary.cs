@@ -61,7 +61,7 @@ public class EntitiesLuaLibrary : ILuaLibrary
 
     public void Install(LuaHost luaHost)
     {
-        luaHost.BeginLibrary("entities");
+        luaHost.BeginLibrary("Entities");
         try
         {
             luaHost.AddLibraryFunction(nameof(Create), Create);

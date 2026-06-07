@@ -24,7 +24,7 @@ namespace Sovereign.ServerCore.Systems.Dialogue;
 /// <summary>
 ///     Provides the "dialogue" Lua module for displaying dialogue to players.
 /// </summary>
-[ScriptableLibrary("dialogue")]
+[ScriptableLibrary("Dialogue")]
 public class DialogueScripting(IDialogueController controller, IEventSender eventSender)
 {
     private readonly Lock eventLock = new();

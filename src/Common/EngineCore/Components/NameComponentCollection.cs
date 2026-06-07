@@ -22,7 +22,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Component collection for the Name component which gives a name to its entity.
 /// </summary>
-[ScriptableComponents("name")]
+[ScriptableComponents]
 public class NameComponentCollection : BaseComponentCollection<string>
 {
     private const int InitialSize = 4096;

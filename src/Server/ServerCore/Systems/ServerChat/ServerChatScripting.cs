@@ -21,7 +21,7 @@ namespace Sovereign.ServerCore.Systems.ServerChat;
 /// <summary>
 ///     Provides the "chat" Lua module for sending messages to players.
 /// </summary>
-[ScriptableLibrary("chat")]
+[ScriptableLibrary("Chat")]
 public class ServerChatScripting
 {
     private readonly ServerChatInternalController internalController;

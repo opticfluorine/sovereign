@@ -1,6 +1,6 @@
 # dialogue Module
 
-The `dialogue` module provides APIs for displaying dialogue to players.
+The `Dialogue` module provides APIs for displaying dialogue to players.
 
 ## Dialogue Functions
 
@@ -9,7 +9,7 @@ The `dialogue` module provides APIs for displaying dialogue to players.
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: dialogue.Show(targetEntityId, subject, message)
+.. lua:function:: Dialogue.Show(targetEntityId, subject, message)
 
    Shows a dialogue message to a specific player.
 
@@ -24,9 +24,9 @@ The `dialogue` module provides APIs for displaying dialogue to players.
 #### Example
 
 ```{code-block} lua
-:caption: Showing a dialogue message to a player using dialogue.Show.
+:caption: Showing a dialogue message to a player using Dialogue.Show.
 :emphasize-lines: 1
-dialogue.Show(playerEntityId, "NPC Name", "Welcome to the world!")
+Dialogue.Show(playerEntityId, "NPC Name", "Welcome to the world!")
 ```
 
 ### ShowProfile(targetEntityId, profileSpriteId, subject, message)
@@ -34,7 +34,7 @@ dialogue.Show(playerEntityId, "NPC Name", "Welcome to the world!")
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: dialogue.ShowProfile(targetEntityId, profileSpriteId, subject, message)
+.. lua:function:: Dialogue.ShowProfile(targetEntityId, profileSpriteId, subject, message)
 
    Shows a dialogue message with a profile sprite to a specific player.
 
@@ -51,7 +51,7 @@ dialogue.Show(playerEntityId, "NPC Name", "Welcome to the world!")
 #### Example
 
 ```{code-block} lua
-:caption: Showing a dialogue message with a profile sprite using dialogue.ShowProfile.
+:caption: Showing a dialogue message with a profile sprite using Dialogue.ShowProfile.
 :emphasize-lines: 1
-dialogue.ShowProfile(playerEntityId, 101, "NPC Name", "This message has a profile sprite.")
+Dialogue.ShowProfile(playerEntityId, 101, "NPC Name", "This message has a profile sprite.")
 ```

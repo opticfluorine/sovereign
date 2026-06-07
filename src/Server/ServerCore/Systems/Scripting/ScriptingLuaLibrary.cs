@@ -60,7 +60,7 @@ public class ScriptingLuaLibrary(
     {
         try
         {
-            luaHost.BeginLibrary("scripting");
+            luaHost.BeginLibrary("Scripting");
             luaHost.AddLibraryFunction(nameof(AddEventCallback), AddEventCallback);
             luaHost.AddLibraryFunction(nameof(AddTimedCallback), AddTimedCallback);
             luaHost.AddLibraryFunction(nameof(AddCollisionCallback), AddCollisionCallback);

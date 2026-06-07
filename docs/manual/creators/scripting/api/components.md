@@ -1,35 +1,35 @@
 (script-components)=
-# components Module
+# Components Module
 
 :::{contents}
 :local:
 :depth: 2
 :::
 
-All components and tags share a common API provided through the `components` module.
+All components and tags share a common API provided through the `Components` module.
 
 ## Component Submodules
 
-Each component collection that is accessible through the scripting engine may be accessed through a submodule of the global `components` module. The following table lists the component submodules, their associated component collection, and the corresponding value type.
+Each component collection that is accessible through the scripting engine may be accessed through a submodule of the global `Components` module. The following table lists the component submodules, their associated component collection, and the corresponding value type.
 
-|Submodule                      |Component Collection                 |Value Type    |
-|-------------------------------|-------------------------------------|--------------|
-|`components.admin`             |`AdminTagCollection`                 |`boolean`     |
-|`components.animated_sprite`   |`AnimatedSpriteComponentCollection`  |`integer`     |
-|`components.block_position`    |`BlockPositionComponentCollection`   |`GridPosition`|
-|`components.block_tile`        |`BlockTileComponentCollection`       |`BlockTile`   |
-|`components.cast_block_shadows`|`CastBlockShadowsTagCollection`      |`boolean`     |
-|`components.cast_shadows`      |`CastShadowsComponentCollection`     |`Shadow`      |
-|`components.drawable`          |`DrawableComponentCollection`        |`Vector2`     |
-|`components.entity_type`       |`EntityTypeComponentCollection`      |`EntityType`  |
-|`components.kinematics`        |`KinematicsComponentCollection`      |`Kinematics`  |
-|`components.name`              |`NameComponentCollection`            |`string`      |
-|`components.orientation`       |`OrientationComponentCollection`     |`integer`     |
-|`components.parent`            |`ParentComponentCollection`          |`integer`     |
-|`components.physics`           |`PhysicsTagCollection`               |`boolean`     |
-|`components.player_character`  |`PlayerCharacterTagCollection`       |`boolean`     |
-|`components.point_light`       |`PointLightSourceComponentCollection`|`PointLight`  |
-|`components.server_only`       |`ServerOnlyTagCollection`            |`boolean`     |
+| Submodule                     | Component Collection                  | Value Type     |
+| ----------------------------- | ------------------------------------- | -------------- |
+| `Components.Admin`            | `AdminTagCollection`                  | `boolean`      |
+| `Components.AnimatedSprite`   | `AnimatedSpriteComponentCollection`   | `integer`      |
+| `Components.BlockPosition`    | `BlockPositionComponentCollection`    | `GridPosition` |
+| `Components.BlockTile`        | `BlockTileComponentCollection`        | `BlockTile`    |
+| `Components.CastBlockShadows` | `CastBlockShadowsTagCollection`       | `boolean`      |
+| `Components.CastShadows`      | `CastShadowsComponentCollection`      | `Shadow`       |
+| `Components.Drawable`         | `DrawableComponentCollection`         | `Vector2`      |
+| `Components.EntityType`       | `EntityTypeComponentCollection`       | `EntityType`   |
+| `Components.Kinematics`       | `KinematicsComponentCollection`       | `Kinematics`   |
+| `Components.Name`             | `NameComponentCollection`             | `string`       |
+| `Components.Orientation`      | `OrientationComponentCollection`      | `integer`      |
+| `Components.Parent`           | `ParentComponentCollection`           | `integer`      |
+| `Components.Physics`          | `PhysicsTagCollection`                | `boolean`      |
+| `Components.PlayerCharacter`  | `PlayerCharacterTagCollection`        | `boolean`      |
+| `Components.PointLight`       | `PointLightSourceComponentCollection` | `PointLight`   |
+| `Components.ServerOnly`       | `ServerOnlyTagCollection`             | `boolean`      |
 
 ## General Component Functions
 
@@ -40,7 +40,7 @@ The following functions are common to multiple component types.
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: components.<component>.Exists(entityId, lookback=false)
+.. lua:function:: Components.<component>.Exists(entityId, lookback=false)
 
    Gets whether the given entity has this component.
    
@@ -57,14 +57,14 @@ The following functions are common to multiple component types.
 ```{code-block} lua
 :caption: Using `Exists(entityId)` to check for the presence of a tag.
 :emphasize-lines: 1, 8
-if (components.player_character.Exists(entityId)) then
+if (Components.PlayerCharacter.Exists(entityId)) then
   -- This entity is a player character.
-  util.LogInfo(string.format("%x is a player.", entityId))
+  Util.LogInfo(string.format("%x is a player.", entityId))
 end
 
 -- If the player just logged out, the tag may have been removed before the script
 -- was called. Use lookback to handle this situation.
-if (components.player_character.Exists(entityId, true)) then
+if (Components.PlayerCharacter.Exists(entityId, true)) then
   -- ...
 end
 ```
@@ -74,7 +74,7 @@ end
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: components.<component>.Get(entityId, lookback=false)
+.. lua:function:: Components.<component>.Get(entityId, lookback=false)
 
    Gets the component value for the given entity.
 
@@ -92,14 +92,14 @@ end
 ```{code-block} lua
 :caption: Using `Get(entityId)` to get the name of an entity.
 :emphasize-lines: 1, 8
-local name = components.name.Get(entityId)
+local name = Components.Name.Get(entityId)
 if (name) then
-  util.LogInfo(string.format("%x is named %s.", entityId, name))
+  Util.LogInfo(string.format("%x is named %s.", entityId, name))
 end
 
 -- If the player just logged out, the name component may have been unloaded before
 -- the script was called. Use lookback to handle this situation.
-local nameWithLookback = components.name.Get(entityId, true)
+local nameWithLookback = Components.Name.Get(entityId, true)
 if (name) then
    -- ...
 end
@@ -110,7 +110,7 @@ end
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: components.<component>.Remove(entityId)
+.. lua:function:: Components.<component>.Remove(entityId)
 
    Removes the component value for the given entity if it exists.
    
@@ -124,7 +124,7 @@ end
 :caption: Using `Remove(entityId)` to remove a component from an entity.
 :emphasize-lines: 2
 -- Remove the point light source from an entity.
-components.point_light.Remove(entityId)
+Components.PointLight.Remove(entityId)
 ```
 
 ### Set(entityId, value)
@@ -132,7 +132,7 @@ components.point_light.Remove(entityId)
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: components.<component>.Set(entityId, value)
+.. lua:function:: Components.<component>.Set(entityId, value)
 
    Enqueues an update to the component value for the given entity
    with the next tick. Note that the effects of this operation
@@ -153,12 +153,12 @@ components.point_light.Remove(entityId)
 :caption: Using `Set(entityId, value) to update a component.
 :emphasize-lines: 2
 -- Apply the drawable tag to the entity.
-components.drawable.Set(entityId, true)
+Components.Drawable.Set(entityId, true)
 
 -- Component values are updated at the boundary between ticks, so the
 -- earlier call to Set only enqueued an update. The result will not
 -- be visible until the next tick, as demonstrated here:
-if (components.drawable.Get(entityId)) then
+if (Components.Drawable.Get(entityId)) then
     -- This path never executes (assuming the entity did not already
     -- have the tag applied) as component updates do not take effect
     -- until the following tick.
@@ -171,7 +171,7 @@ end
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: components.<component>.Add(entityId, value)
+.. lua:function:: Components.<component>.Add(entityId, value)
 
    Enqueues an update to the component value which adds the given
    value to the current component value. This operation takes effect
@@ -193,15 +193,15 @@ end
 :caption: Using `Add(entityId, value)` to update a component.
 :emphasize-lines: 3
 -- Decrease the entity's health by a fixed amount.
-local currentHealth = components.health.Get(entityId)
-components.health.Add(entityId, -10)
+local currentHealth = Components.Health.Get(entityId)
+Components.Health.Add(entityId, -10)
 
 -- Component values are updated at the boundary between ticks, so the
 -- earlier call to Add only enqueued an update. The result will not
 -- be visible until the next tick, as demonstrated here:
-if (components.health.Get(entityId) == currentHealth) then
+if (Components.Health.Get(entityId) == currentHealth) then
     -- Entity health has not been changed yet - this branch executes.
-    util.LogInfo("Entity health has not changed yet.")
+    Util.LogInfo("Entity health has not changed yet.")
 end
 ```
 
@@ -210,7 +210,7 @@ end
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: components.<component>.Multiply(entityId, value)
+.. lua:function:: Components.<component>.Multiply(entityId, value)
 
    Enqueues an update to the component value which multiplies the current
    component value by the given value. This operation takes effect
@@ -232,15 +232,15 @@ end
 :caption: Using `Multiply(entityId, value)` to update a component.
 :emphasize-lines: 3
 -- Deal poison damage for 5% of the entity's current health.
-local currentHealth = components.health.Get(entityId)
-components.health.Multiply(entityId, 0.95)
+local currentHealth = Components.Health.Get(entityId)
+Components.Health.Multiply(entityId, 0.95)
 
 -- Component values are updated at the boundary between ticks, so the
 -- earlier call to Multiply only enqueued an update. The result will not
 -- be visible until the next tick, as demonstrated here:
-if (components.health.Get(entityId) == currentHealth) then
+if (Components.Health.Get(entityId) == currentHealth) then
     -- Entity health has not been changed yet - this branch executes.
-    util.LogInfo("Entity health has not changed yet.")
+    Util.LogInfo("Entity health has not changed yet.")
 end
 ```
 
@@ -249,7 +249,7 @@ end
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: components.<component>.Divide(entityId, value)
+.. lua:function:: Components.<component>.Divide(entityId, value)
 
    Enqueues an update to the component value which divides the current
    component value by the given value. This operation takes effect
@@ -271,17 +271,17 @@ end
 :caption: Using `Divide(entityId, value)` to update a component.
 :emphasize-lines: 5
 -- Sacrifice half of entity's health to fully restore own mana.
-local currentHealth = components.health.Get(entityId)
-local maxMana = components.max_mana.Get(entityId)
-components.mana.Set(entityId, maxMana)
-components.health.Divide(entityId, 2.0)
+local currentHealth = Components.Health.Get(entityId)
+local maxMana = Components.Max_Mana.Get(entityId)
+Components.Mana.Set(entityId, maxMana)
+Components.Health.Divide(entityId, 2.0)
 
 -- Component values are updated at the boundary between ticks, so the
 -- earlier call to Divide only enqueued an update. The result will not
 -- be visible until the next tick, as demonstrated here:
-if (components.health.Get(entityId) == currentHealth) then
+if (Components.Health.Get(entityId) == currentHealth) then
     -- Entity health has not been changed yet - this branch executes.
-    util.LogInfo("Entity health has not changed yet.")
+    Util.LogInfo("Entity health has not changed yet.")
 end
 ```
 
@@ -292,7 +292,7 @@ end
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: components.kinematics.SetVelocity(entityId, value)
+.. lua:function:: Components.kinematics.SetVelocity(entityId, value)
 
    Enqueues an update to a kinematics component value which changes
    the velocity value only, leaving the position value unchanged.
@@ -311,7 +311,7 @@ end
 :caption: Using `SetVelocity(entityId, value)` to update a component.
 :emphasize-lines: 2,3,4,5
 -- Stop any entity motion.
-components.kinematics.SetVelocity(entityId, {
+Components.Kinematics.SetVelocity(entityId, {
   Position = { X = 0.0, Y = 0.0, Z = 0.0 }, -- ignored
   Velocity = { X = 0.0, Y = 0.0, Z = 0.0 }  -- new velocity
 })
@@ -322,7 +322,7 @@ components.kinematics.SetVelocity(entityId, {
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: components.kinematics.AddPosition(entityId, value)
+.. lua:function:: Components.kinematics.AddPosition(entityId, value)
 
    Enqueues an update to a kinematics component value which adds to the
    position only, leaving the velocity value unchanged.
@@ -341,7 +341,7 @@ components.kinematics.SetVelocity(entityId, {
 :caption: Using `AddPosition(entityId, value)` to update a component.
 :emphasize-lines: 2,3,4,5
 -- Shift the entity by one block upward (+z direction).
-components.kinematics.AddPosition(entityId, {
+Components.Kinematics.AddPosition(entityId, {
   Position = { X = 0.0, Y = 0.0, Z = 1.0 }, -- position step
   Velocity = { X = 0.0, Y = 0.0, Z = 0.0 }  -- ignored
 })

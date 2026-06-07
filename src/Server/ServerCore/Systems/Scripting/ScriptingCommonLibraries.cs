@@ -25,28 +25,28 @@ public static class ScriptingCommonLibraries
     ///     Lua code for the global 'colors' module.
     /// </summary>
     public const string Color = @"
-        color = {}
+        Color = {}
         
-        color.Rgba = function (r, g, b, a)
+        Color.Rgba = function (r, g, b, a)
             return ((r & 0xFF) << 24) | ((g & 0xFF) << 16) | ((b & 0xFF) << 8) | (a & 0xFF)
         end
 
-        color.Rgb = function (r, g, b)
-            return color.Rgba(r, g, b, 0xFF)
+        Color.Rgb = function (r, g, b)
+            return Color.Rgba(r, g, b, 0xFF)
         end
 
-        -- Color constants by color.
-        color.WHITE = color.Rgb(255, 255, 255)
-        color.BLACK = color.Rgb(0, 0, 0)
-        color.RED   = color.Rgb(255, 0, 0)
-        color.GREEN = color.Rgb(0, 255, 0)
-        color.BLUE  = color.Rgb(0, 0, 255)
+        -- Color constants by Color.
+        Color.WHITE = Color.Rgb(255, 255, 255)
+        Color.BLACK = Color.Rgb(0, 0, 0)
+        Color.RED   = Color.Rgb(255, 0, 0)
+        Color.GREEN = Color.Rgb(0, 255, 0)
+        Color.BLUE  = Color.Rgb(0, 0, 255)
 
         -- Color constants by purpose.
-        color.MOTD        = color.Rgb(160, 160, 240)
-        color.ALERT       = color.Rgb(210, 80, 80)
-        color.CHAT_LOCAL  = color.Rgb(179, 179, 179)
-        color.CHAT_GLOBAL = color.Rgb(255, 255, 255)
-        color.CHAT_SYSTEM = color.Rgb(128, 128, 128)
+        Color.MOTD        = Color.Rgb(160, 160, 240)
+        Color.ALERT       = Color.Rgb(210, 80, 80)
+        Color.CHAT_LOCAL  = Color.Rgb(179, 179, 179)
+        Color.CHAT_GLOBAL = Color.Rgb(255, 255, 255)
+        Color.CHAT_SYSTEM = Color.Rgb(128, 128, 128)
     ";
 }

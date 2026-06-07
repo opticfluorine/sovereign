@@ -23,7 +23,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Manages the grid-based positions of block entities.
 /// </summary>
-[ScriptableComponents("block_position")]
+[ScriptableComponents]
 public class BlockPositionComponentCollection : BaseComponentCollection<GridPosition>
 {
     /// <summary>

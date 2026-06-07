@@ -23,7 +23,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Orientation component collection.
 /// </summary>
-[ScriptableComponents("orientation")]
+[ScriptableComponents]
 public class OrientationComponentCollection : BaseComponentCollection<Orientation>
 {
     /// <summary>

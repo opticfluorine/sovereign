@@ -23,7 +23,7 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Component collection for the CastShadows component.
 /// </summary>
-[ScriptableComponents("cast_shadows")]
+[ScriptableComponents]
 public class CastShadowsComponentCollection : BaseComponentCollection<Shadow>
 {
     private const int DefaultSize = 4096;

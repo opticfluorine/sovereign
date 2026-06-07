@@ -38,28 +38,18 @@ public class ScriptableField : Attribute
 ///     Designates a class as being intended for export to Lua as a library.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class ScriptableLibrary : Attribute
+public class ScriptableLibrary(string name) : Attribute
 {
-    public ScriptableLibrary(string name)
-    {
-        Name = name;
-    }
-
-    public string Name { get; }
+    public string Name { get; } = name;
 }
 
 /// <summary>
 ///     Designates a method in a [ScriptableLibrary] class as a target for export to Lua.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public class ScriptableFunction : Attribute
+public class ScriptableFunction(string name) : Attribute
 {
-    public ScriptableFunction(string name)
-    {
-        Name = name;
-    }
-
-    public string Name { get; }
+    public string Name { get; } = name;
 }
 
 /// <summary>
@@ -87,24 +77,13 @@ public class ScriptableEnum : Attribute
 [AttributeUsage(AttributeTargets.Class)]
 public class ScriptableComponents : Attribute
 {
-    public ScriptableComponents(string name)
-    {
-        Name = name;
-    }
-
-    public string Name { get; }
 }
 
 /// <summary>
 ///     Designates an IEntityBuilder method for binding to Lua.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public class ScriptableEntityBuilderAction : Attribute
+public class ScriptableEntityBuilderAction(string keyName) : Attribute
 {
-    public ScriptableEntityBuilderAction(string keyName)
-    {
-        KeyName = keyName;
-    }
-
-    public string KeyName { get; }
+    public string KeyName { get; } = keyName;
 }

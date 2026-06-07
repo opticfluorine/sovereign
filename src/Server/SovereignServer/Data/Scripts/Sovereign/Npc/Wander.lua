@@ -42,7 +42,9 @@
 --
 -- ================
 
-local EntityBehavior = require("EntityBehavior")
+local EntityBehavior = require("Sovereign.EntityBehavior")
+
+local WaitType = EntityBehavior.WaitType
 
 ------------------------------------------
 -- Constants                            --
@@ -70,108 +72,94 @@ local DelayRandomScale = 0.1
 local Wander = {}
 
 ---Entity load hook that begins the wandering behavior.
----@param entityId integer # Loaded entity ID.
-function Wander.LoadParams(entityId)
+---@param entity Entity # Loaded entity. 
+function Wander.LoadParams(entity)
     -- Load per-entity parameters.
-    local entityData = data.GetEntityData(entityId)
-    local wanderStep = tonumber(entityData[ParamWanderStep])
-    local wanderDelay = tonumber(entityData[ParamWanderDelay])
-    local wanderSpeed = tonumber(entityData[ParamWanderSpeed])
+    local wanderStep = tonumber(entity.Data[ParamWanderStep])
+    local wanderDelay = tonumber(entity.Data[ParamWanderDelay])
+    local wanderSpeed = tonumber(entity.Data[ParamWanderSpeed])
 
     -- Validate per-entity parameters.
     local paramsValid = true
     if not wanderStep then
-        util.LogError(string.format("Entity %X requires parameter %s of type number.", entityId, ParamWanderStep))
+        Util.LogError(string.format("Entity %X requires parameter %s of type number.", entity.EntityId, ParamWanderStep))
         paramsValid = false
     end
     if not wanderDelay then
-        util.LogError(string.format("Entity %X requires parameter %s of type number.", entityId, ParamWanderDelay))
+        Util.LogError(string.format("Entity %X requires parameter %s of type number.", entity.EntityId, ParamWanderDelay))
         paramsValid = false
     end
     if not wanderSpeed then
-        util.LogError(string.format("Entity %X requires parameter %s of type number.", entityId, ParamWanderSpeed))
+        Util.LogError(string.format("Entity %X requires parameter %s of type number.", entity.EntityId, ParamWanderSpeed))
         paramsValid = false
     end
     if not paramsValid then
-        return false
+        return false, 0, 0
     end
 
     if wanderStep <= 0 then
-        util.LogError(string.format("Entity %X has invalid wander step.", entityId))
+        Util.LogError(string.format("Entity %X has invalid wander step.", entity.EntityId))
         paramsValid = false
     end
     if wanderDelay < 0 then
-        util.LogError(string.format("Entity %X has invalid wander delay.", entityId))
+        Util.LogError(string.format("Entity %X has invalid wander delay.", entity.EntityId))
         paramsValid = false
     end
     if wanderSpeed <= 0 then
-        util.LogError(string.format("Entity %X has invalid wander speed.", entityId))
+        Util.LogError(string.format("Entity %X has invalid wander speed.", entity.EntityId))
         paramsValid = false
     end
     if not paramsValid then
-        return false
+        return false, 0, 0
     end
 
     -- Create and start a new coroutine for the new entity.
-    local wanderTime = wanderStep / wanderSpeed
-    return true, wanderTime, wanderDelay, wanderSpeed
+    return true, wanderDelay, wanderSpeed
 end
 
 --- Main coroutine for single entity behavior.
 --- @async
---- @param behavior table # Behavior object.
---- @param entityId integer # Entity ID.
-function Wander.RunAsync(behavior, entityId)
-    local ok, wanderTime, wanderDelay, wanderSpeed = Wander.LoadParams(entityId)
+--- @param behavior EntityBehavior # Behavior object.
+--- @param entity Entity # Entity.
+function Wander.RunAsync(behavior, entity)
+    local ok, wanderDelay, wanderSpeed = Wander.LoadParams(entity)
     if not ok then return end
 
     -- Start at a random time within the movement period.
     -- This decorrelates the motion between entities that are loaded at the same time.
-    behavior:WaitAsync(entityId, math.random() * wanderDelay)
+    behavior:Wait(entity.EntityId, WaitType.Time, math.random() * wanderDelay)
 
     while true do
-        -- Wait until time for the next movement.
-        local nextDelay = wanderDelay + (math.random() - 0.5) * DelayRandomScale * wanderDelay
-        behavior:WaitAsync(entityId, nextDelay)
-
         -- Get current position and velocity.
-        local posVel = components.kinematics.Get(entityId)
-        if posVel == nil then
-            util.LogError(string.format("No Kinematics data for entity %X.", entityId))
+        local posVel = entity.Components.Kinematics
+        if not posVel then
+            Util.LogError(string.format("No Kinematics data for entity %X.", entity.EntityId))
             return
         end
 
         -- Pick random movement direction, then set up a velocity vector.
         -- Leave Z component alone to respect gravity.
         local dx, dy = Wander.RandomDirection()
-        posVel.Velocity = {X = dx * wanderSpeed, Y = dy * wanderSpeed, Z = posVel.Velocity.Z}
+        local nextDelay = wanderDelay + (math.random() - 0.5) * DelayRandomScale * wanderDelay
 
         -- Set entity in motion, then wait for movement to complete.
-        components.kinematics.Set(entityId, posVel)
-        behavior:WaitAsync(entityId, wanderTime)
+        entity:MoveBy({X = dx, Y = dy, Z = 0}, wanderSpeed)
+        behavior:Wait(entity.EntityId, WaitType.Collision | WaitType.ScheduledStop)
 
-        -- Movement complete, so stop motion (leave Z axis alone for gravity).
-        posVel = components.kinematics.Get(entityId)
-        if posVel == nil then
-            util.LogError(string.format("No Kinematics data for entity %X.", entityId))
-            return
-        end
-
-        posVel.Velocity.X = 0.0
-        posVel.Velocity.Y = 0.0
-        components.kinematics.Set(entityId, posVel)
+        -- Pause until ready to move again.
+        behavior:Wait(entity.EntityId, WaitType.Time, nextDelay)
     end
 end
 
-Wander.xstep = {-1.0, 1.0,  0.0, 0.0}
-Wander.ystep = { 0.0, 0.0, -1.0, 1.0}
+Wander._xstep = {-1.0, 1.0,  0.0, 0.0}
+Wander._ystep = { 0.0, 0.0, -1.0, 1.0}
 
 --- Selects a random direction and returns a (x,y) vector.
 --- @return number dx # X step
 --- @return number dy # Y step
 function Wander.RandomDirection()
     local direction = math.random(4)
-    return Wander.xstep[direction], Wander.ystep[direction]
+    return Wander._xstep[direction], Wander._ystep[direction]
 end
 
 
@@ -179,22 +167,22 @@ end
 -- Export Public API to NPC Editor      --
 ------------------------------------------
 
-EntityBehavior.Create(Wander.RunAsync):InstallGlobalHooks()
+local wander = EntityBehavior.Create(Wander.RunAsync)
 
-scripting.AddEntityParameterHint(
-    "OnLoad",
+Scripting.AddEntityParameterHint(
+    wander.LoadHookName,
     ParamWanderStep,
     "Float",
     "Distance in world units to travel per step.")
 
-scripting.AddEntityParameterHint(
-    "OnLoad",
+Scripting.AddEntityParameterHint(
+    wander.LoadHookName,
     ParamWanderDelay,
     "Float",
     "Average time in seconds between movements.")
 
-scripting.AddEntityParameterHint(
-    "OnLoad",
+Scripting.AddEntityParameterHint(
+    wander.LoadHookName,
     ParamWanderSpeed,
     "Float",
     "Movement speed in world units per second.")

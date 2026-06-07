@@ -39,8 +39,9 @@
 -- ================
 --
 
-local EntityBehavior = require("EntityBehavior")
-local Vectors = require("Vectors")
+local EntityBehavior = require("Sovereign.EntityBehavior")
+local Vectors = require("Sovereign.Vectors")
+local WaitType = EntityBehavior.WaitType
 
 local ParamTemplateId = "Sovereign.ItemSpawn.TemplateId"
 local ParamDelay = "Sovereign.ItemSpawn.Delay"
@@ -49,41 +50,41 @@ local KeyItemId = "Sovereign.ItemSpawn.ItemId"
 
 local DefaultDelay = 60.0
 
-EntityBehavior.Create(
-function (behavior, spawnerEntityId)
+local itemSpawn = EntityBehavior.Create(
+---@param behavior EntityBehavior
+---@param spawnerEntity Entity
+function (behavior, spawnerEntity)
 
     -- Load parameters for this spawner.
-    local spawnData = data.GetEntityData(spawnerEntityId)
-
-    local templateId = tonumber(spawnData[ParamTemplateId])
-    if not templateId or not entities.IsTemplate(templateId) then
-        util.LogError(string.format("Entity %X is missing required parameter %s.", 
-            spawnerEntityId, ParamTemplateId))
+    local templateId = tonumber(spawnerEntity.Data[ParamTemplateId])
+    if not templateId or not Entities.IsTemplate(templateId) then
+        Util.LogError(string.format("Entity %X is missing required parameter %s.", 
+            spawnerEntity.EntityId, ParamTemplateId))
         return
     end
-    local templateType = components.entity_type.Get(templateId)
+    local templateType = Components.EntityType.Get(templateId)
     if templateType ~= EntityType.Item then
-        util.LogError(string.format("Entity %X has non-item spawn template.", spawnerEntityId))
+        Util.LogError(string.format("Entity %X has non-item spawn template.", spawnerEntity.EntityId))
         return
     end
 
-    local delay = tonumber(spawnData[ParamDelay])
+    local delay = tonumber(spawnerEntity.Data[ParamDelay])
     if not delay then
         delay = DefaultDelay
     end
 
     -- Periodically check if we need to respawn.
-    local itemId = tonumber(spawnData[KeyItemId])
+    local itemId = tonumber(spawnerEntity.Data[KeyItemId])
     while true do
         -- Bail out if the spawner was destroyed.
-        local spawnPosVel = components.kinematics.Get(spawnerEntityId)
+        local spawnPosVel = spawnerEntity.Components.Kinematic
         if not spawnPosVel then
             return
         end
 
         -- Check if a spawned item is in the spawn position.
         if itemId then
-            local itemPosVel = components.kinematics.Get(itemId)
+            local itemPosVel = Components.Kinematics.Get(itemId)
             if itemPosVel and Vectors.Equal(spawnPosVel.Position, itemPosVel.Position) then
                 -- Spawned item is still in original location, no action needed.
                 goto waiting
@@ -91,7 +92,7 @@ function (behavior, spawnerEntityId)
         end
 
         -- Spawn new item.
-        itemId = entities.Create({
+        itemId = Entities.Create({
             Template = templateId,
             Kinematics = {
                 Position = spawnPosVel.Position,
@@ -99,29 +100,29 @@ function (behavior, spawnerEntityId)
             }
         })
         if not itemId then
-            util.LogError(string.format("Spawner %X has failed; disabling until reload.", spawnerEntityId))
+            Util.LogError(string.format("Spawner %X has failed; disabling until reload.", spawnerEntity.EntityId))
             return
         end
 
         -- Update the tracked item ID in case of restart/reload.
-        spawnData[KeyItemId] = itemId
+        spawnerEntity.Data[KeyItemId] = itemId
 
         -- Wait for the spawn delay to elapse before checking/spawning an item again.
         ::waiting::
-        behavior:WaitAsync(spawnerEntityId, delay)
+        behavior:Wait(spawnerEntity.EntityId, WaitType.Time, delay)
     end
 
 end
-):InstallGlobalHooks()
+)
 
-scripting.AddEntityParameterHint(
-    EntityBehavior.DefaultLoadFunction,
+Scripting.AddEntityParameterHint(
+    itemSpawn.LoadHookName,
     ParamTemplateId,
     "ItemTemplate",
     "Template to use for spawned NPCs.")
 
-scripting.AddEntityParameterHint(
-    EntityBehavior.DefaultLoadFunction,
+Scripting.AddEntityParameterHint(
+    itemSpawn.LoadHookName,
     ParamDelay,
     "Float",
     string.format("Delay time in seconds between spawns (default: %.1f).", DefaultDelay))
