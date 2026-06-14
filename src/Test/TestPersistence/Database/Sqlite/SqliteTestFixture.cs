@@ -97,20 +97,20 @@ public class SqliteTestFixture : IDisposable
     }
 
     /// <summary>
-    ///     Adds a material component to the given entity.
+    ///     Adds a front tile ID to the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    /// <param name="material">Material.</param>
-    public void AddMaterial(ulong entityId, int material)
+    /// <param name="tileId">Tile ID.</param>
+    public void AddFrontTile(ulong entityId, int tileId)
     {
-        const string sql = @"UPDATE Entity SET material = @Val WHERE id = @Id";
+        const string sql = @"UPDATE Entity SET front_tile_id = @Val WHERE id = @Id";
         using (var cmd = new SqliteCommand(sql, Connection))
         {
             var pId = new SqliteParameter("Id", entityId);
             pId.SqliteType = SqliteType.Integer;
             cmd.Parameters.Add(pId);
 
-            var pVal = new SqliteParameter("Val", material);
+            var pVal = new SqliteParameter("Val", tileId);
             pVal.SqliteType = SqliteType.Integer;
             cmd.Parameters.Add(pVal);
 

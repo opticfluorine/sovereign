@@ -216,32 +216,32 @@ FROM Entity;
 --------------------------------------
 
 -- Grass block template entity.
-INSERT INTO Entity (id, name, material, material_mod, cast_block_shadows)
-VALUES (0x7FFE000000000000, 'Grass', 1, 0, 1);
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
+VALUES (0x7FFE000000000000, 'Grass', 3, 2, 1);
 
 -- Water block template entity.
 INSERT INTO Entity (id, name, front_tile_id, top_tile_id)
-VALUES (0x7FFE000000000001, 'Water', 2, 0);
+VALUES (0x7FFE000000000001, 'Water', 1, 0);
 
 -- GrassRock block template entity (currently unused).
 INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
-VALUES (0x7FFE000000000002, 'GrassRock', 1, 0, 1);
+VALUES (0x7FFE000000000002, 'GrassRock', 10, 2, 1);
 
 -- Dirt block template entity.
 INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
-VALUES (0x7FFE000000000003, 'Dirt', 3, 0, 1);
+VALUES (0x7FFE000000000003, 'Dirt', 3, 5, 1);
 
 -- Sand block template entity.
 INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
-VALUES (0x7FFE000000000004, 'Sand', 4, 0, 1);
+VALUES (0x7FFE000000000004, 'Sand', 7, 6, 1);
 
 -- Rock block template entity.
 INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
-VALUES (0x7FFE000000000005, 'Rock', 5, 0, 1);
+VALUES (0x7FFE000000000005, 'Rock', 10, 9, 1);
 
 -- Cobblestone block template entity.
 INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
-VALUES (0x7FFE000000000006, 'Cobblestone', 6, 0, 1);
+VALUES (0x7FFE000000000006, 'Cobblestone', 13, 12, 1);
 
 -- Initial block data at origin.
 INSERT INTO WorldSegmentBlockData
@@ -267,4 +267,4 @@ VALUES (1, 'Baseline');
 
 -- Enable WAL.
 PRAGMA
-    journal_mode= WAL;
+journal_mode= WAL;

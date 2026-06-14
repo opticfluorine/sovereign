@@ -46,11 +46,11 @@ public sealed class TestSimpleSqliteRemoveComponentQuery
         var entityId2 = entityId1 + 1;
         testFixture.AddEntity(entityId1);
         testFixture.AddEntity(entityId2);
-        testFixture.AddMaterial(entityId1, 1);
-        testFixture.AddMaterial(entityId2, 1);
+        testFixture.AddFrontTile(entityId1, 1);
+        testFixture.AddFrontTile(entityId2, 1);
 
         /* Remove the material from the first entity. */
-        var query = new SimpleSqliteRemoveComponentQuery("Material", testFixture.Connection);
+        var query = new SimpleSqliteRemoveComponentQuery("front_tile_id", testFixture.Connection);
         using (var transaction = testFixture.Connection.BeginTransaction())
         {
             query.Remove(entityId1, transaction);
@@ -58,7 +58,7 @@ public sealed class TestSimpleSqliteRemoveComponentQuery
         }
 
         /* Confirm that the first entity's component was removed. */
-        var sql = @"SELECT COUNT(*) FROM Entity WHERE id = @Id AND material IS NOT NULL";
+        var sql = @"SELECT COUNT(*) FROM Entity WHERE id = @Id AND front_tile_id IS NOT NULL";
         using (var cmd = new SqliteCommand(sql, testFixture.Connection))
         {
             var param = new SqliteParameter("Id", entityId1);
