@@ -79,20 +79,20 @@ setmetatable(PropertyProxy, PropertyProxy)
 
 function PropertyProxy.Create(entityId)
     local obj = {}
-    setmetatable(obj, PropertyProxy)
 
-    rawset(obj, "_entityId", entityId)
+    obj._entityId = entityId
 
-    rawset(obj, "_getters", {})
+    obj._getters = {}
     function obj._getters.TemplateId()
         return Entities.GetTemplate(obj._entityId)
     end
 
-    rawset(obj, "_setters", {})
+    obj._setters = {}
     function obj._setters.TemplateId(value)
         Entities.SetTemplate(obj._entityId, value)
     end
 
+    setmetatable(obj, PropertyProxy)
     return obj
 end
 

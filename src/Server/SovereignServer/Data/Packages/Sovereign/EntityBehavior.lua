@@ -128,13 +128,6 @@ function EntityBehavior:OnLoad(entityId)
         local templateId = Entities.GetTemplate(entityId)
         if templateId then
             self._templateIds[entityId] = templateId
-        end
-    end
-
-    if not self.FollowTemplateChanges then
-        local templateId = Entities.GetTemplate(entityId)
-        if templateId then
-            self._templateIds[entityId] = templateId
         else
             self._templateIds[entityId] = nil
         end
@@ -223,19 +216,19 @@ function EntityBehavior:Wait(entityId, waitTypes, delaySeconds)
     -- Configure any requested waits.
     local configuredWaits = WaitType.None
     if (waitTypes & WaitType.Time) > 0 and delaySeconds and delaySeconds > 0 then
-        scripting.AddTimedCallback(delaySeconds,
+        Scripting.AddTimedCallback(delaySeconds,
             function (cbEntityId) self:_ResumeFromWait(cbEntityId, WaitType.Time, waitKey) end, entityId)
         configuredWaits = configuredWaits | WaitType.Time
     end
 
     if (waitTypes & WaitType.ScheduledStop) > 0 then
-        self._scheduledStopHandles[entityId] = scripting.AddScheduledStopCallback(entityId,
+        self._scheduledStopHandles[entityId] = Scripting.AddScheduledStopCallback(entityId,
             function (cbEntityId) self:_ResumeFromWait(cbEntityId, WaitType.ScheduledStop, waitKey) end)
         configuredWaits = configuredWaits | WaitType.ScheduledStop
     end
 
     if (waitTypes & WaitType.Collision) > 0 then
-        self._collisionHandles[entityId] = scripting.AddCollisionCallback(entityId, 
+        self._collisionHandles[entityId] = Scripting.AddCollisionCallback(entityId, 
             function (cbEntityId) self:_ResumeFromWait(cbEntityId, WaitType.Collision, waitKey) end)
         configuredWaits = configuredWaits | WaitType.Collision
     end
@@ -265,13 +258,13 @@ function EntityBehavior:_ResumeFromWait(entityId, waitType, waitKey)
     local collisionHandle = self._collisionHandles[entityId]
     if collisionHandle then
         self._collisionHandles[entityId] = nil
-        scripting.RemoveCollisionCallback(entityId, collisionHandle)
+        Scripting.RemoveCollisionCallback(entityId, collisionHandle)
     end
 
     local scheduledStopHandle = self._scheduledStopHandles[entityId]
     if scheduledStopHandle then
         self._scheduledStopHandles[entityId] = nil
-        scripting.RemoveScheduledStopCallback(entityId, scheduledStopHandle)
+        Scripting.RemoveScheduledStopCallback(entityId, scheduledStopHandle)
     end
 
     -- Resume the entity's coroutine, passing the reaosn the wait ended as an argument

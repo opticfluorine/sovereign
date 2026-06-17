@@ -378,7 +378,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     {{
                         {dataModel.NativeType} tval = default;
                         var lt = lua_getfield(luaState, -1, ""{dataModel.Name}"");
-                        if (lt != LuaType.Nil) Unmarshal(luaState, out tval);
+                        if (lt != LuaType.Nil) Unmarshal(luaState, out tval); else lua_pop(luaState, 1);
                         tmp.{dataModel.Name} = tval;
                     }}
                 ");
