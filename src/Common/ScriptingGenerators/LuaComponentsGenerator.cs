@@ -160,7 +160,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     }}
                     catch (Exception e)
                     {{
-                        logger.LogError(e, ""Error in components.{model.LuaName}.Exists()."");
+                        logger.LogError(e, luaState, ""Error in components.{model.LuaName}.Exists()."");
                     }}
 
                     luaL_checkstack(luaState, 1, null);
@@ -201,7 +201,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     }}
                     catch (Exception e)
                     {{
-                        logger.LogError(e, ""Error in components.{model.LuaName}.Get()."");
+                        logger.LogError(e, luaState, ""Error in components.{model.LuaName}.Get()."");
                         lua_pushnil(luaState);
                     }}
 
@@ -221,7 +221,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     }}
                     catch (Exception e)
                     {{
-                        logger.LogError(e, ""Error in components.{model.LuaName}.Remove()."");
+                        logger.LogError(e, luaState, ""Error in components.{model.LuaName}.Remove()."");
                     }}
                     return 0;
                 }}
@@ -242,7 +242,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     }}
                     catch (Exception e)
                     {{
-                        logger.LogError(e, ""Error in components.{model.LuaName}.Set()."");
+                        logger.LogError(e, luaState, ""Error in components.{model.LuaName}.Set()."");
                     }}
                     return 0;
                 }}
@@ -255,7 +255,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     }}
                     catch (Exception e)
                     {{
-                        logger.LogError(e, ""Error in components.{model.LuaName}.Add()."");
+                        logger.LogError(e, luaState, ""Error in components.{model.LuaName}.Add()."");
                     }}
                     return 0;
                 }}
@@ -268,7 +268,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     }}
                     catch (Exception e)
                     {{
-                        logger.LogError(e, ""Error in components.{model.LuaName}.Multiply()."");
+                        logger.LogError(e, luaState, ""Error in components.{model.LuaName}.Multiply()."");
                     }}
                     return 0;
                 }}
@@ -281,7 +281,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     }}
                     catch (Exception e)
                     {{
-                        logger.LogError(e, ""Error in components.{model.LuaName}.Divide()."");
+                        logger.LogError(e, luaState, ""Error in components.{model.LuaName}.Divide()."");
                     }}
                     return 0;
                 }}
@@ -294,7 +294,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     }}
                     catch (Exception e)
                     {{
-                        logger.LogError(e, ""Error in components.{model.LuaName}.SetVelocity()."");
+                        logger.LogError(e, luaState, ""Error in components.{model.LuaName}.SetVelocity()."");
                     }}
                     return 0;
                 }}
@@ -307,7 +307,7 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     }}
                     catch (Exception e)
                     {{
-                        logger.LogError(e, ""Error in components.{model.LuaName}.AddPosition()."");
+                        logger.LogError(e, luaState, ""Error in components.{model.LuaName}.AddPosition()."");
                     }}
                     return 0;
                 }}

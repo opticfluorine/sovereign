@@ -31,6 +31,11 @@ namespace Sovereign.Scripting.Lua;
 /// </remarks>
 public class LuaHost : IDisposable
 {
+    /// <summary>
+    ///     Lua registry key where the traceback function can be found.
+    /// </summary>
+    public const string TracebackRegistryKey = "traceback";
+
     private const int QuickLookupSizeHint = 32;
     private const string QuickLookupKey = "sovereign_ql";
     private readonly List<GCHandle> bindings = new();
@@ -64,6 +69,9 @@ public class LuaHost : IDisposable
         lua_getglobal(LuaState, "debug");
         lua_getfield(LuaState, -1, "traceback");
         tracebackStackPosition = lua_gettop(LuaState);
+        lua_pushnil(LuaState);
+        lua_copy(LuaState, tracebackStackPosition, -1);
+        lua_setfield(LuaState, LUA_REGISTRYINDEX, TracebackRegistryKey);
 
         // Create the Quick Lookup table for fast C#-to-Lua callback access.
         // No need to push it to global state - it will permanently live on the stack for fast access.

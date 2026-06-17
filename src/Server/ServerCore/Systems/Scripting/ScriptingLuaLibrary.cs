@@ -106,7 +106,7 @@ public class ScriptingLuaLibrary(
             catch (Exception e)
             {
                 scriptingServices.GetScriptLogger(LuaUtil.GetMainThread(luaState), logger)
-                    .LogError(e, "Error executing timed callback.");
+                    .LogError(e, luaState, "Error executing timed callback.");
             }
         }));
     }
@@ -133,20 +133,20 @@ public class ScriptingLuaLibrary(
 
             if (lua_gettop(luaState) != 2)
             {
-                luaHost.Logger.LogError("AddEventCallback requires 2 arguments.");
+                luaHost.Logger.LogError(luaState, "AddEventCallback requires 2 arguments.");
                 return 0;
             }
 
             if (!lua_isinteger(luaState, -2))
             {
-                luaHost.Logger.LogError("AddEventCallback first argument must be an integer.");
+                luaHost.Logger.LogError(luaState, "AddEventCallback first argument must be an integer.");
                 return 0;
             }
 
             var eventId = (EventId)lua_tointeger(luaState, -2);
             if (!ScriptableEventSet.Events.Contains(eventId))
             {
-                luaHost.Logger.LogError("AddEventCallback: unsupported event id {Id}.", eventId);
+                luaHost.Logger.LogError(luaState, "AddEventCallback: unsupported event id {Id}.", eventId);
                 return 0;
             }
 
@@ -158,7 +158,7 @@ public class ScriptingLuaLibrary(
         catch (Exception e)
         {
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError(e, "Error in AddEventCallback.");
+                .LogError(e, luaState, "Error in AddEventCallback.");
         }
 
         return 0;
@@ -182,7 +182,7 @@ public class ScriptingLuaLibrary(
             if (lua_gettop(luaState) < 2 || lua_gettop(luaState) > 3)
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("AddTimedCallback requires 2 or 3 arguments.");
+                    .LogError(luaState, "AddTimedCallback requires 2 or 3 arguments.");
                 return 0;
             }
 
@@ -196,14 +196,14 @@ public class ScriptingLuaLibrary(
             if (!lua_isnumber(luaState, -3))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("AddTimedCallback first argument must be a number.");
+                    .LogError(luaState, "AddTimedCallback first argument must be a number.");
                 return 0;
             }
 
             if (!lua_isfunction(luaState, -2))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("AddTimedCallback second argument must be a function.");
+                    .LogError(luaState, "AddTimedCallback second argument must be a function.");
                 return 0;
             }
 
@@ -211,7 +211,7 @@ public class ScriptingLuaLibrary(
             if (!double.IsNormal(delay) || delay < 0.0)
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("AddTimedCallback delay must be a positive number.");
+                    .LogError(luaState, "AddTimedCallback delay must be a positive number.");
                 return 0;
             }
 
@@ -235,7 +235,7 @@ public class ScriptingLuaLibrary(
         catch (Exception e)
         {
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError(e, "Error in AddTimedCallback.");
+                .LogError(e, luaState, "Error in AddTimedCallback.");
         }
 
         return 0;
@@ -307,7 +307,7 @@ public class ScriptingLuaLibrary(
             if (lua_gettop(luaState) != 4)
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError(
+                    .LogError(luaState,
                         "AddEntityParameterHint requires 4 arguments: functionName, parameterName, type, tooltip.");
                 return 0;
             }
@@ -316,7 +316,7 @@ public class ScriptingLuaLibrary(
                 !lua_isstring(luaState, -1))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("AddEntityParameterHint requires four string arguments.");
+                    .LogError(luaState, "AddEntityParameterHint requires four string arguments.");
                 return 0;
             }
 
@@ -335,7 +335,8 @@ public class ScriptingLuaLibrary(
             if (!Enum.TryParse<EntityParameterType>(typeString, true, out var type))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogWarning("Invalid EntityParameterType: {TypeString}; defaulting to String.", typeString);
+                    .LogWarning(luaState, "Invalid EntityParameterType: {TypeString}; defaulting to String.",
+                        typeString);
                 type = EntityParameterType.String;
             }
 
@@ -344,7 +345,7 @@ public class ScriptingLuaLibrary(
         catch (Exception e)
         {
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError(e, "Error in AddEntityParameterHint.");
+                .LogError(e, luaState, "Error in AddEntityParameterHint.");
         }
 
         return 0;
@@ -372,21 +373,21 @@ public class ScriptingLuaLibrary(
             if (lua_gettop(luaState) != 2)
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("{LuaFunctionName} takes two arguments.", luaFunctionName);
+                    .LogError(luaState, "{LuaFunctionName} takes two arguments.", luaFunctionName);
                 return 0;
             }
 
             if (!lua_isinteger(luaState, -2))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("Argument 1 to {LuaFunctionName} must be an integer.", luaFunctionName);
+                    .LogError(luaState, "Argument 1 to {LuaFunctionName} must be an integer.", luaFunctionName);
                 return 0;
             }
 
-            if (lua_isfunction(luaState, -1))
+            if (!lua_isfunction(luaState, -1))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("Argument 2 to {LuaFunctionName} must be a Lua function.", luaFunctionName);
+                    .LogError(luaState, "Argument 2 to {LuaFunctionName} must be a Lua function.", luaFunctionName);
                 return 0;
             }
 
@@ -403,7 +404,7 @@ public class ScriptingLuaLibrary(
         catch (Exception e)
         {
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError(e, "Error in {LuaFunctionName}.", luaFunctionName);
+                .LogError(e, luaState, "Error in {LuaFunctionName}.", luaFunctionName);
             return 0;
         }
     }
@@ -430,14 +431,14 @@ public class ScriptingLuaLibrary(
             if (lua_gettop(luaState) != 2)
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("{FunctionName} takes two arguments.", functionName);
+                    .LogError(luaState, "{FunctionName} takes two arguments.", functionName);
                 return 0;
             }
 
             if (!lua_isinteger(luaState, -1) || !lua_isinteger(luaState, -2))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("{FunctionName} requires integer arguments.", functionName);
+                    .LogError(luaState, "{FunctionName} requires integer arguments.", functionName);
                 return 0;
             }
 
@@ -449,7 +450,7 @@ public class ScriptingLuaLibrary(
         catch (Exception e)
         {
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError(e, "Error in {FunctionName}.", functionName);
+                .LogError(e, luaState, "Error in {FunctionName}.", functionName);
         }
 
         return 0;

@@ -166,7 +166,7 @@ end
 function Entity:MoveBy(displacement, speed)
     local moveTime = Vectors.Vector3.Length(displacement) / speed
     local velocity = Vectors.Vector3.Scale(displacement, 1.0 / moveTime)
-    local endTime = Time.GetSystemTime() + moveTime * Units.Time.SToUs
+    local endTime = Time.FutureSystemTime(moveTime)
 
     local posVel = self.Components.Kinematics
     posVel.Velocity = velocity
