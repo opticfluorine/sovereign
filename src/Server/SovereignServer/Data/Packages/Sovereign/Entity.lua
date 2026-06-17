@@ -34,10 +34,10 @@ setmetatable(ComponentsProxy, ComponentsProxy)
 --- @return ComponentsProxy # ComponentsProxy object.
 function ComponentsProxy.Create(entityId)
     local obj = {}
-    setmetatable(obj, ComponentsProxy)
 
     obj._entityId = entityId
 
+    setmetatable(obj, ComponentsProxy)
     return obj
 end
 
@@ -46,7 +46,7 @@ end
 --- Proxy getter that gets a component by name.
 --- @param key string Component key.
 --- @return any # Component value, or nil if entity lacks this component.
-function ComponentsProxy:_Get(key)
+function ComponentsProxy:__index(key)
     local component = Components[key]
     if not component then return nil end
     return component.Get(self._entityId)
@@ -57,16 +57,11 @@ end
 --- Proxy setter that sets a component by name.
 --- @param key string Component key.
 --- @param value any New component value.
-function ComponentsProxy:_Set(key, value)
+function ComponentsProxy:__newindex(key, value)
     local component = Components[key]
     if not component then return end
     component.Set(self._entityId, value)
 end
-
--------------------------------------
-
-ComponentsProxy.__index = ComponentsProxy._Get
-ComponentsProxy.__newindex = ComponentsProxy._Set
 
 -------------------------------------
 
@@ -86,14 +81,14 @@ function PropertyProxy.Create(entityId)
     local obj = {}
     setmetatable(obj, PropertyProxy)
 
-    obj._entityId = entityId
+    rawset(obj, "_entityId", entityId)
 
-    obj._getters = {}
+    rawset(obj, "_getters", {})
     function obj._getters.TemplateId()
         return Entities.GetTemplate(obj._entityId)
     end
 
-    obj._setters = {}
+    rawset(obj, "_setters", {})
     function obj._setters.TemplateId(value)
         Entities.SetTemplate(obj._entityId, value)
     end

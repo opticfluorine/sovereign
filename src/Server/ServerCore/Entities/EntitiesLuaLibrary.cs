@@ -33,8 +33,8 @@ namespace Sovereign.ServerCore.Entities;
 public class EntitiesLuaLibrary : ILuaLibrary
 {
     private const string IsTemplate =
-        @"function entities.IsTemplate(entityId) 
-              return entities.FirstTemplateEntityId <= entityId and entityId <= entities.LastTemplateEntityId 
+        @"function Entities.IsTemplate(entityId) 
+              return Entities.FirstTemplateEntityId <= entityId and entityId <= Entities.LastTemplateEntityId 
           end";
 
     private readonly IEntityFactory entityFactory;

@@ -79,6 +79,16 @@ public class ScriptLoader(
         foreach (var file in files)
             try
             {
+                if (scriptingOptions.Value.UseAllowlist)
+                {
+                    var scriptName = GetNameFromPath(file);
+                    if (!scriptingOptions.Value.AllowedScripts.Contains(scriptName))
+                    {
+                        logger.LogWarning("Script {Name} is not on the allowlist and will not be loaded.", scriptName);
+                        continue;
+                    }
+                }
+
                 hosts.Add(HostScript(file));
             }
             catch (LuaException e)

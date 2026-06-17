@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
+
 namespace Sovereign.ServerCore.Configuration;
 
 /// <summary>
@@ -172,6 +174,16 @@ public sealed class ScriptingOptions
     ///     searching for scripts.
     /// </summary>
     public uint MaxScriptDirectoryDepth { get; set; } = 5;
+
+    /// <summary>
+    ///     Whether to apply an allowlist to the list of loaded scripts.
+    /// </summary>
+    public bool UseAllowlist { get; set; } = false;
+
+    /// <summary>
+    ///     Allowlist for scripts to load. Only used if UseAllowlist is set to true.
+    /// </summary>
+    public IReadOnlyList<string> AllowedScripts { get; set; } = [];
 }
 
 /// <summary>
