@@ -207,7 +207,7 @@ end
 --- @param delaySeconds? number Seconds to wait if waitTypes includes WaitType.Time.
 function EntityBehavior:Wait(entityId, waitTypes, delaySeconds)
     -- Select a new wait key.
-    if not self._waitKeys[entityId] then
+    if self._waitKeys[entityId] == nil then
         self._waitKeys[entityId] = 0
     end
     local waitKey = self._waitKeys[entityId] + 1
@@ -236,6 +236,7 @@ function EntityBehavior:Wait(entityId, waitTypes, delaySeconds)
     -- Wait and return the type of wait that resumed first
     local cbWaitType = WaitType.None
     if configuredWaits ~= WaitType.None then
+        self._waitTypes[entityId] = configuredWaits
         cbWaitType = coroutine.yield()
     end
     return cbWaitType
@@ -269,7 +270,8 @@ function EntityBehavior:_ResumeFromWait(entityId, waitType, waitKey)
 
     -- Resume the entity's coroutine, passing the reaosn the wait ended as an argument
     self._waitTypes[entityId] = nil
-    self:Resume(entityId, waitType) end
+    self:Resume(entityId, waitType)
+end
 
 -------------------------------------
 
