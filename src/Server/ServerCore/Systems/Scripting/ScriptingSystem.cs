@@ -92,6 +92,7 @@ internal class ScriptingSystem : ISystem
             {
                 case EventId.Core_Tick:
                     entityScriptCallbacks.ProcessCallbacks();
+                    entityCallbacks.DoPerTickProcessing();
                     break;
 
                 case EventId.Server_Scripting_ReloadAll:

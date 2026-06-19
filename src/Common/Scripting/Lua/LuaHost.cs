@@ -406,12 +406,13 @@ public class LuaHost : IDisposable
     private void DoRefFunctionCall(int refIndex, int argCount)
     {
         // Attempt retrieval of callback function from Lua reference table.
-        luaL_checkstack(LuaState, 2, null);
+        luaL_checkstack(LuaState, 1, null);
         var refType = lua_rawgeti(LuaState, LUA_REGISTRYINDEX, refIndex);
+        if (argCount > 0) lua_rotate(LuaState, lua_gettop(LuaState) - argCount, 1);
 
         if (refType != LuaType.Function)
         {
-            Logger.LogError("Callback reference is not a Lua function.");
+            Logger.LogError(LuaState, "Callback reference is not a Lua function.");
             return;
         }
 
@@ -499,7 +500,7 @@ public class LuaHost : IDisposable
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            Logger.LogError(e, "Error in util.log_trace.");
+            Logger.LogError(e, LuaState, "Error in util.log_trace.");
         }
 
         return 0;
@@ -523,7 +524,7 @@ public class LuaHost : IDisposable
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            Logger.LogError(e, "Error in util.log_debug.");
+            Logger.LogError(e, LuaState, "Error in util.log_debug.");
         }
 
         return 0;
@@ -547,7 +548,7 @@ public class LuaHost : IDisposable
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            Logger.LogError(e, "Error in util.log_info.");
+            Logger.LogError(e, LuaState, "Error in util.log_info.");
         }
 
         return 0;
@@ -571,7 +572,7 @@ public class LuaHost : IDisposable
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            Logger.LogError(e, "Error in util.log_warn.");
+            Logger.LogError(e, LuaState, "Error in util.log_warn.");
         }
 
         return 0;
@@ -595,7 +596,7 @@ public class LuaHost : IDisposable
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            Logger.LogError(e, "Error in util.log_error.");
+            Logger.LogError(e, LuaState, "Error in util.log_error.");
         }
 
         return 0;
@@ -619,7 +620,7 @@ public class LuaHost : IDisposable
         catch (Exception e)
         {
             // Log error but continue the script as-is.
-            Logger.LogError(e, "Error in util.log_crit.");
+            Logger.LogError(e, LuaState, "Error in util.log_crit.");
         }
 
         return 0;
@@ -648,11 +649,11 @@ public class LuaHost : IDisposable
         }
         catch (LuaException e)
         {
-            Logger.LogError("{Error}", e.Message);
+            Logger.LogError(LuaState, "{Error}", e.Message);
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Error in util.to_bool.");
+            Logger.LogError(e, LuaState, "Error in util.to_bool.");
         }
 
         return 0;

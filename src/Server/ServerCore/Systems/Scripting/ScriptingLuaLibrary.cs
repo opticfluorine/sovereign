@@ -392,7 +392,7 @@ public class ScriptingLuaLibrary(
             }
 
             var entityId = (ulong)lua_tointeger(luaState, -2);
-            var refIndex = luaL_ref(luaState, -1);
+            var refIndex = luaL_ref(luaState, LUA_REGISTRYINDEX);
 
             cbMgr.AddCallback(luaHost, entityId, refIndex);
 
@@ -445,7 +445,8 @@ public class ScriptingLuaLibrary(
             var entityId = (ulong)lua_tointeger(luaState, -2);
             var refIndex = (int)lua_tointeger(luaState, -1);
 
-            cbMgr.RemoveCallback(luaHost, entityId, refIndex);
+            cbMgr.RemoveCallback(luaHost, luaState, entityId, refIndex);
+            luaL_unref(luaState, LUA_REGISTRYINDEX, refIndex);
         }
         catch (Exception e)
         {

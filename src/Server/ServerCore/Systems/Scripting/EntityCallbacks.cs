@@ -25,13 +25,12 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 /// <summary>
 ///     Manages a set of entity-specific scripting callbacks.
 /// </summary>
-public sealed class EntityCallbackManager(
-    ILogger logger,
-    ScriptingServices services)
+public sealed class EntityCallbackManager
 {
     private readonly Lock accessLock = new();
     private readonly Dictionary<ulong, List<(LuaHost, int)>> callbacks = new();
     private readonly Dictionary<IntPtr, List<ulong>> entitiesByHost = new();
+    private readonly HashSet<(LuaHost, ulong, int)> pendingRemoves = new();
 
     /// <summary>
     ///     Adds an entity callback.
@@ -64,44 +63,60 @@ public sealed class EntityCallbackManager(
     ///     Removes an entity callback.
     /// </summary>
     /// <param name="luaHost">Lua host.</param>
+    /// <param name="callingLuaState">Calling Lua state.</param>
     /// <param name="entityId">Entity ID to unsubscribe from.</param>
     /// <param name="callbackRef">Callback function reference index.</param>
-    public void RemoveCallback(LuaHost luaHost, ulong entityId, int callbackRef)
+    public void RemoveCallback(LuaHost luaHost, IntPtr callingLuaState, ulong entityId, int callbackRef)
     {
         lock (accessLock)
         {
-            if (!callbacks.TryGetValue(entityId, out var entityCallbacks))
-            {
-                services.GetScriptLogger(luaHost.LuaState, logger)
-                    .LogWarning("Tried to remove nonexistant callback for entity ID {EntityId:X}.", entityId);
-                return;
-            }
+            pendingRemoves.Add((luaHost, entityId, callbackRef));
+        }
+    }
 
-            if (!entitiesByHost.TryGetValue(luaHost.LuaState, out var entityList))
+    /// <summary>
+    ///     Applies pending removes.
+    /// </summary>
+    public void DoRemoveCallback()
+    {
+        lock (accessLock)
+        {
+            foreach (var (luaHost, entityId, callbackRef) in pendingRemoves)
             {
-                services.GetScriptLogger(luaHost.LuaState, logger)
-                    .LogError("No entity list found for script.");
-                entityList = [];
-            }
-
-            for (var i = 0; i < entityCallbacks.Count; ++i)
-            {
-                var (curHost, curCbRef) = entityCallbacks[i];
-                if (curHost.LuaState == luaHost.LuaState && curCbRef == callbackRef)
+                if (!callbacks.TryGetValue(entityId, out var entityCallbacks))
                 {
-                    entityCallbacks.RemoveAt(i);
-                    break;
+                    luaHost.Logger.LogWarning("Tried to remove nonexistent callback for entity ID {EntityId:X}.",
+                        entityId);
+                    return;
+                }
+
+                if (!entitiesByHost.TryGetValue(luaHost.LuaState, out var entityList))
+                {
+                    luaHost.Logger.LogError("No entity list found for script.");
+                    entityList = [];
+                }
+
+                for (var i = 0; i < entityCallbacks.Count; ++i)
+                {
+                    var (curHost, curCbRef) = entityCallbacks[i];
+                    if (curHost.LuaState == luaHost.LuaState && curCbRef == callbackRef)
+                    {
+                        entityCallbacks.RemoveAt(i);
+                        break;
+                    }
+                }
+
+                for (var i = 0; i < entityList.Count; ++i)
+                {
+                    if (entityList[i] == entityId)
+                    {
+                        entityList.RemoveAt(i);
+                        break;
+                    }
                 }
             }
 
-            for (var i = 0; i < entityList.Count; ++i)
-            {
-                if (entityList[i] == entityId)
-                {
-                    entityList.RemoveAt(i);
-                    break;
-                }
-            }
+            pendingRemoves.Clear();
         }
     }
 
@@ -115,8 +130,7 @@ public sealed class EntityCallbackManager(
         {
             if (!entitiesByHost.TryGetValue(luaHost.LuaState, out var entityList))
             {
-                services.GetScriptLogger(luaHost.LuaState, logger)
-                    .LogError("No entity list found for script.");
+                luaHost.Logger.LogError(luaHost.LuaState, "No entity list found for script.");
                 entityList = [];
             }
 
@@ -124,14 +138,14 @@ public sealed class EntityCallbackManager(
             {
                 if (!callbacks.TryGetValue(entityId, out var entityCallbacks))
                 {
-                    services.GetScriptLogger(luaHost.LuaState, logger)
-                        .LogError("No callbacks found when removing for entity ID {EntityId:X}.", entityId);
+                    luaHost.Logger.LogError(luaHost.LuaState,
+                        "No callbacks found when removing for entity ID {EntityId:X}.", entityId);
                     continue;
                 }
 
                 for (var i = entityCallbacks.Count - 1; i >= 0; --i)
                 {
-                    var (curHost, curRefCb) = entityCallbacks[i];
+                    var (curHost, _) = entityCallbacks[i];
                     if (curHost.LuaState == luaHost.LuaState) entityCallbacks.RemoveAt(i);
                 }
             }
@@ -152,12 +166,14 @@ public sealed class EntityCallbackManager(
             {
                 try
                 {
+                    if (pendingRemoves.Contains((host, entityId, cref))) continue;
                     host.Logger.LogTrace("Invoking callback for entity ID {EntityId:X}.", entityId);
                     host.CallRefFunction(cref, (long)entityId);
                 }
                 catch (Exception e)
                 {
-                    host.Logger.LogError(e, "Error calling callback for entity ID {EntityId:X}.", entityId);
+                    host.Logger.LogError(e, "Error calling callback for entity ID {EntityId:X}.",
+                        entityId);
                 }
             }
         }
@@ -167,17 +183,24 @@ public sealed class EntityCallbackManager(
 /// <summary>
 ///     Collection of entity callbacks for scripting.
 /// </summary>
-public sealed class EntityCallbacks(ILoggerFactory loggerFactory, ScriptingServices scriptingServices)
+public sealed class EntityCallbacks
 {
     /// <summary>
     ///     Collision callbacks.
     /// </summary>
-    public EntityCallbackManager Collisions { get; } =
-        new(loggerFactory.CreateLogger("CollisionCallbacks"), scriptingServices);
+    public EntityCallbackManager Collisions { get; } = new();
 
     /// <summary>
     ///     Scheduled stop callbacks.
     /// </summary>
-    public EntityCallbackManager ScheduledStops { get; } =
-        new(loggerFactory.CreateLogger("ScheduledStopCallbacks"), scriptingServices);
+    public EntityCallbackManager ScheduledStops { get; } = new();
+
+    /// <summary>
+    ///     Handles any per-tick processing for the various callbacks.
+    /// </summary>
+    public void DoPerTickProcessing()
+    {
+        Collisions.DoRemoveCallback();
+        ScheduledStops.DoRemoveCallback();
+    }
 }
