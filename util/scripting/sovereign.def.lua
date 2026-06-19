@@ -142,6 +142,11 @@ end
 function Chat.SendToAll(color, message)
 end
 
+---@param command string
+---@param callback function
+function Chat.AddCommand(command, callback)
+end
+
 --------------------
 
 --

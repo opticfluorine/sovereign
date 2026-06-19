@@ -123,7 +123,9 @@ public class LuaLibraryGenerator : IIncrementalGenerator
         {
             Name = param.Name,
             TypeName = $"{SyntaxUtil.GetFullNamespace(typeSymbol.ContainingNamespace)}.{typeSymbol.Name}",
-            MarshallerClass = GetMarshallerClass(typeSymbol)
+            MarshallerClass = GetMarshallerClass(typeSymbol),
+            IsRefCallback = param.GetAttributes().Any(a => a.AttributeClass!.Name == "ScriptableCallback"),
+            IsLuaState = typeSymbol.Name == "IntPtr" && param.Name == "luaState"
         };
     }
 
@@ -221,12 +223,12 @@ public class LuaLibraryGenerator : IIncrementalGenerator
             /// </summary>
             class {libraryModel.LibraryShortClass}LuaLibrary : ILuaLibrary
             {{
-                private {libraryModel.LibraryShortClass} _nativeLibrary;
+                private {libraryModel.LibraryShortClass} _managedLibrary;
                 private ILogger logger;
 
                 public {libraryModel.LibraryShortClass}LuaLibrary({libraryModel.LibraryShortClass} nativeLibrary, ILogger<{libraryModel.LibraryShortClass}LuaLibrary> logger)
                 {{
-                    _nativeLibrary = nativeLibrary;
+                    _managedLibrary = nativeLibrary;
                     this.logger = logger;
                 }}
 
@@ -245,25 +247,35 @@ public class LuaLibraryGenerator : IIncrementalGenerator
 
         foreach (var function in functionModels)
         {
+            var reqArgCount = function.ParameterModels.List.Count(p => !p.IsLuaState);
             sb.Append($@"
                 public int {function.MethodName}_Lua(IntPtr luaState)
                 {{
                     int returnCount = 0;
                     try {{
-                        if (lua_gettop(luaState) != {function.ParameterModels.List.Count})
-                            throw new LuaException(""{libraryModel.LibraryName}.{function.MethodName} requires {function.ParameterModels.List.Count} arguments."");");
+                        if (lua_gettop(luaState) != {reqArgCount})
+                            throw new LuaException(""{libraryModel.LibraryName}.{function.MethodName} requires {reqArgCount} arguments."");");
 
             for (var i = function.ParameterModels.List.Count - 1; i >= 0; --i)
             {
                 var param = function.ParameterModels.List[i];
-                sb.Append($@"
+                if (param.IsRefCallback)
+                {
+                    sb.Append($@"
+                        if (!lua_isfunction(luaState, -1)) throw new LuaException(""callback must be a function"");
+                        int {param.Name} = luaL_ref(luaState, LUA_REGISTRYINDEX);");
+                }
+                else if (!param.IsLuaState)
+                {
+                    sb.Append($@"
                         {param.MarshallerClass}.Unmarshal(luaState, out {param.TypeName} {param.Name});");
+                }
             }
 
             var capture = function.ReturnTypeName == "System.Void" ? "" : "var result = ";
 
             sb.Append($@"
-                        {capture}_nativeLibrary.{function.MethodName}(");
+                        {capture}_managedLibrary.{function.MethodName}(");
 
             for (var i = 0; i < function.ParameterModels.List.Count; ++i)
             {
@@ -368,5 +380,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
         public string Name { get; set; }
         public string TypeName { get; set; }
         public string MarshallerClass { get; set; }
+        public bool IsRefCallback { get; set; }
+        public bool IsLuaState { get; set; }
     }
 }

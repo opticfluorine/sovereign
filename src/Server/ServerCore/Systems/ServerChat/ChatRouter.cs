@@ -36,6 +36,8 @@ public class ChatRouter
     /// </summary>
     private const string HelpCommand = "help";
 
+    private readonly ScriptChatCallbacks callbacks;
+
     private readonly ChatHelpManager helpManager;
     private readonly ServerChatInternalController internalController;
     private readonly KinematicsComponentCollection kinematics;
@@ -51,7 +53,7 @@ public class ChatRouter
 
     public ChatRouter(IEnumerable<IChatProcessor> processors, ServerChatInternalController internalController,
         KinematicsComponentCollection kinematics, WorldSegmentResolver resolver, LoggingUtil loggingUtil,
-        ChatHelpManager helpManager, ILogger<ChatRouter> logger)
+        ChatHelpManager helpManager, ILogger<ChatRouter> logger, ScriptChatCallbacks callbacks)
     {
         this.internalController = internalController;
         this.kinematics = kinematics;
@@ -59,6 +61,7 @@ public class ChatRouter
         this.loggingUtil = loggingUtil;
         this.helpManager = helpManager;
         this.logger = logger;
+        this.callbacks = callbacks;
 
         // Build lookup table.
         foreach (var proc in processors)
@@ -91,7 +94,7 @@ public class ChatRouter
                     helpManager.SendHelp(details.SenderEntityId);
                 else if (processorsByCommand.TryGetValue(command, out var processor))
                     processor.ProcessChat(command, remainder, details.SenderEntityId);
-                else
+                else if (!callbacks.TryHandleCommand(command, remainder, details.SenderEntityId))
                     internalController.SendSystemMessage("Unrecognized command.", details.SenderEntityId);
             }
             else

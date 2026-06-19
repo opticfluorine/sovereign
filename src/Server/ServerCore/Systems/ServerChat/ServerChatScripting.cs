@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using Sovereign.EngineUtil.Attributes;
+using Sovereign.Scripting.Lua;
+using Sovereign.ServerCore.Systems.Scripting;
 
 namespace Sovereign.ServerCore.Systems.ServerChat;
 
@@ -22,14 +25,13 @@ namespace Sovereign.ServerCore.Systems.ServerChat;
 ///     Provides the "chat" Lua module for sending messages to players.
 /// </summary>
 [ScriptableLibrary("Chat")]
-public class ServerChatScripting
+public class ServerChatScripting(
+    ServerChatInternalController internalController,
+    ScriptChatCallbacks callbacks,
+    ScriptingServices scriptingServices)
 {
-    private readonly ServerChatInternalController internalController;
-
-    public ServerChatScripting(ServerChatInternalController internalController)
-    {
-        this.internalController = internalController;
-    }
+    private readonly ScriptChatCallbacks callbacks = callbacks;
+    private readonly ScriptingServices scriptingServices = scriptingServices;
 
     [ScriptableFunction("SendSystemMessage")]
     public void SendSystemMessage(ulong targetEntityId, string message)
@@ -47,5 +49,17 @@ public class ServerChatScripting
     public void SendMessageToAll(uint color, string message)
     {
         internalController.SendMessageToAll(message, color);
+    }
+
+    [ScriptableFunction("AddCommand")]
+    public void AddCommand(IntPtr luaState, string command, [ScriptableCallback] int callback)
+    {
+        if (!scriptingServices.TryGetHostForState(luaState, out var host))
+            throw new Exception("No host found for script.");
+
+        if (!callbacks.TryAddCallbackCommand(command, host, callback))
+        {
+            host.Logger.LogError(luaState, "Chat command /{Command} is already registered.", command);
+        }
     }
 }

@@ -53,6 +53,12 @@ public class ScriptableFunction(string name) : Attribute
 }
 
 /// <summary>
+///     Designates a parameter as a reference-based callback.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter)]
+public class ScriptableCallback : Attribute;
+
+/// <summary>
 ///     Designates an event ID as an event which a script can react to.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field)]

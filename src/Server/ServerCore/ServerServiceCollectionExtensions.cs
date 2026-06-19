@@ -145,6 +145,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<ServerChatInternalController>();
         services.TryAddSingleton<ChatHelpManager>();
         services.TryAddSingleton<ServerChatScripting>();
+        services.TryAddSingleton<ScriptChatCallbacks>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ServerChatSystem>());
 

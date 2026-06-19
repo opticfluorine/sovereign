@@ -146,6 +146,23 @@ function (behavior, spawnerEntity)
 end
 )
 
+------------------------------
+
+--- /spawnstatus chat command.
+--- @param msg string # Remaining chat message.
+--- @param senderEntityId integer # Sender entity ID.
+local function chat_spawnstatus(msg, senderEntityId)
+    Chat.SendSystemMessage(senderEntityId, string.format("Command success: %s", msg))
+end
+
+Chat.AddCommand("spawnstatus", chat_spawnstatus)
+
+------------------------------
+
+------------------------------------------
+-- Export Public API to NPC Editor      --
+------------------------------------------
+
 Scripting.AddEntityParameterHint(
     spawn.LoadHookName,
     ParamTemplateId,

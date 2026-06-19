@@ -258,6 +258,12 @@ public class LuaHost : IDisposable
         }
     }
 
+    // --- Reference-Based Callbacks
+    // We implement these as a bunch of overloads based on parameter types and orders.
+    // This allows proper resolution at compile time and avoids allocating object arrays on the heap.
+    // Also avoids messing with marshaller lookups that would be needed for a generics-based approach.
+    //
+
     /// <summary>
     ///     Calls a no-argument callback function that was pushed into the Lua registry as a Lua reference.
     /// </summary>
@@ -282,6 +288,25 @@ public class LuaHost : IDisposable
             luaL_checkstack(LuaState, 1, null);
             lua_pushinteger(LuaState, arg);
             DoRefFunctionCall(refIndex, 1);
+        }
+    }
+
+    /// <summary>
+    ///     Calls a three-argument callback function via a Lua reference.
+    /// </summary>
+    /// <param name="refIndex">Callback reference.</param>
+    /// <param name="arg0">First argument.</param>
+    /// <param name="arg1">Second argument.</param>
+    /// <param name="arg2">Third argument.</param>
+    public void CallRefFunction(int refIndex, string arg0, string arg1, ulong arg2)
+    {
+        lock (opsLock)
+        {
+            luaL_checkstack(LuaState, 3, null);
+            lua_pushstring(LuaState, arg0);
+            lua_pushstring(LuaState, arg1);
+            lua_pushinteger(LuaState, (long)arg2);
+            DoRefFunctionCall(refIndex, 2);
         }
     }
 
