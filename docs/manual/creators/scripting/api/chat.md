@@ -78,3 +78,31 @@ Chat.SendToPlayer(playerEntityId, Color.Rgb(210, 210, 0),
 :emphasize-lines: 1
 Chat.SendToAll(Color.Rgb(210, 210, 0), "This is a message sent with SendToAll.")
 ```
+
+### AddCommand)command, callback)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: Chat.AddCommand(command, callback)
+
+   Adds a new chat command for all players.
+
+   :param command: Command to add (case-insensitive).
+   :type command: string
+   :param callback: Callback function. First parameter is any text entered after the command. Second parameter is the entity ID of the player who sent the command.
+   :type callback: function
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Adding a "/hello" chat command using Chat.AddCommand.
+:emphasize-lines: 6
+function chat_hello(msg, senderEntityId)
+   Chat.SendSystemMessage(senderEntityId, "Hello World!")
+end
+
+-- Typing "/hello" in chat will send a Hello World message.
+Chat.AddCommand("hello", chat_hello)
+```
