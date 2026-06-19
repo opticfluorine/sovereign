@@ -453,4 +453,7 @@ public static partial class LuaBindings
 
     [LibraryImport(LibName)]
     public static partial void luaL_openlibs(IntPtr luaState);
+
+    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
+    public static partial void luaL_traceback(IntPtr luaState, IntPtr traceState, string? message, int level);
 }

@@ -205,13 +205,7 @@ public static class LuaLoggingExtensions
     private static string GetTraceback(IntPtr luaState)
     {
         luaL_checkstack(luaState, 1, null);
-        lua_getfield(luaState, LUA_REGISTRYINDEX, LuaHost.TracebackRegistryKey);
-        var result = lua_pcall(luaState, 0, 1, 0);
-        if (result != LuaResult.Ok)
-        {
-            return "Error getting traceback";
-        }
-
+        luaL_traceback(luaState, luaState, null, 0);
         var traceback = lua_tostring(luaState, -1);
         lua_pop(luaState, 1);
         return traceback;
