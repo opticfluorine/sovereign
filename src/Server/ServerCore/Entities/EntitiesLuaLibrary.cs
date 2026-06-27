@@ -20,9 +20,9 @@ using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Lua;
+using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Systems.Scripting;
-using Sovereign.ServerCore.Systems.WorldManagement;
 using static Sovereign.Scripting.Lua.LuaBindings;
 
 namespace Sovereign.ServerCore.Entities;
@@ -70,6 +70,7 @@ public class EntitiesLuaLibrary : ILuaLibrary
             luaHost.AddLibraryFunction(nameof(SetTemplate), SetTemplate);
             luaHost.AddLibraryFunction(nameof(Sync), Sync);
             luaHost.AddLibraryFunction(nameof(SyncTree), SyncTree);
+            luaHost.AddLibraryFunction(nameof(AbsoluteTemplateId), AbsoluteTemplateId);
             luaHost.AddLibraryConstant(nameof(EntityConstants.FirstTemplateEntityId),
                 (long)EntityConstants.FirstTemplateEntityId);
             luaHost.AddLibraryConstant(nameof(EntityConstants.LastTemplateEntityId),
@@ -448,6 +449,43 @@ public class EntitiesLuaLibrary : ILuaLibrary
         lock (eventLock)
         {
             worldManagementController.ResyncEntityTree(eventSender, entityId);
+        }
+    }
+
+    /// <summary>
+    ///     Converts a relative template ID to absolute template ID.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of return values.</returns>
+    private int AbsoluteTemplateId(IntPtr luaState)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
+
+        try
+        {
+            if (lua_gettop(luaState) != 1)
+            {
+                localLogger.LogError("AbsoluteTemplateId requires one parameter.");
+                return 0;
+            }
+
+            if (!lua_isinteger(luaState, -1))
+            {
+                localLogger.LogError("AbsoluteTemplateId parameter must be an integer.");
+                return 0;
+            }
+
+            var relativeId = (ulong)lua_tointeger(luaState, -1);
+            lua_pop(luaState, 1);
+
+            lua_pushinteger(luaState, (long)(relativeId + EntityConstants.FirstTemplateEntityId));
+            return 1;
+        }
+        catch (Exception e)
+        {
+            localLogger.LogError(e, "Error in AbsoluteTemplateId.");
+            return 0;
         }
     }
 }

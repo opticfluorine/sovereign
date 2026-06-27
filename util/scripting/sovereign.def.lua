@@ -150,7 +150,7 @@ end
 --------------------
 
 --
--- color Module
+-- Color Module
 --
 
 ---@class Color
@@ -199,7 +199,7 @@ end
 --------------------
 
 --
--- components Module
+-- Components Module
 --
 
 ---Provides access to component data.
@@ -537,7 +537,7 @@ Components.ServerOnly.Set = function (entityId, value) end
 --------------------
 
 --
--- data Module
+-- Data Module
 --
 
 ---Provides access to global and per-entity key-value data.
@@ -556,7 +556,7 @@ end
 --------------------
 
 --
--- dialogue Module
+-- Dialogue Module
 --
 
 ---Provides functions for displaying dialogue to players.
@@ -654,6 +654,99 @@ Events = {
     ---Event emitted when a player enters the world.
     Server_Persistence_PlayerEnteredWorld = 200002
 }
+
+--------------------
+
+--
+-- Inventory Module
+--
+
+---@class Inventory
+Inventory = {}
+
+---Gets the inventory for a player as a list of item entity IDs in order of inventory slots. Empty slots are listed with an item ID of 0.
+---@param entityId integer Entity ID.
+---@return table # Inventory as a list of item IDs in slot order; 0 indicates an empty slot.
+function Inventory.GetInventory(entityId)
+end
+
+---Gets the ID of the item in a particular inventory slot.
+---@param entityId integer Entity ID.
+---@param slotIndex integer Slot index.
+---@return integer # Item ID, or 0 if the slot is empty or does not exist.
+function Inventory.GetItem(entityId, slotIndex)
+end
+
+---Gets the slot index for the given item if it is in the entity's inventory.
+---@param entityId integer Entity ID.
+---@param itemId integer Item ID.
+---@return integer # Slot index containing the item, or 0 if not found.
+function Inventory.GetSlotIndexForItem(entityId, itemId)
+end
+
+---Finds the first item (in slot order) in the entity's inventory that has the given template ID.
+---@param entityId integer Entity ID.
+---@param templateId integer Item template ID to search for.
+---@return integer # Item ID of the first matching item, or 0 if no matches found.
+function Inventory.FindFirstMatchingItem(entityId, templateId)
+end
+
+---Gets the number of slots in the entity's inventory.
+---@param entityId integer Entity ID.
+---@return integer # Slot count.
+function Inventory.GetSlotCount(entityId)
+end
+
+---Adds one or more slots to an entity's inventory.
+---@param entityId integer Entity ID.
+---@param slotCount integer Number of slots to add. Must be positive.
+function Inventory.AddSlots(entityId, slotCount)
+end
+
+---Gets an empty slot in the entity's inventory.
+---@param entityId integer Entity ID.
+---@return integer # Empty slot index, or 0 if no empty slot was found.
+function Inventory.GetEmptySlot(entityId)
+end
+
+---Tries to add an existing item to a free slot in the entity's inventory.
+---@param entityId integer Entity ID.
+---@param itemId integer Item ID.
+---@return boolean # true if the item was added to a free slot, false otherwise.
+function Inventory.AddItem(entityId, itemId)
+end
+
+---Picks up an item into the entity's inventory. The item must be within range of the entity.
+---@param entityId integer Entity ID.
+---@param itemId integer Item ID.
+function Inventory.PickUp(entityId, itemId)
+end
+
+---Drops the item in a slot at the position of the entity.
+---@param entityId integer Entity ID.
+---@param slotIndex integer Slot index of the item to drop.
+function Inventory.Drop(entityId, slotIndex)
+end
+
+---Drops the item in a slot at a specific position. The position must be within the allowed drop range.
+---@param entityId integer Entity ID.
+---@param slotIndex integer Slot index of the item to drop.
+---@param dropPosition Vector3 Position to drop the item.
+function Inventory.DropAt(entityId, slotIndex, dropPosition)
+end
+
+---Swaps two slots in an entity's inventory.
+---@param entityId integer Entity ID.
+---@param slotIndex1 integer First slot index to swap.
+---@param slotIndex2 integer Second slot index to swap.
+function Inventory.Swap(entityId, slotIndex1, slotIndex2)
+end
+
+---Removes the item in an inventory slot, destroying the item entity.
+---@param entityId integer Entity ID.
+---@param slotIndex integer Slot index of the item to remove.
+function Inventory.RemoveItem(entityId, slotIndex)
+end
 
 --------------------
 

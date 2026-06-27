@@ -46,7 +46,9 @@ internal sealed class InventorySystem : ISystem
         EventId.Core_Inventory_PickUp,
         EventId.Core_Inventory_Drop,
         EventId.Core_Inventory_DropAtPosition,
-        EventId.Core_Inventory_Swap
+        EventId.Core_Inventory_Swap,
+        EventId.Core_Inventory_AddSlots,
+        EventId.Core_Inventory_RemoveItem
     };
 
     public int WorkloadEstimate => 50;
@@ -121,6 +123,30 @@ internal sealed class InventorySystem : ISystem
                     }
 
                     manager.SwapItems(ev.FromPlayerId, details.First, details.Second);
+                    break;
+                }
+
+                case EventId.Core_Inventory_AddSlots:
+                {
+                    if (ev.EventDetails is not EntityIntEventDetails details)
+                    {
+                        logger.LogError("Received AddSlots without details.");
+                        break;
+                    }
+
+                    manager.AddSlots(details.EntityId, details.Value);
+                    break;
+                }
+
+                case EventId.Core_Inventory_RemoveItem:
+                {
+                    if (ev.EventDetails is not EntityIntEventDetails details)
+                    {
+                        logger.LogError("Received RemoveItem without details.");
+                        break;
+                    }
+
+                    manager.RemoveItem(details.EntityId, details.Value);
                     break;
                 }
             }

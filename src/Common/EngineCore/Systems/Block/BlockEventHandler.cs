@@ -32,15 +32,15 @@ public sealed class BlockEventHandler
 {
     private readonly BlockGridPositionIndexer blockGridPositionIndexer;
     private readonly BlockController controller;
-    private readonly CoreWorldManagementController coreWorldManagementController;
     private readonly IEventSender eventSender;
     private readonly ILogger<BlockEventHandler> logger;
     private readonly BlockManager manager;
     private readonly BlockNoticeProcessor noticeProcessor;
+    private readonly WorldManagementController worldManagementController;
 
     public BlockEventHandler(BlockController controller, BlockManager manager,
         BlockGridPositionIndexer blockGridPositionIndexer, BlockNoticeProcessor noticeProcessor,
-        IEventSender eventSender, CoreWorldManagementController coreWorldManagementController,
+        IEventSender eventSender, WorldManagementController worldManagementController,
         ILogger<BlockEventHandler> logger)
     {
         this.controller = controller;
@@ -48,7 +48,7 @@ public sealed class BlockEventHandler
         this.blockGridPositionIndexer = blockGridPositionIndexer;
         this.noticeProcessor = noticeProcessor;
         this.eventSender = eventSender;
-        this.coreWorldManagementController = coreWorldManagementController;
+        this.worldManagementController = worldManagementController;
         this.logger = logger;
     }
 
@@ -165,7 +165,7 @@ public sealed class BlockEventHandler
 
         // Announce world segment load if needed.
         if (eventDetails.IsWorldSegment)
-            coreWorldManagementController.AnnounceWorldSegmentLoaded(eventSender, eventDetails.SegmentIndex);
+            worldManagementController.AnnounceWorldSegmentLoaded(eventSender, eventDetails.SegmentIndex);
     }
 
     /// <summary>

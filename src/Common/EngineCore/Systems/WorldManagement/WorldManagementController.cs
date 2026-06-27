@@ -21,10 +21,52 @@ using Sovereign.EngineCore.Events.Details;
 namespace Sovereign.EngineCore.Systems.WorldManagement;
 
 /// <summary>
-///     Controller for core world management events used by both client and server.
+///     Public asynchronous API for the WorldManagement system.
 /// </summary>
-public class CoreWorldManagementController
+public class WorldManagementController
 {
+    /// <summary>
+    ///     Requests a resynchronization of the given entity to any subscribers. If the entity is not positioned,
+    ///     its parent/ancestors will be checked for the nearest position in the tree; if no position is found,
+    ///     there will be no effect.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <remarks>
+    ///     The synchronization will not occur earlier than the beginning of the next server tick
+    ///     to allow time for any recent component updates to be applied prior to synchronization.
+    /// </remarks>
+    public void ResyncEntity(IEventSender eventSender, ulong entityId)
+    {
+        var details = new EntityEventDetails { EntityId = entityId };
+        var ev = new Event(EventId.Server_WorldManagement_ResyncEntity, details)
+        {
+            SyncToTick = true
+        };
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Requests a resynchronization of the given entity, and of all of its descendents,
+    ///     to any subscribers. If the entity is not positioned, its parent/ancestors will be checked
+    ///     for the nearest position in the tree; if no position is found, there will be no effect.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    /// <remarks>
+    ///     The synchronization will not occur earlier than the beginning of the next server tick
+    ///     to allow time for any recent component updates to be applied prior to synchronization.
+    /// </remarks>
+    public void ResyncEntityTree(IEventSender eventSender, ulong entityId)
+    {
+        var details = new EntityEventDetails { EntityId = entityId };
+        var ev = new Event(EventId.Server_WorldManagement_ResyncEntityTree, details)
+        {
+            SyncToTick = true
+        };
+        eventSender.SendEvent(ev);
+    }
+
     /// <summary>
     ///     Announces that the given world segment has been loaded.
     /// </summary>

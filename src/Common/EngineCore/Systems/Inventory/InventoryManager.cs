@@ -21,7 +21,10 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Logging;
+using Sovereign.EngineCore.Systems.WorldManagement;
 
 namespace Sovereign.EngineCore.Systems.Inventory;
 
@@ -37,7 +40,11 @@ internal sealed class InventoryManager(
     KinematicsComponentCollection kinematics,
     BoundingBoxComponentCollection boundingBoxes,
     EntityTypeComponentCollection entityTypes,
-    IOptions<InventoryOptions> inventoryOptions)
+    IOptions<InventoryOptions> inventoryOptions,
+    IEntityFactory entityFactory,
+    EntityManager entityManager,
+    WorldManagementController worldManagementController,
+    IEventSender eventSender)
 {
     private readonly float maxDropD2 = inventoryOptions.Value.MaxDropDistance * inventoryOptions.Value.MaxDropDistance;
 
@@ -144,6 +151,64 @@ internal sealed class InventoryManager(
 
         if (hasFirst) parents.ModifyComponent(firstItemId, ComponentOperation.Set, secondSlotEid);
         if (hasSecond) parents.ModifyComponent(secondItemId, ComponentOperation.Set, firstSlotEid);
+
+        worldManagementController.ResyncEntityTree(eventSender, firstItemId);
+        worldManagementController.ResyncEntityTree(eventSender, secondItemId);
+    }
+
+    /// <summary>
+    ///     Adds slots to an entity's inventory.
+    /// </summary>
+    /// <param name="entityId">Entity ID that will own the new slots.</param>
+    /// <param name="slotCount">Number of new slots to add (> 0).</param>
+    public void AddSlots(ulong entityId, int slotCount)
+    {
+        if (slotCount < 1)
+        {
+            logger.LogError("Bad request to add {Slots} slots to {Entity} ({EntityId:X}).", slotCount,
+                loggingUtil.FormatEntity(entityId), entityId);
+            return;
+        }
+
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Add {SlotCount} slots to {Entity} ({EntityId:X}).",
+                slotCount, loggingUtil.FormatEntity(entityId), entityId);
+
+        for (var i = 0; i < slotCount; ++i)
+        {
+            var slotId = entityFactory.GetBuilder()
+                .EntityType(EntityType.Slot)
+                .Parent(entityId)
+                .Build();
+
+            if (logger.IsEnabled(LogLevel.Trace))
+                logger.LogTrace("Add slot {SlotId:X} to entity {EntityId:X}.", slotId, entityId);
+        }
+    }
+
+    /// <summary>
+    ///     Removes the item in the given inventory slot.
+    /// </summary>
+    /// <param name="entityId">Entity ID that owns the inventory..</param>
+    /// <param name="slotIndex">Slot index.</param>
+    public void RemoveItem(ulong entityId, int slotIndex)
+    {
+        if (!slotIndexer.TryGetSlotForEntity(entityId, slotIndex, out var slotId))
+        {
+            logger.LogError("RemoveItem for bad slot index {SlotIndex} on entity {EntityId:X}.", slotIndex, entityId);
+            return;
+        }
+
+        if (!hierarchyIndexer.TryGetFirstDirectChild(slotId, out var itemId))
+        {
+            logger.LogError("RemoveItem for empty slot index {SlotIndex} on entity {EntityId:X}.", slotIndex, entityId);
+            return;
+        }
+
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Remove item ID {ItemId:X} from entity {EntityId:X}.", itemId, entityId);
+
+        entityManager.RemoveEntity(itemId);
     }
 
     /// <summary>
@@ -154,9 +219,10 @@ internal sealed class InventoryManager(
     private void DoPickupToFirstSlot(ulong playerId, ulong itemId)
     {
         // Pick up item in first empty slot.
-        if (!slotIndexer.TryFindEmptySlot(playerId, out var slotId)) return;
+        if (!slotIndexer.TryFindEmptySlot(playerId, out var slotId, out _)) return;
         kinematics.RemoveComponent(itemId);
         parents.AddComponent(itemId, slotId);
+        worldManagementController.ResyncEntityTree(eventSender, slotId);
         logger.LogInformation("{Player} picked up item {Item} ({Id:X}).", loggingUtil.FormatEntity(playerId),
             loggingUtil.FormatEntity(itemId), itemId);
     }
@@ -174,6 +240,7 @@ internal sealed class InventoryManager(
             loggingUtil.FormatEntity(itemId), itemId);
         parents.RemoveComponent(itemId);
         kinematics.AddComponent(itemId, new Kinematics { Position = position, Velocity = Vector3.Zero });
+        worldManagementController.ResyncEntityTree(eventSender, itemId);
     }
 
     /// <summary>

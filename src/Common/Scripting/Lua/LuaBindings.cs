@@ -387,6 +387,9 @@ public static partial class LuaBindings
     [LibraryImport(LibName)]
     public static partial int lua_next(IntPtr luaState, int index);
 
+    [LibraryImport(LibName)]
+    public static partial void lua_len(IntPtr luaState, int index);
+
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
     public static partial LuaResult luaL_loadfilex(IntPtr luaState, string filename, string? mode);
 

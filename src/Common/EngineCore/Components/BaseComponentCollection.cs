@@ -82,6 +82,11 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     private readonly StructBuffer<PendingAdd> pendingAdds = new(OperationBufferSize);
 
     /// <summary>
+    ///     Values of pending adds, used to allow early lookups.
+    /// </summary>
+    private readonly Dictionary<ulong, T> pendingAddValues = new();
+
+    /// <summary>
     ///     Load events that are pending invocation.
     /// </summary>
     private readonly HashSet<ulong> pendingLoadEvents = new();
@@ -241,6 +246,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         get
         {
             if (entityToComponentMap.TryGetValue(entityId, out var index)) return components[index];
+            if (hasAdds && pendingAddValues.TryGetValue(entityId, out var pendingValue)) return pendingValue;
             if (entityTable.TryGetTemplate(entityId, out var templateId) &&
                 entityToComponentMap.TryGetValue(templateId, out var templateIndex))
                 return components[templateIndex];
@@ -332,6 +338,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             };
             pendingAdds.Add(ref pendingAdd);
             pendingAddEntityIds.Add(entityId);
+            pendingAddValues[entityId] = initialValue;
 
             hasAdds = true;
         }
@@ -407,7 +414,8 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <returns>true if a local component is associated, false otherwise.</returns>
     public bool HasLocalComponentForEntity(ulong entityId, bool lookback = false)
     {
-        return entityToComponentMap.ContainsKey(entityId) && (lookback || !pendingReclaims.Contains(entityId));
+        return (entityToComponentMap.ContainsKey(entityId) && (lookback || !pendingReclaims.Contains(entityId))) ||
+               (hasAdds && pendingAddValues.ContainsKey(entityId));
     }
 
     /// <summary>
@@ -491,7 +499,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     }
 
     /// <summary>
-    ///     Gets the component value (if any) for the entity.
+    ///     Gets the component value (if any) for the entity, including the value of a pending add operation.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="value">Component value. Only meaningful if this method returns true.</param>
@@ -607,6 +615,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         }
 
         /* Reset the buffer. */
+        pendingAddValues.Clear();
         pendingAddEntityIds.Clear();
         pendingAdds.Clear();
         hasAdds = false;

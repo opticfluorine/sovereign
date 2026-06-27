@@ -18,6 +18,7 @@
 // -- Disabled as ReSharper doesn't understand our pattern of taking/releasing the lock when
 // -- component updates are in progress to avoid many redundant lock/unlock cycles
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Extensions.Logging;
@@ -71,6 +72,53 @@ public sealed class SlotIndexer : BaseComponentIndexer<EntityType>
     }
 
     /// <summary>
+    ///     Gets the IDs of any slots attached directly to the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="slots">Span to fill with slot IDs. Must be large enough to hold all slots for the entity.</param>
+    /// <returns>Number of slots retrieved.</returns>
+    public int GetSlotsForEntity(ulong entityId, Span<ulong> slots)
+    {
+        lock (accessLock)
+        {
+            if (!slotsByParent.TryGetValue(entityId, out var knownSlots)) return 0;
+            try
+            {
+                knownSlots.CopyTo(slots);
+                return knownSlots.Count;
+            }
+            catch (ArgumentException)
+            {
+                // Destination buffer was too small. This is probably a bug, but could be a rare edge case
+                // where a slot was added between corresponding calls to GetSlotCountForEntity and GetSlotsForEntity.
+                // Degrade gracefully by truncating the list of slots.
+                logger.LogWarning("GetSlotsForEntity for {EntityId:X}: buffer too small, truncating.", entityId);
+                for (var i = 0; i < slots.Length; ++i)
+                {
+                    // Exception is only thrown by CopyTo when the source list is larger than the destination,
+                    // so we don't need to check the range here.
+                    slots[i] = knownSlots[i];
+                }
+
+                return slots.Length;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Gets the number of inventory slots attached to the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>Number of inventory slots.</returns>
+    public int GetSlotCountForEntity(ulong entityId)
+    {
+        lock (accessLock)
+        {
+            return slotsByParent.TryGetValue(entityId, out var knownSlots) ? knownSlots.Count : 0;
+        }
+    }
+
+    /// <summary>
     ///     Gets a specific slot attached to an entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
@@ -97,26 +145,57 @@ public sealed class SlotIndexer : BaseComponentIndexer<EntityType>
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="slotId">Slot ID. Only meaningful if method returns true.</param>
+    /// <param name="slotIndex">Slot index. Only meaningful if method returns true.</param>
     /// <returns>Whether an empty slot was found on the entity.</returns>
     /// <remarks>
     ///     This method will only return a slot for a given entity once per tick. This is because if a free slot
     ///     is filled with an item during a tick, the parent-child relationship will not be committed until the
     ///     end of a tick. In this case, the method will return false even if another free slot exists.
     /// </remarks>
-    public bool TryFindEmptySlot(ulong entityId, out ulong slotId)
+    public bool TryFindEmptySlot(ulong entityId, out ulong slotId, out int slotIndex)
     {
         slotId = 0;
+        slotIndex = -1;
 
         lock (accessLock)
         {
             if (!entitiesWithPendingSlot.Add(entityId)) return false;
             if (!slotsByParent.TryGetValue(entityId, out var slotList)) return false;
+            var i = 0;
             foreach (var checkId in slotList)
+            {
                 if (!hierarchyIndexer.TryGetFirstDirectChild(checkId, out _))
                 {
                     slotId = checkId;
+                    slotIndex = i;
                     return true;
                 }
+
+                i++;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Checks whether the given entity has an empty inventory slot.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>true if an empty slot exists, false otherwise.</returns>
+    public bool HasEmptySlot(ulong entityId)
+    {
+        lock (accessLock)
+        {
+            if (!entitiesWithPendingSlot.Add(entityId)) return false;
+            if (!slotsByParent.TryGetValue(entityId, out var slotList)) return false;
+            foreach (var checkId in slotList)
+            {
+                if (!hierarchyIndexer.TryGetFirstDirectChild(checkId, out _))
+                {
+                    return true;
+                }
+            }
         }
 
         return false;

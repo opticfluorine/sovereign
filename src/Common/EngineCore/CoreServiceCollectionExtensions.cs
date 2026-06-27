@@ -280,6 +280,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<InventoryManager>();
         services.TryAddSingleton<IInventoryController, InventoryController>();
         services.TryAddSingleton<IInventoryServices, InventoryServices>();
+        services.TryAddSingleton<InventoryScripting>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, InventorySystem>());
     }
 
@@ -312,7 +313,7 @@ public static class CoreServiceCollectionExtensions
     private static void AddWorldManagementSystem(IServiceCollection services)
     {
         services.TryAddSingleton<WorldSegmentBlockDataLoader>();
-        services.TryAddSingleton<CoreWorldManagementController>();
+        services.TryAddSingleton<WorldManagementController>();
     }
 
     private static void AddTiming(IServiceCollection services)

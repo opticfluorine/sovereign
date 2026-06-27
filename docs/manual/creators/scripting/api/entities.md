@@ -220,7 +220,32 @@ local multipleIds = { 0x7FFF000000000000, 0x7FFF000000000001 }
 Entities.SyncTree(multipleIds)
 ```
 
-### Constants
+## Entity ID Conversion Functions
+
+### AbsoluteTemplateId(relativeId)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: entities.AbsoluteTemplateId(relativeId)
+
+   Converts a relative template entity ID to an absolute template entity ID.
+
+   :param relativeId: Relative template entity ID.
+   :type relativeId: integer
+   :return: Absolute template entity ID.
+   :rtype: integer
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Using `AbsoluteTemplateId` to convert from relative to absolute template ID.
+:emphasize-lines: 1
+local absId = Entities.AbsoluteTemplateId(4) -- returns 0x7ffe000000000004
+```
+
+## Constants
 
 The following constants are available in the `Entities` module:
 

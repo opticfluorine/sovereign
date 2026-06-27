@@ -114,11 +114,81 @@ end
 
 -------------------------------------
 
+---@class InventoryProxy
+---@field private _entityId integer Entity ID.
+local InventoryProxy = {}
+for k,v in pairs(Inventory) do
+    if type(v) == "function" then
+        InventoryProxy[k] = function (self, ...) return v(self._entityId, ...) end
+    end
+end
+setmetatable(InventoryProxy, InventoryProxy)
+
+-------------------------------------
+
+function InventoryProxy:__len()
+    return Inventory.GetSlotCount(self._entityId)
+end
+
+-------------------------------------
+
+function InventoryProxy:__index(slotIndex)
+    if not tonumber(slotIndex) or not (slotIndex > 0 and slotIndex <= #self) then
+        -- Try object fields first.
+        local value = rawget(self, slotIndex)
+        if value then return value end
+
+        -- Fall back on the metatable.
+        return rawget(InventoryProxy, slotIndex)
+    end
+
+    return Inventory.GetItem(self._entityId, slotIndex)
+end
+
+-------------------------------------
+
+function InventoryProxy:__newindex(slotIndex, itemId)
+    if not tonumber(slotIndex) or not (slotIndex > 0 and slotIndex <= #self) then 
+        rawset(self, slotIndex, itemId)
+        return
+    end
+
+    local currentItem = Inventory.GetItem(self._entityId, slotIndex)
+    if currentItem > 0 then
+        -- Slot is filled.
+        if itemId == nil then
+            Inventory.RemoveItem(self._entityId, slotIndex)
+        else
+            error("Entity.Inventory: tried to set item to a non-empty slot")
+        end
+    else
+        -- Slot is empty.
+        if itemId ~= nil then
+            Inventory.AddItem(self._entityId, itemId)
+        end
+    end
+end
+
+-------------------------------------
+
+--- Creates a new InventoryProxy for an entity.
+--- @param entityId integer Entity ID.
+--- @return InventoryProxy # New InventoryProxy for entity.
+function InventoryProxy.Create(entityId)
+    local obj = {}
+    obj._entityId = entityId
+    setmetatable(obj, InventoryProxy)
+    return obj
+end
+
+-------------------------------------
+
 --- Lightweight object-oriented wrapper for an entity and its components.
 --- @class Entity
 --- @field EntityId integer Entity ID.
 --- @field Properties PropertyProxy Provides access to the entity's properties.
 --- @field Components ComponentsProxy Provides access to the entity's components.
+--- @field Inventory InventoryProxy Provides access to the entity's inventory.
 --- @field Data table Entity key-value data.
 local Entity = {}
 Entity.__index = Entity
@@ -137,8 +207,30 @@ function Entity.Get(entityId)
     obj.Properties = PropertyProxy.Create(entityId)
     obj.Components = ComponentsProxy.Create(entityId)
     obj.Data = Data.GetEntityData(entityId)
+    obj.Inventory = InventoryProxy.Create(entityId)
 
     return obj
+end
+
+-------------------------------------
+-------------------------------------
+--   Chat Methods                  --
+-------------------------------------
+-------------------------------------
+
+--- Sends a system message to the entity if it is a player.
+--- @param message string Message.
+function Entity:SendSystemMessage(message)
+    Chat.SendSystemMessage(self.EntityId, message)
+end
+
+-------------------------------------
+
+--- Sends a chat message to the entity if it is a player.
+--- @param color integer Text color.
+--- @param message string Message.
+function Entity:SendChatMessage(color, message)
+    Chat.SendToPlayer(self.EntityId, color, message)
 end
 
 -------------------------------------

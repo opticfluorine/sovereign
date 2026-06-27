@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2026 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,14 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components.Types;
+using MessagePack;
 
 namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Event details containing a material ID and material modifier.
+///     Entity details type that maps
 /// </summary>
-public class MaterialPairEventDetails : IEventDetails
+[MessagePackObject]
+public class EntityIntEventDetails : IEventDetails
 {
-    public MaterialPair MaterialPair = new();
+    /// <summary>
+    ///     Entity ID.
+    /// </summary>
+    [Key(0)]
+    public ulong EntityId { get; set; }
+
+    /// <summary>
+    ///     Associated value.
+    /// </summary>
+    [Key(1)]
+    public int Value { get; set; }
 }

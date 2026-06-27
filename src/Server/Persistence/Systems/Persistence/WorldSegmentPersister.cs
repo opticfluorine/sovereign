@@ -40,22 +40,22 @@ public class WorldSegmentPersister
     private const int BufferSize = 1048576;
 
     private readonly ObjectPool<PersistenceBuffer> bufferPool = new();
-    private readonly CoreWorldManagementController coreWorldManagementController;
     private readonly IEventSender eventSender;
 
     private readonly WorldSegmentBlockDataLoader loader;
     private readonly ILogger<WorldSegmentPersister> logger;
+    private readonly WorldManagementController worldManagementController;
 
     private readonly WorldManagementServices worldManagementServices;
 
     public WorldSegmentPersister(WorldManagementServices worldManagementServices, WorldSegmentBlockDataLoader loader,
-        IEventSender eventSender, CoreWorldManagementController coreWorldManagementController,
+        IEventSender eventSender, WorldManagementController worldManagementController,
         ILogger<WorldSegmentPersister> logger)
     {
         this.worldManagementServices = worldManagementServices;
         this.loader = loader;
         this.eventSender = eventSender;
-        this.coreWorldManagementController = coreWorldManagementController;
+        this.worldManagementController = worldManagementController;
         this.logger = logger;
     }
 
@@ -79,7 +79,7 @@ public class WorldSegmentPersister
                     blockDataBuffer.Buffer))
             {
                 // This is a new segment with no persisted data, so declare it loaded.
-                coreWorldManagementController.AnnounceWorldSegmentLoaded(eventSender, segmentIndex);
+                worldManagementController.AnnounceWorldSegmentLoaded(eventSender, segmentIndex);
                 return;
             }
 

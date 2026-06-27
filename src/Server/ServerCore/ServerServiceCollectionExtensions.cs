@@ -24,6 +24,7 @@ using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Resources;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Systems.Movement;
+using Sovereign.EngineCore.Systems.Scripting;
 using Sovereign.EngineCore.Timing;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Components;
@@ -192,7 +193,6 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<EntitySynchronizer>();
         services.TryAddSingleton<WorldManagementServices>();
         services.TryAddSingleton<WorldSegmentChangeMonitor>();
-        services.TryAddSingleton<WorldManagementController>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, WorldManagementSystem>());
     }
@@ -205,6 +205,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<ScriptingCallbackManager>();
         services.TryAddSingleton<EntityCallbacks>();
         services.TryAddSingleton<ScriptingServices>();
+        services.TryAddSingleton<IScriptingServices>(s => s.GetRequiredService<ScriptingServices>());
         services.TryAddSingleton<ScriptingController>();
         services.TryAddSingleton<EntityScriptCallbacks>();
         services.TryAddSingleton<ScriptingLuaLibrary>();

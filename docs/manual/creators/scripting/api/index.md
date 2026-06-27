@@ -12,6 +12,7 @@ data.md
 dialogue.md
 entities.md
 events.md
+inventory.md
 scripting.md
 time.md
 util.md

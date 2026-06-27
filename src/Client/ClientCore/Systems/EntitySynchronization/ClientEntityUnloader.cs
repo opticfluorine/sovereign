@@ -40,7 +40,7 @@ public class ClientEntityUnloader
     /// </summary>
     private readonly HashSet<GridPosition> subscribedSegments = new();
 
-    private readonly CoreWorldManagementController worldController;
+    private readonly WorldManagementController worldController;
 
     /// <summary>
     ///     Current player entity ID.
@@ -50,7 +50,7 @@ public class ClientEntityUnloader
     public ClientEntityUnloader(BlockWorldSegmentIndexer blockSegmentIndexer,
         NonBlockWorldSegmentIndexer nonBlockSegmentIndexer,
         EntityHierarchyIndexer hierarchyIndexer, EntityManager entityManager,
-        CoreWorldManagementController worldController, IEventSender eventSender)
+        WorldManagementController worldController, IEventSender eventSender)
     {
         this.blockSegmentIndexer = blockSegmentIndexer;
         this.nonBlockSegmentIndexer = nonBlockSegmentIndexer;

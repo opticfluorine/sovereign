@@ -168,4 +168,14 @@ public static class EntityUtil
     {
         return entityId is >= EntityConstants.FirstBlockEntityId and <= EntityConstants.LastBlockEntityId;
     }
+
+    /// <summary>
+    ///     Checks whether the given entity is a regular (non-template, non-block, non-ephemeral) entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>true if regular entity, false otherwise.</returns>
+    public static bool IsRegularEntity(ulong entityId)
+    {
+        return entityId >= EntityConstants.FirstPersistedEntityId;
+    }
 }

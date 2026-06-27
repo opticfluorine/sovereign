@@ -1,4 +1,4 @@
-# util Module
+# Util Module
 
 The `Util` global module provides common utility functions for scripts.
 

@@ -59,6 +59,16 @@ public class ScriptableFunction(string name) : Attribute
 public class ScriptableCallback : Attribute;
 
 /// <summary>
+///     Designates that a parameter in a [ScriptableFunction] should be treated as a caller-supplied output buffer.
+/// </summary>
+/// <param name="sizeHintFunctionName">Name of a function that provides a hint for the size of the output buffer.</param>
+[AttributeUsage(AttributeTargets.Parameter)]
+public class ScriptableOutputBuffer(string sizeHintFunctionName) : Attribute
+{
+    public string SizeHintFunctionname { get; } = sizeHintFunctionName;
+}
+
+/// <summary>
 ///     Designates an event ID as an event which a script can react to.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field)]

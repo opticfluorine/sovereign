@@ -98,6 +98,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
         // Preamble, class definition, marshallers for base types.
         sb.Append($@"
             using System;
+            using System.Collections.Generic;
             using System.Numerics;
             using Sovereign.Scripting.Lua;
             using static Sovereign.Scripting.Lua.LuaBindings;
@@ -138,6 +139,30 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     if (!lua_isinteger(luaState, -1)) {throwTypeError};
                     value = (ulong)lua_tointeger(luaState, -1);
                     lua_pop(luaState, 1);
+                }}
+
+                public static int Marshal(IntPtr luaState, ReadOnlySpan<ulong> value)
+                {{
+                    luaL_checkstack(luaState, 2, null);
+                    lua_createtable(luaState, value.Length, 0);
+                    for (var i = 0; i < value.Length; ++i)
+                    {{
+                        Marshal(luaState, value[i]);
+                        lua_seti(luaState, -2, i + 1);
+                    }}
+                    return 1;
+                }}
+
+                public static int Marshal(IntPtr luaState, ReadOnlySpan<long> value)
+                {{
+                    luaL_checkstack(luaState, 2, null);
+                    lua_createtable(luaState, value.Length, 0);
+                    for (var i = 0; i < value.Length; ++i)
+                    {{
+                        Marshal(luaState, value[i]);
+                        lua_seti(luaState, -2, i + 1);
+                    }}
+                    return 1;
                 }}
 
                 public static int Marshal(IntPtr luaState, int value)
@@ -321,6 +346,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     value = new Guid(guidString);
                 }}
 
+
             ");
 
         // Classes and structs.
@@ -384,10 +410,87 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                 ");
                 }
 
-                sb.Append(@"
+                sb.Append($@"
                     lua_pop(luaState, 1);
                     value = tmp;
-                }
+                }}
+
+                public static int Marshal(IntPtr luaState, ReadOnlySpan<{record.Name}> value)
+                {{
+                    luaL_checkstack(luaState, 2, null);
+                    lua_createtable(luaState, value.Length, 0);
+                    for (var i = 0; i < value.Length; ++i)
+                    {{
+                        Marshal(luaState, value[i]);
+                        lua_seti(luaState, -2, i + 1);
+                    }}
+                    return 1;
+                }}
+
+                public static int Marshal(IntPtr luaState, List<{record.Name}> value)
+                {{
+                    luaL_checkstack(luaState, 2, null);
+                    lua_createtable(luaState, value.Count, 0);
+                    var i = 1;
+                    foreach (var item in value)
+                    {{
+                        Marshal(luaState, item);
+                        lua_seti(luaState, -2, i++);
+                    }}
+                    return 1;
+                }}
+
+                public static void Unmarshal(IntPtr luaState, out List<{record.Name}> value)
+                {{
+                    if (!lua_istable(luaState, -1)) throw new LuaException(""lists must be tables"");
+                    luaL_checkstack(luaState, 2, null);
+                    lua_len(luaState, -1);
+                    var size = (int)lua_tointeger(luaState, -1);
+                    lua_pop(luaState, 1);
+                    value = new(size);
+                    
+                    for (var i = 0; i < size; ++i)
+                    {{
+                        lua_geti(luaState, -1, i + 1);
+                        Unmarshal(luaState, out {record.Name} item);
+                        value.Add(item);
+                    }}
+
+                    lua_pop(luaState, 1);
+                }}
+
+                public static int Marshal(IntPtr luaState, Dictionary<string, {record.Name}> value)
+                {{
+                    luaL_checkstack(luaState, 2, null);
+                    lua_createtable(luaState, 0, value.Count);
+
+                    foreach (var kvp in value)
+                    {{
+                        Marshal(luaState, kvp.Value);
+                        lua_setfield(luaState, -2, kvp.Key);
+                    }}
+
+                    return 1;
+                }}
+
+                public static void Unmarshal(IntPtr luaState, out Dictionary<string, {record.Name}> value)
+                {{
+                    if (!lua_istable(luaState, -1)) throw new LuaException(""dictionaries must be tables"");
+
+                    value = new();
+
+                    luaL_checkstack(luaState, 2, null);
+                    var tableIdx = lua_gettop(luaState);
+                    lua_pushnil(luaState);
+                    while (lua_next(luaState, tableIdx) != 0)
+                    {{
+                        var k = lua_tostring(luaState, -2);
+                        Unmarshal(luaState, out {record.Name} v);
+                        value[k] = v;
+                    }}
+
+                    lua_pop(luaState, 2);
+                }}
                 ");
             }
         }

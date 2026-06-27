@@ -365,6 +365,18 @@ public enum EventId
     /// Associated details: IntPairEventDetails (values are slot indices to swap)
     Core_Inventory_Swap = 1303,
 
+    /// <summary>
+    ///     Event sent to add one or more slots to an entity's inventory.
+    /// </summary>
+    /// Associated details: EntityIntEventDetails (value is number of slots to add, must be > 0)
+    Core_Inventory_AddSlots = 1304,
+
+    /// <summary>
+    ///     Event sent to remove an item from an entity's inventory.
+    /// </summary>
+    /// Associated details: EntityIntEventDetails (value is slot index to remove item from)
+    Core_Inventory_RemoveItem = 1305,
+
     #endregion Inventory
 
     #endregion Core

@@ -60,6 +60,11 @@ public class EntityTable
     private readonly StructBuffer<EntityRemove> pendingRemoves = new(InitialPendingBufferSize);
 
     /// <summary>
+    ///     Template entities for pending adds.
+    /// </summary>
+    private readonly Dictionary<ulong, ulong> pendingTemplates = new();
+
+    /// <summary>
     ///     Subset of entities that are persisted entities.
     /// </summary>
     private readonly HashSet<ulong> persistedEntities = new(InitialEntitySetSize);
@@ -151,6 +156,7 @@ public class EntityTable
             EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock, IsLoad = isLoad
         };
         pendingAdds.Add(ref newAdd);
+        pendingTemplates[entityId] = templateEntityId;
 
         // Set the persistence flag immediately so that it can be looked up as component changes are committed.
         if (isPersisted && !isBlock) persistedEntities.Add(entityId);
@@ -219,6 +225,7 @@ public class EntityTable
         }
 
         pendingAdds.Clear();
+        pendingTemplates.Clear();
         pendingRemoves.Clear();
     }
 
@@ -230,7 +237,8 @@ public class EntityTable
     /// <returns>true if there is a template, false otherwise.</returns>
     public bool TryGetTemplate(ulong entityId, out ulong templateEntityId)
     {
-        return entityTemplates.TryGetValue(entityId, out templateEntityId);
+        return entityTemplates.TryGetValue(entityId, out templateEntityId) ||
+               pendingTemplates.TryGetValue(entityId, out templateEntityId);
     }
 
     /// <summary>

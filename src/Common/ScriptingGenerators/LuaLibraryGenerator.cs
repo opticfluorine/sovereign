@@ -34,12 +34,14 @@ public class LuaLibraryGenerator : IIncrementalGenerator
     private const string ScriptableLibraryName = "ScriptableLibrary";
     private const string ScriptableFunctionFullName = "Sovereign.EngineUtil.Attributes.ScriptableFunction";
     private const string ScriptableFunctionName = "ScriptableFunction";
+    private const string ScriptableCallbackName = "ScriptableCallback";
+    private const string ScriptableOutputBufferName = "ScriptableOutputBuffer";
     private const string DefaultMarshaller = "Sovereign.EngineCore.Lua.LuaMarshaller";
 
     private static readonly List<string> predefinedTypes =
     [
         "System.Int64", "System.UInt64", "System.Int32", "System.UInt32", "System.Int16", "System.UInt16",
-        "System.Byte", "System.Single", "System.Boolean", "System.String", "System.Numerics.Vector3", "System.Guid"
+        "System.Byte", "System.Single", "System.Boolean", "System.String", "Numerics.Vector3", "System.Guid"
     ];
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -77,21 +79,41 @@ public class LuaLibraryGenerator : IIncrementalGenerator
                                 IMethodSymbol function) throw new Exception("not a method");
 
                             var parameters = function.Parameters
-                                .Select(GetParameterModel);
+                                .Zip(Enumerable.Range(0, function.Parameters.Length), (p, i) => (p, i))
+                                .Select(GetParameterModel)
+                                .OrderByDescending(p => p.IsOutputBuffer);
 
                             if (function.ReturnType is not INamedTypeSymbol returnType)
                                 throw new Exception("return type has no name");
 
-                            return new FunctionModel
+                            var paramModels = parameters.ToList();
+                            var hasOutputBuffer = paramModels.Any(p => p.IsOutputBuffer);
+
+                            var fnModel = new FunctionModel
                             {
                                 FunctionName = GetFunctionName(function),
                                 MethodName = function.Name,
                                 LibraryClass = GetClassForFunction(function),
-                                ParameterModels = new ValueEquatableList<ParameterModel>(parameters.ToList()),
+                                ParameterModels = new ValueEquatableList<ParameterModel>(paramModels),
                                 ReturnTypeName =
                                     $"{SyntaxUtil.GetFullNamespace(function.ReturnType.ContainingNamespace)}.{function.ReturnType.Name}",
-                                ReturnTypeMarshallerClass = GetMarshallerClass(returnType)
+                                ReturnTypeMarshallerClass = GetMarshallerClass(returnType),
+                                HasOutputBuffer = hasOutputBuffer,
+                                OutputBufferName = hasOutputBuffer
+                                    ? paramModels.First(p => p.IsOutputBuffer).Name
+                                    : string.Empty
                             };
+
+                            if (fnModel.HasOutputBuffer && fnModel.ReturnTypeName != "System.Void")
+                                throw new Exception(
+                                    $"Function {fnModel.FunctionName} has output buffer but also a non-void return type.");
+                            if (paramModels.Count(p => p.IsOutputBuffer) > 1)
+                                throw new Exception($"Function {fnModel.FunctionName} has multiple output buffers.");
+                            if (paramModels.Any(p => p.IsOutputBuffer && !p.TypeName.StartsWith("System.Span")))
+                                throw new Exception(
+                                    $"Function {fnModel.FunctionName} has output buffer that is not a Span type.");
+
+                            return fnModel;
                         })
                     .Collect()
             )
@@ -113,19 +135,32 @@ public class LuaLibraryGenerator : IIncrementalGenerator
     /// <summary>
     ///     Extracts a model for the given parameter.
     /// </summary>
-    /// <param name="param">Parameter.</param>
+    /// <param name="pdata">Parameter data.</param>
     /// <returns>Parameter model.</returns>
-    private static ParameterModel GetParameterModel(IParameterSymbol param)
+    private static ParameterModel GetParameterModel((IParameterSymbol param, int index) pdata)
     {
+        var (param, index) = pdata;
         if (param.Type is not INamedTypeSymbol typeSymbol) throw new Exception("parameter type not named");
+
+        var outputBufferAttr = param.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass!.Name == ScriptableOutputBufferName);
 
         return new ParameterModel
         {
+            Index = index,
             Name = param.Name,
             TypeName = $"{SyntaxUtil.GetFullNamespace(typeSymbol.ContainingNamespace)}.{typeSymbol.Name}",
             MarshallerClass = GetMarshallerClass(typeSymbol),
-            IsRefCallback = param.GetAttributes().Any(a => a.AttributeClass!.Name == "ScriptableCallback"),
-            IsLuaState = typeSymbol.Name == "IntPtr" && param.Name == "luaState"
+            IsRefCallback = param.GetAttributes().Any(a => a.AttributeClass!.Name == ScriptableCallbackName),
+            IsLuaState = typeSymbol.Name == "IntPtr" && param.Name == "luaState",
+            IsOutputBuffer = outputBufferAttr != null,
+            OutputBufferSizeHintFn = outputBufferAttr != null
+                ? (string)outputBufferAttr.ConstructorArguments.First().Value!
+                : string.Empty,
+            IsGeneric = typeSymbol.IsGenericType,
+            GenericT = typeSymbol.TypeArguments
+                .Select(t => $"{SyntaxUtil.GetFullNamespace(t.ContainingNamespace)}.{t.Name}").ToArray(),
+            IsTUnmanaged = typeSymbol.TypeArguments.Select(t => t.IsUnmanagedType).ToArray()
         };
     }
 
@@ -214,6 +249,7 @@ public class LuaLibraryGenerator : IIncrementalGenerator
             using System;
             using Microsoft.Extensions.Logging;
             using Sovereign.Scripting.Lua;
+            using Sovereign.EngineCore.Systems.Scripting;
             using static Sovereign.Scripting.Lua.LuaBindings;
 
             namespace {libraryModel.LibraryNamespace};
@@ -223,13 +259,18 @@ public class LuaLibraryGenerator : IIncrementalGenerator
             /// </summary>
             class {libraryModel.LibraryShortClass}LuaLibrary : ILuaLibrary
             {{
-                private {libraryModel.LibraryShortClass} _managedLibrary;
-                private ILogger logger;
+                private readonly {libraryModel.LibraryShortClass} _managedLibrary;
+                private readonly ILogger logger;
+                private readonly IScriptingServices scriptingServices;
+                private const int StackLimit = 128;
 
-                public {libraryModel.LibraryShortClass}LuaLibrary({libraryModel.LibraryShortClass} nativeLibrary, ILogger<{libraryModel.LibraryShortClass}LuaLibrary> logger)
+                public {libraryModel.LibraryShortClass}LuaLibrary({libraryModel.LibraryShortClass} nativeLibrary, 
+                    ILogger<{libraryModel.LibraryShortClass}LuaLibrary> logger,
+                    IScriptingServices scriptingServices)
                 {{
                     _managedLibrary = nativeLibrary;
                     this.logger = logger;
+                    this.scriptingServices = scriptingServices;
                 }}
 
                 public void Install(LuaHost luaHost)
@@ -265,6 +306,24 @@ public class LuaLibraryGenerator : IIncrementalGenerator
                         if (!lua_isfunction(luaState, -1)) throw new LuaException(""callback must be a function"");
                         int {param.Name} = luaL_ref(luaState, LUA_REGISTRYINDEX);");
                 }
+                else if (param.IsOutputBuffer)
+                {
+                    sb.Append($@"
+                        var {param.Name}_sz = _managedLibrary.{param.OutputBufferSizeHintFn};");
+                    if (param.IsTUnmanaged[0])
+                    {
+                        // Unmanaged types can be stackalloc'd to avoid the heap.
+                        sb.Append($@"
+                        {param.TypeName}<{param.GenericT[0]}> {param.Name} = {param.Name}_sz > StackLimit ? new(new {param.GenericT[0]}[{param.Name}_sz]) : stackalloc {param.GenericT[0]}[{param.Name}_sz];
+                        if ({param.Name}_sz <= StackLimit) {param.Name}.Clear();");
+                    }
+                    else
+                    {
+                        // Managed types have to go on the heap.
+                        sb.Append($@"
+                        {param.TypeName}<{param.GenericT[0]}> {param.Name} = new(new {param.GenericT[0]}[{param.Name}_sz]);");
+                    }
+                }
                 else if (!param.IsLuaState)
                 {
                     sb.Append($@"
@@ -277,25 +336,43 @@ public class LuaLibraryGenerator : IIncrementalGenerator
             sb.Append($@"
                         {capture}_managedLibrary.{function.MethodName}(");
 
-            for (var i = 0; i < function.ParameterModels.List.Count; ++i)
+            var paramsCallOrder = function.ParameterModels.List.OrderBy(p => p.Index).ToList();
+            for (var i = 0; i < paramsCallOrder.Count; ++i)
             {
-                var param = function.ParameterModels.List[i];
-                var delim = i < function.ParameterModels.List.Count - 1 ? ", " : "";
+                var param = paramsCallOrder[i];
+                var delim = i < paramsCallOrder.Count - 1 ? ", " : "";
                 sb.Append($"{param.Name}{delim}");
             }
 
             sb.Append(");");
 
             if (function.ReturnTypeName != "System.Void")
+            {
                 sb.Append($@"
                         // return type = {function.ReturnTypeName}
                         returnCount = {function.ReturnTypeMarshallerClass}.Marshal(luaState, result);");
+            }
+            else if (function.HasOutputBuffer)
+            {
+                // TODO handle return from output buffer
+                sb.Append($@"
+                        // return output buffer
+                        returnCount = {DefaultMarshaller}.Marshal(luaState, {function.OutputBufferName});");
+            }
 
             sb.Append(@"
                     }
+                    catch (LuaException e)
+                    {
+                        var mainState = LuaUtil.GetMainThread(luaState);
+                        scriptingServices.GetScriptLogger(mainState, logger).LogError(e.Message);
+                        return 0;
+                    }
                     catch (Exception e)
                     {
-                        logger.LogError(e, ""Error when calling function from Lua."");
+                        var mainState = LuaUtil.GetMainThread(luaState);
+                        scriptingServices.GetScriptLogger(mainState, logger)
+                            .LogError(e, ""Error when calling function from Lua."");
                         return 0;
                     }
                     return returnCount;
@@ -372,15 +449,23 @@ public class LuaLibraryGenerator : IIncrementalGenerator
         public string LibraryClass { get; set; }
         public string ReturnTypeName { get; set; }
         public string ReturnTypeMarshallerClass { get; set; }
+        public bool HasOutputBuffer { get; set; }
+        public string OutputBufferName { get; set; }
         public ValueEquatableList<ParameterModel> ParameterModels { get; set; }
     }
 
     private record struct ParameterModel
     {
+        public int Index { get; set; }
         public string Name { get; set; }
         public string TypeName { get; set; }
         public string MarshallerClass { get; set; }
         public bool IsRefCallback { get; set; }
         public bool IsLuaState { get; set; }
+        public bool IsOutputBuffer { get; set; }
+        public string OutputBufferSizeHintFn { get; set; }
+        public bool IsGeneric { get; set; }
+        public string[] GenericT { get; set; }
+        public bool[] IsTUnmanaged { get; set; }
     }
 }
