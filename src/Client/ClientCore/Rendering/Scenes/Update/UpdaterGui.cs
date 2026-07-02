@@ -59,15 +59,15 @@ public class UpdaterGui
 
         var fontSize = ImGui.GetFontSize();
         var windowSize = fontSize * (autoUpdater.State == AutoUpdaterState.NotStarted
-            ? new Vector2(PreUpdateWindowWidth, PreUpdateWindowHeight)
+            ? new Vector2(PreUpdateWindowWidth, 6.56f)
             : new Vector2(InUpdateWindowWidth, InUpdateWindowHeight));
 
         var io = ImGui.GetIO();
-        ImGui.SetNextWindowSize(windowSize, ImGuiCond.Always);
+        //ImGui.SetNextWindowSize(windowSize, ImGuiCond.Always);
         ImGui.SetNextWindowPos(0.5f * io.DisplaySize, ImGuiCond.Always, new Vector2(0.5f));
         ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
 
-        if (!ImGui.Begin("Update")) return;
+        if (!ImGui.Begin("Update", ImGuiWindowFlags.AlwaysAutoResize)) return;
 
         switch (autoUpdater.State)
         {

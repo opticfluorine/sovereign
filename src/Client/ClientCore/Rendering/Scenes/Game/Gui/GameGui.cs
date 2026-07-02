@@ -27,40 +27,21 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
 /// <summary>
 ///     Manages the in-game GUI.
 /// </summary>
-public class GameGui
+public class GameGui(
+    ClientStateServices stateServices,
+    PlayerDebugGui playerDebugGui,
+    EntityDebugGui entityDebugGui,
+    InGameMenuGui menuGui,
+    ChatGui chatGui,
+    TemplateEditorGui templateEditorGui,
+    PlayerRoleCheck roleCheck,
+    WorldEditorGui worldEditorGui,
+    OverlayGui overlayGui,
+    DialogueGui dialogueGui,
+    InventoryGui inventoryGui,
+    ItemContextGui itemContextGui,
+    HotbarGui hotbarGui)
 {
-    private readonly ChatGui chatGui;
-    private readonly DialogueGui dialogueGui;
-    private readonly EntityDebugGui entityDebugGui;
-    private readonly InventoryGui inventoryGui;
-    private readonly ItemContextGui itemContextGui;
-    private readonly InGameMenuGui menuGui;
-    private readonly OverlayGui overlayGui;
-    private readonly PlayerDebugGui playerDebugGui;
-    private readonly PlayerRoleCheck roleCheck;
-    private readonly ClientStateServices stateServices;
-    private readonly TemplateEditorGui templateEditorGui;
-    private readonly WorldEditorGui worldEditorGui;
-
-    public GameGui(ClientStateServices stateServices, PlayerDebugGui playerDebugGui, EntityDebugGui entityDebugGui,
-        InGameMenuGui menuGui, ChatGui chatGui, TemplateEditorGui templateEditorGui, PlayerRoleCheck roleCheck,
-        WorldEditorGui worldEditorGui, OverlayGui overlayGui, DialogueGui dialogueGui, InventoryGui inventoryGui,
-        ItemContextGui itemContextGui)
-    {
-        this.stateServices = stateServices;
-        this.playerDebugGui = playerDebugGui;
-        this.entityDebugGui = entityDebugGui;
-        this.menuGui = menuGui;
-        this.chatGui = chatGui;
-        this.templateEditorGui = templateEditorGui;
-        this.roleCheck = roleCheck;
-        this.worldEditorGui = worldEditorGui;
-        this.overlayGui = overlayGui;
-        this.dialogueGui = dialogueGui;
-        this.inventoryGui = inventoryGui;
-        this.itemContextGui = itemContextGui;
-    }
-
     /// <summary>
     ///     Renders the in-game GUI.
     /// </summary>
@@ -75,6 +56,7 @@ public class GameGui
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowInventory)) inventoryGui.Render();
 
         overlayGui.Render(renderPlan);
+        hotbarGui.Render();
         dialogueGui.Render();
         itemContextGui.Render();
 

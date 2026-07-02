@@ -519,6 +519,12 @@ public enum EventId
     /// Associated details: IntEventDetails (value is slot index, -1 to deselect)
     Client_State_SelectItem = 100402,
 
+    /// <summary>
+    ///     Event sent to select an item in the hotbar.
+    /// </summary>
+    /// Associated details: IntEventDetails (value is slot index).
+    Client_State_SelectHotbarItem = 100403,
+
     #endregion Client_State
 
     #region Client_WorldEdit

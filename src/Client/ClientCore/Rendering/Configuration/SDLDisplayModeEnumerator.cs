@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using SDL2;
 
 namespace Sovereign.ClientCore.Rendering.Configuration;
@@ -24,7 +24,7 @@ namespace Sovereign.ClientCore.Rendering.Configuration;
 /// <summary>
 ///     Common display mode emulator using SDL2 functions.
 /// </summary>
-public class SDLDisplayModeEnumerator : IDisplayModeEnumerator
+public class SDLDisplayModeEnumerator(ILogger<SDLDisplayModeEnumerator> logger) : IDisplayModeEnumerator
 {
     public IEnumerable<IDisplayMode> EnumerateDisplayModes(IVideoAdapter adapter)
     {
@@ -42,6 +42,7 @@ public class SDLDisplayModeEnumerator : IDisplayModeEnumerator
                 if (mode.format != SDL.SDL_PIXELFORMAT_RGB888) continue;
 
                 // Otherwise add it to the list.
+                logger.LogDebug("Available mode: {W}x{H}", mode.w, mode.h);
                 modes.Add(new SDLDisplayMode(
                     mode.w,
                     mode.h,
@@ -51,15 +52,5 @@ public class SDLDisplayModeEnumerator : IDisplayModeEnumerator
         }
 
         return modes;
-    }
-
-    /// <summary>
-    ///     Converts an SDL format.
-    /// </summary>
-    /// <param name="format"></param>
-    /// <returns></returns>
-    private DisplayFormat ConvertFormat(uint format)
-    {
-        throw new NotImplementedException();
     }
 }

@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2024 opticfluorine
+// Copyright (c) 2026 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,24 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.ClientCore.Events.Details;
-
-namespace Sovereign.ClientCore.Systems.Input;
+namespace Sovereign.ClientCore.Systems.Inventory;
 
 /// <summary>
-///     Default input handler that does not perform additional input handling.
+///     Client-side inventory constants.
 /// </summary>
-public class NullInputHandler : IInputHandler
+public static class ClientInventoryConstants
 {
-    public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
-    {
-    }
-
-    public void HandleMouseButtonEvent(MouseButtonEventDetails details, bool isButtonDown)
-    {
-    }
-
-    public void HandleMouseWheelEvent(MouseWheelEventDetails details)
-    {
-    }
+    /// <summary>
+    ///     Number of hotbar slots.
+    /// </summary>
+    public const int HotbarSlotCount = 10;
 }

@@ -14,14 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Logging;
+using Sovereign.ClientCore.Systems.Inventory;
+
 namespace Sovereign.ClientCore.Systems.ClientState;
 
 /// <summary>
 ///     Manages state of inventory GUI actions.
 /// </summary>
-public sealed class InventoryStateManager
+public sealed class InventoryStateManager(ILogger<InventoryStateManager> logger)
 {
     private const int NoneSelected = -1;
+    private int hotbarSelectedIndex;
     private int selectedSlotIndex = NoneSelected;
 
     /// <summary>
@@ -50,5 +54,29 @@ public sealed class InventoryStateManager
     {
         slotIndex = selectedSlotIndex;
         return selectedSlotIndex != NoneSelected;
+    }
+
+    /// <summary>
+    ///     Gets the currently selected hotbar slot index, if any.
+    /// </summary>
+    /// <returns>Currently selected hotbar slot.</returns>
+    public int GetSelectedHotbarSlot()
+    {
+        return hotbarSelectedIndex;
+    }
+
+    /// <summary>
+    ///     Selects a hotbar slot.
+    /// </summary>
+    /// <param name="slotIndex"></param>
+    public void SelectHotbar(int slotIndex)
+    {
+        if (slotIndex is < 0 or >= ClientInventoryConstants.HotbarSlotCount)
+        {
+            logger.LogError("Tried to select invalid hotbar slot {Index}.", slotIndex);
+            return;
+        }
+
+        hotbarSelectedIndex = slotIndex;
     }
 }

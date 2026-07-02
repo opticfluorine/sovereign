@@ -81,6 +81,18 @@ public class ClientStateController(HighlightManager highlightManager)
     }
 
     /// <summary>
+    ///     Selects a hotbar slot.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="slotIndex">Hotbar slot index.</param>
+    public void SelectHotbar(IEventSender eventSender, int slotIndex)
+    {
+        var details = new IntEventDetails { Value = (uint)slotIndex };
+        var ev = new Event(EventId.Client_State_SelectHotbarItem, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
     ///     Synchronously clears any block highlights.
     /// </summary>
     public void ClearBlockHighlights()

@@ -14,49 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using SDL2;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.ClientState;
+using Sovereign.ClientCore.Systems.Inventory;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.ClientCore.Systems.Player;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.ClientCore.Systems.Input;
 
-public class InGameInputHandler : IInputHandler
+public class InGameInputHandler(
+    KeyboardState keyboardState,
+    PlayerInputMovementMapper playerInputMovementMapper,
+    InGameKeyboardShortcuts inGameKeyboardShortcuts,
+    PlayerController playerController,
+    IEventSender eventSender,
+    IPerspectiveServices perspectiveServices,
+    CameraServices cameraServices,
+    EntityClickHandler entityClickHandler,
+    ClientStateServices stateServices,
+    InventoryClickHandler inventoryClickHandler,
+    ClientStateController stateController)
+    : IInputHandler
 {
-    private readonly CameraServices cameraServices;
-    private readonly EntityClickHandler entityClickHandler;
-    private readonly IEventSender eventSender;
-    private readonly InGameKeyboardShortcuts inGameKeyboardShortcuts;
-    private readonly InventoryClickHandler inventoryClickHandler;
-    private readonly KeyboardState keyboardState;
-    private readonly IPerspectiveServices perspectiveServices;
-    private readonly PlayerController playerController;
-    private readonly PlayerInputMovementMapper playerInputMovementMapper;
-    private readonly ClientStateController stateController;
-    private readonly ClientStateServices stateServices;
-
-    public InGameInputHandler(KeyboardState keyboardState, PlayerInputMovementMapper playerInputMovementMapper,
-        InGameKeyboardShortcuts inGameKeyboardShortcuts, PlayerController playerController, IEventSender eventSender,
-        IPerspectiveServices perspectiveServices, CameraServices cameraServices, EntityClickHandler entityClickHandler,
-        ClientStateServices stateServices, InventoryClickHandler inventoryClickHandler,
-        ClientStateController stateController)
-    {
-        this.keyboardState = keyboardState;
-        this.playerInputMovementMapper = playerInputMovementMapper;
-        this.inGameKeyboardShortcuts = inGameKeyboardShortcuts;
-        this.playerController = playerController;
-        this.eventSender = eventSender;
-        this.perspectiveServices = perspectiveServices;
-        this.cameraServices = cameraServices;
-        this.entityClickHandler = entityClickHandler;
-        this.stateServices = stateServices;
-        this.inventoryClickHandler = inventoryClickHandler;
-        this.stateController = stateController;
-    }
-
     public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
     {
         if (!isKeyUp) inGameKeyboardShortcuts.OnKeyDown(details.Key);
@@ -87,6 +70,22 @@ public class InGameInputHandler : IInputHandler
                 HandleCommaKeyEvent(oldState, !isKeyUp);
                 break;
 
+            case SDL.SDL_Keycode.SDLK_0:
+            case SDL.SDL_Keycode.SDLK_1:
+            case SDL.SDL_Keycode.SDLK_2:
+            case SDL.SDL_Keycode.SDLK_3:
+            case SDL.SDL_Keycode.SDLK_4:
+            case SDL.SDL_Keycode.SDLK_5:
+            case SDL.SDL_Keycode.SDLK_6:
+            case SDL.SDL_Keycode.SDLK_7:
+            case SDL.SDL_Keycode.SDLK_8:
+            case SDL.SDL_Keycode.SDLK_9:
+            {
+                var number = (int)details.Key - (int)SDL.SDL_Keycode.SDLK_0;
+                HandleNumberKeyEvent(number, oldState, !isKeyUp);
+                break;
+            }
+
             /* Ignore keys that don't do anything for now. */
         }
     }
@@ -110,6 +109,18 @@ public class InGameInputHandler : IInputHandler
         var clickPos = cameraServices.GetMousePositionWorldCoordinates();
         if (perspectiveServices.TryGetHighestCoveringEntity(clickPos, out var entityId))
             entityClickHandler.OnEntityClicked(entityId, details.Button);
+    }
+
+    public void HandleMouseWheelEvent(MouseWheelEventDetails details)
+    {
+        // World edit inputs are handled by their own system, so ignore.
+        if (stateServices.GetStateFlagValue(ClientStateFlag.WorldEditMode)) return;
+
+        // Hotbar scroll.
+        var delta = -Math.Sign(details.ScrollAmount);
+        var newSlotIndex = (stateServices.GetSelectedHotbarSlot() + ClientInventoryConstants.HotbarSlotCount + delta) %
+                           ClientInventoryConstants.HotbarSlotCount;
+        stateController.SelectHotbar(eventSender, newSlotIndex);
     }
 
     /// <summary>
@@ -156,5 +167,20 @@ public class InGameInputHandler : IInputHandler
     private void HandleCommaKeyEvent(bool oldState, bool newState)
     {
         if (!oldState && newState) playerController.PickUpItemUnder(eventSender);
+    }
+
+    /// <summary>
+    ///     Handles number key events.
+    /// </summary>
+    /// <param name="number">Number pressed.</param>
+    /// <param name="oldState">Old state.</param>
+    /// <param name="newState">New state.</param>
+    private void HandleNumberKeyEvent(int number, bool oldState, bool newState)
+    {
+        // This will dispatch to a hotbar slot selection. Slots are numbered in QWERTY layout order (1,2,3,...,0)
+        // but indexed from 0 (i.e. slot 0 is key 1, slot 1 is key 2, ..., slot 9 is key 0).
+        var slotIndex = (number + ClientInventoryConstants.HotbarSlotCount - 1) %
+                        ClientInventoryConstants.HotbarSlotCount;
+        if (!oldState && newState) stateController.SelectHotbar(eventSender, slotIndex);
     }
 }

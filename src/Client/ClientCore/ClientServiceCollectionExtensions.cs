@@ -229,6 +229,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<InventoryGui>();
         services.TryAddSingleton<ItemContextGui>();
         services.TryAddSingleton<RendererDebugGui>();
+        services.TryAddSingleton<HotbarGui>();
     }
 
     private static void AddScenes(IServiceCollection services)

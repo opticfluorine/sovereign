@@ -100,6 +100,16 @@ public sealed class ClientStateServices(
     }
 
     /// <summary>
+    ///     Gets the currently selected hotbar slot, if any.
+    /// </summary>
+    /// <param name="slotIndex">Selected hotbar slot index. Only meaningful if method returns true.</param>
+    /// <returns>true if a hotbar slot is currently selected, false otherwise.</returns>
+    public int GetSelectedHotbarSlot()
+    {
+        return inventoryStateManager.GetSelectedHotbarSlot();
+    }
+
+    /// <summary>
     ///     Copies the block highlight set into a destination buffer. The buffer is not cleared before copy.
     /// </summary>
     /// <param name="destination">Destination buffer.</param>

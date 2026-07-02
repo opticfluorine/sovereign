@@ -166,7 +166,6 @@ public sealed class InventoryGui(
         ImGui.PopFont();
     }
 
-
     /// <summary>
     ///     Called when an item is left-clicked in the inventory.
     /// </summary>

@@ -68,6 +68,7 @@ public class ClientStateSystem : ISystem
         EventId.Client_State_SetFlag,
         EventId.Client_State_SetMainMenuState,
         EventId.Client_State_SelectItem,
+        EventId.Client_State_SelectHotbarItem,
         EventId.Client_Network_BeginConnection,
         EventId.Client_Network_PlayerEntitySelected,
         EventId.Core_WorldManagement_Subscribe,
@@ -168,6 +169,19 @@ public class ClientStateSystem : ISystem
                     var slotIndex = (int)details.Value;
                     if (slotIndex >= 0) inventoryStateManager.Select(slotIndex);
                     else inventoryStateManager.Deselect();
+                    break;
+                }
+
+                case EventId.Client_State_SelectHotbarItem:
+                {
+                    if (ev.EventDetails is not IntEventDetails details)
+                    {
+                        logger.LogError("Received SelectHotbarItem event without details.");
+                        break;
+                    }
+
+                    var slotIndex = (int)details.Value;
+                    inventoryStateManager.SelectHotbar(slotIndex);
                     break;
                 }
             }

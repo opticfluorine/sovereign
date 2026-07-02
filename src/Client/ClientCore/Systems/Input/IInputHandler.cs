@@ -37,4 +37,10 @@ public interface IInputHandler
     /// <param name="details">Mouse button event details.</param>
     /// <param name="isButtonDown">Whether the mouse button is down.</param>
     void HandleMouseButtonEvent(MouseButtonEventDetails details, bool isButtonDown);
+
+    /// <summary>
+    ///     Handles a mouse wheel event.
+    /// </summary>
+    /// <param name="details">Mouse wheel event details.</param>
+    void HandleMouseWheelEvent(MouseWheelEventDetails details);
 }

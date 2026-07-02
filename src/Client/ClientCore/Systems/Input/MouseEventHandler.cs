@@ -126,6 +126,7 @@ public class MouseEventHandler(
     private void HandleMouseWheelEvent(MouseWheelEventDetails details)
     {
         mouseState.UpdateWheel(details.ScrollAmount);
+        DoWheelStateSpecificProcessing(details);
     }
 
     /// <summary>
@@ -135,12 +136,30 @@ public class MouseEventHandler(
     /// <param name="isDown">Whether the mouse button is down.</param>
     private void DoButtonStateSpecificProcessing(MouseButtonEventDetails details, bool isDown)
     {
-        IInputHandler handler = stateServices.State switch
+        var handler = GetStateInputHandler();
+        handler.HandleMouseButtonEvent(details, isDown);
+    }
+
+    /// <summary>
+    ///     Dispatches state-specific mouse wheel event processing.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void DoWheelStateSpecificProcessing(MouseWheelEventDetails details)
+    {
+        var handler = GetStateInputHandler();
+        handler.HandleMouseWheelEvent(details);
+    }
+
+    /// <summary>
+    ///     Gets the input handler for the current client state.
+    /// </summary>
+    /// <returns>Input handler.</returns>
+    private IInputHandler GetStateInputHandler()
+    {
+        return stateServices.State switch
         {
             MainClientState.InGame => inGameHandler,
             _ => nullHandler
         };
-
-        handler.HandleMouseButtonEvent(details, isDown);
     }
 }
