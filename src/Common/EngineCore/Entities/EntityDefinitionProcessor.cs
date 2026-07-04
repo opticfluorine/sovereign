@@ -139,6 +139,21 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutServerOnly();
 
+        if (definition.Stackable)
+            builder.Stackable();
+        else
+            builder.WithoutStackable();
+
+        if (definition.Quantity.HasValue)
+            builder.Quantity(definition.Quantity.Value);
+        else
+            builder.WithoutQuantity();
+
+        if (definition.ItemUse.HasValue)
+            builder.ItemUse(definition.ItemUse.Value);
+        else
+            builder.WithoutItemUse();
+
         var entityId = builder.Build();
         logger.LogDebug("Processed entity ID {Id:X}.", entityId);
     }

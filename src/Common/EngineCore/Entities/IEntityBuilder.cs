@@ -342,4 +342,45 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutServerOnly();
+
+    /// <summary>
+    ///     Adds a Stackable tag to the entity.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(Stackable))]
+    IEntityBuilder Stackable();
+
+    /// <summary>
+    ///     Removes the Stackable tag if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutStackable();
+
+    /// <summary>
+    ///     Adds a Quantity component to the entity.
+    /// </summary>
+    /// <param name="quantity">Quantity.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(Quantity))]
+    IEntityBuilder Quantity(uint quantity);
+
+    /// <summary>
+    ///     Removes the Quantity component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutQuantity();
+
+    /// <summary>
+    ///     Adds an ItemUseTargetType component to the entity.
+    /// </summary>
+    /// <param name="itemUse">Target type.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(ItemUse))]
+    IEntityBuilder ItemUse(ItemUse itemUse);
+
+    /// <summary>
+    ///     Removes the ItemUseTargetType component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutItemUse();
 }

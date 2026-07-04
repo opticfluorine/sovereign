@@ -40,6 +40,18 @@ public static class ComponentOperators
         };
 
     /// <summary>
+    ///     Standard operators for uint-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<uint, uint, uint>>
+        UintOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b },
+            { ComponentOperation.Add, (a, b) => a + b },
+            { ComponentOperation.Multiply, (a, b) => a * b },
+            { ComponentOperation.Divide, (a, b) => a / b }
+        };
+
+    /// <summary>
     ///     Standard operators for ulong-valued components.
     /// </summary>
     public static readonly Dictionary<ComponentOperation, Func<ulong, ulong, ulong>>
@@ -184,6 +196,15 @@ public static class ComponentOperators
     /// </summary>
     public static readonly Dictionary<ComponentOperation, Func<BlockTile, BlockTile, BlockTile>>
         BlockTileOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
+        };
+
+    /// <summary>
+    ///     Standard operators for ItemUseTargetType-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<ItemUse, ItemUse, ItemUse>>
+        ItemUseOperators = new()
         {
             { ComponentOperation.Set, (_, b) => b }
         };

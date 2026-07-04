@@ -348,6 +348,24 @@ public interface IPersistenceProvider : IDisposable
     /// </summary>
     IRemoveComponentQuery RemoveServerOnlyComponentQuery { get; }
 
+    IAddComponentQuery<bool> AddStackableComponentQuery { get; }
+
+    IModifyComponentQuery<bool> ModifyStackableComponentQuery { get; }
+
+    IRemoveComponentQuery RemoveStackableComponentQuery { get; }
+
+    IAddComponentQuery<uint> AddQuantityComponentQuery { get; }
+
+    IModifyComponentQuery<uint> ModifyQuantityComponentQuery { get; }
+
+    IRemoveComponentQuery RemoveQuantityComponentQuery { get; }
+
+    IAddComponentQuery<ItemUse> AddItemUseComponentQuery { get; }
+
+    IModifyComponentQuery<ItemUse> ModifyItemUseComponentQuery { get; }
+
+    IRemoveComponentQuery RemoveItemUseComponentQuery { get; }
+
     /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>

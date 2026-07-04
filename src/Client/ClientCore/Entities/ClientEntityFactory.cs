@@ -24,78 +24,37 @@ namespace Sovereign.ClientCore.Entities;
 /// <summary>
 ///     Entity factory for the client.
 /// </summary>
-public sealed class ClientEntityFactory : IEntityFactory
+public sealed class ClientEntityFactory(
+    EntityManager entityManager,
+    KinematicsComponentCollection kinematics,
+    DrawableComponentCollection drawables,
+    BlockTileComponentCollection blockTiles,
+    AboveBlockComponentCollection aboveBlocks,
+    AnimatedSpriteComponentCollection animatedSprites,
+    PlayerCharacterTagCollection playerCharacterTags,
+    NameComponentCollection names,
+    ParentComponentCollection parents,
+    OrientationComponentCollection orientations,
+    AdminTagCollection admins,
+    BlockPositionComponentCollection blockPositions,
+    CastBlockShadowsTagCollection castBlockShadows,
+    PointLightSourceComponentCollection pointLightSources,
+    PhysicsTagCollection physics,
+    BoundingBoxComponentCollection boundingBoxes,
+    CastShadowsComponentCollection castShadows,
+    EntityTypeComponentCollection entityTypes,
+    ServerOnlyTagCollection serverOnly,
+    StackableTagCollection stackables,
+    QuantityComponentCollection quantities,
+    ItemUseComponentCollection itemUses,
+    EntityTable entityTable,
+    EntityAssigner entityAssigner)
+    : IEntityFactory
 {
-    private readonly AboveBlockComponentCollection aboveBlocks;
-    private readonly AdminTagCollection admins;
-    private readonly AnimatedSpriteComponentCollection animatedSprites;
-    private readonly BlockPositionComponentCollection blockPositions;
-    private readonly BlockTileComponentCollection blockTiles;
-    private readonly BoundingBoxComponentCollection boundingBoxes;
-    private readonly CastBlockShadowsTagCollection castBlockShadows;
-    private readonly CastShadowsComponentCollection castShadows;
-    private readonly DrawableComponentCollection drawables;
-    private readonly EntityAssigner entityAssigner;
-    private readonly EntityManager entityManager;
-    private readonly EntityTable entityTable;
-    private readonly EntityTypeComponentCollection entityTypes;
-    private readonly KinematicsComponentCollection kinematics;
-    private readonly NameComponentCollection names;
-    private readonly OrientationComponentCollection orientations;
-    private readonly ParentComponentCollection parents;
-    private readonly PhysicsTagCollection physics;
-    private readonly PlayerCharacterTagCollection playerCharacterTags;
-    private readonly PointLightSourceComponentCollection pointLightSources;
-    private readonly ServerOnlyTagCollection serverOnly;
-
     /// <summary>
     ///     Next available block entity ID.
     /// </summary>
     private ulong nextBlockId = EntityConstants.FirstBlockEntityId;
-
-    public ClientEntityFactory(EntityManager entityManager,
-        KinematicsComponentCollection kinematics,
-        DrawableComponentCollection drawables,
-        BlockTileComponentCollection blockTiles,
-        AboveBlockComponentCollection aboveBlocks,
-        AnimatedSpriteComponentCollection animatedSprites,
-        PlayerCharacterTagCollection playerCharacterTags,
-        NameComponentCollection names,
-        ParentComponentCollection parents,
-        OrientationComponentCollection orientations,
-        AdminTagCollection admins,
-        BlockPositionComponentCollection blockPositions,
-        CastBlockShadowsTagCollection castBlockShadows,
-        PointLightSourceComponentCollection pointLightSources,
-        PhysicsTagCollection physics,
-        BoundingBoxComponentCollection boundingBoxes,
-        CastShadowsComponentCollection castShadows,
-        EntityTypeComponentCollection entityTypes,
-        ServerOnlyTagCollection serverOnly,
-        EntityTable entityTable, EntityAssigner entityAssigner)
-    {
-        this.entityManager = entityManager;
-        this.kinematics = kinematics;
-        this.drawables = drawables;
-        this.blockTiles = blockTiles;
-        this.aboveBlocks = aboveBlocks;
-        this.animatedSprites = animatedSprites;
-        this.playerCharacterTags = playerCharacterTags;
-        this.names = names;
-        this.parents = parents;
-        this.orientations = orientations;
-        this.admins = admins;
-        this.blockPositions = blockPositions;
-        this.castBlockShadows = castBlockShadows;
-        this.pointLightSources = pointLightSources;
-        this.physics = physics;
-        this.boundingBoxes = boundingBoxes;
-        this.castShadows = castShadows;
-        this.entityTypes = entityTypes;
-        this.serverOnly = serverOnly;
-        this.entityTable = entityTable;
-        this.entityAssigner = entityAssigner;
-    }
 
     public IEntityBuilder GetBuilder(EntityCategory entityCategory, bool load = false)
     {
@@ -113,6 +72,7 @@ public sealed class ClientEntityFactory : IEntityFactory
             entityManager, kinematics, drawables, blockTiles,
             aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources,
-            physics, boundingBoxes, castShadows, entityTypes, serverOnly, entityTable);
+            physics, boundingBoxes, castShadows, entityTypes, serverOnly, stackables, quantities,
+            itemUses, entityTable);
     }
 }

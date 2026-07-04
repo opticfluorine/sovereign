@@ -72,6 +72,15 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const SqliteType ServerOnlyParamType = SqliteType.Integer;
     private const string ServerOnlyParamName = "server_only";
 
+    private const SqliteType StackableParamType = SqliteType.Integer;
+    private const string StackableParamName = "stackable";
+
+    private const SqliteType QuantityParamType = SqliteType.Integer;
+    private const string QuantityParamName = "quantity";
+
+    private const SqliteType ItemUseParamType = SqliteType.Integer;
+    private const string ItemUseParamName = "item_use";
+
     private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
 
@@ -242,6 +251,25 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         ModifyServerOnlyComponentQuery = new SimpleSqliteModifyComponentQuery<bool>(ServerOnlyParamName,
             ServerOnlyParamType, conn);
         RemoveServerOnlyComponentQuery = new SimpleSqliteRemoveComponentQuery(ServerOnlyParamName, conn);
+
+        // Stackable tag.
+        AddStackableComponentQuery =
+            new SimpleSqliteAddComponentQuery<bool>(StackableParamName, StackableParamType, conn);
+        ModifyStackableComponentQuery =
+            new SimpleSqliteModifyComponentQuery<bool>(StackableParamName, StackableParamType, conn);
+        RemoveStackableComponentQuery = new SimpleSqliteRemoveComponentQuery(StackableParamName, conn);
+
+        // Quantity component.
+        AddQuantityComponentQuery = new SimpleSqliteAddComponentQuery<uint>(QuantityParamName, QuantityParamType, conn);
+        ModifyQuantityComponentQuery =
+            new SimpleSqliteModifyComponentQuery<uint>(QuantityParamName, QuantityParamType, conn);
+        RemoveQuantityComponentQuery = new SimpleSqliteRemoveComponentQuery(QuantityParamName, conn);
+
+        // ItemUse component.
+        AddItemUseComponentQuery = new SimpleSqliteAddComponentQuery<ItemUse>(ItemUseParamName, ItemUseParamType, conn);
+        ModifyItemUseComponentQuery =
+            new SimpleSqliteModifyComponentQuery<ItemUse>(ItemUseParamName, ItemUseParamType, conn);
+        RemoveItemUseComponentQuery = new SimpleSqliteRemoveComponentQuery(ItemUseParamName, conn);
     }
 
     public IAddComponentQuery<BlockTile> AddBlockTileQuery { get; }
@@ -307,6 +335,15 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<bool> AddServerOnlyComponentQuery { get; }
     public IModifyComponentQuery<bool> ModifyServerOnlyComponentQuery { get; }
     public IRemoveComponentQuery RemoveServerOnlyComponentQuery { get; }
+    public IAddComponentQuery<bool> AddStackableComponentQuery { get; }
+    public IModifyComponentQuery<bool> ModifyStackableComponentQuery { get; }
+    public IRemoveComponentQuery RemoveStackableComponentQuery { get; }
+    public IAddComponentQuery<uint> AddQuantityComponentQuery { get; }
+    public IModifyComponentQuery<uint> ModifyQuantityComponentQuery { get; }
+    public IRemoveComponentQuery RemoveQuantityComponentQuery { get; }
+    public IAddComponentQuery<ItemUse> AddItemUseComponentQuery { get; }
+    public IModifyComponentQuery<ItemUse> ModifyItemUseComponentQuery { get; }
+    public IRemoveComponentQuery RemoveItemUseComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

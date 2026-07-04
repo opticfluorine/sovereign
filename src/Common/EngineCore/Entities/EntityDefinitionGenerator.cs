@@ -34,6 +34,7 @@ public class EntityDefinitionGenerator
     private readonly DrawableComponentCollection drawables;
     private readonly EntityTable entityTable;
     private readonly EntityTypeComponentCollection entityTypes;
+    private readonly ItemUseComponentCollection itemUses;
     private readonly KinematicsComponentCollection kinematics;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
@@ -41,7 +42,9 @@ public class EntityDefinitionGenerator
     private readonly PhysicsTagCollection physics;
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly PointLightSourceComponentCollection pointLightSources;
+    private readonly QuantityComponentCollection quantities;
     private readonly ServerOnlyTagCollection serverOnly;
+    private readonly StackableTagCollection stackable;
 
     public EntityDefinitionGenerator(
         KinematicsComponentCollection kinematics,
@@ -53,8 +56,8 @@ public class EntityDefinitionGenerator
         CastBlockShadowsTagCollection castBlockShadows, PointLightSourceComponentCollection pointLightSources,
         PhysicsTagCollection physics, BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows, EntityTypeComponentCollection entityTypes,
-        ServerOnlyTagCollection serverOnly,
-        EntityTable entityTable)
+        ServerOnlyTagCollection serverOnly, StackableTagCollection stackable, QuantityComponentCollection quantities,
+        ItemUseComponentCollection itemUses, EntityTable entityTable)
     {
         this.kinematics = kinematics;
         this.blockTiles = blockTiles;
@@ -73,6 +76,9 @@ public class EntityDefinitionGenerator
         this.castShadows = castShadows;
         this.entityTypes = entityTypes;
         this.serverOnly = serverOnly;
+        this.stackable = stackable;
+        this.quantities = quantities;
+        this.itemUses = itemUses;
         this.entityTable = entityTable;
     }
 
@@ -135,6 +141,14 @@ public class EntityDefinitionGenerator
             def.ServerOnly = serverOnly[entityId];
 
         def.EntityType = entityTypes.HasLocalComponentForEntity(entityId) ? entityTypes[entityId] : EntityType.Other;
+
+        def.Stackable = stackable.HasLocalTagForEntity(entityId);
+
+        if (quantities.HasLocalComponentForEntity(entityId))
+            def.Quantity = quantities[entityId];
+
+        if (itemUses.HasLocalComponentForEntity(entityId))
+            def.ItemUse = itemUses[entityId];
 
         return def;
     }

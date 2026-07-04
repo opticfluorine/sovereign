@@ -101,6 +101,7 @@ public sealed class StateBuffer
     private readonly HashSet<string> globalKeyValuePairs = new();
 
     private readonly PersistenceInternalController internalController;
+    private readonly StructBuffer<StateUpdate<ItemUse>> itemUseUpdates = new(BufferSize);
 
     /// <summary>
     ///     Position state updates.
@@ -144,6 +145,8 @@ public sealed class StateBuffer
     /// </summary>
     private readonly StructBuffer<StateUpdate<PointLight>> pointLightSourceUpdates = new(BufferSize);
 
+    private readonly StructBuffer<StateUpdate<uint>> quantityUpdates = new(BufferSize);
+
     /// <summary>
     ///     Removed entity IDs.
     /// </summary>
@@ -153,6 +156,8 @@ public sealed class StateBuffer
     ///     ServerOnly tag updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<bool>> serverOnlyUpdates = new(BufferSize);
+
+    private readonly StructBuffer<StateUpdate<bool>> stackableUpdates = new(BufferSize);
 
     /// <summary>
     ///     Template state updates.
@@ -354,6 +359,21 @@ public sealed class StateBuffer
         serverOnlyUpdates.Add(ref update);
     }
 
+    public void UpdateStackable(ref StateUpdate<bool> update)
+    {
+        stackableUpdates.Add(ref update);
+    }
+
+    public void UpdateQuantity(ref StateUpdate<uint> update)
+    {
+        quantityUpdates.Add(ref update);
+    }
+
+    public void UpdateItemUse(ref StateUpdate<ItemUse> update)
+    {
+        itemUseUpdates.Add(ref update);
+    }
+
     /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
@@ -400,6 +420,9 @@ public sealed class StateBuffer
         globalKeyValuePairs.Clear();
         entityKeyValuePairs.Clear();
         serverOnlyUpdates.Clear();
+        stackableUpdates.Clear();
+        quantityUpdates.Clear();
+        itemUseUpdates.Clear();
     }
 
     /// <summary>
@@ -539,6 +562,27 @@ public sealed class StateBuffer
                     persistenceProvider.AddServerOnlyComponentQuery,
                     persistenceProvider.ModifyServerOnlyComponentQuery,
                     persistenceProvider.RemoveServerOnlyComponentQuery,
+                    transaction);
+
+                // Stackable.
+                SynchronizeComponent(stackableUpdates,
+                    persistenceProvider.AddStackableComponentQuery,
+                    persistenceProvider.ModifyStackableComponentQuery,
+                    persistenceProvider.RemoveStackableComponentQuery,
+                    transaction);
+
+                // Quantity.
+                SynchronizeComponent(quantityUpdates,
+                    persistenceProvider.AddQuantityComponentQuery,
+                    persistenceProvider.ModifyQuantityComponentQuery,
+                    persistenceProvider.RemoveQuantityComponentQuery,
+                    transaction);
+
+                // ItemUse.
+                SynchronizeComponent(itemUseUpdates,
+                    persistenceProvider.AddItemUseComponentQuery,
+                    persistenceProvider.ModifyItemUseComponentQuery,
+                    persistenceProvider.RemoveItemUseComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

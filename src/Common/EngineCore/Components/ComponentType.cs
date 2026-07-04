@@ -119,6 +119,21 @@ public enum ComponentType
     /// </summary>
     ServerOnly = 0x0013,
 
+    /// <summary>
+    ///     Stackable tag.
+    /// </summary>
+    Stackable = 0x0014,
+
+    /// <summary>
+    ///     Quantity component.
+    /// </summary>
+    Quantity = 0x0015,
+
+    /// <summary>
+    ///     ItemUseTargetType component.
+    /// </summary>
+    ItemUse = 0x0016,
+
     #endregion Common
 
     #region Client

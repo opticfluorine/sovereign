@@ -66,6 +66,9 @@ public sealed class EntityProcessor
     private const int IndexShadowRadius = IndexBbSizeZ + 1;
     private const int IndexEntityType = IndexShadowRadius + 1;
     private const int IndexServerOnly = IndexEntityType + 1;
+    private const int IndexStackable = IndexServerOnly + 1;
+    private const int IndexQuantity = IndexStackable + 1;
+    private const int IndexItemUse = IndexQuantity + 1;
     private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
     private readonly ExistingEntitySet existingEntitySet;
@@ -135,6 +138,9 @@ public sealed class EntityProcessor
             ProcessCastShadows(reader, builder);
             ProcessEntityType(reader, builder);
             ProcessServerOnly(reader, builder);
+            ProcessStackable(reader, builder);
+            ProcessQuantity(reader, builder);
+            ProcessItemUse(reader, builder);
 
             /* Complete the entity. */
             builder.Build();
@@ -397,6 +403,24 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexServerOnly)) return;
         if (reader.GetBoolean(IndexServerOnly)) builder.ServerOnly();
+    }
+
+    private void ProcessStackable(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexStackable)) return;
+        if (reader.GetBoolean(IndexStackable)) builder.Stackable();
+    }
+
+    private void ProcessQuantity(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexQuantity)) return;
+        builder.Quantity((uint)reader.GetInt32(IndexQuantity));
+    }
+
+    private void ProcessItemUse(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexItemUse)) return;
+        builder.ItemUse((ItemUse)reader.GetInt32(IndexItemUse));
     }
 
     /// <summary>

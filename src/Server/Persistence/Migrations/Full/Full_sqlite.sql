@@ -103,6 +103,9 @@ CREATE TABLE Entity
     shadow_radius       FLOAT,
     entity_type         INTEGER,
     server_only         BOOLEAN,
+    stackable           BOOLEAN,
+    quantity            INTEGER,
+    item_use            INTEGER,
     FOREIGN KEY (template_id) REFERENCES Entity (id),
     FOREIGN KEY (parent_id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
@@ -207,7 +210,10 @@ SELECT Entity.id                 AS id,
        Entity.bb_size_z          AS bbSizeZ,
        Entity.shadow_radius      AS shadowRadius,
        Entity.entity_type        AS entityType,
-       Entity.server_only        AS serverOnly
+       Entity.server_only        AS serverOnly,
+       Entity.stackable          AS stackable,
+       Entity.quantity           AS quantity,
+       Entity.item_use           AS itemUse
 FROM Entity;
 
 
@@ -267,4 +273,4 @@ VALUES (1, 'Baseline');
 
 -- Enable WAL.
 PRAGMA
-journal_mode= WAL;
+    journal_mode= WAL;

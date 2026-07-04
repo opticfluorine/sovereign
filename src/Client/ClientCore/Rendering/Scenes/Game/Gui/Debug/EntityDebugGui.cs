@@ -29,66 +29,31 @@ namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Debug;
 /// <summary>
 ///     Entity debug window.
 /// </summary>
-public class EntityDebugGui
+public class EntityDebugGui(
+    AboveBlockComponentCollection aboveBlocks,
+    AnimatedSpriteComponentCollection animatedSprites,
+    DrawableComponentCollection drawables,
+    BlockTileComponentCollection blockTiles,
+    NameComponentCollection names,
+    OrientationComponentCollection orientations,
+    ParentComponentCollection parents,
+    KinematicsComponentCollection kinematics,
+    BlockPositionComponentCollection blockPositions,
+    CastBlockShadowsTagCollection castBlockShadows,
+    EntityTable entityTable,
+    CameraServices cameraServices,
+    IPerspectiveServices perspectiveServices,
+    PointLightSourceComponentCollection pointLightSources,
+    PhysicsTagCollection physics,
+    BoundingBoxComponentCollection boundingBoxes,
+    CastShadowsComponentCollection castShadows,
+    ServerOnlyTagCollection serverOnly,
+    EntityTypeComponentCollection entityTypes,
+    StackableTagCollection stackable,
+    QuantityComponentCollection quantities,
+    ItemUseComponentCollection itemUses)
 {
-    private readonly AboveBlockComponentCollection aboveBlocks;
-    private readonly AnimatedSpriteComponentCollection animatedSprites;
-    private readonly BlockPositionComponentCollection blockPositions;
-    private readonly BlockTileComponentCollection blockTiles;
-    private readonly BoundingBoxComponentCollection boundingBoxes;
-    private readonly CameraServices cameraServices;
-    private readonly CastBlockShadowsTagCollection castBlockShadows;
-    private readonly CastShadowsComponentCollection castShadows;
-    private readonly DrawableComponentCollection drawables;
-    private readonly EntityTable entityTable;
-    private readonly EntityTypeComponentCollection entityTypes;
-    private readonly KinematicsComponentCollection kinematics;
-    private readonly NameComponentCollection names;
-    private readonly OrientationComponentCollection orientations;
-    private readonly ParentComponentCollection parents;
-    private readonly IPerspectiveServices perspectiveServices;
-    private readonly PhysicsTagCollection physics;
-    private readonly PointLightSourceComponentCollection pointLightSources;
-    private readonly ServerOnlyTagCollection serverOnly;
     private string entityIdInput = "";
-
-    public EntityDebugGui(AboveBlockComponentCollection aboveBlocks, AnimatedSpriteComponentCollection animatedSprites,
-        DrawableComponentCollection drawables, BlockTileComponentCollection blockTiles,
-        NameComponentCollection names,
-        OrientationComponentCollection orientations, ParentComponentCollection parents,
-        KinematicsComponentCollection kinematics,
-        BlockPositionComponentCollection blockPositions,
-        CastBlockShadowsTagCollection castBlockShadows,
-        EntityTable entityTable,
-        CameraServices cameraServices,
-        IPerspectiveServices perspectiveServices,
-        PointLightSourceComponentCollection pointLightSources,
-        PhysicsTagCollection physics,
-        BoundingBoxComponentCollection boundingBoxes,
-        CastShadowsComponentCollection castShadows,
-        ServerOnlyTagCollection serverOnly,
-        EntityTypeComponentCollection entityTypes)
-    {
-        this.aboveBlocks = aboveBlocks;
-        this.animatedSprites = animatedSprites;
-        this.drawables = drawables;
-        this.blockTiles = blockTiles;
-        this.names = names;
-        this.orientations = orientations;
-        this.parents = parents;
-        this.kinematics = kinematics;
-        this.blockPositions = blockPositions;
-        this.castBlockShadows = castBlockShadows;
-        this.entityTable = entityTable;
-        this.cameraServices = cameraServices;
-        this.perspectiveServices = perspectiveServices;
-        this.pointLightSources = pointLightSources;
-        this.physics = physics;
-        this.boundingBoxes = boundingBoxes;
-        this.castShadows = castShadows;
-        this.serverOnly = serverOnly;
-        this.entityTypes = entityTypes;
-    }
 
     /// <summary>
     ///     Renders the entity debug window.
@@ -166,6 +131,9 @@ public class EntityDebugGui
                     AddCompoundRows("Cast Shadows:", entityId, castShadows,
                         shadow => { AddValueRow("Shadow Radius:", shadow.Radius); });
                     AddComponentRow("Server Only:", entityId, serverOnly);
+                    AddComponentRow("Stackable:", entityId, stackable);
+                    AddComponentRow("Quantity:", entityId, quantities);
+                    AddComponentRow("Item Use:", entityId, itemUses);
                     ImGui.EndTable();
                 }
             }

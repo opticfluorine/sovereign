@@ -8,26 +8,29 @@ In addition to components, Sovereign Engine allows *tags* to be associated with 
 
 Core components are available in both the client and server.
 
-| Component          | Component Collection Class            | Description                                                                                                            |
-| ------------------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `AboveBlock`       | `AboveBlockComponentCollection`       | For material block entities (see `Material` component), denotes the entity ID of the block that sits atop this entity. |
-| `Admin`            | `AdminTagCollection`                  | Denotes a player character as an admin.                                                                                |
-| `AnimatedSprite`   | `AnimatedSpriteComponentCollection`   | For non-block drawable entities (see `Drawable` component), denotes the animated sprite ID to use for rendering.       |
-| `BlockPosition`    | `BlockPositionComponentCollection`    | Grid-aligned position of a block entity.                                                                               |
-| `BlockTile`        | `BlockTileComponentCollection`        | Specifies the tile sprites of a block entity.                                                                          |
-| `BoundingBox`      | `BoundingBoxComponentCollection`      | For non-block entities, specifies the bounding box used for physics calculations.                                      |
-| `CastBlockShadows` | `CastBlockShadowsTagCollection`       | For block entities, indicates that the block should be included for calculating shadows.                               |
-| `CastShadows`      | `CastShadowsComponentCollection`      | For non-block entities, specifies the shape of the shadow cast by the entity.                                          |
-| `Drawable`         | `DrawableComponentCollection`         | For non-block entities, specifies that the entity should be drawn.                                                     |
-| `EntityType`       | `EntityTypeComponentCollection`       | Denotes that the entity is a special type (e.g. item, NPC, player).                                                    |
-| `Kinematics`       | `KinematicsComponentCollection`       | For non-block positioned entities, contains the position and velocity of the entity.                                   |
-| `Name`             | `NameComponentCollection`             | Gives the name of the entity.                                                                                          |
-| `Orientation`      | `OrientationComponentCollection`      | Specifies the directional orientation of the entity.                                                                   |
-| `Parent`           | `ParentComponentCollection`           | Maps an entity to its parent entity.                                                                                   |
-| `Physics`          | `PhysicsTagCollection`                | Indicates that a non-block entity has physics effects.                                                                 |
-| `PlayerCharacter`  | `PlayerCharacterTagCollection`        | Indicates that an entity is a player character.                                                                        |
-| `PointLightSource` | `PointLightSourceComponentCollection` | Specifies the properties of a point light source attached to the entity.                                               |
-| `ServerOnly`       | `ServerOnlyComponentCollection`       | Specifies that the entity is server-only and should not be shared with players (except admins).                        |
+| Component          | Component Collection Class            | Description                                                                                     |
+| ------------------ | ------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `AboveBlock`       | `AboveBlockComponentCollection`       | For block entities, denotes the entity ID of the block that sits atop this entity.              |
+| `Admin`            | `AdminTagCollection`                  | Denotes a player character as an admin.                                                         |
+| `AnimatedSprite`   | `AnimatedSpriteComponentCollection`   | For non-block drawable entities, denotes the animated sprite ID to use for rendering.           |
+| `BlockPosition`    | `BlockPositionComponentCollection`    | Grid-aligned position of a block entity.                                                        |
+| `BlockTile`        | `BlockTileComponentCollection`        | Specifies the tile sprites of a block entity.                                                   |
+| `BoundingBox`      | `BoundingBoxComponentCollection`      | For non-block entities, specifies the bounding box used for physics calculations.               |
+| `CastBlockShadows` | `CastBlockShadowsTagCollection`       | For block entities, indicates that the block should be included for calculating shadows.        |
+| `CastShadows`      | `CastShadowsComponentCollection`      | For non-block entities, specifies the shape of the shadow cast by the entity.                   |
+| `Drawable`         | `DrawableComponentCollection`         | For non-block entities, specifies that the entity should be drawn.                              |
+| `EntityType`       | `EntityTypeComponentCollection`       | Denotes that the entity is a special type (e.g. item, NPC, player).                             |
+| `ItemUse`          | `ItemUseComponentCollection`          | Provides a hint on how an item may be used as a tool.                                           |
+| `Kinematics`       | `KinematicsComponentCollection`       | For non-block positioned entities, contains the position and velocity of the entity.            |
+| `Name`             | `NameComponentCollection`             | Gives the name of the entity.                                                                   |
+| `Orientation`      | `OrientationComponentCollection`      | Specifies the directional orientation of the entity.                                            |
+| `Parent`           | `ParentComponentCollection`           | Maps an entity to its parent entity.                                                            |
+| `Physics`          | `PhysicsTagCollection`                | Indicates that a non-block entity has physics effects.                                          |
+| `PlayerCharacter`  | `PlayerCharacterTagCollection`        | Indicates that an entity is a player character.                                                 |
+| `PointLightSource` | `PointLightSourceComponentCollection` | Specifies the properties of a point light source attached to the entity.                        |
+| `Quantity`         | `QuantityComponentCollection`         | For items that are also `Stackable`, specifies the quantity of items in the stack.              |
+| `ServerOnly`       | `ServerOnlyComponentCollection`       | Specifies that the entity is server-only and should not be shared with players (except admins). |
+| `Stackable`        | `StackableTagCollection`              | Specifies that an item may be stacked.                                                          |
 
 ## Client Components
 

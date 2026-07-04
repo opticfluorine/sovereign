@@ -35,12 +35,12 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
             EntityTree(id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent, 
                 drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
                 plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius,
-                entityType, serverOnly)
+                entityType, serverOnly, stackable, quantity, itemUse)
 	        AS (
 	        	SELECT id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
                         drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
                         plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ,
-                        shadowRadius, entityType, serverOnly
+                        shadowRadius, entityType, serverOnly, stackable, quantity, itemUse
 	        		FROM EntityWithComponents
 	        		WHERE x >= @X1 AND x < @X2
 	        		  AND y >= @Y1 AND y < @Y2
@@ -51,7 +51,8 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                         ec.name, ec.account, ec.parent, ec.drawableX, ec.drawableY, ec.animatedSprite, ec.orientation, ec.admin,
                         ec.castBlockShadows, ec.plsRadius, ec.plsIntensity, ec.plsColor,
                         ec.plsPosX, ec.plsPosY, ec.plsPosZ, ec.physics, ec.bbPosX, ec.bbPosY, ec.bbPosZ,
-                        ec.bbSizeX, ec.bbSizeY, ec.bbSizeZ, ec.shadowRadius, ec.entityType, ec.serverOnly
+                        ec.bbSizeX, ec.bbSizeY, ec.bbSizeZ, ec.shadowRadius, ec.entityType, ec.serverOnly,
+                        ec.stackable, ec.quantity, ec.itemUse
 	        		FROM EntityWithComponents ec, EntityTree et
 	        		WHERE ec.parent = et.id 
                       AND ec.playerCharacter IS NULL
@@ -59,7 +60,7 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
             SELECT id, kv.key, kv.value, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
                 drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
                 plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius,
-                entityType, serverOnly
+                entityType, serverOnly, stackable, quantity, itemUse
             FROM EntityTree 
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = id
             ORDER BY parent NULLS LAST";

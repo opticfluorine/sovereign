@@ -42,6 +42,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     protected readonly EntityTable entityTable;
     private readonly EntityTypeComponentCollection entityTypes;
     protected readonly bool isTemplate;
+    private readonly ItemUseComponentCollection itemUses;
     protected readonly KinematicsComponentCollection Kinematics;
     protected readonly bool load;
     protected readonly NameComponentCollection names;
@@ -50,7 +51,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly PhysicsTagCollection physics;
     protected readonly PlayerCharacterTagCollection playerCharacterTags;
     private readonly PointLightSourceComponentCollection pointLightSources;
+    private readonly QuantityComponentCollection quantities;
     private readonly ServerOnlyTagCollection serverOnly;
+    private readonly StackableTagCollection stackables;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
     private bool isBlock;
@@ -78,6 +81,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         CastShadowsComponentCollection castShadows,
         EntityTypeComponentCollection entityTypes,
         ServerOnlyTagCollection serverOnly,
+        StackableTagCollection stackables,
+        QuantityComponentCollection quantities,
+        ItemUseComponentCollection itemUses,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -101,6 +107,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.castShadows = castShadows;
         this.entityTypes = entityTypes;
         this.serverOnly = serverOnly;
+        this.stackables = stackables;
+        this.quantities = quantities;
+        this.itemUses = itemUses;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -403,6 +412,42 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutServerOnly()
     {
         serverOnly.UntagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder Stackable()
+    {
+        stackables.TagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutStackable()
+    {
+        stackables.UntagEntity(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder Quantity(uint quantity)
+    {
+        quantities.AddOrUpdateComponent(entityId, quantity, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutQuantity()
+    {
+        quantities.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder ItemUse(ItemUse itemUse)
+    {
+        itemUses.AddOrUpdateComponent(entityId, itemUse, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutItemUse()
+    {
+        itemUses.RemoveComponent(entityId, load);
         return this;
     }
 

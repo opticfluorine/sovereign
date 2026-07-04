@@ -59,6 +59,9 @@ public class EntityDefinition
         CastShadows = other.CastShadows;
         EntityType = other.EntityType;
         ServerOnly = other.ServerOnly;
+        Stackable = other.Stackable;
+        Quantity = other.Quantity;
+        ItemUse = other.ItemUse;
     }
 
     /// <summary>
@@ -174,4 +177,22 @@ public class EntityDefinition
     /// </summary>
     [Key(18)]
     public bool ServerOnly { get; set; }
+
+    /// <summary>
+    ///     Stackable tag.
+    /// </summary>
+    [Key(19)]
+    public bool Stackable { get; set; }
+
+    /// <summary>
+    ///     Quantity component.
+    /// </summary>
+    [Key(20)]
+    public uint? Quantity { get; set; }
+
+    /// <summary>
+    ///     ItemUse component.
+    /// </summary>
+    [Key(21)]
+    public ItemUse? ItemUse { get; set; }
 }

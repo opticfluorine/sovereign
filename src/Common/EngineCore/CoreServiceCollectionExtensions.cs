@@ -132,6 +132,9 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<CastShadowsComponentCollection>();
         services.TryAddComponentCollection<EntityTypeComponentCollection>();
         services.TryAddComponentCollection<ServerOnlyTagCollection>();
+        services.TryAddComponentCollection<StackableTagCollection>();
+        services.TryAddComponentCollection<QuantityComponentCollection>();
+        services.TryAddComponentCollection<ItemUseComponentCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)

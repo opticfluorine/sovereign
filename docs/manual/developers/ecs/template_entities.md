@@ -65,16 +65,19 @@ Not all components are applicable to template entities. The matrix below provide
 a summary of which components are applicable to which types of template entities.
 Any component not listed is not supported in any template entities.
 
-| Component          | Blocks | NPCs |
-| ------------------ | ------ | ---- |
-| `AnimatedSprite`   |        | X    |
-| `CastBlockShadows` | X      |      |
-| `CastShadows`      |        | X    |
-| `Drawable`         | X      | X    |
-| `EntityType`       |        | X    |
-| `Material`         | X      |      |
-| `MaterialModifier` | X      |      |
-| `Name`             | X      | X    |
-| `Orientation`      |        |      |
-| `Physics`          |        | X    |
-| `PointLightSource` |        | X    |
+| Component          | Blocks | NPCs | Items |
+| ------------------ | ------ | ---- | ----- |
+| `AnimatedSprite`   |        | X    |       |
+| `BlockTile`        | X      |      |       |
+| `BoundingBox`      |        | X    |       |
+| `CastBlockShadows` | X      |      |       |
+| `CastShadows`      |        | X    |       |
+| `Drawable`         | X      | X    |       |
+| `EntityType`       |        | X    |       |
+| `ItemUse`          |        |      | X     |
+| `Name`             | X      | X    |       |
+| `Orientation`      |        |      |       |
+| `Physics`          |        | X    |       |
+| `PointLightSource` |        | X    |       |
+| `ServerOnly`       |        | X    |       |
+| `Stackable`        |        |      | X     |

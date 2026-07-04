@@ -22,6 +22,7 @@ Each component collection that is accessible through the scripting engine may be
 | `Components.CastShadows`      | `CastShadowsComponentCollection`      | `Shadow`       |
 | `Components.Drawable`         | `DrawableComponentCollection`         | `Vector2`      |
 | `Components.EntityType`       | `EntityTypeComponentCollection`       | `EntityType`   |
+| `Components.ItemUse`          | `ItemUseComponentCollection`          | `ItemUse`      |
 | `Components.Kinematics`       | `KinematicsComponentCollection`       | `Kinematics`   |
 | `Components.Name`             | `NameComponentCollection`             | `string`       |
 | `Components.Orientation`      | `OrientationComponentCollection`      | `integer`      |
@@ -29,7 +30,9 @@ Each component collection that is accessible through the scripting engine may be
 | `Components.Physics`          | `PhysicsTagCollection`                | `boolean`      |
 | `Components.PlayerCharacter`  | `PlayerCharacterTagCollection`        | `boolean`      |
 | `Components.PointLight`       | `PointLightSourceComponentCollection` | `PointLight`   |
+| `Components.Quantity`         | `QuantityComponentCollection`         | `integer`      |
 | `Components.ServerOnly`       | `ServerOnlyTagCollection`             | `boolean`      |
+| `Components.Stackable`        | `StackableTagCollection`              | `boolean`      |
 
 ## General Component Functions
 

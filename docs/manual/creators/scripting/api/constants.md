@@ -32,6 +32,43 @@ This section describes constants and enumerations provided by the scripting engi
         Entity has no special type. Not explicitly stored; only used in EntityDefinition.
 ```
 
+(script-constants-itemuse)=
+## ItemUse
+
+```{eval-rst}
+.. lua:class:: ItemUse
+
+    Bitwise flags that specify how an item may be used as a tool.
+
+    .. lua:attribute:: None: integer
+
+        Item may not be used as a tool.
+
+    .. lua:attribute:: BlockFrontFace: integer
+
+        Item may be used on the front face of a block.
+
+    .. lua:attribute:: BlockTopFace: integer
+    
+        Item may be used on the top face of a block.
+
+    .. lua:attribute:: Npc: integer
+
+        Item may be used on an NPC.
+
+    .. lua:attribute:: Player: integer
+
+        Item may be used on a player.
+
+    .. lua:attribute:: Item: integer
+
+        Item may be used on another item.
+
+    .. lua:attribute:: EmptyBlock: integer
+
+        Item may be used on an empty block.
+```
+
 (script-constants-orientation)=
 ## Orientation
 

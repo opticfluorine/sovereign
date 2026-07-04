@@ -233,9 +233,75 @@ public class ItemTemplateEditorTab
 
         basicInformationControlGroup.Render(selectedDefinition);
         appearanceControlGroup.Render(selectedDefinition);
+        RenderItemControls();
         entityDataControlGroup.Render();
 
         ImGui.EndTable();
+    }
+
+    /// <summary>
+    ///     Renders the item-specific component controls.
+    /// </summary>
+    private void RenderItemControls()
+    {
+        if (!ImGui.CollapsingHeader("Item Properties", ImGuiTreeNodeFlags.DefaultOpen)) return;
+        if (!ImGui.BeginTable("ItemProperties", 2, ImGuiTableFlags.SizingFixedFit)) return;
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Stackable:");
+        ImGui.TableNextColumn();
+        var stackable = selectedDefinition.Stackable;
+        ImGui.Checkbox("##stackable", ref stackable);
+        selectedDefinition.Stackable = stackable;
+        ImGui.EndTable();
+
+        ImGui.Text("Item Use:");
+        if (!selectedDefinition.ItemUse.HasValue) selectedDefinition.ItemUse = ItemUse.None;
+        if (ImGui.BeginChild("itemUses", ImGuiChildFlags.AlwaysAutoResize | ImGuiChildFlags.AutoResizeY))
+        {
+            if (ImGui.BeginTable("itemUses", 4, ImGuiTableFlags.SizingFixedSame))
+            {
+                ImGui.TableNextColumn();
+                var blockFrontFace = (selectedDefinition.ItemUse & ItemUse.BlockFrontFace) > 0;
+                ImGui.Checkbox("Block Front Face", ref blockFrontFace);
+                if (blockFrontFace) selectedDefinition.ItemUse |= ItemUse.BlockFrontFace;
+                else selectedDefinition.ItemUse &= ~ItemUse.BlockFrontFace;
+
+                ImGui.TableNextColumn();
+                var blockTopFace = (selectedDefinition.ItemUse & ItemUse.BlockTopFace) > 0;
+                ImGui.Checkbox("Block Top Face", ref blockTopFace);
+                if (blockTopFace) selectedDefinition.ItemUse |= ItemUse.BlockTopFace;
+                else selectedDefinition.ItemUse &= ~ItemUse.BlockTopFace;
+
+                ImGui.TableNextColumn();
+                var player = (selectedDefinition.ItemUse & ItemUse.Player) > 0;
+                ImGui.Checkbox("Player", ref player);
+                if (player) selectedDefinition.ItemUse |= ItemUse.Player;
+                else selectedDefinition.ItemUse &= ~ItemUse.Player;
+
+                ImGui.TableNextColumn();
+                var npc = (selectedDefinition.ItemUse & ItemUse.Npc) > 0;
+                ImGui.Checkbox("NPC", ref npc);
+                if (npc) selectedDefinition.ItemUse |= ItemUse.Npc;
+                else selectedDefinition.ItemUse &= ~ItemUse.Npc;
+
+                ImGui.TableNextColumn();
+                var item = (selectedDefinition.ItemUse & ItemUse.Item) > 0;
+                ImGui.Checkbox("Item", ref item);
+                if (item) selectedDefinition.ItemUse |= ItemUse.Item;
+                else selectedDefinition.ItemUse &= ~ItemUse.Item;
+
+                ImGui.TableNextColumn();
+                var emptyBlock = (selectedDefinition.ItemUse & ItemUse.EmptyBlock) > 0;
+                ImGui.Checkbox("Empty Block", ref emptyBlock);
+                if (emptyBlock) selectedDefinition.ItemUse |= ItemUse.EmptyBlock;
+                else selectedDefinition.ItemUse &= ~ItemUse.EmptyBlock;
+
+                ImGui.EndTable();
+            }
+
+            ImGui.EndChild();
+        }
     }
 
     /// <summary>
