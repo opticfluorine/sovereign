@@ -146,7 +146,7 @@ end
 
 ---@param command string
 ---@param callback function
----@param flags ChatCommandFlags Behaviour flags controlling how the callback is invoked.
+---@param flags integer Behaviour flags controlling how the callback is invoked.
 function Chat.AddCommand(command, callback, flags)
 end
 
@@ -811,7 +811,65 @@ end
 function Inventory.RemoveItem(entityId, slotIndex)
 end
 
---------------------
+-------------------
+
+--
+-- Items Module
+--
+
+---A single fuzzy item-template-name match result.
+---@class ItemTemplateMatch
+---@field EntityId integer Entity ID of the matched item template.
+---@field Name string Matched item template name.
+---@field Score number Similarity score in [0, 1] (1.0 = exact match).
+ItemTemplateMatch = {}
+
+---@class Items
+Items = {}
+
+---Looks up item template entities by name (case-insensitive).
+---@param name string Item template name.
+---@return table # List of item template entity IDs matching the name (empty if none).
+function Items.FindByName(name)
+end
+
+---Performs a fuzzy lookup of item template entities by name, returning the best matches ordered by descending similarity score.
+---@param name string Query name.
+---@param maxResults integer Maximum number of distinct names to select (clamped to [1, 64] server-side).
+---@return table # Best-first list of ItemTemplateMatch results.
+function Items.FindByFuzzyName(name, maxResults)
+end
+
+-------------------
+
+--
+-- Players Module
+--
+
+---A single fuzzy player-name match result.
+---@class PlayerNameMatch
+---@field EntityId integer Entity ID of the matched online player.
+---@field Name string Matched player name.
+---@field Score number Similarity score in [0, 1] (1.0 = exact match).
+PlayerNameMatch = {}
+
+---@class Players
+Players = {}
+
+---Looks up an online player entity by name (case-insensitive).
+---@param name string Player name.
+---@return integer # Player entity ID, or 0 if no online player has the given name.
+function Players.FindByName(name)
+end
+
+---Performs a fuzzy lookup of online players by name, returning the top-N matches ordered by descending similarity score.
+---@param name string Query name.
+---@param maxResults integer Maximum number of results (clamped to [1, 64] server-side).
+---@return table # Best-first list of PlayerNameMatch results.
+function Players.FindByFuzzyName(name, maxResults)
+end
+
+-------------------
 
 --
 -- Scripting Module
