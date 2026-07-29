@@ -51,6 +51,7 @@ public sealed class FuzzyMatcher
 
     private readonly BinaryHeap<(string Name, float Score)> heap;
     private readonly (string Name, float Score)[] drainBuffer;
+    private readonly bool caseSensitive;
 
     /// <summary>
     ///     Creates a new fuzzy matcher.
@@ -60,10 +61,15 @@ public sealed class FuzzyMatcher
     ///     call to <see cref="AppendBestMatches" />. Also sizes the internal
     ///     scratch buffers.
     /// </param>
-    public FuzzyMatcher(int maxCapacity = 64)
+    /// <param name="caseSensitive">
+    ///     If true (default), string comparison is case-sensitive.
+    ///     If false, comparison is case-insensitive.
+    /// </param>
+    public FuzzyMatcher(int maxCapacity = 64, bool caseSensitive = true)
     {
         if (maxCapacity < 0) maxCapacity = 0;
         MaxCapacity = maxCapacity;
+        this.caseSensitive = caseSensitive;
         heap = new BinaryHeap<(string Name, float Score)>(Math.Max(maxCapacity, 1), WorstFirstComparer);
         drainBuffer = new (string Name, float Score)[Math.Max(maxCapacity, 1)];
     }
@@ -183,7 +189,8 @@ public sealed class FuzzyMatcher
     ///     broken alphabetically (Ordinal ascending) for determinism.
     ///     Candidates with a similarity score of 0 (no shared characters)
     ///     are excluded. The same list instance is returned (no new list
-    ///     is allocated).
+    ///     is allocated).  String comparison respects the
+    ///     <see cref="caseSensitive" /> setting passed at construction.
     /// </remarks>
     /// <param name="query">Query string.</param>
     /// <param name="candidates">Candidate strings.</param>
@@ -198,9 +205,12 @@ public sealed class FuzzyMatcher
 
         heap.Clear();
 
+        var queryNormalized = caseSensitive ? query : query.ToLowerInvariant();
+
         foreach (var name in candidates)
         {
-            var score = Similarity(query, name);
+            var candidateNormalized = caseSensitive ? name : name.ToLowerInvariant();
+            var score = Similarity(queryNormalized, candidateNormalized);
             if (score <= 0f) continue;
 
             if (heap.Count < maxResults)

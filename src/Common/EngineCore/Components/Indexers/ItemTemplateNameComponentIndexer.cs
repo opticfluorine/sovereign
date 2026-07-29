@@ -32,7 +32,7 @@ public class ItemTemplateNameComponentIndexer : BaseComponentIndexer<string>
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<ulong, byte>> entitiesByName
         = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<ulong, string> nameByEntity = new();
-    private readonly FuzzyMatcher fuzzy = new();
+    private readonly FuzzyMatcher fuzzy = new(caseSensitive: false);
     private readonly Lock fuzzyLock = new();
 
     public ItemTemplateNameComponentIndexer(NameComponentCollection names, ItemTemplateNameComponentFilter filter)

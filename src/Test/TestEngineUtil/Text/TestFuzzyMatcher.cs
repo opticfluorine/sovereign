@@ -197,4 +197,59 @@ public class TestFuzzyMatcher
         var single = Assert.Single(results);
         Assert.Equal("Alice", single.Name);
     }
+
+    [Fact]
+    public void AppendBestMatches_CaseInsensitive_FindsCaseMismatches()
+    {
+        var matcher = new FuzzyMatcher(caseSensitive: false);
+        var results = new List<(string Name, float Score)>();
+
+        matcher.AppendBestMatches("alice", new[] { "ALICE", "Bob", "Alicia" }, 3, results);
+
+        // "Bob" has zero similarity; only ALICE and Alicia qualify.
+        Assert.Equal(2, results.Count);
+        Assert.Equal("ALICE", results[0].Name);
+        Assert.Equal(1.0f, results[0].Score);
+    }
+
+    [Fact]
+    public void AppendBestMatches_CaseInsensitive_AllLowerCaseTies()
+    {
+        var matcher = new FuzzyMatcher(caseSensitive: false);
+        var results = new List<(string Name, float Score)>();
+
+        matcher.AppendBestMatches("alice", new[] { "ALICE", "alice", "AliCE" }, 3, results);
+
+        Assert.Equal(3, results.Count);
+        // All score 1.0; ties broken alphabetically (Ordinal).
+        Assert.Equal("ALICE", results[0].Name);
+        Assert.Equal("AliCE", results[1].Name);
+        Assert.Equal("alice", results[2].Name);
+    }
+
+    [Fact]
+    public void AppendBestMatches_DefaultConstructor_CaseSensitive()
+    {
+        var matcher = new FuzzyMatcher();
+        var results = new List<(string Name, float Score)>();
+
+        matcher.AppendBestMatches("alice", new[] { "Alice", "alicE" }, 3, results);
+
+        // Case-sensitive: "Alice" and "alicE" both have distance 1 from "alice".
+        Assert.Equal(2, results.Count);
+        Assert.Equal("Alice", results[0].Name);
+        Assert.Equal("alicE", results[1].Name);
+        Assert.True(results[0].Score < 1.0f);
+    }
+
+    [Fact]
+    public void AppendBestMatches_CaseInsensitive_ExcludesZeroScore()
+    {
+        var matcher = new FuzzyMatcher(caseSensitive: false);
+        var results = new List<(string Name, float Score)>();
+
+        matcher.AppendBestMatches("abc", new[] { "xyz" }, 3, results);
+
+        Assert.Empty(results);
+    }
 }

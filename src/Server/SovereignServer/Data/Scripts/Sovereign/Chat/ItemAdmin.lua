@@ -102,11 +102,11 @@ local function ItemGive(args, playerId)
     local templateId = itemMatch.EntityId
 
     -- Create a new item entity from the resolved template.
-    local itemId = 0
+    local itemId = nil
     if quantity ~= nil and Components.Stackable.Exists(templateId) then
-        Entities.Create({ Template = templateId, Quantity = quantity })
+        itemId = Entities.Create({ Template = templateId, Quantity = quantity })
     else
-        Entities.Create({ Template = templateId })
+        itemId = Entities.Create({ Template = templateId })
     end
 
     if not itemId then

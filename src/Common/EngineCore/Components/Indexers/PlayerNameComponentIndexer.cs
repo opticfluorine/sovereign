@@ -33,7 +33,7 @@ public class PlayerNameComponentIndexer : BaseComponentIndexer<string>
     private readonly ConcurrentDictionary<string, ulong> entityIdsByName
         = new(StringComparer.OrdinalIgnoreCase);
 
-    private readonly FuzzyMatcher fuzzy = new();
+    private readonly FuzzyMatcher fuzzy = new(caseSensitive: false);
     private readonly Lock fuzzyLock = new();
 
     public PlayerNameComponentIndexer(NameComponentCollection names, PlayerNameEventFilter filter)
