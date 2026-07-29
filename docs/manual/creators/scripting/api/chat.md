@@ -79,19 +79,35 @@ Chat.SendToPlayer(playerEntityId, Color.Rgb(210, 210, 0),
 Chat.SendToAll(Color.Rgb(210, 210, 0), "This is a message sent with SendToAll.")
 ```
 
-### AddCommand)command, callback)
+### AddCommand)command, callback, flags)
 
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: Chat.AddCommand(command, callback)
+.. lua:function:: Chat.AddCommand(command, callback, flags)
 
    Adds a new chat command for all players.
 
    :param command: Command to add (case-insensitive).
    :type command: string
-   :param callback: Callback function. First parameter is any text entered after the command. Second parameter is the entity ID of the player who sent the command.
+   :param callback: Callback function. When ``flags`` is ``ChatCommandFlags.None`` (the default), the first parameter is any text entered after the command and the second parameter is the entity ID of the player who sent the command. When ``flags`` is ``ChatCommandFlags.CommaSeparatedArgs``, the first parameter is a 1-indexed table of trimmed strings produced by splitting the command remainder on commas, and the second parameter is the entity ID of the player who sent the command.
    :type callback: function
+   :param flags: Behaviour flags (see ChatCommandFlags).
+   :type flags: ChatCommandFlags
+```
+
+#### ChatCommandFlags
+
+The following flags are defined in the ``ChatCommandFlags`` library:
+
+```{eval-rst}
+.. lua:attribute:: ChatCommandFlags.None
+
+   No special behaviour. The callback receives the raw command remainder.
+
+.. lua:attribute:: ChatCommandFlags.CommaSeparatedArgs
+
+   Splits the command remainder on commas, trims whitespace from each token, and passes the resulting 1-indexed table of strings to the callback as its first argument. An empty remainder yields a one-element table ``{""}``.
 ```
 
 #### Example
@@ -104,5 +120,5 @@ function chat_hello(msg, senderEntityId)
 end
 
 -- Typing "/hello" in chat will send a Hello World message.
-Chat.AddCommand("hello", chat_hello)
+Chat.AddCommand("hello", chat_hello, ChatCommandFlags.None)
 ```

@@ -38,4 +38,4 @@ local function ItemGive(command, playerId)
     end
 end
 
-Chat.AddCommand("itemgive", ItemGive)
+Chat.AddCommand("itemgive", ItemGive, ChatCommandFlags.None)

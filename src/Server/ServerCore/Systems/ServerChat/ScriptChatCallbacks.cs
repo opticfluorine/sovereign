@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Sovereign.Scripting.Lua;
 
@@ -26,7 +27,7 @@ namespace Sovereign.ServerCore.Systems.ServerChat;
 /// </summary>
 public sealed class ScriptChatCallbacks
 {
-    private readonly ConcurrentDictionary<string, (LuaHost, int)> callbackCommands =
+    private readonly ConcurrentDictionary<string, (LuaHost host, int cbRef, ChatCommandFlags flags)> callbackCommands =
         new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
@@ -35,10 +36,11 @@ public sealed class ScriptChatCallbacks
     /// <param name="command">Command (case-insensitive).</param>
     /// <param name="host">Script host.</param>
     /// <param name="callbackRef">Callback function Lua reference.</param>
+    /// <param name="flags">Behaviour flags controlling how the callback is invoked.</param>
     /// <returns>true if successfully registered, false otherwise.</returns>
-    public bool TryAddCallbackCommand(string command, LuaHost host, int callbackRef)
+    public bool TryAddCallbackCommand(string command, LuaHost host, int callbackRef, ChatCommandFlags flags)
     {
-        return callbackCommands.TryAdd(command, (host, callbackRef));
+        return callbackCommands.TryAdd(command, (host, callbackRef, flags));
     }
 
     /// <summary>
@@ -52,10 +54,18 @@ public sealed class ScriptChatCallbacks
     {
         if (!callbackCommands.TryGetValue(command, out var cb)) return false;
 
-        var (host, cbRef) = cb;
+        var (host, cbRef, flags) = cb;
         try
         {
-            host.CallRefFunction(cbRef, command, message, senderEntityId);
+            if ((flags & ChatCommandFlags.CommaSeparatedArgs) > 0)
+            {
+                var args = message.Split(',').Select(s => s.Trim()).ToList();
+                host.CallRefFunction(cbRef, command, args, senderEntityId);
+            }
+            else
+            {
+                host.CallRefFunction(cbRef, command, message, senderEntityId);
+            }
         }
         catch (LuaException e)
         {

@@ -144,8 +144,21 @@ end
 
 ---@param command string
 ---@param callback function
-function Chat.AddCommand(command, callback)
+---@param flags ChatCommandFlags Behaviour flags controlling how the callback is invoked.
+function Chat.AddCommand(command, callback, flags)
 end
+
+---Behaviour flags for scripted chat commands.
+---@class ChatCommandFlags
+ChatCommandFlags = {}
+
+---No special behaviour; the callback receives the raw command remainder.
+---@type integer
+ChatCommandFlags.None = 0
+
+---Splits the command remainder on commas and passes the trimmed tokens to the callback as a 1-indexed table of strings.
+---@type integer
+ChatCommandFlags.CommaSeparatedArgs = 1
 
 --------------------
 

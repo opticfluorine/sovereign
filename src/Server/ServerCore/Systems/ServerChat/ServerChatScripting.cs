@@ -51,13 +51,20 @@ public class ServerChatScripting(
         internalController.SendMessageToAll(message, color);
     }
 
+    /// <summary>
+    ///     Registers a script callback for a custom chat command.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="command">Command name (case-insensitive).</param>
+    /// <param name="callback">Callback function reference.</param>
+    /// <param name="flags">Behaviour flags controlling how the callback is invoked.</param>
     [ScriptableFunction("AddCommand")]
-    public void AddCommand(IntPtr luaState, string command, [ScriptableCallback] int callback)
+    public void AddCommand(IntPtr luaState, string command, [ScriptableCallback] int callback, ChatCommandFlags flags)
     {
         if (!scriptingServices.TryGetHostForState(luaState, out var host))
             throw new Exception("No host found for script.");
 
-        if (!callbacks.TryAddCallbackCommand(command, host, callback))
+        if (!callbacks.TryAddCallbackCommand(command, host, callback, flags))
         {
             host.Logger.LogError(luaState, "Chat command /{Command} is already registered.", command);
         }
