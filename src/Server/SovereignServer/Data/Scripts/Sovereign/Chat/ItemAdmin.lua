@@ -20,6 +20,10 @@
 local Entity = require('Sovereign.Entity')
 local ErrorMessages = require('Sovereign.ErrorMessages')
 
+--- Minimum fuzyz match similarity for offering a "did you mean" suggestion.
+local MinSimilarity = 0.7
+
+--- Usage help text.
 local ItemGiveUsage = "Usage: /itemgive <player>, <item>, [quantity]"
 
 --- /itemgive <player>, <item>, [quantity]
@@ -65,7 +69,18 @@ local function ItemGive(args, playerId)
         issuer:SendSystemMessage(ErrorMessages.PlayerNotFound)
         return
     end
-    local targetId = playerMatches[1].EntityId
+    local playerMatch = playerMatches[1]
+    if playerMatch.Score < MinSimilarity then
+        issuer:SendSystemMessage(ErrorMessages.PlayerNotFound)
+        return
+    end
+    if playerMatch.Score < 1.0 then
+        issuer:SendSystemMessage(string.format(
+            "No online player named \"%s\". Did you mean \"%s\"?",
+            targetName, playerMatch.Name))
+        return
+    end
+    local targetId = playerMatch.EntityId
 
     -- Resolve the item template by fuzzy name match (best match).
     local itemMatches = Items.FindByFuzzyName(itemName, 1)
@@ -73,7 +88,18 @@ local function ItemGive(args, playerId)
         issuer:SendSystemMessage(ErrorMessages.ItemNotFound)
         return
     end
-    local templateId = itemMatches[1].EntityId
+    local itemMatch = itemMatches[1]
+    if itemMatch.Score < MinSimilarity then
+        issuer:SendSystemMessage(ErrorMessages.ItemNotFound)
+        return
+    end
+    if itemMatch.Score < 1.0 then
+        issuer:SendSystemMessage(string.format(
+            "No item template named \"%s\". Did you mean \"%s\"?",
+            itemName, itemMatch.Name))
+        return
+    end
+    local templateId = itemMatch.EntityId
 
     -- Create a new item entity from the resolved template.
     local itemId = 0
