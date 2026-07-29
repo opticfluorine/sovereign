@@ -131,6 +131,8 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     InstallSingle(luaHost, DivideComponent, ""Divide"");
                     InstallSingle(luaHost, SetVelocityComponent, ""SetVelocity"");
                     InstallSingle(luaHost, AddPositionComponent, ""AddPosition"");
+                    InstallSingle(luaHost, AddNoOverflowComponent, ""AddNoOverflow"");
+                    InstallSingle(luaHost, SubtractNoUnderflowComponent, ""SubtractNoUnderflow"");
 
                     lua_setfield(luaHost.LuaState, -2, ""{model.LuaName}"");
                 }}
@@ -308,6 +310,32 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     catch (Exception e)
                     {{
                         logger.LogError(e, luaState, ""Error in components.{model.LuaName}.AddPosition()."");
+                    }}
+                    return 0;
+                }}
+
+                private int AddNoOverflowComponent(IntPtr luaState)
+                {{
+                    try
+                    {{
+                        ModifyComponent(luaState, ComponentOperation.AddNoOverflow);
+                    }}
+                    catch (Exception e)
+                    {{
+                        logger.LogError(e, luaState, ""Error in components.{model.LuaName}.AddNoOverflow()."");
+                    }}
+                    return 0;
+                }}
+
+                private int SubtractNoUnderflowComponent(IntPtr luaState)
+                {{
+                    try
+                    {{
+                        ModifyComponent(luaState, ComponentOperation.SubtractNoUnderflow);
+                    }}
+                    catch (Exception e)
+                    {{
+                        logger.LogError(e, luaState, ""Error in components.{model.LuaName}.SubtractNoUnderflow()."");
                     }}
                     return 0;
                 }}

@@ -548,6 +548,14 @@ Components.Quantity.Remove = function (entityId) end
 ---@param entityId integer Entity ID.
 ---@param value integer Value.
 Components.Quantity.Set = function (entityId, value) end
+---Adds to the quantity while clamping the result to avoid integer overflow.
+---@param entityId integer Entity ID.
+---@param value integer Value to add.
+Components.Quantity.AddNoOverflow = function (entityId, value) end
+---Subtracts from the quantity while clamping the result to avoid integer underflow.
+---@param entityId integer Entity ID.
+---@param value integer Value to subtract.
+Components.Quantity.SubtractNoUnderflow = function (entityId, value) end
 
 ---ServerOnly tag.
 ---@class Components.ServerOnly 

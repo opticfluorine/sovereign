@@ -349,3 +349,67 @@ Components.Kinematics.AddPosition(entityId, {
   Velocity = { X = 0.0, Y = 0.0, Z = 0.0 }  -- ignored
 })
 ```
+
+## Quantity Functions
+
+### AddNoOverflow(entityId, value)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: Components.Quantity.AddNoOverflow(entityId, value)
+
+   Enqueues an update to the quantity component which adds the given
+   value to the current quantity while clamping the result to avoid
+   integer overflow. This operation takes effect on the next tick and
+   is cumulative with any other component changes.
+   
+   This function is only supported for the quantity component. Attempting
+   to use this function with other component types will result in no
+   effect with an error being logged.
+   
+   :param entityId: Entity ID.
+   :type entityId: integer
+   :param value: Amount to be added to the current quantity.
+   :type value: integer
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Using `AddNoOverflow(entityId, value)` to update a quantity.
+:emphasize-lines: 2
+-- Add a large quantity, clamping at the maximum value.
+Components.Quantity.AddNoOverflow(entityId, 1000000)
+```
+
+### SubtractNoUnderflow(entityId, value)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: Components.Quantity.SubtractNoUnderflow(entityId, value)
+
+   Enqueues an update to the quantity component which subtracts the given
+   value from the current quantity while clamping the result to avoid
+   integer underflow. This operation takes effect on the next tick and
+   is cumulative with any other component changes.
+   
+   This function is only supported for the quantity component. Attempting
+   to use this function with other component types will result in no
+   effect with an error being logged.
+   
+   :param entityId: Entity ID.
+   :type entityId: integer
+   :param value: Amount to be subtracted from the current quantity.
+   :type value: integer
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Using `SubtractNoUnderflow(entityId, value)` to update a quantity.
+:emphasize-lines: 2
+-- Subtract a quantity, clamping at zero.
+Components.Quantity.SubtractNoUnderflow(entityId, 1000000)
+```
