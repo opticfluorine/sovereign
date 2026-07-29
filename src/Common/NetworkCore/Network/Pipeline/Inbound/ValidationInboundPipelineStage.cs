@@ -30,8 +30,6 @@ namespace Sovereign.NetworkCore.Network.Pipeline.Inbound;
 public class ValidationInboundPipelineStage : IInboundPipelineStage
 {
     private readonly ILogger<ValidationInboundPipelineStage> logger;
-    private readonly TeleportNoticeEventDetailsValidator teleportNoticeValidator;
-    private readonly TemplateEntityDefinitionEventDetailsValidator templateValidator;
     private readonly Dictionary<EventId, IEventDetailsValidator> validators;
 
     public ValidationInboundPipelineStage(NullEventDetailsValidator nullValidator,
@@ -54,11 +52,10 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         NpcAddEventDetailsValidator npcAddValidator,
         NpcRemoveEventDetailsValidator npcRemoveValidator,
         DialogueEventDetailsValidator dialogueValidator,
-        IntVectorEventDetailsValidator intVectorValidator,
+        DropAtPositionEventDetailsValidator dropAtPositionValidator,
+        InventorySwapEventDetailsValidator invSwapValidator,
         ILogger<ValidationInboundPipelineStage> logger)
     {
-        this.templateValidator = templateValidator;
-        this.teleportNoticeValidator = teleportNoticeValidator;
         this.logger = logger;
         validators = new Dictionary<EventId, IEventDetailsValidator>
         {
@@ -92,8 +89,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Client_Dialogue_Enqueue, dialogueValidator },
             { EventId.Core_Inventory_PickUp, entityValidator },
             { EventId.Core_Inventory_Drop, intValidator },
-            { EventId.Core_Inventory_DropAtPosition, intVectorValidator },
-            { EventId.Core_Inventory_Swap, new TypeCheckedEventDetailsValidator<IntPairEventDetails>() }
+            { EventId.Core_Inventory_DropAtPosition, dropAtPositionValidator },
+            { EventId.Core_Inventory_Swap, invSwapValidator }
         };
     }
 

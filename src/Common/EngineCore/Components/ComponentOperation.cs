@@ -20,12 +20,15 @@ namespace Sovereign.EngineCore.Components;
 /// <summary>
 ///     Describes the operation to be performed on the component.
 /// </summary>
+/// <remarks>
+///     The numeric value affects the order in which the updates are applied - lower values are applied first.
+/// </remarks>
 public enum ComponentOperation
 {
     /// <summary>
     ///     Sets the value of the component to a new value.
     /// </summary>
-    Set = 0,
+    Set = 0xffff,
 
     /// <summary>
     ///     Adds a constant to the value of the component.
@@ -50,5 +53,15 @@ public enum ComponentOperation
     /// <summary>
     ///     For Kinematics components, adds the position part of the component, leaving velocity unchanged.
     /// </summary>
-    AddPosition = 5
+    AddPosition = 5,
+
+    /// <summary>
+    ///     Adds while clamping the resulting value to avoid integer overflow.
+    /// </summary>
+    AddNoOverflow = 6,
+
+    /// <summary>
+    ///     Subtracts while clamping the resulting value to avoid integer underflow.
+    /// </summary>
+    SubtractNoUnderflow = 7
 }

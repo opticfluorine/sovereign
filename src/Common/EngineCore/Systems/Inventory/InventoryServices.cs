@@ -16,7 +16,6 @@
 
 using System;
 using Sovereign.EngineCore.Components.Indexers;
-using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.EngineCore.Systems.Inventory;
 
@@ -70,6 +69,14 @@ public interface IInventoryServices
     /// <param name="itemTemplateId">Template ID to search for.</param>
     /// <returns>Entity ID of the first matching item, or 0 if no match was found.</returns>
     ulong FindFirstMatchingItem(ulong entityId, ulong itemTemplateId);
+
+    /// <summary>
+    ///     Gets the quantity of items in a slot.
+    /// </summary>
+    /// <param name="entityId">Owner entity ID.</param>
+    /// <param name="slotIndex">Slot index.</param>
+    /// <returns></returns>
+    uint GetQuantity(ulong entityId, int slotIndex);
 }
 
 /// <summary>
@@ -78,8 +85,7 @@ public interface IInventoryServices
 internal sealed class InventoryServices(
     InventoryManager inventoryManager,
     SlotIndexer slotIndexer,
-    EntityHierarchyIndexer hierarchyIndexer,
-    EntityTable entityTable) : IInventoryServices
+    EntityHierarchyIndexer hierarchyIndexer) : IInventoryServices
 {
     public bool CanPickUp(ulong entityId, ulong itemId)
     {
@@ -105,8 +111,7 @@ internal sealed class InventoryServices(
 
     public ulong GetItem(ulong entityId, int slotIndex)
     {
-        if (!slotIndexer.TryGetSlotForEntity(entityId, slotIndex, out var slotId)) return 0;
-        return hierarchyIndexer.TryGetFirstDirectChild(slotId, out var itemId) ? itemId : 0;
+        return inventoryManager.GetItem(entityId, slotIndex);
     }
 
     public int GetSlotIndexForItem(ulong entityId, ulong itemId)
@@ -116,15 +121,11 @@ internal sealed class InventoryServices(
 
     public ulong FindFirstMatchingItem(ulong entityId, ulong itemTemplateId)
     {
-        var slotCount = GetSlotCount(entityId);
-        for (var i = 0; i < slotCount; ++i)
-        {
-            var itemId = GetItem(entityId, i);
-            if (itemId == 0) continue;
-            if (entityTable.TryGetTemplate(itemId, out var templateId) && templateId == itemTemplateId)
-                return itemId;
-        }
+        return inventoryManager.FindFirstMatchingItem(entityId, itemTemplateId);
+    }
 
-        return 0;
+    public uint GetQuantity(ulong entityId, int slotIndex)
+    {
+        return inventoryManager.GetQuantity(entityId, slotIndex);
     }
 }

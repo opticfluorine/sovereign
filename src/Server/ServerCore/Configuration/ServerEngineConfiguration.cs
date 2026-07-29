@@ -25,4 +25,5 @@ namespace Sovereign.ServerCore.Configuration;
 public sealed class ServerEngineConfiguration : IEngineConfiguration
 {
     public int ExecutorThreadSleepInterval => 1;
+    public bool IsAuthoritative => true;
 }

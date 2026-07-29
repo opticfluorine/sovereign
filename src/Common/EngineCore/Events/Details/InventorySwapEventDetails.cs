@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2025 opticfluorine
+// Copyright (c) 2026 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,26 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Numerics;
 using MessagePack;
 
 namespace Sovereign.EngineCore.Events.Details;
 
-/// <summary>
-///     Event details that contains an integer and a Vector3.
-/// </summary>
 [MessagePackObject]
-public sealed class IntVectorEventDetails : IEventDetails
+public class InventorySwapEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Integer value.
+    ///     Entity ID that owns the inventory.
     /// </summary>
     [Key(0)]
-    public int IntValue { get; set; }
+    public ulong OwnerId { get; set; }
 
     /// <summary>
-    ///     Vector value.
+    ///     Slot index to merge items from.
     /// </summary>
     [Key(1)]
-    public Vector3 VectorValue { get; set; }
+    public int FromSlotIndex { get; set; }
+
+    /// <summary>
+    ///     Slot index to move items to.
+    /// </summary>
+    [Key(2)]
+    public int ToSlotIndex { get; set; }
+
+    /// <summary>
+    ///     Quantity of items to move from one slot to another.
+    /// </summary>
+    [Key(3)]
+    public uint Quantity { get; set; }
 }

@@ -354,3 +354,19 @@ public sealed class BrandingOptions
     /// </summary>
     public string StartupGuiName { get; set; } = "Sovereign Engine";
 }
+
+/// <summary>
+///     Client-side inventory-related options.
+/// </summary>
+public sealed class ClientInventoryOptions
+{
+    /// <summary>
+    ///     Delay in microseconds until first repeated pickup when holding the right mouse button.
+    /// </summary>
+    public ulong RightMouseFirstDelayUs { get; set; } = 250000;
+
+    /// <summary>
+    ///     Delay in microseconds until subsequent repeated pickups when holding the right mouse button.
+    /// </summary>
+    public ulong RightMouseRepeatDelayUs { get; set; } = 20000;
+}

@@ -16,13 +16,21 @@
 
 using System.Collections.Generic;
 using System.Threading;
+using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Entities;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
 /// <summary>
 ///     Component indexer that tracks the full hierarchy of parent-child relationships.
 /// </summary>
-public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
+public class EntityHierarchyIndexer(
+    ParentComponentCollection parents,
+    EntityTypeComponentCollection entityTypes,
+    IEngineConfiguration engineConfiguration,
+    EntityManager entityManager)
+    : BaseComponentIndexer<ulong>(parents, parents)
 {
     private readonly Lock accessLock = new();
 
@@ -41,10 +49,7 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
     /// </summary>
     private readonly Dictionary<ulong, ulong> trackedParent = new();
 
-    public EntityHierarchyIndexer(ParentComponentCollection parents)
-        : base(parents, parents)
-    {
-    }
+    private readonly List<ulong> toRemove = new();
 
     /// <summary>
     ///     Gets the set of direct children of an entity.
@@ -203,6 +208,31 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
         }
 
         trackedParent[entityId] = parentId;
+
+        if (!engineConfiguration.IsAuthoritative) RemoveOutdatedEphemerals(parentId);
+    }
+
+    /// <summary>
+    ///     Removes any outdated ephemeral entities that were synced to the server.
+    /// </summary>
+    /// <param name="parentId">Parent entity ID to check.</param>
+    private void RemoveOutdatedEphemerals(ulong parentId)
+    {
+        if (!entityTypes.TryGetValue(parentId, out var et) || et != EntityType.Slot) return;
+
+        var ephemeral = 0ul;
+        foreach (var childId in directChildren[parentId])
+        {
+            if (childId < EntityConstants.FirstBlockEntityId)
+            {
+                ephemeral = childId;
+                break;
+            }
+        }
+
+        if (ephemeral == 0) return;
+        entityManager.RemoveEntity(ephemeral);
+        RemoveEntity(ephemeral);
     }
 
     /// <summary>
@@ -212,7 +242,7 @@ public class EntityHierarchyIndexer : BaseComponentIndexer<ulong>
     private void RemoveEntity(ulong entityId)
     {
         // Remove from its direct parent.
-        var parentId = trackedParent[entityId];
+        if (!trackedParent.TryGetValue(entityId, out var parentId)) return;
         directChildren[parentId].Remove(entityId);
         allDescendants[parentId].Remove(entityId);
 

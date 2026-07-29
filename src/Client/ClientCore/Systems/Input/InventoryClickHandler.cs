@@ -39,9 +39,10 @@ public sealed class InventoryClickHandler(
     /// <summary>
     ///     Drops the currently selected item at the mouse position if it is in range.
     /// </summary>
-    /// <param name="slotIndex">Slot index.</param>
+    /// <param name="slotIndex">Selected slot index.</param>
+    /// <param name="selectedQty">Selected quantity.</param>
     /// <param name="snapToGrid">Whether to snap the dropped item to the block grid.</param>
-    public void DropSelectedItem(int slotIndex, bool snapToGrid)
+    public void DropSelectedItem(int slotIndex, uint selectedQty, bool snapToGrid)
     {
         if (!stateServices.TryGetSelectedPlayer(out var playerId))
         {

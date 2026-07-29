@@ -160,14 +160,15 @@ public class ClientStateSystem : ISystem
 
                 case EventId.Client_State_SelectItem:
                 {
-                    if (ev.EventDetails is not IntEventDetails details)
+                    if (ev.EventDetails is not IntPairEventDetails details)
                     {
                         logger.LogError("Received SelectItem event without details.");
                         break;
                     }
 
-                    var slotIndex = (int)details.Value;
-                    if (slotIndex >= 0) inventoryStateManager.Select(slotIndex);
+                    var slotIndex = details.First;
+                    var quantity = (uint)details.Second;
+                    if (slotIndex >= 0) inventoryStateManager.Select(slotIndex, quantity);
                     else inventoryStateManager.Deselect();
                     break;
                 }

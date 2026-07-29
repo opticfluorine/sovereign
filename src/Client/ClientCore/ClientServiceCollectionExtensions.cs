@@ -111,6 +111,8 @@ public static class ClientServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(EditorOptions)}"));
         services.Configure<BrandingOptions>(
             configuration.GetSection($"Sovereign:{nameof(BrandingOptions)}"));
+        services.Configure<ClientInventoryOptions>(
+            configuration.GetSection($"Sovereign:{nameof(ClientInventoryOptions)}"));
 
         return services;
     }

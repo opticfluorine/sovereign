@@ -16,25 +16,47 @@
 
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Systems.Inventory;
+using Sovereign.EngineCore.Systems.Inventory;
 
 namespace Sovereign.ClientCore.Systems.ClientState;
 
 /// <summary>
 ///     Manages state of inventory GUI actions.
 /// </summary>
-public sealed class InventoryStateManager(ILogger<InventoryStateManager> logger)
+public sealed class InventoryStateManager(
+    ILogger<InventoryStateManager> logger,
+    IInventoryServices inventoryServices,
+    PlayerStateManager playerState)
 {
     private const int NoneSelected = -1;
     private int hotbarSelectedIndex;
+    private uint selectedQuantity;
     private int selectedSlotIndex = NoneSelected;
 
     /// <summary>
     ///     Selects an item for GUI operations.
     /// </summary>
     /// <param name="slotIndex">Inventory slot index.</param>
-    public void Select(int slotIndex)
+    /// <param name="quantity">Quantity (0 to select entire stack).</param>
+    public void Select(int slotIndex, uint quantity)
     {
+        if (!playerState.TryGetPlayerEntityId(out var playerId))
+        {
+            logger.LogError("Select() called without active player.");
+            return;
+        }
+
+        var maxQuantity = inventoryServices.GetQuantity(playerId, slotIndex);
+        var clampedQuantity = quantity;
+        if (quantity > maxQuantity)
+        {
+            logger.LogWarning("Tried to select {Qty} items from slot {SlotIdx} which only has {MaxQty} items.",
+                quantity, slotIndex, maxQuantity);
+            clampedQuantity = maxQuantity;
+        }
+
         selectedSlotIndex = slotIndex;
+        selectedQuantity = quantity > 0 ? clampedQuantity : maxQuantity;
     }
 
     /// <summary>
@@ -43,16 +65,19 @@ public sealed class InventoryStateManager(ILogger<InventoryStateManager> logger)
     public void Deselect()
     {
         selectedSlotIndex = NoneSelected;
+        selectedQuantity = 0;
     }
 
     /// <summary>
     ///     Gets the currently selected slot index, if any.
     /// </summary>
     /// <param name="slotIndex">Slot index. Only meaningful if method returns true.</param>
+    /// <param name="quantity">Selected quantity. Only meaningful if method returns true.</param>
     /// <returns>true if a slot is currently selected, false otherwise.</returns>
-    public bool TryGetSelectedSlot(out int slotIndex)
+    public bool TryGetSelectedSlot(out int slotIndex, out uint quantity)
     {
         slotIndex = selectedSlotIndex;
+        quantity = selectedQuantity;
         return selectedSlotIndex != NoneSelected;
     }
 

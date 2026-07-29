@@ -360,9 +360,9 @@ public enum EventId
     Core_Inventory_DropAtPosition = 1302,
 
     /// <summary>
-    ///     Event sent to swap the contents of two slots attached to the same entity.
+    ///     Event sent to swap some or all of the contents of two slots attached to the same entity.
     /// </summary>
-    /// Associated details: IntPairEventDetails (values are slot indices to swap)
+    /// Associated details: InventorySwapEventDetails
     Core_Inventory_Swap = 1303,
 
     /// <summary>
@@ -376,6 +376,12 @@ public enum EventId
     /// </summary>
     /// Associated details: EntityIntEventDetails (value is slot index to remove item from)
     Core_Inventory_RemoveItem = 1305,
+
+    /// <summary>
+    ///     Event sent to merge part or all of two mutually stackable stacks of items.
+    /// </summary>
+    /// Associated details:
+    Core_Inventory_MergeStacks = 1306,
 
     #endregion Inventory
 
@@ -516,7 +522,7 @@ public enum EventId
     /// <summary>
     ///     Event sent to select an item in the GUI.
     /// </summary>
-    /// Associated details: IntEventDetails (value is slot index, -1 to deselect)
+    /// Associated details: IntPairEventDetails (first value is slot index, -1 to deselect; second value is quantity, 0 to select entire stack)
     Client_State_SelectItem = 100402,
 
     /// <summary>

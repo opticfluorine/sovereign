@@ -48,7 +48,9 @@ public static class ComponentOperators
             { ComponentOperation.Set, (_, b) => b },
             { ComponentOperation.Add, (a, b) => a + b },
             { ComponentOperation.Multiply, (a, b) => a * b },
-            { ComponentOperation.Divide, (a, b) => a / b }
+            { ComponentOperation.Divide, (a, b) => a / b },
+            { ComponentOperation.AddNoOverflow, (a, b) => a + b >= a ? a + b : uint.MaxValue },
+            { ComponentOperation.SubtractNoUnderflow, (a, b) => a - b <= a ? a - b : uint.MinValue }
         };
 
     /// <summary>

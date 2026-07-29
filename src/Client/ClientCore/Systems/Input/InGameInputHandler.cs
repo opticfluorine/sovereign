@@ -99,9 +99,9 @@ public class InGameInputHandler(
     {
         if (!isButtonDown) return;
 
-        if (stateServices.TryGetSelectedInventorySlot(out var slotIndex))
+        if (stateServices.TryGetSelectedInventorySlot(out var slotIndex, out var selectedQty))
         {
-            inventoryClickHandler.DropSelectedItem(slotIndex, keyboardState[SDL.SDL_Keycode.SDLK_LCTRL]);
+            inventoryClickHandler.DropSelectedItem(slotIndex, selectedQty, keyboardState[SDL.SDL_Keycode.SDLK_LCTRL]);
             stateController.DeselectItem(eventSender);
         }
 

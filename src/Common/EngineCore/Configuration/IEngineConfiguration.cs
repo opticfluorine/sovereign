@@ -35,4 +35,9 @@ public interface IEngineConfiguration
     ///     progressively favor performance over CPU consumption.
     /// </remarks>
     int ExecutorThreadSleepInterval { get; }
+
+    /// <summary>
+    ///     Whether the engine configuration acts as an authoritative source of truth (i.e. is the server).
+    /// </summary>
+    bool IsAuthoritative { get; }
 }

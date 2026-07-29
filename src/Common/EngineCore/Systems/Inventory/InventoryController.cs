@@ -48,7 +48,8 @@ public interface IInventoryController
     /// <param name="entityId">Entity ID that will drop the item.</param>
     /// <param name="slotIndex">Inventory slot index.</param>
     /// <param name="position">Requested drop position.</param>
-    void Drop(IEventSender eventSender, ulong entityId, int slotIndex, Vector3 position);
+    /// <param name="quantity">Quantity to drop (0 drops all).</param>
+    void Drop(IEventSender eventSender, ulong entityId, int slotIndex, Vector3 position, uint quantity = 0);
 
     /// <summary>
     ///     Swaps the contents of two inventory slots.
@@ -57,7 +58,8 @@ public interface IInventoryController
     /// <param name="entityId">Entity ID that will swap the items.</param>
     /// <param name="firstSlotIdx">First slot index.</param>
     /// <param name="secondSlotIdx">Second slot index.</param>
-    void Swap(IEventSender eventSender, ulong entityId, int firstSlotIdx, int secondSlotIdx);
+    /// <param name="quantity">Quantity to move from first slot to second. 0 specifies the full stack.</param>
+    void Swap(IEventSender eventSender, ulong entityId, int firstSlotIdx, int secondSlotIdx, uint quantity = 0);
 
     /// <summary>
     ///     Removes the item in an inventory slot.
@@ -101,12 +103,13 @@ internal class InventoryController : IInventoryController
         eventSender.SendEvent(ev);
     }
 
-    public void Drop(IEventSender eventSender, ulong entityId, int slotIndex, Vector3 position)
+    public void Drop(IEventSender eventSender, ulong entityId, int slotIndex, Vector3 position, uint quantity)
     {
-        var details = new IntVectorEventDetails
+        var details = new DropAtPositionEventDetails
         {
-            IntValue = slotIndex,
-            VectorValue = position
+            SlotIndex = slotIndex,
+            Quantity = quantity,
+            Position = position
         };
         var ev = new Event(EventId.Core_Inventory_DropAtPosition, details)
         {
@@ -115,11 +118,21 @@ internal class InventoryController : IInventoryController
         eventSender.SendEvent(ev);
     }
 
-    public void Swap(IEventSender eventSender, ulong entityId, int firstSlotIdx, int secondSlotIdx)
+    public void Swap(IEventSender eventSender, ulong entityId, int firstSlotIdx, int secondSlotIdx, uint quantity)
     {
-        var details = new IntPairEventDetails { First = firstSlotIdx, Second = secondSlotIdx };
+        var details = new InventorySwapEventDetails
+        {
+            OwnerId = entityId,
+            FromSlotIndex = firstSlotIdx,
+            ToSlotIndex = secondSlotIdx,
+            Quantity = quantity
+        };
         var ev = new Event(EventId.Core_Inventory_Swap, details)
         {
+            // Swaps are locally requested on behalf of the inventory itself, so they will always pass local
+            // validation (e.g. if a server script requests a swap). When replicated over the network, this value
+            // is updated to the player who requested the swap, and so the server will perform full validation of
+            // whether the player is able to modify the inventory as requested.
             FromPlayerId = entityId
         };
         eventSender.SendEvent(ev);

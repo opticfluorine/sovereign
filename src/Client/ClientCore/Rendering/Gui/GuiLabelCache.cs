@@ -22,6 +22,10 @@ namespace Sovereign.ClientCore.Rendering.Gui;
 /// <summary>
 ///     Auto-resizing cache of indexed labels for GUI components.
 /// </summary>
+/// <remarks>
+///     The cached labels are stored consecutively in memory for fast lookup. If the set of indices is expected
+///     to be sparse, use SparseGuiLabelCache instead.
+/// </remarks>
 /// <param name="prefix">Label prefix.</param>
 public sealed class GuiLabelCache(string prefix)
 {
@@ -46,6 +50,34 @@ public sealed class GuiLabelCache(string prefix)
             }
 
             return labels[index];
+        }
+    }
+}
+
+/// <summary>
+///     GUI label cache suitable for sparse indices (i.e. those with random access patterns).
+/// </summary>
+/// <param name="prefix">Label prefix.</param>
+public sealed class SparseGuiLabelCache(string prefix)
+{
+    private readonly Dictionary<uint, string> labels = new();
+
+    /// <summary>
+    ///     Gets the given label.
+    /// </summary>
+    /// <param name="index">Label index.</param>
+    /// <exception cref="IndexOutOfRangeException">Thrown if the index is negative.</exception>
+    public string this[uint index]
+    {
+        get
+        {
+            if (!labels.TryGetValue(index, out var label))
+            {
+                label = $"{prefix}{index}";
+                labels[index] = label;
+            }
+
+            return label;
         }
     }
 }

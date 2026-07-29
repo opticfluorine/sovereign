@@ -43,6 +43,7 @@ internal sealed class InventorySystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
+        EventId.Core_Tick,
         EventId.Core_Inventory_PickUp,
         EventId.Core_Inventory_Drop,
         EventId.Core_Inventory_DropAtPosition,
@@ -78,6 +79,10 @@ internal sealed class InventorySystem : ISystem
 
             switch (ev.EventId)
             {
+                case EventId.Core_Tick:
+                    manager.OnTick();
+                    break;
+
                 case EventId.Core_Inventory_PickUp:
                 {
                     if (ev.EventDetails is not EntityEventDetails details)
@@ -104,25 +109,26 @@ internal sealed class InventorySystem : ISystem
 
                 case EventId.Core_Inventory_DropAtPosition:
                 {
-                    if (ev.EventDetails is not IntVectorEventDetails details)
+                    if (ev.EventDetails is not DropAtPositionEventDetails details)
                     {
                         logger.LogError("Received DropAtPosition without details.");
                         break;
                     }
 
-                    manager.DropItemAtPosition(ev.FromPlayerId, details.IntValue, details.VectorValue);
+                    manager.DropItemAtPosition(ev.FromPlayerId, details.SlotIndex, details.Quantity, details.Position);
                     break;
                 }
 
                 case EventId.Core_Inventory_Swap:
                 {
-                    if (ev.EventDetails is not IntPairEventDetails details)
+                    if (ev.EventDetails is not InventorySwapEventDetails details)
                     {
                         logger.LogError("Received Swap without details.");
                         break;
                     }
 
-                    manager.SwapItems(ev.FromPlayerId, details.First, details.Second);
+                    manager.SwapItemsAsPlayer(ev.FromPlayerId, details.OwnerId, details.FromSlotIndex,
+                        details.ToSlotIndex, details.Quantity);
                     break;
                 }
 

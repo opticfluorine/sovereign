@@ -64,10 +64,14 @@ public class ClientStateController(HighlightManager highlightManager)
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
     /// <param name="slotIndex">Inventory slot index.</param>
-    public void SelectItem(IEventSender eventSender, int slotIndex)
+    /// <param name="quantity">Quantity to select (0 to select the entire stack).</param>
+    public void SelectItem(IEventSender eventSender, int slotIndex, uint quantity = 0)
     {
-        var details = new IntEventDetails { Value = (uint)slotIndex };
-        var ev = new Event(EventId.Client_State_SelectItem, details);
+        var details = new IntPairEventDetails { First = slotIndex, Second = (int)quantity };
+        var ev = new Event(EventId.Client_State_SelectItem, details)
+        {
+            SyncToTick = true
+        };
         eventSender.SendEvent(ev);
     }
 

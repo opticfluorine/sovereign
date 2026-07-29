@@ -14,20 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Inventory;
+using System.Numerics;
+using MessagePack;
+
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Label text for the inventory GUI.
+///     Event details that contains an integer and a Vector3.
 /// </summary>
-public static class InventoryLabels
+[MessagePackObject]
+public sealed class DropAtPositionEventDetails : IEventDetails
 {
     /// <summary>
-    ///     "Drop" label.
+    ///     Slot index of item to be dropped.
     /// </summary>
-    public const string Drop = "Drop";
+    [Key(0)]
+    public int SlotIndex { get; set; }
 
     /// <summary>
-    ///     "Split" label.
+    ///     Quantity of item to be dropped (0 for full stack).
     /// </summary>
-    public const string Split = "Split";
+    [Key(1)]
+    public uint Quantity { get; set; }
+
+    /// <summary>
+    ///     Position to drop item at.
+    /// </summary>
+    [Key(2)]
+    public Vector3 Position { get; set; }
 }

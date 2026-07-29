@@ -21,11 +21,11 @@ namespace Sovereign.EngineCore.Events.Details.Validators;
 /// <summary>
 ///     Validator for IntVectorEventDetails.
 /// </summary>
-public class IntVectorEventDetailsValidator : IEventDetailsValidator
+public class DropAtPositionEventDetailsValidator : IEventDetailsValidator
 {
     public bool IsValid(IEventDetails? details)
     {
-        return details is IntVectorEventDetails specificDetails &&
-               specificDetails.VectorValue.IsFinite();
+        return details is DropAtPositionEventDetails specificDetails &&
+               specificDetails.Position.IsFinite();
     }
 }

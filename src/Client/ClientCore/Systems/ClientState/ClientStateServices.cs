@@ -93,17 +93,17 @@ public sealed class ClientStateServices(
     ///     Gets the currently selected inventory slot, if any.
     /// </summary>
     /// <param name="slotIndex">Selected slot index. Only meaningful if method returns true.</param>
+    /// <param name="quantity">Selected quantity. Only meaningful if method returns true.</param>
     /// <returns>true if a slot is currently selected, false otherwise.</returns>
-    public bool TryGetSelectedInventorySlot(out int slotIndex)
+    public bool TryGetSelectedInventorySlot(out int slotIndex, out uint quantity)
     {
-        return inventoryStateManager.TryGetSelectedSlot(out slotIndex);
+        return inventoryStateManager.TryGetSelectedSlot(out slotIndex, out quantity);
     }
 
     /// <summary>
     ///     Gets the currently selected hotbar slot, if any.
     /// </summary>
-    /// <param name="slotIndex">Selected hotbar slot index. Only meaningful if method returns true.</param>
-    /// <returns>true if a hotbar slot is currently selected, false otherwise.</returns>
+    /// <returns>Selected hotbar slot.</returns>
     public int GetSelectedHotbarSlot()
     {
         return inventoryStateManager.GetSelectedHotbarSlot();

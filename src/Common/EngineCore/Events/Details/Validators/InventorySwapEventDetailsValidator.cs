@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2025 opticfluorine
+// Copyright (c) 2026 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,20 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Inventory;
+namespace Sovereign.EngineCore.Events.Details.Validators;
 
-/// <summary>
-///     Label text for the inventory GUI.
-/// </summary>
-public static class InventoryLabels
+public class InventorySwapEventDetailsValidator : IEventDetailsValidator
 {
-    /// <summary>
-    ///     "Drop" label.
-    /// </summary>
-    public const string Drop = "Drop";
-
-    /// <summary>
-    ///     "Split" label.
-    /// </summary>
-    public const string Split = "Split";
+    public bool IsValid(IEventDetails? details)
+    {
+        return details is InventorySwapEventDetails { FromSlotIndex: >= 0, ToSlotIndex: >= 0 } d &&
+               d.FromSlotIndex != d.ToSlotIndex;
+    }
 }

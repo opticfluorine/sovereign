@@ -94,7 +94,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// <summary>
     ///     Pending component modifications binned by operation.
     /// </summary>
-    private readonly Dictionary<ComponentOperation, StructBuffer<PendingModify>>
+    private readonly SortedDictionary<ComponentOperation, StructBuffer<PendingModify>>
         pendingModifications = new();
 
     /// <summary>

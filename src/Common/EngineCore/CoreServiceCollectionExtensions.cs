@@ -207,7 +207,8 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<NpcAddEventDetailsValidator>();
         services.TryAddSingleton<NpcRemoveEventDetailsValidator>();
         services.TryAddSingleton<DialogueEventDetailsValidator>();
-        services.TryAddSingleton<IntVectorEventDetailsValidator>();
+        services.TryAddSingleton<DropAtPositionEventDetailsValidator>();
+        services.TryAddSingleton<InventorySwapEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)

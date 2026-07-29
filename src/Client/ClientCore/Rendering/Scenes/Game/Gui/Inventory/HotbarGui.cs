@@ -40,7 +40,9 @@ public sealed class HotbarGui(
     GuiFontAtlas fontAtlas,
     NameComponentCollection names,
     IEventSender eventSender,
-    ClientStateController stateController)
+    ClientStateController stateController,
+    StackableTagCollection stackable,
+    QuantityComponentCollection quantities)
 {
     private const int GridWidthItems = 10;
     private const int StackLimit = 128;
@@ -48,6 +50,7 @@ public sealed class HotbarGui(
     private const uint CellBorderColor = 0xff886666;
     private const uint CellBorderColorSelected = 0xff997777;
     private readonly GuiLabelCache gridLabels = new("invg");
+    private readonly SparseGuiLabelCache quantityLabels = new("");
     private readonly List<string> quickSlotLabels = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
     private ulong[]? inventoryBuffer;
 
@@ -152,7 +155,27 @@ public sealed class HotbarGui(
         // Show tooltip if hovered.
         if (ImGui.IsItemHovered()) ShowItemTooltip(itemId);
 
+        if (stackable.HasTagForEntity(itemId)) DrawQuantityLabel(itemId, startPosLocal, itemSize);
         DrawQuickSlotLabel(slotIndex, startPosLocal, itemSize);
+    }
+
+    /// <summary>
+    ///     Draws a quantity label.
+    /// </summary>
+    /// <param name="itemId">Item entity ID.</param>
+    /// <param name="startPos">Position of top-left corner of inventory grid cell.</param>
+    /// <param name="itemSize">Item size.</param>
+    private void DrawQuantityLabel(ulong itemId, Vector2 startPos, Vector2 itemSize)
+    {
+        ImGui.PushFont(fontAtlas.BoldItemLabelFont);
+        var quantity = quantities.TryGetValue(itemId, out var qty) ? qty : 1;
+        var label = quantityLabels[quantity];
+        var labelSize = ImGui.CalcTextSize(label);
+
+        ImGui.SetCursorPos(new Vector2(startPos.X + itemSize.X - QuickSlotLabelOffset * labelSize.X,
+            startPos.Y + itemSize.Y - labelSize.Y));
+        ImGui.Text(label);
+        ImGui.PopFont();
     }
 
     /// <summary>

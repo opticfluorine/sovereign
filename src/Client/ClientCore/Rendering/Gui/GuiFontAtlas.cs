@@ -80,6 +80,8 @@ public sealed class GuiFontAtlas : IDisposable
 
     public ImFontPtr ItemLabelFont { get; private set; }
 
+    public ImFontPtr BoldItemLabelFont { get; private set; }
+
     /// <summary>
     ///     Gets a pointer to the SDL surface containing the font atlas.
     /// </summary>
@@ -203,6 +205,8 @@ public sealed class GuiFontAtlas : IDisposable
         // Load item label font.
         ItemLabelFont =
             io.Fonts.AddFontFromFileTTF(fontPath, itemLabelFontSize, null, io.Fonts.GetGlyphRangesDefault());
+        BoldItemLabelFont =
+            io.Fonts.AddFontFromFileTTF(boldFontPath, itemLabelFontSize, null, io.Fonts.GetGlyphRangesDefault());
 
         // Retrieve raw data from ImGui.
         io.Fonts.Build();
