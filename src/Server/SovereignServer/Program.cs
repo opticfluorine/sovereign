@@ -64,7 +64,8 @@ builder.Services
     .AddSovereignEngineCoreLuaLibraries()
     .AddSovereignServerCoreLuaLibraries()
     .AddSovereignEngineCoreLuaComponents()
-    .AddSovereignEngineCoreLuaEnums();
+    .AddSovereignEngineCoreLuaEnums()
+    .AddSovereignServerCoreLuaEnums();
 
 // Bind appsettings.json (and other sources) to options classes.
 builder.Services
