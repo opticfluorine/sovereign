@@ -30,7 +30,7 @@ public class SqliteAddAdminRoleQuery : IAddAdminRoleQuery
     private const string Query =
         @"UPDATE Entity
             SET admin = TRUE
-            WHERE Name.value = @Name AND player_char = TRUE AND player_char_deleted = FALSE";
+            WHERE name = @Name COLLATE NOCASE AND player_char = TRUE AND player_char_deleted = FALSE";
 
     private readonly SqliteConnection connection;
 

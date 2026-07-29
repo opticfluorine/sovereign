@@ -29,7 +29,7 @@ public class SqliteRemoveAdminRoleQuery : IRemoveAdminRoleQuery
     /// </summary>
     private const string Sql
         = @"UPDATE Entity SET admin = NULL 
-            WHERE name = @Name 
+            WHERE name = @Name COLLATE NOCASE
                 AND player_char = TRUE 
                 AND player_char_deleted = FALSE";
 

@@ -14,8 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
+using Sovereign.EngineUtil.Text;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
@@ -27,7 +30,11 @@ public class PlayerNameComponentIndexer : BaseComponentIndexer<string>
     /// <summary>
     ///     Map from player name to entity ID.
     /// </summary>
-    private readonly ConcurrentDictionary<string, ulong> entityIdsByName = new();
+    private readonly ConcurrentDictionary<string, ulong> entityIdsByName
+        = new(StringComparer.OrdinalIgnoreCase);
+
+    private readonly FuzzyMatcher fuzzy = new();
+    private readonly Lock fuzzyLock = new();
 
     public PlayerNameComponentIndexer(NameComponentCollection names, PlayerNameEventFilter filter)
         : base(names, filter)
@@ -36,6 +43,7 @@ public class PlayerNameComponentIndexer : BaseComponentIndexer<string>
 
     /// <summary>
     ///     Gets the currently logged in player associated with the given name, if any.
+    ///     The lookup is case-insensitive.
     /// </summary>
     /// <param name="name">Player name.</param>
     /// <param name="playerEntityId">Player entity ID.</param>
@@ -43,6 +51,25 @@ public class PlayerNameComponentIndexer : BaseComponentIndexer<string>
     public bool TryGetPlayerByName(string name, out ulong playerEntityId)
     {
         return entityIdsByName.TryGetValue(name, out playerEntityId);
+    }
+
+    /// <summary>
+    ///     Appends up to <paramref name="maxResults" /> fuzzy matches for the
+    ///     given query name to the caller-supplied <paramref name="results" />
+    ///     list. Matches are ordered by descending similarity score; ties are
+    ///     broken alphabetically. The caller-supplied list is mutated
+    ///     (append semantics); pre-existing entries are preserved.
+    /// </summary>
+    /// <param name="query">Query name.</param>
+    /// <param name="maxResults">Maximum number of results to append.</param>
+    /// <param name="results">Caller-supplied list to append to.</param>
+    public void AppendFuzzyMatches(string query, int maxResults,
+        List<(string Name, float Score)> results)
+    {
+        lock (fuzzyLock)
+        {
+            fuzzy.AppendBestMatches(query, entityIdsByName.Keys, maxResults, results);
+        }
     }
 
     protected override void ComponentAddedCallback(ulong entityId, string componentValue, bool isLoad)

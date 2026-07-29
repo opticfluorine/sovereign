@@ -36,6 +36,7 @@ using Sovereign.EngineCore.Systems.Dialogue;
 using Sovereign.EngineCore.Systems.Interaction;
 using Sovereign.EngineCore.Systems.Inventory;
 using Sovereign.EngineCore.Systems.Movement;
+using Sovereign.EngineCore.Systems.Players;
 using Sovereign.EngineCore.Systems.Performance;
 using Sovereign.EngineCore.Systems.Time;
 using Sovereign.EngineCore.Systems.WorldManagement;
@@ -230,6 +231,7 @@ public static class CoreServiceCollectionExtensions
     private static void AddPlayer(IServiceCollection services)
     {
         services.TryAddSingleton<PlayerRoleCheck>();
+        services.TryAddSingleton<PlayersScripting>();
     }
 
     private static void AddSystems(IServiceCollection services)

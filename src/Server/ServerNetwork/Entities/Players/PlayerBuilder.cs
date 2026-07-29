@@ -42,8 +42,11 @@ public sealed class PlayerBuilder(
 
     /// <summary>
     ///     Tracks which names have been used recently in order to avoid duplication.
+    ///     Case-insensitive (OrdinalIgnoreCase) to enforce system-wide case-insensitive
+    ///     name uniqueness.
     /// </summary>
-    private readonly HashSet<string> recentNames = new();
+    private readonly HashSet<string> recentNames
+        = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     ///     Attempts to create a new player.

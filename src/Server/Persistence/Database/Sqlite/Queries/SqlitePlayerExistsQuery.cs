@@ -26,7 +26,7 @@ public class SqlitePlayerExistsQuery : IPlayerExistsQuery
     /// </summary>
     private const string query =
         @"SELECT EXISTS(SELECT 1 FROM Entity
-            WHERE name = @Name AND player_char = TRUE AND player_char_deleted = FALSE)";
+            WHERE name = @Name COLLATE NOCASE AND player_char = TRUE AND player_char_deleted = FALSE)";
 
     private readonly SqliteConnection dbConnection;
 
