@@ -165,6 +165,32 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                     return 1;
                 }}
 
+                public static int Marshal(IntPtr luaState, List<ulong> value)
+                {{
+                    luaL_checkstack(luaState, 2, null);
+                    lua_createtable(luaState, value.Count, 0);
+                    var i = 1;
+                    foreach (var item in value)
+                    {{
+                        Marshal(luaState, item);
+                        lua_seti(luaState, -2, i++);
+                    }}
+                    return 1;
+                }}
+
+                public static int Marshal(IntPtr luaState, List<long> value)
+                {{
+                    luaL_checkstack(luaState, 2, null);
+                    lua_createtable(luaState, value.Count, 0);
+                    var i = 1;
+                    foreach (var item in value)
+                    {{
+                        Marshal(luaState, item);
+                        lua_seti(luaState, -2, i++);
+                    }}
+                    return 1;
+                }}
+
                 public static int Marshal(IntPtr luaState, int value)
                 {{
                     Marshal(luaState, (long)value);

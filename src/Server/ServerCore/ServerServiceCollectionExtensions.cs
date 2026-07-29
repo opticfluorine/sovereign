@@ -214,5 +214,6 @@ public static class ServerServiceCollectionExtensions
             ServiceDescriptor.Singleton<ILuaLibrary, ScriptingLuaLibrary>(s =>
                 s.GetRequiredService<ScriptingLuaLibrary>()));
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, EntitiesLuaLibrary>());
+        services.TryAddSingleton<ItemsScripting>();
     }
 }

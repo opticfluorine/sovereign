@@ -152,6 +152,8 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<BlockWorldSegmentIndexer>();
         services.TryAddSingleton<BlockTemplateNameComponentFilter>();
         services.TryAddSingleton<BlockTemplateNameComponentIndexer>();
+        services.TryAddSingleton<ItemTemplateNameComponentFilter>();
+        services.TryAddSingleton<ItemTemplateNameComponentIndexer>();
         services.TryAddSingleton<SlotComponentEventFilter>();
         services.TryAddSingleton<SlotIndexer>();
     }

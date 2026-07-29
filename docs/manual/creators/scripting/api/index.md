@@ -13,6 +13,8 @@ dialogue.md
 entities.md
 events.md
 inventory.md
+items.md
+players.md
 scripting.md
 time.md
 util.md

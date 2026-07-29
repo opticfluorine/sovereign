@@ -55,7 +55,6 @@ The scripting engine uses Lua tables with specific entries to communicate inform
     
         The entity ID related to the event.
 ```
-
 (script-types-gridposition)=
 ## GridPosition
 
@@ -77,6 +76,28 @@ The scripting engine uses Lua tables with specific entries to communicate inform
         The Z value of the vector.
 ```
 
+(script-types-itemtemplatematch)=
+## ItemTemplateMatch
+
+```{eval-rst}
+.. lua:class:: ItemTemplateMatch
+
+    A single fuzzy item-template-name match, as returned by
+    `Items.FindByFuzzyName <items.html>`_.
+
+    .. lua:attribute:: EntityId: integer
+
+        Entity ID of the matched item template.
+
+    .. lua:attribute:: Name: string
+
+        Matched item template name.
+
+    .. lua:attribute:: Score: number
+
+        Similarity score in [0, 1] (1.0 = exact match).
+```
+
 (script-types-kinematics)=
 ## Kinematics
 
@@ -92,6 +113,28 @@ The scripting engine uses Lua tables with specific entries to communicate inform
     .. lua:attribute:: Velocity: Vector3
     
         Entity velocity.
+```
+
+(script-types-playernamematch)=
+## PlayerNameMatch
+
+```{eval-rst}
+.. lua:class:: PlayerNameMatch
+
+    A single fuzzy player-name match, as returned by
+    `Players.FindByFuzzyName <players.html>`_.
+
+    .. lua:attribute:: EntityId: integer
+
+        Entity ID of the matched online player.
+
+    .. lua:attribute:: Name: string
+
+        Matched player name.
+
+    .. lua:attribute:: Score: number
+
+        Similarity score in [0, 1] (1.0 = exact match).
 ```
 
 (script-types-pointlight)=
