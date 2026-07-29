@@ -54,7 +54,9 @@ EntityEventDetails = {}
 ---@field Parent integer? Optional. Entity ID of parent entity.
 ---@field Physics boolean? Optional. Whether entity has physics effects.
 ---@field PointLightSource PointLight? Optional. Point light source.
+---@field Quantity integer? Optional. Quantity of a stackable item.
 ---@field ServerOnly boolean? Optional. Whether entity is server-only.
+---@field Stackable boolean? Optional. Whether entity is stackable.
 EntitySpecification = {}
 
 ---Integer-valued 3D vector type.
@@ -527,6 +529,26 @@ Components.PointLightSource.Remove = function (entityId) end
 ---@param value PointLight Value.
 Components.PointLightSource.Set = function (entityId, value) end
 
+---Quantity component.
+---@class Components.Quantity 
+Components.Quantity = {}
+---Checks whether the component exists for an entity.
+---@param entityId integer Entity ID.
+---@return boolean true if exists, false otherwise.
+Components.Quantity.Exists = function (entityId) end
+---Gets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param lookback boolean? If true, enable lookback at components from the last tick.
+---@return integer?
+Components.Quantity.Get = function(entityId, lookback) end
+---Removes the component for the entity if it exists.
+---@param entityId integer Entity ID.
+Components.Quantity.Remove = function (entityId) end
+---Sets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param value integer Value.
+Components.Quantity.Set = function (entityId, value) end
+
 ---ServerOnly tag.
 ---@class Components.ServerOnly 
 Components.ServerOnly = {}
@@ -546,6 +568,26 @@ Components.ServerOnly.Remove = function (entityId) end
 ---@param entityId integer Entity ID.
 ---@param value boolean Value.
 Components.ServerOnly.Set = function (entityId, value) end
+
+---Stackable tag.
+---@class Components.Stackable
+Components.Stackable = {}
+---Checks whether the component exists for an entity.
+---@param entityId integer Entity ID.
+---@return boolean true if exists, false otherwise.
+Components.Stackable.Exists = function (entityId) end
+---Gets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param lookback boolean? If true, enable lookback at components from the last tick.
+---@return boolean?
+Components.Stackable.Get = function(entityId, lookback) end
+---Removes the component for the entity if it exists.
+---@param entityId integer Entity ID.
+Components.Stackable.Remove = function (entityId) end
+---Sets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param value boolean Value.
+Components.Stackable.Set = function (entityId, value) end
 
 --------------------
 

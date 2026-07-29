@@ -20,22 +20,83 @@
 local Entity = require('Sovereign.Entity')
 local ErrorMessages = require('Sovereign.ErrorMessages')
 
---- /itemgive <player>, <relative template ID>, [quantity]
---- Admin command that inserts an item into a player's inventory.
---- @param command string
---- @param playerId integer
-local function ItemGive(command, playerId)
-    local player = Entity.Get(playerId)
-    if not player.Components.Admin then
-        player:SendSystemMessage(ErrorMessages.CommandRequiresAdmin)
+local ItemGiveUsage = "Usage: /itemgive <player>, <item>, [quantity]"
+
+--- /itemgive <player>, <item>, [quantity]
+--- Admin command that creates an item from a fuzzy-matched item template
+--- and places it into a free slot of a fuzzy-matched online player's inventory.
+--- @param args table 1-indexed table of trimmed string arguments.
+--- @param playerId integer Entity ID of the player who issued the command.
+local function ItemGive(args, playerId)
+    local issuer = Entity.Get(playerId)
+    if not issuer.Components.Admin then
+        issuer:SendSystemMessage(ErrorMessages.CommandRequiresAdmin)
         return
     end
 
-    -- parse comma delimited args
-    local args = {}
-    for token in string.gmatch(command, "%s*([^%s,][^,]*[^%s,])%s*") do
-        table.insert(args, token)
+    -- Read comma-separated arguments.
+    local targetName = args[1]
+    local itemName = args[2]
+    local qtyRaw = args[3]
+
+    -- Validate required arguments.
+    if targetName == nil or targetName == ""
+        or itemName == nil or itemName == "" then
+        issuer:SendSystemMessage(ItemGiveUsage)
+        return
+    end
+
+    -- Parse the optional quantity argument, if present.
+    local quantity = nil
+    if qtyRaw ~= nil and qtyRaw ~= "" then
+        quantity = tonumber(qtyRaw)
+        if quantity == nil
+            or math.tointeger(quantity) == nil
+            or quantity < 1 then
+            issuer:SendSystemMessage(ErrorMessages.InvalidQuantity)
+            return
+        end
+        quantity = math.tointeger(quantity)
+    end
+
+    -- Resolve the target player by fuzzy name match (best match).
+    local playerMatches = Players.FindByFuzzyName(targetName, 1)
+    if #playerMatches == 0 then
+        issuer:SendSystemMessage(ErrorMessages.PlayerNotFound)
+        return
+    end
+    local targetId = playerMatches[1].EntityId
+
+    -- Resolve the item template by fuzzy name match (best match).
+    local itemMatches = Items.FindByFuzzyName(itemName, 1)
+    if #itemMatches == 0 then
+        issuer:SendSystemMessage(ErrorMessages.ItemNotFound)
+        return
+    end
+    local templateId = itemMatches[1].EntityId
+
+    -- Create a new item entity from the resolved template.
+    local itemId = 0
+    if quantity ~= nil and Components.Stackable.Exists(templateId) then
+        Entities.Create({ Template = templateId, Quantity = quantity })
+    else
+        Entities.Create({ Template = templateId })
+    end
+
+    if not itemId then
+        Util.LogError(string.format(
+            "ItemGive: failed to create item from template %X for issuer %X.",
+            templateId, playerId))
+        issuer:SendSystemMessage(ErrorMessages.ItemNotFound)
+        return
+    end
+
+    -- Place the new item into the first free inventory slot of the target.
+    if not Inventory.AddItem(targetId, itemId) then
+        issuer:SendSystemMessage(ErrorMessages.NoFreeSlot)
+        Entities.Remove(itemId)
+        return
     end
 end
 
-Chat.AddCommand("itemgive", ItemGive, ChatCommandFlags.None)
+Chat.AddCommand("itemgive", ItemGive, ChatCommandFlags.CommaSeparatedArgs)

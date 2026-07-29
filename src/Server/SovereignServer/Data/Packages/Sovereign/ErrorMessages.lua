@@ -21,4 +21,16 @@ local ErrorMessages = {}
 ---Error message indicating that a chat command requires admin privileges.
 ErrorMessages.CommandRequiresAdmin = "This command requires admin privileges."
 
+---Error message indicating that no online player matched the requested name.
+ErrorMessages.PlayerNotFound = "No matching online player found."
+
+---Error message indicating that no item template matched the requested name.
+ErrorMessages.ItemNotFound = "No matching item template found."
+
+---Error message indicating that the target player has no free inventory slot.
+ErrorMessages.NoFreeSlot = "The target player has no free inventory slot."
+
+---Error message indicating that the requested quantity was not a positive integer.
+ErrorMessages.InvalidQuantity = "Quantity must be a positive integer."
+
 return ErrorMessages
