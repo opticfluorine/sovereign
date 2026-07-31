@@ -361,3 +361,66 @@ if keyId > 0 then
     -- ...
 end
 ```
+
+## ConsumeItem
+
+### Definition
+
+```{eval-rst}
+.. lua:function:: Inventory.ConsumeItem(entityId, templateId)
+
+   Synchronously consumes (removes and destroys) a single item with the given template ID from the entity's inventory. The operation is atomic within the current server tick: once an item is claimed by this call it is locked for the remainder of the tick, preventing duplication. A second call targeting the same item in the same tick will return ``false`` by design.
+
+   :param entityId: Entity ID.
+   :type entityId: integer
+   :param templateId: Item template entity ID.
+   :type templateId: integer
+
+   :return: ``true`` if an item was found and removed, ``false`` otherwise.
+   :rtype: boolean
+```
+
+### Example
+
+```{code-block} lua
+:caption: Using ``ConsumeItem`` to remove a key item from a player's inventory.
+:emphasize-lines: 1
+if Inventory.ConsumeItem(playerId, keyTemplateId) then
+    -- Key was consumed; the player had the key.
+    -- ...
+end
+```
+
+## ConsumeItemQuantity
+
+### Definition
+
+```{eval-rst}
+.. lua:function:: Inventory.ConsumeItemQuantity(entityId, templateId, quantity)
+
+   Synchronously consumes the requested quantity of items with the given template ID from the entity's inventory. The operation is atomic within the current server tick: if insufficient items are present, nothing is changed and ``false`` is returned. If enough items are present, the exact quantity is removed across one or more stacks and ``true`` is returned.
+
+   Works with both stackable and non-stackable items. For non-stackable items, each matching item contributes a quantity of 1, so the function can be used to remove multiple individual items across slots.
+
+   :param entityId: Entity ID.
+   :type entityId: integer
+   :param templateId: Item template entity ID.
+   :type templateId: integer
+   :param quantity: Required quantity. Must be at least 1.
+   :type quantity: integer
+
+   :return: ``true`` if the requested quantity was removed, ``false`` if insufficient items were available.
+   :rtype: boolean
+```
+
+### Example
+
+```{code-block} lua
+:caption: Using ``ConsumeItemQuantity`` to remove multiple crafting ingredients.
+:emphasize-lines: 3
+-- Check if the player has 5 wood logs and consume them if so.
+if Inventory.ConsumeItemQuantity(playerId, woodTemplateId, 5) then
+    -- Player had 5 wood logs; they were consumed. Craft the item.
+    -- ...
+end
+```

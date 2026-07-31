@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Components;
@@ -32,7 +34,7 @@ namespace Sovereign.EngineCore.Systems.Inventory;
 /// <summary>
 ///     Manages inventory interactions.
 /// </summary>
-internal sealed class InventoryManager(
+public sealed class InventoryManager(
     SlotIndexer slotIndexer,
     EntityHierarchyIndexer hierarchyIndexer,
     ILogger<InventoryManager> logger,
@@ -51,6 +53,7 @@ internal sealed class InventoryManager(
     IEngineConfiguration engineConfiguration,
     IEventSender eventSender)
 {
+    private readonly List<(int slotIndex, ulong itemId, uint qty)> consumeCandidates = new();
     private readonly float maxDropD2 = inventoryOptions.Value.MaxDropDistance * inventoryOptions.Value.MaxDropDistance;
 
     private readonly float maxPickupD2 =
@@ -63,6 +66,13 @@ internal sealed class InventoryManager(
     private readonly HashSet<ulong> modifiedItems = new();
 
     /// <summary>
+    ///     Synchronizes all inventory mutations across executor threads so that
+    ///     scan+claim+remove is atomic and <see cref="modifiedItems" /> is never
+    ///     accessed concurrently.
+    /// </summary>
+    private readonly Lock mutationLock = new();
+
+    /// <summary>
     ///     Known pending changes indexed by (entityId, slotIndex).
     /// </summary>
     private readonly Dictionary<(ulong, int), (ulong, uint)> pendingChanges = new();
@@ -72,8 +82,11 @@ internal sealed class InventoryManager(
     /// </summary>
     public void OnTick()
     {
-        pendingChanges.Clear();
-        modifiedItems.Clear();
+        lock (mutationLock)
+        {
+            pendingChanges.Clear();
+            modifiedItems.Clear();
+        }
     }
 
     /// <summary>
@@ -83,17 +96,20 @@ internal sealed class InventoryManager(
     /// <param name="itemId">Item entity ID.</param>
     public void PickUpItem(ulong entityId, ulong itemId)
     {
-        if (modifiedItems.Contains(itemId) || !IsPickUpAllowed(entityId, itemId)) return;
+        lock (mutationLock)
+        {
+            if (modifiedItems.Contains(itemId) || !IsPickUpAllowed(entityId, itemId)) return;
 
-        if (stackable.HasTagForEntity(itemId))
-        {
-            // Stackable items should be merged with an existing stack if possible.
-            DoPickupStackable(entityId, itemId);
-        }
-        else
-        {
-            // Non-stackable items always go to an empty slot.
-            DoPickupToFirstSlot(entityId, itemId);
+            if (stackable.HasTagForEntity(itemId))
+            {
+                // Stackable items should be merged with an existing stack if possible.
+                DoPickupStackable(entityId, itemId);
+            }
+            else
+            {
+                // Non-stackable items always go to an empty slot.
+                DoPickupToFirstSlot(entityId, itemId);
+            }
         }
     }
 
@@ -115,23 +131,27 @@ internal sealed class InventoryManager(
     /// <param name="slotIndex">Inventory slot index.</param>
     public void DropItem(ulong playerId, int slotIndex)
     {
-        if (!slotIndexer.TryGetSlotForEntity(playerId, slotIndex, out var slotEid))
+        lock (mutationLock)
         {
-            logger.LogWarning("Player {Player} tried to drop nonexistent slot.", loggingUtil.FormatEntity(playerId));
-            return;
+            if (!slotIndexer.TryGetSlotForEntity(playerId, slotIndex, out var slotEid))
+            {
+                logger.LogWarning("Player {Player} tried to drop nonexistent slot.",
+                    loggingUtil.FormatEntity(playerId));
+                return;
+            }
+
+            // Do nothing if the slot is empty.
+            if (!hierarchyIndexer.TryGetFirstDirectChild(slotEid, out var itemId) ||
+                modifiedItems.Contains(itemId)) return;
+
+            if (!kinematics.TryGetValue(playerId, out var posVel))
+            {
+                logger.LogError("Player {Player} has no position to drop.", loggingUtil.FormatEntity(playerId));
+                return;
+            }
+
+            DoDrop(playerId, itemId, 0, posVel.Position);
         }
-
-        // Do nothing if the slot is empty.
-        if (!hierarchyIndexer.TryGetFirstDirectChild(slotEid, out var itemId) ||
-            modifiedItems.Contains(itemId)) return;
-
-        if (!kinematics.TryGetValue(playerId, out var posVel))
-        {
-            logger.LogError("Player {Player} has no position to drop.", loggingUtil.FormatEntity(playerId));
-            return;
-        }
-
-        DoDrop(playerId, itemId, 0, posVel.Position);
     }
 
     /// <summary>
@@ -143,25 +163,29 @@ internal sealed class InventoryManager(
     /// <param name="dropPosition">Requested drop position.</param>
     public void DropItemAtPosition(ulong playerId, int slotIndex, uint quantity, Vector3 dropPosition)
     {
-        if (!slotIndexer.TryGetSlotForEntity(playerId, slotIndex, out var slotEid))
+        lock (mutationLock)
         {
-            logger.LogWarning("Player {Player} tried to drop nonexistent slot.", loggingUtil.FormatEntity(playerId));
-            return;
+            if (!slotIndexer.TryGetSlotForEntity(playerId, slotIndex, out var slotEid))
+            {
+                logger.LogWarning("Player {Player} tried to drop nonexistent slot.",
+                    loggingUtil.FormatEntity(playerId));
+                return;
+            }
+
+            // Do nothing if the slot is empty.
+            if (!hierarchyIndexer.TryGetFirstDirectChild(slotEid, out var itemId) ||
+                modifiedItems.Contains(itemId)) return;
+
+            if (!kinematics.TryGetValue(playerId, out var posVel))
+            {
+                logger.LogError("Player {Player} has no position to drop.", loggingUtil.FormatEntity(playerId));
+                return;
+            }
+
+            var d2 = (posVel.Position - dropPosition).LengthSquared();
+            if (d2 > maxDropD2) return;
+            DoDrop(playerId, itemId, quantity, dropPosition);
         }
-
-        // Do nothing if the slot is empty.
-        if (!hierarchyIndexer.TryGetFirstDirectChild(slotEid, out var itemId) ||
-            modifiedItems.Contains(itemId)) return;
-
-        if (!kinematics.TryGetValue(playerId, out var posVel))
-        {
-            logger.LogError("Player {Player} has no position to drop.", loggingUtil.FormatEntity(playerId));
-            return;
-        }
-
-        var d2 = (posVel.Position - dropPosition).LengthSquared();
-        if (d2 > maxDropD2) return;
-        DoDrop(playerId, itemId, quantity, dropPosition);
     }
 
     /// <summary>
@@ -175,14 +199,17 @@ internal sealed class InventoryManager(
     /// <param name="quantity">Quantity to move from first slot to second; 0 moves the entire stack.</param>
     public void SwapItemsAsPlayer(ulong playerId, ulong inventoryId, int firstSlotIdx, int secondSlotIdx, uint quantity)
     {
-        if (playerId != inventoryId)
+        lock (mutationLock)
         {
-            logger.LogWarning("[SECURITY] Player {Player} tried to modify inventory for entity ID {InvId:X}.",
-                loggingUtil.FormatEntity(playerId), inventoryId);
-            return;
-        }
+            if (playerId != inventoryId)
+            {
+                logger.LogWarning("[SECURITY] Player {Player} tried to modify inventory for entity ID {InvId:X}.",
+                    loggingUtil.FormatEntity(playerId), inventoryId);
+                return;
+            }
 
-        SwapItems(inventoryId, firstSlotIdx, secondSlotIdx, quantity);
+            SwapItems(inventoryId, firstSlotIdx, secondSlotIdx, quantity);
+        }
     }
 
     /// <summary>
@@ -192,26 +219,29 @@ internal sealed class InventoryManager(
     /// <param name="slotCount">Number of new slots to add (> 0).</param>
     public void AddSlots(ulong entityId, int slotCount)
     {
-        if (slotCount < 1)
+        lock (mutationLock)
         {
-            logger.LogError("Bad request to add {Slots} slots to {Entity} ({EntityId:X}).", slotCount,
-                loggingUtil.FormatEntity(entityId), entityId);
-            return;
-        }
+            if (slotCount < 1)
+            {
+                logger.LogError("Bad request to add {Slots} slots to {Entity} ({EntityId:X}).", slotCount,
+                    loggingUtil.FormatEntity(entityId), entityId);
+                return;
+            }
 
-        if (logger.IsEnabled(LogLevel.Debug))
-            logger.LogDebug("Add {SlotCount} slots to {Entity} ({EntityId:X}).",
-                slotCount, loggingUtil.FormatEntity(entityId), entityId);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Add {SlotCount} slots to {Entity} ({EntityId:X}).",
+                    slotCount, loggingUtil.FormatEntity(entityId), entityId);
 
-        for (var i = 0; i < slotCount; ++i)
-        {
-            var slotId = entityFactory.GetBuilder()
-                .EntityType(EntityType.Slot)
-                .Parent(entityId)
-                .Build();
+            for (var i = 0; i < slotCount; ++i)
+            {
+                var slotId = entityFactory.GetBuilder()
+                    .EntityType(EntityType.Slot)
+                    .Parent(entityId)
+                    .Build();
 
-            if (logger.IsEnabled(LogLevel.Trace))
-                logger.LogTrace("Add slot {SlotId:X} to entity {EntityId:X}.", slotId, entityId);
+                if (logger.IsEnabled(LogLevel.Trace))
+                    logger.LogTrace("Add slot {SlotId:X} to entity {EntityId:X}.", slotId, entityId);
+            }
         }
     }
 
@@ -221,6 +251,20 @@ internal sealed class InventoryManager(
     /// <param name="entityId">Entity ID that owns the inventory..</param>
     /// <param name="slotIndex">Slot index.</param>
     public void RemoveItem(ulong entityId, int slotIndex)
+    {
+        lock (mutationLock)
+        {
+            RemoveItemCore(entityId, slotIndex);
+        }
+    }
+
+    /// <summary>
+    ///     Lock-free core of <see cref="RemoveItem" />. Caller must hold
+    ///     <see cref="mutationLock" />.
+    /// </summary>
+    /// <param name="entityId">Entity ID that owns the inventory.</param>
+    /// <param name="slotIndex">Slot index.</param>
+    private void RemoveItemCore(ulong entityId, int slotIndex)
     {
         if (!slotIndexer.TryGetSlotForEntity(entityId, slotIndex, out var slotId))
         {
@@ -447,6 +491,124 @@ internal sealed class InventoryManager(
         var d2 = (itemPos - playerPos).LengthSquared();
         if (d2 > maxPickupD2) return false;
         return true;
+    }
+
+    /// <summary>
+    ///     Lock-free helper that subtracts a quantity from a stack and resyncs.
+    ///     Caller must hold <see cref="mutationLock" />.
+    /// </summary>
+    /// <param name="entityId">Inventory owner entity ID.</param>
+    /// <param name="slotIndex">Slot index.</param>
+    /// <param name="quantity">Quantity to subtract.</param>
+    private void RemoveQuantityCore(ulong entityId, int slotIndex, uint quantity)
+    {
+        if (!slotIndexer.TryGetSlotForEntity(entityId, slotIndex, out var slotId))
+        {
+            logger.LogError("RemoveQuantityCore for bad slot index {SlotIndex} on entity {EntityId:X}.", slotIndex,
+                entityId);
+            return;
+        }
+
+        if (!hierarchyIndexer.TryGetFirstDirectChild(slotId, out var itemId))
+        {
+            logger.LogError("RemoveQuantityCore for empty slot index {SlotIndex} on entity {EntityId:X}.", slotIndex,
+                entityId);
+            return;
+        }
+
+        if (modifiedItems.Contains(itemId)) return;
+
+        quantities.ModifyComponent(itemId, ComponentOperation.SubtractNoUnderflow, quantity);
+        modifiedItems.Add(itemId);
+        worldManagementController.ResyncEntity(eventSender, itemId);
+    }
+
+    /// <summary>
+    ///     Synchronously searches for an item with the given template ID in the
+    ///     entity's inventory. If found, removes (destroys) it and returns true;
+    ///     otherwise returns false.
+    /// </summary>
+    /// <param name="entityId">Inventory owner entity ID.</param>
+    /// <param name="templateId">Item template entity ID.</param>
+    /// <returns>true if an item was found and removed; false otherwise.</returns>
+    public bool TryConsumeItem(ulong entityId, ulong templateId)
+    {
+        lock (mutationLock)
+        {
+            var slotCount = slotIndexer.GetSlotCountForEntity(entityId);
+            if (slotCount == 0) return false;
+
+            for (var i = 0; i < slotCount; ++i)
+            {
+                if (!slotIndexer.TryGetSlotForEntity(entityId, i, out var slotId)) continue;
+                if (!hierarchyIndexer.TryGetFirstDirectChild(slotId, out var itemId)) continue;
+                if (modifiedItems.Contains(itemId)) continue;
+                if (!entityTable.TryGetTemplate(itemId, out var tmpl) || tmpl != templateId) continue;
+
+                modifiedItems.Add(itemId);
+                RemoveItemCore(entityId, i);
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///     Synchronously searches for enough items with the given template ID to
+    ///     satisfy the requested quantity. If sufficient items are present, the
+    ///     required quantity is removed (across one or more stacks) and true is
+    ///     returned; otherwise nothing is changed and false is returned.
+    /// </summary>
+    /// <param name="entityId">Inventory owner entity ID.</param>
+    /// <param name="templateId">Item template entity ID.</param>
+    /// <param name="quantity">Required quantity.</param>
+    /// <returns>true if the quantity was removed; false if insufficient.</returns>
+    public bool TryConsumeQuantity(ulong entityId, ulong templateId, uint quantity)
+    {
+        lock (mutationLock)
+        {
+            if (quantity == 0) return false;
+
+            var slotCount = slotIndexer.GetSlotCountForEntity(entityId);
+            if (slotCount == 0) return false;
+
+            // Plan pass: collect matching candidates and tally total.
+            uint total = 0;
+            consumeCandidates.Clear();
+
+            for (var i = 0; i < slotCount; ++i)
+            {
+                if (!slotIndexer.TryGetSlotForEntity(entityId, i, out var slotId)) continue;
+                if (!hierarchyIndexer.TryGetFirstDirectChild(slotId, out var itemId)) continue;
+                if (modifiedItems.Contains(itemId)) continue;
+                if (!entityTable.TryGetTemplate(itemId, out var tmpl) || tmpl != templateId) continue;
+
+                var qty = quantities.TryGetValue(itemId, out var q) ? q : 1u;
+                consumeCandidates.Add((i, itemId, qty));
+                total += qty;
+            }
+
+            if (total < quantity) return false;
+
+            // Issue pass: remove exactly the required quantity.
+            var remaining = quantity;
+            foreach (var (slotIndex, itemId, qty) in consumeCandidates)
+            {
+                var take = Math.Min(qty, remaining);
+                modifiedItems.Add(itemId);
+
+                if (take == qty)
+                    RemoveItemCore(entityId, slotIndex);
+                else
+                    RemoveQuantityCore(entityId, slotIndex, take);
+
+                remaining -= take;
+                if (remaining == 0) break;
+            }
+
+            return true;
+        }
     }
 
     #region Swap

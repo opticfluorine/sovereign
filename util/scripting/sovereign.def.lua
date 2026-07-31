@@ -811,6 +811,21 @@ end
 function Inventory.RemoveItem(entityId, slotIndex)
 end
 
+---Synchronously consumes (removes and destroys) a single item with the given template ID from the entity's inventory. Returns true if an item was found and removed, false otherwise.
+---@param entityId integer Entity ID.
+---@param templateId integer Item template entity ID.
+---@return boolean consumed true if an item was consumed, false otherwise.
+function Inventory.ConsumeItem(entityId, templateId)
+end
+
+---Synchronously consumes the requested quantity of items with the given template ID from the entity's inventory. Returns true if the required quantity was available and removed, false otherwise. When false is returned, no items are changed.
+---@param entityId integer Entity ID.
+---@param templateId integer Item template entity ID.
+---@param quantity integer Required quantity.
+---@return boolean consumed true if the quantity was consumed, false otherwise.
+function Inventory.ConsumeItemQuantity(entityId, templateId, quantity)
+end
+
 -------------------
 
 --

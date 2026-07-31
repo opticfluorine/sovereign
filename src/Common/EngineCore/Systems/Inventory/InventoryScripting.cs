@@ -36,7 +36,8 @@ public sealed class InventoryScripting(
     IInventoryServices services,
     SlotIndexer slotIndexer,
     ParentComponentCollection parents,
-    EntityTypeComponentCollection entityTypes)
+    EntityTypeComponentCollection entityTypes,
+    InventoryManager manager)
 {
     [ScriptableFunction("PickUp")]
     public void PickUp(ulong entityId, ulong itemEntityId)
@@ -145,5 +146,35 @@ public sealed class InventoryScripting(
 
         parents.AddOrUpdateComponent(itemId, slotId);
         return true;
+    }
+
+    /// <summary>
+    ///     Synchronously consumes (removes) a single item with the given template
+    ///     ID from the entity's inventory. The operation is atomic within the
+    ///     current tick: if an item is claimed by this call it is locked for the
+    ///     rest of the tick.
+    /// </summary>
+    /// <param name="entityId">Entity ID whose inventory to search.</param>
+    /// <param name="templateId">Item template entity ID.</param>
+    /// <returns>true if an item was found and removed; false otherwise.</returns>
+    [ScriptableFunction("ConsumeItem")]
+    public bool ConsumeItem(ulong entityId, ulong templateId)
+    {
+        return manager.TryConsumeItem(entityId, templateId);
+    }
+
+    /// <summary>
+    ///     Synchronously consumes the requested quantity of items with the given
+    ///     template ID from the entity's inventory. The operation is atomic within
+    ///     the current tick: if insufficient items are present, nothing is changed.
+    /// </summary>
+    /// <param name="entityId">Entity ID whose inventory to search.</param>
+    /// <param name="templateId">Item template entity ID.</param>
+    /// <param name="quantity">Required quantity (must be at least 1).</param>
+    /// <returns>true if the requested quantity was removed; false if insufficient.</returns>
+    [ScriptableFunction("ConsumeItemQuantity")]
+    public bool ConsumeItemQuantity(ulong entityId, ulong templateId, uint quantity)
+    {
+        return manager.TryConsumeQuantity(entityId, templateId, quantity);
     }
 }

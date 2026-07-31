@@ -21,7 +21,7 @@ local Entity = require('Sovereign.Entity')
 local ErrorMessages = require('Sovereign.ErrorMessages')
 
 --- Minimum fuzyz match similarity for offering a "did you mean" suggestion.
-local MinSimilarity = 0.7
+local MinSimilarity = 0.4
 
 --- Usage help text.
 local ItemGiveUsage = "Usage: /itemgive <player>, <item>, [quantity]"
@@ -103,7 +103,9 @@ local function ItemGive(args, playerId)
 
     -- Create a new item entity from the resolved template.
     local itemId = nil
+    local hasQty = false
     if quantity ~= nil and Components.Stackable.Exists(templateId) then
+        hasQty = true
         itemId = Entities.Create({ Template = templateId, Quantity = quantity })
     else
         itemId = Entities.Create({ Template = templateId })
@@ -111,8 +113,8 @@ local function ItemGive(args, playerId)
 
     if not itemId then
         Util.LogError(string.format(
-            "ItemGive: failed to create item from template %X for issuer %X.",
-            templateId, playerId))
+            "/itemgive: failed to create item from template %X for issuer %s.",
+            templateId, issuer.Components.Name))
         issuer:SendSystemMessage(ErrorMessages.ItemNotFound)
         return
     end
@@ -122,6 +124,12 @@ local function ItemGive(args, playerId)
         issuer:SendSystemMessage(ErrorMessages.NoFreeSlot)
         Entities.Remove(itemId)
         return
+    end
+    
+    if hasQty then
+        issuer:SendSystemMessage(string.format("Gave %s %d %s.", playerMatch.Name, quantity, itemMatch.Name))
+    else
+        issuer:SendSystemMessage(string.format("Gave %s %s.", playerMatch.Name, itemMatch.Name))
     end
 end
 

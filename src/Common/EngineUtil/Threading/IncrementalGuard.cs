@@ -29,7 +29,7 @@ public sealed class IncrementalGuard
     /// <summary>
     ///     Object used for internal locking.
     /// </summary>
-    private readonly object innerLock = new();
+    private readonly Lock innerLock = new();
 
     /// <summary>
     ///     Number of active weak locks.
@@ -85,7 +85,7 @@ public sealed class IncrementalGuard
     /// </summary>
     private void TakeStrongLock()
     {
-        Monitor.Enter(innerLock);
+        innerLock.Enter();
         SpinWait.SpinUntil(CanTakeStrongLock);
     }
 
@@ -103,7 +103,7 @@ public sealed class IncrementalGuard
     /// </summary>
     private void ReleaseStrongLock()
     {
-        Monitor.Exit(innerLock);
+        innerLock.Exit();
     }
 
     /// <summary>
