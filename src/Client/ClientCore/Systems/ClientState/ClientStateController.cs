@@ -97,6 +97,18 @@ public class ClientStateController(HighlightManager highlightManager)
     }
 
     /// <summary>
+    ///     Sets the entity ID of the secondary inventory. Use 0 to clear.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID of the entity whose inventory to display, or 0 to clear.</param>
+    public void SetSecondaryInventoryEntity(IEventSender eventSender, ulong entityId)
+    {
+        var details = new EntityEventDetails { EntityId = entityId };
+        var ev = new Event(EventId.Client_State_SetSecondaryInventoryEntity, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
     ///     Synchronously clears any block highlights.
     /// </summary>
     public void ClearBlockHighlights()

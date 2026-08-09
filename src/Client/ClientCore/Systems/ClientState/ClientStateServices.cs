@@ -110,6 +110,16 @@ public sealed class ClientStateServices(
     }
 
     /// <summary>
+    ///     Gets the entity ID of the secondary inventory, if any.
+    /// </summary>
+    /// <param name="entityId">Entity ID. Only meaningful if method returns true.</param>
+    /// <returns>true if a secondary inventory is set, false otherwise.</returns>
+    public bool TryGetSecondaryInventoryEntity(out ulong entityId)
+    {
+        return inventoryStateManager.TryGetSecondaryEntityId(out entityId);
+    }
+
+    /// <summary>
     ///     Copies the block highlight set into a destination buffer. The buffer is not cleared before copy.
     /// </summary>
     /// <param name="destination">Destination buffer.</param>

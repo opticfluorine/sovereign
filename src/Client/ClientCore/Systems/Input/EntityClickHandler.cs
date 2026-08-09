@@ -32,6 +32,7 @@ public sealed class EntityClickHandler(
     IInventoryServices inventoryServices,
     ClientStateServices clientStateServices,
     IInventoryController inventoryController,
+    ClientStateController stateController,
     IEventSender eventSender)
 {
     /// <summary>
@@ -47,6 +48,27 @@ public sealed class EntityClickHandler(
         {
             case EntityType.Item:
                 OnItemClicked(entityId, button);
+                break;
+
+            case EntityType.Npc:
+                OnNpcClicked(entityId, button);
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Called when an NPC is clicked.
+    /// </summary>
+    /// <param name="npcId">NPC entity ID.</param>
+    /// <param name="button">Mouse button.</param>
+    private void OnNpcClicked(ulong npcId, MouseButton button)
+    {
+        switch (button)
+        {
+            case MouseButton.Right:
+                // Right-clicking an NPC with an inventory opens its inventory in the secondary window.
+                if (inventoryServices.GetSlotCount(npcId) > 0)
+                    stateController.SetSecondaryInventoryEntity(eventSender, npcId);
                 break;
         }
     }

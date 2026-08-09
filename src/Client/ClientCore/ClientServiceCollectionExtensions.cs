@@ -229,6 +229,8 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<NetworkDebugGui>();
         services.TryAddSingleton<DialogueGui>();
         services.TryAddSingleton<InventoryGui>();
+        services.TryAddSingleton<InventoryGridRenderer>();
+        services.TryAddSingleton<SecondaryInventoryGui>();
         services.TryAddSingleton<ItemContextGui>();
         services.TryAddSingleton<RendererDebugGui>();
         services.TryAddSingleton<HotbarGui>();

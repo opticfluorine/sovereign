@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using System.Numerics;
 using Hexa.NET.ImGui;
 using Microsoft.Extensions.Options;
@@ -23,7 +22,6 @@ using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
@@ -33,201 +31,109 @@ using Sovereign.EngineCore.Timing;
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Inventory;
 
 /// <summary>
-///     Root class of the inventory GUI.
+///     Root class of the inventory GUI for the current player.
 /// </summary>
 public sealed class InventoryGui(
-    SlotIndexer slotIndexer,
     ClientStateServices stateServices,
-    EntityHierarchyIndexer hierarchyIndexer,
     GuiExtensions guiExtensions,
     AnimatedSpriteComponentCollection animatedSprites,
     GuiFontAtlas fontAtlas,
     IEventSender eventSender,
     IInventoryController inventoryController,
-    NameComponentCollection names,
     ClientStateController stateController,
-    StackableTagCollection stackable,
     ISystemTimer systemTimer,
     EntityTable entityTable,
     IInventoryServices inventoryServices,
-    IOptions<ClientInventoryOptions> options)
+    IOptions<ClientInventoryOptions> options,
+    InventoryGridRenderer gridRenderer)
 {
-    private const int GridWidthItems = 10;
-    private const float QuickSlotLabelOffset = 1.5f;
-    private const uint CellBorderColor = 0xff997777;
-    private readonly GuiLabelCache gridLabels = new("invg");
-    private readonly SparseGuiLabelCache quantityLabels = new("");
-
-    private readonly List<string> quickSlotLabels = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
-    private readonly List<ulong> slotList = new(128);
     private ulong autoClickNextTime;
-
-    private Vector2 itemSize = Vector2.Zero;
 
     /// <summary>
     ///     Renders the inventory GUI.
     /// </summary>
     public void Render()
     {
-        itemSize = guiExtensions.WorldUnitsToPixels(Vector2.One);
-
         if (!stateServices.TryGetSelectedPlayer(out var playerId)) return;
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0.0f, 0.025f * itemSize.X));
-        ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, 0.025f * itemSize);
-        if (ImGui.Begin("Inventory", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse))
-        {
-            slotList.Clear();
-            slotIndexer.GetSlotsForEntity(playerId, slotList);
+        var itemSize = guiExtensions.WorldUnitsToPixels(Vector2.One);
 
-            var hasSelection =
-                stateServices.TryGetSelectedInventorySlot(out var selectedSlotIndex, out var selectedQty);
-            if (hasSelection &&
-                hierarchyIndexer.TryGetFirstDirectChild(slotList[selectedSlotIndex], out var selectedItemId) &&
-                animatedSprites.TryGetValue(selectedItemId, out var selectedSpriteId))
+        var hasSelection =
+            stateServices.TryGetSelectedInventorySlot(out var selectedSlotIndex, out var selectedQty);
+        if (hasSelection)
+        {
+            // Show the selected item being dragged at the mouse position.
+            var selectedItemId = inventoryServices.GetItem(playerId, selectedSlotIndex);
+            if (selectedItemId != 0 && animatedSprites.TryGetValue(selectedItemId, out var selectedSpriteId))
             {
-                // Show the selected item being dragged at the mouse position.
                 guiExtensions.AnimatedSpriteForeground(selectedSpriteId, Orientation.South, AnimationPhase.Default,
                     ImGui.GetMousePos());
                 if (selectedQty > 1)
                 {
                     ImGui.PushFont(fontAtlas.BoldItemLabelFont);
-                    var labelSize = ImGui.CalcTextSize(quantityLabels[selectedQty]);
+                    var quantityLabel = selectedQty.ToString();
+                    var labelSize = ImGui.CalcTextSize(quantityLabel);
                     ImGui.GetForegroundDrawList().AddText(
-                        ImGui.GetMousePos() + new Vector2(itemSize.X - QuickSlotLabelOffset * labelSize.X,
+                        ImGui.GetMousePos() + new Vector2(
+                            itemSize.X - InventoryGridRenderer.LabelOffset * labelSize.X,
                             itemSize.Y - labelSize.Y),
-                        0xffffffff, quantityLabels[selectedQty]);
+                        0xffffffff, quantityLabel);
                     ImGui.PopFont();
                 }
             }
+        }
 
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0.0f, 0.025f * itemSize.X));
+        if (ImGui.Begin("Inventory", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse))
+        {
             ImGui.Indent(0.1f * itemSize.X);
-            if (ImGui.BeginTable("invGrid", GridWidthItems,
-                    ImGuiTableFlags.SizingFixedSame |
-                    ImGuiTableFlags.NoHostExtendX |
-                    ImGuiTableFlags.NoPadOuterX))
-            {
-                for (var i = 0; i < slotList.Count; ++i)
+            gridRenderer.RenderGrid(playerId, "invGrid", OnCellRendered,
+                new InventoryGridOptions
                 {
-                    var slotId = slotList[i];
-
-                    ImGui.TableNextColumn();
-                    if (!hierarchyIndexer.TryGetFirstDirectChild(slotId, out var itemId))
-                    {
-                        // Empty slot
-                        RenderEmpty(i, hasSelection, selectedSlotIndex, selectedQty);
-                        continue;
-                    }
-
-                    // Occupied slot - show item.
-                    RenderItem(i, itemId, hasSelection, selectedSlotIndex, selectedQty);
-                }
-
-                ImGui.EndTable();
-            }
+                    SelectedSlotIndex = hasSelection ? selectedSlotIndex : -1,
+                    SelectedQty = selectedQty,
+                    ShowQuickSlotLabels = true
+                });
         }
 
         ImGui.End();
         ImGui.PopStyleVar();
-        ImGui.PopStyleVar();
     }
 
     /// <summary>
-    ///     Renders a held item in its table cell.
+    ///     Handles interactions on a grid cell after it has been rendered.
     /// </summary>
     /// <param name="slotIndex">Slot index.</param>
-    /// <param name="itemId">Item ID.</param>
-    /// <param name="isAnySelected">Whether any item is actively selected.</param>
-    /// <param name="selectedSlotIndex">Actively selected slot index. Only meaningful if isAnySelected is true.</param>
-    /// <param name="selectedQty">Quantity of selection. Only meaningful if isAnySelected is true.</param>
-    private void RenderItem(int slotIndex, ulong itemId, bool isAnySelected, int selectedSlotIndex, uint selectedQty)
+    /// <param name="itemId">Item entity ID, or 0 if the slot is empty.</param>
+    /// <param name="isOccupied">true if the slot contains an item, false otherwise.</param>
+    private void OnCellRendered(int slotIndex, ulong itemId, bool isOccupied)
     {
         if (!stateServices.TryGetSelectedPlayer(out var playerId)) return;
-        var isSelected = isAnySelected && selectedSlotIndex == slotIndex;
-        var startPosLocal = ImGui.GetCursorPos();
-        var startPosGlobal = ImGui.GetCursorScreenPos();
-        var quantity = inventoryServices.GetQuantity(playerId, slotIndex);
+        var hasSelection = stateServices.TryGetSelectedInventorySlot(out var selectedSlotIndex, out var selectedQty);
 
-        // If the item has a sprite and isn't actively selected, draw it in its grid cell.
-        // Otherwise, if it's selected, it will be floating with the mouse cursor.
-        // Always blank if there is no sprite to draw.
-        if ((!isSelected || selectedQty < quantity) && animatedSprites.TryGetValue(itemId, out var spriteId))
+        if (isOccupied)
         {
-            DrawStyledSlot(startPosGlobal);
-            guiExtensions.AnimatedSprite(spriteId, Orientation.South, AnimationPhase.Default, itemSize);
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                OnLeftClickItem(playerId, slotIndex, hasSelection, selectedSlotIndex, selectedQty);
+            else if (ImGui.IsItemHovered() && ImGui.IsMouseDown(ImGuiMouseButton.Right))
+                OnRightClickItem(playerId, slotIndex);
         }
         else
         {
-            DrawBlank(gridLabels[slotIndex], startPosGlobal);
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                OnLeftClickEmpty(playerId, slotIndex, hasSelection, selectedSlotIndex, selectedQty);
         }
-
-        // Handle interactions.
-        if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-            OnLeftClickItem(slotIndex, isAnySelected, selectedSlotIndex, selectedQty);
-        else if (ImGui.IsItemHovered() && ImGui.IsMouseDown(ImGuiMouseButton.Right))
-            OnRightClickItem(slotIndex);
-
-        // Show tooltip if hovered.
-        if (ImGui.IsItemHovered()) ShowItemTooltip(itemId);
-
-        // If this is the first row of the inventory...
-        if (slotIndex / GridWidthItems == 0)
-            // ...then draw the quickslot label at top right.
-            DrawQuickSlotLabel(slotIndex, startPosLocal);
-
-        // Draw quantity label for stackable items.
-        if (stackable.HasTagForEntity(itemId)) DrawQuantityLabel(slotIndex, startPosLocal, isSelected, selectedQty);
-    }
-
-    /// <summary>
-    ///     Draws a quantity label.
-    /// </summary>
-    /// <param name="slotIndex">Slot index.</param>
-    /// <param name="startPos">Position of top-left corner of inventory grid cell.</param>
-    /// <param name="isSelected">Whether the item is selected.</param>
-    /// <param name="selectedQty">If selected, the selected quantity.</param>
-    private void DrawQuantityLabel(int slotIndex, Vector2 startPos, bool isSelected, uint selectedQty)
-    {
-        if (!stateServices.TryGetSelectedPlayer(out var playerId)) return;
-        var quantity = inventoryServices.GetQuantity(playerId, slotIndex);
-        var labelQty = isSelected ? quantity - selectedQty : quantity;
-        if (labelQty < 2) return;
-        var label = quantityLabels[labelQty];
-
-        ImGui.PushFont(fontAtlas.BoldItemLabelFont);
-        var labelSize = ImGui.CalcTextSize(label);
-        ImGui.SetCursorPos(new Vector2(startPos.X + itemSize.X - QuickSlotLabelOffset * labelSize.X,
-            startPos.Y + itemSize.Y - labelSize.Y));
-        ImGui.Text(label);
-        ImGui.PopFont();
-    }
-
-    /// <summary>
-    ///     Draws a quickslot label.
-    /// </summary>
-    /// <param name="slotIndex">Slot index.</param>
-    /// <param name="startPos">Position of top-left corner of inventory grid cell.</param>
-    private void DrawQuickSlotLabel(int slotIndex, Vector2 startPos)
-    {
-        ImGui.PushFont(fontAtlas.ItemLabelFont);
-        var label = quickSlotLabels[slotIndex];
-        var labelSize = ImGui.CalcTextSize(label);
-
-        ImGui.SetCursorPos(startPos with { X = startPos.X + itemSize.X - QuickSlotLabelOffset * labelSize.X });
-        ImGui.Text(label);
-        ImGui.PopFont();
     }
 
     /// <summary>
     ///     Called when an item is left-clicked in the inventory.
     /// </summary>
+    /// <param name="playerId">Player entity ID.</param>
     /// <param name="slotIndex">Slot index.</param>
     /// <param name="isAnySelected">Whether any item is actively selected.</param>
-    /// <param name="selectedSlotIndex">Currently selected slot index. Only meaningful if isAnySelected is true.</param>
+    /// <param name="selectedSlotIndex">Actively selected slot index. Only meaningful if isAnySelected is true.</param>
     /// <param name="selectedQty">Selected quantity. Only meaningful if isAnySelected is true.</param>
-    private void OnLeftClickItem(int slotIndex, bool isAnySelected, int selectedSlotIndex, uint selectedQty)
+    private void OnLeftClickItem(ulong playerId, int slotIndex, bool isAnySelected, int selectedSlotIndex, uint selectedQty)
     {
-        if (!stateServices.TryGetSelectedPlayer(out var playerId)) return;
-
         var isSelected = isAnySelected && slotIndex == selectedSlotIndex;
         if (isAnySelected)
         {
@@ -243,10 +149,10 @@ public sealed class InventoryGui(
     /// <summary>
     ///     Called when an item is right-clicked in the inventory.
     /// </summary>
+    /// <param name="playerId">Player entity ID.</param>
     /// <param name="slotIndex">Slot index.</param>
-    private void OnRightClickItem(int slotIndex)
+    private void OnRightClickItem(ulong playerId, int slotIndex)
     {
-        if (!stateServices.TryGetSelectedPlayer(out var playerId)) return;
         var itemId = inventoryServices.GetItem(playerId, slotIndex);
         if (itemId == 0) return;
 
@@ -298,68 +204,18 @@ public sealed class InventoryGui(
     }
 
     /// <summary>
-    ///     Shows a tooltip for a hovered item.
-    /// </summary>
-    /// <param name="itemId">Item entity ID.</param>
-    private void ShowItemTooltip(ulong itemId)
-    {
-        ImGui.BeginTooltip();
-        ImGui.Text(names.TryGetValue(itemId, out var name) ? name : "[no name]");
-        ImGui.EndTooltip();
-    }
-
-    /// <summary>
-    ///     Renders an empty item slot.
-    /// </summary>
-    /// <param name="slotIndex">Slot index.</param>
-    /// <param name="isAnySelected">Whether any item is actively selected.</param>
-    /// <param name="selectedSlotIndex">Actively selected slot index. Only meaningful if isAnySelected is true.</param>
-    /// <param name="selectedQty">If selected, the selected quantity.</param>
-    private void RenderEmpty(int slotIndex, bool isAnySelected, int selectedSlotIndex, uint selectedQty)
-    {
-        var startPosLocal = ImGui.GetCursorPos();
-        var startPosGlobal = ImGui.GetCursorScreenPos();
-        DrawBlank(gridLabels[slotIndex], startPosGlobal);
-        if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-            OnLeftClickEmpty(slotIndex, isAnySelected, selectedSlotIndex, selectedQty);
-
-        if (slotIndex / GridWidthItems == 0) DrawQuickSlotLabel(slotIndex, startPosLocal);
-    }
-
-    /// <summary>
     ///     Called when an empty item slot is left-clicked.
     /// </summary>
+    /// <param name="playerId">Player entity ID.</param>
     /// <param name="slotIndex">Slot index.</param>
     /// <param name="isAnySelected">Whether any item is actively selected.</param>
     /// <param name="selectedSlotIndex">Actively selected slot index. Only meaningful if isAnySelected is true.</param>
     /// <param name="selectedQty">Selected quantity.</param>
-    private void OnLeftClickEmpty(int slotIndex, bool isAnySelected, int selectedSlotIndex, uint selectedQty)
+    private void OnLeftClickEmpty(ulong playerId, int slotIndex, bool isAnySelected, int selectedSlotIndex, uint selectedQty)
     {
-        if (!isAnySelected || !stateServices.TryGetSelectedPlayer(out var playerId)) return;
+        if (!isAnySelected) return;
 
         inventoryController.Swap(eventSender, playerId, selectedSlotIndex, slotIndex, selectedQty);
         stateController.DeselectItem(eventSender);
-    }
-
-    /// <summary>
-    ///     Draws a blank item slot (draw only, no behavior).
-    /// </summary>
-    /// <param name="id">Unique ID for grid cell.</param>
-    /// <param name="startPosGlobal">Start position of cell.</param>
-    private void DrawBlank(string id, Vector2 startPosGlobal)
-    {
-        ImGui.InvisibleButton(id, itemSize + new Vector2(4.0f));
-        DrawStyledSlot(startPosGlobal);
-    }
-
-    /// <summary>
-    ///     Draws the styled box for an inventory slot.
-    /// </summary>
-    /// <param name="startPosGlobal">Start position of cell.</param>
-    private void DrawStyledSlot(Vector2 startPosGlobal)
-    {
-        var drawList = ImGui.GetWindowDrawList();
-        drawList.AddRect(startPosGlobal, startPosGlobal + itemSize + new Vector2(2.0f),
-            CellBorderColor, ImDrawFlags.Closed, 2.0f);
     }
 }

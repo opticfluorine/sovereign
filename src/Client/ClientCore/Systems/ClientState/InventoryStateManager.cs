@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Systems.Inventory;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Inventory;
 
 namespace Sovereign.ClientCore.Systems.ClientState;
@@ -23,15 +25,32 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 /// <summary>
 ///     Manages state of inventory GUI actions.
 /// </summary>
-public sealed class InventoryStateManager(
-    ILogger<InventoryStateManager> logger,
-    IInventoryServices inventoryServices,
-    PlayerStateManager playerState)
+public sealed class InventoryStateManager : IDisposable
 {
     private const int NoneSelected = -1;
+    private readonly EntityTable entityTable;
+    private readonly IInventoryServices inventoryServices;
+    private readonly ILogger<InventoryStateManager> logger;
+    private readonly PlayerStateManager playerState;
     private int hotbarSelectedIndex;
+    private ulong secondaryEntityId;
     private uint selectedQuantity;
     private int selectedSlotIndex = NoneSelected;
+
+    public InventoryStateManager(ILogger<InventoryStateManager> logger,
+        IInventoryServices inventoryServices, PlayerStateManager playerState, EntityTable entityTable)
+    {
+        this.logger = logger;
+        this.inventoryServices = inventoryServices;
+        this.playerState = playerState;
+        this.entityTable = entityTable;
+        entityTable.OnEntityRemoved += OnEntityRemoved;
+    }
+
+    public void Dispose()
+    {
+        entityTable.OnEntityRemoved -= OnEntityRemoved;
+    }
 
     /// <summary>
     ///     Selects an item for GUI operations.
@@ -103,5 +122,36 @@ public sealed class InventoryStateManager(
         }
 
         hotbarSelectedIndex = slotIndex;
+    }
+
+    /// <summary>
+    ///     Sets the entity ID of the secondary inventory. Use 0 to clear.
+    /// </summary>
+    /// <param name="entityId">Entity ID of the entity whose inventory is shown, or 0 to clear.</param>
+    public void SetSecondaryEntityId(ulong entityId)
+    {
+        secondaryEntityId = entityId;
+    }
+
+    /// <summary>
+    ///     Gets the entity ID of the secondary inventory, if any.
+    /// </summary>
+    /// <param name="entityId">Entity ID. Only meaningful if method returns true.</param>
+    /// <returns>true if a secondary inventory is set, false otherwise.</returns>
+    public bool TryGetSecondaryEntityId(out ulong entityId)
+    {
+        entityId = secondaryEntityId;
+        return secondaryEntityId != 0;
+    }
+
+    /// <summary>
+    ///     Called when an entity is removed from the entity table. If the removed entity
+    ///     is the current secondary inventory, clears the secondary inventory.
+    /// </summary>
+    /// <param name="entityId">Entity ID of the removed entity.</param>
+    /// <param name="isUnload">true if this is an unload, false otherwise.</param>
+    private void OnEntityRemoved(ulong entityId, bool isUnload)
+    {
+        if (entityId == secondaryEntityId) secondaryEntityId = 0;
     }
 }

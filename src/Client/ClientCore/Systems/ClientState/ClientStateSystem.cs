@@ -69,6 +69,7 @@ public class ClientStateSystem : ISystem
         EventId.Client_State_SetMainMenuState,
         EventId.Client_State_SelectItem,
         EventId.Client_State_SelectHotbarItem,
+        EventId.Client_State_SetSecondaryInventoryEntity,
         EventId.Client_Network_BeginConnection,
         EventId.Client_Network_PlayerEntitySelected,
         EventId.Core_WorldManagement_Subscribe,
@@ -183,6 +184,18 @@ public class ClientStateSystem : ISystem
 
                     var slotIndex = (int)details.Value;
                     inventoryStateManager.SelectHotbar(slotIndex);
+                    break;
+                }
+
+                case EventId.Client_State_SetSecondaryInventoryEntity:
+                {
+                    if (ev.EventDetails is not EntityEventDetails details)
+                    {
+                        logger.LogError("Received SetSecondaryInventoryEntity event without details.");
+                        break;
+                    }
+
+                    inventoryStateManager.SetSecondaryEntityId(details.EntityId);
                     break;
                 }
             }

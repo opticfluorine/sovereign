@@ -39,6 +39,7 @@ public class GameGui(
     OverlayGui overlayGui,
     DialogueGui dialogueGui,
     InventoryGui inventoryGui,
+    SecondaryInventoryGui secondaryInventoryGui,
     ItemContextGui itemContextGui,
     HotbarGui hotbarGui)
 {
@@ -54,6 +55,7 @@ public class GameGui(
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowInGameMenu)) menuGui.Render();
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowChat)) chatGui.Render();
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowInventory)) inventoryGui.Render();
+        secondaryInventoryGui.Render();
 
         overlayGui.Render(renderPlan);
         hotbarGui.Render();

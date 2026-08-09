@@ -531,6 +531,12 @@ public enum EventId
     /// Associated details: IntEventDetails (value is slot index).
     Client_State_SelectHotbarItem = 100403,
 
+    /// <summary>
+    ///     Event sent to set the secondary inventory entity ID. Use 0 to clear.
+    /// </summary>
+    /// Associated details: EntityEventDetails (value is entity ID of the secondary inventory, 0 to clear).
+    Client_State_SetSecondaryInventoryEntity = 100404,
+
     #endregion Client_State
 
     #region Client_WorldEdit
