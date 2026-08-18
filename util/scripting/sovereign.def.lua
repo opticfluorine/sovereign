@@ -805,6 +805,25 @@ end
 function Inventory.Swap(entityId, slotIndex1, slotIndex2)
 end
 
+---Swaps two slots between potentially different inventories, acting on behalf of an actor.
+---@param actorId integer Actor entity ID performing the swap.
+---@param inventoryId1 integer Entity ID of the first inventory.
+---@param slotIndex1 integer First slot index to swap.
+---@param inventoryId2 integer Entity ID of the second inventory.
+---@param slotIndex2 integer Second slot index to swap.
+function Inventory.SwapAsActor(actorId, inventoryId1, slotIndex1, inventoryId2, slotIndex2)
+end
+
+---Swaps a partial quantity between two slots across potentially different inventories, acting on behalf of an actor.
+---@param actorId integer Actor entity ID performing the swap.
+---@param inventoryId1 integer Entity ID of the first inventory.
+---@param slotIndex1 integer First slot index to swap.
+---@param inventoryId2 integer Entity ID of the second inventory.
+---@param slotIndex2 integer Second slot index to swap.
+---@param quantity integer Quantity to transfer from the first slot.
+function Inventory.SwapQuantityAsActor(actorId, inventoryId1, slotIndex1, inventoryId2, slotIndex2, quantity)
+end
+
 ---Removes the item in an inventory slot, destroying the item entity.
 ---@param entityId integer Entity ID.
 ---@param slotIndex integer Slot index of the item to remove.

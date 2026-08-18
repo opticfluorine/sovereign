@@ -127,8 +127,8 @@ internal sealed class InventorySystem : ISystem
                         break;
                     }
 
-                    manager.SwapItemsAsPlayer(ev.FromPlayerId, details.OwnerId, details.FromSlotIndex,
-                        details.ToSlotIndex, details.Quantity);
+                    manager.SwapItemsAsPlayer(details.ActorId, details.FirstInventoryEntityId, details.FirstSlotIndex,
+                        details.SecondInventoryEntityId, details.SecondSlotIndex, details.Quantity);
                     break;
                 }
 

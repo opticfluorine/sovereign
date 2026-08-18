@@ -65,13 +65,25 @@ public sealed class InventoryScripting(
     [ScriptableFunction("Swap")]
     public void Swap(ulong entityId, int slotIndex1, int slotIndex2)
     {
-        controller.Swap(eventSender, entityId, slotIndex1 - 1, slotIndex2 - 1);
+        controller.Swap(eventSender, entityId, entityId, slotIndex1 - 1, entityId, slotIndex2 - 1);
     }
 
     [ScriptableFunction("SwapQuantity")]
     public void SwapQuantity(ulong entityId, int slotIndex1, int slotIndex2, uint quantity)
     {
-        controller.Swap(eventSender, entityId, slotIndex1 - 1, slotIndex2 - 1, quantity);
+        controller.Swap(eventSender, entityId, entityId, slotIndex1 - 1, entityId, slotIndex2 - 1, quantity);
+    }
+
+    [ScriptableFunction("SwapAsActor")]
+    public void SwapAsActor(ulong actorId, ulong inventoryId1, int slotIndex1, ulong inventoryId2, int slotIndex2)
+    {
+        controller.Swap(eventSender, actorId, inventoryId1, slotIndex1 - 1, inventoryId2, slotIndex2 - 1);
+    }
+
+    [ScriptableFunction("SwapQuantityAsActor")]
+    public void SwapQuantityAsActor(ulong actorId, ulong inventoryId1, int slotIndex1, ulong inventoryId2, int slotIndex2, uint quantity)
+    {
+        controller.Swap(eventSender, actorId, inventoryId1, slotIndex1 - 1, inventoryId2, slotIndex2 - 1, quantity);
     }
 
     [ScriptableFunction("RemoveItem")]

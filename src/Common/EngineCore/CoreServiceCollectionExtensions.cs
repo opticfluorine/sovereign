@@ -286,6 +286,7 @@ public static class CoreServiceCollectionExtensions
     private static void AddInventorySystem(IServiceCollection services)
     {
         services.TryAddSingleton<InventoryManager>();
+        services.TryAddSingleton<InventoryPermissionService>();
         services.TryAddSingleton<IInventoryController, InventoryController>();
         services.TryAddSingleton<IInventoryServices, InventoryServices>();
         services.TryAddSingleton<InventoryScripting>();

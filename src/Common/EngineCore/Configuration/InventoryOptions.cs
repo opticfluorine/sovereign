@@ -29,7 +29,13 @@ public sealed class InventoryOptions
     /// <summary>
     ///     Maximum allowed distance in world units between player and item when dropping an item.
     /// </summary>
-    public float MaxDropDistance { get; set; } = 4.0f;
+    public float MaxDropDistance { get; set; } = 5.0f;
+
+    /// <summary>
+    ///     Maximum allowed distance in world units between an actor and an inventory
+    ///     that the actor does not own when the actor accesses it (e.g. to swap items).
+    /// </summary>
+    public float MaxAccessedInventoryDistance { get; set; } = 5.0f;
 
     /// <summary>
     ///     Default number of inventory slots for new players.

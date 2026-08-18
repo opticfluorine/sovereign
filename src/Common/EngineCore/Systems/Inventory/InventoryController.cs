@@ -52,14 +52,18 @@ public interface IInventoryController
     void Drop(IEventSender eventSender, ulong entityId, int slotIndex, Vector3 position, uint quantity = 0);
 
     /// <summary>
-    ///     Swaps the contents of two inventory slots.
+    ///     Swaps part or all of the contents of two inventory slots, which may belong to
+    ///     different inventories, on behalf of an actor.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
-    /// <param name="entityId">Entity ID that will swap the items.</param>
-    /// <param name="firstSlotIdx">First slot index.</param>
-    /// <param name="secondSlotIdx">Second slot index.</param>
-    /// <param name="quantity">Quantity to move from first slot to second. 0 specifies the full stack.</param>
-    void Swap(IEventSender eventSender, ulong entityId, int firstSlotIdx, int secondSlotIdx, uint quantity = 0);
+    /// <param name="actorEntityId">Entity ID performing the swap.</param>
+    /// <param name="firstInvEntityId">Entity ID that owns the inventory containing the source slot.</param>
+    /// <param name="firstSlotIdx">Source slot index.</param>
+    /// <param name="secondInvEntityId">Entity ID that owns the inventory containing the destination slot.</param>
+    /// <param name="secondSlotIdx">Destination slot index.</param>
+    /// <param name="quantity">Quantity to move from source to destination. 0 specifies the full stack.</param>
+    void Swap(IEventSender eventSender, ulong actorEntityId, ulong firstInvEntityId, int firstSlotIdx,
+        ulong secondInvEntityId, int secondSlotIdx, uint quantity = 0);
 
     /// <summary>
     ///     Removes the item in an inventory slot.
@@ -118,13 +122,16 @@ internal class InventoryController : IInventoryController
         eventSender.SendEvent(ev);
     }
 
-    public void Swap(IEventSender eventSender, ulong entityId, int firstSlotIdx, int secondSlotIdx, uint quantity)
+    public void Swap(IEventSender eventSender, ulong actorEntityId, ulong firstInvEntityId, int firstSlotIdx,
+        ulong secondInvEntityId, int secondSlotIdx, uint quantity)
     {
         var details = new InventorySwapEventDetails
         {
-            OwnerId = entityId,
-            FromSlotIndex = firstSlotIdx,
-            ToSlotIndex = secondSlotIdx,
+            ActorId = actorEntityId,
+            FirstInventoryEntityId = firstInvEntityId,
+            FirstSlotIndex = firstSlotIdx,
+            SecondInventoryEntityId = secondInvEntityId,
+            SecondSlotIndex = secondSlotIdx,
             Quantity = quantity
         };
         var ev = new Event(EventId.Core_Inventory_Swap, details)
@@ -133,7 +140,7 @@ internal class InventoryController : IInventoryController
             // validation (e.g. if a server script requests a swap). When replicated over the network, this value
             // is updated to the player who requested the swap, and so the server will perform full validation of
             // whether the player is able to modify the inventory as requested.
-            FromPlayerId = entityId
+            FromPlayerId = actorEntityId
         };
         eventSender.SendEvent(ev);
     }

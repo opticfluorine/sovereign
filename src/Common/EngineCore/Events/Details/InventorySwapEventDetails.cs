@@ -22,26 +22,38 @@ namespace Sovereign.EngineCore.Events.Details;
 public class InventorySwapEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Entity ID that owns the inventory.
+    ///     Entity ID that performs the swap.
+    /// </summary>
+    [IgnoreMember]
+    public ulong ActorId { get; set; }
+
+    /// <summary>
+    ///     Entity ID that owns the inventory containing the source slot.
     /// </summary>
     [Key(0)]
-    public ulong OwnerId { get; set; }
+    public ulong FirstInventoryEntityId { get; set; }
 
     /// <summary>
-    ///     Slot index to merge items from.
+    ///     Slot index to swap items from.
     /// </summary>
     [Key(1)]
-    public int FromSlotIndex { get; set; }
+    public int FirstSlotIndex { get; set; }
 
     /// <summary>
-    ///     Slot index to move items to.
+    ///     Entity ID that owns the inventory containing the destination slot.
     /// </summary>
     [Key(2)]
-    public int ToSlotIndex { get; set; }
+    public ulong SecondInventoryEntityId { get; set; }
 
     /// <summary>
-    ///     Quantity of items to move from one slot to another.
+    ///     Slot index to swap items to.
     /// </summary>
     [Key(3)]
+    public int SecondSlotIndex { get; set; }
+
+    /// <summary>
+    ///     Quantity of items to move from the source slot to the destination slot.
+    /// </summary>
+    [Key(4)]
     public uint Quantity { get; set; }
 }

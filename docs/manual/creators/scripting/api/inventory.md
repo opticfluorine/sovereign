@@ -331,6 +331,68 @@ Inventory.DropAt(playerId, 2, dropPos)
 Inventory.Swap(playerId, 1, 2)
 ```
 
+## SwapAsActor
+
+### Definition
+
+```{eval-rst}
+.. lua:function:: Inventory.SwapAsActor(actorId, inventoryId1, slotIndex1, inventoryId2, slotIndex2)
+
+   Swaps two slots between potentially different inventories, acting on behalf of an actor. The usual restrictions on the actor (e.g. range to inventory, permissions checks) are applied; if the restrictions are not met, this function will fail silently.
+
+   :param actorId: Actor entity ID performing the swap.
+   :type actorId: integer
+   :param inventoryId1: Entity ID of the first inventory.
+   :type inventoryId1: integer
+   :param slotIndex1: First slot index to swap.
+   :type slotIndex1: integer
+   :param inventoryId2: Entity ID of the second inventory.
+   :type inventoryId2: integer
+   :param slotIndex2: Second slot index to swap.
+   :type slotIndex2: integer
+```
+
+### Example
+
+```{code-block} lua
+:caption: Using ``SwapAsActor`` to swap items between two different inventories.
+:emphasize-lines: 2
+-- Swap the first slot of the player's inventory with the third slot of a chest.
+Inventory.SwapAsActor(playerId, playerId, 1, chestId, 3)
+```
+
+## SwapQuantityAsActor
+
+### Definition
+
+```{eval-rst}
+.. lua:function:: Inventory.SwapQuantityAsActor(actorId, inventoryId1, slotIndex1, inventoryId2, slotIndex2, quantity)
+
+   Swaps a partial quantity between two slots across potentially different inventories, acting on behalf of an actor. The usual restrictions on the actor (e.g. range to inventory, permissions checks) are applied; if the restrictions are not met, this function will fail silently.
+
+   :param actorId: Actor entity ID performing the swap.
+   :type actorId: integer
+   :param inventoryId1: Entity ID of the first inventory.
+   :type inventoryId1: integer
+   :param slotIndex1: First slot index to swap.
+   :type slotIndex1: integer
+   :param inventoryId2: Entity ID of the second inventory.
+   :type inventoryId2: integer
+   :param slotIndex2: Second slot index to swap.
+   :type slotIndex2: integer
+   :param quantity: Quantity to transfer from the first slot.
+   :type quantity: integer
+```
+
+### Example
+
+```{code-block} lua
+:caption: Using ``SwapQuantityAsActor`` to transfer a partial stack between inventories.
+:emphasize-lines: 2
+-- Transfer 5 items from the player's first slot to the chest's second slot.
+Inventory.SwapQuantityAsActor(playerId, playerId, 1, chestId, 2, 5)
+```
+
 ## RemoveItem
 
 ### Definition

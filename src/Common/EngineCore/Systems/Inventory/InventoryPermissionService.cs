@@ -14,14 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Events.Details.Validators;
+namespace Sovereign.EngineCore.Systems.Inventory;
 
-public class InventorySwapEventDetailsValidator : IEventDetailsValidator
+/// <summary>
+///     Determines whether an actor entity is permitted to modify an entity's inventory.
+/// </summary>
+public sealed class InventoryPermissionService
 {
-    public bool IsValid(IEventDetails? details)
+    /// <summary>
+    ///     Determines whether the given actor is permitted to modify the given inventory.
+    /// </summary>
+    /// <param name="actorEntityId">Actor entity ID.</param>
+    /// <param name="inventoryEntityId">Entity ID that owns the inventory.</param>
+    /// <returns>true if the actor may modify the inventory, false otherwise.</returns>
+    public bool CanModify(ulong actorEntityId, ulong inventoryEntityId)
     {
-        return details is InventorySwapEventDetails { FirstSlotIndex: >= 0, SecondSlotIndex: >= 0 } d &&
-               (d.FirstInventoryEntityId != d.SecondInventoryEntityId ||
-                d.FirstSlotIndex != d.SecondSlotIndex);
+        return actorEntityId == inventoryEntityId;
     }
 }

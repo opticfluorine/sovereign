@@ -137,7 +137,7 @@ public sealed class InventoryGui(
         var isSelected = isAnySelected && slotIndex == selectedSlotIndex;
         if (isAnySelected)
         {
-            if (!isSelected) inventoryController.Swap(eventSender, playerId, selectedSlotIndex, slotIndex, selectedQty);
+            if (!isSelected) inventoryController.Swap(eventSender, playerId, playerId, selectedSlotIndex, playerId, slotIndex, selectedQty);
             stateController.DeselectItem(eventSender);
         }
         else
@@ -197,7 +197,7 @@ public sealed class InventoryGui(
         // updating the selection.
         if (curSlotIndex != slotIndex)
         {
-            inventoryController.Swap(eventSender, playerId, curSlotIndex, slotIndex);
+            inventoryController.Swap(eventSender, playerId, playerId, curSlotIndex, playerId, slotIndex);
         }
 
         stateController.SelectItem(eventSender, slotIndex, newQty);
@@ -215,7 +215,7 @@ public sealed class InventoryGui(
     {
         if (!isAnySelected) return;
 
-        inventoryController.Swap(eventSender, playerId, selectedSlotIndex, slotIndex, selectedQty);
+        inventoryController.Swap(eventSender, playerId, playerId, selectedSlotIndex, playerId, slotIndex, selectedQty);
         stateController.DeselectItem(eventSender);
     }
 }

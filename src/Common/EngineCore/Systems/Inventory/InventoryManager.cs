@@ -51,13 +51,18 @@ public sealed class InventoryManager(
     EntityTable entityTable,
     QuantityComponentCollection quantities,
     IEngineConfiguration engineConfiguration,
-    IEventSender eventSender)
+    IEventSender eventSender,
+    InventoryPermissionService permissionService)
 {
     private readonly List<(int slotIndex, ulong itemId, uint qty)> consumeCandidates = new();
     private readonly float maxDropD2 = inventoryOptions.Value.MaxDropDistance * inventoryOptions.Value.MaxDropDistance;
 
     private readonly float maxPickupD2 =
         inventoryOptions.Value.MaxPickupDistance * inventoryOptions.Value.MaxPickupDistance;
+
+    private readonly float maxAccessedInvD2 =
+        inventoryOptions.Value.MaxAccessedInventoryDistance *
+        inventoryOptions.Value.MaxAccessedInventoryDistance;
 
     /// <summary>
     ///     Items modified in some way during the current tick. Used to prevent item duplication exploits and other bugs that
@@ -189,26 +194,37 @@ public sealed class InventoryManager(
     }
 
     /// <summary>
-    ///     Swaps part or all of two slots on behalf of a player, ensuring that the player has the ability to
-    ///     modify the affected inventory.
+    ///     Swaps part or all of two slots, which may belong to different inventories, on behalf of
+    ///     an actor. The actor must be permitted to modify both affected inventories, and any
+    ///     inventory not owned by the actor must be within range of the actor.
     /// </summary>
-    /// <param name="playerId">Player ID taking the action.</param>
-    /// <param name="inventoryId">Entity ID that owns the inventory.</param>
-    /// <param name="firstSlotIdx">First slot index.</param>
-    /// <param name="secondSlotIdx">Second slot index.</param>
-    /// <param name="quantity">Quantity to move from first slot to second; 0 moves the entire stack.</param>
-    public void SwapItemsAsPlayer(ulong playerId, ulong inventoryId, int firstSlotIdx, int secondSlotIdx, uint quantity)
+    /// <param name="actorId">Actor entity ID performing the swap.</param>
+    /// <param name="inventory0Id">Entity ID that owns the inventory containing the source slot.</param>
+    /// <param name="firstSlotIdx">Source slot index.</param>
+    /// <param name="inventory1Id">Entity ID that owns the inventory containing the destination slot.</param>
+    /// <param name="secondSlotIdx">Destination slot index.</param>
+    /// <param name="quantity">Quantity to move from source to destination; 0 moves the entire stack.</param>
+    public void SwapItemsAsPlayer(ulong actorId, ulong inventory0Id, int firstSlotIdx, ulong inventory1Id,
+        int secondSlotIdx, uint quantity)
     {
         lock (mutationLock)
         {
-            if (playerId != inventoryId)
+            if (!permissionService.CanModify(actorId, inventory0Id) ||
+                (inventory0Id != inventory1Id && !permissionService.CanModify(actorId, inventory1Id)))
             {
-                logger.LogWarning("[SECURITY] Player {Player} tried to modify inventory for entity ID {InvId:X}.",
-                    loggingUtil.FormatEntity(playerId), inventoryId);
+                logger.LogWarning("[SECURITY] Player {Actor} tried to modify inventory for entity IDs {Inv0Id:X} and {Inv1Id:X}.",
+                    loggingUtil.FormatEntity(actorId), inventory0Id, inventory1Id);
                 return;
             }
 
-            SwapItems(inventoryId, firstSlotIdx, secondSlotIdx, quantity);
+            // Inventories owned by another entity must be within range of the actor.
+            // Under the current placeholder permission this range check is effectively
+            // a no-op (only the actor's own inventory is accessible). It becomes
+            // meaningful once permission logic permits access to other inventories.
+            if (inventory0Id != actorId && !IsInRangeForInventoryAccess(actorId, inventory0Id)) return;
+            if (inventory1Id != actorId && !IsInRangeForInventoryAccess(actorId, inventory1Id)) return;
+
+            SwapItems(inventory0Id, firstSlotIdx, inventory1Id, secondSlotIdx, quantity);
         }
     }
 
@@ -466,6 +482,32 @@ public sealed class InventoryManager(
     }
 
     /// <summary>
+    ///     Gets the distance squared between player and item in the XY plane.
+    /// </summary>
+    /// <param name="firstEntityId">First entity ID.</param>
+    /// <param name="secondEntityId">Second entity ID.</param>
+    /// <param name="d2">Squared xy distance, or 0 if it could not be computed.</param>
+    /// <returns>true if the distance was computed, false otherwise.</returns>
+    private bool TryGetCenterDistanceSq(ulong firstEntityId, ulong secondEntityId, out float d2)
+    {
+        d2 = 0.0f;
+        if (!kinematics.TryGetValue(firstEntityId, out var firstPosVel) ||
+            !kinematics.TryGetValue(secondEntityId, out var secondPosVel))
+        {
+            return false;
+        }
+
+        var firstPos = boundingBoxes.TryGetValue(firstEntityId, out var firstBox)
+            ? firstBox.Translate(firstPosVel.Position).CenterXy
+            : firstPosVel.Position;
+        var secondPos = boundingBoxes.TryGetValue(secondEntityId, out var secondBox)
+            ? secondBox.Translate(secondPosVel.Position).CenterXy
+            : secondPosVel.Position;
+        d2 = (secondPos - firstPos).LengthSquared();
+        return true;
+    }
+
+    /// <summary>
     ///     Checks if the item is within range for the player to pick up.
     /// </summary>
     /// <param name="playerId">Player ID.</param>
@@ -473,24 +515,32 @@ public sealed class InventoryManager(
     /// <returns>true if in range, false otherwise.</returns>
     private bool IsInRangeForPickup(ulong playerId, ulong itemId)
     {
-        if (!kinematics.TryGetValue(playerId, out var playerPosVel) ||
-            !kinematics.TryGetValue(itemId, out var itemPosVel))
+        if (!TryGetCenterDistanceSq(playerId, itemId, out var d2))
         {
             logger.LogError("{Player} tried to pick up {Item} but positions are missing.",
                 loggingUtil.FormatEntity(playerId), loggingUtil.FormatEntity(itemId));
             return false;
         }
 
-        // Item must be in range of player.
-        var playerPos = boundingBoxes.TryGetValue(playerId, out var playerBox)
-            ? playerBox.Translate(playerPosVel.Position).CenterXy
-            : playerPosVel.Position;
-        var itemPos = boundingBoxes.TryGetValue(itemId, out var itemBox)
-            ? itemBox.Translate(itemPosVel.Position).CenterXy
-            : itemPosVel.Position;
-        var d2 = (itemPos - playerPos).LengthSquared();
-        if (d2 > maxPickupD2) return false;
-        return true;
+        return d2 <= maxPickupD2;
+    }
+
+    /// <summary>
+    ///     Checks if the inventory entity is within range of the actor for access (e.g. a swap).
+    /// </summary>
+    /// <param name="actorId">Actor entity ID.</param>
+    /// <param name="inventoryEntityId">Entity ID that owns the inventory.</param>
+    /// <returns>true if in range, false otherwise.</returns>
+    private bool IsInRangeForInventoryAccess(ulong actorId, ulong inventoryEntityId)
+    {
+        if (!TryGetCenterDistanceSq(actorId, inventoryEntityId, out var d2))
+        {
+            logger.LogError("{Actor} tried to access inventory {Inventory} but positions are missing.",
+                loggingUtil.FormatEntity(actorId), loggingUtil.FormatEntity(inventoryEntityId));
+            return false;
+        }
+
+        return d2 <= maxAccessedInvD2;
     }
 
     /// <summary>
@@ -647,24 +697,25 @@ public sealed class InventoryManager(
     //
 
     /// <summary>
-    ///     Swaps the contents of two inventory slots.
+    ///     Swaps the contents of two inventory slots, which may belong to different inventories.
     /// </summary>
-    /// <param name="inventoryId">Inventory owner ID.</param>
+    /// <param name="inventory0Id">Inventory owner ID of the source slot.</param>
     /// <param name="firstSlotIdx">First slot index.</param>
+    /// <param name="inventory1Id">Inventory owner ID of the destination slot.</param>
     /// <param name="secondSlotIdx">Second slot index.</param>
     /// <param name="quantity">Quantity to move from first slot to second; 0 moves the entire stack.</param>
-    private void SwapItems(ulong inventoryId, int firstSlotIdx, int secondSlotIdx, uint quantity)
+    private void SwapItems(ulong inventory0Id, int firstSlotIdx, ulong inventory1Id, int secondSlotIdx, uint quantity)
     {
-        if (!slotIndexer.TryGetSlotForEntity(inventoryId, firstSlotIdx, out var firstSlotEid) ||
-            !slotIndexer.TryGetSlotForEntity(inventoryId, secondSlotIdx, out var secondSlotEid))
+        if (!slotIndexer.TryGetSlotForEntity(inventory0Id, firstSlotIdx, out var firstSlotEid) ||
+            !slotIndexer.TryGetSlotForEntity(inventory1Id, secondSlotIdx, out var secondSlotEid))
         {
-            logger.LogWarning("Tried to swap invalid slot indices on {Entity} ({Id:X}), ignoring.",
-                loggingUtil.FormatEntity(inventoryId), inventoryId);
+            logger.LogWarning("Tried to swap invalid slot indices on inventories {Inv0Id:X} and {Inv1Id:X}, ignoring.",
+                inventory0Id, inventory1Id);
             return;
         }
 
-        var item0 = GetItem(inventoryId, firstSlotIdx);
-        var item1 = GetItem(inventoryId, secondSlotIdx);
+        var item0 = GetItem(inventory0Id, firstSlotIdx);
+        var item1 = GetItem(inventory1Id, secondSlotIdx);
         if (item0 == 0 || modifiedItems.Contains(item0)) return; // first slot must not be empty
         if (!entityTable.TryGetTemplate(item0, out var template0))
         {
@@ -682,14 +733,16 @@ public sealed class InventoryManager(
 
         if (item1 == 0)
         {
-            SwapToEmpty(item0, qty0, template0, quantity, secondSlotEid, inventoryId, firstSlotIdx, secondSlotIdx);
+            SwapToEmpty(item0, qty0, template0, quantity, secondSlotEid, inventory0Id, inventory1Id, firstSlotIdx,
+                secondSlotIdx);
             return;
         }
 
         // Both slots contain items.
         if (entityTable.TryGetTemplate(item1, out var template1) && template0 == template1)
         {
-            SwapMutuallyStackable(item0, item1, qty0, quantity, inventoryId, firstSlotIdx, secondSlotIdx);
+            SwapMutuallyStackable(item0, item1, qty0, quantity, inventory0Id, inventory1Id, firstSlotIdx,
+                secondSlotIdx);
             return;
         }
 
@@ -697,25 +750,25 @@ public sealed class InventoryManager(
         if (quantity == qty0)
         {
             // Case 2, swap entire stack with non-mutually stackable
-            SwapFullNonMutuallyStackable(item0, item1, firstSlotEid, secondSlotEid, inventoryId, firstSlotIdx,
-                secondSlotIdx);
+            SwapFullNonMutuallyStackable(item0, item1, firstSlotEid, secondSlotEid, inventory0Id, inventory1Id,
+                firstSlotIdx, secondSlotIdx);
             return;
         }
 
         // Finally, if we get here, we have Case 6 and need to move the second item to another empty slot.
-        SwapPartialNonMutuallyStackable(inventoryId, item0, item1, quantity, template0, secondSlotEid,
+        SwapPartialNonMutuallyStackable(inventory0Id, inventory1Id, item0, item1, quantity, template0, secondSlotEid,
             qty0, firstSlotIdx, secondSlotIdx);
     }
 
     private void SwapToEmpty(ulong item0, uint qty0, ulong template0, uint quantity, ulong secondSlotEid,
-        ulong inventoryId, int fromSlotIndex, int toSlotIndex)
+        ulong inventory0Id, ulong inventory1Id, int fromSlotIndex, int toSlotIndex)
     {
         if (quantity == qty0)
         {
             // Case 1, swap entire stack with empty slot
             parents.AddOrUpdateComponent(item0, secondSlotEid);
-            pendingChanges[(inventoryId, fromSlotIndex)] = (0, 0);
-            pendingChanges[(inventoryId, toSlotIndex)] = (item0, quantity);
+            pendingChanges[(inventory0Id, fromSlotIndex)] = (0, 0);
+            pendingChanges[(inventory1Id, toSlotIndex)] = (item0, quantity);
         }
         else
         {
@@ -728,59 +781,59 @@ public sealed class InventoryManager(
             modifiedItems.Add(item1);
             quantities.ModifyComponent(item0, ComponentOperation.SubtractNoUnderflow, quantity);
             worldManagementController.ResyncEntity(eventSender, item1);
-            pendingChanges[(inventoryId, fromSlotIndex)] = (item0, qty0 - quantity);
-            pendingChanges[(inventoryId, toSlotIndex)] = (item0, quantity); // use existing item ID for preview
+            pendingChanges[(inventory0Id, fromSlotIndex)] = (item0, qty0 - quantity);
+            pendingChanges[(inventory1Id, toSlotIndex)] = (item0, quantity); // use existing item ID for preview
         }
 
         worldManagementController.ResyncEntity(eventSender, item0);
     }
 
-    private void SwapMutuallyStackable(ulong item0, ulong item1, uint qty0, uint quantity, ulong inventoryId,
-        int fromSlotIdx, int toSlotIdx)
+    private void SwapMutuallyStackable(ulong item0, ulong item1, uint qty0, uint quantity, ulong inventory0Id,
+        ulong inventory1Id, int fromSlotIdx, int toSlotIdx)
     {
         if (quantities.HasLocalComponentForEntity(item1))
         {
             quantities.ModifyComponent(item1, ComponentOperation.AddNoOverflow, quantity);
-            pendingChanges[(inventoryId, toSlotIdx)] = (item1, quantities[item1] + quantity);
+            pendingChanges[(inventory1Id, toSlotIdx)] = (item1, quantities[item1] + quantity);
         }
         else
         {
             quantities.AddComponent(item1, quantity + 1);
-            pendingChanges[(inventoryId, toSlotIdx)] = (item1, quantity + 1);
+            pendingChanges[(inventory1Id, toSlotIdx)] = (item1, quantity + 1);
         }
 
         if (quantity == qty0)
         {
             // Case 3, swap entire stack with another mutually stackable
             entityManager.RemoveEntity(item0);
-            pendingChanges[(inventoryId, fromSlotIdx)] = (0, 0);
+            pendingChanges[(inventory0Id, fromSlotIdx)] = (0, 0);
         }
         else
         {
             // Case 5, swap part of stack with another mutually stackable
             quantities.ModifyComponent(item0, ComponentOperation.SubtractNoUnderflow, quantity);
             worldManagementController.ResyncEntity(eventSender, item0);
-            pendingChanges[(inventoryId, fromSlotIdx)] = (item0, qty0 - quantity);
+            pendingChanges[(inventory0Id, fromSlotIdx)] = (item0, qty0 - quantity);
         }
 
         worldManagementController.ResyncEntity(eventSender, item1);
     }
 
     private void SwapFullNonMutuallyStackable(ulong item0, ulong item1, ulong firstSlotEid, ulong secondSlotEid,
-        ulong inventoryId, int fromSlotIdx, int toSlotIdx)
+        ulong inventory0Id, ulong inventory1Id, int fromSlotIdx, int toSlotIdx)
     {
         parents.AddOrUpdateComponent(item0, secondSlotEid);
         parents.AddOrUpdateComponent(item1, firstSlotEid);
-        pendingChanges[(inventoryId, fromSlotIdx)] = (item1, quantities.TryGetValue(item1, out var qty1) ? qty1 : 1);
-        pendingChanges[(inventoryId, toSlotIdx)] = (item0, quantities.TryGetValue(item0, out var qty0) ? qty0 : 1);
+        pendingChanges[(inventory0Id, fromSlotIdx)] = (item1, quantities.TryGetValue(item1, out var qty1) ? qty1 : 1);
+        pendingChanges[(inventory1Id, toSlotIdx)] = (item0, quantities.TryGetValue(item0, out var qty0) ? qty0 : 1);
         worldManagementController.ResyncEntity(eventSender, item0);
         worldManagementController.ResyncEntity(eventSender, item1);
     }
 
-    private void SwapPartialNonMutuallyStackable(ulong inventoryId, ulong item0, ulong item1, uint quantity,
-        ulong template0, ulong secondSlotEid, uint qty0, int fromSlotIdx, int toSlotIdx)
+    private void SwapPartialNonMutuallyStackable(ulong inventory0Id, ulong inventory1Id, ulong item0, ulong item1,
+        uint quantity, ulong template0, ulong secondSlotEid, uint qty0, int fromSlotIdx, int toSlotIdx)
     {
-        if (!slotIndexer.TryFindEmptySlot(inventoryId, out var thirdSlotEid, out var thirdSlotIdx)) return;
+        if (!slotIndexer.TryFindEmptySlot(inventory1Id, out var thirdSlotEid, out var thirdSlotIdx)) return;
         parents.AddOrUpdateComponent(item1, thirdSlotEid);
         var item2 = entityFactory.GetBuilder()
             .Template(template0)
@@ -790,10 +843,10 @@ public sealed class InventoryManager(
         quantities.ModifyComponent(item0, ComponentOperation.SubtractNoUnderflow, quantity);
         modifiedItems.Add(item2);
 
-        pendingChanges[(inventoryId, fromSlotIdx)] = (item0, qty0 - quantity);
-        pendingChanges[(inventoryId, toSlotIdx)] = (item0, quantity);
+        pendingChanges[(inventory0Id, fromSlotIdx)] = (item0, qty0 - quantity);
+        pendingChanges[(inventory1Id, toSlotIdx)] = (item0, quantity);
         if (!quantities.TryGetValue(item1, out var qty1)) qty1 = 1;
-        pendingChanges[(inventoryId, thirdSlotIdx)] = (item1, qty1);
+        pendingChanges[(inventory1Id, thirdSlotIdx)] = (item1, qty1);
 
         worldManagementController.ResyncEntity(eventSender, item0);
         worldManagementController.ResyncEntity(eventSender, item1);

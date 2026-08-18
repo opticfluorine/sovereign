@@ -48,6 +48,7 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Network_Logout, EntityEventMapper },
             { EventId.Core_Chat_Send, ChatEventMapper },
             { EventId.Core_Interaction_Interact, InteractEventMapper },
+            { EventId.Core_Inventory_Swap, SwapEventMapper },
             { EventId.Server_TemplateEntity_Update, EntityDefinitionEventMapper }
         };
     }
@@ -120,5 +121,15 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
     private static void InteractEventMapper(IEventDetails details, ulong entityId)
     {
         ((InteractEventDetails)details).SourceEntityId = entityId;
+    }
+
+    /// <summary>
+    ///     Mapper for InventorySwapEventDetails events.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    /// <param name="entityId">Player entity ID.</param>
+    private static void SwapEventMapper(IEventDetails details, ulong entityId)
+    {
+        ((InventorySwapEventDetails)details).ActorId = entityId;
     }
 }
