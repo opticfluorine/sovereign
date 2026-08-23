@@ -77,6 +77,15 @@ public interface IInventoryServices
     /// <param name="slotIndex">Slot index.</param>
     /// <returns></returns>
     uint GetQuantity(ulong entityId, int slotIndex);
+
+    /// <summary>
+    ///     Checks if the inventory belonging to <paramref name="inventoryEntityId" /> is within
+    ///     range of <paramref name="actorId" /> for access.
+    /// </summary>
+    /// <param name="actorId">Actor entity ID.</param>
+    /// <param name="inventoryEntityId">Entity ID that owns the inventory.</param>
+    /// <returns>true if in range, false otherwise.</returns>
+    bool IsInRangeForInventoryAccess(ulong actorId, ulong inventoryEntityId);
 }
 
 /// <summary>
@@ -127,5 +136,10 @@ internal sealed class InventoryServices(
     public uint GetQuantity(ulong entityId, int slotIndex)
     {
         return inventoryManager.GetQuantity(entityId, slotIndex);
+    }
+
+    public bool IsInRangeForInventoryAccess(ulong actorId, ulong inventoryEntityId)
+    {
+        return inventoryManager.IsInRangeForInventoryAccess(actorId, inventoryEntityId);
     }
 }

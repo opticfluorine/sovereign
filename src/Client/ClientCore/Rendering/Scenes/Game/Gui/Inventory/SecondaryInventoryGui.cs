@@ -20,6 +20,7 @@ using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems.Inventory;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.Inventory;
 
@@ -32,7 +33,8 @@ public sealed class SecondaryInventoryGui(
     ClientStateController stateController,
     IEventSender eventSender,
     NameComponentCollection names,
-    GuiExtensions guiExtensions)
+    GuiExtensions guiExtensions,
+    IInventoryServices inventoryServices)
 {
     /// <summary>
     ///     Renders the secondary inventory GUI, if one is selected.
@@ -40,6 +42,13 @@ public sealed class SecondaryInventoryGui(
     public void Render()
     {
         if (!stateServices.TryGetSecondaryInventoryEntity(out var entityId)) return;
+        if (!stateServices.TryGetSelectedPlayer(out var playerId) ||
+            !inventoryServices.IsInRangeForInventoryAccess(playerId, entityId))
+        {
+            stateController.SetSecondaryInventoryEntity(eventSender, 0);
+            return;
+        }
+
         var itemSize = guiExtensions.WorldUnitsToPixels(Vector2.One);
         var name = names.TryGetValue(entityId, out var n) ? n : "[unknown]";
         var open = true;

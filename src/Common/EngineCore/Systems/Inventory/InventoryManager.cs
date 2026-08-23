@@ -359,6 +359,24 @@ public sealed class InventoryManager(
     }
 
     /// <summary>
+    ///     Checks if the inventory entity is within range of the actor for access (e.g. a swap).
+    /// </summary>
+    /// <param name="actorId">Actor entity ID.</param>
+    /// <param name="inventoryEntityId">Entity ID that owns the inventory.</param>
+    /// <returns>true if in range, false otherwise.</returns>
+    public bool IsInRangeForInventoryAccess(ulong actorId, ulong inventoryEntityId)
+    {
+        if (!TryGetCenterDistanceSq(actorId, inventoryEntityId, out var d2))
+        {
+            logger.LogError("{Actor} tried to access inventory {Inventory} but positions are missing.",
+                loggingUtil.FormatEntity(actorId), loggingUtil.FormatEntity(inventoryEntityId));
+            return false;
+        }
+
+        return d2 <= maxAccessedInvD2;
+    }
+
+    /// <summary>
     ///     Picks up the given item and places it in the first free inventory slot.
     /// </summary>
     /// <param name="entityId">Owner ID.</param>
@@ -523,24 +541,6 @@ public sealed class InventoryManager(
         }
 
         return d2 <= maxPickupD2;
-    }
-
-    /// <summary>
-    ///     Checks if the inventory entity is within range of the actor for access (e.g. a swap).
-    /// </summary>
-    /// <param name="actorId">Actor entity ID.</param>
-    /// <param name="inventoryEntityId">Entity ID that owns the inventory.</param>
-    /// <returns>true if in range, false otherwise.</returns>
-    private bool IsInRangeForInventoryAccess(ulong actorId, ulong inventoryEntityId)
-    {
-        if (!TryGetCenterDistanceSq(actorId, inventoryEntityId, out var d2))
-        {
-            logger.LogError("{Actor} tried to access inventory {Inventory} but positions are missing.",
-                loggingUtil.FormatEntity(actorId), loggingUtil.FormatEntity(inventoryEntityId));
-            return false;
-        }
-
-        return d2 <= maxAccessedInvD2;
     }
 
     /// <summary>
