@@ -49,6 +49,7 @@ public sealed class ServerEntityFactory(
     StackableTagCollection stackables,
     QuantityComponentCollection quantities,
     ItemUseComponentCollection itemUses,
+    NpcFlagsComponentCollection npcFlags,
     EntityTable entityTable,
     EntityAssigner entityAssigner)
     : IEntityFactory
@@ -93,6 +94,7 @@ public sealed class ServerEntityFactory(
             stackables,
             quantities,
             itemUses,
+            npcFlags,
             entityTable);
     }
 }

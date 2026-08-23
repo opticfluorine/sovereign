@@ -136,6 +136,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<StackableTagCollection>();
         services.TryAddComponentCollection<QuantityComponentCollection>();
         services.TryAddComponentCollection<ItemUseComponentCollection>();
+        services.TryAddComponentCollection<NpcFlagsComponentCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)

@@ -210,4 +210,13 @@ public static class ComponentOperators
         {
             { ComponentOperation.Set, (_, b) => b }
         };
+
+    /// <summary>
+    ///     Standard operators for NpcFlag-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<NpcFlag, NpcFlag, NpcFlag>>
+        NpcFlagOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
+        };
 }

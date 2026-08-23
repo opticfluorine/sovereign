@@ -154,6 +154,11 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutItemUse();
 
+        if (definition.NpcFlags.HasValue)
+            builder.NpcFlags(definition.NpcFlags.Value);
+        else
+            builder.WithoutNpcFlags();
+
         var entityId = builder.Build();
         logger.LogDebug("Processed entity ID {Id:X}.", entityId);
     }

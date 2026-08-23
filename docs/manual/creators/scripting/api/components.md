@@ -25,6 +25,7 @@ Each component collection that is accessible through the scripting engine may be
 | `Components.ItemUse`          | `ItemUseComponentCollection`          | `ItemUse`      |
 | `Components.Kinematics`       | `KinematicsComponentCollection`       | `Kinematics`   |
 | `Components.Name`             | `NameComponentCollection`             | `string`       |
+| `Components.NpcFlags`         | `NpcFlagsComponentCollection`         | `NpcFlag`      |
 | `Components.Orientation`      | `OrientationComponentCollection`      | `integer`      |
 | `Components.Parent`           | `ParentComponentCollection`           | `integer`      |
 | `Components.Physics`          | `PhysicsTagCollection`                | `boolean`      |

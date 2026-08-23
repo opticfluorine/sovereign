@@ -47,6 +47,7 @@ public sealed class ClientEntityFactory(
     StackableTagCollection stackables,
     QuantityComponentCollection quantities,
     ItemUseComponentCollection itemUses,
+    NpcFlagsComponentCollection npcFlags,
     EntityTable entityTable,
     EntityAssigner entityAssigner)
     : IEntityFactory
@@ -73,6 +74,6 @@ public sealed class ClientEntityFactory(
             aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources,
             physics, boundingBoxes, castShadows, entityTypes, serverOnly, stackables, quantities,
-            itemUses, entityTable);
+            itemUses, npcFlags, entityTable);
     }
 }

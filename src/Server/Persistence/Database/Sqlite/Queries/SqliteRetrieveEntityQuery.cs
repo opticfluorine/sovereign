@@ -33,12 +33,12 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
         @"WITH RECURSIVE EntityTree(id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, 
                 parent, drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
                 plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ,
-                shadowRadius, entityType, serverOnly, stackable, quantity, itemUse)
+                shadowRadius, entityType, serverOnly, stackable, quantity, itemUse, npcFlags)
 	        AS (
 		        SELECT id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent, 
                         drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
                         plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ,
-                        shadowRadius, entityType, serverOnly, stackable, quantity, itemUse
+                        shadowRadius, entityType, serverOnly, stackable, quantity, itemUse, npcFlags
 			        FROM EntityWithComponents WHERE id = @Id
 		        UNION ALL
             		SELECT ec.id, ec.template_id, ec.x, ec.y, ec.z, ec.frontTileId, ec.topTileId, ec.playerCharacter,
@@ -46,7 +46,7 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
                         ec.castBlockShadows, ec.plsRadius, ec.plsIntensity, ec.plsColor,
                         ec.plsPosX, ec.plsPosY, ec.plsPosZ, ec.physics, ec.bbPosX, ec.bbPosY, ec.bbPosZ,
                         ec.bbSizeX, ec.bbSizeY, ec.bbSizeZ, ec.shadowRadius, ec.entityType, ec.serverOnly,
-                        ec.stackable, ec.quantity, ec.itemUse
+                        ec.stackable, ec.quantity, ec.itemUse, ec.npcFlags
 			        FROM EntityWithComponents ec, EntityTree et
         			WHERE ec.parent = et.id
 	        )
@@ -54,7 +54,7 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
                 et.account, et.parent, et.drawableX, et.drawableY, et.animatedSprite, et.orientation, et.admin, et.castBlockShadows, et.plsRadius, 
                 et.plsIntensity, et.plsColor, et.plsPosX, et.plsPosY, et.plsPosZ, et.physics, et.bbPosX, et.bbPosY, et.bbPosZ, 
                 et.bbSizeX, et.bbSizeY, et.bbSizeZ, et.shadowRadius, et.entityType, et.serverOnly, et.stackable,
-                et.quantity, et.itemUse
+                et.quantity, et.itemUse, et.npcFlags
             FROM EntityTree et
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = et.id
             ORDER BY et.parent NULLS LAST";

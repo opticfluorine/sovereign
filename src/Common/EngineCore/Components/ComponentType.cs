@@ -134,6 +134,11 @@ public enum ComponentType
     /// </summary>
     ItemUse = 0x0016,
 
+    /// <summary>
+    ///     NpcFlags component.
+    /// </summary>
+    NpcFlags = 0x0017,
+
     #endregion Common
 
     #region Client

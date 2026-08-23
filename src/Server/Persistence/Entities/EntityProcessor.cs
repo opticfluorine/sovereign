@@ -69,6 +69,7 @@ public sealed class EntityProcessor
     private const int IndexStackable = IndexServerOnly + 1;
     private const int IndexQuantity = IndexStackable + 1;
     private const int IndexItemUse = IndexQuantity + 1;
+    private const int IndexNpcFlags = IndexItemUse + 1;
     private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
     private readonly ExistingEntitySet existingEntitySet;
@@ -141,6 +142,7 @@ public sealed class EntityProcessor
             ProcessStackable(reader, builder);
             ProcessQuantity(reader, builder);
             ProcessItemUse(reader, builder);
+            ProcessNpcFlags(reader, builder);
 
             /* Complete the entity. */
             builder.Build();
@@ -421,6 +423,12 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexItemUse)) return;
         builder.ItemUse((ItemUse)reader.GetInt32(IndexItemUse));
+    }
+
+    private void ProcessNpcFlags(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexNpcFlags)) return;
+        builder.NpcFlags((NpcFlag)reader.GetInt32(IndexNpcFlags));
     }
 
     /// <summary>

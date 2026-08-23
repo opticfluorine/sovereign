@@ -236,8 +236,28 @@ public class NpcTemplateEditorTab
         basicInformationControlGroup.Render(selectedDefinition);
         appearanceControlGroup.Render(selectedDefinition);
         behaviorControlGroup.Render(selectedDefinition);
+        RenderNpcFlags();
         entityDataControlGroup.Render();
 
+        ImGui.EndTable();
+    }
+
+    /// <summary>
+    ///     Renders the NPC-specific component controls.
+    /// </summary>
+    private void RenderNpcFlags()
+    {
+        if (!ImGui.CollapsingHeader("NPC Flags", ImGuiTreeNodeFlags.DefaultOpen)) return;
+        if (!ImGui.BeginTable("NpcFlags", 2, ImGuiTableFlags.SizingFixedFit)) return;
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Chest:");
+        ImGui.TableNextColumn();
+        if (!selectedDefinition.NpcFlags.HasValue) selectedDefinition.NpcFlags = NpcFlag.None;
+        var chest = (selectedDefinition.NpcFlags.Value & NpcFlag.Chest) > 0;
+        ImGui.Checkbox("##chest", ref chest);
+        if (chest) selectedDefinition.NpcFlags |= NpcFlag.Chest;
+        else selectedDefinition.NpcFlags &= ~NpcFlag.Chest;
         ImGui.EndTable();
     }
 

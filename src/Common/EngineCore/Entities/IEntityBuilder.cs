@@ -383,4 +383,18 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutItemUse();
+
+    /// <summary>
+    ///     Adds an NpcFlags component to the entity.
+    /// </summary>
+    /// <param name="npcFlags">NPC flags.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(NpcFlags))]
+    IEntityBuilder NpcFlags(NpcFlag npcFlags);
+
+    /// <summary>
+    ///     Removes the NpcFlags component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutNpcFlags();
 }

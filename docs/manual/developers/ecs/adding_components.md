@@ -31,8 +31,11 @@ The following steps must be performed when adding a new component to Sovereign:
 
    If the base type `T` of the component collection has not been used for another
    component before, you may need to add new component operators to the
-   `ComponentOperators` class in order to dervice from `BaseComponentCollection<T>`.
-4. Update `IEntityBuilder` with methods for adding and removing the new component
+   `ComponentOperators` class in order to derive from `BaseComponentCollection<T>`.
+5. Register the component collection in the DI container by adding
+   `services.TryAddComponentCollection<NewComponentCollection>();` in the
+   `AddComponents` method of `CoreServiceCollectionExtensions`.
+6. Update `IEntityBuilder` with methods for adding and removing the new component
    from an entity. For common-scoped components, the new methods should be implemented
    in `AbstractEntityBuilder`, while client-only methods and server-only methods
    should be implemented in `ClientEntityBuilder` and `ServerEntityBuilder`
@@ -128,14 +131,15 @@ Persisting a component in the database requires several changes:
    you will need to create your own (see `Vector3SqliteAddComponentQuery` for an
    example).
 4. Add a new state tracker derived from `BaseStateTracker` for the component to
-   the `Sovereign.Persistence.State.Trackers` namespace. Add the tracker to the
-   `StateTrackerInstaller` and `TrackerManager` classes as well.
+   the `Sovereign.Persistence.State.Trackers` namespace. Register the tracker in
+   `TrackerManager` (field + constructor param + assignment) and
+   `PersistenceServiceCollectionExtensions` (`services.TryAddSingleton<XxxStateTracker>()`).
 5. Update `StateBuffer` to add a new `StructBuffer<StateUpdate<T>>` field to store
    state updates for the components, where `T` is the component value type. Add a
-   new update method to `StateBuffer` to the component, then call this from your
+   new update method to `StateBuffer` for the component, then call this from your
    new state tracker. Also update the `StateBuffer.Reset()` method to call `Clear()`
    on the new `StructBuffer` field. Finally, update the 
-   `DoSynchronize(IPersistenceProvider)` method to call `SynchronizeComponent` with
+   `Synchronize(IPersistenceProvider)` method to call `SynchronizeComponent` with
    the newly added `StructBuffer` and add/modify/delete queries.
 6. Update `SqliteRetrieveEntityQuery` and `SqliteRetrieveRangeQuery` to retrieve
    the new component when fetching entities from the database. For components which
@@ -153,7 +157,7 @@ This section applies only to common- and server-scoped components.
 
 For many components, it is useful to have a binding of the component collection to
 the scripting engine so that scripts may read and write the component value. To do this,
-simply add the `[ScriptableComponents]` attribute to the component collection class
-with a single parameter corresponding to the name that will be assigned to the binding.
-By standard Lua conventions, this name should be all lowercase. Refer to an existing
-bound component collection (e.g. `NameComponentCollection`) for examples.
+simply add the `[ScriptableComponents]` attribute to the component collection class.
+The binding name is derived automatically from the class name, converted to
+lowercase with underscores. Refer to an existing bound component collection
+(e.g. `NameComponentCollection`) for examples.

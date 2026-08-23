@@ -37,6 +37,7 @@ public class EntityDefinitionGenerator
     private readonly ItemUseComponentCollection itemUses;
     private readonly KinematicsComponentCollection kinematics;
     private readonly NameComponentCollection names;
+    private readonly NpcFlagsComponentCollection npcFlags;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
     private readonly PhysicsTagCollection physics;
@@ -57,7 +58,7 @@ public class EntityDefinitionGenerator
         PhysicsTagCollection physics, BoundingBoxComponentCollection boundingBoxes,
         CastShadowsComponentCollection castShadows, EntityTypeComponentCollection entityTypes,
         ServerOnlyTagCollection serverOnly, StackableTagCollection stackable, QuantityComponentCollection quantities,
-        ItemUseComponentCollection itemUses, EntityTable entityTable)
+        ItemUseComponentCollection itemUses, NpcFlagsComponentCollection npcFlags, EntityTable entityTable)
     {
         this.kinematics = kinematics;
         this.blockTiles = blockTiles;
@@ -79,6 +80,7 @@ public class EntityDefinitionGenerator
         this.stackable = stackable;
         this.quantities = quantities;
         this.itemUses = itemUses;
+        this.npcFlags = npcFlags;
         this.entityTable = entityTable;
     }
 
@@ -149,6 +151,9 @@ public class EntityDefinitionGenerator
 
         if (itemUses.HasLocalComponentForEntity(entityId))
             def.ItemUse = itemUses[entityId];
+
+        if (npcFlags.HasLocalComponentForEntity(entityId))
+            def.NpcFlags = npcFlags[entityId];
 
         return def;
     }

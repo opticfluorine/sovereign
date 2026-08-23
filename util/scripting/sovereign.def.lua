@@ -597,6 +597,26 @@ Components.Stackable.Remove = function (entityId) end
 ---@param value boolean Value.
 Components.Stackable.Set = function (entityId, value) end
 
+---NpcFlags component.
+---@class Components.NpcFlags
+Components.NpcFlags = {}
+---Checks whether the component exists for an entity.
+---@param entityId integer Entity ID.
+---@return boolean true if exists, false otherwise.
+Components.NpcFlags.Exists = function (entityId) end
+---Gets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param lookback boolean? If true, enable lookback at components from the last tick.
+---@return integer?
+Components.NpcFlags.Get = function(entityId, lookback) end
+---Removes the component for the entity if it exists.
+---@param entityId integer Entity ID.
+Components.NpcFlags.Remove = function (entityId) end
+---Sets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param value integer Value.
+Components.NpcFlags.Set = function (entityId, value) end
+
 --------------------
 
 --

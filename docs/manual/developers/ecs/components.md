@@ -23,6 +23,7 @@ Core components are available in both the client and server.
 | `ItemUse`          | `ItemUseComponentCollection`          | Provides a hint on how an item may be used as a tool.                                           |
 | `Kinematics`       | `KinematicsComponentCollection`       | For non-block positioned entities, contains the position and velocity of the entity.            |
 | `Name`             | `NameComponentCollection`             | Gives the name of the entity.                                                                   |
+| `NpcFlags`         | `NpcFlagsComponentCollection`         | Bitwise flags for NPC behavior characteristics (e.g. Chest).                                    |
 | `Orientation`      | `OrientationComponentCollection`      | Specifies the directional orientation of the entity.                                            |
 | `Parent`           | `ParentComponentCollection`           | Maps an entity to its parent entity.                                                            |
 | `Physics`          | `PhysicsTagCollection`                | Indicates that a non-block entity has physics effects.                                          |

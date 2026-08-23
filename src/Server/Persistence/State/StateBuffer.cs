@@ -104,6 +104,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<ItemUse>> itemUseUpdates = new(BufferSize);
 
     /// <summary>
+    ///     NpcFlags state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<NpcFlag>> npcFlagsUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Position state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<Kinematics>> kinematicsUpdates = new(BufferSize);
@@ -375,6 +380,15 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Queues an NpcFlags update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateNpcFlags(ref StateUpdate<NpcFlag> update)
+    {
+        npcFlagsUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -423,6 +437,7 @@ public sealed class StateBuffer
         stackableUpdates.Clear();
         quantityUpdates.Clear();
         itemUseUpdates.Clear();
+        npcFlagsUpdates.Clear();
     }
 
     /// <summary>
@@ -583,6 +598,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddItemUseComponentQuery,
                     persistenceProvider.ModifyItemUseComponentQuery,
                     persistenceProvider.RemoveItemUseComponentQuery,
+                    transaction);
+
+                // NpcFlags.
+                SynchronizeComponent(npcFlagsUpdates,
+                    persistenceProvider.AddNpcFlagsComponentQuery,
+                    persistenceProvider.ModifyNpcFlagsComponentQuery,
+                    persistenceProvider.RemoveNpcFlagsComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

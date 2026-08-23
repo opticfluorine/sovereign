@@ -62,6 +62,7 @@ public class EntityDefinition
         Stackable = other.Stackable;
         Quantity = other.Quantity;
         ItemUse = other.ItemUse;
+        NpcFlags = other.NpcFlags;
     }
 
     /// <summary>
@@ -195,4 +196,10 @@ public class EntityDefinition
     /// </summary>
     [Key(21)]
     public ItemUse? ItemUse { get; set; }
+
+    /// <summary>
+    ///     NpcFlags component.
+    /// </summary>
+    [Key(22)]
+    public NpcFlag? NpcFlags { get; set; }
 }

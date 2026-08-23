@@ -43,6 +43,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly EntityTypeComponentCollection entityTypes;
     protected readonly bool isTemplate;
     private readonly ItemUseComponentCollection itemUses;
+    private readonly NpcFlagsComponentCollection npcFlags;
     protected readonly KinematicsComponentCollection Kinematics;
     protected readonly bool load;
     protected readonly NameComponentCollection names;
@@ -84,6 +85,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         StackableTagCollection stackables,
         QuantityComponentCollection quantities,
         ItemUseComponentCollection itemUses,
+        NpcFlagsComponentCollection npcFlags,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -110,6 +112,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.stackables = stackables;
         this.quantities = quantities;
         this.itemUses = itemUses;
+        this.npcFlags = npcFlags;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -448,6 +451,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutItemUse()
     {
         itemUses.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder NpcFlags(NpcFlag npcFlag)
+    {
+        npcFlags.AddOrUpdateComponent(entityId, npcFlag, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutNpcFlags()
+    {
+        npcFlags.RemoveComponent(entityId, load);
         return this;
     }
 
