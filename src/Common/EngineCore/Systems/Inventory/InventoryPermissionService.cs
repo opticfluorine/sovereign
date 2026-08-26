@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
+
 namespace Sovereign.EngineCore.Systems.Inventory;
 
 /// <summary>
@@ -21,14 +24,39 @@ namespace Sovereign.EngineCore.Systems.Inventory;
 /// </summary>
 public sealed class InventoryPermissionService
 {
+    private readonly NpcFlagsComponentCollection npcFlags;
+
+    public InventoryPermissionService(NpcFlagsComponentCollection npcFlags)
+    {
+        this.npcFlags = npcFlags;
+    }
+
     /// <summary>
-    ///     Determines whether the given actor is permitted to modify the given inventory.
+    ///     Determines whether the given actor is permitted to swap items between the two
+    ///     specified inventories. One inventory must be the actor's own, and the other must
+    ///     either also be the actor's own or have the Chest NpcFlag set.
     /// </summary>
     /// <param name="actorEntityId">Actor entity ID.</param>
-    /// <param name="inventoryEntityId">Entity ID that owns the inventory.</param>
-    /// <returns>true if the actor may modify the inventory, false otherwise.</returns>
-    public bool CanModify(ulong actorEntityId, ulong inventoryEntityId)
+    /// <param name="inventory0Id">Entity ID that owns the first inventory.</param>
+    /// <param name="inventory1Id">Entity ID that owns the second inventory.</param>
+    /// <returns>true if the actor may swap between these inventories, false otherwise.</returns>
+    public bool IsSwapPermitted(ulong actorEntityId, ulong inventory0Id, ulong inventory1Id)
     {
-        return actorEntityId == inventoryEntityId;
+        if (inventory0Id == actorEntityId && inventory1Id == actorEntityId)
+            return true;
+
+        if (inventory0Id == actorEntityId)
+            return HasChestFlag(inventory1Id);
+
+        if (inventory1Id == actorEntityId)
+            return HasChestFlag(inventory0Id);
+
+        return false;
+    }
+
+    private bool HasChestFlag(ulong entityId)
+    {
+        return npcFlags.TryGetValue(entityId, out var flags) &&
+               (flags & NpcFlag.Chest) > 0;
     }
 }

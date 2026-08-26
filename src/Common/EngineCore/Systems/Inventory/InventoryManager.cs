@@ -209,8 +209,7 @@ public sealed class InventoryManager(
     {
         lock (mutationLock)
         {
-            if (!permissionService.CanModify(actorId, inventory0Id) ||
-                (inventory0Id != inventory1Id && !permissionService.CanModify(actorId, inventory1Id)))
+            if (!permissionService.IsSwapPermitted(actorId, inventory0Id, inventory1Id))
             {
                 logger.LogWarning("[SECURITY] Player {Actor} tried to modify inventory for entity IDs {Inv0Id:X} and {Inv1Id:X}.",
                     loggingUtil.FormatEntity(actorId), inventory0Id, inventory1Id);

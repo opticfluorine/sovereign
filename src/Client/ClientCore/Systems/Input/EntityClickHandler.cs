@@ -28,6 +28,7 @@ namespace Sovereign.ClientCore.Systems.Input;
 /// </summary>
 public sealed class EntityClickHandler(
     EntityTypeComponentCollection entityTypes,
+    NpcFlagsComponentCollection npcFlags,
     ItemContextGui itemContextGui,
     IInventoryServices inventoryServices,
     ClientStateServices clientStateServices,
@@ -66,8 +67,11 @@ public sealed class EntityClickHandler(
         switch (button)
         {
             case MouseButton.Right:
-                // Right-clicking an NPC with an inventory opens its inventory in the secondary window.
-                if (inventoryServices.GetSlotCount(npcId) > 0)
+                // Right-clicking an NPC with an inventory opens its inventory in the secondary window,
+                // but only if the NPC has the Chest flag set.
+                if (npcFlags.TryGetValue(npcId, out var flags) &&
+                    (flags & NpcFlag.Chest) > 0 &&
+                    inventoryServices.GetSlotCount(npcId) > 0)
                     stateController.SetSecondaryInventoryEntity(eventSender, npcId);
                 break;
         }
