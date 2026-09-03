@@ -219,4 +219,13 @@ public static class ComponentOperators
         {
             { ComponentOperation.Set, (_, b) => b }
         };
+
+    /// <summary>
+    ///     Standard operators for PlayerFlag-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<PlayerFlag, PlayerFlag, PlayerFlag>>
+        PlayerFlagOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
+        };
 }

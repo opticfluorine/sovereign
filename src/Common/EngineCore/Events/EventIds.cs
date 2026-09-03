@@ -760,5 +760,23 @@ public enum EventId
 
     #endregion Server_Scripting
 
+    #region Server_Chat
+
+    /// <summary>
+    ///     Sent when a chat mute is added for a player.
+    /// </summary>
+    /// Associated details: ModerationEventDetails
+    [ScriptableEvent(nameof(ModerationEventDetails))]
+    Server_Chat_MuteAdded = 200800,
+
+    /// <summary>
+    ///     Sent when a chat mute is removed for a player.
+    /// </summary>
+    /// Associated details: ModerationEventDetails
+    [ScriptableEvent(nameof(ModerationEventDetails))]
+    Server_Chat_MuteRemoved = 200801,
+
+    #endregion Server_Chat
+
     #endregion Server
 }

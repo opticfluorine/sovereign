@@ -7,6 +7,7 @@
 #### 3 September 2026
 
 * Add a server option to limit the number of concurrently connected players.
+* Add player moderation: PlayerFlags component, timed chat mutes, moderator-only mute commands, and mute events for scripts.
 
 ### April
 

@@ -221,3 +221,14 @@ public sealed class AccountsOptions
     /// </summary>
     public int MaxPlayers { get; set; } = 0;
 }
+
+/// <summary>
+///     Full description of the moderation configuration.
+/// </summary>
+public sealed class ModerationOptions
+{
+    /// <summary>
+    ///     Default duration of a new mute when no timeout is specified, in minutes.
+    /// </summary>
+    public int DefaultMuteTimeoutMinutes { get; set; } = 5;
+}

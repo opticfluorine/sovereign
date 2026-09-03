@@ -86,6 +86,9 @@ interpolating the two steps around the point in time.
 - **HandoffPeriodSeconds**: The duration in seconds for handoff operations.
 - **MaxPlayers**: The maximum number of concurrently connected players. A value of 0 (the default) means no limit.
 
+### ModerationOptions
+- **DefaultMuteTimeoutMinutes**: The default duration in minutes for a new chat mute when no timeout is specified with the mute command.
+
 ### ScriptingOptions
 - **ScriptDirectory**: The directory where scripts are stored.
 - **MaxDirectoryDepth**: The maximum directory depth for script discovery.

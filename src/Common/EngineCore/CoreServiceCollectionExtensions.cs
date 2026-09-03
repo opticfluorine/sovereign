@@ -137,6 +137,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<QuantityComponentCollection>();
         services.TryAddComponentCollection<ItemUseComponentCollection>();
         services.TryAddComponentCollection<NpcFlagsComponentCollection>();
+        services.TryAddComponentCollection<PlayerFlagsComponentCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)

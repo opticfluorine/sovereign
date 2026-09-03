@@ -50,6 +50,7 @@ public sealed class ServerEntityFactory(
     QuantityComponentCollection quantities,
     ItemUseComponentCollection itemUses,
     NpcFlagsComponentCollection npcFlags,
+    PlayerFlagsComponentCollection playerFlags,
     EntityTable entityTable,
     EntityAssigner entityAssigner)
     : IEntityFactory
@@ -95,6 +96,7 @@ public sealed class ServerEntityFactory(
             quantities,
             itemUses,
             npcFlags,
+            playerFlags,
             entityTable);
     }
 }

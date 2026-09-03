@@ -397,4 +397,18 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutNpcFlags();
+
+    /// <summary>
+    ///     Adds a PlayerFlags component to the entity.
+    /// </summary>
+    /// <param name="playerFlags">Player flags.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(PlayerFlags))]
+    IEntityBuilder PlayerFlags(PlayerFlag playerFlags);
+
+    /// <summary>
+    ///     Removes the PlayerFlags component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutPlayerFlags();
 }

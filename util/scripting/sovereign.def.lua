@@ -36,6 +36,13 @@ BoundingBox = {}
 ---@field EntityId integer The entity ID related to the event.
 EntityEventDetails = {}
 
+---Event details type describing a chat mute change.
+---@class ModerationEventDetails
+---@field EntityId integer The entity ID of the affected player.
+---@field Scope ChatMuteScope The scope of the mute.
+---@field ExpirySystemTime integer Absolute system time in microseconds at which the mute expires, or 0 if the mute was removed before expiring.
+ModerationEventDetails = {}
+
 ---Entity specification used by entities.Create. All values are optional, nil values are ignored.
 ---@class EntitySpecification
 ---@field EntityId integer? Optional entity ID for new entity. If none provided, one will be automatically chosen.
@@ -57,6 +64,7 @@ EntityEventDetails = {}
 ---@field Quantity integer? Optional. Quantity of a stackable item.
 ---@field ServerOnly boolean? Optional. Whether entity is server-only.
 ---@field Stackable boolean? Optional. Whether entity is stackable.
+---@field PlayerFlags PlayerFlag? Optional. Player flags for the entity.
 EntitySpecification = {}
 
 ---Integer-valued 3D vector type.
@@ -105,6 +113,18 @@ EntityType = {
     Item = 1,
     Player = 2,
     Other = 0x7F
+}
+
+---@enum PlayerFlag Bitwise flags that define player characteristics.
+PlayerFlag = {
+    None = 0,
+    Moderator = 1
+}
+
+---@enum ChatMuteScope Describes the scope of a chat mute.
+ChatMuteScope = {
+    Global = 0,
+    All = 1
 }
 
 ---@enum Orientation Describes the direction an entity is facing.
@@ -617,6 +637,26 @@ Components.NpcFlags.Remove = function (entityId) end
 ---@param value integer Value.
 Components.NpcFlags.Set = function (entityId, value) end
 
+---PlayerFlags component.
+---@class Components.PlayerFlags
+Components.PlayerFlags = {}
+---Checks whether the component exists for an entity.
+---@param entityId integer Entity ID.
+---@return boolean true if exists, false otherwise.
+Components.PlayerFlags.Exists = function (entityId) end
+---Gets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param lookback boolean? If true, enable lookback at components from the last tick.
+---@return PlayerFlag?
+Components.PlayerFlags.Get = function(entityId, lookback) end
+---Removes the component for the entity if it exists.
+---@param entityId integer Entity ID.
+Components.PlayerFlags.Remove = function (entityId) end
+---Sets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param value PlayerFlag Value.
+Components.PlayerFlags.Set = function (entityId, value) end
+
 --------------------
 
 --
@@ -735,7 +775,11 @@ Events = {
     ---Event emitted when a logout occurs.
     Core_Network_Logout = 700,
     ---Event emitted when a player enters the world.
-    Server_Persistence_PlayerEnteredWorld = 200002
+    Server_Persistence_PlayerEnteredWorld = 200002,
+    ---Event emitted when a chat mute is added for a player.
+    Server_Chat_MuteAdded = 200800,
+    ---Event emitted when a chat mute is removed for a player.
+    Server_Chat_MuteRemoved = 200801
 }
 
 --------------------

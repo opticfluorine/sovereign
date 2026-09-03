@@ -51,6 +51,16 @@ public class AdminChatProcessor : IChatProcessor
     private const string RemoveAdmin = "removeadmin";
 
     /// <summary>
+    ///     Command name for /addmoderator.
+    /// </summary>
+    private const string AddModerator = "addmoderator";
+
+    /// <summary>
+    ///     Command name for /removemoderator.
+    /// </summary>
+    private const string RemoveModerator = "removemoderator";
+
+    /// <summary>
     ///     Command name for /addblock.
     /// </summary>
     private const string AddBlock = "addblock";
@@ -91,6 +101,7 @@ public class AdminChatProcessor : IChatProcessor
     private readonly NameComponentCollection names;
     private readonly NameComponentValidator nameValidator;
     private readonly PersistencePlayerServices persistencePlayerServices;
+    private readonly PlayerFlagsComponentCollection playerFlags;
     private readonly PlayerNameComponentIndexer playerNameIndex;
     private readonly PlayerRoleCheck playerRoleCheck;
     private readonly ScriptingController scriptingController;
@@ -103,7 +114,8 @@ public class AdminChatProcessor : IChatProcessor
         LoggingUtil loggingUtil, NameComponentCollection names, WorldManagementController worldManagementController,
         IEventSender eventSender, BlockController blockController, IBlockServices blockServices,
         BlockTemplateNameComponentIndexer blockTemplateNames, ILogger<AdminChatProcessor> logger,
-        ScriptingController scriptingController, ScriptingServices scriptingServices)
+        ScriptingController scriptingController, ScriptingServices scriptingServices,
+        PlayerFlagsComponentCollection playerFlags)
     {
         this.admins = admins;
         this.internalController = internalController;
@@ -121,12 +133,15 @@ public class AdminChatProcessor : IChatProcessor
         this.logger = logger;
         this.scriptingController = scriptingController;
         this.scriptingServices = scriptingServices;
+        this.playerFlags = playerFlags;
     }
 
     public List<ChatCommand> MatchingCommands => new()
     {
         new ChatCommand { Command = AddAdmin, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = RemoveAdmin, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = AddModerator, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = RemoveModerator, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = AddBlock, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = RemoveBlock, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ReloadAllScripts, HelpSummary = "", IncludeInHelp = false },
@@ -159,6 +174,14 @@ public class AdminChatProcessor : IChatProcessor
 
             case RemoveAdmin:
                 OnRemoveAdmin(message, senderEntityId);
+                break;
+
+            case AddModerator:
+                OnAddModerator(message, senderEntityId);
+                break;
+
+            case RemoveModerator:
+                OnRemoveModerator(message, senderEntityId);
                 break;
 
             case AddBlock:
@@ -263,6 +286,76 @@ public class AdminChatProcessor : IChatProcessor
         logger.LogInformation("Player {Player} is no longer admin (or already was not); change made by {Admin}.",
             playerName, loggingUtil.FormatEntity(senderEntityId));
         internalController.SendSystemMessage($"Player {playerName} is no longer admin.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /addmoderator command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnAddModerator(string message, ulong senderEntityId)
+    {
+        var playerName = message.Trim();
+        if (!nameValidator.IsValid(playerName))
+        {
+            internalController.SendSystemMessage("Invalid name.", senderEntityId);
+            return;
+        }
+
+        if (!playerNameIndex.TryGetPlayerByName(playerName, out var playerEntityId))
+        {
+            logger.LogWarning("Cannot make player {Name} moderator: player does not exist or is not logged in.",
+                playerName);
+            internalController.SendSystemMessage("Player does not exist or is not logged in.", senderEntityId);
+            return;
+        }
+
+        var flags = playerFlags.HasComponentForEntity(playerEntityId)
+            ? playerFlags[playerEntityId]
+            : PlayerFlag.None;
+        playerFlags.AddOrUpdateComponent(playerEntityId, flags | PlayerFlag.Moderator, false);
+
+        logger.LogInformation("Player {Name} is now a moderator; change made by {Admin}.", playerName,
+            loggingUtil.FormatEntity(senderEntityId));
+        internalController.SendSystemMessage("You are now a moderator.", playerEntityId);
+        internalController.SendSystemMessage($"Player {playerName} is now a moderator.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /removemoderator command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnRemoveModerator(string message, ulong senderEntityId)
+    {
+        var playerName = message.Trim();
+        if (!nameValidator.IsValid(playerName))
+        {
+            internalController.SendSystemMessage("Invalid name.", senderEntityId);
+            return;
+        }
+
+        if (!playerNameIndex.TryGetPlayerByName(playerName, out var playerEntityId))
+        {
+            logger.LogWarning(
+                "Cannot remove moderator role from player {Name}: player does not exist or is not logged in.",
+                playerName);
+            internalController.SendSystemMessage("Player does not exist or is not logged in.", senderEntityId);
+            return;
+        }
+
+        var flags = playerFlags.HasComponentForEntity(playerEntityId)
+            ? playerFlags[playerEntityId] & ~PlayerFlag.Moderator
+            : PlayerFlag.None;
+        if (flags != PlayerFlag.None)
+            playerFlags.AddOrUpdateComponent(playerEntityId, flags, false);
+        else
+            playerFlags.RemoveComponent(playerEntityId);
+
+        logger.LogInformation("Player {Name} is no longer a moderator (or already was not); change made by {Admin}.",
+            playerName, loggingUtil.FormatEntity(senderEntityId));
+        internalController.SendSystemMessage("You are no longer a moderator.", playerEntityId);
+        internalController.SendSystemMessage($"Player {playerName} is no longer a moderator.", senderEntityId);
     }
 
     /// <summary>

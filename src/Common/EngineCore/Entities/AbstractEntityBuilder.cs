@@ -46,6 +46,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly NpcFlagsComponentCollection npcFlags;
     protected readonly KinematicsComponentCollection Kinematics;
     protected readonly bool load;
+    private readonly PlayerFlagsComponentCollection playerFlags;
     protected readonly NameComponentCollection names;
     protected readonly OrientationComponentCollection orientations;
     protected readonly ParentComponentCollection parents;
@@ -86,6 +87,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         QuantityComponentCollection quantities,
         ItemUseComponentCollection itemUses,
         NpcFlagsComponentCollection npcFlags,
+        PlayerFlagsComponentCollection playerFlags,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -113,6 +115,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.quantities = quantities;
         this.itemUses = itemUses;
         this.npcFlags = npcFlags;
+        this.playerFlags = playerFlags;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -463,6 +466,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutNpcFlags()
     {
         npcFlags.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder PlayerFlags(PlayerFlag playerFlag)
+    {
+        playerFlags.AddOrUpdateComponent(entityId, playerFlag, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutPlayerFlags()
+    {
+        playerFlags.RemoveComponent(entityId, load);
         return this;
     }
 

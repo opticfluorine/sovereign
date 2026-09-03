@@ -50,11 +50,13 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         QuantityComponentCollection quantities,
         ItemUseComponentCollection itemUses,
         NpcFlagsComponentCollection npcFlags,
+        PlayerFlagsComponentCollection playerFlags,
         EntityTable entityTable)
         : base(entityId, isLoad, entityManager, kinematics, blockTiles,
             aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources, physics, boundingBoxes,
-            castShadows, entityTypes, serverOnly, stackables, quantities, itemUses, npcFlags, entityTable)
+            castShadows, entityTypes, serverOnly, stackables, quantities, itemUses, npcFlags, playerFlags,
+            entityTable)
     {
     }
 

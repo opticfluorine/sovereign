@@ -553,7 +553,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
         return new DataModel
         {
             Name = symbol.Name,
-            NativeType = symbol.Type.Name
+            NativeType = symbol.Type.ToDisplayString()
         };
     }
 
@@ -567,7 +567,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
         return new DataModel
         {
             Name = symbol.Name,
-            NativeType = symbol.Type.Name
+            NativeType = symbol.Type.ToDisplayString()
         };
     }
 
