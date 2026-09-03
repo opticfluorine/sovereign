@@ -43,6 +43,7 @@ public class ChatRouter
     private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<ChatRouter> logger;
     private readonly LoggingUtil loggingUtil;
+    private readonly ModerationStateManager moderationStateManager;
 
     /// <summary>
     ///     Map from lowercase command to corresponding chat processor.
@@ -53,7 +54,8 @@ public class ChatRouter
 
     public ChatRouter(IEnumerable<IChatProcessor> processors, ServerChatInternalController internalController,
         KinematicsComponentCollection kinematics, WorldSegmentResolver resolver, LoggingUtil loggingUtil,
-        ChatHelpManager helpManager, ILogger<ChatRouter> logger, ScriptChatCallbacks callbacks)
+        ChatHelpManager helpManager, ILogger<ChatRouter> logger, ScriptChatCallbacks callbacks,
+        ModerationStateManager moderationStateManager)
     {
         this.internalController = internalController;
         this.kinematics = kinematics;
@@ -62,6 +64,7 @@ public class ChatRouter
         this.helpManager = helpManager;
         this.logger = logger;
         this.callbacks = callbacks;
+        this.moderationStateManager = moderationStateManager;
 
         // Build lookup table.
         foreach (var proc in processors)
@@ -99,6 +102,12 @@ public class ChatRouter
             }
             else
             {
+                if (moderationStateManager.IsMuted(details.SenderEntityId, ChatMuteScope.All))
+                {
+                    internalController.SendSystemMessage("You are muted.", details.SenderEntityId);
+                    return;
+                }
+
                 RouteLocalChat(details);
             }
         }

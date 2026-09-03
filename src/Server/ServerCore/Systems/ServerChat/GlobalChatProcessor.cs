@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Logging;
 
 namespace Sovereign.ServerCore.Systems.ServerChat;
@@ -29,13 +30,15 @@ public class GlobalChatProcessor : IChatProcessor
     private readonly ServerChatInternalController internalController;
     private readonly ILogger<GlobalChatProcessor> logger;
     private readonly LoggingUtil loggingUtil;
+    private readonly ModerationStateManager moderationStateManager;
 
     public GlobalChatProcessor(ServerChatInternalController internalController, LoggingUtil loggingUtil,
-        ILogger<GlobalChatProcessor> logger)
+        ILogger<GlobalChatProcessor> logger, ModerationStateManager moderationStateManager)
     {
         this.internalController = internalController;
         this.loggingUtil = loggingUtil;
         this.logger = logger;
+        this.moderationStateManager = moderationStateManager;
     }
 
     public List<ChatCommand> MatchingCommands => new()
@@ -47,6 +50,13 @@ public class GlobalChatProcessor : IChatProcessor
     {
         // Ignore empty messages.
         if (message.Length == 0) return;
+
+        if (moderationStateManager.IsMuted(senderEntityId, ChatMuteScope.All) ||
+            moderationStateManager.IsMuted(senderEntityId, ChatMuteScope.Global))
+        {
+            internalController.SendSystemMessage("You are muted.", senderEntityId);
+            return;
+        }
 
         // Send message.
         var name = loggingUtil.FormatEntity(senderEntityId);

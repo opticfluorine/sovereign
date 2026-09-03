@@ -76,6 +76,8 @@ public static class ServerServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(TestHarnessOptions)}"));
         services.Configure<WorldOptions>(
             configuration.GetSection($"Sovereign:{nameof(WorldOptions)}"));
+        services.Configure<ModerationOptions>(
+            configuration.GetSection($"Sovereign:{nameof(ModerationOptions)}"));
 
         return services;
     }
@@ -149,11 +151,13 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<ChatHelpManager>();
         services.TryAddSingleton<ServerChatScripting>();
         services.TryAddSingleton<ScriptChatCallbacks>();
+        services.TryAddSingleton<ModerationStateManager>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, ServerChatSystem>());
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, GlobalChatProcessor>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, RescueChatProcessor>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, ModerationChatProcessor>());
     }
 
     private static void AddServerManagementSystem(IServiceCollection services)

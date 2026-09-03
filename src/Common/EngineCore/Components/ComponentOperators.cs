@@ -239,6 +239,7 @@ public static class ComponentOperators
         };
 
     /// <summary>
+<<<<<<< HEAD
     ///     Standard operators for Vital-valued components.
     /// </summary>
     public static readonly Dictionary<ComponentOperation, Func<Vital, Vital, Vital>>
@@ -275,5 +276,14 @@ public static class ComponentOperators
                     Luck = a.Luck + b.Luck
                 }
             }
+        };
+
+    /// <summary>
+    ///     Standard operators for PlayerFlag-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<PlayerFlag, PlayerFlag, PlayerFlag>>
+        PlayerFlagOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
         };
 }

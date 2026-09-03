@@ -50,6 +50,7 @@ public sealed class ServerEntityFactory(
     QuantityComponentCollection quantities,
     ItemUseComponentCollection itemUses,
     NpcFlagsComponentCollection npcFlags,
+    PlayerFlagsComponentCollection playerFlags,
     UseRangeComponentCollection useRanges,
     HealthComponentCollection healths,
     StaminaComponentCollection staminas,
@@ -113,6 +114,7 @@ public sealed class ServerEntityFactory(
             levels,
             experiences,
             radiantDatas,
+            playerFlags,
             entityTable);
     }
 }

@@ -54,6 +54,7 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         QuantityComponentCollection quantities,
         ItemUseComponentCollection itemUses,
         NpcFlagsComponentCollection npcFlags,
+        PlayerFlagsComponentCollection playerFlags,
         UseRangeComponentCollection useRanges,
         HealthComponentCollection healths,
         StaminaComponentCollection staminas,
@@ -70,6 +71,7 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
             physics, boundingBoxes, castShadows, entityTypes, serverOnly, stackables, quantities, itemUses, npcFlags,
             useRanges, healths, staminas, manas, stats, equipmentTypes, levels, experiences, radiantDatas,
             entityTable)
+            playerFlags, entityTable)
     {
         this.accounts = accounts;
     }
