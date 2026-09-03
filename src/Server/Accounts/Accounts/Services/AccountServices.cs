@@ -21,6 +21,7 @@ using Microsoft.Extensions.Options;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Registration;
 using Sovereign.EngineUtil.Monads;
+using Sovereign.Persistence.Bans;
 using Sovereign.ServerCore.Configuration;
 
 namespace Sovereign.Accounts.Accounts.Services;
@@ -36,6 +37,7 @@ public sealed class AccountServices
     private readonly ILogger<AccountServices> logger;
     private readonly LoginHandoffTracker loginHandoffTracker;
     private readonly AccountLoginTracker loginTracker;
+    private readonly PersistenceBanServices persistenceBanServices;
     private readonly RegistrationController registrationController;
     private readonly RegistrationValidator registrationValidator;
     private readonly SharedSecretManager sharedSecretManager;
@@ -47,6 +49,7 @@ public sealed class AccountServices
         RegistrationController registrationController,
         SharedSecretManager sharedSecretManager,
         LoginHandoffTracker loginHandoffTracker,
+        PersistenceBanServices persistenceBanServices,
         IOptions<AccountsOptions> config,
         ILogger<AccountServices> logger)
     {
@@ -57,6 +60,7 @@ public sealed class AccountServices
         this.registrationController = registrationController;
         this.sharedSecretManager = sharedSecretManager;
         this.loginHandoffTracker = loginHandoffTracker;
+        this.persistenceBanServices = persistenceBanServices;
         this.config = config.Value;
         this.logger = logger;
     }
@@ -93,6 +97,13 @@ public sealed class AccountServices
                 limiter.RegisterFailedAttempt(username);
                 logger.LogInformation("Rejected login for {Username}: authentication failure.", username);
                 return AuthenticationResult.Failed;
+            }
+
+            // Reject if the account is banned.
+            if (persistenceBanServices.GetActiveBansForAccount(id).Count > 0)
+            {
+                logger.LogInformation("Rejected login for {Username}: account is banned.", username);
+                return AuthenticationResult.Banned;
             }
 
             // Verify that the account is not already logged in.
@@ -174,6 +185,17 @@ public sealed class AccountServices
             result = new Maybe<int>(connectionId);
 
         return result;
+    }
+
+    /// <summary>
+    ///     Gets the connection ID associated with a logged in account, if any.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <param name="connectionId">Connection ID. Only valid if the method returns true.</param>
+    /// <returns>true if a connection ID was found, false otherwise.</returns>
+    public bool TryGetConnectionIdForAccount(Guid accountId, out int connectionId)
+    {
+        return loginTracker.TryGetConnectionIdForAccount(accountId, out connectionId);
     }
 
     /// <summary>

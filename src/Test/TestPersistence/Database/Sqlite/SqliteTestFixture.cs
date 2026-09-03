@@ -217,6 +217,44 @@ public class SqliteTestFixture : IDisposable
     }
 
     /// <summary>
+    ///     Adds a ban for the given account.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <param name="playerName">Player name the ban is recorded for.</param>
+    /// <param name="adminName">Player name of the admin who created the ban.</param>
+    /// <param name="createdUtc">UTC timestamp at which the ban was created.</param>
+    /// <param name="durationDays">Ban duration in days, or null for a permanent ban.</param>
+    public void AddBan(Guid accountId, string playerName, string adminName,
+        DateTime createdUtc, int? durationDays)
+    {
+        const string sql = @"INSERT INTO Ban (account_id, player_name, admin_name, created, duration_days)
+                                   VALUES (@AccountId, @PlayerName, @AdminName, @Created, @DurationDays)";
+        using var cmd = new SqliteCommand(sql, Connection);
+
+        var pAccountId = new SqliteParameter("AccountId", accountId.ToByteArray());
+        pAccountId.SqliteType = SqliteType.Blob;
+        cmd.Parameters.Add(pAccountId);
+
+        var pPlayerName = new SqliteParameter("PlayerName", playerName);
+        pPlayerName.SqliteType = SqliteType.Text;
+        cmd.Parameters.Add(pPlayerName);
+
+        var pAdminName = new SqliteParameter("AdminName", adminName);
+        pAdminName.SqliteType = SqliteType.Text;
+        cmd.Parameters.Add(pAdminName);
+
+        var pCreated = new SqliteParameter("Created", createdUtc);
+        pCreated.SqliteType = SqliteType.Text;
+        cmd.Parameters.Add(pCreated);
+
+        var pDuration = new SqliteParameter("DurationDays", SqliteType.Integer);
+        pDuration.Value = (object?)durationDays ?? DBNull.Value;
+        cmd.Parameters.Add(pDuration);
+
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
     ///     Adds an account with the given username.
     /// </summary>
     /// <param name="id">Account ID.</param>

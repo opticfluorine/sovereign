@@ -192,6 +192,17 @@ public sealed class AccountLoginTracker
     }
 
     /// <summary>
+    ///     Gets the connection associated with a logged in account, if any.
+    /// </summary>
+    /// <param name="accountId">Account ID.</param>
+    /// <param name="connectionId">Connection ID. Only set if return value is true.</param>
+    /// <returns>true if a connection ID was found, false otherwise.</returns>
+    public bool TryGetConnectionIdForAccount(Guid accountId, out int connectionId)
+    {
+        return accountsToConnections.TryGetValue(accountId, out connectionId);
+    }
+
+    /// <summary>
     ///     Gets the player associated with a connection, if any.
     /// </summary>
     /// <param name="connectionId">Connection ID.</param>
