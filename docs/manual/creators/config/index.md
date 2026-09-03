@@ -84,6 +84,7 @@ interpolating the two steps around the point in time.
 - **LoginDenialPeriodSeconds**: The duration in seconds for which login is denied when the account is locked.
 - **MinimumPasswordLength**: The minimum length for user passwords.
 - **HandoffPeriodSeconds**: The duration in seconds for handoff operations.
+- **MaxPlayers**: The maximum number of concurrently connected players. A value of 0 (the default) means no limit.
 
 ### ScriptingOptions
 - **ScriptDirectory**: The directory where scripts are stored.

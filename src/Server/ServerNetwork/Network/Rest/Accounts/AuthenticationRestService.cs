@@ -56,6 +56,7 @@ public sealed class AuthenticationRestService
             { AuthenticationResult.Successful, 201 },
             { AuthenticationResult.AlreadyLoggedIn, 409 },
             { AuthenticationResult.TooManyAttempts, 429 },
+            { AuthenticationResult.ServerAtCapacity, 503 },
             { AuthenticationResult.Failed, 403 }
         };
 
@@ -70,6 +71,10 @@ public sealed class AuthenticationRestService
             {
                 AuthenticationResult.TooManyAttempts,
                 "The account is temporarily locked due to too many failed login attempts."
+            },
+            {
+                AuthenticationResult.ServerAtCapacity,
+                "The server is at capacity. Please try again later."
             },
             { AuthenticationResult.Failed, "Failed." }
         };

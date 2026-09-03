@@ -118,6 +118,13 @@ public sealed class AuthenticationClient
                     result = new Option<LoginResponse, string>(serverError);
                     break;
 
+                case HttpStatusCode.ServiceUnavailable:
+                    // Failed: Server is at capacity.
+                    const string serverAtCapacity = "Login failed: server is at capacity, try again later.";
+                    logger.LogError(serverAtCapacity);
+                    result = new Option<LoginResponse, string>(serverAtCapacity);
+                    break;
+
                 default:
                     // Failed: Unknown error.
                     const string unknownError = "Login failed: unknown error.";

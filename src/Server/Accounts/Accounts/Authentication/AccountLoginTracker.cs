@@ -155,6 +155,11 @@ public sealed class AccountLoginTracker
     }
 
     /// <summary>
+    ///     Gets the number of accounts currently logged in.
+    /// </summary>
+    public int LoggedInAccountCount => accountLoginStates.Count;
+
+    /// <summary>
     ///     Gets the login state of the given account ID.
     /// </summary>
     /// <param name="accountId">Account ID.</param>
