@@ -2,6 +2,12 @@
 
 ## 2026
 
+### September
+
+#### 3 September 2026
+
+* Add a server option to limit the number of concurrently connected players.
+
 ### April
 
 #### 12 April 2026

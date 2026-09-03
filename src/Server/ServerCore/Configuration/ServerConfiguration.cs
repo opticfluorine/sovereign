@@ -215,4 +215,9 @@ public sealed class AccountsOptions
     ///     beyond which the handoff will be invalidated.
     /// </summary>
     public int HandoffPeriodSeconds { get; set; } = 30;
+
+    /// <summary>
+    ///     Maximum number of concurrently connected players, or 0 for no limit.
+    /// </summary>
+    public int MaxPlayers { get; set; } = 0;
 }

@@ -17,9 +17,11 @@
 
 using System;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.Accounts.Accounts.Authentication;
 using Sovereign.Accounts.Accounts.Registration;
 using Sovereign.EngineUtil.Monads;
+using Sovereign.ServerCore.Configuration;
 
 namespace Sovereign.Accounts.Accounts.Services;
 
@@ -29,6 +31,7 @@ namespace Sovereign.Accounts.Accounts.Services;
 public sealed class AccountServices
 {
     private readonly AccountAuthenticator authenticator;
+    private readonly AccountsOptions config;
     private readonly AuthenticationAttemptLimiter limiter;
     private readonly ILogger<AccountServices> logger;
     private readonly LoginHandoffTracker loginHandoffTracker;
@@ -44,6 +47,7 @@ public sealed class AccountServices
         RegistrationController registrationController,
         SharedSecretManager sharedSecretManager,
         LoginHandoffTracker loginHandoffTracker,
+        IOptions<AccountsOptions> config,
         ILogger<AccountServices> logger)
     {
         this.authenticator = authenticator;
@@ -53,6 +57,7 @@ public sealed class AccountServices
         this.registrationController = registrationController;
         this.sharedSecretManager = sharedSecretManager;
         this.loginHandoffTracker = loginHandoffTracker;
+        this.config = config.Value;
         this.logger = logger;
     }
 
@@ -96,6 +101,15 @@ public sealed class AccountServices
                 // Already logged in, log and reject.
                 logger.LogInformation("Rejected login for {Username}: already logged in.", username);
                 return AuthenticationResult.AlreadyLoggedIn;
+            }
+
+            // Reject if the server is at its concurrent player limit.
+            if (config.MaxPlayers > 0 && loginTracker.LoggedInAccountCount >= config.MaxPlayers)
+            {
+                logger.LogWarning(
+                    "Rejected login for {Username}: server is at capacity ({Count}/{MaxPlayers}).",
+                    username, loginTracker.LoggedInAccountCount, config.MaxPlayers);
+                return AuthenticationResult.ServerAtCapacity;
             }
 
             // Login successful.

@@ -42,5 +42,11 @@ public enum AuthenticationResult
     ///     Too many failed attempts have been made to log into the account,
     ///     and login attempts are temporarily disabled for this account.
     /// </summary>
-    TooManyAttempts
+    TooManyAttempts,
+
+    /// <summary>
+    ///     The authentication was successful, but the server is at its
+    ///     concurrent player limit and the login was denied.
+    /// </summary>
+    ServerAtCapacity
 }
