@@ -7,6 +7,8 @@
 #### 3 September 2026
 
 * Add a server option to limit the number of concurrently connected players.
+* Add /ban, /unban, and /listbans admin commands to ban and unban accounts.
+* Bans are stored in a new database table; existing server databases must be recreated.
 
 ### April
 

@@ -48,5 +48,11 @@ public enum AuthenticationResult
     ///     The authentication was successful, but the server is at its
     ///     concurrent player limit and the login was denied.
     /// </summary>
-    ServerAtCapacity
+    ServerAtCapacity,
+
+    /// <summary>
+    ///     The authentication was successful, but the account is banned
+    ///     and the login was denied.
+    /// </summary>
+    Banned
 }

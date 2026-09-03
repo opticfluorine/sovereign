@@ -159,6 +159,25 @@ CREATE TABLE EntityKeyValue
 CREATE INDEX EntityKeyValue_Id ON EntityKeyValue (entity_id);
 
 
+-------------------
+-- Ban Table     --
+-------------------
+
+CREATE TABLE Ban
+(
+    id            INTEGER PRIMARY KEY NOT NULL,
+    account_id    BLOB                NOT NULL,
+    player_name   VARCHAR(255)        NOT NULL,
+    admin_name    VARCHAR(255)        NOT NULL,
+    created       TEXT                NOT NULL,
+    duration_days INTEGER,
+    deleted       BOOLEAN             NOT NULL DEFAULT (FALSE),
+    FOREIGN KEY (account_id) REFERENCES Account (id)
+);
+
+CREATE INDEX Ban_Account ON Ban (account_id);
+
+
 --------------------------------------
 -- Account With Authentication View --
 --------------------------------------
