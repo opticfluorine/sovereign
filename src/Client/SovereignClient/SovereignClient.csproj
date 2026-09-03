@@ -85,7 +85,8 @@
             <GlslFiles Include="Shader/*.vert;Shader/*.frag"/>
         </ItemGroup>
         <MakeDir Directories="$(OutDir)Data/Shader"/>
-        <Exec Command="glslc @(GlslFiles) -g -o $(OutDir)Data/Shader/%(Filename)%(Extension).spv" Outputs="$(OutDir)Data/Shader/%(Filename)%(Extension).spv"/>
+        <Exec Command="glslc @(GlslFiles) -g -o $(OutDir)Data/Shader/%(Filename)%(Extension).spv" Outputs="$(OutDir)Data/Shader/%(Filename)%(Extension).spv" Condition="'$(OS)' != 'Unix'"/>
+        <Exec Command="if command -v glslc &gt; /dev/null 2&gt;&amp;1; then glslc @(GlslFiles) -g -o $(OutDir)Data/Shader/%(Filename)%(Extension).spv; else echo 'glslc not found; skipping SPIR-V shader compilation.'; fi" Outputs="$(OutDir)Data/Shader/%(Filename)%(Extension).spv" Condition="'$(OS)' == 'Unix'"/>
     </Target>
 
 </Project>
