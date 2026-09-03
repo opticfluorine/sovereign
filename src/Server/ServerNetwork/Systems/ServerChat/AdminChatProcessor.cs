@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
@@ -29,9 +30,12 @@ using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.WorldManagement;
+using Sovereign.Persistence.Bans;
 using Sovereign.Persistence.Players;
+using Sovereign.ServerCore.Components;
 using Sovereign.ServerCore.Systems.Scripting;
 using Sovereign.ServerCore.Systems.ServerChat;
+using Sovereign.ServerNetwork.Network.ServerNetwork;
 
 namespace Sovereign.ServerNetwork.Systems.ServerChat;
 
@@ -80,7 +84,24 @@ public class AdminChatProcessor : IChatProcessor
     /// </summary>
     private const string ListScripts = "listscripts";
 
+    /// <summary>
+    ///     Command name for /ban.
+    /// </summary>
+    private const string Ban = "ban";
+
+    /// <summary>
+    ///     Command name for /unban.
+    /// </summary>
+    private const string Unban = "unban";
+
+    /// <summary>
+    ///     Command name for /listbans.
+    /// </summary>
+    private const string ListBans = "listbans";
+
+    private readonly AccountComponentCollection accounts;
     private readonly AdminTagCollection admins;
+    private readonly AccountServices accountServices;
     private readonly BlockController blockController;
     private readonly IBlockServices blockServices;
     private readonly BlockTemplateNameComponentIndexer blockTemplateNames;
@@ -90,12 +111,14 @@ public class AdminChatProcessor : IChatProcessor
     private readonly LoggingUtil loggingUtil;
     private readonly NameComponentCollection names;
     private readonly NameComponentValidator nameValidator;
+    private readonly PersistenceBanServices persistenceBanServices;
     private readonly PersistencePlayerServices persistencePlayerServices;
     private readonly PlayerNameComponentIndexer playerNameIndex;
     private readonly PlayerRoleCheck playerRoleCheck;
     private readonly ScriptingController scriptingController;
     private readonly ScriptingServices scriptingServices;
     private readonly WorldManagementController worldManagementController;
+    private readonly ServerNetworkController networkController;
 
     public AdminChatProcessor(AdminTagCollection admins, ServerChatInternalController internalController,
         PlayerRoleCheck playerRoleCheck, PlayerNameComponentIndexer playerNameIndex,
@@ -103,7 +126,9 @@ public class AdminChatProcessor : IChatProcessor
         LoggingUtil loggingUtil, NameComponentCollection names, WorldManagementController worldManagementController,
         IEventSender eventSender, BlockController blockController, IBlockServices blockServices,
         BlockTemplateNameComponentIndexer blockTemplateNames, ILogger<AdminChatProcessor> logger,
-        ScriptingController scriptingController, ScriptingServices scriptingServices)
+        ScriptingController scriptingController, ScriptingServices scriptingServices,
+        PersistenceBanServices persistenceBanServices, AccountServices accountServices,
+        ServerNetworkController networkController, AccountComponentCollection accounts)
     {
         this.admins = admins;
         this.internalController = internalController;
@@ -121,6 +146,10 @@ public class AdminChatProcessor : IChatProcessor
         this.logger = logger;
         this.scriptingController = scriptingController;
         this.scriptingServices = scriptingServices;
+        this.persistenceBanServices = persistenceBanServices;
+        this.accountServices = accountServices;
+        this.networkController = networkController;
+        this.accounts = accounts;
     }
 
     public List<ChatCommand> MatchingCommands => new()
@@ -132,7 +161,10 @@ public class AdminChatProcessor : IChatProcessor
         new ChatCommand { Command = ReloadAllScripts, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ReloadScript, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = LoadNewScripts, HelpSummary = "", IncludeInHelp = false },
-        new ChatCommand { Command = ListScripts, HelpSummary = "", IncludeInHelp = false }
+        new ChatCommand { Command = ListScripts, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = Ban, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = Unban, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = ListBans, HelpSummary = "", IncludeInHelp = false }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)
@@ -183,6 +215,18 @@ public class AdminChatProcessor : IChatProcessor
 
             case ListScripts:
                 OnListScripts(senderEntityId);
+                break;
+
+            case Ban:
+                OnBan(message, senderEntityId);
+                break;
+
+            case Unban:
+                OnUnban(message, senderEntityId);
+                break;
+
+            case ListBans:
+                OnListBans(senderEntityId);
                 break;
         }
     }
@@ -443,5 +487,139 @@ public class AdminChatProcessor : IChatProcessor
         internalController.SendSystemMessage("Currently loaded scripts:", senderEntityId);
         foreach (var name in scriptingServices.GetLoadedScripts().Order())
             internalController.SendSystemMessage($"  - {name}", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /ban command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnBan(string message, ulong senderEntityId)
+    {
+        // Parse arguments, do basic validation.
+        var args = message.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (args.Length is < 1 or > 2)
+        {
+            internalController.SendSystemMessage("Usage: /ban player [duration_in_days]", senderEntityId);
+            return;
+        }
+
+        var playerName = args[0];
+        if (!nameValidator.IsValid(playerName))
+        {
+            internalController.SendSystemMessage("Invalid name.", senderEntityId);
+            return;
+        }
+
+        int? durationDays = null;
+        if (args.Length == 2)
+        {
+            if (!int.TryParse(args[1], out var duration) || duration <= 0)
+            {
+                internalController.SendSystemMessage("Duration must be a positive number of days.",
+                    senderEntityId);
+                return;
+            }
+
+            durationDays = duration;
+        }
+
+        // Resolve the banned player's account.
+        if (!TryResolveAccount(playerName, senderEntityId, out var accountId)) return;
+
+        // Record the ban.
+        persistenceBanServices.AddBan(accountId, playerName, names[senderEntityId], durationDays);
+        logger.LogInformation("Player {Name} (account {AccountId}) has been banned; ban created by {Admin}.",
+            playerName, accountId, loggingUtil.FormatEntity(senderEntityId));
+
+        // Kick the account's connection if the account is logged in.
+        if (accountServices.TryGetConnectionIdForAccount(accountId, out var connectionId))
+        {
+            if (accountServices.TryGetPlayerForAccount(accountId, out var playerEntityId))
+                internalController.SendSystemMessage("You have been banned from this server.", playerEntityId);
+            networkController.Disconnect(eventSender, connectionId);
+        }
+
+        // Confirm to the admin.
+        internalController.SendSystemMessage(durationDays.HasValue
+            ? $"Account of player {playerName} has been banned for {durationDays.Value} day(s)."
+            : $"Account of player {playerName} has been banned permanently.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /unban command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnUnban(string message, ulong senderEntityId)
+    {
+        // Parse arguments, do basic validation.
+        var playerName = message.Trim();
+        if (!nameValidator.IsValid(playerName))
+        {
+            internalController.SendSystemMessage("Invalid name.", senderEntityId);
+            return;
+        }
+
+        // Resolve the player's account.
+        if (!TryResolveAccount(playerName, senderEntityId, out var accountId)) return;
+
+        // Remove any active bans.
+        var removed = persistenceBanServices.RemoveBansForAccount(accountId);
+        logger.LogInformation("Removed {Count} ban(s) for player {Name}; request made by {Admin}.",
+            removed, playerName, loggingUtil.FormatEntity(senderEntityId));
+
+        internalController.SendSystemMessage(removed > 0
+            ? $"Removed {removed} ban(s)."
+            : "No active bans for that player.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /listbans command.
+    /// </summary>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnListBans(ulong senderEntityId)
+    {
+        var bans = persistenceBanServices.GetActiveBans();
+        if (bans.Count == 0)
+        {
+            internalController.SendSystemMessage("No active bans.", senderEntityId);
+            return;
+        }
+
+        internalController.SendSystemMessage("Active bans:", senderEntityId);
+        foreach (var ban in bans)
+        {
+            var duration = ban.DurationDays.HasValue ? $"{ban.DurationDays.Value} day(s)" : "permanent";
+            internalController.SendSystemMessage(
+                $"  - {ban.Username} (banned as {ban.PlayerName}, {duration}, created {ban.CreatedUtc:u} by {ban.AdminName})",
+                senderEntityId);
+        }
+    }
+
+    /// <summary>
+    ///     Resolves a player name to an account ID, checking online players first
+    ///     and then falling back to the database.
+    /// </summary>
+    /// <param name="playerName">Player name (matched case-insensitively).</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    /// <param name="accountId">Resolved account ID. Only valid if the method returns true.</param>
+    /// <returns>true if the account was resolved, false otherwise.</returns>
+    private bool TryResolveAccount(string playerName, ulong senderEntityId, out Guid accountId)
+    {
+        // Check if the player is online.
+        if (playerNameIndex.TryGetPlayerByName(playerName, out var playerEntityId)
+            && accounts.HasComponentForEntity(playerEntityId))
+        {
+            accountId = accounts[playerEntityId];
+            return true;
+        }
+
+        // Player is offline; resolve through the database.
+        if (persistenceBanServices.TryGetAccountForPlayerName(playerName, out accountId)) return true;
+
+        logger.LogWarning("Cannot resolve account for player {Name}; player does not exist.", playerName);
+        internalController.SendSystemMessage("Player does not exist.", senderEntityId);
+        return false;
     }
 }

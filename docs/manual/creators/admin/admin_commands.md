@@ -27,6 +27,44 @@ Revokes the Admin role from the given player. If the player does not already hav
 Admin role, no change will be made. This command cannot be used to revoke the Admin
 role from yourself.
 
+## Bans
+
+Admins may ban accounts, preventing them from logging in to the server. Bans are
+recorded at the account level: once an account is banned, no player character of that
+account may log in. Banning a player who is currently online immediately disconnects
+that player.
+
+### /ban
+
+**Usage:** `/ban [player_name] [duration_in_days]`
+
+**Parameters:**
+* `player_name`: Name of the player whose account is to be banned.
+* `duration_in_days`: Optional duration of the ban in days. If omitted, the ban is
+  permanent.
+
+Bans the account of the given player. If the player is currently online, the player
+will be disconnected immediately. Timed bans expire automatically once their duration
+has elapsed; expired bans are removed from the list of active bans when it is next
+queried.
+
+### /unban
+
+**Usage:** `/unban [player_name]`
+
+**Parameters:**
+* `player_name`: Name of the player whose account is to be unbanned.
+
+Lifts all active bans on the account of the given player. If the account has no active
+bans, no change will be made.
+
+### /listbans
+
+**Usage:** `/listbans`
+
+Lists all active bans, including the banned account, the player name used when the ban
+was created, the ban duration, and the admin who created the ban.
+
 (chat-admin-scripting)=
 ## Scripting
 

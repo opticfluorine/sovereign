@@ -57,6 +57,7 @@ public sealed class AuthenticationRestService
             { AuthenticationResult.AlreadyLoggedIn, 409 },
             { AuthenticationResult.TooManyAttempts, 429 },
             { AuthenticationResult.ServerAtCapacity, 503 },
+            { AuthenticationResult.Banned, 423 },
             { AuthenticationResult.Failed, 403 }
         };
 
@@ -76,6 +77,7 @@ public sealed class AuthenticationRestService
                 AuthenticationResult.ServerAtCapacity,
                 "The server is at capacity. Please try again later."
             },
+            { AuthenticationResult.Banned, "The account is banned." },
             { AuthenticationResult.Failed, "Failed." }
         };
 

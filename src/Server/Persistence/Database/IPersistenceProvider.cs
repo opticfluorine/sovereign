@@ -403,6 +403,36 @@ public interface IPersistenceProvider : IDisposable
     IRemoveAdminRoleQuery RemoveAdminRoleQuery { get; }
 
     /// <summary>
+    ///     IGetAccountForPlayerNameQuery for this persistence provider.
+    /// </summary>
+    IGetAccountForPlayerNameQuery GetAccountForPlayerNameQuery { get; }
+
+    /// <summary>
+    ///     IAddBanQuery for this persistence provider.
+    /// </summary>
+    IAddBanQuery AddBanQuery { get; }
+
+    /// <summary>
+    ///     IRemoveBansForAccountQuery for this persistence provider.
+    /// </summary>
+    IRemoveBansForAccountQuery RemoveBansForAccountQuery { get; }
+
+    /// <summary>
+    ///     ISoftDeleteExpiredBansQuery for this persistence provider.
+    /// </summary>
+    ISoftDeleteExpiredBansQuery SoftDeleteExpiredBansQuery { get; }
+
+    /// <summary>
+    ///     IGetActiveBansForAccountQuery for this persistence provider.
+    /// </summary>
+    IGetActiveBansForAccountQuery GetActiveBansForAccountQuery { get; }
+
+    /// <summary>
+    ///     IListActiveBansQuery for this persistence provider.
+    /// </summary>
+    IListActiveBansQuery ListActiveBansQuery { get; }
+
+    /// <summary>
     ///     IGetWorldSegmentBlockDataQuery for this persistence provider.
     /// </summary>
     IGetWorldSegmentBlockDataQuery GetWorldSegmentBlockDataQuery { get; }

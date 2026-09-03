@@ -126,6 +126,13 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         AddAdminRoleQuery = new SqliteAddAdminRoleQuery(conn);
         RemoveAdminRoleQuery = new SqliteRemoveAdminRoleQuery(conn);
 
+        GetAccountForPlayerNameQuery = new SqliteGetAccountForPlayerNameQuery(conn);
+        AddBanQuery = new SqliteAddBanQuery(conn);
+        RemoveBansForAccountQuery = new SqliteRemoveBansForAccountQuery(conn);
+        SoftDeleteExpiredBansQuery = new SqliteSoftDeleteExpiredBansQuery(conn);
+        GetActiveBansForAccountQuery = new SqliteGetActiveBansForAccountQuery(conn);
+        ListActiveBansQuery = new SqliteListActiveBansQuery(conn);
+
         GetGlobalKeyValuePairsQuery = new SqliteGetGlobalKeyValuePairsQuery(conn);
         UpdateGlobalKeyValuePairQuery = new SqliteUpdateGlobalKeyValuePairQuery(conn);
         RemoveGlobalKeyValuePairQuery = new SqliteRemoveGlobalKeyValuePairQuery(conn);
@@ -362,6 +369,12 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IDeletePlayerQuery DeletePlayerQuery { get; }
     public IAddAdminRoleQuery AddAdminRoleQuery { get; }
     public IRemoveAdminRoleQuery RemoveAdminRoleQuery { get; }
+    public IGetAccountForPlayerNameQuery GetAccountForPlayerNameQuery { get; }
+    public IAddBanQuery AddBanQuery { get; }
+    public IRemoveBansForAccountQuery RemoveBansForAccountQuery { get; }
+    public ISoftDeleteExpiredBansQuery SoftDeleteExpiredBansQuery { get; }
+    public IGetActiveBansForAccountQuery GetActiveBansForAccountQuery { get; }
+    public IListActiveBansQuery ListActiveBansQuery { get; }
     public IGetWorldSegmentBlockDataQuery GetWorldSegmentBlockDataQuery { get; }
     public ISetWorldSegmentBlockDataQuery SetWorldSegmentBlockDataQuery { get; }
     public IAddComponentQuery<PointLight> AddPointLightSourceComponentQuery { get; }

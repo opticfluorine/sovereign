@@ -104,6 +104,13 @@ public sealed class AuthenticationClient
                     result = new Option<LoginResponse, string>(invalidInfo);
                     break;
 
+                case HttpStatusCode.Locked:
+                    // Failed: Account is banned.
+                    const string banned = "Login failed: this account is banned.";
+                    logger.LogError(banned);
+                    result = new Option<LoginResponse, string>(banned);
+                    break;
+
                 case HttpStatusCode.BadRequest:
                     // Failed: Invalid request.
                     const string invalidRequest = "Login failed: invalid request.";
