@@ -29,8 +29,10 @@ public sealed class WorldManagementEventHandler
 {
     private readonly WorldSegmentActivationManager activationManager;
     private readonly WorldSegmentBlockDataManager blockDataManager;
+    private readonly IEventSender eventSender;
     private readonly ILogger<WorldManagementEventHandler> logger;
     private readonly WorldSegmentSubscriptionManager subscriptionManager;
+    private readonly WorldSegmentUnloadManager unloadManager;
     private readonly WorldSegmentSynchronizationManager syncManager;
 
     private bool initialized;
@@ -39,12 +41,15 @@ public sealed class WorldManagementEventHandler
         WorldSegmentSynchronizationManager syncManager,
         WorldSegmentBlockDataManager blockDataManager,
         WorldSegmentSubscriptionManager subscriptionManager,
+        WorldSegmentUnloadManager unloadManager, IEventSender eventSender,
         ILogger<WorldManagementEventHandler> logger)
     {
         this.activationManager = activationManager;
         this.syncManager = syncManager;
         this.blockDataManager = blockDataManager;
         this.subscriptionManager = subscriptionManager;
+        this.unloadManager = unloadManager;
+        this.eventSender = eventSender;
         this.logger = logger;
     }
 
@@ -109,6 +114,16 @@ public sealed class WorldManagementEventHandler
                 }
 
                 subscriptionManager.OnResyncSingleRequest(details.EntityId);
+                break;
+            }
+
+            case EventId.Server_WorldManagement_UnloadIdleWorldSegments:
+            {
+                // Treat missing details as a periodic pass.
+                var details = ev.EventDetails as BooleanEventDetails;
+                unloadManager.UnloadIdleSegments(details?.Value ?? false);
+                if (details is not { Value: true })
+                    unloadManager.ScheduleNextUnloadCheck(eventSender);
                 break;
             }
 

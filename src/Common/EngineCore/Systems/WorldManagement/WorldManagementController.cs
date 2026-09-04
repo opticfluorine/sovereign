@@ -68,6 +68,21 @@ public class WorldManagementController
     }
 
     /// <summary>
+    ///     Requests that all zero-subscriber world segments not on the auto load list be unloaded,
+    ///     ignoring the zero-subscriber age cutoff.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    public void RequestUnloadIdleWorldSegments(IEventSender eventSender)
+    {
+        var details = new BooleanEventDetails { Value = true };
+        var ev = new Event(EventId.Server_WorldManagement_UnloadIdleWorldSegments, details)
+        {
+            SyncToTick = true
+        };
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
     ///     Announces that the given world segment has been loaded.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>

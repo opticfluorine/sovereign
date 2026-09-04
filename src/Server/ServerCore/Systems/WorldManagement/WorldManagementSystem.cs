@@ -18,6 +18,7 @@
 using System.Collections.Generic;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Timing;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
 
@@ -29,13 +30,16 @@ public sealed class WorldManagementSystem : ISystem
     private readonly WorldManagementEventHandler eventHandler;
 
     private readonly IEventLoop eventLoop;
+    private readonly IEventSender eventSender;
     private readonly WorldSegmentChangeMonitor segmentChangeMonitor;
     private readonly WorldSegmentSubscriptionManager subscriptionManager;
+    private readonly WorldSegmentUnloadManager unloadManager;
 
     public WorldManagementSystem(EventCommunicator eventCommunicator,
         IEventLoop eventLoop, WorldManagementEventHandler eventHandler,
         WorldSegmentSubscriptionManager subscriptionManager,
-        WorldSegmentChangeMonitor segmentChangeMonitor)
+        WorldSegmentChangeMonitor segmentChangeMonitor,
+        WorldSegmentUnloadManager unloadManager, IEventSender eventSender)
     {
         /* Dependency injection. */
         EventCommunicator = eventCommunicator;
@@ -43,6 +47,8 @@ public sealed class WorldManagementSystem : ISystem
         this.eventHandler = eventHandler;
         this.subscriptionManager = subscriptionManager;
         this.segmentChangeMonitor = segmentChangeMonitor;
+        this.unloadManager = unloadManager;
+        this.eventSender = eventSender;
 
         /* Register system. */
         eventLoop.RegisterSystem(this);
@@ -56,7 +62,8 @@ public sealed class WorldManagementSystem : ISystem
         EventId.Core_WorldManagement_WorldSegmentLoaded,
         EventId.Core_WorldManagement_EntityLeaveWorldSegment,
         EventId.Server_WorldManagement_ResyncEntityTree,
-        EventId.Server_WorldManagement_ResyncEntity
+        EventId.Server_WorldManagement_ResyncEntity,
+        EventId.Server_WorldManagement_UnloadIdleWorldSegments
     };
 
     public int WorkloadEstimate => 80;
@@ -79,5 +86,7 @@ public sealed class WorldManagementSystem : ISystem
 
     public void Initialize()
     {
+        // Schedule the first idle world segment unload check.
+        unloadManager.ScheduleNextUnloadCheck(eventSender);
     }
 }
