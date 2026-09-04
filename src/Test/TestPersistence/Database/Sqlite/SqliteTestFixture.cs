@@ -206,7 +206,7 @@ public class SqliteTestFixture : IDisposable
     /// <param name="level">Migration level.</param>
     public void AddMigrationLevel(int level)
     {
-        const string sql = @"INSERT INTO MigrationLog (id, name) VALUES (@Id, ""test"")";
+        const string sql = @"INSERT INTO MigrationLog (id, name) VALUES (@Id, 'test')";
         var cmd = new SqliteCommand(sql, Connection);
 
         var pId = new SqliteParameter("Id", level);
