@@ -43,6 +43,23 @@ The scripting engine uses Lua tables with specific entries to communicate inform
         The size of the bounding box.
 ```
 
+(script-types-chatmutescope)=
+## ChatMuteScope
+
+```{eval-rst}
+.. lua:class:: ChatMuteScope
+
+    Describes the scope of a chat mute.
+
+    .. lua:attribute:: Global
+
+        The mute applies to global chat only.
+
+    .. lua:attribute:: All
+
+        The mute applies to all chat, including local chat and global chat.
+```
+
 (script-types-entityeventdetails)=
 ## EntityEventDetails
 
@@ -113,6 +130,28 @@ The scripting engine uses Lua tables with specific entries to communicate inform
     .. lua:attribute:: Velocity: Vector3
     
         Entity velocity.
+```
+
+(script-types-moderationeventdetails)=
+## ModerationEventDetails
+
+```{eval-rst}
+.. lua:class:: ModerationEventDetails
+
+    Event details type describing a chat mute change.
+
+    .. lua:attribute:: EntityId: integer
+
+        The entity ID of the affected player.
+
+    .. lua:attribute:: Scope: ChatMuteScope
+
+        The scope of the mute.
+
+    .. lua:attribute:: ExpirySystemTime: integer
+
+        Absolute system time in microseconds at which the mute expires, or 0
+        if the mute was removed before expiring.
 ```
 
 (script-types-playernamematch)=

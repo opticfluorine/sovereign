@@ -139,6 +139,11 @@ public enum ComponentType
     /// </summary>
     NpcFlags = 0x0017,
 
+    /// <summary>
+    ///     PlayerFlags component.
+    /// </summary>
+    PlayerFlags = 0x0018,
+
     #endregion Common
 
     #region Client

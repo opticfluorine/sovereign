@@ -27,6 +27,85 @@ Revokes the Admin role from the given player. If the player does not already hav
 Admin role, no change will be made. This command cannot be used to revoke the Admin
 role from yourself.
 
+### /addmoderator
+
+**Usage:** `/addmoderator [player_name]`
+
+**Parameters:**
+* `player_name`: Name of the player to be granted moderator privileges.
+
+Grants the Moderator role to the given player. If the player already has the Moderator
+role, no change will be made. Moderator privileges are held in memory only, so the
+player must be logged in and the role is cleared when the server restarts.
+
+### /removemoderator
+
+**Usage:** `/removemoderator [player_name]`
+
+**Parameters:**
+* `player_name`: Name of the player to have moderator privileges revoked.
+
+Revokes the Moderator role from the given player. If the player does not already have
+the Moderator role, no change will be made.
+
+(moderation-commands)=
+## Moderation
+
+Players with the Moderator role (including admins) have access to a number of chat
+commands for moderating player chat. Timed mutes are held in memory only and are
+cleared when the server restarts. Mutes expire automatically, and mute changes are
+announced to all players by the default `Sovereign/Chat/Moderation` script.
+
+### /muteglobal
+
+**Usage:** `/muteglobal [player_name] [timeout]`
+
+**Parameters:**
+* `player_name`: Name of the player to be muted from global chat.
+* `timeout`: Optional mute duration in minutes. Defaults to the
+  `DefaultMuteTimeoutMinutes` server option (5 minutes by default).
+
+Mutes the given player from global chat for the given duration. The player must be
+logged in. Muting an already-muted player replaces the mute with a new one.
+
+### /unmuteglobal
+
+**Usage:** `/unmuteglobal [player_name]`
+
+**Parameters:**
+* `player_name`: Name of the player to have their global chat mute removed.
+
+Removes the global chat mute from the given player.
+
+### /mute
+
+**Usage:** `/mute [player_name] [timeout]`
+
+**Parameters:**
+* `player_name`: Name of the player to be muted from all chat.
+* `timeout`: Optional mute duration in minutes. Defaults to the
+  `DefaultMuteTimeoutMinutes` server option (5 minutes by default).
+
+Mutes the given player from all chat (both local and global chat) for the given
+duration. The player must be logged in. Muting an already-muted player replaces the
+mute with a new one.
+
+### /unmute
+
+**Usage:** `/unmute [player_name]`
+
+**Parameters:**
+* `player_name`: Name of the player to have their all-chat mute removed.
+
+Removes the all-chat mute from the given player.
+
+### /listmutes
+
+**Usage:** `/listmutes`
+
+Lists all active mutes, including the affected player, the mute scope, and the
+remaining time until each mute expires.
+
 (chat-admin-scripting)=
 ## Scripting
 

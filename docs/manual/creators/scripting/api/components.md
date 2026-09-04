@@ -30,6 +30,7 @@ Each component collection that is accessible through the scripting engine may be
 | `Components.Parent`           | `ParentComponentCollection`           | `integer`      |
 | `Components.Physics`          | `PhysicsTagCollection`                | `boolean`      |
 | `Components.PlayerCharacter`  | `PlayerCharacterTagCollection`        | `boolean`      |
+| `Components.PlayerFlags`      | `PlayerFlagsComponentCollection`      | `PlayerFlag`   |
 | `Components.PointLight`       | `PointLightSourceComponentCollection` | `PointLight`   |
 | `Components.Quantity`         | `QuantityComponentCollection`         | `integer`      |
 | `Components.ServerOnly`       | `ServerOnlyTagCollection`             | `boolean`      |

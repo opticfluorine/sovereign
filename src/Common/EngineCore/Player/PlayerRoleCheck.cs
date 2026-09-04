@@ -1,20 +1,21 @@
 // Sovereign Engine
 // Copyright (c) 2024 opticfluorine
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Player;
 
@@ -24,10 +25,12 @@ namespace Sovereign.EngineCore.Player;
 public class PlayerRoleCheck
 {
     private readonly AdminTagCollection admins;
+    private readonly PlayerFlagsComponentCollection playerFlags;
 
-    public PlayerRoleCheck(AdminTagCollection admins)
+    public PlayerRoleCheck(AdminTagCollection admins, PlayerFlagsComponentCollection playerFlags)
     {
         this.admins = admins;
+        this.playerFlags = playerFlags;
     }
 
     /// <summary>
@@ -43,5 +46,17 @@ public class PlayerRoleCheck
         // can happen is if some other external tool modifies the database, which is not recommended.
         // Accordingly, this is an acceptable tradeoff.
         return admins.HasTagForEntity(playerEntityId) || admins.HasPendingTagForEntity(playerEntityId);
+    }
+
+    /// <summary>
+    ///     Checks whether the given player is a moderator. Admins implicitly satisfy this check.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <returns>true if moderator, false otherwise.</returns>
+    public bool IsPlayerModerator(ulong playerEntityId)
+    {
+        if (IsPlayerAdmin(playerEntityId)) return true;
+        return playerFlags.HasComponentForEntity(playerEntityId) &&
+               (playerFlags[playerEntityId] & PlayerFlag.Moderator) != 0;
     }
 }

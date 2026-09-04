@@ -28,6 +28,7 @@ Core components are available in both the client and server.
 | `Parent`           | `ParentComponentCollection`           | Maps an entity to its parent entity.                                                            |
 | `Physics`          | `PhysicsTagCollection`                | Indicates that a non-block entity has physics effects.                                          |
 | `PlayerCharacter`  | `PlayerCharacterTagCollection`        | Indicates that an entity is a player character.                                                 |
+| `PlayerFlags`      | `PlayerFlagsComponentCollection`      | Bitwise flags for player characteristics (e.g. Moderator).                                      |
 | `PointLightSource` | `PointLightSourceComponentCollection` | Specifies the properties of a point light source attached to the entity.                        |
 | `Quantity`         | `QuantityComponentCollection`         | For items that are also `Stackable`, specifies the quantity of items in the stack.              |
 | `ServerOnly`       | `ServerOnlyComponentCollection`       | Specifies that the entity is server-only and should not be shared with players (except admins). |

@@ -29,12 +29,14 @@ namespace Sovereign.ServerCore.Systems.ServerChat;
 public class ServerChatSystem : ISystem
 {
     private readonly ILogger<ServerChatSystem> logger;
+    private readonly ModerationStateManager moderationStateManager;
     private readonly ChatRouter router;
 
     public ServerChatSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, ChatRouter router,
-        ILogger<ServerChatSystem> logger)
+        ModerationStateManager moderationStateManager, ILogger<ServerChatSystem> logger)
     {
         this.router = router;
+        this.moderationStateManager = moderationStateManager;
         this.logger = logger;
         EventCommunicator = eventCommunicator;
 
@@ -80,6 +82,8 @@ public class ServerChatSystem : ISystem
 
             processed++;
         }
+
+        moderationStateManager.PurgeExpired();
 
         return processed;
     }
