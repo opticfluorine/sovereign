@@ -80,6 +80,11 @@ public class AdminChatProcessor : IChatProcessor
     /// </summary>
     private const string ListScripts = "listscripts";
 
+    /// <summary>
+    ///     Command name for /gcworld.
+    /// </summary>
+    private const string GcWorld = "gcworld";
+
     private readonly AdminTagCollection admins;
     private readonly BlockController blockController;
     private readonly IBlockServices blockServices;
@@ -132,7 +137,8 @@ public class AdminChatProcessor : IChatProcessor
         new ChatCommand { Command = ReloadAllScripts, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ReloadScript, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = LoadNewScripts, HelpSummary = "", IncludeInHelp = false },
-        new ChatCommand { Command = ListScripts, HelpSummary = "", IncludeInHelp = false }
+        new ChatCommand { Command = ListScripts, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = GcWorld, HelpSummary = "", IncludeInHelp = false }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)
@@ -183,6 +189,10 @@ public class AdminChatProcessor : IChatProcessor
 
             case ListScripts:
                 OnListScripts(senderEntityId);
+                break;
+
+            case GcWorld:
+                OnGcWorld(senderEntityId);
                 break;
         }
     }
@@ -443,5 +453,15 @@ public class AdminChatProcessor : IChatProcessor
         internalController.SendSystemMessage("Currently loaded scripts:", senderEntityId);
         foreach (var name in scriptingServices.GetLoadedScripts().Order())
             internalController.SendSystemMessage($"  - {name}", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /gcworld command.
+    /// </summary>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnGcWorld(ulong senderEntityId)
+    {
+        worldManagementController.RequestUnloadIdleWorldSegments(eventSender);
+        internalController.SendSystemMessage("Idle world segment unload requested.", senderEntityId);
     }
 }

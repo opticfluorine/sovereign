@@ -98,6 +98,29 @@ public class WorldSegmentActivationManager
     }
 
     /// <summary>
+    ///     Deactivates the given world segment so that a later subscription reloads it from the
+    ///     database.
+    /// </summary>
+    /// <param name="segmentIndex">Segment index.</param>
+    public void DeactivateWorldSegment(GridPosition segmentIndex)
+    {
+        segmentRefCounts.Remove(segmentIndex);
+
+        var taken = false;
+        try
+        {
+            loadedSegmentsSpinLock.Enter(ref taken);
+            loadedSegments.Remove(segmentIndex);
+        }
+        finally
+        {
+            if (taken) loadedSegmentsSpinLock.Exit();
+        }
+
+        logger.LogTrace("Segment {SegmentIndex} deactivated.", segmentIndex);
+    }
+
+    /// <summary>
     ///     Called when a world segment has been loaded into memory.
     /// </summary>
     /// <param name="segmentIndex">Segment index.</param>

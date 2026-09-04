@@ -90,6 +90,15 @@ interpolating the two steps around the point in time.
 - **ScriptDirectory**: The directory where scripts are stored.
 - **MaxDirectoryDepth**: The maximum directory depth for script discovery.
 
+### WorldOptions
+- **AutoLoadWorldSegments**: A list of world segments to automatically load at startup. Each
+  entry is an object with `X`, `Y`, and `Z` integer fields giving the world segment index.
+  Auto-loaded segments are never unloaded from server memory.
+- **EntityUnloadCheckIntervalSeconds**: How often, in seconds, the server checks for idle world
+  segments whose entities should be unloaded from server memory.
+- **EntityUnloadCutoffSeconds**: How long, in seconds, a world segment must have had no
+  subscribed players before its entities are unloaded from server memory.
+
 ---
 
 ## Common Configuration Options (Client and Server)

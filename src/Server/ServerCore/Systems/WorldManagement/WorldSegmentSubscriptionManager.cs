@@ -23,6 +23,7 @@ using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Timing;
 using Sovereign.EngineCore.World;
 
 namespace Sovereign.ServerCore.Systems.WorldManagement;
@@ -89,13 +90,21 @@ public class WorldSegmentSubscriptionManager
 
     private readonly WorldSegmentSynchronizationManager syncManager;
 
+    private readonly ISystemTimer systemTimer;
+
+    /// <summary>
+    ///     Map from world segment index to the system time (us) at which its subscriber count
+    ///     reached zero. Segments with subscribers are not tracked.
+    /// </summary>
+    private readonly Dictionary<GridPosition, ulong> zeroSubscriberTimes = new();
+
     public WorldSegmentSubscriptionManager(PlayerPositionEventFilter positionEventFilter,
         WorldSegmentResolver resolver, WorldSegmentActivationManager activationManager,
         IEventSender eventSender, WorldManagementInternalController internalController,
         WorldSegmentSynchronizationManager syncManager, KinematicsComponentCollection kinematics,
         EntitySynchronizer synchronizer, EntityHierarchyIndexer hierarchyIndexer,
         EntityTable entityTable, NonBlockPositionEventFilter nonBlockPositionEventFilter,
-        ParentComponentCollection parents,
+        ParentComponentCollection parents, ISystemTimer systemTimer,
         ILogger<WorldSegmentSubscriptionManager> logger)
     {
         this.positionEventFilter = positionEventFilter;
@@ -110,6 +119,7 @@ public class WorldSegmentSubscriptionManager
         this.entityTable = entityTable;
         this.nonBlockPositionEventFilter = nonBlockPositionEventFilter;
         this.parents = parents;
+        this.systemTimer = systemTimer;
         this.logger = logger;
 
         // Register event handlers.
@@ -135,6 +145,35 @@ public class WorldSegmentSubscriptionManager
         return playersByWorldSegments.TryGetValue(segmentIndex, out var players)
             ? players
             : new HashSet<ulong>();
+    }
+
+    /// <summary>
+    ///     Gets a copy of the list of world segments that currently have zero subscribers.
+    /// </summary>
+    /// <returns>List of world segment indices that have zero subscribers.</returns>
+    public List<GridPosition> GetZeroSubscriberSegments()
+    {
+        return new List<GridPosition>(zeroSubscriberTimes.Keys);
+    }
+
+    /// <summary>
+    ///     Clears the zero-subscriber tracking for the given world segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    public void ClearZeroSubscriberSegment(GridPosition segmentIndex)
+    {
+        zeroSubscriberTimes.Remove(segmentIndex);
+    }
+
+    /// <summary>
+    ///     Gets the system time at which the given world segment reached zero subscribers.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <param name="zeroTime">System time (us) at which the segment reached zero subscribers.</param>
+    /// <returns>true if the segment is tracked as zero-subscriber, false otherwise.</returns>
+    public bool TryGetZeroSubscriberTime(GridPosition segmentIndex, out ulong zeroTime)
+    {
+        return zeroSubscriberTimes.TryGetValue(segmentIndex, out zeroTime);
     }
 
     /// <summary>
@@ -241,6 +280,25 @@ public class WorldSegmentSubscriptionManager
     private void OnEndUpdates()
     {
         activationManager.ProcessChanges(changeCounts);
+        foreach (var segmentIndex in changeCounts.Keys) UpdateZeroSubscriberTracking(segmentIndex);
+    }
+
+    /// <summary>
+    ///     Updates the zero-subscriber tracking for the given world segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    private void UpdateZeroSubscriberTracking(GridPosition segmentIndex)
+    {
+        if (playersByWorldSegments.TryGetValue(segmentIndex, out var players) && players.Count > 0)
+        {
+            // Segment has subscribers again, so stop tracking it.
+            zeroSubscriberTimes.Remove(segmentIndex);
+        }
+        else if (!zeroSubscriberTimes.ContainsKey(segmentIndex))
+        {
+            // Segment has no subscribers; record when it first reached this state.
+            zeroSubscriberTimes[segmentIndex] = systemTimer.GetTime();
+        }
     }
 
     /// <summary>

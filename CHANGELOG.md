@@ -4,6 +4,10 @@
 
 ### September
 
+#### 4 September 2026
+
+* Add automatic unloading of the entities of idle world segments from server memory. World segments with no subscribed players for longer than the configured cutoff (and not on the auto load list) are periodically unloaded, and the new `/gcworld` admin chat command forces an unload of all idle world segments immediately.
+
 #### 3 September 2026
 
 * Add a server option to limit the number of concurrently connected players.

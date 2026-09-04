@@ -682,6 +682,13 @@ public enum EventId
     /// Associated details: EntityEventDetails
     Server_WorldManagement_ResyncEntity = 200402,
 
+    /// <summary>
+    ///     Requests that the WorldManagement system unload the entities of idle world segments.
+    /// </summary>
+    /// Associated details: BooleanEventDetails (true to ignore the zero-subscriber age cutoff,
+    /// e.g. for the /gcworld admin command; false for the periodic check)
+    Server_WorldManagement_UnloadIdleWorldSegments = 200403,
+
     #endregion Server_WorldManagement
 
     #region Server_TemplateEntity
