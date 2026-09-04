@@ -188,6 +188,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<WorldSegmentBlockDataGenerator>();
         services.TryAddSingleton<WorldSegmentActivationManager>();
         services.TryAddSingleton<WorldSegmentSubscriptionManager>();
+        services.TryAddSingleton<WorldSegmentUnloadManager>();
         services.TryAddSingleton<WorldManagementInternalController>();
         services.TryAddSingleton<WorldSegmentSynchronizationManager>();
         services.TryAddSingleton<EntitySynchronizer>();

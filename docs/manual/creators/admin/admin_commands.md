@@ -101,3 +101,22 @@ position, no change will be made.
 This action cannot be undone. If there are any child entities attached to the
 removed block, they will be permanently lost.
 :::
+
+## World Management
+
+### /gcworld
+
+**Usage:** `/gcworld`
+
+Forces the unloading of the entities of all loaded world segments which have no
+subscribed players and are not configured to load automatically, even if they have
+not yet reached the configured unload cutoff. Unloading a world segment frees the
+memory used by its blocks and other entities; the world segment is reloaded from
+the database the next time a player subscribes to it.
+
+:::{note}
+World segments with unsaved block changes are skipped until the next database
+synchronization, at which point a subsequent `/gcworld` will unload them. REST
+requests for block data of an unloaded world segment return empty data until the
+segment is reloaded.
+:::
