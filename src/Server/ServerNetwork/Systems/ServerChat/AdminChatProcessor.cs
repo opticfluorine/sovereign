@@ -83,6 +83,11 @@ public class AdminChatProcessor : IChatProcessor
     private const string ListScripts = "listscripts";
 
     /// <summary>
+    ///     Command name for /runtests.
+    /// </summary>
+    private const string RunTests = "runtests";
+
+    /// <summary>
     ///     Command name for /reloadentity.
     /// </summary>
     private const string ReloadEntity = "reloadentity";
@@ -123,13 +128,14 @@ public class AdminChatProcessor : IChatProcessor
     private readonly ServerChatInternalController internalController;
     private readonly ILogger<AdminChatProcessor> logger;
     private readonly LoggingUtil loggingUtil;
-    private readonly NameComponentCollection names;
     private readonly NameComponentValidator nameValidator;
+    private readonly NameComponentCollection names;
     private readonly PersistencePlayerServices persistencePlayerServices;
     private readonly PlayerNameComponentIndexer playerNameIndex;
     private readonly PlayerRoleCheck playerRoleCheck;
     private readonly ScriptingController scriptingController;
     private readonly ScriptingServices scriptingServices;
+    private readonly TestHarnessController testHarnessController;
     private readonly WorldManagementController worldManagementController;
 
     public AdminChatProcessor(AdminTagCollection admins, ServerChatInternalController internalController,
@@ -137,6 +143,7 @@ public class AdminChatProcessor : IChatProcessor
         NameComponentValidator nameValidator, PersistencePlayerServices persistencePlayerServices,
         LoggingUtil loggingUtil, NameComponentCollection names, WorldManagementController worldManagementController,
         IEventSender eventSender, BlockController blockController, IBlockServices blockServices,
+        TestHarnessController testHarnessController,
         BlockTemplateNameComponentIndexer blockTemplateNames, EntityTable entityTable,
         IDataController dataController, IDataServices dataServices,
         ILogger<AdminChatProcessor> logger, ScriptingController scriptingController,
@@ -161,6 +168,7 @@ public class AdminChatProcessor : IChatProcessor
         this.logger = logger;
         this.scriptingController = scriptingController;
         this.scriptingServices = scriptingServices;
+        this.testHarnessController = testHarnessController;
     }
 
     public List<ChatCommand> MatchingCommands => new()
@@ -172,6 +180,8 @@ public class AdminChatProcessor : IChatProcessor
         new ChatCommand { Command = ReloadAllScripts, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ReloadScript, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = LoadNewScripts, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = ListScripts, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = RunTests, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ListScripts, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ReloadEntity, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ReloadTemplate, HelpSummary = "", IncludeInHelp = false },
@@ -229,6 +239,10 @@ public class AdminChatProcessor : IChatProcessor
 
             case ListScripts:
                 OnListScripts(senderEntityId);
+                break;
+
+            case RunTests:
+                OnRunTests(senderEntityId);
                 break;
 
             case ReloadEntity:
@@ -513,6 +527,16 @@ public class AdminChatProcessor : IChatProcessor
         internalController.SendSystemMessage("Currently loaded scripts:", senderEntityId);
         foreach (var name in scriptingServices.GetLoadedScripts().Order())
             internalController.SendSystemMessage($"  - {name}", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /runtests command.
+    /// </summary>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnRunTests(ulong senderEntityId)
+    {
+        testHarnessController.RequestRun(eventSender);
+        internalController.SendSystemMessage("Test suite requested.", senderEntityId);
     }
 
     /// <summary>

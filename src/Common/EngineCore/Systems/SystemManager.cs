@@ -74,7 +74,10 @@ public class SystemManager : BackgroundService
         await RunExecutors(stoppingToken);
 
         logger.LogInformation("SystemManager stopped. Exiting application.");
-        Environment.Exit(0);
+
+        /* Exit with any exit code that has been set elsewhere in the application,
+         * defaulting to zero. */
+        Environment.Exit(Environment.ExitCode);
     }
 
     /// <summary>

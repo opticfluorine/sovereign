@@ -187,6 +187,42 @@ public sealed class ScriptingOptions
 }
 
 /// <summary>
+///     Full description of the script test harness configuration.
+/// </summary>
+public sealed class TestHarnessOptions
+{
+    /// <summary>
+    ///     Whether the test harness is enabled. When disabled, the Test Lua library
+    ///     is not installed into any script host and test scripts are never loaded.
+    /// </summary>
+    public bool Enabled { get; set; } = false;
+
+    /// <summary>
+    ///     Whether to automatically load and run test scripts at server startup.
+    ///     Only used when Enabled is true.
+    /// </summary>
+    public bool AutoRun { get; set; } = false;
+
+    /// <summary>
+    ///     Whether to request a graceful server shutdown when a test run completes.
+    ///     The process exit code is 0 if all tests passed and 1 otherwise.
+    /// </summary>
+    public bool QuitOnCompletion { get; set; } = false;
+
+    /// <summary>
+    ///     Global watchdog timeout for a test run, in seconds. Tests that are still
+    ///     pending when the timeout elapses are marked as timed out.
+    /// </summary>
+    public int TestTimeoutSeconds { get; set; } = 60;
+
+    /// <summary>
+    ///     Path to which a JSON test results file is written when a run completes,
+    ///     relative to the server working directory, or empty to disable.
+    /// </summary>
+    public string ResultsFile { get; set; } = "";
+}
+
+/// <summary>
 ///     Full description of the accounts configuration.
 /// </summary>
 public sealed class AccountsOptions
