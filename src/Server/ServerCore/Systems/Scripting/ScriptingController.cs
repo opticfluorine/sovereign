@@ -62,6 +62,30 @@ public class ScriptingController(ScriptManager scriptManager, ILogger<ScriptingC
     }
 
     /// <summary>
+    ///     Requests that an entity be soft-reloaded by the Scripting system.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID.</param>
+    public void ReloadEntity(IEventSender eventSender, ulong entityId)
+    {
+        var details = new EntityEventDetails { EntityId = entityId };
+        var ev = new Event(EventId.Server_Scripting_ReloadEntity, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Requests that all loaded instances of a template be soft-reloaded.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="templateId">Template entity ID.</param>
+    public void ReloadTemplate(IEventSender eventSender, ulong templateId)
+    {
+        var details = new EntityEventDetails { EntityId = templateId };
+        var ev = new Event(EventId.Server_Scripting_ReloadTemplate, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
     ///     Asynchronously invokes a function from a loaded script.
     /// </summary>
     /// <param name="scriptName">Script name.</param>

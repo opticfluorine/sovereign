@@ -59,6 +59,36 @@ Reloads the specified script.
 
 Reloads all scripts, including any scripts which are not currently loaded.
 
+### /reloadentity
+
+**Usage:** `/reloadentity [entity_id]`
+
+**Parameters:**
+* `entity_id`: The hex-encoded entity ID of the entity to reload. If the ID is given with
+  no more than 12 hex digits, it is interpreted as an offset from the first persisted entity
+  ID `7fff000000000000` (e.g. `0` for entity ID `7fff000000000000`). Longer values are
+  interpreted as absolute entity IDs.
+
+Soft-reloads the given entity without unloading it. The entity's `OnEntityUnloaded` callback
+is invoked, followed by its `OnEntityLoaded` callback. The entity remains in memory, no
+entity unload or load events are fired, and the `OnEntityAdded`/`OnEntityRemoved` callbacks
+are not called. Only entities that are currently loaded can be reloaded; template entities
+and block entities are not eligible.
+
+### /reloadtemplate
+
+**Usage:** `/reloadtemplate [template_rel_id]`
+
+**Parameters:**
+* `template_rel_id`: The relative entity ID of the template entity (e.g. `0` for entity ID
+  `7ffe000000000000`), given as a decimal integer.
+
+Soft-reloads all currently loaded entities that have the given template. As with
+`/reloadentity`, each affected entity's `OnEntityUnloaded` callback is invoked followed by
+its `OnEntityLoaded` callback, and the entities remain in memory. The template entity itself
+is not reloaded, since template entities do not receive entity lifecycle callbacks. Callback
+hooks defined on the template entity are used for entities that do not define their own.
+
 ## World Editing
 
 ### /addblock

@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
@@ -80,10 +81,21 @@ public class AdminChatProcessor : IChatProcessor
     /// </summary>
     private const string ListScripts = "listscripts";
 
+    /// <summary>
+    ///     Command name for /reloadentity.
+    /// </summary>
+    private const string ReloadEntity = "reloadentity";
+
+    /// <summary>
+    ///     Command name for /reloadtemplate.
+    /// </summary>
+    private const string ReloadTemplate = "reloadtemplate";
+
     private readonly AdminTagCollection admins;
     private readonly BlockController blockController;
     private readonly IBlockServices blockServices;
     private readonly BlockTemplateNameComponentIndexer blockTemplateNames;
+    private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
     private readonly ServerChatInternalController internalController;
     private readonly ILogger<AdminChatProcessor> logger;
@@ -102,8 +114,9 @@ public class AdminChatProcessor : IChatProcessor
         NameComponentValidator nameValidator, PersistencePlayerServices persistencePlayerServices,
         LoggingUtil loggingUtil, NameComponentCollection names, WorldManagementController worldManagementController,
         IEventSender eventSender, BlockController blockController, IBlockServices blockServices,
-        BlockTemplateNameComponentIndexer blockTemplateNames, ILogger<AdminChatProcessor> logger,
-        ScriptingController scriptingController, ScriptingServices scriptingServices)
+        BlockTemplateNameComponentIndexer blockTemplateNames, EntityTable entityTable,
+        ILogger<AdminChatProcessor> logger, ScriptingController scriptingController,
+        ScriptingServices scriptingServices)
     {
         this.admins = admins;
         this.internalController = internalController;
@@ -118,6 +131,7 @@ public class AdminChatProcessor : IChatProcessor
         this.blockController = blockController;
         this.blockServices = blockServices;
         this.blockTemplateNames = blockTemplateNames;
+        this.entityTable = entityTable;
         this.logger = logger;
         this.scriptingController = scriptingController;
         this.scriptingServices = scriptingServices;
@@ -132,7 +146,9 @@ public class AdminChatProcessor : IChatProcessor
         new ChatCommand { Command = ReloadAllScripts, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ReloadScript, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = LoadNewScripts, HelpSummary = "", IncludeInHelp = false },
-        new ChatCommand { Command = ListScripts, HelpSummary = "", IncludeInHelp = false }
+        new ChatCommand { Command = ListScripts, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = ReloadEntity, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = ReloadTemplate, HelpSummary = "", IncludeInHelp = false }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)
@@ -183,6 +199,14 @@ public class AdminChatProcessor : IChatProcessor
 
             case ListScripts:
                 OnListScripts(senderEntityId);
+                break;
+
+            case ReloadEntity:
+                OnReloadEntity(message, senderEntityId);
+                break;
+
+            case ReloadTemplate:
+                OnReloadTemplate(message, senderEntityId);
                 break;
         }
     }
@@ -443,5 +467,115 @@ public class AdminChatProcessor : IChatProcessor
         internalController.SendSystemMessage("Currently loaded scripts:", senderEntityId);
         foreach (var name in scriptingServices.GetLoadedScripts().Order())
             internalController.SendSystemMessage($"  - {name}", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /reloadentity command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnReloadEntity(string message, ulong senderEntityId)
+    {
+        var args = message.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (args.Length != 1)
+        {
+            logger.LogWarning("{Player} used /reloadentity with bad parameters.",
+                loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("Usage: /reloadentity entity_id", senderEntityId);
+            return;
+        }
+
+        // Parse the hex-encoded entity ID. Short IDs are offsets from the first persisted entity ID.
+        var arg = args[0];
+        if (!ulong.TryParse(arg, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var parsed))
+        {
+            logger.LogWarning("{Player} used /reloadentity with a non-hex entity ID.",
+                loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("Entity ID must be hex-encoded.", senderEntityId);
+            return;
+        }
+
+        var entityId = arg.Length <= 12 ? EntityConstants.FirstPersistedEntityId + parsed : parsed;
+        if (!EntityUtil.IsRegularEntity(entityId))
+        {
+            logger.LogWarning("{Player} tried to reload non-regular entity {EntityId:X16}.",
+                loggingUtil.FormatEntity(senderEntityId), entityId);
+            internalController.SendSystemMessage("Entity ID must refer to a regular entity.", senderEntityId);
+            return;
+        }
+
+        if (!entityTable.Exists(entityId))
+        {
+            logger.LogWarning("{Player} tried to reload entity {EntityId:X16} which is not loaded.",
+                loggingUtil.FormatEntity(senderEntityId), entityId);
+            internalController.SendSystemMessage("Entity is not currently loaded.", senderEntityId);
+            return;
+        }
+
+        scriptingController.ReloadEntity(eventSender, entityId);
+        internalController.SendSystemMessage($"Entity {entityId:X16} will be reloaded.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /reloadtemplate command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnReloadTemplate(string message, ulong senderEntityId)
+    {
+        var args = message.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (args.Length != 1)
+        {
+            logger.LogWarning("{Player} used /reloadtemplate with bad parameters.",
+                loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("Usage: /reloadtemplate template_rel_id", senderEntityId);
+            return;
+        }
+
+        // Parse the decimal relative template entity ID, matching the /addblock convention.
+        ulong templateId;
+        try
+        {
+            templateId = EntityConstants.FirstTemplateEntityId + ulong.Parse(args[0]);
+        }
+        catch (Exception)
+        {
+            logger.LogWarning("{Player} used /reloadtemplate with a bad template_rel_id.",
+                loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("template_rel_id must correspond to a template entity.",
+                senderEntityId);
+            return;
+        }
+
+        if (!EntityUtil.IsTemplateEntity(templateId))
+        {
+            logger.LogWarning("{Player} tried to use a non-template entity as template entity.",
+                loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("template_rel_id must correspond to a template entity.",
+                senderEntityId);
+            return;
+        }
+
+        if (!entityTable.Exists(templateId))
+        {
+            logger.LogWarning("{Player} tried to reload template {TemplateId:X16} which is not loaded.",
+                loggingUtil.FormatEntity(senderEntityId), templateId);
+            internalController.SendSystemMessage("Template is not loaded.", senderEntityId);
+            return;
+        }
+
+        // Snapshot the live instance set so the count reported here matches the reload request.
+        var count = entityTable.GetInstancesOfTemplate(templateId).Count;
+        if (count == 0)
+        {
+            logger.LogWarning("{Player} tried to reload template {TemplateId:X16} which has no loaded instances.",
+                loggingUtil.FormatEntity(senderEntityId), templateId);
+            internalController.SendSystemMessage("No loaded entities have the given template.", senderEntityId);
+            return;
+        }
+
+        scriptingController.ReloadTemplate(eventSender, templateId);
+        internalController.SendSystemMessage(
+            count == 1 ? "1 entity will be reloaded." : $"{count} entities will be reloaded.", senderEntityId);
     }
 }

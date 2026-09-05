@@ -34,3 +34,7 @@ in the [entity key-value store](#script-data-keyvaluedata):
 |`__OnEntityUnloaded_Function` |Name of the function to use as the EntityUnloaded callback.   |
 |`__OnEntityRemoved_Script`    |Name of the script that contains the EntityRemoved callback.  |
 |`__OnEntityRemoved_Function`  |Name of the function to use at the EntityRemoved callback.
+
+The EntityUnloaded and EntityLoaded callbacks can also be re-triggered for a loaded entity
+by an admin using the `/reloadentity` and `/reloadtemplate` commands without a full
+unload/load cycle.
