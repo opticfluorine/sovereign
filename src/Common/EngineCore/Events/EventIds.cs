@@ -758,6 +758,19 @@ public enum EventId
     /// Associated details: IntEventDetails
     Server_Scripting_TimedCallback = 200703,
 
+    /// <summary>
+    ///     Requests that an entity be soft-reloaded by invoking its unload and load script hooks
+    ///     without unloading the entity.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Server_Scripting_ReloadEntity = 200704,
+
+    /// <summary>
+    ///     Requests that all loaded instances of a template entity be soft-reloaded.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Server_Scripting_ReloadTemplate = 200705,
+
     #endregion Server_Scripting
 
     #endregion Server

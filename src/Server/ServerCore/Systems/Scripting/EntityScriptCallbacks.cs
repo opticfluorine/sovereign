@@ -36,22 +36,56 @@ public sealed class EntityScriptCallbacks
 
     private readonly Queue<ulong> entityAddQueue = new();
     private readonly Queue<ulong> entityLoadQueue = new();
+    private readonly Queue<ulong> entityReloadQueue = new();
     private readonly Queue<ulong> entityRemoveQueue = new();
     private readonly Dictionary<ulong, Task> entityTasks = new();
     private readonly Queue<(ulong, ulong)> entityTemplateUnloadQueue = new();
     private readonly Queue<ulong> entityUnloadQueue = new();
     private readonly ILogger<EntityScriptCallbacks> logger;
     private readonly ScriptManager scriptManager;
+    private readonly EntityTable entityTable;
 
     public EntityScriptCallbacks(EntityTable entityTable, IDataServices dataServices, ScriptManager scriptManager,
         ILogger<EntityScriptCallbacks> logger)
     {
+        this.entityTable = entityTable;
         this.dataServices = dataServices;
         this.scriptManager = scriptManager;
         this.logger = logger;
         entityTable.OnEntityAdded += OnEntityAdded;
         entityTable.OnEntityRemoved += OnEntityRemoved;
         entityTable.OnTemplateSet += OnTemplateSet;
+    }
+
+    /// <summary>
+    ///     Requests a soft reload of the given entity by enqueueing its unload and load callbacks.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>true if the entity was accepted for reload, false otherwise.</returns>
+    public bool RequestEntityReload(ulong entityId)
+    {
+        if (entityId is >= ExcludeRangeStart and < ExcludeRangeEnd) return false;
+        if (!entityTable.Exists(entityId)) return false;
+        entityReloadQueue.Enqueue(entityId);
+        return true;
+    }
+
+    /// <summary>
+    ///     Requests a soft reload of all loaded instances of the given template.
+    /// </summary>
+    /// <param name="templateId">Template entity ID.</param>
+    /// <returns>Number of instances enqueued for reload.</returns>
+    public int RequestTemplateReload(ulong templateId)
+    {
+        // Snapshot the live instance set so that changes during processing do not affect this request.
+        var count = 0;
+        foreach (var entityId in entityTable.GetInstancesOfTemplate(templateId))
+        {
+            entityReloadQueue.Enqueue(entityId);
+            count++;
+        }
+
+        return count;
     }
 
     /// <summary>
@@ -72,6 +106,33 @@ public sealed class EntityScriptCallbacks
             EntityConstants.LoadCallbackFunctionKey, EntityConstants.LoadCallbackName);
         ProcessCallbacks(entityUnloadQueue, EntityConstants.UnloadCallbackScriptKey,
             EntityConstants.UnloadCallbackFunctionKey, EntityConstants.UnloadCallbackName);
+        ProcessReloadCallbacks();
+    }
+
+    /// <summary>
+    ///     Processes pending soft reload callbacks by firing the unload hook followed by the load hook.
+    /// </summary>
+    private void ProcessReloadCallbacks()
+    {
+        while (entityReloadQueue.TryDequeue(out var entityId))
+        {
+            // Skip entities that were removed or unloaded since the reload was requested.
+            if (!entityTable.Exists(entityId)) continue;
+
+            // Fire the unload hook first, then the load hook. InvokeCallback chains tasks per entity ID,
+            // so the load hook will not run until the unload hook completes.
+            if (dataServices.TryGetEntityKeyValue(entityId, EntityConstants.UnloadCallbackScriptKey,
+                    out var unloadScript) &&
+                dataServices.TryGetEntityKeyValue(entityId, EntityConstants.UnloadCallbackFunctionKey,
+                    out var unloadFunction))
+                InvokeCallback(entityId, EntityConstants.UnloadCallbackName, unloadScript, unloadFunction);
+
+            if (dataServices.TryGetEntityKeyValue(entityId, EntityConstants.LoadCallbackScriptKey,
+                    out var loadScript) &&
+                dataServices.TryGetEntityKeyValue(entityId, EntityConstants.LoadCallbackFunctionKey,
+                    out var loadFunction))
+                InvokeCallback(entityId, EntityConstants.LoadCallbackName, loadScript, loadFunction);
+        }
     }
 
     /// <summary>

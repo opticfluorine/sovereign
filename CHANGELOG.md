@@ -4,6 +4,10 @@
 
 ### September
 
+#### 4 September 2026
+
+* Add new admin chat commands `/reloadentity` and `/reloadtemplate` to soft-reload entity script hooks.
+
 #### 3 September 2026
 
 * Add a server option to limit the number of concurrently connected players.

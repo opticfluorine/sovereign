@@ -59,6 +59,8 @@ internal class ScriptingSystem : ISystem
             EventId.Server_Scripting_Reload,
             EventId.Server_Scripting_LoadNew,
             EventId.Server_Scripting_TimedCallback,
+            EventId.Server_Scripting_ReloadEntity,
+            EventId.Server_Scripting_ReloadTemplate,
             EventId.Core_Tick,
             EventId.Core_Movement_EntityCollision,
             EventId.Core_Movement_ScheduledStop
@@ -124,6 +126,34 @@ internal class ScriptingSystem : ISystem
                     }
 
                     OnTimedCallback(details.LuaState, details.CallbackReference, details.ArgumentReference);
+                    break;
+                }
+
+                case EventId.Server_Scripting_ReloadEntity:
+                {
+                    if (ev.EventDetails is not EntityEventDetails reloadDetails)
+                    {
+                        logger.LogError("Received ReloadEntity event without details.");
+                        break;
+                    }
+
+                    if (!entityScriptCallbacks.RequestEntityReload(reloadDetails.EntityId))
+                        logger.LogError("Cannot reload entity {EntityId:X}: not an eligible in-memory entity.",
+                            reloadDetails.EntityId);
+                    break;
+                }
+
+                case EventId.Server_Scripting_ReloadTemplate:
+                {
+                    if (ev.EventDetails is not EntityEventDetails templateDetails)
+                    {
+                        logger.LogError("Received ReloadTemplate event without details.");
+                        break;
+                    }
+
+                    var count = entityScriptCallbacks.RequestTemplateReload(templateDetails.EntityId);
+                    logger.LogInformation("Requested reload of {Count} instances of template {TemplateId:X}.",
+                        count, templateDetails.EntityId);
                     break;
                 }
 

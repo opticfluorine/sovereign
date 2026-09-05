@@ -127,6 +127,8 @@ prompt to download the latest game data files.
 | /reloadscript     | scriptName            | Admin only. Reloads the specific named script.        |
 | /loadnewscripts   |                       | Admin only. Loads any new scripts.                    |
 | /listscripts      |                       | Admin only. Lists all currently loaded scripts.       |
+| /reloadentity     | entityId              | Admin only. Reloads the script hooks of the given entity. |
+| /reloadtemplate   | templateRelId         | Admin only. Reloads all loaded entities of the given template. |
 
 ## Reporting Issues
 
