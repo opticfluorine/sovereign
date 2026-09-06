@@ -109,6 +109,13 @@ public interface IDataServices
     /// <param name="entityId">Entity ID.</param>
     /// <param name="data">Dictionary that will be cleared and filled with all key-value pairs.</param>
     void GetEntityData(ulong entityId, Dictionary<string, string> data);
+
+    /// <summary>
+    ///     Determines whether a key is read-only to scripts and admin chat commands.
+    /// </summary>
+    /// <param name="key">Key.</param>
+    /// <returns>true if the key is read-only, false otherwise.</returns>
+    bool IsKeyReadOnly(string key);
 }
 
 /// <summary>
@@ -173,5 +180,10 @@ internal class DataServices : IDataServices
     {
         data.Clear();
         entityStore.GetAllKeyValuePairs(entityId, data);
+    }
+
+    public bool IsKeyReadOnly(string key)
+    {
+        return DataKeyConstraints.IsKeyReadOnly(key);
     }
 }

@@ -170,7 +170,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
             var key = lua_tostring(luaState, -2);
 
-            if (DataKeyConstraints.IsKeyReadOnly(key))
+            if (dataServices.IsKeyReadOnly(key))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("data.global[key]: key {Key} is read-only.", key);
@@ -349,7 +349,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
             var key = lua_tostring(luaState, -2);
 
-            if (DataKeyConstraints.IsKeyReadOnly(key))
+            if (dataServices.IsKeyReadOnly(key))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("Entity KV set: key {Key} is read-only.", key);

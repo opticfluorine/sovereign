@@ -660,7 +660,7 @@ public class AdminChatProcessor : IChatProcessor
         }
 
         var key = args[0];
-        if (DataKeyConstraints.IsKeyReadOnly(key))
+        if (dataServices.IsKeyReadOnly(key))
         {
             logger.LogWarning("{Player} tried to set read-only key {Key} via /setvalue.",
                 loggingUtil.FormatEntity(senderEntityId), key);
@@ -730,7 +730,7 @@ public class AdminChatProcessor : IChatProcessor
         if (!ValidateEntityForDataCommand(args[0], senderEntityId, out var entityId)) return;
 
         var key = args[1];
-        if (DataKeyConstraints.IsKeyReadOnly(key))
+        if (dataServices.IsKeyReadOnly(key))
         {
             logger.LogWarning("{Player} tried to set read-only key {Key} on entity {EntityId:X16} via /setentityvalue.",
                 loggingUtil.FormatEntity(senderEntityId), key, entityId);

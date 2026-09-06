@@ -21,7 +21,7 @@ namespace Sovereign.EngineCore.Systems.Data;
 /// <summary>
 ///     Constraints on Data system key-value keys that are shared by all write paths.
 /// </summary>
-public static class DataKeyConstraints
+internal static class DataKeyConstraints
 {
     /// <summary>
     ///     Prefix of keys that are read-only to scripts and admin chat commands.
