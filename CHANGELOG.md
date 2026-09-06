@@ -4,6 +4,10 @@
 
 ### September
 
+#### 6 September 2026
+
+* Add new admin chat commands `/getvalue`, `/setvalue`, `/getentityvalue`, and `/setentityvalue` for working with global and entity key-value data.
+
 #### 4 September 2026
 
 * Add new admin chat commands `/reloadentity` and `/reloadtemplate` to soft-reload entity script hooks.

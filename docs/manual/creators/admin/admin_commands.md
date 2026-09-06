@@ -89,6 +89,68 @@ its `OnEntityLoaded` callback, and the entities remain in memory. The template e
 is not reloaded, since template entities do not receive entity lifecycle callbacks. Callback
 hooks defined on the template entity are used for entities that do not define their own.
 
+(chat-admin-key-value-data)=
+## Key-Value Data
+
+The key-value data stores described in the [Data Module](../scripting/api/data.md)
+can also be inspected and modified with the following admin commands. These
+commands follow the same rules as the scripting API: keys beginning with two
+underscores (`__`) are reserved for internal use by the engine and are
+read-only, and entity key-value stores are only available for loaded
+non-block entities that are not template entities.
+
+### /getvalue
+
+**Usage:** `/getvalue key`
+
+**Parameters:**
+* `key`: Key to look up in the global key-value store.
+
+Prints the value of the given key-value pair from the global key-value store, or an
+error message if the key does not exist.
+
+### /setvalue
+
+**Usage:** `/setvalue key [value]`
+
+**Parameters:**
+* `key`: Key of the global key-value pair to be modified or removed.
+* `value`: New value for the key. If omitted, the key is deleted.
+
+Sets the value of the given key-value pair in the global key-value store, creating
+the key if it does not already exist. If the value is omitted, the key is deleted
+from the global key-value store.
+
+### /getentityvalue
+
+**Usage:** `/getentityvalue entity_id key`
+
+**Parameters:**
+* `entity_id`: The hex-encoded entity ID of the entity, using the same convention as
+  `/reloadentity`.
+* `key`: Key to look up in the entity's key-value store.
+
+Prints the value of the given key-value pair from the given entity's key-value store.
+If the entity does not define the key itself but its template entity does, the
+inherited value is printed along with a note identifying the template entity from
+which it is inherited.
+
+### /setentityvalue
+
+**Usage:** `/setentityvalue entity_id key [value]`
+
+**Parameters:**
+* `entity_id`: The hex-encoded entity ID of the entity, using the same convention as
+  `/reloadentity`.
+* `key`: Key of the entity key-value pair to be modified or removed.
+* `value`: New value for the key. If omitted, the key is deleted.
+
+Sets the value of the given key-value pair on the given entity, creating the key if
+it does not already exist. The value is always written to the entity itself and never
+to its template entity. If the value is omitted, the key is deleted from the entity;
+if the entity's template entity defines the same key, the template's value will then
+be inherited again.
+
 ## World Editing
 
 ### /addblock

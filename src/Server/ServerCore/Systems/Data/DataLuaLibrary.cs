@@ -33,7 +33,6 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     private const string LibraryName = "Data";
     private const long TableEntityIndex = 0;
 
-    private const string ReadOnlyKeyPrefix = "__";
     private readonly IDataController dataController;
     private readonly IDataServices dataServices;
 
@@ -171,7 +170,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
             var key = lua_tostring(luaState, -2);
 
-            if (IsKeyReadOnly(key))
+            if (DataKeyConstraints.IsKeyReadOnly(key))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("data.global[key]: key {Key} is read-only.", key);
@@ -350,7 +349,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
             var key = lua_tostring(luaState, -2);
 
-            if (IsKeyReadOnly(key))
+            if (DataKeyConstraints.IsKeyReadOnly(key))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
                     .LogError("Entity KV set: key {Key} is read-only.", key);
@@ -409,16 +408,5 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         }
 
         return 0;
-    }
-
-    /// <summary>
-    ///     Determines whether a key is read-only to scripts (i.e. special internal
-    ///     keys used by the engine such as the in-game clock).
-    /// </summary>
-    /// <param name="key">Key.</param>
-    /// <returns>true if read-only to scripts, false otherwise.</returns>
-    private bool IsKeyReadOnly(string key)
-    {
-        return key.StartsWith(ReadOnlyKeyPrefix);
     }
 }

@@ -29,6 +29,7 @@ using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems.Block;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.Persistence.Players;
 using Sovereign.ServerCore.Systems.Scripting;
@@ -91,10 +92,32 @@ public class AdminChatProcessor : IChatProcessor
     /// </summary>
     private const string ReloadTemplate = "reloadtemplate";
 
+    /// <summary>
+    ///     Command name for /getvalue.
+    /// </summary>
+    private const string GetValue = "getvalue";
+
+    /// <summary>
+    ///     Command name for /setvalue.
+    /// </summary>
+    private const string SetValue = "setvalue";
+
+    /// <summary>
+    ///     Command name for /getentityvalue.
+    /// </summary>
+    private const string GetEntityValue = "getentityvalue";
+
+    /// <summary>
+    ///     Command name for /setentityvalue.
+    /// </summary>
+    private const string SetEntityValue = "setentityvalue";
+
     private readonly AdminTagCollection admins;
     private readonly BlockController blockController;
     private readonly IBlockServices blockServices;
     private readonly BlockTemplateNameComponentIndexer blockTemplateNames;
+    private readonly IDataController dataController;
+    private readonly IDataServices dataServices;
     private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
     private readonly ServerChatInternalController internalController;
@@ -115,6 +138,7 @@ public class AdminChatProcessor : IChatProcessor
         LoggingUtil loggingUtil, NameComponentCollection names, WorldManagementController worldManagementController,
         IEventSender eventSender, BlockController blockController, IBlockServices blockServices,
         BlockTemplateNameComponentIndexer blockTemplateNames, EntityTable entityTable,
+        IDataController dataController, IDataServices dataServices,
         ILogger<AdminChatProcessor> logger, ScriptingController scriptingController,
         ScriptingServices scriptingServices)
     {
@@ -132,6 +156,8 @@ public class AdminChatProcessor : IChatProcessor
         this.blockServices = blockServices;
         this.blockTemplateNames = blockTemplateNames;
         this.entityTable = entityTable;
+        this.dataController = dataController;
+        this.dataServices = dataServices;
         this.logger = logger;
         this.scriptingController = scriptingController;
         this.scriptingServices = scriptingServices;
@@ -148,7 +174,11 @@ public class AdminChatProcessor : IChatProcessor
         new ChatCommand { Command = LoadNewScripts, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ListScripts, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ReloadEntity, HelpSummary = "", IncludeInHelp = false },
-        new ChatCommand { Command = ReloadTemplate, HelpSummary = "", IncludeInHelp = false }
+        new ChatCommand { Command = ReloadTemplate, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = GetValue, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = SetValue, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = GetEntityValue, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = SetEntityValue, HelpSummary = "", IncludeInHelp = false }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)
@@ -207,6 +237,22 @@ public class AdminChatProcessor : IChatProcessor
 
             case ReloadTemplate:
                 OnReloadTemplate(message, senderEntityId);
+                break;
+
+            case GetValue:
+                OnGetValue(message, senderEntityId);
+                break;
+
+            case SetValue:
+                OnSetValue(message, senderEntityId);
+                break;
+
+            case GetEntityValue:
+                OnGetEntityValue(message, senderEntityId);
+                break;
+
+            case SetEntityValue:
+                OnSetEntityValue(message, senderEntityId);
                 break;
         }
     }
@@ -577,5 +623,192 @@ public class AdminChatProcessor : IChatProcessor
         scriptingController.ReloadTemplate(eventSender, templateId);
         internalController.SendSystemMessage(
             count == 1 ? "1 entity will be reloaded." : $"{count} entities will be reloaded.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /getvalue command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnGetValue(string message, ulong senderEntityId)
+    {
+        var key = message.Trim();
+        if (key.Length == 0)
+        {
+            internalController.SendSystemMessage("Usage: /getvalue key", senderEntityId);
+            return;
+        }
+
+        if (dataServices.TryGetGlobal(key, out var value))
+            internalController.SendSystemMessage(value, senderEntityId);
+        else
+            internalController.SendSystemMessage("Key not found.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /setvalue command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnSetValue(string message, ulong senderEntityId)
+    {
+        var args = message.Split(' ', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (args.Length == 0)
+        {
+            internalController.SendSystemMessage("Usage: /setvalue key [value]", senderEntityId);
+            return;
+        }
+
+        var key = args[0];
+        if (DataKeyConstraints.IsKeyReadOnly(key))
+        {
+            logger.LogWarning("{Player} tried to set read-only key {Key} via /setvalue.",
+                loggingUtil.FormatEntity(senderEntityId), key);
+            internalController.SendSystemMessage("Key is read-only.", senderEntityId);
+            return;
+        }
+
+        if (args.Length == 1)
+        {
+            dataController.RemoveGlobalSync(key);
+            internalController.SendSystemMessage($"Key {key} deleted.", senderEntityId);
+            return;
+        }
+
+        dataController.SetGlobalSync(key, args[1]);
+        internalController.SendSystemMessage($"Key {key} set to {args[1]}.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /getentityvalue command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnGetEntityValue(string message, ulong senderEntityId)
+    {
+        var args = message.Split(' ', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (args.Length != 2)
+        {
+            internalController.SendSystemMessage("Usage: /getentityvalue entity_id key", senderEntityId);
+            return;
+        }
+
+        if (!ValidateEntityForDataCommand(args[0], senderEntityId, out var entityId)) return;
+
+        var key = args[1];
+        if (dataServices.TryGetEntityKeyValueLocal(entityId, key, out var value))
+        {
+            internalController.SendSystemMessage(value, senderEntityId);
+            return;
+        }
+
+        if (entityTable.TryGetTemplate(entityId, out var templateId) &&
+            dataServices.TryGetEntityKeyValueLocal(templateId, key, out value))
+        {
+            internalController.SendSystemMessage($"{value} (inherited from template {templateId:X16})",
+                senderEntityId);
+            return;
+        }
+
+        internalController.SendSystemMessage("Key not found.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /setentityvalue command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnSetEntityValue(string message, ulong senderEntityId)
+    {
+        var args = message.Split(' ', 3, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (args.Length < 2)
+        {
+            internalController.SendSystemMessage("Usage: /setentityvalue entity_id key [value]", senderEntityId);
+            return;
+        }
+
+        if (!ValidateEntityForDataCommand(args[0], senderEntityId, out var entityId)) return;
+
+        var key = args[1];
+        if (DataKeyConstraints.IsKeyReadOnly(key))
+        {
+            logger.LogWarning("{Player} tried to set read-only key {Key} on entity {EntityId:X16} via /setentityvalue.",
+                loggingUtil.FormatEntity(senderEntityId), key, entityId);
+            internalController.SendSystemMessage("Key is read-only.", senderEntityId);
+            return;
+        }
+
+        if (args.Length == 2)
+        {
+            dataController.RemoveEntityKeyValueSync(entityId, key);
+            internalController.SendSystemMessage($"Key {key} deleted on entity {entityId:X16}.", senderEntityId);
+            return;
+        }
+
+        dataController.SetEntityKeyValueSync(entityId, key, args[2]);
+        internalController.SendSystemMessage($"Key {key} on entity {entityId:X16} set to {args[2]}.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Parses a hex-encoded entity ID, interpreting short IDs as offsets from the first persisted
+    ///     entity ID.
+    /// </summary>
+    /// <param name="arg">Hex-encoded entity ID argument.</param>
+    /// <param name="entityId">Parsed entity ID, or zero if the method returns false.</param>
+    /// <returns>true if the entity ID was parsed, false otherwise.</returns>
+    private bool TryParseEntityId(string arg, out ulong entityId)
+    {
+        if (!ulong.TryParse(arg, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var parsed))
+        {
+            entityId = 0;
+            return false;
+        }
+
+        entityId = arg.Length <= 12 ? EntityConstants.FirstPersistedEntityId + parsed : parsed;
+        return true;
+    }
+
+    /// <summary>
+    ///     Validates that the given entity ID argument refers to a loaded regular entity that is
+    ///     eligible for key-value data commands, sending a system message to the sender if not.
+    /// </summary>
+    /// <param name="arg">Hex-encoded entity ID argument.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    /// <param name="entityId">Parsed entity ID, or zero if the method returns false.</param>
+    /// <returns>true if the entity is valid for key-value data commands, false otherwise.</returns>
+    private bool ValidateEntityForDataCommand(string arg, ulong senderEntityId, out ulong entityId)
+    {
+        if (!TryParseEntityId(arg, out entityId))
+        {
+            internalController.SendSystemMessage("Entity ID must be hex-encoded.", senderEntityId);
+            return false;
+        }
+
+        if (entityId is >= EntityConstants.FirstBlockEntityId and <= EntityConstants.LastBlockEntityId)
+        {
+            logger.LogWarning("{Player} used a key-value data command on block entity {EntityId:X16}.",
+                loggingUtil.FormatEntity(senderEntityId), entityId);
+            internalController.SendSystemMessage("Entity key-value data cannot be used on block entities.",
+                senderEntityId);
+            return false;
+        }
+
+        if (!EntityUtil.IsRegularEntity(entityId))
+        {
+            logger.LogWarning("{Player} used a key-value data command on non-regular entity {EntityId:X16}.",
+                loggingUtil.FormatEntity(senderEntityId), entityId);
+            internalController.SendSystemMessage("Entity ID must refer to a regular entity.", senderEntityId);
+            return false;
+        }
+
+        if (!entityTable.Exists(entityId))
+        {
+            logger.LogWarning("{Player} used a key-value data command on entity {EntityId:X16} which is not loaded.",
+                loggingUtil.FormatEntity(senderEntityId), entityId);
+            internalController.SendSystemMessage("Entity is not currently loaded.", senderEntityId);
+            return false;
+        }
+
+        return true;
     }
 }
