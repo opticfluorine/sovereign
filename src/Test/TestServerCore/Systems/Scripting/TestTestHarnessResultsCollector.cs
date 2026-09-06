@@ -265,9 +265,9 @@ public class TestTestHarnessResultsCollector
     {
         options ??= new TestHarnessOptions();
         eventSender ??= new FakeEventSender();
-        var controller = new TestHarnessController(new Sovereign.EngineCore.Main.CoreController());
 
-        return new TestHarnessResultsCollector(Options.Create(options), controller, eventSender,
+        return new TestHarnessResultsCollector(Options.Create(options),
+            new Sovereign.EngineCore.Main.CoreController(), eventSender,
             NullLogger<TestHarnessResultsCollector>.Instance);
     }
 

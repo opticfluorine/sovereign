@@ -218,7 +218,6 @@ public static class ServerServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, EntitiesLuaLibrary>());
         services.TryAddSingleton<ItemsScripting>();
         services.TryAddSingleton<TestHarnessResultsCollector>();
-        services.TryAddSingleton<TestHarnessController>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, TestHarnessLuaLibrary>());
     }
 }

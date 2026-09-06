@@ -135,7 +135,6 @@ public class AdminChatProcessor : IChatProcessor
     private readonly PlayerRoleCheck playerRoleCheck;
     private readonly ScriptingController scriptingController;
     private readonly ScriptingServices scriptingServices;
-    private readonly TestHarnessController testHarnessController;
     private readonly WorldManagementController worldManagementController;
 
     public AdminChatProcessor(AdminTagCollection admins, ServerChatInternalController internalController,
@@ -168,7 +167,6 @@ public class AdminChatProcessor : IChatProcessor
         this.logger = logger;
         this.scriptingController = scriptingController;
         this.scriptingServices = scriptingServices;
-        this.testHarnessController = testHarnessController;
     }
 
     public List<ChatCommand> MatchingCommands => new()
@@ -535,7 +533,7 @@ public class AdminChatProcessor : IChatProcessor
     /// <param name="senderEntityId">Sender entity ID.</param>
     private void OnRunTests(ulong senderEntityId)
     {
-        testHarnessController.RequestRun(eventSender);
+        scriptingController.RunTests(eventSender);
         internalController.SendSystemMessage("Test suite requested.", senderEntityId);
     }
 

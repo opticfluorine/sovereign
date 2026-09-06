@@ -24,6 +24,7 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Main;
 using Sovereign.ServerCore.Configuration;
 
 namespace Sovereign.ServerCore.Systems.Scripting;
@@ -64,7 +65,7 @@ public sealed class TestHarnessResultsCollector : IDisposable
     private readonly object lockObject = new();
     private readonly ILogger<TestHarnessResultsCollector> logger;
     private readonly TestHarnessOptions options;
-    private readonly TestHarnessController controller;
+    private readonly CoreController coreController;
     private readonly IEventSender eventSender;
     private readonly List<SuiteResults> suites = new();
     private readonly Dictionary<string, SuiteResults> suitesByName = new();
@@ -78,14 +79,14 @@ public sealed class TestHarnessResultsCollector : IDisposable
     ///     Creates the test harness results collector.
     /// </summary>
     /// <param name="options">Test harness options.</param>
-    /// <param name="controller">Test harness controller.</param>
+    /// <param name="coreController">Core controller.</param>
     /// <param name="eventSender">Event sender.</param>
     /// <param name="logger">Logger.</param>
-    public TestHarnessResultsCollector(IOptions<TestHarnessOptions> options, TestHarnessController controller,
+    public TestHarnessResultsCollector(IOptions<TestHarnessOptions> options, CoreController coreController,
         IEventSender eventSender, ILogger<TestHarnessResultsCollector> logger)
     {
         this.options = options.Value;
-        this.controller = controller;
+        this.coreController = coreController;
         this.eventSender = eventSender;
         this.logger = logger;
     }
@@ -301,8 +302,19 @@ public sealed class TestHarnessResultsCollector : IDisposable
         if (options.QuitOnCompletion)
         {
             logger.LogInformation("Requesting server shutdown with exit code {ExitCode}.", failed + timedOut > 0 ? 1 : 0);
-            controller.RequestShutdown(eventSender, failed + timedOut > 0);
+            RequestShutdown(eventSender, failed + timedOut > 0);
         }
+    }
+
+    /// <summary>
+    ///     Requests a graceful server shutdown with an exit code reflecting the test results.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="failed">Whether any test failed or timed out.</param>
+    private void RequestShutdown(IEventSender eventSender, bool failed)
+    {
+        Environment.ExitCode = failed ? 1 : 0;
+        coreController.Quit(eventSender);
     }
 
     /// <summary>
