@@ -80,6 +80,23 @@ internal class EntityKeyValueStore
     }
 
     /// <summary>
+    ///     Gets the value (if any) for the given entity ID and key, checking only the entity's own
+    ///     store without the template entity fallback.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    /// <param name="value">Value. Only meaningful if method returns true.</param>
+    /// <returns>true if the key-value pair exists for the entity, false otherwise.</returns>
+    public bool TryGetValueLocal(ulong entityId, string key, [NotNullWhen(true)] out string? value)
+    {
+        if (keyValueStores.TryGetValue(entityId, out var store) && store.TryGetValue(key, out value))
+            return true;
+
+        value = null;
+        return false;
+    }
+
+    /// <summary>
     ///     Sets the value for the given entity ID and key.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>

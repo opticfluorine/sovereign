@@ -94,11 +94,28 @@ public interface IDataServices
     bool TryGetEntityKeyValue(ulong entityId, string key, [NotNullWhen(true)] out string? value);
 
     /// <summary>
+    ///     Gets a key-value pair for the given entity, checking only the entity's own store without
+    ///     the template entity fallback.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    /// <param name="value">Value. Only meaningful if the method returns true.</param>
+    /// <returns>true if the key is found for the entity, false otherwise.</returns>
+    bool TryGetEntityKeyValueLocal(ulong entityId, string key, [NotNullWhen(true)] out string? value);
+
+    /// <summary>
     ///     Gets all key-value pairs for the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="data">Dictionary that will be cleared and filled with all key-value pairs.</param>
     void GetEntityData(ulong entityId, Dictionary<string, string> data);
+
+    /// <summary>
+    ///     Determines whether a key is read-only to scripts and admin chat commands.
+    /// </summary>
+    /// <param name="key">Key.</param>
+    /// <returns>true if the key is read-only, false otherwise.</returns>
+    bool IsKeyReadOnly(string key);
 }
 
 /// <summary>
@@ -154,9 +171,19 @@ internal class DataServices : IDataServices
         return entityStore.TryGetValue(entityId, key, out value);
     }
 
+    public bool TryGetEntityKeyValueLocal(ulong entityId, string key, [NotNullWhen(true)] out string? value)
+    {
+        return entityStore.TryGetValueLocal(entityId, key, out value);
+    }
+
     public void GetEntityData(ulong entityId, Dictionary<string, string> data)
     {
         data.Clear();
         entityStore.GetAllKeyValuePairs(entityId, data);
+    }
+
+    public bool IsKeyReadOnly(string key)
+    {
+        return DataKeyConstraints.IsKeyReadOnly(key);
     }
 }
