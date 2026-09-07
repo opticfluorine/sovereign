@@ -130,14 +130,14 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
                 public static int Marshal(IntPtr luaState, ulong value)
                 {{
                     luaL_checkstack(luaState, 1, null);
-                    lua_pushinteger(luaState, (long)value);
+                    lua_pushlightuserdata(luaState, (IntPtr)value);
                     return 1;
                 }}
 
                 public static void Unmarshal(IntPtr luaState, out ulong value)
                 {{
-                    if (!lua_isinteger(luaState, -1)) {throwTypeError};
-                    value = (ulong)lua_tointeger(luaState, -1);
+                    if (lua_type(luaState, -1) != LuaType.LightUserData) {throwTypeError};
+                    value = (ulong)lua_touserdata(luaState, -1);
                     lua_pop(luaState, 1);
                 }}
 
@@ -206,7 +206,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
 
                 public static int Marshal(IntPtr luaState, uint value) 
                 {{
-                    Marshal(luaState, (ulong)value);
+                    Marshal(luaState, (long)value);
                     return 1;
                 }}
 
@@ -232,7 +232,7 @@ public class LuaMarshallerGenerator : IIncrementalGenerator
 
                 public static int Marshal(IntPtr luaState, ushort value)
                 {{
-                    Marshal(luaState, (ulong)value);
+                    Marshal(luaState, (long)value);
                     return 1;
                 }}
 

@@ -201,6 +201,24 @@ public class LuaHost : IDisposable
     }
 
     /// <summary>
+    ///     Adds an entity ID constant to the current library as a light userdata.
+    /// </summary>
+    /// <param name="name">Constant name.</param>
+    /// <param name="value">Entity ID.</param>
+    public void AddLibraryEntityIdConstant(string name, ulong value)
+    {
+        lock (opsLock)
+        {
+            luaL_checkstack(LuaState, 2, null);
+
+            lua_getglobal(LuaState, library);
+            lua_pushlightuserdata(LuaState, (IntPtr)value);
+            lua_setfield(LuaState, -2, name);
+            lua_pop(LuaState, 1);
+        }
+    }
+
+    /// <summary>
     ///     Ends the current library, if any.
     /// </summary>
     public void EndLibrary()
@@ -292,12 +310,28 @@ public class LuaHost : IDisposable
     }
 
     /// <summary>
+    ///     Calls a one-argument callback function that was pushed into the Lua registry as a Lua reference,
+    ///     passing an entity ID as a light userdata argument.
+    /// </summary>
+    /// <param name="refIndex">Reference index in the Lua registry.</param>
+    /// <param name="arg">Entity ID argument.</param>
+    public void CallRefFunction(int refIndex, ulong arg)
+    {
+        lock (opsLock)
+        {
+            luaL_checkstack(LuaState, 1, null);
+            lua_pushlightuserdata(LuaState, (IntPtr)arg);
+            DoRefFunctionCall(refIndex, 1);
+        }
+    }
+
+    /// <summary>
     ///     Calls a three-argument callback function via a Lua reference.
     /// </summary>
     /// <param name="refIndex">Callback reference.</param>
     /// <param name="arg0">First argument.</param>
     /// <param name="arg1">Second argument.</param>
-    /// <param name="arg2">Third argument.</param>
+    /// <param name="arg2">Entity ID argument.</param>
     public void CallRefFunction(int refIndex, string arg0, string arg1, ulong arg2)
     {
         lock (opsLock)
@@ -305,19 +339,19 @@ public class LuaHost : IDisposable
             luaL_checkstack(LuaState, 3, null);
             lua_pushstring(LuaState, arg0);
             lua_pushstring(LuaState, arg1);
-            lua_pushinteger(LuaState, (long)arg2);
+            lua_pushlightuserdata(LuaState, (IntPtr)arg2);
             DoRefFunctionCall(refIndex, 2);
         }
     }
 
     /// <summary>
     ///     Calls a two-argument callback function via a Lua reference, passing a list of strings as a
-    ///     Lua table followed by an integer argument.
+    ///     Lua table followed by an entity ID argument.
     /// </summary>
     /// <param name="refIndex">Callback reference.</param>
     /// <param name="arg0">First argument, retained for signature parity but not pushed to Lua.</param>
     /// <param name="arg1">List of strings to be marshaled as a 1-indexed Lua table.</param>
-    /// <param name="arg2">Integer argument.</param>
+    /// <param name="arg2">Entity ID argument.</param>
     public void CallRefFunction(int refIndex, string arg0, List<string> arg1, ulong arg2)
     {
         lock (opsLock)
@@ -329,7 +363,7 @@ public class LuaHost : IDisposable
                 lua_pushstring(LuaState, arg1[i]);
                 lua_seti(LuaState, -2, i + 1);
             }
-            lua_pushinteger(LuaState, (long)arg2);
+            lua_pushlightuserdata(LuaState, (IntPtr)arg2);
             DoRefFunctionCall(refIndex, 2);
         }
     }
@@ -763,6 +797,16 @@ public class LuaHost : IDisposable
         {
             luaL_checkstack(host.LuaState, 1, null);
             lua_pushinteger(host.LuaState, argument);
+        }
+
+        /// <summary>
+        ///     Pushes an entity ID argument onto the function call as a light userdata.
+        /// </summary>
+        /// <param name="argument">Entity ID.</param>
+        public void AddLightUserData(ulong argument)
+        {
+            luaL_checkstack(host.LuaState, 1, null);
+            lua_pushlightuserdata(host.LuaState, (IntPtr)argument);
         }
     }
 

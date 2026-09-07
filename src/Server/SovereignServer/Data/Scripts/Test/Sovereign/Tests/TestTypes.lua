@@ -62,7 +62,8 @@ end
 
 step6VerifyGridPosition = function()
     Test.Step("GridPositionBlock", function()
-        Test.AssertTrue(blockEntityId ~= nil and blockEntityId > 0, "block entity should be created")
+        Test.AssertTrue(blockEntityId ~= nil and blockEntityId ~= Entities.ToEntityId(0),
+            "block entity should be created")
         local pos = Components.BlockPosition.Get(blockEntityId)
         Test.AssertEqual(10, pos.X, "GridPosition X roundtrip")
         Test.AssertEqual(10, pos.Y, "GridPosition Y roundtrip")

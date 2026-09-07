@@ -241,14 +241,14 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         var mainState = LuaUtil.GetMainThread(luaState);
 
         // First argument: entity ID
-        if (lua_gettop(luaState) < 1 || !lua_isinteger(luaState, -1))
+        if (lua_gettop(luaState) < 1 || !lua_islightuserdata(luaState, -1))
         {
             scriptingServices.GetScriptLogger(mainState, logger)
                 .LogError("data.GetEntityData(entityId) requires entity ID as the first argument.");
             return 0;
         }
 
-        var entityId = (ulong)lua_tointeger(luaState, -1);
+        var entityId = (ulong)lua_touserdata(luaState, -1);
         if (entityId >= EntityConstants.FirstBlockEntityId && entityId <= EntityConstants.LastBlockEntityId)
         {
             scriptingServices.GetScriptLogger(mainState, logger)
@@ -263,7 +263,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
         // Bind new table to entity.
         lua_pushinteger(luaState, TableEntityIndex);
-        lua_pushinteger(luaState, (long)entityId);
+        lua_pushlightuserdata(luaState, (IntPtr)entityId);
         lua_rawset(luaState, -4);
 
         // Populate metatable.
@@ -302,7 +302,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             // Retrieve the bound entity ID.
             lua_pushinteger(luaState, TableEntityIndex);
             lua_rawget(luaState, -3);
-            if (!lua_isinteger(luaState, -1))
+            if (!lua_islightuserdata(luaState, -1))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
                     .LogCritical(
@@ -310,7 +310,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
                 return 0;
             }
 
-            var entityId = (ulong)lua_tointeger(luaState, -1);
+            var entityId = (ulong)lua_touserdata(luaState, -1);
             lua_pop(luaState, 1);
 
             // Fetch value for key if it exists.
@@ -359,7 +359,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             // Retrieve the bound entity ID.
             lua_pushinteger(luaState, TableEntityIndex);
             lua_rawget(luaState, -4);
-            if (!lua_isinteger(luaState, -1))
+            if (!lua_islightuserdata(luaState, -1))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
                     .LogCritical(
@@ -368,7 +368,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
                 return 1;
             }
 
-            var entityId = (ulong)lua_tointeger(luaState, -1);
+            var entityId = (ulong)lua_touserdata(luaState, -1);
             lua_pop(luaState, 1);
 
             // Handle the set or delete if the type is supported.

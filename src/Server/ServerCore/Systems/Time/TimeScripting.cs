@@ -27,14 +27,23 @@ namespace Sovereign.ServerCore.Systems.Time;
 [ScriptableLibrary("Time")]
 public class TimeScripting(ITimeServices timeServices, ISystemTimer systemTimer)
 {
+    /// <summary>
+    ///     Gets the current system time in microseconds since server start.
+    /// </summary>
+    /// <returns>System time in microseconds since server start.</returns>
     [ScriptableFunction("GetSystemTime")]
-    public ulong GetSystemTime()
+    public double GetSystemTime()
     {
         return systemTimer.GetTime();
     }
 
+    /// <summary>
+    ///     Gets the system time in microseconds since server start after the given delay.
+    /// </summary>
+    /// <param name="delaySeconds">Delay in seconds.</param>
+    /// <returns>Future system time in microseconds since server start.</returns>
     [ScriptableFunction("FutureSystemTime")]
-    public ulong FutureSystemTime(float delaySeconds)
+    public double FutureSystemTime(float delaySeconds)
     {
         return systemTimer.GetTime() + (ulong)(UnitConversions.SToUs * delaySeconds);
     }

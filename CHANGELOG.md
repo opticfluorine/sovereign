@@ -4,6 +4,13 @@
 
 ### September
 
+#### 7 September 2026
+
+* Entity IDs now cross the Lua scripting boundary as `lightuserdata` values instead of (possibly truncated) integers, preserving the full 64-bit entity ID. All scripting APIs that send or receive entity IDs are affected; entity IDs support only equality comparison in scripts.
+* Add new `Entities.FormatEntityId(entityId)`, `Entities.ToEntityId(integer)`, and `Entities.ToTemplateEntityId(relativeId)` helper functions for displaying and converting entity IDs.
+* The `Entities.FirstTemplateEntityId` and related entity ID constants are now `lightuserdata` values, and `Entities.IsTemplate` is now an engine function that accepts a `lightuserdata` entity ID.
+* System time values from `Time.GetSystemTime` and `Time.FutureSystemTime`, and the `Kinematics.StopSystemTime` field, are now Lua numbers (`double`) instead of integers.
+
 #### 6 September 2026
 
 * Add new admin chat commands `/getvalue`, `/setvalue`, `/getentityvalue`, and `/setentityvalue` for working with global and entity key-value data.

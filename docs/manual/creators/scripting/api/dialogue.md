@@ -14,7 +14,7 @@ The `Dialogue` module provides APIs for displaying dialogue to players.
    Shows a dialogue message to a specific player.
 
    :param targetEntityId: Entity ID of the target player.
-   :type targetEntityId: integer
+   :type targetEntityId: lightuserdata
    :param subject: Dialogue subject (e.g. who is speaking).
    :type subject: string
    :param message: Dialogue message.
@@ -39,7 +39,7 @@ Dialogue.Show(playerEntityId, "NPC Name", "Welcome to the world!")
    Shows a dialogue message with a profile sprite to a specific player.
 
    :param targetEntityId: Entity ID of the target player.
-   :type targetEntityId: integer
+   :type targetEntityId: lightuserdata
    :param profileSpriteId: Profile sprite ID.
    :type profileSpriteId: integer
    :param subject: Dialogue subject (e.g. who is speaking).

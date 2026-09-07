@@ -16,7 +16,7 @@ The `Chat` module provides APIs for sending chat messages to players.
    command or similar (e.g. the response to the `/help` command).
    
    :param playerEntityId: Entity ID of the target player.
-   :type playerEntityId: integer
+   :type playerEntityId: lightuserdata
    :param message: Message.
    :type message: string
 ```
@@ -40,7 +40,7 @@ Chat.SendSystemMessage(playerEntityId, "This is a system message.")
    Sends a generic chat message to a specific player.
    
    :param playerEntityId: Entity ID of the target player.
-   :type playerEntityId: integer
+   :type playerEntityId: lightuserdata
    :param color: RGB text color.
    :type color: integer
    :param message: Message.

@@ -9,7 +9,8 @@ Test.Async("CreateWithSpec")
 
 step1VerifyNpc = function()
     Test.Step("CreateWithSpec", function()
-        Test.AssertTrue(npcEntityId ~= nil and npcEntityId > 0, "entity ID should be returned")
+        Test.AssertTrue(npcEntityId ~= nil and npcEntityId ~= Entities.ToEntityId(0),
+            "entity ID should be returned")
         Test.AssertEqual("TestEntitiesFixture", Components.Name.Get(npcEntityId), "name from spec")
         Test.AssertEqual(EntityType.Npc, Components.EntityType.Get(npcEntityId), "entity type from spec")
         local kin = Components.Kinematics.Get(npcEntityId)
@@ -41,7 +42,8 @@ step4VerifyItemTemplate = function()
     Test.Step("TemplateQueries", function()
         Test.AssertTrue(swordTemplateId ~= nil, "sword item template should exist")
         Test.AssertTrue(Entities.IsTemplate(swordTemplateId), "sword template ID should be a template entity")
-        Test.AssertTrue(itemEntityId ~= nil and itemEntityId > 0, "item entity should be created")
+        Test.AssertTrue(itemEntityId ~= nil and itemEntityId ~= Entities.ToEntityId(0),
+            "item entity should be created")
         Test.AssertEqual(swordTemplateId, Entities.GetTemplate(itemEntityId), "item should reference its template")
         Test.AssertTrue(not Entities.IsTemplate(itemEntityId), "item entity is not a template")
     end)
@@ -49,15 +51,16 @@ step4VerifyItemTemplate = function()
 end
 
 Test.Case("AbsoluteTemplateId", function()
-    Test.AssertEqual(0x7FFE000000000004, Entities.AbsoluteTemplateId(4),
+    Test.AssertEqual("7FFE000000000004", Entities.FormatEntityId(Entities.ToTemplateEntityId(4)),
         "relative template ID 4 should map to the absolute range")
-    Test.AssertEqual(Entities.FirstTemplateEntityId, Entities.AbsoluteTemplateId(0),
+    Test.AssertEqual(Entities.FirstTemplateEntityId, Entities.ToTemplateEntityId(0),
         "relative template ID 0 should map to the first template entity ID")
 end)
 
 Test.Case("IsTemplateForNonTemplate", function()
-    Test.AssertTrue(not Entities.IsTemplate(0), "entity ID 0 is not a template")
-    Test.AssertTrue(not Entities.IsTemplate(0x6FFF000000000000), "block entities are not templates")
+    Test.AssertTrue(not Entities.IsTemplate(Entities.ToEntityId(0)), "entity ID 0 is not a template")
+    Test.AssertTrue(not Entities.IsTemplate(Entities.ToEntityId(0x6FFF000000000000)),
+        "block entities are not templates")
 end)
 
 -- Suite setup. ------------------------------------------------------------------------

@@ -112,7 +112,7 @@ public class ScriptingController(ScriptManager scriptManager, ILogger<ScriptingC
 
                 host.CallNamedFunction(functionName, builder =>
                 {
-                    foreach (var arg in args) builder.AddInteger((long)arg);
+                    foreach (var arg in args) builder.AddLightUserData(arg);
                     return args.Length;
                 });
             }

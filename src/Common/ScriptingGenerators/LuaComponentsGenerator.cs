@@ -152,10 +152,10 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     {{
                         var argCount = lua_gettop(luaState);
                         if (argCount < 1 || argCount > 2) throw new LuaException(""Must be called with one or two arguments."");
-                        if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
+                        if (!lua_islightuserdata(luaState, 1)) throw new LuaException(""First argument must be an entity ID."");
                         if (argCount == 2 && !lua_isboolean(luaState, 2)) throw new LuaException(""Second argument must be boolean."");
 
-                        var entityId = (ulong)lua_tointeger(luaState, 1);
+                        var entityId = (ulong)lua_touserdata(luaState, 1);
                         var lookback = argCount == 2 ? lua_toboolean(luaState, 2) : false;
 
                         result = components.HasComponentForEntity(entityId, lookback);
@@ -180,10 +180,10 @@ public class LuaComponentsGenerator : IIncrementalGenerator
 
                         var argCount = lua_gettop(luaState);
                         if (argCount < 1 || argCount > 2) throw new LuaException(""Must be called with one or two arguments."");
-                        if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
+                        if (!lua_islightuserdata(luaState, 1)) throw new LuaException(""First argument must be an entity ID."");
                         if (argCount == 2 && !lua_isboolean(luaState, 2)) throw new LuaException(""Second argument must be boolean."");
 
-                        var entityId = (ulong)lua_tointeger(luaState, 1);
+                        var entityId = (ulong)lua_touserdata(luaState, 1);
                         var lookback = argCount == 2 ? lua_toboolean(luaState, 2) : false;");
 
         if (model.IsTag)
@@ -216,9 +216,9 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     {{
                         var argCount = lua_gettop(luaState);
                         if (argCount != 1) throw new LuaException(""Must be called with one argument."");
-                        if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
+                        if (!lua_islightuserdata(luaState, 1)) throw new LuaException(""First argument must be an entity ID."");
 
-                        var entityId = (ulong)lua_tointeger(luaState, 1);
+                        var entityId = (ulong)lua_touserdata(luaState, 1);
                         components.RemoveComponent(entityId);
                     }}
                     catch (Exception e)
@@ -234,9 +234,9 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                     {{
                         var argCount = lua_gettop(luaState);
                         if (argCount < 2) throw new LuaException(""Too few arguments."");
-                        if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
+                        if (!lua_islightuserdata(luaState, 1)) throw new LuaException(""First argument must be an entity ID."");
 
-                        var entityId = (ulong)lua_tointeger(luaState, 1);
+                        var entityId = (ulong)lua_touserdata(luaState, 1);
                         {model.ValueTypeFullNamespace}.{model.ValueType} value;
                         {model.MarshallerAssemblyName}.Lua.LuaMarshaller.Unmarshal(luaState, out value);
 
@@ -344,9 +344,9 @@ public class LuaComponentsGenerator : IIncrementalGenerator
                 {{
                     var argCount = lua_gettop(luaState);
                     if (argCount < 2) throw new LuaException(""Too few arguments."");
-                    if (!lua_isinteger(luaState, 1)) throw new LuaException(""First argument must be integer."");
+                    if (!lua_islightuserdata(luaState, 1)) throw new LuaException(""First argument must be an entity ID."");
 
-                    var entityId = (ulong)lua_tointeger(luaState, 1);
+                    var entityId = (ulong)lua_touserdata(luaState, 1);
                     {model.ValueTypeFullNamespace}.{model.ValueType} value;
                     {model.MarshallerAssemblyName}.Lua.LuaMarshaller.Unmarshal(luaState, out value);
 

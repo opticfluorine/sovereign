@@ -82,15 +82,18 @@ function Wander.LoadParams(entity)
     -- Validate per-entity parameters.
     local paramsValid = true
     if not wanderStep then
-        Util.LogError(string.format("Entity %X requires parameter %s of type number.", entity.EntityId, ParamWanderStep))
+        Util.LogError(string.format("Entity %s requires parameter %s of type number.",
+            Entities.FormatEntityId(entity.EntityId), ParamWanderStep))
         paramsValid = false
     end
     if not wanderDelay then
-        Util.LogError(string.format("Entity %X requires parameter %s of type number.", entity.EntityId, ParamWanderDelay))
+        Util.LogError(string.format("Entity %s requires parameter %s of type number.",
+            Entities.FormatEntityId(entity.EntityId), ParamWanderDelay))
         paramsValid = false
     end
     if not wanderSpeed then
-        Util.LogError(string.format("Entity %X requires parameter %s of type number.", entity.EntityId, ParamWanderSpeed))
+        Util.LogError(string.format("Entity %s requires parameter %s of type number.",
+            Entities.FormatEntityId(entity.EntityId), ParamWanderSpeed))
         paramsValid = false
     end
     if not paramsValid then
@@ -98,15 +101,15 @@ function Wander.LoadParams(entity)
     end
 
     if wanderStep <= 0 then
-        Util.LogError(string.format("Entity %X has invalid wander step.", entity.EntityId))
+        Util.LogError(string.format("Entity %s has invalid wander step.", Entities.FormatEntityId(entity.EntityId)))
         paramsValid = false
     end
     if wanderDelay < 0 then
-        Util.LogError(string.format("Entity %X has invalid wander delay.", entity.EntityId))
+        Util.LogError(string.format("Entity %s has invalid wander delay.", Entities.FormatEntityId(entity.EntityId)))
         paramsValid = false
     end
     if wanderSpeed <= 0 then
-        Util.LogError(string.format("Entity %X has invalid wander speed.", entity.EntityId))
+        Util.LogError(string.format("Entity %s has invalid wander speed.", Entities.FormatEntityId(entity.EntityId)))
         paramsValid = false
     end
     if not paramsValid then
@@ -133,7 +136,7 @@ function Wander.RunAsync(behavior, entity)
         -- Get current position and velocity.
         local posVel = entity.Components.Kinematics
         if not posVel then
-            Util.LogError(string.format("No Kinematics data for entity %X.", entity.EntityId))
+            Util.LogError(string.format("No Kinematics data for entity %s.", Entities.FormatEntityId(entity.EntityId)))
             return
         end
 

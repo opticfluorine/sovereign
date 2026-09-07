@@ -22,7 +22,7 @@ local Vectors = require("Sovereign.Vectors")
 --- Proxy class that provides read-write access to an entity's components
 --- as if they were fields on an object.
 --- @class ComponentsProxy
---- @field private _entityId integer Entity ID.
+--- @field private _entityId lightuserdata Entity ID.
 --- @field [string] any
 local ComponentsProxy = {}
 setmetatable(ComponentsProxy, ComponentsProxy)
@@ -30,7 +30,7 @@ setmetatable(ComponentsProxy, ComponentsProxy)
 -------------------------------------
 
 --- Creates a components proxy for the given entity.
---- @param entityId integer Entity ID.
+--- @param entityId lightuserdata Entity ID.
 --- @return ComponentsProxy # ComponentsProxy object.
 function ComponentsProxy.Create(entityId)
     local obj = {}
@@ -68,8 +68,8 @@ end
 --- Proxy class that provides read-write access to various entity properties
 --- as if they were fields on an object.
 --- @class PropertyProxy
---- @field TemplateId integer Template ID.
---- @field private _entityId integer Entity ID.
+--- @field TemplateId lightuserdata Template ID.
+--- @field private _entityId lightuserdata Entity ID.
 --- @field private _getters table Getters.
 --- @field private _setters table Setters.
 local PropertyProxy = {}
@@ -115,7 +115,7 @@ end
 -------------------------------------
 
 ---@class InventoryProxy
----@field private _entityId integer Entity ID.
+---@field private _entityId lightuserdata Entity ID.
 local InventoryProxy = {}
 for k,v in pairs(Inventory) do
     if type(v) == "function" then
@@ -154,7 +154,7 @@ function InventoryProxy:__newindex(slotIndex, itemId)
     end
 
     local currentItem = Inventory.GetItem(self._entityId, slotIndex)
-    if currentItem > 0 then
+    if currentItem ~= Entities.ToEntityId(0) then
         -- Slot is filled.
         if itemId == nil then
             Inventory.RemoveItem(self._entityId, slotIndex)
@@ -172,7 +172,7 @@ end
 -------------------------------------
 
 --- Creates a new InventoryProxy for an entity.
---- @param entityId integer Entity ID.
+--- @param entityId lightuserdata Entity ID.
 --- @return InventoryProxy # New InventoryProxy for entity.
 function InventoryProxy.Create(entityId)
     local obj = {}
@@ -185,7 +185,7 @@ end
 
 --- Lightweight object-oriented wrapper for an entity and its components.
 --- @class Entity
---- @field EntityId integer Entity ID.
+--- @field EntityId lightuserdata Entity ID.
 --- @field Properties PropertyProxy Provides access to the entity's properties.
 --- @field Components ComponentsProxy Provides access to the entity's components.
 --- @field Inventory InventoryProxy Provides access to the entity's inventory.
@@ -197,7 +197,7 @@ setmetatable(Entity, Entity)
 -------------------------------------
 
 --- Gets an object wrapper for the given entity.
---- @param entityId integer Entity ID.
+--- @param entityId lightuserdata Entity ID.
 --- @return Entity # Entity object.
 function Entity.Get(entityId)
     local obj = {}

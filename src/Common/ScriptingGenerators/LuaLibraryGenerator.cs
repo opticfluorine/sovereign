@@ -42,7 +42,8 @@ public class LuaLibraryGenerator : IIncrementalGenerator
     private static readonly List<string> predefinedTypes =
     [
         "System.Int64", "System.UInt64", "System.Int32", "System.UInt32", "System.Int16", "System.UInt16",
-        "System.Byte", "System.Single", "System.Boolean", "System.String", "Numerics.Vector3", "System.Guid"
+        "System.Byte", "System.Single", "System.Double", "System.Boolean", "System.String", "Numerics.Vector3",
+        "System.Guid"
     ];
 
     public void Initialize(IncrementalGeneratorInitializationContext context)

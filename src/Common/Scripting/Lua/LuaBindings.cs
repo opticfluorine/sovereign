@@ -186,6 +186,17 @@ public static partial class LuaBindings
         return lua_type(luaState, idx) == LuaType.Function;
     }
 
+    /// <summary>
+    ///     Determines if the value at the given stack index is a light userdata.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="idx">Stack index.</param>
+    /// <returns>true if the value is a light userdata, false otherwise.</returns>
+    public static bool lua_islightuserdata(IntPtr luaState, int idx)
+    {
+        return lua_type(luaState, idx) == LuaType.LightUserData;
+    }
+
     [LibraryImport(LibName)]
     public static partial LuaType lua_type(IntPtr luaState, int idx);
 

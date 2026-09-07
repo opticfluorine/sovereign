@@ -46,7 +46,7 @@ s5VerifyContents = function()
         Test.AssertEqual(sword1, Inventory.GetItem(actorId, 1), "slot 1 should hold sword1")
         Test.AssertEqual(shield1, Inventory.GetItem(actorId, 2), "slot 2 should hold shield1")
         Test.AssertEqual(sword2, Inventory.GetItem(actorId, 3), "slot 3 should hold sword2")
-        Test.AssertEqual(0, Inventory.GetItem(chestAId, 1), "chest A should start empty")
+        Test.AssertEqual(Entities.ToEntityId(0), Inventory.GetItem(chestAId, 1), "chest A should start empty")
         Test.AssertEqual(2, Inventory.GetSlotIndexForItem(actorId, shield1), "shield1 slot index")
         Test.AssertEqual(sword1, Inventory.FindFirstMatchingItem(actorId, swordTemplateId),
             "first matching sword should be sword1")
@@ -56,7 +56,7 @@ s5VerifyContents = function()
         Test.AssertEqual(sword1, inv[1], "GetInventory slot 1")
         Test.AssertEqual(shield1, inv[2], "GetInventory slot 2")
         Test.AssertEqual(sword2, inv[3], "GetInventory slot 3")
-        Test.AssertEqual(0, inv[4], "GetInventory empty slot")
+        Test.AssertEqual(Entities.ToEntityId(0), inv[4], "GetInventory empty slot")
     end)
     Test.Pass("AddItemAndGetItem")
 end
@@ -86,7 +86,7 @@ end
 s9VerifySwapAsActor = function()
     Test.Step("SwapAsActor", function()
         Test.AssertEqual(shield1, Inventory.GetItem(chestAId, 1), "shield1 should move to chest A")
-        Test.AssertEqual(0, Inventory.GetItem(actorId, 1), "actor slot 1 should be empty")
+        Test.AssertEqual(Entities.ToEntityId(0), Inventory.GetItem(actorId, 1), "actor slot 1 should be empty")
     end)
     Test.Pass("SwapAsActor")
 end
@@ -112,7 +112,7 @@ end
 s13VerifySwapQuantity = function()
     Test.Step("SwapQuantityAsActor", function()
         local splitItem = Inventory.GetItem(chestBId, 3)
-        Test.AssertTrue(splitItem > 0, "destination slot should hold the split stack")
+        Test.AssertTrue(splitItem ~= Entities.ToEntityId(0), "destination slot should hold the split stack")
         Test.AssertEqual(4, Components.Quantity.Get(splitItem), "split stack quantity")
         Test.AssertEqual(sword1, Inventory.GetItem(actorId, 2), "source slot should still hold sword1")
         Test.AssertEqual(6, Components.Quantity.Get(sword1), "source stack quantity after split")
@@ -130,7 +130,7 @@ end
 
 s15VerifyMerge = function()
     Test.Step("SwapMerge", function()
-        Test.AssertEqual(0, Inventory.GetItem(actorId, 2), "merged source slot should be empty")
+        Test.AssertEqual(Entities.ToEntityId(0), Inventory.GetItem(actorId, 2), "merged source slot should be empty")
         Test.AssertEqual(sword3, Inventory.GetItem(chestAId, 2), "merged destination slot should hold sword3")
         Test.AssertEqual(7, Components.Quantity.Get(sword3), "sword3 quantity after merge (1 + 6)")
     end)
@@ -158,8 +158,8 @@ end
 
 s18VerifyConsume = function()
     Test.Step("ConsumeItem", function()
-        Test.AssertEqual(0, Inventory.GetItem(actorId, 1), "slot 1 should be empty after consumption")
-        Test.AssertEqual(0, Inventory.GetItem(actorId, 3), "slot 3 should be empty after consumption")
+        Test.AssertEqual(Entities.ToEntityId(0), Inventory.GetItem(actorId, 1), "slot 1 should be empty after consumption")
+        Test.AssertEqual(Entities.ToEntityId(0), Inventory.GetItem(actorId, 3), "slot 3 should be empty after consumption")
     end)
     Test.Pass("ConsumeItem")
 end
@@ -179,7 +179,7 @@ end
 
 s21VerifyRemove = function()
     Test.Step("RemoveItem", function()
-        Test.AssertEqual(0, Inventory.GetItem(actorId, 1), "slot 1 should be empty after RemoveItem")
+        Test.AssertEqual(Entities.ToEntityId(0), Inventory.GetItem(actorId, 1), "slot 1 should be empty after RemoveItem")
     end)
     Test.Pass("RemoveItem")
 end

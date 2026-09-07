@@ -168,7 +168,7 @@ public sealed class EntityCallbackManager
                 {
                     if (pendingRemoves.Contains((host, entityId, cref))) continue;
                     host.Logger.LogTrace("Invoking callback for entity ID {EntityId:X}.", entityId);
-                    host.CallRefFunction(cref, (long)entityId);
+                    host.CallRefFunction(cref, entityId);
                 }
                 catch (Exception e)
                 {

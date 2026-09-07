@@ -18,7 +18,7 @@
 
 local function OnPlayerEntered(event)
     local playerEntityId = event.EntityId
-    Util.LogDebug(string.format("playerEntityId = %s (type %s)", playerEntityId, type(playerEntityId)))
+    Util.LogDebug(string.format("playerEntityId = %s", Entities.FormatEntityId(playerEntityId)))
     local playerName = Components.Name.Get(playerEntityId)
     Chat.SendToPlayer(playerEntityId, Color.MOTD,
             string.format("Welcome to Sovereign Engine, %s!", playerName))

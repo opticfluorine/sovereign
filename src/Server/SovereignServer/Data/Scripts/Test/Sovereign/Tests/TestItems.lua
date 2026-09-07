@@ -7,8 +7,7 @@ Test.Case("FindByName", function()
     local swords = Items.FindByName("Sword")
     Test.AssertTrue(swords ~= nil, "FindByName should return a table")
     Test.AssertTrue(#swords > 0, "sword item template should exist in the database")
-    Test.AssertTrue(swords[1] >= Entities.FirstTemplateEntityId and swords[1] <= Entities.LastTemplateEntityId,
-        "matched entity should be in the template range")
+    Test.AssertTrue(Entities.IsTemplate(swords[1]), "matched entity should be in the template range")
 
     -- Lookups are case-insensitive.
     local lower = Items.FindByName("sword")
@@ -25,7 +24,8 @@ Test.Case("FindByFuzzyName", function()
     Test.AssertTrue(#matches > 0, "fuzzy query should match the sword template")
 
     local match = matches[1]
-    Test.AssertTrue(match.EntityId ~= nil and match.EntityId > 0, "match should carry an entity ID")
+    Test.AssertTrue(match.EntityId ~= nil and match.EntityId ~= Entities.ToEntityId(0),
+        "match should carry an entity ID")
     Test.AssertTrue(match.Name ~= nil and match.Name:len() > 0, "match should carry a name")
     Test.AssertTrue(match.Score >= 0.0 and match.Score <= 1.0, "score should be in [0, 1]")
 

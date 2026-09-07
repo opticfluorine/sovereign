@@ -35,7 +35,7 @@ The `Scripting` module provides APIs for interacting with the server-side script
 :emphasize-lines: 6
 function on_player_entered(event)
     local playerEntityId = event.EntityId
-    Util.LogInfo(string.format("Player ID %s has logged in.", playerEntityId))
+    Util.LogInfo("Player ID " .. Entities.FormatEntityId(playerEntityId) .. " has logged in.")
 end
 
 Scripting.AddEventCallback(events.Server_Persistence_PlayerEnteredWorld, on_player_entered)
@@ -78,7 +78,7 @@ Scripting.AddTimedCallback(1.0, on_timer, 0)
    Registers a callback that is called whenever the given entity collides with another object (either a block or non-block entity). The callback will be called whenever the entity stops moving as a result of collision; it is not called if the entity is not moving and another object collides with it.
 
    :param entityId: Entity ID to listen for collisions on.
-   :type entityId: number
+   :type entityId: lightuserdata
    :param callback: Callback function, which may accept the entity ID as its first argument.
    :type callback: function
    
@@ -106,7 +106,7 @@ local collisionHandle = Scripting.AddCollisionCallback(entityId, on_collision)
    Removes a collision callback that was previously registered by the same script. If no such callback is found, this function logs an error and otherwise does nothing.
 
    :param entityId: Entity ID on which the callback was registered.
-   :type entityId: number
+   :type entityId: lightuserdata
    :param callbackHandle: Callback handle returned by the corresponding call to `Scripting.AddCollisionCallback(entityId, callback)`.
    :type callbacHanle: number
 ```

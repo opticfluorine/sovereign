@@ -32,7 +32,7 @@ more entries than `maxResults`).
 :caption: Looking up item template entities by name using Items.FindByName.
 :emphasize-lines: 1,2,3
 for _, itemId in ipairs(Items.FindByName("Sword")) do
-    Util.LogInfo(string.format("Found item template %x", itemId))
+    Util.LogInfo("Found item template " .. Entities.FormatEntityId(itemId))
 end
 ```
 
@@ -64,6 +64,7 @@ end
 :caption: Fuzzy lookup of item templates using Items.FindByFuzzyName.
 :emphasize-lines: 1,2,3
 for _, match in ipairs(Items.FindByFuzzyName("Sowrd", 5)) do
-    Util.LogInfo(string.format("%s (id %x, score %.2f)", match.Name, match.EntityId, match.Score))
+    Util.LogInfo(string.format("%s (id %s, score %.2f)",
+        match.Name, Entities.FormatEntityId(match.EntityId), match.Score))
 end
 ```
