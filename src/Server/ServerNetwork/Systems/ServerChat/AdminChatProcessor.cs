@@ -142,7 +142,6 @@ public class AdminChatProcessor : IChatProcessor
         NameComponentValidator nameValidator, PersistencePlayerServices persistencePlayerServices,
         LoggingUtil loggingUtil, NameComponentCollection names, WorldManagementController worldManagementController,
         IEventSender eventSender, BlockController blockController, IBlockServices blockServices,
-        TestHarnessController testHarnessController,
         BlockTemplateNameComponentIndexer blockTemplateNames, EntityTable entityTable,
         IDataController dataController, IDataServices dataServices,
         ILogger<AdminChatProcessor> logger, ScriptingController scriptingController,
@@ -381,7 +380,7 @@ public class AdminChatProcessor : IChatProcessor
         }
 
         // Parse template entity specification.
-        ulong templateEntityId = 0;
+        ulong templateEntityId;
         try
         {
             templateEntityId = EntityConstants.FirstTemplateEntityId + ulong.Parse(args[3]);
