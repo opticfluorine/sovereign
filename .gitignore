@@ -1,4 +1,5 @@
-src/Server/SovereignServer/Data/Scripts/Test/
+src/Server/SovereignServer/Data/Scripts/Test/*
+!src/Server/SovereignServer/Data/Scripts/Test/Sovereign/
 _dev/
 *.exe
 .vscode/

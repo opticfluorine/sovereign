@@ -522,7 +522,8 @@ public enum EventId
     /// <summary>
     ///     Event sent to select an item in the GUI.
     /// </summary>
-    /// Associated details: IntPairEventDetails (first value is slot index, -1 to deselect; second value is quantity, 0 to select entire stack)
+    /// Associated details: IntPairEventDetails (first value is slot index, -1 to deselect; second value is quantity, 0 to
+    /// select entire stack)
     Client_State_SelectItem = 100402,
 
     /// <summary>
@@ -770,6 +771,12 @@ public enum EventId
     /// </summary>
     /// Associated details: EntityEventDetails
     Server_Scripting_ReloadTemplate = 200705,
+
+    /// <summary>
+    ///     Requests that the script test harness run the test suite.
+    /// </summary>
+    /// Associated details: None
+    Server_Scripting_RunTests = 200706,
 
     #endregion Server_Scripting
 

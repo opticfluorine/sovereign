@@ -11,6 +11,7 @@
 #### 4 September 2026
 
 * Add new admin chat commands `/reloadentity` and `/reloadtemplate` to soft-reload entity script hooks.
+* Add a test harness to the server scripting engine with a committed Lua test suite covering the public scripting APIs. The harness is disabled by default and can be run automatically at startup or on demand with the new `/runtests` admin command.
 
 #### 3 September 2026
 

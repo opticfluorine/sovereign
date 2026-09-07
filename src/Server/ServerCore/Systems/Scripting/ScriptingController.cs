@@ -86,6 +86,16 @@ public class ScriptingController(ScriptManager scriptManager, ILogger<ScriptingC
     }
 
     /// <summary>
+    ///     Requests that the Scripting system run the test suite.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    public void RunTests(IEventSender eventSender)
+    {
+        var ev = new Event(EventId.Server_Scripting_RunTests);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
     ///     Asynchronously invokes a function from a loaded script.
     /// </summary>
     /// <param name="scriptName">Script name.</param>

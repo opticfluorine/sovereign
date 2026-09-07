@@ -251,6 +251,14 @@ VALUES (0x7FFE000000000005, 'Rock', 10, 9, 1);
 INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
 VALUES (0x7FFE000000000006, 'Cobblestone', 13, 12, 1);
 
+-- Sword item template entity (entity_type 1 = Item).
+INSERT INTO Entity (id, name, entity_type, stackable)
+VALUES (0x7FFE000000000007, 'Sword', 1, 1);
+
+-- Shield item template entity (entity_type 1 = Item; non-stackable).
+INSERT INTO Entity (id, name, entity_type, stackable)
+VALUES (0x7FFE000000000008, 'Shield', 1, NULL);
+
 -- Initial block data at origin.
 INSERT INTO WorldSegmentBlockData
 VALUES (0, 0, 0,

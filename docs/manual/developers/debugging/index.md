@@ -6,4 +6,5 @@ of the useful debugging tools and techniques that are available.
 :::{toctree}
 :maxdepth: 2
 eventlog.md
+script-test-harness.md
 :::

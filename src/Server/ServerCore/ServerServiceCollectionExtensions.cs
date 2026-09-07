@@ -72,6 +72,8 @@ public static class ServerServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(AccountsOptions)}"));
         services.Configure<ScriptingOptions>(
             configuration.GetSection($"Sovereign:{nameof(ScriptingOptions)}"));
+        services.Configure<TestHarnessOptions>(
+            configuration.GetSection($"Sovereign:{nameof(TestHarnessOptions)}"));
         services.Configure<WorldOptions>(
             configuration.GetSection($"Sovereign:{nameof(WorldOptions)}"));
 
@@ -215,5 +217,7 @@ public static class ServerServiceCollectionExtensions
                 s.GetRequiredService<ScriptingLuaLibrary>()));
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, EntitiesLuaLibrary>());
         services.TryAddSingleton<ItemsScripting>();
+        services.TryAddSingleton<TestHarnessResultsCollector>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, TestHarnessLuaLibrary>());
     }
 }

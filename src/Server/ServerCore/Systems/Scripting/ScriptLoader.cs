@@ -37,35 +37,59 @@ public class ScriptLoader(
     ILoggerFactory loggerFactory,
     IEnumerable<ILuaComponents> luaComponents)
 {
+    private const string TestScriptDirectoryPrefix = "Test/";
+
     private readonly ScriptingOptions config = scriptingOptions.Value;
 
     /// <summary>
-    ///     Loads and hosts all scripts.
+    ///     Loads and hosts all non-test scripts.
     /// </summary>
+    /// <returns>Loaded scripts.</returns>
     public List<LuaHost> LoadAll()
     {
-        return LoadScriptList(GetAllScriptFiles());
+        return LoadScriptList(EnumerateScriptFiles(true));
     }
 
     /// <summary>
-    ///     Loads scripts where the script name satisfies a given predicate.
+    ///     Loads non-test scripts where the script name satisfies a given predicate.
     /// </summary>
     /// <param name="namePredicate">Predicate acting on script names. Names for which this returns true are loaded.</param>
     /// <returns>Loaded scripts whose names satisfied the given predicate.</returns>
     public List<LuaHost> LoadWhere(Func<string, bool> namePredicate)
     {
-        return LoadScriptList(GetAllScriptFiles().Where(f => namePredicate(GetNameFromPath(f))));
+        return LoadScriptList(EnumerateScriptFiles(true).Where(f => namePredicate(GetNameFromPath(f))));
+    }
+
+    /// <summary>
+    ///     Loads and hosts all test scripts.
+    /// </summary>
+    /// <returns>Loaded test scripts.</returns>
+    public List<LuaHost> LoadTestScripts()
+    {
+        return LoadScriptList(EnumerateScriptFiles(false)
+            .Where(f => IsTestScript(GetNameFromPath(f))));
     }
 
     /// <summary>
     ///     Loads the script with the given name.
     /// </summary>
     /// <param name="scriptName">Script name.</param>
-    /// <returns></returns>
+    /// <returns>The hosted script.</returns>
     public LuaHost Load(string scriptName)
     {
         var scriptPath = Path.Combine(config.ScriptDirectory, $"{scriptName}.lua");
         return HostScript(scriptPath);
+    }
+
+    /// <summary>
+    ///     Determines whether the given script name refers to a test script.
+    /// </summary>
+    /// <param name="name">Script name.</param>
+    /// <returns>true if the script is a test script, false otherwise.</returns>
+    public static bool IsTestScript(string name)
+    {
+        return name.StartsWith(TestScriptDirectoryPrefix, StringComparison.Ordinal) ||
+               name.StartsWith("Test\\", StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -104,12 +128,13 @@ public class ScriptLoader(
     }
 
     /// <summary>
-    ///     Identifies all script files.
+    ///     Identifies all script files, optionally excluding test scripts.
     /// </summary>
+    /// <param name="excludeTestScripts">Whether to exclude test scripts from the enumeration.</param>
     /// <returns>Enumerated script files.</returns>
-    private IEnumerable<string> GetAllScriptFiles()
+    private IEnumerable<string> EnumerateScriptFiles(bool excludeTestScripts)
     {
-        return Directory.EnumerateFiles(config.ScriptDirectory, "*.lua",
+        var files = Directory.EnumerateFiles(config.ScriptDirectory, "*.lua",
             new EnumerationOptions
             {
                 MatchCasing = MatchCasing.CaseInsensitive,
@@ -117,6 +142,10 @@ public class ScriptLoader(
                 RecurseSubdirectories = true,
                 MaxRecursionDepth = (int)config.MaxScriptDirectoryDepth
             });
+
+        return excludeTestScripts
+            ? files.Where(f => !IsTestScript(GetNameFromPath(f)))
+            : files;
     }
 
     /// <summary>

@@ -17,11 +17,13 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Events.Details.Validators;
 using Sovereign.EngineCore.Lua;
 using Sovereign.EngineCore.Systems;
+using Sovereign.ServerCore.Configuration;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerCore.Systems.Scripting;
@@ -37,12 +39,15 @@ internal class ScriptingSystem : ISystem
     private readonly ILogger<ScriptingSystem> logger;
     private readonly ScriptManager manager;
     private readonly ScriptLoader scriptLoader;
+    private readonly TestHarnessResultsCollector testHarnessCollector;
+    private readonly TestHarnessOptions testHarnessOptions;
     private readonly ITimedCallbackRunner timedCallbackRunner;
 
     public ScriptingSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop, ScriptManager manager,
         ScriptingCallbackManager callbackManager, ScriptLoader scriptLoader, ILogger<ScriptingSystem> logger,
         EntityScriptCallbacks entityScriptCallbacks, ITimedCallbackRunner timedCallbackRunner,
-        EntityCallbacks entityCallbacks)
+        EntityCallbacks entityCallbacks, TestHarnessResultsCollector testHarnessCollector,
+        IOptions<TestHarnessOptions> testHarnessOptions)
     {
         this.manager = manager;
         this.callbackManager = callbackManager;
@@ -51,6 +56,8 @@ internal class ScriptingSystem : ISystem
         this.entityScriptCallbacks = entityScriptCallbacks;
         this.timedCallbackRunner = timedCallbackRunner;
         this.entityCallbacks = entityCallbacks;
+        this.testHarnessCollector = testHarnessCollector;
+        this.testHarnessOptions = testHarnessOptions.Value;
         EventCommunicator = eventCommunicator;
 
         EventIdsOfInterest = new HashSet<EventId>(ScriptableEventSet.Events);
@@ -61,6 +68,7 @@ internal class ScriptingSystem : ISystem
             EventId.Server_Scripting_TimedCallback,
             EventId.Server_Scripting_ReloadEntity,
             EventId.Server_Scripting_ReloadTemplate,
+            EventId.Server_Scripting_RunTests,
             EventId.Core_Tick,
             EventId.Core_Movement_EntityCollision,
             EventId.Core_Movement_ScheduledStop
@@ -95,6 +103,7 @@ internal class ScriptingSystem : ISystem
                 case EventId.Core_Tick:
                     entityScriptCallbacks.ProcessCallbacks();
                     entityCallbacks.DoPerTickProcessing();
+                    ForwardEventToScripts(ev);
                     break;
 
                 case EventId.Server_Scripting_ReloadAll:
@@ -115,6 +124,10 @@ internal class ScriptingSystem : ISystem
 
                 case EventId.Server_Scripting_LoadNew:
                     OnLoadNew();
+                    break;
+
+                case EventId.Server_Scripting_RunTests:
+                    OnRunTests();
                     break;
 
                 case EventId.Server_Scripting_TimedCallback:
@@ -210,6 +223,19 @@ internal class ScriptingSystem : ISystem
         manager.UnloadAll();
 
         var scripts = scriptLoader.LoadAll();
+
+        // Test scripts are only loaded automatically in CI-style auto-run mode.
+        if (testHarnessOptions.Enabled && testHarnessOptions.AutoRun)
+        {
+            var testScripts = scriptLoader.LoadTestScripts();
+            if (testScripts.Count > 0)
+            {
+                testHarnessCollector.ExpectSuites(testScripts.Count);
+                testHarnessCollector.TryBeginRun();
+                scripts.AddRange(testScripts);
+            }
+        }
+
         manager.Load(scripts);
 
         logger.LogInformation("Loaded {Count} scripts.", scripts.Count);
@@ -250,10 +276,33 @@ internal class ScriptingSystem : ISystem
     {
         logger.LogInformation("Loading new scripts since last full reload.");
 
+        // LoadWhere excludes test scripts; they are loaded only by an explicit test run.
         var scripts = scriptLoader.LoadWhere(name => !manager.TryGetHost(name, out _));
         manager.Load(scripts);
 
         logger.LogInformation("Loaded {Count} new scripts.", scripts.Count);
+    }
+
+    /// <summary>
+    ///     Called when a RunTests event is received.
+    /// </summary>
+    private void OnRunTests()
+    {
+        if (!testHarnessOptions.Enabled)
+        {
+            logger.LogWarning("Test run requested but the test harness is disabled.");
+            return;
+        }
+
+        if (!testHarnessCollector.TryBeginRun()) return;
+
+        logger.LogInformation("Loading test scripts.");
+
+        var scripts = scriptLoader.LoadTestScripts();
+        testHarnessCollector.ExpectSuites(scripts.Count);
+        manager.Load(scripts);
+
+        logger.LogInformation("Loaded {Count} test scripts.", scripts.Count);
     }
 
     /// <summary>
