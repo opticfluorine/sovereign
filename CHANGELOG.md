@@ -4,6 +4,10 @@
 
 ### September
 
+#### 8 September 2026
+
+* The server scripting engine now uses LuaJIT 2.1 instead of Lua 5.4, with updated standard behavior scripts. The Lua API available to scripts is now Lua 5.1-compatible plus LuaJIT extensions (e.g. the `bit` library).
+
 #### 7 September 2026
 
 * Entity IDs now cross the Lua scripting boundary as `lightuserdata` values instead of (possibly truncated) integers, preserving the full 64-bit entity ID. All scripting APIs that send or receive entity IDs are affected; entity IDs support only equality comparison in scripts.

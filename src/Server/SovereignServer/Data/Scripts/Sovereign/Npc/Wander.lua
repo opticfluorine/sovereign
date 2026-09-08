@@ -147,7 +147,7 @@ function Wander.RunAsync(behavior, entity)
 
         -- Set entity in motion, then wait for movement to complete.
         entity:MoveBy({X = dx, Y = dy, Z = 0}, wanderSpeed)
-        behavior:Wait(entity.EntityId, WaitType.Collision | WaitType.ScheduledStop)
+        behavior:Wait(entity.EntityId, bit.bor(WaitType.Collision, WaitType.ScheduledStop))
 
         -- Pause until ready to move again.
         behavior:Wait(entity.EntityId, WaitType.Time, nextDelay)

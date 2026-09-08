@@ -86,33 +86,35 @@ function (behavior, spawnerEntity)
         end
 
         -- Check if a spawned item is in the spawn position.
+        local needSpawn = true
         if itemId then
             local itemPosVel = Components.Kinematics.Get(itemId)
             if itemPosVel and Vectors.Equal(spawnPosVel.Position, itemPosVel.Position) then
                 -- Spawned item is still in original location, no action needed.
-                goto waiting
+                needSpawn = false
             end
         end
 
-        -- Spawn new item.
-        itemId = Entities.Create({
-            Template = templateId,
-            Kinematics = {
-                Position = spawnPosVel.Position,
-                Velocity = Vectors.Vector3.Zero
-            }
-        })
-        if not itemId then
-            Util.LogError(string.format("Spawner %s has failed; disabling until reload.",
-                Entities.FormatEntityId(spawnerEntity.EntityId)))
-            return
+        if needSpawn then
+            -- Spawn new item.
+            itemId = Entities.Create({
+                Template = templateId,
+                Kinematics = {
+                    Position = spawnPosVel.Position,
+                    Velocity = Vectors.Vector3.Zero
+                }
+            })
+            if not itemId then
+                Util.LogError(string.format("Spawner %s has failed; disabling until reload.",
+                    Entities.FormatEntityId(spawnerEntity.EntityId)))
+                return
+            end
+
+            -- Update the tracked item ID in case of restart/reload.
+            spawnerEntity.Data[KeyItemId] = Entities.FormatEntityId(itemId)
         end
 
-        -- Update the tracked item ID in case of restart/reload.
-        spawnerEntity.Data[KeyItemId] = Entities.FormatEntityId(itemId)
-
         -- Wait for the spawn delay to elapse before checking/spawning an item again.
-        ::waiting::
         behavior:Wait(spawnerEntity.EntityId, WaitType.Time, delay)
     end
 

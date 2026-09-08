@@ -57,7 +57,12 @@ public class LuaHost : IDisposable
 
         // Create basic Lua environment.
         LuaState = luaL_newstate();
-        lua_gc(LuaState, LuaGcWhat.Gen, GcDefaultMinorMul, GcDefaultMajorMul);
+
+        // Register the main thread pointer in the registry so that the main thread can be
+        // found from any coroutine stack; LuaJIT does not track the main thread in the registry.
+        lua_pushlightuserdata(LuaState, LuaState);
+        lua_setfield(LuaState, LUA_REGISTRYINDEX, MainThreadRegistryKey);
+
         luaL_openlibs(LuaState);
         ConfigurePackagePath(packagePath);
         ConfigureRng();
@@ -532,14 +537,14 @@ public class LuaHost : IDisposable
     /// </summary>
     private void ConfigureRng()
     {
-        // Use the CSPRNG to uniquely seed Lua's xoshiro256** fast PRNG for this host.
+        // Use the CSPRNG to uniquely seed Lua's fast PRNG for this host.
+        // LuaJIT's math.randomseed accepts a single numeric seed.
         var (a, b) = Rng.NextInt64PairSecure();
-        luaL_checkstack(LuaState, 4, null);
+        luaL_checkstack(LuaState, 3, null);
         lua_getglobal(LuaState, "math");
         lua_getfield(LuaState, -1, "randomseed");
-        lua_pushinteger(LuaState, a);
-        lua_pushinteger(LuaState, b);
-        Validate(lua_pcall(LuaState, 2, 0, tracebackStackPosition));
+        lua_pushinteger(LuaState, a ^ b);
+        Validate(lua_pcall(LuaState, 1, 0, tracebackStackPosition));
         lua_pop(LuaState, 1);
     }
 
@@ -763,7 +768,7 @@ public class LuaHost : IDisposable
         nameSet.Clear();
 
         luaL_checkstack(LuaState, 2, null);
-        lua_rawgeti(LuaState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS); // push global table
+        lua_pushvalue(LuaState, LUA_GLOBALSINDEX); // push global table
         lua_pushnil(LuaState); // init key for loop
         while (lua_next(LuaState, -2) != 0)
         {
