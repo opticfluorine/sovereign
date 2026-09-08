@@ -74,5 +74,6 @@ located [here](https://discord.gg/7nPmhJ8XtX).
 
 ## Additional Resources
 
-* [Lua 5.4 Reference Manual](https://lua.org/manual/5.4/)
+* [Lua 5.1 Reference Manual](https://lua.org/manual/5.1/)
+* [LuaJIT Extensions](https://luajit.org/extensions.html)
 * [Programmming in Lua, First Edition](https://lua.org/pil/contents.html)
