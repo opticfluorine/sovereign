@@ -51,7 +51,7 @@ The scripting engine uses Lua tables with specific entries to communicate inform
 
     Event details type containing a single entity ID.
     
-    .. lua:attribute:: EntityId: integer
+    .. lua:attribute:: EntityId: lightuserdata
     
         The entity ID related to the event.
 ```
@@ -85,7 +85,7 @@ The scripting engine uses Lua tables with specific entries to communicate inform
     A single fuzzy item-template-name match, as returned by
     `Items.FindByFuzzyName <items.html>`_.
 
-    .. lua:attribute:: EntityId: integer
+    .. lua:attribute:: EntityId: lightuserdata
 
         Entity ID of the matched item template.
 
@@ -113,6 +113,10 @@ The scripting engine uses Lua tables with specific entries to communicate inform
     .. lua:attribute:: Velocity: Vector3
     
         Entity velocity.
+    
+    .. lua:attribute:: StopSystemTime: number
+    
+        If non-zero, the system time at which motion should stop.
 ```
 
 (script-types-playernamematch)=
@@ -124,7 +128,7 @@ The scripting engine uses Lua tables with specific entries to communicate inform
     A single fuzzy player-name match, as returned by
     `Players.FindByFuzzyName <players.html>`_.
 
-    .. lua:attribute:: EntityId: integer
+    .. lua:attribute:: EntityId: lightuserdata
 
         Entity ID of the matched online player.
 

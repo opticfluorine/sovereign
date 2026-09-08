@@ -44,7 +44,7 @@ All numeric time values start at zero (e.g. `GetMonthOfYear` runs from
    Gets the current system time in microseconds since an arbitrary reference point.
    
    :return: System time in microseconds.
-   :rtype: integer
+   :rtype: number
 ```
 
 #### Example
@@ -66,7 +66,7 @@ local systemTime = Time.GetSystemTime()
    :type delaySeconds: number
    
    :return: Future system time in microseconds.
-   :rtype: integer
+   :rtype: number
 ```
 
 #### Example

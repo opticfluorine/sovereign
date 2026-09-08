@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Globalization;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Entities;
@@ -32,11 +33,6 @@ namespace Sovereign.ServerCore.Entities;
 /// </summary>
 public class EntitiesLuaLibrary : ILuaLibrary
 {
-    private const string IsTemplate =
-        @"function Entities.IsTemplate(entityId) 
-              return Entities.FirstTemplateEntityId <= entityId and entityId <= Entities.LastTemplateEntityId 
-          end";
-
     private readonly IEntityFactory entityFactory;
     private readonly EntityManager entityManager;
     private readonly EntityTable entityTable;
@@ -71,17 +67,20 @@ public class EntitiesLuaLibrary : ILuaLibrary
             luaHost.AddLibraryFunction(nameof(Sync), Sync);
             luaHost.AddLibraryFunction(nameof(SyncTree), SyncTree);
             luaHost.AddLibraryFunction(nameof(AbsoluteTemplateId), AbsoluteTemplateId);
-            luaHost.AddLibraryConstant(nameof(EntityConstants.FirstTemplateEntityId),
-                (long)EntityConstants.FirstTemplateEntityId);
-            luaHost.AddLibraryConstant(nameof(EntityConstants.LastTemplateEntityId),
-                (long)EntityConstants.LastTemplateEntityId);
-            luaHost.AddLibraryConstant(nameof(EntityConstants.FirstBlockEntityId),
-                (long)EntityConstants.FirstBlockEntityId);
-            luaHost.AddLibraryConstant(nameof(EntityConstants.LastBlockEntityId),
-                (long)EntityConstants.LastBlockEntityId);
-            luaHost.AddLibraryConstant(nameof(EntityConstants.FirstPersistedEntityId),
-                (long)EntityConstants.FirstPersistedEntityId);
-            luaHost.LoadAndExecuteString(IsTemplate);
+            luaHost.AddLibraryFunction(nameof(FormatEntityId), FormatEntityId);
+            luaHost.AddLibraryFunction(nameof(ToEntityId), ToEntityId);
+            luaHost.AddLibraryFunction(nameof(ToTemplateEntityId), ToTemplateEntityId);
+            luaHost.AddLibraryFunction(nameof(IsTemplate), IsTemplate);
+            luaHost.AddLibraryEntityIdConstant(nameof(EntityConstants.FirstTemplateEntityId),
+                EntityConstants.FirstTemplateEntityId);
+            luaHost.AddLibraryEntityIdConstant(nameof(EntityConstants.LastTemplateEntityId),
+                EntityConstants.LastTemplateEntityId);
+            luaHost.AddLibraryEntityIdConstant(nameof(EntityConstants.FirstBlockEntityId),
+                EntityConstants.FirstBlockEntityId);
+            luaHost.AddLibraryEntityIdConstant(nameof(EntityConstants.LastBlockEntityId),
+                EntityConstants.LastBlockEntityId);
+            luaHost.AddLibraryEntityIdConstant(nameof(EntityConstants.FirstPersistedEntityId),
+                EntityConstants.FirstPersistedEntityId);
         }
         finally
         {
@@ -118,6 +117,20 @@ public class EntitiesLuaLibrary : ILuaLibrary
     }
 
     /// <summary>
+    ///     Reads an entity ID from the given position of the Lua stack.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="idx">Stack index.</param>
+    /// <returns>Entity ID.</returns>
+    /// <exception cref="LuaException">Thrown if the value is not an entity ID.</exception>
+    private static ulong UnmarshalEntityId(IntPtr luaState, int idx)
+    {
+        if (!lua_islightuserdata(luaState, idx))
+            throw new LuaException("Value is not an entity ID.");
+        return (ulong)lua_touserdata(luaState, idx);
+    }
+
+    /// <summary>
     ///     Implementation of Lua function entities.Create.
     /// </summary>
     /// <param name="luaState">Lua state.</param>
@@ -150,15 +163,16 @@ public class EntitiesLuaLibrary : ILuaLibrary
             var luaType = lua_getfield(luaState, -1, "EntityId");
             if (luaType != LuaType.Nil)
             {
-                if (!lua_isinteger(luaState, -1))
+                if (!lua_islightuserdata(luaState, -1))
                 {
-                    localLogger.LogError("entities.Build: EntityId must be an integer if specified.");
+                    localLogger.LogError(
+                        "entities.Build: EntityId must be an entity ID (lightuserdata) if specified.");
                     lua_pop(luaState, 1);
                     lua_pushnil(luaState);
                     return 1;
                 }
 
-                var entityId = (ulong)lua_tointeger(luaState, -1);
+                var entityId = (ulong)lua_touserdata(luaState, -1);
                 builder = entityFactory.GetBuilder(entityId);
             }
             else
@@ -183,7 +197,7 @@ public class EntitiesLuaLibrary : ILuaLibrary
 
             // No need to pop the value - the handler does this for us in the success case.
             var builtEntityId = builder.Build();
-            lua_pushinteger(luaState, (long)builtEntityId);
+            lua_pushlightuserdata(luaState, (IntPtr)builtEntityId);
             return 1;
         }
         catch (Exception e)
@@ -241,19 +255,21 @@ public class EntitiesLuaLibrary : ILuaLibrary
                 return 0;
             }
 
-            if (!lua_isinteger(luaState, -1))
+            try
             {
-                localLogger.LogError($"entities.{nameof(GetTemplate)}(): argument must be integer.");
+                var entityId = UnmarshalEntityId(luaState, -1);
+                lua_pop(luaState, 1);
+
+                if (!entityTable.TryGetTemplate(entityId, out var templateId)) return 0;
+
+                lua_pushlightuserdata(luaState, (IntPtr)templateId);
+                return 1;
+            }
+            catch (LuaException)
+            {
+                localLogger.LogError($"entities.{nameof(GetTemplate)}(): argument must be an entity ID.");
                 return 0;
             }
-
-            var entityId = (ulong)lua_tointeger(luaState, -1);
-            lua_pop(luaState, 1);
-
-            if (!entityTable.TryGetTemplate(entityId, out var templateId)) return 0;
-
-            lua_pushinteger(luaState, (long)templateId);
-            return 1;
         }
         catch (Exception e)
         {
@@ -280,32 +296,34 @@ public class EntitiesLuaLibrary : ILuaLibrary
                 return 0;
             }
 
-            if (!lua_isinteger(luaState, -2) || !lua_isinteger(luaState, -1))
+            try
             {
-                localLogger.LogError($"entities.{nameof(SetTemplate)}: arguments must be integers.");
+                var entityId = UnmarshalEntityId(luaState, -2);
+                var templateId = UnmarshalEntityId(luaState, -1);
+
+                if (EntityUtil.IsTemplateEntity(entityId))
+                {
+                    localLogger.LogError(
+                        $"entities.{nameof(SetTemplate)}: {{EntityId:X}} is a template and may not have its own template.",
+                        entityId);
+                    return 0;
+                }
+
+                if (!EntityUtil.IsTemplateEntity(templateId))
+                {
+                    localLogger.LogError($"entities.{nameof(SetTemplate)}: {{TemplateId:X}} is not a valid template ID.",
+                        templateId);
+                    return 0;
+                }
+
+                entityTable.SetTemplate(entityId, templateId);
                 return 0;
             }
-
-            var entityId = (ulong)lua_tointeger(luaState, -2);
-            var templateId = (ulong)lua_tointeger(luaState, -1);
-
-            if (EntityUtil.IsTemplateEntity(entityId))
+            catch (LuaException)
             {
-                localLogger.LogError(
-                    $"entities.{nameof(SetTemplate)}: {{EntityId:X}} is a template and may not have its own template.",
-                    entityId);
+                localLogger.LogError($"entities.{nameof(SetTemplate)}: arguments must be entity IDs.");
                 return 0;
             }
-
-            if (!EntityUtil.IsTemplateEntity(templateId))
-            {
-                localLogger.LogError($"entities.{nameof(SetTemplate)}: {{TemplateId:X}} is not a valid template ID.",
-                    templateId);
-                return 0;
-            }
-
-            entityTable.SetTemplate(entityId, templateId);
-            return 0;
         }
         catch (Exception e)
         {
@@ -332,35 +350,42 @@ public class EntitiesLuaLibrary : ILuaLibrary
                 return 0;
             }
 
-            if (lua_isinteger(luaState, -1))
+            try
             {
-                // Request single entity sync.
-                var entityId = (ulong)lua_tointeger(luaState, -1);
-                DoSyncSingle(entityId);
-            }
-            else if (lua_istable(luaState, -1))
-            {
-                // Request sync of list of entities.
-                luaL_checkstack(luaState, 2, null);
-                lua_pushnil(luaState);
-                while (lua_next(luaState, 1) != 0)
+                if (lua_islightuserdata(luaState, -1))
                 {
-                    if (!lua_isinteger(luaState, -1))
-                    {
-                        localLogger.LogWarning(
-                            $"found non-integer item in table passed to entities.{nameof(Sync)}; skipping.");
-                        lua_pop(luaState, 1);
-                        continue;
-                    }
-
-                    var entityId = (ulong)lua_tointeger(luaState, -1);
+                    // Request single entity sync.
+                    var entityId = UnmarshalEntityId(luaState, -1);
                     DoSyncSingle(entityId);
-                    lua_pop(luaState, 1);
+                }
+                else if (lua_istable(luaState, -1))
+                {
+                    // Request sync of list of entities.
+                    luaL_checkstack(luaState, 2, null);
+                    lua_pushnil(luaState);
+                    while (lua_next(luaState, 1) != 0)
+                    {
+                        if (!lua_islightuserdata(luaState, -1))
+                        {
+                            localLogger.LogWarning(
+                                $"found non-entity-ID item in table passed to entities.{nameof(Sync)}; skipping.");
+                            lua_pop(luaState, 1);
+                            continue;
+                        }
+
+                        var entityId = UnmarshalEntityId(luaState, -1);
+                        DoSyncSingle(entityId);
+                        lua_pop(luaState, 1);
+                    }
+                }
+                else
+                {
+                    localLogger.LogError($"entities.{nameof(Sync)} requires entity ID or table argument.");
                 }
             }
-            else
+            catch (LuaException)
             {
-                localLogger.LogError($"entities.{nameof(Sync)} requires integer or table argument.");
+                localLogger.LogError($"entities.{nameof(Sync)} requires entity ID or table argument.");
             }
         }
         catch (Exception e)
@@ -401,35 +426,42 @@ public class EntitiesLuaLibrary : ILuaLibrary
                 return 0;
             }
 
-            if (lua_isinteger(luaState, -1))
+            try
             {
-                // Request single entity sync.
-                var entityId = (ulong)lua_tointeger(luaState, -1);
-                DoSyncTreeSingle(entityId);
-            }
-            else if (lua_istable(luaState, -1))
-            {
-                // Request sync of list of entities.
-                luaL_checkstack(luaState, 2, null);
-                lua_pushnil(luaState);
-                while (lua_next(luaState, 1) != 0)
+                if (lua_islightuserdata(luaState, -1))
                 {
-                    if (!lua_isinteger(luaState, -1))
-                    {
-                        localLogger.LogWarning(
-                            $"found non-integer item in table passed to entities.{nameof(SyncTree)}; skipping.");
-                        lua_pop(luaState, 1);
-                        continue;
-                    }
-
-                    var entityId = (ulong)lua_tointeger(luaState, -1);
+                    // Request single entity sync.
+                    var entityId = UnmarshalEntityId(luaState, -1);
                     DoSyncTreeSingle(entityId);
-                    lua_pop(luaState, 1);
+                }
+                else if (lua_istable(luaState, -1))
+                {
+                    // Request sync of list of entities.
+                    luaL_checkstack(luaState, 2, null);
+                    lua_pushnil(luaState);
+                    while (lua_next(luaState, 1) != 0)
+                    {
+                        if (!lua_islightuserdata(luaState, -1))
+                        {
+                            localLogger.LogWarning(
+                                $"found non-entity-ID item in table passed to entities.{nameof(SyncTree)}; skipping.");
+                            lua_pop(luaState, 1);
+                            continue;
+                        }
+
+                        var entityId = UnmarshalEntityId(luaState, -1);
+                        DoSyncTreeSingle(entityId);
+                        lua_pop(luaState, 1);
+                    }
+                }
+                else
+                {
+                    localLogger.LogError($"entities.{nameof(SyncTree)} requires entity ID or table argument.");
                 }
             }
-            else
+            catch (LuaException)
             {
-                localLogger.LogError($"entities.{nameof(SyncTree)} requires integer or table argument.");
+                localLogger.LogError($"entities.{nameof(SyncTree)} requires entity ID or table argument.");
             }
         }
         catch (Exception e)
@@ -479,12 +511,150 @@ public class EntitiesLuaLibrary : ILuaLibrary
             var relativeId = (ulong)lua_tointeger(luaState, -1);
             lua_pop(luaState, 1);
 
-            lua_pushinteger(luaState, (long)(relativeId + EntityConstants.FirstTemplateEntityId));
+            lua_pushlightuserdata(luaState, (IntPtr)(relativeId + EntityConstants.FirstTemplateEntityId));
             return 1;
         }
         catch (Exception e)
         {
             localLogger.LogError(e, "Error in AbsoluteTemplateId.");
+            return 0;
+        }
+    }
+
+    /// <summary>
+    ///     Formats an entity ID as an uppercase hexadecimal string.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of return values.</returns>
+    private int FormatEntityId(IntPtr luaState)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
+
+        try
+        {
+            if (lua_gettop(luaState) != 1)
+            {
+                localLogger.LogError("FormatEntityId requires one parameter.");
+                return 0;
+            }
+
+            var entityId = UnmarshalEntityId(luaState, -1);
+            lua_pushstring(luaState, entityId.ToString("X", CultureInfo.InvariantCulture));
+            return 1;
+        }
+        catch (LuaException)
+        {
+            localLogger.LogError("FormatEntityId parameter must be an entity ID.");
+            return 0;
+        }
+        catch (Exception e)
+        {
+            localLogger.LogError(e, "Error in FormatEntityId.");
+            return 0;
+        }
+    }
+
+    /// <summary>
+    ///     Converts an integer to an entity ID.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of return values.</returns>
+    private int ToEntityId(IntPtr luaState)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
+
+        try
+        {
+            if (lua_gettop(luaState) != 1)
+            {
+                localLogger.LogError("ToEntityId requires one parameter.");
+                return 0;
+            }
+
+            if (!lua_isinteger(luaState, -1))
+            {
+                localLogger.LogError("ToEntityId parameter must be an integer.");
+                return 0;
+            }
+
+            var entityId = (ulong)lua_tointeger(luaState, -1);
+            lua_pushlightuserdata(luaState, (IntPtr)entityId);
+            return 1;
+        }
+        catch (Exception e)
+        {
+            localLogger.LogError(e, "Error in ToEntityId.");
+            return 0;
+        }
+    }
+
+    /// <summary>
+    ///     Converts a relative template ID to an absolute template entity ID.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of return values.</returns>
+    private int ToTemplateEntityId(IntPtr luaState)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
+
+        try
+        {
+            if (lua_gettop(luaState) != 1)
+            {
+                localLogger.LogError("ToTemplateEntityId requires one parameter.");
+                return 0;
+            }
+
+            if (!lua_isinteger(luaState, -1))
+            {
+                localLogger.LogError("ToTemplateEntityId parameter must be an integer.");
+                return 0;
+            }
+
+            var relativeId = (ulong)lua_tointeger(luaState, -1);
+            lua_pushlightuserdata(luaState, (IntPtr)(EntityConstants.FirstTemplateEntityId + relativeId));
+            return 1;
+        }
+        catch (Exception e)
+        {
+            localLogger.LogError(e, "Error in ToTemplateEntityId.");
+            return 0;
+        }
+    }
+
+    /// <summary>
+    ///     Determines whether an entity ID is a template entity ID.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of return values.</returns>
+    private int IsTemplate(IntPtr luaState)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        var localLogger = scriptingServices.GetScriptLogger(mainState, logger);
+
+        try
+        {
+            if (lua_gettop(luaState) != 1)
+            {
+                localLogger.LogError("IsTemplate requires one parameter.");
+                return 0;
+            }
+
+            var entityId = UnmarshalEntityId(luaState, -1);
+            lua_pushboolean(luaState, EntityUtil.IsTemplateEntity(entityId));
+            return 1;
+        }
+        catch (LuaException)
+        {
+            localLogger.LogError("IsTemplate parameter must be an entity ID.");
+            return 0;
+        }
+        catch (Exception e)
+        {
+            localLogger.LogError(e, "Error in IsTemplate.");
             return 0;
         }
     }

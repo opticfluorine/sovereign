@@ -37,7 +37,7 @@ Entity-scoped key-value stores may be retrieved using the `Data.GetEntityData(en
    Gets the key-value store associated with the given entity.
    
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
 
    :return: Key-value store for the requested entity.
    :rtype: table

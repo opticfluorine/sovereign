@@ -38,5 +38,5 @@ public struct Kinematics
     /// <summary>
     ///     If non-zero, specifies the system time at which motion should stop.
     /// </summary>
-    [ScriptableField] public ulong StopSystemTime;
+    [ScriptableField] public double StopSystemTime;
 }

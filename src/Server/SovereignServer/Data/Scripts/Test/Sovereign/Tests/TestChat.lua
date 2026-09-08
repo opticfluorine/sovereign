@@ -24,11 +24,12 @@ Test.Case("AddCommaSeparatedCommand", function()
 end)
 
 Test.Case("SendSystemMessageSmoke", function()
-    Chat.SendSystemMessage(0, "[" .. Suite .. "] smoke message to a nonexistent player")
+    Chat.SendSystemMessage(Entities.ToEntityId(0), "[" .. Suite .. "] smoke message to a nonexistent player")
 end)
 
 Test.Case("SendToPlayerSmoke", function()
-    Chat.SendToPlayer(0, Color.Rgb(210, 210, 0), "[" .. Suite .. "] smoke message to a nonexistent player")
+    Chat.SendToPlayer(Entities.ToEntityId(0), Color.Rgb(210, 210, 0),
+        "[" .. Suite .. "] smoke message to a nonexistent player")
 end)
 
 Test.Case("SendToAllSmoke", function()

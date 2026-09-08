@@ -115,10 +115,11 @@ end
 -------------------------------------
 
 --- Entity load life cycle hook. Starts behavior for newly loaded entity.
---- @param entityId integer # Entity ID.
+--- @param entityId lightuserdata # Entity ID.
 function EntityBehavior:OnLoad(entityId)
     if self._coroutines[entityId] then
-        Util.LogWarn(string.format("Behavior for entity %X already exists; replacing.", entityId))
+        Util.LogWarn(string.format("Behavior for entity %s already exists; replacing.",
+            Entities.FormatEntityId(entityId)))
         self:_CleanupEntity(entityId)
     end
 
@@ -137,7 +138,7 @@ function EntityBehavior:OnLoad(entityId)
     self._coroutines[entityId] = thread
     local ok, err = coroutine.resume(thread, self, Entity.Get(entityId), table.unpack(self._startArgs))
     if not ok then
-        Util.LogError(string.format("Failed to add behavior for %X: %s", entityId, err))
+        Util.LogError(string.format("Failed to add behavior for %s: %s", Entities.FormatEntityId(entityId), err))
     end
     if coroutine.status(thread) == "dead" then
         -- Coroutine terminated.
@@ -148,7 +149,7 @@ end
 -------------------------------------
 
 --- Entity unload life cycle hook. Stops behavior for unloaded entity and frees resources.
---- @param entityId integer # Entity ID.
+--- @param entityId lightuserdata # Entity ID.
 function EntityBehavior:OnUnload(entityId)
     local thread = self._coroutines[entityId]
     if thread == nil then
@@ -162,12 +163,13 @@ end
 -------------------------------------
 
 --- Resumes the behavior for the given entity.
---- @param entityId integer # Entity ID.
+--- @param entityId lightuserdata # Entity ID.
 --- @param ... any # Additional parameters to pass back to the coroutine.
 function EntityBehavior:Resume(entityId, ...)
     local thread = self._coroutines[entityId]
     if thread == nil then
-        Util.LogError(string.format("Error resuming behavior for entity %X: behavior not loaded.", entityId))
+        Util.LogError(string.format("Error resuming behavior for entity %s: behavior not loaded.",
+            Entities.FormatEntityId(entityId)))
         return
     end
 
@@ -179,7 +181,8 @@ function EntityBehavior:Resume(entityId, ...)
 
     local ok, err = coroutine.resume(thread, ...)
     if not ok then
-        Util.LogError(string.format("Error resuming behavior for entity %X: %s", entityId, err))
+        Util.LogError(string.format("Error resuming behavior for entity %s: %s",
+            Entities.FormatEntityId(entityId), err))
     end
     if coroutine.status(thread) == "dead" then
         -- Coroutine has finished.
@@ -202,7 +205,7 @@ end
 -------------------------------------
 
 --- Waits until one of a set of conditions is met.
---- @param entityId integer Entity ID.
+--- @param entityId lightuserdata Entity ID.
 --- @param waitTypes WaitType Bitwise flags indicating which conditions to wait for.
 --- @param delaySeconds? number Seconds to wait if waitTypes includes WaitType.Time.
 function EntityBehavior:Wait(entityId, waitTypes, delaySeconds)
@@ -245,7 +248,7 @@ end
 -------------------------------------
 
 --- Resumes from a Wait call.
---- @param entityId integer Entity ID.
+--- @param entityId lightuserdata Entity ID.
 --- @param waitType WaitType Reason that the coroutine is being resumed.
 --- @param waitKey integer Wait key for filtering stale callbacks.
 function EntityBehavior:_ResumeFromWait(entityId, waitType, waitKey)

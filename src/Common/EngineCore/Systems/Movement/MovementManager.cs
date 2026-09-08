@@ -310,7 +310,7 @@ public class MovementManager
                 // Roll back the entity's movement to the scheduled stop time if needed.
                 if (componentList[i].StopSystemTime > 0 && componentList[i].StopSystemTime <= currentSystemTime)
                 {
-                    var dt = currentSystemTime - componentList[i].StopSystemTime;
+                    var dt = currentSystemTime - (ulong)componentList[i].StopSystemTime;
                     var z0 = componentList[i].Position.Z;
                     componentList[i].Position =
                         componentList[i].Position - dt * UnitConversions.UsToS * componentList[i].Velocity;
@@ -319,7 +319,7 @@ public class MovementManager
                     // Stop motion in the XY plane (leave Z motion for gravity/jumping/etc.)
                     componentList[i].Velocity.X = 0.0f;
                     componentList[i].Velocity.Y = 0.0f;
-                    componentList[i].StopSystemTime = 0;
+                    componentList[i].StopSystemTime = 0.0;
                     internalController.NotifyScheduledStop(entityId);
                 }
 

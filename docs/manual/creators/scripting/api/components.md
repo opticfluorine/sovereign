@@ -27,7 +27,7 @@ Each component collection that is accessible through the scripting engine may be
 | `Components.Name`             | `NameComponentCollection`             | `string`       |
 | `Components.NpcFlags`         | `NpcFlagsComponentCollection`         | `NpcFlag`      |
 | `Components.Orientation`      | `OrientationComponentCollection`      | `integer`      |
-| `Components.Parent`           | `ParentComponentCollection`           | `integer`      |
+| `Components.Parent`           | `ParentComponentCollection`           | `lightuserdata` |
 | `Components.Physics`          | `PhysicsTagCollection`                | `boolean`      |
 | `Components.PlayerCharacter`  | `PlayerCharacterTagCollection`        | `boolean`      |
 | `Components.PointLight`       | `PointLightSourceComponentCollection` | `PointLight`   |
@@ -49,7 +49,7 @@ The following functions are common to multiple component types.
    Gets whether the given entity has this component.
    
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param lookback: Whether to look back at components deleted in the last tick (default: false).
    :type lookback: boolean
    :return: true if the entity has this component, or false otherwise.
@@ -63,7 +63,7 @@ The following functions are common to multiple component types.
 :emphasize-lines: 1, 8
 if (Components.PlayerCharacter.Exists(entityId)) then
   -- This entity is a player character.
-  Util.LogInfo(string.format("%x is a player.", entityId))
+  Util.LogInfo(Entities.FormatEntityId(entityId) .. " is a player.")
 end
 
 -- If the player just logged out, the tag may have been removed before the script
@@ -83,7 +83,7 @@ end
    Gets the component value for the given entity.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param lookback: Whether to look back at components deleted in the last tick (default: false).
    :type lookback: boolean
    :return: Component value, or nil if no the entity does not have this component.
@@ -98,7 +98,7 @@ end
 :emphasize-lines: 1, 8
 local name = Components.Name.Get(entityId)
 if (name) then
-  Util.LogInfo(string.format("%x is named %s.", entityId, name))
+  Util.LogInfo(Entities.FormatEntityId(entityId) .. " is named " .. name .. ".")
 end
 
 -- If the player just logged out, the name component may have been unloaded before
@@ -119,7 +119,7 @@ end
    Removes the component value for the given entity if it exists.
    
    :param entityId: EntityID
-   :type entityId: integer
+   :type entityId: lightuserdata
 ```
 
 #### Example
@@ -146,7 +146,7 @@ Components.PointLight.Remove(entityId)
    while a value of false removes the flag from the entity.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param value: New component value.
    :type value: Component value type, or boolean for tags
 ```
@@ -186,7 +186,7 @@ end
    component types will result in no effect with an error being logged.
    
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param value: Amount to be added to the current component value.
    :type value: Component value type
 ```
@@ -225,7 +225,7 @@ end
    component types will result in no effect with an error being logged.
    
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param value: Amount by which to multiply the current component value.
    :type value: Component value type
 ```
@@ -264,7 +264,7 @@ end
    component types will result in no effect with an error being logged.
    
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param value: Amount by which to divide the current component value.
    :type value: Component value type
 ```
@@ -304,7 +304,7 @@ end
    position is ignored. This option takes effect on the next tick.
     
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param value: Kinematics object with velocity to use.
    :type value: Kinematics
 ```
@@ -334,7 +334,7 @@ Components.Kinematics.SetVelocity(entityId, {
    velocity is ignored. This option takes effect on the next tick.
     
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param value: Kinematics object with position increment to use.
    :type value: Kinematics
 ```
@@ -370,7 +370,7 @@ Components.Kinematics.AddPosition(entityId, {
    effect with an error being logged.
    
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param value: Amount to be added to the current quantity.
    :type value: integer
 ```
@@ -401,7 +401,7 @@ Components.Quantity.AddNoOverflow(entityId, 1000000)
    effect with an error being logged.
    
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param value: Amount to be subtracted from the current quantity.
    :type value: integer
 ```

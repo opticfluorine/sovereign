@@ -377,10 +377,10 @@ public class ScriptingLuaLibrary(
                 return 0;
             }
 
-            if (!lua_isinteger(luaState, -2))
+            if (!lua_islightuserdata(luaState, -2))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError(luaState, "Argument 1 to {LuaFunctionName} must be an integer.", luaFunctionName);
+                    .LogError(luaState, "Argument 1 to {LuaFunctionName} must be an entity ID.", luaFunctionName);
                 return 0;
             }
 
@@ -391,7 +391,7 @@ public class ScriptingLuaLibrary(
                 return 0;
             }
 
-            var entityId = (ulong)lua_tointeger(luaState, -2);
+            var entityId = (ulong)lua_touserdata(luaState, -2);
             var refIndex = luaL_ref(luaState, LUA_REGISTRYINDEX);
 
             cbMgr.AddCallback(luaHost, entityId, refIndex);
@@ -435,14 +435,14 @@ public class ScriptingLuaLibrary(
                 return 0;
             }
 
-            if (!lua_isinteger(luaState, -1) || !lua_isinteger(luaState, -2))
+            if (!lua_isinteger(luaState, -1) || !lua_islightuserdata(luaState, -2))
             {
                 scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError(luaState, "{FunctionName} requires integer arguments.", functionName);
+                    .LogError(luaState, "{FunctionName} requires an entity ID and a callback handle.", functionName);
                 return 0;
             }
 
-            var entityId = (ulong)lua_tointeger(luaState, -2);
+            var entityId = (ulong)lua_touserdata(luaState, -2);
             var refIndex = (int)lua_tointeger(luaState, -1);
 
             cbMgr.RemoveCallback(luaHost, luaState, entityId, refIndex);

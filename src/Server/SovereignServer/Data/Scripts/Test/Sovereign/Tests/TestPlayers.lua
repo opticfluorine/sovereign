@@ -4,7 +4,7 @@ local Suite = "TestPlayers"
 
 Test.Case("FindByNameNoPlayers", function()
     local playerId = Players.FindByName("TestHarnessNobody")
-    Test.AssertEqual(0, playerId, "lookup of a non-online player should return 0")
+    Test.AssertEqual(Entities.ToEntityId(0), playerId, "lookup of a non-online player should return 0")
 end)
 
 Test.Case("FindByFuzzyNameNoPlayers", function()

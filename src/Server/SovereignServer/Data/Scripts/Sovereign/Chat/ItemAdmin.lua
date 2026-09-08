@@ -30,7 +30,7 @@ local ItemGiveUsage = "Usage: /itemgive <player>, <item>, [quantity]"
 --- Admin command that creates an item from a fuzzy-matched item template
 --- and places it into a free slot of a fuzzy-matched online player's inventory.
 --- @param args table 1-indexed table of trimmed string arguments.
---- @param playerId integer Entity ID of the player who issued the command.
+--- @param playerId lightuserdata Entity ID of the player who issued the command.
 local function ItemGive(args, playerId)
     local issuer = Entity.Get(playerId)
     if not issuer.Components.Admin then
@@ -113,8 +113,8 @@ local function ItemGive(args, playerId)
 
     if not itemId then
         Util.LogError(string.format(
-            "/itemgive: failed to create item from template %X for issuer %s.",
-            templateId, issuer.Components.Name))
+            "/itemgive: failed to create item from template %s for issuer %s.",
+            Entities.FormatEntityId(templateId), issuer.Components.Name))
         issuer:SendSystemMessage(ErrorMessages.ItemNotFound)
         return
     end

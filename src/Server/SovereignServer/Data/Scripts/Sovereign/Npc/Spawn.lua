@@ -60,15 +60,16 @@ local spawn = EntityBehavior.Create(
 function (behavior, spawnerEntity)
 
     -- Load parameters for this spawner.
-    local templateId = tonumber(spawnerEntity.Data[ParamTemplateId])
+    local templateId = Entities.ToEntityId(tonumber(spawnerEntity.Data[ParamTemplateId]))
     if not templateId or not Entities.IsTemplate(templateId) then
-        Util.LogError(string.format("Entity %X is missing required parameter %s.",
-            spawnerEntity.EntityId, ParamTemplateId))
+        Util.LogError(string.format("Entity %s is missing required parameter %s.",
+            Entities.FormatEntityId(spawnerEntity.EntityId), ParamTemplateId))
         return
     end
     local templateType = Components.EntityType.Get(templateId)
     if templateType ~= EntityType.Npc then
-        Util.LogError(string.format("Entity %X has non-NPC spawn template.", spawnerEntity.EntityId))
+        Util.LogError(string.format("Entity %s has non-NPC spawn template.",
+            Entities.FormatEntityId(spawnerEntity.EntityId)))
         return
     end
 
@@ -133,7 +134,8 @@ function (behavior, spawnerEntity)
             })
 
             if not newId then
-                Util.LogError(string.format("Spawner %X has failed; disabling until reload.", spawnerEntity.EntityId))
+                Util.LogError(string.format("Spawner %s has failed; disabling until reload.",
+                    Entities.FormatEntityId(spawnerEntity.EntityId)))
                 return
             end
 

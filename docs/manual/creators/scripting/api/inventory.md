@@ -11,10 +11,10 @@ Entities that have inventories store items in one or more slots. These slots are
 ```{eval-rst}
 .. lua:function:: Inventory.GetInventory(entityId)
 
-   Gets the inventory for a player as a list of item entity IDs in order of inventory slots. Empty slots are listed with an item ID of 0.
+   Gets the inventory for a player as a list of item entity IDs in order of inventory slots. Empty slots are listed with entity ID 0 (i.e. ``Entities.ToEntityId(0)``).
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
 
    :return: Inventory for the entity.
    :rtype: table
@@ -38,12 +38,12 @@ local inv = Inventory.GetInventory(entityId)
    Gets the ID of the item in a particular inventory slot.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param slotIndex: Slot index. 
    :type slotIndex: integer
 
-   :return: Item ID, or 0 if the slot is empty or does not exist.
-   :rtype: integer
+   :return: Item ID, or entity ID 0 (``Entities.ToEntityId(0)``) if the slot is empty or does not exist.
+   :rtype: lightuserdata
 ```
 
 ### Example
@@ -65,9 +65,9 @@ local itemId = Inventory.GetItem(entityId, 4)
    Gets the slot index for the given item if it is in the entity's inventory.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param itemId: Item entity ID. 
-   :type itemId: integer
+   :type itemId: lightuserdata
 
    :return: Slot index, or 0 if the item is not in a slot belonging to the entity.
    :rtype: integer
@@ -99,12 +99,12 @@ end
    Finds the first item (in slot order) in the entity's inventory that has the given template ID.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param templateId: Item template entity ID. 
-   :type templateId: integer
+   :type templateId: lightuserdata
 
-   :return: Item entity ID, or 0 if a matching item is not found in the entity's inventory.
-   :rtype: integer
+   :return: Item entity ID, or entity ID 0 (``Entities.ToEntityId(0)``) if a matching item is not found in the entity's inventory.
+   :rtype: lightuserdata
 ```
 
 ### Example
@@ -112,7 +112,7 @@ end
 ```{code-block} lua
 :caption: Using `FindFirstMatchingItem` to check if an entity is holding a specific type of item.
 :emphasize-lines: 1
-if Inventory.FindFirstMatchingItem(entityId, templateId) > 0 then
+if Inventory.FindFirstMatchingItem(entityId, templateId) ~= Entities.ToEntityId(0) then
     -- The entity is holding an item with the template.
     -- ...
 end
@@ -128,7 +128,7 @@ end
    Gets the number of slots in the entity's inventory.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
 
    :return: Number of slots in the entity's inventory.
    :rtype: integer
@@ -155,7 +155,7 @@ end
    Adds one or more slots to an entity's inventory.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param slotCount: Number of slots to add. Must be positive.
    :type slotCount: integer
 ```
@@ -179,7 +179,7 @@ Inventory.AddSlots(entityId, 8)
    Gets an empty slot in the entity's inventory. Note that the slot will be flagged as temporarily unavailable for the remainder of the server tick to reduce the risk of multiple scripts competing for the same empty slot.
 
    :param entityId: Entity ID.
-   :type entityId: intege
+   :type entityId: lightuserdata
    :return: Empty slot index, or 0 if no empty slot was found.
    :rtype: integer
 ```
@@ -207,9 +207,9 @@ end
    Tries to add an existing item to a free slot in the entity's inventory.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param itemId: Item entity ID.
-   :type itemId: integer
+   :type itemId: lightuserdata
    :return: true if the item was added to a free slot, false otherwise.
    :rtype: boolean
 ```
@@ -239,9 +239,9 @@ end
    Picks up an item into the entity's inventory. The item must be within range of the entity.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param itemId: Item entity ID.
-   :type itemId: integer
+   :type itemId: lightuserdata
 ```
 
 ### Example
@@ -263,7 +263,7 @@ Inventory.PickUp(playerId, swordItemId)
    Drops the item in a slot at the position of the entity.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param slotIndex: Slot index of the item to drop.
    :type slotIndex: integer
 ```
@@ -287,7 +287,7 @@ Inventory.Drop(playerId, 2)
    Drops the item in a slot at a specific position. The position must be within the allowed drop range.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param slotIndex: Slot index of the item to drop.
    :type slotIndex: integer
    :param dropPosition: Position to drop the item.
@@ -315,7 +315,7 @@ Inventory.DropAt(playerId, 2, dropPos)
    Swaps two slots in an entity's inventory.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param slotIndex1: First slot index to swap.
    :type slotIndex1: integer
    :param slotIndex2: Second slot index to swap.
@@ -341,13 +341,13 @@ Inventory.Swap(playerId, 1, 2)
    Swaps two slots between potentially different inventories, acting on behalf of an actor. The usual restrictions on the actor (e.g. range to inventory, permissions checks) are applied; if the restrictions are not met, this function will fail silently.
 
    :param actorId: Actor entity ID performing the swap.
-   :type actorId: integer
+   :type actorId: lightuserdata
    :param inventoryId1: Entity ID of the first inventory.
-   :type inventoryId1: integer
+   :type inventoryId1: lightuserdata
    :param slotIndex1: First slot index to swap.
    :type slotIndex1: integer
    :param inventoryId2: Entity ID of the second inventory.
-   :type inventoryId2: integer
+   :type inventoryId2: lightuserdata
    :param slotIndex2: Second slot index to swap.
    :type slotIndex2: integer
 ```
@@ -371,13 +371,13 @@ Inventory.SwapAsActor(playerId, playerId, 1, chestId, 3)
    Swaps a partial quantity between two slots across potentially different inventories, acting on behalf of an actor. The usual restrictions on the actor (e.g. range to inventory, permissions checks) are applied; if the restrictions are not met, this function will fail silently.
 
    :param actorId: Actor entity ID performing the swap.
-   :type actorId: integer
+   :type actorId: lightuserdata
    :param inventoryId1: Entity ID of the first inventory.
-   :type inventoryId1: integer
+   :type inventoryId1: lightuserdata
    :param slotIndex1: First slot index to swap.
    :type slotIndex1: integer
    :param inventoryId2: Entity ID of the second inventory.
-   :type inventoryId2: integer
+   :type inventoryId2: lightuserdata
    :param slotIndex2: Second slot index to swap.
    :type slotIndex2: integer
    :param quantity: Quantity to transfer from the first slot.
@@ -403,7 +403,7 @@ Inventory.SwapQuantityAsActor(playerId, playerId, 1, chestId, 2, 5)
    Removes the item in an inventory slot, destroying the item entity.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param slotIndex: Slot index of the item to remove.
    :type slotIndex: integer
 ```
@@ -415,7 +415,7 @@ Inventory.SwapQuantityAsActor(playerId, playerId, 1, chestId, 2, 5)
 :emphasize-lines: 5
 -- Check whether the player is holding a key. If so, consume the key.
 local keyId = Inventory.FindFirstMatchingItem(playerId, keyTemplateId)
-if keyId > 0 then
+if keyId ~= Entities.ToEntityId(0) then
     local slotIndex = Inventory.GetSlotIndexForItem(playerId, keyId)
     Inventory.RemoveItem(playerId, slotIndex)
 
@@ -434,9 +434,9 @@ end
    Synchronously consumes (removes and destroys) a single item with the given template ID from the entity's inventory. The operation is atomic within the current server tick: once an item is claimed by this call it is locked for the remainder of the tick, preventing duplication. A second call targeting the same item in the same tick will return ``false`` by design.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param templateId: Item template entity ID.
-   :type templateId: integer
+   :type templateId: lightuserdata
 
    :return: ``true`` if an item was found and removed, ``false`` otherwise.
    :rtype: boolean
@@ -465,9 +465,9 @@ end
    Works with both stackable and non-stackable items. For non-stackable items, each matching item contributes a quantity of 1, so the function can be used to remove multiple individual items across slots.
 
    :param entityId: Entity ID.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param templateId: Item template entity ID.
-   :type templateId: integer
+   :type templateId: lightuserdata
    :param quantity: Required quantity. Must be at least 1.
    :type quantity: integer
 

@@ -42,7 +42,8 @@ In Lua, an absent object or field will return `nil` when read instead of raising
 can propagate and introduce bugs that are difficult to track down.
 
 We then send a message to the player who logged in using the [`chat.SendToPlayer`](#script-chat-sendtoplayer) function.
-We address the player by their *entity ID*, a 64-bit integer that uniquely identifies the entity that corresponds
+We address the player by their *entity ID*, an opaque 64-bit value (passed to Lua as a `lightuserdata`) that uniquely
+identifies the entity that corresponds
 to the player character. Most scripting functions that interact with players do so through the entity ID. We also
 use a standard color from the [`color`](#script-color) module. Finally, we provide the message to be sent to the
 player.

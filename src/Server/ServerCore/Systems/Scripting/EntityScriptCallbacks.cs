@@ -219,7 +219,7 @@ public sealed class EntityScriptCallbacks
         {
             host.CallNamedFunction(functionName, args =>
             {
-                args.AddInteger((long)entityId);
+                args.AddLightUserData(entityId);
                 return 1;
             });
         }

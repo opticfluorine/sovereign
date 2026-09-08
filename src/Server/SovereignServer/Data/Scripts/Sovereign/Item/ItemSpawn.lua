@@ -56,15 +56,16 @@ local itemSpawn = EntityBehavior.Create(
 function (behavior, spawnerEntity)
 
     -- Load parameters for this spawner.
-    local templateId = tonumber(spawnerEntity.Data[ParamTemplateId])
+    local templateId = Entities.ToEntityId(tonumber(spawnerEntity.Data[ParamTemplateId]))
     if not templateId or not Entities.IsTemplate(templateId) then
-        Util.LogError(string.format("Entity %X is missing required parameter %s.", 
-            spawnerEntity.EntityId, ParamTemplateId))
+        Util.LogError(string.format("Entity %s is missing required parameter %s.",
+            Entities.FormatEntityId(spawnerEntity.EntityId), ParamTemplateId))
         return
     end
     local templateType = Components.EntityType.Get(templateId)
     if templateType ~= EntityType.Item then
-        Util.LogError(string.format("Entity %X has non-item spawn template.", spawnerEntity.EntityId))
+        Util.LogError(string.format("Entity %s has non-item spawn template.",
+            Entities.FormatEntityId(spawnerEntity.EntityId)))
         return
     end
 
@@ -74,7 +75,9 @@ function (behavior, spawnerEntity)
     end
 
     -- Periodically check if we need to respawn.
-    local itemId = tonumber(spawnerEntity.Data[KeyItemId])
+    -- The tracked item ID is stored as a hexadecimal string.
+    local itemIdRaw = tonumber(spawnerEntity.Data[KeyItemId], 16)
+    local itemId = itemIdRaw and Entities.ToEntityId(itemIdRaw) or nil
     while true do
         -- Bail out if the spawner was destroyed.
         local spawnPosVel = spawnerEntity.Components.Kinematic
@@ -100,12 +103,13 @@ function (behavior, spawnerEntity)
             }
         })
         if not itemId then
-            Util.LogError(string.format("Spawner %X has failed; disabling until reload.", spawnerEntity.EntityId))
+            Util.LogError(string.format("Spawner %s has failed; disabling until reload.",
+                Entities.FormatEntityId(spawnerEntity.EntityId)))
             return
         end
 
         -- Update the tracked item ID in case of restart/reload.
-        spawnerEntity.Data[KeyItemId] = itemId
+        spawnerEntity.Data[KeyItemId] = Entities.FormatEntityId(itemId)
 
         -- Wait for the spawn delay to elapse before checking/spawning an item again.
         ::waiting::

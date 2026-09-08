@@ -17,8 +17,8 @@ descending similarity score (ties broken alphabetically).
 
    :param name: Player name.
    :type name: string
-   :return: Player entity ID, or 0 if no online player has the given name.
-   :rtype: integer
+   :return: Player entity ID, or entity ID 0 (``Entities.ToEntityId(0)``) if no online player has the given name.
+   :rtype: lightuserdata
 ```
 
 ### Example
@@ -55,6 +55,7 @@ local playerId = Players.FindByName("Alice")
 :caption: Fuzzy lookup of online players using Players.FindByFuzzyName.
 :emphasize-lines: 1,2,3
 for _, match in ipairs(Players.FindByFuzzyName("Alce", 5)) do
-    Util.LogInfo(string.format("%s (id %x, score %.2f)", match.Name, match.EntityId, match.Score))
+    Util.LogInfo(string.format("%s (id %s, score %.2f)",
+        match.Name, Entities.FormatEntityId(match.EntityId), match.Score))
 end
 ```

@@ -63,22 +63,22 @@ local timedChange = EntityBehavior.Create(
 function (behavior, entity)
 
     -- Retrieve and validate parameters.
-    local nextId = tonumber(entity.Data[ParamNextId])
+    local nextId = Entities.ToEntityId(tonumber(entity.Data[ParamNextId]))
     if not nextId or not Entities.IsTemplate(nextId) then
-        Util.LogError(string.format("Entity %X has invalid or missing parameter %s.",
-            entity.EntityId, ParamNextId))
+        Util.LogError(string.format("Entity %s has invalid or missing parameter %s.",
+            Entities.FormatEntityId(entity.EntityId), ParamNextId))
         return
     end
 
     local changeTime = tonumber(entity.Data[ParamChangeTime])
     if not changeTime or changeTime < 0 then
-        Util.LogError(string.format("Entity %X has invalid or missing parameter %s.",
-            entity.EntityId, ParamChangeTime))
+        Util.LogError(string.format("Entity %s has invalid or missing parameter %s.",
+            Entities.FormatEntityId(entity.EntityId), ParamChangeTime))
         return
     end
 
     local templateId = entity.Properties.TemplateId
-    local selfIdStr = templateId and tostring(templateId - Entities.FirstTemplateEntityId) or "Self"
+    local selfIdStr = templateId and Entities.FormatEntityId(templateId) or "Self"
     local key = string.format(DataNextTime, selfIdStr)
 
     while true do

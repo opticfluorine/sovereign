@@ -8,6 +8,11 @@
 
 The `Entities` module provides functions for creating and removing entities.
 
+Entity IDs are passed to and from the `Entities` module as Lua
+`lightuserdata` values. Entity IDs are opaque 64-bit values; they support only
+equality comparison in scripts. To display an entity ID or to convert between
+integers and entity IDs, use the [entity ID conversion functions](#script-entities-conversion).
+
 ## Entity Management Functions
 
 ### Create(spec)
@@ -23,7 +28,7 @@ The `Entities` module provides functions for creating and removing entities.
    :type spec: table (see below for allowed entries)
 
    :return: Entity ID of the newly created entity, or `nil` on error.
-   :rtype: integer
+   :rtype: lightuserdata
 ```
 
 The entity specification accepted by `Create(spec)` is a table containing
@@ -34,8 +39,8 @@ if one is not provided.
 
 | Key              | Value Type                                   | Meaning                                          |
 |------------------|----------------------------------------------|--------------------------------------------------|
-| EntityId         | integer                                      | Entity ID                                        |
-| Template         | integer                                      | Template entity ID                               |
+| EntityId         | lightuserdata                                | Entity ID                                        |
+| Template         | lightuserdata                                | Template entity ID                               |
 | NonPersistent    | boolean                                      | Whether entity is nonpersistent                  |
 | AnimatedSprite   | integer                                      | Animated sprite ID                               |
 | BlockPosition    | [GridPosition](#script-types-gridposition)   | Position (block entities)                        |
@@ -47,7 +52,7 @@ if one is not provided.
 | Kinematics       | [Kinematics](#script-types-kinematics)       | Position and velocity (non-block entities)       |
 | Name             | string                                       | Name                                             |
 | Orientation      | [Orientation](#script-constants-orientation) | Orientation                                      |
-| Parent           | integer                                      | Entity ID of parent entity                       |
+| Parent           | lightuserdata                                | Entity ID of parent entity                       |
 | Physics          | boolean                                      | Whether entity has physics effects               |
 | PointLightSource | [PointLight](#script-types-pointlight)       | Point light source                               |
 | ServerOnly       | boolean                                      | Whether entity is server-only                    |
@@ -68,7 +73,7 @@ local entityId = Entities.Create({
 })
 
 if (entityId) then
-    Util.LogDebug(string.format("Created new entity with ID %x.", entityId))
+    Util.LogDebug("Created new entity with ID " .. Entities.FormatEntityId(entityId) .. ".")
 else
     Util.LogError("Error while creating entity.")
 end
@@ -84,7 +89,7 @@ end
    Removes the given entity from the game world.
    
    :param entityId: Entity to remove.
-   :type entityId: integer
+   :type entityId: lightuserdata
 ```   
 
 #### Example
@@ -105,9 +110,9 @@ Entities.Remove(targetEntityId)
    Gets the template entity ID for the given entity, if any.
    
    :param entityId: Entity to query.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :return: Template entity ID, or nil if not set.
-   :rtype: integer or nil
+   :rtype: lightuserdata or nil
 ```
 
 #### Example
@@ -128,9 +133,9 @@ local templateId = Entities.GetTemplate(entityId)
    Sets the template entity ID for the given entity.
    
    :param entityId: Entity to modify.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :param templateId: Template entity ID to assign.
-   :type templateId: integer
+   :type templateId: lightuserdata
 ```
 
 #### Example
@@ -151,7 +156,7 @@ Entities.SetTemplate(entityId, templateId)
    Returns true if the given entity ID is a template entity.
    
    :param entityId: Entity ID to check.
-   :type entityId: integer
+   :type entityId: lightuserdata
    :return: True if entity is a template, false otherwise.
    :rtype: boolean
 ```
@@ -176,7 +181,7 @@ end
    Synchronizes the given entity or entities to any subscribed clients.
 
    :param entityId: Entity ID or table of multiple entity IDs to synchronize.
-   :type entityId: integer|table
+   :type entityId: lightuserdata|table
 ```
 
 #### Example
@@ -185,11 +190,11 @@ end
 :caption: Synchronizing entities
 :emphasize-lines: 3,7
 -- Single entity.
-local singleId = 0x7FFF000000000000
+local singleId = Entities.ToEntityId(0x7FFF000000000000)
 Entities.Sync(singleId)
 
 -- Multiple Entities.
-local multipleIds = { 0x7FFF000000000000, 0x7FFF000000000001 }
+local multipleIds = { Entities.ToEntityId(0x7FFF000000000000), Entities.ToEntityId(0x7FFF000000000001) }
 Entities.Sync(multipleIds)
 ```
 
@@ -203,7 +208,7 @@ Entities.Sync(multipleIds)
    Synchronizes the given entity or entities and all descendants to any subscribed clients.
 
    :param entityId: Entity ID or table of multiple entity IDs to synchronize.
-   :type entityId: integer|table
+   :type entityId: lightuserdata|table
 ```
 
 #### Example
@@ -212,29 +217,34 @@ Entities.Sync(multipleIds)
 :caption: Synchronizing entities
 :emphasize-lines: 3,7
 -- Single entity and its descendants.
-local singleId = 0x7FFF000000000000
+local singleId = Entities.ToEntityId(0x7FFF000000000000)
 Entities.SyncTree(singleId)
 
 -- Multiple entities and their descendants.
-local multipleIds = { 0x7FFF000000000000, 0x7FFF000000000001 }
+local multipleIds = { Entities.ToEntityId(0x7FFF000000000000), Entities.ToEntityId(0x7FFF000000000001) }
 Entities.SyncTree(multipleIds)
 ```
 
+(script-entities-conversion)=
 ## Entity ID Conversion Functions
+
+The following functions convert entity IDs between their `lightuserdata`
+representation and other representations. Entity IDs support only equality
+comparison in scripts; use these functions for arithmetic, display, or storage.
 
 ### AbsoluteTemplateId(relativeId)
 
 #### Definition
 
 ```{eval-rst}
-.. lua:function:: entities.AbsoluteTemplateId(relativeId)
+.. lua:function:: Entities.AbsoluteTemplateId(relativeId)
 
    Converts a relative template entity ID to an absolute template entity ID.
 
    :param relativeId: Relative template entity ID.
    :type relativeId: integer
    :return: Absolute template entity ID.
-   :rtype: integer
+   :rtype: lightuserdata
 ```
 
 #### Example
@@ -245,14 +255,85 @@ Entities.SyncTree(multipleIds)
 local absId = Entities.AbsoluteTemplateId(4) -- returns 0x7ffe000000000004
 ```
 
+### FormatEntityId(entityId)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: Entities.FormatEntityId(entityId)
+
+   Formats an entity ID as an uppercase hexadecimal string (e.g. ``"7FFE000000000004"``).
+
+   :param entityId: Entity ID to format.
+   :type entityId: lightuserdata
+   :return: Uppercase hexadecimal representation of the entity ID.
+   :rtype: string
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Using `FormatEntityId` to display an entity ID.
+:emphasize-lines: 1
+Util.LogDebug("Created entity " .. Entities.FormatEntityId(entityId))
+```
+
+### ToEntityId(integer)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: Entities.ToEntityId(integer)
+
+   Converts an integer to the corresponding entity ID.
+
+   :param integer: Integer value of the entity ID.
+   :type integer: integer
+   :return: Entity ID as a lightuserdata value.
+   :rtype: lightuserdata
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Using `ToEntityId` to convert from an integer.
+:emphasize-lines: 1
+local entityId = Entities.ToEntityId(0x7FFF000000000000)
+```
+
+### ToTemplateEntityId(relativeId)
+
+#### Definition
+
+```{eval-rst}
+.. lua:function:: Entities.ToTemplateEntityId(relativeId)
+
+   Converts a relative template entity ID to the corresponding absolute
+   template entity ID. Equivalent to `AbsoluteTemplateId`.
+
+   :param relativeId: Relative template entity ID.
+   :type relativeId: integer
+   :return: Absolute template entity ID as a lightuserdata value.
+   :rtype: lightuserdata
+```
+
+#### Example
+
+```{code-block} lua
+:caption: Using `ToTemplateEntityId` to convert from a relative template ID.
+:emphasize-lines: 1
+local templateId = Entities.ToTemplateEntityId(4) -- same as Entities.AbsoluteTemplateId(4)
+```
+
 ## Constants
 
-The following constants are available in the `Entities` module:
+The following constants are available in the `Entities` module. The constants
+are entity IDs and are provided as `lightuserdata` values.
 
-| Constant                      | Value Type   | Description                                 |
-|-------------------------------|--------------|---------------------------------------------|
-| `FirstTemplateEntityId`       | `integer`    | First template entity ID                    |
-| `LastTemplateEntityId`        | `integer`    | Last template entity ID                     |
-| `FirstBlockEntityId`          | `integer`    | First block entity ID                       |
-| `LastBlockEntityId`           | `integer`    | Last block entity ID                        |
-| `FirstPersistedEntityId`      | `integer`    | First persisted entity ID                   |
+| Constant                      | Value Type      | Description                                 |
+|-------------------------------|-----------------|---------------------------------------------|
+| `FirstTemplateEntityId`       | `lightuserdata` | First template entity ID                    |
+| `LastTemplateEntityId`        | `lightuserdata` | Last template entity ID                     |
+| `FirstBlockEntityId`          | `lightuserdata` | First block entity ID                       |
+| `LastBlockEntityId`           | `lightuserdata` | Last block entity ID                        |
+| `FirstPersistedEntityId`      | `lightuserdata` | First persisted entity ID                   |
