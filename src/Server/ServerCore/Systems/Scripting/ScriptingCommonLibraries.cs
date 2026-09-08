@@ -24,11 +24,18 @@ public static class ScriptingCommonLibraries
     /// <summary>
     ///     Lua code for the global 'colors' module.
     /// </summary>
+    /// <remarks>
+    ///     The color packing is written with the LuaJIT bit library and arithmetic shifts so that
+    ///     packed colors are unsigned numbers, matching the values expected by the engine APIs.
+    /// </remarks>
     public const string Color = @"
         Color = {}
         
         Color.Rgba = function (r, g, b, a)
-            return ((r & 0xFF) << 24) | ((g & 0xFF) << 16) | ((b & 0xFF) << 8) | (a & 0xFF)
+            return bit.band(r, 0xFF) * 0x1000000
+                 + bit.band(g, 0xFF) * 0x10000
+                 + bit.band(b, 0xFF) * 0x100
+                 + bit.band(a, 0xFF)
         end
 
         Color.Rgb = function (r, g, b)

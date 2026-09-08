@@ -60,7 +60,7 @@ Download and run the Windows installer for the latest release.
 Use your distribution's package manager to install the required dependencies:
 * libSDL2
 * libSDL2_image
-* liblua5.4
+* libluajit-5.1
 
 Download the binary .tar.gz files for the latest release and extract them to the location
 where you would like the client and server to be installed.

@@ -28,7 +28,7 @@ public static class LuaUtil
     public static IntPtr GetMainThread(IntPtr luaState)
     {
         luaL_checkstack(luaState, 1, null);
-        lua_geti(luaState, LUA_REGISTRYINDEX, LUA_RIDX_MAINTHREAD);
+        lua_getfield(luaState, LUA_REGISTRYINDEX, MainThreadRegistryKey);
         var mainThread = lua_topointer(luaState, -1);
         lua_pop(luaState, 1);
         return mainThread;

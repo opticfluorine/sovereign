@@ -100,9 +100,9 @@ end
 
 --- Cleans up resources for an entity after behavior completes.
 function EntityBehavior:_CleanupEntity(entityId)
-    local thread, isMain = coroutine.running()
-    if isMain and self._coroutines[entityId] then
-        coroutine.close(self._coroutines[entityId])
+    -- LuaJIT's coroutine.running() returns nil on the main thread.
+    local thread = coroutine.running()
+    if thread == nil and self._coroutines[entityId] then
         self._coroutines[entityId] = nil
     end
     self._templateIds[entityId] = nil
@@ -136,7 +136,7 @@ function EntityBehavior:OnLoad(entityId)
 
     local thread = coroutine.create(self._main)
     self._coroutines[entityId] = thread
-    local ok, err = coroutine.resume(thread, self, Entity.Get(entityId), table.unpack(self._startArgs))
+    local ok, err = coroutine.resume(thread, self, Entity.Get(entityId), unpack(self._startArgs))
     if not ok then
         Util.LogError(string.format("Failed to add behavior for %s: %s", Entities.FormatEntityId(entityId), err))
     end
@@ -218,22 +218,22 @@ function EntityBehavior:Wait(entityId, waitTypes, delaySeconds)
 
     -- Configure any requested waits.
     local configuredWaits = WaitType.None
-    if (waitTypes & WaitType.Time) > 0 and delaySeconds and delaySeconds > 0 then
+    if bit.band(waitTypes, WaitType.Time) > 0 and delaySeconds and delaySeconds > 0 then
         Scripting.AddTimedCallback(delaySeconds,
             function (cbEntityId) self:_ResumeFromWait(cbEntityId, WaitType.Time, waitKey) end, entityId)
-        configuredWaits = configuredWaits | WaitType.Time
+        configuredWaits = bit.bor(configuredWaits, WaitType.Time)
     end
 
-    if (waitTypes & WaitType.ScheduledStop) > 0 then
+    if bit.band(waitTypes, WaitType.ScheduledStop) > 0 then
         self._scheduledStopHandles[entityId] = Scripting.AddScheduledStopCallback(entityId,
             function (cbEntityId) self:_ResumeFromWait(cbEntityId, WaitType.ScheduledStop, waitKey) end)
-        configuredWaits = configuredWaits | WaitType.ScheduledStop
+        configuredWaits = bit.bor(configuredWaits, WaitType.ScheduledStop)
     end
 
-    if (waitTypes & WaitType.Collision) > 0 then
+    if bit.band(waitTypes, WaitType.Collision) > 0 then
         self._collisionHandles[entityId] = Scripting.AddCollisionCallback(entityId, 
             function (cbEntityId) self:_ResumeFromWait(cbEntityId, WaitType.Collision, waitKey) end)
-        configuredWaits = configuredWaits | WaitType.Collision
+        configuredWaits = bit.bor(configuredWaits, WaitType.Collision)
     end
 
     -- Wait and return the type of wait that resumed first
@@ -255,7 +255,7 @@ function EntityBehavior:_ResumeFromWait(entityId, waitType, waitKey)
     -- Screen out any late callbacks from a previous wait.
     local crWaitTypes = self._waitTypes[entityId]
     local crWaitKey = self._waitKeys[entityId]
-    if not crWaitTypes or (crWaitTypes & waitType) == 0 then return end
+    if not crWaitTypes or bit.band(crWaitTypes, waitType) == 0 then return end
     if crWaitKey ~= waitKey then return end
 
     -- Clean up the full set of callbacks that were spawned by the wait call

@@ -4,6 +4,7 @@
 
 ### September
 
+<<<<<<< HEAD
 #### 13 September 2026
 
 * Add new common, scriptable `Level` and `Experience` components for players and NPCs. The components are exposed to scripts as `Components.Level` and `Components.Experience` and as `Level` and `Experience` keys in the `Entities.Create` spec table, may be set on NPC templates in the template editor, and are persisted to the database. New players are created with `Level 1` and `Experience 0`.
@@ -29,6 +30,10 @@
 * Players may now use the item selected in the hotbar as a tool by left-clicking an entity in the game world. If the selected item has a `UseRange` component and the target is within that range, the target entity's `OnInteract` scripting callback is invoked with the using entity's ID as the first argument, followed by the tool and target entity IDs.
 * Add new common, scriptable `UseRange` component (item-only) that defines the maximum distance in world units at which an item may be used as a tool. The component is exposed to scripts as `Components.UseRange` and as a `UseRange` key in the `Entities.Create` spec table.
 * Add a new `Inventory.UseItem(actorId, itemId, targetId)` Lua scripting function that routes through the same validation as the player use-item path.
+
+#### 8 September 2026
+
+* The server scripting engine now uses LuaJIT 2.1 instead of Lua 5.4, with updated standard behavior scripts. The Lua API available to scripts is now Lua 5.1-compatible plus LuaJIT extensions (e.g. the `bit` library).
 
 #### 7 September 2026
 
