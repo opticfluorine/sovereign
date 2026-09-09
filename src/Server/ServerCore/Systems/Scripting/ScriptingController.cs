@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Systems.Scripting;
 using Sovereign.Scripting.Lua;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
@@ -28,6 +29,7 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 ///     Public controller class for the Scripting system.
 /// </summary>
 public class ScriptingController(ScriptManager scriptManager, ILogger<ScriptingController> logger)
+    : IScriptingController
 {
     /// <summary>
     ///     Requests that the Scripting system reloads all scripts.
@@ -126,5 +128,23 @@ public class ScriptingController(ScriptManager scriptManager, ILogger<ScriptingC
                     functionName);
             }
         });
+    }
+
+    /// <summary>
+    ///     Requests that the interaction callback of the target entity be invoked with the given tool entity.
+    ///     If the target has an interaction callback, it is invoked with the tool entity ID as the first Lua argument.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="toolEntityId">Tool entity ID.</param>
+    /// <param name="targetEntityId">Target entity ID.</param>
+    public void InvokeInteractCallback(IEventSender eventSender, ulong toolEntityId, ulong targetEntityId)
+    {
+        var details = new ScriptingInteractEventDetails
+        {
+            ToolEntityId = toolEntityId,
+            TargetEntityId = targetEntityId
+        };
+        var ev = new Event(EventId.Server_Scripting_InteractCallback, details);
+        eventSender.SendEvent(ev);
     }
 }

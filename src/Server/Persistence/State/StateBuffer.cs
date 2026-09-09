@@ -153,6 +153,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<uint>> quantityUpdates = new(BufferSize);
 
     /// <summary>
+    ///     UseRange state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<float>> useRangeUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Removed entity IDs.
     /// </summary>
     private readonly StructBuffer<ulong> removedEntities = new(BufferSize);
@@ -389,6 +394,15 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Queues a UseRange update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateUseRange(ref StateUpdate<float> update)
+    {
+        useRangeUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -438,6 +452,7 @@ public sealed class StateBuffer
         quantityUpdates.Clear();
         itemUseUpdates.Clear();
         npcFlagsUpdates.Clear();
+        useRangeUpdates.Clear();
     }
 
     /// <summary>
@@ -605,6 +620,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddNpcFlagsComponentQuery,
                     persistenceProvider.ModifyNpcFlagsComponentQuery,
                     persistenceProvider.RemoveNpcFlagsComponentQuery,
+                    transaction);
+
+                // UseRange.
+                SynchronizeComponent(useRangeUpdates,
+                    persistenceProvider.AddUseRangeComponentQuery,
+                    persistenceProvider.ModifyUseRangeComponentQuery,
+                    persistenceProvider.RemoveUseRangeComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

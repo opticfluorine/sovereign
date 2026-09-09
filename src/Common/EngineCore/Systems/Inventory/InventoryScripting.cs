@@ -86,6 +86,17 @@ public sealed class InventoryScripting(
         controller.Swap(eventSender, actorId, inventoryId1, slotIndex1 - 1, inventoryId2, slotIndex2 - 1, quantity);
     }
 
+    [ScriptableFunction("UseItem")]
+    public void UseItem(ulong actorId, ulong itemId, ulong targetEntityId)
+    {
+        if (!EntityUtil.IsRegularEntity(itemId))
+            throw new LuaException("itemId must be a regular entity");
+        if (!EntityUtil.IsRegularEntity(targetEntityId))
+            throw new LuaException("targetEntityId must be a regular entity");
+
+        controller.UseItem(eventSender, actorId, itemId, targetEntityId);
+    }
+
     [ScriptableFunction("RemoveItem")]
     public void RemoveItem(ulong entityId, int slotIndex)
     {

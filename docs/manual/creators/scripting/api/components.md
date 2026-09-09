@@ -34,6 +34,7 @@ Each component collection that is accessible through the scripting engine may be
 | `Components.Quantity`         | `QuantityComponentCollection`         | `integer`      |
 | `Components.ServerOnly`       | `ServerOnlyTagCollection`             | `boolean`      |
 | `Components.Stackable`        | `StackableTagCollection`              | `boolean`      |
+| `Components.UseRange`         | `UseRangeComponentCollection`         | `float`        |
 
 ## General Component Functions
 

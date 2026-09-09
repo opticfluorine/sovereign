@@ -55,6 +55,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly QuantityComponentCollection quantities;
     private readonly ServerOnlyTagCollection serverOnly;
     private readonly StackableTagCollection stackables;
+    private readonly UseRangeComponentCollection useRanges;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
     private bool isBlock;
@@ -86,6 +87,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         QuantityComponentCollection quantities,
         ItemUseComponentCollection itemUses,
         NpcFlagsComponentCollection npcFlags,
+        UseRangeComponentCollection useRanges,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -113,6 +115,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.quantities = quantities;
         this.itemUses = itemUses;
         this.npcFlags = npcFlags;
+        this.useRanges = useRanges;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -451,6 +454,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutItemUse()
     {
         itemUses.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder UseRange(float useRange)
+    {
+        useRanges.AddOrUpdateComponent(entityId, useRange, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutUseRange()
+    {
+        useRanges.RemoveComponent(entityId, load);
         return this;
     }
 

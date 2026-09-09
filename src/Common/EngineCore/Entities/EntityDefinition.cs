@@ -63,6 +63,7 @@ public class EntityDefinition
         Quantity = other.Quantity;
         ItemUse = other.ItemUse;
         NpcFlags = other.NpcFlags;
+        UseRange = other.UseRange;
     }
 
     /// <summary>
@@ -202,4 +203,10 @@ public class EntityDefinition
     /// </summary>
     [Key(22)]
     public NpcFlag? NpcFlags { get; set; }
+
+    /// <summary>
+    ///     UseRange component, or null if the entity has no use range.
+    /// </summary>
+    [Key(23)]
+    public float? UseRange { get; set; }
 }

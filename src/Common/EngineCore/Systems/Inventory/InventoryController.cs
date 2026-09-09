@@ -80,6 +80,15 @@ public interface IInventoryController
     /// <param name="entityId">Entity ID that will own the new slots.</param>
     /// <param name="slotCount">Number of slots to add. Must be greater than zero.</param>
     void AddSlots(IEventSender eventSender, ulong entityId, int slotCount);
+
+    /// <summary>
+    ///     Uses an item as a tool on a target entity.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="actorEntityId">Entity ID performing the use.</param>
+    /// <param name="toolItemId">Item entity ID to use as a tool.</param>
+    /// <param name="targetEntityId">Entity ID of the target.</param>
+    void UseItem(IEventSender eventSender, ulong actorEntityId, ulong toolItemId, ulong targetEntityId);
 }
 
 /// <summary>
@@ -156,6 +165,20 @@ internal class InventoryController : IInventoryController
     {
         var details = new EntityIntEventDetails { EntityId = entityId, Value = slotCount };
         var ev = new Event(EventId.Core_Inventory_AddSlots, details);
+        eventSender.SendEvent(ev);
+    }
+
+    public void UseItem(IEventSender eventSender, ulong actorEntityId, ulong toolItemId, ulong targetEntityId)
+    {
+        var details = new UseItemEventDetails
+        {
+            ToolEntityId = toolItemId,
+            TargetEntityId = targetEntityId
+        };
+        var ev = new Event(EventId.Core_Inventory_UseItem, details)
+        {
+            FromPlayerId = actorEntityId
+        };
         eventSender.SendEvent(ev);
     }
 }

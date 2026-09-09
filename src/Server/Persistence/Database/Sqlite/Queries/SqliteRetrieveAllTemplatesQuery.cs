@@ -34,7 +34,7 @@ public class SqliteRetrieveAllTemplatesQuery : IRetrieveAllTemplatesQuery
                 NULL, drawableX, drawableY, animatedSprite, orientation, NULL, castBlockShadows,
                 plsRadius, plsIntensity, plsColor, plsPosX, plsPosY, plsPosZ,
                 physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius, entityType, serverOnly,
-                stackable, quantity, itemUse, npcFlags
+                stackable, quantity, itemUse, npcFlags, useRange
             FROM EntityWithComponents 
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = id
             WHERE id >= @FirstTemplateId AND id <= @LastTemplateId";

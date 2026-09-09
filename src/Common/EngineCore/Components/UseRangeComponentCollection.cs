@@ -14,17 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Systems.Inventory;
+using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
 
-namespace Sovereign.ClientCore.Systems.Inventory;
+namespace Sovereign.EngineCore.Components;
 
 /// <summary>
-///     Client-side inventory constants.
+///     UseRange component. Specifies the maximum distance in world units at which an item may be used as a tool.
 /// </summary>
-public static class ClientInventoryConstants
+[ScriptableComponents]
+public class UseRangeComponentCollection(
+    EntityTable entityTable,
+    ComponentManager componentManager)
+    : BaseComponentCollection<float>(entityTable, componentManager, InitialSize, ComponentOperators.FloatOperators,
+        ComponentType.UseRange)
 {
-    /// <summary>
-    ///     Number of hotbar slots.
-    /// </summary>
-    public const int HotbarSlotCount = InventoryConstants.HotbarSlotCount;
+    private const int InitialSize = 16384;
 }

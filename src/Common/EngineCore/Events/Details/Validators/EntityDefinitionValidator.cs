@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Components.Validators;
 using Sovereign.EngineCore.Entities;
 
@@ -41,7 +42,8 @@ public class EntityDefinitionValidator(
         return IsNotPositionedChildEntity(definition) &&
                IsCompleteIfPlayerCharacter(definition) &&
                IsNotDoublePositioned(definition) &&
-               AreComponentsValid(definition);
+               AreComponentsValid(definition) &&
+               IsUseRangeValid(definition);
     }
 
     /// <summary>
@@ -79,6 +81,23 @@ public class EntityDefinitionValidator(
                      && definition is not { BlockPosition: not null, Parent: not null };
 
         if (!result) logger.LogError("Definition for {Id:X} is a positioned child entity.", definition.EntityId);
+        return result;
+    }
+
+    /// <summary>
+    ///     Checks that the UseRange component, if present, is only applied to items with a non-negative range.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <returns>true if valid for this rule, false otherwise.</returns>
+    private bool IsUseRangeValid(EntityDefinition definition)
+    {
+        if (!definition.UseRange.HasValue) return true;
+
+        var result = definition.EntityType == EntityType.Item && definition.UseRange.Value >= 0f;
+        if (!result)
+            logger.LogError(
+                "Definition for {Id:X} has an invalid UseRange; it must be non-negative and only items may have it.",
+                definition.EntityId);
         return result;
     }
 

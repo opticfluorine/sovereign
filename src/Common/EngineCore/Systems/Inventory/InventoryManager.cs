@@ -27,6 +27,7 @@ using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Logging;
+using Sovereign.EngineCore.Systems.Scripting;
 using Sovereign.EngineCore.Systems.WorldManagement;
 
 namespace Sovereign.EngineCore.Systems.Inventory;
@@ -50,9 +51,11 @@ public sealed class InventoryManager(
     StackableTagCollection stackable,
     EntityTable entityTable,
     QuantityComponentCollection quantities,
+    UseRangeComponentCollection useRanges,
     IEngineConfiguration engineConfiguration,
     IEventSender eventSender,
-    InventoryPermissionService permissionService)
+    InventoryPermissionService permissionService,
+    IScriptingController scriptingController)
 {
     private readonly List<(int slotIndex, ulong itemId, uint qty)> consumeCandidates = new();
     private readonly float maxDropD2 = inventoryOptions.Value.MaxDropDistance * inventoryOptions.Value.MaxDropDistance;
@@ -225,6 +228,54 @@ public sealed class InventoryManager(
 
             SwapItems(inventory0Id, firstSlotIdx, inventory1Id, secondSlotIdx, quantity);
         }
+    }
+
+    /// <summary>
+    ///     Uses an item from the player's hotbar as a tool on a target entity. If the use is valid on an
+    ///     authoritative engine, the target entity's interaction callback is invoked with the tool entity ID
+    ///     as the first argument.
+    /// </summary>
+    /// <param name="playerId">Player entity ID performing the use.</param>
+    /// <param name="toolItemId">Item entity ID to use as a tool.</param>
+    /// <param name="targetEntityId">Entity ID of the target.</param>
+    public void UseItem(ulong playerId, ulong toolItemId, ulong targetEntityId)
+    {
+        lock (mutationLock)
+        {
+            if (!IsToolInHotbar(playerId, toolItemId) ||
+                !useRanges.TryGetValue(toolItemId, out var useRange) ||
+                !TryGetCenterDistanceSq(playerId, targetEntityId, out var d2) ||
+                d2 > useRange * useRange)
+            {
+                if (engineConfiguration.IsAuthoritative)
+                    logger.LogWarning(
+                        "[SECURITY] Player {Actor} tried to use item {Tool} on target {Target}.",
+                        loggingUtil.FormatEntity(playerId), loggingUtil.FormatEntity(toolItemId),
+                        loggingUtil.FormatEntity(targetEntityId));
+                return;
+            }
+
+            if (engineConfiguration.IsAuthoritative)
+                scriptingController.InvokeInteractCallback(eventSender, toolItemId, targetEntityId);
+        }
+    }
+
+    /// <summary>
+    ///     Determines whether the given item is held in one of the player's hotbar slots.
+    /// </summary>
+    /// <param name="playerId">Player entity ID.</param>
+    /// <param name="toolItemId">Item entity ID.</param>
+    /// <returns>true if the item is in a hotbar slot, false otherwise.</returns>
+    private bool IsToolInHotbar(ulong playerId, ulong toolItemId)
+    {
+        for (var i = 0; i < InventoryConstants.HotbarSlotCount; ++i)
+        {
+            if (!slotIndexer.TryGetSlotForEntity(playerId, i, out var slotEid)) continue;
+            if (!hierarchyIndexer.TryGetFirstDirectChild(slotEid, out var itemId)) continue;
+            if (itemId == toolItemId) return true;
+        }
+
+        return false;
     }
 
     /// <summary>

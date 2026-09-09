@@ -18,11 +18,13 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Events.Details.Validators;
 using Sovereign.EngineCore.Lua;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.ServerCore.Configuration;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
@@ -34,11 +36,13 @@ namespace Sovereign.ServerCore.Systems.Scripting;
 internal class ScriptingSystem : ISystem
 {
     private readonly ScriptingCallbackManager callbackManager;
+    private readonly IDataServices dataServices;
     private readonly EntityCallbacks entityCallbacks;
     private readonly EntityScriptCallbacks entityScriptCallbacks;
     private readonly ILogger<ScriptingSystem> logger;
     private readonly ScriptManager manager;
     private readonly ScriptLoader scriptLoader;
+    private readonly ScriptingController scriptingController;
     private readonly TestHarnessResultsCollector testHarnessCollector;
     private readonly TestHarnessOptions testHarnessOptions;
     private readonly ITimedCallbackRunner timedCallbackRunner;
@@ -47,7 +51,8 @@ internal class ScriptingSystem : ISystem
         ScriptingCallbackManager callbackManager, ScriptLoader scriptLoader, ILogger<ScriptingSystem> logger,
         EntityScriptCallbacks entityScriptCallbacks, ITimedCallbackRunner timedCallbackRunner,
         EntityCallbacks entityCallbacks, TestHarnessResultsCollector testHarnessCollector,
-        IOptions<TestHarnessOptions> testHarnessOptions)
+        IOptions<TestHarnessOptions> testHarnessOptions, IDataServices dataServices,
+        ScriptingController scriptingController)
     {
         this.manager = manager;
         this.callbackManager = callbackManager;
@@ -58,6 +63,8 @@ internal class ScriptingSystem : ISystem
         this.entityCallbacks = entityCallbacks;
         this.testHarnessCollector = testHarnessCollector;
         this.testHarnessOptions = testHarnessOptions.Value;
+        this.dataServices = dataServices;
+        this.scriptingController = scriptingController;
         EventCommunicator = eventCommunicator;
 
         EventIdsOfInterest = new HashSet<EventId>(ScriptableEventSet.Events);
@@ -69,6 +76,7 @@ internal class ScriptingSystem : ISystem
             EventId.Server_Scripting_ReloadEntity,
             EventId.Server_Scripting_ReloadTemplate,
             EventId.Server_Scripting_RunTests,
+            EventId.Server_Scripting_InteractCallback,
             EventId.Core_Tick,
             EventId.Core_Movement_EntityCollision,
             EventId.Core_Movement_ScheduledStop
@@ -129,6 +137,18 @@ internal class ScriptingSystem : ISystem
                 case EventId.Server_Scripting_RunTests:
                     OnRunTests();
                     break;
+
+                case EventId.Server_Scripting_InteractCallback:
+                {
+                    if (ev.EventDetails is not ScriptingInteractEventDetails details)
+                    {
+                        logger.LogError("Received InteractCallback event without details.");
+                        break;
+                    }
+
+                    OnInteractCallback(details);
+                    break;
+                }
 
                 case EventId.Server_Scripting_TimedCallback:
                 {
@@ -314,5 +334,20 @@ internal class ScriptingSystem : ISystem
     private void OnTimedCallback(IntPtr luaState, int callbackRef, int argRef)
     {
         timedCallbackRunner.RunTimedCallback(luaState, callbackRef, argRef);
+    }
+
+    /// <summary>
+    ///     Called when an InteractCallback event is received.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    private void OnInteractCallback(ScriptingInteractEventDetails details)
+    {
+        if (!dataServices.TryGetEntityKeyValue(details.TargetEntityId, EntityConstants.InteractScriptKey,
+                out var scriptName) ||
+            !dataServices.TryGetEntityKeyValue(details.TargetEntityId, EntityConstants.InteractFunctionKey,
+                out var funcName)) return;
+
+        scriptingController.CallFunctionAsync(scriptName, funcName, details.ToolEntityId,
+            details.TargetEntityId);
     }
 }

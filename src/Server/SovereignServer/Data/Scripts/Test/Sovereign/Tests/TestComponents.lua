@@ -8,7 +8,8 @@ local step8QuantityAdd, step9VerifyQuantityAdd, step10QuantitySubtract
 local step11VerifyQuantitySubtract, step12QuantitySet, step13VerifyQuantitySet
 local step14QuantityMultiply, step15VerifyQuantityMultiply
 local step16QuantityDivide, step17VerifyQuantityDivide
-local fixtureEntityId, quantityEntityId
+local step18UseRangeSet, step19VerifyUseRangeSet
+local fixtureEntityId, quantityEntityId, useRangeEntityId
 local positionBeforeAdd
 
 Test.Async("GetAfterCreate")
@@ -139,6 +140,20 @@ step17VerifyQuantityDivide = function()
     Test.Pass("QuantityArithmetic")
 end
 
+Test.Async("UseRangeComponent")
+
+step18UseRangeSet = function()
+    Components.UseRange.Set(useRangeEntityId, 2.5)
+end
+
+step19VerifyUseRangeSet = function()
+    Test.Step("UseRangeComponent", function()
+        Test.AssertTrue(Components.UseRange.Exists(useRangeEntityId), "use range component should exist")
+        Test.AssertNear(2.5, Components.UseRange.Get(useRangeEntityId), 0.0001, "use range after Set")
+    end)
+    Test.Pass("UseRangeComponent")
+end
+
 -- Suite setup. ------------------------------------------------------------------------
 
 -- Fixture creation is deferred to stagger startup across suites; the engine does not
@@ -162,6 +177,14 @@ setup = function()
         Quantity = 5
     })
 
+    -- The UseRange spec key exercises the scriptable entity builder action.
+    useRangeEntityId = Entities.Create({
+        Name = "TestComponentsUseRange",
+        EntityType = EntityType.Item,
+        NonPersistent = true,
+        UseRange = 1.5
+    })
+
     Scripting.AddTimedCallback(0.3, step1VerifyCreated)
     Scripting.AddTimedCallback(0.5, step2Rename)
     Scripting.AddTimedCallback(0.7, step3VerifyRename)
@@ -179,6 +202,17 @@ setup = function()
     Scripting.AddTimedCallback(1.9, step15VerifyQuantityMultiply)
     Scripting.AddTimedCallback(2.1, step16QuantityDivide)
     Scripting.AddTimedCallback(2.3, step17VerifyQuantityDivide)
+    Scripting.AddTimedCallback(0.5, function()
+        -- Verify the value created through the Entities.Create spec key.
+        Test.Step("UseRangeComponent", function()
+            Test.AssertTrue(Components.UseRange.Exists(useRangeEntityId),
+                "use range component should exist after creation")
+            Test.AssertNear(1.5, Components.UseRange.Get(useRangeEntityId), 0.0001,
+                "use range from Entities.Create spec")
+        end)
+    end)
+    Scripting.AddTimedCallback(0.7, step18UseRangeSet)
+    Scripting.AddTimedCallback(0.9, step19VerifyUseRangeSet)
 end
 
 Scripting.AddTimedCallback(0.3, setup)

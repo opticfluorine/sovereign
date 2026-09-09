@@ -14,17 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Systems.Inventory;
-
-namespace Sovereign.ClientCore.Systems.Inventory;
+namespace Sovereign.EngineCore.Events.Details.Validators;
 
 /// <summary>
-///     Client-side inventory constants.
+///     Validates UseItemEventDetails objects.
 /// </summary>
-public static class ClientInventoryConstants
+public class UseItemEventDetailsValidator : IEventDetailsValidator
 {
-    /// <summary>
-    ///     Number of hotbar slots.
-    /// </summary>
-    public const int HotbarSlotCount = InventoryConstants.HotbarSlotCount;
+    public bool IsValid(IEventDetails? details)
+    {
+        return details is UseItemEventDetails { ToolEntityId: > 0, TargetEntityId: > 0 };
+    }
 }

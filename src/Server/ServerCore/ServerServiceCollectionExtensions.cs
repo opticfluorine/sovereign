@@ -209,6 +209,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<ScriptingServices>();
         services.TryAddSingleton<IScriptingServices>(s => s.GetRequiredService<ScriptingServices>());
         services.TryAddSingleton<ScriptingController>();
+        services.TryAddSingleton<IScriptingController>(s => s.GetRequiredService<ScriptingController>());
         services.TryAddSingleton<EntityScriptCallbacks>();
         services.TryAddSingleton<ScriptingLuaLibrary>();
         services.TryAddSingleton<ITimedCallbackRunner>(s => s.GetRequiredService<ScriptingLuaLibrary>());

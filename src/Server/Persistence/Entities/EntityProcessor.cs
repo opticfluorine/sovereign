@@ -70,6 +70,7 @@ public sealed class EntityProcessor
     private const int IndexQuantity = IndexStackable + 1;
     private const int IndexItemUse = IndexQuantity + 1;
     private const int IndexNpcFlags = IndexItemUse + 1;
+    private const int IndexUseRange = IndexNpcFlags + 1;
     private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
     private readonly ExistingEntitySet existingEntitySet;
@@ -143,6 +144,7 @@ public sealed class EntityProcessor
             ProcessQuantity(reader, builder);
             ProcessItemUse(reader, builder);
             ProcessNpcFlags(reader, builder);
+            ProcessUseRange(reader, builder);
 
             /* Complete the entity. */
             builder.Build();
@@ -429,6 +431,17 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexNpcFlags)) return;
         builder.NpcFlags((NpcFlag)reader.GetInt32(IndexNpcFlags));
+    }
+
+    /// <summary>
+    ///     Processes the UseRange component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessUseRange(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexUseRange)) return;
+        builder.UseRange(reader.GetFloat(IndexUseRange));
     }
 
     /// <summary>

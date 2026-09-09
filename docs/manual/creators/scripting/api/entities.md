@@ -56,6 +56,7 @@ if one is not provided.
 | Physics          | boolean                                      | Whether entity has physics effects               |
 | PointLightSource | [PointLight](#script-types-pointlight)       | Point light source                               |
 | ServerOnly       | boolean                                      | Whether entity is server-only                    |
+| UseRange         | float                                        | Maximum tool use distance (item entities)        |
 
 #### Example
 
