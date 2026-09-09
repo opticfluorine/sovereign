@@ -25,7 +25,7 @@ public sealed class ScriptingInteractEventDetails : IEventDetails
     /// <summary>
     ///     Entity using the tool.
     /// </summary>
-    public ulong UsingEntityId { get; set; }
+    public ulong ActorEntityId { get; set; }
 
     /// <summary>
     ///     Item entity used as the tool.

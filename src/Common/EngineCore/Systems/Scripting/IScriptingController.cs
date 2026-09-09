@@ -76,9 +76,9 @@ public interface IScriptingController
     ///     and target entity ID as arguments, in that order.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
-    /// <param name="usingEntityId">Entity ID of the entity using the tool.</param>
+    /// <param name="actorEntityId">Entity ID of the entity using the tool.</param>
     /// <param name="toolEntityId">Tool entity ID.</param>
     /// <param name="targetEntityId">Target entity ID.</param>
-    void InvokeInteractCallback(IEventSender eventSender, ulong usingEntityId, ulong toolEntityId,
+    void InvokeInteractCallback(IEventSender eventSender, ulong actorEntityId, ulong toolEntityId,
         ulong targetEntityId);
 }

@@ -139,7 +139,7 @@ internal class ScriptingSystem : ISystem
                         break;
                     }
 
-                    entityScriptCallbacks.InvokeInteractCallback(details.UsingEntityId, details.ToolEntityId,
+                    entityScriptCallbacks.InvokeInteractCallback(details.ActorEntityId, details.ToolEntityId,
                         details.TargetEntityId);
                     break;
                 }
