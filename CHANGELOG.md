@@ -6,7 +6,7 @@
 
 #### 9 September 2026
 
-* Players may now use the item selected in the hotbar as a tool by left-clicking an entity in the game world. If the selected item has a `UseRange` component and the target is within that range, the target entity's `OnInteract` scripting callback is invoked with the tool entity ID as the first argument.
+* Players may now use the item selected in the hotbar as a tool by left-clicking an entity in the game world. If the selected item has a `UseRange` component and the target is within that range, the target entity's `OnInteract` scripting callback is invoked with the using entity's ID as the first argument, followed by the tool and target entity IDs.
 * Add new common, scriptable `UseRange` component (item-only) that defines the maximum distance in world units at which an item may be used as a tool. The component is exposed to scripts as `Components.UseRange` and as a `UseRange` key in the `Entities.Create` spec table.
 * Add a new `Inventory.UseItem(actorId, itemId, targetId)` Lua scripting function that routes through the same validation as the player use-item path.
 

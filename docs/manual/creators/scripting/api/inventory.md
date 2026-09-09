@@ -460,7 +460,7 @@ end
 ```{eval-rst}
 .. lua:function:: Inventory.UseItem(actorId, itemId, targetId)
 
-   Uses an item as a tool on a target entity, acting on behalf of an actor. The same validation as the player use-item path is applied: the item must be held in one of the actor's hotbar slots, must have a ``UseRange`` component, and the target must be within that range. If validation succeeds on the server and the target has an interaction callback, the callback is invoked with the tool entity ID as its first argument.
+   Uses an item as a tool on a target entity, acting on behalf of an actor. The same validation as the player use-item path is applied: the item must be held in one of the actor's hotbar slots, must have a ``UseRange`` component, and the target must be within that range. If validation succeeds on the server and the target has an interaction callback, the callback is invoked with the actor entity ID as its first argument, followed by the item entity ID and the target entity ID.
 
    :param actorId: Actor entity ID performing the use.
    :type actorId: lightuserdata

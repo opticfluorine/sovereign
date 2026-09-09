@@ -72,10 +72,13 @@ public interface IScriptingController
 
     /// <summary>
     ///     Requests that the interaction callback of the target entity be invoked with the given tool entity.
-    ///     If the target has an interaction callback, it is invoked with the tool entity ID as the first Lua argument.
+    ///     If the target has an interaction callback, it is invoked with the using entity ID, tool entity ID,
+    ///     and target entity ID as arguments, in that order.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
+    /// <param name="usingEntityId">Entity ID of the entity using the tool.</param>
     /// <param name="toolEntityId">Tool entity ID.</param>
     /// <param name="targetEntityId">Target entity ID.</param>
-    void InvokeInteractCallback(IEventSender eventSender, ulong toolEntityId, ulong targetEntityId);
+    void InvokeInteractCallback(IEventSender eventSender, ulong usingEntityId, ulong toolEntityId,
+        ulong targetEntityId);
 }

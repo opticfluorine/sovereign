@@ -23,6 +23,11 @@ namespace Sovereign.EngineCore.Events.Details;
 public sealed class ScriptingInteractEventDetails : IEventDetails
 {
     /// <summary>
+    ///     Entity using the tool.
+    /// </summary>
+    public ulong UsingEntityId { get; set; }
+
+    /// <summary>
     ///     Item entity used as the tool.
     /// </summary>
     public ulong ToolEntityId { get; set; }

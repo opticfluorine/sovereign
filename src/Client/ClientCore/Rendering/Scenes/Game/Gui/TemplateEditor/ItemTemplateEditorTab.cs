@@ -257,7 +257,7 @@ public class ItemTemplateEditorTab
         selectedDefinition.Stackable = stackable;
 
         ImGui.TableNextColumn();
-        ImGui.Text("Has Use Range:");
+        ImGui.Text("Usable:");
         ImGui.TableNextColumn();
         ImGui.Checkbox("##useRangeEnabled", ref inputUseRangeEnabled);
 

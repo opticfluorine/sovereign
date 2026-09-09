@@ -84,6 +84,7 @@ namespace Sovereign.EngineCore.Events;
 [JsonDerivedType(typeof(NonBlockAddEventDetails), nameof(NonBlockAddEventDetails))]
 [JsonDerivedType(typeof(NonBlockRemoveEventDetails), nameof(NonBlockRemoveEventDetails))]
 [JsonDerivedType(typeof(RequestMoveEventDetails), nameof(RequestMoveEventDetails))]
+[JsonDerivedType(typeof(ScriptingInteractEventDetails), nameof(ScriptingInteractEventDetails))]
 [JsonDerivedType(typeof(SelectPlayerEventDetails), nameof(SelectPlayerEventDetails))]
 [JsonDerivedType(typeof(SequenceEventDetails), nameof(SequenceEventDetails))]
 [JsonDerivedType(typeof(StringEventDetails), nameof(StringEventDetails))]

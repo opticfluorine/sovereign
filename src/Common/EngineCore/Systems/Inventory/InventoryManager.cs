@@ -232,8 +232,8 @@ public sealed class InventoryManager(
 
     /// <summary>
     ///     Uses an item from the player's hotbar as a tool on a target entity. If the use is valid on an
-    ///     authoritative engine, the target entity's interaction callback is invoked with the tool entity ID
-    ///     as the first argument.
+    ///     authoritative engine, the target entity's interaction callback is invoked with the using entity ID,
+    ///     tool entity ID, and target entity ID as arguments, in that order.
     /// </summary>
     /// <param name="playerId">Player entity ID performing the use.</param>
     /// <param name="toolItemId">Item entity ID to use as a tool.</param>
@@ -256,7 +256,7 @@ public sealed class InventoryManager(
             }
 
             if (engineConfiguration.IsAuthoritative)
-                scriptingController.InvokeInteractCallback(eventSender, toolItemId, targetEntityId);
+                scriptingController.InvokeInteractCallback(eventSender, playerId, toolItemId, targetEntityId);
         }
     }
 

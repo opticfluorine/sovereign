@@ -24,74 +24,36 @@ namespace Sovereign.ClientCore.Systems.Scripting;
 /// </summary>
 public sealed class NullScriptingController : IScriptingController
 {
-    /// <summary>
-    ///     Does nothing.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
     public void ReloadAllScripts(IEventSender eventSender)
     {
     }
 
-    /// <summary>
-    ///     Does nothing.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="scriptName">Script name.</param>
     public void ReloadScript(IEventSender eventSender, string scriptName)
     {
     }
 
-    /// <summary>
-    ///     Does nothing.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
     public void LoadNewScripts(IEventSender eventSender)
     {
     }
 
-    /// <summary>
-    ///     Does nothing.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="entityId">Entity ID.</param>
     public void ReloadEntity(IEventSender eventSender, ulong entityId)
     {
     }
 
-    /// <summary>
-    ///     Does nothing.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="templateId">Template entity ID.</param>
     public void ReloadTemplate(IEventSender eventSender, ulong templateId)
     {
     }
 
-    /// <summary>
-    ///     Does nothing.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
     public void RunTests(IEventSender eventSender)
     {
     }
 
-    /// <summary>
-    ///     Does nothing.
-    /// </summary>
-    /// <param name="scriptName">Script name.</param>
-    /// <param name="functionName">Function name.</param>
-    /// <param name="args">Arguments.</param>
     public void CallFunctionAsync(string scriptName, string functionName, params ulong[] args)
     {
     }
 
-    /// <summary>
-    ///     Does nothing.
-    /// </summary>
-    /// <param name="eventSender">Event sender.</param>
-    /// <param name="toolEntityId">Tool entity ID.</param>
-    /// <param name="targetEntityId">Target entity ID.</param>
-    public void InvokeInteractCallback(IEventSender eventSender, ulong toolEntityId, ulong targetEntityId)
+    public void InvokeInteractCallback(IEventSender eventSender, ulong usingEntityId, ulong toolEntityId,
+        ulong targetEntityId)
     {
     }
 }
