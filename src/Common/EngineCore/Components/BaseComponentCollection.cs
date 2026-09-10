@@ -39,7 +39,9 @@ namespace Sovereign.EngineCore.Components;
 /// </list>
 /// Operations are enqueued with respect to the current state of the component;
 /// for example, RemoveComponent() cannot be called to remove a component that
-/// is currently enqueued for addition.
+/// is currently enqueued for addition. Modifying a component inherited from a
+/// template entity creates a local copy of the component value for the entity;
+/// the template value is left unchanged.
 /// <typeparam name="T">Component value type.</typeparam>
 public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSource<T>, IComponentRemover
     where T : notnull
@@ -48,6 +50,12 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     ///     Internal operation buffer size.
     /// </summary>
     private const int OperationBufferSize = 1024;
+
+    /// <summary>
+    ///     Sentinel component index indicating that a pending modification applies to an
+    ///     entity that inherits its component value from its template entity.
+    /// </summary>
+    private const int InheritedComponentIndex = -1;
 
     private readonly EntityTable entityTable;
 
@@ -348,8 +356,12 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     ///     Enqueues the modification of the component associated with the given entity.
     /// </summary>
     /// Note that the component must already exist and be associated with the given
-    /// entity; it is not sufficient to first make the corresponding call to
-    /// AddComponent. If the component is not associated, this method has no effect.
+    /// entity, either directly or via template inheritance; it is not sufficient to
+    /// first make the corresponding call to AddComponent. If the component is not
+    /// associated with the entity, this method has no effect. If the component value
+    /// is inherited from the entity's template entity, a local copy of the template
+    /// value is created for the entity when the modification is applied, and the
+    /// template value is left unchanged.
     /// <param name="entityId">Entity ID.</param>
     /// <param name="operation">Operation to perform on the component.</param>
     /// <param name="adjustment">Adjustment value.</param>
@@ -358,8 +370,16 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     /// </exception>
     public void ModifyComponent(ulong entityId, ComponentOperation operation, T adjustment)
     {
-        /* Ensure that the entity has an associated component. */
-        if (!entityToComponentMap.TryGetValue(entityId, out var componentIndex)) return;
+        /* Ensure that the entity has an associated component, either directly or via
+           template inheritance. */
+        var isInherited = false;
+        if (!entityToComponentMap.TryGetValue(entityId, out var componentIndex))
+        {
+            if (!(entityTable.TryGetTemplate(entityId, out var templateId) &&
+                    HasComponentForEntity(templateId)))
+                return;
+            isInherited = true;
+        }
 
         /* Ensure that the operation is supported by this component. */
         if (!operators.ContainsKey(operation))
@@ -369,7 +389,7 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         var pendingModify = new PendingModify
         {
             EntityId = entityId,
-            ComponentIndex = componentIndex,
+            ComponentIndex = isInherited ? InheritedComponentIndex : componentIndex,
             ComponentOperation = operation,
             Adjustment = adjustment
         };
@@ -635,9 +655,10 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
             for (var i = 0; i < queue.Count; ++i)
             {
                 ref var pendingModify = ref queue[i];
-                var transformed = op(components[pendingModify.ComponentIndex],
+                if (!TryResolveComponentIndexForModify(ref pendingModify, out var componentIndex)) continue;
+                var transformed = op(components[componentIndex],
                     pendingModify.Adjustment);
-                components[pendingModify.ComponentIndex] = transformed;
+                components[componentIndex] = transformed;
                 pendingModifyEvents.Add(pendingModify.EntityId);
             }
 
@@ -646,6 +667,33 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
         }
 
         hasModifications = false;
+    }
+
+    /// <summary>
+    ///     Resolves the component buffer index to which a pending modification applies, creating a
+    ///     local copy of the inherited template value for the entity if needed.
+    /// </summary>
+    /// <param name="pendingModify">Pending modification.</param>
+    /// <param name="componentIndex">
+    ///     Component buffer index to which the modification applies. Only meaningful if this
+    ///     method returns true.
+    /// </param>
+    /// <returns>true if a component index was resolved, false otherwise.</returns>
+    private bool TryResolveComponentIndexForModify(ref PendingModify pendingModify, out int componentIndex)
+    {
+        if (pendingModify.ComponentIndex != InheritedComponentIndex)
+        {
+            componentIndex = pendingModify.ComponentIndex;
+            return true;
+        }
+
+        if (entityToComponentMap.TryGetValue(pendingModify.EntityId, out componentIndex)) return true;
+
+        var maybeValue = GetComponentForEntity(pendingModify.EntityId);
+        if (!maybeValue.HasValue) return false;
+        componentIndex = AddComponentToBuffer(maybeValue.Value);
+        RegisterIndices(componentIndex, pendingModify.EntityId);
+        return true;
     }
 
     /// <summary>
