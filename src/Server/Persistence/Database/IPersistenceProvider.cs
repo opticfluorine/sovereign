@@ -379,6 +379,51 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveUseRangeComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for the Health component.
+    /// </summary>
+    IAddComponentQuery<Vital> AddHealthComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the Health component.
+    /// </summary>
+    IModifyComponentQuery<Vital> ModifyHealthComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the Health component.
+    /// </summary>
+    IRemoveComponentQuery RemoveHealthComponentQuery { get; }
+
+    /// <summary>
+    ///     IAddComponentQuery for the Stamina component.
+    /// </summary>
+    IAddComponentQuery<Vital> AddStaminaComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the Stamina component.
+    /// </summary>
+    IModifyComponentQuery<Vital> ModifyStaminaComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the Stamina component.
+    /// </summary>
+    IRemoveComponentQuery RemoveStaminaComponentQuery { get; }
+
+    /// <summary>
+    ///     IAddComponentQuery for the Mana component.
+    /// </summary>
+    IAddComponentQuery<Vital> AddManaComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the Mana component.
+    /// </summary>
+    IModifyComponentQuery<Vital> ModifyManaComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the Mana component.
+    /// </summary>
+    IRemoveComponentQuery RemoveManaComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }

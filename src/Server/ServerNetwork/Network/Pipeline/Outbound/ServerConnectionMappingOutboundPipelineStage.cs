@@ -122,6 +122,18 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             return accountServices.GetConnectionIdForPlayer(details.TargetEntityId);
         });
 
+        var killMapper = entityWorldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not EntityEventDetails details) return new Maybe<ulong>();
+            return new Maybe<ulong>(details.EntityId);
+        });
+
+        var changeVitalsMapper = entityWorldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not ChangeVitalsEventDetails details) return new Maybe<ulong>();
+            return new Maybe<ulong>(details.EntityId);
+        });
+
         // Configure specific connection mappers.
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
@@ -140,6 +152,8 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Core_Block_RemoveNotice] = blockPosMapper;
         specificMappers[EventId.Core_Time_Clock] = globalMapper;
         specificMappers[EventId.Client_Dialogue_Enqueue] = dialogueMapepr;
+        specificMappers[EventId.Core_Vitals_Kill] = killMapper;
+        specificMappers[EventId.Core_Vitals_ChangeVitals] = changeVitalsMapper;
     }
 
     public void Process(OutboundEventInfo evInfo)

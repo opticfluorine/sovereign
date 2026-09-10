@@ -391,6 +391,22 @@ public enum EventId
 
     #endregion Inventory
 
+    #region Vitals
+
+    /// <summary>
+    ///     Event sent to kill an entity.
+    /// </summary>
+    /// Associated details: EntityEventDetails
+    Core_Vitals_Kill = 1400,
+
+    /// <summary>
+    ///     Event sent from server to client to change a vital of an entity.
+    /// </summary>
+    /// Associated details: ChangeVitalsEventDetails
+    Core_Vitals_ChangeVitals = 1401,
+
+    #endregion Vitals
+
     #endregion Core
 
     #region Client

@@ -51,6 +51,9 @@ public sealed class ServerEntityFactory(
     ItemUseComponentCollection itemUses,
     NpcFlagsComponentCollection npcFlags,
     UseRangeComponentCollection useRanges,
+    HealthComponentCollection healths,
+    StaminaComponentCollection staminas,
+    ManaComponentCollection manas,
     EntityTable entityTable,
     EntityAssigner entityAssigner)
     : IEntityFactory
@@ -97,6 +100,9 @@ public sealed class ServerEntityFactory(
             itemUses,
             npcFlags,
             useRanges,
+            healths,
+            staminas,
+            manas,
             entityTable);
     }
 }

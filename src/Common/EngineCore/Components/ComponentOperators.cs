@@ -219,4 +219,21 @@ public static class ComponentOperators
         {
             { ComponentOperation.Set, (_, b) => b }
         };
+
+    /// <summary>
+    ///     Standard operators for Vital-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<Vital, Vital, Vital>>
+        VitalOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b },
+            { ComponentOperation.SetValue, (a, b) => a with { Value = b.Value } },
+            { ComponentOperation.AddValue, (a, b) => a with { Value = a.Value + b.Value } },
+            { ComponentOperation.SetMaxValue, (a, b) => a with { MaxValue = b.MaxValue } },
+            { ComponentOperation.AddMaxValue, (a, b) => a with { MaxValue = a.MaxValue + b.MaxValue } },
+            {
+                ComponentOperation.SetChangeRate,
+                (a, b) => a with { ChangeRate = b.ChangeRate, ChangeInterval = b.ChangeInterval }
+            }
+        };
 }

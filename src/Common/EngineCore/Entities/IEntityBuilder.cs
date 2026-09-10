@@ -411,4 +411,46 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutUseRange();
+
+    /// <summary>
+    ///     Adds a Health component to the entity.
+    /// </summary>
+    /// <param name="health">Health.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(Health))]
+    IEntityBuilder Health(Vital health);
+
+    /// <summary>
+    ///     Removes the Health component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutHealth();
+
+    /// <summary>
+    ///     Adds a Stamina component to the entity.
+    /// </summary>
+    /// <param name="stamina">Stamina.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(Stamina))]
+    IEntityBuilder Stamina(Vital stamina);
+
+    /// <summary>
+    ///     Removes the Stamina component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutStamina();
+
+    /// <summary>
+    ///     Adds a Mana component to the entity.
+    /// </summary>
+    /// <param name="mana">Mana.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(Mana))]
+    IEntityBuilder Mana(Vital mana);
+
+    /// <summary>
+    ///     Removes the Mana component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutMana();
 }

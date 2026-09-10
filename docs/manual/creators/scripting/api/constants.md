@@ -106,6 +106,27 @@ This section describes constants and enumerations provided by the scripting engi
         West.
         
     .. lua:attribute:: Northwest: integer
-    
+        
         Northwest.
+```
+
+(script-constants-vitaltype)=
+## VitalType
+
+```{eval-rst}
+.. lua:class:: VitalType
+
+    Enumeration that specifies a type of vital.
+
+    .. lua:attribute:: Health: integer
+
+        Health vital.
+
+    .. lua:attribute:: Stamina: integer
+
+        Stamina vital.
+
+    .. lua:attribute:: Mana: integer
+
+        Mana vital.
 ```

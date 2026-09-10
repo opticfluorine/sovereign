@@ -51,11 +51,15 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         ItemUseComponentCollection itemUses,
         NpcFlagsComponentCollection npcFlags,
         UseRangeComponentCollection useRanges,
+        HealthComponentCollection healths,
+        StaminaComponentCollection staminas,
+        ManaComponentCollection manas,
         EntityTable entityTable)
         : base(entityId, isLoad, entityManager, kinematics, blockTiles,
             aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources, physics, boundingBoxes,
-            castShadows, entityTypes, serverOnly, stackables, quantities, itemUses, npcFlags, useRanges, entityTable)
+            castShadows, entityTypes, serverOnly, stackables, quantities, itemUses, npcFlags, useRanges,
+            healths, staminas, manas, entityTable)
     {
     }
 

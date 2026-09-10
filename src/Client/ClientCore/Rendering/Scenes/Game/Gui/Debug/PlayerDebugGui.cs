@@ -34,10 +34,13 @@ public class PlayerDebugGui
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly BlockGridPositionIndexer blocks;
     private readonly DrawableComponentCollection drawables;
+    private readonly HealthComponentCollection healths;
     private readonly KinematicsComponentCollection kinematics;
+    private readonly ManaComponentCollection manas;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
     private readonly PlayerCharacterTagCollection players;
+    private readonly StaminaComponentCollection staminas;
     private readonly ClientStateServices stateServices;
     private readonly WorldSegmentResolver worldSegmentResolver;
 
@@ -46,7 +49,8 @@ public class PlayerDebugGui
         AnimatedSpriteComponentCollection animatedSprites, WorldSegmentResolver worldSegmentResolver,
         DrawableComponentCollection drawables, PlayerCharacterTagCollection players,
         OrientationComponentCollection orientations, BlockGridPositionIndexer blocks,
-        AdminTagCollection admins)
+        AdminTagCollection admins, HealthComponentCollection healths, StaminaComponentCollection staminas,
+        ManaComponentCollection manas)
     {
         this.stateServices = stateServices;
         this.names = names;
@@ -58,6 +62,9 @@ public class PlayerDebugGui
         this.orientations = orientations;
         this.blocks = blocks;
         this.admins = admins;
+        this.healths = healths;
+        this.staminas = staminas;
+        this.manas = manas;
     }
 
     /// <summary>
@@ -84,6 +91,8 @@ public class PlayerDebugGui
                 AddComponentRow("World Segment:", playerEntityId, kinematics,
                     x => worldSegmentResolver.GetWorldSegmentForPosition(x.Position).ToString());
 
+                AddVitalsRows(playerEntityId);
+
                 AddBelowBlockInfo(playerEntityId);
 
                 ImGui.EndTable();
@@ -95,6 +104,40 @@ public class PlayerDebugGui
         }
 
         ImGui.End();
+    }
+
+    /// <summary>
+    ///     Adds vitals data rows for the player, if any.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    private void AddVitalsRows(ulong playerEntityId)
+    {
+        if (healths.HasComponentForEntity(playerEntityId))
+        {
+            var health = healths[playerEntityId];
+            AddValueRow("Health Value:", health.Value);
+            AddValueRow("Health Max Value:", health.MaxValue);
+            AddValueRow("Health Change Rate:", health.ChangeRate);
+            AddValueRow("Health Change Interval:", health.ChangeInterval);
+        }
+
+        if (staminas.HasComponentForEntity(playerEntityId))
+        {
+            var stamina = staminas[playerEntityId];
+            AddValueRow("Stamina Value:", stamina.Value);
+            AddValueRow("Stamina Max Value:", stamina.MaxValue);
+            AddValueRow("Stamina Change Rate:", stamina.ChangeRate);
+            AddValueRow("Stamina Change Interval:", stamina.ChangeInterval);
+        }
+
+        if (manas.HasComponentForEntity(playerEntityId))
+        {
+            var mana = manas[playerEntityId];
+            AddValueRow("Mana Value:", mana.Value);
+            AddValueRow("Mana Max Value:", mana.MaxValue);
+            AddValueRow("Mana Change Rate:", mana.ChangeRate);
+            AddValueRow("Mana Change Interval:", mana.ChangeInterval);
+        }
     }
 
     /// <summary>

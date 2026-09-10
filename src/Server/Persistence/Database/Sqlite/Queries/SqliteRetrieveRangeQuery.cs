@@ -35,24 +35,33 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
             EntityTree(id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent, 
                 drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
                 plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius,
-                entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange)
+                entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange,
+                healthValue, healthMaxValue, healthChangeRate, healthChangeInterval,
+                staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
+                manaValue, manaMaxValue, manaChangeRate, manaChangeInterval)
 	        AS (
 	        	SELECT id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
                         drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
                         plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ,
-                        shadowRadius, entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange
+                        shadowRadius, entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange,
+                        healthValue, healthMaxValue, healthChangeRate, healthChangeInterval,
+                        staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
+                        manaValue, manaMaxValue, manaChangeRate, manaChangeInterval
 	        		FROM EntityWithComponents
 	        		WHERE x >= @X1 AND x < @X2
 	        		  AND y >= @Y1 AND y < @Y2
 	        		  AND z >= @Z1 AND z < @Z2
 	        		  AND playerCharacter IS NULL
-	        	UNION ALL
+	        UNION ALL
 	        	SELECT ec.id, ec.template_id, NULL, NULL, NULL, ec.frontTileId, ec.topTileId, ec.playerCharacter, 
                         ec.name, ec.account, ec.parent, ec.drawableX, ec.drawableY, ec.animatedSprite, ec.orientation, ec.admin,
                         ec.castBlockShadows, ec.plsRadius, ec.plsIntensity, ec.plsColor,
                         ec.plsPosX, ec.plsPosY, ec.plsPosZ, ec.physics, ec.bbPosX, ec.bbPosY, ec.bbPosZ,
                         ec.bbSizeX, ec.bbSizeY, ec.bbSizeZ, ec.shadowRadius, ec.entityType, ec.serverOnly,
-                        ec.stackable, ec.quantity, ec.itemUse, ec.npcFlags, ec.useRange
+                        ec.stackable, ec.quantity, ec.itemUse, ec.npcFlags, ec.useRange,
+                        ec.healthValue, ec.healthMaxValue, ec.healthChangeRate, ec.healthChangeInterval,
+                        ec.staminaValue, ec.staminaMaxValue, ec.staminaChangeRate, ec.staminaChangeInterval,
+                        ec.manaValue, ec.manaMaxValue, ec.manaChangeRate, ec.manaChangeInterval
 	        		FROM EntityWithComponents ec, EntityTree et
 	        		WHERE ec.parent = et.id 
                       AND ec.playerCharacter IS NULL
@@ -60,7 +69,10 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
             SELECT id, kv.key, kv.value, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
                 drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
                 plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius,
-                entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange
+                entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange,
+                healthValue, healthMaxValue, healthChangeRate, healthChangeInterval,
+                staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
+                manaValue, manaMaxValue, manaChangeRate, manaChangeInterval
             FROM EntityTree 
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = id
             ORDER BY parent NULLS LAST";

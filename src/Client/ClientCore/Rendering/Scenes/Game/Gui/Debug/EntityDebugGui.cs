@@ -52,7 +52,10 @@ public class EntityDebugGui(
     StackableTagCollection stackable,
     QuantityComponentCollection quantities,
     ItemUseComponentCollection itemUses,
-    UseRangeComponentCollection useRanges)
+    UseRangeComponentCollection useRanges,
+    HealthComponentCollection healths,
+    StaminaComponentCollection staminas,
+    ManaComponentCollection manas)
 {
     private string entityIdInput = "";
 
@@ -136,6 +139,30 @@ public class EntityDebugGui(
                     AddComponentRow("Quantity:", entityId, quantities);
                     AddComponentRow("Item Use:", entityId, itemUses);
                     AddComponentRow("Use Range:", entityId, useRanges);
+                    AddCompoundRows("Health:", entityId, healths,
+                        health =>
+                        {
+                            AddValueRow("Health Value:", health.Value);
+                            AddValueRow("Health Max Value:", health.MaxValue);
+                            AddValueRow("Health Change Rate:", health.ChangeRate);
+                            AddValueRow("Health Change Interval:", health.ChangeInterval);
+                        });
+                    AddCompoundRows("Stamina:", entityId, staminas,
+                        stamina =>
+                        {
+                            AddValueRow("Stamina Value:", stamina.Value);
+                            AddValueRow("Stamina Max Value:", stamina.MaxValue);
+                            AddValueRow("Stamina Change Rate:", stamina.ChangeRate);
+                            AddValueRow("Stamina Change Interval:", stamina.ChangeInterval);
+                        });
+                    AddCompoundRows("Mana:", entityId, manas,
+                        mana =>
+                        {
+                            AddValueRow("Mana Value:", mana.Value);
+                            AddValueRow("Mana Max Value:", mana.MaxValue);
+                            AddValueRow("Mana Change Rate:", mana.ChangeRate);
+                            AddValueRow("Mana Change Interval:", mana.ChangeInterval);
+                        });
                     ImGui.EndTable();
                 }
             }

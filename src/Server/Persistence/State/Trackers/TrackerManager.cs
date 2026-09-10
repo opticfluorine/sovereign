@@ -28,13 +28,16 @@ public sealed class TrackerManager
     private readonly CastBlockShadowsStateTracker castBlockShadowsStateTracker;
     private readonly CastShadowsStateTracker castShadowsStateTracker;
     private readonly EntityTypeStateTracker entityTypeStateTracker;
+    private readonly HealthStateTracker healthStateTracker;
     private readonly ItemUseStateTracker itemUseStateTracker;
+    private readonly ManaStateTracker manaStateTracker;
     private readonly NpcFlagsStateTracker npcFlagsStateTracker;
     private readonly PhysicsStateTracker physicsStateTracker;
     private readonly PointLightSourceStateTracker pointLightSourceStateTracker;
     private readonly QuantityStateTracker quantityStateTracker;
     private readonly ServerOnlyStateTracker serverOnlyStateTracker;
     private readonly StackableStateTracker stackableStateTracker;
+    private readonly StaminaStateTracker staminaStateTracker;
     private readonly TemplateStateTracker templateStateTracker;
     private readonly UseRangeStateTracker useRangeStateTracker;
 
@@ -60,7 +63,10 @@ public sealed class TrackerManager
         QuantityStateTracker quantityStateTracker,
         ItemUseStateTracker itemUseStateTracker,
         NpcFlagsStateTracker npcFlagsStateTracker,
-        UseRangeStateTracker useRangeStateTracker)
+        UseRangeStateTracker useRangeStateTracker,
+        HealthStateTracker healthStateTracker,
+        StaminaStateTracker staminaStateTracker,
+        ManaStateTracker manaStateTracker)
     {
         this.adminStateTracker = adminStateTracker;
         this.templateStateTracker = templateStateTracker;
@@ -76,6 +82,9 @@ public sealed class TrackerManager
         this.itemUseStateTracker = itemUseStateTracker;
         this.npcFlagsStateTracker = npcFlagsStateTracker;
         this.useRangeStateTracker = useRangeStateTracker;
+        this.healthStateTracker = healthStateTracker;
+        this.staminaStateTracker = staminaStateTracker;
+        this.manaStateTracker = manaStateTracker;
         OrientationStateTracker = orientationStateTracker;
         KinematicsStateTracker = kinematicsStateTracker;
         BlockTileStateTracker = blockTileStateTracker;

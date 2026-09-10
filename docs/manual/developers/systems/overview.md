@@ -18,6 +18,7 @@ Core systems are present in both the client and server.
 | `Performance` | `PerformanceSystem` | Responsible for monitoring engine performance.                     |
 | `Ping`        | `PingSystem`        | Responsible for periodic and aperiodic network ping.               |
 | `Time`        | `TimeSystem`        | Responsible for tracking and synchronizing in-game time.           |
+| `Vitals`      | `VitalsSystem`      | Responsible for advancing and managing entity vitals (health, stamina, mana). |
 
 ## Client Systems
 
