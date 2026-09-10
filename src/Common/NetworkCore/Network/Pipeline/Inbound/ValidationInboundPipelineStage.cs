@@ -54,6 +54,7 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         DialogueEventDetailsValidator dialogueValidator,
         DropAtPositionEventDetailsValidator dropAtPositionValidator,
         InventorySwapEventDetailsValidator invSwapValidator,
+        UseItemEventDetailsValidator useItemValidator,
         ILogger<ValidationInboundPipelineStage> logger)
     {
         this.logger = logger;
@@ -90,7 +91,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Inventory_PickUp, entityValidator },
             { EventId.Core_Inventory_Drop, intValidator },
             { EventId.Core_Inventory_DropAtPosition, dropAtPositionValidator },
-            { EventId.Core_Inventory_Swap, invSwapValidator }
+            { EventId.Core_Inventory_Swap, invSwapValidator },
+            { EventId.Core_Inventory_UseItem, useItemValidator }
         };
     }
 

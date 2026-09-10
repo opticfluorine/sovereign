@@ -37,6 +37,7 @@ public class ClientOutboundEventSet : IOutboundEventSet
         EventId.Core_Inventory_Drop,
         EventId.Core_Inventory_DropAtPosition,
         EventId.Core_Inventory_Swap,
+        EventId.Core_Inventory_UseItem,
         EventId.Server_TemplateEntity_Update,
         EventId.Server_WorldEdit_SetBlock,
         EventId.Server_WorldEdit_RemoveBlock,

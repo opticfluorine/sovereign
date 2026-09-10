@@ -51,7 +51,8 @@ public class EntityDebugGui(
     EntityTypeComponentCollection entityTypes,
     StackableTagCollection stackable,
     QuantityComponentCollection quantities,
-    ItemUseComponentCollection itemUses)
+    ItemUseComponentCollection itemUses,
+    UseRangeComponentCollection useRanges)
 {
     private string entityIdInput = "";
 
@@ -134,6 +135,7 @@ public class EntityDebugGui(
                     AddComponentRow("Stackable:", entityId, stackable);
                     AddComponentRow("Quantity:", entityId, quantities);
                     AddComponentRow("Item Use:", entityId, itemUses);
+                    AddComponentRow("Use Range:", entityId, useRanges);
                     ImGui.EndTable();
                 }
             }

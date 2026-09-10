@@ -14,17 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Systems.Inventory;
-
-namespace Sovereign.ClientCore.Systems.Inventory;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Client-side inventory constants.
+///     Details for invoking the interaction callback of a target entity with a tool entity.
+///     Server-internal; never crosses the network.
 /// </summary>
-public static class ClientInventoryConstants
+public sealed class ScriptingInteractEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Number of hotbar slots.
+    ///     Entity using the tool.
     /// </summary>
-    public const int HotbarSlotCount = InventoryConstants.HotbarSlotCount;
+    public ulong ActorEntityId { get; set; }
+
+    /// <summary>
+    ///     Item entity used as the tool.
+    /// </summary>
+    public ulong ToolEntityId { get; set; }
+
+    /// <summary>
+    ///     Entity on which the tool is used.
+    /// </summary>
+    public ulong TargetEntityId { get; set; }
 }

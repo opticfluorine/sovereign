@@ -372,6 +372,12 @@ public interface IPersistenceProvider : IDisposable
 
     IRemoveComponentQuery RemoveNpcFlagsComponentQuery { get; }
 
+    IAddComponentQuery<float> AddUseRangeComponentQuery { get; }
+
+    IModifyComponentQuery<float> ModifyUseRangeComponentQuery { get; }
+
+    IRemoveComponentQuery RemoveUseRangeComponentQuery { get; }
+
     /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>

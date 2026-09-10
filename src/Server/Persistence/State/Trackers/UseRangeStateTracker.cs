@@ -14,17 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Systems.Inventory;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Entities;
+using Sovereign.Persistence.Entities;
 
-namespace Sovereign.ClientCore.Systems.Inventory;
+namespace Sovereign.Persistence.State.Trackers;
 
 /// <summary>
-///     Client-side inventory constants.
+///     State tracker for the UseRange component.
 /// </summary>
-public static class ClientInventoryConstants
+public class UseRangeStateTracker(
+    UseRangeComponentCollection components,
+    ExistingEntitySet existingEntitySet,
+    StateManager stateManager,
+    EntityTable entityTable)
+    : BaseStateTracker<float>(components, 0f, existingEntitySet, stateManager, entityTable)
 {
-    /// <summary>
-    ///     Number of hotbar slots.
-    /// </summary>
-    public const int HotbarSlotCount = InventoryConstants.HotbarSlotCount;
+    protected override void OnStateUpdate(ref StateUpdate<float> update)
+    {
+        stateManager.FrontBuffer.UpdateUseRange(ref update);
+    }
 }

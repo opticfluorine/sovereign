@@ -14,17 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Systems.Inventory;
+using MessagePack;
 
-namespace Sovereign.ClientCore.Systems.Inventory;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Client-side inventory constants.
+///     Details for using an item as a tool on a target entity.
 /// </summary>
-public static class ClientInventoryConstants
+[MessagePackObject]
+public class UseItemEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Number of hotbar slots.
+    ///     Item entity to be used as a tool.
     /// </summary>
-    public const int HotbarSlotCount = InventoryConstants.HotbarSlotCount;
+    [Key(0)]
+    public ulong ToolEntityId { get; set; }
+
+    /// <summary>
+    ///     Entity on which the tool is used.
+    /// </summary>
+    [Key(1)]
+    public ulong TargetEntityId { get; set; }
 }

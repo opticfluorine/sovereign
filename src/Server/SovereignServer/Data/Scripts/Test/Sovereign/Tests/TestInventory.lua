@@ -11,8 +11,11 @@ local s10AddSword3, s11VerifySword3, s12SwapQuantity, s13VerifySwapQuantity
 local s14Merge, s15VerifyMerge
 local s16AddSword4, s17Consume, s18VerifyConsume
 local s19AddShield2, s20RemoveItem, s21VerifyRemove
+local s22AddTool, s23VerifyTool, s24AddPlainItem, s25UseOutOfRange
+local s26UseWithoutUseRange, s27UseInRangeNoKeys
 local actorId, chestAId, chestBId, swordTemplateId, shieldTemplateId
 local sword1, sword2, sword3, sword4, shield1, shield2
+local useItemActor, toolItem, plainItem, interactTarget, farTarget
 
 Test.Async("AddSlotsAndSlotCount")
 
@@ -184,6 +187,46 @@ s21VerifyRemove = function()
     Test.Pass("RemoveItem")
 end
 
+Test.Async("UseItem")
+
+s22AddTool = function()
+    Test.AssertTrue(Inventory.AddItem(useItemActor, toolItem), "AddItem of tool should succeed")
+end
+
+s23VerifyTool = function()
+    Test.Step("UseItem", function()
+        Test.AssertEqual(toolItem, Inventory.GetItem(useItemActor, 1), "tool should be in hotbar slot 1")
+        Test.AssertNear(5.0, Components.UseRange.Get(toolItem), 0.0001, "tool use range")
+        Test.AssertTrue(not Components.UseRange.Exists(sword1),
+            "item should not inherit UseRange from a template that lacks it")
+    end)
+end
+
+s24AddPlainItem = function()
+    Test.AssertTrue(Inventory.AddItem(useItemActor, plainItem), "AddItem of plain item should succeed")
+end
+
+s25UseOutOfRange = function()
+    -- Tool is in the hotbar with a UseRange component, but the target is out of range.
+    -- The use is rejected; this step completes as long as the rejection is graceful.
+    Inventory.UseItem(useItemActor, toolItem, farTarget)
+end
+
+s26UseWithoutUseRange = function()
+    -- The plain item has no UseRange component, so its use is rejected.
+    Inventory.UseItem(useItemActor, plainItem, interactTarget)
+end
+
+s27UseInRangeNoKeys = function()
+    -- In-range use of the tool against a target with no interact keys is a silent no-op.
+    Inventory.UseItem(useItemActor, toolItem, interactTarget)
+    Test.Step("UseItem", function()
+        Test.AssertEqual(toolItem, Inventory.GetItem(useItemActor, 1), "tool should remain in slot 1")
+        Test.AssertEqual(plainItem, Inventory.GetItem(useItemActor, 2), "plain item should remain in slot 2")
+    end)
+    Test.Pass("UseItem")
+end
+
 -- Suite setup. ------------------------------------------------------------------------
 
 -- Fixture creation is deferred to stagger startup across suites; the engine does not
@@ -226,9 +269,47 @@ setup = function()
         }
     })
 
+    useItemActor = Entities.Create({
+        Name = "TestInventoryUseItemActor",
+        EntityType = EntityType.Npc,
+        NonPersistent = true,
+        Kinematics = {
+            Position = { X = 10.5, Y = 0.5, Z = 1.0 },
+            Velocity = { X = 0.0, Y = 0.0, Z = 0.0 }
+        }
+    })
+
+    -- The UseRange spec key exercises the scriptable entity builder action.
+    toolItem = Entities.Create({
+        Template = swordTemplateId,
+        NonPersistent = true,
+        UseRange = 5.0
+    })
+
+    interactTarget = Entities.Create({
+        Name = "TestInventoryInteractTarget",
+        EntityType = EntityType.Npc,
+        NonPersistent = true,
+        Kinematics = {
+            Position = { X = 11.5, Y = 0.5, Z = 1.0 },
+            Velocity = { X = 0.0, Y = 0.0, Z = 0.0 }
+        }
+    })
+
+    farTarget = Entities.Create({
+        Name = "TestInventoryFarTarget",
+        EntityType = EntityType.Npc,
+        NonPersistent = true,
+        Kinematics = {
+            Position = { X = 20.5, Y = 0.5, Z = 1.0 },
+            Velocity = { X = 0.0, Y = 0.0, Z = 0.0 }
+        }
+    })
+
     Inventory.AddSlots(actorId, 8)
     Inventory.AddSlots(chestAId, 4)
     Inventory.AddSlots(chestBId, 4)
+    Inventory.AddSlots(useItemActor, 4)
 
     Scripting.AddTimedCallback(0.4, s1CreateItems)
     Scripting.AddTimedCallback(0.6, s1bVerifySlots)
@@ -252,6 +333,12 @@ setup = function()
     Scripting.AddTimedCallback(4.3, s19AddShield2)
     Scripting.AddTimedCallback(4.5, s20RemoveItem)
     Scripting.AddTimedCallback(4.7, s21VerifyRemove)
+    Scripting.AddTimedCallback(0.9, s22AddTool)
+    Scripting.AddTimedCallback(1.1, s23VerifyTool)
+    Scripting.AddTimedCallback(1.3, s24AddPlainItem)
+    Scripting.AddTimedCallback(1.5, s25UseOutOfRange)
+    Scripting.AddTimedCallback(1.7, s26UseWithoutUseRange)
+    Scripting.AddTimedCallback(1.9, s27UseInRangeNoKeys)
 end
 
 s1CreateItems = function()
@@ -267,6 +354,9 @@ s1CreateItems = function()
     sword4 = Entities.Create({ Template = swordTemplateId, NonPersistent = true })
     shield1 = Entities.Create({ Template = shieldTemplateId, NonPersistent = true })
     shield2 = Entities.Create({ Template = shieldTemplateId, NonPersistent = true })
+
+    -- The plain item has no UseRange component, so it cannot be used as a tool.
+    plainItem = Entities.Create({ Template = swordTemplateId, NonPersistent = true })
 end
 
 Scripting.AddTimedCallback(0.5, setup)

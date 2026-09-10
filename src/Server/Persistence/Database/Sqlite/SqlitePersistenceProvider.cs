@@ -84,6 +84,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const SqliteType NpcFlagsParamType = SqliteType.Integer;
     private const string NpcFlagsParamName = "npc_flags";
 
+    private const SqliteType UseRangeParamType = SqliteType.Real;
+    private const string UseRangeParamName = "use_range";
+
     private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
 
@@ -279,6 +282,12 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         ModifyNpcFlagsComponentQuery =
             new SimpleSqliteModifyComponentQuery<NpcFlag>(NpcFlagsParamName, NpcFlagsParamType, conn);
         RemoveNpcFlagsComponentQuery = new SimpleSqliteRemoveComponentQuery(NpcFlagsParamName, conn);
+
+        // UseRange component.
+        AddUseRangeComponentQuery = new SimpleSqliteAddComponentQuery<float>(UseRangeParamName, UseRangeParamType, conn);
+        ModifyUseRangeComponentQuery =
+            new SimpleSqliteModifyComponentQuery<float>(UseRangeParamName, UseRangeParamType, conn);
+        RemoveUseRangeComponentQuery = new SimpleSqliteRemoveComponentQuery(UseRangeParamName, conn);
     }
 
     public IAddComponentQuery<BlockTile> AddBlockTileQuery { get; }
@@ -356,6 +365,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<NpcFlag> AddNpcFlagsComponentQuery { get; }
     public IModifyComponentQuery<NpcFlag> ModifyNpcFlagsComponentQuery { get; }
     public IRemoveComponentQuery RemoveNpcFlagsComponentQuery { get; }
+    public IAddComponentQuery<float> AddUseRangeComponentQuery { get; }
+    public IModifyComponentQuery<float> ModifyUseRangeComponentQuery { get; }
+    public IRemoveComponentQuery RemoveUseRangeComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

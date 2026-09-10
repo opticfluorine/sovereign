@@ -36,6 +36,7 @@ public sealed class TrackerManager
     private readonly ServerOnlyStateTracker serverOnlyStateTracker;
     private readonly StackableStateTracker stackableStateTracker;
     private readonly TemplateStateTracker templateStateTracker;
+    private readonly UseRangeStateTracker useRangeStateTracker;
 
     public TrackerManager(KinematicsStateTracker kinematicsStateTracker,
         BlockTileStateTracker blockTileStateTracker,
@@ -58,7 +59,8 @@ public sealed class TrackerManager
         StackableStateTracker stackableStateTracker,
         QuantityStateTracker quantityStateTracker,
         ItemUseStateTracker itemUseStateTracker,
-        NpcFlagsStateTracker npcFlagsStateTracker)
+        NpcFlagsStateTracker npcFlagsStateTracker,
+        UseRangeStateTracker useRangeStateTracker)
     {
         this.adminStateTracker = adminStateTracker;
         this.templateStateTracker = templateStateTracker;
@@ -73,6 +75,7 @@ public sealed class TrackerManager
         this.quantityStateTracker = quantityStateTracker;
         this.itemUseStateTracker = itemUseStateTracker;
         this.npcFlagsStateTracker = npcFlagsStateTracker;
+        this.useRangeStateTracker = useRangeStateTracker;
         OrientationStateTracker = orientationStateTracker;
         KinematicsStateTracker = kinematicsStateTracker;
         BlockTileStateTracker = blockTileStateTracker;

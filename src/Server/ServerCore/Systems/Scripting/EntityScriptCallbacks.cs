@@ -110,6 +110,24 @@ public sealed class EntityScriptCallbacks
     }
 
     /// <summary>
+    ///     Invokes the interact callback of the target entity with the using entity ID, tool entity ID,
+    ///     and target entity ID as arguments, in that order.
+    /// </summary>
+    /// <param name="usingEntityId">Entity ID of the entity using the tool.</param>
+    /// <param name="toolEntityId">Tool entity ID.</param>
+    /// <param name="targetEntityId">Target entity ID.</param>
+    public void InvokeInteractCallback(ulong usingEntityId, ulong toolEntityId, ulong targetEntityId)
+    {
+        if (!dataServices.TryGetEntityKeyValue(targetEntityId, EntityConstants.InteractScriptKey,
+                out var scriptName) ||
+            !dataServices.TryGetEntityKeyValue(targetEntityId, EntityConstants.InteractFunctionKey,
+                out var functionName)) return;
+
+        InvokeCallback(targetEntityId, EntityConstants.InteractCallbackName, scriptName, functionName,
+            usingEntityId, toolEntityId, targetEntityId);
+    }
+
+    /// <summary>
     ///     Processes pending soft reload callbacks by firing the unload hook followed by the load hook.
     /// </summary>
     private void ProcessReloadCallbacks()
@@ -125,13 +143,13 @@ public sealed class EntityScriptCallbacks
                     out var unloadScript) &&
                 dataServices.TryGetEntityKeyValue(entityId, EntityConstants.UnloadCallbackFunctionKey,
                     out var unloadFunction))
-                InvokeCallback(entityId, EntityConstants.UnloadCallbackName, unloadScript, unloadFunction);
+                InvokeCallback(entityId, EntityConstants.UnloadCallbackName, unloadScript, unloadFunction, entityId);
 
             if (dataServices.TryGetEntityKeyValue(entityId, EntityConstants.LoadCallbackScriptKey,
                     out var loadScript) &&
                 dataServices.TryGetEntityKeyValue(entityId, EntityConstants.LoadCallbackFunctionKey,
                     out var loadFunction))
-                InvokeCallback(entityId, EntityConstants.LoadCallbackName, loadScript, loadFunction);
+                InvokeCallback(entityId, EntityConstants.LoadCallbackName, loadScript, loadFunction, entityId);
         }
     }
 
@@ -149,7 +167,7 @@ public sealed class EntityScriptCallbacks
             if (!dataServices.TryGetEntityKeyValue(entityId, scriptKey, out var scriptName)) continue;
             if (!dataServices.TryGetEntityKeyValue(entityId, functionKey, out var functionName)) continue;
 
-            InvokeCallback(entityId, callbackName, scriptName, functionName);
+            InvokeCallback(entityId, callbackName, scriptName, functionName, entityId);
         }
     }
 
@@ -169,7 +187,7 @@ public sealed class EntityScriptCallbacks
             if (!dataServices.TryGetEntityKeyValue(templateId, EntityConstants.UnloadCallbackFunctionKey,
                     out var functionName)) continue;
 
-            InvokeCallback(entityId, EntityConstants.UnloadCallbackName, scriptName, functionName);
+            InvokeCallback(entityId, EntityConstants.UnloadCallbackName, scriptName, functionName, entityId);
         }
     }
 
@@ -180,7 +198,9 @@ public sealed class EntityScriptCallbacks
     /// <param name="callbackName">Callback name.</param>
     /// <param name="scriptName">Script name.</param>
     /// <param name="functionName">Function name.</param>
-    private void InvokeCallback(ulong entityId, string callbackName, string scriptName, string functionName)
+    /// <param name="callbackArgs">Arguments passed to the callback.</param>
+    private void InvokeCallback(ulong entityId, string callbackName, string scriptName, string functionName,
+        params ulong[] callbackArgs)
     {
         if (!scriptManager.TryGetHost(scriptName, out var host))
         {
@@ -194,10 +214,11 @@ public sealed class EntityScriptCallbacks
             logger.LogTrace("Calling {CallbackName} callback {ScriptName}::{FunctionName} for entity {EntityId:X}.",
                 callbackName, scriptName, functionName, entityId);
             if (!entityTasks.TryGetValue(entityId, out var prevTask))
-                entityTasks[entityId] = Task.Run(() => RunCallback(callbackName, functionName, host, entityId));
+                entityTasks[entityId] = Task.Run(() =>
+                    RunCallback(callbackName, functionName, host, entityId, callbackArgs));
             else
                 entityTasks[entityId] =
-                    prevTask.ContinueWith(_ => RunCallback(callbackName, functionName, host, entityId));
+                    prevTask.ContinueWith(_ => RunCallback(callbackName, functionName, host, entityId, callbackArgs));
         }
         catch (Exception e)
         {
@@ -213,14 +234,16 @@ public sealed class EntityScriptCallbacks
     /// <param name="functionName">Function name.</param>
     /// <param name="host">Script host.</param>
     /// <param name="entityId">Entity ID.</param>
-    private static void RunCallback(string callbackName, string functionName, LuaHost host, ulong entityId)
+    /// <param name="callbackArgs">Arguments passed to the callback.</param>
+    private static void RunCallback(string callbackName, string functionName, LuaHost host, ulong entityId,
+        ulong[] callbackArgs)
     {
         try
         {
             host.CallNamedFunction(functionName, args =>
             {
-                args.AddLightUserData(entityId);
-                return 1;
+                foreach (var arg in callbackArgs) args.AddLightUserData(arg);
+                return callbackArgs.Length;
             });
         }
         catch (Exception e)

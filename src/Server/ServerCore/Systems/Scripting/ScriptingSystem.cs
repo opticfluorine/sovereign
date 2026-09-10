@@ -69,6 +69,7 @@ internal class ScriptingSystem : ISystem
             EventId.Server_Scripting_ReloadEntity,
             EventId.Server_Scripting_ReloadTemplate,
             EventId.Server_Scripting_RunTests,
+            EventId.Server_Scripting_InteractCallback,
             EventId.Core_Tick,
             EventId.Core_Movement_EntityCollision,
             EventId.Core_Movement_ScheduledStop
@@ -129,6 +130,19 @@ internal class ScriptingSystem : ISystem
                 case EventId.Server_Scripting_RunTests:
                     OnRunTests();
                     break;
+
+                case EventId.Server_Scripting_InteractCallback:
+                {
+                    if (ev.EventDetails is not ScriptingInteractEventDetails details)
+                    {
+                        logger.LogError("Received InteractCallback event without details.");
+                        break;
+                    }
+
+                    entityScriptCallbacks.InvokeInteractCallback(details.ActorEntityId, details.ToolEntityId,
+                        details.TargetEntityId);
+                    break;
+                }
 
                 case EventId.Server_Scripting_TimedCallback:
                 {

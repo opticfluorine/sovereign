@@ -49,7 +49,8 @@ internal sealed class InventorySystem : ISystem
         EventId.Core_Inventory_DropAtPosition,
         EventId.Core_Inventory_Swap,
         EventId.Core_Inventory_AddSlots,
-        EventId.Core_Inventory_RemoveItem
+        EventId.Core_Inventory_RemoveItem,
+        EventId.Core_Inventory_UseItem
     };
 
     public int WorkloadEstimate => 50;
@@ -153,6 +154,18 @@ internal sealed class InventorySystem : ISystem
                     }
 
                     manager.RemoveItem(details.EntityId, details.Value);
+                    break;
+                }
+
+                case EventId.Core_Inventory_UseItem:
+                {
+                    if (ev.EventDetails is not UseItemEventDetails details)
+                    {
+                        logger.LogError("Received UseItem without details.");
+                        break;
+                    }
+
+                    manager.UseItem(ev.FromPlayerId, details.ToolEntityId, details.TargetEntityId);
                     break;
                 }
             }

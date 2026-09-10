@@ -81,3 +81,4 @@ Any component not listed is not supported in any template entities.
 | `PointLightSource` |        | X    |       |
 | `ServerOnly`       |        | X    |       |
 | `Stackable`        |        |      | X     |
+| `UseRange`         |        |      | X     |

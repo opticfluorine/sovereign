@@ -65,6 +65,7 @@ using Sovereign.ClientCore.Systems.Movement;
 using Sovereign.ClientCore.Systems.Network;
 using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.ClientCore.Systems.Player;
+using Sovereign.ClientCore.Systems.Scripting;
 using Sovereign.ClientCore.Timing;
 using Sovereign.ClientCore.Updater;
 using Sovereign.EngineCore.Components;
@@ -75,6 +76,7 @@ using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Resources;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Systems.Movement;
+using Sovereign.EngineCore.Systems.Scripting;
 using Sovereign.EngineCore.Timing;
 using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
@@ -160,6 +162,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<IOutboundEventSet, ClientOutboundEventSet>();
         services.TryAddSingleton<IMovementNotifier, ClientMovementNotifier>();
         services.TryAddSingleton<IMovementZCuller, NullMovementZCuller>();
+        services.TryAddSingleton<IScriptingController, NullScriptingController>();
     }
 
     private static void AddMain(IServiceCollection services)

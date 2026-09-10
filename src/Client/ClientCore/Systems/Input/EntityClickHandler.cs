@@ -34,7 +34,8 @@ public sealed class EntityClickHandler(
     ClientStateServices clientStateServices,
     IInventoryController inventoryController,
     ClientStateController stateController,
-    IEventSender eventSender)
+    IEventSender eventSender,
+    UseRangeComponentCollection useRanges)
 {
     /// <summary>
     ///     Called when an entity is clicked in game.
@@ -43,6 +44,8 @@ public sealed class EntityClickHandler(
     /// <param name="button">Mouse button.</param>
     public void OnEntityClicked(ulong entityId, MouseButton button)
     {
+        if (button == MouseButton.Left && TryUseSelectedTool(entityId)) return;
+
         if (!entityTypes.TryGetValue(entityId, out var entityType)) return;
 
         switch (entityType)
@@ -55,6 +58,25 @@ public sealed class EntityClickHandler(
                 OnNpcClicked(entityId, button);
                 break;
         }
+    }
+
+    /// <summary>
+    ///     Attempts to use the item selected in the hotbar as a tool on the clicked entity. Only
+    ///     succeeds if the selected slot holds an item with a UseRange component.
+    /// </summary>
+    /// <param name="targetEntityId">Entity ID of the clicked entity.</param>
+    /// <returns>true if the use was initiated, false to fall through to other click handling.</returns>
+    private bool TryUseSelectedTool(ulong targetEntityId)
+    {
+        if (!clientStateServices.TryGetSelectedPlayer(out var playerId)) return false;
+
+        var itemId = inventoryServices.GetItem(playerId, clientStateServices.GetSelectedHotbarSlot());
+        if (itemId == 0) return false;
+
+        if (!useRanges.TryGetValue(itemId, out _)) return false;
+
+        inventoryController.UseItem(eventSender, playerId, itemId, targetEntityId);
+        return true;
     }
 
     /// <summary>

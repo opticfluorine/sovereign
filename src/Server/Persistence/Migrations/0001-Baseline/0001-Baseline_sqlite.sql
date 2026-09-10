@@ -107,6 +107,7 @@ CREATE TABLE Entity
     quantity            INTEGER,
     item_use            INTEGER,
     npc_flags           INTEGER,
+    use_range           FLOAT,
     FOREIGN KEY (template_id) REFERENCES Entity (id),
     FOREIGN KEY (parent_id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
@@ -215,7 +216,8 @@ SELECT Entity.id                 AS id,
        Entity.stackable          AS stackable,
        Entity.quantity           AS quantity,
        Entity.item_use           AS itemUse,
-       Entity.npc_flags          AS npcFlags
+       Entity.npc_flags          AS npcFlags,
+       Entity.use_range          AS useRange
 FROM Entity;
 
 

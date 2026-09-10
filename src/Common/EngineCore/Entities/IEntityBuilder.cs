@@ -397,4 +397,18 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutNpcFlags();
+
+    /// <summary>
+    ///     Adds a UseRange component to the entity.
+    /// </summary>
+    /// <param name="useRange">Maximum use distance in world units.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(UseRange))]
+    IEntityBuilder UseRange(float useRange);
+
+    /// <summary>
+    ///     Removes the UseRange component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutUseRange();
 }

@@ -14,17 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Systems.Inventory;
-
-namespace Sovereign.ClientCore.Systems.Inventory;
+namespace Sovereign.EngineCore.Systems.Inventory;
 
 /// <summary>
-///     Client-side inventory constants.
+///     Inventory constants shared by the client and server.
 /// </summary>
-public static class ClientInventoryConstants
+public static class InventoryConstants
 {
     /// <summary>
-    ///     Number of hotbar slots.
+    ///     Number of hotbar slots at the front of an inventory.
     /// </summary>
-    public const int HotbarSlotCount = InventoryConstants.HotbarSlotCount;
+    public const int HotbarSlotCount = 10;
 }

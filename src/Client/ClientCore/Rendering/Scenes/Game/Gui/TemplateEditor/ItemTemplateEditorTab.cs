@@ -59,6 +59,8 @@ public class ItemTemplateEditorTab
     private readonly TemplateEntityDataClient templateEntityDataClient;
 
     private bool initialized;
+    private float inputUseRange;
+    private bool inputUseRangeEnabled;
     private EntityDefinition selectedDefinition = new();
     private ulong selectedEntityId;
     private int selectedIndex;
@@ -253,6 +255,19 @@ public class ItemTemplateEditorTab
         var stackable = selectedDefinition.Stackable;
         ImGui.Checkbox("##stackable", ref stackable);
         selectedDefinition.Stackable = stackable;
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Usable:");
+        ImGui.TableNextColumn();
+        ImGui.Checkbox("##useRangeEnabled", ref inputUseRangeEnabled);
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Use Range:");
+        ImGui.TableNextColumn();
+        ImGui.BeginDisabled(!inputUseRangeEnabled);
+        ImGui.InputFloat("##useRange", ref inputUseRange, 0.1f, 1.0f, "%.2f");
+        ImGui.EndDisabled();
+
         ImGui.EndTable();
 
         ImGui.Text("Item Use:");
@@ -377,6 +392,7 @@ public class ItemTemplateEditorTab
     /// <param name="entityData">Entity key-value data.</param>
     private void Save(EntityDefinition definition, Dictionary<string, string> entityData)
     {
+        selectedDefinition.UseRange = inputUseRangeEnabled ? inputUseRange : null;
         templateEntityDataClient.SetTemplateEntity(definition, entityData);
     }
 
@@ -400,6 +416,13 @@ public class ItemTemplateEditorTab
             selectedEntityId = sortedTemplateEntityIds[index];
             selectedDefinition = definitionGenerator.GenerateDefinition(selectedEntityId);
             entityDataControlGroup.SelectEntity(selectedEntityId);
+            inputUseRangeEnabled = selectedDefinition.UseRange.HasValue;
+            inputUseRange = selectedDefinition.UseRange ?? 0f;
+        }
+        else
+        {
+            inputUseRangeEnabled = false;
+            inputUseRange = 0f;
         }
     }
 

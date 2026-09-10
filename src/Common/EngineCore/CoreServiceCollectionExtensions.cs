@@ -137,6 +137,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<QuantityComponentCollection>();
         services.TryAddComponentCollection<ItemUseComponentCollection>();
         services.TryAddComponentCollection<NpcFlagsComponentCollection>();
+        services.TryAddComponentCollection<UseRangeComponentCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)
@@ -213,6 +214,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<DialogueEventDetailsValidator>();
         services.TryAddSingleton<DropAtPositionEventDetailsValidator>();
         services.TryAddSingleton<InventorySwapEventDetailsValidator>();
+        services.TryAddSingleton<UseItemEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)

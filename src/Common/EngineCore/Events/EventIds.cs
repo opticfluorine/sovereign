@@ -383,6 +383,12 @@ public enum EventId
     /// Associated details:
     Core_Inventory_MergeStacks = 1306,
 
+    /// <summary>
+    ///     Event sent to use the item selected in the player's hotbar as a tool on a target entity.
+    /// </summary>
+    /// Associated details: UseItemEventDetails
+    Core_Inventory_UseItem = 1307,
+
     #endregion Inventory
 
     #endregion Core
@@ -777,6 +783,13 @@ public enum EventId
     /// </summary>
     /// Associated details: None
     Server_Scripting_RunTests = 200706,
+
+    /// <summary>
+    ///     Requests that the interaction callback of a target entity be invoked with a tool entity.
+    ///     Server-internal; never crosses the network.
+    /// </summary>
+    /// Associated details: ScriptingInteractEventDetails
+    Server_Scripting_InteractCallback = 200707,
 
     #endregion Server_Scripting
 
