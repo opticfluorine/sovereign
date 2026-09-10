@@ -21,11 +21,14 @@ namespace Sovereign.EngineCore.Components;
 
 public class TestBaseComponentCollection
 {
+    private const ulong TemplateId = 0x7ffe000000000001;
+    private const ulong EntityId = 0x7fff000000000001;
+
+    private readonly EntityTable entityTable = new();
     private readonly BaseComponentCollection<int> collection;
 
     public TestBaseComponentCollection()
     {
-        var entityTable = new EntityTable();
         var entityNotifier = new EntityNotifier();
         var componentManager = new ComponentManager(entityNotifier);
         collection =
@@ -363,6 +366,104 @@ public class TestBaseComponentCollection
 
         Assert.False(collection.HasComponentForEntity(entityId1));
         Assert.False(collection.HasComponentForEntity(entityId2));
+    }
+
+    [Fact]
+    public void ModifyComponent_Add_CreatesLocalComponentFromTemplateValue()
+    {
+        RegisterTemplateInheritance();
+        collection.AddComponent(TemplateId, 42);
+        collection.ApplyComponentUpdates();
+
+        collection.ModifyComponent(EntityId, ComponentOperation.Add, 10);
+        collection.ApplyComponentUpdates();
+
+        Assert.Equal(52, collection[EntityId]);
+        Assert.True(collection.HasLocalComponentForEntity(EntityId));
+        Assert.Equal(42, collection[TemplateId]);
+    }
+
+    [Fact]
+    public void ModifyComponent_Set_CreatesLocalComponentFromTemplateValue()
+    {
+        RegisterTemplateInheritance();
+        collection.AddComponent(TemplateId, 42);
+        collection.ApplyComponentUpdates();
+
+        collection.ModifyComponent(EntityId, ComponentOperation.Set, 7);
+        collection.ApplyComponentUpdates();
+
+        Assert.Equal(7, collection[EntityId]);
+        Assert.True(collection.HasLocalComponentForEntity(EntityId));
+        Assert.Equal(42, collection[TemplateId]);
+    }
+
+    [Fact]
+    public void ModifyComponent_MultipleModificationsInTick_CreateSingleLocalComponent()
+    {
+        RegisterTemplateInheritance();
+        collection.AddComponent(TemplateId, 42);
+        collection.ApplyComponentUpdates();
+
+        collection.ModifyComponent(EntityId, ComponentOperation.Add, 3);
+        collection.ModifyComponent(EntityId, ComponentOperation.Multiply, 2);
+        collection.ApplyComponentUpdates();
+
+        Assert.Equal(90, collection[EntityId]);
+        Assert.True(collection.HasLocalComponentForEntity(EntityId));
+        Assert.Equal(42, collection[TemplateId]);
+    }
+
+    [Fact]
+    public void ModifyComponent_FiresModifiedEventForLocalCopy()
+    {
+        RegisterTemplateInheritance();
+        collection.AddComponent(TemplateId, 42);
+        collection.ApplyComponentUpdates();
+
+        var modifiedEntityIds = new List<ulong>();
+        var modifiedValues = new List<int>();
+        collection.OnComponentModified += (entityId, value) =>
+        {
+            modifiedEntityIds.Add(entityId);
+            modifiedValues.Add(value);
+        };
+
+        collection.ModifyComponent(EntityId, ComponentOperation.Set, 7);
+        collection.ApplyComponentUpdates();
+
+        Assert.Equal(EntityId, Assert.Single(modifiedEntityIds));
+        Assert.Equal(7, Assert.Single(modifiedValues));
+    }
+
+    [Fact]
+    public void ModifyComponent_NoEffectIfNoComponent()
+    {
+        ulong entityId = 1;
+
+        collection.ModifyComponent(entityId, ComponentOperation.Add, 10);
+        collection.ApplyComponentUpdates();
+
+        Assert.False(collection.HasComponentForEntity(entityId));
+    }
+
+    [Fact]
+    public void ModifyComponent_NoEffectIfTemplateLacksComponent()
+    {
+        RegisterTemplateInheritance();
+
+        collection.ModifyComponent(EntityId, ComponentOperation.Add, 10);
+        collection.ApplyComponentUpdates();
+
+        Assert.False(collection.HasLocalComponentForEntity(EntityId));
+        Assert.False(collection.HasComponentForEntity(EntityId));
+    }
+
+    private void RegisterTemplateInheritance()
+    {
+        entityTable.Add(TemplateId, 0, false, false, false);
+        entityTable.Add(EntityId, TemplateId, false, false, false);
+        entityTable.UpdateAllEntities();
     }
 
     private class DummyComponentCollection<T> : BaseComponentCollection<T> where T : notnull
