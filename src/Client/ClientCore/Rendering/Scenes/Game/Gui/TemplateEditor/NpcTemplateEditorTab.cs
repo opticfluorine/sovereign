@@ -270,6 +270,15 @@ public class NpcTemplateEditorTab
         if (!ImGui.CollapsingHeader("Stats", ImGuiTreeNodeFlags.DefaultOpen)) return;
         if (!ImGui.BeginTable("Stats", 2, ImGuiTableFlags.SizingFixedFit)) return;
 
+        var statsEnabled = selectedDefinition.Stats.HasValue;
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Enabled:");
+        ImGui.TableNextColumn();
+        ImGui.Checkbox("##statsEnabled", ref statsEnabled);
+
+        ImGui.BeginDisabled(!statsEnabled);
+
         var stats = selectedDefinition.Stats ?? default;
 
         ImGui.TableNextColumn();
@@ -307,7 +316,9 @@ public class NpcTemplateEditorTab
         ImGui.TableNextColumn();
         ImGui.InputInt("##statsLuck", ref stats.Luck);
 
-        selectedDefinition.Stats = stats;
+        ImGui.EndDisabled();
+
+        selectedDefinition.Stats = statsEnabled ? stats : null;
 
         ImGui.EndTable();
     }
