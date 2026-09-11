@@ -38,6 +38,7 @@ public sealed class TrackerManager
     private readonly ServerOnlyStateTracker serverOnlyStateTracker;
     private readonly StackableStateTracker stackableStateTracker;
     private readonly StaminaStateTracker staminaStateTracker;
+    private readonly StatsStateTracker statsStateTracker;
     private readonly TemplateStateTracker templateStateTracker;
     private readonly UseRangeStateTracker useRangeStateTracker;
 
@@ -66,7 +67,8 @@ public sealed class TrackerManager
         UseRangeStateTracker useRangeStateTracker,
         HealthStateTracker healthStateTracker,
         StaminaStateTracker staminaStateTracker,
-        ManaStateTracker manaStateTracker)
+        ManaStateTracker manaStateTracker,
+        StatsStateTracker statsStateTracker)
     {
         this.adminStateTracker = adminStateTracker;
         this.templateStateTracker = templateStateTracker;
@@ -85,6 +87,7 @@ public sealed class TrackerManager
         this.healthStateTracker = healthStateTracker;
         this.staminaStateTracker = staminaStateTracker;
         this.manaStateTracker = manaStateTracker;
+        this.statsStateTracker = statsStateTracker;
         OrientationStateTracker = orientationStateTracker;
         KinematicsStateTracker = kinematicsStateTracker;
         BlockTileStateTracker = blockTileStateTracker;

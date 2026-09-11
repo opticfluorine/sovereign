@@ -41,6 +41,7 @@ public class PlayerDebugGui
     private readonly OrientationComponentCollection orientations;
     private readonly PlayerCharacterTagCollection players;
     private readonly StaminaComponentCollection staminas;
+    private readonly StatsComponentCollection stats;
     private readonly ClientStateServices stateServices;
     private readonly WorldSegmentResolver worldSegmentResolver;
 
@@ -50,7 +51,7 @@ public class PlayerDebugGui
         DrawableComponentCollection drawables, PlayerCharacterTagCollection players,
         OrientationComponentCollection orientations, BlockGridPositionIndexer blocks,
         AdminTagCollection admins, HealthComponentCollection healths, StaminaComponentCollection staminas,
-        ManaComponentCollection manas)
+        ManaComponentCollection manas, StatsComponentCollection stats)
     {
         this.stateServices = stateServices;
         this.names = names;
@@ -65,6 +66,7 @@ public class PlayerDebugGui
         this.healths = healths;
         this.staminas = staminas;
         this.manas = manas;
+        this.stats = stats;
     }
 
     /// <summary>
@@ -92,6 +94,8 @@ public class PlayerDebugGui
                     x => worldSegmentResolver.GetWorldSegmentForPosition(x.Position).ToString());
 
                 AddVitalsRows(playerEntityId);
+
+                AddStatsRows(playerEntityId);
 
                 AddBelowBlockInfo(playerEntityId);
 
@@ -138,6 +142,24 @@ public class PlayerDebugGui
             AddValueRow("Mana Change Rate:", mana.ChangeRate);
             AddValueRow("Mana Change Interval:", mana.ChangeInterval);
         }
+    }
+
+    /// <summary>
+    ///     Adds stats data rows for the player, if any.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    private void AddStatsRows(ulong playerEntityId)
+    {
+        if (!stats.HasComponentForEntity(playerEntityId)) return;
+
+        var s = stats[playerEntityId];
+        AddValueRow("Strength:", s.Strength);
+        AddValueRow("Defense:", s.Defense);
+        AddValueRow("Agility:", s.Agility);
+        AddValueRow("Intelligence:", s.Intelligence);
+        AddValueRow("Wisdom:", s.Wisdom);
+        AddValueRow("Charisma:", s.Charisma);
+        AddValueRow("Luck:", s.Luck);
     }
 
     /// <summary>

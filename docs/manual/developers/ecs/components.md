@@ -32,6 +32,7 @@ Core components are available in both the client and server.
 | `Quantity`         | `QuantityComponentCollection`         | For items that are also `Stackable`, specifies the quantity of items in the stack.              |
 | `ServerOnly`       | `ServerOnlyComponentCollection`       | Specifies that the entity is server-only and should not be shared with players (except admins). |
 | `Stackable`        | `StackableTagCollection`              | Specifies that an item may be stacked.                                                          |
+| `Stats`            | `StatsComponentCollection`            | For players and NPCs, specifies the basic statistics (e.g. Strength, Luck).                     |
 | `UseRange`         | `UseRangeComponentCollection`         | For items, specifies the maximum tool use distance in world units.                              |
 
 ## Client Components

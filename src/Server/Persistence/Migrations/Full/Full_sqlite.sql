@@ -120,6 +120,13 @@ CREATE TABLE Entity
     mana_max_value      INTEGER,
     mana_change_rate    INTEGER,
     mana_change_interval INTEGER,
+    stats_strength      INTEGER,
+    stats_defense       INTEGER,
+    stats_agility       INTEGER,
+    stats_intelligence  INTEGER,
+    stats_wisdom        INTEGER,
+    stats_charisma      INTEGER,
+    stats_luck          INTEGER,
     FOREIGN KEY (template_id) REFERENCES Entity (id),
     FOREIGN KEY (parent_id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
@@ -241,7 +248,14 @@ SELECT Entity.id                 AS id,
        Entity.mana_value         AS manaValue,
        Entity.mana_max_value     AS manaMaxValue,
        Entity.mana_change_rate   AS manaChangeRate,
-       Entity.mana_change_interval AS manaChangeInterval
+       Entity.mana_change_interval AS manaChangeInterval,
+       Entity.stats_strength     AS statsStrength,
+       Entity.stats_defense      AS statsDefense,
+       Entity.stats_agility      AS statsAgility,
+       Entity.stats_intelligence AS statsIntelligence,
+       Entity.stats_wisdom       AS statsWisdom,
+       Entity.stats_charisma     AS statsCharisma,
+       Entity.stats_luck         AS statsLuck
 FROM Entity;
 
 

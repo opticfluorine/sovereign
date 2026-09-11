@@ -38,7 +38,8 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                 entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange,
                 healthValue, healthMaxValue, healthChangeRate, healthChangeInterval,
                 staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
-                manaValue, manaMaxValue, manaChangeRate, manaChangeInterval)
+                manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
+                statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck)
 	        AS (
 	        	SELECT id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
                         drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
@@ -46,7 +47,8 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                         shadowRadius, entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange,
                         healthValue, healthMaxValue, healthChangeRate, healthChangeInterval,
                         staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
-                        manaValue, manaMaxValue, manaChangeRate, manaChangeInterval
+                        manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
+                        statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck
 	        		FROM EntityWithComponents
 	        		WHERE x >= @X1 AND x < @X2
 	        		  AND y >= @Y1 AND y < @Y2
@@ -61,7 +63,8 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                         ec.stackable, ec.quantity, ec.itemUse, ec.npcFlags, ec.useRange,
                         ec.healthValue, ec.healthMaxValue, ec.healthChangeRate, ec.healthChangeInterval,
                         ec.staminaValue, ec.staminaMaxValue, ec.staminaChangeRate, ec.staminaChangeInterval,
-                        ec.manaValue, ec.manaMaxValue, ec.manaChangeRate, ec.manaChangeInterval
+                        ec.manaValue, ec.manaMaxValue, ec.manaChangeRate, ec.manaChangeInterval,
+                        ec.statsStrength, ec.statsDefense, ec.statsAgility, ec.statsIntelligence, ec.statsWisdom, ec.statsCharisma, ec.statsLuck
 	        		FROM EntityWithComponents ec, EntityTree et
 	        		WHERE ec.parent = et.id 
                       AND ec.playerCharacter IS NULL
@@ -72,7 +75,8 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                 entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange,
                 healthValue, healthMaxValue, healthChangeRate, healthChangeInterval,
                 staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
-                manaValue, manaMaxValue, manaChangeRate, manaChangeInterval
+                manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
+                statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck
             FROM EntityTree 
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = id
             ORDER BY parent NULLS LAST";

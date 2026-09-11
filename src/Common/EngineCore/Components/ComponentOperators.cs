@@ -236,4 +236,26 @@ public static class ComponentOperators
                 (a, b) => a with { ChangeRate = b.ChangeRate, ChangeInterval = b.ChangeInterval }
             }
         };
+
+    /// <summary>
+    ///     Standard operators for Stats-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<Stats, Stats, Stats>>
+        StatsOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b },
+            {
+                ComponentOperation.Add,
+                (a, b) => a with
+                {
+                    Strength = a.Strength + b.Strength,
+                    Defense = a.Defense + b.Defense,
+                    Agility = a.Agility + b.Agility,
+                    Intelligence = a.Intelligence + b.Intelligence,
+                    Wisdom = a.Wisdom + b.Wisdom,
+                    Charisma = a.Charisma + b.Charisma,
+                    Luck = a.Luck + b.Luck
+                }
+            }
+        };
 }

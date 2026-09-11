@@ -83,6 +83,13 @@ public sealed class EntityProcessor
     private const int IndexManaMaxValue = IndexManaValue + 1;
     private const int IndexManaChangeRate = IndexManaMaxValue + 1;
     private const int IndexManaChangeInterval = IndexManaChangeRate + 1;
+    private const int IndexStatsStrength = IndexManaChangeInterval + 1;
+    private const int IndexStatsDefense = IndexStatsStrength + 1;
+    private const int IndexStatsAgility = IndexStatsDefense + 1;
+    private const int IndexStatsIntelligence = IndexStatsAgility + 1;
+    private const int IndexStatsWisdom = IndexStatsIntelligence + 1;
+    private const int IndexStatsCharisma = IndexStatsWisdom + 1;
+    private const int IndexStatsLuck = IndexStatsCharisma + 1;
     private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
     private readonly ExistingEntitySet existingEntitySet;
@@ -160,6 +167,7 @@ public sealed class EntityProcessor
             ProcessHealth(reader, builder);
             ProcessStamina(reader, builder);
             ProcessMana(reader, builder);
+            ProcessStats(reader, builder);
 
             /* Complete the entity. */
             builder.Build();
@@ -493,6 +501,26 @@ public sealed class EntityProcessor
         if (reader.IsDBNull(IndexManaValue)) return;
         builder.Mana(GetVital(reader, IndexManaValue, IndexManaMaxValue, IndexManaChangeRate,
             IndexManaChangeInterval));
+    }
+
+    /// <summary>
+    ///     Processes the Stats component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessStats(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexStatsStrength)) return;
+        builder.Stats(new Stats
+        {
+            Strength = reader.GetInt32(IndexStatsStrength),
+            Defense = reader.GetInt32(IndexStatsDefense),
+            Agility = reader.GetInt32(IndexStatsAgility),
+            Intelligence = reader.GetInt32(IndexStatsIntelligence),
+            Wisdom = reader.GetInt32(IndexStatsWisdom),
+            Charisma = reader.GetInt32(IndexStatsCharisma),
+            Luck = reader.GetInt32(IndexStatsLuck)
+        });
     }
 
     /// <summary>

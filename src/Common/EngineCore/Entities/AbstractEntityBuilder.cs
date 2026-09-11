@@ -58,6 +58,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly ServerOnlyTagCollection serverOnly;
     private readonly StackableTagCollection stackables;
     private readonly StaminaComponentCollection staminas;
+    private readonly StatsComponentCollection stats;
     private readonly UseRangeComponentCollection useRanges;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
@@ -94,6 +95,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         HealthComponentCollection healths,
         StaminaComponentCollection staminas,
         ManaComponentCollection manas,
+        StatsComponentCollection stats,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -125,6 +127,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.healths = healths;
         this.staminas = staminas;
         this.manas = manas;
+        this.stats = stats;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -511,6 +514,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutMana()
     {
         manas.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder Stats(Stats stats)
+    {
+        this.stats.AddOrUpdateComponent(entityId, stats, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutStats()
+    {
+        this.stats.RemoveComponent(entityId, load);
         return this;
     }
 

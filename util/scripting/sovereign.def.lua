@@ -57,6 +57,7 @@ EntityEventDetails = {}
 ---@field Quantity integer? Optional. Quantity of a stackable item.
 ---@field ServerOnly boolean? Optional. Whether entity is server-only.
 ---@field Stackable boolean? Optional. Whether entity is stackable.
+---@field Stats Stats? Optional. Stats for players and NPCs.
 EntitySpecification = {}
 
 ---Integer-valued 3D vector type.
@@ -85,6 +86,17 @@ PointLight = {}
 ---@class Shadow
 ---@field Radius number Radius of the shadow in world units when the entity is at the same Z as the cast shadow.
 Shadow = {}
+
+---Describes the basic statistics of a player or NPC.
+---@class Stats
+---@field Strength integer Physical strength of the entity.
+---@field Defense integer Physical defense of the entity.
+---@field Agility integer Agility of the entity.
+---@field Intelligence integer Intelligence of the entity.
+---@field Wisdom integer Wisdom of the entity.
+---@field Charisma integer Charisma of the entity.
+---@field Luck integer Luck of the entity.
+Stats = {}
 
 ---2D vector type.
 ---@class Vector2
@@ -596,6 +608,30 @@ Components.Stackable.Remove = function (entityId) end
 ---@param entityId integer Entity ID.
 ---@param value boolean Value.
 Components.Stackable.Set = function (entityId, value) end
+
+---Stats component.
+---@class Components.Stats
+Components.Stats = {}
+---Checks whether the component exists for an entity.
+---@param entityId integer Entity ID.
+---@return boolean true if exists, false otherwise.
+Components.Stats.Exists = function (entityId) end
+---Gets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param lookback boolean? If true, enable lookback at components from the last tick.
+---@return Stats?
+Components.Stats.Get = function(entityId, lookback) end
+---Removes the component for the entity if it exists.
+---@param entityId integer Entity ID.
+Components.Stats.Remove = function (entityId) end
+---Sets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param value Stats Value.
+Components.Stats.Set = function (entityId, value) end
+---Adds the given value to the component fieldwise.
+---@param entityId integer Entity ID.
+---@param value Stats Value to add.
+Components.Stats.Add = function (entityId, value) end
 
 ---NpcFlags component.
 ---@class Components.NpcFlags

@@ -159,6 +159,11 @@ public enum ComponentType
     /// </summary>
     Mana = 0x001B,
 
+    /// <summary>
+    ///     Stats component.
+    /// </summary>
+    Stats = 0x001C,
+
     #endregion Common
 
     #region Client

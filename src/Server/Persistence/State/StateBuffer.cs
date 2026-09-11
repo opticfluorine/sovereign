@@ -126,6 +126,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<Vital>> manaUpdates = new(BufferSize);
 
     /// <summary>
+    ///     Stats state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<Stats>> statsUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Name component updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<string>> nameUpdates = new(BufferSize);
@@ -445,6 +450,15 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Queues a Stats update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateStats(ref StateUpdate<Stats> update)
+    {
+        statsUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -498,6 +512,7 @@ public sealed class StateBuffer
         healthUpdates.Clear();
         staminaUpdates.Clear();
         manaUpdates.Clear();
+        statsUpdates.Clear();
     }
 
     /// <summary>
@@ -693,6 +708,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddManaComponentQuery,
                     persistenceProvider.ModifyManaComponentQuery,
                     persistenceProvider.RemoveManaComponentQuery,
+                    transaction);
+
+                // Stats.
+                SynchronizeComponent(statsUpdates,
+                    persistenceProvider.AddStatsComponentQuery,
+                    persistenceProvider.ModifyStatsComponentQuery,
+                    persistenceProvider.RemoveStatsComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

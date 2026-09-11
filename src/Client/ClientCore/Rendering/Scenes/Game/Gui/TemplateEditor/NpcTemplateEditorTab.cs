@@ -237,6 +237,7 @@ public class NpcTemplateEditorTab
         appearanceControlGroup.Render(selectedDefinition);
         behaviorControlGroup.Render(selectedDefinition);
         RenderNpcFlags();
+        RenderStats();
         entityDataControlGroup.Render();
 
         ImGui.EndTable();
@@ -258,6 +259,67 @@ public class NpcTemplateEditorTab
         ImGui.Checkbox("##chest", ref chest);
         if (chest) selectedDefinition.NpcFlags |= NpcFlag.Chest;
         else selectedDefinition.NpcFlags &= ~NpcFlag.Chest;
+        ImGui.EndTable();
+    }
+
+    /// <summary>
+    ///     Renders the Stats component controls.
+    /// </summary>
+    private void RenderStats()
+    {
+        if (!ImGui.CollapsingHeader("Stats", ImGuiTreeNodeFlags.DefaultOpen)) return;
+        if (!ImGui.BeginTable("Stats", 2, ImGuiTableFlags.SizingFixedFit)) return;
+
+        var statsEnabled = selectedDefinition.Stats.HasValue;
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Enabled:");
+        ImGui.TableNextColumn();
+        ImGui.Checkbox("##statsEnabled", ref statsEnabled);
+
+        ImGui.BeginDisabled(!statsEnabled);
+
+        var stats = selectedDefinition.Stats ?? default;
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Strength:");
+        ImGui.TableNextColumn();
+        ImGui.InputInt("##statsStrength", ref stats.Strength);
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Defense:");
+        ImGui.TableNextColumn();
+        ImGui.InputInt("##statsDefense", ref stats.Defense);
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Agility:");
+        ImGui.TableNextColumn();
+        ImGui.InputInt("##statsAgility", ref stats.Agility);
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Intelligence:");
+        ImGui.TableNextColumn();
+        ImGui.InputInt("##statsIntelligence", ref stats.Intelligence);
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Wisdom:");
+        ImGui.TableNextColumn();
+        ImGui.InputInt("##statsWisdom", ref stats.Wisdom);
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Charisma:");
+        ImGui.TableNextColumn();
+        ImGui.InputInt("##statsCharisma", ref stats.Charisma);
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Luck:");
+        ImGui.TableNextColumn();
+        ImGui.InputInt("##statsLuck", ref stats.Luck);
+
+        ImGui.EndDisabled();
+
+        selectedDefinition.Stats = statsEnabled ? stats : null;
+
         ImGui.EndTable();
     }
 

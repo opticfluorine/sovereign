@@ -4,6 +4,10 @@
 
 ### September
 
+#### 11 September 2026
+
+* Add new common, scriptable `Stats` component for players and NPCs with the new `Stats` value type (`Strength`, `Defense`, `Agility`, `Intelligence`, `Wisdom`, `Charisma`, `Luck`). The component is exposed to scripts as `Components.Stats` and as a `Stats` key in the `Entities.Create` spec table, and is persisted to the database. NPC templates may now specify Stats in the template editor.
+
 #### 10 September 2026
 
 * Add new common, scriptable `Health`, `Stamina`, and `Mana` components that share the new `Vital` value type (`Value`, `MaxValue`, `ChangeRate`, `ChangeInterval`). The components are exposed to scripts as `Components.Health`, `Components.Stamina`, and `Components.Mana` and as spec keys in the `Entities.Create` table.
