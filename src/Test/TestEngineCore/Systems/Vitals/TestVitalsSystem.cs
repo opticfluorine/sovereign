@@ -63,7 +63,7 @@ public class TestVitalsSystem
         var vitalsController = new VitalsController();
         var movementController = new MovementController();
         var deathHandler = new EntityDeathHandler(entityTypes, healths, entityManager, vitalsController,
-            movementController, mockEventSender.Object);
+            movementController, mockEventSender.Object, Mock.Of<ILogger<EntityDeathHandler>>());
         eventHandler = new VitalsEventHandler(deathHandler, healths, staminas, manas,
             Mock.Of<ILogger<VitalsEventHandler>>());
         system = new VitalsSystem(eventCommunicator, new Mock<IEventLoop>().Object, eventHandler,

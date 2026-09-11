@@ -129,14 +129,14 @@ public class VitalsSystem : ISystem
                 and <= EntityConstants.LastTemplateEntityId)
                 continue;
 
-            var vital = componentList[i];
-            if (vital.ChangeInterval > 0 && tickCount % vital.ChangeInterval == 0)
-                vital.Value += vital.ChangeRate;
-            if (vital.Value > vital.MaxValue) vital.Value = vital.MaxValue;
-            if (vital.Value < 0) vital.Value = 0;
-            if (isHealth && vital.Value == 0) eventHandler.ZeroHealthEntities.Add(entityId);
+            var value = componentList[i].Value;
+            if (componentList[i].ChangeInterval > 0 && tickCount % componentList[i].ChangeInterval == 0)
+                value += componentList[i].ChangeRate;
+            if (value > componentList[i].MaxValue) value = componentList[i].MaxValue;
+            if (value < 0) value = 0;
+            if (isHealth && value == 0) eventHandler.ZeroHealthEntities.Add(entityId);
 
-            componentList[i] = vital;
+            componentList[i].Value = value;
             modifiedIndices[modCount++] = i;
         }
 

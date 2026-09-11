@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
@@ -106,12 +105,6 @@ public class VitalsEventHandler
     /// <param name="details">Change details.</param>
     private void HandleChangeVitals(ChangeVitalsEventDetails details)
     {
-        if (!Enum.IsDefined(typeof(VitalType), details.Vital))
-        {
-            logger.LogError("Received ChangeVitals event with undefined vital type.");
-            return;
-        }
-
         BaseComponentCollection<Vital>? collection = details.Vital switch
         {
             VitalType.Health => healths,

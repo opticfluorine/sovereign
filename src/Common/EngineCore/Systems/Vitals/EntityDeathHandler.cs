@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
@@ -32,7 +33,8 @@ public class EntityDeathHandler(
     EntityManager entityManager,
     VitalsController vitalsController,
     MovementController movementController,
-    IEventSender eventSender)
+    IEventSender eventSender,
+    ILogger<EntityDeathHandler> logger)
 {
     /// <summary>
     ///     Handles the death of the given entity.
@@ -53,6 +55,8 @@ public class EntityDeathHandler(
     /// <param name="entityId">Entity ID of the dead player.</param>
     private void HandlePlayerDeath(ulong entityId)
     {
+        logger.LogInformation("Player {EntityId} died; respawning at spawn point.", entityId);
+
         // TODO Select per-player spawn point.
         var spawnPoint = new Vector3(0, 0, 1);
 

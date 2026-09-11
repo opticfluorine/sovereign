@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Events.Details.Validators;
@@ -27,6 +26,10 @@ public class ChangeVitalsEventDetailsValidator : IEventDetailsValidator
     public bool IsValid(IEventDetails? details)
     {
         if (details is not ChangeVitalsEventDetails changeVitalsDetails) return false;
-        return Enum.IsDefined(typeof(VitalType), changeVitalsDetails.Vital);
+        return changeVitalsDetails.Vital switch
+        {
+            VitalType.Health or VitalType.Stamina or VitalType.Mana => true,
+            _ => false
+        };
     }
 }
