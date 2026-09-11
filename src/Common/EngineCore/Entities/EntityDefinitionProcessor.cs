@@ -179,6 +179,11 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutMana();
 
+        if (definition.Stats.HasValue)
+            builder.Stats(definition.Stats.Value);
+        else
+            builder.WithoutStats();
+
         var entityId = builder.Build();
         logger.LogDebug("Processed entity ID {Id:X}.", entityId);
     }

@@ -55,7 +55,8 @@ public class EntityDebugGui(
     UseRangeComponentCollection useRanges,
     HealthComponentCollection healths,
     StaminaComponentCollection staminas,
-    ManaComponentCollection manas)
+    ManaComponentCollection manas,
+    StatsComponentCollection stats)
 {
     private string entityIdInput = "";
 
@@ -162,6 +163,17 @@ public class EntityDebugGui(
                             AddValueRow("Mana Max Value:", mana.MaxValue);
                             AddValueRow("Mana Change Rate:", mana.ChangeRate);
                             AddValueRow("Mana Change Interval:", mana.ChangeInterval);
+                        });
+                    AddCompoundRows("Stats:", entityId, stats,
+                        s =>
+                        {
+                            AddValueRow("Strength:", s.Strength);
+                            AddValueRow("Defense:", s.Defense);
+                            AddValueRow("Agility:", s.Agility);
+                            AddValueRow("Intelligence:", s.Intelligence);
+                            AddValueRow("Wisdom:", s.Wisdom);
+                            AddValueRow("Charisma:", s.Charisma);
+                            AddValueRow("Luck:", s.Luck);
                         });
                     ImGui.EndTable();
                 }

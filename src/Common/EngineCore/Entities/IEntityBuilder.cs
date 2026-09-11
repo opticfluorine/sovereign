@@ -453,4 +453,18 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutMana();
+
+    /// <summary>
+    ///     Adds a Stats component to the entity.
+    /// </summary>
+    /// <param name="stats">Stats.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(Stats))]
+    IEntityBuilder Stats(Stats stats);
+
+    /// <summary>
+    ///     Removes the Stats component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutStats();
 }

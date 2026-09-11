@@ -52,6 +52,7 @@ public sealed class ClientEntityFactory(
     HealthComponentCollection healths,
     StaminaComponentCollection staminas,
     ManaComponentCollection manas,
+    StatsComponentCollection stats,
     EntityTable entityTable,
     EntityAssigner entityAssigner)
     : IEntityFactory
@@ -78,6 +79,6 @@ public sealed class ClientEntityFactory(
             aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources,
             physics, boundingBoxes, castShadows, entityTypes, serverOnly, stackables, quantities,
-            itemUses, npcFlags, useRanges, healths, staminas, manas, entityTable);
+            itemUses, npcFlags, useRanges, healths, staminas, manas, stats, entityTable);
     }
 }

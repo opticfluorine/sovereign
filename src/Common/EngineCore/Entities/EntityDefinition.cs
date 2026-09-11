@@ -67,6 +67,7 @@ public class EntityDefinition
         Health = other.Health;
         Stamina = other.Stamina;
         Mana = other.Mana;
+        Stats = other.Stats;
     }
 
     /// <summary>
@@ -230,4 +231,10 @@ public class EntityDefinition
     /// </summary>
     [Key(26)]
     public Vital? Mana { get; set; }
+
+    /// <summary>
+    ///     Stats component, or null if the entity has no stats.
+    /// </summary>
+    [Key(27)]
+    public Stats? Stats { get; set; }
 }

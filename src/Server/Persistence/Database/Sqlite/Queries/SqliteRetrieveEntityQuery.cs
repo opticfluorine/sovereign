@@ -36,7 +36,8 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
                 shadowRadius, entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange,
                 healthValue, healthMaxValue, healthChangeRate, healthChangeInterval,
                 staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
-                manaValue, manaMaxValue, manaChangeRate, manaChangeInterval)
+                manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
+                statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck)
 	        AS (
 		        SELECT id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent, 
                         drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
@@ -44,10 +45,11 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
                         shadowRadius, entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange,
                         healthValue, healthMaxValue, healthChangeRate, healthChangeInterval,
                         staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
-                        manaValue, manaMaxValue, manaChangeRate, manaChangeInterval
+                        manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
+                        statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck
 		        FROM EntityWithComponents WHERE id = @Id
 	        UNION ALL
-            		SELECT ec.id, ec.template_id, ec.x, ec.y, ec.z, ec.frontTileId, ec.topTileId, ec.playerCharacter,
+            	SELECT ec.id, ec.template_id, ec.x, ec.y, ec.z, ec.frontTileId, ec.topTileId, ec.playerCharacter,
                         ec.name, ec.account, ec.parent, ec.drawableX, ec.drawableY, ec.animatedSprite, ec.orientation, ec.admin,
                         ec.castBlockShadows, ec.plsRadius, ec.plsIntensity, ec.plsColor,
                         ec.plsPosX, ec.plsPosY, ec.plsPosZ, ec.physics, ec.bbPosX, ec.bbPosY, ec.bbPosZ,
@@ -55,7 +57,8 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
                         ec.stackable, ec.quantity, ec.itemUse, ec.npcFlags, ec.useRange,
                         ec.healthValue, ec.healthMaxValue, ec.healthChangeRate, ec.healthChangeInterval,
                         ec.staminaValue, ec.staminaMaxValue, ec.staminaChangeRate, ec.staminaChangeInterval,
-                        ec.manaValue, ec.manaMaxValue, ec.manaChangeRate, ec.manaChangeInterval
+                        ec.manaValue, ec.manaMaxValue, ec.manaChangeRate, ec.manaChangeInterval,
+                        ec.statsStrength, ec.statsDefense, ec.statsAgility, ec.statsIntelligence, ec.statsWisdom, ec.statsCharisma, ec.statsLuck
 		        FROM EntityWithComponents ec, EntityTree et
         			WHERE ec.parent = et.id
 	        )
@@ -66,7 +69,8 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
                 et.quantity, et.itemUse, et.npcFlags, et.useRange,
                 et.healthValue, et.healthMaxValue, et.healthChangeRate, et.healthChangeInterval,
                 et.staminaValue, et.staminaMaxValue, et.staminaChangeRate, et.staminaChangeInterval,
-                et.manaValue, et.manaMaxValue, et.manaChangeRate, et.manaChangeInterval
+                et.manaValue, et.manaMaxValue, et.manaChangeRate, et.manaChangeInterval,
+                et.statsStrength, et.statsDefense, et.statsAgility, et.statsIntelligence, et.statsWisdom, et.statsCharisma, et.statsLuck
             FROM EntityTree et
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = et.id
             ORDER BY et.parent NULLS LAST";

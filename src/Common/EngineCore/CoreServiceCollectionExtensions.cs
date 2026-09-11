@@ -142,6 +142,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<HealthComponentCollection>();
         services.TryAddComponentCollection<StaminaComponentCollection>();
         services.TryAddComponentCollection<ManaComponentCollection>();
+        services.TryAddComponentCollection<StatsComponentCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)

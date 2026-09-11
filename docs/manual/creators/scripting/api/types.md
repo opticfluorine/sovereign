@@ -181,6 +181,43 @@ The scripting engine uses Lua tables with specific entries to communicate inform
         Radius of the shadow as a multiple of the block size.
 ```
 
+(script-types-stats)=
+## Stats
+
+```{eval-rst}
+.. lua:class:: Stats
+
+    Describes the basic statistics of a player or NPC.
+
+    .. lua:attribute:: Strength: integer
+
+        Physical strength of the entity.
+
+    .. lua:attribute:: Defense: integer
+
+        Physical defense of the entity.
+
+    .. lua:attribute:: Agility: integer
+
+        Agility of the entity.
+
+    .. lua:attribute:: Intelligence: integer
+
+        Intelligence of the entity.
+
+    .. lua:attribute:: Wisdom: integer
+
+        Wisdom of the entity.
+
+    .. lua:attribute:: Charisma: integer
+
+        Charisma of the entity.
+
+    .. lua:attribute:: Luck: integer
+
+        Luck of the entity.
+```
+
 (script-types-vital)=
 ## Vital
 

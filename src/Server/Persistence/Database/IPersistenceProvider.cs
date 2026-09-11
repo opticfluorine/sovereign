@@ -424,6 +424,21 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveManaComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for the Stats component.
+    /// </summary>
+    IAddComponentQuery<Stats> AddStatsComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the Stats component.
+    /// </summary>
+    IModifyComponentQuery<Stats> ModifyStatsComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the Stats component.
+    /// </summary>
+    IRemoveComponentQuery RemoveStatsComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }

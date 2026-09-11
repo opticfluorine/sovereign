@@ -90,6 +90,7 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const string HealthColumnPrefix = "health_";
     private const string StaminaColumnPrefix = "stamina_";
     private const string ManaColumnPrefix = "mana_";
+    private const string StatsColumnPrefix = "stats_";
 
     private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
@@ -310,6 +311,12 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         AddManaComponentQuery = manaQueries;
         ModifyManaComponentQuery = manaQueries;
         RemoveManaComponentQuery = manaQueries;
+
+        // Stats component.
+        var statsQueries = new StatsSqliteComponentQueries(StatsColumnPrefix, conn);
+        AddStatsComponentQuery = statsQueries;
+        ModifyStatsComponentQuery = statsQueries;
+        RemoveStatsComponentQuery = statsQueries;
     }
 
     public IAddComponentQuery<BlockTile> AddBlockTileQuery { get; }
@@ -399,6 +406,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<Vital> AddManaComponentQuery { get; }
     public IModifyComponentQuery<Vital> ModifyManaComponentQuery { get; }
     public IRemoveComponentQuery RemoveManaComponentQuery { get; }
+    public IAddComponentQuery<Stats> AddStatsComponentQuery { get; }
+    public IModifyComponentQuery<Stats> ModifyStatsComponentQuery { get; }
+    public IRemoveComponentQuery RemoveStatsComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

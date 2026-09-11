@@ -49,6 +49,7 @@ public class EntityDefinitionGenerator
     private readonly ServerOnlyTagCollection serverOnly;
     private readonly StackableTagCollection stackable;
     private readonly StaminaComponentCollection staminas;
+    private readonly StatsComponentCollection stats;
     private readonly UseRangeComponentCollection useRanges;
 
     public EntityDefinitionGenerator(
@@ -64,7 +65,8 @@ public class EntityDefinitionGenerator
         ServerOnlyTagCollection serverOnly, StackableTagCollection stackable, QuantityComponentCollection quantities,
         ItemUseComponentCollection itemUses, NpcFlagsComponentCollection npcFlags,
         UseRangeComponentCollection useRanges, HealthComponentCollection healths,
-        StaminaComponentCollection staminas, ManaComponentCollection manas, EntityTable entityTable)
+        StaminaComponentCollection staminas, ManaComponentCollection manas, StatsComponentCollection stats,
+        EntityTable entityTable)
     {
         this.kinematics = kinematics;
         this.blockTiles = blockTiles;
@@ -91,6 +93,7 @@ public class EntityDefinitionGenerator
         this.healths = healths;
         this.staminas = staminas;
         this.manas = manas;
+        this.stats = stats;
         this.entityTable = entityTable;
     }
 
@@ -176,6 +179,9 @@ public class EntityDefinitionGenerator
 
         if (manas.HasLocalComponentForEntity(entityId))
             def.Mana = manas[entityId];
+
+        if (stats.HasLocalComponentForEntity(entityId))
+            def.Stats = stats[entityId];
 
         return def;
     }

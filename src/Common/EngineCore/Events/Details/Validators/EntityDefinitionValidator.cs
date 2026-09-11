@@ -46,7 +46,8 @@ public class EntityDefinitionValidator(
                IsUseRangeValid(definition) &&
                IsHealthValid(definition) &&
                IsStaminaValid(definition) &&
-               IsManaValid(definition);
+               IsManaValid(definition) &&
+               IsStatsValid(definition);
     }
 
     /// <summary>
@@ -179,6 +180,23 @@ public class EntityDefinitionValidator(
         var result = mana.MaxValue >= 0;
         if (!result)
             logger.LogError("Definition for {Id:X} has an invalid Mana; MaxValue must be non-negative.",
+                definition.EntityId);
+        return result;
+    }
+
+    /// <summary>
+    ///     Checks that the Stats component, if present, is only applied to players and NPCs.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <returns>true if valid for this rule, false otherwise.</returns>
+    private bool IsStatsValid(EntityDefinition definition)
+    {
+        if (!definition.Stats.HasValue) return true;
+
+        var result = definition.EntityType is EntityType.Player or EntityType.Npc;
+        if (!result)
+            logger.LogError(
+                "Definition for {Id:X} has an invalid Stats; only players and NPCs may have it.",
                 definition.EntityId);
         return result;
     }

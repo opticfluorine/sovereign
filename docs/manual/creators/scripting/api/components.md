@@ -37,6 +37,7 @@ Each component collection that is accessible through the scripting engine may be
 | `Components.ServerOnly`       | `ServerOnlyTagCollection`             | `boolean`      |
 | `Components.Stackable`        | `StackableTagCollection`              | `boolean`      |
 | `Components.Stamina`          | `StaminaComponentCollection`          | `Vital`        |
+| `Components.Stats`            | `StatsComponentCollection`            | `Stats`        |
 | `Components.UseRange`         | `UseRangeComponentCollection`         | `float`        |
 
 ## General Component Functions
