@@ -96,6 +96,11 @@ public sealed class StateBuffer
     private readonly FatalErrorHandler fatalErrorHandler;
 
     /// <summary>
+    ///     Health state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<Vital>> healthUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Global key-value pairs to be synchronized.
     /// </summary>
     private readonly HashSet<string> globalKeyValuePairs = new();
@@ -114,6 +119,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<Kinematics>> kinematicsUpdates = new(BufferSize);
 
     private readonly ILogger<StateBuffer> logger;
+
+    /// <summary>
+    ///     Mana state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<Vital>> manaUpdates = new(BufferSize);
 
     /// <summary>
     ///     Name component updates.
@@ -168,6 +178,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<bool>> serverOnlyUpdates = new(BufferSize);
 
     private readonly StructBuffer<StateUpdate<bool>> stackableUpdates = new(BufferSize);
+
+    /// <summary>
+    ///     Stamina state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<Vital>> staminaUpdates = new(BufferSize);
 
     /// <summary>
     ///     Template state updates.
@@ -403,6 +418,33 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Queues a Health update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateHealth(ref StateUpdate<Vital> update)
+    {
+        healthUpdates.Add(ref update);
+    }
+
+    /// <summary>
+    ///     Queues a Stamina update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateStamina(ref StateUpdate<Vital> update)
+    {
+        staminaUpdates.Add(ref update);
+    }
+
+    /// <summary>
+    ///     Queues a Mana update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateMana(ref StateUpdate<Vital> update)
+    {
+        manaUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -453,6 +495,9 @@ public sealed class StateBuffer
         itemUseUpdates.Clear();
         npcFlagsUpdates.Clear();
         useRangeUpdates.Clear();
+        healthUpdates.Clear();
+        staminaUpdates.Clear();
+        manaUpdates.Clear();
     }
 
     /// <summary>
@@ -627,6 +672,27 @@ public sealed class StateBuffer
                     persistenceProvider.AddUseRangeComponentQuery,
                     persistenceProvider.ModifyUseRangeComponentQuery,
                     persistenceProvider.RemoveUseRangeComponentQuery,
+                    transaction);
+
+                // Health.
+                SynchronizeComponent(healthUpdates,
+                    persistenceProvider.AddHealthComponentQuery,
+                    persistenceProvider.ModifyHealthComponentQuery,
+                    persistenceProvider.RemoveHealthComponentQuery,
+                    transaction);
+
+                // Stamina.
+                SynchronizeComponent(staminaUpdates,
+                    persistenceProvider.AddStaminaComponentQuery,
+                    persistenceProvider.ModifyStaminaComponentQuery,
+                    persistenceProvider.RemoveStaminaComponentQuery,
+                    transaction);
+
+                // Mana.
+                SynchronizeComponent(manaUpdates,
+                    persistenceProvider.AddManaComponentQuery,
+                    persistenceProvider.ModifyManaComponentQuery,
+                    persistenceProvider.RemoveManaComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

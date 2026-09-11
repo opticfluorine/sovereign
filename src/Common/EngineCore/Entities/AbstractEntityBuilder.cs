@@ -37,6 +37,8 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly CastBlockShadowsTagCollection castBlockShadows;
     private readonly CastShadowsComponentCollection castShadows;
     protected readonly DrawableComponentCollection drawables;
+    private readonly HealthComponentCollection healths;
+    private readonly ManaComponentCollection manas;
 
     protected readonly ulong entityId;
     protected readonly EntityTable entityTable;
@@ -55,6 +57,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly QuantityComponentCollection quantities;
     private readonly ServerOnlyTagCollection serverOnly;
     private readonly StackableTagCollection stackables;
+    private readonly StaminaComponentCollection staminas;
     private readonly UseRangeComponentCollection useRanges;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
@@ -88,6 +91,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         ItemUseComponentCollection itemUses,
         NpcFlagsComponentCollection npcFlags,
         UseRangeComponentCollection useRanges,
+        HealthComponentCollection healths,
+        StaminaComponentCollection staminas,
+        ManaComponentCollection manas,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -116,6 +122,9 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.itemUses = itemUses;
         this.npcFlags = npcFlags;
         this.useRanges = useRanges;
+        this.healths = healths;
+        this.staminas = staminas;
+        this.manas = manas;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -466,6 +475,42 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutUseRange()
     {
         useRanges.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder Health(Vital health)
+    {
+        healths.AddOrUpdateComponent(entityId, health, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutHealth()
+    {
+        healths.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder Stamina(Vital stamina)
+    {
+        staminas.AddOrUpdateComponent(entityId, stamina, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutStamina()
+    {
+        staminas.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder Mana(Vital mana)
+    {
+        manas.AddOrUpdateComponent(entityId, mana, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutMana()
+    {
+        manas.RemoveComponent(entityId, load);
         return this;
     }
 

@@ -104,6 +104,9 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<ItemUseStateTracker>();
         services.TryAddSingleton<NpcFlagsStateTracker>();
         services.TryAddSingleton<UseRangeStateTracker>();
+        services.TryAddSingleton<HealthStateTracker>();
+        services.TryAddSingleton<StaminaStateTracker>();
+        services.TryAddSingleton<ManaStateTracker>();
     }
 
     private static void AddPersistenceSystem(IServiceCollection services)

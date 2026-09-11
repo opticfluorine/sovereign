@@ -43,7 +43,10 @@ public class EntityDefinitionValidator(
                IsCompleteIfPlayerCharacter(definition) &&
                IsNotDoublePositioned(definition) &&
                AreComponentsValid(definition) &&
-               IsUseRangeValid(definition);
+               IsUseRangeValid(definition) &&
+               IsHealthValid(definition) &&
+               IsStaminaValid(definition) &&
+               IsManaValid(definition);
     }
 
     /// <summary>
@@ -129,6 +132,54 @@ public class EntityDefinitionValidator(
     {
         var result = definition is not { Position: not null, BlockPosition: not null };
         if (!result) logger.LogError("Definition for {Id:X} is dual-positioned.", definition.EntityId);
+        return result;
+    }
+
+    /// <summary>
+    ///     Checks that the Health component, if present, has a non-negative maximum value.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <returns>true if valid for this rule, false otherwise.</returns>
+    private bool IsHealthValid(EntityDefinition definition)
+    {
+        if (definition.Health is not { } health) return true;
+
+        var result = health.MaxValue >= 0;
+        if (!result)
+            logger.LogError("Definition for {Id:X} has an invalid Health; MaxValue must be non-negative.",
+                definition.EntityId);
+        return result;
+    }
+
+    /// <summary>
+    ///     Checks that the Stamina component, if present, has a non-negative maximum value.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <returns>true if valid for this rule, false otherwise.</returns>
+    private bool IsStaminaValid(EntityDefinition definition)
+    {
+        if (definition.Stamina is not { } stamina) return true;
+
+        var result = stamina.MaxValue >= 0;
+        if (!result)
+            logger.LogError("Definition for {Id:X} has an invalid Stamina; MaxValue must be non-negative.",
+                definition.EntityId);
+        return result;
+    }
+
+    /// <summary>
+    ///     Checks that the Mana component, if present, has a non-negative maximum value.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <returns>true if valid for this rule, false otherwise.</returns>
+    private bool IsManaValid(EntityDefinition definition)
+    {
+        if (definition.Mana is not { } mana) return true;
+
+        var result = mana.MaxValue >= 0;
+        if (!result)
+            logger.LogError("Definition for {Id:X} has an invalid Mana; MaxValue must be non-negative.",
+                definition.EntityId);
         return result;
     }
 }

@@ -64,6 +64,9 @@ public class EntityDefinition
         ItemUse = other.ItemUse;
         NpcFlags = other.NpcFlags;
         UseRange = other.UseRange;
+        Health = other.Health;
+        Stamina = other.Stamina;
+        Mana = other.Mana;
     }
 
     /// <summary>
@@ -209,4 +212,22 @@ public class EntityDefinition
     /// </summary>
     [Key(23)]
     public float? UseRange { get; set; }
+
+    /// <summary>
+    ///     Health component, or null if the entity has no health.
+    /// </summary>
+    [Key(24)]
+    public Vital? Health { get; set; }
+
+    /// <summary>
+    ///     Stamina component, or null if the entity has no stamina.
+    /// </summary>
+    [Key(25)]
+    public Vital? Stamina { get; set; }
+
+    /// <summary>
+    ///     Mana component, or null if the entity has no mana.
+    /// </summary>
+    [Key(26)]
+    public Vital? Mana { get; set; }
 }

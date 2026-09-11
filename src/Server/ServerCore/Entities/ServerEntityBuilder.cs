@@ -55,12 +55,15 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         ItemUseComponentCollection itemUses,
         NpcFlagsComponentCollection npcFlags,
         UseRangeComponentCollection useRanges,
+        HealthComponentCollection healths,
+        StaminaComponentCollection staminas,
+        ManaComponentCollection manas,
         EntityTable entityTable)
         : base(entityId, load, entityManager, kinematics, blockTiles,
             aboveBlocks, playerCharacterTags, names, parents,
             drawables, animatedSprites, orientations, admins, blockPositions, castBlockShadows, pointLightSources,
             physics, boundingBoxes, castShadows, entityTypes, serverOnly, stackables, quantities, itemUses, npcFlags,
-            useRanges, entityTable)
+            useRanges, healths, staminas, manas, entityTable)
     {
         this.accounts = accounts;
     }

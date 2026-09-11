@@ -34,8 +34,10 @@ public class EntityDefinitionGenerator
     private readonly DrawableComponentCollection drawables;
     private readonly EntityTable entityTable;
     private readonly EntityTypeComponentCollection entityTypes;
+    private readonly HealthComponentCollection healths;
     private readonly ItemUseComponentCollection itemUses;
     private readonly KinematicsComponentCollection kinematics;
+    private readonly ManaComponentCollection manas;
     private readonly NameComponentCollection names;
     private readonly NpcFlagsComponentCollection npcFlags;
     private readonly OrientationComponentCollection orientations;
@@ -46,6 +48,7 @@ public class EntityDefinitionGenerator
     private readonly QuantityComponentCollection quantities;
     private readonly ServerOnlyTagCollection serverOnly;
     private readonly StackableTagCollection stackable;
+    private readonly StaminaComponentCollection staminas;
     private readonly UseRangeComponentCollection useRanges;
 
     public EntityDefinitionGenerator(
@@ -60,7 +63,8 @@ public class EntityDefinitionGenerator
         CastShadowsComponentCollection castShadows, EntityTypeComponentCollection entityTypes,
         ServerOnlyTagCollection serverOnly, StackableTagCollection stackable, QuantityComponentCollection quantities,
         ItemUseComponentCollection itemUses, NpcFlagsComponentCollection npcFlags,
-        UseRangeComponentCollection useRanges, EntityTable entityTable)
+        UseRangeComponentCollection useRanges, HealthComponentCollection healths,
+        StaminaComponentCollection staminas, ManaComponentCollection manas, EntityTable entityTable)
     {
         this.kinematics = kinematics;
         this.blockTiles = blockTiles;
@@ -84,6 +88,9 @@ public class EntityDefinitionGenerator
         this.itemUses = itemUses;
         this.npcFlags = npcFlags;
         this.useRanges = useRanges;
+        this.healths = healths;
+        this.staminas = staminas;
+        this.manas = manas;
         this.entityTable = entityTable;
     }
 
@@ -160,6 +167,15 @@ public class EntityDefinitionGenerator
 
         if (useRanges.HasLocalComponentForEntity(entityId))
             def.UseRange = useRanges[entityId];
+
+        if (healths.HasLocalComponentForEntity(entityId))
+            def.Health = healths[entityId];
+
+        if (staminas.HasLocalComponentForEntity(entityId))
+            def.Stamina = staminas[entityId];
+
+        if (manas.HasLocalComponentForEntity(entityId))
+            def.Mana = manas[entityId];
 
         return def;
     }

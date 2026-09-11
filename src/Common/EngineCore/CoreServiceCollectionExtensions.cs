@@ -39,6 +39,7 @@ using Sovereign.EngineCore.Systems.Movement;
 using Sovereign.EngineCore.Systems.Performance;
 using Sovereign.EngineCore.Systems.Players;
 using Sovereign.EngineCore.Systems.Time;
+using Sovereign.EngineCore.Systems.Vitals;
 using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.EngineCore.Timing;
 using Sovereign.EngineCore.World;
@@ -138,6 +139,9 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<ItemUseComponentCollection>();
         services.TryAddComponentCollection<NpcFlagsComponentCollection>();
         services.TryAddComponentCollection<UseRangeComponentCollection>();
+        services.TryAddComponentCollection<HealthComponentCollection>();
+        services.TryAddComponentCollection<StaminaComponentCollection>();
+        services.TryAddComponentCollection<ManaComponentCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)
@@ -215,6 +219,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<DropAtPositionEventDetailsValidator>();
         services.TryAddSingleton<InventorySwapEventDetailsValidator>();
         services.TryAddSingleton<UseItemEventDetailsValidator>();
+        services.TryAddSingleton<ChangeVitalsEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)
@@ -251,6 +256,7 @@ public static class CoreServiceCollectionExtensions
         AddMovementSystem(services);
         AddPerformanceSystem(services);
         AddTimeSystem(services);
+        AddVitalsSystem(services);
         AddWorldManagementSystem(services);
     }
 
@@ -312,6 +318,14 @@ public static class CoreServiceCollectionExtensions
     private static void AddPerformanceSystem(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PerformanceSystem>());
+    }
+
+    private static void AddVitalsSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<VitalsEventHandler>();
+        services.TryAddSingleton<EntityDeathHandler>();
+        services.TryAddSingleton<VitalsController>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, VitalsSystem>());
     }
 
     private static void AddTimeSystem(IServiceCollection services)

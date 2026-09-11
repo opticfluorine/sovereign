@@ -144,6 +144,21 @@ public enum ComponentType
     /// </summary>
     UseRange = 0x0018,
 
+    /// <summary>
+    ///     Health component.
+    /// </summary>
+    Health = 0x0019,
+
+    /// <summary>
+    ///     Stamina component.
+    /// </summary>
+    Stamina = 0x001A,
+
+    /// <summary>
+    ///     Mana component.
+    /// </summary>
+    Mana = 0x001B,
+
     #endregion Common
 
     #region Client

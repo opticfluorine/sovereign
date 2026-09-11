@@ -22,8 +22,10 @@ Each component collection that is accessible through the scripting engine may be
 | `Components.CastShadows`      | `CastShadowsComponentCollection`      | `Shadow`       |
 | `Components.Drawable`         | `DrawableComponentCollection`         | `Vector2`      |
 | `Components.EntityType`       | `EntityTypeComponentCollection`       | `EntityType`   |
+| `Components.Health`           | `HealthComponentCollection`           | `Vital`        |
 | `Components.ItemUse`          | `ItemUseComponentCollection`          | `ItemUse`      |
 | `Components.Kinematics`       | `KinematicsComponentCollection`       | `Kinematics`   |
+| `Components.Mana`             | `ManaComponentCollection`             | `Vital`        |
 | `Components.Name`             | `NameComponentCollection`             | `string`       |
 | `Components.NpcFlags`         | `NpcFlagsComponentCollection`         | `NpcFlag`      |
 | `Components.Orientation`      | `OrientationComponentCollection`      | `integer`      |
@@ -34,6 +36,7 @@ Each component collection that is accessible through the scripting engine may be
 | `Components.Quantity`         | `QuantityComponentCollection`         | `integer`      |
 | `Components.ServerOnly`       | `ServerOnlyTagCollection`             | `boolean`      |
 | `Components.Stackable`        | `StackableTagCollection`              | `boolean`      |
+| `Components.Stamina`          | `StaminaComponentCollection`          | `Vital`        |
 | `Components.UseRange`         | `UseRangeComponentCollection`         | `float`        |
 
 ## General Component Functions

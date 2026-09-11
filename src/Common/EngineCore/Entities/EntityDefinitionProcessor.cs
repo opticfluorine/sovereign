@@ -164,6 +164,21 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutUseRange();
 
+        if (definition.Health.HasValue)
+            builder.Health(definition.Health.Value);
+        else
+            builder.WithoutHealth();
+
+        if (definition.Stamina.HasValue)
+            builder.Stamina(definition.Stamina.Value);
+        else
+            builder.WithoutStamina();
+
+        if (definition.Mana.HasValue)
+            builder.Mana(definition.Mana.Value);
+        else
+            builder.WithoutMana();
+
         var entityId = builder.Build();
         logger.LogDebug("Processed entity ID {Id:X}.", entityId);
     }

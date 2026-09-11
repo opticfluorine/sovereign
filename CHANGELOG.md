@@ -4,6 +4,12 @@
 
 ### September
 
+#### 10 September 2026
+
+* Add new common, scriptable `Health`, `Stamina`, and `Mana` components that share the new `Vital` value type (`Value`, `MaxValue`, `ChangeRate`, `ChangeInterval`). The components are exposed to scripts as `Components.Health`, `Components.Stamina`, and `Components.Mana` and as spec keys in the `Entities.Create` table.
+* Add a common `VitalsSystem` that advances vitals per tick (periodic change, clamping to `[0, MaxValue]`, death detection when health reaches zero). Dead non-player entities are removed; dead players respawn at the spawn point with their health reset. Vitals are persisted to the database.
+* Add new server-to-client `Kill` and `ChangeVitals` events used to synchronize deaths and vital changes to subscribed clients.
+
 #### 9 September 2026
 
 * Players may now use the item selected in the hotbar as a tool by left-clicking an entity in the game world. If the selected item has a `UseRange` component and the target is within that range, the target entity's `OnInteract` scripting callback is invoked with the using entity's ID as the first argument, followed by the tool and target entity IDs.

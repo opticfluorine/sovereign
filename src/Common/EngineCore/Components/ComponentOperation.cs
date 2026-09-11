@@ -63,5 +63,31 @@ public enum ComponentOperation
     /// <summary>
     ///     Subtracts while clamping the resulting value to avoid integer underflow.
     /// </summary>
-    SubtractNoUnderflow = 7
+    SubtractNoUnderflow = 7,
+
+    /// <summary>
+    ///     For Vital components, sets the value part of the component, leaving the other parts unchanged.
+    /// </summary>
+    SetValue = 8,
+
+    /// <summary>
+    ///     For Vital components, adds to the value part of the component, leaving the other parts unchanged.
+    /// </summary>
+    AddValue = 9,
+
+    /// <summary>
+    ///     For Vital components, sets the max value part of the component, leaving the other parts unchanged.
+    /// </summary>
+    SetMaxValue = 10,
+
+    /// <summary>
+    ///     For Vital components, adds to the max value part of the component, leaving the other parts unchanged.
+    /// </summary>
+    AddMaxValue = 11,
+
+    /// <summary>
+    ///     For Vital components, sets the change rate and change interval parts of the component,
+    ///     leaving the value parts unchanged.
+    /// </summary>
+    SetChangeRate = 12
 }

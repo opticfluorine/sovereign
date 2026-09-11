@@ -181,6 +181,32 @@ The scripting engine uses Lua tables with specific entries to communicate inform
         Radius of the shadow as a multiple of the block size.
 ```
 
+(script-types-vital)=
+## Vital
+
+```{eval-rst}
+.. lua:class:: Vital
+
+    Describes a regenerating or decaying vital of an entity, such as
+    health, stamina, or mana.
+
+    .. lua:attribute:: Value: integer
+
+        Current value of the vital.
+
+    .. lua:attribute:: MaxValue: integer
+
+        Maximum value of the vital.
+
+    .. lua:attribute:: ChangeRate: integer
+
+        Amount added to the value on each change interval.
+
+    .. lua:attribute:: ChangeInterval: integer
+
+        Interval in ticks between changes, or zero to disable periodic changes.
+```
+
 (script-types-vector2)=
 ## Vector2
 

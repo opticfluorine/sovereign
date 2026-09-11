@@ -71,6 +71,18 @@ public sealed class EntityProcessor
     private const int IndexItemUse = IndexQuantity + 1;
     private const int IndexNpcFlags = IndexItemUse + 1;
     private const int IndexUseRange = IndexNpcFlags + 1;
+    private const int IndexHealthValue = IndexUseRange + 1;
+    private const int IndexHealthMaxValue = IndexHealthValue + 1;
+    private const int IndexHealthChangeRate = IndexHealthMaxValue + 1;
+    private const int IndexHealthChangeInterval = IndexHealthChangeRate + 1;
+    private const int IndexStaminaValue = IndexHealthChangeInterval + 1;
+    private const int IndexStaminaMaxValue = IndexStaminaValue + 1;
+    private const int IndexStaminaChangeRate = IndexStaminaMaxValue + 1;
+    private const int IndexStaminaChangeInterval = IndexStaminaChangeRate + 1;
+    private const int IndexManaValue = IndexStaminaChangeInterval + 1;
+    private const int IndexManaMaxValue = IndexManaValue + 1;
+    private const int IndexManaChangeRate = IndexManaMaxValue + 1;
+    private const int IndexManaChangeInterval = IndexManaChangeRate + 1;
     private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
     private readonly ExistingEntitySet existingEntitySet;
@@ -145,6 +157,9 @@ public sealed class EntityProcessor
             ProcessItemUse(reader, builder);
             ProcessNpcFlags(reader, builder);
             ProcessUseRange(reader, builder);
+            ProcessHealth(reader, builder);
+            ProcessStamina(reader, builder);
+            ProcessMana(reader, builder);
 
             /* Complete the entity. */
             builder.Build();
@@ -442,6 +457,63 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexUseRange)) return;
         builder.UseRange(reader.GetFloat(IndexUseRange));
+    }
+
+    /// <summary>
+    ///     Processes the Health component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessHealth(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexHealthValue)) return;
+        builder.Health(GetVital(reader, IndexHealthValue, IndexHealthMaxValue, IndexHealthChangeRate,
+            IndexHealthChangeInterval));
+    }
+
+    /// <summary>
+    ///     Processes the Stamina component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessStamina(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexStaminaValue)) return;
+        builder.Stamina(GetVital(reader, IndexStaminaValue, IndexStaminaMaxValue, IndexStaminaChangeRate,
+            IndexStaminaChangeInterval));
+    }
+
+    /// <summary>
+    ///     Processes the Mana component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessMana(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexManaValue)) return;
+        builder.Mana(GetVital(reader, IndexManaValue, IndexManaMaxValue, IndexManaChangeRate,
+            IndexManaChangeInterval));
+    }
+
+    /// <summary>
+    ///     Extracts a Vital from the reader.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="indexValue">Index of the value.</param>
+    /// <param name="indexMaxValue">Index of the max value.</param>
+    /// <param name="indexChangeRate">Index of the change rate.</param>
+    /// <param name="indexChangeInterval">Index of the change interval.</param>
+    /// <returns>Vital.</returns>
+    private static Vital GetVital(IDataReader reader, int indexValue, int indexMaxValue, int indexChangeRate,
+        int indexChangeInterval)
+    {
+        return new Vital
+        {
+            Value = reader.GetInt32(indexValue),
+            MaxValue = reader.GetInt32(indexMaxValue),
+            ChangeRate = reader.GetInt32(indexChangeRate),
+            ChangeInterval = (uint)reader.GetInt32(indexChangeInterval)
+        };
     }
 
     /// <summary>

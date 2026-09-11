@@ -87,6 +87,10 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const SqliteType UseRangeParamType = SqliteType.Real;
     private const string UseRangeParamName = "use_range";
 
+    private const string HealthColumnPrefix = "health_";
+    private const string StaminaColumnPrefix = "stamina_";
+    private const string ManaColumnPrefix = "mana_";
+
     private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
 
@@ -288,6 +292,24 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         ModifyUseRangeComponentQuery =
             new SimpleSqliteModifyComponentQuery<float>(UseRangeParamName, UseRangeParamType, conn);
         RemoveUseRangeComponentQuery = new SimpleSqliteRemoveComponentQuery(UseRangeParamName, conn);
+
+        // Health component.
+        var healthQueries = new VitalSqliteComponentQueries(HealthColumnPrefix, conn);
+        AddHealthComponentQuery = healthQueries;
+        ModifyHealthComponentQuery = healthQueries;
+        RemoveHealthComponentQuery = healthQueries;
+
+        // Stamina component.
+        var staminaQueries = new VitalSqliteComponentQueries(StaminaColumnPrefix, conn);
+        AddStaminaComponentQuery = staminaQueries;
+        ModifyStaminaComponentQuery = staminaQueries;
+        RemoveStaminaComponentQuery = staminaQueries;
+
+        // Mana component.
+        var manaQueries = new VitalSqliteComponentQueries(ManaColumnPrefix, conn);
+        AddManaComponentQuery = manaQueries;
+        ModifyManaComponentQuery = manaQueries;
+        RemoveManaComponentQuery = manaQueries;
     }
 
     public IAddComponentQuery<BlockTile> AddBlockTileQuery { get; }
@@ -368,6 +390,15 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<float> AddUseRangeComponentQuery { get; }
     public IModifyComponentQuery<float> ModifyUseRangeComponentQuery { get; }
     public IRemoveComponentQuery RemoveUseRangeComponentQuery { get; }
+    public IAddComponentQuery<Vital> AddHealthComponentQuery { get; }
+    public IModifyComponentQuery<Vital> ModifyHealthComponentQuery { get; }
+    public IRemoveComponentQuery RemoveHealthComponentQuery { get; }
+    public IAddComponentQuery<Vital> AddStaminaComponentQuery { get; }
+    public IModifyComponentQuery<Vital> ModifyStaminaComponentQuery { get; }
+    public IRemoveComponentQuery RemoveStaminaComponentQuery { get; }
+    public IAddComponentQuery<Vital> AddManaComponentQuery { get; }
+    public IModifyComponentQuery<Vital> ModifyManaComponentQuery { get; }
+    public IRemoveComponentQuery RemoveManaComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }
