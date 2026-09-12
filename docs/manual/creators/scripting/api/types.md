@@ -168,6 +168,49 @@ The scripting engine uses Lua tables with specific entries to communicate inform
         in the center of the entity's XY plane.
 ```
 
+(script-types-equipmenttype)=
+## EquipmentType
+
+```{eval-rst}
+.. lua:class:: EquipmentType
+
+    Type of equipment that an item may be equipped as or that an equipment
+    slot accepts. Items without an ``EquipmentType`` component are not
+    equippable.
+
+    .. lua:attribute:: Weapon
+
+        Weapon.
+
+    .. lua:attribute:: Offhand
+
+        Offhand item such as a shield.
+
+    .. lua:attribute:: Helmet
+
+        Helmet.
+
+    .. lua:attribute:: Chest
+
+        Chest armor.
+
+    .. lua:attribute:: Leggings
+
+        Leggings.
+
+    .. lua:attribute:: Necklace
+
+        Necklace.
+
+    .. lua:attribute:: LeftRing
+
+        Ring worn on the left hand.
+
+    .. lua:attribute:: RightRing
+
+        Ring worn on the right hand.
+```
+
 (script-types-shadow)=
 ## Shadow
 

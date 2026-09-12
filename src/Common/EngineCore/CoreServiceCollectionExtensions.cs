@@ -143,6 +143,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<StaminaComponentCollection>();
         services.TryAddComponentCollection<ManaComponentCollection>();
         services.TryAddComponentCollection<StatsComponentCollection>();
+        services.TryAddComponentCollection<EquipmentTypeComponentCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)
@@ -163,6 +164,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<ItemTemplateNameComponentIndexer>();
         services.TryAddSingleton<SlotComponentEventFilter>();
         services.TryAddSingleton<SlotIndexer>();
+        services.TryAddSingleton<PlayerEquipmentIndexer>();
     }
 
     private static void AddComponentValidators(IServiceCollection services)
@@ -221,6 +223,8 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<InventorySwapEventDetailsValidator>();
         services.TryAddSingleton<UseItemEventDetailsValidator>();
         services.TryAddSingleton<ChangeVitalsEventDetailsValidator>();
+        services.TryAddSingleton<EquipEventDetailsValidator>();
+        services.TryAddSingleton<UnequipEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)

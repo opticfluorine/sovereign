@@ -109,6 +109,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<ItemUse>> itemUseUpdates = new(BufferSize);
 
     /// <summary>
+    ///     EquipmentType state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<EquipmentType>> equipmentTypeUpdates = new(BufferSize);
+
+    /// <summary>
     ///     NpcFlags state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<NpcFlag>> npcFlagsUpdates = new(BufferSize);
@@ -459,6 +464,15 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Queues an EquipmentType update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateEquipmentType(ref StateUpdate<EquipmentType> update)
+    {
+        equipmentTypeUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -513,6 +527,7 @@ public sealed class StateBuffer
         staminaUpdates.Clear();
         manaUpdates.Clear();
         statsUpdates.Clear();
+        equipmentTypeUpdates.Clear();
     }
 
     /// <summary>
@@ -715,6 +730,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddStatsComponentQuery,
                     persistenceProvider.ModifyStatsComponentQuery,
                     persistenceProvider.RemoveStatsComponentQuery,
+                    transaction);
+
+                // EquipmentType.
+                SynchronizeComponent(equipmentTypeUpdates,
+                    persistenceProvider.AddEquipmentTypeComponentQuery,
+                    persistenceProvider.ModifyEquipmentTypeComponentQuery,
+                    persistenceProvider.RemoveEquipmentTypeComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

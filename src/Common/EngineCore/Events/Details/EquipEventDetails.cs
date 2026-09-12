@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2025 opticfluorine
+// Copyright (c) 2026 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,44 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineUtil.Attributes;
+using MessagePack;
 
-namespace Sovereign.EngineCore.Components.Types;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Entity type for non-block entities.
+///     Details of an event requesting that a player equip the item in one of their inventory slots.
 /// </summary>
-[Scriptable]
-[ScriptableEnum]
-public enum EntityType
+[MessagePackObject]
+public class EquipEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Entity is an NPC.
+    ///     Entity ID of the player performing the equip. Overwritten by the server with the
+    ///     authenticated player's entity ID when received over the network.
     /// </summary>
-    Npc = 0,
+    [Key(0)]
+    public ulong PlayerEntityId { get; set; }
 
     /// <summary>
-    ///     Entity is an item.
+    ///     Index of the inventory slot holding the item to equip.
     /// </summary>
-    Item = 1,
-
-    /// <summary>
-    ///     Entity is a player.
-    /// </summary>
-    Player = 2,
-
-    /// <summary>
-    ///     Entity is a slot (e.g. inventory slot).
-    /// </summary>
-    Slot = 3,
-
-    /// <summary>
-    ///     Entity is an equipment slot (e.g. weapon slot).
-    /// </summary>
-    EquipmentSlot = 4,
-
-    /// <summary>
-    ///     Entity has no special type. Not explicitly stored; only used in EntityDefinition.
-    /// </summary>
-    Other = 0x7F
+    [Key(1)]
+    public int SlotIndex { get; set; }
 }

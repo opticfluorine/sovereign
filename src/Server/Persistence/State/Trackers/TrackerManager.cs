@@ -28,6 +28,7 @@ public sealed class TrackerManager
     private readonly CastBlockShadowsStateTracker castBlockShadowsStateTracker;
     private readonly CastShadowsStateTracker castShadowsStateTracker;
     private readonly EntityTypeStateTracker entityTypeStateTracker;
+    private readonly EquipmentTypeStateTracker equipmentTypeStateTracker;
     private readonly HealthStateTracker healthStateTracker;
     private readonly ItemUseStateTracker itemUseStateTracker;
     private readonly ManaStateTracker manaStateTracker;
@@ -68,7 +69,8 @@ public sealed class TrackerManager
         HealthStateTracker healthStateTracker,
         StaminaStateTracker staminaStateTracker,
         ManaStateTracker manaStateTracker,
-        StatsStateTracker statsStateTracker)
+        StatsStateTracker statsStateTracker,
+        EquipmentTypeStateTracker equipmentTypeStateTracker)
     {
         this.adminStateTracker = adminStateTracker;
         this.templateStateTracker = templateStateTracker;
@@ -88,6 +90,7 @@ public sealed class TrackerManager
         this.staminaStateTracker = staminaStateTracker;
         this.manaStateTracker = manaStateTracker;
         this.statsStateTracker = statsStateTracker;
+        this.equipmentTypeStateTracker = equipmentTypeStateTracker;
         OrientationStateTracker = orientationStateTracker;
         KinematicsStateTracker = kinematicsStateTracker;
         BlockTileStateTracker = blockTileStateTracker;

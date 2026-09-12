@@ -20,6 +20,7 @@ using System.Numerics;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
@@ -91,6 +92,7 @@ public sealed class PlayerBuilder(
 
             playerEntityId = builder.Build();
             AddInventorySlots(playerEntityId);
+            AddEquipmentSlots(playerEntityId);
 
             recentNames.Add(playerName);
             return true;
@@ -109,6 +111,22 @@ public sealed class PlayerBuilder(
             builder
                 .EntityType(EntityType.Slot)
                 .Parent(playerId)
+                .Build();
+        }
+    }
+
+    /// <summary>
+    ///     Adds one equipment slot per equipment type for a player.
+    /// </summary>
+    /// <param name="playerId">Player ID.</param>
+    private void AddEquipmentSlots(ulong playerId)
+    {
+        for (var i = 0; i < EquipmentConstants.EquipmentSlotCount; i++)
+        {
+            entityFactory.GetBuilder()
+                .EntityType(EntityType.EquipmentSlot)
+                .Parent(playerId)
+                .EquipmentType((EquipmentType)i)
                 .Build();
         }
     }

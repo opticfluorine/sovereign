@@ -511,3 +511,87 @@ if Inventory.ConsumeItemQuantity(playerId, woodTemplateId, 5) then
     -- ...
 end
 ```
+
+## GetEquipment(entityId, equipmentType)
+
+### Definition
+
+```{eval-rst}
+.. lua:function:: Inventory.GetEquipment(entityId, equipmentType)
+
+   Gets the item currently equipped by the player in the given equipment type slot.
+
+   :param entityId: Entity ID.
+   :type entityId: lightuserdata
+   :param equipmentType: Equipment type slot to query.
+   :type equipmentType: EquipmentType
+
+   :return: Equipped item entity ID, or ``Entities.None`` if nothing is equipped in that slot.
+   :rtype: lightuserdata
+```
+
+### Example
+
+```{code-block} lua
+:caption: Checking what a player has equipped as a weapon.
+:emphasize-lines: 1
+local weaponId = Inventory.GetEquipment(playerId, EquipmentType.Weapon)
+if weaponId ~= Entities.None then
+    -- The player has a weapon equipped.
+    -- ...
+end
+```
+
+## Equip(entityId, slotIndex)
+
+### Definition
+
+```{eval-rst}
+.. lua:function:: Inventory.Equip(entityId, slotIndex)
+
+   Equips the item in one of the entity's inventory slots into the matching equipment slot. If the equipment slot is occupied, the previously equipped item is moved into the source inventory slot.
+
+   The request is applied by the authoritative server and the resulting state reaches clients via entity synchronization of the affected slots. Component and indexer updates commit at the next tick, so scripts must wait a tick between equipping and reading the result.
+
+   :param entityId: Entity ID.
+   :type entityId: lightuserdata
+   :param slotIndex: Slot index of the item to equip. Must be at least 1.
+   :type slotIndex: integer
+```
+
+### Example
+
+```{code-block} lua
+:caption: Equipping the item in the player's first inventory slot.
+:emphasize-lines: 2
+-- Equip the sword in the player's first slot as their weapon.
+Inventory.Equip(playerId, 1)
+```
+
+## Unequip(entityId, equipmentType, slotIndex)
+
+### Definition
+
+```{eval-rst}
+.. lua:function:: Inventory.Unequip(entityId, equipmentType, slotIndex)
+
+   Unequips the player's equipped item of the given equipment type, moving it to an empty inventory slot. If the target slot is occupied or invalid, nothing is changed.
+
+   The request is applied by the authoritative server and the resulting state reaches clients via entity synchronization of the affected slots. Component and indexer updates commit at the next tick, so scripts must wait a tick between unequipping and reading the result.
+
+   :param entityId: Entity ID.
+   :type entityId: lightuserdata
+   :param equipmentType: Equipment type to unequip.
+   :type equipmentType: EquipmentType
+   :param slotIndex: Slot index to which the item should be moved. Must be at least 1.
+   :type slotIndex: integer
+```
+
+### Example
+
+```{code-block} lua
+:caption: Unequipping a player's weapon into their first inventory slot.
+:emphasize-lines: 2
+-- Unequip the weapon into the player's first slot.
+Inventory.Unequip(playerId, EquipmentType.Weapon, 1)
+```

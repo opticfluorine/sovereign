@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Components.Validators;
 using Sovereign.EngineCore.Entities;
@@ -47,7 +48,8 @@ public class EntityDefinitionValidator(
                IsHealthValid(definition) &&
                IsStaminaValid(definition) &&
                IsManaValid(definition) &&
-               IsStatsValid(definition);
+               IsStatsValid(definition) &&
+               IsEquipmentTypeValid(definition);
     }
 
     /// <summary>
@@ -197,6 +199,34 @@ public class EntityDefinitionValidator(
         if (!result)
             logger.LogError(
                 "Definition for {Id:X} has an invalid Stats; only players and NPCs may have it.",
+                definition.EntityId);
+        return result;
+    }
+
+    /// <summary>
+    ///     Checks that the EquipmentType component, if present, is only applied to items and
+    ///     equipment slots with a valid value, and that equipment slots always specify one.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <returns>true if valid for this rule, false otherwise.</returns>
+    private bool IsEquipmentTypeValid(EntityDefinition definition)
+    {
+        if (definition.EntityType == EntityType.EquipmentSlot && !definition.EquipmentType.HasValue)
+        {
+            logger.LogError(
+                "Definition for {Id:X} is an equipment slot without an EquipmentType.",
+                definition.EntityId);
+            return false;
+        }
+
+        if (!definition.EquipmentType.HasValue) return true;
+
+        var result = (int)definition.EquipmentType.Value >= 0 &&
+                     (int)definition.EquipmentType.Value < EquipmentConstants.EquipmentSlotCount &&
+                     definition.EntityType is EntityType.Item or EntityType.EquipmentSlot;
+        if (!result)
+            logger.LogError(
+                "Definition for {Id:X} has an invalid EquipmentType; it must be a valid equipment type and only items and equipment slots may have it.",
                 definition.EntityId);
         return result;
     }

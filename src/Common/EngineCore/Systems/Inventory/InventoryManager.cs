@@ -52,6 +52,8 @@ public sealed class InventoryManager(
     EntityTable entityTable,
     QuantityComponentCollection quantities,
     UseRangeComponentCollection useRanges,
+    EquipmentTypeComponentCollection equipmentTypes,
+    PlayerEquipmentIndexer equipmentIndexer,
     IEngineConfiguration engineConfiguration,
     IEventSender eventSender,
     InventoryPermissionService permissionService,
@@ -710,6 +712,134 @@ public sealed class InventoryManager(
             return true;
         }
     }
+
+    #region Equipment
+
+    /// <summary>
+    ///     Equips the item in one of the player's inventory slots into the matching equipment slot.
+    ///     If the equipment slot is occupied, the previously equipped item is moved into the
+    ///     source inventory slot.
+    /// </summary>
+    /// <param name="playerId">Player entity ID.</param>
+    /// <param name="slotIndex">Inventory slot index holding the item to equip.</param>
+    public void Equip(ulong playerId, int slotIndex)
+    {
+        lock (mutationLock)
+        {
+            if (!slotIndexer.TryGetSlotForEntity(playerId, slotIndex, out var sourceSlotEid))
+            {
+                logger.LogWarning("Player {Player} tried to equip nonexistent slot.",
+                    loggingUtil.FormatEntity(playerId));
+                return;
+            }
+
+            // Do nothing if the slot is empty or its item was already modified this tick.
+            if (!hierarchyIndexer.TryGetFirstDirectChild(sourceSlotEid, out var itemId) ||
+                modifiedItems.Contains(itemId)) return;
+
+            if (!entityTypes.TryGetValue(itemId, out var entityType) || entityType != EntityType.Item)
+            {
+                logger.LogWarning("{Player} tried to equip non-item entity {Entity}.",
+                    loggingUtil.FormatEntity(playerId), loggingUtil.FormatEntity(itemId));
+                return;
+            }
+
+            // Items without an EquipmentType component cannot be equipped.
+            if (!equipmentTypes.TryGetValue(itemId, out var equipmentType)) return;
+
+            if (!TryGetEquipmentSlot(playerId, equipmentType, out var equipSlotEid))
+            {
+                logger.LogWarning("Player {Player} has no equipment slot for {Type}; cannot equip.",
+                    loggingUtil.FormatEntity(playerId), equipmentType);
+                return;
+            }
+
+            // If the equipment slot is occupied, move the previously equipped item into the source slot.
+            if (hierarchyIndexer.TryGetFirstDirectChild(equipSlotEid, out var previousItemId))
+            {
+                if (modifiedItems.Contains(previousItemId)) return;
+                parents.AddOrUpdateComponent(previousItemId, sourceSlotEid);
+                modifiedItems.Add(previousItemId);
+            }
+
+            parents.AddOrUpdateComponent(itemId, equipSlotEid);
+            modifiedItems.Add(itemId);
+
+            // Push authoritative state for both affected slots to subscribed clients.
+            worldManagementController.ResyncEntityTree(eventSender, sourceSlotEid);
+            worldManagementController.ResyncEntityTree(eventSender, equipSlotEid);
+
+            logger.LogInformation("{Player} equipped {Item}.", loggingUtil.FormatEntity(playerId),
+                loggingUtil.FormatEntity(itemId));
+        }
+    }
+
+    /// <summary>
+    ///     Unequips the item equipped by the player in the given equipment type slot, moving it
+    ///     to an empty inventory slot.
+    /// </summary>
+    /// <param name="playerId">Player entity ID.</param>
+    /// <param name="equipmentType">Equipment type to unequip.</param>
+    /// <param name="targetSlotIndex">Inventory slot index to which the item should be moved.</param>
+    public void Unequip(ulong playerId, EquipmentType equipmentType, int targetSlotIndex)
+    {
+        lock (mutationLock)
+        {
+            // Do nothing if the player has nothing equipped in the given slot.
+            if (!equipmentIndexer.TryGetEquippedItem(playerId, equipmentType, out var itemId) || itemId == 0) return;
+
+            // Do nothing if the item was already modified this tick.
+            if (modifiedItems.Contains(itemId)) return;
+
+            // Do nothing if the target slot does not exist or is occupied.
+            if (!slotIndexer.TryGetSlotForEntity(playerId, targetSlotIndex, out var targetSlotEid)) return;
+            if (hierarchyIndexer.TryGetFirstDirectChild(targetSlotEid, out _)) return;
+
+            if (!TryGetEquipmentSlot(playerId, equipmentType, out var equipSlotEid))
+            {
+                logger.LogWarning("Player {Player} has no equipment slot for {Type}; cannot unequip.",
+                    loggingUtil.FormatEntity(playerId), equipmentType);
+                return;
+            }
+
+            parents.AddOrUpdateComponent(itemId, targetSlotEid);
+            modifiedItems.Add(itemId);
+
+            // Push authoritative state for both affected slots to subscribed clients.
+            worldManagementController.ResyncEntityTree(eventSender, equipSlotEid);
+            worldManagementController.ResyncEntityTree(eventSender, targetSlotEid);
+
+            logger.LogInformation("{Player} unequipped {Item}.", loggingUtil.FormatEntity(playerId),
+                loggingUtil.FormatEntity(itemId));
+        }
+    }
+
+    /// <summary>
+    ///     Finds the player's equipment slot for the given equipment type.
+    ///     Caller must hold <see cref="mutationLock" />.
+    /// </summary>
+    /// <param name="playerId">Player entity ID.</param>
+    /// <param name="equipmentType">Equipment type.</param>
+    /// <param name="slotEid">Equipment slot entity ID. Only meaningful if this method returns true.</param>
+    /// <returns>true if the equipment slot was found, false otherwise.</returns>
+    private bool TryGetEquipmentSlot(ulong playerId, EquipmentType equipmentType, out ulong slotEid)
+    {
+        foreach (var candidateEid in hierarchyIndexer.GetDirectChildren(playerId))
+        {
+            if (!entityTypes.TryGetValue(candidateEid, out var candidateType) ||
+                candidateType != EntityType.EquipmentSlot) continue;
+            if (!equipmentTypes.TryGetValue(candidateEid, out var candidateEquipmentType) ||
+                candidateEquipmentType != equipmentType) continue;
+
+            slotEid = candidateEid;
+            return true;
+        }
+
+        slotEid = 0;
+        return false;
+    }
+
+    #endregion Equipment
 
     #region Swap
 

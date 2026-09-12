@@ -49,6 +49,8 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Chat_Send, ChatEventMapper },
             { EventId.Core_Interaction_Interact, InteractEventMapper },
             { EventId.Core_Inventory_Swap, SwapEventMapper },
+            { EventId.Core_Inventory_Equip, EquipEventMapper },
+            { EventId.Core_Inventory_Unequip, UnequipEventMapper },
             { EventId.Server_TemplateEntity_Update, EntityDefinitionEventMapper }
         };
     }
@@ -131,5 +133,25 @@ public class SourceEntityMappingInboundPipelineStage : IInboundPipelineStage
     private static void SwapEventMapper(IEventDetails details, ulong entityId)
     {
         ((InventorySwapEventDetails)details).ActorId = entityId;
+    }
+
+    /// <summary>
+    ///     Mapper for EquipEventDetails events.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    /// <param name="entityId">Player entity ID.</param>
+    private static void EquipEventMapper(IEventDetails details, ulong entityId)
+    {
+        ((EquipEventDetails)details).PlayerEntityId = entityId;
+    }
+
+    /// <summary>
+    ///     Mapper for UnequipEventDetails events.
+    /// </summary>
+    /// <param name="details">Event details.</param>
+    /// <param name="entityId">Player entity ID.</param>
+    private static void UnequipEventMapper(IEventDetails details, ulong entityId)
+    {
+        ((UnequipEventDetails)details).PlayerEntityId = entityId;
     }
 }

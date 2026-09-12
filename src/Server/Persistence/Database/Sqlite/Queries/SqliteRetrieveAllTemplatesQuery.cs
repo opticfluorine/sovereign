@@ -38,7 +38,8 @@ public class SqliteRetrieveAllTemplatesQuery : IRetrieveAllTemplatesQuery
                 healthValue, healthMaxValue, healthChangeRate, healthChangeInterval,
                 staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
                 manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
-                statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck
+                statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck,
+                equipmentType
             FROM EntityWithComponents 
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = id
             WHERE id >= @FirstTemplateId AND id <= @LastTemplateId";
