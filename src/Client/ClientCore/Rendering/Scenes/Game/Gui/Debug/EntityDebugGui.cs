@@ -56,7 +56,8 @@ public class EntityDebugGui(
     HealthComponentCollection healths,
     StaminaComponentCollection staminas,
     ManaComponentCollection manas,
-    StatsComponentCollection stats)
+    StatsComponentCollection stats,
+    EquipmentTypeComponentCollection equipmentTypes)
 {
     private string entityIdInput = "";
 
@@ -140,6 +141,7 @@ public class EntityDebugGui(
                     AddComponentRow("Quantity:", entityId, quantities);
                     AddComponentRow("Item Use:", entityId, itemUses);
                     AddComponentRow("Use Range:", entityId, useRanges);
+                    AddComponentRow("EquipmentType:", entityId, equipmentTypes);
                     AddCompoundRows("Health:", entityId, healths,
                         health =>
                         {

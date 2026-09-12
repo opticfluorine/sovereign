@@ -194,6 +194,15 @@ public static class ComponentOperators
         };
 
     /// <summary>
+    ///     Standard operators for EquipmentType-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<EquipmentType, EquipmentType, EquipmentType>>
+        EquipmentTypeOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
+        };
+
+    /// <summary>
     ///     Standard operators for BlockTile-valued components.
     /// </summary>
     public static readonly Dictionary<ComponentOperation, Func<BlockTile, BlockTile, BlockTile>>

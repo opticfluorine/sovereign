@@ -81,6 +81,7 @@ public class EntitiesLuaLibrary : ILuaLibrary
                 EntityConstants.LastBlockEntityId);
             luaHost.AddLibraryEntityIdConstant(nameof(EntityConstants.FirstPersistedEntityId),
                 EntityConstants.FirstPersistedEntityId);
+            luaHost.AddLibraryEntityIdConstant("None", EntityConstants.NoEntity);
         }
         finally
         {

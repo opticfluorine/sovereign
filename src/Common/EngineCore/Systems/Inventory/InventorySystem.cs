@@ -50,7 +50,9 @@ internal sealed class InventorySystem : ISystem
         EventId.Core_Inventory_Swap,
         EventId.Core_Inventory_AddSlots,
         EventId.Core_Inventory_RemoveItem,
-        EventId.Core_Inventory_UseItem
+        EventId.Core_Inventory_UseItem,
+        EventId.Core_Inventory_Equip,
+        EventId.Core_Inventory_Unequip
     };
 
     public int WorkloadEstimate => 50;
@@ -166,6 +168,42 @@ internal sealed class InventorySystem : ISystem
                     }
 
                     manager.UseItem(ev.FromPlayerId, details.ToolEntityId, details.TargetEntityId);
+                    break;
+                }
+
+                case EventId.Core_Inventory_Equip:
+                {
+                    if (ev.EventDetails is not EquipEventDetails details)
+                    {
+                        logger.LogError("Received Equip without details.");
+                        break;
+                    }
+
+                    if (details.PlayerEntityId == 0)
+                    {
+                        logger.LogError("Received Equip with no player entity ID.");
+                        break;
+                    }
+
+                    manager.Equip(details.PlayerEntityId, details.SlotIndex);
+                    break;
+                }
+
+                case EventId.Core_Inventory_Unequip:
+                {
+                    if (ev.EventDetails is not UnequipEventDetails details)
+                    {
+                        logger.LogError("Received Unequip without details.");
+                        break;
+                    }
+
+                    if (details.PlayerEntityId == 0)
+                    {
+                        logger.LogError("Received Unequip with no player entity ID.");
+                        break;
+                    }
+
+                    manager.Unequip(details.PlayerEntityId, details.EquipmentType, details.TargetSlotIndex);
                     break;
                 }
             }

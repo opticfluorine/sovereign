@@ -467,4 +467,18 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutStats();
+
+    /// <summary>
+    ///     Adds an EquipmentType component to the entity.
+    /// </summary>
+    /// <param name="equipmentType">Equipment type.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(EquipmentType))]
+    IEntityBuilder EquipmentType(EquipmentType equipmentType);
+
+    /// <summary>
+    ///     Removes the EquipmentType component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutEquipmentType();
 }

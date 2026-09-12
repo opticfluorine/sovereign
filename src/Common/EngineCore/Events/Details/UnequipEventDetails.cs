@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2025 opticfluorine
+// Copyright (c) 2026 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,44 +14,33 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineUtil.Attributes;
+using MessagePack;
+using Sovereign.EngineCore.Components.Types;
 
-namespace Sovereign.EngineCore.Components.Types;
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Entity type for non-block entities.
+///     Details of an event requesting that a player unequip an equipped item into an inventory slot.
 /// </summary>
-[Scriptable]
-[ScriptableEnum]
-public enum EntityType
+[MessagePackObject]
+public class UnequipEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Entity is an NPC.
+    ///     Entity ID of the player performing the unequip. Overwritten by the server with the
+    ///     authenticated player's entity ID when received over the network.
     /// </summary>
-    Npc = 0,
+    [Key(0)]
+    public ulong PlayerEntityId { get; set; }
 
     /// <summary>
-    ///     Entity is an item.
+    ///     Equipment type to unequip.
     /// </summary>
-    Item = 1,
+    [Key(1)]
+    public EquipmentType EquipmentType { get; set; }
 
     /// <summary>
-    ///     Entity is a player.
+    ///     Index of the inventory slot to which the equipped item should be moved.
     /// </summary>
-    Player = 2,
-
-    /// <summary>
-    ///     Entity is a slot (e.g. inventory slot).
-    /// </summary>
-    Slot = 3,
-
-    /// <summary>
-    ///     Entity is an equipment slot (e.g. weapon slot).
-    /// </summary>
-    EquipmentSlot = 4,
-
-    /// <summary>
-    ///     Entity has no special type. Not explicitly stored; only used in EntityDefinition.
-    /// </summary>
-    Other = 0x7F
+    [Key(2)]
+    public int TargetSlotIndex { get; set; }
 }
