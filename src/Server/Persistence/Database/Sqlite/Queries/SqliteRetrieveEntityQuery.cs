@@ -38,7 +38,7 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
                 staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
                 manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
                 statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck,
-                equipmentType)
+                equipmentType, level, experience)
 	        AS (
 		        SELECT id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent, 
                         drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
@@ -48,7 +48,7 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
                         staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
                         manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
                         statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck,
-                        equipmentType
+                        equipmentType, level, experience
 		        FROM EntityWithComponents WHERE id = @Id
 	        UNION ALL
             	SELECT ec.id, ec.template_id, ec.x, ec.y, ec.z, ec.frontTileId, ec.topTileId, ec.playerCharacter,
@@ -61,7 +61,7 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
                         ec.staminaValue, ec.staminaMaxValue, ec.staminaChangeRate, ec.staminaChangeInterval,
                         ec.manaValue, ec.manaMaxValue, ec.manaChangeRate, ec.manaChangeInterval,
                         ec.statsStrength, ec.statsDefense, ec.statsAgility, ec.statsIntelligence, ec.statsWisdom, ec.statsCharisma, ec.statsLuck,
-                        ec.equipmentType
+                        ec.equipmentType, ec.level, ec.experience
 		        FROM EntityWithComponents ec, EntityTree et
         			WHERE ec.parent = et.id
 	        )
@@ -74,7 +74,7 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
                 et.staminaValue, et.staminaMaxValue, et.staminaChangeRate, et.staminaChangeInterval,
                 et.manaValue, et.manaMaxValue, et.manaChangeRate, et.manaChangeInterval,
                 et.statsStrength, et.statsDefense, et.statsAgility, et.statsIntelligence, et.statsWisdom, et.statsCharisma, et.statsLuck,
-                et.equipmentType
+                et.equipmentType, et.level, et.experience
             FROM EntityTree et
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = et.id
             ORDER BY et.parent NULLS LAST";

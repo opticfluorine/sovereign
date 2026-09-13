@@ -69,6 +69,8 @@ public class EntityDefinition
         Mana = other.Mana;
         Stats = other.Stats;
         EquipmentType = other.EquipmentType;
+        Level = other.Level;
+        Experience = other.Experience;
     }
 
     /// <summary>
@@ -244,4 +246,16 @@ public class EntityDefinition
     /// </summary>
     [Key(28)]
     public EquipmentType? EquipmentType { get; set; }
+
+    /// <summary>
+    ///     Level component, or null if the entity has no level.
+    /// </summary>
+    [Key(29)]
+    public int? Level { get; set; }
+
+    /// <summary>
+    ///     Experience component, or null if the entity has no experience.
+    /// </summary>
+    [Key(30)]
+    public int? Experience { get; set; }
 }

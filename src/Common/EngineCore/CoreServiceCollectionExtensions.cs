@@ -144,6 +144,8 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<ManaComponentCollection>();
         services.TryAddComponentCollection<StatsComponentCollection>();
         services.TryAddComponentCollection<EquipmentTypeComponentCollection>();
+        services.TryAddComponentCollection<LevelComponentCollection>();
+        services.TryAddComponentCollection<ExperienceComponentCollection>();
     }
 
     private static void AddComponentIndexers(IServiceCollection services)

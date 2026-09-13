@@ -49,7 +49,9 @@ public class EntityDefinitionValidator(
                IsStaminaValid(definition) &&
                IsManaValid(definition) &&
                IsStatsValid(definition) &&
-               IsEquipmentTypeValid(definition);
+               IsEquipmentTypeValid(definition) &&
+               IsLevelValid(definition) &&
+               IsExperienceValid(definition);
     }
 
     /// <summary>
@@ -119,7 +121,9 @@ public class EntityDefinitionValidator(
                      definition is
                      {
                          Position: not null,
-                         Name: not null
+                         Name: not null,
+                         Level: not null,
+                         Experience: not null
                      };
 
         if (!result) logger.LogError("Definition for {Id:X} is an incomplete player character.", definition.EntityId);
@@ -227,6 +231,42 @@ public class EntityDefinitionValidator(
         if (!result)
             logger.LogError(
                 "Definition for {Id:X} has an invalid EquipmentType; it must be a valid equipment type and only items and equipment slots may have it.",
+                definition.EntityId);
+        return result;
+    }
+
+    /// <summary>
+    ///     Checks that the Level component, if present, is only applied to players and NPCs
+    ///     with a value of at least 1.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <returns>true if valid for this rule, false otherwise.</returns>
+    private bool IsLevelValid(EntityDefinition definition)
+    {
+        if (!definition.Level.HasValue) return true;
+
+        var result = definition.Level.Value >= 1 &&
+                     definition.EntityType is EntityType.Player or EntityType.Npc;
+        if (!result)
+            logger.LogError(
+                "Definition for {Id:X} has an invalid Level; it must be at least 1 and only players and NPCs may have it.",
+                definition.EntityId);
+        return result;
+    }
+
+    /// <summary>
+    ///     Checks that the Experience component, if present, is only applied to players and NPCs.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <returns>true if valid for this rule, false otherwise.</returns>
+    private bool IsExperienceValid(EntityDefinition definition)
+    {
+        if (!definition.Experience.HasValue) return true;
+
+        var result = definition.EntityType is EntityType.Player or EntityType.Npc;
+        if (!result)
+            logger.LogError(
+                "Definition for {Id:X} has an invalid Experience; only players and NPCs may have it.",
                 definition.EntityId);
         return result;
     }

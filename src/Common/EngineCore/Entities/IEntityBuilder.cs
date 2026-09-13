@@ -481,4 +481,32 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutEquipmentType();
+
+    /// <summary>
+    ///     Adds a Level component to the entity.
+    /// </summary>
+    /// <param name="level">Level.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(Level))]
+    IEntityBuilder Level(int level);
+
+    /// <summary>
+    ///     Removes the Level component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutLevel();
+
+    /// <summary>
+    ///     Adds an Experience component to the entity.
+    /// </summary>
+    /// <param name="experience">Experience.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(Experience))]
+    IEntityBuilder Experience(int experience);
+
+    /// <summary>
+    ///     Removes the Experience component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutExperience();
 }

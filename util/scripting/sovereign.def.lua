@@ -57,6 +57,8 @@ EntityEventDetails = {}
 ---@field Quantity integer? Optional. Quantity of a stackable item.
 ---@field ServerOnly boolean? Optional. Whether entity is server-only.
 ---@field Stackable boolean? Optional. Whether entity is stackable.
+---@field Level integer? Optional. Level of the entity.
+---@field Experience integer? Optional. Experience of the entity.
 ---@field Stats Stats? Optional. Stats for players and NPCs.
 EntitySpecification = {}
 
@@ -632,6 +634,54 @@ Components.Stats.Set = function (entityId, value) end
 ---@param entityId integer Entity ID.
 ---@param value Stats Value to add.
 Components.Stats.Add = function (entityId, value) end
+
+---Level component.
+---@class Components.Level
+Components.Level = {}
+---Checks whether the component exists for an entity.
+---@param entityId integer Entity ID.
+---@return boolean true if exists, false otherwise.
+Components.Level.Exists = function (entityId) end
+---Gets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param lookback boolean? If true, enable lookback at components from the last tick.
+---@return integer?
+Components.Level.Get = function(entityId, lookback) end
+---Removes the component for the entity if it exists.
+---@param entityId integer Entity ID.
+Components.Level.Remove = function (entityId) end
+---Sets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param value integer Value.
+Components.Level.Set = function (entityId, value) end
+---Adds the given value to the component.
+---@param entityId integer Entity ID.
+---@param value integer Value to add.
+Components.Level.Add = function (entityId, value) end
+
+---Experience component.
+---@class Components.Experience
+Components.Experience = {}
+---Checks whether the component exists for an entity.
+---@param entityId integer Entity ID.
+---@return boolean true if exists, false otherwise.
+Components.Experience.Exists = function (entityId) end
+---Gets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param lookback boolean? If true, enable lookback at components from the last tick.
+---@return integer?
+Components.Experience.Get = function(entityId, lookback) end
+---Removes the component for the entity if it exists.
+---@param entityId integer Entity ID.
+Components.Experience.Remove = function (entityId) end
+---Sets the value of the component for the entity.
+---@param entityId integer Entity ID.
+---@param value integer Value.
+Components.Experience.Set = function (entityId, value) end
+---Adds the given value to the component.
+---@param entityId integer Entity ID.
+---@param value integer Value to add.
+Components.Experience.Add = function (entityId, value) end
 
 ---NpcFlags component.
 ---@class Components.NpcFlags

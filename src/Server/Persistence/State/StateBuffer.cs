@@ -114,9 +114,19 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<EquipmentType>> equipmentTypeUpdates = new(BufferSize);
 
     /// <summary>
+    ///     Experience state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<int>> experienceUpdates = new(BufferSize);
+
+    /// <summary>
     ///     NpcFlags state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<NpcFlag>> npcFlagsUpdates = new(BufferSize);
+
+    /// <summary>
+    ///     Level state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<int>> levelUpdates = new(BufferSize);
 
     /// <summary>
     ///     Position state updates.
@@ -473,6 +483,24 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Queues a Level update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateLevel(ref StateUpdate<int> update)
+    {
+        levelUpdates.Add(ref update);
+    }
+
+    /// <summary>
+    ///     Queues an Experience update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateExperience(ref StateUpdate<int> update)
+    {
+        experienceUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -528,6 +556,8 @@ public sealed class StateBuffer
         manaUpdates.Clear();
         statsUpdates.Clear();
         equipmentTypeUpdates.Clear();
+        levelUpdates.Clear();
+        experienceUpdates.Clear();
     }
 
     /// <summary>
@@ -737,6 +767,20 @@ public sealed class StateBuffer
                     persistenceProvider.AddEquipmentTypeComponentQuery,
                     persistenceProvider.ModifyEquipmentTypeComponentQuery,
                     persistenceProvider.RemoveEquipmentTypeComponentQuery,
+                    transaction);
+
+                // Level.
+                SynchronizeComponent(levelUpdates,
+                    persistenceProvider.AddLevelComponentQuery,
+                    persistenceProvider.ModifyLevelComponentQuery,
+                    persistenceProvider.RemoveLevelComponentQuery,
+                    transaction);
+
+                // Experience.
+                SynchronizeComponent(experienceUpdates,
+                    persistenceProvider.AddExperienceComponentQuery,
+                    persistenceProvider.ModifyExperienceComponentQuery,
+                    persistenceProvider.RemoveExperienceComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);
