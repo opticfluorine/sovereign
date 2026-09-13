@@ -57,7 +57,9 @@ public class EntityDebugGui(
     StaminaComponentCollection staminas,
     ManaComponentCollection manas,
     StatsComponentCollection stats,
-    EquipmentTypeComponentCollection equipmentTypes)
+    EquipmentTypeComponentCollection equipmentTypes,
+    LevelComponentCollection levels,
+    ExperienceComponentCollection experiences)
 {
     private string entityIdInput = "";
 
@@ -142,6 +144,8 @@ public class EntityDebugGui(
                     AddComponentRow("Item Use:", entityId, itemUses);
                     AddComponentRow("Use Range:", entityId, useRanges);
                     AddComponentRow("Equipment Type:", entityId, equipmentTypes);
+                    AddComponentRow("Level:", entityId, levels);
+                    AddComponentRow("Experience:", entityId, experiences);
                     AddCompoundRows("Health:", entityId, healths,
                         health =>
                         {

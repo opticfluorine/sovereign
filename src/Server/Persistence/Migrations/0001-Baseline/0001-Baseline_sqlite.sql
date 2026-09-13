@@ -128,6 +128,8 @@ CREATE TABLE Entity
     stats_charisma      INTEGER,
     stats_luck          INTEGER,
     equipment_type      INTEGER,
+    level               INTEGER,
+    experience          INTEGER,
     FOREIGN KEY (template_id) REFERENCES Entity (id),
     FOREIGN KEY (parent_id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
@@ -257,7 +259,9 @@ SELECT Entity.id                 AS id,
        Entity.stats_wisdom       AS statsWisdom,
        Entity.stats_charisma     AS statsCharisma,
        Entity.stats_luck         AS statsLuck,
-       Entity.equipment_type     AS equipmentType
+       Entity.equipment_type     AS equipmentType,
+       Entity.level              AS level,
+       Entity.experience         AS experience
 FROM Entity;
 
 

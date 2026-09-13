@@ -36,6 +36,8 @@ public class PlayerDebugGui
     private readonly DrawableComponentCollection drawables;
     private readonly HealthComponentCollection healths;
     private readonly KinematicsComponentCollection kinematics;
+    private readonly LevelComponentCollection levels;
+    private readonly ExperienceComponentCollection experiences;
     private readonly ManaComponentCollection manas;
     private readonly NameComponentCollection names;
     private readonly OrientationComponentCollection orientations;
@@ -51,7 +53,8 @@ public class PlayerDebugGui
         DrawableComponentCollection drawables, PlayerCharacterTagCollection players,
         OrientationComponentCollection orientations, BlockGridPositionIndexer blocks,
         AdminTagCollection admins, HealthComponentCollection healths, StaminaComponentCollection staminas,
-        ManaComponentCollection manas, StatsComponentCollection stats)
+        ManaComponentCollection manas, StatsComponentCollection stats, LevelComponentCollection levels,
+        ExperienceComponentCollection experiences)
     {
         this.stateServices = stateServices;
         this.names = names;
@@ -67,6 +70,8 @@ public class PlayerDebugGui
         this.staminas = staminas;
         this.manas = manas;
         this.stats = stats;
+        this.levels = levels;
+        this.experiences = experiences;
     }
 
     /// <summary>
@@ -94,6 +99,9 @@ public class PlayerDebugGui
                     x => worldSegmentResolver.GetWorldSegmentForPosition(x.Position).ToString());
 
                 AddVitalsRows(playerEntityId);
+
+                AddComponentRow("Level:", playerEntityId, levels);
+                AddComponentRow("Experience:", playerEntityId, experiences);
 
                 AddStatsRows(playerEntityId);
 

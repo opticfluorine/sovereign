@@ -95,6 +95,12 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const SqliteType EquipmentTypeParamType = SqliteType.Integer;
     private const string EquipmentTypeParamName = "equipment_type";
 
+    private const SqliteType LevelParamType = SqliteType.Integer;
+    private const string LevelParamName = "level";
+
+    private const SqliteType ExperienceParamType = SqliteType.Integer;
+    private const string ExperienceParamName = "experience";
+
     private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
 
@@ -328,6 +334,18 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             new SimpleSqliteModifyComponentQuery<EquipmentType>(EquipmentTypeParamName, EquipmentTypeParamType, conn);
         RemoveEquipmentTypeComponentQuery =
             new SimpleSqliteRemoveComponentQuery(EquipmentTypeParamName, conn);
+
+        // Level component.
+        AddLevelComponentQuery = new SimpleSqliteAddComponentQuery<int>(LevelParamName, LevelParamType, conn);
+        ModifyLevelComponentQuery = new SimpleSqliteModifyComponentQuery<int>(LevelParamName, LevelParamType, conn);
+        RemoveLevelComponentQuery = new SimpleSqliteRemoveComponentQuery(LevelParamName, conn);
+
+        // Experience component.
+        AddExperienceComponentQuery =
+            new SimpleSqliteAddComponentQuery<int>(ExperienceParamName, ExperienceParamType, conn);
+        ModifyExperienceComponentQuery =
+            new SimpleSqliteModifyComponentQuery<int>(ExperienceParamName, ExperienceParamType, conn);
+        RemoveExperienceComponentQuery = new SimpleSqliteRemoveComponentQuery(ExperienceParamName, conn);
     }
 
     public IAddComponentQuery<BlockTile> AddBlockTileQuery { get; }
@@ -423,6 +441,12 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<EquipmentType> AddEquipmentTypeComponentQuery { get; }
     public IModifyComponentQuery<EquipmentType> ModifyEquipmentTypeComponentQuery { get; }
     public IRemoveComponentQuery RemoveEquipmentTypeComponentQuery { get; }
+    public IAddComponentQuery<int> AddLevelComponentQuery { get; }
+    public IModifyComponentQuery<int> ModifyLevelComponentQuery { get; }
+    public IRemoveComponentQuery RemoveLevelComponentQuery { get; }
+    public IAddComponentQuery<int> AddExperienceComponentQuery { get; }
+    public IModifyComponentQuery<int> ModifyExperienceComponentQuery { get; }
+    public IRemoveComponentQuery RemoveExperienceComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

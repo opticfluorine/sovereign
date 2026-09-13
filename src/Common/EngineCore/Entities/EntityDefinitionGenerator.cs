@@ -52,6 +52,8 @@ public class EntityDefinitionGenerator
     private readonly StatsComponentCollection stats;
     private readonly UseRangeComponentCollection useRanges;
     private readonly EquipmentTypeComponentCollection equipmentTypes;
+    private readonly LevelComponentCollection levels;
+    private readonly ExperienceComponentCollection experiences;
 
     public EntityDefinitionGenerator(
         KinematicsComponentCollection kinematics,
@@ -67,7 +69,8 @@ public class EntityDefinitionGenerator
         ItemUseComponentCollection itemUses, NpcFlagsComponentCollection npcFlags,
         UseRangeComponentCollection useRanges, HealthComponentCollection healths,
         StaminaComponentCollection staminas, ManaComponentCollection manas, StatsComponentCollection stats,
-        EquipmentTypeComponentCollection equipmentTypes, EntityTable entityTable)
+        EquipmentTypeComponentCollection equipmentTypes, LevelComponentCollection levels,
+        ExperienceComponentCollection experiences, EntityTable entityTable)
     {
         this.kinematics = kinematics;
         this.blockTiles = blockTiles;
@@ -96,6 +99,8 @@ public class EntityDefinitionGenerator
         this.manas = manas;
         this.stats = stats;
         this.equipmentTypes = equipmentTypes;
+        this.levels = levels;
+        this.experiences = experiences;
         this.entityTable = entityTable;
     }
 
@@ -187,6 +192,12 @@ public class EntityDefinitionGenerator
 
         if (equipmentTypes.HasLocalComponentForEntity(entityId))
             def.EquipmentType = equipmentTypes[entityId];
+
+        if (levels.HasLocalComponentForEntity(entityId))
+            def.Level = levels[entityId];
+
+        if (experiences.HasLocalComponentForEntity(entityId))
+            def.Experience = experiences[entityId];
 
         return def;
     }

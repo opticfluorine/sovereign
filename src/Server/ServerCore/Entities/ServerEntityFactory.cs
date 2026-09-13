@@ -56,6 +56,8 @@ public sealed class ServerEntityFactory(
     ManaComponentCollection manas,
     StatsComponentCollection stats,
     EquipmentTypeComponentCollection equipmentTypes,
+    LevelComponentCollection levels,
+    ExperienceComponentCollection experiences,
     EntityTable entityTable,
     EntityAssigner entityAssigner)
     : IEntityFactory
@@ -107,6 +109,8 @@ public sealed class ServerEntityFactory(
             manas,
             stats,
             equipmentTypes,
+            levels,
+            experiences,
             entityTable);
     }
 }

@@ -91,6 +91,8 @@ public sealed class EntityProcessor
     private const int IndexStatsCharisma = IndexStatsWisdom + 1;
     private const int IndexStatsLuck = IndexStatsCharisma + 1;
     private const int IndexEquipmentType = IndexStatsLuck + 1;
+    private const int IndexLevel = IndexEquipmentType + 1;
+    private const int IndexExperience = IndexLevel + 1;
     private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
     private readonly ExistingEntitySet existingEntitySet;
@@ -170,6 +172,8 @@ public sealed class EntityProcessor
             ProcessMana(reader, builder);
             ProcessStats(reader, builder);
             ProcessEquipmentType(reader, builder);
+            ProcessLevel(reader, builder);
+            ProcessExperience(reader, builder);
 
             /* Complete the entity. */
             builder.Build();
@@ -456,6 +460,28 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexEquipmentType)) return;
         builder.EquipmentType((EquipmentType)reader.GetInt32(IndexEquipmentType));
+    }
+
+    /// <summary>
+    ///     Processes the Level component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessLevel(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexLevel)) return;
+        builder.Level(reader.GetInt32(IndexLevel));
+    }
+
+    /// <summary>
+    ///     Processes the Experience component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessExperience(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexExperience)) return;
+        builder.Experience(reader.GetInt32(IndexExperience));
     }
 
     private void ProcessNpcFlags(IDataReader reader, IEntityBuilder builder)

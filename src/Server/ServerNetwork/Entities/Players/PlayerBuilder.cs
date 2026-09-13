@@ -82,7 +82,9 @@ public sealed class PlayerBuilder(
                     Size = Vector3.One
                 })
                 .CastShadows(new Shadow { Radius = 0.2f })
-                .AnimatedSprite(newPlayersOptions.Value.AnimatedSprite);
+                .AnimatedSprite(newPlayersOptions.Value.AnimatedSprite)
+                .Level(1)
+                .Experience(0);
 
             if (newPlayersOptions.Value.AdminByDefault)
             {

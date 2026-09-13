@@ -61,6 +61,8 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly StatsComponentCollection stats;
     private readonly UseRangeComponentCollection useRanges;
     private readonly EquipmentTypeComponentCollection equipmentTypes;
+    private readonly LevelComponentCollection levels;
+    private readonly ExperienceComponentCollection experiences;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
     private bool isBlock;
@@ -98,6 +100,8 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         ManaComponentCollection manas,
         StatsComponentCollection stats,
         EquipmentTypeComponentCollection equipmentTypes,
+        LevelComponentCollection levels,
+        ExperienceComponentCollection experiences,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -131,6 +135,8 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.manas = manas;
         this.stats = stats;
         this.equipmentTypes = equipmentTypes;
+        this.levels = levels;
+        this.experiences = experiences;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -541,6 +547,30 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutEquipmentType()
     {
         this.equipmentTypes.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder Level(int level)
+    {
+        levels.AddOrUpdateComponent(entityId, level, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutLevel()
+    {
+        levels.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder Experience(int experience)
+    {
+        experiences.AddOrUpdateComponent(entityId, experience, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutExperience()
+    {
+        experiences.RemoveComponent(entityId, load);
         return this;
     }
 

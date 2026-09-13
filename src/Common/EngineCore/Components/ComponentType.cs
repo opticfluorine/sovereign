@@ -169,6 +169,16 @@ public enum ComponentType
     /// </summary>
     EquipmentType = 0x001D,
 
+    /// <summary>
+    ///     Level component.
+    /// </summary>
+    Level = 0x001E,
+
+    /// <summary>
+    ///     Experience component.
+    /// </summary>
+    Experience = 0x001F,
+
     #endregion Common
 
     #region Client
