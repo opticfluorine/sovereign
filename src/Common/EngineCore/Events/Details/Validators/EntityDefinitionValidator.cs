@@ -236,7 +236,8 @@ public class EntityDefinitionValidator(
     }
 
     /// <summary>
-    ///     Checks that the Level component, if present, is only applied to players and NPCs.
+    ///     Checks that the Level component, if present, is only applied to players and NPCs
+    ///     with a value of at least 1.
     /// </summary>
     /// <param name="definition">Entity definition.</param>
     /// <returns>true if valid for this rule, false otherwise.</returns>
@@ -244,10 +245,11 @@ public class EntityDefinitionValidator(
     {
         if (!definition.Level.HasValue) return true;
 
-        var result = definition.EntityType is EntityType.Player or EntityType.Npc;
+        var result = definition.Level.Value >= 1 &&
+                     definition.EntityType is EntityType.Player or EntityType.Npc;
         if (!result)
             logger.LogError(
-                "Definition for {Id:X} has an invalid Level; only players and NPCs may have it.",
+                "Definition for {Id:X} has an invalid Level; it must be at least 1 and only players and NPCs may have it.",
                 definition.EntityId);
         return result;
     }

@@ -238,7 +238,6 @@ public class NpcTemplateEditorTab
         behaviorControlGroup.Render(selectedDefinition);
         RenderNpcFlags();
         RenderStats();
-        RenderLevel();
         entityDataControlGroup.Render();
 
         ImGui.EndTable();
@@ -264,12 +263,32 @@ public class NpcTemplateEditorTab
     }
 
     /// <summary>
-    ///     Renders the Stats component controls.
+    ///     Renders the Level and Stats component controls.
     /// </summary>
     private void RenderStats()
     {
         if (!ImGui.CollapsingHeader("Stats", ImGuiTreeNodeFlags.DefaultOpen)) return;
         if (!ImGui.BeginTable("Stats", 2, ImGuiTableFlags.SizingFixedFit)) return;
+
+        var levelEnabled = selectedDefinition.Level.HasValue;
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Has Level:");
+        ImGui.TableNextColumn();
+        ImGui.Checkbox("##levelEnabled", ref levelEnabled);
+
+        ImGui.BeginDisabled(!levelEnabled);
+
+        var level = selectedDefinition.Level ?? 0;
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Level:");
+        ImGui.TableNextColumn();
+        ImGui.InputInt("##level", ref level);
+
+        ImGui.EndDisabled();
+
+        selectedDefinition.Level = levelEnabled ? level : null;
 
         var statsEnabled = selectedDefinition.Stats.HasValue;
 
@@ -320,37 +339,6 @@ public class NpcTemplateEditorTab
         ImGui.EndDisabled();
 
         selectedDefinition.Stats = statsEnabled ? stats : null;
-
-        ImGui.EndTable();
-    }
-
-    /// <summary>
-    ///     Renders the Level component controls.
-    /// </summary>
-    private void RenderLevel()
-    {
-        if (!ImGui.CollapsingHeader("Level", ImGuiTreeNodeFlags.DefaultOpen)) return;
-        if (!ImGui.BeginTable("Level", 2, ImGuiTableFlags.SizingFixedFit)) return;
-
-        var levelEnabled = selectedDefinition.Level.HasValue;
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Enabled:");
-        ImGui.TableNextColumn();
-        ImGui.Checkbox("##levelEnabled", ref levelEnabled);
-
-        ImGui.BeginDisabled(!levelEnabled);
-
-        var level = selectedDefinition.Level ?? 0;
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Level:");
-        ImGui.TableNextColumn();
-        ImGui.InputInt("##level", ref level);
-
-        ImGui.EndDisabled();
-
-        selectedDefinition.Level = levelEnabled ? level : null;
 
         ImGui.EndTable();
     }
