@@ -14,20 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Systems.Inventory;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
+using Sovereign.Persistence.Entities;
 
-/// <summary>
-///     Inventory constants shared by the client and server.
-/// </summary>
-public static class InventoryConstants
+namespace Sovereign.Persistence.State.Trackers;
+
+public class EquipmentTypeStateTracker(
+    EquipmentTypeComponentCollection components,
+    ExistingEntitySet existingEntitySet,
+    StateManager stateManager,
+    EntityTable entityTable)
+    : BaseStateTracker<EquipmentType>(components, EquipmentType.Weapon, existingEntitySet, stateManager, entityTable)
 {
-    /// <summary>
-    ///     Number of hotbar slots at the front of an inventory.
-    /// </summary>
-    public const int HotbarSlotCount = 10;
-
-    /// <summary>
-    ///     Number of equipment slots per player, one for each EquipmentType value.
-    /// </summary>
-    public const int EquipmentSlotCount = 8;
+    protected override void OnStateUpdate(ref StateUpdate<EquipmentType> update)
+    {
+        stateManager.FrontBuffer.UpdateEquipmentType(ref update);
+    }
 }

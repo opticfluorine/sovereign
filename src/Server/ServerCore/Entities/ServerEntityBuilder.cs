@@ -59,12 +59,13 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         StaminaComponentCollection staminas,
         ManaComponentCollection manas,
         StatsComponentCollection stats,
+        EquipmentTypeComponentCollection equipmentTypes,
         EntityTable entityTable)
         : base(entityId, load, entityManager, kinematics, blockTiles,
             aboveBlocks, playerCharacterTags, names, parents,
             drawables, animatedSprites, orientations, admins, blockPositions, castBlockShadows, pointLightSources,
             physics, boundingBoxes, castShadows, entityTypes, serverOnly, stackables, quantities, itemUses, npcFlags,
-            useRanges, healths, staminas, manas, stats, entityTable)
+            useRanges, healths, staminas, manas, stats, equipmentTypes, entityTable)
     {
         this.accounts = accounts;
     }

@@ -60,6 +60,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly StaminaComponentCollection staminas;
     private readonly StatsComponentCollection stats;
     private readonly UseRangeComponentCollection useRanges;
+    private readonly EquipmentTypeComponentCollection equipmentTypes;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
     private bool isBlock;
@@ -96,6 +97,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         StaminaComponentCollection staminas,
         ManaComponentCollection manas,
         StatsComponentCollection stats,
+        EquipmentTypeComponentCollection equipmentTypes,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -128,6 +130,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.staminas = staminas;
         this.manas = manas;
         this.stats = stats;
+        this.equipmentTypes = equipmentTypes;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -526,6 +529,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutStats()
     {
         this.stats.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder EquipmentType(EquipmentType equipmentType)
+    {
+        this.equipmentTypes.AddOrUpdateComponent(entityId, equipmentType, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutEquipmentType()
+    {
+        this.equipmentTypes.RemoveComponent(entityId, load);
         return this;
     }
 

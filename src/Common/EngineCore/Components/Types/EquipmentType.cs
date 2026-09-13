@@ -1,5 +1,5 @@
 // Sovereign Engine
-// Copyright (c) 2025 opticfluorine
+// Copyright (c) 2026 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,39 +19,53 @@ using Sovereign.EngineUtil.Attributes;
 namespace Sovereign.EngineCore.Components.Types;
 
 /// <summary>
-///     Entity type for non-block entities.
+///     Type of equipment that an item may be equipped as or that an equipment slot accepts.
 /// </summary>
+/// <remarks>
+///     Values are explicitly indexed from zero so that they can be used to index arrays;
+///     there is deliberately no "none" value, since absence of the component means "not equippable".
+/// </remarks>
 [Scriptable]
 [ScriptableEnum]
-public enum EntityType
+public enum EquipmentType
 {
     /// <summary>
-    ///     Entity is an NPC.
+    ///     Weapon.
     /// </summary>
-    Npc = 0,
+    Weapon = 0,
 
     /// <summary>
-    ///     Entity is an item.
+    ///     Offhand item such as a shield.
     /// </summary>
-    Item = 1,
+    Offhand = 1,
 
     /// <summary>
-    ///     Entity is a player.
+    ///     Helmet.
     /// </summary>
-    Player = 2,
+    Helmet = 2,
 
     /// <summary>
-    ///     Entity is a slot (e.g. inventory slot).
+    ///     Chest armor.
     /// </summary>
-    Slot = 3,
+    Chest = 3,
 
     /// <summary>
-    ///     Entity is an equipment slot (e.g. weapon slot).
+    ///     Leggings.
     /// </summary>
-    EquipmentSlot = 4,
+    Leggings = 4,
 
     /// <summary>
-    ///     Entity has no special type. Not explicitly stored; only used in EntityDefinition.
+    ///     Necklace.
     /// </summary>
-    Other = 0x7F
+    Necklace = 5,
+
+    /// <summary>
+    ///     Ring worn on the left hand.
+    /// </summary>
+    LeftRing = 6,
+
+    /// <summary>
+    ///     Ring worn on the right hand.
+    /// </summary>
+    RightRing = 7
 }

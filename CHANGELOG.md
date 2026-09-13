@@ -4,6 +4,12 @@
 
 ### September
 
+#### 12 September 2026
+
+* Add equipment and equippable items. Each new player is assigned one `EquipmentSlot` child entity per equipment type, and a new common, scriptable `EquipmentType` component (with the new `EquipmentType` value type: `Weapon`, `Offhand`, `Helmet`, `Chest`, `Leggings`, `Necklace`, `LeftRing`, `RightRing`) marks equippable items and configures equipment slots. The component is exposed to scripts as `Components.EquipmentType` and as an `EquipmentType` key in the `Entities.Create` spec table, may be set on item templates in the template editor, and is persisted to the database.
+* Add new client-to-server `Equip` and `Unequip` inventory events processed by the inventory system. Equipping moves the item into the matching equipment slot (swapping out any previously equipped item into the source slot); unequipping moves the equipped item into an empty inventory slot. The server pushes the authoritative state by resynchronizing each affected slot's entity tree. A new `PlayerEquipmentIndexer` tracks equipped items per player.
+* Add new `Inventory.GetEquipment(entityId, equipmentType)`, `Inventory.Equip(entityId, slotIndex)`, and `Inventory.Unequip(entityId, equipmentType, slotIndex)` Lua scripting functions, and a new `Entities.None` constant for entity ID 0.
+
 #### 11 September 2026
 
 * Add new common, scriptable `Stats` component for players and NPCs with the new `Stats` value type (`Strength`, `Defense`, `Agility`, `Intelligence`, `Wisdom`, `Charisma`, `Luck`). The component is exposed to scripts as `Components.Stats` and as a `Stats` key in the `Entities.Create` spec table, and is persisted to the database. NPC templates may now specify Stats in the template editor.

@@ -92,6 +92,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const string ManaColumnPrefix = "mana_";
     private const string StatsColumnPrefix = "stats_";
 
+    private const SqliteType EquipmentTypeParamType = SqliteType.Integer;
+    private const string EquipmentTypeParamName = "equipment_type";
+
     private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
 
@@ -317,6 +320,14 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         AddStatsComponentQuery = statsQueries;
         ModifyStatsComponentQuery = statsQueries;
         RemoveStatsComponentQuery = statsQueries;
+
+        // EquipmentType component.
+        AddEquipmentTypeComponentQuery =
+            new SimpleSqliteAddComponentQuery<EquipmentType>(EquipmentTypeParamName, EquipmentTypeParamType, conn);
+        ModifyEquipmentTypeComponentQuery =
+            new SimpleSqliteModifyComponentQuery<EquipmentType>(EquipmentTypeParamName, EquipmentTypeParamType, conn);
+        RemoveEquipmentTypeComponentQuery =
+            new SimpleSqliteRemoveComponentQuery(EquipmentTypeParamName, conn);
     }
 
     public IAddComponentQuery<BlockTile> AddBlockTileQuery { get; }
@@ -409,6 +420,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<Stats> AddStatsComponentQuery { get; }
     public IModifyComponentQuery<Stats> ModifyStatsComponentQuery { get; }
     public IRemoveComponentQuery RemoveStatsComponentQuery { get; }
+    public IAddComponentQuery<EquipmentType> AddEquipmentTypeComponentQuery { get; }
+    public IModifyComponentQuery<EquipmentType> ModifyEquipmentTypeComponentQuery { get; }
+    public IRemoveComponentQuery RemoveEquipmentTypeComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

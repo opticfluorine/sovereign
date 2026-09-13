@@ -68,6 +68,7 @@ public class EntityDefinition
         Stamina = other.Stamina;
         Mana = other.Mana;
         Stats = other.Stats;
+        EquipmentType = other.EquipmentType;
     }
 
     /// <summary>
@@ -237,4 +238,10 @@ public class EntityDefinition
     /// </summary>
     [Key(27)]
     public Stats? Stats { get; set; }
+
+    /// <summary>
+    ///     EquipmentType component, or null if the entity is not equippable.
+    /// </summary>
+    [Key(28)]
+    public EquipmentType? EquipmentType { get; set; }
 }

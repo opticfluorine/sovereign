@@ -184,6 +184,11 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutStats();
 
+        if (definition.EquipmentType.HasValue)
+            builder.EquipmentType(definition.EquipmentType.Value);
+        else
+            builder.WithoutEquipmentType();
+
         var entityId = builder.Build();
         logger.LogDebug("Processed entity ID {Id:X}.", entityId);
     }

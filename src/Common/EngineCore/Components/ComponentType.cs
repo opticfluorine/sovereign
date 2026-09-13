@@ -164,6 +164,11 @@ public enum ComponentType
     /// </summary>
     Stats = 0x001C,
 
+    /// <summary>
+    ///     EquipmentType component.
+    /// </summary>
+    EquipmentType = 0x001D,
+
     #endregion Common
 
     #region Client

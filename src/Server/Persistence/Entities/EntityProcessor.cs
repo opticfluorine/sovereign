@@ -90,6 +90,7 @@ public sealed class EntityProcessor
     private const int IndexStatsWisdom = IndexStatsIntelligence + 1;
     private const int IndexStatsCharisma = IndexStatsWisdom + 1;
     private const int IndexStatsLuck = IndexStatsCharisma + 1;
+    private const int IndexEquipmentType = IndexStatsLuck + 1;
     private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
     private readonly ExistingEntitySet existingEntitySet;
@@ -168,6 +169,7 @@ public sealed class EntityProcessor
             ProcessStamina(reader, builder);
             ProcessMana(reader, builder);
             ProcessStats(reader, builder);
+            ProcessEquipmentType(reader, builder);
 
             /* Complete the entity. */
             builder.Build();
@@ -448,6 +450,12 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexItemUse)) return;
         builder.ItemUse((ItemUse)reader.GetInt32(IndexItemUse));
+    }
+
+    private void ProcessEquipmentType(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexEquipmentType)) return;
+        builder.EquipmentType((EquipmentType)reader.GetInt32(IndexEquipmentType));
     }
 
     private void ProcessNpcFlags(IDataReader reader, IEntityBuilder builder)

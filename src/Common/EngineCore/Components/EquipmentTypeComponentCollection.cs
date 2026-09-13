@@ -14,20 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Systems.Inventory;
+using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
+using Sovereign.EngineUtil.Attributes;
+
+namespace Sovereign.EngineCore.Components;
 
 /// <summary>
-///     Inventory constants shared by the client and server.
+///     Component that marks an entity as equippable and specifies the type of equipment.
 /// </summary>
-public static class InventoryConstants
+[ScriptableComponents]
+public class EquipmentTypeComponentCollection : BaseComponentCollection<EquipmentType>
 {
-    /// <summary>
-    ///     Number of hotbar slots at the front of an inventory.
-    /// </summary>
-    public const int HotbarSlotCount = 10;
+    private const int InitialSize = 65536;
 
-    /// <summary>
-    ///     Number of equipment slots per player, one for each EquipmentType value.
-    /// </summary>
-    public const int EquipmentSlotCount = 8;
+    public EquipmentTypeComponentCollection(EntityTable entityTable, ComponentManager componentManager)
+        : base(entityTable, componentManager, InitialSize, ComponentOperators.EquipmentTypeOperators,
+            ComponentType.EquipmentType)
+    {
+    }
 }

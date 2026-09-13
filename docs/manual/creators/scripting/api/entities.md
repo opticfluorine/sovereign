@@ -338,3 +338,4 @@ are entity IDs and are provided as `lightuserdata` values.
 | `FirstBlockEntityId`          | `lightuserdata` | First block entity ID                       |
 | `LastBlockEntityId`           | `lightuserdata` | Last block entity ID                        |
 | `FirstPersistedEntityId`      | `lightuserdata` | First persisted entity ID                   |
+| `None`                        | `lightuserdata` | Entity ID 0, meaning "no entity"            |

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Numerics;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 
@@ -89,6 +90,23 @@ public interface IInventoryController
     /// <param name="toolItemId">Item entity ID to use as a tool.</param>
     /// <param name="targetEntityId">Entity ID of the target.</param>
     void UseItem(IEventSender eventSender, ulong actorEntityId, ulong toolItemId, ulong targetEntityId);
+
+    /// <summary>
+    ///     Equips the item in one of a player's inventory slots.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID of the player performing the equip.</param>
+    /// <param name="slotIndex">Inventory slot index holding the item to equip.</param>
+    void Equip(IEventSender eventSender, ulong entityId, int slotIndex);
+
+    /// <summary>
+    ///     Unequips a player's equipped item into an inventory slot.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="entityId">Entity ID of the player performing the unequip.</param>
+    /// <param name="equipmentType">Equipment type to unequip.</param>
+    /// <param name="targetSlotIndex">Inventory slot index to which the item should be moved.</param>
+    void Unequip(IEventSender eventSender, ulong entityId, EquipmentType equipmentType, int targetSlotIndex);
 }
 
 /// <summary>
@@ -178,6 +196,35 @@ internal class InventoryController : IInventoryController
         var ev = new Event(EventId.Core_Inventory_UseItem, details)
         {
             FromPlayerId = actorEntityId
+        };
+        eventSender.SendEvent(ev);
+    }
+
+    public void Equip(IEventSender eventSender, ulong entityId, int slotIndex)
+    {
+        var details = new EquipEventDetails
+        {
+            PlayerEntityId = entityId,
+            SlotIndex = slotIndex
+        };
+        var ev = new Event(EventId.Core_Inventory_Equip, details)
+        {
+            FromPlayerId = entityId
+        };
+        eventSender.SendEvent(ev);
+    }
+
+    public void Unequip(IEventSender eventSender, ulong entityId, EquipmentType equipmentType, int targetSlotIndex)
+    {
+        var details = new UnequipEventDetails
+        {
+            PlayerEntityId = entityId,
+            EquipmentType = equipmentType,
+            TargetSlotIndex = targetSlotIndex
+        };
+        var ev = new Event(EventId.Core_Inventory_Unequip, details)
+        {
+            FromPlayerId = entityId
         };
         eventSender.SendEvent(ev);
     }

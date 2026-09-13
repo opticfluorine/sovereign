@@ -14,20 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Systems.Inventory;
+using Sovereign.EngineCore.Systems.Inventory;
+
+namespace Sovereign.EngineCore.Events.Details.Validators;
 
 /// <summary>
-///     Inventory constants shared by the client and server.
+///     Validates UnequipEventDetails objects. PlayerEntityId is not validated because it is
+///     overwritten by the server with the authenticated player's entity ID.
 /// </summary>
-public static class InventoryConstants
+public class UnequipEventDetailsValidator : IEventDetailsValidator
 {
-    /// <summary>
-    ///     Number of hotbar slots at the front of an inventory.
-    /// </summary>
-    public const int HotbarSlotCount = 10;
-
-    /// <summary>
-    ///     Number of equipment slots per player, one for each EquipmentType value.
-    /// </summary>
-    public const int EquipmentSlotCount = 8;
+    public bool IsValid(IEventDetails? details)
+    {
+        return details is UnequipEventDetails
+        {
+            TargetSlotIndex: >= 0,
+            EquipmentType: var equipmentType
+        } && (int)equipmentType >= 0 && (int)equipmentType < InventoryConstants.EquipmentSlotCount;
+    }
 }

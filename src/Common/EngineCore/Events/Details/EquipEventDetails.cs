@@ -14,20 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.EngineCore.Systems.Inventory;
+using MessagePack;
+
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Inventory constants shared by the client and server.
+///     Details of an event requesting that a player equip the item in one of their inventory slots.
 /// </summary>
-public static class InventoryConstants
+[MessagePackObject]
+public class EquipEventDetails : IEventDetails
 {
     /// <summary>
-    ///     Number of hotbar slots at the front of an inventory.
+    ///     Entity ID of the player performing the equip. Overwritten by the server with the
+    ///     authenticated player's entity ID when received over the network.
     /// </summary>
-    public const int HotbarSlotCount = 10;
+    [Key(0)]
+    public ulong PlayerEntityId { get; set; }
 
     /// <summary>
-    ///     Number of equipment slots per player, one for each EquipmentType value.
+    ///     Index of the inventory slot holding the item to equip.
     /// </summary>
-    public const int EquipmentSlotCount = 8;
+    [Key(1)]
+    public int SlotIndex { get; set; }
 }

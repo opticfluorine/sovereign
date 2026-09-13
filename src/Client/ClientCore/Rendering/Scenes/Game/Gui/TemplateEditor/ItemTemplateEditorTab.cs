@@ -30,6 +30,7 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Components.Validators;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Inventory;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 
@@ -42,6 +43,12 @@ public class ItemTemplateEditorTab
     ///     Color for selected row in the browser.
     /// </summary>
     private const uint SelectionColor = 0xFF773333;
+
+    /// <summary>
+    ///     Names of the equipment types, indexed by equipment type value.
+    /// </summary>
+    private static readonly string[] EquipmentTypeNames =
+        Enum.GetNames<EquipmentType>();
 
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly AppearanceControlGroup appearanceControlGroup;
@@ -59,6 +66,8 @@ public class ItemTemplateEditorTab
     private readonly TemplateEntityDataClient templateEntityDataClient;
 
     private bool initialized;
+    private EquipmentType inputEquipmentType = EquipmentType.Weapon;
+    private bool inputEquippableEnabled;
     private float inputUseRange;
     private bool inputUseRangeEnabled;
     private EntityDefinition selectedDefinition = new();
@@ -268,6 +277,21 @@ public class ItemTemplateEditorTab
         ImGui.InputFloat("##useRange", ref inputUseRange, 0.1f, 1.0f, "%.2f");
         ImGui.EndDisabled();
 
+        ImGui.TableNextColumn();
+        ImGui.Text("Equippable:");
+        ImGui.TableNextColumn();
+        ImGui.Checkbox("##equippableEnabled", ref inputEquippableEnabled);
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Equipment Type:");
+        ImGui.TableNextColumn();
+        ImGui.BeginDisabled(!inputEquippableEnabled);
+        var equipmentTypeIndex = (int)inputEquipmentType;
+        if (ImGui.Combo("##equipmentType", ref equipmentTypeIndex, EquipmentTypeNames,
+                InventoryConstants.EquipmentSlotCount))
+            inputEquipmentType = (EquipmentType)equipmentTypeIndex;
+        ImGui.EndDisabled();
+
         ImGui.EndTable();
 
         ImGui.Text("Item Use:");
@@ -393,6 +417,7 @@ public class ItemTemplateEditorTab
     private void Save(EntityDefinition definition, Dictionary<string, string> entityData)
     {
         selectedDefinition.UseRange = inputUseRangeEnabled ? inputUseRange : null;
+        selectedDefinition.EquipmentType = inputEquippableEnabled ? inputEquipmentType : null;
         templateEntityDataClient.SetTemplateEntity(definition, entityData);
     }
 
@@ -418,11 +443,15 @@ public class ItemTemplateEditorTab
             entityDataControlGroup.SelectEntity(selectedEntityId);
             inputUseRangeEnabled = selectedDefinition.UseRange.HasValue;
             inputUseRange = selectedDefinition.UseRange ?? 0f;
+            inputEquippableEnabled = selectedDefinition.EquipmentType.HasValue;
+            inputEquipmentType = selectedDefinition.EquipmentType ?? EquipmentType.Weapon;
         }
         else
         {
             inputUseRangeEnabled = false;
             inputUseRange = 0f;
+            inputEquippableEnabled = false;
+            inputEquipmentType = EquipmentType.Weapon;
         }
     }
 

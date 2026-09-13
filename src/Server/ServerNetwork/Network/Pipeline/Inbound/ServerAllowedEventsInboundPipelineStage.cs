@@ -50,7 +50,9 @@ public class ServerAllowedEventsInboundPipelineStage : IInboundPipelineStage
         EventId.Core_Inventory_Drop,
         EventId.Core_Inventory_DropAtPosition,
         EventId.Core_Inventory_Swap,
-        EventId.Core_Inventory_UseItem
+        EventId.Core_Inventory_UseItem,
+        EventId.Core_Inventory_Equip,
+        EventId.Core_Inventory_Unequip
     };
 
     private readonly IEventSender eventSender;

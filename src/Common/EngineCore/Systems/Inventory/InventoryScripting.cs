@@ -37,6 +37,7 @@ public sealed class InventoryScripting(
     SlotIndexer slotIndexer,
     ParentComponentCollection parents,
     EntityTypeComponentCollection entityTypes,
+    PlayerEquipmentIndexer equipmentIndexer,
     InventoryManager manager)
 {
     [ScriptableFunction("PickUp")]
@@ -95,6 +96,24 @@ public sealed class InventoryScripting(
             throw new LuaException("targetEntityId must be a regular entity");
 
         controller.UseItem(eventSender, actorId, itemId, targetEntityId);
+    }
+
+    [ScriptableFunction("GetEquipment")]
+    public ulong GetEquipment(ulong entityId, EquipmentType equipmentType)
+    {
+        return equipmentIndexer.TryGetEquippedItem(entityId, equipmentType, out var itemId) ? itemId : 0;
+    }
+
+    [ScriptableFunction("Equip")]
+    public void Equip(ulong entityId, int slotIndex)
+    {
+        controller.Equip(eventSender, entityId, slotIndex - 1);
+    }
+
+    [ScriptableFunction("Unequip")]
+    public void Unequip(ulong entityId, EquipmentType equipmentType, int slotIndex)
+    {
+        controller.Unequip(eventSender, entityId, equipmentType, slotIndex - 1);
     }
 
     [ScriptableFunction("RemoveItem")]

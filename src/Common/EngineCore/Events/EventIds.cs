@@ -389,6 +389,18 @@ public enum EventId
     /// Associated details: UseItemEventDetails
     Core_Inventory_UseItem = 1307,
 
+    /// <summary>
+    ///     Event sent to equip the item in one of a player's inventory slots.
+    /// </summary>
+    /// Associated details: EquipEventDetails
+    Core_Inventory_Equip = 1308,
+
+    /// <summary>
+    ///     Event sent to unequip a player's equipped item.
+    /// </summary>
+    /// Associated details: UnequipEventDetails
+    Core_Inventory_Unequip = 1309,
+
     #endregion Inventory
 
     #region Vitals

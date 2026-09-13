@@ -55,6 +55,7 @@ public sealed class ServerEntityFactory(
     StaminaComponentCollection staminas,
     ManaComponentCollection manas,
     StatsComponentCollection stats,
+    EquipmentTypeComponentCollection equipmentTypes,
     EntityTable entityTable,
     EntityAssigner entityAssigner)
     : IEntityFactory
@@ -105,6 +106,7 @@ public sealed class ServerEntityFactory(
             staminas,
             manas,
             stats,
+            equipmentTypes,
             entityTable);
     }
 }

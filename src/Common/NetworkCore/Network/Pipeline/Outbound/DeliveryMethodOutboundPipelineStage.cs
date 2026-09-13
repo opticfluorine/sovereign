@@ -66,6 +66,8 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Core_Inventory_DropAtPosition, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Inventory_Swap, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Inventory_UseItem, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Inventory_Equip, DeliveryMethod.ReliableUnordered },
+        { EventId.Core_Inventory_Unequip, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Vitals_Kill, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Vitals_ChangeVitals, DeliveryMethod.ReliableUnordered }
     };

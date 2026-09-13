@@ -56,6 +56,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         InventorySwapEventDetailsValidator invSwapValidator,
         UseItemEventDetailsValidator useItemValidator,
         ChangeVitalsEventDetailsValidator changeVitalsValidator,
+        EquipEventDetailsValidator equipValidator,
+        UnequipEventDetailsValidator unequipValidator,
         ILogger<ValidationInboundPipelineStage> logger)
     {
         this.logger = logger;
@@ -94,6 +96,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Inventory_DropAtPosition, dropAtPositionValidator },
             { EventId.Core_Inventory_Swap, invSwapValidator },
             { EventId.Core_Inventory_UseItem, useItemValidator },
+            { EventId.Core_Inventory_Equip, equipValidator },
+            { EventId.Core_Inventory_Unequip, unequipValidator },
             { EventId.Core_Vitals_Kill, entityValidator },
             { EventId.Core_Vitals_ChangeVitals, changeVitalsValidator }
         };
