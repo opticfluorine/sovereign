@@ -54,6 +54,7 @@ public sealed class InventoryManager(
     UseRangeComponentCollection useRanges,
     EquipmentTypeComponentCollection equipmentTypes,
     PlayerEquipmentIndexer equipmentIndexer,
+    EquipmentSlotIndexer equipmentSlotIndexer,
     IEngineConfiguration engineConfiguration,
     IEventSender eventSender,
     InventoryPermissionService permissionService,
@@ -747,7 +748,7 @@ public sealed class InventoryManager(
             // Items without an EquipmentType component cannot be equipped.
             if (!equipmentTypes.TryGetValue(itemId, out var equipmentType)) return;
 
-            if (!TryGetEquipmentSlot(playerId, equipmentType, out var equipSlotEid))
+            if (!equipmentSlotIndexer.TryGetEquipmentSlot(playerId, equipmentType, out var equipSlotEid))
             {
                 logger.LogWarning("Player {Player} has no equipment slot for {Type}; cannot equip.",
                     loggingUtil.FormatEntity(playerId), equipmentType);
@@ -795,7 +796,7 @@ public sealed class InventoryManager(
             if (!slotIndexer.TryGetSlotForEntity(playerId, targetSlotIndex, out var targetSlotEid)) return;
             if (hierarchyIndexer.TryGetFirstDirectChild(targetSlotEid, out _)) return;
 
-            if (!TryGetEquipmentSlot(playerId, equipmentType, out var equipSlotEid))
+            if (!equipmentSlotIndexer.TryGetEquipmentSlot(playerId, equipmentType, out var equipSlotEid))
             {
                 logger.LogWarning("Player {Player} has no equipment slot for {Type}; cannot unequip.",
                     loggingUtil.FormatEntity(playerId), equipmentType);
@@ -812,31 +813,6 @@ public sealed class InventoryManager(
             logger.LogInformation("{Player} unequipped {Item}.", loggingUtil.FormatEntity(playerId),
                 loggingUtil.FormatEntity(itemId));
         }
-    }
-
-    /// <summary>
-    ///     Finds the player's equipment slot for the given equipment type.
-    ///     Caller must hold <see cref="mutationLock" />.
-    /// </summary>
-    /// <param name="playerId">Player entity ID.</param>
-    /// <param name="equipmentType">Equipment type.</param>
-    /// <param name="slotEid">Equipment slot entity ID. Only meaningful if this method returns true.</param>
-    /// <returns>true if the equipment slot was found, false otherwise.</returns>
-    private bool TryGetEquipmentSlot(ulong playerId, EquipmentType equipmentType, out ulong slotEid)
-    {
-        foreach (var candidateEid in hierarchyIndexer.GetDirectChildren(playerId))
-        {
-            if (!entityTypes.TryGetValue(candidateEid, out var candidateType) ||
-                candidateType != EntityType.EquipmentSlot) continue;
-            if (!equipmentTypes.TryGetValue(candidateEid, out var candidateEquipmentType) ||
-                candidateEquipmentType != equipmentType) continue;
-
-            slotEid = candidateEid;
-            return true;
-        }
-
-        slotEid = 0;
-        return false;
     }
 
     #endregion Equipment

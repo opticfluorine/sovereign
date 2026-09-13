@@ -24,6 +24,7 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Inventory;
 using Sovereign.Persistence.Players;
 using Sovereign.ServerCore.Configuration;
 
@@ -121,7 +122,7 @@ public sealed class PlayerBuilder(
     /// <param name="playerId">Player ID.</param>
     private void AddEquipmentSlots(ulong playerId)
     {
-        for (var i = 0; i < EquipmentConstants.EquipmentSlotCount; i++)
+        for (var i = 0; i < InventoryConstants.EquipmentSlotCount; i++)
         {
             entityFactory.GetBuilder()
                 .EntityType(EntityType.EquipmentSlot)

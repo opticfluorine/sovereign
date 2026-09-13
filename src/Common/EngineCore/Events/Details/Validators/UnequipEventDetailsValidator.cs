@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Systems.Inventory;
 
 namespace Sovereign.EngineCore.Events.Details.Validators;
 
@@ -30,6 +30,6 @@ public class UnequipEventDetailsValidator : IEventDetailsValidator
         {
             TargetSlotIndex: >= 0,
             EquipmentType: var equipmentType
-        } && (int)equipmentType >= 0 && (int)equipmentType < EquipmentConstants.EquipmentSlotCount;
+        } && (int)equipmentType >= 0 && (int)equipmentType < InventoryConstants.EquipmentSlotCount;
     }
 }

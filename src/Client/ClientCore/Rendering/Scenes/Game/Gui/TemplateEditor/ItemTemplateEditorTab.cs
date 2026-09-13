@@ -30,6 +30,7 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Components.Validators;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Inventory;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 
@@ -287,7 +288,7 @@ public class ItemTemplateEditorTab
         ImGui.BeginDisabled(!inputEquippableEnabled);
         var equipmentTypeIndex = (int)inputEquipmentType;
         if (ImGui.Combo("##equipmentType", ref equipmentTypeIndex, EquipmentTypeNames,
-                EquipmentConstants.EquipmentSlotCount))
+                InventoryConstants.EquipmentSlotCount))
             inputEquipmentType = (EquipmentType)equipmentTypeIndex;
         ImGui.EndDisabled();
 

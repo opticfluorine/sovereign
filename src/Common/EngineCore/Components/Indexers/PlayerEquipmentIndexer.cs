@@ -24,6 +24,7 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Inventory;
 
 namespace Sovereign.EngineCore.Components.Indexers;
 
@@ -217,7 +218,7 @@ public sealed class PlayerEquipmentIndexer : BaseComponentIndexer<ulong>
     {
         if (equippedByPlayer.TryGetValue(playerId, out var equipment)) return equipment;
 
-        equipment = new ulong[EquipmentConstants.EquipmentSlotCount];
+        equipment = new ulong[InventoryConstants.EquipmentSlotCount];
         equippedByPlayer[playerId] = equipment;
         return equipment;
     }

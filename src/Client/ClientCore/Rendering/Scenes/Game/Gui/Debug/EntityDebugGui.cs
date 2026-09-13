@@ -141,7 +141,7 @@ public class EntityDebugGui(
                     AddComponentRow("Quantity:", entityId, quantities);
                     AddComponentRow("Item Use:", entityId, itemUses);
                     AddComponentRow("Use Range:", entityId, useRanges);
-                    AddComponentRow("EquipmentType:", entityId, equipmentTypes);
+                    AddComponentRow("Equipment Type:", entityId, equipmentTypes);
                     AddCompoundRows("Health:", entityId, healths,
                         health =>
                         {

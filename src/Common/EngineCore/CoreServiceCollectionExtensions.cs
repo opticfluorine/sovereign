@@ -165,6 +165,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<SlotComponentEventFilter>();
         services.TryAddSingleton<SlotIndexer>();
         services.TryAddSingleton<PlayerEquipmentIndexer>();
+        services.TryAddSingleton<EquipmentSlotIndexer>();
     }
 
     private static void AddComponentValidators(IServiceCollection services)

@@ -25,4 +25,9 @@ public static class InventoryConstants
     ///     Number of hotbar slots at the front of an inventory.
     /// </summary>
     public const int HotbarSlotCount = 10;
+
+    /// <summary>
+    ///     Number of equipment slots per player, one for each EquipmentType value.
+    /// </summary>
+    public const int EquipmentSlotCount = 8;
 }

@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.Logging;
-using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Components.Validators;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Inventory;
 
 namespace Sovereign.EngineCore.Events.Details.Validators;
 
@@ -222,7 +222,7 @@ public class EntityDefinitionValidator(
         if (!definition.EquipmentType.HasValue) return true;
 
         var result = (int)definition.EquipmentType.Value >= 0 &&
-                     (int)definition.EquipmentType.Value < EquipmentConstants.EquipmentSlotCount &&
+                     (int)definition.EquipmentType.Value < InventoryConstants.EquipmentSlotCount &&
                      definition.EntityType is EntityType.Item or EntityType.EquipmentSlot;
         if (!result)
             logger.LogError(
