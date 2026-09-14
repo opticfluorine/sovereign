@@ -4,7 +4,6 @@
 
 ### September
 
-<<<<<<< HEAD
 #### 13 September 2026
 
 * Add new common, scriptable `Level` and `Experience` components for players and NPCs. The components are exposed to scripts as `Components.Level` and `Components.Experience` and as `Level` and `Experience` keys in the `Entities.Create` spec table, may be set on NPC templates in the template editor, and are persisted to the database. New players are created with `Level 1` and `Experience 0`.
