@@ -14,51 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace Sovereign.Scripting.Lua;
 
 /// <summary>
-///     P/Invoke bindings and macro reimplementations for Lua 5.4.
+///     P/Invoke bindings and macro reimplementations for LuaJIT 2.1.
 /// </summary>
 /// <remarks>
-///     These are partial bindings created from the Lua 5.4 lua.h and lauxlib.h headers.
-///     For documentation of these functions, refer to the Lua 5.4 Reference Manual.
+///     These are partial bindings created from the LuaJIT 2.1 lua.h and lauxlib.h headers.
+///     LuaJIT exposes the Lua 5.1 API with LuaJIT extensions; for documentation of these
+///     functions, refer to the Lua 5.1 Reference Manual and the LuaJIT extensions page.
+///     Several Lua 5.4-only functions do not exist in LuaJIT and are reimplemented here
+///     in managed code on top of the Lua 5.1 API.
 /// </remarks>
 public static partial class LuaBindings
 {
     public delegate int LuaCFunction(IntPtr luaState);
-
-    public delegate int LuaKFunction(IntPtr luaState, int status, IntPtr ctx);
-
-    public delegate string LuaReader(IntPtr luaState, IntPtr ud, ref long sz);
-
-    public delegate int LuaWriter(IntPtr luaState, IntPtr p, long sz, IntPtr ud);
-
-    public enum LuaArithOp
-    {
-        Add = 0,
-        Sub = 1,
-        Mul = 2,
-        Mod = 3,
-        Pow = 4,
-        Div = 5,
-        IDiv = 6,
-        BAnd = 7,
-        BOr = 8,
-        BXor = 9,
-        Shl = 10,
-        Shr = 11,
-        Unm = 12,
-        BNot = 13
-    }
-
-    public enum LuaCompareOp
-    {
-        Eq = 0,
-        Lt = 1,
-        Le = 2
-    }
 
     public enum LuaGcWhat
     {
@@ -70,9 +43,7 @@ public static partial class LuaBindings
         Step = 5,
         SetPause = 6,
         SetStepMul = 7,
-        IsRunning = 9,
-        Gen = 10,
-        Inc = 11
+        IsRunning = 9
     }
 
     public enum LuaResult
@@ -101,14 +72,20 @@ public static partial class LuaBindings
 
     public const int LUA_MULTRET = -1;
 
-    public const int LUA_REGISTRYINDEX = -1001000;
-    public const int LUA_RIDX_MAINTHREAD = 1;
-    public const int LUA_RIDX_GLOBALS = 2;
+    public const int LUA_REGISTRYINDEX = -10000;
+    public const int LUA_GLOBALSINDEX = -10002;
 
-    public const int GcDefaultMinorMul = 20;
-    public const int GcDefaultMajorMul = 100;
+    /// <summary>
+    ///     Lua registry key under which the pointer of the main thread state is stored.
+    /// </summary>
+    public const string MainThreadRegistryKey = "sovereign_mainthread";
 
-    private const string LibName = "lua5.4";
+    private const string LibName = "luajit-5.1";
+
+    static LuaBindings()
+    {
+        NativeLibrary.SetDllImportResolver(typeof(LuaBindings).Assembly, ResolveLuaLibrary);
+    }
 
     [LibraryImport(LibName)]
     public static partial IntPtr luaL_newstate();
@@ -120,8 +97,10 @@ public static partial class LuaBindings
     // Basic Stack Manipulation
     //
 
-    [LibraryImport(LibName)]
-    public static partial int lua_absindex(IntPtr luaState, int idx);
+    public static int lua_absindex(IntPtr luaState, int idx)
+    {
+        return idx > 0 || idx <= LUA_REGISTRYINDEX ? idx : lua_gettop(luaState) + idx + 1;
+    }
 
     [LibraryImport(LibName)]
     public static partial int lua_gettop(IntPtr luaState);
@@ -137,8 +116,39 @@ public static partial class LuaBindings
     [LibraryImport(LibName)]
     public static partial void lua_pushvalue(IntPtr luaState, int idx);
 
-    [LibraryImport(LibName)]
-    public static partial void lua_rotate(IntPtr luaState, int idx, int n);
+    /// <summary>
+    ///     Rotates the elements between the given index and the top of the stack by n positions.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="idx">Stack index of the first element to rotate.</param>
+    /// <param name="n">Number of positions to rotate; may be negative.</param>
+    public static void lua_rotate(IntPtr luaState, int idx, int n)
+    {
+        var absIdx = lua_absindex(luaState, idx);
+        var count = lua_gettop(luaState) - absIdx + 1;
+        if (count <= 1) return;
+
+        // Normalize the rotation amount into [0, count).
+        n %= count;
+        if (n < 0) n += count;
+        if (n == 0) return;
+
+        // Save copies of the top n elements; they will move to the bottom.
+        var oldTop = lua_gettop(luaState);
+        for (var i = 0; i < n; ++i)
+            lua_pushvalue(luaState, absIdx + count - n + i);
+
+        // Shift the remaining elements upward by n positions. Iterating downward ensures
+        // that each destination is always above the not-yet-copied sources.
+        for (var i = count - n - 1; i >= 0; --i)
+            lua_copy(luaState, absIdx + i, absIdx + n + i);
+
+        // Move the saved copies into the bottom n slots.
+        for (var i = 0; i < n; ++i)
+            lua_copy(luaState, oldTop + 1 + i, absIdx + i);
+
+        lua_pop(luaState, n);
+    }
 
     [LibraryImport(LibName)]
     public static partial void lua_copy(IntPtr luaState, int fromidx, int toidx);
@@ -163,9 +173,18 @@ public static partial class LuaBindings
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool lua_iscfunction(IntPtr luaState, int idx);
 
-    [LibraryImport(LibName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool lua_isinteger(IntPtr luaState, int idx);
+    /// <summary>
+    ///     Determines if the value at the given stack index is an integer-valued number.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="idx">Stack index.</param>
+    /// <returns>true if the value is an integral number, false otherwise.</returns>
+    public static bool lua_isinteger(IntPtr luaState, int idx)
+    {
+        if (lua_type(luaState, idx) != LuaType.Number) return false;
+        var value = lua_tonumber(luaState, idx);
+        return !double.IsNaN(value) && !double.IsInfinity(value) && value == Math.Truncate(value);
+    }
 
     [LibraryImport(LibName)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -231,8 +250,10 @@ public static partial class LuaBindings
         return Marshal.PtrToStringUTF8(lua_tolstring(luaState, idx, IntPtr.Zero)) ?? "";
     }
 
-    [LibraryImport(LibName)]
-    public static partial uint lua_rawlen(IntPtr luaState, int idx);
+    public static uint lua_rawlen(IntPtr luaState, int idx)
+    {
+        return (uint)LuaObjLenNative(luaState, idx);
+    }
 
     [LibraryImport(LibName)]
     public static partial IntPtr lua_touserdata(IntPtr luaState, int idx);
@@ -244,19 +265,12 @@ public static partial class LuaBindings
     public static partial IntPtr lua_topointer(IntPtr luaState, int idx);
 
     //
-    // Comparison and Arithmetic Functions
+    // Comparison Functions
     //
-
-    [LibraryImport(LibName)]
-    public static partial void lua_arith(IntPtr luaState, LuaArithOp op);
 
     [LibraryImport(LibName)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool lua_rawequal(IntPtr luaState, int idx1, int idx2);
-
-    [LibraryImport(LibName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool lua_compare(IntPtr luaState, int idx1, int idx2, LuaCompareOp op);
 
     //
     // Push Functions (C# -> stack)
@@ -272,10 +286,10 @@ public static partial class LuaBindings
     public static partial void lua_pushinteger(IntPtr luaState, long n);
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial IntPtr lua_pushlstring(IntPtr luaState, string s, long len);
+    public static partial void lua_pushlstring(IntPtr luaState, string s, long len);
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial IntPtr lua_pushstring(IntPtr luaState, string s);
+    public static partial void lua_pushstring(IntPtr luaState, string s);
 
     [LibraryImport(LibName)]
     public static partial void lua_pushcclosure(IntPtr luaState, LuaCFunction fn, int n);
@@ -299,46 +313,57 @@ public static partial class LuaBindings
     // Get Functions (Lua -> stack)
     //
 
-    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial LuaType lua_getglobal(IntPtr luaState, string name);
+    public static LuaType lua_getglobal(IntPtr luaState, string name)
+    {
+        return lua_getfield(luaState, LUA_GLOBALSINDEX, name);
+    }
 
-    [LibraryImport(LibName)]
-    public static partial LuaType lua_gettable(IntPtr luaState, int idx);
+    public static LuaType lua_gettable(IntPtr luaState, int idx)
+    {
+        LuaGetTableNative(luaState, idx);
+        return lua_type(luaState, -1);
+    }
 
-    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial LuaType lua_getfield(IntPtr luaState, int idx, string k);
+    public static LuaType lua_getfield(IntPtr luaState, int idx, string k)
+    {
+        LuaGetFieldNative(luaState, idx, k);
+        return lua_type(luaState, -1);
+    }
 
-    [LibraryImport(LibName)]
-    public static partial LuaType lua_geti(IntPtr luaState, int idx, int i);
+    public static LuaType lua_geti(IntPtr luaState, int idx, int i)
+    {
+        var absIdx = lua_absindex(luaState, idx);
+        lua_pushinteger(luaState, i);
+        return lua_gettable(luaState, absIdx);
+    }
 
-    [LibraryImport(LibName)]
-    public static partial LuaType lua_rawget(IntPtr luaState, int idx);
+    public static LuaType lua_rawget(IntPtr luaState, int idx)
+    {
+        LuaRawGetNative(luaState, idx);
+        return lua_type(luaState, -1);
+    }
 
-    [LibraryImport(LibName)]
-    public static partial LuaType lua_rawgeti(IntPtr luaState, int idx, int i);
-
-    [LibraryImport(LibName)]
-    public static partial LuaType lua_rawgetp(IntPtr luaState, int idx, IntPtr p);
+    public static LuaType lua_rawgeti(IntPtr luaState, int idx, int i)
+    {
+        LuaRawGetiNative(luaState, idx, i);
+        return lua_type(luaState, -1);
+    }
 
     [LibraryImport(LibName)]
     public static partial void lua_createtable(IntPtr luaState, int narr, int nrec);
 
     [LibraryImport(LibName)]
-    public static partial IntPtr lua_newuserdatauv(IntPtr luaState, long sz, int nuvalue);
-
-    [LibraryImport(LibName)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool lua_getmetatable(IntPtr luaState, int objindex);
-
-    [LibraryImport(LibName)]
-    public static partial LuaType lua_getiuservalue(IntPtr luaState, int index, int n);
 
     //
     // Set Functions (Stack -> Lua)
     //
 
-    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial void lua_setglobal(IntPtr luaState, string name);
+    public static void lua_setglobal(IntPtr luaState, string name)
+    {
+        lua_setfield(luaState, LUA_GLOBALSINDEX, name);
+    }
 
     [LibraryImport(LibName)]
     public static partial void lua_settable(IntPtr luaState, int idx);
@@ -346,8 +371,20 @@ public static partial class LuaBindings
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
     public static partial void lua_setfield(IntPtr luaState, int idx, string k);
 
-    [LibraryImport(LibName)]
-    public static partial void lua_seti(IntPtr luaState, int idx, int n);
+    /// <summary>
+    ///     Sets t[n] = v where v is the top of the stack, popping the value from the stack.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="idx">Stack index of the table.</param>
+    /// <param name="n">Integer key.</param>
+    public static void lua_seti(IntPtr luaState, int idx, int n)
+    {
+        var absIdx = lua_absindex(luaState, idx);
+        lua_pushinteger(luaState, n);
+        lua_pushvalue(luaState, -2);
+        lua_settable(luaState, absIdx);
+        lua_pop(luaState, 1);
+    }
 
     [LibraryImport(LibName)]
     public static partial void lua_rawset(IntPtr luaState, int idx);
@@ -356,50 +393,26 @@ public static partial class LuaBindings
     public static partial void lua_rawseti(IntPtr luaState, int idx, int n);
 
     [LibraryImport(LibName)]
-    public static partial void lua_rawsetp(IntPtr luaState, int idex, IntPtr p);
-
-    [LibraryImport(LibName)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool lua_setmetatable(IntPtr luaState, int objindex);
-
-    [LibraryImport(LibName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool lua_setiuservalue(IntPtr luaState, int idx, int n);
 
     //
     // Load and Call Functions
     //
 
     [LibraryImport(LibName)]
-    public static partial void lua_callk(IntPtr luaState, int nargs, int nresults, IntPtr ctx, LuaKFunction? k);
-
-    public static void lua_call(IntPtr luaState, int nargs, int nresults)
-    {
-        lua_callk(luaState, nargs, nresults, IntPtr.Zero, null);
-    }
+    public static partial void lua_call(IntPtr luaState, int nargs, int nresults);
 
     [LibraryImport(LibName)]
-    public static partial LuaResult lua_pcallk(IntPtr luaState, int nargs, int nresults, int errfunc, IntPtr ctx,
-        LuaKFunction? k);
-
-    public static LuaResult lua_pcall(IntPtr luaState, int nargs, int nresults, int errfunc)
-    {
-        return lua_pcallk(luaState, nargs, nresults, errfunc, IntPtr.Zero, null);
-    }
-
-    [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
-    public static partial LuaResult lua_load(IntPtr luaState, LuaReader reader, IntPtr dt, string chunkname,
-        string mode);
-
-    [LibraryImport(LibName)]
-    public static partial LuaResult lua_dump(IntPtr luaState, LuaWriter writer, IntPtr data,
-        [MarshalAs(UnmanagedType.Bool)] bool strip);
+    public static partial LuaResult lua_pcall(IntPtr luaState, int nargs, int nresults, int errfunc);
 
     [LibraryImport(LibName)]
     public static partial int lua_next(IntPtr luaState, int index);
 
-    [LibraryImport(LibName)]
-    public static partial void lua_len(IntPtr luaState, int index);
+    public static void lua_len(IntPtr luaState, int index)
+    {
+        lua_pushinteger(luaState, (long)LuaObjLenNative(luaState, index));
+    }
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
     public static partial LuaResult luaL_loadfilex(IntPtr luaState, string filename, string? mode);
@@ -409,16 +422,7 @@ public static partial class LuaBindings
     //
 
     [LibraryImport(LibName)]
-    public static partial int lua_gc(IntPtr luaState, LuaGcWhat what);
-
-    [LibraryImport(LibName)]
-    public static partial int lua_gc(IntPtr luaState, LuaGcWhat what, int stepsize);
-
-    [LibraryImport(LibName)]
-    public static partial int lua_gc(IntPtr luaState, LuaGcWhat what, int minormul, int majormul);
-
-    [LibraryImport(LibName)]
-    public static partial int lua_gc(IntPtr luaState, LuaGcWhat what, int pause, int stepmul, int stepsize);
+    public static partial int lua_gc(IntPtr luaState, LuaGcWhat what, int data);
 
     //
     // Auxiliary Library Functions
@@ -470,4 +474,49 @@ public static partial class LuaBindings
 
     [LibraryImport(LibName, StringMarshalling = StringMarshalling.Utf8)]
     public static partial void luaL_traceback(IntPtr luaState, IntPtr traceState, string? message, int level);
+
+    //
+    // Native stubs for functions that are reimplemented as managed wrappers above.
+    // The public wrappers take their names; these bind to the real entry points.
+    //
+
+    [LibraryImport(LibName, EntryPoint = "lua_getfield", StringMarshalling = StringMarshalling.Utf8)]
+    private static partial void LuaGetFieldNative(IntPtr luaState, int idx, string k);
+
+    [LibraryImport(LibName, EntryPoint = "lua_gettable")]
+    private static partial void LuaGetTableNative(IntPtr luaState, int idx);
+
+    [LibraryImport(LibName, EntryPoint = "lua_rawget")]
+    private static partial void LuaRawGetNative(IntPtr luaState, int idx);
+
+    [LibraryImport(LibName, EntryPoint = "lua_rawgeti")]
+    private static partial void LuaRawGetiNative(IntPtr luaState, int idx, int i);
+
+    [LibraryImport(LibName, EntryPoint = "lua_objlen")]
+    private static partial ulong LuaObjLenNative(IntPtr luaState, int idx);
+
+    /// <summary>
+    ///     Attempts to load the LuaJIT native library by its known names, falling back to the
+    ///     default probing behavior if none are found.
+    /// </summary>
+    /// <param name="libraryName">Requested library name.</param>
+    /// <returns>Loaded library handle, or Zero to fall back to default probing.</returns>
+    private static IntPtr ResolveLuaLibrary(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+    {
+        if (libraryName != LibName) return IntPtr.Zero;
+
+        if (OperatingSystem.IsLinux())
+        {
+            if (NativeLibrary.TryLoad("libluajit-5.1.so.2", assembly, searchPath, out var handle)) return handle;
+            if (NativeLibrary.TryLoad("libluajit-5.1.so", assembly, searchPath, out handle)) return handle;
+        }
+        else if (OperatingSystem.IsWindows())
+        {
+            if (NativeLibrary.TryLoad("luajit-5.1.dll", assembly, searchPath, out var handle)) return handle;
+            if (NativeLibrary.TryLoad("lua51.dll", assembly, searchPath, out handle)) return handle;
+            if (NativeLibrary.TryLoad("luajit.dll", assembly, searchPath, out handle)) return handle;
+        }
+
+        return IntPtr.Zero;
+    }
 }
