@@ -9,7 +9,9 @@ local step11VerifyQuantitySubtract, step12QuantitySet, step13VerifyQuantitySet
 local step14QuantityMultiply, step15VerifyQuantityMultiply
 local step16QuantityDivide, step17VerifyQuantityDivide
 local step18UseRangeSet, step19VerifyUseRangeSet
-local fixtureEntityId, quantityEntityId, useRangeEntityId
+local step20CreateNpcFlags, step21VerifyNpcFlagsSpec
+local step22SetNpcFlags, step23VerifyNpcFlagsSet
+local fixtureEntityId, quantityEntityId, useRangeEntityId, npcFlagsEntityId
 local positionBeforeAdd
 
 Test.Async("GetAfterCreate")
@@ -154,6 +156,41 @@ step19VerifyUseRangeSet = function()
     Test.Pass("UseRangeComponent")
 end
 
+Test.Async("NpcFlagsHostile")
+
+step20CreateNpcFlags = function()
+    npcFlagsEntityId = Entities.Create({
+        Name = "TestComponentsNpcFlags",
+        EntityType = EntityType.Npc,
+        NonPersistent = true,
+        NpcFlags = NpcFlag.Hostile
+    })
+end
+
+step21VerifyNpcFlagsSpec = function()
+    Test.Step("NpcFlagsHostile", function()
+        Test.AssertEqual(2, NpcFlag.Hostile, "NpcFlag.Hostile value")
+        Test.AssertTrue(Components.NpcFlags.Exists(npcFlagsEntityId),
+            "npc flags component should exist after creation")
+        local flags = Components.NpcFlags.Get(npcFlagsEntityId)
+        Test.AssertTrue(bit.band(flags, NpcFlag.Hostile) > 0, "hostile flag should be set")
+        Test.AssertTrue(bit.band(flags, NpcFlag.Chest) == 0, "chest flag should be clear")
+    end)
+end
+
+step22SetNpcFlags = function()
+    Components.NpcFlags.Set(npcFlagsEntityId, bit.bor(NpcFlag.Chest, NpcFlag.Hostile))
+end
+
+step23VerifyNpcFlagsSet = function()
+    Test.Step("NpcFlagsHostile", function()
+        local flags = Components.NpcFlags.Get(npcFlagsEntityId)
+        Test.AssertTrue(bit.band(flags, NpcFlag.Hostile) > 0, "hostile flag should remain set after Set")
+        Test.AssertTrue(bit.band(flags, NpcFlag.Chest) > 0, "chest flag should be set after Set")
+    end)
+    Test.Pass("NpcFlagsHostile")
+end
+
 -- Suite setup. ------------------------------------------------------------------------
 
 -- Fixture creation is deferred to stagger startup across suites; the engine does not
@@ -213,6 +250,10 @@ setup = function()
     end)
     Scripting.AddTimedCallback(0.7, step18UseRangeSet)
     Scripting.AddTimedCallback(0.9, step19VerifyUseRangeSet)
+    Scripting.AddTimedCallback(1.1, step20CreateNpcFlags)
+    Scripting.AddTimedCallback(1.3, step21VerifyNpcFlagsSpec)
+    Scripting.AddTimedCallback(1.5, step22SetNpcFlags)
+    Scripting.AddTimedCallback(1.7, step23VerifyNpcFlagsSet)
 end
 
 Scripting.AddTimedCallback(0.3, setup)

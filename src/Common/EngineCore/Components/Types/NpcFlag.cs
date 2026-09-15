@@ -35,5 +35,10 @@ public enum NpcFlag
     /// <summary>
     ///     The entity is chest-like (i.e. has an inventory that can be accessed by a player).
     /// </summary>
-    Chest = 1
+    Chest = 1,
+
+    /// <summary>
+    ///     The NPC has a hostile alignment to players, meaning that players can attack the NPC.
+    /// </summary>
+    Hostile = 2
 }
