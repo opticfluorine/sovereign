@@ -96,7 +96,7 @@ public class RadiantIndexer : BaseComponentIndexer<RadiantData>
             {
                 if (!buckets.TryGetValue((category, new GridPosition(x, y, z)), out var entries)) continue;
                 foreach (var entry in entries)
-                    sum += entry.Data.Param0 * Vector3.Distance(entry.Position, position) + entry.Data.Param1;
+                    sum += EvaluateEntry(entry, position);
             }
 
             return sum;
@@ -195,6 +195,23 @@ public class RadiantIndexer : BaseComponentIndexer<RadiantData>
         {
             RemoveEntity(entityId);
         }
+    }
+
+    /// <summary>
+    ///     Evaluates the radiant field contribution of an entry at the queried position.
+    /// </summary>
+    /// <param name="entry">Indexed radiant field contribution.</param>
+    /// <param name="position">Queried position.</param>
+    /// <returns>Field contribution of the entry at the queried position.</returns>
+    /// <exception cref="ArgumentException">Thrown if the entry has an unrecognized radiant function.</exception>
+    private float EvaluateEntry(in Entry entry, Vector3 position)
+    {
+        return entry.Data.Function switch
+        {
+            RadiantFunction.Linear => entry.Data.Param0 * Vector3.Distance(entry.Position, position)
+                                      + entry.Data.Param1,
+            _ => throw new ArgumentException("Unrecognized radiant function.")
+        };
     }
 
     /// <summary>
