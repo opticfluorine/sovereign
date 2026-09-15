@@ -199,6 +199,11 @@ public class EntityDefinitionProcessor
         else
             builder.WithoutExperience();
 
+        if (definition.RadiantData.HasValue)
+            builder.RadiantData(definition.RadiantData.Value);
+        else
+            builder.WithoutRadiantData();
+
         var entityId = builder.Build();
         logger.LogDebug("Processed entity ID {Id:X}.", entityId);
     }

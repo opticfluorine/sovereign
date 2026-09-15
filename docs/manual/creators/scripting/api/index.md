@@ -15,6 +15,7 @@ events.md
 inventory.md
 items.md
 players.md
+radiant.md
 scripting.md
 time.md
 util.md

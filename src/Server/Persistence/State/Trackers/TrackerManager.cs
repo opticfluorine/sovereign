@@ -38,6 +38,7 @@ public sealed class TrackerManager
     private readonly PhysicsStateTracker physicsStateTracker;
     private readonly PointLightSourceStateTracker pointLightSourceStateTracker;
     private readonly QuantityStateTracker quantityStateTracker;
+    private readonly RadiantDataStateTracker radiantDataStateTracker;
     private readonly ServerOnlyStateTracker serverOnlyStateTracker;
     private readonly StackableStateTracker stackableStateTracker;
     private readonly StaminaStateTracker staminaStateTracker;
@@ -74,7 +75,8 @@ public sealed class TrackerManager
         StatsStateTracker statsStateTracker,
         EquipmentTypeStateTracker equipmentTypeStateTracker,
         LevelStateTracker levelStateTracker,
-        ExperienceStateTracker experienceStateTracker)
+        ExperienceStateTracker experienceStateTracker,
+        RadiantDataStateTracker radiantDataStateTracker)
     {
         this.adminStateTracker = adminStateTracker;
         this.templateStateTracker = templateStateTracker;
@@ -97,6 +99,7 @@ public sealed class TrackerManager
         this.equipmentTypeStateTracker = equipmentTypeStateTracker;
         this.levelStateTracker = levelStateTracker;
         this.experienceStateTracker = experienceStateTracker;
+        this.radiantDataStateTracker = radiantDataStateTracker;
         OrientationStateTracker = orientationStateTracker;
         KinematicsStateTracker = kinematicsStateTracker;
         BlockTileStateTracker = blockTileStateTracker;

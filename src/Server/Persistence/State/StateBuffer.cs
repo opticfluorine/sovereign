@@ -180,6 +180,11 @@ public sealed class StateBuffer
     /// </summary>
     private readonly StructBuffer<StateUpdate<PointLight>> pointLightSourceUpdates = new(BufferSize);
 
+    /// <summary>
+    ///     RadiantData state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<RadiantData>> radiantDataUpdates = new(BufferSize);
+
     private readonly StructBuffer<StateUpdate<uint>> quantityUpdates = new(BufferSize);
 
     /// <summary>
@@ -501,6 +506,15 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Queues a RadiantData update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateRadiantData(ref StateUpdate<RadiantData> update)
+    {
+        radiantDataUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -558,6 +572,7 @@ public sealed class StateBuffer
         equipmentTypeUpdates.Clear();
         levelUpdates.Clear();
         experienceUpdates.Clear();
+        radiantDataUpdates.Clear();
     }
 
     /// <summary>
@@ -781,6 +796,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddExperienceComponentQuery,
                     persistenceProvider.ModifyExperienceComponentQuery,
                     persistenceProvider.RemoveExperienceComponentQuery,
+                    transaction);
+
+                // RadiantData.
+                SynchronizeComponent(radiantDataUpdates,
+                    persistenceProvider.AddRadiantDataComponentQuery,
+                    persistenceProvider.ModifyRadiantDataComponentQuery,
+                    persistenceProvider.RemoveRadiantDataComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

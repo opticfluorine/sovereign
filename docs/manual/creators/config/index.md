@@ -114,6 +114,9 @@ Movement-related options should match between client and server.
  - **MoveExpirationTicks**: Number of ticks after which movement is stopepd if no further request is received.
  - **UpdateIntervalTicks**: Number of ticks between sending subsequent movement updates.
 
+### RadiantOptions
+ - **SearchRange**: Range in world units around a queried position within which `RadiantData` field contributions are considered when evaluating `Radiant.GetValue`. Larger values scan more world segments per query.
+
 ### PerformanceOptions
  - **SystemExecutorCount**: Number of threads to use for executing systems.
  - **YieldEventLoop**: Whether to periodically yield control of the event loop thread. Lowers CPU usage at the cost of increased event latency.

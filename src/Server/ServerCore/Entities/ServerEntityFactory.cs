@@ -58,6 +58,7 @@ public sealed class ServerEntityFactory(
     EquipmentTypeComponentCollection equipmentTypes,
     LevelComponentCollection levels,
     ExperienceComponentCollection experiences,
+    RadiantDataComponentCollection radiantDatas,
     EntityTable entityTable,
     EntityAssigner entityAssigner)
     : IEntityFactory
@@ -111,6 +112,7 @@ public sealed class ServerEntityFactory(
             equipmentTypes,
             levels,
             experiences,
+            radiantDatas,
             entityTable);
     }
 }

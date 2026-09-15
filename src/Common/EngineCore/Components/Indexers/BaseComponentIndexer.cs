@@ -42,7 +42,7 @@ public class BaseComponentIndexer<T> : IDisposable
         eventSource.OnEndUpdates += EndUpdatesCallback;
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         eventSource.OnEndUpdates -= EndUpdatesCallback;
         eventSource.OnComponentRemoved -= ComponentRemovedCallback;

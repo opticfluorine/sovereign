@@ -509,4 +509,18 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutExperience();
+
+    /// <summary>
+    ///     Adds a RadiantData component to the entity.
+    /// </summary>
+    /// <param name="radiantData">Radiant data.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction("RadiantData")]
+    IEntityBuilder RadiantData(RadiantData radiantData);
+
+    /// <summary>
+    ///     Removes the RadiantData component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutRadiantData();
 }

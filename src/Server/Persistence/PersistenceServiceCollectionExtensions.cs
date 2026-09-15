@@ -111,6 +111,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<EquipmentTypeStateTracker>();
         services.TryAddSingleton<LevelStateTracker>();
         services.TryAddSingleton<ExperienceStateTracker>();
+        services.TryAddSingleton<RadiantDataStateTracker>();
     }
 
     private static void AddPersistenceSystem(IServiceCollection services)

@@ -4,6 +4,10 @@
 
 ### September
 
+#### 15 September 2026
+
+* Add new common, scriptable `RadiantData` component that describes a radiant scalar field contribution at the position of the associated entity, with the new `RadiantCategory` (`MineralDrop`) and `RadiantFunction` (`Linear`) value types. The component is exposed to scripts as `Components.RadiantData` and as a `RadiantData` key in the `Entities.Create` spec table, and is persisted to the database. A new `RadiantIndexer` evaluates the summed scalar field of a category over the world segments near a queried position (configurable via the new `RadiantOptions` section), and a new `Radiant.GetValue(category, position)` Lua scripting function exposes the field value to scripts.
+
 #### 13 September 2026
 
 * Add new common, scriptable `Level` and `Experience` components for players and NPCs. The components are exposed to scripts as `Components.Level` and `Components.Experience` and as `Level` and `Experience` keys in the `Entities.Create` spec table, may be set on NPC templates in the template editor, and are persisted to the database. New players are created with `Level 1` and `Experience 0`.

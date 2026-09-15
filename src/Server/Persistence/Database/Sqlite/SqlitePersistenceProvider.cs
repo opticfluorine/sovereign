@@ -346,6 +346,12 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         ModifyExperienceComponentQuery =
             new SimpleSqliteModifyComponentQuery<int>(ExperienceParamName, ExperienceParamType, conn);
         RemoveExperienceComponentQuery = new SimpleSqliteRemoveComponentQuery(ExperienceParamName, conn);
+
+        // RadiantData component.
+        var radiantDataQuery = new SqliteAddModifyRadiantDataComponentQuery(conn);
+        AddRadiantDataComponentQuery = radiantDataQuery;
+        ModifyRadiantDataComponentQuery = radiantDataQuery;
+        RemoveRadiantDataComponentQuery = new SqliteRemoveRadiantDataComponentQuery(conn);
     }
 
     public IAddComponentQuery<BlockTile> AddBlockTileQuery { get; }
@@ -447,6 +453,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<int> AddExperienceComponentQuery { get; }
     public IModifyComponentQuery<int> ModifyExperienceComponentQuery { get; }
     public IRemoveComponentQuery RemoveExperienceComponentQuery { get; }
+    public IAddComponentQuery<RadiantData> AddRadiantDataComponentQuery { get; }
+    public IModifyComponentQuery<RadiantData> ModifyRadiantDataComponentQuery { get; }
+    public IRemoveComponentQuery RemoveRadiantDataComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

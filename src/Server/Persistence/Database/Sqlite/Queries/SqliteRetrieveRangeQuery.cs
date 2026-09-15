@@ -40,7 +40,8 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                 staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
                 manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
                 statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck,
-                equipmentType, level, experience)
+                equipmentType, level, experience,
+                radiantCategory, radiantFunction, radiantParam0, radiantParam1, radiantParam2)
 	        AS (
 	        	SELECT id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
                         drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
@@ -50,7 +51,8 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                         staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
                         manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
                         statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck,
-                        equipmentType, level, experience
+                        equipmentType, level, experience,
+                        radiantCategory, radiantFunction, radiantParam0, radiantParam1, radiantParam2
 	        		FROM EntityWithComponents
 	        		WHERE x >= @X1 AND x < @X2
 	        		  AND y >= @Y1 AND y < @Y2
@@ -67,7 +69,8 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                         ec.staminaValue, ec.staminaMaxValue, ec.staminaChangeRate, ec.staminaChangeInterval,
                         ec.manaValue, ec.manaMaxValue, ec.manaChangeRate, ec.manaChangeInterval,
                         ec.statsStrength, ec.statsDefense, ec.statsAgility, ec.statsIntelligence, ec.statsWisdom, ec.statsCharisma, ec.statsLuck,
-                        ec.equipmentType, ec.level, ec.experience
+                        ec.equipmentType, ec.level, ec.experience,
+                        ec.radiantCategory, ec.radiantFunction, ec.radiantParam0, ec.radiantParam1, ec.radiantParam2
 	        		FROM EntityWithComponents ec, EntityTree et
 	        		WHERE ec.parent = et.id 
                       AND ec.playerCharacter IS NULL
@@ -80,7 +83,8 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                 staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
                 manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
                 statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck,
-                equipmentType, level, experience
+                equipmentType, level, experience,
+                radiantCategory, radiantFunction, radiantParam0, radiantParam1, radiantParam2
             FROM EntityTree 
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = id
             ORDER BY parent NULLS LAST";

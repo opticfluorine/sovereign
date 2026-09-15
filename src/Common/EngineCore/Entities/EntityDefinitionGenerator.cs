@@ -54,6 +54,7 @@ public class EntityDefinitionGenerator
     private readonly EquipmentTypeComponentCollection equipmentTypes;
     private readonly LevelComponentCollection levels;
     private readonly ExperienceComponentCollection experiences;
+    private readonly RadiantDataComponentCollection radiantDatas;
 
     public EntityDefinitionGenerator(
         KinematicsComponentCollection kinematics,
@@ -70,7 +71,8 @@ public class EntityDefinitionGenerator
         UseRangeComponentCollection useRanges, HealthComponentCollection healths,
         StaminaComponentCollection staminas, ManaComponentCollection manas, StatsComponentCollection stats,
         EquipmentTypeComponentCollection equipmentTypes, LevelComponentCollection levels,
-        ExperienceComponentCollection experiences, EntityTable entityTable)
+        ExperienceComponentCollection experiences, RadiantDataComponentCollection radiantDatas,
+        EntityTable entityTable)
     {
         this.kinematics = kinematics;
         this.blockTiles = blockTiles;
@@ -101,6 +103,7 @@ public class EntityDefinitionGenerator
         this.equipmentTypes = equipmentTypes;
         this.levels = levels;
         this.experiences = experiences;
+        this.radiantDatas = radiantDatas;
         this.entityTable = entityTable;
     }
 
@@ -198,6 +201,9 @@ public class EntityDefinitionGenerator
 
         if (experiences.HasLocalComponentForEntity(entityId))
             def.Experience = experiences[entityId];
+
+        if (radiantDatas.HasLocalComponentForEntity(entityId))
+            def.RadiantData = radiantDatas[entityId];
 
         return def;
     }

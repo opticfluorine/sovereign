@@ -167,6 +167,15 @@ public static class ComponentOperators
         };
 
     /// <summary>
+    ///     Standard operators for RadiantData-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<RadiantData, RadiantData, RadiantData>>
+        RadiantDataOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
+        };
+
+    /// <summary>
     ///     Standard operators for BoundingBox-valued components.
     /// </summary>
     public static readonly Dictionary<ComponentOperation, Func<BoundingBox, BoundingBox, BoundingBox>>

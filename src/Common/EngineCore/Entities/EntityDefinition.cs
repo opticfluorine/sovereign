@@ -71,6 +71,7 @@ public class EntityDefinition
         EquipmentType = other.EquipmentType;
         Level = other.Level;
         Experience = other.Experience;
+        RadiantData = other.RadiantData;
     }
 
     /// <summary>
@@ -258,4 +259,10 @@ public class EntityDefinition
     /// </summary>
     [Key(30)]
     public int? Experience { get; set; }
+
+    /// <summary>
+    ///     RadiantData component, or null if the entity emits no radiant field.
+    /// </summary>
+    [Key(31)]
+    public RadiantData? RadiantData { get; set; }
 }
