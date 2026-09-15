@@ -259,6 +259,14 @@ public class NpcTemplateEditorTab
         ImGui.Checkbox("##chest", ref chest);
         if (chest) selectedDefinition.NpcFlags |= NpcFlag.Chest;
         else selectedDefinition.NpcFlags &= ~NpcFlag.Chest;
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Hostile:");
+        ImGui.TableNextColumn();
+        var hostile = (selectedDefinition.NpcFlags.Value & NpcFlag.Hostile) > 0;
+        ImGui.Checkbox("##hostile", ref hostile);
+        if (hostile) selectedDefinition.NpcFlags |= NpcFlag.Hostile;
+        else selectedDefinition.NpcFlags &= ~NpcFlag.Hostile;
         ImGui.EndTable();
     }
 
