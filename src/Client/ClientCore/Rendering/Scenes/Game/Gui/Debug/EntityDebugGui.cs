@@ -59,7 +59,8 @@ public class EntityDebugGui(
     StatsComponentCollection stats,
     EquipmentTypeComponentCollection equipmentTypes,
     LevelComponentCollection levels,
-    ExperienceComponentCollection experiences)
+    ExperienceComponentCollection experiences,
+    RadiantDataComponentCollection radiantDatas)
 {
     private string entityIdInput = "";
 
@@ -128,6 +129,15 @@ public class EntityDebugGui(
                             AddValueRow("PLS Intensity:", pls.Intensity);
                             AddValueRow("PLS Color:", CleanVec3ToString(ColorUtil.UnpackColorRgb(pls.Color)));
                             AddValueRow("PLS Pos Offset:", CleanVec3ToString(pls.PositionOffset));
+                        });
+                    AddCompoundRows("Radiant Data:", entityId, radiantDatas,
+                        rd =>
+                        {
+                            AddValueRow("Radiant Category:", rd.Category);
+                            AddValueRow("Radiant Function:", rd.Function);
+                            AddValueRow("Radiant Param0:", rd.Param0);
+                            AddValueRow("Radiant Param1:", rd.Param1);
+                            AddValueRow("Radiant Param2:", rd.Param2);
                         });
                     AddComponentRow("Physics:", entityId, physics);
                     AddCompoundRows("Bounding Box:", entityId, boundingBoxes,

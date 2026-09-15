@@ -130,6 +130,11 @@ CREATE TABLE Entity
     equipment_type      INTEGER,
     level               INTEGER,
     experience          INTEGER,
+    radiant_category    INTEGER,
+    radiant_function    INTEGER,
+    radiant_param0      FLOAT,
+    radiant_param1      FLOAT,
+    radiant_param2      FLOAT,
     FOREIGN KEY (template_id) REFERENCES Entity (id),
     FOREIGN KEY (parent_id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
@@ -261,7 +266,12 @@ SELECT Entity.id                 AS id,
        Entity.stats_luck         AS statsLuck,
        Entity.equipment_type     AS equipmentType,
        Entity.level              AS level,
-       Entity.experience         AS experience
+       Entity.experience         AS experience,
+       Entity.radiant_category   AS radiantCategory,
+       Entity.radiant_function   AS radiantFunction,
+       Entity.radiant_param0     AS radiantParam0,
+       Entity.radiant_param1     AS radiantParam1,
+       Entity.radiant_param2     AS radiantParam2
 FROM Entity;
 
 

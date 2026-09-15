@@ -179,6 +179,11 @@ public enum ComponentType
     /// </summary>
     Experience = 0x001F,
 
+    /// <summary>
+    ///     RadiantData component.
+    /// </summary>
+    RadiantData = 0x0020,
+
     #endregion Common
 
     #region Client

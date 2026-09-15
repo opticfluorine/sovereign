@@ -62,12 +62,14 @@ public sealed class ServerEntityBuilder : AbstractEntityBuilder
         EquipmentTypeComponentCollection equipmentTypes,
         LevelComponentCollection levels,
         ExperienceComponentCollection experiences,
+        RadiantDataComponentCollection radiantDatas,
         EntityTable entityTable)
         : base(entityId, load, entityManager, kinematics, blockTiles,
             aboveBlocks, playerCharacterTags, names, parents,
             drawables, animatedSprites, orientations, admins, blockPositions, castBlockShadows, pointLightSources,
             physics, boundingBoxes, castShadows, entityTypes, serverOnly, stackables, quantities, itemUses, npcFlags,
-            useRanges, healths, staminas, manas, stats, equipmentTypes, levels, experiences, entityTable)
+            useRanges, healths, staminas, manas, stats, equipmentTypes, levels, experiences, radiantDatas,
+            entityTable)
     {
         this.accounts = accounts;
     }

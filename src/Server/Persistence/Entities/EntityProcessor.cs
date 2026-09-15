@@ -93,6 +93,11 @@ public sealed class EntityProcessor
     private const int IndexEquipmentType = IndexStatsLuck + 1;
     private const int IndexLevel = IndexEquipmentType + 1;
     private const int IndexExperience = IndexLevel + 1;
+    private const int IndexRadiantCategory = IndexExperience + 1;
+    private const int IndexRadiantFunction = IndexRadiantCategory + 1;
+    private const int IndexRadiantParam0 = IndexRadiantFunction + 1;
+    private const int IndexRadiantParam1 = IndexRadiantParam0 + 1;
+    private const int IndexRadiantParam2 = IndexRadiantParam1 + 1;
     private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
     private readonly ExistingEntitySet existingEntitySet;
@@ -174,6 +179,7 @@ public sealed class EntityProcessor
             ProcessEquipmentType(reader, builder);
             ProcessLevel(reader, builder);
             ProcessExperience(reader, builder);
+            ProcessRadiantData(reader, builder);
 
             /* Complete the entity. */
             builder.Build();
@@ -482,6 +488,24 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexExperience)) return;
         builder.Experience(reader.GetInt32(IndexExperience));
+    }
+
+    /// <summary>
+    ///     Processes the RadiantData component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessRadiantData(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexRadiantCategory)) return;
+        builder.RadiantData(new RadiantData
+        {
+            Category = (RadiantCategory)reader.GetInt32(IndexRadiantCategory),
+            Function = (RadiantFunction)reader.GetInt32(IndexRadiantFunction),
+            Param0 = reader.GetFloat(IndexRadiantParam0),
+            Param1 = reader.GetFloat(IndexRadiantParam1),
+            Param2 = reader.GetFloat(IndexRadiantParam2)
+        });
     }
 
     private void ProcessNpcFlags(IDataReader reader, IEntityBuilder builder)

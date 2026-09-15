@@ -70,6 +70,8 @@ public static class CoreServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(PerformanceOptions)}"));
         services.Configure<InventoryOptions>(
             configuration.GetSection($"Sovereign:{nameof(InventoryOptions)}"));
+        services.Configure<RadiantOptions>(
+            configuration.GetSection($"Sovereign:{nameof(RadiantOptions)}"));
 
         return services;
     }
@@ -129,6 +131,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<ParentComponentCollection>();
         services.TryAddComponentCollection<PlayerCharacterTagCollection>();
         services.TryAddComponentCollection<PointLightSourceComponentCollection>();
+        services.TryAddComponentCollection<RadiantDataComponentCollection>();
         services.TryAddComponentCollection<PhysicsTagCollection>();
         services.TryAddComponentCollection<BoundingBoxComponentCollection>();
         services.TryAddComponentCollection<CastShadowsComponentCollection>();
@@ -168,6 +171,8 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<SlotIndexer>();
         services.TryAddSingleton<PlayerEquipmentIndexer>();
         services.TryAddSingleton<EquipmentSlotIndexer>();
+        services.TryAddSingleton<RadiantIndexer>();
+        services.TryAddSingleton<RadiantScripting>();
     }
 
     private static void AddComponentValidators(IServiceCollection services)
