@@ -28,5 +28,10 @@ public enum RadiantCategory
     /// <summary>
     ///     Radiant field governing mineral drops.
     /// </summary>
-    MineralDrop = 0
+    MineralDrop = 0,
+
+    /// <summary>
+    ///     First value reserved for user-specified radiant categories.
+    /// </summary>
+    FirstUserCategory = 1024
 }
