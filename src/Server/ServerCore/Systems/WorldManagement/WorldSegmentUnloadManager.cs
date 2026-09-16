@@ -50,6 +50,8 @@ public class WorldSegmentUnloadManager
     /// </summary>
     private readonly HashSet<GridPosition> autoLoadSegments;
 
+    private readonly HashSet<ulong> toUnload = new();
+
     private readonly BlockWorldSegmentIndexer blockSegmentIndexer;
     private readonly WorldSegmentBlockDataManager blockDataManager;
     private readonly EntityManager entityManager;
@@ -164,7 +166,7 @@ public class WorldSegmentUnloadManager
     {
         // Materialize the set of entities to unload before unloading anything so that the
         // world segment indexers are not mutated while they are being enumerated.
-        var toUnload = new HashSet<ulong>();
+        toUnload.Clear();
         GatherEntitiesToUnload(blockSegmentIndexer.GetEntitiesInWorldSegment(segmentIndex), toUnload);
         GatherEntitiesToUnload(nonBlockSegmentIndexer.GetEntitiesInWorldSegment(segmentIndex), toUnload);
 
