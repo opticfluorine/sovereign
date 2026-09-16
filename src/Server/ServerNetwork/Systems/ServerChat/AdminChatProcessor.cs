@@ -883,10 +883,11 @@ public class AdminChatProcessor : IChatProcessor
     private void OnBan(string message, ulong senderEntityId)
     {
         // Parse arguments, do basic validation.
-        var args = message.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        var args = message.Split(',',
+            StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         if (args.Length is < 1 or > 2)
         {
-            internalController.SendSystemMessage("Usage: /ban player [duration_in_days]", senderEntityId);
+            internalController.SendSystemMessage("Usage: /ban player[,duration_in_days]", senderEntityId);
             return;
         }
 

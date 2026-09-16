@@ -36,7 +36,10 @@ that player.
 
 ### /ban
 
-**Usage:** `/ban [player_name] [duration_in_days]`
+**Usage:** `/ban [player_name][,duration_in_days]`
+
+Arguments are comma-separated. Player names may contain spaces; any surrounding
+whitespace on each argument is ignored.
 
 **Parameters:**
 * `player_name`: Name of the player whose account is to be banned.
