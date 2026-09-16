@@ -144,6 +144,7 @@ CREATE INDEX Entity_PC ON Entity (player_char);
 CREATE INDEX Entity_Pos ON Entity (pos_x, pos_y, pos_z);
 CREATE INDEX Entity_Parent ON Entity (parent_id);
 CREATE INDEX Entity_Account ON Entity (account_id);
+CREATE INDEX Entity_Name ON Entity (name COLLATE NOCASE);
 
 
 ------------------------------
@@ -185,6 +186,27 @@ CREATE TABLE EntityKeyValue
 );
 
 CREATE INDEX EntityKeyValue_Id ON EntityKeyValue (entity_id);
+
+
+-------------------
+-- Ban Table     --
+-------------------
+
+CREATE TABLE Ban
+(
+    id            INTEGER PRIMARY KEY NOT NULL,
+    account_id    BLOB                NOT NULL,
+    player_name   VARCHAR(255)        NOT NULL,
+    admin_name    VARCHAR(255)        NOT NULL,
+    created       TEXT                NOT NULL,
+    duration_days INTEGER,
+    deleted       BOOLEAN             NOT NULL DEFAULT (FALSE),
+    FOREIGN KEY (account_id) REFERENCES Account (id)
+);
+
+CREATE INDEX Ban_Account ON Ban (account_id);
+
+CREATE INDEX Ban_Active_Created ON Ban (created) WHERE deleted = FALSE;
 
 
 --------------------------------------

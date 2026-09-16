@@ -28,6 +28,10 @@ Note that an email address is not associated with the account by default. It is
 the responsibility of the server administrator to implement a policy for the
 handling of lost passwords.
 
+Note also that a server's administrators may record ban entries for an account,
+storing the account ID, the player and admin names associated with the ban, the
+time at which the ban was created, and the ban duration.
+
 ## Password Storage
 
 Passwords are not stored in the Sovereign Engine database. Instead, one-way

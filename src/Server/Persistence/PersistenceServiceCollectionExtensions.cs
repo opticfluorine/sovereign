@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sovereign.EngineCore.Systems;
 using Sovereign.Persistence.Accounts;
+using Sovereign.Persistence.Bans;
 using Sovereign.Persistence.Data;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Entities;
@@ -41,6 +42,7 @@ public static class PersistenceServiceCollectionExtensions
     public static IServiceCollection AddSovereignPersistence(this IServiceCollection services)
     {
         AddAccounts(services);
+        AddBans(services);
         AddData(services);
         AddDatabase(services);
         AddEntities(services);
@@ -54,6 +56,11 @@ public static class PersistenceServiceCollectionExtensions
     private static void AddAccounts(IServiceCollection services)
     {
         services.TryAddSingleton<PersistenceAccountServices>();
+    }
+
+    private static void AddBans(IServiceCollection services)
+    {
+        services.TryAddSingleton<PersistenceBanServices>();
     }
 
     private static void AddData(IServiceCollection services)

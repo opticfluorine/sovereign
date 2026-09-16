@@ -121,6 +121,9 @@ prompt to download the latest game data files.
 | /rescue           |                       | Emergency teleport back to spawn point.               |
 | /addadmin         | playerName            | Admin only. Grants admin role to the given player.    |
 | /removeadmin      | playerName            | Admin only. Revokes admin role from the given player. |
+| /ban              | playerName, [days]    | Admin only. Bans the account of the given player.     |
+| /unban            | playerName            | Admin only. Lifts all bans on the player's account.   |
+| /listbans         |                       | Admin only. Lists all active account bans.            |
 | /addblock         | x, y, z, templateName | Admin only. Adds a block at the given position.       |
 | /removeblock      | x, y, z               | Admin only. Removes a block at the given position.    |
 | /reloadallscripts |                       | Admin only. Reloads all server-side scripts.          |
