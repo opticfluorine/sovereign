@@ -139,6 +139,7 @@ CREATE INDEX Entity_PC ON Entity (player_char);
 CREATE INDEX Entity_Pos ON Entity (pos_x, pos_y, pos_z);
 CREATE INDEX Entity_Parent ON Entity (parent_id);
 CREATE INDEX Entity_Account ON Entity (account_id);
+CREATE INDEX Entity_Name ON Entity (name COLLATE NOCASE);
 
 
 ------------------------------
@@ -199,6 +200,8 @@ CREATE TABLE Ban
 );
 
 CREATE INDEX Ban_Account ON Ban (account_id);
+
+CREATE INDEX Ban_Active_Created ON Ban (created) WHERE deleted = FALSE;
 
 
 --------------------------------------
