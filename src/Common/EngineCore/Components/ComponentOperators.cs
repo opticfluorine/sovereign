@@ -239,7 +239,6 @@ public static class ComponentOperators
         };
 
     /// <summary>
-<<<<<<< HEAD
     ///     Standard operators for Vital-valued components.
     /// </summary>
     public static readonly Dictionary<ComponentOperation, Func<Vital, Vital, Vital>>

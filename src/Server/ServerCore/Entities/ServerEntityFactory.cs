@@ -105,6 +105,7 @@ public sealed class ServerEntityFactory(
             quantities,
             itemUses,
             npcFlags,
+            playerFlags,
             useRanges,
             healths,
             staminas,
@@ -114,7 +115,6 @@ public sealed class ServerEntityFactory(
             levels,
             experiences,
             radiantDatas,
-            playerFlags,
             entityTable);
     }
 }

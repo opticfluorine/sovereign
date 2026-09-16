@@ -76,8 +76,9 @@ was created, the ban duration, and the admin who created the ban.
 * `player_name`: Name of the player to be granted moderator privileges.
 
 Grants the Moderator role to the given player. If the player already has the Moderator
-role, no change will be made. Moderator privileges are held in memory only, so the
-player must be logged in and the role is cleared when the server restarts.
+role, no change will be made. The player must be logged in to be granted the role;
+moderator privileges are persisted to the database and will be restored when the
+player logs in.
 
 ### /removemoderator
 

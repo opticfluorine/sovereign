@@ -119,6 +119,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<LevelStateTracker>();
         services.TryAddSingleton<ExperienceStateTracker>();
         services.TryAddSingleton<RadiantDataStateTracker>();
+        services.TryAddSingleton<PlayerFlagsStateTracker>();
     }
 
     private static void AddPersistenceSystem(IServiceCollection services)

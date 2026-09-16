@@ -127,6 +127,9 @@ public sealed class StateBuffer
     ///     Level state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<int>> levelUpdates = new(BufferSize);
+    ///     PlayerFlags state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<PlayerFlag>> playerFlagsUpdates = new(BufferSize);
 
     /// <summary>
     ///     Position state updates.
@@ -515,6 +518,15 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Queues a PlayerFlags update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdatePlayerFlags(ref StateUpdate<PlayerFlag> update)
+    {
+        playerFlagsUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -573,6 +585,7 @@ public sealed class StateBuffer
         levelUpdates.Clear();
         experienceUpdates.Clear();
         radiantDataUpdates.Clear();
+        playerFlagsUpdates.Clear();
     }
 
     /// <summary>
@@ -803,6 +816,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddRadiantDataComponentQuery,
                     persistenceProvider.ModifyRadiantDataComponentQuery,
                     persistenceProvider.RemoveRadiantDataComponentQuery,
+                    transaction);
+
+                // PlayerFlags.
+                SynchronizeComponent(playerFlagsUpdates,
+                    persistenceProvider.AddPlayerFlagsComponentQuery,
+                    persistenceProvider.ModifyPlayerFlagsComponentQuery,
+                    persistenceProvider.RemovePlayerFlagsComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

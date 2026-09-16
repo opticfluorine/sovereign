@@ -40,7 +40,7 @@ public class SqliteRetrieveAllTemplatesQuery : IRetrieveAllTemplatesQuery
                 manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
                 statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck,
                 equipmentType, level, experience,
-                radiantCategory, radiantFunction, radiantParam0, radiantParam1, radiantParam2
+                radiantCategory, radiantFunction, radiantParam0, radiantParam1, radiantParam2, playerFlags
             FROM EntityWithComponents 
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = id
             WHERE id >= @FirstTemplateId AND id <= @LastTemplateId";

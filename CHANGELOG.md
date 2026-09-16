@@ -60,7 +60,7 @@
 * Add a server option to limit the number of concurrently connected players.
 * Add /ban, /unban, and /listbans admin commands to ban and unban accounts.
 * Bans are stored in a new database table; existing server databases must be recreated.
-* Add player moderation: PlayerFlags component, timed chat mutes, moderator-only mute commands, and mute events for scripts.
+* Add player moderation: PlayerFlags component with persistent moderator privileges, timed chat mutes, moderator-only mute commands, and mute events for scripts.
 
 ### April
 
