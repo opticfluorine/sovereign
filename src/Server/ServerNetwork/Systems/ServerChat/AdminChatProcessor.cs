@@ -136,6 +136,10 @@ public class AdminChatProcessor : IChatProcessor
     private const string ListBans = "listbans";
 
     private readonly AccountComponentCollection accounts;
+    ///     Command name for /gcworld.
+    /// </summary>
+    private const string GcWorld = "gcworld";
+
     private readonly AdminTagCollection admins;
     private readonly AccountServices accountServices;
     private readonly BlockController blockController;
@@ -215,7 +219,8 @@ public class AdminChatProcessor : IChatProcessor
         new ChatCommand { Command = SetEntityValue, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = Ban, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = Unban, HelpSummary = "", IncludeInHelp = false },
-        new ChatCommand { Command = ListBans, HelpSummary = "", IncludeInHelp = false }
+        new ChatCommand { Command = ListBans, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = GcWorld, HelpSummary = "", IncludeInHelp = false }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)
@@ -306,6 +311,10 @@ public class AdminChatProcessor : IChatProcessor
 
             case ListBans:
                 OnListBans(senderEntityId);
+                break;
+
+            case GcWorld:
+                OnGcWorld(senderEntityId);
                 break;
         }
     }
@@ -1008,5 +1017,15 @@ public class AdminChatProcessor : IChatProcessor
         logger.LogWarning("Cannot resolve account for player {Name}; player does not exist.", playerName);
         internalController.SendSystemMessage("Player does not exist.", senderEntityId);
         return false;
+    }
+
+    /// <summary>
+    ///     Handles the /gcworld command.
+    /// </summary>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnGcWorld(ulong senderEntityId)
+    {
+        worldManagementController.RequestUnloadIdleWorldSegments(eventSender);
+        internalController.SendSystemMessage("Idle world segment unload requested.", senderEntityId);
     }
 }

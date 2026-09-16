@@ -28,4 +28,16 @@ public sealed class WorldOptions
     ///     World segments to automatically load at startup.
     /// </summary>
     public List<GridPosition> AutoLoadWorldSegments { get; set; } = new();
+
+    /// <summary>
+    ///     How often, in seconds, the WorldManagement system checks for idle world segments
+    ///     whose entities should be unloaded from server memory.
+    /// </summary>
+    public int EntityUnloadCheckIntervalSeconds { get; set; } = 60;
+
+    /// <summary>
+    ///     How long, in seconds, a world segment must have had zero subscribers before its
+    ///     entities are unloaded from server memory.
+    /// </summary>
+    public int EntityUnloadCutoffSeconds { get; set; } = 300;
 }

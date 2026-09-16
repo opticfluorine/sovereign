@@ -181,6 +181,25 @@ public sealed class WorldSegmentBlockDataManager
     }
 
     /// <summary>
+    ///     Checks whether the given world segment has block data changes that have not yet been
+    ///     synchronized to the database.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <returns>true if the segment has pending block data updates, false otherwise.</returns>
+    public bool HasPendingBlockDataUpdates(GridPosition segmentIndex)
+    {
+        lock (segmentsToRegenerate)
+        {
+            if (segmentsToRegenerate.Contains(segmentIndex)) return true;
+        }
+
+        lock (segmentsToPersist)
+        {
+            return segmentsToPersist.Contains(segmentIndex);
+        }
+    }
+
+    /// <summary>
     ///     Blocking call that adds a world segment to the data set.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
@@ -260,11 +279,15 @@ public sealed class WorldSegmentBlockDataManager
     ///     Schedules a regeneration of block data for transfer if needed.
     /// </summary>
     /// <param name="entityId">Block entity ID.</param>
-    /// <param name="isUnload">Unused.</param>
+    /// <param name="isUnload">If true, the block is being unloaded from memory rather than deleted.</param>
     private void ScheduleFromBlock(ulong entityId, bool isUnload)
     {
         // Ignore template entities.
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId) return;
+
+        // Ignore unloads; the database still holds the authoritative block data, and the
+        // segment will be regenerated from the database if it is re-activated.
+        if (isUnload) return;
 
         try
         {
