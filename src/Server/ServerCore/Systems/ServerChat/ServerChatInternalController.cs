@@ -117,4 +117,41 @@ public class ServerChatInternalController
         var ev = new Event(EventId.Core_Chat_Generic, details);
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Sends a mute added event for the given player.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <param name="scope">Mute scope.</param>
+    /// <param name="expirySystemTime">Absolute system time in microseconds at which the mute expires.</param>
+    public void SendMuteAdded(ulong playerEntityId, ChatMuteScope scope, ulong expirySystemTime)
+    {
+        var details = new ModerationEventDetails
+        {
+            EntityId = playerEntityId,
+            Scope = scope,
+            ExpirySystemTime = expirySystemTime
+        };
+        var ev = new Event(EventId.Server_Chat_MuteAdded, details);
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Sends a mute removed event for the given player.
+    /// </summary>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    /// <param name="scope">Mute scope.</param>
+    /// <param name="expirySystemTime">Absolute system time in microseconds at which the mute was due to expire,
+    /// or 0 if the mute was removed before expiring.</param>
+    public void SendMuteRemoved(ulong playerEntityId, ChatMuteScope scope, ulong expirySystemTime)
+    {
+        var details = new ModerationEventDetails
+        {
+            EntityId = playerEntityId,
+            Scope = scope,
+            ExpirySystemTime = expirySystemTime
+        };
+        var ev = new Event(EventId.Server_Chat_MuteRemoved, details);
+        eventSender.SendEvent(ev);
+    }
 }

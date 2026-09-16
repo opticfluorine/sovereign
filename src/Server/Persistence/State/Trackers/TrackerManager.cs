@@ -37,6 +37,7 @@ public sealed class TrackerManager
     private readonly NpcFlagsStateTracker npcFlagsStateTracker;
     private readonly PhysicsStateTracker physicsStateTracker;
     private readonly PointLightSourceStateTracker pointLightSourceStateTracker;
+    private readonly PlayerFlagsStateTracker playerFlagsStateTracker;
     private readonly QuantityStateTracker quantityStateTracker;
     private readonly RadiantDataStateTracker radiantDataStateTracker;
     private readonly ServerOnlyStateTracker serverOnlyStateTracker;
@@ -76,7 +77,8 @@ public sealed class TrackerManager
         EquipmentTypeStateTracker equipmentTypeStateTracker,
         LevelStateTracker levelStateTracker,
         ExperienceStateTracker experienceStateTracker,
-        RadiantDataStateTracker radiantDataStateTracker)
+        RadiantDataStateTracker radiantDataStateTracker,
+        PlayerFlagsStateTracker playerFlagsStateTracker)
     {
         this.adminStateTracker = adminStateTracker;
         this.templateStateTracker = templateStateTracker;
@@ -100,6 +102,7 @@ public sealed class TrackerManager
         this.levelStateTracker = levelStateTracker;
         this.experienceStateTracker = experienceStateTracker;
         this.radiantDataStateTracker = radiantDataStateTracker;
+        this.playerFlagsStateTracker = playerFlagsStateTracker;
         OrientationStateTracker = orientationStateTracker;
         KinematicsStateTracker = kinematicsStateTracker;
         BlockTileStateTracker = blockTileStateTracker;

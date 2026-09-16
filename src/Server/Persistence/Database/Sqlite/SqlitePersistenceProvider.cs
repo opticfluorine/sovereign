@@ -100,6 +100,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
 
     private const SqliteType ExperienceParamType = SqliteType.Integer;
     private const string ExperienceParamName = "experience";
+    private const SqliteType PlayerFlagsParamType = SqliteType.Integer;
+    private const string PlayerFlagsParamName = "player_flags";
 
     private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
@@ -359,6 +361,12 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         AddRadiantDataComponentQuery = radiantDataQuery;
         ModifyRadiantDataComponentQuery = radiantDataQuery;
         RemoveRadiantDataComponentQuery = new SqliteRemoveRadiantDataComponentQuery(conn);
+        // PlayerFlags component.
+        AddPlayerFlagsComponentQuery =
+            new SimpleSqliteAddComponentQuery<PlayerFlag>(PlayerFlagsParamName, PlayerFlagsParamType, conn);
+        ModifyPlayerFlagsComponentQuery =
+            new SimpleSqliteModifyComponentQuery<PlayerFlag>(PlayerFlagsParamName, PlayerFlagsParamType, conn);
+        RemovePlayerFlagsComponentQuery = new SimpleSqliteRemoveComponentQuery(PlayerFlagsParamName, conn);
     }
 
     public IAddComponentQuery<BlockTile> AddBlockTileQuery { get; }
@@ -463,6 +471,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<RadiantData> AddRadiantDataComponentQuery { get; }
     public IModifyComponentQuery<RadiantData> ModifyRadiantDataComponentQuery { get; }
     public IRemoveComponentQuery RemoveRadiantDataComponentQuery { get; }
+    public IAddComponentQuery<PlayerFlag> AddPlayerFlagsComponentQuery { get; }
+    public IModifyComponentQuery<PlayerFlag> ModifyPlayerFlagsComponentQuery { get; }
+    public IRemoveComponentQuery RemovePlayerFlagsComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

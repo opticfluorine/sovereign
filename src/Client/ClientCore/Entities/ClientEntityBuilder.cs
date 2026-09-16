@@ -50,6 +50,7 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         QuantityComponentCollection quantities,
         ItemUseComponentCollection itemUses,
         NpcFlagsComponentCollection npcFlags,
+        PlayerFlagsComponentCollection playerFlags,
         UseRangeComponentCollection useRanges,
         HealthComponentCollection healths,
         StaminaComponentCollection staminas,
@@ -63,7 +64,7 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         : base(entityId, isLoad, entityManager, kinematics, blockTiles,
             aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources, physics, boundingBoxes,
-            castShadows, entityTypes, serverOnly, stackables, quantities, itemUses, npcFlags, useRanges,
+            castShadows, entityTypes, serverOnly, stackables, quantities, itemUses, npcFlags, playerFlags, useRanges,
             healths, staminas, manas, stats, equipmentTypes, levels, experiences, radiantDatas, entityTable)
     {
     }

@@ -184,6 +184,11 @@ public enum ComponentType
     /// </summary>
     RadiantData = 0x0020,
 
+    /// <summary>
+    ///     PlayerFlags component.
+    /// </summary>
+    PlayerFlags = 0x0021,
+
     #endregion Common
 
     #region Client

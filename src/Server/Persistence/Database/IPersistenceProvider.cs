@@ -372,6 +372,12 @@ public interface IPersistenceProvider : IDisposable
 
     IRemoveComponentQuery RemoveNpcFlagsComponentQuery { get; }
 
+    IAddComponentQuery<PlayerFlag> AddPlayerFlagsComponentQuery { get; }
+
+    IModifyComponentQuery<PlayerFlag> ModifyPlayerFlagsComponentQuery { get; }
+
+    IRemoveComponentQuery RemovePlayerFlagsComponentQuery { get; }
+
     IAddComponentQuery<float> AddUseRangeComponentQuery { get; }
 
     IModifyComponentQuery<float> ModifyUseRangeComponentQuery { get; }

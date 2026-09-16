@@ -98,6 +98,7 @@ public sealed class EntityProcessor
     private const int IndexRadiantParam0 = IndexRadiantFunction + 1;
     private const int IndexRadiantParam1 = IndexRadiantParam0 + 1;
     private const int IndexRadiantParam2 = IndexRadiantParam1 + 1;
+    private const int IndexPlayerFlags = IndexRadiantParam2 + 1;
     private readonly IDataController dataController;
     private readonly IEntityFactory entityFactory;
     private readonly ExistingEntitySet existingEntitySet;
@@ -180,6 +181,7 @@ public sealed class EntityProcessor
             ProcessLevel(reader, builder);
             ProcessExperience(reader, builder);
             ProcessRadiantData(reader, builder);
+            ProcessPlayerFlags(reader, builder);
 
             /* Complete the entity. */
             builder.Build();
@@ -512,6 +514,12 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexNpcFlags)) return;
         builder.NpcFlags((NpcFlag)reader.GetInt32(IndexNpcFlags));
+    }
+
+    private void ProcessPlayerFlags(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexPlayerFlags)) return;
+        builder.PlayerFlags((PlayerFlag)reader.GetInt32(IndexPlayerFlags));
     }
 
     /// <summary>

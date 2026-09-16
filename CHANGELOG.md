@@ -4,7 +4,6 @@
 
 ### September
 
-<<<<<<< HEAD
 #### 15 September 2026
 
 * Add new common, scriptable `RadiantData` component that describes a radiant scalar field contribution at the position of the associated entity, with the new `RadiantCategory` (`MineralDrop`) and `RadiantFunction` (`Linear`) value types. The component is exposed to scripts as `Components.RadiantData` and as a `RadiantData` key in the `Entities.Create` spec table, and is persisted to the database. A new `RadiantIndexer` evaluates the summed scalar field of a category over the world segments near a queried position (configurable via the new `RadiantOptions` section), and a new `Radiant.GetValue(category, position)` Lua scripting function exposes the field value to scripts.
@@ -55,14 +54,13 @@
 * Add automatic unloading of the entities of idle world segments from server memory. World segments with no subscribed players for longer than the configured cutoff (and not on the auto load list) are periodically unloaded, and the new `/gcworld` admin chat command forces an unload of all idle world segments immediately.
 * Add new admin chat commands `/reloadentity` and `/reloadtemplate` to soft-reload entity script hooks.
 * Add a test harness to the server scripting engine with a committed Lua test suite covering the public scripting APIs. The harness is disabled by default and can be run automatically at startup or on demand with the new `/runtests` admin command.
-=======
->>>>>>> ae29e710 (Add server-side unloading of entities of idle world segments.)
 
 #### 3 September 2026
 
 * Add a server option to limit the number of concurrently connected players.
 * Add /ban, /unban, and /listbans admin commands to ban and unban accounts.
 * Bans are stored in a new database table; existing server databases must be recreated.
+* Add player moderation: PlayerFlags component with persistent moderator privileges, timed chat mutes, moderator-only mute commands, and mute events for scripts.
 
 ### April
 

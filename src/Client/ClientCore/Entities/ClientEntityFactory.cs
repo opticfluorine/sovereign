@@ -48,6 +48,7 @@ public sealed class ClientEntityFactory(
     QuantityComponentCollection quantities,
     ItemUseComponentCollection itemUses,
     NpcFlagsComponentCollection npcFlags,
+    PlayerFlagsComponentCollection playerFlags,
     UseRangeComponentCollection useRanges,
     HealthComponentCollection healths,
     StaminaComponentCollection staminas,
@@ -83,7 +84,7 @@ public sealed class ClientEntityFactory(
             aboveBlocks, animatedSprites, playerCharacterTags, names, parents,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources,
             physics, boundingBoxes, castShadows, entityTypes, serverOnly, stackables, quantities,
-            itemUses, npcFlags, useRanges, healths, staminas, manas, stats, equipmentTypes, levels, experiences,
+            itemUses, npcFlags, playerFlags, useRanges, healths, staminas, manas, stats, equipmentTypes, levels, experiences,
             radiantDatas, entityTable);
     }
 }

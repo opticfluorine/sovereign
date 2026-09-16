@@ -135,6 +135,7 @@ CREATE TABLE Entity
     radiant_param0      FLOAT,
     radiant_param1      FLOAT,
     radiant_param2      FLOAT,
+    player_flags        INTEGER,
     FOREIGN KEY (template_id) REFERENCES Entity (id),
     FOREIGN KEY (parent_id) REFERENCES Entity (id),
     FOREIGN KEY (account_id) REFERENCES Account (id)
@@ -293,7 +294,8 @@ SELECT Entity.id                 AS id,
        Entity.radiant_function   AS radiantFunction,
        Entity.radiant_param0     AS radiantParam0,
        Entity.radiant_param1     AS radiantParam1,
-       Entity.radiant_param2     AS radiantParam2
+       Entity.radiant_param2     AS radiantParam2,
+       Entity.player_flags       AS playerFlags
 FROM Entity;
 
 
