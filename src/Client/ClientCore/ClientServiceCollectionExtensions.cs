@@ -115,6 +115,8 @@ public static class ClientServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(BrandingOptions)}"));
         services.Configure<ClientInventoryOptions>(
             configuration.GetSection($"Sovereign:{nameof(ClientInventoryOptions)}"));
+        services.Configure<KeybindingsOptions>(
+            configuration.GetSection($"Sovereign:{nameof(KeybindingsOptions)}"));
 
         return services;
     }
@@ -383,6 +385,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<MouseEventHandler>();
         services.TryAddSingleton<MouseState>();
         services.TryAddSingleton<PlayerInputMovementMapper>();
+        services.TryAddSingleton<Keybindings>();
         services.TryAddSingleton<GlobalKeyboardShortcuts>();
         services.TryAddSingleton<InGameKeyboardShortcuts>();
         services.TryAddSingleton<InputServices>();

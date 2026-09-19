@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using System.Numerics;
 using SDL2;
 
@@ -79,5 +80,15 @@ public class InputServices
     public bool IsKeyDown(SDL.SDL_Keycode keycode)
     {
         return keyboardState[keycode];
+    }
+
+    /// <summary>
+    ///     Gets whether any of the given keyboard keys is pressed down.
+    /// </summary>
+    /// <param name="keys">Keys.</param>
+    /// <returns>true if any of the given keys is pressed, false otherwise.</returns>
+    public bool IsAnyKeyDown(IReadOnlyCollection<SDL.SDL_Keycode> keys)
+    {
+        return keyboardState.IsAnyDown(keys);
     }
 }

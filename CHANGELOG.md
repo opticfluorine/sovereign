@@ -6,6 +6,7 @@
 
 #### 15 September 2026
 
+* Add a new `KeybindingsOptions` client configuration section that makes the client keyboard bindings configurable in `appsettings.json`. Global shortcuts, in-game shortcuts, and in-game actions (movement, jump, interact, pick up item, hotbar selection, and the inventory drop and world editor scroll modifiers) are each bound to SDL key names, with movement and modifier options accepting multiple keys and defaults matching the previously hard-coded bindings.
 * Add new common, scriptable `RadiantData` component that describes a radiant scalar field contribution at the position of the associated entity, with the new `RadiantCategory` (`MineralDrop`) and `RadiantFunction` (`Linear`) value types. The component is exposed to scripts as `Components.RadiantData` and as a `RadiantData` key in the `Entities.Create` spec table, and is persisted to the database. A new `RadiantIndexer` evaluates the summed scalar field of a category over the world segments near a queried position (configurable via the new `RadiantOptions` section), and a new `Radiant.GetValue(category, position)` Lua scripting function exposes the field value to scripts.
 
 #### 13 September 2026

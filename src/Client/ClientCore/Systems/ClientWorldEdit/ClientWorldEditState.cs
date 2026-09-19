@@ -15,7 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using SDL2;
 using Sovereign.ClientCore.Components.Indexers;
 using Sovereign.ClientCore.Systems.Input;
 using Sovereign.EngineCore.Entities;
@@ -30,6 +29,7 @@ public class ClientWorldEditState
     private readonly BlockTemplateEntityIndexer blockTemplateIndexer;
     private readonly InputServices inputServices;
     private readonly ItemTemplateEntityIndexer itemTemplateIndexer;
+    private readonly Keybindings keybindings;
     private readonly NpcTemplateEntityIndexer npcTemplateIndexer;
 
     private ulong blockTemplateId;
@@ -37,12 +37,14 @@ public class ClientWorldEditState
     private ulong npcTemplateId;
 
     public ClientWorldEditState(InputServices inputServices, BlockTemplateEntityIndexer blockTemplateIndexer,
-        NpcTemplateEntityIndexer npcTemplateIndexer, ItemTemplateEntityIndexer itemTemplateIndexer)
+        NpcTemplateEntityIndexer npcTemplateIndexer, ItemTemplateEntityIndexer itemTemplateIndexer,
+        Keybindings keybindings)
     {
         this.inputServices = inputServices;
         this.blockTemplateIndexer = blockTemplateIndexer;
         this.npcTemplateIndexer = npcTemplateIndexer;
         this.itemTemplateIndexer = itemTemplateIndexer;
+        this.keybindings = keybindings;
     }
 
     /// <summary>
@@ -178,13 +180,11 @@ public class ClientWorldEditState
     private void HandleScrollForBlockTool(bool isScrollUp)
     {
         // The following rules are applied in priority order:
-        // Scroll while holding CTRL varies the z-offset.
-        // Scroll while holding SHIFT varies the pen width.
+        // Scroll while holding a z-offset modifier key varies the z-offset.
+        // Scroll while holding a pen width modifier key varies the pen width.
         // Scrolling without holding keys varies the material and material modifier.
-        var ctrlPressed = inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_LCTRL)
-                          || inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_RCTRL);
-        var shiftPressed = inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_LSHIFT)
-                           || inputServices.IsKeyDown(SDL.SDL_Keycode.SDLK_RSHIFT);
+        var ctrlPressed = inputServices.IsAnyKeyDown(keybindings.ScrollZOffsetModifier);
+        var shiftPressed = inputServices.IsAnyKeyDown(keybindings.ScrollPenWidthModifier);
         if (ctrlPressed)
         {
             // Z offset scroll.
