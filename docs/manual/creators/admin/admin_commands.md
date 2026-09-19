@@ -315,6 +315,37 @@ This action cannot be undone. If there are any child entities attached to the
 removed block, they will be permanently lost.
 :::
 
+## Teleportation
+
+### /teleport
+
+**Usage:** `/teleport x y z`
+
+**Parameters:**
+* `x`: X coordinate of the destination world position.
+* `y`: Y coordinate of the destination world position.
+* `z`: Z coordinate of the destination world position.
+
+Teleports yourself to the given world position. The coordinates must be finite
+decimal numbers given in world units.
+
+:::{note}
+The destination does not need to be empty. If the destination is occupied, e.g.
+inside terrain or another entity, the physics engine will resolve the overlap on
+the next simulation tick.
+:::
+
+### /teleportto
+
+**Usage:** `/teleportto player_name`
+
+**Parameters:**
+* `player_name`: Name of the player to teleport to (case insensitive).
+
+Teleports yourself to the current position of the given player. The target player
+must be logged in. As with `/teleport`, the destination may be occupied; the
+physics engine will resolve any overlap on the next simulation tick.
+
 ## World Management
 
 ### /gcworld
