@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using Microsoft.Extensions.Logging;
 using Sovereign.Accounts.Accounts.Services;
 using Sovereign.EngineCore.Components;
@@ -31,6 +32,7 @@ using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Data;
+using Sovereign.EngineCore.Systems.Movement;
 using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.Persistence.Bans;
 using Sovereign.Persistence.Players;
@@ -150,6 +152,16 @@ public class AdminChatProcessor : IChatProcessor
     /// </summary>
     private const string GcWorld = "gcworld";
 
+    /// <summary>
+    ///     Command name for /teleport.
+    /// </summary>
+    private const string Teleport = "teleport";
+
+    /// <summary>
+    ///     Command name for /teleportto.
+    /// </summary>
+    private const string TeleportTo = "teleportto";
+
     private readonly AdminTagCollection admins;
     private readonly AccountServices accountServices;
     private readonly BlockController blockController;
@@ -160,8 +172,10 @@ public class AdminChatProcessor : IChatProcessor
     private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
     private readonly ServerChatInternalController internalController;
+    private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<AdminChatProcessor> logger;
     private readonly LoggingUtil loggingUtil;
+    private readonly MovementController movementController;
     private readonly NameComponentValidator nameValidator;
     private readonly NameComponentCollection names;
     private readonly PersistenceBanServices persistenceBanServices;
@@ -185,7 +199,8 @@ public class AdminChatProcessor : IChatProcessor
         ScriptingServices scriptingServices,
         PersistenceBanServices persistenceBanServices, AccountServices accountServices,
         ServerNetworkController networkController, AccountComponentCollection accounts,
-        PlayerFlagsComponentCollection playerFlags)
+        PlayerFlagsComponentCollection playerFlags, MovementController movementController,
+        KinematicsComponentCollection kinematics)
     {
         this.admins = admins;
         this.internalController = internalController;
@@ -211,6 +226,8 @@ public class AdminChatProcessor : IChatProcessor
         this.networkController = networkController;
         this.accounts = accounts;
         this.playerFlags = playerFlags;
+        this.movementController = movementController;
+        this.kinematics = kinematics;
     }
 
     public List<ChatCommand> MatchingCommands => new()
@@ -235,7 +252,9 @@ public class AdminChatProcessor : IChatProcessor
         new ChatCommand { Command = Ban, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = Unban, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = ListBans, HelpSummary = "", IncludeInHelp = false },
-        new ChatCommand { Command = GcWorld, HelpSummary = "", IncludeInHelp = false }
+        new ChatCommand { Command = GcWorld, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = Teleport, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand { Command = TeleportTo, HelpSummary = "", IncludeInHelp = false }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)
@@ -338,6 +357,14 @@ public class AdminChatProcessor : IChatProcessor
 
             case GcWorld:
                 OnGcWorld(senderEntityId);
+                break;
+
+            case Teleport:
+                OnTeleport(message, senderEntityId);
+                break;
+
+            case TeleportTo:
+                OnTeleportTo(message, senderEntityId);
                 break;
         }
     }
@@ -1120,5 +1147,73 @@ public class AdminChatProcessor : IChatProcessor
     {
         worldManagementController.RequestUnloadIdleWorldSegments(eventSender);
         internalController.SendSystemMessage("Idle world segment unload requested.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /teleport command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnTeleport(string message, ulong senderEntityId)
+    {
+        var args = message.Split(' ', 3, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (args.Length != 3)
+        {
+            logger.LogWarning("{Player} used /teleport with bad parameters.", loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("Usage: /teleport x y z", senderEntityId);
+            return;
+        }
+
+        if (!TryParseCoordinate(args[0], out var x) || !TryParseCoordinate(args[1], out var y)
+            || !TryParseCoordinate(args[2], out var z))
+        {
+            logger.LogWarning("{Player} used /teleport with bad coordinates.",
+                loggingUtil.FormatEntity(senderEntityId));
+            internalController.SendSystemMessage("x, y, and z must be finite decimal numbers.", senderEntityId);
+            return;
+        }
+
+        movementController.Teleport(eventSender, senderEntityId, new Vector3(x, y, z));
+        internalController.SendSystemMessage("You have been teleported.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /teleportto command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnTeleportTo(string message, ulong senderEntityId)
+    {
+        var playerName = message.Trim();
+        if (!nameValidator.IsValid(playerName))
+        {
+            internalController.SendSystemMessage("Invalid name.", senderEntityId);
+            return;
+        }
+
+        if (!playerNameIndex.TryGetPlayerByName(playerName, out var targetEntityId)
+            || !kinematics.HasComponentForEntity(targetEntityId))
+        {
+            logger.LogWarning("Cannot teleport to player {Name}: player does not exist or is not logged in.",
+                playerName);
+            internalController.SendSystemMessage("Player does not exist or is not logged in.", senderEntityId);
+            return;
+        }
+
+        var targetPosition = kinematics[targetEntityId].Position;
+        movementController.Teleport(eventSender, senderEntityId, targetPosition);
+        internalController.SendSystemMessage($"You have been teleported to {playerName}.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Tries to parse a single coordinate argument as a finite decimal number.
+    /// </summary>
+    /// <param name="arg">Coordinate argument.</param>
+    /// <param name="value">Parsed coordinate, or zero if the method returns false.</param>
+    /// <returns>true if the argument was parsed as a finite decimal number, false otherwise.</returns>
+    private static bool TryParseCoordinate(string arg, out float value)
+    {
+        return float.TryParse(arg, NumberStyles.Float, CultureInfo.InvariantCulture, out value)
+            && float.IsFinite(value);
     }
 }
