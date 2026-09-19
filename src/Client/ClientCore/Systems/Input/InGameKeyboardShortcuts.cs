@@ -27,6 +27,8 @@ public class InGameKeyboardShortcuts
 {
     private readonly IEventSender eventSender;
 
+    private readonly PlayerRoleCheck roleCheck;
+
     /// <summary>
     ///     Map from keycodes to shortcut actions.
     /// </summary>
@@ -36,28 +38,21 @@ public class InGameKeyboardShortcuts
     private readonly ClientStateServices stateServices;
 
     public InGameKeyboardShortcuts(IEventSender eventSender, ClientStateServices stateServices,
-        ClientStateController stateController, PlayerRoleCheck roleCheck)
+        ClientStateController stateController, PlayerRoleCheck roleCheck, Keybindings keybindings)
     {
         this.eventSender = eventSender;
         this.stateServices = stateServices;
         this.stateController = stateController;
+        this.roleCheck = roleCheck;
 
-        // For now the shortcuts are hardcoded.
-        shortcutTable[SDL.SDL_Keycode.SDLK_i] = () => Toggle(ClientStateFlag.ShowInventory);
-        shortcutTable[SDL.SDL_Keycode.SDLK_RETURN] = () => Toggle(ClientStateFlag.ShowChat);
-        shortcutTable[SDL.SDL_Keycode.SDLK_ESCAPE] = () => Toggle(ClientStateFlag.ShowInGameMenu);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F2] = () => Toggle(ClientStateFlag.ShowPlayerDebug);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F3] = () => Toggle(ClientStateFlag.ShowEntityDebug);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F4] = () => Toggle(ClientStateFlag.ShowRendererDebug);
-        shortcutTable[SDL.SDL_Keycode.SDLK_INSERT] = () => Toggle(ClientStateFlag.ShowTemplateEntityEditor);
-        shortcutTable[SDL.SDL_Keycode.SDLK_DELETE] = () =>
-        {
-            if (stateServices.TryGetSelectedPlayer(out var playerId) && roleCheck.IsPlayerAdmin(playerId))
-            {
-                Toggle(ClientStateFlag.WorldEditMode);
-                Toggle(ClientStateFlag.ShowHiddenEntities);
-            }
-        };
+        Register(keybindings, ClientStateFlag.ShowInventory);
+        Register(keybindings, ClientStateFlag.ShowChat);
+        Register(keybindings, ClientStateFlag.ShowInGameMenu);
+        Register(keybindings, ClientStateFlag.ShowPlayerDebug);
+        Register(keybindings, ClientStateFlag.ShowEntityDebug);
+        Register(keybindings, ClientStateFlag.ShowRendererDebug);
+        Register(keybindings, ClientStateFlag.ShowTemplateEntityEditor);
+        RegisterWorldEditModeShortcut(keybindings);
     }
 
     /// <summary>
@@ -68,6 +63,38 @@ public class InGameKeyboardShortcuts
     {
         if (shortcutTable.TryGetValue(key, out var action))
             action.Invoke();
+    }
+
+    /// <summary>
+    ///     Registers the toggle shortcut for a state flag using its configured key.
+    /// </summary>
+    /// <param name="keybindings">Parsed client keyboard bindings.</param>
+    /// <param name="flag">Flag to toggle.</param>
+    private void Register(Keybindings keybindings, ClientStateFlag flag)
+    {
+        var key = keybindings.InGameShortcutKey(flag);
+        if (key == SDL.SDL_Keycode.SDLK_UNKNOWN) return;
+
+        shortcutTable[key] = () => Toggle(flag);
+    }
+
+    /// <summary>
+    ///     Registers the world edit mode shortcut using its configured key.
+    /// </summary>
+    /// <param name="keybindings">Parsed client keyboard bindings.</param>
+    private void RegisterWorldEditModeShortcut(Keybindings keybindings)
+    {
+        var key = keybindings.InGameShortcutKey(ClientStateFlag.WorldEditMode);
+        if (key == SDL.SDL_Keycode.SDLK_UNKNOWN) return;
+
+        shortcutTable[key] = () =>
+        {
+            if (stateServices.TryGetSelectedPlayer(out var playerId) && roleCheck.IsPlayerAdmin(playerId))
+            {
+                Toggle(ClientStateFlag.WorldEditMode);
+                Toggle(ClientStateFlag.ShowHiddenEntities);
+            }
+        };
     }
 
     /// <summary>

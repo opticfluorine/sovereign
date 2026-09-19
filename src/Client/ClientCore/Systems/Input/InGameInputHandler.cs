@@ -1,20 +1,21 @@
 // Sovereign Engine
 // Copyright (c) 2024 opticfluorine
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using SDL2;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Systems.Camera;
@@ -37,57 +38,64 @@ public class InGameInputHandler(
     EntityClickHandler entityClickHandler,
     ClientStateServices stateServices,
     InventoryClickHandler inventoryClickHandler,
-    ClientStateController stateController)
+    ClientStateController stateController,
+    Keybindings keybindings)
     : IInputHandler
 {
+    /// <summary>
+    ///     Movement directions that can be bound to keys.
+    /// </summary>
+    private enum Direction
+    {
+        Up,
+        Down,
+        Left,
+        Right
+    }
+
+    /// <summary>
+    ///     Map from keycode to movement direction.
+    /// </summary>
+    private readonly Dictionary<SDL.SDL_Keycode, Direction> movementKeys = BuildMovementKeys(keybindings);
+
+    /// <summary>
+    ///     Map from keycode to hotbar slot index.
+    /// </summary>
+    private readonly Dictionary<SDL.SDL_Keycode, int> hotbarKeys = BuildHotbarKeys(keybindings);
+
     public void HandleKeyboardEvent(KeyEventDetails details, bool isKeyUp, bool oldState)
     {
         if (!isKeyUp) inGameKeyboardShortcuts.OnKeyDown(details.Key);
 
-        switch (details.Key)
+        var newState = !isKeyUp;
+        if (movementKeys.ContainsKey(details.Key))
         {
-            /* Direction keys. */
-            case SDL.SDL_Keycode.SDLK_UP:
-            case SDL.SDL_Keycode.SDLK_DOWN:
-            case SDL.SDL_Keycode.SDLK_LEFT:
-            case SDL.SDL_Keycode.SDLK_RIGHT:
-            case SDL.SDL_Keycode.SDLK_w:
-            case SDL.SDL_Keycode.SDLK_a:
-            case SDL.SDL_Keycode.SDLK_s:
-            case SDL.SDL_Keycode.SDLK_d:
-                HandleDirectionKeyEvent(oldState, !isKeyUp);
-                break;
-
-            case SDL.SDL_Keycode.SDLK_SPACE:
-                HandleSpaceKeyEvent(oldState, !isKeyUp);
-                break;
-
-            case SDL.SDL_Keycode.SDLK_e:
-                HandleEKeyEvent(oldState, !isKeyUp);
-                break;
-
-            case SDL.SDL_Keycode.SDLK_COMMA:
-                HandleCommaKeyEvent(oldState, !isKeyUp);
-                break;
-
-            case SDL.SDL_Keycode.SDLK_0:
-            case SDL.SDL_Keycode.SDLK_1:
-            case SDL.SDL_Keycode.SDLK_2:
-            case SDL.SDL_Keycode.SDLK_3:
-            case SDL.SDL_Keycode.SDLK_4:
-            case SDL.SDL_Keycode.SDLK_5:
-            case SDL.SDL_Keycode.SDLK_6:
-            case SDL.SDL_Keycode.SDLK_7:
-            case SDL.SDL_Keycode.SDLK_8:
-            case SDL.SDL_Keycode.SDLK_9:
-            {
-                var number = (int)details.Key - (int)SDL.SDL_Keycode.SDLK_0;
-                HandleNumberKeyEvent(number, oldState, !isKeyUp);
-                break;
-            }
-
-            /* Ignore keys that don't do anything for now. */
+            HandleDirectionKeyEvent(oldState, newState);
+            return;
         }
+
+        if (details.Key == keybindings.Jump)
+        {
+            HandleJumpKeyEvent(oldState, newState);
+            return;
+        }
+
+        if (details.Key == keybindings.Interact)
+        {
+            HandleInteractKeyEvent(oldState, newState);
+            return;
+        }
+
+        if (details.Key == keybindings.PickUpItem)
+        {
+            HandlePickUpItemKeyEvent(oldState, newState);
+            return;
+        }
+
+        if (hotbarKeys.TryGetValue(details.Key, out var slotIndex))
+            HandleNumberKeyEvent(slotIndex, oldState, newState);
+
+        /* Ignore keys that don't do anything for now. */
     }
 
     /// <summary>
@@ -101,7 +109,8 @@ public class InGameInputHandler(
 
         if (stateServices.TryGetSelectedInventorySlot(out var slotIndex, out var selectedQty))
         {
-            inventoryClickHandler.DropSelectedItem(slotIndex, selectedQty, keyboardState[SDL.SDL_Keycode.SDLK_LCTRL]);
+            inventoryClickHandler.DropSelectedItem(slotIndex, selectedQty,
+                keyboardState.IsAnyDown(keybindings.DropItemModifier));
             stateController.DeselectItem(eventSender);
         }
 
@@ -124,6 +133,52 @@ public class InGameInputHandler(
     }
 
     /// <summary>
+    ///     Builds the movement key lookup from the configured movement bindings.
+    /// </summary>
+    /// <param name="keybindings">Parsed client keyboard bindings.</param>
+    /// <returns>Map from keycode to movement direction.</returns>
+    private static Dictionary<SDL.SDL_Keycode, Direction> BuildMovementKeys(Keybindings keybindings)
+    {
+        var keys = new Dictionary<SDL.SDL_Keycode, Direction>();
+        AddMovementKeys(keys, keybindings.MoveUp, Direction.Up);
+        AddMovementKeys(keys, keybindings.MoveDown, Direction.Down);
+        AddMovementKeys(keys, keybindings.MoveLeft, Direction.Left);
+        AddMovementKeys(keys, keybindings.MoveRight, Direction.Right);
+        return keys;
+    }
+
+    /// <summary>
+    ///     Adds the keys for one movement direction to the movement key lookup.
+    /// </summary>
+    /// <param name="keys">Movement key lookup.</param>
+    /// <param name="bindings">Bound keys for the direction.</param>
+    /// <param name="direction">Movement direction.</param>
+    private static void AddMovementKeys(Dictionary<SDL.SDL_Keycode, Direction> keys,
+        IReadOnlyList<SDL.SDL_Keycode> bindings, Direction direction)
+    {
+        foreach (var key in bindings)
+            if (key != SDL.SDL_Keycode.SDLK_UNKNOWN) keys[key] = direction;
+    }
+
+    /// <summary>
+    ///     Builds the hotbar key lookup from the configured hotbar slot bindings.
+    /// </summary>
+    /// <param name="keybindings">Parsed client keyboard bindings.</param>
+    /// <returns>Map from keycode to hotbar slot index.</returns>
+    private static Dictionary<SDL.SDL_Keycode, int> BuildHotbarKeys(Keybindings keybindings)
+    {
+        var keys = new Dictionary<SDL.SDL_Keycode, int>();
+        var slotKeys = keybindings.HotbarSlotKeys;
+        for (var i = 0; i < slotKeys.Count; ++i)
+        {
+            var key = slotKeys[i];
+            if (key != SDL.SDL_Keycode.SDLK_UNKNOWN) keys[key] = i;
+        }
+
+        return keys;
+    }
+
+    /// <summary>
     ///     Handles direction key events.
     /// </summary>
     /// <param name="oldState">Old state of the key.</param>
@@ -133,54 +188,50 @@ public class InGameInputHandler(
         /* Only update movement if the state has changed. */
         if (oldState != newState)
             playerInputMovementMapper.UpdateMovement(
-                keyboardState[SDL.SDL_Keycode.SDLK_UP] || keyboardState[SDL.SDL_Keycode.SDLK_w],
-                keyboardState[SDL.SDL_Keycode.SDLK_DOWN] || keyboardState[SDL.SDL_Keycode.SDLK_s],
-                keyboardState[SDL.SDL_Keycode.SDLK_LEFT] || keyboardState[SDL.SDL_Keycode.SDLK_a],
-                keyboardState[SDL.SDL_Keycode.SDLK_RIGHT] || keyboardState[SDL.SDL_Keycode.SDLK_d]);
+                keyboardState.IsAnyDown(keybindings.MoveUp),
+                keyboardState.IsAnyDown(keybindings.MoveDown),
+                keyboardState.IsAnyDown(keybindings.MoveLeft),
+                keyboardState.IsAnyDown(keybindings.MoveRight));
     }
 
     /// <summary>
-    ///     Handles space key events.
+    ///     Handles jump key events.
     /// </summary>
     /// <param name="oldState">Old state of the key.</param>
     /// <param name="newState">New state of the key.</param>
-    private void HandleSpaceKeyEvent(bool oldState, bool newState)
+    private void HandleJumpKeyEvent(bool oldState, bool newState)
     {
         if (!oldState && newState) playerInputMovementMapper.Jump();
     }
 
     /// <summary>
-    ///     Handles E key events.
+    ///     Handles interact key events.
     /// </summary>
     /// <param name="oldState">Old state of the key.</param>
     /// <param name="newState">New state of the key.</param>
-    private void HandleEKeyEvent(bool oldState, bool newState)
+    private void HandleInteractKeyEvent(bool oldState, bool newState)
     {
         if (oldState && !newState) playerController.Interact(eventSender);
     }
 
     /// <summary>
-    ///     Handles ',' key events.
+    ///     Handles pick up item key events.
     /// </summary>
     /// <param name="oldState">Old state of the key (true = key down).</param>
     /// <param name="newState">New state of the key (true = key down).</param>
-    private void HandleCommaKeyEvent(bool oldState, bool newState)
+    private void HandlePickUpItemKeyEvent(bool oldState, bool newState)
     {
         if (!oldState && newState) playerController.PickUpItemUnder(eventSender);
     }
 
     /// <summary>
-    ///     Handles number key events.
+    ///     Handles hotbar slot key events.
     /// </summary>
-    /// <param name="number">Number pressed.</param>
+    /// <param name="slotIndex">Hotbar slot index bound to the key.</param>
     /// <param name="oldState">Old state.</param>
     /// <param name="newState">New state.</param>
-    private void HandleNumberKeyEvent(int number, bool oldState, bool newState)
+    private void HandleNumberKeyEvent(int slotIndex, bool oldState, bool newState)
     {
-        // This will dispatch to a hotbar slot selection. Slots are numbered in QWERTY layout order (1,2,3,...,0)
-        // but indexed from 0 (i.e. slot 0 is key 1, slot 1 is key 2, ..., slot 9 is key 0).
-        var slotIndex = (number + ClientInventoryConstants.HotbarSlotCount - 1) %
-                        ClientInventoryConstants.HotbarSlotCount;
         if (!oldState && newState) stateController.SelectHotbar(eventSender, slotIndex);
     }
 }

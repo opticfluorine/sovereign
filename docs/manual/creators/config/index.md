@@ -48,6 +48,56 @@ The global light color for a specific second of the day can be found by linearly
 interpolating the two steps around the point in time.
 :::
 
+### KeybindingsOptions
+Client keyboard bindings. Each binding is specified as an SDL key name, using SDL's canonical
+names: letters and digits as literal characters (`W`, `3`), function and navigation keys in
+canonical form (`F7`, `Return`, `Escape`, `Space`, `Insert`, `Delete`, `Up`), and modifier
+keys as `Left Ctrl`, `Right Ctrl`, `Left Shift`, or `Right Shift`. Punctuation keys use the
+literal character, e.g. `` ` `` for the backquote key or `,` for the comma key. If a key name
+is not recognized, the binding is disabled and a warning is logged at startup. Options
+documented as accepting a list of key names activate the associated action when any key in
+the list is used.
+
+#### GlobalShortcuts
+Shortcuts that apply to all client states.
+- **ShowNetworkDebug**: Toggles the network debug window.
+- **ShowImGuiDebugLog**: Toggles the Dear ImGui debug log window.
+- **ShowImGuiDemo**: Toggles the Dear ImGui demo window.
+- **ShowImGuiIdStackTool**: Toggles the Dear ImGui ID stack tool window.
+- **ShowImGuiMetrics**: Toggles the Dear ImGui metrics window.
+- **DebugFrame**: Toggles debug tracing of the next frame.
+- **ShowResourceEditor**: Toggles the resource editor window.
+
+#### InGameShortcuts
+Shortcuts that apply while in the game.
+- **ShowInventory**: Toggles the inventory GUI.
+- **ShowChat**: Toggles the chat window.
+- **ShowInGameMenu**: Toggles the in-game menu.
+- **ShowPlayerDebug**: Toggles the player debug window.
+- **ShowEntityDebug**: Toggles the entity debug window.
+- **ShowRendererDebug**: Toggles the renderer debug window.
+- **ShowTemplateEntityEditor**: Toggles the template entity editor window.
+- **ToggleWorldEditMode**: Toggles world edit mode (admins only).
+
+#### InGameActions
+In-game player actions. Unless noted otherwise, each option is a single key name.
+- **MoveUp**: Keys that move the player up (list).
+- **MoveDown**: Keys that move the player down (list).
+- **MoveLeft**: Keys that move the player left (list).
+- **MoveRight**: Keys that move the player right (list).
+- **Jump**: Jumps.
+- **Interact**: Interacts with the targeted entity.
+- **PickUpItem**: Picks up the item under the player.
+- **HotbarSlots**: Ordered list of keys selecting hotbar slots; the entry at index 0
+  selects the first hotbar slot, and so on. The list is expected to have one entry per
+  hotbar slot.
+- **DropItemModifier**: Keys that, while held, cause a click on an inventory item to drop
+  the item instead of selecting it (list).
+- **ScrollZOffsetModifier**: Keys that, while held, cause the mouse wheel to vary the world
+  editor Z offset (list).
+- **ScrollPenWidthModifier**: Keys that, while held, cause the mouse wheel to vary the world
+  editor pen width (list).
+
 ---
 
 ## Server Configuration Options
