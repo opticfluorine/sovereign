@@ -7,6 +7,7 @@
 #### 19 September 2026
 
 * Add new admin chat commands `/teleport x y z` and `/teleportto player_name` for teleporting to a world position or to another player.
+* Removed the redundant `EntityWithComponents` database view; entity retrieval queries now read from the `Entity` table directly. Existing databases are unaffected.
 
 #### 15 September 2026
 
