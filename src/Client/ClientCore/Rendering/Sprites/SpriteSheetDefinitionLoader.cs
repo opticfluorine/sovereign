@@ -18,8 +18,7 @@
 using System;
 using System.IO;
 using System.Text;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using System.Text.Json;
 
 namespace Sovereign.ClientCore.Rendering.Sprites;
 
@@ -28,13 +27,6 @@ namespace Sovereign.ClientCore.Rendering.Sprites;
 /// </summary>
 public class SpriteSheetDefinitionLoader
 {
-    /// <summary>
-    ///     YAML deserializer for the spritesheet definition file.
-    /// </summary>
-    private readonly IDeserializer deserializer = new DeserializerBuilder()
-        .WithNamingConvention(PascalCaseNamingConvention.Instance)
-        .Build();
-
     /// <summary>
     ///     Loads a spritesheet definition from the given file.
     /// </summary>
@@ -46,12 +38,11 @@ public class SpriteSheetDefinitionLoader
     public SpriteSheetDefinition LoadDefinition(string filename)
     {
         /* Deserialize the definition file. */
+        SpriteSheetDefinition? definition;
         try
         {
-            using (var reader = new StreamReader(filename))
-            {
-                return deserializer.Deserialize<SpriteSheetDefinition>(reader);
-            }
+            using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read);
+            definition = JsonSerializer.Deserialize<SpriteSheetDefinition>(stream);
         }
         catch (Exception e)
         {
@@ -60,5 +51,13 @@ public class SpriteSheetDefinitionLoader
                 .Append(filename).Append("'.");
             throw new SpriteSheetDefinitionException(sb.ToString(), e);
         }
+
+        if (definition == null)
+        {
+            throw new SpriteSheetDefinitionException(
+                $"Failed to load spritesheet definition file '{filename}'.");
+        }
+
+        return definition;
     }
 }

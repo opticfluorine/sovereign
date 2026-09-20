@@ -65,7 +65,7 @@ public partial class UpdaterResourceSetBuilder
     private void AddSpritesheet(UpdaterResourceSet resourceSet, IResourcePathBuilder pathBuilder)
     {
         AddFiles(resourceSet, pathBuilder, ResourceType.Spritesheet,
-            f => IsPngRegex().IsMatch(f) || IsYamlRegex().IsMatch(f));
+            f => IsPngRegex().IsMatch(f) || IsJsonRegex().IsMatch(f));
     }
 
     /// <summary>
@@ -117,13 +117,6 @@ public partial class UpdaterResourceSetBuilder
     /// <returns>Regex.</returns>
     [GeneratedRegex(@".+\.png$")]
     private static partial Regex IsPngRegex();
-
-    /// <summary>
-    ///     Generated regex that matches .yaml filenames.
-    /// </summary>
-    /// <returns>Regex.</returns>
-    [GeneratedRegex(@".+\.yaml$")]
-    private static partial Regex IsYamlRegex();
 
     /// <summary>
     ///     Generated regex that matches .json filenames.

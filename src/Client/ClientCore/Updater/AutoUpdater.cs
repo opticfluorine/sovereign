@@ -300,6 +300,6 @@ public partial class AutoUpdater
     ///     Regex that matches allowed resource filenames.
     /// </summary>
     /// <returns></returns>
-    [GeneratedRegex(@"^[A-Za-z0-9_\-]+/[A-Za-z0-9_\-]+\.(?:png|json|yaml|txt)$")]
+    [GeneratedRegex(@"^[A-Za-z0-9_\-]+/[A-Za-z0-9_\-]+\.(?:png|json|txt)$")]
     private static partial Regex AllowedFilenamesRegex();
 }

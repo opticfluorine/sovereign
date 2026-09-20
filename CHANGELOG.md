@@ -4,6 +4,10 @@
 
 ### September
 
+#### 20 September 2026
+
+* Spritesheet definition files are now JSON (`.json`) instead of YAML (`.yaml`), and the YamlDotNet dependency has been removed.
+
 #### 19 September 2026
 
 * Add new admin chat commands `/teleport x y z` and `/teleportto player_name` for teleporting to a world position or to another player.
