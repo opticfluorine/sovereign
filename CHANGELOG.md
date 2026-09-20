@@ -4,6 +4,10 @@
 
 ### September
 
+#### 20 September 2026
+
+* Add a new `AutoLoginOptions` client configuration section that, when enabled, makes the client skip the automatic update check at startup, log into the configured account, and enter the world as the configured player without user interaction. Intended for development and testing; any failure along the way is logged and the client exits with status code 1.
+
 #### 19 September 2026
 
 * Add new admin chat commands `/teleport x y z` and `/teleportto player_name` for teleporting to a world position or to another player.
