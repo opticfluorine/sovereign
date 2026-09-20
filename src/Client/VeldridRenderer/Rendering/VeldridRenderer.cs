@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
@@ -32,6 +33,11 @@ namespace Sovereign.VeldridRenderer.Rendering;
 /// </summary>
 public class VeldridRenderer : IRenderer
 {
+    /// <summary>
+    ///     Number of bytes per pixel in each supported capture format.
+    /// </summary>
+    private const int BytesPerPixel = 4;
+
     /// <summary>
     ///     Veldrid graphics device.
     /// </summary>
@@ -153,5 +159,84 @@ public class VeldridRenderer : IRenderer
         device.Device.WaitForIdle();
         device.Device.SwapBuffers();
         guiRenderer.EndFrame();
+    }
+
+    public CapturedFrame? CaptureFrame()
+    {
+        try
+        {
+            var graphicsDevice = device.Device
+                ?? throw new InvalidOperationException("Device not ready.");
+            var commandList = resourceManager.CommandList
+                ?? throw new InvalidOperationException("Command list not ready.");
+
+            var colorTarget = graphicsDevice.SwapchainFramebuffer.ColorTargets[0].Target;
+            var captureFormat = MapPixelFormat(colorTarget.Format);
+            var width = (int)colorTarget.Width;
+            var height = (int)colorTarget.Height;
+            var bytesPerRow = width * BytesPerPixel;
+
+            /* Copy the swapchain color target into a one-shot staging texture. */
+            using var staging = graphicsDevice.ResourceFactory.CreateTexture(
+                TextureDescription.Texture2D(colorTarget.Width, colorTarget.Height, 1, 1,
+                    colorTarget.Format, TextureUsage.Staging));
+
+            commandList.Begin();
+            commandList.CopyTexture(colorTarget, staging);
+            commandList.End();
+            graphicsDevice.SubmitCommands(commandList);
+            graphicsDevice.WaitForIdle();
+
+            var map = graphicsDevice.Map(staging, MapMode.Read);
+            try
+            {
+                /* Copy row by row to drop the padding between mapped rows. */
+                var pixels = new byte[checked(bytesPerRow * height)];
+                unsafe
+                {
+                    var data = (byte*)map.Data;
+                    for (var y = 0; y < height; y++)
+                    {
+                        Marshal.Copy((IntPtr)(data + y * map.RowPitch),
+                            pixels, y * bytesPerRow, bytesPerRow);
+                    }
+                }
+
+                return new CapturedFrame
+                {
+                    Width = width,
+                    Height = height,
+                    Format = captureFormat,
+                    Pixels = pixels
+                };
+            }
+            finally
+            {
+                graphicsDevice.Unmap(staging);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to capture frame.");
+            return null;
+        }
+    }
+
+    /// <summary>
+    ///     Maps a Veldrid pixel format to the corresponding captured frame pixel format.
+    /// </summary>
+    /// <param name="format">Veldrid pixel format.</param>
+    /// <returns>Captured frame pixel format.</returns>
+    /// <exception cref="NotSupportedException">Thrown if the format is not supported.</exception>
+    private static CapturedPixelFormat MapPixelFormat(PixelFormat format)
+    {
+        return format switch
+        {
+            PixelFormat.B8_G8_R8_A8_UNorm => CapturedPixelFormat.Bgra8,
+            PixelFormat.B8_G8_R8_A8_UNorm_SRgb => CapturedPixelFormat.Bgra8Srgb,
+            PixelFormat.R8_G8_B8_A8_UNorm => CapturedPixelFormat.Rgba8,
+            PixelFormat.R8_G8_B8_A8_UNorm_SRgb => CapturedPixelFormat.Rgba8Srgb,
+            _ => throw new NotSupportedException($"Unsupported swapchain pixel format {format}.")
+        };
     }
 }

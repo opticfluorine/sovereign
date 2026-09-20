@@ -57,6 +57,7 @@ using Sovereign.ClientCore.Systems.ClientChat;
 using Sovereign.ClientCore.Systems.ClientNetwork;
 using Sovereign.ClientCore.Systems.ClientState;
 using Sovereign.ClientCore.Systems.ClientWorldEdit;
+using Sovereign.ClientCore.Systems.DebugInterface;
 using Sovereign.ClientCore.Systems.Dialogue;
 using Sovereign.ClientCore.Systems.EntityAnimation;
 using Sovereign.ClientCore.Systems.EntitySynchronization;
@@ -117,6 +118,8 @@ public static class ClientServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(ClientInventoryOptions)}"));
         services.Configure<KeybindingsOptions>(
             configuration.GetSection($"Sovereign:{nameof(KeybindingsOptions)}"));
+        services.Configure<DebugInterfaceOptions>(
+            configuration.GetSection($"Sovereign:{nameof(DebugInterfaceOptions)}"));
 
         return services;
     }
@@ -140,6 +143,7 @@ public static class ClientServiceCollectionExtensions
         AddScenes(services);
         AddSprites(services);
         AddSystems(services);
+        AddDebugInterface(services);
         AddUpdater(services);
 
         return services;
@@ -411,5 +415,14 @@ public static class ClientServiceCollectionExtensions
     private static void AddUpdater(IServiceCollection services)
     {
         services.TryAddSingleton<AutoUpdater>();
+    }
+
+    private static void AddDebugInterface(IServiceCollection services)
+    {
+        services.TryAddSingleton<SdlEventInjectionQueue>();
+        services.TryAddSingleton<FrameCaptureQueue>();
+        services.TryAddSingleton<DebugRequestProcessor>();
+        services.TryAddSingleton<DebugInterfaceServer>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, DebugInterfaceSystem>());
     }
 }

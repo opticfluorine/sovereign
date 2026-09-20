@@ -47,4 +47,10 @@ public interface IRenderer
     ///     Renders the next frame.
     /// </summary>
     void Render();
+
+    /// <summary>
+    ///     Captures the most recently rendered frame. Must be called on the render thread.
+    /// </summary>
+    /// <returns>The captured frame, or null if the capture failed.</returns>
+    CapturedFrame? CaptureFrame();
 }

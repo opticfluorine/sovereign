@@ -98,6 +98,14 @@ In-game player actions. Unless noted otherwise, each option is a single key name
 - **ScrollPenWidthModifier**: Keys that, while held, cause the mouse wheel to vary the world
   editor pen width (list).
 
+### DebugInterfaceOptions
+Options for the client debug interface, a local IPC server for automated testing tools.
+The interface is disabled by default. See the [Debug Interface](../../developers/debugging/debug-interface.md)
+page for the wire protocol.
+- **Enabled**: A boolean indicating whether the debug interface server is started with the client. Defaults to false.
+- **Host**: The IPv4 address to bind the debug interface server to. The loopback address (127.0.0.1) is the default and is the intended security boundary for the interface.
+- **Port**: The UDP port to bind the debug interface server to. Defaults to 12821.
+
 ---
 
 ## Server Configuration Options

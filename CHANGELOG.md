@@ -4,6 +4,10 @@
 
 ### September
 
+#### 20 September 2026
+
+* Add an opt-in debug IPC interface to the client for automated testing tools. When enabled via the new `DebugInterfaceOptions` configuration section (disabled by default, bound to the loopback interface), the client accepts MessagePack-over-LiteNetLib requests to capture a screenshot of the next rendered frame (raw pixels with the pixel format reported), query keyboard and mouse input state, inject SDL key and mouse events through the full input processing path (including Dear ImGui), and quit the client.
+
 #### 19 September 2026
 
 * Add new admin chat commands `/teleport x y z` and `/teleportto player_name` for teleporting to a world position or to another player.

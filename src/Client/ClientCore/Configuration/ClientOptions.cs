@@ -372,6 +372,32 @@ public sealed class ClientInventoryOptions
 }
 
 /// <summary>
+///     Configuration options for the client debug interface.
+/// </summary>
+public sealed class DebugInterfaceOptions
+{
+    public const string DefaultHost = "127.0.0.1";
+
+    public const ushort DefaultPort = 12821;
+
+    /// <summary>
+    ///     Whether the debug interface server is enabled. Disabled by default.
+    /// </summary>
+    public bool Enabled { get; set; }
+
+    /// <summary>
+    ///     IPv4 address to bind the debug interface server to. The loopback address
+    ///     is the default and is the intended security boundary for the interface.
+    /// </summary>
+    public string Host { get; set; } = DefaultHost;
+
+    /// <summary>
+    ///     UDP port to bind the debug interface server to.
+    /// </summary>
+    public ushort Port { get; set; } = DefaultPort;
+}
+
+/// <summary>
 ///     Client keyboard bindings.
 /// </summary>
 public sealed class KeybindingsOptions
