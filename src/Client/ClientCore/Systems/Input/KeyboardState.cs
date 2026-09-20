@@ -39,6 +39,19 @@ public class KeyboardState
     public bool this[SDL.SDL_Keycode key] => keysDown.ContainsKey(key) ? keysDown[key] : false;
 
     /// <summary>
+    ///     Indicates whether any of the given keys is currently pressed.
+    /// </summary>
+    /// <param name="keys">Keys to check.</param>
+    /// <returns>true if any of the given keys is pressed, false otherwise.</returns>
+    public bool IsAnyDown(IEnumerable<SDL.SDL_Keycode> keys)
+    {
+        foreach (var key in keys)
+            if (this[key]) return true;
+
+        return false;
+    }
+
+    /// <summary>
     ///     Registers that a key has been pressed.
     /// </summary>
     /// <param name="key">Key that was pressed.</param>

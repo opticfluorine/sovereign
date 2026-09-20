@@ -38,20 +38,19 @@ public class GlobalKeyboardShortcuts
     private readonly ClientStateServices stateServices;
 
     public GlobalKeyboardShortcuts(IEventSender eventSender, ClientStateServices stateServices,
-        ClientStateController stateController)
+        ClientStateController stateController, Keybindings keybindings)
     {
         this.eventSender = eventSender;
         this.stateServices = stateServices;
         this.stateController = stateController;
 
-        // For now the shortcuts are hardcoded.
-        shortcutTable[SDL.SDL_Keycode.SDLK_F7] = () => Toggle(ClientStateFlag.ShowNetworkDebug);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F8] = () => Toggle(ClientStateFlag.ShowImGuiDebugLog);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F9] = () => Toggle(ClientStateFlag.ShowImGuiDemo);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F10] = () => Toggle(ClientStateFlag.ShowImGuiIdStackTool);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F11] = () => Toggle(ClientStateFlag.ShowImGuiMetrics);
-        shortcutTable[SDL.SDL_Keycode.SDLK_F12] = () => Toggle(ClientStateFlag.DebugFrame);
-        shortcutTable[SDL.SDL_Keycode.SDLK_BACKQUOTE] = () => Toggle(ClientStateFlag.ShowResourceEditor);
+        Register(keybindings, ClientStateFlag.ShowNetworkDebug);
+        Register(keybindings, ClientStateFlag.ShowImGuiDebugLog);
+        Register(keybindings, ClientStateFlag.ShowImGuiDemo);
+        Register(keybindings, ClientStateFlag.ShowImGuiIdStackTool);
+        Register(keybindings, ClientStateFlag.ShowImGuiMetrics);
+        Register(keybindings, ClientStateFlag.DebugFrame);
+        Register(keybindings, ClientStateFlag.ShowResourceEditor);
     }
 
     /// <summary>
@@ -62,6 +61,19 @@ public class GlobalKeyboardShortcuts
     {
         if (shortcutTable.TryGetValue(key, out var action))
             action.Invoke();
+    }
+
+    /// <summary>
+    ///     Registers the toggle shortcut for a state flag using its configured key.
+    /// </summary>
+    /// <param name="keybindings">Parsed client keyboard bindings.</param>
+    /// <param name="flag">State flag to toggle.</param>
+    private void Register(Keybindings keybindings, ClientStateFlag flag)
+    {
+        var key = keybindings.GlobalShortcutKey(flag);
+        if (key == SDL.SDL_Keycode.SDLK_UNKNOWN) return;
+
+        shortcutTable[key] = () => Toggle(flag);
     }
 
     /// <summary>

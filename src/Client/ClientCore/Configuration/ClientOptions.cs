@@ -370,3 +370,172 @@ public sealed class ClientInventoryOptions
     /// </summary>
     public ulong RightMouseRepeatDelayUs { get; set; } = 20000;
 }
+
+/// <summary>
+///     Client keyboard bindings.
+/// </summary>
+public sealed class KeybindingsOptions
+{
+    /// <summary>
+    ///     Keyboard shortcuts that apply to all client states.
+    /// </summary>
+    public GlobalShortcutsOptions GlobalShortcuts { get; set; } = new();
+
+    /// <summary>
+    ///     Keyboard shortcuts that apply while in the game.
+    /// </summary>
+    public InGameShortcutsOptions InGameShortcuts { get; set; } = new();
+
+    /// <summary>
+    ///     Keyboard bindings for in-game player actions.
+    /// </summary>
+    public InGameActionsOptions InGameActions { get; set; } = new();
+}
+
+/// <summary>
+///     Keyboard shortcuts that apply to all client states.
+/// </summary>
+public sealed class GlobalShortcutsOptions
+{
+    /// <summary>
+    ///     Key to toggle the network debug window.
+    /// </summary>
+    public string ShowNetworkDebug { get; set; } = "F7";
+
+    /// <summary>
+    ///     Key to toggle the Dear ImGui debug log window.
+    /// </summary>
+    public string ShowImGuiDebugLog { get; set; } = "F8";
+
+    /// <summary>
+    ///     Key to toggle the Dear ImGui demo window.
+    /// </summary>
+    public string ShowImGuiDemo { get; set; } = "F9";
+
+    /// <summary>
+    ///     Key to toggle the Dear ImGui ID stack tool window.
+    /// </summary>
+    public string ShowImGuiIdStackTool { get; set; } = "F10";
+
+    /// <summary>
+    ///     Key to toggle the Dear ImGui metrics window.
+    /// </summary>
+    public string ShowImGuiMetrics { get; set; } = "F11";
+
+    /// <summary>
+    ///     Key to toggle debug tracing of the next frame.
+    /// </summary>
+    public string DebugFrame { get; set; } = "F12";
+
+    /// <summary>
+    ///     Key to toggle the resource editor window.
+    /// </summary>
+    public string ShowResourceEditor { get; set; } = "`";
+}
+
+/// <summary>
+///     Keyboard shortcuts that apply while in the game.
+/// </summary>
+public sealed class InGameShortcutsOptions
+{
+    /// <summary>
+    ///     Key to toggle the inventory GUI.
+    /// </summary>
+    public string ShowInventory { get; set; } = "I";
+
+    /// <summary>
+    ///     Key to toggle the chat window.
+    /// </summary>
+    public string ShowChat { get; set; } = "Return";
+
+    /// <summary>
+    ///     Key to toggle the in-game menu.
+    /// </summary>
+    public string ShowInGameMenu { get; set; } = "Escape";
+
+    /// <summary>
+    ///     Key to toggle the player debug window.
+    /// </summary>
+    public string ShowPlayerDebug { get; set; } = "F2";
+
+    /// <summary>
+    ///     Key to toggle the entity debug window.
+    /// </summary>
+    public string ShowEntityDebug { get; set; } = "F3";
+
+    /// <summary>
+    ///     Key to toggle the renderer debug window.
+    /// </summary>
+    public string ShowRendererDebug { get; set; } = "F4";
+
+    /// <summary>
+    ///     Key to toggle the template entity editor window.
+    /// </summary>
+    public string ShowTemplateEntityEditor { get; set; } = "Insert";
+
+    /// <summary>
+    ///     Key to toggle world edit mode (admins only).
+    /// </summary>
+    public string ToggleWorldEditMode { get; set; } = "Delete";
+}
+
+/// <summary>
+///     Keyboard bindings for in-game player actions.
+/// </summary>
+public sealed class InGameActionsOptions
+{
+    /// <summary>
+    ///     Keys that move the player up.
+    /// </summary>
+    public List<string> MoveUp { get; set; } = new() { "Up", "W" };
+
+    /// <summary>
+    ///     Keys that move the player down.
+    /// </summary>
+    public List<string> MoveDown { get; set; } = new() { "Down", "S" };
+
+    /// <summary>
+    ///     Keys that move the player left.
+    /// </summary>
+    public List<string> MoveLeft { get; set; } = new() { "Left", "A" };
+
+    /// <summary>
+    ///     Keys that move the player right.
+    /// </summary>
+    public List<string> MoveRight { get; set; } = new() { "Right", "D" };
+
+    /// <summary>
+    ///     Key to jump.
+    /// </summary>
+    public string Jump { get; set; } = "Space";
+
+    /// <summary>
+    ///     Key to interact with the targeted entity.
+    /// </summary>
+    public string Interact { get; set; } = "E";
+
+    /// <summary>
+    ///     Key to pick up the item under the player.
+    /// </summary>
+    public string PickUpItem { get; set; } = ",";
+
+    /// <summary>
+    ///     Hotbar slot keys in slot order; the entry at index i selects hotbar slot i.
+    /// </summary>
+    public List<string> HotbarSlots { get; set; } = new() { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" };
+
+    /// <summary>
+    ///     Keys that, while held, cause a click on an inventory item to drop the item.
+    /// </summary>
+    public List<string> DropItemModifier { get; set; } = new() { "Left Ctrl" };
+
+    /// <summary>
+    ///     Keys that, while held, cause the mouse wheel to vary the world editor Z offset.
+    /// </summary>
+    public List<string> ScrollZOffsetModifier { get; set; } = new() { "Left Ctrl", "Right Ctrl" };
+
+    /// <summary>
+    ///     Keys that, while held, cause the mouse wheel to vary the world editor pen width.
+    /// </summary>
+    public List<string> ScrollPenWidthModifier { get; set; } = new() { "Left Shift", "Right Shift" };
+}
