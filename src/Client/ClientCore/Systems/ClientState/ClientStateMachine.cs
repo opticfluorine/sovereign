@@ -31,7 +31,8 @@ public class ClientStateMachine
     private readonly Dictionary<MainClientState, Action> stateEntryHandlers;
     private readonly Dictionary<MainClientState, Action> stateExitHandlers;
 
-    public ClientStateMachine(IOptions<AutoUpdaterOptions> autoUpdaterOptions, ClientStateFlagManager flagManager)
+    public ClientStateMachine(IOptions<AutoUpdaterOptions> autoUpdaterOptions,
+        IOptions<AutoLoginOptions> autoLoginOptions, ClientStateFlagManager flagManager)
     {
         this.flagManager = flagManager;
 
@@ -45,7 +46,7 @@ public class ClientStateMachine
             { MainClientState.Update, OnExitUpdate }
         };
 
-        State = autoUpdaterOptions.Value.UpdateOnStartup
+        State = autoUpdaterOptions.Value.UpdateOnStartup && !autoLoginOptions.Value.Enabled
             ? MainClientState.Update
             : MainClientState.MainMenu;
     }

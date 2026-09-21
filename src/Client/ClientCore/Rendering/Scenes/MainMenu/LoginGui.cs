@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Numerics;
 using Hexa.NET.ImGui;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network;
@@ -41,9 +43,11 @@ public class LoginGui
     private const string Ok = "OK";
 
     private const int MaxFieldSize = 256;
+    private readonly AutoLoginOptions autoLoginOptions;
     private readonly ClientNetworkController clientNetworkController;
     private readonly ConnectionOptions connectionOptions;
     private readonly IEventSender eventSender;
+    private readonly ILogger<LoginGui> logger;
     private readonly ClientNetworkManager networkManager;
     private string errorText = "";
     private LoginState loginState = LoginState.Input;
@@ -53,12 +57,15 @@ public class LoginGui
 
     public LoginGui(ClientNetworkManager networkManager, IEventSender eventSender,
         ClientNetworkController clientNetworkController,
-        IOptions<ConnectionOptions> connectionOptions)
+        IOptions<ConnectionOptions> connectionOptions,
+        IOptions<AutoLoginOptions> autoLoginOptions, ILogger<LoginGui> logger)
     {
         this.networkManager = networkManager;
         this.eventSender = eventSender;
         this.clientNetworkController = clientNetworkController;
         this.connectionOptions = connectionOptions.Value;
+        this.autoLoginOptions = autoLoginOptions.Value;
+        this.logger = logger;
     }
 
     /// <summary>
@@ -67,6 +74,25 @@ public class LoginGui
     public void Initialize()
     {
         Reset();
+
+        if (autoLoginOptions.Enabled)
+        {
+            if (autoLoginOptions.Username.Length == 0)
+            {
+                logger.LogError("AutoLoginOptions.Username must not be empty.");
+                Environment.Exit(1);
+            }
+
+            if (autoLoginOptions.Password.Length == 0)
+            {
+                logger.LogError("AutoLoginOptions.Password must not be empty.");
+                Environment.Exit(1);
+            }
+
+            usernameInput = autoLoginOptions.Username;
+            passwordInput = autoLoginOptions.Password;
+            DoLogin();
+        }
     }
 
     /// <summary>
@@ -161,6 +187,12 @@ public class LoginGui
         if (networkManager.ClientState == NetworkClientState.Failed)
         {
             // Error.
+            if (autoLoginOptions.Enabled)
+            {
+                logger.LogError("Login failed: {Error}", networkManager.ErrorMessage);
+                Environment.Exit(1);
+            }
+
             errorText = networkManager.ErrorMessage;
             loginState = LoginState.Error;
         }

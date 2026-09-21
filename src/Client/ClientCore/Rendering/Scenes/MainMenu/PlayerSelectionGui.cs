@@ -14,10 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Hexa.NET.ImGui;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Network.Infrastructure;
 using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
@@ -49,9 +55,11 @@ public class PlayerSelectionGui
     private const string ConfirmDelete = "Confirm Player Delete";
 
     private const string EnteringWorld = "Entering world...";
+    private readonly AutoLoginOptions autoLoginOptions;
     private readonly PlayerManagementClient client;
     private readonly IEventSender eventSender;
     private readonly GuiExtensions guiExtensions;
+    private readonly ILogger<PlayerSelectionGui> logger;
     private readonly ClientNetworkController networkController;
     private Task<Option<DeletePlayerResponse, string>>? deletionTask;
     private string errorMessage = "";
@@ -66,12 +74,15 @@ public class PlayerSelectionGui
     private Task<Option<SelectPlayerResponse, string>>? selectionTask;
 
     public PlayerSelectionGui(PlayerManagementClient client, ClientNetworkController networkController,
-        IEventSender eventSender, GuiExtensions guiExtensions)
+        IEventSender eventSender, GuiExtensions guiExtensions,
+        IOptions<AutoLoginOptions> autoLoginOptions, ILogger<PlayerSelectionGui> logger)
     {
         this.client = client;
         this.networkController = networkController;
         this.eventSender = eventSender;
         this.guiExtensions = guiExtensions;
+        this.autoLoginOptions = autoLoginOptions.Value;
+        this.logger = logger;
     }
 
     /// <summary>
@@ -124,11 +135,24 @@ public class PlayerSelectionGui
     {
         if (playerListRequest == null)
         {
+            if (autoLoginOptions.Enabled)
+            {
+                logger.LogError("Player list request is missing.");
+                Environment.Exit(1);
+            }
+
             errorMessage = "Error: playerListRequest is null.";
             selectionState = PlayerSelectionState.Error;
         }
         else if (playerListRequest.IsFaulted)
         {
+            if (autoLoginOptions.Enabled)
+            {
+                logger.LogError("Failed to retrieve player list: {Error}",
+                    playerListRequest.Exception?.Message ?? "Unknown error.");
+                Environment.Exit(1);
+            }
+
             errorMessage = playerListRequest.Exception != null
                 ? playerListRequest.Exception.Message
                 : "An unknown error occurred.";
@@ -140,10 +164,17 @@ public class PlayerSelectionGui
             if (result.HasFirst)
             {
                 // Successfully retrieved list.
+                if (autoLoginOptions.Enabled) AutoSelectPlayer(result.First.Players);
                 selectionState = PlayerSelectionState.Input;
             }
             else
             {
+                if (autoLoginOptions.Enabled)
+                {
+                    logger.LogError("Failed to retrieve player list: {Error}", result.Second);
+                    Environment.Exit(1);
+                }
+
                 selectionState = PlayerSelectionState.Error;
                 errorMessage = result.Second;
             }
@@ -152,6 +183,25 @@ public class PlayerSelectionGui
         // If we get here, the load is still in progress.
         ImGui.Text("Retrieving player list from server...");
         return MainMenuState.PlayerSelection;
+    }
+
+    /// <summary>
+    ///     Selects the configured player for automatic login.
+    /// </summary>
+    /// <param name="playerList">Players associated with the account.</param>
+    private void AutoSelectPlayer(List<PlayerInfo>? playerList)
+    {
+        var player = playerList?.FirstOrDefault(p =>
+            string.Equals(p.Name, autoLoginOptions.PlayerName, StringComparison.Ordinal));
+
+        if (player == null)
+        {
+            logger.LogError("No player named \"{PlayerName}\" was found for automatic login.",
+                autoLoginOptions.PlayerName);
+            Environment.Exit(1);
+        }
+
+        OnSelect(player);
     }
 
     /// <summary>
@@ -292,6 +342,12 @@ public class PlayerSelectionGui
         {
             if (selectionTask.Result.HasSecond)
             {
+                if (autoLoginOptions.Enabled)
+                {
+                    logger.LogError("Player selection failed: {Error}", selectionTask.Result.Second);
+                    Environment.Exit(1);
+                }
+
                 ImGui.Text(selectionTask.Result.Second);
                 if (ImGui.Button(Ok)) LoadSelections();
             }
@@ -302,6 +358,13 @@ public class PlayerSelectionGui
         }
         else if (selectionTask.IsFaulted)
         {
+            if (autoLoginOptions.Enabled)
+            {
+                logger.LogError("Player selection failed: {Error}",
+                    selectionTask.Exception?.Message ?? "Unknown error.");
+                Environment.Exit(1);
+            }
+
             if (selectionTask.Exception != null)
             {
                 var message = new StringBuilder("Error: ").Append(selectionTask.Exception.Message).ToString();

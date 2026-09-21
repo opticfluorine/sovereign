@@ -198,6 +198,32 @@ public class AutoUpdaterOptions
 }
 
 /// <summary>
+///     Configuration options for automatic login at client startup.
+/// </summary>
+public sealed class AutoLoginOptions
+{
+    /// <summary>
+    ///     Whether to automatically log in at client startup.
+    /// </summary>
+    public bool Enabled { get; set; }
+
+    /// <summary>
+    ///     Account username with which to log in.
+    /// </summary>
+    public string Username { get; set; } = "";
+
+    /// <summary>
+    ///     Account password with which to log in.
+    /// </summary>
+    public string Password { get; set; } = "";
+
+    /// <summary>
+    ///     Name of the player with which to enter the world.
+    /// </summary>
+    public string PlayerName { get; set; } = "";
+}
+
+/// <summary>
 ///     Configuration options for connection details.
 /// </summary>
 public sealed class ConnectionOptions
@@ -369,6 +395,32 @@ public sealed class ClientInventoryOptions
     ///     Delay in microseconds until subsequent repeated pickups when holding the right mouse button.
     /// </summary>
     public ulong RightMouseRepeatDelayUs { get; set; } = 20000;
+}
+
+/// <summary>
+///     Configuration options for the client debug interface.
+/// </summary>
+public sealed class DebugInterfaceOptions
+{
+    public const string DefaultHost = "127.0.0.1";
+
+    public const ushort DefaultPort = 12821;
+
+    /// <summary>
+    ///     Whether the debug interface server is enabled. Disabled by default.
+    /// </summary>
+    public bool Enabled { get; set; }
+
+    /// <summary>
+    ///     IPv4 address to bind the debug interface server to. The loopback address
+    ///     is the default and is the intended security boundary for the interface.
+    /// </summary>
+    public string Host { get; set; } = DefaultHost;
+
+    /// <summary>
+    ///     UDP port to bind the debug interface server to.
+    /// </summary>
+    public ushort Port { get; set; } = DefaultPort;
 }
 
 /// <summary>

@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Options;
+using Sovereign.ClientCore.Configuration;
+
 namespace Sovereign.ClientCore.Systems.ClientState;
 
 /// <summary>
@@ -30,6 +33,20 @@ public class MainMenuStateMachine
     ///     Flag indicating whether an internal GUI reset is required.
     /// </summary>
     public bool NeedReset { get; private set; }
+
+    /// <summary>
+    ///     Initializes the main menu state machine, starting in the Login state if
+    ///     automatic login is enabled.
+    /// </summary>
+    /// <param name="autoLoginOptions">Automatic login options.</param>
+    public MainMenuStateMachine(IOptions<AutoLoginOptions> autoLoginOptions)
+    {
+        if (autoLoginOptions.Value.Enabled)
+        {
+            State = MainMenuState.Login;
+            NeedReset = true;
+        }
+    }
 
     /// <summary>
     ///     Sets the main menu state.

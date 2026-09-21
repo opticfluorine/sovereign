@@ -120,8 +120,7 @@ This section applies only to common- and server-scoped components.
 Persisting a component in the database requires several changes:
 
 1. Update the SQL migration scripts with a table for the new component as well as
-   any required indices. Also update the `EntityWithComponents` view to add columns
-   for the new component.
+   any required indices.
 2. Update `IPersistenceProvider` with add/modify/remove queries for your new
    component.
 3. Update `SqlitePersistenceProvider` to implement the methods you added to
@@ -144,8 +143,8 @@ Persisting a component in the database requires several changes:
 6. Update `SqliteRetrieveEntityQuery` and `SqliteRetrieveRangeQuery` to retrieve
    the new component when fetching entities from the database. For components which
    may be held by template entities, also update `SqliteRetrieveAllTemplatesQuery`.
-7. Update `EntityProcessor` to process the new component from the 
-   `EntityWithComponents` by adding a new `ProcessX(IDataReader, IEntityBuilder)`
+7. Update `EntityProcessor` to process the new component from the database query
+   results by adding a new `ProcessX(IDataReader, IEntityBuilder)`
    method (where `X` is the component name) and calling it from the
    `ProcessSingleEntity(IDataReader)` method.
 

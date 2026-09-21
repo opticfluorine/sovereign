@@ -22,6 +22,17 @@ Any configuration option can be overridden from the command line by passing a `-
 - **UpdateOnStartup**: A boolean indicating whether to check for updates on startup.
 - **PromptForUpdate**: A boolean indicating whether to prompt the user before applying updates. Only relevant if `UpdateOnStartup` is true.
 
+### AutoLoginOptions
+- **Enabled**: A boolean indicating whether to automatically log in when the client starts. `Enabled` must be true for the other keys in this section to take effect.
+- **Username**: The account username with which to log in.
+- **Password**: The account password with which to log in. Stored in plain text, which is acceptable for the development and test environments this feature targets.
+- **PlayerName**: The exact name of the player with which to enter the world.
+
+When enabled, the client skips the automatic update check, logs into the configured account,
+and enters the world as the named player without user interaction. Any failure (such as bad
+credentials, an unknown player name, or a lost connection) is logged and the client exits
+with status code 1. This feature is intended for development and testing.
+
 ### DisplayOptions
 - **ResolutionWidth**: The width of the display resolution, in pixels.
 - **ResolutionHeight**: The height of the display resolution, in pixels.
@@ -97,6 +108,14 @@ In-game player actions. Unless noted otherwise, each option is a single key name
   editor Z offset (list).
 - **ScrollPenWidthModifier**: Keys that, while held, cause the mouse wheel to vary the world
   editor pen width (list).
+
+### DebugInterfaceOptions
+Options for the client debug interface, a local IPC server for automated testing tools.
+The interface is disabled by default. See the [Debug Interface](../../developers/debugging/debug-interface.md)
+page for the wire protocol.
+- **Enabled**: A boolean indicating whether the debug interface server is started with the client. Defaults to false.
+- **Host**: The IPv4 address to bind the debug interface server to. The loopback address (127.0.0.1) is the default and is the intended security boundary for the interface.
+- **Port**: The UDP port to bind the debug interface server to. Defaults to 12821.
 
 ---
 

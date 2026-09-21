@@ -45,7 +45,8 @@ public class RenderingManager(
     DisplayViewport viewport,
     IOptions<DisplayOptions> displayOptions,
     GuiFontAtlas guiFontAtlas,
-    ClientStateController stateController)
+    ClientStateController stateController,
+    FrameCaptureQueue frameCaptureQueue)
     : IDisposable
 {
     private readonly DisplayOptions displayOptions = displayOptions.Value;
@@ -118,6 +119,18 @@ public class RenderingManager(
 
         StartNewFrame();
         renderer.Render();
+        CaptureFrames();
+    }
+
+    /// <summary>
+    ///     Completes pending frame capture requests against the most recently rendered frame.
+    /// </summary>
+    private void CaptureFrames()
+    {
+        while (frameCaptureQueue.TryDequeueRequest(out var requestId))
+        {
+            frameCaptureQueue.CompleteCapture(requestId, renderer.CaptureFrame());
+        }
     }
 
     /// <summary>
