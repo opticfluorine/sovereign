@@ -7,10 +7,12 @@
 #### 20 September 2026
 
 * Add an opt-in debug IPC interface to the client for automated testing tools. When enabled via the new `DebugInterfaceOptions` configuration section (disabled by default, bound to the loopback interface), the client accepts MessagePack-over-LiteNetLib requests to capture a screenshot of the next rendered frame (raw pixels with the pixel format reported), query keyboard and mouse input state, inject SDL key and mouse events through the full input processing path (including Dear ImGui), and quit the client.
+* Add a new `AutoLoginOptions` client configuration section that, when enabled, makes the client skip the automatic update check at startup, log into the configured account, and enter the world as the configured player without user interaction. Intended for development and testing; any failure along the way is logged and the client exits with status code 1.
 
 #### 19 September 2026
 
 * Add new admin chat commands `/teleport x y z` and `/teleportto player_name` for teleporting to a world position or to another player.
+* Removed the redundant `EntityWithComponents` database view; entity retrieval queries now read from the `Entity` table directly. Existing databases are unaffected.
 
 #### 15 September 2026
 

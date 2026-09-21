@@ -14,8 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Numerics;
 using Hexa.NET.ImGui;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Sovereign.ClientCore.Configuration;
 using Sovereign.ClientCore.Systems.ClientState;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
@@ -25,12 +29,32 @@ namespace Sovereign.ClientCore.Rendering.Scenes.MainMenu;
 /// </summary>
 public class ConnectionLostGui
 {
+    private readonly AutoLoginOptions autoLoginOptions;
+    private readonly ILogger<ConnectionLostGui> logger;
+
+    /// <summary>
+    ///     Initializes the connection lost dialog.
+    /// </summary>
+    /// <param name="autoLoginOptions">Automatic login options.</param>
+    /// <param name="logger">Logger.</param>
+    public ConnectionLostGui(IOptions<AutoLoginOptions> autoLoginOptions, ILogger<ConnectionLostGui> logger)
+    {
+        this.autoLoginOptions = autoLoginOptions.Value;
+        this.logger = logger;
+    }
+
     /// <summary>
     ///     Renders the GUI for the connection lost error dialog.
     /// </summary>
     /// <returns>Next main menu state.</returns>
     public MainMenuState Render()
     {
+        if (autoLoginOptions.Enabled)
+        {
+            logger.LogError("Connection to server lost while automatic login is enabled.");
+            Environment.Exit(1);
+        }
+
         var nextState = MainMenuState.ConnectionLost;
 
         var io = ImGui.GetIO();

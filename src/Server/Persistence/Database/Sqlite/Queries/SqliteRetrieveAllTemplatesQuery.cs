@@ -30,18 +30,18 @@ public class SqliteRetrieveAllTemplatesQuery : IRetrieveAllTemplatesQuery
     ///     with EntityProcessor.
     /// </summary>
     private const string query =
-        @"SELECT id, kv.key, kv.value, NULL, NULL, NULL, NULL, frontTileId, topTileId, NULL, name, NULL, 
-                NULL, drawableX, drawableY, animatedSprite, orientation, NULL, castBlockShadows,
-                plsRadius, plsIntensity, plsColor, plsPosX, plsPosY, plsPosZ,
-                physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius, entityType, serverOnly,
-                stackable, quantity, itemUse, npcFlags, useRange,
-                healthValue, healthMaxValue, healthChangeRate, healthChangeInterval,
-                staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
-                manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
-                statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck,
-                equipmentType, level, experience,
-                radiantCategory, radiantFunction, radiantParam0, radiantParam1, radiantParam2, playerFlags
-            FROM EntityWithComponents 
+        @"SELECT id, kv.key, kv.value, NULL, NULL, NULL, NULL, front_tile_id, top_tile_id, NULL, name, NULL, 
+                NULL, drawable_x, drawable_y, animated_sprite, orientation, NULL, cast_block_shadows,
+                pls_radius, pls_intensity, pls_color, pls_pos_x, pls_pos_y, pls_pos_z,
+                physics, bb_pos_x, bb_pos_y, bb_pos_z, bb_size_x, bb_size_y, bb_size_z, shadow_radius, entity_type, server_only,
+                stackable, quantity, item_use, npc_flags, use_range,
+                health_value, health_max_value, health_change_rate, health_change_interval,
+                stamina_value, stamina_max_value, stamina_change_rate, stamina_change_interval,
+                mana_value, mana_max_value, mana_change_rate, mana_change_interval,
+                stats_strength, stats_defense, stats_agility, stats_intelligence, stats_wisdom, stats_charisma, stats_luck,
+                equipment_type, level, experience,
+                radiant_category, radiant_function, radiant_param0, radiant_param1, radiant_param2, player_flags
+            FROM Entity
             LEFT JOIN EntityKeyValue kv ON kv.entity_id = id
             WHERE id >= @FirstTemplateId AND id <= @LastTemplateId";
 

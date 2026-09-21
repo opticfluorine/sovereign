@@ -43,37 +43,49 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
                 equipmentType, level, experience,
                 radiantCategory, radiantFunction, radiantParam0, radiantParam1, radiantParam2, playerFlags)
 	        AS (
-	        	SELECT id, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
-                        drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity,
-                        plsColor, plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ,
-                        shadowRadius, entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange,
-                        healthValue, healthMaxValue, healthChangeRate, healthChangeInterval,
-                        staminaValue, staminaMaxValue, staminaChangeRate, staminaChangeInterval,
-                        manaValue, manaMaxValue, manaChangeRate, manaChangeInterval,
-                        statsStrength, statsDefense, statsAgility, statsIntelligence, statsWisdom, statsCharisma, statsLuck,
-                        equipmentType, level, experience,
-                        radiantCategory, radiantFunction, radiantParam0, radiantParam1, radiantParam2, playerFlags
-	        		FROM EntityWithComponents
-	        		WHERE x >= @X1 AND x < @X2
-	        		  AND y >= @Y1 AND y < @Y2
-	        		  AND z >= @Z1 AND z < @Z2
-	        		  AND playerCharacter IS NULL
+	        	SELECT id, template_id, pos_x AS x, pos_y AS y, pos_z AS z,
+                        front_tile_id AS frontTileId, top_tile_id AS topTileId, player_char AS playerCharacter,
+                        name, account_id AS account, parent_id AS parent,
+                        drawable_x AS drawableX, drawable_y AS drawableY, animated_sprite AS animatedSprite, orientation, admin,
+                        cast_block_shadows AS castBlockShadows, pls_radius AS plsRadius, pls_intensity AS plsIntensity,
+                        pls_color AS plsColor, pls_pos_x AS plsPosX, pls_pos_y AS plsPosY, pls_pos_z AS plsPosZ, physics,
+                        bb_pos_x AS bbPosX, bb_pos_y AS bbPosY, bb_pos_z AS bbPosZ,
+                        bb_size_x AS bbSizeX, bb_size_y AS bbSizeY, bb_size_z AS bbSizeZ,
+                        shadow_radius AS shadowRadius, entity_type AS entityType, server_only AS serverOnly,
+                        stackable, quantity, item_use AS itemUse, npc_flags AS npcFlags, use_range AS useRange,
+                        health_value AS healthValue, health_max_value AS healthMaxValue, 
+                        health_change_rate AS healthChangeRate, health_change_interval AS healthChangeInterval,
+                        stamina_value AS staminaValue, stamina_max_value AS staminaMaxValue, 
+                        stamina_change_rate AS staminaChangeRate, stamina_change_interval AS staminaChangeInterval,
+                        mana_value AS manaValue, mana_max_value AS manaMaxValue, 
+                        mana_change_rate AS manaChangeRate, mana_change_interval AS manaChangeInterval,
+                        stats_strength AS statsStrength, stats_defense AS statsDefense, stats_agility AS statsAgility, 
+                        stats_intelligence AS statsIntelligence, stats_wisdom AS statsWisdom, stats_charisma AS statsCharisma, stats_luck AS statsLuck,
+                        equipment_type AS equipmentType, level, experience,
+                        radiant_category AS radiantCategory, radiant_function AS radiantFunction, 
+                        radiant_param0 AS radiantParam0, radiant_param1 AS radiantParam1, radiant_param2 AS radiantParam2,
+                        player_flags AS playerFlags
+	        		FROM Entity
+	        		WHERE pos_x >= @X1 AND pos_x < @X2
+	        		  AND pos_y >= @Y1 AND pos_y < @Y2
+	        		  AND pos_z >= @Z1 AND pos_z < @Z2
+	        		  AND player_char IS NULL
 	        UNION ALL
-	        	SELECT ec.id, ec.template_id, NULL, NULL, NULL, ec.frontTileId, ec.topTileId, ec.playerCharacter, 
-                        ec.name, ec.account, ec.parent, ec.drawableX, ec.drawableY, ec.animatedSprite, ec.orientation, ec.admin,
-                        ec.castBlockShadows, ec.plsRadius, ec.plsIntensity, ec.plsColor,
-                        ec.plsPosX, ec.plsPosY, ec.plsPosZ, ec.physics, ec.bbPosX, ec.bbPosY, ec.bbPosZ,
-                        ec.bbSizeX, ec.bbSizeY, ec.bbSizeZ, ec.shadowRadius, ec.entityType, ec.serverOnly,
-                        ec.stackable, ec.quantity, ec.itemUse, ec.npcFlags, ec.useRange,
-                        ec.healthValue, ec.healthMaxValue, ec.healthChangeRate, ec.healthChangeInterval,
-                        ec.staminaValue, ec.staminaMaxValue, ec.staminaChangeRate, ec.staminaChangeInterval,
-                        ec.manaValue, ec.manaMaxValue, ec.manaChangeRate, ec.manaChangeInterval,
-                        ec.statsStrength, ec.statsDefense, ec.statsAgility, ec.statsIntelligence, ec.statsWisdom, ec.statsCharisma, ec.statsLuck,
-                        ec.equipmentType, ec.level, ec.experience,
-                        ec.radiantCategory, ec.radiantFunction, ec.radiantParam0, ec.radiantParam1, ec.radiantParam2, ec.playerFlags
-	        		FROM EntityWithComponents ec, EntityTree et
-	        		WHERE ec.parent = et.id 
-                      AND ec.playerCharacter IS NULL
+	        	SELECT ec.id, ec.template_id, NULL, NULL, NULL, ec.front_tile_id, ec.top_tile_id, ec.player_char, 
+                        ec.name, ec.account_id, ec.parent_id, ec.drawable_x, ec.drawable_y, ec.animated_sprite, ec.orientation, ec.admin,
+                        ec.cast_block_shadows, ec.pls_radius, ec.pls_intensity, ec.pls_color,
+                        ec.pls_pos_x, ec.pls_pos_y, ec.pls_pos_z, ec.physics, ec.bb_pos_x, ec.bb_pos_y, ec.bb_pos_z,
+                        ec.bb_size_x, ec.bb_size_y, ec.bb_size_z, ec.shadow_radius, ec.entity_type, ec.server_only,
+                        ec.stackable, ec.quantity, ec.item_use, ec.npc_flags, ec.use_range,
+                        ec.health_value, ec.health_max_value, ec.health_change_rate, ec.health_change_interval,
+                        ec.stamina_value, ec.stamina_max_value, ec.stamina_change_rate, ec.stamina_change_interval,
+                        ec.mana_value, ec.mana_max_value, ec.mana_change_rate, ec.mana_change_interval,
+                        ec.stats_strength, ec.stats_defense, ec.stats_agility, ec.stats_intelligence, ec.stats_wisdom, ec.stats_charisma, ec.stats_luck,
+                        ec.equipment_type, ec.level, ec.experience,
+                        ec.radiant_category, ec.radiant_function, ec.radiant_param0, ec.radiant_param1, ec.radiant_param2, ec.player_flags
+	        		FROM Entity ec, EntityTree et
+	        		WHERE ec.parent_id = et.id 
+                      AND ec.player_char IS NULL
 	        )
             SELECT id, kv.key, kv.value, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
                 drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,

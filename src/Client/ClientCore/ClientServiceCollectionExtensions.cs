@@ -104,6 +104,8 @@ public static class ClientServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(ConnectionOptions)}"));
         services.Configure<AutoUpdaterOptions>(
             configuration.GetSection($"Sovereign:{nameof(AutoUpdaterOptions)}"));
+        services.Configure<AutoLoginOptions>(
+            configuration.GetSection($"Sovereign:{nameof(AutoLoginOptions)}"));
         services.Configure<DisplayOptions>(
             configuration.GetSection($"Sovereign:{nameof(DisplayOptions)}"));
         services.Configure<RendererOptions>(

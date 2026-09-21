@@ -198,6 +198,32 @@ public class AutoUpdaterOptions
 }
 
 /// <summary>
+///     Configuration options for automatic login at client startup.
+/// </summary>
+public sealed class AutoLoginOptions
+{
+    /// <summary>
+    ///     Whether to automatically log in at client startup.
+    /// </summary>
+    public bool Enabled { get; set; }
+
+    /// <summary>
+    ///     Account username with which to log in.
+    /// </summary>
+    public string Username { get; set; } = "";
+
+    /// <summary>
+    ///     Account password with which to log in.
+    /// </summary>
+    public string Password { get; set; } = "";
+
+    /// <summary>
+    ///     Name of the player with which to enter the world.
+    /// </summary>
+    public string PlayerName { get; set; } = "";
+}
+
+/// <summary>
 ///     Configuration options for connection details.
 /// </summary>
 public sealed class ConnectionOptions
