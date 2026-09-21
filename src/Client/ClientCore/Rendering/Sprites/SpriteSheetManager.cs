@@ -35,7 +35,7 @@ public class SpriteSheetManager
     /// <summary>
     ///     Suffix attached to spritesheet definition filenames.
     /// </summary>
-    private const string DefinitionSuffix = ".yaml";
+    private const string DefinitionSuffix = ".json";
 
     /// <summary>
     ///     Spritesheet definition file loader.

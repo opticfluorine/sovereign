@@ -14,9 +14,9 @@ static image that can be incorporated into other resources. Sprites are created 
 
 When the Sovereign Engine client starts, it loads all of the spritesheets from the
 `Data/Spritesheet` directory. Each spritesheet is defined by two files: a PNG file which
-contains the graphics, and a YAML file which contains information about the structure
+contains the graphics, and a JSON file which contains information about the structure
 and attribution of the spritesheet. For a single spritesheet, these two files have the
-same name but different extension (e.g. `bat.png` and `bat.yaml`). Both files must be
+same name but different extension (e.g. `bat.png` and `bat.json`). Both files must be
 present for the spritesheet to be loaded.
 
 While all of the sprites in a single spritesheet are the same size, not all spritesheets
@@ -97,12 +97,12 @@ game's graphical resources. To open the resource editor, press the backtick ( ` 
 Adding a tilesheet must be done outside of the engine. To add a new tilesheet, follow these steps:
 
 1. Copy the spritesheet PNG file to the client's `Data/Spritesheet` directory.
-2. Create a YAML file with the same name as the PNG file. For example, if the spritesheet is named
-   `bat.png`, name the new YAML file `bat.yaml`.
+2. Create a JSON file with the same name as the PNG file. For example, if the spritesheet is named
+   `bat.png`, name the new JSON file `bat.json`.
    :::{tip}
-   The easiest way to create the YAML file is to copy an existing YAML file then updating it.
+   The easiest way to create the JSON file is to copy an existing JSON file then updating it.
    :::
-3. Update the information in the YAML file as needed. Make sure that the `Filename` field matches the
+3. Update the information in the JSON file as needed. Make sure that the `Filename` field matches the
    name of the PNG file for the spritesheet, and make sure that the `SpriteWidth` and `SpriteHeight`
    fields are set correctly. Finally, make sure that the attribution fields `Author` and `License`
    are set correctly, especially if you are using third party assets.

@@ -23,7 +23,7 @@ using System.Text.Json;
 namespace Sovereign.ClientCore.Rendering.Sprites;
 
 /// <summary>
-///     Loads sprite definitions from a YAML file.
+///     Loads sprite definitions from a JSON file.
 /// </summary>
 public sealed class SpriteDefinitionsLoader
 {

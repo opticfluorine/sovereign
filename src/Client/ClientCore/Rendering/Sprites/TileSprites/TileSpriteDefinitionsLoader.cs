@@ -22,7 +22,7 @@ using System.Text.Json;
 namespace Sovereign.ClientCore.Rendering.Sprites.TileSprites;
 
 /// <summary>
-///     Loads tile sprite definitions from a YAML file.
+///     Loads tile sprite definitions from a JSON file.
 /// </summary>
 public sealed class TileSpriteDefinitionsLoader
 {
