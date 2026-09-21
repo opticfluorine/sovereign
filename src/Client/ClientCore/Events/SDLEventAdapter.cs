@@ -19,6 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using SDL2;
 using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Rendering.Gui;
+using Sovereign.ClientCore.Systems.DebugInterface;
 using Sovereign.ClientCore.Systems.Input;
 using Sovereign.EngineCore.Events;
 
@@ -30,10 +31,13 @@ namespace Sovereign.ClientCore.Events;
 public class SDLEventAdapter : IEventAdapter
 {
     private readonly CommonGuiManager guiManager;
+    private readonly SdlEventInjectionQueue injectionQueue;
 
-    public SDLEventAdapter(EventAdapterManager adapterManager, CommonGuiManager guiManager)
+    public SDLEventAdapter(EventAdapterManager adapterManager, CommonGuiManager guiManager,
+        SdlEventInjectionQueue injectionQueue)
     {
         this.guiManager = guiManager;
+        this.injectionQueue = injectionQueue;
 
         adapterManager.RegisterEventAdapter(this);
     }
@@ -52,47 +56,60 @@ public class SDLEventAdapter : IEventAdapter
         ev = null;
         while (ev == null && SDL.SDL_PollEvent(out var sdlEv) == 1)
         {
-            /*
-             * Occasionally the GUI system will entirely consume keyboard
-             * and mouse events. When this occurs, we do not convert the
-             * SDL event to the corresponding internal event.
-             */
-            guiManager.ProcessEvent(ref sdlEv, out var shouldDispatch);
-            if (!shouldDispatch) continue;
+            ev = AdaptSdlEvent(sdlEv);
+        }
 
-            switch (sdlEv.type)
-            {
-                case SDL.SDL_EventType.SDL_QUIT:
-                    ev = AdaptSdlQuit(sdlEv);
-                    break;
-
-                case SDL.SDL_EventType.SDL_KEYDOWN:
-                    ev = AdaptSdlKeyDown(sdlEv);
-                    break;
-
-                case SDL.SDL_EventType.SDL_KEYUP:
-                    ev = AdaptSdlKeyUp(sdlEv);
-                    break;
-
-                case SDL.SDL_EventType.SDL_MOUSEMOTION:
-                    ev = AdaptSdlMouseMotion(sdlEv);
-                    break;
-
-                case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
-                    ev = AdaptSdlMouseDown(sdlEv);
-                    break;
-
-                case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
-                    ev = AdaptSdlMouseUp(sdlEv);
-                    break;
-
-                case SDL.SDL_EventType.SDL_MOUSEWHEEL:
-                    ev = AdaptSdlMouseWheel(sdlEv);
-                    break;
-            }
+        /* Drain any events injected through the debug interface. */
+        while (ev == null && injectionQueue.TryDequeue(out var injectedEv))
+        {
+            ev = AdaptSdlEvent(injectedEv);
         }
 
         return ev != null;
+    }
+
+    /// <summary>
+    ///     Passes an SDL event through GUI event processing and, if the GUI does not
+    ///     consume it, adapts it to the corresponding internal event.
+    /// </summary>
+    /// <param name="sdlEv">SDL event.</param>
+    /// <returns>Internal event, or null if the event was consumed or not adaptable.</returns>
+    private Event? AdaptSdlEvent(SDL.SDL_Event sdlEv)
+    {
+        /*
+         * Occasionally the GUI system will entirely consume keyboard
+         * and mouse events. When this occurs, we do not convert the
+         * SDL event to the corresponding internal event.
+         */
+        guiManager.ProcessEvent(ref sdlEv, out var shouldDispatch);
+        if (!shouldDispatch) return null;
+
+        switch (sdlEv.type)
+        {
+            case SDL.SDL_EventType.SDL_QUIT:
+                return AdaptSdlQuit(sdlEv);
+
+            case SDL.SDL_EventType.SDL_KEYDOWN:
+                return AdaptSdlKeyDown(sdlEv);
+
+            case SDL.SDL_EventType.SDL_KEYUP:
+                return AdaptSdlKeyUp(sdlEv);
+
+            case SDL.SDL_EventType.SDL_MOUSEMOTION:
+                return AdaptSdlMouseMotion(sdlEv);
+
+            case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                return AdaptSdlMouseDown(sdlEv);
+
+            case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
+                return AdaptSdlMouseUp(sdlEv);
+
+            case SDL.SDL_EventType.SDL_MOUSEWHEEL:
+                return AdaptSdlMouseWheel(sdlEv);
+
+            default:
+                return null;
+        }
     }
 
     /// <summary>

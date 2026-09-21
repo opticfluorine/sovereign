@@ -91,4 +91,13 @@ public class InputServices
     {
         return keyboardState.IsAnyDown(keys);
     }
+
+    /// <summary>
+    ///     Gets a snapshot of the currently pressed keys.
+    /// </summary>
+    /// <returns>Currently pressed keys.</returns>
+    public IReadOnlyCollection<SDL.SDL_Keycode> GetPressedKeys()
+    {
+        return keyboardState.GetPressedKeys();
+    }
 }

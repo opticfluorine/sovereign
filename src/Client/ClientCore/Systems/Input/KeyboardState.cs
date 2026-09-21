@@ -16,6 +16,7 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using SDL2;
 
 namespace Sovereign.ClientCore.Systems.Input;
@@ -25,6 +26,11 @@ namespace Sovereign.ClientCore.Systems.Input;
 /// </summary>
 public class KeyboardState
 {
+    /// <summary>
+    ///     Lock guarding keysDown.
+    /// </summary>
+    private readonly object keysDownLock = new();
+
     /// <summary>
     ///     Keys that are currently pressed.
     /// </summary>
@@ -36,7 +42,16 @@ public class KeyboardState
     /// </summary>
     /// <param name="key">Key.</param>
     /// <returns>true if pressed, false otherwise.</returns>
-    public bool this[SDL.SDL_Keycode key] => keysDown.ContainsKey(key) ? keysDown[key] : false;
+    public bool this[SDL.SDL_Keycode key]
+    {
+        get
+        {
+            lock (keysDownLock)
+            {
+                return keysDown.TryGetValue(key, out var isDown) && isDown;
+            }
+        }
+    }
 
     /// <summary>
     ///     Indicates whether any of the given keys is currently pressed.
@@ -52,12 +67,29 @@ public class KeyboardState
     }
 
     /// <summary>
+    ///     Gets a snapshot of the currently pressed keys.
+    /// </summary>
+    /// <returns>Currently pressed keys.</returns>
+    public IReadOnlyCollection<SDL.SDL_Keycode> GetPressedKeys()
+    {
+        lock (keysDownLock)
+        {
+            return keysDown.Where(pair => pair.Value)
+                .Select(pair => pair.Key)
+                .ToList();
+        }
+    }
+
+    /// <summary>
     ///     Registers that a key has been pressed.
     /// </summary>
     /// <param name="key">Key that was pressed.</param>
     public void KeyDown(SDL.SDL_Keycode key)
     {
-        keysDown[key] = true;
+        lock (keysDownLock)
+        {
+            keysDown[key] = true;
+        }
     }
 
     /// <summary>
@@ -66,6 +98,9 @@ public class KeyboardState
     /// <param name="key">Key that was released.</param>
     public void KeyUp(SDL.SDL_Keycode key)
     {
-        keysDown[key] = false;
+        lock (keysDownLock)
+        {
+            keysDown[key] = false;
+        }
     }
 }
