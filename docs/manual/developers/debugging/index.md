@@ -7,5 +7,6 @@ of the useful debugging tools and techniques that are available.
 :maxdepth: 2
 eventlog.md
 debug-interface.md
+client-mcp-debug-server.md
 script-test-harness.md
 :::

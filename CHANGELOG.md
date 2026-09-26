@@ -4,6 +4,10 @@
 
 ### September
 
+#### 21 September 2026
+
+* Add a new `SovereignClientMcp` utility that exposes a Model Context Protocol (MCP) stdio server for debugging a running client with AI coding agents. The server provides a single `run_client_script` tool that runs a Lua script with functions to capture screenshots (saved as PNG files), query the client's input state, inject SDL keyboard and mouse events, and quit the client, and returns the script's messages, screenshot paths, and any error as a JSON object. The server connects to the client debug interface over its MessagePack-over-LiteNetLib protocol (default `127.0.0.1:12821`, configurable with `--host` and `--port`, with `--screenshots-dir` controlling the screenshot output directory).
+
 #### 20 September 2026
 
 * Spritesheet definition files are now JSON (`.json`) instead of YAML (`.yaml`), and the YamlDotNet dependency has been removed.
