@@ -53,6 +53,11 @@ public sealed class StateBuffer
     private readonly StructBuffer<StateUpdate<bool>> adminUpdates = new(BufferSize);
 
     /// <summary>
+    ///     AttackDetails state updates.
+    /// </summary>
+    private readonly StructBuffer<StateUpdate<AttackDetails>> attackDetailsUpdates = new(BufferSize);
+
+    /// <summary>
     ///     Animated sprite state updates.
     /// </summary>
     private readonly StructBuffer<StateUpdate<int>> animatedSpriteUpdates = new(BufferSize);
@@ -527,6 +532,15 @@ public sealed class StateBuffer
     }
 
     /// <summary>
+    ///     Queues an AttackDetails update.
+    /// </summary>
+    /// <param name="update">State update.</param>
+    public void UpdateAttackDetails(ref StateUpdate<AttackDetails> update)
+    {
+        attackDetailsUpdates.Add(ref update);
+    }
+
+    /// <summary>
     ///     Flags a global key-value pair for synchronization.
     /// </summary>
     /// <param name="key">Key.</param>
@@ -586,6 +600,7 @@ public sealed class StateBuffer
         experienceUpdates.Clear();
         radiantDataUpdates.Clear();
         playerFlagsUpdates.Clear();
+        attackDetailsUpdates.Clear();
     }
 
     /// <summary>
@@ -823,6 +838,13 @@ public sealed class StateBuffer
                     persistenceProvider.AddPlayerFlagsComponentQuery,
                     persistenceProvider.ModifyPlayerFlagsComponentQuery,
                     persistenceProvider.RemovePlayerFlagsComponentQuery,
+                    transaction);
+
+                // AttackDetails.
+                SynchronizeComponent(attackDetailsUpdates,
+                    persistenceProvider.AddAttackDetailsComponentQuery,
+                    persistenceProvider.ModifyAttackDetailsComponentQuery,
+                    persistenceProvider.RemoveAttackDetailsComponentQuery,
                     transaction);
 
                 SynchronizeRemovedEntities(persistenceProvider, transaction);

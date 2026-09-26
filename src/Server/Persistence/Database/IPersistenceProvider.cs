@@ -505,6 +505,21 @@ public interface IPersistenceProvider : IDisposable
     IRemoveComponentQuery RemoveRadiantDataComponentQuery { get; }
 
     /// <summary>
+    ///     IAddComponentQuery for the AttackDetails component.
+    /// </summary>
+    IAddComponentQuery<AttackDetails> AddAttackDetailsComponentQuery { get; }
+
+    /// <summary>
+    ///     IModifyComponentQuery for the AttackDetails component.
+    /// </summary>
+    IModifyComponentQuery<AttackDetails> ModifyAttackDetailsComponentQuery { get; }
+
+    /// <summary>
+    ///     IRemoveComponentQuery for the AttackDetails component.
+    /// </summary>
+    IRemoveComponentQuery RemoveAttackDetailsComponentQuery { get; }
+
+    /// <summary>
     ///     IPlayerExistsQuery for this persistence provider.
     /// </summary>
     IPlayerExistsQuery PlayerExistsQuery { get; }

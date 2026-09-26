@@ -189,6 +189,11 @@ public enum ComponentType
     /// </summary>
     PlayerFlags = 0x0021,
 
+    /// <summary>
+    ///     AttackDetails component.
+    /// </summary>
+    AttackDetails = 0x0022,
+
     #endregion Common
 
     #region Client

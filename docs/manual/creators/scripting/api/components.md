@@ -16,6 +16,7 @@ Each component collection that is accessible through the scripting engine may be
 | ----------------------------- | ------------------------------------- | -------------- |
 | `Components.Admin`            | `AdminTagCollection`                  | `boolean`      |
 | `Components.AnimatedSprite`   | `AnimatedSpriteComponentCollection`   | `integer`      |
+| `Components.AttackDetails`    | `AttackDetailsComponentCollection`    | `AttackDetails` |
 | `Components.BlockPosition`    | `BlockPositionComponentCollection`    | `GridPosition` |
 | `Components.BlockTile`        | `BlockTileComponentCollection`        | `BlockTile`    |
 | `Components.CastBlockShadows` | `CastBlockShadowsTagCollection`       | `boolean`      |
